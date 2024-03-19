@@ -1,7 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
 import {
   renderHook as renderHookRTL,
@@ -17,8 +16,6 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
-import { Permission, RBACContext, RBACContextValue } from '../src/features/RBAC';
-
 import { server } from './server';
 
 interface ProvidersProps {
@@ -27,14 +24,6 @@ interface ProvidersProps {
 }
 
 const Providers = ({ children, initialEntries }: ProvidersProps) => {
-  const rbacContextValue: RBACContextValue = React.useMemo(
-    () => ({
-      allPermissions: fixtures.permissions.allPermissions as unknown as Permission[],
-      refetchPermissions: jest.fn(),
-    }),
-    []
-  );
-
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -51,9 +40,7 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
     <MemoryRouter initialEntries={initialEntries}>
       <IntlProvider locale="en" textComponent="span">
         <DesignSystemProvider locale="en">
-          <QueryClientProvider client={queryClient}>
-            <RBACContext.Provider value={rbacContextValue}>{children}</RBACContext.Provider>
-          </QueryClientProvider>
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         </DesignSystemProvider>
       </IntlProvider>
     </MemoryRouter>

@@ -1,12 +1,10 @@
 import * as React from 'react';
 
-import { createSelector } from '@reduxjs/toolkit';
-import { useRBAC, type Permission } from '@strapi/helper-plugin';
 import { useParams } from 'react-router-dom';
 
 import { createContext } from '../../components/Context';
-import { RootState } from '../../core/store/configure';
-import { useTypedSelector } from '../../core/store/hooks';
+import { useAuth, type Permission } from '../../features/Auth';
+import { useRBAC } from '../../hooks/useRBAC';
 
 import type { Attribute } from '@strapi/types';
 
@@ -54,32 +52,6 @@ interface DocumentRBACProps {
   permissions: Permission[] | null;
 }
 
-const selectContentTypePermissionsOrganisedByAction = createSelector(
-  [
-    (state: RootState) => state.rbacProvider.collectionTypesRelatedPermissions,
-    (_, slug: string) => slug,
-  ],
-  (allContentTypePermissions, slug) => {
-    const contentTypePermissions = allContentTypePermissions[slug];
-
-    return Object.entries(contentTypePermissions).reduce<Record<string, Permission[]>>(
-      (acc, [action, permissions]) => {
-        /**
-         * The original action is in the format `plugins::content-manager.explorer.{ACTION}`,
-         * we only want the last part of the string so our actions form properties like can{ACTION}
-         */
-        const [actionShorthand] = action.split('.').slice(-1);
-
-        return {
-          ...acc,
-          [actionShorthand]: permissions,
-        };
-      },
-      {}
-    );
-  }
-);
-
 /**
  * @internal This component is not meant to be used outside of the Content Manager plugin.
  * It depends on knowing the slug/model of the content-type using the params of the URL.
@@ -95,10 +67,19 @@ const DocumentRBAC = ({ children, permissions }: DocumentRBACProps) => {
     throw new Error('Cannot find the slug param in the URL');
   }
 
-  const contentTypePermissions = useTypedSelector((state) =>
-    selectContentTypePermissionsOrganisedByAction(state, slug)
-  );
-  const { isLoading, allowedActions } = useRBAC(contentTypePermissions, permissions ?? []);
+  const userPermissions = useAuth('DocumentRBAC', (state) => state.permissions);
+
+  const contentTypePermissions = React.useMemo(() => {
+    const contentTypePermissions = userPermissions.filter(
+      (permission) => permission.subject === slug
+    );
+    return contentTypePermissions.reduce<Record<string, Permission[]>>((acc, permission) => {
+      const [action] = permission.action.split('.').slice(-1);
+      return { ...acc, [action]: [permission] };
+    }, {});
+  }, [slug, userPermissions]);
+
+  const { isLoading, allowedActions } = useRBAC(contentTypePermissions);
 
   const canCreateFields =
     !isLoading && allowedActions.canCreate

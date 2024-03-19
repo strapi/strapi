@@ -9,63 +9,6 @@ tags:
 Currently, there are a few different ways to use permissions in the application. This document will explain the different ways, how to use them and suggestions
 on when is best to use them. It's advised that you've read [how they work](../01-how-they-work.mdx) and [fetching permissions](fetching-permissions.mdx) before reading this document so you have the full context.
 
-## useRBACProvider
-
-In [fetching permissions](./fetching-permissions.mdx) we briefly mentioned the `useRBACProvider` hook which is used to access the [context](https://beta.reactjs.org/learn/passing-data-deeply-with-context)
-that contains the permissions. This is very low level and does nothing but give you access to _every_ permission for the user and a way to refetch them from the API.
-
-### Usage
-
-Because this hook is so low level, it's recommended you use one of the other hooks or the wrapper components instead which use this inside and expose the methods
-of this hook.
-
-```jsx
-import { useRBACProvider } from '@strapi/helper-plugin';
-
-const MyComponent = () => {
-  const { allPermissions, refetchPermissions } = useRBACProvider();
-
-  const handleClick = async () => {
-    await refetchPermissions();
-  };
-
-  const canSeeMyComponent = allPermissions.some(
-    // this string will declared in the backend.
-    (permission) => permission.action === 'plugins::my-plugin.my-component.read'
-  );
-
-  return (
-    <div>
-      <button type="button" onClick={handleClick}>
-        Refetch permissions
-      </button>
-      {canSeeMyComponent ? <p>aha you found me</p> : null}
-    </div>
-  );
-};
-```
-
-### Typescript
-
-```ts
-interface Permission {
-  id: number;
-  action: string;
-  subject: string | null;
-  // This can be custom defined to the needs of the plugin/application
-  properties: Record<string, any>;
-  conditions: Array<string>;
-}
-
-type UseRBACProvider = () => {
-  allPermissions: Permission[];
-  // This is the `refetch` method from react-query's useQueries hook
-  refetchPermissions: <TPageData>(
-    options?: RefetchOptions & RefetchQueryFilters<TPageData>
-  ) => Promise<QueryObserverResult<unknown, unknown>>;
-};
-```
-
 ## Components
 
 There are two different wrapper components available to use. They are very similar but have different use cases. They are both

@@ -1,8 +1,6 @@
 import * as React from 'react';
 
-import { createSelector } from '@reduxjs/toolkit';
-import { Store, unstable_useDocument as useDocument } from '@strapi/admin/strapi-admin';
-import { useSelector } from 'react-redux';
+import { useAuth, unstable_useDocument as useDocument } from '@strapi/admin/strapi-admin';
 import { useParams } from 'react-router-dom';
 
 import { doesPluginOptionsHaveI18nLocalized } from '../utils/fields';
@@ -17,40 +15,6 @@ type UseI18n = () => {
   canPublish: string[];
 };
 
-type RootState = ReturnType<Store['getState']>;
-
-const makeSelectContentTypePermissions = () =>
-  // @ts-expect-error – I have no idea why this fails like this.
-  createSelector(
-    (state: RootState) => state.rbacProvider.collectionTypesRelatedPermissions,
-    (_, slug: string) => slug,
-    (state: RootState['rbacProvider']['collectionTypesRelatedPermissions'], slug: string) => {
-      const contentTypePermissions = slug ? state[slug] : {};
-
-      return Object.entries(contentTypePermissions).reduce<Omit<ReturnType<UseI18n>, 'hasI18n'>>(
-        (acc, [action, [permission]]) => {
-          /**
-           * The original action is in the format `plugins::content-manager.explorer.{ACTION}`,
-           * we only want the last part of the string so our actions form properties like can{ACTION}
-           */
-          const [actionShorthand] = action.split('.').slice(-1);
-
-          return {
-            ...acc,
-            [`can${capitalize(actionShorthand)}`]: permission.properties?.locales ?? [],
-          };
-        },
-        {
-          canCreate: [],
-          canRead: [],
-          canUpdate: [],
-          canDelete: [],
-          canPublish: [],
-        }
-      );
-    }
-  );
-
 /**
  * @alpha
  * @description This hook is used to get the i18n status of a content type.
@@ -61,8 +25,22 @@ const useI18n: UseI18n = () => {
   // Extract the params from the URL to pass to our useDocument hook
   const params = useParams<{ collectionType: string; slug: string; model: string }>();
 
-  const selectContentTypePermissions = React.useMemo(makeSelectContentTypePermissions, []);
-  const actions = useSelector((state) => selectContentTypePermissions(state, params.slug));
+  const userPermissions = useAuth('useI18n', (state) => state.permissions);
+  const actions = React.useMemo(() => {
+    const permissions = userPermissions.filter((permission) => permission.subject === params.slug);
+
+    return permissions.reduce<Omit<ReturnType<UseI18n>, 'hasI18n'>>(
+      (acc, permission) => {
+        const [actionShorthand] = permission.action.split('.').slice(-1);
+
+        return {
+          ...acc,
+          [`can${capitalize(actionShorthand)}`]: permission.properties?.locales ?? [],
+        };
+      },
+      { canCreate: [], canRead: [], canUpdate: [], canDelete: [], canPublish: [] }
+    );
+  }, [params.slug, userPermissions]);
 
   const { schema } = useDocument(
     {

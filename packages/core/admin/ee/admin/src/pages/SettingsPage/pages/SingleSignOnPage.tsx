@@ -13,7 +13,6 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -25,6 +24,7 @@ import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useNotification } from '../../../../../../admin/src/features/Notifications';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../../../admin/src/hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../../../admin/src/hooks/useRBAC';
 import {
   useGetProviderOptionsQuery,
   useUpdateProviderOptionsMutation,

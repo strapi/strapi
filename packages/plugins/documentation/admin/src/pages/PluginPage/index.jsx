@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 
-import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import {
   LinkButton,
   ContentLayout,
@@ -17,9 +16,8 @@ import {
   Typography,
   EmptyStateLayout,
 } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Eye as Show, Refresh as Reload, Trash } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { ConfirmDialog, useRBAC, Page } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';

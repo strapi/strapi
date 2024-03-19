@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 import { Combobox, ComboboxOption, useCollator } from '@strapi/design-system';
-import { findMatchingPermissions, useRBACProvider } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { Filters } from '../../../../components/Filters';
 import { useField } from '../../../../components/Form';
+import { useAuth } from '../../../../features/Auth';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
@@ -46,18 +46,15 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
   const { attributes, uid: model, options } = schema;
   const { formatMessage, locale } = useIntl();
   const { trackUsage } = useTracking();
-  const { allPermissions } = useRBACProvider();
+  const allPermissions = useAuth('FiltersImpl', (state) => state.permissions);
   const [{ query }] = useQueryParams<Filters.Query>();
   const { schemas } = useContentTypeSchema();
 
   const canReadAdminUsers = React.useMemo(
     () =>
-      findMatchingPermissions(allPermissions, [
-        {
-          action: 'admin::users.read',
-          subject: null,
-        },
-      ]).length > 0,
+      allPermissions.filter(
+        (permission) => permission.action === 'admin::users.read' && permission.subject === null
+      ).length > 0,
     [allPermissions]
   );
 
@@ -96,14 +93,10 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
   });
 
   const displayedAttributeFilters = React.useMemo(() => {
-    const [{ properties: { fields = [] } = { fields: [] } }] = findMatchingPermissions(
-      allPermissions,
-      [
-        {
-          action: 'plugin::content-manager.explorer.read',
-          subject: model,
-        },
-      ]
+    const [{ properties: { fields = [] } = { fields: [] } }] = allPermissions.filter(
+      (permission) =>
+        permission.action === 'plugin::content-manager.explorer.read' &&
+        permission.subject === model
     );
 
     const allowedFields = fields.filter((field) => {
@@ -198,14 +191,7 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
               // do not display the filter at all, if the current user does
               // not have permissions to read admin users
               if (eeFilter.name === 'strapi_assignee') {
-                return (
-                  findMatchingPermissions(allPermissions, [
-                    {
-                      action: 'admin::users.read',
-                      subject: null,
-                    },
-                  ]).length > 0
-                );
+                return canReadAdminUsers;
               }
               return true;
             })

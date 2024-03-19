@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -14,6 +13,7 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import {
   useCreateTransferTokenMutation,
   useGetTransferTokenQuery,

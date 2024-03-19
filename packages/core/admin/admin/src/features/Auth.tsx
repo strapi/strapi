@@ -9,18 +9,30 @@ import { useTypedDispatch } from '../core/store/hooks';
 import { setLocale } from '../reducer';
 import {
   useGetMeQuery,
+  useGetMyPermissionsQuery,
+  useLazyCheckPermissionsQuery,
   useLoginMutation,
   useLogoutMutation,
   useRenewTokenMutation,
 } from '../services/auth';
 
-import type { SanitizedAdminUser } from '../../../shared/contracts/shared';
+import type {
+  Permission as PermissionContract,
+  SanitizedAdminUser,
+} from '../../../shared/contracts/shared';
+
+interface Permission
+  extends Pick<PermissionContract, 'action' | 'subject'>,
+    Partial<Omit<PermissionContract, 'action' | 'subject'>> {}
 
 interface AuthContextValue {
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
   logout: () => Promise<void>;
+  checkUserHasPermissions: (permissions: Permission[]) => Promise<boolean>;
+  permissions: Permission[];
+  refetchPermissions: () => Promise<void>;
   setToken: (token: string | null) => void;
   token: string | null;
   user?: SanitizedAdminUser;
@@ -57,6 +69,10 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
      */
     skip: !token,
   });
+  const { data: permissions = [], refetch } = useGetMyPermissionsQuery(undefined, {
+    skip: !token,
+  });
+
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
@@ -159,11 +175,63 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     navigate('/auth/login');
   }, [clearStorage, logoutMutation, navigate]);
 
+  const refetchPermissions = React.useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+
+  const [checkPermissions] = useLazyCheckPermissionsQuery();
+  const checkUserHasPermissions: AuthContextValue['checkUserHasPermissions'] = React.useCallback(
+    async (permissions) => {
+      if (!permissions || !permissions.length) {
+        return true;
+      }
+
+      const matchingPermissions = permissions.filter(
+        (permission) =>
+          permissions.findIndex(
+            (perm) => perm.action === permission.action && perm.subject === permission.subject
+          ) >= 0
+      );
+
+      const shouldCheckConditions = matchingPermissions.some(
+        (perm) => Array.isArray(perm.conditions) && perm.conditions.length > 0
+      );
+
+      if (!shouldCheckConditions) {
+        return matchingPermissions.length > 0;
+      }
+
+      const { data, error } = await checkPermissions({
+        permissions: matchingPermissions.map((perm) => ({
+          action: perm.action,
+          subject: perm.subject,
+        })),
+      });
+
+      if (error) {
+        throw error;
+      } else {
+        return data?.data.every((v) => v === true) ?? false;
+      }
+    },
+    [checkPermissions]
+  );
+
   return (
-    <Provider token={token} user={user} login={login} logout={logout} setToken={setToken}>
+    <Provider
+      token={token}
+      user={user}
+      login={login}
+      logout={logout}
+      permissions={permissions}
+      checkUserHasPermissions={checkUserHasPermissions}
+      refetchPermissions={refetchPermissions}
+      setToken={setToken}
+    >
       {children}
     </Provider>
   );
 };
 
 export { AuthProvider, useAuth };
+export type { AuthContextValue, Permission };

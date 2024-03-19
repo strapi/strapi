@@ -13,9 +13,8 @@ import {
   Typography,
   FieldAction,
 } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
-import { translatedErrors, Page } from '@strapi/strapi/admin';
+import { translatedErrors, Page, useRBAC } from '@strapi/strapi/admin';
 import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';

@@ -16,9 +16,14 @@ import {
   VisuallyHidden,
   useCollator,
 } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { Page, useAPIErrorHandler, useNotification, useFetchClient } from '@strapi/strapi/admin';
+import {
+  Page,
+  useAPIErrorHandler,
+  useNotification,
+  useFetchClient,
+  useRBAC,
+} from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';

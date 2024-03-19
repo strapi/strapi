@@ -17,7 +17,6 @@ import {
   useFilter,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import {
   ConfirmDialog,
@@ -28,6 +27,7 @@ import {
   useNotification,
   useQueryParams,
   useFetchClient,
+  useRBAC,
 } from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';

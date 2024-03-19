@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { hasPermissions, useRBACProvider } from '@strapi/helper-plugin';
 import sortBy from 'lodash/sortBy';
 import { useSelector } from 'react-redux';
 
 import { SETTINGS_LINKS_CE, SettingsMenuLink } from '../constants';
 import { useAppInfo } from '../features/AppInfo';
+import { useAuth } from '../features/Auth';
 import { useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 import { PermissionMap } from '../types/permissions';
@@ -63,7 +63,10 @@ const useSettingsMenu = (): {
     isLoading: true,
     menu: [],
   });
-  const { allPermissions: userPermissions } = useRBACProvider();
+  const checkUserHasPermission = useAuth(
+    'useSettingsMenu',
+    (state) => state.checkUserHasPermissions
+  );
   const shouldUpdateStrapi = useAppInfo('useSettingsMenu', (state) => state.shouldUpdateStrapi);
   const settings = useStrapiApp('useSettingsMenu', (state) => state.settings);
   const permissions = useSelector(selectAdminPermissions);
@@ -117,7 +120,7 @@ const useSettingsMenu = (): {
         Promise.all(
           sections.reduce<Promise<MenuLinkPermission>[]>((acc, section, sectionIndex) => {
             const linksWithPermissions = section.links.map(async (link, linkIndex) => ({
-              hasPermission: await hasPermissions(userPermissions, link.permissions),
+              hasPermission: await checkUserHasPermission(link.permissions),
               sectionIndex,
               linkIndex,
             }));
@@ -170,7 +173,14 @@ const useSettingsMenu = (): {
     ]);
 
     getData();
-  }, [adminLinks, globalLinks, userPermissions, settings, shouldUpdateStrapi, addPermissions]);
+  }, [
+    adminLinks,
+    globalLinks,
+    settings,
+    shouldUpdateStrapi,
+    addPermissions,
+    checkUserHasPermission,
+  ]);
 
   return {
     isLoading,

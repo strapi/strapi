@@ -4,7 +4,6 @@ import * as React from 'react';
 import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { Permission, RBACContext } from '@strapi/helper-plugin';
 import {
   fireEvent,
   renderHook as renderHookRTL,
@@ -19,6 +18,7 @@ import {
   Queries,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { rest } from 'msw';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
@@ -26,13 +26,12 @@ import { Provider } from 'react-redux';
 import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-router-dom';
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
-import { RBACReducer } from '../src/components/RBACProvider';
 import { Theme } from '../src/components/Theme';
 import { reducer as cmAppReducer } from '../src/content-manager/layout';
 import { reducer as contentManagerReducer } from '../src/content-manager/modules/reducers';
 import { contentManagerApi } from '../src/content-manager/services/api';
 import { AppInfoProvider } from '../src/features/AppInfo';
-import { AuthProvider } from '../src/features/Auth';
+import { AuthProvider, type Permission } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
 import { NotificationsProvider } from '../src/features/Notifications';
 import { StrapiAppProvider } from '../src/features/StrapiApp';
@@ -60,7 +59,6 @@ const defaultTestStoreConfig = {
   reducer: {
     [adminApi.reducerPath]: adminApi.reducer,
     admin_app: appReducer,
-    rbacProvider: RBACReducer,
     'content-manager_app': cmAppReducer,
     [contentManagerApi.reducerPath]: contentManagerApi.reducer,
     'content-manager': contentManagerReducer,
@@ -89,6 +87,27 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
   const store = configureStore(
     // @ts-expect-error – we've not filled up the entire initial state.
     storeConfig ?? defaultTestStoreConfig
+  );
+
+  server.use(
+    rest.get('/admin/users/me/permissions', (req, res, ctx) =>
+      res(
+        ctx.json({
+          data: [
+            ...fixtures.permissions.allPermissions,
+            ...permissions,
+            {
+              id: 314,
+              action: 'admin::users.read',
+              subject: null,
+              properties: {},
+              conditions: [],
+              actionParameters: {},
+            },
+          ],
+        })
+      )
+    )
   );
 
   const router = createMemoryRouter(
@@ -144,47 +163,29 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                         settings={{}}
                       >
                         <NotificationsProvider>
-                          <RBACContext.Provider
-                            value={{
-                              refetchPermissions: jest.fn(),
-                              allPermissions: [
-                                ...fixtures.permissions.allPermissions,
-                                ...permissions,
-                                {
-                                  id: 314,
-                                  action: 'admin::users.read',
-                                  subject: null,
-                                  properties: {},
-                                  conditions: [],
-                                  actionParameters: {},
-                                },
-                              ] as Permission[],
+                          <ConfigurationContextProvider
+                            showReleaseNotification={false}
+                            showTutorials={false}
+                            logos={{
+                              auth: { default: '' },
+                              menu: { default: '' },
                             }}
+                            updateProjectSettings={jest.fn()}
                           >
-                            <ConfigurationContextProvider
-                              showReleaseNotification={false}
-                              showTutorials={false}
-                              logos={{
-                                auth: { default: '' },
-                                menu: { default: '' },
+                            <AppInfoProvider
+                              autoReload
+                              useYarn
+                              dependencies={{
+                                '@strapi/plugin-documentation': '4.2.0',
+                                '@strapi/provider-upload-cloudinary': '4.2.0',
                               }}
-                              updateProjectSettings={jest.fn()}
+                              strapiVersion="4.1.0"
+                              communityEdition
+                              shouldUpdateStrapi={false}
                             >
-                              <AppInfoProvider
-                                autoReload
-                                useYarn
-                                dependencies={{
-                                  '@strapi/plugin-documentation': '4.2.0',
-                                  '@strapi/provider-upload-cloudinary': '4.2.0',
-                                }}
-                                strapiVersion="4.1.0"
-                                communityEdition
-                                shouldUpdateStrapi={false}
-                              >
-                                {children}
-                              </AppInfoProvider>
-                            </ConfigurationContextProvider>
-                          </RBACContext.Provider>
+                              {children}
+                            </AppInfoProvider>
+                          </ConfigurationContextProvider>
                         </NotificationsProvider>
                       </StrapiAppProvider>
                     </Theme>

@@ -8,8 +8,8 @@ import {
   useNotification,
   useAppInfo,
   useFetchClient,
+  useAuth,
 } from '@strapi/admin/strapi-admin';
-import { useRBACProvider } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import set from 'lodash/set';
@@ -92,7 +92,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { refetchPermissions } = useRBACProvider();
+  const refetchPermissions = useAuth('DataManagerProvider', (state) => state.refetchPermissions);
   const { pathname } = useLocation();
   const { onCloseModal } = useFormModalNavigation();
   const contentTypeMatch = useMatch(`/plugins/${pluginId}/content-types/:uid`);

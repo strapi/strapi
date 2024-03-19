@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { ContentLayout, Flex } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -13,6 +12,7 @@ import { useTypedSelector } from '../../../../../core/store/hooks';
 import { useNotification } from '../../../../../features/Notifications';
 import { useTracking } from '../../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import {
   useCreateAPITokenMutation,
   useGetAPITokenQuery,

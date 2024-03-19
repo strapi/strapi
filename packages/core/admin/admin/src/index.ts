@@ -30,6 +30,7 @@ export {
   NotificationsProvider,
 } from './features/Notifications';
 export { useAppInfo, type AppInfoContextValue } from './features/AppInfo';
+export { type Permission, useAuth, type AuthContextValue } from './features/Auth';
 
 /**
  * Hooks
@@ -40,6 +41,7 @@ export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
 export { useAPIErrorHandler, type ApiError } from './hooks/useAPIErrorHandler';
 export { useQueryParams } from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
+export { useRBAC } from './hooks/useRBAC';
 
 /**
  * Types

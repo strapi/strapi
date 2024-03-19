@@ -17,7 +17,6 @@ import { Onboarding } from '../components/Onboarding';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
-import { RBACProvider } from '../components/RBACProvider';
 import { useIsHistoryRoute } from '../content-manager/history/routes';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
@@ -26,7 +25,6 @@ import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
 import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
-import { useGetMyPermissionsQuery } from '../services/auth';
 import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
 
 const strapiVersion = packageJSON.version;
@@ -42,14 +40,6 @@ const AdminLayout = () => {
   const { showReleaseNotification } = useConfiguration('AuthenticatedApp');
 
   const { data: appInfo, isLoading: isLoadingAppInfo } = useInformationQuery();
-  /**
-   * TODO: in V5 remove the `RBACProvider` and fire this in the Auth provider instead.
-   */
-  const {
-    data: permissions,
-    isLoading: isLoadingPermissions,
-    refetch,
-  } = useGetMyPermissionsQuery();
 
   const [tagName, setTagName] = React.useState<string>(strapiVersion);
 
@@ -103,7 +93,7 @@ const AdminLayout = () => {
     isLoading: isLoadingMenu,
     generalSectionLinks,
     pluginsSectionLinks,
-  } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName), permissions ?? []);
+  } = useMenu(checkLatestStrapiVersion(strapiVersion, tagName));
   const { showTutorials } = useConfiguration('Admin');
 
   /**
@@ -120,13 +110,9 @@ const AdminLayout = () => {
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
-  if (isLoadingMenu || isLoadingAppInfo || isLoadingPermissions) {
+  if (isLoadingMenu || isLoadingAppInfo) {
     return <Page.Loading />;
   }
-
-  const refetchPermissions = async () => {
-    await refetch();
-  };
 
   return (
     <AppInfoProvider
@@ -135,31 +121,29 @@ const AdminLayout = () => {
       latestStrapiReleaseTag={tagName}
       shouldUpdateStrapi={checkLatestStrapiVersion(strapiVersion, tagName)}
     >
-      <RBACProvider permissions={permissions ?? []} refetchPermissions={refetchPermissions}>
-        <NpsSurvey />
-        <PluginsInitializer>
-          <DndProvider backend={HTML5Backend}>
-            <Box background="neutral100">
-              <SkipToContent>
-                {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
-              </SkipToContent>
-              <Flex alignItems="flex-start">
-                {!isHistoryRoute && (
-                  <LeftMenu
-                    generalSectionLinks={generalSectionLinks}
-                    pluginsSectionLinks={pluginsSectionLinks}
-                  />
-                )}
-                <Box flex={1}>
-                  <Outlet />
-                  <GuidedTourModal />
-                  {showTutorials && <Onboarding />}
-                </Box>
-              </Flex>
-            </Box>
-          </DndProvider>
-        </PluginsInitializer>
-      </RBACProvider>
+      <NpsSurvey />
+      <PluginsInitializer>
+        <DndProvider backend={HTML5Backend}>
+          <Box background="neutral100">
+            <SkipToContent>
+              {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
+            </SkipToContent>
+            <Flex alignItems="flex-start">
+              {!isHistoryRoute && (
+                <LeftMenu
+                  generalSectionLinks={generalSectionLinks}
+                  pluginsSectionLinks={pluginsSectionLinks}
+                />
+              )}
+              <Box flex={1}>
+                <Outlet />
+                <GuidedTourModal />
+                {showTutorials && <Onboarding />}
+              </Box>
+            </Flex>
+          </Box>
+        </DndProvider>
+      </PluginsInitializer>
     </AppInfoProvider>
   );
 };
