@@ -1,4 +1,3 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
@@ -20,6 +19,7 @@ import { pluginId } from './pluginId';
 import { i18nApi } from './services/api';
 import { LOCALIZED_FIELDS } from './utils/fields';
 import { getTranslation } from './utils/getTranslation';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
 import type { DocumentActionComponent } from '@strapi/strapi/admin';
