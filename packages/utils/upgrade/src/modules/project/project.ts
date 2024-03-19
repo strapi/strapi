@@ -12,43 +12,9 @@ import * as constants from './constants';
 import type { Version } from '../version';
 import type { Codemod } from '../codemod';
 import type { Report } from '../report';
-import type {
-  IAppProject,
-  IPluginProject,
-  FileExtension,
-  MinimalPackageJSON,
-  RunCodemodsOptions,
-  IProjectBase,
-} from './types';
+import type { FileExtension, MinimalPackageJSON, RunCodemodsOptions } from './types';
 
-export const isPluginProject = (project: unknown): project is IPluginProject => {
-  return (
-    project instanceof PluginProject &&
-    'type' in project &&
-    project.type === 'plugin' &&
-    !('strapiVersion' in project)
-  );
-};
-
-export const assertPluginProject: (project: unknown) => asserts project is IPluginProject = (
-  project
-) => {
-  if (!isPluginProject(project)) {
-    throw new Error('Project must be an app');
-  }
-};
-
-export const isAppProject = (project: unknown): project is IAppProject => {
-  return project instanceof AppProject && 'type' in project && project.type === 'app';
-};
-
-export const assertAppProject: (project: unknown) => asserts project is IAppProject = (project) => {
-  if (!isAppProject(project)) {
-    throw new Error('Project must be an app');
-  }
-};
-
-export class Project implements IProjectBase {
+export class Project {
   public cwd: string;
 
   // The following properties are assigned during the .refresh() call in the constructor.
@@ -160,7 +126,7 @@ export class Project implements IProjectBase {
   }
 }
 
-export class AppProject extends Project implements IAppProject {
+export class AppProject extends Project {
   public strapiVersion!: Version.SemVer;
 
   readonly type = 'app' as const;
@@ -238,7 +204,7 @@ const formatGlobCollectionPattern = (collection: string[]): string => {
   return collection.length === 1 ? collection[0] : `{${collection}}`;
 };
 
-export class PluginProject extends Project implements IPluginProject {
+export class PluginProject extends Project {
   readonly type = 'plugin' as const;
 }
 

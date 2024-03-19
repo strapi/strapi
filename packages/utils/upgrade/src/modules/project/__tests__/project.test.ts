@@ -1,14 +1,9 @@
 import path from 'node:path';
 import { vol, fs } from 'memfs';
 
-// eslint-disable-next-line import/first
-import {
-  PluginProject,
-  assertAppProject,
-  assertPluginProject,
-  isPluginProject,
-  projectFactory,
-} from '../project';
+import { PluginProject, projectFactory } from '../project';
+
+import { assertAppProject, assertPluginProject, isPluginProject } from '../utils';
 
 jest.mock('fs', () => fs);
 

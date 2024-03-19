@@ -1,4 +1,6 @@
 export type * from './types';
 
-export { projectFactory } from './project';
+export { projectFactory, Project, AppProject, PluginProject } from './project';
 export * as constants from './constants';
+
+export { isAppProject, assertAppProject, isPluginProject, assertPluginProject } from './utils';

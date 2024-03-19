@@ -4,12 +4,11 @@ import * as requirements from './requirements';
 import { timerFactory } from '../../modules/timer';
 import { upgraderFactory, constants as upgraderConstants } from '../../modules/upgrader';
 import { npmPackageFactory } from '../../modules/npm';
-import { projectFactory } from '../../modules/project';
+import { projectFactory, isPluginProject } from '../../modules/project';
 import * as f from '../../modules/format';
 import { Version } from '../../modules/version';
 
 import type { UpgradeOptions } from './types';
-import { isPluginProject } from '../../modules/project/project';
 
 export const upgrade = async (options: UpgradeOptions) => {
   const timer = timerFactory();
