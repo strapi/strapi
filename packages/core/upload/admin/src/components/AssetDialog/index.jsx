@@ -17,7 +17,6 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { useSelectionState } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -27,6 +26,7 @@ import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import useModalQueryParams from '../../hooks/useModalQueryParams';
+import { useSelectionState } from '../../hooks/useSelectionState';
 import { containsAssetFilter, getTrad } from '../../utils';
 import getAllowedFiles from '../../utils/getAllowedFiles';
 import { moveElement } from '../../utils/moveElement';
