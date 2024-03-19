@@ -8,6 +8,7 @@ import { isShortHand, isLongHand } from '../utils/data';
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
+import { isContentType } from '../utils/content-types';
 
 const isNumeric = (value: any): value is number => {
   if (Array.isArray(value)) return false; // Handle [1, 'docId'] case
@@ -155,14 +156,6 @@ const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
   return relation;
 };
 
-const EXCLUDED_FIELDS = [
-  'createdBy',
-  'updatedBy',
-  'localizations',
-  'strapi_stage',
-  'strapi_assignee',
-];
-
 const transformDataIdsVisitor = (
   idMap: IdMap,
   data: Record<string, any>,
@@ -178,10 +171,9 @@ const transformDataIdsVisitor = (
       // Find relational attributes, and return the document ids
       if (attribute.type === 'relation') {
         const target = attribute.target as Common.UID.Schema | undefined;
+        // If uid doesn't target a content type, ignore any transformation
         // TODO: Handle polymorphic relations
-        if (!target) return;
-        // TODO: V5 remove excluded fields and use { id: } syntax for those relations
-        if (EXCLUDED_FIELDS.includes(key)) return;
+        if (!target || !isContentType(target)) return;
 
         const getIds = (
           documentId: ID,

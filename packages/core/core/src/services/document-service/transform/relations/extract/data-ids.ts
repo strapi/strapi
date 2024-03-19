@@ -6,6 +6,7 @@ import { ShortHand, LongHand, LongHandDocument } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
+import { isContentType } from '../utils/content-types';
 
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
@@ -94,7 +95,7 @@ const extractDataIds = (
 
         // TODO: Handle morph relations (they have multiple targets)
         const target = attribute.target;
-        if (!target) return;
+        if (!target || !isContentType(target)) return;
 
         // If not connecting to any version on disabled d&p, we should connect to both draft and published relations at the same time
         extractedIds.forEach((relation) => {
