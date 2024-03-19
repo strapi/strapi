@@ -134,6 +134,7 @@ const NpmPackageCard = ({
         <LinkButton
           size="S"
           href={npmPackageHref}
+          target="_blank"
           isExternal
           endIcon={<ExternalLink />}
           aria-label={formatMessage(
