@@ -218,6 +218,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
 
       const item = {
         id: relation.id,
+        status: relation.status,
         /**
          * If there's a last item, that's the first key we use to generate out next one.
          */
