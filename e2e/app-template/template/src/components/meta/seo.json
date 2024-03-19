@@ -1,0 +1,28 @@
+{
+  "collectionName": "components_meta_seos",
+  "info": {
+    "displayName": "Seo",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    },
+    "description": {
+      "type": "text",
+      "maxLength": 150
+    },
+    "indexable": {
+      "type": "boolean",
+      "default": false,
+      "required": true
+    },
+    "image": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": ["images"]
+    }
+  }
+}
