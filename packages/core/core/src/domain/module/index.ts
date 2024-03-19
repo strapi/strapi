@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { PropertyPath } from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Strapi, Common, Schema } from '@strapi/types';
 
@@ -30,7 +30,7 @@ export interface Module {
   destroy: () => Promise<void>;
   load: () => void;
   routes: Common.Module['routes'];
-  config: (path: string, defaultValue?: unknown) => unknown;
+  config: (path: PropertyPath, defaultValue?: unknown) => unknown;
   contentType: (ctName: Common.UID.ContentType) => Schema.ContentType;
   contentTypes: Record<string, Schema.ContentType>;
   service: (serviceName: Common.UID.Service) => Common.Service;
@@ -103,8 +103,8 @@ export const createModule = (namespace: string, rawModule: RawModule, strapi: St
     get routes() {
       return rawModule.routes ?? {};
     },
-    config(path: string, defaultValue: unknown) {
-      return strapi.get('config').get(`${namespace}.${path}`, defaultValue);
+    config(path: PropertyPath, defaultValue: unknown) {
+      return strapi.get('config').get([namespace, path], defaultValue);
     },
     contentType(ctName: Common.UID.ContentType) {
       return strapi.get('content-types').get(`${namespace}.${ctName}`);
