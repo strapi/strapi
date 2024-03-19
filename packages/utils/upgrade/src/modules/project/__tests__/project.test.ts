@@ -1,6 +1,9 @@
 import path from 'node:path';
 import { vol, fs } from 'memfs';
 
+import { PluginProject, projectFactory } from '../project';
+import { assertAppProject, assertPluginProject, isPluginProject } from '../utils';
+
 jest.mock('fs', () => fs);
 
 const srcFilename = (cwd: string, filename: string) => path.join(cwd, 'src', filename);
@@ -12,10 +15,18 @@ const currentStrapiVersion = '1.2.3';
 
 const defaultCWD = '/__unit_tests__';
 
-const packageJSONFile = `{
+const appPackageJSONFile = `{
   "name": "test",
   "version": "1.0.0",
   "dependencies": { "@strapi/strapi": "${currentStrapiVersion}" }
+}`;
+
+const pluginPackageJSONFile = `{
+  "name": "test",
+  "version": "1.0.0",
+  "strapi": {
+    "kind": "plugin"
+  }
 }`;
 
 const srcFiles = {
@@ -27,10 +38,15 @@ const srcFiles = {
   'f.tsx': `console.log('f.tsx')`,
 };
 
-const defaultVolume = { 'package.json': packageJSONFile, src: srcFiles };
+const appVolume = {
+  'package.json': appPackageJSONFile,
+  src: srcFiles,
+};
 
-// eslint-disable-next-line import/first
-import { projectFactory } from '../project';
+const pluginVolume = {
+  'package.json': pluginPackageJSONFile,
+  src: srcFiles,
+};
 
 describe('Project', () => {
   beforeEach(() => {
@@ -44,7 +60,7 @@ describe('Project', () => {
 
   describe('Factory', () => {
     test('Fails on invalid project path', async () => {
-      vol.fromNestedJSON(defaultVolume, defaultCWD);
+      vol.fromNestedJSON(appVolume, defaultCWD);
 
       const cwd = 'unknown-path';
 
@@ -61,7 +77,7 @@ describe('Project', () => {
       );
     });
 
-    test('Fails on project without a @strapi/strapi dependency', async () => {
+    test('Fails when not a plugin and no @strapi/strapi dependency found', async () => {
       vol.fromNestedJSON(
         { 'package.json': `{ "name": "test", "version": "1.2.3" }`, src: srcFiles },
         defaultCWD
@@ -89,10 +105,12 @@ describe('Project', () => {
     // TODO: Waiting for https://github.com/jestjs/jest/issues/9543 to be implemented as we rely on require.resolve to find the actual module
     test.todo(`Use the @strapi/strapi's package.json version as a fallback succeed`);
 
-    test('Succeed for valid project', () => {
-      vol.fromNestedJSON(defaultVolume, defaultCWD);
+    test('Succeed for valid AppProject', () => {
+      vol.fromNestedJSON(appVolume, defaultCWD);
 
       const project = projectFactory(defaultCWD);
+
+      assertAppProject(project);
 
       expect(project.files.length).toBe(7);
       expect(project.files).toStrictEqual(
@@ -100,16 +118,35 @@ describe('Project', () => {
       );
 
       expect(project.cwd).toBe(defaultCWD);
-
       expect(project.strapiVersion.raw).toBe(currentStrapiVersion);
+    });
+
+    test('Succeed for valid PluginProject', () => {
+      vol.fromNestedJSON(pluginVolume, defaultCWD);
+
+      const project = projectFactory(defaultCWD);
+
+      assertPluginProject(project);
+
+      expect(project.type).toBe('plugin');
+      expect(project instanceof PluginProject).toBe(true);
+
+      expect(project.files.length).toBe(7);
+      expect(project.files).toStrictEqual(
+        expect.arrayContaining([path.join(defaultCWD, 'package.json'), ...srcFilenames(defaultCWD)])
+      );
+
+      expect(project.cwd).toBe(defaultCWD);
     });
   });
 
   describe('refresh', () => {
-    test('Succeed for valid project', () => {
-      vol.fromNestedJSON(defaultVolume, defaultCWD);
+    test('Succeed for valid AppProject', () => {
+      vol.fromNestedJSON(appVolume, defaultCWD);
 
       const project = projectFactory(defaultCWD);
+
+      assertAppProject(project);
 
       project.refresh();
 
@@ -124,13 +161,31 @@ describe('Project', () => {
 
       project.packageJSON.name = 'test';
     });
+
+    test('Succeed for valid PluginProject', () => {
+      vol.fromNestedJSON(pluginVolume, defaultCWD);
+
+      const project = projectFactory(defaultCWD);
+      expect(isPluginProject(project)).toBe(true);
+
+      project.refresh();
+
+      expect(project.files.length).toBe(7);
+      expect(project.files).toStrictEqual(
+        expect.arrayContaining([path.join(defaultCWD, 'package.json'), ...srcFilenames(defaultCWD)])
+      );
+
+      expect(project.cwd).toBe(defaultCWD);
+
+      project.packageJSON.name = 'test';
+    });
   });
 
   describe('runCodemods', () => {});
 
   describe('getFilesByExtensions', () => {
     beforeEach(() => {
-      vol.fromNestedJSON(defaultVolume, defaultCWD);
+      vol.fromNestedJSON(appVolume, defaultCWD);
     });
 
     test('Get .js files only', () => {

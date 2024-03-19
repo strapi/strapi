@@ -14,7 +14,7 @@ import type { Version } from '../version';
 export class CodemodRunner implements CodemodRunnerInterface {
   private readonly project: Project;
 
-  private range: Version.Range;
+  private range?: Version.Range;
 
   private isDry: boolean;
 
@@ -22,7 +22,7 @@ export class CodemodRunner implements CodemodRunnerInterface {
 
   private selectCodemodsCallback: SelectCodemodsCallback | null;
 
-  constructor(project: Project, range: Version.Range) {
+  constructor(project: Project, range?: Version.Range) {
     this.project = project;
     this.range = range;
 
@@ -60,7 +60,9 @@ export class CodemodRunner implements CodemodRunnerInterface {
     // Make sure we have access to the latest snapshots of codemods on the system
     repository.refresh();
 
-    const allVersionedCodemods = repository.findByRange(this.range);
+    const allVersionedCodemods = this.range
+      ? repository.findByRange(this.range)
+      : repository.findAll();
 
     // If a selection callback is set, use it, else keep every codemods
     const versionedCodemods = this.selectCodemodsCallback
@@ -70,15 +72,22 @@ export class CodemodRunner implements CodemodRunnerInterface {
     const hasCodemodsToRun = versionedCodemods.length > 0;
 
     if (!hasCodemodsToRun) {
-      this.logger?.debug(`Found no codemods to run for ${f.versionRange(this.range)}`);
+      if (this.range) {
+        this.logger?.debug(`Found no codemods to run for ${f.versionRange(this.range)}`);
+      } else {
+        this.logger?.debug(`Found no codemods to run`);
+      }
       return successReport();
     }
 
-    this.logger?.debug(
-      `Found codemods for ${f.highlight(
-        versionedCodemods.length
-      )} version(s) using ${f.versionRange(this.range)}`
-    );
+    if (this.range) {
+      this.logger?.debug(
+        `Found codemods for ${f.highlight(versionedCodemods.length)} version(s) using ${this.range}`
+      );
+    } else {
+      this.logger?.debug(`Found codemods for ${f.highlight(versionedCodemods.length)} version(s)`);
+    }
+
     versionedCodemods.forEach(({ version, codemods }) =>
       this.logger?.debug(`- ${f.version(version)} (${codemods.length})`)
     );
@@ -97,7 +106,7 @@ export class CodemodRunner implements CodemodRunnerInterface {
   }
 }
 
-export const codemodRunnerFactory = (project: Project, range: Version.Range) => {
+export const codemodRunnerFactory = (project: Project, range?: Version.Range) => {
   return new CodemodRunner(project, range);
 };
 
