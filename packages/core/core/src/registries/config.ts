@@ -1,5 +1,5 @@
 import type { ConfigProvider, LoadedStrapi, Strapi } from '@strapi/types';
-import { get, set, has, isString, type PropertyName, type PropertyPath } from 'lodash';
+import { get, set, has, isString, type PropertyPath, isNumber } from 'lodash';
 import { isArray } from 'lodash/fp';
 
 type Config = Record<string, unknown>;
@@ -9,7 +9,7 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
 
   // Accessing model configs with dot (.) was deprecated between v4->v5, but to avoid a major breaking change
   // we will still support certain namespaces, currently only 'plugin.'
-  const transformPathString = (path: PropertyName): PropertyName => {
+  const transformPathString = (path: string) => {
     if (isString(path) && path.startsWith('plugin.')) {
       const newPath = path.replace('plugin.', 'plugin::');
 
@@ -28,8 +28,8 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
       return transformPathString(path);
     }
     if (isArray(path)) {
-      // if the path is not entirely strings, we won't attempt to do anything to do it
-      if (path.some((part) => !isString(part))) {
+      // if the path is not joinable, we won't apply our deprecation support
+      if (path.some((part) => !(isString(part) || isNumber(part)))) {
         return path;
       }
 
