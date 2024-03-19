@@ -8,7 +8,7 @@
 import type { Database } from '@strapi/database';
 import type { Logger } from '@strapi/logger';
 
-import type { PropertyName, PropertyPath } from 'lodash';
+import type { PropertyPath } from 'lodash';
 import type { Server } from './modules/server';
 import type { EventHub } from './modules/event-hub';
 import type { CronService } from './modules/cron';
@@ -91,9 +91,9 @@ export interface StrapiFS {
 }
 
 export interface ConfigProvider {
-  get<T = unknown>(key: PropertyName | PropertyPath, defaultVal?: T): T;
-  set(path: PropertyName | PropertyPath, val: unknown): this;
-  has(path: PropertyName | PropertyPath): boolean;
+  get<T = unknown>(key: PropertyPath, defaultVal?: T): T;
+  set(path: PropertyPath, val: unknown): this;
+  has(path: PropertyPath): boolean;
   [key: string]: any;
 }
 

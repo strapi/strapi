@@ -23,7 +23,7 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
     return path;
   };
 
-  const transformDeprecatedPaths = (path: PropertyPath | PropertyName) => {
+  const transformDeprecatedPaths = (path: PropertyPath) => {
     if (isString(path)) {
       return transformPathString(path);
     }
@@ -36,14 +36,14 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
 
   return {
     ..._config, // TODO: to remove
-    get(path: PropertyPath | PropertyName, defaultValue?: unknown) {
+    get(path: PropertyPath, defaultValue?: unknown) {
       return get(_config, transformDeprecatedPaths(path), defaultValue);
     },
-    set(path: PropertyPath | PropertyName, val: unknown) {
+    set(path: PropertyPath, val: unknown) {
       set(_config, transformDeprecatedPaths(path), val);
       return this;
     },
-    has(path: PropertyPath | PropertyName) {
+    has(path: PropertyPath) {
       return has(_config, path);
     },
   };
