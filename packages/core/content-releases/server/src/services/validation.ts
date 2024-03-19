@@ -51,6 +51,12 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
     if (!contentType) {
       throw new errors.NotFoundError(`No content type found for uid ${contentTypeUid}`);
     }
+
+    if (!contentType.options?.draftAndPublish) {
+      throw new errors.ValidationError(
+        `Content type with uid ${contentTypeUid} does not have draftAndPublish enabled`
+      );
+    }
   },
   async validatePendingReleasesLimit() {
     // Use the maximum releases option if it exists, otherwise default to 3

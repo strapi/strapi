@@ -4,6 +4,7 @@ import type { LoadedStrapi } from '@strapi/types';
 import { ACTIONS, RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from './constants';
 import {
   deleteActionsOnDeleteContentType,
+  deleteActionsOnDisableDraftAndPublish,
   migrateIsValidAndStatusReleases,
   revalidateChangedContentTypes,
   disableContentTypeLocalized,
@@ -14,7 +15,11 @@ export const register = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
     await strapi.admin.services.permission.actionProvider.registerMany(ACTIONS);
 
-    strapi.hook('strapi::content-types.beforeSync').register(disableContentTypeLocalized);
+    strapi
+      .hook('strapi::content-types.beforeSync')
+      .register(disableContentTypeLocalized)
+      .register(deleteActionsOnDisableDraftAndPublish);
+
     strapi
       .hook('strapi::content-types.afterSync')
       .register(deleteActionsOnDeleteContentType)

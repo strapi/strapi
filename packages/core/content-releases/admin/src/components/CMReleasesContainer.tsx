@@ -1,7 +1,12 @@
 import * as React from 'react';
 
 import { skipToken } from '@reduxjs/toolkit/query';
-import { useAPIErrorHandler, useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
+import {
+  useAPIErrorHandler,
+  useNotification,
+  useQueryParams,
+  unstable_useDocument,
+} from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -248,7 +253,7 @@ const AddActionToReleaseModal = ({
 export const CMReleasesContainer = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { formatMessage, formatDate, formatTime } = useIntl();
-  const { id, slug } = useParams<{
+  const { id, slug, collectionType } = useParams<{
     id: string;
     origin: string;
     slug: string;
@@ -258,6 +263,13 @@ export const CMReleasesContainer = () => {
   const {
     allowedActions: { canCreateAction, canMain, canDeleteAction },
   } = useRBAC(PERMISSIONS);
+
+  const { schema } = unstable_useDocument({
+    collectionType: collectionType!,
+    model: slug!,
+  });
+
+  const hasDraftAndPublish = schema?.options?.draftAndPublish;
 
   const contentTypeUid = slug as Common.UID.ContentType;
   const canFetch = id != null && contentTypeUid != null;
@@ -282,8 +294,9 @@ export const CMReleasesContainer = () => {
 
   /**
    * - Impossible to add entry to release before it exists
+   * - Content types without draft and publish cannot add entries to release
    */
-  if (isCreatingEntry) {
+  if (isCreatingEntry || !hasDraftAndPublish) {
     return null;
   }
 
