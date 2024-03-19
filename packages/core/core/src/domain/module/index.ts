@@ -1,4 +1,4 @@
-import _, { PropertyPath } from 'lodash';
+import _, { PropertyPath, flatten } from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Strapi, Common, Schema } from '@strapi/types';
 
@@ -104,7 +104,8 @@ export const createModule = (namespace: string, rawModule: RawModule, strapi: St
       return rawModule.routes ?? {};
     },
     config(path: PropertyPath, defaultValue: unknown) {
-      return strapi.get('config').get([namespace, path], defaultValue);
+      const pathArray = flatten([namespace, path]);
+      return strapi.get('config').get(pathArray, defaultValue);
     },
     contentType(ctName: Common.UID.ContentType) {
       return strapi.get('content-types').get(`${namespace}.${ctName}`);
