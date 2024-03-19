@@ -1,6 +1,6 @@
 import { addColumnToTableHook } from '../listView';
 
-import type { ListFieldLayout, ListLayout } from '@strapi/strapi/admin';
+import type { ListFieldLayout, ListLayout } from '@strapi/admin/strapi-admin';
 
 describe('addColumnToTableHook', () => {
   const DEFAULT_FIELD: ListFieldLayout = {

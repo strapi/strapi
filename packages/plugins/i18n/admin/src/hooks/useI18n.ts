@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { createSelector } from '@reduxjs/toolkit';
-import { Store, unstable_useDocument as useDocument } from '@strapi/strapi/admin';
+import { Store, unstable_useDocument as useDocument } from '@strapi/admin/strapi-admin';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 

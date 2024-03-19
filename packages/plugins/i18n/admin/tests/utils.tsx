@@ -2,10 +2,10 @@
 import * as React from 'react';
 
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
 import { Permission, RBACContext } from '@strapi/helper-plugin';
-import { NotificationsProvider } from '@strapi/strapi/admin';
 import {
   renderHook as renderHookRTL,
   render as renderRTL,

@@ -116,6 +116,7 @@
     "@strapi/plugin-content-manager": "5.0.0-alpha.0",
     "@strapi/plugin-content-type-builder": "5.0.0-alpha.0",
     "@strapi/plugin-email": "5.0.0-alpha.0",
+    "@strapi/plugin-i18n": "5.0.0-alpha.0",
     "@strapi/plugin-upload": "5.0.0-alpha.0",
     "@strapi/types": "5.0.0-alpha.0",
     "@strapi/typescript-utils": "5.0.0-alpha.0",

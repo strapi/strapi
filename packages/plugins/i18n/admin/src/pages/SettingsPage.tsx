@@ -1,9 +1,9 @@
 import * as React from 'react';
 
+import { Page, useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
 import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
 import { useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments } from '@strapi/icons';
-import { Page, useAPIErrorHandler, useNotification } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { CreateLocale } from '../components/CreateLocale';

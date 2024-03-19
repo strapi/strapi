@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useNotification, useAPIErrorHandler, Form, FormHelpers } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -20,7 +21,6 @@ import {
 } from '@strapi/design-system';
 import { useRBACProvider } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { useNotification, useAPIErrorHandler, Form, FormHelpers } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { UpdateLocale, Locale } from '../../../shared/contracts/locales';

@@ -7611,12 +7611,13 @@ __metadata:
   resolution: "@strapi/plugin-i18n@workspace:packages/plugins/i18n"
   dependencies:
     "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/admin": "npm:5.0.0-alpha.0"
     "@strapi/admin-test-utils": "npm:5.0.0-alpha.0"
     "@strapi/design-system": "npm:1.16.0"
     "@strapi/helper-plugin": "npm:5.0.0-alpha.0"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:5.0.0-alpha.0"
-    "@strapi/strapi": "npm:5.0.0-alpha.0"
+    "@strapi/types": "npm:5.0.0-alpha.0"
     "@strapi/utils": "npm:5.0.0-alpha.0"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
@@ -7633,7 +7634,7 @@ __metadata:
     styled-components: "npm:5.3.11"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^4.0.0
+    "@strapi/admin": ^4.19.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7892,6 +7893,7 @@ __metadata:
     "@strapi/plugin-content-manager": "npm:5.0.0-alpha.0"
     "@strapi/plugin-content-type-builder": "npm:5.0.0-alpha.0"
     "@strapi/plugin-email": "npm:5.0.0-alpha.0"
+    "@strapi/plugin-i18n": "npm:5.0.0-alpha.0"
     "@strapi/plugin-upload": "npm:5.0.0-alpha.0"
     "@strapi/types": "npm:5.0.0-alpha.0"
     "@strapi/typescript-utils": "npm:5.0.0-alpha.0"
