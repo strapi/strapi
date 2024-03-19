@@ -28,7 +28,12 @@ export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvi
       return transformPathString(path);
     }
     if (isArray(path)) {
-      return path.map((name, index) => (index === 0 ? transformPathString(name) : name));
+      // if the path is not entirely strings, we won't attempt to do anything to do it
+      if (path.some((part) => !isString(part))) {
+        return path;
+      }
+
+      return transformPathString(path.join('.'));
     }
 
     return path;

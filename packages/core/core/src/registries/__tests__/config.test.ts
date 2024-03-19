@@ -8,9 +8,14 @@ describe('config', () => {
     expect(config.get('default')).toEqual({ child: 'val' });
   });
 
-  test('supports full paths', () => {
+  test('supports full string paths', () => {
     const config = configProvider({ default: { child: 'val' } });
     expect(config.get('default.child')).toEqual('val');
+  });
+
+  test('supports array paths', () => {
+    const config = configProvider({ default: { child: 'val' } });
+    expect(config.get(['default', 'child'])).toEqual('val');
   });
 
   test('accepts initial values', () => {
@@ -31,7 +36,7 @@ describe('config', () => {
     expect(config.get('plugin::myplugin')).toEqual({ foo: 'bar' });
   });
 
-  test('get supports `plugin::` prefix', () => {
+  test('`get` supports `plugin::` prefix', () => {
     const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
     const config = configProvider({
@@ -40,6 +45,30 @@ describe('config', () => {
 
     expect(config.get('plugin.myplugin.foo')).toEqual('bar');
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+    consoleSpy.mockRestore();
+  });
+
+  test('`get` supports `plugin` in array path', () => {
+    const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
+
+    const config = configProvider({
+      'plugin::myplugin': { foo: 'bar' },
+    });
+
+    expect(config.get(['plugin', 'myplugin', 'foo'])).toEqual('bar');
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('deprecated'));
+    consoleSpy.mockRestore();
+  });
+
+  test('`get` supports `plugin::model` in array path', () => {
+    const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
+
+    const config = configProvider({
+      'plugin::myplugin': { foo: 'bar' },
+    });
+
+    expect(config.get(['plugin::myplugin', 'foo'])).toEqual('bar');
+    expect(consoleSpy).not.toHaveBeenCalledWith(expect.stringContaining('deprecated'));
     consoleSpy.mockRestore();
   });
 
