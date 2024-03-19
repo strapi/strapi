@@ -621,6 +621,7 @@ const UpdateAction: DocumentActionComponent = ({
   const document = useForm('UpdateAction', ({ values }) => values);
   const validate = useForm('UpdateAction', (state) => state.validate);
   const setErrors = useForm('UpdateAction', (state) => state.setErrors);
+  const resetForm = useForm('PublishAction', ({ resetForm }) => resetForm);
 
   return {
     /**
@@ -701,6 +702,8 @@ const UpdateAction: DocumentActionComponent = ({
             res.error.name === 'ValidationError'
           ) {
             setErrors(formatValidationErrors(res.error));
+          } else {
+            resetForm();
           }
         } else {
           const res = await create(
