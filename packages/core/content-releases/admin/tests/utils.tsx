@@ -6,13 +6,12 @@ import {
   defaultTestStoreConfig,
   render as renderAdmin,
   RenderOptions,
+  server,
 } from '@strapi/admin/strapi-admin/tests';
 import { waitFor, RenderResult, act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { releaseApi } from '../src/services/release';
-
-import { server } from './server';
 
 const storeConfig: ConfigureStoreOptions = {
   preloadedState: defaultTestStoreConfig.preloadedState,

@@ -1884,7 +1884,7 @@ const CM_CONTENT_TYPE_MOCK_DATA = [
       displayName: 'Article',
       description: '',
     },
-    options: {},
+    options: { draftAndPublish: true },
     attributes: {
       id: {
         type: 'string',
