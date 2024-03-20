@@ -15,12 +15,36 @@ export default ({ strapi }: { strapi: Strapi }) => {
 };
 
 /**
+ * Match urls for model creation
+ *  /content-manager/collection-types/api::category.category/
+ *  /content-manager/collection-types/api::category.category
+ *
+ * And not match:
+ *  /content-manager/collection-types/api::category.category/1
+ *  /content-manager/collection-types/api::category.category/1/actions/publish
+ */
+const isUrlForCreation = (url: string) => {
+  if (!url) return false;
+
+  // Split path and remove empty strings
+  // [ 'content-manager', 'collection-types', 'api::category.category' ]
+  const splitUrl = url.split('/').filter(Boolean);
+
+  // Get the last element of the array
+  // api::category.category / 1 / publish
+  const model = splitUrl[splitUrl.length - 1];
+
+  // If the model contains :: it means it's a uid
+  return model.includes('::');
+};
+
+/**
  * Adds middleware on CM creation routes to use i18n locale passed in a specific param
  * @param {Strapi} strapi
  */
 const addContentManagerLocaleMiddleware = (strapi: Strapi) => {
   strapi.server.router.use('/content-manager/collection-types/:model', (ctx, next) => {
-    if (ctx.method === 'POST') {
+    if (ctx.method === 'POST' && isUrlForCreation(ctx.originalUrl)) {
       return validateLocaleCreation(ctx, next);
     }
 
@@ -28,7 +52,7 @@ const addContentManagerLocaleMiddleware = (strapi: Strapi) => {
   });
 
   strapi.server.router.use('/content-manager/single-types/:model', (ctx, next) => {
-    if (ctx.method === 'PUT') {
+    if (ctx.method === 'PUT' && isUrlForCreation(ctx.originalUrl)) {
       return validateLocaleCreation(ctx, next);
     }
 

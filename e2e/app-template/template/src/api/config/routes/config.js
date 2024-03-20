@@ -8,5 +8,13 @@ module.exports = {
         auth: false,
       },
     },
+    {
+      method: 'POST',
+      path: '/config/resettransfertoken',
+      handler: 'config.resetTransferToken',
+      config: {
+        auth: false,
+      },
+    },
   ],
 };

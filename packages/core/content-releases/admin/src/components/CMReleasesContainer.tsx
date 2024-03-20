@@ -34,6 +34,7 @@ import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { GetContentTypeEntryReleases } from '../../../shared/contracts/releases';
 import { PERMISSIONS } from '../constants';
 import { useCreateReleaseActionMutation, useGetReleasesForEntryQuery } from '../services/release';
+import { getTimezoneOffset } from '../utils/time';
 
 import { ReleaseActionMenu } from './ReleaseActionMenu';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
@@ -249,7 +250,7 @@ const AddActionToReleaseModal = ({
 
 export const CMReleasesContainer = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatDate, formatTime } = useIntl();
   const {
     isCreatingEntry,
     hasDraftAndPublish,
@@ -258,7 +259,6 @@ export const CMReleasesContainer = () => {
   } = useCMEditViewDataManager();
 
   const contentTypeUid = slug as Common.UID.ContentType;
-
   const canFetch = entryId != null && contentTypeUid != null;
   const fetchParams = canFetch
     ? {
@@ -356,12 +356,39 @@ export const CMReleasesContainer = () => {
                     )}
                   </Typography>
                 </Box>
-                <Flex padding={4} direction="column" gap={3} width="100%" alignItems="flex-start">
+                <Flex padding={4} direction="column" gap={2} width="100%" alignItems="flex-start">
                   <Typography fontSize={2} fontWeight="bold" variant="omega" textColor="neutral700">
                     {release.name}
                   </Typography>
+                  {release.scheduledAt && release.timezone && (
+                    <Typography variant="pi" textColor="neutral600">
+                      {formatMessage(
+                        {
+                          id: 'content-releases.content-manager-edit-view.scheduled.date',
+                          defaultMessage: '{date} at {time} ({offset})',
+                        },
+                        {
+                          date: formatDate(new Date(release.scheduledAt), {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            timeZone: release.timezone,
+                          }),
+                          time: formatTime(new Date(release.scheduledAt), {
+                            hourCycle: 'h23',
+                            timeZone: release.timezone,
+                          }),
+                          offset: getTimezoneOffset(
+                            release.timezone,
+                            new Date(release.scheduledAt)
+                          ),
+                        }
+                      )}
+                    </Typography>
+                  )}
                   <CheckPermissions permissions={PERMISSIONS.deleteAction}>
                     <ReleaseActionMenu.Root hasTriggerBorder>
+                      <ReleaseActionMenu.EditReleaseItem releaseId={release.id} />
                       <ReleaseActionMenu.DeleteReleaseActionItem
                         releaseId={release.id}
                         actionId={release.action.id}

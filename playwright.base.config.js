@@ -1,11 +1,28 @@
 // @ts-check
 const { devices } = require('@playwright/test');
+const { parseType } = require('@strapi/utils');
 
 const getEnvNum = (envVar, defaultValue) => {
   if (envVar !== undefined && envVar !== null) {
     return Number(envVar);
   }
   return defaultValue;
+};
+
+const getEnvString = (envVar, defaultValue) => {
+  if (envVar?.trim().length) {
+    return envVar;
+  }
+
+  return defaultValue;
+};
+
+const getEnvBool = (envVar, defaultValue) => {
+  if (!envVar || envVar === '') {
+    return defaultValue;
+  }
+
+  return parseType({ type: 'boolean', value: envVar.toLowerCase() });
 };
 
 /**
@@ -28,7 +45,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
      */
-    timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 30 * 1000),
+    timeout: getEnvNum(process.env.PLAYWRIGHT_EXPECT_TIMEOUT, 20 * 1000),
   },
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -52,7 +69,16 @@ const createConfig = ({ port, testDir, appDir }) => ({
        Until https://github.com/strapi/strapi/issues/18196 is fixed we can't enable this locally,
        because the Strapi server restarts every time a new file (trace) is created.
     */
-    trace: process.env.CI ? 'retain-on-failure' : 'off',
+    trace: 'retain-on-failure',
+    video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)
+      ? {
+          mode: 'retain-on-failure', // 'retain-on-failure' to save videos only for failed tests
+          size: {
+            width: 1280,
+            height: 720,
+          },
+        }
+      : 'off',
   },
 
   /* Configure projects for major browsers */
@@ -80,7 +106,7 @@ const createConfig = ({ port, testDir, appDir }) => ({
   ],
 
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
-  outputDir: 'test-results/',
+  outputDir: getEnvString(process.env.PLAYWRIGHT_OUTPUT_DIR, '../test-results/'), // in the test-apps/e2e dir, to avoid writing files to the running Strapi project dir
 
   /* Run your local dev server before starting the tests */
   webServer: {

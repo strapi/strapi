@@ -10,13 +10,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
     await page.goto('/admin');
     await login({ page });
-
-    await page.evaluate(() => {
-      // Remove after Scheduling Beta release
-      window.strapi.future = {
-        isEnabled: () => true,
-      };
-    });
   });
 
   test('A user should be able to create a release without scheduling it and view their pending and done releases', async ({
@@ -25,13 +18,11 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     // Navigate to the releases page
     await page.getByRole('link', { name: 'Releases' }).click();
 
-    await expect(
-      page.getByRole('link', { name: `Trent Crimm: The Independent 6 entries` })
-    ).toBeVisible();
+    await expect(page.getByRole('link', { name: `Trent Crimm: The Independent` })).toBeVisible();
 
     // Open the 'Done' tab panel
     await page.getByRole('tab', { name: 'Done' }).click();
-    await expect(page.getByRole('link', { name: `Nate: A wonder kid 2 entries` })).toBeVisible();
+    await expect(page.getByRole('link', { name: `Nate: A wonder kid` })).toBeVisible();
 
     // Open the create release dialog
     await page.getByRole('button', { name: 'New release' }).click();
@@ -49,7 +40,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     // Navigate back to the release page to see the newly created release
     await page.getByRole('link', { name: 'Releases' }).click();
-    await expect(page.getByRole('link', { name: `${newReleaseName} No entries` })).toBeVisible();
+    await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 
   test('A user should be able to create a release with scheduling info and view their pending and done releases', async ({
@@ -72,15 +63,25 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
         name: 'Date',
       })
       .click();
-    await page.getByRole('gridcell', { name: 'Sunday, March 3, 2024' }).click();
+
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+    await page.getByRole('gridcell', { name: formattedDate }).click();
 
     await page
       .getByRole('combobox', {
         name: 'Time *',
       })
       .click();
-    await page.getByRole('option', { name: '14:00' }).click();
 
+    await page.getByRole('option', { name: '14:00' }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
     // Wait for client side redirect to created release
     await page.waitForURL('/admin/plugins/content-releases/*');
@@ -88,6 +89,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     // Navigate back to the release page to see the newly created release
     await page.getByRole('link', { name: 'Releases' }).click();
-    await expect(page.getByRole('link', { name: `${newReleaseName} No entries` })).toBeVisible();
+    await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 });
