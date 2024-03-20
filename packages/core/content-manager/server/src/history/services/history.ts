@@ -88,10 +88,10 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       diffKeys: string[],
       source: CreateHistoryVersion['schema']
     ) => {
-      return diffKeys.reduce<CreateHistoryVersion['schema']>((previousAttributeObject, diffKey) => {
-        previousAttributeObject[diffKey] = source[diffKey];
+      return diffKeys.reduce<CreateHistoryVersion['schema']>((previousAttributesObject, diffKey) => {
+        previousAttributesObject[diffKey] = source[diffKey];
 
-        return previousAttributeObject;
+        return previousAttributesObject;
       }, {});
     };
 
