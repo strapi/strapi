@@ -1,10 +1,19 @@
-import type { LoadedStrapi, Documents } from '@strapi/types';
+import type { LoadedStrapi, Documents, Common, Entity } from '@strapi/types';
+import { contentTypes } from '@strapi/utils';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
 
 import { HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
+import {
+  CreateHistoryVersion,
+  HistoryVersionDataResponse,
+} from '../../../../shared/contracts/history-versions';
+
+// Needed because the query engine doesn't return any types yet
+type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
+  Pick<CreateHistoryVersion, 'locale'>;
 
 const DEFAULT_RETENTION_DAYS = 90;
 
@@ -59,6 +68,56 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     return documentMetadataService.getStatus(document, meta.availableStatus);
   };
 
+  /**
+   * Creates a populate object that looks for all the relations that need
+   * to be saved in history, and populates only the fields needed to later retrieve the content.
+   */
+  const getDeepPopulate = (uid: Common.UID.Schema) => {
+    const model = strapi.getModel(uid);
+    const attributes = Object.entries(model.attributes);
+
+    return attributes.reduce((acc: any, [attributeName, attribute]) => {
+      switch (attribute.type) {
+        case 'relation': {
+          const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
+          if (isVisible) {
+            acc[attributeName] = { fields: ['documentId', 'locale'] };
+          }
+          break;
+        }
+
+        case 'media': {
+          acc[attributeName] = { fields: ['id'] };
+          break;
+        }
+
+        case 'component': {
+          const populate = getDeepPopulate(attribute.component);
+          acc[attributeName] = { populate };
+          break;
+        }
+
+        case 'dynamiczone': {
+          // Use fragments to populate the dynamic zone components
+          const populatedComponents = (attribute.components || []).reduce(
+            (acc: any, componentUID: Common.UID.Component) => {
+              acc[componentUID] = { populate: getDeepPopulate(componentUID) };
+              return acc;
+            },
+            {}
+          );
+
+          acc[attributeName] = { on: populatedComponents };
+          break;
+        }
+        default:
+          break;
+      }
+
+      return acc;
+    }, {});
+  };
+
   return {
     async bootstrap() {
       // Prevent initializing the service twice
@@ -101,7 +160,9 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           .documents(contentTypeUid)
           .findOne(documentContext.documentId, {
             locale,
+            populate: getDeepPopulate(contentTypeUid),
           });
+
         const status = await getVersionStatus(contentTypeUid, document);
 
         const fieldsToIgnore = [
@@ -115,13 +176,37 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           'strapi_assignee',
         ];
 
+        /**
+         * Store schema of both the fields and the fields of the attributes, as it will let us know
+         * if changes were made in the CTB since a history version was created,
+         * and therefore which fields can be restored and which cannot.
+         */
+        const attributesSchema = strapi.getModel(contentTypeUid).attributes;
+        const componentsSchemas: CreateHistoryVersion['componentsSchemas'] = Object.keys(
+          attributesSchema
+        ).reduce((currentComponentSchemas, key) => {
+          const fieldSchema = attributesSchema[key];
+
+          if (fieldSchema.type === 'component') {
+            const componentSchema = strapi.getModel(fieldSchema.component).attributes;
+            return {
+              ...currentComponentSchemas,
+              [fieldSchema.component]: componentSchema,
+            };
+          }
+
+          // Ignore anything that's not a component
+          return currentComponentSchemas;
+        }, {});
+
         // Prevent creating a history version for an action that wasn't actually executed
         await strapi.db.transaction(async ({ onCommit }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
               data: omit(fieldsToIgnore, document),
-              schema: omit(fieldsToIgnore, strapi.contentType(contentTypeUid).attributes),
+              schema: omit(fieldsToIgnore, attributesSchema),
+              componentsSchemas,
               relatedDocumentId: documentContext.documentId,
               locale,
               status,
@@ -166,7 +251,10 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       });
     },
 
-    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
+    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']): Promise<{
+      results: HistoryVersionDataResponse[];
+      pagination: HistoryVersions.Pagination;
+    }> {
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
           ...params,
@@ -183,13 +271,102 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         getLocaleDictionary(),
       ]);
 
-      const sanitizedResults = results.map((result) => ({
-        ...result,
-        locale: result.locale ? localeDictionary[result.locale] : null,
-        createdBy: result.createdBy
-          ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
-          : null,
-      }));
+      const sanitizedResults = await Promise.all(
+        (results as HistoryVersionQueryResult[]).map(async (result) => {
+          const dataWithRelations = await Object.entries(result.schema).reduce(
+            async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
+              const isNormalRelation =
+                attributeSchema.type === 'relation' &&
+                attributeSchema.relation !== 'morphToOne' &&
+                attributeSchema.relation !== 'morphToMany';
+
+              // TODO: handle nested content structures
+              if (isNormalRelation || attributeSchema.type === 'media') {
+                const attributeValue = result.data[attributeKey];
+                const relationDataPromise = (
+                  (Array.isArray(attributeValue) ? attributeValue : [attributeValue]) as Array<
+                    | {
+                        documentId: string;
+                        locale: string | null;
+                      }
+                    | { id: Entity.ID }
+                    | null
+                  >
+                )
+                  // Until we implement proper pagination, limit relations to an arbitrary amount
+                  .slice(0, 25)
+                  .reduce(
+                    async (currentRelationDataPromise, entry) => {
+                      const currentRelationData = await currentRelationDataPromise;
+
+                      // Entry can be null if it's a toOne relation
+                      if (!entry) {
+                        return currentRelationData;
+                      }
+
+                      /**
+                       * Adapt the query depending on if the attribute is a media
+                       * or a normal relation. The extra checks are only for type narrowing
+                       */
+                      let relatedEntry;
+                      if (isNormalRelation) {
+                        if ('documentId' in entry) {
+                          relatedEntry = await strapi
+                            .documents(attributeSchema.target)
+                            .findOne(entry.documentId, { locale: entry.locale || undefined });
+                        }
+                      } else if ('id' in entry) {
+                        relatedEntry = await strapi.db
+                          .query('plugin::upload.file')
+                          .findOne({ where: { id: entry.id } });
+                      }
+
+                      if (relatedEntry) {
+                        currentRelationData.results.push({
+                          ...relatedEntry,
+                          ...(isNormalRelation
+                            ? {
+                                status: await getVersionStatus(
+                                  attributeSchema.target,
+                                  relatedEntry
+                                ),
+                              }
+                            : {}),
+                        });
+                      } else {
+                        // The related content has been deleted
+                        currentRelationData.meta.missingCount += 1;
+                      }
+
+                      return currentRelationData;
+                    },
+                    Promise.resolve({
+                      results: [] as any[],
+                      meta: { missingCount: 0 },
+                    })
+                  );
+                return {
+                  ...(await currentDataWithRelations),
+                  [attributeKey]: await relationDataPromise,
+                };
+              }
+
+              // Not a media or relation, nothing to change
+              return currentDataWithRelations;
+            },
+            Promise.resolve(result.data)
+          );
+
+          return {
+            ...result,
+            data: dataWithRelations,
+            locale: result.locale ? localeDictionary[result.locale] : null,
+            createdBy: result.createdBy
+              ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
+              : undefined,
+          };
+        })
+      );
 
       return {
         results: sanitizedResults,

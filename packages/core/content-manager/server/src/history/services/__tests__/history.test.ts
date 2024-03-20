@@ -23,7 +23,7 @@ const mockGetRequestContext = jest.fn(() => {
     },
   };
 });
-
+const mockFindOne = jest.fn();
 const mockStrapi = {
   plugins: {
     'content-manager': {
@@ -64,7 +64,7 @@ const mockStrapi = {
     },
   },
   documents: jest.fn(() => ({
-    findOne: jest.fn(),
+    findOne: mockFindOne,
   })),
   config: {
     get: () => undefined,
@@ -72,12 +72,41 @@ const mockStrapi = {
   requestContext: {
     get: mockGetRequestContext,
   },
-  contentType(uid: UID.ContentType) {
+  getModel(uid: UID.ContentType | UID.Component) {
     if (uid === 'api::article.article') {
       return {
         attributes: {
           title: {
             type: 'string',
+          },
+          relation: {
+            type: 'relation',
+            target: 'api::category.category',
+          },
+          component: {
+            type: 'component',
+            component: 'some.component',
+          },
+          media: {
+            type: 'media',
+          },
+        },
+      };
+    }
+
+    if (uid === 'some.component') {
+      return {
+        attributes: {
+          title: {
+            type: 'string',
+          },
+          relation: {
+            type: 'relation',
+            target: 'api::restaurant.restaurant',
+          },
+          medias: {
+            type: 'media',
+            multiple: true,
           },
         },
       };
@@ -124,8 +153,62 @@ describe('history-version service', () => {
     await historyMiddlewareFunction(context, next);
     expect(next).toHaveBeenCalledWith(context);
 
+    // Ensure we're only storing the data we need in the database
+    expect(mockFindOne).toHaveBeenLastCalledWith('document-id', {
+      locale: 'fr',
+      populate: {
+        component: {
+          populate: {
+            relation: {
+              fields: ['documentId', 'locale'],
+            },
+            medias: {
+              fields: ['id'],
+            },
+          },
+        },
+        relation: {
+          fields: ['documentId', 'locale'],
+        },
+        media: {
+          fields: ['id'],
+        },
+      },
+    });
+
     // Create and update actions should be saved in history
-    expect(createMock).toHaveBeenCalled();
+    const createPayload = createMock.mock.calls.at(-1)[0].data;
+    expect(createPayload.schema).toEqual({
+      title: {
+        type: 'string',
+      },
+      relation: {
+        type: 'relation',
+        target: 'api::category.category',
+      },
+      component: {
+        type: 'component',
+        component: 'some.component',
+      },
+      media: {
+        type: 'media',
+      },
+    });
+    expect(createPayload.componentsSchemas).toEqual({
+      'some.component': {
+        title: {
+          type: 'string',
+        },
+        relation: {
+          type: 'relation',
+          target: 'api::restaurant.restaurant',
+        },
+        medias: {
+          type: 'media',
+          multiple: true,
+        },
+      },
+    });
     context.action = 'update';
     await historyMiddlewareFunction(context, next);
     expect(createMock).toHaveBeenCalledTimes(2);
@@ -170,9 +253,10 @@ describe('history-version service', () => {
       relatedDocumentId: 'randomid',
       schema: {
         title: {
-          type: 'string',
+          type: 'string' as const,
         },
       },
+      componentsSchemas: {},
       status: 'draft' as const,
     };
 
@@ -196,9 +280,10 @@ describe('history-version service', () => {
       },
       locale: 'en',
       relatedDocumentId: 'randomid',
+      componentsSchema: {},
       schema: {
         title: {
-          type: 'string',
+          type: 'string' as const,
         },
       },
       status: null,
