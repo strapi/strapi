@@ -1,12 +1,23 @@
 import type { LoadedStrapi, Documents } from '@strapi/types';
-import { omit, pick } from 'lodash/fp';
+import { difference, omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
 
 import { HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
+import { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 
 const DEFAULT_RETENTION_DAYS = 90;
+const FIELDS_TO_IGNORE = [
+  'createdAt',
+  'updatedAt',
+  'publishedAt',
+  'createdBy',
+  'updatedBy',
+  'locale',
+  'strapi_stage',
+  'strapi_assignee',
+];
 
 const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
   const state: {
@@ -59,6 +70,49 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     return documentMetadataService.getStatus(document, meta.availableStatus);
   };
 
+  /**
+   * Get the difference between the version schema and the content type schema
+   * Returns the attributes with their original shape
+   */
+  const getAttributesDiff = (
+    versionSchema: CreateHistoryVersion['schema'],
+    versionContentTypeUid: CreateHistoryVersion['contentType']
+  ) => {
+    // Omit the same fields that were omitted when creating a history version
+    const currentContentTypeSchemaAttributes = omit(
+      FIELDS_TO_IGNORE,
+      strapi.getModel(versionContentTypeUid).attributes
+    ) as CreateHistoryVersion['schema'];
+
+    const reduceDifferenceToAttributesObject = (
+      diffKeys: string[],
+      source: CreateHistoryVersion['schema']
+    ) => {
+      return diffKeys.reduce<CreateHistoryVersion['schema']>((previousAttributeObject, diffKey) => {
+        previousAttributeObject[diffKey] = source[diffKey];
+
+        return previousAttributeObject;
+      }, {});
+    };
+
+    const versionSchemaKeys = Object.keys(versionSchema);
+    const currentContentTypeSchemaAttributesKeys = Object.keys(currentContentTypeSchemaAttributes);
+    // The attribute is new if it's on the content type schema but not on the version schema
+    const uniqueToContentType = difference(
+      currentContentTypeSchemaAttributesKeys,
+      versionSchemaKeys
+    );
+    const added = reduceDifferenceToAttributesObject(
+      uniqueToContentType,
+      currentContentTypeSchemaAttributes
+    );
+    // The attribute was removed or renamed if it's on the version schema but not on the content type schema
+    const uniqueToVersion = difference(versionSchemaKeys, currentContentTypeSchemaAttributesKeys);
+    const removed = reduceDifferenceToAttributesObject(uniqueToVersion, versionSchema);
+
+    return { added, removed };
+  };
+
   return {
     async bootstrap() {
       // Prevent initializing the service twice
@@ -104,24 +158,16 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           });
         const status = await getVersionStatus(contentTypeUid, document);
 
-        const fieldsToIgnore = [
-          'createdAt',
-          'updatedAt',
-          'publishedAt',
-          'createdBy',
-          'updatedBy',
-          'locale',
-          'strapi_stage',
-          'strapi_assignee',
-        ];
-
         // Prevent creating a history version for an action that wasn't actually executed
         await strapi.db.transaction(async ({ onCommit }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
-              data: omit(fieldsToIgnore, document),
-              schema: omit(fieldsToIgnore, strapi.contentType(contentTypeUid).attributes),
+              data: omit(FIELDS_TO_IGNORE, document),
+              schema: omit(
+                FIELDS_TO_IGNORE,
+                strapi.contentType(contentTypeUid).attributes
+              ),
               relatedDocumentId: documentContext.documentId,
               locale,
               status,
@@ -183,7 +229,16 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         getLocaleDictionary(),
       ]);
 
-      const sanitizedResults = results.map((result) => ({
+      const versionsWithMeta = results.map((version) => {
+        return {
+          ...version,
+          meta: {
+            unknownAttributes: getAttributesDiff(version.schema, version.contentType),
+          },
+        };
+      });
+
+      const sanitizedResults = versionsWithMeta.map((result) => ({
         ...result,
         locale: result.locale ? localeDictionary[result.locale] : null,
         createdBy: result.createdBy

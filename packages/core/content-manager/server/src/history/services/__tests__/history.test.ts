@@ -25,6 +25,18 @@ const mockGetRequestContext = jest.fn(() => {
 });
 
 const mockStrapi = {
+  getModel() {
+    return {
+      attributes: {
+        newField: {
+          type: 'string',
+        },
+        renamed: {
+          type: 'string',
+        },
+      },
+    };
+  },
   plugins: {
     'content-manager': {
       service: jest.fn(() => ({
@@ -35,6 +47,7 @@ const mockStrapi = {
     i18n: {
       service: jest.fn(() => ({
         getDefaultLocale: jest.fn().mockReturnValue('en'),
+        find: jest.fn(),
       })),
     },
   },
@@ -45,6 +58,20 @@ const mockStrapi = {
       if (uid === HISTORY_VERSION_UID) {
         return {
           create: createMock,
+          findPage() {
+            return {
+              results: [
+                {
+                  contentType: 'api::article.article',
+                  schema: {
+                    title: {
+                      type: 'string',
+                    },
+                  },
+                },
+              ],
+            };
+          },
         };
       }
     },
@@ -95,136 +122,162 @@ describe('history-version service', () => {
     jest.useRealTimers();
   });
 
-  it('inits service only once', () => {
-    historyService.bootstrap();
-    historyService.bootstrap();
-    // @ts-expect-error - ignore
-    expect(mockStrapi.documents.use).toHaveBeenCalledTimes(1);
-  });
+  describe('boostrap', () => {
+    it('inits service only once', () => {
+      historyService.bootstrap();
+      historyService.bootstrap();
+      // @ts-expect-error - ignore
+      expect(mockStrapi.documents.use).toHaveBeenCalledTimes(1);
+    });
 
-  it('saves relevant document actions in history', async () => {
-    const context = {
-      action: 'create',
-      contentType: {
-        uid: 'api::article.article',
-      },
-      args: [
-        {
-          locale: 'fr',
+    it('saves relevant document actions in history', async () => {
+      const context = {
+        action: 'create',
+        contentType: {
+          uid: 'api::article.article',
         },
-      ],
-    };
+        args: [
+          {
+            locale: 'fr',
+          },
+        ],
+      };
 
-    const next = jest.fn((context) => ({ ...context, documentId: 'document-id' }));
-    await historyService.bootstrap();
-    // @ts-expect-error - ignore
-    const historyMiddlewareFunction = mockStrapi.documents.use.mock.calls[0][0];
+      const next = jest.fn((context) => ({ ...context, documentId: 'document-id' }));
+      await historyService.bootstrap();
+      // @ts-expect-error - ignore
+      const historyMiddlewareFunction = mockStrapi.documents.use.mock.calls[0][0];
 
-    // Check that we don't break the middleware chain
-    await historyMiddlewareFunction(context, next);
-    expect(next).toHaveBeenCalledWith(context);
+      // Check that we don't break the middleware chain
+      await historyMiddlewareFunction(context, next);
+      expect(next).toHaveBeenCalledWith(context);
 
-    // Create and update actions should be saved in history
-    expect(createMock).toHaveBeenCalled();
-    context.action = 'update';
-    await historyMiddlewareFunction(context, next);
-    expect(createMock).toHaveBeenCalledTimes(2);
+      // Create and update actions should be saved in history
+      expect(createMock).toHaveBeenCalled();
+      context.action = 'update';
+      await historyMiddlewareFunction(context, next);
+      expect(createMock).toHaveBeenCalledTimes(2);
 
-    // Publish and unpublish actions should be saved in history
-    createMock.mockClear();
-    await historyMiddlewareFunction(context, next);
-    context.action = 'unpublish';
-    await historyMiddlewareFunction(context, next);
-    expect(createMock).toHaveBeenCalledTimes(2);
+      // Publish and unpublish actions should be saved in history
+      createMock.mockClear();
+      await historyMiddlewareFunction(context, next);
+      context.action = 'unpublish';
+      await historyMiddlewareFunction(context, next);
+      expect(createMock).toHaveBeenCalledTimes(2);
 
-    // Other actions should be ignored
-    createMock.mockClear();
-    context.action = 'findOne';
-    await historyMiddlewareFunction(context, next);
-    context.action = 'delete';
-    await historyMiddlewareFunction(context, next);
-    expect(createMock).toHaveBeenCalledTimes(0);
+      // Other actions should be ignored
+      createMock.mockClear();
+      context.action = 'findOne';
+      await historyMiddlewareFunction(context, next);
+      context.action = 'delete';
+      await historyMiddlewareFunction(context, next);
+      expect(createMock).toHaveBeenCalledTimes(0);
 
-    // Non-api content types should be ignored
-    createMock.mockClear();
-    context.contentType.uid = 'plugin::upload.file';
-    context.action = 'create';
-    await historyMiddlewareFunction(context, next);
-    expect(createMock).toHaveBeenCalledTimes(0);
+      // Non-api content types should be ignored
+      createMock.mockClear();
+      context.contentType.uid = 'plugin::upload.file';
+      context.action = 'create';
+      await historyMiddlewareFunction(context, next);
+      expect(createMock).toHaveBeenCalledTimes(0);
 
-    // Don't break middleware chain even if we don't save the action in history
-    next.mockClear();
-    await historyMiddlewareFunction(context, next);
-    expect(next).toHaveBeenCalledWith(context);
-  });
+      // Don't break middleware chain even if we don't save the action in history
+      next.mockClear();
+      await historyMiddlewareFunction(context, next);
+      expect(next).toHaveBeenCalledWith(context);
+    });
 
-  it('creates a history version with the author', async () => {
-    jest.useFakeTimers().setSystemTime(fakeDate);
+    it('should create a cron job that runs once a day', async () => {
+      // @ts-expect-error - this is a mock
+      const mockScheduleJob = scheduleJob.mockImplementationOnce(
+        jest.fn((rule, callback) => callback())
+      );
 
-    const historyVersionData = {
-      contentType: 'api::article.article' as UID.ContentType,
-      data: {
-        title: 'My article',
-      },
-      locale: 'en',
-      relatedDocumentId: 'randomid',
-      schema: {
-        title: {
-          type: 'string',
-        },
-      },
-      status: 'draft' as const,
-    };
+      await historyService.bootstrap();
 
-    await historyService.createVersion(historyVersionData);
-    expect(createMock).toHaveBeenCalledWith({
-      data: {
-        ...historyVersionData,
-        createdBy: userId,
-        createdAt: fakeDate,
-      },
+      expect(mockScheduleJob).toHaveBeenCalledTimes(1);
+      expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
     });
   });
 
-  it('creates a history version without any author', async () => {
-    jest.useFakeTimers().setSystemTime(fakeDate);
+  describe('createVersion', () => {
+    it('creates a history version with the author', async () => {
+      jest.useFakeTimers().setSystemTime(fakeDate);
 
-    const historyVersionData = {
-      contentType: 'api::article.article' as UID.ContentType,
-      data: {
-        title: 'My article',
-      },
-      locale: 'en',
-      relatedDocumentId: 'randomid',
-      schema: {
-        title: {
-          type: 'string',
+      const historyVersionData = {
+        contentType: 'api::article.article' as UID.ContentType,
+        data: {
+          title: 'My article',
         },
-      },
-      status: null,
-    };
+        locale: 'en',
+        relatedDocumentId: 'randomid',
+        schema: {
+          title: {
+            type: 'string',
+          },
+        },
+        status: 'draft' as const,
+      };
 
-    mockGetRequestContext.mockReturnValueOnce(null as any);
+      await historyService.createVersion(historyVersionData);
+      expect(createMock).toHaveBeenCalledWith({
+        data: {
+          ...historyVersionData,
+          createdBy: userId,
+          createdAt: fakeDate,
+        },
+      });
+    });
 
-    await historyService.createVersion(historyVersionData);
-    expect(createMock).toHaveBeenCalledWith({
-      data: {
-        ...historyVersionData,
-        createdBy: undefined,
-        createdAt: fakeDate,
-      },
+    it('creates a history version without any author', async () => {
+      jest.useFakeTimers().setSystemTime(fakeDate);
+
+      const historyVersionData = {
+        contentType: 'api::article.article' as UID.ContentType,
+        data: {
+          title: 'My article',
+        },
+        locale: 'en',
+        relatedDocumentId: 'randomid',
+        schema: {
+          title: {
+            type: 'string',
+          },
+        },
+        status: null,
+      };
+
+      mockGetRequestContext.mockReturnValueOnce(null as any);
+
+      await historyService.createVersion(historyVersionData);
+      expect(createMock).toHaveBeenCalledWith({
+        data: {
+          ...historyVersionData,
+          createdBy: undefined,
+          createdAt: fakeDate,
+        },
+      });
     });
   });
 
-  it('should create a cron job that runs once a day', async () => {
-    // @ts-expect-error - this is a mock
-    const mockScheduleJob = scheduleJob.mockImplementationOnce(
-      jest.fn((rule, callback) => callback())
-    );
+  describe('findVersionPage', () => {
+    it('should contain a meta object with unknown attributes', async () => {
+      const { results } = await historyService.findVersionsPage({
+        contentType: 'api::article.article',
+        documentId: 'randomid',
+        locale: 'en',
+      });
 
-    await historyService.bootstrap();
-
-    expect(mockScheduleJob).toHaveBeenCalledTimes(1);
-    expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
+      expect(results[0].meta).toEqual({
+        unknownAttributes: {
+          added: {
+            newField: { type: 'string' },
+            renamed: { type: 'string' },
+          },
+          removed: {
+            title: { type: 'string' },
+          },
+        },
+      });
+    });
   });
 });
