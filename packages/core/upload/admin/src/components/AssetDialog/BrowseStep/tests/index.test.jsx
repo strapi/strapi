@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, usePersistentState } from '@strapi/helper-plugin';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -10,11 +10,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { BrowseStep } from '..';
 import { viewOptions } from '../../../../constants';
 import { useFolder } from '../../../../hooks/useFolder';
+import { usePersistentState } from '../../../../hooks/usePersistentState';
 
 jest.mock('../../../../hooks/useFolder');
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('../../../../hooks/usePersistentState', () => ({
   usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
 

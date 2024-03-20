@@ -1,4 +1,4 @@
-import { getFetchClient } from '@strapi/helper-plugin';
+import { getFetchClient } from '@strapi/admin/strapi-admin';
 
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 

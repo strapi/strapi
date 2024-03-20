@@ -6,13 +6,7 @@ import { AdminSeatInfoEE } from '../AdminSeatInfo';
 
 jest.mock('../../../../../../hooks/useLicenseLimits');
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn().mockReturnValue({
-    isLoading: false,
-    allowedActions: { canRead: true, canCreate: true, canUpdate: true, canDelete: true },
-  }),
-}));
+jest.mock('../../../../../../../../../admin/src/hooks/useRBAC');
 
 const LICENSE_MOCK = {
   isLoading: false,
@@ -41,7 +35,7 @@ describe('<AdminSeatInfo />', () => {
 
   test('Do not render anything, when permittedSeats is falsy', () => {
     // @ts-expect-error – mocked
-    useLicenseLimits.mockReturnValueOnce({
+    useLicenseLimits.mockReturnValue({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
@@ -56,7 +50,7 @@ describe('<AdminSeatInfo />', () => {
 
   test('Render seat info', () => {
     // @ts-expect-error – mocked
-    useLicenseLimits.mockReturnValueOnce(LICENSE_MOCK);
+    useLicenseLimits.mockReturnValue(LICENSE_MOCK);
 
     const { getByText } = render(<AdminSeatInfoEE />);
 
@@ -68,7 +62,7 @@ describe('<AdminSeatInfo />', () => {
 
   test('Render billing link (not on strapi cloud)', () => {
     // @ts-expect-error – mocked
-    useLicenseLimits.mockReturnValueOnce(LICENSE_MOCK);
+    useLicenseLimits.mockReturnValue(LICENSE_MOCK);
 
     const { getByText } = render(<AdminSeatInfoEE />);
 
@@ -80,9 +74,9 @@ describe('<AdminSeatInfo />', () => {
     );
   });
 
-  test('Render billing link (on strapi cloud)', () => {
+  test('Render billing link (on strapi cloud)', async () => {
     // @ts-expect-error – mocked
-    useLicenseLimits.mockReturnValueOnce({
+    useLicenseLimits.mockReturnValue({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,
@@ -90,9 +84,9 @@ describe('<AdminSeatInfo />', () => {
       },
     });
 
-    const { getByText } = render(<AdminSeatInfoEE />);
+    const { findByText, getByText } = render(<AdminSeatInfoEE />);
 
-    expect(getByText('Add seats')).toBeInTheDocument();
+    await findByText('Add seats');
     // eslint-disable-next-line testing-library/no-node-access
     expect(getByText('Add seats').closest('a')).toHaveAttribute(
       'href',
@@ -102,7 +96,7 @@ describe('<AdminSeatInfo />', () => {
 
   test('Render OVER_LIMIT icon', () => {
     // @ts-expect-error – mocked
-    useLicenseLimits.mockReturnValueOnce({
+    useLicenseLimits.mockReturnValue({
       ...LICENSE_MOCK,
       license: {
         ...LICENSE_MOCK.license,

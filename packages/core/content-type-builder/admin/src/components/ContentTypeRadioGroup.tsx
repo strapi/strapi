@@ -1,4 +1,5 @@
-import { useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/admin/strapi-admin';
+import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils';
 
@@ -21,16 +22,17 @@ interface ContentTypeRadioGroupProps {
 }
 
 export const ContentTypeRadioGroup = ({ onChange, ...rest }: ContentTypeRadioGroupProps) => {
-  const toggleNotification = useNotification();
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
 
   const handleChange = (e: any) => {
     toggleNotification({
       type: 'info',
-      message: {
+      message: formatMessage({
         id: getTrad('contentType.kind.change.warning'),
         defaultMessage:
           'You just changed the kind of a content type: API will be reset (routes, controllers, and services will be overwritten).',
-      },
+      }),
     });
 
     onChange(e);

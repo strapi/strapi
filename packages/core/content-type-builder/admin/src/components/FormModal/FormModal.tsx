@@ -1,6 +1,6 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { useStrapiApp, useTracking } from '@strapi/admin/strapi-admin';
+import { useStrapiApp, useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -15,7 +15,6 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import { getYupInnerErrors, useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
@@ -30,6 +29,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import { findAttribute } from '../../utils/findAttribute';
+import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 // New compos
 import { AllowedTypesSelect } from '../AllowedTypesSelect';
 import { IconByType } from '../AttributeIcon';
@@ -108,7 +108,7 @@ export const FormModal = () => {
 
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const reducerState = useSelector((state) => formModalSelector(state), shallowEqual);
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
@@ -544,8 +544,8 @@ export const FormModal = () => {
             submitData(modifiedData);
           } else {
             toggleNotification({
-              type: 'warning',
-              message: { id: 'notification.contentType.relations.conflict' },
+              type: 'danger',
+              message: formatMessage({ id: 'notification.contentType.relations.conflict' }),
             });
           }
 

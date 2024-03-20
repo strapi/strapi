@@ -9,10 +9,6 @@ import { PendingAssetStep } from '../PendingAssetStep';
 
 jest.mock('../../../../utils/getTrad', () => (x) => x);
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-}));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

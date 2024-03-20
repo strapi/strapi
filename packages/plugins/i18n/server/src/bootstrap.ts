@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/strapi';
+import type { Strapi } from '@strapi/types';
 
 import { getService } from './utils';
 

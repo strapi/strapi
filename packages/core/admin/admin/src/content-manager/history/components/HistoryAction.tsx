@@ -1,11 +1,10 @@
-import * as React from 'react';
-
-import { useQueryParams } from '@strapi/helper-plugin';
 import { History } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+
+import { useQueryParams } from '../../../hooks/useQueryParams';
 
 import type { DocumentActionComponent } from '../../../core/apis/content-manager';
 

@@ -15,13 +15,14 @@ import {
   KeyboardNavigable,
   useComposedRefs,
 } from '@strapi/design-system';
-import { useNotification, useQuery } from '@strapi/helper-plugin';
 import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useField, useForm } from '../../../../../../components/Form';
+import { useNotification } from '../../../../../../features/Notifications';
 import { getIn } from '../../../../../../utils/objects';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
@@ -50,8 +51,10 @@ const RepeatableComponent = ({
   name,
   mainField,
 }: RepeatableComponentProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
+  const { search: searchString } = useLocation();
+  const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { components } = useDoc();
 
   const { value = [], error } =
@@ -63,8 +66,6 @@ const RepeatableComponent = ({
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<number | null>(null);
   const [liveText, setLiveText] = React.useState('');
-
-  const search = useQuery();
 
   /**
    * Get the temp key of the component that has the field that is currently focussed
@@ -112,7 +113,9 @@ const RepeatableComponent = ({
     } else if (value.length >= max) {
       toggleNotification({
         type: 'info',
-        message: { id: getTranslation('components.notification.info.maximum-requirement') },
+        message: formatMessage({
+          id: getTranslation('components.notification.info.maximum-requirement'),
+        }),
       });
     }
   };

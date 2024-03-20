@@ -2,23 +2,18 @@
 
 import React from 'react';
 
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render as renderRTL, waitForElementToBeRemoved } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter, useLocation } from 'react-router-dom';
+import { render as renderAdmin } from '@strapi/strapi/admin/test';
+import { waitForElementToBeRemoved } from '@testing-library/react';
+import { useLocation } from 'react-router-dom';
 
 import { RolesListPage } from '../index';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn().mockImplementation(() => jest.fn()),
+jest.mock('@strapi/strapi/admin', () => ({
+  ...jest.requireActual('@strapi/strapi/admin'),
   useRBAC: jest.fn().mockImplementation(() => ({
     isLoading: false,
     allowedActions: { canRead: true, canUpdate: true, canDelete: true, canCreate: true },
   })),
-  CheckPermissions: jest.fn(({ children }) => children),
 }));
 
 const LocationDisplay = () => {
@@ -27,33 +22,19 @@ const LocationDisplay = () => {
   return <span data-testid="location-display">{location.pathname}</span>;
 };
 
-const render = () => ({
-  ...renderRTL(<RolesListPage />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      return (
-        <MemoryRouter>
-          <ThemeProvider theme={lightTheme}>
-            <QueryClientProvider client={client}>
-              <IntlProvider locale="en" messages={{}} textComponent="span">
-                {children}
-                <LocationDisplay />
-              </IntlProvider>
-            </QueryClientProvider>
-          </ThemeProvider>
-        </MemoryRouter>
-      );
+const render = () =>
+  renderAdmin(<RolesListPage />, {
+    renderOptions: {
+      wrapper({ children }) {
+        return (
+          <>
+            {children}
+            <LocationDisplay />
+          </>
+        );
+      },
     },
-  }),
-  user: userEvent.setup(),
-});
+  });
 
 describe('Roles – ListPage', () => {
   beforeEach(() => {
@@ -76,21 +57,21 @@ describe('Roles – ListPage', () => {
   });
 
   it('should direct me to the new user page when I press the add a new role button', async () => {
-    const { getByRole, getByTestId, queryByText } = render();
+    const { getByRole, getByTestId, queryByText, user } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
-    await userEvent.click(getByRole('link', { name: 'Add new role' }));
+    await user.click(getByRole('link', { name: 'Add new role' }));
 
     expect(getByTestId('location-display')).toHaveTextContent('/new');
   });
 
   it('should direct me to the edit view of a selected role if I click the edit role button', async () => {
-    const { getByRole, queryByText, getByTestId } = render();
+    const { getByRole, queryByText, getByTestId, user } = render();
 
     await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
-    await userEvent.click(getByRole('link', { name: 'Edit Authenticated', hidden: true }));
+    await user.click(getByRole('link', { name: 'Edit Authenticated', hidden: true }));
 
     expect(getByTestId('location-display')).toHaveTextContent('/1');
   });

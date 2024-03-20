@@ -1,8 +1,9 @@
 /* eslint-disable testing-library/no-node-access */
-import { useAppInfo } from '@strapi/helper-plugin';
+
 import { screen, within, fireEvent } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
 
+import { useAppInfo } from '../../../features/AppInfo';
 import { useTracking } from '../../../features/Tracking';
 import { MarketplacePage } from '../MarketplacePage';
 
@@ -12,8 +13,8 @@ jest.mock('../../../features/Tracking', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
 }));
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('../../../features/AppInfo', () => ({
+  ...jest.requireActual('../../../features/AppInfo'),
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {

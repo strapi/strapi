@@ -12,9 +12,9 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
+import { useNotification } from '../../../../../../../../admin/src/features/Notifications';
 import { useAPIErrorHandler } from '../../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { AuditLog } from '../../../../../../../../shared/contracts/audit-logs';
 import { useGetAuditLogQuery } from '../../../../../services/auditLogs';
@@ -27,7 +27,7 @@ interface ModalProps {
 }
 
 export const Modal = ({ handleClose, logId }: ModalProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const { data, error, isLoading } = useGetAuditLogQuery(logId);
@@ -35,7 +35,7 @@ export const Modal = ({ handleClose, logId }: ModalProps) => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
       handleClose();

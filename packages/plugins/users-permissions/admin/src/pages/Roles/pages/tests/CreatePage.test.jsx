@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/strapi/admin';
 import { fireEvent, render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -9,11 +9,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { CreatePage } from '../CreatePage';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-}));
 
 const render = () => ({
   ...renderRTL(<Route path="/settings/users-permissions/roles/new" element={<CreatePage />} />, {

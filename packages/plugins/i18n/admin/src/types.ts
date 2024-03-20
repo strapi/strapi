@@ -1,4 +1,4 @@
-import type { Documents } from '@strapi/strapi';
+import type { Documents } from '@strapi/types';
 
 export interface I18nBaseQuery {
   plugins?: {

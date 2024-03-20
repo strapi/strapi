@@ -21,11 +21,10 @@ export default async ({ oldContentTypes, contentTypes }: any) => {
     if (!isLocalizedContentType(oldContentType) && isLocalizedContentType(contentType)) {
       const defaultLocale = (await getDefaultLocale()) || DEFAULT_LOCALE.code;
 
-      await strapi.db
-        .queryBuilder(uid)
-        .update({ locale: defaultLocale })
-        .where({ locale: null })
-        .execute();
+      await strapi.db.query(uid).updateMany({
+        where: { locale: null },
+        data: { locale: defaultLocale },
+      });
     }
   }
 };

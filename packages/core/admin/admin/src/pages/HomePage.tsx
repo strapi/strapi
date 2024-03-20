@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, GridItem, Layout, Main, Typography } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
-import { useAppInfo } from '@strapi/helper-plugin';
 import {
   ArrowRight,
   CodeSquare,
@@ -26,6 +25,7 @@ import { ContentBox } from '../components/ContentBox';
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
 import { useGuidedTour } from '../components/GuidedTour/Provider';
 import { Page } from '../components/PageHelpers';
+import { useAppInfo } from '../features/AppInfo';
 import { useTracking } from '../features/Tracking';
 import { useContentTypes } from '../hooks/useContentTypes';
 import { useEnterprise } from '../hooks/useEnterprise';
@@ -315,7 +315,7 @@ const CloudIconWrapper = styled(Flex)`
 
 const SocialLinks = () => {
   const { formatMessage } = useIntl();
-  const { communityEdition } = useAppInfo();
+  const communityEdition = useAppInfo('SocialLinks', (state) => state.communityEdition);
 
   const socialLinksExtended = [
     ...SOCIAL_LINKS,
