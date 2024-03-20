@@ -384,9 +384,7 @@ const createMorphOne = (
   attributeName: string,
   attribute: Relation.MorphOne,
   meta: Meta,
-  metadata: Metadata,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _options: MetadataOptions
+  metadata: Metadata
 ) => {
   const targetMeta = metadata.get(attribute.target);
 
@@ -406,9 +404,7 @@ const createMorphMany = (
   attributeName: string,
   attribute: Relation.MorphMany,
   meta: Meta,
-  metadata: Metadata,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _options: MetadataOptions
+  metadata: Metadata
 ) => {
   const targetMeta = metadata.get(attribute.target);
 
@@ -700,9 +696,9 @@ export const createRelation = (
     case 'morphToMany':
       return createMorphToMany(attributeName, attribute, meta, metadata, options);
     case 'morphOne':
-      return createMorphOne(attributeName, attribute, meta, metadata, options);
+      return createMorphOne(attributeName, attribute, meta, metadata);
     case 'morphMany':
-      return createMorphMany(attributeName, attribute, meta, metadata, options);
+      return createMorphMany(attributeName, attribute, meta, metadata);
     default: {
       throw new Error(`Unknown relation`);
     }
