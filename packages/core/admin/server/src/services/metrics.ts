@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 
 const sendDidInviteUser = async () => {
@@ -19,7 +19,7 @@ const sendDidChangeInterfaceLanguage = async () => {
   strapi.telemetry.send('didChangeInterfaceLanguage', { userProperties: { languagesInUse } });
 };
 
-const sendUpdateProjectInformation = async (strapi: Strapi) => {
+const sendUpdateProjectInformation = async (strapi: Core.Strapi) => {
   const numberOfActiveAdminUsers = await getService('user').count({ isActive: true });
   const numberOfAdminUsers = await getService('user').count();
 
@@ -28,7 +28,7 @@ const sendUpdateProjectInformation = async (strapi: Strapi) => {
   });
 };
 
-const startCron = (strapi: Strapi) => {
+const startCron = (strapi: Core.Strapi) => {
   strapi.cron.add({
     '0 0 0 * * *': () => sendUpdateProjectInformation(strapi),
   });

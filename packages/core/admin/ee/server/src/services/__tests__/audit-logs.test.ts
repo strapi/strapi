@@ -2,8 +2,9 @@ import auditLogs from '@strapi/provider-audit-logs-local';
 import { scheduleJob } from 'node-schedule';
 import createAuditLogsService from '../audit-logs';
 import createEventHub from '../../../../../../core/dist/services/event-hub';
+
+import type { Core } from '@strapi/types';
 import '@strapi/types';
-import { LoadedStrapi } from '@strapi/types';
 
 jest.mock('../../../../../server/src/register');
 
@@ -129,7 +130,7 @@ describe('Audit logs service', () => {
     const mockFindMany = jest.fn();
     const mockDeleteExpiredEvents = jest.fn();
 
-    let strapi = {} as LoadedStrapi;
+    let strapi = {} as Core.LoadedStrapi;
 
     beforeAll(() => {
       // @ts-expect-error - register is a mock
@@ -177,7 +178,7 @@ describe('Audit logs service', () => {
             return cb(opt);
           },
         },
-      } as unknown as LoadedStrapi;
+      } as unknown as Core.LoadedStrapi;
     });
 
     afterEach(() => {

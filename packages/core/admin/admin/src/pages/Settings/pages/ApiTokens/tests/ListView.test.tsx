@@ -1,13 +1,11 @@
-import { useRBAC } from '@strapi/helper-plugin';
 import { render, waitFor } from '@tests/utils';
 
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import { ListView } from '../ListView';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('../../../../../hooks/useRBAC', () => ({
   useRBAC: jest.fn().mockReturnValue({
     isLoading: false,
-    setIsLoading: jest.fn(),
     allowedActions: {
       canCreate: true,
       canDelete: true,
@@ -17,6 +15,8 @@ jest.mock('@strapi/helper-plugin', () => ({
     },
   }),
 }));
+
+jest.mock('../../../../../components/GuidedTour/Provider');
 
 describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   afterAll(() => {
@@ -33,7 +33,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   it('should not show the create button when the user does not have the rights to create', async () => {
     jest.mocked(useRBAC).mockReturnValue({
       isLoading: false,
-      setIsLoading: jest.fn(),
       allowedActions: {
         canCreate: false,
         canDelete: true,
@@ -51,7 +50,6 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   it('should show the delete button when the user have the rights to delete', async () => {
     jest.mocked(useRBAC).mockReturnValue({
       isLoading: false,
-      setIsLoading: jest.fn(),
       allowedActions: {
         canCreate: false,
         canDelete: true,

@@ -1,6 +1,6 @@
 import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface EnumerationProps extends Omit<InputProps, 'options' | 'type'> {
   options: Array<{ disabled?: boolean; hidden?: boolean; label?: string; value: string }>;
@@ -10,7 +10,7 @@ interface EnumerationProps extends Omit<InputProps, 'options' | 'type'> {
 interface StringProps
   extends Omit<InputProps, 'autoComplete' | 'type'>,
     Pick<ComponentPropsWithoutRef<'input'>, 'autoComplete'> {
-  type: Extract<Attribute.Kind, 'text' | 'string' | 'password' | 'email'>;
+  type: Extract<Schema.Attribute.Kind, 'text' | 'string' | 'password' | 'email'>;
 }
 
 /**
@@ -30,7 +30,7 @@ interface InputProps {
   options?: never;
   type:
     | Exclude<
-        Attribute.Kind,
+        Schema.Attribute.Kind,
         | 'enumeration'
         | 'media'
         | 'blocks'

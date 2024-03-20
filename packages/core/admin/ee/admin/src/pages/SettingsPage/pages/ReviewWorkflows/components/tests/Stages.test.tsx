@@ -1,17 +1,10 @@
 import React from 'react';
 
-import { configureStore } from '@reduxjs/toolkit';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { IntlProvider } from 'react-intl';
-import { Provider } from 'react-redux';
+import { render, defaultTestStoreConfig } from '@tests/utils';
 
 import { Stage } from '../../../../../../../../../shared/contracts/review-workflows';
 import * as actions from '../../actions';
-import { STAGE_COLOR_DEFAULT } from '../../constants';
+import { REDUX_NAMESPACE, STAGE_COLOR_DEFAULT } from '../../constants';
 import { reducer } from '../../reducer';
 import { Stages, StagesProps } from '../Stages';
 
@@ -49,33 +42,21 @@ const STAGES_FIXTURE: Stage[] = [
   },
 ];
 
-const setup = (props?: StagesProps) => ({
-  ...render(<Stages stages={STAGES_FIXTURE} {...props} />, {
-    wrapper({ children }) {
-      const store = configureStore({
-        reducer,
-        middleware: (getDefaultMiddleware: any) =>
-          getDefaultMiddleware({
-            // Disable timing checks for test env
-            immutableCheck: false,
-            serializableCheck: false,
-          }),
-      });
-
-      return (
-        <DndProvider backend={HTML5Backend}>
-          <Provider store={store}>
-            <IntlProvider locale="en" messages={{}}>
-              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
-            </IntlProvider>
-          </Provider>
-        </DndProvider>
-      );
+const setup = (props?: StagesProps) => {
+  const storeConfig = {
+    ...defaultTestStoreConfig,
+    reducer: {
+      ...defaultTestStoreConfig.reducer,
+      [REDUX_NAMESPACE]: reducer,
     },
-  }),
+  };
 
-  user: userEvent.setup(),
-});
+  return render(<Stages stages={STAGES_FIXTURE} {...props} />, {
+    providerOptions: {
+      storeConfig,
+    },
+  });
+};
 
 describe('Admin | Settings | Review Workflow | Stages', () => {
   beforeEach(() => {

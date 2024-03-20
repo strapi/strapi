@@ -10,7 +10,6 @@ import {
   useCollator,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { CheckPermissions, useTracking, useQueryParams } from '@strapi/helper-plugin';
 import { Cog, Layer } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -18,6 +17,9 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useTracking } from '../../../../features/Tracking';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
@@ -27,9 +29,16 @@ interface ViewSettingsMenuProps extends FieldPickerProps {}
 const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
   const [isVisible, setIsVisible] = React.useState(false);
   const cogButtonRef = React.useRef<HTMLButtonElement>(null!);
-  const permissions = useTypedSelector((state) => state.admin_app.permissions);
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions.contentManager?.collectionTypesConfigurations ?? []
+  );
   const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
   const { formatMessage } = useIntl();
+  const {
+    allowedActions: { canViewConfiguration },
+  } = useRBAC({
+    viewConfiguration: permissions,
+  });
 
   const handleToggle = () => {
     setIsVisible((prev) => !prev);
@@ -55,9 +64,7 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
           padding={3}
         >
           <Flex alignItems="stretch" direction="column" gap={3}>
-            <CheckPermissions
-              permissions={permissions.contentManager?.collectionTypesConfigurations}
-            >
+            {canViewConfiguration ? (
               <LinkButton
                 size="S"
                 startIcon={<Layer />}
@@ -76,8 +83,7 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
                   defaultMessage: 'Configure the view',
                 })}
               </LinkButton>
-            </CheckPermissions>
-
+            ) : null}
             <FieldPicker {...props} />
           </Flex>
         </Popover>

@@ -11,18 +11,18 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { useAppInfo } from '@strapi/helper-plugin';
 import { Cross, Message, Play, Question, Book, PaperPlane } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import onboardingPreview from '../assets/images/onboarding-preview.png';
+import { useAppInfo } from '../features/AppInfo';
 
 const Onboarding = () => {
   const triggerRef = React.useRef<HTMLButtonElement>(null!);
   const [isOpen, setIsOpen] = React.useState(false);
   const { formatMessage } = useIntl();
-  const { communityEdition } = useAppInfo();
+  const communityEdition = useAppInfo('Onboarding', (state) => state.communityEdition);
 
   const handlePopoverVisibility = () => {
     setIsOpen((prev) => !prev);

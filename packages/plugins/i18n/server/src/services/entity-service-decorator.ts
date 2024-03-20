@@ -1,6 +1,6 @@
 import { has, get, omit, isArray } from 'lodash/fp';
 import { errors, convertQueryParams } from '@strapi/utils';
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 import { getService } from '../utils';
 

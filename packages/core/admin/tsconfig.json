@@ -6,5 +6,5 @@
     "noEmit": true,
     "outDir": "./dist/cli"
   },
-  "include": ["_internal", "packup.config.ts"]
+  "include": ["_internal"]
 }

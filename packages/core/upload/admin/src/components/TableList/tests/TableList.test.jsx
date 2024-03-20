@@ -7,11 +7,6 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { TableList } from '..';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useQueryParams: jest.fn(() => [{ query: {} }]),
-}));
-
 const PROPS_FIXTURE = {
   canUpdate: true,
   indeterminate: false,

@@ -1,10 +1,10 @@
 import type { IconByType } from '../../AttributeIcon';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 export const getAttributesToDisplay = (
   dataTarget = '',
-  targetUid: UID.Any,
-  nestedComponents: Array<UID.Any>
+  targetUid: Internal.UID.Schema,
+  nestedComponents: Array<Internal.UID.Schema>
 ): IconByType[][] => {
   const defaultAttributes: IconByType[] = [
     'text',

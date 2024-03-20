@@ -1,4 +1,4 @@
-import { Common } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { setCreatorFields, async, errors } from '@strapi/utils';
 
 import { getDocumentLocaleAndStatus } from './utils/dimensions';
@@ -12,7 +12,7 @@ const buildPopulateFromQuery = async (query: any, model: any) => {
     .build();
 };
 
-const findDocument = async (query: any, uid: Common.UID.SingleType, opts: any = {}) => {
+const findDocument = async (query: any, uid: UID.SingleType, opts: any = {}) => {
   const documentManager = getService('document-manager');
   const populate = await buildPopulateFromQuery(query, uid);
 

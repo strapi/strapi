@@ -1,11 +1,13 @@
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
 import { getTrad } from '../utils';
 
 export const useBulkRemove = () => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
+  const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
   const { post } = useFetchClient();
 
@@ -43,14 +45,14 @@ export const useBulkRemove = () => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTrad('modal.remove.success-label'),
           defaultMessage: 'Elements have been successfully deleted.',
-        },
+        }),
       });
     },
     onError(error) {
-      toggleNotification({ type: 'warning', message: error.message });
+      toggleNotification({ type: 'danger', message: error.message });
     },
   });
 

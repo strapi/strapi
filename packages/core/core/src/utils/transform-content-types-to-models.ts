@@ -1,5 +1,5 @@
-import { type Model, type MetadataOptions, utils } from '@strapi/database';
-import { Schema, Attribute } from '@strapi/types';
+import { type Model, utils, type MetadataOptions } from '@strapi/database';
+import type { Struct, Schema } from '@strapi/types';
 import { createId } from '@paralleldrive/cuid2';
 import assert from 'node:assert';
 import _ from 'lodash/fp';
@@ -76,13 +76,13 @@ export const getComponentFkIndexName = (contentType: string, options: MetadataOp
 
 const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order } = identifiers;
 
-export type LoadedContentTypeModel = Schema.ContentType &
-  Required<Pick<Schema.ContentType, 'collectionName' | 'uid' | 'modelName'>>;
+export type LoadedContentTypeModel = Struct.ContentTypeSchema &
+  Required<Pick<Struct.ContentTypeSchema, 'collectionName' | 'uid' | 'modelName'>>;
 
 // Transforms an attribute (particularly for relation types) into the format that strapi/database accepts
 export const transformAttribute = (
   name: string,
-  attribute: Attribute.Any,
+  attribute: Schema.Attribute.AnyAttribute,
   contentType: LoadedContentTypeModel,
   options: MetadataOptions
 ) => {
@@ -289,7 +289,7 @@ export const transformContentTypesToModels = (
 
     // Add document id to content types
     // as it is not documented
-    const documentIdAttribute: Record<string, Attribute.Any> =
+    const documentIdAttribute: Record<string, Schema.Attribute.AnyAttribute> =
       contentType.modelType === 'contentType'
         ? { documentId: { type: 'string', default: createDocumentId } }
         : {};

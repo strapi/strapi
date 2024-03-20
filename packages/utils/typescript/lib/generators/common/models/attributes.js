@@ -28,8 +28,8 @@ const getAttributeType = (attributeName, attribute, uid) => {
 
   const [attributeType, typeParams] = mappers[attribute.type]({ uid, attribute, attributeName });
 
-  // Make sure the attribute namespace is imported
-  addImport(NAMESPACES.attribute);
+  // Make sure the schema namespace is imported
+  addImport(NAMESPACES.Schema);
 
   return getTypeNode(attributeType, typeParams);
 };
@@ -195,6 +195,4 @@ const attributeToPropertySignature = (schema, attributeName, attribute) => {
 
 module.exports = attributeToPropertySignature;
 
-module.exports.mappers = mappers;
-module.exports.getAttributeType = getAttributeType;
-module.exports.getAttributeModifiers = getAttributeModifiers;
+Object.assign(module.exports, { mappers, getAttributeModifiers, getAttributeType });

@@ -1,9 +1,9 @@
 import { pick } from 'lodash/fp';
-import type { Common, Documents } from '@strapi/types';
+import type { UID, Modules } from '@strapi/types';
 
-const pickSelectionParams = <TUID extends Common.UID.ContentType>(
+const pickSelectionParams = <TUID extends UID.ContentType>(
   data: unknown
-): Documents.Params.Pick<TUID, 'fields' | 'populate' | 'status'> => {
+): Modules.Documents.Params.Pick<TUID, 'fields' | 'populate' | 'status'> => {
   return pick(['fields', 'populate', 'status'], data);
 };
 

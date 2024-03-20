@@ -1,4 +1,4 @@
-import type { LoadedStrapi, Documents } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
@@ -8,7 +8,7 @@ import type { HistoryVersions } from '../../../../shared/contracts';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
-const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
+const createHistoryService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const state: {
     deleteExpiredJob: ReturnType<typeof scheduleJob> | null;
     isInitialized: boolean;
@@ -19,7 +19,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
   const query = strapi.db.query(HISTORY_VERSION_UID);
 
-  const getRetentionDays = (strapi: LoadedStrapi) => {
+  const getRetentionDays = (strapi: Core.LoadedStrapi) => {
     const licenseRetentionDays =
       strapi.ee.features.get('cms-content-history')?.options.retentionDays;
     const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
@@ -51,7 +51,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
   const getVersionStatus = async (
     contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
-    document: Documents.AnyDocument | null
+    document: Modules.Documents.AnyDocument | null
   ) => {
     const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
     const meta = await documentMetadataService.getMetadata(contentTypeUid, document);

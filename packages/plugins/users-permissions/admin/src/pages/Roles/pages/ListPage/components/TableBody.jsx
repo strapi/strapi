@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { Flex, IconButton, Link, Tbody, Td, Tr, Typography } from '@strapi/design-system';
-import { CheckPermissions, onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -35,7 +34,7 @@ const EditLink = styled(Link)`
   }
 `;
 
-const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDelete }) => {
+const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelete }) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const [showConfirmDelete, setShowConfirmDelete] = onDelete;
@@ -51,7 +50,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
   return (
     <Tbody>
       {sortedRoles?.map((role) => (
-        <Tr key={role.name} {...onRowClick({ fn: () => navigate(role.id.toString()) })}>
+        <Tr key={role.name} onClick={() => navigate(role.id.toString())}>
           <Td width="20%">
             <Typography>{role.name}</Typography>
           </Td>
@@ -70,8 +69,8 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
             </Typography>
           </Td>
           <Td>
-            <Flex justifyContent="end" {...stopPropagation}>
-              <CheckPermissions permissions={permissions.updateRole}>
+            <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
+              {canUpdate ? (
                 <EditLink
                   to={role.id.toString()}
                   aria-label={formatMessage(
@@ -81,20 +80,18 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
                 >
                   <Pencil />
                 </EditLink>
-              </CheckPermissions>
+              ) : null}
 
               {checkCanDeleteRole(role) && (
-                <CheckPermissions permissions={permissions.deleteRole}>
-                  <IconButton
-                    onClick={() => handleClickDelete(role.id.toString())}
-                    noBorder
-                    icon={<Trash />}
-                    label={formatMessage(
-                      { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
-                      { target: `${role.name}` }
-                    )}
-                  />
-                </CheckPermissions>
+                <IconButton
+                  onClick={() => handleClickDelete(role.id.toString())}
+                  noBorder
+                  icon={<Trash />}
+                  label={formatMessage(
+                    { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
+                    { target: `${role.name}` }
+                  )}
+                />
               )}
             </Flex>
           </Td>
@@ -108,6 +105,7 @@ export default TableBody;
 
 TableBody.defaultProps = {
   canDelete: false,
+  canUpdate: false,
 };
 
 TableBody.propTypes = {
@@ -116,4 +114,5 @@ TableBody.propTypes = {
   setRoleToDelete: PropTypes.func.isRequired,
   sortedRoles: PropTypes.array.isRequired,
   canDelete: PropTypes.bool,
+  canUpdate: PropTypes.bool,
 };

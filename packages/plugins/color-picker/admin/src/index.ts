@@ -1,8 +1,7 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
-
 import { ColorPickerIcon } from './components/ColorPickerIcon';
 import { pluginId } from './pluginId';
 import { getTrad } from './utils/getTrad';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 // eslint-disable-next-line import/no-default-export
 export default {

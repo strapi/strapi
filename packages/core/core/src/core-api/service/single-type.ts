@@ -1,10 +1,10 @@
-import type { Schema, CoreApi } from '@strapi/types';
+import type { Struct, Core } from '@strapi/types';
 import { CoreService } from './core-service';
 
-export class SingleTypeService extends CoreService implements CoreApi.Service.SingleType {
-  private contentType: Schema.SingleType;
+export class SingleTypeService extends CoreService implements Core.CoreAPI.Service.SingleType {
+  private contentType: Struct.SingleTypeSchema;
 
-  constructor(contentType: Schema.SingleType) {
+  constructor(contentType: Struct.SingleTypeSchema) {
     super();
 
     this.contentType = contentType;
@@ -47,7 +47,9 @@ export class SingleTypeService extends CoreService implements CoreApi.Service.Si
   }
 }
 
-const createSingleTypeService = (contentType: Schema.SingleType): CoreApi.Service.SingleType => {
+const createSingleTypeService = (
+  contentType: Struct.SingleTypeSchema
+): Core.CoreAPI.Service.SingleType => {
   return new SingleTypeService(contentType);
 };
 

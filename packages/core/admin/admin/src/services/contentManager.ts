@@ -10,16 +10,6 @@ import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared'
 const contentManager = adminApi.injectEndpoints({
   endpoints: (builder) => ({
     /**
-     * Components
-     */
-    getComponents: builder.query<Contracts.Components.FindComponents.Response['data'], void>({
-      query: () => ({
-        url: `/content-manager/components`,
-        method: 'GET',
-      }),
-      transformResponse: (res: Contracts.Components.FindComponents.Response) => res.data,
-    }),
-    /**
      * Content Types
      */
     getContentTypes: builder.query<Contracts.ContentTypes.FindContentTypes.Response['data'], void>({
@@ -33,6 +23,6 @@ const contentManager = adminApi.injectEndpoints({
   overrideExisting: false,
 });
 
-const { useGetComponentsQuery, useGetContentTypesQuery } = contentManager;
+const { useGetContentTypesQuery } = contentManager;
 
-export { useGetComponentsQuery, useGetContentTypesQuery };
+export { useGetContentTypesQuery };

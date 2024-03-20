@@ -1,16 +1,16 @@
 import { prop } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import { LoadedStrapi as Strapi, Schema } from '@strapi/types';
 
+import type { Core, Struct } from '@strapi/types';
 import { getService } from '../utils';
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   canConfigureContentType({
     userAbility,
     contentType,
   }: {
     userAbility: any;
-    contentType: Schema.ContentType;
+    contentType: Struct.ContentTypeSchema;
   }) {
     const action = contentTypesUtils.isSingleType(contentType)
       ? 'plugin::content-manager.single-types.configure-view'

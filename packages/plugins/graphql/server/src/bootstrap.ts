@@ -9,7 +9,7 @@ import depthLimit from 'graphql-depth-limit';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
@@ -20,7 +20,7 @@ const merge = mergeWith((a, b) => {
   }
 });
 
-export async function bootstrap({ strapi }: { strapi: Strapi }) {
+export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   // Generate the GraphQL schema for the content API
   const schema = strapi.plugin('graphql').service('content-api').buildSchema();
 
@@ -93,7 +93,7 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
   }
 
   // Create the route handlers for Strapi
-  const handler: Common.MiddlewareHandler[] = [];
+  const handler: Core.MiddlewareHandler[] = [];
 
   // add cors middleware
   if (cors) {

@@ -4,10 +4,10 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import type { InputProps } from '../../../../../components/FormInputs/types';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface NotAllowedInputProps extends Omit<InputProps, 'type'> {
-  type: Attribute.Kind;
+  type: Schema.Attribute.Kind;
 }
 
 const NotAllowedInput = ({ hint, label, required, name }: NotAllowedInputProps) => {

@@ -1,4 +1,4 @@
-import produce from 'immer'; // current
+import { produce } from 'immer'; // current
 import get from 'lodash/get';
 import set from 'lodash/set';
 

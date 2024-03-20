@@ -56,8 +56,8 @@ const generateSchemaDefinition = (schema) => {
   const interfaceName = getSchemaInterfaceName(uid);
   const parentType = getSchemaExtendsTypeName(schema);
 
-  // Make sure the Schema namespace is imported
-  addImport(NAMESPACES.schema);
+  // Make sure the Struct namespace is imported
+  addImport(NAMESPACES.Struct);
 
   // Properties whose values can be mapped to a literal type expression
   const literalPropertiesDefinitions = ['collectionName', 'info', 'options', 'pluginOptions']

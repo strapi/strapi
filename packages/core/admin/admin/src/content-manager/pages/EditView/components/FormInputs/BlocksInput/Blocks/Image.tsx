@@ -1,16 +1,17 @@
 import * as React from 'react';
 
 import { Box, Flex } from '@strapi/design-system';
-import { useLibrary } from '@strapi/helper-plugin';
 import { Picture } from '@strapi/icons';
-import { type Attribute } from '@strapi/types';
 import { type Element, Transforms, Editor } from 'slate';
 import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import styled, { css } from 'styled-components';
 
+import { useStrapiApp } from '../../../../../../../features/StrapiApp';
 import { prefixFileUrlWithBackendUrl } from '../../../../../../../utils/urls';
 import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
 import { type Block } from '../utils/types';
+
+import type { Schema } from '@strapi/types';
 
 interface ImageWrapperProps extends React.ComponentProps<typeof Box> {
   isFocused: boolean;
@@ -92,14 +93,14 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
 const ImageDialog = () => {
   const [isOpen, setIsOpen] = React.useState(true);
   const { editor } = useBlocksEditorContext('ImageDialog');
-  const { components } = useLibrary();
+  const components = useStrapiApp('ImageDialog', (state) => state.components);
 
   if (!components || !isOpen) return null;
 
   const MediaLibraryDialog = components['media-library'] as React.ComponentType<{
-    allowedTypes: Attribute.MediaKind[];
+    allowedTypes: Schema.Attribute.MediaKind[];
     onClose: () => void;
-    onSelectAssets: (_images: Attribute.MediaValue<true>) => void;
+    onSelectAssets: (_images: Schema.Attribute.MediaValue<true>) => void;
   }>;
 
   const insertImages = (images: Block<'image'>['image'][]) => {
@@ -142,7 +143,7 @@ const ImageDialog = () => {
     Transforms.select(editor, pathToInsert);
   };
 
-  const handleSelectAssets = (images: Attribute.MediaValue<true>) => {
+  const handleSelectAssets = (images: Schema.Attribute.MediaValue<true>) => {
     const formattedImages = images.map((image) => {
       // Create an object with imageSchema defined and exclude unnecessary props coming from media library config
       const expectedImage = pick(image, IMAGE_SCHEMA_FIELDS);

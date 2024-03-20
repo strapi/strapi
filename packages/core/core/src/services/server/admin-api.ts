@@ -1,7 +1,7 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { createAPI } from './api';
 
-const createAdminAPI = (strapi: Strapi) => {
+const createAdminAPI = (strapi: Core.Strapi) => {
   const opts = {
     prefix: '', // '/admin';
     type: 'admin',

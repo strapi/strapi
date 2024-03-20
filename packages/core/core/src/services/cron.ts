@@ -1,6 +1,6 @@
 import { Job } from 'node-schedule';
 import { isFunction } from 'lodash/fp';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 interface JobSpec {
   job: Job;
@@ -8,7 +8,7 @@ interface JobSpec {
   name: string | null;
 }
 
-type TaskFn = ({ strapi }: { strapi: Strapi }, ...args: unknown[]) => Promise<unknown>;
+type TaskFn = ({ strapi }: { strapi: Core.Strapi }, ...args: unknown[]) => Promise<unknown>;
 
 type Task =
   | TaskFn

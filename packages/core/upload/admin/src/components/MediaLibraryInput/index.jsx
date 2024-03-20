@@ -1,8 +1,8 @@
 import React, { forwardRef, useEffect, useState } from 'react';
 
-import { useField } from '@strapi/admin/strapi-admin';
-import { useNotification } from '@strapi/helper-plugin';
+import { useField, useNotification } from '@strapi/admin/strapi-admin';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 import getAllowedFiles from '../../utils/getAllowedFiles';
 import getTrad from '../../utils/getTrad';
@@ -23,6 +23,7 @@ export const MediaLibraryInput = forwardRef(
     { attribute: { allowedTypes }, label, hint, disabled, labelAction, multiple, name, required },
     forwardedRef
   ) => {
+    const { formatMessage } = useIntl();
     const { onChange, value, error } = useField(name);
     const fieldAllowedTypes = allowedTypes || ['files', 'images', 'videos', 'audios'];
     const [uploadedFiles, setUploadedFiles] = useState([]);
@@ -30,7 +31,7 @@ export const MediaLibraryInput = forwardRef(
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [droppedAssets, setDroppedAssets] = useState();
     const [folderId, setFolderId] = useState(null);
-    const toggleNotification = useNotification();
+    const { toggleNotification } = useNotification();
 
     useEffect(() => {
       // Clear the uploaded files on close
@@ -108,15 +109,17 @@ export const MediaLibraryInput = forwardRef(
         callback(allowedAssets);
       } else {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           timeout: 4000,
-          message: {
-            id: getTrad('input.notification.not-supported'),
-            defaultMessage: `You can't upload this type of file.`,
-            values: {
-              fileTypes: fieldAllowedTypes.join(','),
+          message: formatMessage(
+            {
+              id: getTrad('input.notification.not-supported'),
+              defaultMessage: `You can't upload this type of file.`,
             },
-          },
+            {
+              fileTypes: fieldAllowedTypes.join(','),
+            }
+          ),
         });
       }
     };

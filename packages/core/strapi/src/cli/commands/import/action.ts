@@ -1,4 +1,4 @@
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { isObject } from 'lodash/fp';
 import chalk from 'chalk';
 
@@ -144,7 +144,7 @@ export default async (opts: CmdOptions) => {
   let results: engineDataTransfer.ITransferResults<typeof source, typeof destination>;
   try {
     // Abort transfer if user interrupts process
-    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as LoadedStrapi }));
+    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Core.LoadedStrapi }));
 
     results = await engine.transfer();
 

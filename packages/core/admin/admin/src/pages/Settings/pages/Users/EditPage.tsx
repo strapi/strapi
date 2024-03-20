@@ -8,17 +8,8 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
-  Main,
   Typography,
 } from '@strapi/design-system';
-import {
-  translatedErrors,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-} from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
@@ -32,10 +23,14 @@ import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useNotification } from '../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 import { getDisplayName } from '../../../../utils/users';
 
 import { MagicLinkCE } from './components/MagicLinkCE';
@@ -48,11 +43,11 @@ const EDIT_VALIDATION_SCHEMA = yup.object().shape({
   roles: yup
     .array()
     .min(1, {
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'This field is required',
     })
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'This field is required',
     }),
 });
@@ -68,8 +63,7 @@ const EditPage = () => {
   const match = useMatch('/settings/users/:id');
   const id = match?.params?.id ?? '';
   const navigate = useNavigate();
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const MagicLink = useEnterprise(
     MagicLinkCE,
     async () =>
@@ -96,8 +90,6 @@ const EditPage = () => {
 
   const [updateUser] = useUpdateUserMutation();
 
-  useFocusWhenNavigate();
-
   const {
     data,
     error,
@@ -117,21 +109,21 @@ const EditPage = () => {
       if (error.name === 'UnauthorizedError') {
         toggleNotification({
           type: 'info',
-          message: {
+          message: formatMessage({
             id: 'notification.permission.not-allowed-read',
             defaultMessage: 'You are not allowed to see this document',
-          },
+          }),
         });
 
         navigate('/');
       } else {
         toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: formatAPIError(error) },
+          type: 'danger',
+          message: formatAPIError(error),
         });
       }
     }
-  }, [error, formatAPIError, navigate, toggleNotification]);
+  }, [error, formatAPIError, formatMessage, navigate, toggleNotification]);
 
   const isLoading = isLoadingAdminUsers || !MagicLink || isLoadingRBAC;
 
@@ -152,8 +144,6 @@ const EditPage = () => {
   } satisfies InitialData;
 
   const handleSubmit = async (body: InitialData, actions: FormHelpers<InitialData>) => {
-    lockApp?.();
-
     const { confirmPassword: _confirmPassword, ...bodyRest } = body;
 
     const res = await updateUser({
@@ -167,7 +157,7 @@ const EditPage = () => {
       }
 
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(res.error),
       });
     } else {
@@ -182,12 +172,10 @@ const EditPage = () => {
         confirmPassword: '',
       });
     }
-
-    unlockApp?.();
   };
 
   return (
-    <Main>
+    <Page.Main>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -302,7 +290,7 @@ const EditPage = () => {
           );
         }}
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 

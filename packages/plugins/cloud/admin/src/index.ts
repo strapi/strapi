@@ -1,9 +1,9 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
 
 import { Initializer } from './components/Initializer';
 import { PluginIcon } from './components/PluginIcon';
 import { pluginId } from './pluginId';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 const name = 'Deploy';
 
