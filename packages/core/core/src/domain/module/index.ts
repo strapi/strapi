@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _, { type PropertyPath, flatten } from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Core, UID, Struct } from '@strapi/types';
 
@@ -30,7 +30,7 @@ export interface Module {
   destroy: () => Promise<void>;
   load: () => void;
   routes: Core.Module['routes'];
-  config: (path: string, defaultValue?: unknown) => unknown;
+  config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider.get, we should use it directly
   contentType: (ctName: UID.ContentType) => Struct.ContentTypeSchema;
   contentTypes: Record<string, Struct.ContentTypeSchema>;
   service: (serviceName: UID.Service) => Core.Service;
@@ -107,8 +107,9 @@ export const createModule = (
     get routes() {
       return rawModule.routes ?? {};
     },
-    config(path: string, defaultValue: unknown) {
-      return strapi.get('config').get(`${namespace}.${path}`, defaultValue);
+    config(path: PropertyPath, defaultValue: unknown) {
+      const pathArray = flatten([namespace, path]);
+      return strapi.get('config').get(pathArray, defaultValue);
     },
     contentType(ctName: UID.ContentType) {
       return strapi.get('content-types').get(`${namespace}.${ctName}`);

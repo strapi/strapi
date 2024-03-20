@@ -1,6 +1,7 @@
 import type { Logger } from '@strapi/logger';
 import type { Database } from '@strapi/database';
 
+import type { PropertyPath } from 'lodash';
 import type * as Core from '.';
 import type * as Modules from '../modules';
 import type * as Schema from '../schema';
@@ -118,7 +119,7 @@ export interface StrapiFS {
 }
 
 export interface ConfigProvider {
-  get<T = unknown>(key: string, defaultVal?: T): T;
+  get<T = unknown>(key: PropertyPath, defaultVal?: T): T;
   set(path: string, val: unknown): this;
   has(path: string): boolean;
   [key: string]: any;
