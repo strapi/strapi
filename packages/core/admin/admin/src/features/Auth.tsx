@@ -236,8 +236,8 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
   );
 };
 
-const storeToken = (token: string, sessionStorage = true) => {
-  if (sessionStorage) {
+const storeToken = (token: string, persist?: boolean) => {
+  if (!persist) {
     return window.sessionStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
   }
   return window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
