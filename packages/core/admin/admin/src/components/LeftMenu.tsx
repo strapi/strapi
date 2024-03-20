@@ -11,7 +11,6 @@ import {
   NavSections,
   NavUser,
 } from '@strapi/design-system/v2';
-import { useAppInfo, usePersistentState } from '@strapi/helper-plugin';
 import { Exit, Write, Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
@@ -21,6 +20,8 @@ import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
 import { useTracking } from '../features/Tracking';
 import { Menu } from '../hooks/useMenu';
+import { usePersistentState } from '../hooks/usePersistentState';
+import { getDisplayName } from '../utils/users';
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -66,11 +67,12 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     logos: { menu },
   } = useConfiguration('LeftMenu');
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
-  const { userDisplayName } = useAppInfo();
+  const user = useAuth('AuthenticatedApp', (state) => state.user);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
   const logout = useAuth('Logout', (state) => state.logout);
+  const userDisplayName = getDisplayName(user, formatMessage);
 
   const initials = userDisplayName
     .split(' ')

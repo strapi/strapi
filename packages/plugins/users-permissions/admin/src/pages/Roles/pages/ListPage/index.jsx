@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 
-import { ConfirmDialog, useTracking } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   ContentLayout,
   HeaderLayout,
   Layout,
-  Main,
   Table,
   Th,
   Thead,
@@ -19,14 +17,18 @@ import {
   useFilter,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
+import { Plus } from '@strapi/icons';
 import {
-  useFocusWhenNavigate,
+  ConfirmDialog,
+  useTracking,
+  Page,
+  SearchInput,
+  BackButton,
   useNotification,
   useQueryParams,
+  useFetchClient,
   useRBAC,
-} from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
-import { Page, SearchInput, BackButton } from '@strapi/strapi/admin';
+} from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
@@ -36,18 +38,17 @@ import { PERMISSIONS } from '../../../../constants';
 import { getTrad } from '../../../../utils';
 
 import TableBody from './components/TableBody';
-import { deleteData, fetchData } from './utils/api';
 
 export const RolesListPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const [{ query }] = useQueryParams();
   const _q = query?._q || '';
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState();
-  useFocusWhenNavigate();
+  const { del, get } = useFetchClient();
 
   const {
     isLoading: isLoadingForPermissions,
@@ -64,7 +65,7 @@ export const RolesListPage = () => {
     data: { roles },
     isFetching,
     refetch,
-  } = useQuery('get-roles', () => fetchData(toggleNotification, notifyStatus), {
+  } = useQuery('get-roles', () => fetchData(toggleNotification, formatMessage, notifyStatus), {
     initialData: {},
     enabled: canRead,
   });
@@ -86,6 +87,33 @@ export const RolesListPage = () => {
     setShowConfirmDelete(!showConfirmDelete);
   };
 
+  const deleteData = async (id, formatMessage, toggleNotification) => {
+    try {
+      await del(`/users-permissions/roles/${id}`);
+    } catch (error) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+      });
+    }
+  };
+
+  const fetchData = async (toggleNotification, formatMessage, notifyStatus) => {
+    try {
+      const { data } = await get('/users-permissions/roles');
+      notifyStatus('The roles have loaded successfully');
+
+      return data;
+    } catch (err) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+
+      throw new Error(err);
+    }
+  };
+
   const emptyLayout = {
     roles: {
       id: getTrad('Roles.empty'),
@@ -102,7 +130,7 @@ export const RolesListPage = () => {
     defaultMessage: 'Roles',
   });
 
-  const deleteMutation = useMutation((id) => deleteData(id, toggleNotification), {
+  const deleteMutation = useMutation((id) => deleteData(id, formatMessage, toggleNotification), {
     async onSuccess() {
       await refetch();
     },
@@ -136,7 +164,7 @@ export const RolesListPage = () => {
           { name: pageTitle }
         )}
       />
-      <Main aria-busy={isLoading}>
+      <Page.Main>
         <HeaderLayout
           title={formatMessage({
             id: 'global.roles',
@@ -231,7 +259,7 @@ export const RolesListPage = () => {
           onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

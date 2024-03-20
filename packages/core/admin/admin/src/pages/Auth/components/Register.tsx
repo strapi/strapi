@@ -2,10 +2,9 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { auth, useNotification, useQuery } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
-import { NavLink, Navigate, useNavigate, useMatch } from 'react-router-dom';
+import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 import { ValidationError } from 'yup';
@@ -20,6 +19,7 @@ import { useGuidedTour } from '../../../components/GuidedTour/Provider';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
+import { useNotification } from '../../../features/Notifications';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
@@ -156,14 +156,15 @@ interface RegisterFormValues {
 }
 
 const Register = ({ hasAdmin }: RegisterProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
   const [submitCount, setSubmitCount] = React.useState(0);
   const [apiError, setApiError] = React.useState<string>();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const setSkipped = useGuidedTour('Register', (state) => state.setSkipped);
-  const query = useQuery();
+  const { search: searchString } = useLocation();
+  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const match = useMatch('/auth/:authType');
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -182,7 +183,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
       const message: string = isBaseQueryError(error) ? formatAPIError(error) : error.message ?? '';
 
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message,
       });
 
@@ -209,7 +210,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
 
         if (isUserSuperAdmin) {
-          auth.set(false, 'GUIDED_TOUR_SKIPPED', true);
+          localStorage.setItem('GUIDED_TOUR_SKIPPED', JSON.stringify(false));
           setSkipped(false);
           trackUsage('didLaunchGuidedtour');
         }

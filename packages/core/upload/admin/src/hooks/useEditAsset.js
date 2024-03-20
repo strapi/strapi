@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
@@ -41,7 +41,7 @@ const editAssetRequest = (asset, file, cancelToken, onProgress, post) => {
 export const useEditAsset = () => {
   const [progress, setProgress] = useState(0);
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const queryClient = useQueryClient();
   const tokenRef = useRef(axios.CancelToken.source());
   const { post } = useFetchClient();
@@ -58,10 +58,10 @@ export const useEditAsset = () => {
         if (reason.response.status === 403) {
           toggleNotification({
             type: 'info',
-            message: { id: getTrad('permissions.not-allowed.update') },
+            message: formatMessage({ id: getTrad('permissions.not-allowed.update') }),
           });
         } else {
-          toggleNotification({ type: 'warning', message: reason.message });
+          toggleNotification({ type: 'danger', message: reason.message });
         }
       },
     }

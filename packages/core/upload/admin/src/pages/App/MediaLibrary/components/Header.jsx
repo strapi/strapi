@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { Button, Flex, HeaderLayout, Link } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';

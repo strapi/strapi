@@ -8,17 +8,13 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
-  Main,
   TextInput,
   ToggleInput,
   Typography,
   FieldAction,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
-import { translatedErrors } from '@strapi/strapi/admin';
-// Strapi Icons
-import { Page } from '@strapi/strapi/admin';
+import { translatedErrors, Page, useRBAC } from '@strapi/strapi/admin';
 import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -36,7 +32,6 @@ const schema = yup.object().shape({
 });
 
 const SettingsPage = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
   const { submit, data, isLoading } = useDocumentation();
   const [passwordShown, setPasswordShown] = useState(false);
@@ -54,7 +49,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <Main>
+    <Page.Main>
       <Formik
         initialValues={{
           restrictedAccess: data?.documentationAccess.restrictedAccess || false,
@@ -190,7 +185,7 @@ const SettingsPage = () => {
           );
         }}
       </Formik>
-    </Main>
+    </Page.Main>
   );
 };
 

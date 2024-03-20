@@ -1,4 +1,4 @@
-import type { Permission } from '@strapi/helper-plugin';
+import type { Permission } from '../features/Auth';
 
 type SettingsPermissions =
   | 'api-tokens'

@@ -2,10 +2,9 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useQuery } from '@strapi/helper-plugin';
 import camelCase from 'lodash/camelCase';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { Form } from '../../../components/Form';
@@ -40,7 +39,8 @@ const LOGIN_SCHEMA = yup.object().shape({
 const Login = ({ children }: LoginProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const { formatMessage } = useIntl();
-  const query = useQuery();
+  const { search: searchString } = useLocation();
+  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const navigate = useNavigate();
 
   const login = useAuth('Login', (state) => state.login);

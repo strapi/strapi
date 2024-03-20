@@ -11,12 +11,12 @@
     "../shared",
     "./module.d.ts",
     "../ee/admin",
-    "../package.json"
+    "../package.json",
+    "./tests"
   ],
   "exclude": [
-    "./tests",
     "**/__mocks__",
-    "**/tests",
+    "./src/**/tests",
     "**/*.test.*",
     "../ee/admin/**/*.test.*",
     "../ee/admin/**/__mocks__"

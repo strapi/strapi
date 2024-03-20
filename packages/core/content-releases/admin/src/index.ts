@@ -1,10 +1,10 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { PaperPlane } from '@strapi/icons';
 
 import { CMReleasesContainer } from './components/CMReleasesContainer';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { releaseApi } from './services/release';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 import type { Plugin } from '@strapi/types';
 

@@ -40,8 +40,8 @@ import { ROUTES_CE } from './pages/Settings/constants';
 import { THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY, ThemeName } from './reducer';
 import { languageNativeNames } from './translations/languageNativeNames';
 
+import type { Permission } from './features/Auth';
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
-import type { Permission } from '@strapi/helper-plugin';
 import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
 const {

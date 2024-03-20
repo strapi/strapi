@@ -2,11 +2,6 @@ import { render, screen } from '@tests/utils';
 
 import { UseCasePage } from '../UseCasePage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(),
-}));
-
 describe('Admin | UseCasePage', () => {
   it('should not show Other input if select value is not Other', async () => {
     const { queryByTestId, user } = render(<UseCasePage />);

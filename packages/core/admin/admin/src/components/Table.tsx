@@ -27,12 +27,12 @@ import {
   TableProps,
   RawTdProps,
 } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { CarretDown, EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import { useControllableState } from '../hooks/useControllableState';
+import { useQueryParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 

@@ -139,7 +139,7 @@ const ListView = () => {
               )}
               <Button
                 startIcon={<Check />}
-                onClick={() => submitData()}
+                onClick={async () => await submitData()}
                 type="submit"
                 disabled={isEqual(modifiedData, initialData)}
               >

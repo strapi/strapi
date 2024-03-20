@@ -1,9 +1,8 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler } from '@strapi/admin/strapi-admin';
+import { useAPIErrorHandler, useNotification, useAuth, useRBAC } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Typography, Icon } from '@strapi/design-system';
 import { Menu, Link } from '@strapi/design-system/v2';
-import { useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
@@ -14,9 +13,6 @@ import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/re
 import { Release } from '../../../shared/contracts/releases';
 import { PERMISSIONS } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
-import { useTypedSelector } from '../store/hooks';
-
-import type { Permission } from '@strapi/helper-plugin';
 
 const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
   &:hover {
@@ -63,7 +59,7 @@ interface DeleteReleaseActionItemProps {
 
 const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionItemProps) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const [deleteReleaseAction] = useDeleteReleaseActionMutation();
   const {
@@ -92,13 +88,13 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
       if (isAxiosError(response.error)) {
         // Handle axios error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(response.error),
         });
       } else {
         // Handle generic error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       }
@@ -139,19 +135,22 @@ const ReleaseActionEntryLinkItem = ({
   locale,
 }: ReleaseActionEntryLinkItemProps) => {
   const { formatMessage } = useIntl();
+  const userPermissions = useAuth('ReleaseActionEntryLinkItem', (state) => state.permissions);
+
   // Confirm user has permissions to access the entry for the given locale
-  const collectionTypePermissions = useTypedSelector(
-    (state) => state.rbacProvider.collectionTypesRelatedPermissions
-  );
-  const updatePermissions = contentTypeUid
-    ? collectionTypePermissions[contentTypeUid]?.['plugin::content-manager.explorer.update']
-    : [];
-  const canUpdateEntryForLocale = Boolean(
-    !locale ||
-      updatePermissions?.find((permission: Permission) =>
-        permission.properties?.locales?.includes(locale)
-      )
-  );
+  const canUpdateEntryForLocale = React.useMemo(() => {
+    const updatePermissions = userPermissions.find(
+      (permission) =>
+        permission.subject === contentTypeUid &&
+        permission.action === 'plugin::content-manager.explorer.update'
+    );
+
+    if (!updatePermissions) {
+      return false;
+    }
+
+    return Boolean(!locale || updatePermissions.properties?.locales?.includes(locale));
+  }, [contentTypeUid, locale, userPermissions]);
 
   const {
     allowedActions: { canUpdateContentType },

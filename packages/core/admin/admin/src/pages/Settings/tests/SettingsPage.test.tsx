@@ -1,7 +1,7 @@
-import { AppInfoContext } from '@strapi/helper-plugin';
 import { render as baseRender, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
+import { AppInfoProvider } from '../../../features/AppInfo';
 import { StrapiAppContextValue, StrapiAppProvider } from '../../../features/StrapiApp';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 import { Layout } from '../Layout';
@@ -20,35 +20,27 @@ const render = (settings: StrapiAppContextValue['settings']) =>
     renderOptions: {
       wrapper({ children }) {
         return (
-          <AppInfoContext.Provider
-            value={{
-              shouldUpdateStrapi: false,
-              setUserDisplayName: () => {},
-              userDisplayName: '',
+          <StrapiAppProvider
+            components={{}}
+            fields={{}}
+            customFields={{
+              customFields: {},
+              get: jest.fn(),
+              getAll: jest.fn(),
+              register: jest.fn(),
             }}
+            settings={settings}
+            plugins={{}}
+            getPlugin={jest.fn()}
+            getAdminInjectedComponents={jest.fn()}
+            runHookParallel={jest.fn()}
+            runHookWaterfall={jest.fn()}
+            runHookSeries={jest.fn()}
+            menu={[]}
           >
-            <StrapiAppProvider
-              components={{}}
-              fields={{}}
-              customFields={{
-                customFields: {},
-                get: jest.fn(),
-                getAll: jest.fn(),
-                register: jest.fn(),
-              }}
-              settings={settings}
-              plugins={{}}
-              getPlugin={jest.fn()}
-              getAdminInjectedComponents={jest.fn()}
-              runHookParallel={jest.fn()}
-              runHookWaterfall={jest.fn()}
-              runHookSeries={jest.fn()}
-              menu={[]}
-            >
-              <Routes>{children}</Routes>
-              <LocationDisplay />
-            </StrapiAppProvider>
-          </AppInfoContext.Provider>
+            <Routes>{children}</Routes>
+            <LocationDisplay />
+          </StrapiAppProvider>
         );
       },
     },

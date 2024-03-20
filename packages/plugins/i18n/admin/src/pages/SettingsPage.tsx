@@ -1,9 +1,8 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
+import { Page, useAPIErrorHandler, useNotification, useRBAC } from '@strapi/admin/strapi-admin';
+import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
 import { EmptyDocuments } from '@strapi/icons';
-import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
 import { CreateLocale } from '../components/CreateLocale';
@@ -13,9 +12,8 @@ import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
 
 const SettingsPage = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { data: locales, isLoading: isLoadingLocales, error } = useGetLocalesQuery();
   const {
@@ -26,7 +24,7 @@ const SettingsPage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -43,7 +41,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <Main tabIndex={-1}>
+    <Page.Main tabIndex={-1}>
       <HeaderLayout
         primaryAction={<CreateLocale disabled={!canCreate} />}
         title={formatMessage({
@@ -69,7 +67,7 @@ const SettingsPage = () => {
           />
         )}
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };
 

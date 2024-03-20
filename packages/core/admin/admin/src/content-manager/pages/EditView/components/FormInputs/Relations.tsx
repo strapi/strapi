@@ -14,7 +14,6 @@ import {
   useComposedRefs,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useFocusInputField, useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { Cross, Drag, Refresh } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
@@ -25,6 +24,9 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import styled from 'styled-components';
 
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
+import { useNotification } from '../../../../../features/Notifications';
+import { useFocusInputField } from '../../../../../hooks/useFocusInputField';
+import { useQueryParams } from '../../../../../hooks/useQueryParams';
 import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
@@ -75,7 +77,7 @@ interface RelationsFieldProps
 
 interface RelationsFormValue {
   connect?: Relation[];
-  disconnect?: Pick<RelationResult, 'documentId'>[];
+  disconnect?: Pick<Relation, 'id'>[];
 }
 
 /**
@@ -215,20 +217,21 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       const [lastItemInList] = relations.slice(-1);
 
       const item = {
-        ...relation,
+        id: relation.id,
+        status: relation.status,
         /**
          * If there's a last item, that's the first key we use to generate out next one.
          */
         __temp_key__: generateNKeysBetween(lastItemInList?.__temp_key__ ?? null, null, 1)[0],
         // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
-        [props.mainField?.name ?? 'id']: relation[props.mainField?.name ?? 'id'],
+        [props.mainField?.name ?? 'documentId']: relation[props.mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, props.mainField),
         // @ts-expect-error – targetModel does exist on the attribute, but it's not typed.
         href: `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relation.documentId}`,
       };
 
       if (ONE_WAY_RELATIONS.includes(props.attribute.relation)) {
-        field.onChange(props.name, { connect: [item] });
+        field.onChange(`${props.name}.connect`, [item]);
       } else {
         field.onChange(`${props.name}.connect`, [...(field.value?.connect ?? []), item]);
       }
@@ -312,7 +315,7 @@ const removeConnected =
     return relations.filter((relation) => {
       const connectedRelations = field?.connect ?? [];
 
-      return connectedRelations.findIndex((rel) => rel.documentId === relation.documentId) === -1;
+      return connectedRelations.findIndex((rel) => rel.id === relation.id) === -1;
     });
   };
 
@@ -325,9 +328,7 @@ const removeDisconnected =
     relations.filter((relation) => {
       const disconnectedRelations = field?.disconnect ?? [];
 
-      return (
-        disconnectedRelations.findIndex((rel) => rel.documentId === relation.documentId) === -1
-      );
+      return disconnectedRelations.findIndex((rel) => rel.id === relation.id) === -1;
     });
 
 /**
@@ -340,8 +341,8 @@ const addLabelAndHref =
     relations.map((relation) => {
       return {
         ...relation,
-        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `id` property with the exact same data.
-        [mainField?.name ?? 'id']: relation[mainField?.name ?? 'id'],
+        // Fallback to `id` if there is no `mainField` value, which will overwrite the above `documentId` property with the exact same data.
+        [mainField?.name ?? 'documentId']: relation[mainField?.name ?? 'documentId'],
         label: getRelationLabel(relation, mainField),
         href: `${href}/${relation.documentId}`,
       };
@@ -382,7 +383,7 @@ const RelationsInput = ({
     _q: '',
     page: 1,
   });
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams();
 
   const { formatMessage } = useIntl();
@@ -412,8 +413,8 @@ const RelationsInput = ({
         ...buildValidParams(query),
         id: id ?? '',
         pageSize: 10,
-        idsToInclude: field.value?.disconnect?.map((rel) => rel.documentId) ?? [],
-        idsToOmit: field.value?.connect?.map((rel) => rel.documentId) ?? [],
+        idsToInclude: field.value?.disconnect?.map((rel) => rel.id.toString()) ?? [],
+        idsToOmit: field.value?.connect?.map((rel) => rel.id.toString()) ?? [],
         ...searchParams,
       },
     });
@@ -441,7 +442,7 @@ const RelationsInput = ({
       return;
     }
 
-    const relation = options.find((opt) => opt.documentId === relationId);
+    const relation = options.find((opt) => opt.id.toString() === relationId);
 
     if (!relation) {
       // This is very unlikely to happen, but it ensures we don't have any data for.
@@ -454,7 +455,7 @@ const RelationsInput = ({
           id: getTranslation('relation.error-adding-relation'),
           defaultMessage: 'An error occurred while trying to add the relation.',
         }),
-        type: 'warning',
+        type: 'danger',
       });
 
       return;
@@ -528,7 +529,7 @@ const RelationsInput = ({
         const textValue = getRelationLabel(opt, mainField);
 
         return (
-          <ComboboxOption key={opt.documentId} value={opt.documentId} textValue={textValue}>
+          <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
             <Flex gap={2} justifyContent="space-between">
               <Typography ellipsis>{textValue}</Typography>
               {opt.status ? <DocumentStatus status={opt.status} /> : null}
@@ -738,8 +739,7 @@ const RelationsList = ({
        * from the connect array
        */
       const indexOfRelationInConnectArray = field.value.connect.findIndex(
-        (rel: NonNullable<RelationsFormValue['connect']>[number]) =>
-          rel.documentId === relation.documentId
+        (rel: NonNullable<RelationsFormValue['connect']>[number]) => rel.id === relation.id
       );
 
       if (indexOfRelationInConnectArray >= 0) {
@@ -748,7 +748,7 @@ const RelationsList = ({
       }
     }
 
-    addFieldRow(`${name}.disconnect`, { documentId: relation.documentId });
+    addFieldRow(`${name}.disconnect`, { id: relation.id });
   };
 
   /**

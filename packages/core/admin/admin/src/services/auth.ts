@@ -188,6 +188,7 @@ const authService = adminApi.injectEndpoints({
 
 const {
   useCheckPermissionsQuery,
+  useLazyCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
   useRenewTokenMutation,
@@ -207,6 +208,7 @@ const {
 
 export {
   useCheckPermissionsQuery,
+  useLazyCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
   useRenewTokenMutation,

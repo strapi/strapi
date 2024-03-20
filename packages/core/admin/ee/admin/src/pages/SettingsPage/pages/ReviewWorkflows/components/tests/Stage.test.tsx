@@ -1,25 +1,11 @@
-import React from 'react';
-
-import { configureStore } from '@reduxjs/toolkit';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render, waitFor, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, waitFor, screen, defaultTestStoreConfig } from '@tests/utils';
 import { FormikProvider, useFormik } from 'formik';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { IntlProvider } from 'react-intl';
-import { Provider } from 'react-redux';
 
 import { Stage as StageT } from '../../../../../../../../../shared/contracts/review-workflows';
 import { AdminRole } from '../../../../../../../../../shared/contracts/shared';
 import { REDUX_NAMESPACE, STAGE_COLOR_DEFAULT } from '../../constants';
 import { reducer } from '../../reducer';
 import { Stage, StageProps } from '../Stage';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => jest.fn()),
-}));
 
 const STAGES_FIXTURE = {
   id: 1,
@@ -150,50 +136,36 @@ const setup = ({ roles, ...props }: Setup = {}) => {
     ...props,
   };
 
-  return {
-    ...render(<ComponentFixture {...componentFixtureProps} />, {
-      wrapper({ children }) {
-        const store = configureStore({
-          reducer,
-          preloadedState: {
-            // @ts-expect-error - Since we are passing the local ReviewWorkflow reducer, REDUX_NAMESPACE can't be set as part of the preloadedState
-            [REDUX_NAMESPACE]: {
-              serverState: {
-                contentTypes: CONTENT_TYPES_FIXTURE,
-                roles: roles ?? ROLES_FIXTURE,
-                workflow: WORKFLOWS_FIXTURE[0],
-                workflows: WORKFLOWS_FIXTURE,
-              },
+  const storeConfig = {
+    ...defaultTestStoreConfig,
+    reducer: {
+      ...defaultTestStoreConfig.reducer,
+      [REDUX_NAMESPACE]: reducer,
+    },
+    preloadedState: {
+      ...defaultTestStoreConfig.preloadedState,
+      [REDUX_NAMESPACE]: {
+        serverState: {
+          contentTypes: CONTENT_TYPES_FIXTURE,
+          roles: roles ?? ROLES_FIXTURE,
+          workflow: WORKFLOWS_FIXTURE[0],
+          workflows: WORKFLOWS_FIXTURE,
+        },
 
-              clientState: {
-                currentWorkflow: {
-                  data: WORKFLOWS_FIXTURE[0],
-                },
-              },
-            },
+        clientState: {
+          currentWorkflow: {
+            data: WORKFLOWS_FIXTURE[0],
           },
-          middleware: (getDefaultMiddleware: any) =>
-            getDefaultMiddleware({
-              // Disable timing checks for test env
-              immutableCheck: false,
-              serializableCheck: false,
-            }),
-        });
-
-        return (
-          <DndProvider backend={HTML5Backend}>
-            <Provider store={store}>
-              <IntlProvider locale="en" messages={{}}>
-                <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
-              </IntlProvider>
-            </Provider>
-          </DndProvider>
-        );
+        },
       },
-    }),
-
-    user: userEvent.setup(),
+    },
   };
+
+  return render(<ComponentFixture {...componentFixtureProps} />, {
+    providerOptions: {
+      storeConfig,
+    },
+  });
 };
 
 describe('Admin | Settings | Review Workflow | Stage', () => {
@@ -208,7 +180,7 @@ describe('Admin | Settings | Review Workflow | Stage', () => {
 
     // open accordion; getByRole is not sufficient here, because the accordion
     // does not have better identifiers
-    // eslint-disable-next-line testing-library/no-node-access
+    // eslint-disable-next-line testing-library/no-node-access, testing-library/no-container
     const button = container.querySelector('button[aria-expanded]');
     if (button) {
       await user.click(button);
