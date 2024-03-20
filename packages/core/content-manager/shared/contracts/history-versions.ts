@@ -31,7 +31,7 @@ export interface HistoryVersionDataResponse extends Omit<CreateHistoryVersion, '
     email: string;
   };
   locale: Locale | null;
-  meta?: {
+  meta: {
     unknownAttributes: {
       added: Record<string, unknown>;
       deleted: Record<string, unknown>;
