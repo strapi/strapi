@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Button, Flex, Loader, Typography } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { useFormik, Form, FormikProvider, FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
@@ -15,6 +14,7 @@ import { useAdminRoles } from '../../../../../../../admin/src/hooks/useAdminRole
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
 import { useInjectReducer } from '../../../../../../../admin/src/hooks/useInjectReducer';
+import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../admin/src/selectors';
 import { isBaseQueryError } from '../../../../../../../admin/src/utils/baseQuery';
 import { Stage } from '../../../../../../../shared/contracts/review-workflows';

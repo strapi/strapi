@@ -10,11 +10,10 @@ import {
   Main,
   MainProps,
 } from '@strapi/design-system';
-import { useRBACProvider } from '@strapi/helper-plugin';
 import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { Permission } from '../../../shared/contracts/shared';
+import { useAuth, Permission } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useCheckPermissionsQuery } from '../services/auth';
@@ -174,11 +173,11 @@ export interface ProtectProps {
  * the loading component and should the check fail it will render the error component with a notification.
  */
 const Protect = ({ permissions = [], children }: ProtectProps) => {
-  const { allPermissions } = useRBACProvider();
+  const userPermissions = useAuth('Protect', (state) => state.permissions);
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const matchingPermissions = allPermissions.filter(
+  const matchingPermissions = userPermissions.filter(
     (permission) =>
       permissions.findIndex(
         (perm) => perm.action === permission.action && perm.subject === permission.subject
@@ -229,7 +228,6 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
     return <NoPermissions />;
   }
 
-  // @ts-expect-error this error comes from the fact we have permissions defined in the helper-plugin & admin, this will be resolved soon.
   return typeof children === 'function' ? children({ permissions: matchingPermissions }) : children;
 };
 

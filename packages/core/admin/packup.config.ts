@@ -3,22 +3,6 @@ import { Config, defineConfig } from '@strapi/pack-up';
 const config: Config = defineConfig({
   bundles: [
     {
-      source: './admin/src/index.ts',
-      import: './dist/admin/index.mjs',
-      require: './dist/admin/index.js',
-      types: './dist/admin/src/index.d.ts',
-      tsconfig: './admin/tsconfig.build.json',
-      runtime: 'web',
-    },
-    {
-      source: './admin/tests/utils.tsx',
-      import: './dist/admin/tests/index.mjs',
-      require: './dist/admin/tests/index.js',
-      types: './dist/admin/tests/utils.d.ts',
-      tsconfig: './admin/tsconfig.build.json',
-      runtime: 'web',
-    },
-    {
       source: './_internal/index.ts',
       import: './dist/_internal.mjs',
       require: './dist/_internal.js',

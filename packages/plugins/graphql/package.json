@@ -54,7 +54,6 @@
     "@graphql-tools/utils": "^8.13.1",
     "@koa/cors": "3.4.3",
     "@strapi/design-system": "1.16.0",
-    "@strapi/helper-plugin": "5.0.0-alpha.2",
     "@strapi/icons": "1.16.0",
     "@strapi/utils": "5.0.0-alpha.2",
     "graphql": "^16.8.1",

@@ -9,7 +9,6 @@ import {
   Status,
   IconButton,
 } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
 import { Helmet } from 'react-helmet';
@@ -26,6 +25,7 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
 import { getDisplayName } from '../../../../utils/users';
 

@@ -1,8 +1,7 @@
 import * as React from 'react';
 
-import { Page, useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
+import { Page, useAPIErrorHandler, useNotification, useRBAC } from '@strapi/admin/strapi-admin';
 import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 

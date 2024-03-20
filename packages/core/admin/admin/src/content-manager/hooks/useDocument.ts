@@ -6,7 +6,6 @@
 
 import * as React from 'react';
 
-import { TranslationMessage } from '@strapi/helper-plugin';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
@@ -22,6 +21,7 @@ import { createYupSchema } from '../utils/validation';
 import { useContentTypeSchema, ComponentsDictionary } from './useContentTypeSchema';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
 interface UseDocumentArgs {
   collectionType: string;
@@ -52,7 +52,9 @@ type UseDocument = (
    * This is the schema of the content type, it is not the same as the layout.
    */
   schema?: Schema;
-  validate: (document: Document) => null | Record<string, TranslationMessage>;
+  validate: (
+    document: Document
+  ) => null | Record<string, MessageDescriptor & { values?: Record<string, PrimitiveType> }>;
 };
 
 /* -------------------------------------------------------------------------------------------------

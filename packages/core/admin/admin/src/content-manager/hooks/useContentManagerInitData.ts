@@ -1,13 +1,13 @@
 import { useEffect } from 'react';
 
 import { useNotifyAT } from '@strapi/design-system';
-import { Permission, hasPermissions, useRBACProvider } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 
 import { HOOKS } from '../../constants';
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
+import { useAuth, Permission } from '../../features/Auth';
 import { useNotification } from '../../features/Notifications';
 import { useStrapiApp } from '../../features/StrapiApp';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
@@ -33,7 +33,6 @@ interface ContentManagerLink {
 const useContentManagerInitData = (): ContentManagerAppState => {
   const dispatch = useTypedDispatch();
   const { toggleNotification } = useNotification();
-  const { allPermissions } = useRBACProvider();
   const runHookWaterfall = useStrapiApp(
     'useContentManagerInitData',
     (state) => state.runHookWaterfall
@@ -41,6 +40,10 @@ const useContentManagerInitData = (): ContentManagerAppState => {
   const { notifyStatus } = useNotifyAT();
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
+  const checkUserHasPermissions = useAuth(
+    'useContentManagerInitData',
+    (state) => state.checkUserHasPermissions
+  );
 
   const state = useTypedSelector((state) => state['content-manager_app']);
 
@@ -117,9 +120,7 @@ const useContentManagerInitData = (): ContentManagerAppState => {
 
     // Collection Types verifications
     const collectionTypeLinksPermissions = await Promise.all(
-      collectionTypeSectionLinks.map(({ permissions }) =>
-        hasPermissions(allPermissions, permissions)
-      )
+      collectionTypeSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
     );
     const authorizedCollectionTypeLinks = collectionTypeSectionLinks.filter(
       (_, index) => collectionTypeLinksPermissions[index]
@@ -127,7 +128,7 @@ const useContentManagerInitData = (): ContentManagerAppState => {
 
     // Single Types verifications
     const singleTypeLinksPermissions = await Promise.all(
-      singleTypeSectionLinks.map(({ permissions }) => hasPermissions(allPermissions, permissions))
+      singleTypeSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
     );
     const authorizedSingleTypeLinks = singleTypeSectionLinks.filter(
       (_, index) => singleTypeLinksPermissions[index]

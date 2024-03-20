@@ -9,6 +9,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
+  useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
   Alert,
@@ -31,7 +32,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation } from 'react-router-dom';

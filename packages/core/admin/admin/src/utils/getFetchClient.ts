@@ -1,6 +1,7 @@
-import { auth } from '@strapi/helper-plugin';
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
 import qs from 'qs';
+
+import { STORAGE_KEYS } from '../features/Auth';
 
 const fetchClient = (): AxiosInstance => {
   const instance = axios.create({
@@ -16,7 +17,7 @@ const fetchClient = (): AxiosInstance => {
   // Add a request interceptor to add authorization token to headers, rejects errors
   instance.interceptors.request.use(
     async (config) => {
-      config.headers.Authorization = `Bearer ${auth.getToken()}`;
+      config.headers.Authorization = `Bearer ${getToken()}`;
 
       return config;
     },
@@ -28,7 +29,9 @@ const fetchClient = (): AxiosInstance => {
     (response) => response,
     (error) => {
       if (error?.response?.status === 401) {
-        auth.clearAppStorage();
+        clearItem(STORAGE_KEYS.TOKEN);
+        clearItem(STORAGE_KEYS.USER);
+
         window.location.reload();
       }
 
@@ -38,6 +41,21 @@ const fetchClient = (): AxiosInstance => {
 
   return instance;
 };
+
+const clearItem = (key: string) => {
+  if (window.localStorage.getItem(key)) {
+    return window.localStorage.removeItem(key);
+  }
+
+  if (window.sessionStorage.getItem(key)) {
+    return window.sessionStorage.removeItem(key);
+  }
+};
+
+const getToken = () =>
+  JSON.parse(
+    localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN) ?? '""'
+  );
 
 const instance = fetchClient();
 

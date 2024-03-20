@@ -23,7 +23,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -35,6 +34,7 @@ import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../hooks/useRBAC';
 
 import { useWebhooks } from './hooks/useWebhooks';
 

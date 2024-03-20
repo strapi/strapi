@@ -34,27 +34,27 @@ interface ProvidersProps {
 const Providers = ({ children, strapi, store }: ProvidersProps) => {
   return (
     <Provider store={store}>
-      <HistoryProvider>
+      <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <LanguageProvider messages={strapi.configurations.translations}>
-            <Theme themes={strapi.configurations.themes}>
-              <QueryClientProvider client={queryClient}>
-                <StrapiAppProvider
-                  components={strapi.library.components}
-                  customFields={strapi.customFields}
-                  fields={strapi.library.fields}
-                  menu={strapi.menu}
-                  getAdminInjectedComponents={strapi.getAdminInjectedComponents}
-                  getPlugin={strapi.getPlugin}
-                  plugins={strapi.plugins}
-                  runHookParallel={strapi.runHookParallel}
-                  runHookWaterfall={(name, initialValue) => {
-                    return strapi.runHookWaterfall(name, initialValue, store);
-                  }}
-                  runHookSeries={strapi.runHookSeries}
-                  settings={strapi.settings}
-                >
-                  <NotificationsProvider>
+          <HistoryProvider>
+            <LanguageProvider messages={strapi.configurations.translations}>
+              <Theme themes={strapi.configurations.themes}>
+                <NotificationsProvider>
+                  <StrapiAppProvider
+                    components={strapi.library.components}
+                    customFields={strapi.customFields}
+                    fields={strapi.library.fields}
+                    menu={strapi.menu}
+                    getAdminInjectedComponents={strapi.getAdminInjectedComponents}
+                    getPlugin={strapi.getPlugin}
+                    plugins={strapi.plugins}
+                    runHookParallel={strapi.runHookParallel}
+                    runHookWaterfall={(name, initialValue) => {
+                      return strapi.runHookWaterfall(name, initialValue, store);
+                    }}
+                    runHookSeries={strapi.runHookSeries}
+                    settings={strapi.settings}
+                  >
                     <TrackingProvider>
                       <GuidedTourProvider>
                         <ConfigurationProvider
@@ -67,13 +67,13 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                         </ConfigurationProvider>
                       </GuidedTourProvider>
                     </TrackingProvider>
-                  </NotificationsProvider>
-                </StrapiAppProvider>
-              </QueryClientProvider>
-            </Theme>
-          </LanguageProvider>
+                  </StrapiAppProvider>
+                </NotificationsProvider>
+              </Theme>
+            </LanguageProvider>
+          </HistoryProvider>
         </AuthProvider>
-      </HistoryProvider>
+      </QueryClientProvider>
     </Provider>
   );
 };

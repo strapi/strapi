@@ -15,7 +15,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -28,6 +27,7 @@ import { useNotification } from '../../../../../../../admin/src/features/Notific
 import { useTracking } from '../../../../../../../admin/src/features/Tracking';
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
+import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 
 import * as Layout from './components/Layout';

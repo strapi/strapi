@@ -1,59 +1,14 @@
 import React from 'react';
 
-import { fixtures } from '@strapi/admin-test-utils';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { RBACContext } from '@strapi/helper-plugin';
-import { NotificationsProvider } from '@strapi/strapi/admin';
-import { render as renderRTL, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { MemoryRouter } from 'react-router-dom';
+import { render, waitFor } from '@strapi/strapi/admin/test';
 
 import PluginPage from '../index';
-
-const render = ({ permissions } = { permissions: fixtures.permissions.allPermissions }) => ({
-  ...renderRTL(<PluginPage />, {
-    wrapper({ children }) {
-      const client = new QueryClient({
-        defaultOptions: {
-          queries: {
-            retry: false,
-          },
-        },
-      });
-
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const rbacContextValue = React.useMemo(
-        () => ({
-          allPermissions: permissions,
-        }),
-        []
-      );
-
-      return (
-        <MemoryRouter>
-          <ThemeProvider theme={lightTheme}>
-            <QueryClientProvider client={client}>
-              <IntlProvider locale="en" messages={{}} textComponent="span">
-                <NotificationsProvider>
-                  <RBACContext.Provider value={rbacContextValue}>{children}</RBACContext.Provider>
-                </NotificationsProvider>
-              </IntlProvider>
-            </QueryClientProvider>
-          </ThemeProvider>
-        </MemoryRouter>
-      );
-    },
-  }),
-  user: userEvent.setup(),
-});
 
 const versions = ['2.0.0', '1.2.0', '1.0.0'];
 
 describe('PluginPage', () => {
   it('render the plugin page correctly', async () => {
-    const { getByRole, queryByText, getByText } = render();
+    const { getByRole, queryByText, getByText } = render(<PluginPage />);
 
     await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
@@ -88,7 +43,7 @@ describe('PluginPage', () => {
 
   describe('actions', () => {
     it('should open the documentation', async () => {
-      const { getByRole, queryByText, user } = render();
+      const { getByRole, queryByText, user } = render(<PluginPage />);
 
       await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
@@ -108,7 +63,7 @@ describe('PluginPage', () => {
     });
 
     it('should regenerate the documentation', async () => {
-      const { getByRole, queryByText, user, getByText } = render();
+      const { getByRole, queryByText, user, getByText } = render(<PluginPage />);
 
       await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
@@ -120,7 +75,7 @@ describe('PluginPage', () => {
     });
 
     it('should delete the documentation', async () => {
-      const { getByRole, queryByText, user, getByText } = render();
+      const { getByRole, queryByText, user, getByText } = render(<PluginPage />);
 
       await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
@@ -140,8 +95,8 @@ describe('PluginPage', () => {
 
   describe('permissions', () => {
     it("should always disable the 'Open Documentation' link if the user cannot open", async () => {
-      const { getByRole, queryByText } = render({
-        permissions: [],
+      const { getByRole, queryByText } = render(<PluginPage />, {
+        providerOptions: { permissions: () => [] },
       });
 
       await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
@@ -158,8 +113,8 @@ describe('PluginPage', () => {
     });
 
     it('should disabled the open documentation version link in the table if the user cannot open', async () => {
-      const { getByRole, queryByText } = render({
-        permissions: [],
+      const { getByRole, queryByText } = render(<PluginPage />, {
+        providerOptions: { permissions: () => [] },
       });
 
       await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
@@ -175,8 +130,8 @@ describe('PluginPage', () => {
     });
 
     it('should not render the regenerate buttons if the user cannot regenerate', async () => {
-      const { queryByRole, getByRole, queryByText } = render({
-        permissions: [],
+      const { queryByRole, getByRole, queryByText } = render(<PluginPage />, {
+        providerOptions: { permissions: () => [] },
       });
 
       await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
@@ -189,8 +144,8 @@ describe('PluginPage', () => {
     });
 
     it('should not render the delete buttons if the user cannot delete', async () => {
-      const { queryByRole, getByRole, queryByText } = render({
-        permissions: [],
+      const { queryByRole, getByRole, queryByText } = render(<PluginPage />, {
+        providerOptions: { permissions: () => [] },
       });
 
       await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());

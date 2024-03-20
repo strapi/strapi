@@ -516,6 +516,23 @@ toggleNotification({
 });
 ```
 
+### RBAC
+
+This feature has removed and not replaced. If you need to access the user's permissions you should use the `useAuth` hook.
+
+```tsx
+// Before
+import { useRBACProvider } from '@strapi/helper-plugin';
+
+const { allPermission, refetchPermissions } = useRBACProvider();
+
+// After
+import { useAuth } from '@strapi/strapi/admin';
+
+const permissions = useAuth('COMPONENT_NAME', (state) => state.permissions);
+const refetchPermission = useAuth('COMPONENT_NAME', (state) => state.refetchPermission);
+```
+
 ### OverlayBlocker
 
 This feature has been removed and not replaced. If you feel like you need this feature, please open an issue on the Strapi repository to discuss your usecase.
@@ -630,6 +647,18 @@ import { useQueryParams } from '@strapi/helper-plugin';
 import { useQueryParams } from '@strapi/strapi/admin';
 ```
 
+### useRBAC
+
+This hook has been moved. You should import it from the `@strapi/strapi/admin` package:
+
+```tsx
+// Before
+import { useRBAC } from '@strapi/helper-plugin';
+
+// After
+import { useRBAC } from '@strapi/strapi/admin';
+```
+
 ### useSelectionState
 
 This hook has been removed and not replaced. If you feel like you need this hook, please open an issue on the Strapi repository to discuss your usecase.
@@ -654,6 +683,14 @@ This util has been removed and not replaced, use async / await with try / catch 
 
 This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
+### findMatchingPermissions
+
+This util has been removed and not replaced. You should filter the permissions yourself. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### formatPermissionsForRequest
+
+This util has been removed and not replaced. You should format the permissions yourself. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
 ### getAPIInnerErrors
 
 This util has been removed and not replaced, use async / await with try / catch instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
@@ -677,6 +714,23 @@ This util has been removed and not replaced. If you feel like you need this util
 ### getYupInnerErrors
 
 This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### hasPermissions
+
+This util has been removed. If you need to use it, you should use the `checkUserHasPermissions` function from the `useAuth` hook.
+
+```tsx
+// Before
+import { hasPermissions } from '@strapi/helper-plugin';
+
+// After
+import { useAuth } from '@strapi/strapi/admin';
+
+const { checkUserHasPermissions } = useAuth(
+  'COMPONENT_NAME',
+  (state) => state.checkUserHasPermissions
+);
+```
 
 ### normalizeAPIError
 
@@ -730,6 +784,10 @@ If you feel like you need this util, please open an issue on the Strapi reposito
 This util has been removed and not replaced, use the native CSS opacity property instead. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 
 ### stopPropagation
+
+This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
+
+### shouldCheckPermissions
 
 This util has been removed and not replaced. If you feel like you need this util, please open an issue on the Strapi repository to discuss your usecase.
 

@@ -12,7 +12,6 @@ import {
   Link,
   Typography,
 } from '@strapi/design-system';
-import { useRBAC } from '@strapi/helper-plugin';
 import { Check, ExternalLink } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -23,6 +22,7 @@ import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 
 import { LogoInput, LogoInputProps } from './components/LogoInput';

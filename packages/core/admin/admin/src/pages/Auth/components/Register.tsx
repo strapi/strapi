@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { auth } from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
@@ -211,7 +210,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
 
         if (isUserSuperAdmin) {
-          auth.set(false, 'GUIDED_TOUR_SKIPPED', true);
+          localStorage.setItem('GUIDED_TOUR_SKIPPED', JSON.stringify(false));
           setSkipped(false);
           trackUsage('didLaunchGuidedtour');
         }

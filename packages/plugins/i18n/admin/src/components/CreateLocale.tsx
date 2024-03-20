@@ -9,6 +9,7 @@ import {
   useForm,
   useAPIErrorHandler,
   useNotification,
+  useAuth,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -31,7 +32,6 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { useRBACProvider } from '@strapi/helper-plugin';
 import { Check, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -116,7 +116,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
   } = useAPIErrorHandler();
   const [createLocale] = useCreateLocaleMutation();
   const { formatMessage } = useIntl();
-  const { refetchPermissions } = useRBACProvider();
+  const refetchPermissions = useAuth('CreateModal', (state) => state.refetchPermissions);
 
   const handleSubmit = async (values: FormValues, helpers: FormHelpers<FormValues>) => {
     try {

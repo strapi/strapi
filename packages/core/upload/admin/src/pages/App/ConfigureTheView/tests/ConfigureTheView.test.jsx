@@ -17,10 +17,6 @@ jest.mock('../../../../hooks/useConfig', () => ({
     },
   })),
 }));
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => jest.fn()),
-}));
 
 const render = (
   config = {

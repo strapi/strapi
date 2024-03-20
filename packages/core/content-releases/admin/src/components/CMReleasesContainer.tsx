@@ -6,6 +6,7 @@ import {
   useNotification,
   useQueryParams,
   unstable_useDocument,
+  useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -22,7 +23,6 @@ import {
   EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Common } from '@strapi/types';
 import { isAxiosError } from 'axios';

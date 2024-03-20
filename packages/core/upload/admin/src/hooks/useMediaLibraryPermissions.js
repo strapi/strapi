@@ -1,4 +1,4 @@
-import { useRBAC } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/admin/strapi-admin';
 
 import { PERMISSIONS } from '../constants';
 

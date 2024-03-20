@@ -5,12 +5,12 @@ import { ConfigureStoreOptions } from '@reduxjs/toolkit';
 import {
   defaultTestStoreConfig,
   render as renderAdmin,
-  RenderOptions,
   server,
   waitFor,
   act,
   screen,
-} from '@strapi/admin/strapi-admin/tests';
+  type RenderOptions,
+} from '@strapi/admin/strapi-admin/test';
 
 import { PERMISSIONS } from '../src/constants';
 import { releaseApi } from '../src/services/release';
