@@ -1,6 +1,6 @@
 import os from 'os';
 import _ from 'lodash';
-import sentry, { Severity } from '@sentry/node';
+import * as sentry from '@sentry/node';
 import { Scope, StderrError, isStderrError } from '../types';
 
 type TrackError = Error | string | StderrError;
@@ -24,7 +24,7 @@ export async function captureException(error: Error) {
 
 async function captureError(message: string) {
   try {
-    sentry.captureMessage(message, Severity.Error);
+    sentry.captureMessage(message, sentry.Severity.Error);
     await sentry.flush();
   } catch (err) {
     /** ignore errors */
@@ -41,7 +41,7 @@ export function captureStderr(name: string, error: unknown) {
         sentry.addBreadcrumb({
           category: 'stderr',
           message: line,
-          level: Severity.Error,
+          level: sentry.Severity.Error,
         });
       });
   }
