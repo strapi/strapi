@@ -41,7 +41,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "5.0.0-alpha.2"
+    "@strapi/utils": "5.0.0-beta.0"
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0-beta.0",

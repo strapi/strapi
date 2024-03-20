@@ -7122,7 +7122,7 @@ __metadata:
     typescript: "npm:5.2.2"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0-alpha.1
+    "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7542,7 +7542,7 @@ __metadata:
     styled-components: "npm:5.3.11"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0-alpha.1
+    "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7617,7 +7617,7 @@ __metadata:
     styled-components: "npm:5.3.11"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0-alpha.1
+    "@strapi/admin": ^5.0.0
     koa: 2.13.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
@@ -7823,7 +7823,7 @@ __metadata:
   dependencies:
     "@strapi/pack-up": "npm:5.0.0-beta.0"
     "@strapi/types": "npm:5.0.0-beta.0"
-    "@strapi/utils": "npm:5.0.0-alpha.2"
+    "@strapi/utils": "npm:5.0.0-beta.0"
     eslint-config-custom: "npm:5.0.0-beta.0"
     tsconfig: "npm:5.0.0-beta.0"
   languageName: unknown
@@ -8135,23 +8135,6 @@ __metadata:
     upgrade: ./bin/upgrade.js
   languageName: unknown
   linkType: soft
-
-"@strapi/utils@npm:5.0.0-alpha.2":
-  version: 5.0.0-alpha.2
-  resolution: "@strapi/utils@npm:5.0.0-alpha.2"
-  dependencies:
-    "@sindresorhus/slugify": "npm:1.1.0"
-    date-fns: "npm:2.30.0"
-    execa: "npm:5.1.1"
-    http-errors: "npm:1.8.1"
-    lodash: "npm:4.17.21"
-    node-machine-id: "npm:1.1.12"
-    p-map: "npm:4.0.0"
-    preferred-pm: "npm:3.1.2"
-    yup: "npm:0.32.9"
-  checksum: ba06b16d23dcd7089c2b4eaa48dc4b7a658a94b28edb00e37c5c410d9e9b579baa7539535a1e90b0952e135ec207b14f6a89876873ef9fbfcd579c3b3d413a76
-  languageName: node
-  linkType: hard
 
 "@strapi/utils@npm:5.0.0-beta.0, @strapi/utils@workspace:packages/core/utils":
   version: 0.0.0-use.local
