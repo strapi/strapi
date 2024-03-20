@@ -174,14 +174,15 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
       ]);
 
       const versionsWithMeta = results.map((version) => {
+        const { added, removed } = getSchemaAttributesDiff(
+          version.schema,
+          strapi.getModel(params.contentType).attributes
+        );
+        const hasSchemaDiff = Object.keys(added).length > 0 || Object.keys(removed).length > 0;
+
         return {
           ...version,
-          meta: {
-            unknownAttributes: getSchemaAttributesDiff(
-              version.schema,
-              strapi.getModel(params.contentType).attributes
-            ),
-          },
+          ...(hasSchemaDiff ? { meta: { unknownAttributes: { added, removed } } } : {}),
         };
       });
 
