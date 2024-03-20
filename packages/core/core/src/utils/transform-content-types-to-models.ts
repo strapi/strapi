@@ -16,7 +16,7 @@ const { identifiers } = utils;
  * If we use short versions of anything, we MUST call getNameFromTokens directly; attempting to shorten them ourselves
  * prevents the unshortened name map from being filled properly, so for example it will think that the short name
  * 'collection4f3a_cmps' maps to the unshortened 'collectionname_cmps' rather than 'collectionname_components'
- * Therefore, we only use the identifiers methods in cases where we do not do any of our own shortening
+ * Therefore, we only use the identifiers helpers in cases where we do not do any of our own shortening
  */
 
 export const getComponentJoinTableName = (collectionName: string, options: MetadataOptions) => {
