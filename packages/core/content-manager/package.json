@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-manager",
-  "version": "5.0.0-alpha.3",
+  "version": "5.0.0-alpha.4",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -49,8 +49,8 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/types": "5.0.0-alpha.3",
-    "@strapi/utils": "5.0.0-alpha.3",
+    "@strapi/types": "5.0.0-alpha.4",
+    "@strapi/utils": "5.0.0-alpha.4",
     "koa": "2.13.4",
     "lodash": "4.17.21",
     "node-schedule": "2.1.0",
