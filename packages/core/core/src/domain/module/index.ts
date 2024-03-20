@@ -30,7 +30,7 @@ export interface Module {
   destroy: () => Promise<void>;
   load: () => void;
   routes: Core.Module['routes'];
-  config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider, we should use it directly
+  config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider.get, we should use it directly
   contentType: (ctName: UID.ContentType) => Struct.ContentTypeSchema;
   contentTypes: Record<string, Struct.ContentTypeSchema>;
   service: (serviceName: UID.Service) => Core.Service;
