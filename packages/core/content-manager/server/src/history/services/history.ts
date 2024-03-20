@@ -1,23 +1,13 @@
 import type { LoadedStrapi, Documents } from '@strapi/types';
-import { difference, omit, pick } from 'lodash/fp';
+import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
 
-import { HISTORY_VERSION_UID } from '../constants';
+import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
-import { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
+import { getSchemaAttributesDiff } from './utils';
 
 const DEFAULT_RETENTION_DAYS = 90;
-const FIELDS_TO_IGNORE = [
-  'createdAt',
-  'updatedAt',
-  'publishedAt',
-  'createdBy',
-  'updatedBy',
-  'locale',
-  'strapi_stage',
-  'strapi_assignee',
-];
 
 const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
   const state: {
@@ -68,49 +58,6 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
     const meta = await documentMetadataService.getMetadata(contentTypeUid, document);
 
     return documentMetadataService.getStatus(document, meta.availableStatus);
-  };
-
-  /**
-   * Get the difference between the version schema and the content type schema
-   * Returns the attributes with their original shape
-   */
-  const getAttributesDiff = (
-    versionSchema: CreateHistoryVersion['schema'],
-    versionContentTypeUid: CreateHistoryVersion['contentType']
-  ) => {
-    // Omit the same fields that were omitted when creating a history version
-    const currentContentTypeSchemaAttributes = omit(
-      FIELDS_TO_IGNORE,
-      strapi.getModel(versionContentTypeUid).attributes
-    ) as CreateHistoryVersion['schema'];
-
-    const reduceDifferenceToAttributesObject = (
-      diffKeys: string[],
-      source: CreateHistoryVersion['schema']
-    ) => {
-      return diffKeys.reduce<CreateHistoryVersion['schema']>((previousAttributesObject, diffKey) => {
-        previousAttributesObject[diffKey] = source[diffKey];
-
-        return previousAttributesObject;
-      }, {});
-    };
-
-    const versionSchemaKeys = Object.keys(versionSchema);
-    const currentContentTypeSchemaAttributesKeys = Object.keys(currentContentTypeSchemaAttributes);
-    // The attribute is new if it's on the content type schema but not on the version schema
-    const uniqueToContentType = difference(
-      currentContentTypeSchemaAttributesKeys,
-      versionSchemaKeys
-    );
-    const added = reduceDifferenceToAttributesObject(
-      uniqueToContentType,
-      currentContentTypeSchemaAttributes
-    );
-    // The attribute was removed or renamed if it's on the version schema but not on the content type schema
-    const uniqueToVersion = difference(versionSchemaKeys, currentContentTypeSchemaAttributesKeys);
-    const removed = reduceDifferenceToAttributesObject(uniqueToVersion, versionSchema);
-
-    return { added, removed };
   };
 
   return {
@@ -230,7 +177,10 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         return {
           ...version,
           meta: {
-            unknownAttributes: getAttributesDiff(version.schema, version.contentType),
+            unknownAttributes: getSchemaAttributesDiff(
+              version.schema,
+              strapi.getModel(params.contentType).attributes
+            ),
           },
         };
       });

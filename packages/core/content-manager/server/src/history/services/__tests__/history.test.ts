@@ -25,18 +25,6 @@ const mockGetRequestContext = jest.fn(() => {
 });
 
 const mockStrapi = {
-  getModel() {
-    return {
-      attributes: {
-        newField: {
-          type: 'string',
-        },
-        renamed: {
-          type: 'string',
-        },
-      },
-    };
-  },
   plugins: {
     'content-manager': {
       service: jest.fn(() => ({
@@ -58,20 +46,6 @@ const mockStrapi = {
       if (uid === HISTORY_VERSION_UID) {
         return {
           create: createMock,
-          findPage() {
-            return {
-              results: [
-                {
-                  contentType: 'api::article.article',
-                  schema: {
-                    title: {
-                      type: 'string',
-                    },
-                  },
-                },
-              ],
-            };
-          },
         };
       }
     },
@@ -254,28 +228,6 @@ describe('history-version service', () => {
           ...historyVersionData,
           createdBy: undefined,
           createdAt: fakeDate,
-        },
-      });
-    });
-  });
-
-  describe('findVersionPage', () => {
-    it('should contain a meta object with unknown attributes', async () => {
-      const { results } = await historyService.findVersionsPage({
-        contentType: 'api::article.article',
-        documentId: 'randomid',
-        locale: 'en',
-      });
-
-      expect(results[0].meta).toEqual({
-        unknownAttributes: {
-          added: {
-            newField: { type: 'string' },
-            renamed: { type: 'string' },
-          },
-          removed: {
-            title: { type: 'string' },
-          },
         },
       });
     });
