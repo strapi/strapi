@@ -1,3 +1,4 @@
+import type { PropertyPath } from 'lodash';
 import type { Router, Controller, Service, Policy, Middleware, Strapi } from '.';
 import type { ContentType } from '../schema';
 
@@ -5,7 +6,7 @@ export interface Module {
   bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  config<TDefault = unknown, TResult = unknown>(path: string, defaultValue?: TDefault): TResult;
+  config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider.get, we should use it directly
   routes: Record<string, Router>;
   controllers: Record<string, Controller>;
   services: Record<string, Service>;
