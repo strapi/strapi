@@ -2,6 +2,7 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { PaperPlane } from '@strapi/icons';
 
 import { CMReleasesContainer } from './components/CMReleasesContainer';
+import { ReleaseAction } from './components/ReleaseAction';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { releaseApi } from './services/release';
@@ -41,6 +42,15 @@ const admin: Plugin.Config.AdminInput = {
       app.injectContentManagerComponent('editView', 'right-links', {
         name: `${pluginId}-link`,
         Component: CMReleasesContainer,
+      });
+
+      //TODO: Check PERMISSIONS.createAction and hasDraftAndPublish enabled to show the button
+      app.plugins['content-manager'].apis.addBulkAction((actions) => {
+        // We want to add this action to just before the delete action all the time
+        const deleteActionIndex = actions.findIndex((action) => action.name === 'DeleteAction');
+
+        actions.splice(deleteActionIndex, 0, ReleaseAction);
+        return actions;
       });
     } else if (
       !window.strapi.features.isEnabled('cms-content-releases') &&
