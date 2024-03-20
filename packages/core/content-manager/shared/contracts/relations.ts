@@ -1,13 +1,13 @@
-import { Documents, Entity, EntityService } from '@strapi/types';
+import { Modules, Data } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
-type PaginationQuery = EntityService.Params.Pagination.PageNotation;
+type PaginationQuery = Modules.EntityService.Params.Pagination.PageNotation;
 
 export interface RelationResult {
-  documentId: Documents.ID;
+  documentId: Modules.Documents.ID;
   id: number;
-  status?: Documents.Params.PublicationStatus.Kind;
-  locale?: Documents.Params.Locale;
+  status?: Modules.Documents.Params.PublicationStatus.Kind;
+  locale?: Modules.Documents.Params.Locale;
   [key: string]: any;
 }
 
@@ -42,12 +42,12 @@ export declare namespace FindAvailable {
   export interface Request {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
-      id?: Entity.ID;
-      locale?: Documents.Params.Locale;
+      id?: Data.ID;
+      locale?: Modules.Documents.Params.Locale;
       _filter?: string;
       _q?: string;
-      idsToOmit?: Documents.ID[];
-      idsToInclude?: Documents.ID[];
+      idsToOmit?: Modules.Documents.ID[];
+      idsToInclude?: Modules.Documents.ID[];
     };
   }
 
@@ -61,7 +61,7 @@ export declare namespace FindExisting {
   export interface Params {
     model: string;
     targetField: string;
-    id?: Entity.ID;
+    id?: Data.ID;
   }
 
   export interface Request {
@@ -70,9 +70,9 @@ export declare namespace FindExisting {
       locale?: string | null;
       _filter?: string;
       _q?: string;
-      status?: Documents.Params.PublicationStatus.Kind;
-      idsToOmit?: Documents.ID[];
-      idsToInclude?: Documents.ID[];
+      status?: Modules.Documents.Params.PublicationStatus.Kind;
+      idsToOmit?: Modules.Documents.ID[];
+      idsToInclude?: Modules.Documents.ID[];
     };
   }
 

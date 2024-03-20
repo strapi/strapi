@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import { LoadedStrapi } from '@strapi/types';
+import { Core } from '@strapi/types';
 import type { Release, CreateRelease, UpdateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
@@ -11,7 +11,7 @@ export class AlreadyOnReleaseError extends errors.ApplicationError<'AlreadyOnRel
   }
 }
 
-const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) => ({
+const createReleaseValidationService = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   async validateUniqueEntry(
     releaseId: CreateReleaseAction.Request['params']['releaseId'],
     releaseActionArgs: CreateReleaseAction.Request['body']

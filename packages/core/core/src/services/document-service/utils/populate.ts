@@ -1,4 +1,4 @@
-import { Common } from '@strapi/types';
+import { UID } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
 interface Options {
@@ -9,7 +9,7 @@ interface Options {
 }
 
 // We want to build a populate object based on the schema
-export const getDeepPopulate = (uid: Common.UID.Schema, opts: Options = {}) => {
+export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
   const model = strapi.getModel(uid);
   const attributes = Object.entries(model.attributes);
 
@@ -39,7 +39,7 @@ export const getDeepPopulate = (uid: Common.UID.Schema, opts: Options = {}) => {
       case 'dynamiczone': {
         // Use fragments to populate the dynamic zone components
         const populatedComponents = (attribute.components || []).reduce(
-          (acc: any, componentUID: Common.UID.Component) => {
+          (acc: any, componentUID: UID.Component) => {
             acc[componentUID] = { populate: getDeepPopulate(componentUID, opts) };
             return acc;
           },

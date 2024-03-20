@@ -1,4 +1,4 @@
-import { Common, Schema } from '@strapi/types';
+import { UID, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import type { Document } from '../document-manager';
 
@@ -52,7 +52,7 @@ function getCountFor(
   }
 }
 
-const getDeepRelationsCount = (entity: any, uid: Common.UID.Schema): Document => {
+const getDeepRelationsCount = (entity: any, uid: UID.Schema): Document => {
   const model = strapi.getModel(uid);
 
   return Object.keys(entity).reduce<Document>(

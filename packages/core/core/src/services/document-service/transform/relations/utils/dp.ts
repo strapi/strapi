@@ -1,7 +1,7 @@
 import { isNil } from 'lodash/fp';
 
 import { contentTypes } from '@strapi/utils';
-import { Common } from '@strapi/types';
+import { UID } from '@strapi/types';
 
 import { LongHandDocument } from './types';
 
@@ -10,8 +10,8 @@ type Status = 'draft' | 'published';
 export const getRelationTargetStatus = (
   relation: Pick<LongHandDocument, 'documentId' | 'status'>,
   opts: {
-    targetUid: Common.UID.Schema;
-    sourceUid: Common.UID.Schema;
+    targetUid: UID.Schema;
+    sourceUid: UID.Schema;
     sourceStatus?: Status;
   }
 ): Status[] => {

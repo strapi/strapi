@@ -16,7 +16,7 @@ import { getTrad } from '../utils';
 import { AttributeIcon, IconByType } from './AttributeIcon';
 
 import type { SchemaType } from '../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 interface Header {
   label: string;
@@ -32,7 +32,7 @@ interface FormModalHeaderProps {
   dynamicZoneTarget: string;
   forTarget: SchemaType;
   modalType: string | null;
-  targetUid: UID.Any;
+  targetUid: Internal.UID.Schema;
   customFieldUid?: string | null;
   showBackLink?: boolean;
 }

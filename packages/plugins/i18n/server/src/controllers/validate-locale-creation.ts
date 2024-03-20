@@ -1,12 +1,12 @@
 import { get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Common, Schema } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import { getService } from '../utils';
 
 const { ApplicationError } = errors;
 
 // TODO: v5 if implemented in the CM => delete this middleware
-const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
+const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
   const { model } = ctx.params;
   const { query } = ctx.request;
   const body = ctx.request.body as any;
@@ -19,7 +19,7 @@ const validateLocaleCreation: Common.MiddlewareHandler = async (ctx, next) => {
     // fillNonLocalizedAttributes,
   } = getService('content-types');
 
-  const modelDef = strapi.getModel(model) as Schema.ContentType;
+  const modelDef = strapi.getModel(model) as Struct.ContentTypeSchema;
 
   if (!isLocalizedContentType(modelDef)) {
     return next();

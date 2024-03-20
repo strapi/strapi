@@ -24,7 +24,6 @@ import {
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { EmptyDocuments, Plus } from '@strapi/icons';
-import { Common } from '@strapi/types';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -39,6 +38,8 @@ import { getTimezoneOffset } from '../utils/time';
 
 import { ReleaseActionMenu } from './ReleaseActionMenu';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
+
+import type { UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * AddActionToReleaseModal
@@ -271,7 +272,7 @@ export const CMReleasesContainer = () => {
 
   const hasDraftAndPublish = schema?.options?.draftAndPublish;
 
-  const contentTypeUid = slug as Common.UID.ContentType;
+  const contentTypeUid = slug as UID.ContentType;
   const canFetch = id != null && contentTypeUid != null;
   const fetchParams = canFetch
     ? {

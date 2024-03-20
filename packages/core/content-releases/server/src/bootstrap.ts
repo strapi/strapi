@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { Common, LoadedStrapi, Entity as StrapiEntity } from '@strapi/types';
+import type { Core, Data, UID } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { getEntryValidStatus, getService } from './utils';
 
-export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
+export const bootstrap = async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
     const contentTypesWithDraftAndPublish = Object.keys(strapi.contentTypes).filter(
       (uid: any) => strapi.contentTypes[uid]?.options?.draftAndPublish
@@ -77,9 +77,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
                 actions: {
                   target_type: model.uid,
                   target_id: {
-                    $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map(
-                      (entry) => entry.id
-                    ),
+                    $in: (entriesToDelete as Array<{ id: Data.ID }>).map((entry) => entry.id),
                   },
                 },
               },
@@ -89,7 +87,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
               where: {
                 target_type: model.uid,
                 target_id: {
-                  $in: (entriesToDelete as Array<{ id: StrapiEntity.ID }>).map((entry) => entry.id),
+                  $in: (entriesToDelete as Array<{ id: Data.ID }>).map((entry) => entry.id),
                 },
               },
             });
@@ -113,13 +111,9 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
           const { model, result } = event;
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-            const isEntryValid = await getEntryValidStatus(
-              model.uid as Common.UID.ContentType,
-              result,
-              {
-                strapi,
-              }
-            );
+            const isEntryValid = await getEntryValidStatus(model.uid as UID.ContentType, result, {
+              strapi,
+            });
 
             await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
               where: {

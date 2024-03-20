@@ -58,7 +58,7 @@ import { serverRestartWatcher } from './utils/serverRestartWatcher';
 import { validateSchema } from './utils/validateSchema';
 
 import type { ContentType, SchemaType, Components } from '../../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 interface DataManagerProviderProps {
   children: ReactNode;
@@ -67,7 +67,7 @@ interface DataManagerProviderProps {
 interface CustomFieldAttributeParams {
   attributeToSet: Record<string, any>;
   forTarget: SchemaType;
-  targetUid: UID.Any;
+  targetUid: Internal.UID.Schema;
   initialAttribute: Record<string, any>;
 }
 
@@ -182,7 +182,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const addAttribute = (
     attributeToSet: Record<string, any>,
     forTarget: SchemaType,
-    targetUid: UID.Any,
+    targetUid: Internal.UID.Schema,
     isEditing = false,
     initialAttribute?: Record<string, any>,
     shouldAddComponentToData = false
@@ -243,7 +243,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const createSchema = (
     data: Record<string, any>,
     schemaType: SchemaType,
-    uid: UID.Any,
+    uid: Internal.UID.Schema,
     componentCategory?: string,
     shouldAddComponentToData = false
   ) => {
@@ -500,7 +500,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         components: getComponentsToPost(
           modifiedData.components as Components,
           components as Components,
-          currentUid as UID.Any
+          currentUid as Internal.UID.Schema
         ),
       };
 
@@ -608,7 +608,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const updateSchema = (
     data: Record<string, any>,
     schemaType: SchemaType,
-    componentUID: UID.Any
+    componentUID: Internal.UID.Schema
   ) => {
     dispatch({
       type: UPDATE_SCHEMA,

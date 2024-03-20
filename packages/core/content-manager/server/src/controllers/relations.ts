@@ -7,7 +7,7 @@ import {
   convertQueryParams,
   errors,
 } from '@strapi/utils';
-import type { Entity, Documents, Common } from '@strapi/types';
+import type { Data, Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
 import { validateFindAvailable, validateFindExisting } from './validation/relations';
@@ -16,8 +16,8 @@ import { isListable } from '../services/utils/configuration/attributes';
 const { PUBLISHED_AT_ATTRIBUTE, UPDATED_AT_ATTRIBUTE } = contentTypes.constants;
 
 interface RelationEntity {
-  id: Entity.ID;
-  documentId: Documents.ID;
+  id: Data.ID;
+  documentId: Modules.Documents.ID;
   updatedAt: string | Date;
   publishedAt?: string | Date;
   [key: string]: unknown;
@@ -58,7 +58,7 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
   return mainField;
 };
 
-const addStatusToRelations = async (uid: Common.UID.ContentType, relations: RelationEntity[]) => {
+const addStatusToRelations = async (uid: UID.ContentType, relations: RelationEntity[]) => {
   if (!contentTypes.hasDraftAndPublish(strapi.contentTypes[uid])) {
     return relations;
   }
@@ -78,7 +78,7 @@ const addStatusToRelations = async (uid: Common.UID.ContentType, relations: Rela
   });
 };
 
-const getPublishedAtClause = (status: string, uid: Common.UID.Schema) => {
+const getPublishedAtClause = (status: string, uid: UID.Schema) => {
   const model = strapi.getModel(uid);
 
   /**
@@ -92,11 +92,7 @@ const getPublishedAtClause = (status: string, uid: Common.UID.Schema) => {
   return status === 'published' ? { $notNull: true } : { $null: true };
 };
 
-const validateLocale = (
-  sourceUid: Common.UID.Schema,
-  targetUid: Common.UID.ContentType,
-  locale?: string
-) => {
+const validateLocale = (sourceUid: UID.Schema, targetUid: UID.ContentType, locale?: string) => {
   const sourceModel = strapi.getModel(sourceUid);
   const targetModel = strapi.getModel(targetUid);
 
@@ -116,8 +112,8 @@ const validateLocale = (
 };
 
 const validateStatus = (
-  sourceUid: Common.UID.Schema,
-  status?: Documents.Params.PublicationStatus.Kind
+  sourceUid: UID.Schema,
+  status?: Modules.Documents.Params.PublicationStatus.Kind
 ) => {
   const sourceModel = strapi.getModel(sourceUid);
 
@@ -137,7 +133,7 @@ const validateStatus = (
 };
 
 export default {
-  async extractAndValidateRequestInfo(ctx: any, id?: Entity.ID) {
+  async extractAndValidateRequestInfo(ctx: any, id?: Data.ID) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
 

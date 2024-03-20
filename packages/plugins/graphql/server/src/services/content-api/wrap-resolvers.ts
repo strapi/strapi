@@ -6,7 +6,7 @@ import {
   GraphQLFieldResolver,
 } from 'graphql';
 import { errors } from '@strapi/utils';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { createPoliciesMiddleware } from './policy';
 
@@ -35,12 +35,12 @@ type GraphQLMiddleware = (
  * @param {object} strapi
  * @return {function[]}
  */
-const parseMiddlewares = (resolverConfig: any, strapi: Strapi): GraphQLMiddleware[] => {
+const parseMiddlewares = (resolverConfig: any, strapi: Core.Strapi): GraphQLMiddleware[] => {
   const resolverMiddlewares = getOr([], 'middlewares', resolverConfig);
 
   // TODO: [v4] to factorize with compose endpoints (routes)
   return resolverMiddlewares.map(
-    (middleware: string | Common.MiddlewareHandler | { name: string; options: any }) => {
+    (middleware: string | Core.MiddlewareHandler | { name: string; options: any }) => {
       if (isFunction(middleware)) {
         return middleware;
       }
@@ -77,7 +77,7 @@ const wrapResolvers = ({
   extension = {},
 }: {
   schema: GraphQLSchema;
-  strapi: Strapi;
+  strapi: Core.Strapi;
   extension: any;
 }) => {
   // Get all the registered resolvers configuration

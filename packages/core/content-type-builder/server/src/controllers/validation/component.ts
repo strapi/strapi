@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import type { Attribute } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import { modelTypes, DEFAULT_TYPES } from '../../services/constants';
 import { isValidCategoryName, isValidIcon } from './common';
 import { createSchema } from './model-schema';
@@ -57,8 +57,8 @@ const updateComponentInputSchema = yup
   .noUnknown();
 
 export const validateUpdateComponentInput = (data: {
-  component?: Attribute.Component;
-  components?: Attribute.Component[];
+  component?: Struct.ComponentSchema;
+  components?: Struct.ComponentSchema[];
 }) => {
   if (_.has(data, 'component') && data.component) {
     removeEmptyDefaults(data.component);

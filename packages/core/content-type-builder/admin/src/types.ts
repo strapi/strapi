@@ -1,4 +1,4 @@
-import type { UID, Attribute } from '@strapi/types';
+import type { Internal, Schema } from '@strapi/types';
 
 export type IntlLabel = {
   id: string;
@@ -10,7 +10,7 @@ export type SchemaType = 'contentType' | 'component' | 'components';
 
 export type DifferentAttributesKind = 'Populatable' | 'NonPopulatable' | 'Any';
 
-export type AttributeType = Attribute.Any & {
+export type AttributeType = Schema.Attribute.AnyAttribute & {
   name?: string;
   target?: string;
   targetAttribute?: string | null;
@@ -21,7 +21,7 @@ export type AttributeType = Attribute.Any & {
 };
 
 export interface Component {
-  uid: UID.Component;
+  uid: Internal.UID.Component;
   category?: string;
   schema: any;
   isTemporary?: boolean;
@@ -30,10 +30,10 @@ export interface Component {
 }
 
 export interface ContentType {
-  uid?: string;
+  uid?: Internal.UID.ContentType;
   isTemporary?: boolean;
   visible?: boolean;
-  name?: UID.Any;
+  name?: string;
   title?: string;
   plugin?: string;
   to?: string;

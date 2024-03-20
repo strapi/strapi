@@ -1,4 +1,4 @@
-import type { Utils } from '../../../types';
+import type { XOR } from '../../../utils';
 
 export type PageNotation = {
   page?: number;
@@ -10,4 +10,4 @@ export type OffsetNotation = {
   limit?: number;
 };
 
-export type Any = Utils.XOR<PageNotation, OffsetNotation>;
+export type Any = XOR<PageNotation, OffsetNotation>;

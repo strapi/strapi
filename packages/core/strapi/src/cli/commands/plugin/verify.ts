@@ -5,7 +5,7 @@ import { CheckOptions, check } from '@strapi/pack-up';
 import { runAction } from '../../utils/helpers';
 import type { StrapiCommand, CLIContext } from '../../types';
 
-interface ActionOptions extends CheckOptions {}
+type ActionOptions = CheckOptions;
 
 const action = async (opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIContext) => {
   try {

@@ -6,7 +6,7 @@ import { createContext } from '../../components/Context';
 import { useAuth, type Permission } from '../../features/Auth';
 import { useRBAC } from '../../hooks/useRBAC';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 /**
  * The boolean values indicate the global actions a user can perform on the document.
@@ -26,7 +26,7 @@ interface DocumentRBACContextValue {
   canUserAction: (
     fieldName: string,
     fieldsUserCanAction: string[],
-    fieldType: Attribute.Kind
+    fieldType: Schema.Attribute.Kind
   ) => boolean;
   isLoading: boolean;
 }

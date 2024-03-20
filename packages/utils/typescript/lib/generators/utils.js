@@ -9,6 +9,9 @@ const chalk = require('chalk');
 
 const { factory } = ts;
 
+const MODULE_DECLARATION = '@strapi/strapi';
+const PUBLIC_NAMESPACE = 'Public';
+
 /**
  * Aggregate the given TypeScript nodes into a single string
  *
@@ -92,11 +95,11 @@ const generateSharedExtensionDefinition = (registry, definitions) => {
 
   return factory.createModuleDeclaration(
     [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
-    factory.createStringLiteral('@strapi/types', true),
+    factory.createStringLiteral(MODULE_DECLARATION, true),
     factory.createModuleBlock([
       factory.createModuleDeclaration(
         [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
-        factory.createIdentifier('Shared'),
+        factory.createIdentifier(PUBLIC_NAMESPACE),
         factory.createModuleBlock(
           properties.length > 0
             ? [

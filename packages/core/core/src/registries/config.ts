@@ -1,10 +1,12 @@
-import type { ConfigProvider, LoadedStrapi, Strapi } from '@strapi/types';
-import { get, set, has, isString, type PropertyPath, isNumber } from 'lodash';
-import { isArray } from 'lodash/fp';
+import type { Core } from '@strapi/types';
+import { get, set, has, isString, isNumber, isArray, type PropertyPath } from 'lodash';
 
 type Config = Record<string, unknown>;
 
-export default (initialConfig = {}, strapi?: Strapi | LoadedStrapi): ConfigProvider => {
+export default (
+  initialConfig = {},
+  strapi?: Core.Strapi | Core.LoadedStrapi
+): Core.ConfigProvider => {
   const _config: Config = { ...initialConfig }; // not deep clone because it would break some config
 
   // Accessing model configs with dot (.) was deprecated between v4->v5, but to avoid a major breaking change

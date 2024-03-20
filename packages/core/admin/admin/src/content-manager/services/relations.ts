@@ -3,7 +3,7 @@ import { generateNKeysBetween } from 'fractional-indexing';
 
 import { contentManagerApi } from './api';
 
-import type { EntityService } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 import type { errors } from '@strapi/utils';
 
 interface RelationResult extends Contracts.Relations.RelationResult {
@@ -14,8 +14,8 @@ type GetRelationsResponse =
   | {
       results: Array<RelationResult>;
       pagination: {
-        page: NonNullable<EntityService.Params.Pagination.PageNotation['page']>;
-        pageSize: NonNullable<EntityService.Params.Pagination.PageNotation['pageSize']>;
+        page: NonNullable<Modules.EntityService.Params.Pagination.PageNotation['page']>;
+        pageSize: NonNullable<Modules.EntityService.Params.Pagination.PageNotation['pageSize']>;
         pageCount: number;
         total: number;
       } | null;

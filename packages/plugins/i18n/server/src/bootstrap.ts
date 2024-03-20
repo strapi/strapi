@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { getService } from './utils';
 
@@ -16,7 +16,7 @@ const registerModelsHooks = () => {
   });
 };
 
-export default async ({ strapi }: { strapi: Strapi }) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const { sendDidInitializeEvent } = getService('metrics');
   const { decorator } = getService('entity-service-decorator');
   const { initDefaultLocale } = getService('locales');

@@ -1,12 +1,12 @@
-import { Attribute, Common, Documents, Schema } from '@strapi/types';
+import type { Schema, Modules, UID, Struct } from '@strapi/types';
 import type { Release, Pagination } from './releases';
 import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
 
-export type ReleaseActionEntry = Documents.AnyDocument & {
+export type ReleaseActionEntry = Modules.Documents.AnyDocument & {
   // Entity attributes
-  [key: string]: Attribute.Any;
+  [key: string]: Schema.Attribute.AnyAttribute;
 } & {
   locale?: string;
 };
@@ -14,7 +14,7 @@ export type ReleaseActionEntry = Documents.AnyDocument & {
 export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
-  contentType: Common.UID.ContentType;
+  contentType: UID.ContentType;
   locale?: string;
   release: Release;
   isEntryValid: boolean;
@@ -24,7 +24,7 @@ export interface FormattedReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
   contentType: {
-    uid: Common.UID.ContentType;
+    uid: UID.ContentType;
     mainFieldValue?: string;
     displayName: string;
   };
@@ -48,7 +48,7 @@ export declare namespace CreateReleaseAction {
       entry: {
         id: ReleaseActionEntry['id'];
         locale?: ReleaseActionEntry['locale'];
-        contentType: Common.UID.ContentType;
+        contentType: UID.ContentType;
       };
     };
   }
@@ -72,7 +72,7 @@ export declare namespace CreateManyReleaseActions {
       entry: {
         id: ReleaseActionEntry['id'];
         locale?: ReleaseActionEntry['locale'];
-        contentType: Common.UID.ContentType;
+        contentType: UID.ContentType;
       };
     }>;
   }
@@ -108,8 +108,8 @@ export declare namespace GetReleaseActions {
     };
     meta: {
       pagination: Pagination;
-      contentTypes: Record<Schema.ContentType['uid'], Schema.ContentType>;
-      components: Record<Schema.Component['uid'], Schema.Component>;
+      contentTypes: Record<Struct.ContentTypeSchema['uid'], Struct.ContentTypeSchema>;
+      components: Record<Struct.ComponentSchema['uid'], Struct.ComponentSchema>;
     };
   }
 }

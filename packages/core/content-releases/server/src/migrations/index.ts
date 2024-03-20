@@ -1,4 +1,4 @@
-import type { Schema, Common } from '@strapi/types';
+import type { Schema, UID } from '@strapi/types';
 import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
 import isEqual from 'lodash/isEqual';
 
@@ -131,7 +131,7 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
     const releasesAffected = new Set();
 
     async
-      .map(contentTypesWithDraftAndPublish, async (contentTypeUID: Common.UID.ContentType) => {
+      .map(contentTypesWithDraftAndPublish, async (contentTypeUID: UID.ContentType) => {
         const oldContentType = oldContentTypes[contentTypeUID];
         const contentType = contentTypes[contentTypeUID];
 
