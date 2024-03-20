@@ -35,7 +35,7 @@ export const createSchemaProvider = (db: Database, options: MetadataOptions): Sc
   return {
     get schema() {
       if (!state.schema) {
-        debug('Creating schema from metadata');
+        debug('Converting metadata to database schema');
         state.schema = metadataToSchema(db.metadata, options);
       }
 

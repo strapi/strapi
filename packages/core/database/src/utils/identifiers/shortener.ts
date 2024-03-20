@@ -26,12 +26,20 @@ export const HASH_SEPARATOR = ''; // no separator is needed, we will just attach
 export const IDENTIFIER_SEPARATOR = '_';
 export const MIN_TOKEN_LENGTH = 3;
 
-export type NameToken = {
-  allocatedLength?: number;
+export type CompressibleNameToken = {
+  compressible: true;
   name: string;
-  compressible: boolean;
-  shortName?: string; // if compressible is false but name generator options maxLength > 0, use this instead of name
+  allocatedLength?: number;
 };
+
+export type IncompressibleNameToken = {
+  compressible: false;
+  name: string;
+  allocatedLength?: number;
+  shortName?: string;
+};
+
+export type NameToken = CompressibleNameToken | IncompressibleNameToken;
 
 type NameTokenWithAllocation = NameToken & { allocatedLength: number };
 
@@ -185,7 +193,9 @@ export const getNameFromTokens = (
   );
 
   const totalIncompressibleLength = sumBy((token: NameToken) =>
-    token.shortName !== undefined ? token.shortName.length : token.name.length
+    token.compressible === false && token.shortName !== undefined
+      ? token.shortName.length
+      : token.name.length
   )(incompressible);
   const totalSeparatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
   const available = maxLength - totalIncompressibleLength - totalSeparatorsLength;
@@ -214,6 +224,7 @@ export const getNameFromTokens = (
     return total + tokenName.length;
   }, nameTokens.length * IDENTIFIER_SEPARATOR.length - 1);
 
+  // TODO: this is the weakest thing of the shortener, but fortunately it can be improved later without a breaking change if it turns out to be a problem (for example, if there is some case we need 6+ name parts in one identifier). We could take this "shortest string we could generate" that is too long and apply the hash directly to that, which would work fine even though it would be very difficult to determine what it was actually referring to
   // Check if the maximum length is less than the total length
   if (maxLength < totalLength) {
     throw new Error('Maximum length is too small to accommodate all tokens');
@@ -265,7 +276,7 @@ export const getNameFromTokens = (
       }
 
       // if is is only compressible as a fixed value, use that
-      if (token.shortName) {
+      if (token.compressible === false && token.shortName) {
         return token.shortName;
       }
 
