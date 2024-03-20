@@ -164,10 +164,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
             this.createVersion({
               contentType: contentTypeUid,
               data: omit(FIELDS_TO_IGNORE, document),
-              schema: omit(
-                FIELDS_TO_IGNORE,
-                strapi.contentType(contentTypeUid).attributes
-              ),
+              schema: omit(FIELDS_TO_IGNORE, strapi.contentType(contentTypeUid).attributes),
               relatedDocumentId: documentContext.documentId,
               locale,
               status,
