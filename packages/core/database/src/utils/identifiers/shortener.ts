@@ -26,12 +26,20 @@ export const HASH_SEPARATOR = ''; // no separator is needed, we will just attach
 export const IDENTIFIER_SEPARATOR = '_';
 export const MIN_TOKEN_LENGTH = 3;
 
-export type NameToken = {
-  allocatedLength?: number;
+export type CompressibleNameToken = {
+  compressible: true;
   name: string;
-  compressible: boolean;
-  shortName?: string; // if compressible is false but name generator options maxLength > 0, use this instead of name
+  allocatedLength?: number;
 };
+
+export type IncompressibleNameToken = {
+  compressible: false;
+  name: string;
+  allocatedLength?: number;
+  shortName?: string;
+};
+
+export type NameToken = CompressibleNameToken | IncompressibleNameToken;
 
 type NameTokenWithAllocation = NameToken & { allocatedLength: number };
 
@@ -182,7 +190,9 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
   );
 
   const totalIncompressibleLength = sumBy((token: NameToken) =>
-    token.shortName !== undefined ? token.shortName.length : token.name.length
+    token.compressible === false && token.shortName !== undefined
+      ? token.shortName.length
+      : token.name.length
   )(incompressible);
   const totalSeparatorsLength = nameTokens.length * IDENTIFIER_SEPARATOR.length - 1;
   const available = maxLength - totalIncompressibleLength - totalSeparatorsLength;
@@ -263,7 +273,7 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
       }
 
       // if is is only compressible as a fixed value, use that
-      if (token.shortName) {
+      if (token.compressible === false && token.shortName) {
         return token.shortName;
       }
 
