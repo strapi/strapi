@@ -314,7 +314,7 @@ export const transformContentTypesToModels = (
     const model: Model = {
       uid: contentType.uid,
       singularName: contentType.modelName,
-      tableName: contentType.collectionName, // This shortening will be handled in metadata
+      tableName: contentType.collectionName, // This gets shortened in metadata.loadModels(), so we don't shorten here or it will happen twice
       attributes: {
         [id]: {
           type: 'increments',
