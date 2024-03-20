@@ -88,11 +88,6 @@ export default {
       Component: LocalePicker,
     });
 
-    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
-      name: 'i18n-delete-bullets-in-modal',
-      Component: DeleteModalAdditionalInfo,
-    });
-
     app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
       name: 'i18n-publish-bullets-in-modal',
       Component: PublishModalAdditionalInfo,
@@ -101,6 +96,11 @@ export default {
     app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
       name: 'i18n-unpublish-bullets-in-modal',
       Component: UnpublishModalAdditionalInfo,
+    });
+
+    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
+      name: 'i18n-delete-bullets-in-modal',
+      Component: DeleteModalAdditionalInfo,
     });
 
     const ctbPlugin = app.getPlugin('content-type-builder');

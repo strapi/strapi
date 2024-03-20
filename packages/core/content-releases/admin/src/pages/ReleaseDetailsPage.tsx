@@ -265,7 +265,12 @@ export const ReleaseDetailsLayout = ({
   };
 
   const handleRefresh = () => {
-    dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
+    dispatch(
+      releaseApi.util.invalidateTags([
+        { type: 'ReleaseAction', id: 'LIST' },
+        { type: 'Release', id: releaseId },
+      ])
+    );
   };
 
   const getCreatedByUser = () => {
@@ -315,7 +320,6 @@ export const ReleaseDetailsLayout = ({
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
-  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   const isScheduled = release.scheduledAt && release.timezone;
   const numberOfEntriesText = formatMessage(
     {
@@ -354,8 +358,7 @@ export const ReleaseDetailsLayout = ({
         subtitle={
           <Flex gap={2} lineHeight={6}>
             <Typography textColor="neutral600" variant="epsilon">
-              {numberOfEntriesText +
-                (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')}
+              {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
             </Typography>
             <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
           </Flex>
