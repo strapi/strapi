@@ -158,8 +158,7 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
 
   const shortArr = Array.from(shortMap.entries());
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  shortArr.forEach(([key, shortObj], index) => {
+  shortArr.forEach(([, shortObj], index) => {
     const fullTableName = getUnshortenedName(shortObj.tableName, options);
     if (!fullTableName) {
       throw new Error(`Missing full table name for ${shortObj.tableName}`);
