@@ -6,7 +6,6 @@ import {
   GridItem,
   HeaderLayout,
   Layout,
-  Main,
   MultiSelect,
   MultiSelectOption,
   Option,
@@ -14,7 +13,6 @@ import {
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -23,8 +21,10 @@ import * as yup from 'yup';
 
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
+import { useNotification } from '../../../../../../admin/src/features/Notifications';
 import { useAdminRoles } from '../../../../../../admin/src/hooks/useAdminRoles';
 import { useAPIErrorHandler } from '../../../../../../admin/src/hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../../../admin/src/hooks/useRBAC';
 import {
   useGetProviderOptionsQuery,
   useUpdateProviderOptionsMutation,
@@ -49,11 +49,9 @@ const schema = yup.object().shape({
 });
 
 export const SingleSignOnPage = () => {
-  useFocusWhenNavigate();
-
   const { formatMessage } = useIntl();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -88,7 +86,7 @@ export const SingleSignOnPage = () => {
           formik.setErrors(formatValidationErrors(res.error));
         } else {
           toggleNotification({
-            type: 'warning',
+            type: 'danger',
             message: formatAPIError(res.error),
           });
         }
@@ -98,15 +96,15 @@ export const SingleSignOnPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.success.saved' },
+        message: formatMessage({ id: 'notification.success.saved' }),
       });
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred, please try again.',
-        },
+        }),
       });
     }
   };
@@ -123,7 +121,7 @@ export const SingleSignOnPage = () => {
           }
         )}
       />
-      <Main aria-busy={isSubmittingForm || isLoadingData} tabIndex={-1}>
+      <Page.Main aria-busy={isSubmittingForm || isLoadingData} tabIndex={-1}>
         <Formik
           onSubmit={handleSubmit}
           initialValues={
@@ -295,7 +293,7 @@ export const SingleSignOnPage = () => {
             </Form>
           )}
         </Formik>
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

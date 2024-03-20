@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import { Button, Flex, HeaderLayout } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import { Check, Refresh } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { BackButton } from '../../../../features/BackButton';
+import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useRegenerateTokenMutation } from '../../../../services/api';
 
@@ -22,7 +22,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
   const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
 
   const [isLoadingConfirmation, setIsLoadingConfirmation] = React.useState(false);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const [regenerateToken] = useRegenerateTokenMutation();
@@ -33,7 +33,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -45,11 +45,11 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
       }
     } catch (error) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'Something went wrong',
-        },
+        }),
       });
     } finally {
       setIsLoadingConfirmation(false);

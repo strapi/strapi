@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 import { rest } from 'msw';
-import { setupServer } from 'msw/node';
+import { type SetupServer, setupServer } from 'msw/node';
 import * as qs from 'qs';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../src/content-manager/constants/collections';
@@ -8,7 +8,7 @@ import { historyHandlers } from '../src/content-manager/history/tests/server';
 
 import { MockData, mockData } from './mockData';
 
-export const server = setupServer(
+export const server: SetupServer = setupServer(
   ...[
     /**
      * TRACKING
@@ -1221,6 +1221,27 @@ export const server = setupServer(
           },
         })
       );
+    }),
+    /**
+     *
+     * fetchClient, useFetchClient and getFetchClient
+     *
+     */
+    rest.get('/use-fetch-client-test', (req, res, ctx) => {
+      return res(
+        ctx.json({
+          data: {
+            results: [
+              { id: 2, name: 'newest', publishedAt: null },
+              { id: 1, name: 'oldest', publishedAt: null },
+            ],
+            pagination: { page: 1, pageCount: 10 },
+          },
+        })
+      );
+    }),
+    rest.get('/test-fetch-client', (req, res, ctx) => {
+      return res(ctx.status(200));
     }),
     /**
      * Content History

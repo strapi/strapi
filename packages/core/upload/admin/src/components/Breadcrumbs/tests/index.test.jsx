@@ -11,11 +11,6 @@ import { Breadcrumbs } from '../index';
 
 jest.mock('../../../hooks/useFolderStructure');
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useQueryParams: jest.fn().mockReturnValue([{ query: { folder: 22 } }]),
-}));
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

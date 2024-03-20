@@ -8,14 +8,26 @@ import {
   Icon,
   Loader,
   Main,
+  MainProps,
 } from '@strapi/design-system';
-import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
-import { Permission } from '../../../shared/contracts/shared';
+import { useAuth, Permission } from '../features/Auth';
+import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useCheckPermissionsQuery } from '../services/auth';
+
+/* -------------------------------------------------------------------------------------------------
+ * Main
+ * -----------------------------------------------------------------------------------------------*/
+interface PageMainProps extends MainProps {
+  children: React.ReactNode;
+}
+
+const PageMain = ({ children, ...restProps }: PageMainProps) => {
+  return <Main {...restProps}>{children}</Main>;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Loading
@@ -34,11 +46,11 @@ interface LoadingProps {
  */
 const Loading = ({ children = 'Loading content.' }: LoadingProps) => {
   return (
-    <Main height="100vh" aria-busy={true}>
+    <PageMain height="100vh" aria-busy={true}>
       <Flex alignItems="center" height="100%" justifyContent="center">
         <Loader>{children}</Loader>
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -56,7 +68,7 @@ const Error = (props: ErrorProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <PageMain height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
         <EmptyStateLayout
           icon={<Icon as={ExclamationMarkCircle} width="10rem" />}
@@ -67,7 +79,7 @@ const Error = (props: ErrorProps) => {
           {...props}
         />
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -87,7 +99,7 @@ const NoPermissions = (props: NoPermissionsProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <PageMain height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
@@ -100,7 +112,7 @@ const NoPermissions = (props: NoPermissionsProps) => {
           />
         </Box>
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -120,7 +132,7 @@ const NoData = (props: NoDataProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <PageMain height="100%">
       <Flex alignItems="center" height="100%" width="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
@@ -133,7 +145,7 @@ const NoData = (props: NoDataProps) => {
           />
         </Box>
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -161,11 +173,11 @@ export interface ProtectProps {
  * the loading component and should the check fail it will render the error component with a notification.
  */
 const Protect = ({ permissions = [], children }: ProtectProps) => {
-  const { allPermissions } = useRBACProvider();
-  const toggleNotification = useNotification();
+  const userPermissions = useAuth('Protect', (state) => state.permissions);
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const matchingPermissions = allPermissions.filter(
+  const matchingPermissions = userPermissions.filter(
     (permission) =>
       permissions.findIndex(
         (perm) => perm.action === permission.action && perm.subject === permission.subject
@@ -191,7 +203,7 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -216,7 +228,6 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
     return <NoPermissions />;
   }
 
-  // @ts-expect-error this error comes from the fact we have permissions defined in the helper-plugin & admin, this will be resolved soon.
   return typeof children === 'function' ? children({ permissions: matchingPermissions }) : children;
 };
 
@@ -226,7 +237,8 @@ const Page = {
   NoPermissions,
   Protect,
   NoData,
+  Main: PageMain,
 };
 
 export { Page };
-export type { ErrorProps, LoadingProps, NoPermissionsProps };
+export type { ErrorProps, LoadingProps, NoPermissionsProps, PageMainProps as MainProps };

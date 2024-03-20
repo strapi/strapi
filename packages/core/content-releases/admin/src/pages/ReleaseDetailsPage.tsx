@@ -9,6 +9,9 @@ import {
   ConfirmDialog,
   useTracking,
   useAPIErrorHandler,
+  useNotification,
+  useQueryParams,
+  useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -28,7 +31,6 @@ import {
   EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
-import { useNotification, useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
@@ -222,7 +224,7 @@ const ReleaseDetailsLayout = ({
     }
   );
   const [publishRelease, { isLoading: isPublishing }] = usePublishReleaseMutation();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const { allowedActions } = useRBAC(PERMISSIONS);
   const { canUpdate, canDelete, canPublish } = allowedActions;
@@ -254,13 +256,13 @@ const ReleaseDetailsLayout = ({
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(response.error),
       });
     } else {
       // Otherwise, the response returns an object with 'error', handle a generic error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
@@ -503,7 +505,7 @@ interface ReleaseDetailsBodyProps {
 const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams<GetReleaseActionsQueryParams>();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const {
     data: releaseData,
@@ -552,13 +554,13 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
       if (isAxiosError(response.error)) {
         // When the response returns an object with 'error', handle axios error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(response.error),
         });
       } else {
         // Otherwise, the response returns an object with 'error', handle a generic error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       }
@@ -819,7 +821,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 const ReleaseDetailsPage = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const navigate = useNavigate();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
@@ -889,13 +891,13 @@ const ReleaseDetailsPage = () => {
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(response.error),
       });
     } else {
       // Otherwise, the response returns an object with 'error', handle a generic error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
@@ -913,13 +915,13 @@ const ReleaseDetailsPage = () => {
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(response.error),
       });
     } else {
       // Otherwise, the response returns an object with 'error', handle a generic error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }

@@ -1,9 +1,9 @@
 import { forwardRef } from 'react';
 
 import { TimePicker, useComposedRefs } from '@strapi/design-system';
-import { useFocusInputField } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
+import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
 
 import { InputProps } from './types';

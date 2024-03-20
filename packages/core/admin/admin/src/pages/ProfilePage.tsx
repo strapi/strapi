@@ -6,13 +6,11 @@ import {
   ContentLayout,
   Flex,
   HeaderLayout,
-  Main,
   useNotifyAT,
   Grid,
   GridItem,
   Typography,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
@@ -24,6 +22,7 @@ import { InputRenderer } from '../components/FormInputs/Renderer';
 import { Page } from '../components/PageHelpers';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
+import { useNotification } from '../features/Notifications';
 import { useTracking } from '../features/Tracking';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { AppState, setAppTheme } from '../reducer';
@@ -60,7 +59,7 @@ const ProfilePage = () => {
   const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
   const dispatch = useTypedDispatch();
@@ -68,8 +67,6 @@ const ProfilePage = () => {
     _unstableFormatValidationErrors: formatValidationErrors,
     _unstableFormatAPIError: formatApiError,
   } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const user = useAuth('ProfilePage', (state) => state.user);
 
@@ -83,8 +80,8 @@ const ProfilePage = () => {
       );
     } else {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
       });
     }
   }, [formatMessage, notifyStatus, toggleNotification, user]);
@@ -102,11 +99,11 @@ const ProfilePage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'Settings.permissions.users.sso.provider.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'Settings.permissions.users.sso.provider.error' }),
       });
     }
-  }, [error, toggleNotification]);
+  }, [error, formatMessage, toggleNotification]);
 
   type UpdateUsersMeBody = UpdateMe.Request['body'] & {
     confirmPassword: string;
@@ -140,7 +137,7 @@ const ProfilePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+        message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
       });
     }
 
@@ -153,13 +150,13 @@ const ProfilePage = () => {
         setErrors(formatValidationErrors(res.error));
       } else if (isBaseQueryError(res.error)) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatApiError(res.error),
         });
       } else {
         toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          type: 'danger',
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
         });
       }
     }
@@ -183,7 +180,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <Main aria-busy={isSubmittingForm}>
+    <Page.Main aria-busy={isSubmittingForm}>
       <Helmet
         title={formatMessage({
           id: 'Settings.profile.form.section.helmet.title',
@@ -223,7 +220,7 @@ const ProfilePage = () => {
           </>
         )}
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 

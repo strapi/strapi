@@ -1,12 +1,12 @@
-import { useAppInfo } from '@strapi/helper-plugin';
 import { render } from '@tests/utils';
 
+import { useAppInfo } from '../../features/AppInfo';
 import { useContentTypes } from '../../hooks/useContentTypes';
 import { HomePage } from '../HomePage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfo: jest.fn(() => ({ communityEdition: true })),
+jest.mock('../../features/AppInfo', () => ({
+  ...jest.requireActual('../../features/AppInfo'),
+  useAppInfo: jest.fn((name, getter) => getter({ communityEdition: true })),
 }));
 
 jest.mock('../../components/GuidedTour/Provider');
@@ -52,7 +52,7 @@ describe('Homepage', () => {
 
   test('should display support link for EE edition', () => {
     // @ts-expect-error - mock implementation
-    useAppInfo.mockImplementation(() => ({ communityEdition: false }));
+    useAppInfo.mockImplementation((name, getter) => getter({ communityEdition: false }));
     const { getByRole } = render(<HomePage />);
 
     expect(getByRole('link', { name: /get help/i })).toHaveAttribute(

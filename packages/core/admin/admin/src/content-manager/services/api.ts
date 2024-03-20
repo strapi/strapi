@@ -12,6 +12,7 @@ const contentManagerApi = createApi({
     'Document',
     'InitialData',
     'HistoryVersion',
+    'Relations',
   ],
   endpoints: () => ({}),
 });

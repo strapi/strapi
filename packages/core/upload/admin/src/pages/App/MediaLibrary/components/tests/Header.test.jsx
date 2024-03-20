@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -9,9 +9,9 @@ import { MemoryRouter } from 'react-router-dom';
 
 import { Header } from '../Header';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useQueryParams: jest.fn().mockReturnValue([{ query: {}, rawQuery: '' }, jest.fn()]),
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
+  useQueryParams: jest.fn(() => [{ rawQuery: '', query: { folder: 2 } }, jest.fn()]),
 }));
 
 const FIXTURE_FOLDER = {

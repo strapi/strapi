@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { useAppInfo } from '@strapi/helper-plugin';
 import axios, { AxiosResponse } from 'axios';
 
 import { useInitQuery, useTelemetryPropertiesQuery } from '../services/admin';
 
+import { useAppInfo } from './AppInfo';
 import { useAuth } from './Auth';
 
 export interface TelemetryProperties {
@@ -384,7 +384,7 @@ export interface UseTrackingReturn {
  *
  * @example
  * ```tsx
- * import { useTracking } from '@strapi/helper-plugin';
+ * import { useTracking } from '@strapi/strapi/admin';
  *
  * const MyComponent = () => {
  *  const { trackUsage } = useTracking();
@@ -399,7 +399,7 @@ export interface UseTrackingReturn {
  */
 const useTracking = (): UseTrackingReturn => {
   const { uuid, telemetryProperties } = React.useContext(TrackingContext);
-  const { userId } = useAppInfo();
+  const userId = useAppInfo('useTracking', (state) => state.userId);
   const trackUsage = React.useCallback(
     async <TEvent extends TrackingEvent>(
       event: TEvent['name'],

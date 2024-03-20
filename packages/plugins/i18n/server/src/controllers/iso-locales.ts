@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 
 const controller: Core.Controller = {

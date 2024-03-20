@@ -1,14 +1,15 @@
 import { useEffect } from 'react';
 
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
-import { useAPIErrorHandler } from '@strapi/strapi/admin';
+import { useAPIErrorHandler, useNotification, useFetchClient } from '@strapi/strapi/admin';
+import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
 import getTrad from '../utils/getTrad';
 
 export const useDocumentation = () => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
+  const { formatMessage } = useIntl();
   const { del, post, put, get } = useFetchClient();
 
   const { formatAPIError } = useAPIErrorHandler();
@@ -25,15 +26,17 @@ export const useDocumentation = () => {
   useEffect(() => {
     if (isError && error) {
       toggleNotification({
-        type: 'warning',
-        message: error ? formatAPIError(error) : { id: 'notification.error' },
+        type: 'danger',
+        message: error
+          ? formatAPIError(error)
+          : formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
-  }, [isError, error, toggleNotification, formatAPIError]);
+  }, [isError, error, toggleNotification, formatAPIError, formatMessage]);
 
   const handleError = (err) => {
     toggleNotification({
-      type: 'warning',
+      type: 'danger',
       message: formatAPIError(err),
     });
   };
@@ -42,7 +45,7 @@ export const useDocumentation = () => {
     refetch();
     toggleNotification({
       type,
-      message: { id: getTrad(tradId), defaultMessage },
+      message: formatMessage({ id: getTrad(tradId), defaultMessage }),
     });
   };
 

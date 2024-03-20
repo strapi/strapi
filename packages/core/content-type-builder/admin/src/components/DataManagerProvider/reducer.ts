@@ -545,6 +545,11 @@ const reducer = (state = initialState, action: Action) =>
 
         break;
       }
+      case actions.UPDATE_INITIAL_STATE: {
+        draftState.initialData = draftState.modifiedData;
+
+        break;
+      }
       case actions.DELETE_NOT_SAVED_TYPE: {
         // Doing so will also reset the modified and the initial data
         draftState.contentTypes = state.initialContentTypes;

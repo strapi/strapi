@@ -1,6 +1,6 @@
 import * as utils from '@strapi/utils';
 import { pick } from 'lodash/fp';
-import type { Core } from '@strapi/strapi';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
 import { formatLocale } from '../domain/locale';

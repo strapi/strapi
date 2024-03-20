@@ -26,21 +26,35 @@ export const getRelationTargetStatus = (
     return ['published'];
   }
 
-  // priority:
-  // DP Enabled 'relation status' -> 'source status' -> 'draft'
-  // DP Disabled 'relation status' -> 'draft' and 'published'
-  if (relation.status) {
-    return [relation.status];
+  /**
+   * If both source and target have DP enabled,
+   * connect it to the same status as the source status
+   */
+  if (sourceHasDP && !isNil(opts.sourceStatus)) {
+    return [opts.sourceStatus];
   }
 
-  // Connect to both draft and published versions if dp is disabled and relation does not specify a status
+  /**
+   * Use the status from the relation if it's set
+   */
+  if (relation.status) {
+    switch (relation.status) {
+      case 'published':
+        return ['published'];
+      default:
+        // Default to draft if it's an invalid status (e.g. modified)
+        return ['draft'];
+    }
+  }
+
+  /**
+   * If DP is disabled and relation does not specify any status
+   * Connect to both draft and published versions
+   */
   if (!sourceHasDP) {
     return ['draft', 'published'];
   }
 
-  if (!isNil(opts.sourceStatus)) {
-    return [opts.sourceStatus];
-  }
-
+  // Default to draft as a fallback
   return ['draft'];
 };

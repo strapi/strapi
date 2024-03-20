@@ -14,12 +14,6 @@ import {
   Tooltip,
   Loader,
 } from '@strapi/design-system';
-import {
-  getYupInnerErrors,
-  useQueryParams,
-  useNotification,
-  TranslationMessage,
-} from '@strapi/helper-plugin';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
@@ -27,7 +21,10 @@ import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { Table, useTable } from '../../../../../components/Table';
+import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
+import { useQueryParams } from '../../../../../hooks/useQueryParams';
+import { getYupInnerErrors } from '../../../../../utils/getYupInnerErrors';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import {
@@ -264,7 +261,7 @@ const SelectedEntriesModalContent = ({
     .filter(({ id }) => selectedEntries.includes(id) && !validationErrors[id])
     .map(({ id }) => id);
 
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { model } = useDoc();
 
   const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
@@ -288,7 +285,7 @@ const SelectedEntriesModalContent = ({
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -318,17 +315,20 @@ const SelectedEntriesModalContent = ({
 
       toggleNotification({
         type: 'success',
-        message: { id: 'content-manager.success.record.publish', defaultMessage: 'Published' },
+        message: formatMessage({
+          id: 'content-manager.success.record.publish',
+          defaultMessage: 'Published',
+        }),
       });
 
       setPublishedCount(res.data.count);
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     }
   };
@@ -478,7 +478,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
   const { rows, validationErrors } = React.useMemo(() => {
     if (data.length > 0 && schema) {
       const validate = createYupSchema(schema.attributes, components);
-      const validationErrors: Record<Data.ID, Record<string, TranslationMessage>> = {};
+      const validationErrors: Record<Data.ID, Record<string, MessageDescriptor>> = {};
       const rows = data.map((entry) => {
         try {
           validate.validateSync(entry, { abortEarly: false });

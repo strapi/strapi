@@ -1,15 +1,17 @@
 import * as React from 'react';
 
 import { FieldAction, Flex, TextInput, Typography, useComposedRefs } from '@strapi/design-system';
-import { useFocusInputField, useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { CheckCircle, ExclamationMarkCircle, Loader, Refresh } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
+import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useDebounce } from '../../../../../hooks/useDebounce';
+import { useFocusInputField } from '../../../../../hooks/useFocusInputField';
+import { useQueryParams } from '../../../../../hooks/useQueryParams';
 import { useDoc } from '../../../../hooks/useDocument';
 import {
   useGenerateUIDMutation,
@@ -39,7 +41,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const [showRegenerate, setShowRegenerate] = React.useState(false);
     const field = useField(name);
     const debouncedValue = useDebounce(field.value, 300);
-    const toggleNotification = useNotification();
+    const { toggleNotification } = useNotification();
     const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
     const { formatMessage } = useIntl();
     const [{ query }] = useQueryParams();
@@ -67,7 +69,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     React.useEffect(() => {
       if (apiError) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(apiError),
         });
       }
@@ -98,14 +100,17 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
           field.onChange(name, res.data);
         } else {
           toggleNotification({
-            type: 'warning',
+            type: 'danger',
             message: formatAPIError(res.error),
           });
         }
       } catch (err) {
         toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occurred.' },
+          type: 'danger',
+          message: formatMessage({
+            id: 'notification.error',
+            defaultMessage: 'An error occurred.',
+          }),
         });
       }
     };
@@ -133,7 +138,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     React.useEffect(() => {
       if (availabilityError) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(availabilityError),
         });
       }

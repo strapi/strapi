@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { Core } from '@strapi/strapi';
+import type { Core } from '@strapi/types';
 
 import validateLocaleCreation from './controllers/validate-locale-creation';
 import graphqlProvider from './graphql';

@@ -1,5 +1,5 @@
 import type { Schema, UID } from '@strapi/types';
-import { async } from '@strapi/utils';
+import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
 import isEqual from 'lodash/isEqual';
 
 import { difference, keys } from 'lodash';
@@ -11,6 +11,35 @@ import { ReleaseAction } from '../../../shared/contracts/release-actions';
 interface Input {
   oldContentTypes: Record<string, Schema.ContentType>;
   contentTypes: Record<string, Schema.ContentType>;
+}
+
+export async function deleteActionsOnDisableDraftAndPublish({
+  oldContentTypes,
+  contentTypes,
+}: Input) {
+  if (!oldContentTypes) {
+    return;
+  }
+
+  for (const uid in contentTypes) {
+    if (!oldContentTypes[uid]) {
+      continue;
+    }
+
+    const oldContentType = oldContentTypes[uid];
+    const contentType = contentTypes[uid];
+
+    if (
+      contentTypesUtils.hasDraftAndPublish(oldContentType) &&
+      !contentTypesUtils.hasDraftAndPublish(contentType)
+    ) {
+      await strapi.db
+        ?.queryBuilder(RELEASE_ACTION_MODEL_UID)
+        .delete()
+        .where({ contentType: uid })
+        .execute();
+    }
+  }
 }
 
 export async function deleteActionsOnDeleteContentType({ oldContentTypes, contentTypes }: Input) {
@@ -96,7 +125,9 @@ export async function migrateIsValidAndStatusReleases() {
 
 export async function revalidateChangedContentTypes({ oldContentTypes, contentTypes }: Input) {
   if (oldContentTypes !== undefined && contentTypes !== undefined) {
-    const contentTypesWithDraftAndPublish = Object.keys(oldContentTypes);
+    const contentTypesWithDraftAndPublish = Object.keys(oldContentTypes).filter(
+      (uid) => oldContentTypes[uid]?.options?.draftAndPublish
+    );
     const releasesAffected = new Set();
 
     async

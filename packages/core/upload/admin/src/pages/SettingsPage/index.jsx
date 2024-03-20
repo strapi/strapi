@@ -1,6 +1,6 @@
 import React, { useReducer } from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -10,11 +10,9 @@ import {
   GridItem,
   HeaderLayout,
   Layout,
-  Main,
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
-import { useFetchClient, useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { Helmet } from 'react-helmet';
@@ -29,10 +27,8 @@ import reducer, { initialState } from './reducer';
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { get, put } = useFetchClient();
-
-  useFocusWhenNavigate();
 
   const [{ initialData, modifiedData }, dispatch] = useReducer(reducer, initialState, init);
 
@@ -67,7 +63,7 @@ export const SettingsPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.form.success.fields' },
+        message: formatMessage({ id: 'notification.form.success.fields' }),
       });
     },
     onError(err) {
@@ -98,7 +94,7 @@ export const SettingsPage = () => {
   }
 
   return (
-    <Main tabIndex={-1}>
+    <Page.Main tabIndex={-1}>
       <Helmet
         title={formatMessage({
           id: getTrad('page.title'),
@@ -238,7 +234,7 @@ export const SettingsPage = () => {
           </Layout>
         </ContentLayout>
       </form>
-    </Main>
+    </Page.Main>
   );
 };
 

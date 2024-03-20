@@ -1,5 +1,5 @@
 import type { Middleware } from '@reduxjs/toolkit';
-import type { Store } from '@strapi/strapi/admin';
+import type { Store } from '@strapi/admin/strapi-admin';
 
 const extendCTBInitialDataMiddleware: () => Middleware<
   object,

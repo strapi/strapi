@@ -1,6 +1,6 @@
 import { get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Core, Struct } from '@strapi/strapi';
+import type { Core, Struct } from '@strapi/types';
 import { getService } from '../utils';
 
 const { ApplicationError } = errors;

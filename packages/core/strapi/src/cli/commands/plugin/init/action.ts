@@ -298,7 +298,6 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
 
                 pkgJson.dependencies = {
                   ...pkgJson.dependencies,
-                  '@strapi/helper-plugin': '*',
                   '@strapi/design-system': '*',
                   '@strapi/icons': '*',
                 };

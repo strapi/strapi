@@ -11,12 +11,12 @@ import {
   ModalLayout,
   Typography,
 } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { Form, InputProps, useField } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
+import { useNotification } from '../../../features/Notifications';
 import { capitalise } from '../../../utils/strings';
 import { ATTRIBUTE_TYPES_THAT_CANNOT_BE_MAIN_FIELD } from '../../constants/attributes';
 import { useGetInitialDataQuery } from '../../services/init';
@@ -52,7 +52,7 @@ interface EditFieldFormProps {
 const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   const { formatMessage } = useIntl();
   const id = React.useId();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
 
   const { value, onChange } =
     useField<ConfigurationFormData['layout'][number]['children'][number]>(name);
@@ -107,7 +107,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
         id: 'content-manager.containers.edit-settings.modal-form.error',
         defaultMessage: 'An error occurred while trying to open the form.',
       }),
-      type: 'warning',
+      type: 'danger',
     });
 
     return null;

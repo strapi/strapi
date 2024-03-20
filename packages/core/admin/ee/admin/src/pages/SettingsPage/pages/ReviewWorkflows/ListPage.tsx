@@ -15,7 +15,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
-import { onRowClick, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -24,9 +23,11 @@ import styled from 'styled-components';
 import { ConfirmDialog } from '../../../../../../../admin/src/components/ConfirmDialog';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../../admin/src/core/store/hooks';
+import { useNotification } from '../../../../../../../admin/src/features/Notifications';
 import { useTracking } from '../../../../../../../admin/src/features/Tracking';
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useContentTypes } from '../../../../../../../admin/src/hooks/useContentTypes';
+import { useRBAC } from '../../../../../../../admin/src/hooks/useRBAC';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 
 import * as Layout from './components/Layout';
@@ -70,7 +71,7 @@ export const ReviewWorkflowsListView = () => {
   const { collectionTypes, singleTypes, isLoading: isLoadingModels } = useContentTypes();
   const { meta, workflows, isLoading, deleteWorkflow } = useReviewWorkflows();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.settings?.['review-workflows']
@@ -106,7 +107,7 @@ export const ReviewWorkflowsListView = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -117,15 +118,15 @@ export const ReviewWorkflowsListView = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.success.deleted', defaultMessage: 'Deleted' },
+        message: formatMessage({ id: 'notification.success.deleted', defaultMessage: 'Deleted' }),
       });
     } catch (error) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error.unexpected',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     }
   };
@@ -290,17 +291,15 @@ export const ReviewWorkflowsListView = () => {
             <Tbody>
               {workflows?.map((workflow) => (
                 <Tr
-                  {...onRowClick({
-                    fn(event) {
-                      const el = event.target as HTMLElement;
-                      // Abort row onClick event when the user click on the delete button
-                      if (el.nodeName === 'BUTTON') {
-                        return;
-                      }
+                  onClick={(event) => {
+                    const el = event.target as HTMLElement;
+                    // Abort row onClick event when the user click on the delete button
+                    if (el.nodeName === 'BUTTON') {
+                      return;
+                    }
 
-                      navigate(`/settings/review-workflows/${workflow.id}`);
-                    },
-                  })}
+                    navigate(`/settings/review-workflows/${workflow.id}`);
+                  }}
                   key={`workflow-${workflow.id}`}
                 >
                   <Td width={`${250 / 16}rem`}>

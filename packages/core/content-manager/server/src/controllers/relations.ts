@@ -78,42 +78,62 @@ const addStatusToRelations = async (uid: UID.ContentType, relations: RelationEnt
   });
 };
 
-const getPublishedAtClause = (
-  status: Modules.Documents.Params.PublicationStatus.Kind,
-  sourceUid: UID.Schema,
-  targetUid: UID.ContentType
-) => {
-  const sourceModel = strapi.getModel(sourceUid);
-  const targetModel = strapi.getModel(targetUid);
+const getPublishedAtClause = (status: string, uid: UID.Schema) => {
+  const model = strapi.getModel(uid);
 
   /**
-   * If target does not have dp, status should be published.
-   * As it only contains entries with publishedAt set.
+   * If dp is disabled, ignore the filter
    */
-  if (!contentTypes.hasDraftAndPublish(targetModel)) {
-    return { $ne: null };
-  }
-
-  /**
-   * If source does not have dp, status should be draft.
-   * Both draft and publish entries are connectable, but we are doing it like
-   * this atm.
-   */
-  if (!contentTypes.hasDraftAndPublish(sourceModel)) {
-    return { $null: true };
+  if (!model || !contentTypes.hasDraftAndPublish(model)) {
+    return {};
   }
 
   // Prioritize the draft status in case it's not provided
   return status === 'published' ? { $notNull: true } : { $null: true };
 };
 
+const validateLocale = (sourceUid: UID.Schema, targetUid: UID.ContentType, locale?: string) => {
+  const sourceModel = strapi.getModel(sourceUid);
+  const targetModel = strapi.getModel(targetUid);
+
+  const isLocalized = strapi.plugin('i18n').service('content-types').isLocalizedContentType;
+  const isSourceLocalized = isLocalized(sourceModel);
+  const isTargetLocalized = isLocalized(targetModel);
+
+  let validatedLocale = locale;
+
+  if (!targetModel || !isTargetLocalized) validatedLocale = undefined;
+
+  return {
+    locale: validatedLocale,
+    isSourceLocalized,
+    isTargetLocalized,
+  };
+};
+
+const validateStatus = (
+  sourceUid: UID.Schema,
+  status?: Modules.Documents.Params.PublicationStatus.Kind
+) => {
+  const sourceModel = strapi.getModel(sourceUid);
+
+  const isDP = contentTypes.hasDraftAndPublish;
+  const isSourceDP = isDP(sourceModel);
+
+  // Default to draft if not set
+  if (!isSourceDP) return { status: undefined };
+
+  switch (status) {
+    case 'published':
+      return { status: 'published' };
+    default:
+      // Assign to draft if the status is not valid
+      return { status: 'draft' };
+  }
+};
+
 export default {
-  async extractAndValidateRequestInfo(
-    ctx: any,
-    id?: Data.ID,
-    locale?: Modules.Documents.Params.Locale,
-    status?: Modules.Documents.Params.PublicationStatus.Kind
-  ) {
+  async extractAndValidateRequestInfo(ctx: any, id?: Data.ID) {
     const { userAbility } = ctx.state;
     const { model, targetField } = ctx.params;
 
@@ -128,6 +148,16 @@ export default {
         `The relational field ${targetField} doesn't exist on ${model}`
       );
     }
+
+    const sourceUid = model;
+    const targetUid = attribute.target;
+
+    const { locale, isSourceLocalized, isTargetLocalized } = validateLocale(
+      sourceUid,
+      targetUid,
+      ctx.request?.query?.locale
+    );
+    const { status } = validateStatus(sourceUid, ctx.request?.query?.status);
 
     const permissionChecker = getService('permission-checker').create({
       userAbility,
@@ -150,13 +180,9 @@ export default {
         where.documentId = id;
 
         if (status) {
-          where.publishedAt = getPublishedAtClause(status, sourceSchema.uid, attribute.target);
+          where.publishedAt = getPublishedAtClause(status, sourceUid);
         }
 
-        const isSourceLocalized = strapi
-          .plugin('i18n')
-          .service('content-types')
-          .isLocalizedContentType(sourceSchema);
         if (locale && isSourceLocalized) {
           where.locale = locale;
         }
@@ -197,7 +223,7 @@ export default {
       ? await getService('components').findConfiguration(sourceSchema)
       : await getService('content-types').findConfiguration(sourceSchema);
 
-    const targetSchema = strapi.getModel(attribute.target);
+    const targetSchema = strapi.getModel(targetUid);
 
     const mainField = flow(
       prop(`metadatas.${targetField}.edit.mainField`),
@@ -212,18 +238,14 @@ export default {
       'documentId',
     ]);
 
-    const isTargetLocalized = strapi
-      .plugin('i18n')
-      .service('content-types')
-      .isLocalizedContentType(targetSchema);
-
-    // TODO: Locale is always present, should we set it regardless?
     if (isTargetLocalized) {
       fieldsToSelect.push('locale');
     }
 
     return {
       entryId,
+      locale,
+      status,
       attribute,
       fieldsToSelect,
       mainField,
@@ -242,12 +264,12 @@ export default {
    */
   async findAvailable(ctx: any) {
     const { id } = ctx.request.query;
-    const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query?.status;
 
     await validateFindAvailable(ctx.request.query);
 
     const {
+      locale,
+      status,
       targetField,
       fieldsToSelect,
       mainField,
@@ -258,7 +280,7 @@ export default {
         schema: { uid: targetUid },
         isLocalized: isTargetLocalized,
       },
-    } = await this.extractAndValidateRequestInfo(ctx, id, locale, status);
+    } = await this.extractAndValidateRequestInfo(ctx, id);
 
     const { idsToOmit, idsToInclude, _q, ...query } = ctx.request.query;
 
@@ -278,7 +300,7 @@ export default {
     // If no status is requested, we find all the draft relations and later update them
     // with the latest available status
     addFiltersClause(queryParams, {
-      publishedAt: getPublishedAtClause(status, sourceUid, targetUid),
+      publishedAt: getPublishedAtClause(status, targetUid),
     });
 
     // We will only filter by locale if the target content type is localized
@@ -316,7 +338,7 @@ export default {
 
       // Add the status and locale filters if they are provided
       if (status) {
-        where[`${alias}.published_at`] = getPublishedAtClause(status, sourceUid, targetUid);
+        where[`${alias}.published_at`] = getPublishedAtClause(status, targetUid);
       }
       if (filterByLocale) {
         where[`${alias}.locale`] = locale;
@@ -328,7 +350,7 @@ export default {
        * We don't want to include them in the available relations.
        */
       if ((idsToInclude?.length ?? 0) !== 0) {
-        where[`${alias}.document_id`].$notIn = idsToInclude;
+        where[`${alias}.id`].$notIn = idsToInclude;
       }
 
       const knexSubQuery = subQuery
@@ -354,7 +376,7 @@ export default {
     if (idsToOmit?.length > 0) {
       // If we have ids to omit, we should filter them out
       addFiltersClause(queryParams, {
-        documentId: { $notIn: uniq(idsToOmit) },
+        id: { $notIn: uniq(idsToOmit) },
       });
     }
 
@@ -374,9 +396,6 @@ export default {
 
     await validateFindExisting(ctx.request.query);
 
-    const locale = ctx.request?.query?.locale || null;
-    const status = ctx.request?.query?.status;
-
     const {
       entryId,
       attribute,
@@ -388,7 +407,7 @@ export default {
       target: {
         schema: { uid: targetUid },
       },
-    } = await this.extractAndValidateRequestInfo(ctx, id, locale, status);
+    } = await this.extractAndValidateRequestInfo(ctx, id);
 
     const permissionQuery = await getService('permission-checker')
       .create({ userAbility, model: targetUid })
@@ -443,7 +462,12 @@ export default {
     const relationsUnion = uniqBy('id', concat(sanitizedRes.results, res.results));
 
     ctx.body = {
-      pagination: res.pagination,
+      pagination: res.pagination || {
+        page: 1,
+        pageCount: 1,
+        pageSize: 10,
+        total: relationsUnion.length,
+      },
       results: await addStatusToRelations(targetUid, relationsUnion),
     };
   },

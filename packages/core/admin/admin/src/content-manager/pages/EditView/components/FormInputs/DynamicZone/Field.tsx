@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
 import { createContext } from '../../../../../../components/Context';
 import { InputProps, useField, useForm } from '../../../../../../components/Form';
+import { useNotification } from '../../../../../../features/Notifications';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
@@ -86,7 +86,7 @@ const DynamicZone = ({
 
   const { formatMessage } = useIntl();
 
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
 
   const dynamicDisplayedComponentsLength = value.length;
 
@@ -111,7 +111,9 @@ const DynamicZone = ({
     } else {
       toggleNotification({
         type: 'info',
-        message: { id: getTranslation('components.notification.info.maximum-requirement') },
+        message: formatMessage({
+          id: getTranslation('components.notification.info.maximum-requirement'),
+        }),
       });
     }
   };

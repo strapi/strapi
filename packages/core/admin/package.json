@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "4.20.5",
+  "version": "5.0.0-alpha.2",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -27,6 +27,13 @@
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
+    "./strapi-admin/test": {
+      "types": "./dist/admin/tests/index.d.ts",
+      "source": "./admin/tests/index.ts",
+      "import": "./dist/admin/test.mjs",
+      "require": "./dist/admin/test.js",
+      "default": "./dist/admin/test.js"
+    },
     "./_internal": {
       "types": "./dist/_internal/index.d.ts",
       "source": "./_internal/index.ts",
@@ -47,7 +54,7 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "pack-up build",
+    "build": "pack-up build && vite build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -64,15 +71,17 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
+    "@strapi/admin-test-utils": "5.0.0-alpha.2",
     "@strapi/design-system": "1.16.0",
-    "@strapi/helper-plugin": "4.20.5",
     "@strapi/icons": "1.16.0",
-    "@strapi/permissions": "4.20.5",
-    "@strapi/provider-audit-logs-local": "4.20.5",
-    "@strapi/types": "4.20.5",
-    "@strapi/typescript-utils": "4.20.5",
-    "@strapi/utils": "4.20.5",
-    "@vitejs/plugin-react-swc": "3.6.0",
+    "@strapi/permissions": "5.0.0-alpha.2",
+    "@strapi/provider-audit-logs-local": "5.0.0-alpha.2",
+    "@strapi/types": "5.0.0-alpha.2",
+    "@strapi/typescript-utils": "5.0.0-alpha.2",
+    "@strapi/utils": "5.0.0-alpha.2",
+    "@testing-library/dom": "9.2.0",
+    "@testing-library/react": "14.0.0",
+    "@testing-library/user-event": "14.4.3",
     "axios": "1.6.8",
     "bcryptjs": "2.4.3",
     "boxen": "5.1.2",
@@ -107,6 +116,7 @@
     "markdown-it-mark": "^3.0.1",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
+    "msw": "1.3.0",
     "node-schedule": "2.1.0",
     "ora": "5.4.1",
     "p-map": "4.0.0",
@@ -138,13 +148,9 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "4.20.5",
-    "@strapi/data-transfer": "4.20.5",
-    "@strapi/pack-up": "4.20.5",
-    "@strapi/plugin-content-manager": "4.20.5",
-    "@testing-library/dom": "9.2.0",
-    "@testing-library/react": "14.0.0",
-    "@testing-library/user-event": "14.4.3",
+    "@strapi/data-transfer": "5.0.0-alpha.2",
+    "@strapi/pack-up": "5.0.0-alpha.2",
+    "@strapi/plugin-content-manager": "5.0.0-alpha.2",
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
     "@types/invariant": "2.2.36",
     "@types/js-cookie": "3.0.6",
@@ -160,12 +166,14 @@
     "@types/prettier": "2.7.3",
     "@types/react-window": "1.8.8",
     "@types/sanitize-html": "2.11.0",
+    "@vitejs/plugin-react-swc": "3.6.0",
     "koa-body": "4.2.0",
-    "msw": "1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "6.22.3",
-    "styled-components": "5.3.11"
+    "styled-components": "5.3.11",
+    "vite": "5.1.6",
+    "vite-plugin-dts": "3.7.3"
   },
   "peerDependencies": {
     "@strapi/data-transfer": "^4.16.0",

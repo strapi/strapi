@@ -1,4 +1,4 @@
-import { Data } from '@strapi/strapi';
+import { Data } from '@strapi/types';
 
 export interface Entity {
   id: Data.ID;

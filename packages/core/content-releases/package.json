@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "4.20.5",
+  "version": "5.0.0-alpha.2",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -56,10 +56,9 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.16.0",
-    "@strapi/helper-plugin": "4.20.5",
     "@strapi/icons": "1.16.0",
     "@strapi/types": "workspace:*",
-    "@strapi/utils": "4.20.5",
+    "@strapi/utils": "5.0.0-alpha.2",
     "axios": "1.6.8",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.1",
@@ -71,8 +70,8 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "4.20.5",
-    "@strapi/admin-test-utils": "4.20.5",
+    "@strapi/admin": "5.0.0-alpha.2",
+    "@strapi/admin-test-utils": "5.0.0-alpha.2",
     "@strapi/pack-up": "workspace:*",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
@@ -88,7 +87,7 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
-    "@strapi/admin": "^4.20.5",
+    "@strapi/admin": "^5.0.0-alpha.1",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

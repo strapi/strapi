@@ -51,6 +51,8 @@ const relationsApi = contentManagerApi.injectEndpoints({
           model: queryArgs.model,
           id: queryArgs.id,
           targetField: queryArgs.targetField,
+          locale: queryArgs.params?.locale,
+          status: queryArgs.params?.status,
         };
       },
       merge: (currentCache, newItems) => {
@@ -95,6 +97,7 @@ const relationsApi = contentManagerApi.injectEndpoints({
           return response;
         }
       },
+      providesTags: ['Relations'],
     }),
     searchRelations: build.query<
       Contracts.Relations.FindAvailable.Response,
