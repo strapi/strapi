@@ -211,6 +211,7 @@ export function getNameFromTokens(nameTokens: NameToken[], options: NameFromToke
     return total + tokenName.length;
   }, nameTokens.length * IDENTIFIER_SEPARATOR.length - 1);
 
+  // TODO: this is the weakest thing of the shortener, but fortunately it can be improved later without a breaking change if it turns out to be a problem (for example, if there is some case we need 6+ name parts in one identifier). We could take this "shortest string we could generate" that is too long and apply the hash directly to that, which would work fine even though it would be very difficult to determine what it was actually referring to
   // Check if the maximum length is less than the total length
   if (maxLength < totalLength) {
     throw new Error('Maximum length is too small to accommodate all tokens');
