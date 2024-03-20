@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { TestUtils } from '@strapi/strapi/admin';
+import { render, waitFor } from '@strapi/strapi/admin/test';
 
 import { AdvancedSettingsPage } from '../index';
 
@@ -18,9 +18,9 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
   });
 
   it('renders correctly', async () => {
-    const { getByRole, queryByText } = TestUtils.render(<AdvancedSettingsPage />);
+    const { getByRole, queryByText } = render(<AdvancedSettingsPage />);
 
-    await TestUtils.waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
     expect(getByRole('heading', { name: 'Advanced Settings' })).toBeInTheDocument();
 

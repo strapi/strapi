@@ -1,10 +1,8 @@
 import React from 'react';
 
-import { TestUtils } from '@strapi/strapi/admin';
+import { render, waitFor } from '@strapi/strapi/admin/test';
 
 import PluginPage from '../index';
-
-const { render, waitFor } = TestUtils;
 
 const versions = ['2.0.0', '1.2.0', '1.0.0'];
 

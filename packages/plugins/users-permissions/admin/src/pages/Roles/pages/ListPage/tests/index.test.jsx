@@ -2,7 +2,7 @@
 
 import React from 'react';
 
-import { TestUtils } from '@strapi/strapi/admin';
+import { render as renderAdmin } from '@strapi/strapi/admin/test';
 import { waitForElementToBeRemoved } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 
@@ -23,7 +23,7 @@ const LocationDisplay = () => {
 };
 
 const render = () =>
-  TestUtils.render(<RolesListPage />, {
+  renderAdmin(<RolesListPage />, {
     renderOptions: {
       wrapper({ children }) {
         return (

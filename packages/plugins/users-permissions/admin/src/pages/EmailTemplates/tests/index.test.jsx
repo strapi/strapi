@@ -1,10 +1,8 @@
 import React from 'react';
 
-import { TestUtils } from '@strapi/strapi/admin';
+import { render, screen, waitFor } from '@strapi/strapi/admin/test';
 
 import { EmailTemplatesPage } from '../index';
-
-const { render, screen, waitFor } = TestUtils;
 
 jest.mock('@strapi/strapi/admin', () => ({
   ...jest.requireActual('@strapi/strapi/admin'),

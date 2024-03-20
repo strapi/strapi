@@ -1,5 +1,11 @@
-import { TestUtils } from '@strapi/admin/strapi-admin';
-
-const { render, renderHook, waitFor, act, fireEvent, screen, server } = TestUtils;
+import {
+  render,
+  renderHook,
+  waitFor,
+  act,
+  fireEvent,
+  screen,
+  server,
+} from '@strapi/admin/strapi-admin/test';
 
 export { render, renderHook, waitFor, server, act, fireEvent, screen };

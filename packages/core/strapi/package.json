@@ -79,6 +79,13 @@
       "require": "./dist/admin.js",
       "default": "./dist/admin.js"
     },
+    "./admin/test": {
+      "types": "./dist/admin-test.d.ts",
+      "source": "./src/admin-test.ts",
+      "import": "./dist/admin-test.mjs",
+      "require": "./dist/admin-test.js",
+      "default": "./dist/admin-test.js"
+    },
     "./package.json": "./package.json"
   },
   "main": "./dist/index.js",

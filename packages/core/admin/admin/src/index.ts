@@ -70,5 +70,3 @@ export { translatedErrors } from './utils/translatedErrors';
 export { getFetchClient } from './utils/getFetchClient';
 
 export * from './content-manager/exports';
-
-export * as TestUtils from '../tests/utils';

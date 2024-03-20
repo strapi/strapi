@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { TestUtils } from '@strapi/strapi/admin';
+import { render, waitFor } from '@strapi/strapi/admin/test';
 
 import { ProvidersPage } from '../index';
 
@@ -18,9 +18,9 @@ describe('Admin | containers | ProvidersPage', () => {
   });
 
   it('should show a list of providers', async () => {
-    const { getByText, getByTestId } = TestUtils.render(<ProvidersPage />);
+    const { getByText, getByTestId } = render(<ProvidersPage />);
 
-    await TestUtils.waitFor(() => {
+    await waitFor(() => {
       expect(getByText('email')).toBeInTheDocument();
       expect(getByTestId('enable-email').textContent).toEqual('Enabled');
       expect(getByTestId('enable-discord').textContent).toEqual('Disabled');

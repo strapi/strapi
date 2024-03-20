@@ -53,7 +53,9 @@ const clearItem = (key: string) => {
 };
 
 const getToken = () =>
-  localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN);
+  JSON.parse(
+    localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN) ?? '""'
+  );
 
 const instance = fetchClient();
 

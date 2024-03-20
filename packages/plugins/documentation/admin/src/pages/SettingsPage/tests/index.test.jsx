@@ -1,12 +1,10 @@
 import React from 'react';
 
-import { TestUtils } from '@strapi/strapi/admin';
+import { fireEvent, render, waitFor } from '@strapi/strapi/admin/test';
 import { rest } from 'msw';
 
 import { server } from '../../../../../tests/server';
 import SettingsPage from '../index';
-
-const { fireEvent, render, waitFor } = TestUtils;
 
 describe('SettingsPage', () => {
   it('renders the setting page correctly', async () => {

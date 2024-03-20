@@ -23,6 +23,13 @@ export default defineConfig({
       types: './dist/admin.d.ts',
       runtime: 'web',
     },
+    {
+      source: './src/admin-test.ts',
+      import: './dist/admin-test.js',
+      require: './dist/admin-test.js',
+      types: './dist/admin-test.d.ts',
+      runtime: 'web',
+    },
   ],
   exports: {},
   dist: './dist',
