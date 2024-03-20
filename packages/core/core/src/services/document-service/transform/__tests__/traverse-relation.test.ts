@@ -5,14 +5,14 @@ const traverser = traverseRelation({
   onLongHand: (relation) => ({ ...relation, id: 'other' }),
   onPositionBefore: (relation) => ({ ...relation, before: 2 }),
   onPositionAfter: (relation) => ({ ...relation, after: 2 }),
-  onDefault: () => 'default',
+  onElse: () => 'else',
 });
 
 describe('traverse relation', () => {
   describe('long hand', () => {
     it('long hand', async () => {
       const relation = { id: 1 };
-      const expectedRelation = { id: 'other' };
+      const expectedRelation = { set: [{ id: 'other' }] };
       expect(await traverser(relation)).toEqual(expectedRelation);
 
       const relationDocId = { documentId: 1 };
@@ -147,9 +147,9 @@ describe('traverse relation', () => {
     });
   });
 
-  it('default', async () => {
+  it('else', async () => {
     const relation = null as any;
-    const expectedRelation = 'default';
+    const expectedRelation = 'else';
 
     expect(await traverser(relation)).toEqual(expectedRelation);
   });

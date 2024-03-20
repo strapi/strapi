@@ -1,4 +1,4 @@
-import { isObject, curry } from 'lodash/fp';
+import { isObject, curry, isNil } from 'lodash/fp';
 
 import { async } from '@strapi/utils';
 
@@ -14,20 +14,32 @@ interface Transforms {
   // { connect: { id: 1 } } || { connect: [{ id: 1 }] }
   // { disconnect: { id: 1 } } || { disconnect: [{ id: 1 }] }
   onLongHand?: (relation: LongHand) => ResultOrPromise<Relation>;
-  // { connect: { id: 1, position: { before: 1 } } }
-  onPositionBefore?: (relation: LongHand) => ResultOrPromise<Relation>;
-  // { connect: { id: 1, position: { after: 1 } } }
-  onPositionAfter?: (relation: LongHand) => ResultOrPromise<Relation>;
-  onDisconnect?: (relation: Relation) => ResultOrPromise<Relation>;
   // '1' || 1 || ['1', '2'] || [1, 2] || null
   onShortHand?: (relation: ShortHand) => ResultOrPromise<Relation>;
-
-  onDefault?: (relation: Relation) => ResultOrPromise<Relation>;
+  // Anything else that is not a valid relation
+  onElse?: (relation: Relation) => ResultOrPromise<Relation>;
 }
 
+const toArray = (value: any) => {
+  // Keep value as it is if it's a nullish value
+  if (isNil(value)) {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    return value;
+  }
+
+  return [value];
+};
+
 /**
- * There are multiple ways to interact with Strapi relations.
- * This is a utility to transform the relation data to a desired format.
+ * There are multiple ways to create Strapi relations.
+ * This is a utility to traverse and transform relation data
+ *
+ *
+ * For consistency and ease of use, the response will always be an object with the following shape:
+ * { set: [{...}], connect: [{...}], disconnect: [{...}] }
  *
  * @example
  * transformRelationData({
@@ -37,95 +49,64 @@ interface Transforms {
  *  },
  * }, relation)
  */
-const traverseRelation = async (transforms: Transforms, rel: Relation): Promise<Relation> => {
+const traverseRelation = async (
+  transforms: Transforms,
+  rel: Relation,
+  isRecursive = false
+): Promise<Relation> => {
   let relation: Relation = rel;
 
   // Pass through if no transforms are provided
-  const {
-    onLongHand = passThrough,
-    onShortHand = passThrough,
-    onPositionBefore = passThrough,
-    onPositionAfter = passThrough,
-    onDefault = passThrough,
-  } = transforms;
+  const { onLongHand = passThrough, onShortHand = passThrough, onElse = passThrough } = transforms;
+
+  // undefined | null
+  if (isNil(relation)) {
+    return onElse(relation);
+  }
 
   // LongHand[] | ShortHand[]
   if (Array.isArray(relation)) {
     return async
-      .map(relation, (r: Relation) => traverseRelation(transforms, r))
-      .then((result: any) => result.flat().filter(Boolean));
+      .map(relation, (r: Relation) => traverseRelation(transforms, r, true))
+      .then((result: any) => result.flat().filter(Boolean))
+      .then((result: any) => (isRecursive ? result : { set: result }));
   }
 
   // LongHand
   if (isObject(relation)) {
     // { id: 1 } || { documentId: 1 }
     if ('id' in relation || 'documentId' in relation) {
-      return onLongHand(relation as LongHand);
+      const result = await onLongHand(relation as LongHand);
+
+      if (isRecursive) {
+        return result;
+      }
+
+      return { set: toArray(result) };
     }
 
     // If not connecting anything, return default visitor
     if (!relation.set && !relation.disconnect && !relation.connect) {
-      return onDefault(relation);
+      return onElse(relation);
     }
 
     // { set }
     if (relation.set) {
-      const set: any = await traverseRelation(transforms, relation.set);
-      relation = { ...relation, set };
+      const set: any = await traverseRelation(transforms, relation.set, true);
+      relation = { ...relation, set: toArray(set) };
     }
 
     // { disconnect}
     if (relation.disconnect) {
-      const disconnect: any = await traverseRelation(transforms, relation.disconnect);
-      relation = { ...relation, disconnect };
+      const disconnect: any = await traverseRelation(transforms, relation.disconnect, true);
+      relation = { ...relation, disconnect: toArray(disconnect) };
     }
 
-    /**
-     * Connect is the most complex scenario.
-     *
-     * User can:
-     * - connect a single relation or an array of relations.
-     *   - { connect: { id: 1 } }
-     *   - { connect: [{ id: 1 }, { id: 2 }] }
-     * - connect an id or a document id
-     *   - { connect: { id: 1 } }
-     *   - { connect: { documentId: 1, locale, status } }
-     * - connect with a position
-     *   - { connect: { id: 1, position: { before, after, end, start }} }
-     *
-     * Here the visitor will be called for each connect relation.
-     */
+    // { connect }
     if (relation.connect) {
-      let connect = relation.connect;
-
-      const mapConnectPosition = async (connect: any) => {
-        let position = connect?.position;
-
-        if (!position) {
-          return connect;
-        }
-
-        if (position?.before) {
-          position = await onPositionBefore(position);
-        }
-
-        if (position?.after) {
-          position = await onPositionAfter(position);
-        }
-
-        return { ...connect, position };
-      };
-
-      if (Array.isArray(connect)) {
-        connect = await async.map(connect, mapConnectPosition);
-      } else {
-        connect = await mapConnectPosition(connect);
-      }
-
-      // @ts-expect-error - fix type
-      connect = await traverseRelation(transforms, connect);
-
-      relation = { ...relation, connect };
+      // Transform the relation to connect
+      const connect: any = await traverseRelation(transforms, relation.connect, true);
+      relation = { ...relation, connect: toArray(connect) };
     }
 
     return relation;
@@ -133,11 +114,17 @@ const traverseRelation = async (transforms: Transforms, rel: Relation): Promise<
 
   // ShortHand
   if (typeof relation === 'string' || typeof relation === 'number') {
-    return onShortHand(relation as ShortHand);
+    const result = onShortHand(relation as ShortHand);
+
+    if (isRecursive) {
+      return result;
+    }
+
+    return { set: toArray(result) };
   }
 
   // Anything else
-  return onDefault(relation);
+  return onElse(relation);
 };
 
 const traverseRelationCurried = curry(traverseRelation);

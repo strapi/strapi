@@ -1,6 +1,8 @@
 /* eslint-disable node/no-callback-literal */
-// @ts-nocheck
 import { curry } from 'lodash/fp';
+
+import { Common } from '@strapi/types';
+import { traverseEntity } from '@strapi/utils';
 
 import { Relation } from './types';
 import { traverseRelation } from './traverse-relation';
@@ -37,26 +39,48 @@ const mapRelation = async (
       onLongHand(relation) {
         return callback(relation);
       },
-      async onPositionBefore(position) {
-        const relationToMap = { documentId: position.before, ...position };
-        const mappedRelation = await callback(relationToMap);
-        position.before = mappedRelation.documentId;
-        return position;
-      },
-      async onPositionAfter(relation) {
-        const relationToMap = { documentId: relation.after, ...relation };
-        const mappedRelation = await callback(relationToMap);
-        relation.after = mappedRelation.documentId;
-        return relation;
-      },
-      onDefault() {
-        return callback(null);
+      onElse(relation) {
+        // Invalid relation
+        return callback(relation);
       },
     },
     relation
   );
 };
 
-const mapRelationCurried = curry(mapRelation);
+type TraverseEntity = Parameters<typeof traverseEntity>;
 
-export { mapRelationCurried as mapRelation };
+/**
+ * Same as `traverseEntity` but only for relations.
+ */
+const traverseEntityRelations = async (
+  visitor: TraverseEntity[0],
+  options: TraverseEntity[1],
+  data: TraverseEntity[2]
+) => {
+  return traverseEntity(
+    async (options, utils) => {
+      if (options.attribute.type !== 'relation') {
+        return;
+      }
+
+      // TODO: Handle morph relations (they have multiple targets)
+      const target = options.attribute.target as Common.UID.Schema | undefined;
+      if (!target) {
+        return;
+      }
+
+      return visitor(options, utils);
+    },
+    options,
+    data
+  );
+};
+
+const mapRelationCurried = curry(mapRelation);
+const traverseEntityRelationsCurried = curry(traverseEntityRelations);
+
+export {
+  mapRelationCurried as mapRelation,
+  traverseEntityRelationsCurried as traverseEntityRelations,
+};

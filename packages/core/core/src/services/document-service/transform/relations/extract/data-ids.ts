@@ -1,58 +1,79 @@
+import { curry } from 'lodash/fp';
+
 import { Common } from '@strapi/types';
-import { traverseEntity } from '@strapi/utils';
+
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
-import { mapRelation } from '../utils/map-relation';
+import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
+import { LongHandDocument } from '../utils/types';
+
+interface Options {
+  uid: Common.UID.Schema;
+  locale?: string | null;
+  status?: 'draft' | 'published';
+}
 
 /**
- * Iterate over all attributes of a Data object and extract all relational document ids.
+ * Load a relation documentId into the idMap.
+ */
+const addRelationDocId = curry(
+  (idMap: IdMap, targetUid: Common.UID.Schema, source: Options, relation: LongHandDocument) => {
+    const targetLocale = getRelationTargetLocale(relation, {
+      targetUid,
+      sourceUid: source.uid,
+      sourceLocale: source.locale,
+    });
+
+    const targetStatus = getRelationTargetStatus(relation, {
+      targetUid,
+      sourceUid: source.uid,
+      sourceStatus: source.status,
+    });
+
+    targetStatus.forEach((status) => {
+      idMap.add({
+        uid: targetUid,
+        documentId: relation.documentId,
+        locale: targetLocale,
+        status,
+      });
+    });
+  }
+);
+
+/**
+ * Iterate over all relations of a data object and extract all relational document ids.
  * Those will later be transformed to entity ids.
  */
-const extractDataIds = (
-  idMap: IdMap,
-  data: Record<string, any>,
-  opts: { uid: UID.Schema; locale?: string | null; status?: 'draft' | 'published' }
-) => {
-  return traverseEntity(
-    async ({ value, attribute }) => {
-      // Find relational attributes, and return the document ids
-      if (attribute.type === 'relation') {
-        // TODO: Handle morph relations (they have multiple targets)
-        const target = attribute.target;
-        if (!target) return;
+const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options) => {
+  return traverseEntityRelations(
+    async ({ attribute, value }) => {
+      const targetUid = attribute.target!;
+      const addDocId = addRelationDocId(idMap, targetUid, source);
 
-        await mapRelation((relation) => {
-          if (!relation || !relation.documentId) {
-            return relation;
-          }
-
-          const targetLocale = getRelationTargetLocale(relation, {
-            targetUid: target as UID.Schema,
-            sourceUid: opts.uid,
-            sourceLocale: opts.locale,
-          });
-
-          const targetStatus = getRelationTargetStatus(relation, {
-            targetUid: target as UID.Schema,
-            sourceUid: opts.uid,
-            sourceStatus: opts.status,
-          });
-
-          targetStatus.forEach((status) => {
-            idMap.add({
-              uid: target,
-              documentId: relation.documentId,
-              locale: targetLocale,
-              status,
-            });
-          });
-
+      return mapRelation((relation) => {
+        if (!relation || !relation.documentId) {
           return relation;
-        }, value as any);
-      }
+        }
+
+        addDocId(relation);
+
+        // Handle positional arguments
+        const position = relation.position;
+
+        if (position?.before) {
+          addDocId({ ...relation, ...position, documentId: position.before });
+        }
+
+        if (position?.after) {
+          addDocId({ ...relation, ...position, documentId: position.after });
+        }
+
+        return relation;
+      }, value as any);
     },
-    { schema: strapi.getModel(opts.uid) },
+    { schema: strapi.getModel(source.uid) },
     data
   );
 };
