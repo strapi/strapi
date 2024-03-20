@@ -13,7 +13,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
@@ -29,6 +28,8 @@ import { translatedErrors } from '../../../../../utils/translatedErrors';
 
 import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
+
+import type { Data } from '@strapi/types';
 
 interface ModalFormProps {
   onToggle: () => void;
@@ -260,7 +261,7 @@ interface InitialData {
   firstname?: string;
   lastname?: string;
   email?: string;
-  roles?: Entity.ID[];
+  roles?: Data.ID[];
   useSSORegistration?: boolean;
 }
 

@@ -15,7 +15,7 @@ import { Table as TableImpl } from '../../../../components/Table';
 import { useTracking } from '../../../../features/Tracking';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Table
@@ -23,7 +23,7 @@ import type { Entity } from '@strapi/types';
 
 interface TableProps
   extends Pick<TableImpl.Props<SanitizedTransferToken | ApiToken>, 'headers' | 'isLoading'> {
-  onConfirmDelete: (id: Entity.ID) => void;
+  onConfirmDelete: (id: Data.ID) => void;
   permissions: {
     canRead: boolean;
     canDelete: boolean;
@@ -56,7 +56,7 @@ const Table = ({
 
   const { canDelete, canUpdate, canRead } = permissions;
 
-  const handleRowClick = (id: Entity.ID) => () => {
+  const handleRowClick = (id: Data.ID) => () => {
     if (canRead) {
       trackUsage('willEditTokenFromList', {
         tokenType,
@@ -152,7 +152,7 @@ const MESSAGES_MAP = {
 
 interface DefaultButtonProps {
   tokenName: string;
-  tokenId: Entity.ID;
+  tokenId: Data.ID;
   buttonType?: 'edit' | 'read';
   children: React.ReactNode;
 }
@@ -237,7 +237,7 @@ const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps
 
 interface ButtonProps {
   tokenName: string;
-  tokenId: Entity.ID;
+  tokenId: Data.ID;
 }
 
 const UpdateButton = ({ tokenName, tokenId }: ButtonProps) => {

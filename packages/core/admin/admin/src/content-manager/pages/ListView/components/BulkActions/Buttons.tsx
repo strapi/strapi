@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Button, Typography } from '@strapi/design-system';
 import { Check, Trash } from '@strapi/icons';
-import { Entity } from '@strapi/types';
+import { Data } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import { useTable } from '../../../../../components/Table';
@@ -113,8 +113,8 @@ interface BulkActionButtonsProps {
   refetchData: () => Promise<void>;
   showPublish?: boolean;
   showDelete?: boolean;
-  onConfirmDeleteAll: (ids: Entity.ID[]) => Promise<void>;
-  onConfirmUnpublishAll: (ids: Entity.ID[]) => Promise<void>;
+  onConfirmDeleteAll: (ids: Data.ID[]) => Promise<void>;
+  onConfirmUnpublishAll: (ids: Data.ID[]) => Promise<void>;
 }
 
 const BulkActionButtons = ({
@@ -160,7 +160,7 @@ const BulkActionButtons = ({
   };
 
   const handleBulkAction =
-    (confirmAction: (ids: Entity.ID[]) => Promise<void>, toggleDialog: () => void) => async () => {
+    (confirmAction: (ids: Data.ID[]) => Promise<void>, toggleDialog: () => void) => async () => {
       try {
         setIsConfirmButtonLoading(true);
         await confirmAction(selectedEntries);

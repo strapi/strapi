@@ -1,12 +1,11 @@
 import { isObject } from 'lodash/fp';
-import { EntityService, Attribute, Common } from '@strapi/types';
+import { Modules, Schema, UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { IdMap } from '../../id-map';
 import { ShortHand, LongHand, LongHandDocument } from '../utils/types';
 import { isShortHand, isLongHand } from '../utils/data';
 import { getRelationTargetLocale } from '../utils/i18n';
 import { getRelationTargetStatus } from '../utils/dp';
-
 /**
  *  Get relation ids from primitive representation (id, id[], {id}, {id}[])
  */
@@ -42,8 +41,8 @@ const handlePrimitive = (
 /**
  * Get all relations document ids from a relation input value
  */
-const extractRelationIds = <T extends Attribute.RelationKind.Any>(
-  relation: EntityService.Params.Attribute.RelationInputValue<T>
+const extractRelationIds = <T extends Schema.Attribute.RelationKind.Any>(
+  relation: Modules.EntityService.Params.Attribute.RelationInputValue<T>
 ): LongHandDocument[] => {
   const ids = handlePrimitive(relation);
   if (!isObject(relation)) return ids;
@@ -84,7 +83,7 @@ const extractRelationIds = <T extends Attribute.RelationKind.Any>(
 const extractDataIds = (
   idMap: IdMap,
   data: Record<string, any>,
-  opts: { uid: Common.UID.Schema; locale?: string | null; status?: 'draft' | 'published' }
+  opts: { uid: UID.Schema; locale?: string | null; status?: 'draft' | 'published' }
 ) => {
   return traverseEntity(
     ({ value, attribute }) => {
@@ -99,13 +98,13 @@ const extractDataIds = (
         // If not connecting to any version on disabled d&p, we should connect to both draft and published relations at the same time
         extractedIds.forEach((relation) => {
           const targetLocale = getRelationTargetLocale(relation, {
-            targetUid: target as Common.UID.Schema,
+            targetUid: target as UID.Schema,
             sourceUid: opts.uid,
             sourceLocale: opts.locale,
           });
 
           const targetStatus = getRelationTargetStatus(relation, {
-            targetUid: target as Common.UID.Schema,
+            targetUid: target as UID.Schema,
             sourceUid: opts.uid,
             sourceStatus: opts.status,
           });

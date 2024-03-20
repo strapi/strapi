@@ -4,14 +4,14 @@
  * which are enabled and disabled.
  */
 
-import type { Strapi, FeaturesService, FeaturesConfig } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
-type FeatureName = keyof FeaturesConfig['future'];
+type FeatureName = keyof Modules.Features.FeaturesConfig['future'];
 
-const createFeaturesService = (strapi: Strapi): FeaturesService => {
-  const service: FeaturesService = {
+const createFeaturesService = (strapi: Core.Strapi): Modules.Features.FeaturesService => {
+  const service: Modules.Features.FeaturesService = {
     get config() {
-      return strapi.config.get<FeaturesService['config']>('features');
+      return strapi.config.get<Modules.Features.FeaturesService['config']>('features');
     },
     future: {
       isEnabled(futureFlagName: string): boolean {
@@ -24,4 +24,4 @@ const createFeaturesService = (strapi: Strapi): FeaturesService => {
 };
 
 export { createFeaturesService };
-export type { FeaturesService };
+export type FeaturesService = Modules.Features.FeaturesService;

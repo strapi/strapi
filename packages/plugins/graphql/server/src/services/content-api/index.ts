@@ -2,7 +2,7 @@ import { pruneSchema } from '@graphql-tools/utils';
 import { makeSchema } from 'nexus';
 import { prop, startsWith } from 'lodash/fp';
 import type * as Nexus from 'nexus';
-import type { Schema, Strapi } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 import { wrapResolvers } from './wrap-resolvers';
 import {
@@ -19,7 +19,7 @@ import {
 } from './register-functions';
 import { TypeRegistry } from '../type-registry';
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { mergeSchemas, addResolversToSchema } = require('@graphql-tools/schema');
 
@@ -146,7 +146,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
    * Register needed GraphQL types for every content type
    * @param {object[]} contentTypes
    */
-  const registerAPITypes = (contentTypes: Schema.Any[]) => {
+  const registerAPITypes = (contentTypes: Struct.Schema[]) => {
     for (const contentType of contentTypes) {
       const { modelType } = contentType;
 
@@ -169,17 +169,17 @@ export default ({ strapi }: { strapi: Strapi }) => {
 
       // Generate & register single type's definition
       if (kind === 'singleType') {
-        registerSingleType(contentType, registerOptions);
+        registerSingleType(contentType as Struct.SingleTypeSchema, registerOptions);
       }
 
       // Generate & register collection type's definition
       else if (kind === 'collectionType') {
-        registerCollectionType(contentType, registerOptions);
+        registerCollectionType(contentType as Struct.CollectionTypeSchema, registerOptions);
       }
     }
   };
 
-  const registerMorphTypes = (contentTypes: Schema.Any[]) => {
+  const registerMorphTypes = (contentTypes: Struct.Schema[]) => {
     // Create & register a union type that includes every type or component registered
     const genericMorphType = builders.buildGenericMorphDefinition();
     registry.register(GENERIC_MORPH_TYPENAME, genericMorphType, { kind: KINDS.morph });

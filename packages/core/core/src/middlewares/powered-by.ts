@@ -1,4 +1,4 @@
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 export interface Config {
   poweredBy: string;
@@ -8,7 +8,7 @@ const defaults: Config = {
   poweredBy: 'Strapi <strapi.io>',
 };
 
-export const poweredBy: Common.MiddlewareFactory<Partial<Config>> = (config) => {
+export const poweredBy: Core.MiddlewareFactory<Partial<Config>> = (config) => {
   const { poweredBy } = { ...defaults, ...config };
 
   return async (ctx, next) => {

@@ -1,10 +1,10 @@
 import crypto from 'crypto';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 /**
  * Generate an admin user hash
  */
-const generateAdminUserHash = (strapi: Strapi) => {
+const generateAdminUserHash = (strapi: Core.Strapi) => {
   const ctx = strapi?.requestContext?.get();
   if (!ctx?.state?.user?.email) {
     return '';

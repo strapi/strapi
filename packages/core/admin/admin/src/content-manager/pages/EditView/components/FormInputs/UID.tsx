@@ -20,7 +20,7 @@ import {
 } from '../../../../services/uid';
 import { buildValidParams } from '../../../../utils/api';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * InputUID
@@ -29,7 +29,7 @@ import type { Attribute } from '@strapi/types';
 const UID_REGEX = /^[A-Za-z0-9-_.~]*$/;
 
 interface UIDInputProps extends Omit<InputProps, 'type'> {
-  type: Attribute.UID['type'];
+  type: Schema.Attribute.TypeOf<Schema.Attribute.UID>;
 }
 
 const UIDInput = React.forwardRef<any, UIDInputProps>(

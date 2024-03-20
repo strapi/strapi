@@ -4,7 +4,7 @@
  */
 
 import { Job, scheduleJob } from 'node-schedule';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import wrapWithRateLimit from './rate-limiter';
 import createSender from './sender';
@@ -19,7 +19,7 @@ const LIMITED_EVENTS = [
   'didInitializePluginUpload',
 ];
 
-const createTelemetryInstance = (strapi: Strapi) => {
+const createTelemetryInstance = (strapi: Core.Strapi) => {
   const uuid = strapi.config.get('uuid');
   const telemetryDisabled = strapi.config.get('packageJsonStrapi.telemetryDisabled');
   const isDisabled =

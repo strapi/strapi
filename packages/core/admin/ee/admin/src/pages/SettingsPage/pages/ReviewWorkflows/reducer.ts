@@ -1,4 +1,3 @@
-import { Schema } from '@strapi/types';
 import { createDraft, produce } from 'immer';
 
 import {
@@ -25,6 +24,8 @@ import {
   STAGE_COLOR_DEFAULT,
 } from './constants';
 
+import type { Struct } from '@strapi/types';
+
 export type CurrentWorkflow = Partial<
   Pick<Workflow, 'name' | 'contentTypes' | 'stages' | 'id'> & {
     permissions?: StagePermission[];
@@ -35,8 +36,8 @@ export type PartialWorkflow = Omit<CurrentWorkflow, 'stages'> & { stages?: Parti
 
 export interface ServerState {
   contentTypes?: {
-    collectionTypes: Schema.CollectionType[];
-    singleTypes: Schema.SingleType[];
+    collectionTypes: Struct.CollectionTypeSchema[];
+    singleTypes: Struct.SingleTypeSchema[];
   };
   roles?: AdminRole[];
   workflow?: PartialWorkflow | null;

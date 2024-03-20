@@ -51,7 +51,7 @@ import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 
-import type { Documents } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 const REVIEW_WORKFLOW_COLUMNS_CE = null;
@@ -230,7 +230,7 @@ const ListViewPage = () => {
 
   const contentTypeTitle = schema?.info.displayName ?? 'Untitled';
 
-  const handleRowClick = (id: Documents.ID) => () => {
+  const handleRowClick = (id: Modules.Documents.ID) => () => {
     trackUsage('willEditEntryFromList');
     navigate({
       pathname: id.toString(),

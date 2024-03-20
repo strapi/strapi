@@ -1,7 +1,7 @@
 import Router from '@koa/router';
 import { has } from 'lodash/fp';
 import { yup } from '@strapi/utils';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import createEndpointComposer from './compose-endpoint';
 
@@ -59,7 +59,7 @@ const routeSchema = yup.object({
     .notRequired(),
 });
 
-const validateRouteConfig = (routeConfig: Common.RouteInput) => {
+const validateRouteConfig = (routeConfig: Core.RouteInput) => {
   try {
     return routeSchema.validateSync(routeConfig, {
       strict: true,
@@ -73,12 +73,12 @@ const validateRouteConfig = (routeConfig: Common.RouteInput) => {
   }
 };
 
-const createRouteManager = (strapi: Strapi, opts: { type?: string } = {}) => {
+const createRouteManager = (strapi: Core.Strapi, opts: { type?: string } = {}) => {
   const { type } = opts;
 
   const composeEndpoint = createEndpointComposer(strapi);
 
-  const createRoute = (route: Common.RouteInput, router: Router) => {
+  const createRoute = (route: Core.RouteInput, router: Router) => {
     validateRouteConfig(route);
 
     // NOTE: the router type is used to tag controller actions and for authentication / authorization so we need to pass this info down to the route level
@@ -92,7 +92,7 @@ const createRouteManager = (strapi: Strapi, opts: { type?: string } = {}) => {
     composeEndpoint(routeWithInfo, { router });
   };
 
-  const addRoutes = (routes: Common.Router | Common.RouteInput[], router: Router) => {
+  const addRoutes = (routes: Core.Router | Core.RouteInput[], router: Router) => {
     if (Array.isArray(routes)) {
       routes.forEach((route) => createRoute(route, router));
     } else if (routes.routes) {

@@ -36,10 +36,10 @@
   "scripts": {
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "doc:ts": "typedoc",
+    "doc:ts:watch": "typedoc --watch",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
@@ -52,11 +52,11 @@
     "@strapi/utils": "5.0.0-alpha.2",
     "commander": "8.3.0",
     "koa": "2.13.4",
-    "node-schedule": "2.1.0"
+    "node-schedule": "2.1.0",
+    "typedoc": "0.25.10"
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0-alpha.2",
-    "@strapi/ts-zen": "^0.2.0",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/koa__router": "12.0.0",

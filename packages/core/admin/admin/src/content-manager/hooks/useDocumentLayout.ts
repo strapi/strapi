@@ -24,7 +24,7 @@ import type { Filters } from '../../components/Filters';
 import type { InputProps } from '../../components/FormInputs/types';
 import type { Table } from '../../components/Table';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { Attribute } from '@strapi/types';
+import type { Schema as SchemaUtils } from '@strapi/types';
 
 type LayoutOptions = Schema['options'] & Schema['pluginOptions'] & object;
 
@@ -36,7 +36,7 @@ interface LayoutSettings extends Contracts.ContentTypes.Settings {
 interface ListFieldLayout
   extends Table.Header<Document, ListFieldLayout>,
     Pick<Filters.Filter, 'mainField'> {
-  attribute: Attribute.Any | { type: 'custom' };
+  attribute: SchemaUtils.Attribute.AnyAttribute | { type: 'custom' };
 }
 
 interface ListLayout {
@@ -63,11 +63,11 @@ interface EditFieldSharedProps
  * is under the property attribute and the type is under the property type.
  */
 type EditFieldLayout = {
-  [K in Attribute.Kind]: EditFieldSharedProps & {
-    attribute: Extract<Attribute.Any, { type: K }>;
+  [K in SchemaUtils.Attribute.Kind]: EditFieldSharedProps & {
+    attribute: Extract<SchemaUtils.Attribute.AnyAttribute, { type: K }>;
     type: K;
   };
-}[Attribute.Kind];
+}[SchemaUtils.Attribute.Kind];
 
 interface EditLayout {
   layout: Array<Array<EditFieldLayout[]>>;

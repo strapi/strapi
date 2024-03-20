@@ -1,6 +1,6 @@
 import { inputObjectType, nonNull } from 'nexus';
 import { contentTypes } from '@strapi/utils';
-import type { Schema } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import type { Context } from '../types';
 
 const { isWritableAttribute } = contentTypes;
@@ -23,7 +23,7 @@ export default ({ strapi }: Context) => {
   } = attributes;
 
   return {
-    buildInputType(contentType: Schema.Any) {
+    buildInputType(contentType: Struct.Schema) {
       const { attributes, modelType } = contentType;
 
       const name = (

@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { convertQueryParams } from '@strapi/utils';
 import auditLogContentType from './content-types/audit-log';
 
@@ -14,7 +14,7 @@ interface Log extends Omit<Event, 'userId'> {
 }
 
 export default {
-  async register({ strapi }: { strapi: Strapi }) {
+  async register({ strapi }: { strapi: Core.Strapi }) {
     const contentTypes = strapi.get('content-types');
     if (!contentTypes.keys().includes('admin::audit-log')) {
       const { schema } = auditLogContentType;

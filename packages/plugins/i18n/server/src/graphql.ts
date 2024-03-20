@@ -1,13 +1,13 @@
 import { propEq, identity } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 const { ValidationError } = errors;
 
 const LOCALE_SCALAR_TYPENAME = 'I18NLocaleCode';
 const LOCALE_ARG_PLUGIN_NAME = 'I18NLocaleArg';
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   register() {
     const { service: getGraphQLService } = strapi.plugin('graphql');
     const { service: getI18NService } = strapi.plugin('i18n');

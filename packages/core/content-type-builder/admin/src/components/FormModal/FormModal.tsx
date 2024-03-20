@@ -76,7 +76,7 @@ import { getFormInputNames } from './utils/getFormInputNames';
 
 import type { CustomFieldAttributeParams } from '../../contexts/DataManagerContext';
 import type { AttributeType } from '../../types';
-import type { Common } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -364,7 +364,7 @@ export const FormModal = () => {
       // This is happening when the user click on the link from the left menu
     } else if (isCreatingComponent) {
       schema = forms.component.schema(
-        Object.keys(components) as Common.UID.Component[],
+        Object.keys(components) as Internal.UID.Component[],
         modifiedData.category || '',
         reservedNames,
         actionType === 'edit',
@@ -389,7 +389,7 @@ export const FormModal = () => {
       // The data is set in the componentToCreate key
     } else if (isComponentAttribute && isCreatingComponentFromAView && isInFirstComponentStep) {
       schema = forms.component.schema(
-        Object.keys(components) as Common.UID.Component[],
+        Object.keys(components) as Internal.UID.Component[],
         get(modifiedData, 'componentToCreate.category', ''),
         reservedNames,
         actionType === 'edit',
@@ -444,7 +444,7 @@ export const FormModal = () => {
       // eslint-disable-next-line no-lonely-if
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
-          Object.keys(components) as Common.UID.Component[],
+          Object.keys(components) as Internal.UID.Component[],
           get(modifiedData, 'componentToCreate.category', ''),
           reservedNames,
           actionType === 'edit',
@@ -571,7 +571,7 @@ export const FormModal = () => {
             targetUid: componentUid,
           });
         } else {
-          updateSchema(modifiedData, modalType, targetUid);
+          updateSchema(modifiedData, modalType, targetUid as Internal.UID.Component);
 
           // Close the modal
           onCloseModal();

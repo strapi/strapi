@@ -49,7 +49,7 @@ import { DocumentStatus } from '../DocumentStatus';
 
 import { useComponent } from './ComponentContext';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * RelationsField
@@ -550,7 +550,7 @@ const RELATION_GUTTER = 4;
 interface RelationsListProps extends Pick<RelationsFieldProps, 'disabled' | 'name'> {
   data: Relation[];
   isLoading?: boolean;
-  relationType: Attribute.Relation['relation'];
+  relationType: Schema.Attribute.RelationKind.Any;
   /**
    * The existing relations connected on the server. We need these to diff against.
    */

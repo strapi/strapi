@@ -1,5 +1,4 @@
 import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
-import { RelationKind } from '@strapi/types/dist/types/core/attributes';
 import uniq from 'lodash/uniq';
 import * as yup from 'yup';
 
@@ -15,6 +14,8 @@ import {
   NAME_REGEX,
   validators,
 } from './validation/common';
+
+import type { Schema } from '@strapi/types';
 
 export const attributeTypes = {
   date(usedAttributeNames: Array<string>, reservedNames: Array<string>) {
@@ -277,7 +278,7 @@ export const attributeTypes = {
       initialData: { targetAttribute?: string };
       modifiedData: {
         name?: string;
-        relation?: RelationKind.WithTarget;
+        relation?: Schema.Attribute.RelationKind.WithTarget;
         targetAttribute?: string;
       };
     }

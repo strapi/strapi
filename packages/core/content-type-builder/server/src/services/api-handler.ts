@@ -1,11 +1,11 @@
 import * as path from 'path';
 import * as fse from 'fs-extra';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 /**
  * Deletes the API folder of a contentType
  */
-export async function clear(uid: UID.ContentType) {
+export async function clear(uid: Internal.UID.ContentType) {
   // TODO double check if this is the correct way to get the apiName
   const { apiName, modelName } = strapi.contentTypes[uid] as any;
 
@@ -19,7 +19,7 @@ export async function clear(uid: UID.ContentType) {
  * Backups the API folder of a contentType
  * @param {string} uid content type uid
  */
-export async function backup(uid: UID.ContentType) {
+export async function backup(uid: Internal.UID.ContentType) {
   const { apiName } = strapi.contentTypes[uid] as any;
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);
@@ -32,7 +32,7 @@ export async function backup(uid: UID.ContentType) {
 /**
  * Deletes an API backup folder
  */
-async function deleteBackup(uid: UID.ContentType) {
+async function deleteBackup(uid: Internal.UID.ContentType) {
   const { apiName } = strapi.contentTypes[uid] as any;
 
   const backupFolder = path.join(strapi.dirs.app.api, '.backup');
@@ -49,7 +49,7 @@ async function deleteBackup(uid: UID.ContentType) {
 /**
  * Rollbacks the API folder of a contentType
  */
-export async function rollback(uid: UID.ContentType) {
+export async function rollback(uid: Internal.UID.ContentType) {
   const { apiName } = strapi.contentTypes[uid] as any;
 
   const apiFolder = path.join(strapi.dirs.app.api, apiName);

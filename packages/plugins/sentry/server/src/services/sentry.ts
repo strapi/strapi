@@ -1,8 +1,8 @@
-import type { Strapi } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
 import type { Config } from 'src/config';
 import * as Sentry from '@sentry/node';
 
-const createSentryService = (strapi: Strapi) => {
+const createSentryService = (strapi: Core.Strapi) => {
   let isReady = false;
   let instance: typeof Sentry | null = null;
 
@@ -72,4 +72,4 @@ const createSentryService = (strapi: Strapi) => {
   };
 };
 
-export default ({ strapi }: { strapi: Strapi }) => createSentryService(strapi);
+export default ({ strapi }: { strapi: Core.Strapi }) => createSentryService(strapi);

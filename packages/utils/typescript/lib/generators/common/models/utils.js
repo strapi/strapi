@@ -18,8 +18,8 @@ const {
 } = require('lodash/fp');
 
 const NAMESPACES = {
-  schema: 'Schema',
-  attribute: 'Attribute',
+  Struct: 'Struct',
+  Schema: 'Schema',
 };
 
 /**
@@ -50,7 +50,7 @@ const getSchemaModelType = (schema) => {
  * Get the parent type name to extend based on the schema's nature
  *
  * @param {object} schema
- * @returns {string}
+ * @returns {string|null}
  */
 const getSchemaExtendsTypeName = (schema) => {
   const base = getSchemaModelType(schema);
@@ -59,7 +59,7 @@ const getSchemaExtendsTypeName = (schema) => {
     return null;
   }
 
-  return `${NAMESPACES.schema}.${upperFirst(base)}`;
+  return `${NAMESPACES.Struct}.${upperFirst(base)}Schema`;
 };
 
 /**
@@ -145,12 +145,12 @@ const getDefinitionAttributesCount = (definition) => {
 };
 
 /**
- * Add the attribute namespace before the typename
+ * Add the Schema.Attribute namespace before the typename
  *
  * @param {string} typeName
  * @returns {string}
  */
-const withAttributeNamespace = (typeName) => `${NAMESPACES.attribute}.${typeName}`;
+const withAttributeNamespace = (typeName) => `${NAMESPACES.Schema}.Attribute.${typeName}`;
 
 /**
  * Add the schema namespace before the typename

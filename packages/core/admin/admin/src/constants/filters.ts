@@ -1,4 +1,4 @@
-import type { EntityService } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 import type { MessageDescriptor } from 'react-intl';
 
 /**
@@ -6,7 +6,7 @@ import type { MessageDescriptor } from 'react-intl';
  * then passed to a Select component.
  */
 interface FilterOption {
-  value: EntityService.Params.Filters.Operator.Where;
+  value: Modules.EntityService.Params.Filters.Operator.Where;
   label: MessageDescriptor;
 }
 

@@ -1,14 +1,14 @@
 import { assoc, curry } from 'lodash/fp';
 
-import { Schema, Documents } from '@strapi/types';
+import { Modules, Struct } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 
-type ParamsTransform = (params: Documents.Params.All) => Documents.Params.All;
+type ParamsTransform = (params: Modules.Documents.Params.All) => Modules.Documents.Params.All;
 
 type TransformWithContentType = (
-  contentType: Schema.SingleType | Schema.CollectionType,
-  params: Documents.Params.All
-) => Documents.Params.All;
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
+  params: Modules.Documents.Params.All
+) => Modules.Documents.Params.All;
 
 /**
  * DP enabled -> set status to draft

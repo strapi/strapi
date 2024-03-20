@@ -2,14 +2,14 @@ import { Kind, valueFromASTUntyped } from 'graphql';
 import { omit } from 'lodash/fp';
 import { unionType, scalarType } from 'nexus';
 import { errors } from '@strapi/utils';
-import type { UID, Attribute } from '@strapi/types';
+import type { Internal, Schema } from '@strapi/types';
 
 import type { Context } from '../types';
 
 const { ApplicationError } = errors;
 
 export default ({ strapi }: Context) => {
-  const buildTypeDefinition = (name: string, components: UID.Component[]) => {
+  const buildTypeDefinition = (name: string, components: Internal.UID.Component[]) => {
     const { ERROR_TYPE_NAME } = strapi.plugin('graphql').service('constants');
     const isEmpty = components.length === 0;
 
@@ -42,7 +42,7 @@ export default ({ strapi }: Context) => {
     });
   };
 
-  const buildInputDefinition = (name: string, components: UID.Component[]) => {
+  const buildInputDefinition = (name: string, components: Internal.UID.Component[]) => {
     const parseData = (value: any) => {
       const component = Object.values(strapi.components).find(
         (component) => component.globalId === value.__typename
@@ -83,12 +83,12 @@ export default ({ strapi }: Context) => {
   return {
     /**
      * Build a Nexus dynamic zone type from a Strapi dz attribute
-     * @param {object} definition - The definition of the dynamic zone
-     * @param {string} name - the name of the dynamic zone
-     * @param {string} inputName - the name of the dynamic zone's input
-     * @return {[NexusUnionTypeDef, NexusScalarTypeDef]}
      */
-    buildDynamicZoneDefinition(definition: Attribute.DynamicZone, name: string, inputName: string) {
+    buildDynamicZoneDefinition(
+      definition: Schema.Attribute.DynamicZone,
+      name: string,
+      inputName: string
+    ) {
       const { components } = definition;
 
       const typeDefinition = buildTypeDefinition(name, components);

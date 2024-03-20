@@ -37,7 +37,7 @@ import { ComponentProvider, useComponent } from '../ComponentContext';
 import { Initializer } from './Initializer';
 
 import type { ComponentInputProps } from './Input';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * RepeatableComponent
@@ -58,7 +58,7 @@ const RepeatableComponent = ({
   const { components } = useDoc();
 
   const { value = [], error } =
-    useField<Attribute.ComponentValue<`${string}.${string}`, true>>(name);
+    useField<Schema.Attribute.ComponentValue<`${string}.${string}`, true>>(name);
   const addFieldRow = useForm('RepeatableComponent', (state) => state.addFieldRow);
   const moveFieldRow = useForm('RepeatableComponent', (state) => state.moveFieldRow);
   const removeFieldRow = useForm('RepeatableComponent', (state) => state.removeFieldRow);
@@ -379,7 +379,7 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
     Pick<RepeatableComponentProps, 'mainField'> {
-  attribute: Attribute.Component<`${string}.${string}`, boolean>;
+  attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
   isOpen?: boolean;

@@ -5,7 +5,7 @@ import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { useGetInitialDataQuery } from '../services/init';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * useContentTypeSchema
@@ -81,7 +81,7 @@ const extractContentTypeComponents = (
   attributes: Contracts.ContentTypes.ContentType['attributes'] = {},
   allComponents: ComponentsDictionary = {}
 ): ComponentsDictionary => {
-  const getComponents = (attributes: Attribute.Any[]) => {
+  const getComponents = (attributes: Schema.Attribute.AnyAttribute[]) => {
     return attributes.reduce<string[]>((acc, attribute) => {
       /**
        * If the attribute is a component or dynamiczone, we need to recursively

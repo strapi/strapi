@@ -1,6 +1,6 @@
 import * as utils from '@strapi/utils';
 import { pick } from 'lodash/fp';
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
 import { formatLocale } from '../domain/locale';
@@ -14,7 +14,7 @@ const sanitizeLocale = (locale: any) => {
   return sanitize.contentAPI.output(locale, model);
 };
 
-const controller: Common.Controller = {
+const controller: Core.Controller = {
   async listLocales(ctx) {
     const localesService = getService('locales');
 

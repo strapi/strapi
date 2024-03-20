@@ -8,11 +8,14 @@ import type {
   State,
 } from '../components/FormModalNavigationProvider/FormModalNavigationProvider';
 import type { SchemaType } from '../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 export interface FormModalNavigationContextValue {
   onCloseModal: () => void;
-  onOpenModalAddField: (options: { forTarget: SchemaType; targetUid?: UID.Any }) => void;
+  onOpenModalAddField: (options: {
+    forTarget: SchemaType;
+    targetUid?: Internal.UID.Schema;
+  }) => void;
   onClickSelectField: (option: ModalEventProps) => void;
   onClickSelectCustomField: (option: ModalEventProps) => void;
   onNavigateToChooseAttributeModal: (options: ModalEventProps) => void;
@@ -37,7 +40,7 @@ export interface FormModalNavigationContextValue {
   showBackLink: boolean;
   kind: string;
   step: string;
-  targetUid: UID.Any;
+  targetUid: Internal.UID.Schema;
 }
 
 // @ts-expect-error need to pass initial value to params

@@ -1,5 +1,6 @@
 import type { ParameterizedContext } from 'koa';
-import type { Common } from '../types';
+
+import type { RouteConfig, MiddlewareHandler } from '../core';
 
 interface AuthenticationResponse {
   authenticated?: boolean;
@@ -17,11 +18,11 @@ interface AuthenticationInfo {
 interface Strategy {
   name: string;
   authenticate: (ctx: ParameterizedContext) => Promise<AuthenticationResponse>;
-  verify?: (auth: AuthenticationInfo, config: Common.RouteConfig['auth']) => Promise<any>;
+  verify?: (auth: AuthenticationInfo, config: RouteConfig['auth']) => Promise<any>;
 }
 
 export interface AuthenticationService {
   register: (type: string, strategy: Strategy) => AuthenticationService;
-  authenticate: Common.MiddlewareHandler;
-  verify: (auth: AuthenticationInfo, config?: Common.RouteConfig['auth']) => Promise<any>;
+  authenticate: MiddlewareHandler;
+  verify: (auth: AuthenticationInfo, config?: RouteConfig['auth']) => Promise<any>;
 }
