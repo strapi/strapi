@@ -13,6 +13,7 @@ export type FindMany<TContentTypeUID extends UID.ContentType> = Pick<
   | 'filters'
   | '_q'
   | 'pagination'
+  | 'sort'
   | 'populate'
   | 'status'
   | 'locale'
