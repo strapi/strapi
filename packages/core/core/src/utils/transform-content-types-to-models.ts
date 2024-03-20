@@ -11,34 +11,68 @@ const { identifiers } = utils;
  * to a relations format that it recognizes
  *
  * Therefore we have to keep an additional set of helpers/extensions to the database naming methods
+ *
+ * IMPORTANT!
+ * If we use short versions of anything, we MUST call getNameFromTokens directly; attempting to shorten them ourselves
+ * prevents the unshortened name map from being filled properly, so for example it will think that the short name
+ * 'collection4f3a_cmps' maps to the unshortened 'collectionname_cmps' rather than 'collectionname_components'
+ * Therefore, we only use the identifiers methods in cases where we do not do any of our own shortening
  */
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const COMPONENT_JOIN_TABLE_SUFFIX = (options: MetadataOptions) => 'components';
+export const getComponentJoinTableName = (collectionName: string, options: MetadataOptions) => {
+  return identifiers.getNameFromTokens(
+    [
+      { name: collectionName, compressible: true },
+      { name: 'components', shortName: 'cmps', compressible: false },
+    ],
+    options
+  );
+};
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const DZ_JOIN_TABLE_SUFFIX = (options: MetadataOptions) => 'components';
+export const getDzJoinTableName = (collectionName: string, options: MetadataOptions) => {
+  return identifiers.getNameFromTokens(
+    [
+      { name: collectionName, compressible: true },
+      { name: 'components', shortName: 'cmps', compressible: false },
+    ],
+    options
+  );
+};
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const COMPONENT_INVERSE_COLUMN_NAME = (options: MetadataOptions) => 'component';
+export const getComponentJoinColumnEntityName = (options: MetadataOptions) => {
+  return identifiers.getNameFromTokens(
+    [
+      { name: 'entity', compressible: false },
+      { name: 'id', compressible: false },
+    ],
+    options
+  );
+};
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const COMPONENT_TYPE_COLUMN = (options: MetadataOptions) => 'component_type';
+export const getComponentJoinColumnInverseName = (options: MetadataOptions) => {
+  return identifiers.getNameFromTokens(
+    [
+      { name: 'component', shortName: 'cmp', compressible: false },
+      { name: 'id', compressible: false },
+    ],
+    options
+  );
+};
 
-export const ENTITY = 'entity';
+export const getComponentTypeColumn = (options: MetadataOptions) => {
+  return identifiers.getNameFromTokens([{ name: 'component_type', compressible: false }], options);
+};
 
-// TODO: we should either support suffix with full+short, or call getNameFromTokens directly to get the correct values in unshortenedName map
-export const getComponentJoinTableName = (collectionName: string, options: MetadataOptions) =>
-  identifiers.getTableName(collectionName, {
-    suffix: COMPONENT_JOIN_TABLE_SUFFIX(options),
-    ...options,
-  });
-
-export const getDzJoinTableName = (collectionName: string, options: MetadataOptions) =>
-  identifiers.getTableName(collectionName, {
-    suffix: DZ_JOIN_TABLE_SUFFIX(options),
-    ...options,
-  });
+export const getComponentFkIndexName = (contentType: string, options: MetadataOptions) => {
+  return identifiers.getNameFromTokens(
+    [
+      { name: contentType, compressible: true },
+      { name: 'entity', compressible: false },
+      { name: 'fk', compressible: false },
+    ],
+    options
+  );
+};
 
 const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order } = identifiers;
 
@@ -63,12 +97,9 @@ export const transformAttribute = (
     }
     case 'component': {
       const joinTableName = getComponentJoinTableName(contentType.collectionName, options);
-      const joinColumnEntityName = identifiers.getJoinColumnAttributeIdName(ENTITY, options);
-      const joinColumnInverseName = identifiers.getJoinColumnAttributeIdName(
-        COMPONENT_INVERSE_COLUMN_NAME(options),
-        options
-      );
-
+      const joinColumnEntityName = getComponentJoinColumnEntityName(options);
+      const joinColumnInverseName = getComponentJoinColumnInverseName(options);
+      const compTypeColumn = getComponentTypeColumn(options);
       return {
         type: 'relation',
         relation: attribute.repeatable === true ? 'oneToMany' : 'oneToOne',
@@ -93,23 +124,15 @@ export const transformAttribute = (
           orderBy: {
             order: 'asc',
           },
-          pivotColumns: [
-            joinColumnEntityName,
-            joinColumnInverseName,
-            field,
-            COMPONENT_TYPE_COLUMN(options),
-          ],
+          pivotColumns: [joinColumnEntityName, joinColumnInverseName, field, compTypeColumn],
         },
       };
     }
     case 'dynamiczone': {
       const joinTableName = getDzJoinTableName(contentType.collectionName, options);
-      const joinColumnEntityName = identifiers.getJoinColumnAttributeIdName(ENTITY, options);
-      const joinColumnInverseName = identifiers.getJoinColumnAttributeIdName(
-        COMPONENT_INVERSE_COLUMN_NAME(options),
-        options
-      );
-      const compTypeColumn = COMPONENT_TYPE_COLUMN(options);
+      const joinColumnEntityName = getComponentJoinColumnEntityName(options);
+      const joinColumnInverseName = getComponentJoinColumnInverseName(options);
+      const compTypeColumn = getComponentTypeColumn(options);
 
       return {
         type: 'relation',
@@ -181,13 +204,10 @@ const createCompoLinkModel = (
 ): Model => {
   const name = getComponentJoinTableName(contentType.collectionName, options);
 
-  const entityId = identifiers.getJoinColumnAttributeIdName(ENTITY, options);
-  const componentId = identifiers.getJoinColumnAttributeIdName(
-    COMPONENT_INVERSE_COLUMN_NAME(options),
-    options
-  );
-  const fkIndex = identifiers.getFkIndexName([contentType.collectionName, ENTITY], options);
-  const compTypeColumn = COMPONENT_TYPE_COLUMN(options);
+  const entityId = getComponentJoinColumnEntityName(options);
+  const componentId = getComponentJoinColumnInverseName(options);
+  const compTypeColumn = getComponentTypeColumn(options);
+  const fkIndex = getComponentFkIndexName(contentType.collectionName, options);
 
   return {
     // TODO: make sure there can't be any conflicts with a prefix

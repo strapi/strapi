@@ -55,7 +55,7 @@ export const expectedMetadataHashedResults = {
               relation: 'oneToOne',
               target: 'api::complex.complex',
               joinTable: {
-                name: 'complexes_comp5354f_links',
+                name: 'complexes_comple5354f_lnk',
                 joinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
@@ -81,11 +81,11 @@ export const expectedMetadataHashedResults = {
         },
       ],
       [
-        'complexes_comp5354f_links',
+        'complexes_comple5354f_lnk',
         {
-          singularName: 'complexes_comp5354f_links',
-          uid: 'complexes_comp5354f_links',
-          tableName: 'complexes_comp5354f_links',
+          singularName: 'complexes_comple5354f_lnk',
+          uid: 'complexes_comple5354f_lnk',
+          tableName: 'complexes_comple5354f_lnk',
           attributes: {
             id: {
               type: 'increments',
@@ -108,29 +108,29 @@ export const expectedMetadataHashedResults = {
           },
           indexes: [
             {
-              name: 'complexes_comp53564c5f_fk',
+              name: 'complexes_comple53957f_fk',
               columns: ['complex_id'],
             },
             {
-              name: 'complexes_com64c5f_inv_fk',
+              name: 'complexes_comple3957f_ifk',
               columns: ['inv_complex_id'],
             },
             {
-              name: 'complexes_com64c5f_unique',
+              name: 'complexes_comple53957f_uq',
               columns: ['complex_id', 'inv_complex_id'],
               type: 'unique',
             },
           ],
           foreignKeys: [
             {
-              name: 'complexes_comp53564c5f_fk',
+              name: 'complexes_comple53957f_fk',
               columns: ['complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
               onDelete: 'CASCADE',
             },
             {
-              name: 'complexes_com64c5f_inv_fk',
+              name: 'complexes_comple3957f_ifk',
               columns: ['inv_complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
@@ -202,7 +202,7 @@ export const expectedMetadataHashedResults = {
               target: 'api::complex.complex',
               inversedBy: 'complexes',
               joinTable: {
-                name: 'complexes_comp3e8ce_links',
+                name: 'complexes_comple3e8ce_lnk',
                 joinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
@@ -214,7 +214,7 @@ export const expectedMetadataHashedResults = {
                   referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
-                inverseOrderColumnName: 'complex_order',
+                inverseOrderColumnName: 'complex_ord',
               },
             },
             complexes: {
@@ -223,7 +223,7 @@ export const expectedMetadataHashedResults = {
               target: 'api::complex.complex',
               mappedBy: 'complexeshasandbelongstomanycomplexes',
               joinTable: {
-                name: 'complexes_comp3e8ce_links',
+                name: 'complexes_comple3e8ce_lnk',
                 joinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
@@ -235,9 +235,9 @@ export const expectedMetadataHashedResults = {
                   referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
-                orderColumnName: 'complex_order',
+                orderColumnName: 'complex_ord',
                 orderBy: {
-                  complex_order: 'asc',
+                  complex_ord: 'asc',
                 },
               },
             },
@@ -254,11 +254,11 @@ export const expectedMetadataHashedResults = {
         },
       ],
       [
-        'complexes_comp3e8ce_links',
+        'complexes_comple3e8ce_lnk',
         {
-          singularName: 'complexes_comp3e8ce_links',
-          uid: 'complexes_comp3e8ce_links',
-          tableName: 'complexes_comp3e8ce_links',
+          singularName: 'complexes_comple3e8ce_lnk',
+          uid: 'complexes_comple3e8ce_lnk',
+          tableName: 'complexes_comple3e8ce_lnk',
           attributes: {
             id: {
               type: 'increments',
@@ -278,44 +278,44 @@ export const expectedMetadataHashedResults = {
               },
               columnName: 'inv_complex_id',
             },
-            complex_order: {
+            complex_ord: {
               type: 'float',
               column: {
                 unsigned: true,
                 defaultTo: null,
               },
-              columnName: 'complex_order',
+              columnName: 'complex_ord',
             },
           },
           indexes: [
             {
-              name: 'complexes_comp3e825c1c_fk',
+              name: 'complexes_comple31c773_fk',
               columns: ['complex_id'],
             },
             {
-              name: 'complexes_com25c1c_inv_fk',
+              name: 'complexes_comple1c773_ifk',
               columns: ['inv_complex_id'],
             },
             {
-              name: 'complexes_com25c1c_unique',
+              name: 'complexes_comple31c773_uq',
               columns: ['complex_id', 'inv_complex_id'],
               type: 'unique',
             },
             {
-              name: 'complex25c1c_order_inv_fk',
-              columns: ['complex_order'],
+              name: 'complexes_compl1c773_oifk',
+              columns: ['complex_ord'],
             },
           ],
           foreignKeys: [
             {
-              name: 'complexes_comp3e825c1c_fk',
+              name: 'complexes_comple31c773_fk',
               columns: ['complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
               onDelete: 'CASCADE',
             },
             {
-              name: 'complexes_com25c1c_inv_fk',
+              name: 'complexes_comple1c773_ifk',
               columns: ['inv_complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
@@ -327,7 +327,7 @@ export const expectedMetadataHashedResults = {
             id: 'id',
             complex_id: 'complex_id',
             inv_complex_id: 'inv_complex_id',
-            complex_order: 'complex_order',
+            complex_ord: 'complex_ord',
           },
         },
       ],
@@ -354,7 +354,7 @@ export const expectedMetadataHashedResults = {
               target: 'api::complex.complex',
               inversedBy: 'complex',
               joinTable: {
-                name: 'complexes_comp64178_links',
+                name: 'complexes_comple64178_lnk',
                 joinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
@@ -374,7 +374,7 @@ export const expectedMetadataHashedResults = {
               target: 'api::complex.complex',
               inversedBy: 'complexbelongstomanycomplexes',
               joinTable: {
-                name: 'complexes_comp64178_links',
+                name: 'complexes_comple64178_lnk',
                 joinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
@@ -401,11 +401,11 @@ export const expectedMetadataHashedResults = {
         },
       ],
       [
-        'complexes_comp64178_links',
+        'complexes_comple64178_lnk',
         {
-          singularName: 'complexes_comp64178_links',
-          uid: 'complexes_comp64178_links',
-          tableName: 'complexes_comp64178_links',
+          singularName: 'complexes_comple64178_lnk',
+          uid: 'complexes_comple64178_lnk',
+          tableName: 'complexes_comple64178_lnk',
           attributes: {
             id: {
               type: 'increments',
@@ -428,29 +428,29 @@ export const expectedMetadataHashedResults = {
           },
           indexes: [
             {
-              name: 'complexes_comp641aac64_fk',
+              name: 'complexes_comple68341a_fk',
               columns: ['complex_id'],
             },
             {
-              name: 'complexes_comaac64_inv_fk',
+              name: 'complexes_comple8341a_ifk',
               columns: ['inv_complex_id'],
             },
             {
-              name: 'complexes_comaac64_unique',
+              name: 'complexes_comple68341a_uq',
               columns: ['complex_id', 'inv_complex_id'],
               type: 'unique',
             },
           ],
           foreignKeys: [
             {
-              name: 'complexes_comp641aac64_fk',
+              name: 'complexes_comple68341a_fk',
               columns: ['complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
               onDelete: 'CASCADE',
             },
             {
-              name: 'complexes_comaac64_inv_fk',
+              name: 'complexes_comple8341a_ifk',
               columns: ['inv_complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
@@ -488,7 +488,7 @@ export const expectedMetadataHashedResults = {
               target: 'api::complex.complex',
               inversedBy: 'complexes',
               joinTable: {
-                name: 'complexes_comp61dc1_links',
+                name: 'complexes_comple61dc1_lnk',
                 joinColumn: {
                   name: 'complex_id',
                   referencedColumn: 'id',
@@ -500,11 +500,11 @@ export const expectedMetadataHashedResults = {
                   referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
-                orderColumnName: 'complex_order',
+                orderColumnName: 'complex_ord',
                 orderBy: {
-                  complex_order: 'asc',
+                  complex_ord: 'asc',
                 },
-                inverseOrderColumnName: 'inv_complex_order',
+                inverseOrderColumnName: 'inv_complex_ord',
               },
             },
             complexes: {
@@ -513,7 +513,7 @@ export const expectedMetadataHashedResults = {
               target: 'api::complex.complex',
               mappedBy: 'complexeshasandbelongstomanycomplexes',
               joinTable: {
-                name: 'complexes_comp61dc1_links',
+                name: 'complexes_comple61dc1_lnk',
                 joinColumn: {
                   name: 'inv_complex_id',
                   referencedColumn: 'id',
@@ -525,11 +525,11 @@ export const expectedMetadataHashedResults = {
                   referencedTable: 'complexes',
                 },
                 pivotColumns: ['complex_id', 'inv_complex_id'],
-                orderColumnName: 'inv_complex_order',
+                orderColumnName: 'inv_complex_ord',
                 orderBy: {
-                  inv_complex_order: 'asc',
+                  inv_complex_ord: 'asc',
                 },
-                inverseOrderColumnName: 'complex_order',
+                inverseOrderColumnName: 'complex_ord',
               },
             },
           },
@@ -545,11 +545,11 @@ export const expectedMetadataHashedResults = {
         },
       ],
       [
-        'complexes_comp61dc1_links',
+        'complexes_comple61dc1_lnk',
         {
-          singularName: 'complexes_comp61dc1_links',
-          uid: 'complexes_comp61dc1_links',
-          tableName: 'complexes_comp61dc1_links',
+          singularName: 'complexes_comple61dc1_lnk',
+          uid: 'complexes_comple61dc1_lnk',
+          tableName: 'complexes_comple61dc1_lnk',
           attributes: {
             id: {
               type: 'increments',
@@ -569,56 +569,56 @@ export const expectedMetadataHashedResults = {
               },
               columnName: 'inv_complex_id',
             },
-            complex_order: {
+            complex_ord: {
               type: 'float',
               column: {
                 unsigned: true,
                 defaultTo: null,
               },
-              columnName: 'complex_order',
+              columnName: 'complex_ord',
             },
-            inv_complex_order: {
+            inv_complex_ord: {
               type: 'float',
               column: {
                 unsigned: true,
                 defaultTo: null,
               },
-              columnName: 'inv_complex_order',
+              columnName: 'inv_complex_ord',
             },
           },
           indexes: [
             {
-              name: 'complexes_comp61d33276_fk',
+              name: 'complexes_comple63adbb_fk',
               columns: ['complex_id'],
             },
             {
-              name: 'complexes_com33276_inv_fk',
+              name: 'complexes_comple3adbb_ifk',
               columns: ['inv_complex_id'],
             },
             {
-              name: 'complexes_com33276_unique',
+              name: 'complexes_comple63adbb_uq',
               columns: ['complex_id', 'inv_complex_id'],
               type: 'unique',
             },
             {
-              name: 'complexes_c33276_order_fk',
-              columns: ['complex_order'],
+              name: 'complexes_comple3adbb_ofk',
+              columns: ['complex_ord'],
             },
             {
-              name: 'complex33276_order_inv_fk',
-              columns: ['inv_complex_order'],
+              name: 'complexes_compl3adbb_oifk',
+              columns: ['inv_complex_ord'],
             },
           ],
           foreignKeys: [
             {
-              name: 'complexes_comp61d33276_fk',
+              name: 'complexes_comple63adbb_fk',
               columns: ['complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
               onDelete: 'CASCADE',
             },
             {
-              name: 'complexes_com33276_inv_fk',
+              name: 'complexes_comple3adbb_ifk',
               columns: ['inv_complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
@@ -630,8 +630,8 @@ export const expectedMetadataHashedResults = {
             id: 'id',
             complex_id: 'complex_id',
             inv_complex_id: 'inv_complex_id',
-            complex_order: 'complex_order',
-            inv_complex_order: 'inv_complex_order',
+            complex_ord: 'complex_ord',
+            inv_complex_ord: 'inv_complex_ord',
           },
         },
       ],
@@ -659,7 +659,7 @@ export const expectedMetadataHashedResults = {
               relation: 'oneToOne',
               target: 'api::complex.complex',
               joinTable: {
-                name: 'compon56bca_complex_links',
+                name: 'componen56bca_complex_lnk',
                 joinColumn: {
                   name: 'long_component_name_id',
                   referencedColumn: 'id',
@@ -678,7 +678,7 @@ export const expectedMetadataHashedResults = {
               relation: 'oneToMany',
               target: 'api::complex.complex',
               joinTable: {
-                name: 'comp56bca_complexes_links',
+                name: 'compon56bca_complexes_lnk',
                 joinColumn: {
                   name: 'long_component_name_id',
                   referencedColumn: 'id',
@@ -690,9 +690,9 @@ export const expectedMetadataHashedResults = {
                   referencedTable: 'complexes',
                 },
                 pivotColumns: ['long_component_name_id', 'complex_id'],
-                orderColumnName: 'complex_order',
+                orderColumnName: 'complex_ord',
                 orderBy: {
-                  complex_order: 'asc',
+                  complex_ord: 'asc',
                 },
               },
             },
@@ -759,11 +759,11 @@ export const expectedMetadataHashedResults = {
         },
       ],
       [
-        'compon56bca_complex_links',
+        'componen56bca_complex_lnk',
         {
-          singularName: 'compon56bca_complex_links',
-          uid: 'compon56bca_complex_links',
-          tableName: 'compon56bca_complex_links',
+          singularName: 'componen56bca_complex_lnk',
+          uid: 'componen56bca_complex_lnk',
+          tableName: 'componen56bca_complex_lnk',
           attributes: {
             id: {
               type: 'increments',
@@ -786,29 +786,29 @@ export const expectedMetadataHashedResults = {
           },
           indexes: [
             {
-              name: 'compon56bca_compl3dff9_fk',
+              name: 'componen56bca_com62cd7_fk',
               columns: ['long_component_name_id'],
             },
             {
-              name: 'compon56bca_c3dff9_inv_fk',
+              name: 'componen56bca_co62cd7_ifk',
               columns: ['complex_id'],
             },
             {
-              name: 'compon56bca_c3dff9_unique',
+              name: 'componen56bca_com62cd7_uq',
               columns: ['long_component_name_id', 'complex_id'],
               type: 'unique',
             },
           ],
           foreignKeys: [
             {
-              name: 'compon56bca_compl3dff9_fk',
+              name: 'componen56bca_com62cd7_fk',
               columns: ['long_component_name_id'],
               referencedColumns: ['id'],
               referencedTable: 'components_default_l807d8',
               onDelete: 'CASCADE',
             },
             {
-              name: 'compon56bca_c3dff9_inv_fk',
+              name: 'componen56bca_co62cd7_ifk',
               columns: ['complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
@@ -824,11 +824,11 @@ export const expectedMetadataHashedResults = {
         },
       ],
       [
-        'comp56bca_complexes_links',
+        'compon56bca_complexes_lnk',
         {
-          singularName: 'comp56bca_complexes_links',
-          uid: 'comp56bca_complexes_links',
-          tableName: 'comp56bca_complexes_links',
+          singularName: 'compon56bca_complexes_lnk',
+          uid: 'compon56bca_complexes_lnk',
+          tableName: 'compon56bca_complexes_lnk',
           attributes: {
             id: {
               type: 'increments',
@@ -848,44 +848,44 @@ export const expectedMetadataHashedResults = {
               },
               columnName: 'complex_id',
             },
-            complex_order: {
+            complex_ord: {
               type: 'float',
               column: {
                 unsigned: true,
                 defaultTo: null,
               },
-              columnName: 'complex_order',
+              columnName: 'complex_ord',
             },
           },
           indexes: [
             {
-              name: 'comp56bca_complex5b601_fk',
+              name: 'compon56bca_compl32aff_fk',
               columns: ['long_component_name_id'],
             },
             {
-              name: 'comp56bca_com5b601_inv_fk',
+              name: 'compon56bca_comp32aff_ifk',
               columns: ['complex_id'],
             },
             {
-              name: 'comp56bca_com5b601_unique',
+              name: 'compon56bca_compl32aff_uq',
               columns: ['long_component_name_id', 'complex_id'],
               type: 'unique',
             },
             {
-              name: 'comp56bca_c5b601_order_fk',
-              columns: ['complex_order'],
+              name: 'compon56bca_comp32aff_ofk',
+              columns: ['complex_ord'],
             },
           ],
           foreignKeys: [
             {
-              name: 'comp56bca_complex5b601_fk',
+              name: 'compon56bca_compl32aff_fk',
               columns: ['long_component_name_id'],
               referencedColumns: ['id'],
               referencedTable: 'components_default_l807d8',
               onDelete: 'CASCADE',
             },
             {
-              name: 'comp56bca_com5b601_inv_fk',
+              name: 'compon56bca_comp32aff_ifk',
               columns: ['complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
@@ -897,7 +897,7 @@ export const expectedMetadataHashedResults = {
             id: 'id',
             long_component_name_id: 'long_component_name_id',
             complex_id: 'complex_id',
-            complex_order: 'complex_order',
+            complex_ord: 'complex_ord',
           },
         },
       ],
@@ -923,7 +923,7 @@ export const expectedMetadataHashedResults = {
               relation: 'oneToOne',
               target: 'api::complex.complex',
               joinTable: {
-                name: 'compon56bca_complex_links',
+                name: 'componen56bca_complex_lnk',
                 joinColumn: {
                   name: 'long_component_name_id',
                   referencedColumn: 'id',
@@ -942,7 +942,7 @@ export const expectedMetadataHashedResults = {
               relation: 'oneToMany',
               target: 'api::complex.complex',
               joinTable: {
-                name: 'comp56bca_complexes_links',
+                name: 'compon56bca_complexes_lnk',
                 joinColumn: {
                   name: 'long_component_name_id',
                   referencedColumn: 'id',
@@ -954,9 +954,9 @@ export const expectedMetadataHashedResults = {
                   referencedTable: 'complexes',
                 },
                 pivotColumns: ['long_component_name_id', 'complex_id'],
-                orderColumnName: 'complex_order',
+                orderColumnName: 'complex_ord',
                 orderBy: {
-                  complex_order: 'asc',
+                  complex_ord: 'asc',
                 },
               },
             },
@@ -1023,11 +1023,11 @@ export const expectedMetadataHashedResults = {
         },
       ],
       [
-        'compon56bca_complex_links',
+        'componen56bca_complex_lnk',
         {
-          singularName: 'compon56bca_complex_links',
-          uid: 'compon56bca_complex_links',
-          tableName: 'compon56bca_complex_links',
+          singularName: 'componen56bca_complex_lnk',
+          uid: 'componen56bca_complex_lnk',
+          tableName: 'componen56bca_complex_lnk',
           attributes: {
             id: {
               type: 'increments',
@@ -1050,29 +1050,29 @@ export const expectedMetadataHashedResults = {
           },
           indexes: [
             {
-              name: 'compon56bca_compl3dff9_fk',
+              name: 'componen56bca_com62cd7_fk',
               columns: ['long_component_name_id'],
             },
             {
-              name: 'compon56bca_c3dff9_inv_fk',
+              name: 'componen56bca_co62cd7_ifk',
               columns: ['complex_id'],
             },
             {
-              name: 'compon56bca_c3dff9_unique',
+              name: 'componen56bca_com62cd7_uq',
               columns: ['long_component_name_id', 'complex_id'],
               type: 'unique',
             },
           ],
           foreignKeys: [
             {
-              name: 'compon56bca_compl3dff9_fk',
+              name: 'componen56bca_com62cd7_fk',
               columns: ['long_component_name_id'],
               referencedColumns: ['id'],
               referencedTable: 'components_default_l807d8',
               onDelete: 'CASCADE',
             },
             {
-              name: 'compon56bca_c3dff9_inv_fk',
+              name: 'componen56bca_co62cd7_ifk',
               columns: ['complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
@@ -1088,11 +1088,11 @@ export const expectedMetadataHashedResults = {
         },
       ],
       [
-        'comp56bca_complexes_links',
+        'compon56bca_complexes_lnk',
         {
-          singularName: 'comp56bca_complexes_links',
-          uid: 'comp56bca_complexes_links',
-          tableName: 'comp56bca_complexes_links',
+          singularName: 'compon56bca_complexes_lnk',
+          uid: 'compon56bca_complexes_lnk',
+          tableName: 'compon56bca_complexes_lnk',
           attributes: {
             id: {
               type: 'increments',
@@ -1112,44 +1112,44 @@ export const expectedMetadataHashedResults = {
               },
               columnName: 'complex_id',
             },
-            complex_order: {
+            complex_ord: {
               type: 'float',
               column: {
                 unsigned: true,
                 defaultTo: null,
               },
-              columnName: 'complex_order',
+              columnName: 'complex_ord',
             },
           },
           indexes: [
             {
-              name: 'comp56bca_complex5b601_fk',
+              name: 'compon56bca_compl32aff_fk',
               columns: ['long_component_name_id'],
             },
             {
-              name: 'comp56bca_com5b601_inv_fk',
+              name: 'compon56bca_comp32aff_ifk',
               columns: ['complex_id'],
             },
             {
-              name: 'comp56bca_com5b601_unique',
+              name: 'compon56bca_compl32aff_uq',
               columns: ['long_component_name_id', 'complex_id'],
               type: 'unique',
             },
             {
-              name: 'comp56bca_c5b601_order_fk',
-              columns: ['complex_order'],
+              name: 'compon56bca_comp32aff_ofk',
+              columns: ['complex_ord'],
             },
           ],
           foreignKeys: [
             {
-              name: 'comp56bca_complex5b601_fk',
+              name: 'compon56bca_compl32aff_fk',
               columns: ['long_component_name_id'],
               referencedColumns: ['id'],
               referencedTable: 'components_default_l807d8',
               onDelete: 'CASCADE',
             },
             {
-              name: 'comp56bca_com5b601_inv_fk',
+              name: 'compon56bca_comp32aff_ifk',
               columns: ['complex_id'],
               referencedColumns: ['id'],
               referencedTable: 'complexes',
@@ -1161,7 +1161,7 @@ export const expectedMetadataHashedResults = {
             id: 'id',
             long_component_name_id: 'long_component_name_id',
             complex_id: 'complex_id',
-            complex_order: 'complex_order',
+            complex_ord: 'complex_ord',
           },
         },
       ],
@@ -1188,7 +1188,7 @@ export const expectedMetadataHashedResults = {
             relation: 'oneToOne',
             target: 'api::complex.complex',
             joinTable: {
-              name: 'compon56bca_complex_links',
+              name: 'componen56bca_complex_lnk',
               joinColumn: {
                 name: 'long_component_name_id',
                 referencedColumn: 'id',
@@ -1207,7 +1207,7 @@ export const expectedMetadataHashedResults = {
             relation: 'oneToMany',
             target: 'api::complex.complex',
             joinTable: {
-              name: 'comp56bca_complexes_links',
+              name: 'compon56bca_complexes_lnk',
               joinColumn: {
                 name: 'long_component_name_id',
                 referencedColumn: 'id',
@@ -1219,9 +1219,9 @@ export const expectedMetadataHashedResults = {
                 referencedTable: 'complexes',
               },
               pivotColumns: ['long_component_name_id', 'complex_id'],
-              orderColumnName: 'complex_order',
+              orderColumnName: 'complex_ord',
               orderBy: {
-                complex_order: 'asc',
+                complex_ord: 'asc',
               },
             },
           },
@@ -1292,11 +1292,11 @@ export const expectedMetadataHashedResults = {
       },
     ],
     [
-      'compon56bca_complex_links',
+      'componen56bca_complex_lnk',
       {
-        singularName: 'compon56bca_complex_links',
-        uid: 'compon56bca_complex_links',
-        tableName: 'compon56bca_complex_links',
+        singularName: 'componen56bca_complex_lnk',
+        uid: 'componen56bca_complex_lnk',
+        tableName: 'componen56bca_complex_lnk',
         attributes: {
           id: {
             type: 'increments',
@@ -1319,29 +1319,29 @@ export const expectedMetadataHashedResults = {
         },
         indexes: [
           {
-            name: 'compon56bca_compl3dff9_fk',
+            name: 'componen56bca_com62cd7_fk',
             columns: ['long_component_name_id'],
           },
           {
-            name: 'compon56bca_c3dff9_inv_fk',
+            name: 'componen56bca_co62cd7_ifk',
             columns: ['complex_id'],
           },
           {
-            name: 'compon56bca_c3dff9_unique',
+            name: 'componen56bca_com62cd7_uq',
             columns: ['long_component_name_id', 'complex_id'],
             type: 'unique',
           },
         ],
         foreignKeys: [
           {
-            name: 'compon56bca_compl3dff9_fk',
+            name: 'componen56bca_com62cd7_fk',
             columns: ['long_component_name_id'],
             referencedColumns: ['id'],
             referencedTable: 'components_default_l807d8',
             onDelete: 'CASCADE',
           },
           {
-            name: 'compon56bca_c3dff9_inv_fk',
+            name: 'componen56bca_co62cd7_ifk',
             columns: ['complex_id'],
             referencedColumns: ['id'],
             referencedTable: 'complexes',
@@ -1357,11 +1357,11 @@ export const expectedMetadataHashedResults = {
       },
     ],
     [
-      'comp56bca_complexes_links',
+      'compon56bca_complexes_lnk',
       {
-        singularName: 'comp56bca_complexes_links',
-        uid: 'comp56bca_complexes_links',
-        tableName: 'comp56bca_complexes_links',
+        singularName: 'compon56bca_complexes_lnk',
+        uid: 'compon56bca_complexes_lnk',
+        tableName: 'compon56bca_complexes_lnk',
         attributes: {
           id: {
             type: 'increments',
@@ -1381,44 +1381,44 @@ export const expectedMetadataHashedResults = {
             },
             columnName: 'complex_id',
           },
-          complex_order: {
+          complex_ord: {
             type: 'float',
             column: {
               unsigned: true,
               defaultTo: null,
             },
-            columnName: 'complex_order',
+            columnName: 'complex_ord',
           },
         },
         indexes: [
           {
-            name: 'comp56bca_complex5b601_fk',
+            name: 'compon56bca_compl32aff_fk',
             columns: ['long_component_name_id'],
           },
           {
-            name: 'comp56bca_com5b601_inv_fk',
+            name: 'compon56bca_comp32aff_ifk',
             columns: ['complex_id'],
           },
           {
-            name: 'comp56bca_com5b601_unique',
+            name: 'compon56bca_compl32aff_uq',
             columns: ['long_component_name_id', 'complex_id'],
             type: 'unique',
           },
           {
-            name: 'comp56bca_c5b601_order_fk',
-            columns: ['complex_order'],
+            name: 'compon56bca_comp32aff_ofk',
+            columns: ['complex_ord'],
           },
         ],
         foreignKeys: [
           {
-            name: 'comp56bca_complex5b601_fk',
+            name: 'compon56bca_compl32aff_fk',
             columns: ['long_component_name_id'],
             referencedColumns: ['id'],
             referencedTable: 'components_default_l807d8',
             onDelete: 'CASCADE',
           },
           {
-            name: 'comp56bca_com5b601_inv_fk',
+            name: 'compon56bca_comp32aff_ifk',
             columns: ['complex_id'],
             referencedColumns: ['id'],
             referencedTable: 'complexes',
@@ -1430,7 +1430,7 @@ export const expectedMetadataHashedResults = {
           id: 'id',
           long_component_name_id: 'long_component_name_id',
           complex_id: 'complex_id',
-          complex_order: 'complex_order',
+          complex_ord: 'complex_ord',
         },
       },
     ],

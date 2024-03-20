@@ -11,10 +11,15 @@
 import _, { snakeCase } from 'lodash/fp';
 
 // Import for use within the module
-import { type NameToken, getNameFromTokens, getUnshortenedName } from './shortener';
+import {
+  type NameToken,
+  getNameFromTokens,
+  getUnshortenedName,
+  setUnshortenedName,
+} from './shortener';
 
 // Re-export
-export { type NameToken, getNameFromTokens, getUnshortenedName };
+export { type NameToken, getNameFromTokens, getUnshortenedName, setUnshortenedName };
 
 // Constants for column names used in naming methods
 export const ID_COLUMN = 'id';
@@ -30,19 +35,18 @@ export type NameOptions = {
 };
 
 // Fixed compression map for suffixes and prefixes
-// TODO: fix this in the migration
 const replacementMap = {
-  // links: 'lnk',
-  // order_inv_fk: 'oifk',
-  // order: 'ord',
-  // morphs: 'mph',
-  // index: 'idx',
-  // inv_fk: 'ifk',
-  // order_fk: 'ofk',
-  // id_column_index: 'idix',
-  // order_index: 'oidx',
-  // unique: 'uq',
-  // primary: 'pk',
+  links: 'lnk',
+  order_inv_fk: 'oifk',
+  order: 'ord',
+  morphs: 'mph',
+  index: 'idx',
+  inv_fk: 'ifk',
+  order_fk: 'ofk',
+  id_column_index: 'idix',
+  order_index: 'oidx',
+  unique: 'uq',
+  primary: 'pk',
 };
 
 export const mapshortNames = (name: string): string | undefined => {
