@@ -6,10 +6,7 @@ export interface Module {
   bootstrap: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   destroy: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
   register: ({ strapi }: { strapi: Strapi }) => void | Promise<void>;
-  config<TDefault = unknown, TResult = unknown>(
-    path: PropertyPath,
-    defaultValue?: TDefault
-  ): TResult;
+  config<T = unknown>(key: PropertyPath, defaultVal?: T): T; // TODO: this mirrors ConfigProvider, we should use it directly
   routes: Record<string, Router>;
   controllers: Record<string, Controller>;
   services: Record<string, Service>;
