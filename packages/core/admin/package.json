@@ -71,7 +71,6 @@
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/admin-test-utils": "5.0.0-alpha.4",
     "@strapi/design-system": "1.16.0",
     "@strapi/icons": "1.16.0",
     "@strapi/permissions": "5.0.0-alpha.4",
@@ -148,6 +147,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
+    "@strapi/admin-test-utils": "5.0.0-alpha.4",
     "@strapi/data-transfer": "5.0.0-alpha.4",
     "@strapi/pack-up": "5.0.0-alpha.4",
     "@strapi/plugin-content-manager": "5.0.0-alpha.4",
