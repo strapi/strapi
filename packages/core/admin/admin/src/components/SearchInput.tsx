@@ -1,9 +1,11 @@
 import * as React from 'react';
 
 import { Icon, IconButton, Searchbar, SearchForm } from '@strapi/design-system';
-import { useQueryParams, type TrackingEvent, useTracking } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { Search as SearchIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+
+import { TrackingEvent, useTracking } from '../features/Tracking';
 
 interface SearchInputProps {
   disabled?: boolean;

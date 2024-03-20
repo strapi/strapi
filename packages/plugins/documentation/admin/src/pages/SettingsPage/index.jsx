@@ -14,9 +14,10 @@ import {
   Typography,
   FieldAction,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, translatedErrors, useRBAC } from '@strapi/helper-plugin';
-// Strapi Icons
+import { useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
+import { translatedErrors } from '@strapi/strapi/admin';
+// Strapi Icons
 import { Page } from '@strapi/strapi/admin';
 import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
@@ -30,7 +31,7 @@ import { getTrad } from '../../utils';
 const schema = yup.object().shape({
   restrictedAccess: yup.boolean(),
   password: yup.string().when('restrictedAccess', (value, initSchema) => {
-    return value ? initSchema.required(translatedErrors.required) : initSchema;
+    return value ? initSchema.required(translatedErrors.required.id) : initSchema;
   }),
 });
 

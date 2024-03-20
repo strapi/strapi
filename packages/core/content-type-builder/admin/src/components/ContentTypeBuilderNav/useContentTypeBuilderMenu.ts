@@ -1,7 +1,8 @@
 import { useState, MouseEvent } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { useCollator, useFilter } from '@strapi/design-system';
-import { useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 

@@ -1,18 +1,14 @@
 import * as React from 'react';
 
 import { FieldAction, Flex, TextInput, Typography, useComposedRefs } from '@strapi/design-system';
-import {
-  useAPIErrorHandler,
-  useFocusInputField,
-  useNotification,
-  useQueryParams,
-} from '@strapi/helper-plugin';
+import { useFocusInputField, useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { CheckCircle, ExclamationMarkCircle, Loader, Refresh } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useDebounce } from '../../../../../hooks/useDebounce';
 import { useDoc } from '../../../../hooks/useDocument';
 import {

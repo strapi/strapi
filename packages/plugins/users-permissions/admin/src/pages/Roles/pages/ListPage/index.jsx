@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { ConfirmDialog } from '@strapi/admin/strapi-admin';
+import { ConfirmDialog, useTracking } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   ContentLayout,
@@ -24,7 +24,6 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import { Page, SearchInput, BackButton } from '@strapi/strapi/admin';

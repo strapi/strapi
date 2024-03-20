@@ -8,9 +8,13 @@ import {
   FlexWrapper,
 } from '../../pages/EditView/components/FormInputs/Relations';
 
+import type { Data } from '@strapi/types';
+
 interface RelationDragPreviewProps {
-  status: string;
+  status?: string;
   displayedValue: string;
+  id: Data.ID;
+  index: number;
   width: number;
 }
 
@@ -40,7 +44,7 @@ const RelationDragPreview = ({ status, displayedValue, width }: RelationDragPrev
                 </Typography>
               </LinkEllipsis>
             </Box>
-            {status && <DocumentStatus status={status} />}
+            {status ? <DocumentStatus status={status} /> : null}
           </Flex>
         </FlexWrapper>
         <Box paddingLeft={4}>

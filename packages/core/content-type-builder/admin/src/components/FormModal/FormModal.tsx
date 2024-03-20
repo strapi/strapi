@@ -1,5 +1,6 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { useStrapiApp, useTracking } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -14,13 +15,7 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import {
-  getYupInnerErrors,
-  useCustomFields,
-  useNotification,
-  useStrapiApp,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { getYupInnerErrors, useNotification } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
@@ -105,7 +100,9 @@ export const FormModal = () => {
     targetUid,
     showBackLink,
   } = useFormModalNavigation();
-  const customField = useCustomFields().get(customFieldUid);
+  const getPlugin = useStrapiApp('FormModal', (state) => state.getPlugin);
+  const getCustomField = useStrapiApp('FormModal', (state) => state.customFields.get);
+  const customField = getCustomField(customFieldUid);
 
   const tabGroupRef = useRef<any>();
 
@@ -116,7 +113,6 @@ export const FormModal = () => {
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { getPlugin } = useStrapiApp();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI: any = ctbPlugin?.apis.forms;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;

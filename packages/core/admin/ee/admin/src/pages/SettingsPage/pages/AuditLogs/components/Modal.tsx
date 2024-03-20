@@ -12,9 +12,10 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
-import { useNotification, useAPIErrorHandler } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
+import { useAPIErrorHandler } from '../../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { AuditLog } from '../../../../../../../../shared/contracts/audit-logs';
 import { useGetAuditLogQuery } from '../../../../../services/auditLogs';
 import { useFormatTimeStamp } from '../hooks/useFormatTimeStamp';

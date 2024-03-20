@@ -1,15 +1,19 @@
 /* eslint-disable testing-library/no-node-access */
-import { useAppInfo, useTracking } from '@strapi/helper-plugin';
+import { useAppInfo } from '@strapi/helper-plugin';
 import { screen, within, fireEvent } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
 
+import { useTracking } from '../../../features/Tracking';
 import { MarketplacePage } from '../MarketplacePage';
 
 jest.mock('../hooks/useNavigatorOnline');
 
+jest.mock('../../../features/Tracking', () => ({
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+}));
+
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {

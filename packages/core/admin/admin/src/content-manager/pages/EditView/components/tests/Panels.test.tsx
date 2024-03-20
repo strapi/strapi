@@ -1,10 +1,8 @@
-import * as React from 'react';
-
-import { StrapiAppContextValue, StrapiAppProvider } from '@strapi/helper-plugin';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
 import { DocumentActionComponent } from '../../../../../core/apis/content-manager';
+import { StrapiAppContextValue, StrapiAppProvider } from '../../../../../features/StrapiApp';
 import { Panels, ActionsPanel } from '../Panels';
 
 const SearchDisplay = () => {
@@ -20,6 +18,7 @@ const DEFAULT_CM_PLUGIN = {
   name: 'content-manager',
   pluginId: 'content-manager',
   getInjectedComponents: jest.fn(),
+  injectComponent: jest.fn(),
   apis: {},
 } satisfies StrapiAppContextValue['plugins'][string];
 
@@ -39,6 +38,14 @@ describe.skip('Panels', () => {
                 path="/content-manager/:collectionType/:slug/:id"
                 element={
                   <StrapiAppProvider
+                    components={{}}
+                    fields={{}}
+                    customFields={{
+                      customFields: {},
+                      get: jest.fn(),
+                      getAll: jest.fn(),
+                      register: jest.fn(),
+                    }}
                     menu={[]}
                     settings={{}}
                     plugins={plugins}
@@ -115,6 +122,14 @@ describe.skip('Panels', () => {
                     path="/content-manager/:collectionType/:slug/:id"
                     element={
                       <StrapiAppProvider
+                        components={{}}
+                        fields={{}}
+                        customFields={{
+                          customFields: {},
+                          get: jest.fn(),
+                          getAll: jest.fn(),
+                          register: jest.fn(),
+                        }}
                         menu={[]}
                         settings={{}}
                         plugins={{

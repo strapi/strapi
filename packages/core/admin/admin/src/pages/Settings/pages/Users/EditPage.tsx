@@ -11,14 +11,7 @@ import {
   Main,
   Typography,
 } from '@strapi/design-system';
-import {
-  translatedErrors,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
 import { Helmet } from 'react-helmet';
@@ -32,10 +25,12 @@ import { InputRenderer } from '../../../../components/FormInputs/Renderer';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
 import { selectAdminPermissions } from '../../../../selectors';
 import { useAdminUsers, useUpdateUserMutation } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 import { getDisplayName } from '../../../../utils/users';
 
 import { MagicLinkCE } from './components/MagicLinkCE';
@@ -48,11 +43,11 @@ const EDIT_VALIDATION_SCHEMA = yup.object().shape({
   roles: yup
     .array()
     .min(1, {
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'This field is required',
     })
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'This field is required',
     }),
 });
@@ -69,7 +64,6 @@ const EditPage = () => {
   const id = match?.params?.id ?? '';
   const navigate = useNavigate();
   const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const MagicLink = useEnterprise(
     MagicLinkCE,
     async () =>
@@ -152,8 +146,6 @@ const EditPage = () => {
   } satisfies InitialData;
 
   const handleSubmit = async (body: InitialData, actions: FormHelpers<InitialData>) => {
-    lockApp?.();
-
     const { confirmPassword: _confirmPassword, ...bodyRest } = body;
 
     const res = await updateUser({
@@ -182,8 +174,6 @@ const EditPage = () => {
         confirmPassword: '',
       });
     }
-
-    unlockApp?.();
   };
 
   return (

@@ -1,10 +1,12 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 
 import { Page } from '../../components/PageHelpers';
 import { useTypedSelector } from '../../core/store/hooks';
+import { useTracking } from '../../features/Tracking';
+import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { setIn } from '../../utils/objects';
 import { TEMP_FIELD_NAME } from '../components/ConfigurationForm/Fields';
 import { ConfigurationForm, ConfigurationFormProps } from '../components/ConfigurationForm/Form';

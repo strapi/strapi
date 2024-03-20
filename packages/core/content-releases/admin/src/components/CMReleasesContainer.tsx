@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { skipToken } from '@reduxjs/toolkit/query';
+import { useAPIErrorHandler } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -16,12 +17,7 @@ import {
   EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import {
-  useAPIErrorHandler,
-  useNotification,
-  useQueryParams,
-  useRBAC,
-} from '@strapi/helper-plugin';
+import { useNotification, useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';

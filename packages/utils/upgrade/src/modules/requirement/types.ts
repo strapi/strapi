@@ -1,4 +1,4 @@
-import type { Project } from '../project';
+import type { AppProject } from '../project';
 import type { MaybePromise } from '../../types';
 import type { Version } from '../version';
 import type { NPMPackageVersion } from '../npm/types';
@@ -23,7 +23,7 @@ export interface Requirement {
 export interface TestContext {
   target: Version.SemVer;
   npmVersionsMatches: NPMPackageVersion[];
-  project: Project;
+  project: AppProject;
 }
 
 export type RequirementTestCallback = (context: TestContext) => MaybePromise<void>;

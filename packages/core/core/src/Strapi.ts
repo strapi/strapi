@@ -201,13 +201,13 @@ class Strapi extends Container implements Core.Strapi {
     this.eventHub = createEventHub();
     this.startupLogger = utils.createStartupLogger(this);
 
-    // We will continue to support 'logger' to prevent unnecessary deprecations but prioritize server.logger.config
-    // So we find: server.logger.config || logger || 'info'
-    const logLevel = this.config.get(
-      'server.logger.config',
-      this.config.get('logger', { level: 'info' })
-    );
-    this.log = createLogger(logLevel);
+    const logConfig = {
+      level: 'http', // Strapi defaults to level 'http'
+      ...this.config.get('logger'), // DEPRECATED
+      ...this.config.get('server.logger.config'),
+    };
+
+    this.log = createLogger(logConfig);
     this.cron = createCronService();
     this.telemetry = createTelemetry(this);
     this.requestContext = requestContext;

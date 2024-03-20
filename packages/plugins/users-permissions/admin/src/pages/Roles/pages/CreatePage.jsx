@@ -12,14 +12,9 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  useFetchClient,
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { useFetchClient, useNotification } from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { Page, useTracking } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -36,7 +31,6 @@ export const CreatePage = () => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const navigate = useNavigate();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
   const { trackUsage } = useTracking();
   const permissionsRef = React.useRef();
@@ -69,16 +63,12 @@ export const CreatePage = () => {
   });
 
   const handleCreateRoleSubmit = async (data) => {
-    lockApp();
-
     // TODO: refactor. Child -> parent component communication is evil;
     // We should either move the provider one level up or move the state
     // straight into redux.
     const permissions = permissionsRef.current.getPermissions();
 
     await mutation.mutate({ ...data, ...permissions, users: [] });
-
-    unlockApp();
   };
 
   return (

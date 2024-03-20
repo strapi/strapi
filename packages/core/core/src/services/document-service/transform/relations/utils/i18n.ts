@@ -8,9 +8,8 @@ export const isLocalizedContentType = (uid: UID.Schema) => {
 };
 
 export const getDefaultLocale = () => {
-  // TODO: Fix this
-  // return strapi.plugin('i18n').service('locales').getDefaultLocale();
-  return 'en';
+  // TODO: V5 make this more performant
+  return strapi.plugin('i18n').service('locales').getDefaultLocale();
 };
 
 export const getRelationTargetLocale = (

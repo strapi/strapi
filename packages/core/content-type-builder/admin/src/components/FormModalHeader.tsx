@@ -5,7 +5,6 @@
  */
 import { Box, Flex, ModalHeader, Typography } from '@strapi/design-system';
 import { Breadcrumbs, Crumb, Link } from '@strapi/design-system/v2';
-import { CustomFieldUID } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -34,7 +33,7 @@ interface FormModalHeaderProps {
   forTarget: SchemaType;
   modalType: string | null;
   targetUid: Internal.UID.Schema;
-  customFieldUid?: CustomFieldUID | null;
+  customFieldUid?: string | null;
   showBackLink?: boolean;
 }
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Main } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { Modules } from '@strapi/types';
 import { FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -11,6 +11,7 @@ import { useNavigate, useMatch } from 'react-router-dom';
 import { CreateWebhook, TriggerWebhook } from '../../../../../../shared/contracts/webhooks';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 

@@ -8,7 +8,6 @@ import type {
   State,
 } from '../components/FormModalNavigationProvider/FormModalNavigationProvider';
 import type { SchemaType } from '../types';
-import type { CustomFieldUID } from '@strapi/helper-plugin';
 import type { Internal } from '@strapi/types';
 
 export interface FormModalNavigationContextValue {
@@ -32,7 +31,7 @@ export interface FormModalNavigationContextValue {
   actionType: string;
   attributeName: string;
   attributeType: string;
-  customFieldUid: CustomFieldUID;
+  customFieldUid: string;
   categoryName: string;
   dynamicZoneTarget: string;
   forTarget: SchemaType;

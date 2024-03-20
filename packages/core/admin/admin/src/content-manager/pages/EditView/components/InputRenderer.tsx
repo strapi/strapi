@@ -1,10 +1,10 @@
 import { ReactNode } from 'react';
 
-import { useLibrary } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { useForm } from '../../../../components/Form';
 import { InputRenderer as FormInputRenderer } from '../../../../components/FormInputs/Renderer';
+import { useStrapiApp } from '../../../../features/StrapiApp';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
@@ -51,7 +51,7 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   const canUserReadField = canUserAction(props.name, readableFields, props.type);
   const canUserEditField = canUserAction(props.name, editableFields, props.type);
 
-  const { fields = {} } = useLibrary();
+  const fields = useStrapiApp('InputRenderer', (app) => app.fields);
   const { lazyComponentStore } = useLazyComponents(
     attributeHasCustomFieldProperty(props.attribute) ? [props.attribute.customField] : undefined
   );

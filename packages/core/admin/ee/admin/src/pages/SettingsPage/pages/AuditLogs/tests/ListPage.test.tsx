@@ -21,7 +21,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
   it('should render page with right header details', async () => {
     render(<ListPage />);
 
-    await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText('Loading content')).not.toBeInTheDocument());
 
     expect(screen.getByRole('heading', { name: 'Audit Logs' })).toBeInTheDocument();
 
@@ -66,7 +66,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
 
     render(<ListPage />);
 
-    await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText('Loading content')).not.toBeInTheDocument());
 
     expect(screen.getByRole('combobox', { name: 'Entries per page' })).toBeInTheDocument();
 
@@ -80,7 +80,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
   it('should open a modal when clicked on a table row and close modal when clicked', async () => {
     const { user } = render(<ListPage />);
 
-    await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText('Loading content')).not.toBeInTheDocument());
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
 
@@ -106,7 +106,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
   it('should show the correct inputs for filtering', async () => {
     const { user } = render(<ListPage />);
 
-    await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText('Loading content')).not.toBeInTheDocument());
 
     await user.click(screen.getByRole('button', { name: 'Filters' }));
 

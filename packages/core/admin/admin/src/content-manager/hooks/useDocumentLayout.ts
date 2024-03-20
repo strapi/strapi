@@ -1,14 +1,11 @@
 import * as React from 'react';
 
 import { SerializedError } from '@reduxjs/toolkit';
-import {
-  useAPIErrorHandler,
-  useNotification,
-  useQueryParams,
-  useStrapiApp,
-} from '@strapi/helper-plugin';
+import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 
 import { HOOKS } from '../../constants';
+import { useStrapiApp } from '../../features/StrapiApp';
+import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { BaseQueryError } from '../../utils/baseQuery';
 import { useGetContentTypeConfigurationQuery } from '../services/contentTypes';
 import { getMainField } from '../utils/attributes';
@@ -135,7 +132,7 @@ const DEFAULT_SETTINGS = {
 const useDocumentLayout: UseDocumentLayout = (model) => {
   const { schema, components } = useDocument({ model, collectionType: '' }, { skip: true });
   const [{ query }] = useQueryParams();
-  const { runHookWaterfall } = useStrapiApp();
+  const runHookWaterfall = useStrapiApp('useDocumentLayout', (state) => state.runHookWaterfall);
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { isLoading: isLoadingSchemas, schemas } = useContentTypeSchema();

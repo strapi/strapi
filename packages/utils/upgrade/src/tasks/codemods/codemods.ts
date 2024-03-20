@@ -1,10 +1,11 @@
 import path from 'node:path';
 
 import { timerFactory } from '../../modules/timer';
-import { projectFactory } from '../../modules/project';
-import type { RunCodemodsOptions } from './types';
+import { isAppProject, projectFactory } from '../../modules/project';
 import { codemodRunnerFactory } from '../../modules/codemod-runner';
 import { Version, isSemverInstance, rangeFactory } from '../../modules/version';
+
+import type { RunCodemodsOptions } from './types';
 
 export const codemods = async (options: RunCodemodsOptions) => {
   const timer = timerFactory();
@@ -14,7 +15,10 @@ export const codemods = async (options: RunCodemodsOptions) => {
   const cwd = path.resolve(options.cwd ?? process.cwd());
 
   const project = projectFactory(cwd);
-  const range = getRangeFromTarget(project.strapiVersion, options.target);
+  const range = isAppProject(project)
+    ? getRangeFromTarget(project.strapiVersion, options.target)
+    : undefined;
+
   const codemodRunner = codemodRunnerFactory(project, range)
     .dry(options.dry ?? false)
     .onSelectCodemods(options.selectCodemods ?? null)

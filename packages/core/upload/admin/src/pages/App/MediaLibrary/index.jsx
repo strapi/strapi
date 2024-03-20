@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 
-import { Page, SearchInput, Pagination } from '@strapi/admin/strapi-admin';
+import { Page, SearchInput, Pagination, useTracking } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
   BaseCheckbox,
@@ -20,7 +20,6 @@ import {
   usePersistentState,
   useQueryParams,
   useSelectionState,
-  useTracking,
 } from '@strapi/helper-plugin';
 import { Cog, Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';

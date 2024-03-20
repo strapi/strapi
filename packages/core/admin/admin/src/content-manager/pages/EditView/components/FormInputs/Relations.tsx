@@ -25,6 +25,7 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import styled from 'styled-components';
 
 import { type InputProps, useField, useForm } from '../../../../../components/Form';
+import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
 import { ItemTypes } from '../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../hooks/useDocument';
@@ -530,7 +531,7 @@ const RelationsInput = ({
           <ComboboxOption key={opt.documentId} value={opt.documentId} textValue={textValue}>
             <Flex gap={2} justifyContent="space-between">
               <Typography ellipsis>{textValue}</Typography>
-              <DocumentStatus status={opt.status} />
+              {opt.status ? <DocumentStatus status={opt.status} /> : null}
             </Flex>
           </ComboboxOption>
         );
@@ -870,25 +871,24 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   const { href, documentId, label, status } = relations[index];
 
   const [{ handlerId, isDragging, handleKeyDown }, relationRef, dropRef, dragRef, dragPreviewRef] =
-    useDragAndDrop<
-      number,
-      { displayedValue: string; status: string; id: string; index: number },
-      HTMLDivElement
-    >(canDrag && !disabled, {
-      type: `${ItemTypes.RELATION}_${name}`,
-      index,
-      item: {
-        displayedValue: label,
-        status,
-        id: documentId,
+    useDragAndDrop<number, Omit<RelationDragPreviewProps, 'width'>, HTMLDivElement>(
+      canDrag && !disabled,
+      {
+        type: `${ItemTypes.RELATION}_${name}`,
         index,
-      },
-      onMoveItem: handleMoveItem,
-      onDropItem: handleDropItem,
-      onGrabItem: handleGrabItem,
-      onCancel: handleCancel,
-      dropSensitivity: DROP_SENSITIVITY.REGULAR,
-    });
+        item: {
+          displayedValue: label,
+          status,
+          id: documentId,
+          index,
+        },
+        onMoveItem: handleMoveItem,
+        onDropItem: handleDropItem,
+        onGrabItem: handleGrabItem,
+        onCancel: handleCancel,
+        dropSensitivity: DROP_SENSITIVITY.REGULAR,
+      }
+    );
 
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
 
@@ -950,7 +950,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                   )}
                 </Tooltip>
               </Box>
-              <DocumentStatus status={status} />
+              {status ? <DocumentStatus status={status} /> : null}
             </Flex>
           </FlexWrapper>
           <Box paddingLeft={4}>

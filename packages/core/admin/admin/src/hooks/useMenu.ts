@@ -1,17 +1,11 @@
 import * as React from 'react';
 
-import {
-  Permission,
-  hasPermissions,
-  useAppInfo,
-  useRBACProvider,
-  useStrapiApp,
-  StrapiAppContextValue,
-} from '@strapi/helper-plugin';
+import { Permission, hasPermissions } from '@strapi/helper-plugin';
 import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 import { useSelector } from 'react-redux';
 
+import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 
 /* -------------------------------------------------------------------------------------------------
@@ -27,7 +21,7 @@ export interface Menu {
 }
 
 const useMenu = (shouldUpdateStrapi: boolean, userPermissions: Permission[]) => {
-  const { menu } = useStrapiApp();
+  const menu = useStrapiApp('useMenu', (state) => state.menu);
   const permissions = useSelector(selectAdminPermissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
