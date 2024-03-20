@@ -30,7 +30,10 @@ export interface Module {
   destroy: () => Promise<void>;
   load: () => void;
   routes: Core.Module['routes'];
-  config: (path: PropertyPath, defaultValue?: unknown) => unknown;
+  config<TDefault = unknown, TResult = unknown>(
+    path: PropertyPath,
+    defaultValue?: TDefault
+  ): TResult;
   contentType: (ctName: UID.ContentType) => Struct.ContentTypeSchema;
   contentTypes: Record<string, Struct.ContentTypeSchema>;
   service: (serviceName: UID.Service) => Core.Service;
