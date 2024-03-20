@@ -3,7 +3,7 @@ import { LocaleListCell } from '../components/LocaleListCell';
 import { doesPluginOptionsHaveI18nLocalized } from '../utils/fields';
 import { getTranslation } from '../utils/getTranslation';
 
-import type { ListFieldLayout, ListLayout } from '@strapi/strapi/admin';
+import type { ListFieldLayout, ListLayout } from '@strapi/admin/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
  * addColumnToTableHook

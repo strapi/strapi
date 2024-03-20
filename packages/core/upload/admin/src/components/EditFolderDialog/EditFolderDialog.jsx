@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
+import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Button,
   FieldLabel,
@@ -14,7 +14,6 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
@@ -53,7 +52,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
   const { trackUsage } = useTracking();
   const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
   const { remove } = useBulkRemove();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const isLoading = isLoadingPermissions || folderStructureIsLoading;
   const isEditing = !!folder;
   const formDisabled = (folder && !canUpdate) || (!folder && !canCreate);

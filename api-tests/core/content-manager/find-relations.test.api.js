@@ -233,18 +233,14 @@ describe('Find Relations', () => {
 
     // Create draft products
     const [skate, chair, candle, table, porte, fenetre] = await Promise.all([
-      strapi.documents(productUid).create({ data: { name: 'Skate' }, status: 'published' }),
-      strapi.documents(productUid).create({ data: { name: 'Chair' }, status: 'published' }),
-      strapi.documents(productUid).create({ data: { name: 'Candle' }, status: 'published' }),
-      strapi.documents(productUid).create({ data: { name: 'Table' }, status: 'published' }),
+      strapi.documents(productUid).create({ data: { name: 'Skate' } }),
+      strapi.documents(productUid).create({ data: { name: 'Chair' } }),
+      strapi.documents(productUid).create({ data: { name: 'Candle' } }),
+      strapi.documents(productUid).create({ data: { name: 'Table' } }),
       // We create products in French in order to test that we can cant find
       // available relations in a different locale
-      strapi
-        .documents(productUid)
-        .create({ data: { name: 'Porte' }, locale: extraLocale, status: 'published' }),
-      strapi
-        .documents(productUid)
-        .create({ data: { name: 'Fenetre' }, locale: extraLocale, status: 'published' }),
+      strapi.documents(productUid).create({ data: { name: 'Porte' }, locale: extraLocale }),
+      strapi.documents(productUid).create({ data: { name: 'Fenetre' }, locale: extraLocale }),
     ]);
     data[productUid].draft.push(skate, chair, candle, table, porte, fenetre);
 
@@ -663,7 +659,7 @@ describe('Find Relations', () => {
               }))
           );
 
-          const idsToOmit = [documentsInThisLocale[1]?.documentId].filter(Boolean);
+          const idsToOmit = [documentsInThisLocale[1]?.id].filter(Boolean);
           const omitIdsRes = await rq({
             method: 'GET',
             url: `/content-manager/relations/${modelUID}/${fieldName}`,
@@ -675,8 +671,7 @@ describe('Find Relations', () => {
           });
 
           expect(omitIdsRes.body.results).toHaveLength(
-            documentsInThisLocale.filter((document) => !idsToOmit.includes(document.documentId))
-              .length
+            documentsInThisLocale.filter((document) => !idsToOmit.includes(document.id)).length
           );
         });
       });
@@ -727,7 +722,7 @@ describe('Find Relations', () => {
 
         expect(res.body.results).toMatchObject(availableDocuments);
 
-        const idsToOmit = [availableDocuments[1]?.documentId].filter(Boolean);
+        const idsToOmit = [availableDocuments[1]?.id].filter(Boolean);
         const omitIdsRes = await rq({
           method: 'GET',
           url: `/content-manager/relations/${modelUID}/${fieldName}`,
@@ -739,7 +734,7 @@ describe('Find Relations', () => {
         });
 
         expect(omitIdsRes.body.results).toHaveLength(
-          availableDocuments.filter((document) => !idsToOmit.includes(document.documentId)).length
+          availableDocuments.filter((document) => !idsToOmit.includes(document.id)).length
         );
       });
 

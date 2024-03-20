@@ -13,7 +13,6 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
@@ -25,6 +24,7 @@ import * as yup from 'yup';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
+import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {
@@ -61,7 +61,7 @@ interface CreateRoleFormValues {
  */
 const CreatePage = () => {
   const match = useMatch('/settings/roles/duplicate/:id');
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
@@ -117,7 +117,7 @@ const CreatePage = () => {
           formik.setErrors(formatValidationErrors(res.error));
         } else {
           toggleNotification({
-            type: 'warning',
+            type: 'danger',
             message: formatAPIError(res.error),
           });
         }
@@ -138,7 +138,7 @@ const CreatePage = () => {
             formik.setErrors(formatValidationErrors(updateRes.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(updateRes.error),
             });
           }
@@ -149,14 +149,14 @@ const CreatePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'Settings.roles.created', defaultMessage: 'created' },
+        message: formatMessage({ id: 'Settings.roles.created', defaultMessage: 'created' }),
       });
 
       navigate(res.data.id.toString(), { replace: true });
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };

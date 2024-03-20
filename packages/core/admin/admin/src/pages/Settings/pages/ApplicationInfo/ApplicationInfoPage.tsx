@@ -10,18 +10,19 @@ import {
   HeaderLayout,
   Layout,
   Link,
-  Main,
   Typography,
 } from '@strapi/design-system';
-import { useAppInfo, useFocusWhenNavigate, useRBAC } from '@strapi/helper-plugin';
 import { Check, ExternalLink } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { Page } from '../../../../components/PageHelpers';
+import { useAppInfo } from '../../../../features/AppInfo';
 import { useConfiguration } from '../../../../features/Configuration';
 import { useTracking } from '../../../../features/Tracking';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 
 import { LogoInput, LogoInputProps } from './components/LogoInput';
@@ -40,13 +41,14 @@ const ApplicationInfoPage = () => {
   const [logos, setLogos] = React.useState({ menu: serverLogos.menu, auth: serverLogos.auth });
   const { settings } = useSelector(selectAdminPermissions);
 
-  const {
-    communityEdition,
-    latestStrapiReleaseTag,
-    nodeVersion,
-    shouldUpdateStrapi,
-    strapiVersion,
-  } = useAppInfo();
+  const communityEdition = useAppInfo('ApplicationInfoPage', (state) => state.communityEdition);
+  const latestStrapiReleaseTag = useAppInfo(
+    'ApplicationInfoPage',
+    (state) => state.latestStrapiReleaseTag
+  );
+  const nodeVersion = useAppInfo('ApplicationInfoPage', (state) => state.nodeVersion);
+  const shouldUpdateStrapi = useAppInfo('ApplicationInfoPage', (state) => state.shouldUpdateStrapi);
+  const strapiVersion = useAppInfo('ApplicationInfoPage', (state) => state.strapiVersion);
 
   const AdminSeatInfo = useEnterprise(
     AdminSeatInfoCE,
@@ -61,8 +63,6 @@ const ApplicationInfoPage = () => {
   const {
     allowedActions: { canRead, canUpdate },
   } = useRBAC(settings ? settings['project-settings'] : {});
-
-  useFocusWhenNavigate();
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
@@ -122,7 +122,7 @@ const ApplicationInfoPage = () => {
           }
         )}
       />
-      <Main>
+      <Page.Main>
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             title={formatMessage({
@@ -289,7 +289,7 @@ const ApplicationInfoPage = () => {
             </Flex>
           </ContentLayout>
         </form>
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

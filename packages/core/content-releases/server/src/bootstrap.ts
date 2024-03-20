@@ -6,7 +6,9 @@ import { getEntryValidStatus, getService } from './utils';
 
 export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
-    const contentTypesWithDraftAndPublish = Object.keys(strapi.contentTypes);
+    const contentTypesWithDraftAndPublish = Object.keys(strapi.contentTypes).filter(
+      (uid: any) => strapi.contentTypes[uid]?.options?.draftAndPublish
+    );
 
     // Clean up release-actions when an entry is deleted
     strapi.db.lifecycles.subscribe({
@@ -53,7 +55,7 @@ export const bootstrap = async ({ strapi }: { strapi: LoadedStrapi }) => {
       async beforeDeleteMany(event) {
         const { model, params } = event;
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        if (model.kind === 'collectionType') {
+        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
           const { where } = params;
           const entriesToDelete = await strapi.db
             .query(model.uid)

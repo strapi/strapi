@@ -1,17 +1,12 @@
 /* eslint-disable testing-library/no-node-access */
 import * as React from 'react';
 
-import { render, screen, waitFor } from '@tests/utils';
+import { render, screen } from '@tests/utils';
 
 import { Form } from '../../../../../../../components/Form';
 import { BlocksInput } from '../BlocksInput';
 
 import { blocksData } from './mock-schema';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useLibrary: () => ({ components: { media: jest.fn() } }),
-}));
 
 type BlocksEditorProps = React.ComponentProps<typeof BlocksInput>;
 

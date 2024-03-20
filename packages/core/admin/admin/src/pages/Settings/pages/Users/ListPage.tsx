@@ -4,13 +4,11 @@ import {
   ActionLayout,
   ContentLayout,
   HeaderLayout,
-  Main,
   Flex,
   Typography,
   Status,
   IconButton,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
 import { Helmet } from 'react-helmet';
@@ -24,8 +22,10 @@ import { Pagination } from '../../../../components/Pagination';
 import { SearchInput } from '../../../../components/SearchInput';
 import { Table } from '../../../../components/Table';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../../hooks/useEnterprise';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import { useAdminUsers, useDeleteManyUsersMutation } from '../../../../services/users';
 import { getDisplayName } from '../../../../utils/users';
 
@@ -44,10 +44,9 @@ const ListPageCE = () => {
     allowedActions: { canCreate, canDelete, canRead },
   } = useRBAC(permissions.settings?.users);
   const navigate = useNavigate();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { search } = useLocation();
-  useFocusWhenNavigate();
   const { data, isError, isLoading } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }));
 
   const { pagination, users = [] } = data ?? {};
@@ -83,14 +82,14 @@ const ListPageCE = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch (err) {
       console.error(err);
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({
           id: 'global.error',
           defaultMessage: 'An error occurred',
@@ -118,7 +117,7 @@ const ListPageCE = () => {
   }
 
   return (
-    <Main aria-busy={isLoading}>
+    <Page.Main aria-busy={isLoading}>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -225,7 +224,7 @@ const ListPageCE = () => {
         </Pagination.Root>
       </ContentLayout>
       {isModalOpened && <ModalForm onToggle={handleToggle} />}
-    </Main>
+    </Page.Main>
   );
 };
 

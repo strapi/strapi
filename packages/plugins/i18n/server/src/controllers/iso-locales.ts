@@ -1,4 +1,4 @@
-import type { Common } from '@strapi/strapi';
+import type { Common } from '@strapi/types';
 import { getService } from '../utils';
 
 const controller: Common.Controller = {

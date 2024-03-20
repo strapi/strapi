@@ -1,4 +1,4 @@
-import { Entity as StrapiEntity } from '@strapi/strapi';
+import { Entity as StrapiEntity } from '@strapi/types';
 
 export interface Entity {
   id: StrapiEntity.ID;

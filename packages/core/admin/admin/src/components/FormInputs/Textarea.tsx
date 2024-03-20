@@ -1,8 +1,8 @@
 import { forwardRef } from 'react';
 
 import { Textarea, useComposedRefs } from '@strapi/design-system';
-import { useFocusInputField } from '@strapi/helper-plugin';
 
+import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
 
 import type { StringProps } from './types';

@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Button, Flex } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { Duplicate, Pencil } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
@@ -11,7 +10,9 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DescriptionComponentRenderer } from '../../../../components/DescriptionComponentRenderer';
+import { useNotification } from '../../../../features/Notifications';
 import { useStrapiApp } from '../../../../features/StrapiApp';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { Document, useDoc } from '../../../hooks/useDocument';
@@ -83,7 +84,7 @@ const EditAction: DocumentActionComponent = ({ documentId }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { canRead } = useDocumentRBAC('EditAction', ({ canRead }) => ({ canRead }));
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [{ query }] = useQueryParams<{ plugins?: object }>();
 
   return {
@@ -105,7 +106,7 @@ const EditAction: DocumentActionComponent = ({ documentId }) => {
             id: 'content-manager.actions.edit.error',
             defaultMessage: 'An error occurred while trying to edit the document.',
           }),
-          type: 'warning',
+          type: 'danger',
         });
 
         return;
@@ -137,7 +138,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
   const { canCreate } = useDocumentRBAC('CloneAction', ({ canCreate }) => ({ canCreate }));
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { autoClone } = useDocumentActions();
   const [prohibitedFields, setProhibitedFields] = React.useState<
     Contracts.CollectionTypes.ProhibitedCloningField[]
@@ -162,7 +163,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
             id: 'content-manager.actions.clone.error',
             defaultMessage: 'An error occurred while trying to clone the document.',
           }),
-          type: 'warning',
+          type: 'danger',
         });
 
         return;

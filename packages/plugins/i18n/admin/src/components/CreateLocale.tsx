@@ -1,6 +1,17 @@
 import * as React from 'react';
 
 import {
+  Form,
+  type InputProps,
+  InputRenderer,
+  useField,
+  type FormHelpers,
+  useForm,
+  useAPIErrorHandler,
+  useNotification,
+  useAuth,
+} from '@strapi/admin/strapi-admin';
+import {
   Box,
   Button,
   ButtonProps,
@@ -21,17 +32,7 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import { Check, Plus } from '@strapi/icons';
-import {
-  Form,
-  type InputProps,
-  InputRenderer,
-  useField,
-  type FormHelpers,
-  useForm,
-  useAPIErrorHandler,
-} from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
@@ -108,14 +109,14 @@ type ModalCreateProps = {
 };
 
 const CreateModal = ({ onClose }: ModalCreateProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
   const [createLocale] = useCreateLocaleMutation();
   const { formatMessage } = useIntl();
-  const { refetchPermissions } = useRBACProvider();
+  const refetchPermissions = useAuth('CreateModal', (state) => state.refetchPermissions);
 
   const handleSubmit = async (values: FormValues, helpers: FormHelpers<FormValues>) => {
     try {
@@ -125,7 +126,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
         if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         } else {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
         }
 
         return;
@@ -133,21 +134,21 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTranslation('Settings.locales.modal.create.success'),
           defaultMessage: 'Created locale',
-        },
+        }),
       });
 
       refetchPermissions();
       onClose();
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred, please try again',
-        },
+        }),
       });
     }
   };
@@ -254,7 +255,7 @@ interface BaseFormProps {
 
 const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const { data: defaultLocales = [], error } = useGetDefaultLocalesQuery();
@@ -263,7 +264,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }

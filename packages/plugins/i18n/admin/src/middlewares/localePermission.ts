@@ -1,6 +1,5 @@
 import type { Middleware } from '@reduxjs/toolkit';
-import type { Permission } from '@strapi/helper-plugin';
-import type { Store } from '@strapi/strapi/admin';
+import type { Store, Permission } from '@strapi/admin/strapi-admin';
 
 /**
  * TODO: is it possible to get the action types? How do we do it
