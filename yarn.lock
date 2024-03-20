@@ -13320,7 +13320,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-strapi-app@workspace:packages/cli/create-strapi-app":
+"create-strapi-app@npm:5.0.0-beta.0, create-strapi-app@workspace:packages/cli/create-strapi-app":
   version: 0.0.0-use.local
   resolution: "create-strapi-app@workspace:packages/cli/create-strapi-app"
   dependencies:
@@ -13352,6 +13352,16 @@ __metadata:
     tsconfig: "npm:5.0.0-beta.0"
   bin:
     create-strapi-starter: ./bin/index.js
+  languageName: unknown
+  linkType: soft
+
+"create-strapi@workspace:packages/cli/create-strapi":
+  version: 0.0.0-use.local
+  resolution: "create-strapi@workspace:packages/cli/create-strapi"
+  dependencies:
+    create-strapi-app: "npm:5.0.0-beta.0"
+  bin:
+    create-strapi: ./bin/index.js
   languageName: unknown
   linkType: soft
 
