@@ -28,7 +28,7 @@ import { getTimezoneOffset } from '../utils/time';
 
 export interface FormValues {
   name: string;
-  date: Date | null;
+  date: string | null;
   time: string;
   timezone: string | null;
   isScheduled?: boolean;
