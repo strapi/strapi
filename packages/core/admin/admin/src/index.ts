@@ -67,7 +67,6 @@ export type {
   HeaderActionDescription,
   HeaderActionProps,
 } from './core/apis/content-manager';
-export type { StrapiApp } from './StrapiApp';
 
 /**
  * Utils
