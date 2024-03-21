@@ -252,6 +252,7 @@ const develop = async ({
 
     const restart = async () => {
       if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
+        strapiInstance.log.info('Restarting Strapi server');
         strapiInstance.reload.isReloading = true;
         strapiInstance.reload();
       }
