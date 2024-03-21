@@ -62,9 +62,8 @@ export const ReleaseModal = ({
   const getScheduledTimestamp = (values: FormValues) => {
     const { date, time, timezone } = values;
     if (!date || !time || !timezone) return null;
-    const formattedDate = parse(time, 'HH:mm', new Date(date));
     const timezoneWithoutOffset = timezone.split('&')[1];
-    return zonedTimeToUtc(formattedDate, timezoneWithoutOffset);
+    return zonedTimeToUtc(`${date} ${time}`, timezoneWithoutOffset);
   };
 
   /**
