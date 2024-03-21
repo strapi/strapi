@@ -1,5 +1,5 @@
-import { Strapi } from '@strapi/strapi';
+// import type { Core } from '@strapi/strapi';
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default (/* { strapi }: { strapi: Core.Strapi } */) => {
   // destroy phase
 };
