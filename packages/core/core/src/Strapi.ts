@@ -402,7 +402,7 @@ class Strapi extends Container implements Core.Strapi {
     const isInitialized = await utils.isInitialized(this);
 
     this.startupLogger.logStartupMessage({ isInitialized });
-
+    this.log.info('Strapi server started successfully');
     this.sendStartupTelemetry();
     this.openAdmin({ isInitialized });
   }
