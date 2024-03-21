@@ -61,6 +61,30 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
       });
   });
 }
+
+async function signUrl(isLocalProvider: boolean, file: any) {
+  if (isLocalProvider) return;
+  const { provider } = strapi.plugins.upload;
+  const { provider: providerName } = strapi.config.get('plugin.upload') as any;
+  const isPrivate = await provider.isPrivate();
+  if (file.provider === providerName && isPrivate) {
+    const signUrl = async (file: any) => {
+      const signedUrl = await provider.getSignedUrl(file);
+      file.url = signedUrl.url;
+      file.isUrlSigned = true;
+    };
+
+    // Sign the original file
+    await signUrl(file);
+    // Sign each file format
+    if (file.formats) {
+      for (const format of Object.keys(file.formats)) {
+        await signUrl(file.formats[format]);
+      }
+    }
+  }
+}
+
 /**
  * Generate and consume assets streams in order to stream each file individually
  */
@@ -76,6 +100,7 @@ export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
 
     for await (const file of stream) {
       const isLocalProvider = file.provider === 'local';
+      await signUrl(isLocalProvider, file);
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
       const stats = await getFileStats(filepath, isLocalProvider);
       const stream = getFileStream(filepath, isLocalProvider);
