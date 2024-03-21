@@ -1,5 +1,5 @@
 import { difference, omit } from 'lodash/fp';
-import { Struct } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import { FIELDS_TO_IGNORE } from '../constants';
 
