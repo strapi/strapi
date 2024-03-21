@@ -1,5 +1,5 @@
-import { Core } from '@strapi/strapi';
+// import type { Core } from '@strapi/strapi';
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+export default (/* { strapi }: { strapi: Core.Strapi } */) => {
   // bootstrap phase
 };

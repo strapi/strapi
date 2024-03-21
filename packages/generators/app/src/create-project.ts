@@ -15,7 +15,7 @@ import packageJSON from './resources/json/common/package.json';
 import jsconfig from './resources/json/js/jsconfig.json';
 import adminTsconfig from './resources/json/ts/tsconfig-admin.json';
 import serverTsconfig from './resources/json/ts/tsconfig-server.json';
-import { createDatabaseConfig, generateDbEnvariables } from './resources/templates/database';
+import { createDatabaseConfig, generateDbEnvVariables } from './resources/templates/database';
 import createEnvFile from './resources/templates/env';
 import { Configuration, Scope, isStderrError } from './types';
 
@@ -110,7 +110,7 @@ export default async function createProject(
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
     // create config/database
-    await fse.appendFile(join(rootPath, '.env'), generateDbEnvariables({ client, connection }));
+    await fse.appendFile(join(rootPath, '.env'), generateDbEnvVariables({ client, connection }));
     await fse.writeFile(
       join(rootPath, `config/database.${language}`),
       createDatabaseConfig({ useTypescript })
