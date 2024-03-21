@@ -9,7 +9,7 @@ import { FIELDS_TO_IGNORE } from '../constants';
  */
 export const getSchemaAttributesDiff = (
   versionSchemaAttributes: CreateHistoryVersion['schema'],
-  contentTypeSchemaAttributes: Schema.Attributes
+  contentTypeSchemaAttributes: Record<string, Schema.Attribute.AnyAttribute>
 ) => {
   // Omit the same fields that were omitted when creating a history version
   const sanitizedContentTypeSchemaAttributes = omit(
