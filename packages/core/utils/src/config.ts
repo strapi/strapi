@@ -28,6 +28,12 @@ export const getConfigUrls = (config: Config, forAdminBuild = false) => {
     serverUrl = `/${serverUrl}`;
   }
 
+  // Defines serverPath value
+  let serverPath = serverUrl;
+  if (serverUrl.startsWith('http')) {
+    serverPath = new URL(serverUrl).pathname;
+  }
+
   // Defines adminUrl value
   let adminUrl = _.get(adminConfig, 'url', '/admin');
   adminUrl = _.trim(adminUrl, '/ ');
@@ -60,6 +66,7 @@ export const getConfigUrls = (config: Config, forAdminBuild = false) => {
 
   return {
     serverUrl,
+    serverPath,
     adminUrl,
     adminPath,
   };

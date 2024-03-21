@@ -1,4 +1,5 @@
 import Router from '@koa/router';
+import { getConfigUrls } from '@strapi/utils';
 import type { Strapi, Common, Server } from '@strapi/types';
 
 import { createHTTPServer } from './http-server';
@@ -20,6 +21,7 @@ const createServer = (strapi: Strapi): Server => {
     proxy: strapi.config.get('server.proxy'),
     keys: strapi.config.get('server.app.keys'),
   });
+  const { serverPath } = getConfigUrls(strapi.config);
 
   app.use((ctx, next) => requestCtx.run(ctx, () => next()));
 
@@ -35,7 +37,7 @@ const createServer = (strapi: Strapi): Server => {
   };
 
   // init health check
-  router.all('/_health', healthCheck);
+  router.all(`${serverPath}/_health`, healthCheck);
 
   const state = {
     mounted: false,

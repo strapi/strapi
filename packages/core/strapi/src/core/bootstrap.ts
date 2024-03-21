@@ -6,10 +6,11 @@ export default async function bootstrap({ strapi }: { strapi: Strapi }) {
   strapi.config.port = strapi.config.get('server.port') || strapi.config.port;
   strapi.config.host = strapi.config.get('server.host') || strapi.config.host;
 
-  const { serverUrl, adminUrl, adminPath } = getConfigUrls(strapi.config);
+  const { serverUrl, serverPath, adminUrl, adminPath } = getConfigUrls(strapi.config);
 
   strapi.config.server = strapi.config.server || {};
   strapi.config.server.url = serverUrl;
+  strapi.config.server.path = serverPath;
   strapi.config.admin.url = adminUrl;
   strapi.config.admin.path = adminPath;
 
