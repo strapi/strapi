@@ -1,5 +1,5 @@
 import { isUndefined } from 'lodash/fp';
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
 import type { TestContext, TestFunction } from 'yup';
 import type { Schema, UID } from '@strapi/types';
 import { typeKinds, coreUids } from '../../services/constants';

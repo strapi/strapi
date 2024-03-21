@@ -66,7 +66,7 @@ export class Package implements PackageInterface {
     // TODO: Use a validation library to make sure the response structure is correct
     assert(response.ok, `Request failed for ${this.packageURL}`);
 
-    this.npmPackage = await response.json();
+    this.npmPackage = (await response.json()) as NPMPackage | null;
 
     return this;
   }

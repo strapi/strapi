@@ -1,8 +1,9 @@
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validators, validateYupSchema } from '@strapi/utils';
 
 const providerOptionsUpdateSchema = yup.object().shape({
   autoRegister: yup.boolean().required(),
-  defaultRole: yup
+  defaultRole: validators
     .strapiID()
     .when('autoRegister', (value, initSchema) => {
       return value ? initSchema.required() : initSchema.nullable();
@@ -17,7 +18,7 @@ const providerOptionsUpdateSchema = yup.object().shape({
     .array()
     .nullable()
     .of(
-      yup
+      validators
         .strapiID()
         .test(
           'is-valid-role',

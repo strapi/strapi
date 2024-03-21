@@ -34,19 +34,19 @@
   "scripts": {
     "build": "pack-up build",
     "clean": "rimraf ./dist",
-    "lint": "run -T eslint .",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "lint": "eslint .",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/logger": "5.0.0-beta.0",
-    "@strapi/types": "5.0.0-beta.0",
-    "@strapi/utils": "5.0.0-beta.0",
+    "@strapi/logger": "workspace:*",
+    "@strapi/types": "workspace:*",
+    "@strapi/utils": "workspace:*",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
-    "fs-extra": "10.1.0",
+    "fs-extra": "11.2.0",
     "inquirer": "8.2.5",
     "lodash": "4.17.21",
     "ora": "5.4.1",
@@ -60,8 +60,8 @@
   },
   "devDependencies": {
     "@strapi/database": "workspace:*",
-    "@strapi/pack-up": "5.0.0-beta.0",
-    "@types/fs-extra": "9.0.13",
+    "@strapi/pack-up": "workspace:*",
+    "@types/fs-extra": "11.0.4",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",
@@ -75,7 +75,9 @@
     "knex": "3.0.1",
     "koa": "2.13.4",
     "rimraf": "3.0.2",
-    "typescript": "5.3.2"
+    "typescript": "5.3.2",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

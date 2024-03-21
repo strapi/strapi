@@ -29,7 +29,7 @@ jobs:
           node-version: 20
 
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
 
       - name: Monorepo build
         uses: ./.github/actions/run-build

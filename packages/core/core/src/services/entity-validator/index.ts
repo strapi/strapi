@@ -5,13 +5,14 @@
 
 import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
+import * as yup from 'yup';
 import strapiUtils from '@strapi/utils';
 import { Modules, UID, Struct, Schema } from '@strapi/types';
 import validators from './validators';
 
 type CreateOrUpdate = 'creation' | 'update';
 
-const { yup, validateYupSchema } = strapiUtils;
+const { validateYupSchema } = strapiUtils;
 const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUtils.contentTypes;
 const { ValidationError } = strapiUtils.errors;
 
@@ -77,7 +78,7 @@ const addMinMax = <
 };
 
 const addRequiredValidation = (createOrUpdate: CreateOrUpdate) => {
-  return <T extends strapiUtils.yup.AnySchema>(
+  return <T extends yup.AnySchema>(
     validator: T,
     {
       attr: { required },
@@ -100,7 +101,7 @@ const addRequiredValidation = (createOrUpdate: CreateOrUpdate) => {
 
 const addDefault = (createOrUpdate: CreateOrUpdate) => {
   return (
-    validator: strapiUtils.yup.BaseSchema,
+    validator: yup.BaseSchema,
     { attr }: ValidatorMeta<Schema.Attribute.AnyAttribute & Schema.Attribute.DefaultOption<unknown>>
   ) => {
     let nextValidator = validator;
@@ -122,7 +123,7 @@ const addDefault = (createOrUpdate: CreateOrUpdate) => {
   };
 };
 
-const preventCast = (validator: strapiUtils.yup.AnySchema) =>
+const preventCast = (validator: yup.AnySchema) =>
   validator.transform((val, originalVal) => originalVal);
 
 const createComponentValidator =
@@ -296,7 +297,7 @@ const createModelValidator =
       validators[attributeName] = validator;
 
       return validators;
-    }, {} as Record<string, strapiUtils.yup.BaseSchema>);
+    }, {} as Record<string, yup.BaseSchema>);
 
     return yup.object().shape(schema);
   };

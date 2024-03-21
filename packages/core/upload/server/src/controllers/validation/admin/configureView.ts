@@ -1,4 +1,5 @@
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validateYupSchema } from '@strapi/utils';
 import { ALLOWED_SORT_STRINGS } from '../../../constants';
 
 const configSchema = yup.object({

@@ -37,21 +37,22 @@
   ],
   "scripts": {
     "build": "pack-up build",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "clean": "rimraf ./dist",
+    "lint": "eslint .",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "5.0.0-beta.0",
+    "@strapi/utils": "workspace:*",
     "form-data": "^4.0.0",
     "mailgun.js": "8.2.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.0",
-    "eslint-config-custom": "5.0.0-beta.0",
-    "tsconfig": "5.0.0-beta.0"
+    "@strapi/pack-up": "workspace:*",
+    "@types/jest": "29.5.2",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

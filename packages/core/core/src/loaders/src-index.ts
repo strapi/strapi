@@ -1,6 +1,7 @@
 import { resolve } from 'path';
 import { statSync, existsSync } from 'fs';
-import { yup, importDefault } from '@strapi/utils';
+import * as yup from 'yup';
+import { importDefault } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
 

@@ -1,7 +1,7 @@
 {
   "version": "5.0.0-beta.0",
   "packages": ["packages/*", "examples/*"],
-  "npmClient": "yarn",
+  "npmClient": "pnpm",
   "useWorkspaces": true,
   "useNx": true
 }

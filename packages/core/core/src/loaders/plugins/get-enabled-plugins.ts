@@ -5,6 +5,7 @@ import _ from 'lodash';
 import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
 import { strings } from '@strapi/utils';
 import type { Core } from '@strapi/types';
+import resolveFrom from 'resolve-from';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
 interface PluginMeta {
@@ -99,23 +100,23 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
   const dependencies = strapi.config.get('info.dependencies', {});
 
   for (const dep of Object.keys(dependencies)) {
-    const packagePath = join(dep, 'package.json');
     let packageInfo;
     try {
+      const packagePath = resolveFrom(strapi.dirs.app.root, join(dep, 'package.json'));
       packageInfo = require(packagePath);
-    } catch {
-      continue;
-    }
 
-    if (isStrapiPlugin(packageInfo)) {
-      validatePluginName(packageInfo.strapi.name);
-      installedPlugins[packageInfo.strapi.name] = {
-        ...toDetailedDeclaration({ enabled: true, resolve: packagePath, isModule: client }),
-        info: {
-          ...packageInfo.strapi,
-          packageName: packageInfo.name,
-        },
-      };
+      if (isStrapiPlugin(packageInfo)) {
+        validatePluginName(packageInfo.strapi.name);
+        installedPlugins[packageInfo.strapi.name] = {
+          ...toDetailedDeclaration({ enabled: true, resolve: packagePath, isModule: client }),
+          info: {
+            ...packageInfo.strapi,
+            packageName: packageInfo.name,
+          },
+        };
+      }
+    } catch (e) {
+      continue;
     }
   }
 

@@ -1,4 +1,4 @@
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
 import type { Core } from '@strapi/types';
 import { resolveMiddlewares } from './middleware';
 

@@ -1,4 +1,5 @@
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validators, validateYupSchema } from '@strapi/utils';
 import { schemas } from '../../../../server/src/validation/user';
 
 const ssoUserCreationInputExtension = yup

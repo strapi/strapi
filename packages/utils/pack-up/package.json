@@ -52,11 +52,11 @@
   "scripts": {
     "build": "node -r esbuild-register scripts/build",
     "check": "node -r esbuild-register scripts/check",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "clean": "rimraf ./dist",
+    "lint": "eslint .",
     "test": "test:ts && test:unit",
-    "test:ts": "run -T tsc --noEmit",
-    "test:unit": "run -T jest",
+    "test:ts": "tsc --noEmit",
+    "test:unit": "jest",
     "watch": "node -r esbuild-register scripts/watch"
   },
   "dependencies": {
@@ -83,13 +83,15 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.0",
+    "@strapi/pack-up": "workspace:*",
     "@types/git-url-parse": "9.0.1",
     "@types/ini": "1.3.31",
+    "@types/jest": "29.5.2",
     "@types/prettier": "2.7.3",
     "@types/prompts": "2.4.9",
-    "eslint-config-custom": "5.0.0-beta.0",
-    "rimraf": "3.0.2"
+    "eslint-config-custom": "workspace:*",
+    "rimraf": "3.0.2",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

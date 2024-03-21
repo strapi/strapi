@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+// @ts-expect-error
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { ContentLayout, HeaderLayout, useNotifyAT } from '@strapi/design-system';
 import {

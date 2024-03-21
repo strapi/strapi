@@ -30,17 +30,21 @@
     "lib": "./lib"
   },
   "scripts": {
-    "lint": "run -T eslint .",
-    "test": "run -T jest",
-    "test:watch": "run -T jest --watch"
+    "lint": "eslint .",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "dependencies": {
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
-    "fs-extra": "10.1.0",
+    "fs-extra": "11.2.0",
     "lodash": "4.17.21",
     "prettier": "2.8.4",
     "typescript": "5.3.2"
+  },
+  "devDependencies": {
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

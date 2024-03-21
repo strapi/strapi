@@ -1,4 +1,5 @@
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validateYupSchema } from '@strapi/utils';
 import { isValidCategoryName } from './common';
 
 const componentCategorySchema = yup

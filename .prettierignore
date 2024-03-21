@@ -3,3 +3,4 @@ test-apps
 dist
 build
 .strapi
+pnpm-lock.yaml

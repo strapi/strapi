@@ -1,4 +1,4 @@
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
 import { getService } from '../../utils';
 import { isListable, hasEditableAttribute } from '../../services/utils/configuration/attributes';
 import { isValidDefaultSort } from '../../services/utils/configuration/settings';

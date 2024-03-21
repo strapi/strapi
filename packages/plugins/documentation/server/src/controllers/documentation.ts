@@ -3,7 +3,8 @@ import bcrypt from 'bcryptjs';
 import fs from 'fs-extra';
 import _ from 'lodash';
 import koaStatic from 'koa-static';
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validateYupSchema } from '@strapi/utils';
 
 import type Koa from 'koa';
 import type {} from 'koa-body';

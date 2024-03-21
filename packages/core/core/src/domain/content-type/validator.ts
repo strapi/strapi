@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { yup, strings } from '@strapi/utils';
+import * as yup from 'yup';
+import { strings } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 
 const LIFECYCLES = [

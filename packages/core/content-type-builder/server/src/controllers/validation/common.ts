@@ -1,5 +1,6 @@
 /* eslint-disable no-template-curly-in-string */
-import { yup, strings } from '@strapi/utils';
+import * as yup from 'yup';
+import { strings } from '@strapi/utils';
 import _ from 'lodash';
 import { TestConfig } from 'yup';
 

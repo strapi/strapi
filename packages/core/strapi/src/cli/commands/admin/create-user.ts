@@ -1,5 +1,5 @@
 import { createCommand } from 'commander';
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
 import _ from 'lodash';
 import inquirer from 'inquirer';
 import { strapiFactory } from '@strapi/core';

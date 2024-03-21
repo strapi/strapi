@@ -1,13 +1,18 @@
 /* eslint-disable import/first */
-
 import path from 'node:path';
 import { vol, fs } from 'memfs';
-
-jest.mock('fs', () => fs);
-
 import fse from 'fs-extra';
-
 import { readJSON, saveJSON } from '../file';
+
+jest.mock('fs-extra', () => {
+  const originalModule = jest.requireActual('fs-extra');
+
+  return {
+    ...originalModule,
+    readFile: jest.fn(fs.readFileSync),
+    writeFile: jest.fn(fs.writeFileSync),
+  };
+});
 
 describe('File (json)', () => {
   const cwd = '/__tests__';
@@ -15,13 +20,14 @@ describe('File (json)', () => {
 
   beforeEach(() => {
     vol.reset();
-
-    jest.spyOn(fse, 'readFile');
-    jest.spyOn(fse, 'writeFile');
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
   });
 
   describe('readJSON', () => {

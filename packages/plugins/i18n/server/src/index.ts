@@ -5,6 +5,8 @@ import services from './services';
 import routes from './routes';
 import controllers from './controllers';
 
+import type {} from 'koa-body';
+
 export default () => ({
   register,
   bootstrap,

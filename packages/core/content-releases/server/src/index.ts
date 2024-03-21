@@ -7,6 +7,8 @@ import { services } from './services';
 import { controllers } from './controllers';
 import { routes } from './routes';
 
+import type {} from 'koa-body';
+
 const getPlugin = () => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
     return {

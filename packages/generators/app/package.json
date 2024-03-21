@@ -36,18 +36,19 @@
     "dist/"
   ],
   "scripts": {
-    "build": "pack-up build && run copy-files",
-    "clean": "run -T rimraf ./dist",
-    "copy-files": "copyfiles -u 1 -a 'src/resources/files/**/*' 'src/resources/dot-files/**/*' 'src/resources/**/*.template' dist",
-    "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
+    "build": "npm-run-all build:*",
+    "build:pack": "pack-up build",
+    "build:copy": "copyfiles -u 1 -a 'src/resources/files/**/*' 'src/resources/dot-files/**/*' 'src/resources/**/*.template' dist",
+    "clean": "rimraf ./dist",
+    "lint": "eslint .",
+    "test:ts": "tsc --noEmit",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
     "chalk": "^4.1.2",
     "execa": "5.1.1",
-    "fs-extra": "10.1.0",
+    "fs-extra": "11.2.0",
     "inquirer": "8.2.5",
     "lodash": "4.17.21",
     "node-machine-id": "^1.1.10",
@@ -56,8 +57,16 @@
     "tar": "6.1.13"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.0",
-    "copyfiles": "2.4.1"
+    "@strapi/pack-up": "workspace:*",
+    "@types/fs-extra": "11.0.4",
+    "@types/inquirer": "8.2.5",
+    "@types/jest": "29.5.2",
+    "@types/lodash": "^4.14.191",
+    "@types/semver": "7.5.0",
+    "copyfiles": "2.4.1",
+    "eslint-config-custom": "workspace:*",
+    "npm-run-all": "4.1.5",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

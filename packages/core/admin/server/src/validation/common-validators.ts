@@ -1,4 +1,5 @@
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
+import { validators } from '@strapi/utils';
 import _ from 'lodash';
 import { isEmpty, has, isNil, isArray } from 'lodash/fp';
 import { getService } from '../utils';
@@ -27,7 +28,7 @@ export const password = yup
   .matches(/[A-Z]/, '${path} must contain at least one uppercase character')
   .matches(/\d/, '${path} must contain at least one number');
 
-export const roles = yup.array(yup.strapiID()).min(1);
+export const roles = yup.array(validators.strapiID()).min(1);
 
 const isAPluginName = yup
   .string()

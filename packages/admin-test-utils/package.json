@@ -67,9 +67,9 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "pack-up build",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
+    "clean": "rimraf ./dist",
+    "lint": "eslint .",
+    "test:ts": "tsc --noEmit",
     "watch": "pack-up watch"
   },
   "dependencies": {
@@ -81,9 +81,10 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/pack-up": "workspace:*",
     "@testing-library/jest-dom": "5.16.5",
-    "eslint-config-custom": "5.0.0-beta.0",
+    "@types/jest": "29.5.2",
+    "eslint-config-custom": "workspace:*",
     "jest-environment-jsdom": "29.6.1",
-    "tsconfig": "5.0.0-beta.0"
+    "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "@reduxjs/toolkit": "^1.9.7",

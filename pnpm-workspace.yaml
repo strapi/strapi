@@ -1,0 +1,7 @@
+packages:
+  - 'packages/*'
+  - 'packages/*/*'
+  - 'examples/*'
+  - 'examples/plugins/*'
+  - '.github/actions/*'
+  - 'scripts/*'

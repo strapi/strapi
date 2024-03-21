@@ -1,3 +1,5 @@
+import type {} from 'csstype';
+import type {} from 'reselect';
 import pluginPkg from '../../package.json';
 
 import { PluginIcon } from './components/PluginIcon';

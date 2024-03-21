@@ -28,24 +28,27 @@
   ],
   "scripts": {
     "build": "pack-up build",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
-    "test:ts": "run -T tsc --noEmit",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "clean": "rimraf ./dist",
+    "lint": "eslint .",
+    "test:ts": "tsc --noEmit",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
-    "@strapi/utils": "5.0.0-beta.0",
+    "@strapi/utils": "workspace:*",
     "lodash": "4.17.21",
     "qs": "6.11.1",
     "sift": "16.0.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.0",
-    "eslint-config-custom": "5.0.0-beta.0",
-    "tsconfig": "5.0.0-beta.0"
+    "@strapi/pack-up": "workspace:*",
+    "@types/jest": "29.5.2",
+    "@types/lodash": "^4.14.191",
+    "@types/qs": "6.9.14",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validateYupSchema } from '@strapi/utils';
 
 const hasPermissionsSchema = yup.object({
   actions: yup.array().of(

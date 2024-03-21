@@ -47,9 +47,9 @@ jobs:
           node-version: 20
       - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Run lint
-        run: yarn prettier:check
+        run: pnpm prettier:check
 
   lint:
     name: 'lint (node: 20)'
@@ -64,11 +64,11 @@ jobs:
           node-version: 20
       - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run lint
-        run: yarn nx affected --target=lint --parallel --nx-ignore-cycles
+        run: pnpm nx affected --target=lint --parallel --nx-ignore-cycles
 
   build:
     name: 'build (node: 20)'
@@ -79,7 +79,7 @@ jobs:
         with:
           node-version: 20
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
@@ -96,22 +96,20 @@ jobs:
           node-version: 20
       - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: TSC for packages
-        run: yarn nx affected --target=test:ts --nx-ignore-cycles
+        run: pnpm nx affected --target=test:ts --nx-ignore-cycles
       - name: TSC for back
-        run: yarn nx affected --target=test:ts:back --nx-ignore-cycles
+        run: pnpm nx affected --target=test:ts:back --nx-ignore-cycles
       - name: TSC for front
-        run: yarn nx affected --target=test:ts:front --nx-ignore-cycles
+        run: pnpm nx affected --target=test:ts:front --nx-ignore-cycles
 
   unit_back:
     name: 'unit_back (node: ${{ matrix.node }})'
     needs: [changes, build]
     runs-on: ubuntu-latest
-    env:
-      YARN_ENABLE_IMMUTABLE_INSTALLS: false
     strategy:
       matrix:
         node: [18, 20]
@@ -124,11 +122,11 @@ jobs:
           node-version: ${{ matrix.node }}
       - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run tests
-        run: yarn nx affected --target=test:unit --nx-ignore-cycles
+        run: pnpm nx affected --target=test:unit --nx-ignore-cycles
 
   unit_front:
     name: 'unit_front (node: ${{ matrix.node }})'
@@ -146,11 +144,11 @@ jobs:
           node-version: ${{ matrix.node }}
       - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - name: Run test
-        run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
+        run: pnpm nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
   e2e_ce:
     timeout-minutes: 60
@@ -171,7 +169,7 @@ jobs:
           node-version: 20
 
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
 
       - name: Install Playwright Browsers
         run: npx playwright@1.42.1 install --with-deps
@@ -213,7 +211,7 @@ jobs:
           node-version: 20
 
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
 
       - name: Install Playwright Browsers
         run: npx playwright@1.42.1 install --with-deps
@@ -250,13 +248,13 @@ jobs:
           node-version: 18
 
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
 
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
       - name: Run CLI tests
-        run: yarn test:cli
+        run: pnpm test:cli
 
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
@@ -292,7 +290,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
@@ -331,7 +329,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
@@ -354,7 +352,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
@@ -399,7 +397,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
@@ -441,7 +439,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests
@@ -467,7 +465,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
-        uses: ./.github/actions/yarn-nm-install
+        uses: ./.github/actions/pnpm-install
       - name: Monorepo build
         uses: ./.github/actions/run-build
       - uses: ./.github/actions/run-api-tests

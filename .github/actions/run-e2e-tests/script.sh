@@ -7,4 +7,4 @@ fi
 
 jestOptions=($JEST_OPTIONS)
 
-yarn test:e2e --setup --concurrency=1 "${jestOptions[@]}"
+pnpm test:e2e --setup --concurrency=1 "${jestOptions[@]}"

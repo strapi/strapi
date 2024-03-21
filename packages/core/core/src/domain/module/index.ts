@@ -1,5 +1,5 @@
 import _, { type PropertyPath, flatten } from 'lodash';
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
 import type { Core, UID, Struct } from '@strapi/types';
 
 import { removeNamespace } from '../../registries/namespace';

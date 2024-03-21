@@ -4,6 +4,16 @@ import { metadata as expected } from './resources/expected-metadata';
 
 const testModels = models as any;
 
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace jest {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    interface Matchers<R> {
+      toEqualMap(expect: any): CustomMatcherResult;
+    }
+  }
+}
+
 expect.extend({
   toEqualMap(received, expected) {
     // Iterate through expected map

@@ -1,4 +1,4 @@
-import type { Core } from '@strapi/strapi';
+import type { Core } from '@strapi/types';
 import type { Config } from 'src/config';
 import * as Sentry from '@sentry/node';
 

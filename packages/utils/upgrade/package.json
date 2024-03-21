@@ -50,21 +50,21 @@
   ],
   "scripts": {
     "build": "pack-up build",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "clean": "rimraf ./dist",
+    "lint": "eslint .",
     "prepublishOnly": "yarn clean && yarn build",
-    "test:ts": "run -T tsc --noEmit",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "test:ts": "tsc --noEmit",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "5.0.0-beta.0",
+    "@strapi/utils": "workspace:*",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
     "esbuild-register": "3.5.0",
-    "fs-extra": "10.1.0",
+    "fs-extra": "11.2.0",
     "glob": "10.3.10",
     "jscodeshift": "0.15.1",
     "lodash": "4.17.21",
@@ -76,10 +76,17 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "workspace:*",
-    "@strapi/types": "5.0.0-beta.0",
+    "@strapi/types": "workspace:*",
+    "@types/fs-extra": "11.0.4",
+    "@types/jest": "29.5.2",
     "@types/jscodeshift": "0.11.10",
+    "@types/lodash": "^4.14.191",
+    "@types/prompts": "2.4.9",
+    "@types/semver": "7.5.0",
     "eslint-config-custom": "workspace:*",
-    "rimraf": "3.0.2"
+    "jest": "29.6.0",
+    "rimraf": "3.0.2",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

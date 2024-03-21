@@ -1,5 +1,6 @@
 import { intersection, map, isEmpty } from 'lodash/fp';
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validators, validateYupSchema } from '@strapi/utils';
 import { FOLDER_MODEL_UID } from '../../../constants';
 import { folderExists } from './utils';
 import { isFolderOrChild } from '../../utils/folders';
@@ -7,8 +8,8 @@ import { isFolderOrChild } from '../../utils/folders';
 const validateDeleteManyFoldersFilesSchema = yup
   .object()
   .shape({
-    fileIds: yup.array().of(yup.strapiID().required()),
-    folderIds: yup.array().of(yup.strapiID().required()),
+    fileIds: yup.array().of(validators.strapiID().required()),
+    folderIds: yup.array().of(validators.strapiID().required()),
   })
   .noUnknown()
   .required();
@@ -16,13 +17,13 @@ const validateDeleteManyFoldersFilesSchema = yup
 const validateStructureMoveManyFoldersFilesSchema = yup
   .object()
   .shape({
-    destinationFolderId: yup
+    destinationFolderId: validators
       .strapiID()
       .nullable()
       .defined()
       .test('folder-exists', 'destination folder does not exist', folderExists),
-    fileIds: yup.array().of(yup.strapiID().required()),
-    folderIds: yup.array().of(yup.strapiID().required()),
+    fileIds: yup.array().of(validators.strapiID().required()),
+    folderIds: yup.array().of(validators.strapiID().required()),
   })
   .noUnknown()
   .required();

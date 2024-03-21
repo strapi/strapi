@@ -1,4 +1,5 @@
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validators, validateYupSchema } from '@strapi/utils';
 
 const roleCreateSchema = yup
   .object()
@@ -13,7 +14,7 @@ const rolesDeleteSchema = yup
   .shape({
     ids: yup
       .array()
-      .of(yup.strapiID())
+      .of(validators.strapiID())
       .min(1)
       .required()
       .test(
@@ -36,7 +37,7 @@ const rolesDeleteSchema = yup
   })
   .noUnknown();
 
-const roleDeleteSchema = yup
+const roleDeleteSchema = validators
   .strapiID()
   .required()
   .test(

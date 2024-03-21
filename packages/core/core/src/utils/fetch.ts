@@ -1,5 +1,5 @@
 import type { Core, Modules } from '@strapi/types';
-import { ProxyAgent } from 'undici';
+import { ProxyAgent, RequestInfo } from 'undici';
 
 // TODO: once core Node exposes a stable way to create a ProxyAgent we will use that instead of undici
 

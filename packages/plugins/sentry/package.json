@@ -43,10 +43,10 @@
   ],
   "scripts": {
     "build": "strapi plugin:build --force",
-    "clean": "run -T rimraf dist",
-    "lint": "run -T eslint .",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "clean": "rimraf dist",
+    "lint": "eslint .",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "watch": "strapi plugin:watch"
   },
   "dependencies": {
@@ -55,12 +55,16 @@
     "@strapi/icons": "1.16.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.0",
-    "@strapi/strapi": "5.0.0-beta.0",
+    "@strapi/pack-up": "workspace:*",
+    "@strapi/strapi": "workspace:*",
+    "@strapi/types": "workspace:*",
+    "@types/jest": "29.5.2",
+    "eslint-config-custom": "workspace:*",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "6.22.3",
-    "styled-components": "5.3.11"
+    "styled-components": "5.3.11",
+    "tsconfig": "workspace:*"
   },
   "peerDependencies": {
     "@strapi/strapi": "^5.0.0",

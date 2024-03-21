@@ -1,4 +1,4 @@
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
 
 const textNodeValidator = yup.object().shape({
   type: yup.string().equals(['text']).required(),

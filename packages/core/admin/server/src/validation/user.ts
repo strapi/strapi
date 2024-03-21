@@ -1,14 +1,15 @@
 import { isUndefined } from 'lodash/fp';
-import { yup, validateYupSchema } from '@strapi/utils';
-import validators from './common-validators';
+import * as yup from 'yup';
+import { validators, validateYupSchema } from '@strapi/utils';
+import commonValidators from './common-validators';
 
 const userCreationSchema = yup
   .object()
   .shape({
-    email: validators.email.required(),
-    firstname: validators.firstname.required(),
-    lastname: validators.lastname,
-    roles: validators.roles.min(1),
+    email: commonValidators.email.required(),
+    firstname: commonValidators.firstname.required(),
+    lastname: commonValidators.lastname,
+    roles: commonValidators.roles.min(1),
     preferedLanguage: yup.string().nullable(),
   })
   .noUnknown();
@@ -16,11 +17,11 @@ const userCreationSchema = yup
 const profileUpdateSchema = yup
   .object()
   .shape({
-    email: validators.email.notNull(),
-    firstname: validators.firstname.notNull(),
-    lastname: validators.lastname.nullable(),
-    username: validators.username.nullable(),
-    password: validators.password.notNull(),
+    email: commonValidators.email.notNull(),
+    firstname: commonValidators.firstname.notNull(),
+    lastname: commonValidators.lastname.nullable(),
+    username: commonValidators.username.nullable(),
+    password: commonValidators.password.notNull(),
     currentPassword: yup
       .string()
       .when('password', (password: string, schema: any) =>
@@ -34,20 +35,20 @@ const profileUpdateSchema = yup
 const userUpdateSchema = yup
   .object()
   .shape({
-    email: validators.email.notNull(),
-    firstname: validators.firstname.notNull(),
-    lastname: validators.lastname.nullable(),
-    username: validators.username.nullable(),
-    password: validators.password.notNull(),
+    email: commonValidators.email.notNull(),
+    firstname: commonValidators.firstname.notNull(),
+    lastname: commonValidators.lastname.nullable(),
+    username: commonValidators.username.nullable(),
+    password: commonValidators.password.notNull(),
     isActive: yup.bool().notNull(),
-    roles: validators.roles.min(1).notNull(),
+    roles: commonValidators.roles.min(1).notNull(),
   })
   .noUnknown();
 
 const usersDeleteSchema = yup
   .object()
   .shape({
-    ids: yup.array().of(yup.strapiID()).min(1).required(),
+    ids: yup.array().of(validators.strapiID()).min(1).required(),
   })
   .noUnknown();
 

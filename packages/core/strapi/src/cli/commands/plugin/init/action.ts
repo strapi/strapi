@@ -336,7 +336,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                   name: 'strapi-server.js',
                   contents: outdent`
                       'use strict';
-  
+
                       module.exports = require('./dist/server');
                   `,
                 });
@@ -358,7 +358,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
 
                   pkgJson.scripts = {
                     ...pkgJson.scripts,
-                    'test:ts:front': 'run -T tsc -p admin/tsconfig.json',
+                    'test:ts:front': 'tsc -p admin/tsconfig.json',
                   };
 
                   pkgJson.devDependencies = {
@@ -383,7 +383,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
 
                   pkgJson.scripts = {
                     ...pkgJson.scripts,
-                    'test:ts:back': 'run -T tsc -p server/tsconfig.json',
+                    'test:ts:back': 'tsc -p server/tsconfig.json',
                   };
 
                   const { serverTsconfigFiles } = await import('./files/typescript');

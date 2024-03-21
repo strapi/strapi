@@ -1,9 +1,7 @@
 import _ from 'lodash';
-import strapiUtils from '@strapi/utils';
+import * as yup from 'yup';
 import type { Schema, Struct } from '@strapi/types';
 import blocksValidator from './blocks-validator';
-
-const { yup } = strapiUtils;
 
 interface ValidatorMetas<TAttribute extends Schema.Attribute.AnyAttribute> {
   attr: TAttribute;
@@ -23,7 +21,7 @@ interface ValidatorOptions {
  * Adds minLength validator
  */
 const addMinLengthValidator = (
-  validator: strapiUtils.yup.StringSchema,
+  validator: yup.StringSchema,
   {
     attr,
   }: {
@@ -47,7 +45,7 @@ const addMinLengthValidator = (
  * @returns {StringSchema}
  */
 const addMaxLengthValidator = (
-  validator: strapiUtils.yup.StringSchema,
+  validator: yup.StringSchema,
   {
     attr,
   }: {
@@ -68,7 +66,7 @@ const addMaxLengthValidator = (
  * @returns {NumberSchema}
  */
 const addMinIntegerValidator = (
-  validator: strapiUtils.yup.NumberSchema,
+  validator: yup.NumberSchema,
   {
     attr,
   }: {
@@ -80,7 +78,7 @@ const addMinIntegerValidator = (
  * Adds max integer validator
  */
 const addMaxIntegerValidator = (
-  validator: strapiUtils.yup.NumberSchema,
+  validator: yup.NumberSchema,
   {
     attr,
   }: {
@@ -92,7 +90,7 @@ const addMaxIntegerValidator = (
  * Adds min float/decimal validator
  */
 const addMinFloatValidator = (
-  validator: strapiUtils.yup.NumberSchema,
+  validator: yup.NumberSchema,
   {
     attr,
   }: {
@@ -104,7 +102,7 @@ const addMinFloatValidator = (
  * Adds max float/decimal validator
  */
 const addMaxFloatValidator = (
-  validator: strapiUtils.yup.NumberSchema,
+  validator: yup.NumberSchema,
   {
     attr,
   }: {
@@ -116,7 +114,7 @@ const addMaxFloatValidator = (
  * Adds regex validator
  */
 const addStringRegexValidator = (
-  validator: strapiUtils.yup.StringSchema,
+  validator: yup.StringSchema,
   {
     attr,
   }: {
@@ -137,7 +135,7 @@ const addStringRegexValidator = (
 /**
  * Adds unique validator
  */
-const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
+const addUniqueValidator = <T extends yup.AnySchema>(
   validator: T,
   {
     attr,

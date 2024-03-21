@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { yup, validateYupSchema, errors } from '@strapi/utils';
+import * as yup from 'yup';
+import { validators, validateYupSchema, errors } from '@strapi/utils';
 import createModelConfigurationSchema from './model-configuration';
 
 const { PaginationError, ValidationError } = errors;
@@ -12,7 +13,7 @@ const kindSchema = yup.string().oneOf(TYPES).nullable();
 
 const bulkActionInputSchema = yup
   .object({
-    ids: yup.array().of(yup.strapiID()).min(1).required(),
+    ids: yup.array().of(validators.strapiID()).min(1).required(),
   })
   .required();
 

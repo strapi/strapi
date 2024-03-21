@@ -1,5 +1,6 @@
-import { format } from 'winston';
+import { format, type Logform } from 'winston';
 
+export type { Logform };
 /**
  * This will remove the chalk color codes from the message provided.
  * It's used to log plain text in the log file

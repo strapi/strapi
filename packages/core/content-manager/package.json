@@ -41,27 +41,33 @@
   ],
   "scripts": {
     "build": "pack-up build",
-    "lint": "run -T eslint .",
-    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
-    "test:unit": "run -T jest",
-    "test:unit:watch": "run -T jest --watch",
+    "lint": "eslint .",
+    "test:ts:back": "tsc --noEmit -p server/tsconfig.json",
+    "test:unit": "jest",
+    "test:unit:watch": "jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/types": "5.0.0-beta.0",
-    "@strapi/utils": "5.0.0-beta.0",
+    "@strapi/types": "workspace:*",
+    "@strapi/utils": "workspace:*",
     "koa": "2.13.4",
     "lodash": "4.17.21",
     "node-schedule": "2.1.0",
-    "qs": "6.11.1"
+    "qs": "6.11.1",
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@strapi/database": "workspace:*",
     "@strapi/pack-up": "workspace:*",
+    "@types/koa": "2.13.4",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
-    "koa-body": "4.2.0"
+    "@types/node-schedule": "2.1.0",
+    "@types/qs": "6.9.14",
+    "koa-body": "4.2.0",
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

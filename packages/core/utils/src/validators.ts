@@ -18,7 +18,7 @@ const validateYupSchema =
       const result = await schema.validate(body, optionsWithDefaults);
       return result;
     } catch (e) {
-      if (e instanceof yup.ValidationError) {
+      if (yup.ValidationError.isError(e)) {
         handleYupError(e, errorMessage);
       }
 
@@ -27,13 +27,13 @@ const validateYupSchema =
   };
 
 const validateYupSchemaSync =
-  <TSchema extends yup.AnySchema>(schema: yup.AnySchema, options = {}) =>
-  (body: unknown, errorMessage?: string): yup.InferType<TSchema> => {
+  <TSchema extends yup.AnySchema>(schema: TSchema, options = {}) =>
+  (body: unknown, errorMessage?: string): Promise<yup.InferType<TSchema>> => {
     try {
       const optionsWithDefaults = defaults(defaultValidationParam, options);
       return schema.validateSync(body, optionsWithDefaults);
     } catch (e) {
-      if (e instanceof yup.ValidationError) {
+      if (yup.ValidationError.isError(e)) {
         handleYupError(e, errorMessage);
       }
 

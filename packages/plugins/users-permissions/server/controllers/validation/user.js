@@ -1,9 +1,10 @@
 'use strict';
 
-const { yup, validateYupSchema } = require('@strapi/utils');
+const yup = require('yup');
+const { validators, validateYupSchema } = require('@strapi/utils');
 
 const deleteRoleSchema = yup.object().shape({
-  role: yup.strapiID().required(),
+  role: validators.strapiID().required(),
 });
 
 const createUserBodySchema = yup.object().shape({
@@ -17,12 +18,12 @@ const createUserBodySchema = yup.object().shape({
           .shape({
             connect: yup
               .array()
-              .of(yup.object().shape({ id: yup.strapiID().required() }))
+              .of(yup.object().shape({ id: validators.strapiID().required() }))
               .min(1, 'Users must have a role')
               .required(),
           })
           .required()
-      : yup.strapiID().required()
+      : validators.strapiID().required()
   ),
 });
 
@@ -35,7 +36,7 @@ const updateUserBodySchema = yup.object().shape({
       ? yup.object().shape({
           connect: yup
             .array()
-            .of(yup.object().shape({ id: yup.strapiID().required() }))
+            .of(yup.object().shape({ id: validators.strapiID().required() }))
             .required(),
           disconnect: yup
             .array()
@@ -48,7 +49,7 @@ const updateUserBodySchema = yup.object().shape({
             })
             .required(),
         })
-      : yup.strapiID()
+      : validators.strapiID()
   ),
 });
 

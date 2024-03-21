@@ -131,7 +131,7 @@ export default {
     const projectId = strapi.config.get('uuid', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
-    // @ts-expect-error replace use of exists
+
     const useYarn: boolean = await exists(path.join(process.cwd(), 'yarn.lock'));
 
     return {

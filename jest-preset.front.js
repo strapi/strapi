@@ -74,7 +74,7 @@ module.exports = {
       path.join(__dirname, 'fileTransformer.js'),
   },
   transformIgnorePatterns: [
-    'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@react-dnd|fractional-indexing)/)',
+    // 'node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend|@react-dnd|fractional-indexing)/)',
   ],
   testMatch: ['**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
   testEnvironmentOptions: {

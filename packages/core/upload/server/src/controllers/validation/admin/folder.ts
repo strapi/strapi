@@ -1,5 +1,6 @@
 import { isUndefined, get, isNil } from 'lodash/fp';
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validators, validateYupSchema } from '@strapi/utils';
 import { getService } from '../../../utils';
 import { FOLDER_MODEL_UID } from '../../../constants';
 import { folderExists } from './utils';
@@ -36,7 +37,7 @@ const validateCreateFolderSchema = yup
       .matches(NO_SPACES_AROUND, 'name cannot start or end with a whitespace')
       .required()
       .test('is-folder-unique', 'A folder with this name already exists', isNameUniqueInFolder()),
-    parent: yup
+    parent: validators
       .strapiID()
       .nullable()
       .test('folder-exists', 'parent folder does not exist', folderExists),
@@ -58,7 +59,7 @@ const validateUpdateFolderSchema = (id: number) =>
           'A folder with this name already exists',
           isNameUniqueInFolder(id)
         ),
-      parent: yup
+      parent: validators
         .strapiID()
         .nullable()
         .test('folder-exists', 'parent folder does not exist', folderExists)

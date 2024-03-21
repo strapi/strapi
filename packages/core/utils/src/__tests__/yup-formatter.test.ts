@@ -1,6 +1,7 @@
 /* eslint-disable import/namespace */
-import * as yup from '../yup';
+import * as yup from 'yup';
 import { formatYupErrors } from '../format-yup-error';
+import {} from '../yup';
 import { YupValidationError } from '../errors';
 
 describe('formatYupErrors', () => {

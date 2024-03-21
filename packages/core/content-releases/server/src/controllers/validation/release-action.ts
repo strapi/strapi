@@ -1,10 +1,11 @@
-import { yup, validateYupSchema } from '@strapi/utils';
+import * as yup from 'yup';
+import { validators, validateYupSchema } from '@strapi/utils';
 
 const RELEASE_ACTION_SCHEMA = yup.object().shape({
   entry: yup
     .object()
     .shape({
-      id: yup.strapiID().required(),
+      id: validators.strapiID().required(),
       contentType: yup.string().required(),
     })
     .required(),

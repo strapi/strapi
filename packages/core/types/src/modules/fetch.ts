@@ -1,4 +1,4 @@
-import type { ProxyAgent } from 'undici';
+import type { ProxyAgent, RequestInfo, Response } from 'undici';
 
 /**
  * strapi.fetch interface is currently an identical wrapper for Node fetch()

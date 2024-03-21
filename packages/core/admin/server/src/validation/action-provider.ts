@@ -1,4 +1,5 @@
-import { yup, validateYupSchemaSync } from '@strapi/utils';
+import * as yup from 'yup';
+import { validateYupSchemaSync } from '@strapi/utils';
 import validators from './common-validators';
 
 const registerProviderActionSchema = yup

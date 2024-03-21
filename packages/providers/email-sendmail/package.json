@@ -36,19 +36,20 @@
   ],
   "scripts": {
     "build": "pack-up build",
-    "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
+    "clean": "rimraf ./dist",
+    "lint": "eslint .",
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "5.0.0-beta.0",
+    "@strapi/utils": "workspace:*",
     "sendmail": "^1.6.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.0",
+    "@strapi/pack-up": "workspace:*",
+    "@types/jest": "29.5.2",
     "@types/sendmail": "1.4.4",
-    "eslint-config-custom": "5.0.0-beta.0",
-    "tsconfig": "5.0.0-beta.0"
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

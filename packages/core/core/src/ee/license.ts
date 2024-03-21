@@ -97,7 +97,10 @@ const fetchLicense = async (
   const contentType = response.headers.get('Content-Type');
 
   if (contentType?.includes('application/json')) {
-    const { data, error } = await response.json();
+    const { data, error } = (await response.json()) as {
+      data: { license: string };
+      error: Error;
+    };
 
     switch (response.status) {
       case 200:

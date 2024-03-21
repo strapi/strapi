@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
 
 import type { TestContext } from 'yup';
 import type { Schema, UID, Struct } from '@strapi/types';

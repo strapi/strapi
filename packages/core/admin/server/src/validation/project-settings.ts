@@ -1,4 +1,5 @@
-import { yup, validateYupSchemaSync } from '@strapi/utils';
+import * as yup from 'yup';
+import { validateYupSchemaSync } from '@strapi/utils';
 
 const MAX_IMAGE_WIDTH = 750;
 const MAX_IMAGE_HEIGHT = MAX_IMAGE_WIDTH;

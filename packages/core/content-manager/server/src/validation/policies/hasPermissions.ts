@@ -1,4 +1,5 @@
-import { yup, validateYupSchemaSync } from '@strapi/utils';
+import * as yup from 'yup';
+import { validateYupSchemaSync } from '@strapi/utils';
 
 const hasPermissionsSchema = yup.object({
   actions: yup.array().of(yup.string()),

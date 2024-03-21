@@ -1,4 +1,4 @@
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
 import _ from 'lodash';
 import { snakeCase } from 'lodash/fp';
 import { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } from '../../services/constants';

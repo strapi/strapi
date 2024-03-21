@@ -1,4 +1,4 @@
-import { yup } from '@strapi/utils';
+import * as yup from 'yup';
 import { isValidName } from '../common';
 import type { CommonTestConfig } from '../common';
 
