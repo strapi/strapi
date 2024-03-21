@@ -7582,7 +7582,7 @@ __metadata:
     yaml: "npm:1.10.2"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^4.0.0
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7662,7 +7662,7 @@ __metadata:
     tsconfig: "npm:5.0.0-beta.0"
     typescript: "npm:5.3.2"
   peerDependencies:
-    "@strapi/strapi": ^4.0.0
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7697,7 +7697,7 @@ __metadata:
     styled-components: "npm:5.3.11"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^4.19.0
+    "@strapi/admin": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7719,7 +7719,7 @@ __metadata:
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:5.3.11"
   peerDependencies:
-    "@strapi/strapi": ^4.0.0
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7809,7 +7809,7 @@ __metadata:
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^4.0.0
+    "@strapi/strapi": ^5.0.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -8020,6 +8020,8 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^6.0.0
+    styled-components: ^5.2.1
   bin:
     strapi: ./bin/strapi.js
   languageName: unknown

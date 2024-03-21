@@ -4,9 +4,6 @@ import {
   Box,
   Button,
   Typography,
-  ModalLayout,
-  ModalHeader,
-  ModalBody,
   ModalFooter,
   IconButton,
   Flex,
@@ -16,6 +13,7 @@ import {
 } from '@strapi/design-system';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
+import { useQueryClient } from 'react-query';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
@@ -25,7 +23,7 @@ import { useNotification } from '../../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
 import { useQueryParams } from '../../../../../hooks/useQueryParams';
 import { getYupInnerErrors } from '../../../../../utils/getYupInnerErrors';
-import { useDoc } from '../../../../hooks/useDocument';
+import { Document, useDoc } from '../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import {
   useGetAllDocumentsQuery,
@@ -33,9 +31,11 @@ import {
 } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
+// import { useAllowedActions } from '../../hooks/useAllowedActions';
 
-import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
+import { ConfirmDialogPublishAll } from './ConfirmBulkActionDialog';
 
+import type { BulkActionComponent } from '../../../../../core/apis/content-manager';
 import type { Data } from '@strapi/types';
 
 const TypographyMaxWidth = styled(Typography)`
@@ -227,10 +227,13 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
 
 interface SelectedEntriesModalContentProps
   extends Pick<SelectedEntriesTableContentProps, 'validationErrors'> {
-  refetchModalData: React.MouseEventHandler<HTMLButtonElement>;
-  setEntriesToFetch: React.Dispatch<React.SetStateAction<Data.ID[]>>;
-  setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Data.ID[]>>;
-  toggleModal: ConfirmDialogPublishAllProps['onToggleDialog'];
+  isDialogOpen: boolean;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchList: () => void;
+  setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Document['id'][]>>;
+  setEntriesToFetch: React.Dispatch<React.SetStateAction<Document['id'][]>>;
+  validationErrors: Record<string, EntryValidationTextProps['validationErrors']>;
+  setIsPublishModalBtnDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface TableRow {
@@ -239,11 +242,13 @@ interface TableRow {
 }
 
 const SelectedEntriesModalContent = ({
-  toggleModal,
-  refetchModalData,
-  setEntriesToFetch,
-  setSelectedListViewEntries,
+  // refetchList,
+  // setEntriesToFetch,
+  // setSelectedListViewEntries,
   validationErrors = {},
+  isDialogOpen,
+  setIsDialogOpen,
+  setIsPublishModalBtnDisabled,
 }: SelectedEntriesModalContentProps) => {
   const { formatMessage } = useIntl();
   const {
@@ -252,8 +257,8 @@ const SelectedEntriesModalContent = ({
     selectRow,
     isLoading,
   } = useTable('SelectedEntriesModal', (state) => state);
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
   const [rowsToDisplay, setRowsToDisplay] = React.useState<Array<TableRow>>([]);
+
   const [publishedCount, setPublishedCount] = React.useState(0);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
@@ -303,15 +308,15 @@ const SelectedEntriesModalContent = ({
       });
 
       setRowsToDisplay(update);
-      const publishedIds = update.map(({ id }) => id);
+      // const publishedIds = update.map(({ id }) => id);
       // Set the parent's entries to fetch when clicking refresh
-      setEntriesToFetch(publishedIds);
+      // setEntriesToFetch(publishedIds);
       // Deselect the entries that were published in the list view
-      setSelectedListViewEntries(publishedIds);
+      // setSelectedListViewEntries(publishedIds);
 
-      if (update.length === 0) {
-        toggleModal();
-      }
+      // if (update.length === 0) {
+      //   toggleModal();
+      // }
 
       toggleNotification({
         type: 'success',
@@ -370,82 +375,62 @@ const SelectedEntriesModalContent = ({
       // Update the rows to display
       setRowsToDisplay(rows);
     }
-  }, [rows]);
+  }, [rows, setRowsToDisplay]);
+
+  React.useEffect(() => {
+    if (
+      selectedEntries.length === 0 ||
+      selectedEntries.length === selectedEntriesWithErrorsCount ||
+      isLoading
+    ) {
+      setIsPublishModalBtnDisabled(true);
+    } else {
+      setIsPublishModalBtnDisabled(false);
+    }
+  }, [isLoading, selectedEntries, selectedEntriesWithErrorsCount, setIsPublishModalBtnDisabled]);
 
   return (
-    <ModalLayout onClose={toggleModal} labelledBy="title">
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-          {formatMessage({
-            id: getTranslation('containers.list.selectedEntriesModal.title'),
-            defaultMessage: 'Publish entries',
-          })}
-        </Typography>
-      </ModalHeader>
-      <ModalBody>
-        <Typography>{getFormattedCountMessage()}</Typography>
-        <Box marginTop={5}>
-          <SelectedEntriesTableContent
-            isPublishing={isSubmittingForm}
-            rowsToDisplay={rowsToDisplay}
-            entriesToPublish={entriesToPublish}
-            validationErrors={validationErrors}
-          />
-        </Box>
-      </ModalBody>
-      <ModalFooter
-        startActions={
-          <Button onClick={toggleModal} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
-        }
-        endActions={
-          <Flex gap={2}>
-            <Button onClick={refetchModalData} variant="tertiary" loading={isLoading}>
-              {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
-            </Button>
-            <Button
-              onClick={toggleDialog}
-              disabled={
-                selectedEntries.length === 0 ||
-                selectedEntries.length === selectedEntriesWithErrorsCount ||
-                isLoading
-              }
-              loading={isSubmittingForm}
-            >
-              {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
-            </Button>
-          </Flex>
-        }
-      />
+    <>
+      <Typography>{getFormattedCountMessage()}</Typography>
+      <Box marginTop={5}>
+        <SelectedEntriesTableContent
+          // isPublishing={bulkPublishMutation.isLoading}
+          rowsToDisplay={rowsToDisplay}
+          entriesToPublish={entriesToPublish}
+          validationErrors={validationErrors}
+        />
+      </Box>
       <ConfirmDialogPublishAll
         isOpen={isDialogOpen}
         onToggleDialog={toggleDialog}
         isConfirmButtonLoading={isSubmittingForm}
         onConfirm={handleConfirmBulkPublish}
       />
-    </ModalLayout>
+    </>
   );
 };
 
 /* -------------------------------------------------------------------------------------------------
- * SelectedEntriesModal
+ * PublishAction
  * -----------------------------------------------------------------------------------------------*/
 
-interface SelectedEntriesModalProps {
-  onToggle: SelectedEntriesModalContentProps['toggleModal'];
-}
+const PublishAction: BulkActionComponent = ({ model: slug }) => {
+  const { formatMessage } = useIntl();
 
-const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
   const { selectedRows: selectedListViewEntries, selectRow: setSelectedListViewEntries } = useTable(
     'SelectedEntriesModal',
     (state) => state
   );
 
   const { model, schema, components, isLoading: isLoadingDoc } = useDoc();
+  // const selectedEntriesObjects = list.filter((entry) => selectedEntries.includes(entry.id));
+  // const hasPublishPermission = useAllowedActions(slug).canPublish;
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const queryClient = useQueryClient();
+  // const showPublishButton =
+  //   hasPublishPermission && selectedEntriesObjects.some((entry) => !entry.publishedAt);
+  const [isPublishModalBtnDisabled, setIsPublishModalBtnDisabled] = React.useState(true);
+
   // The child table will update this value based on the entries that were published
   const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
   // We want to keep the selected entries order same as the list view
@@ -455,7 +440,7 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
     },
   ] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
 
-  const { data, refetch, isLoading, isFetching } = useGetAllDocumentsQuery(
+  const { data, isLoading, isFetching } = useGetAllDocumentsQuery(
     {
       model,
       params: {
@@ -502,22 +487,85 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
     };
   }, [components, data, schema]);
 
-  return (
-    <Table.Root
-      rows={rows}
-      defaultSelectedRows={selectedListViewEntries}
-      headers={TABLE_HEADERS}
-      isLoading={isLoading || isLoadingDoc || isFetching}
-    >
-      <SelectedEntriesModalContent
-        setSelectedListViewEntries={setSelectedListViewEntries}
-        setEntriesToFetch={setEntriesToFetch}
-        toggleModal={onToggle}
-        refetchModalData={refetch}
-        validationErrors={validationErrors}
-      />
-    </Table.Root>
-  );
+  const refetchList = () => {
+    queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
+  };
+
+  // If all the entries are published, we want to refetch the list view
+  if (rows.length === 0) {
+    refetchList();
+  }
+
+  // if (!showPublishButton) return null;
+
+  return {
+    actionType: 'publish',
+    variant: 'tertiary',
+    label: formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' }),
+    dialog: {
+      type: 'modal',
+      title: formatMessage({
+        id: getTranslation('containers.ListPage.selectedEntriesModal.title'),
+        defaultMessage: 'Publish entries',
+      }),
+      content: (
+        <Table.Root
+          rows={rows}
+          defaultSelectedRows={selectedListViewEntries}
+          headers={TABLE_HEADERS}
+          isLoading={isLoading || isLoadingDoc || isFetching}
+        >
+          <SelectedEntriesModalContent
+            isDialogOpen={isDialogOpen}
+            setIsDialogOpen={setIsDialogOpen}
+            refetchList={refetchList}
+            setSelectedListViewEntries={setSelectedListViewEntries}
+            setEntriesToFetch={setEntriesToFetch}
+            validationErrors={validationErrors}
+            setIsPublishModalBtnDisabled={setIsPublishModalBtnDisabled}
+          />
+        </Table.Root>
+      ),
+      footer: ({ onClose }) => {
+        return (
+          <ModalFooter
+            startActions={
+              <Button
+                onClick={() => {
+                  onClose();
+                  refetchList();
+                }}
+                variant="tertiary"
+              >
+                {formatMessage({
+                  id: 'app.components.Button.cancel',
+                  defaultMessage: 'Cancel',
+                })}
+              </Button>
+            }
+            endActions={
+              <Flex gap={2}>
+                <Button /* onClick={() => refetchModalData()} */ variant="tertiary">
+                  {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
+                </Button>
+                <Button
+                  onClick={() => setIsDialogOpen((prev) => !prev)}
+                  disabled={isPublishModalBtnDisabled}
+                  // TODO: in V5 when bulk actions are refactored, we should use the isLoading prop
+                  // loading={bulkPublishMutation.isLoading}
+                >
+                  {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+                </Button>
+              </Flex>
+            }
+          />
+        );
+      },
+      onClose: () => {
+        refetchList();
+      },
+    },
+  };
 };
 
-export { SelectedEntriesModal };
+export { PublishAction, SelectedEntriesModalContent };
