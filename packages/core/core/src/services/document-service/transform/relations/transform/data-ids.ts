@@ -93,7 +93,14 @@ const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source
         }
 
         // Transform all ids to new relations
-        return ids?.map((id) => ({ id, position }));
+        return ids?.map((id) => {
+          const newRelation = { id } as typeof relation;
+          if (relation.position) {
+            newRelation.position = position;
+          }
+
+          return newRelation;
+        });
       }, value as any);
 
       set(key, newRelation as any);

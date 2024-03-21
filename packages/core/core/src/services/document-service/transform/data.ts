@@ -8,8 +8,6 @@ import { transformDataIdsVisitor as transformRelationDataIds } from './relations
 export const transformData = async (data: any, opts: any) => {
   const idMap = createIdMap({ strapi });
 
-  // Assign default locale to relations
-
   // Extract any relation ids from the input
   await extractDataRelationIds(idMap, data, opts);
 
