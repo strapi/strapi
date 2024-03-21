@@ -77,7 +77,7 @@ const getAbsoluteUrl =
 
     const hostname =
       config.get('environment') === 'development' &&
-      ['127.0.0.1', '0.0.0.0'].includes(config.get('server.host'))
+      ['127.0.0.1', '0.0.0.0', '::1', '::'].includes(config.get('server.host'))
         ? 'localhost'
         : config.get('server.host');
 
