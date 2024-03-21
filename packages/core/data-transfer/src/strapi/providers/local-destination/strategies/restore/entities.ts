@@ -1,7 +1,7 @@
 import { Writable } from 'stream';
-import type { LoadedStrapi, Common, Schema, Attribute } from '@strapi/types';
+import type { LoadedStrapi, Common } from '@strapi/types';
 
-import { get, last } from 'lodash/fp';
+import { last } from 'lodash/fp';
 
 import { ProviderTransferError } from '../../../../../errors/providers';
 import type { IEntity, Transaction } from '../../../../../../types';
