@@ -1,6 +1,6 @@
 import { curry } from 'lodash/fp';
 
-import { Common } from '@strapi/types';
+import type { UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
 import { ID, LongHandDocument } from '../utils/types';
@@ -10,7 +10,7 @@ import { getRelationTargetStatus } from '../utils/dp';
 import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 
 interface Options {
-  uid: Common.UID.Schema;
+  uid: UID.Schema;
   locale?: string | null;
   status?: 'draft' | 'published';
   allowMissingId?: boolean; // Whether to ignore missing ids and not throw any error
@@ -20,7 +20,7 @@ interface Options {
  * Get the entry ids for a given documentId.
  */
 const getRelationIds = curry(
-  (idMap: IdMap, targetUid: Common.UID.Schema, source: Options, relation: LongHandDocument) => {
+  (idMap: IdMap, targetUid: UID.Schema, source: Options, relation: LongHandDocument) => {
     // locale to connect to
     const targetLocale = getRelationTargetLocale(relation, {
       targetUid,

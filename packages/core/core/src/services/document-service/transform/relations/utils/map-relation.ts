@@ -1,7 +1,7 @@
 /* eslint-disable node/no-callback-literal */
 import { curry } from 'lodash/fp';
 
-import { Common } from '@strapi/types';
+import { UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 
 import { Relation } from './types';
@@ -65,7 +65,7 @@ const traverseEntityRelations = async (
       }
 
       // TODO: Handle morph relations (they have multiple targets)
-      const target = options.attribute.target as Common.UID.Schema | undefined;
+      const target = options.attribute.target as UID.Schema | undefined;
       if (!target) {
         return;
       }

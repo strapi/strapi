@@ -1,6 +1,6 @@
 import { curry } from 'lodash/fp';
 
-import { Common } from '@strapi/types';
+import { UID } from '@strapi/types';
 
 import { IdMap } from '../../id-map';
 import { getRelationTargetLocale } from '../utils/i18n';
@@ -9,7 +9,7 @@ import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 import { LongHandDocument } from '../utils/types';
 
 interface Options {
-  uid: Common.UID.Schema;
+  uid: UID.Schema;
   locale?: string | null;
   status?: 'draft' | 'published';
 }
@@ -18,7 +18,7 @@ interface Options {
  * Load a relation documentId into the idMap.
  */
 const addRelationDocId = curry(
-  (idMap: IdMap, targetUid: Common.UID.Schema, source: Options, relation: LongHandDocument) => {
+  (idMap: IdMap, targetUid: UID.Schema, source: Options, relation: LongHandDocument) => {
     const targetLocale = getRelationTargetLocale(relation, {
       targetUid,
       sourceUid: source.uid,

@@ -1,4 +1,4 @@
-import { Common } from '@strapi/types';
+import { UID } from '@strapi/types';
 import { traverseEntity } from '@strapi/utils';
 import { getDefaultLocale, isLocalizedContentType } from '../utils/i18n';
 
@@ -11,7 +11,7 @@ type Visitor = Parameters<typeof traverseEntity>[0];
  * relations can be connected to multiple locales,
  * in case user does not provide the locale, this sets it to the default one.
  */
-const setDefaultLocaleToRelations = (data: Record<string, any>, uid: Common.UID.Schema) => {
+const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema) => {
   // I18n CT -> anything will already have a locale set (source locale)
   if (isLocalizedContentType(uid)) {
     return data;
@@ -29,7 +29,7 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: Common.UID.
     }
 
     // Ignore non-18n -> non-i18n relations
-    const target = attribute.target as Common.UID.Schema | undefined;
+    const target = attribute.target as UID.Schema | undefined;
     if (!target || !isLocalizedContentType(target)) {
       return;
     }
