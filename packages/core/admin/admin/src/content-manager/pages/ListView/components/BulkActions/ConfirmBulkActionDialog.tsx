@@ -19,7 +19,8 @@ import { useQueryParams } from '../../../../../hooks/useQueryParams';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useGetManyDraftRelationCountQuery } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
-import { InjectionZoneList } from '../InjectionZoneList';
+
+import { Emphasis } from './Actions';
 
 interface ConfirmBulkActionDialogProps extends Pick<DialogFooterProps, 'endAction'> {
   onToggleDialog: () => void;
@@ -90,7 +91,7 @@ const ConfirmDialogPublishAll = ({
   const selectedEntries = useTable('ConfirmDialogPublishAll', (state) => state.selectedRows);
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
-  const { model } = useDoc();
+  const { model, schema } = useDoc();
   const [{ query }] = useQueryParams<{
     plugins?: {
       i18n?: {
@@ -149,7 +150,22 @@ const ConfirmDialogPublishAll = ({
               defaultMessage: 'Are you sure you want to publish these entries?',
             })}
           </Typography>
-          <InjectionZoneList area="contentManager.listView.publishModalAdditionalInfos" />
+          {schema?.pluginOptions &&
+            'i18n' in schema.pluginOptions &&
+            schema?.pluginOptions.i18n && (
+              <Typography textColor="danger500">
+                {formatMessage(
+                  {
+                    id: getTranslation('Settings.list.actions.publishAdditionalInfos'),
+                    defaultMessage:
+                      'This will publish the active locale versions <em>(from Internationalization)</em>',
+                  },
+                  {
+                    em: Emphasis,
+                  }
+                )}
+              </Typography>
+            )}
         </>
       }
       endAction={

@@ -19,6 +19,10 @@ import {
   ActionsPanel,
   type PanelDescription,
 } from '../../content-manager/pages/EditView/components/Panels';
+import {
+  DEFAULT_BULK_ACTIONS,
+  type BulkActionDescription,
+} from '../../content-manager/pages/ListView/components/BulkActions/Actions';
 import { DEFAULT_TABLE_ROW_ACTIONS } from '../../content-manager/pages/ListView/components/TableActions';
 
 import type { PluginConfig } from './Plugin';
@@ -32,7 +36,7 @@ import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared'
 
 type DescriptionReducer<Config extends object> = (prev: Config[]) => Config[];
 
-interface Context {
+interface EditViewContext {
   /**
    * This will ONLY be null, if the content-type
    * does not have draft & published enabled.
@@ -60,7 +64,22 @@ interface Context {
   model: string;
 }
 
-interface PanelComponentProps extends Context {}
+interface ListViewContext {
+  /**
+   * Will be either 'single-types' | 'collection-types'
+   */
+  collectionType: string;
+  /**
+   * TODO: add comment
+   */
+  documentIds: string[];
+  /**
+   * The current content-type's model.
+   */
+  model: string;
+}
+
+interface PanelComponentProps extends EditViewContext {}
 
 interface PanelComponent extends DescriptionComponent<PanelComponentProps, PanelDescription> {
   /**
@@ -70,7 +89,7 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
   type?: 'actions' | 'review-workflows' | 'releases';
 }
 
-interface DocumentActionProps extends Context {}
+interface DocumentActionProps extends EditViewContext {}
 
 interface DocumentActionComponent
   extends DescriptionComponent<DocumentActionProps, DocumentActionDescription> {
@@ -87,10 +106,17 @@ interface DocumentActionComponent
     | 'update';
 }
 
-interface HeaderActionProps extends Context {}
+interface HeaderActionProps extends EditViewContext {}
 
 interface HeaderActionComponent
   extends DescriptionComponent<HeaderActionProps, HeaderActionDescription> {}
+
+interface BulkActionComponentProps extends ListViewContext {}
+
+interface BulkActionComponent
+  extends DescriptionComponent<BulkActionComponentProps, BulkActionDescription> {
+  actionType?: 'delete' | 'publish' | 'unpublish';
+}
 
 /* -------------------------------------------------------------------------------------------------
  * ContentManager plugin
@@ -103,6 +129,7 @@ class ContentManagerPlugin {
    * application, so instead we collate them and run them later with the complete list incl.
    * ones already registered & the context of the view.
    */
+  bulkActions: BulkActionComponent[] = [...DEFAULT_BULK_ACTIONS];
   documentActions: DocumentActionComponent[] = [
     ...DEFAULT_ACTIONS,
     ...DEFAULT_TABLE_ROW_ACTIONS,
@@ -159,7 +186,23 @@ class ContentManagerPlugin {
       this.headerActions = actions(this.headerActions);
     } else {
       throw new Error(
-        `Expected the \`actions\` passed to \`addDocumentHeaderAction\` to be an array or a function, but received ${getPrintableType(
+        `Expected the \`actions\` passed to \`addBulkAction\` to be an array or a function, but received ${getPrintableType(
+          actions
+        )}`
+      );
+    }
+  }
+
+  addBulkAction(actions: DescriptionReducer<BulkActionComponent>): void;
+  addBulkAction(actions: BulkActionComponent[]): void;
+  addBulkAction(actions: DescriptionReducer<BulkActionComponent> | BulkActionComponent[]) {
+    if (Array.isArray(actions)) {
+      this.bulkActions = [...this.bulkActions, ...actions];
+    } else if (typeof actions === 'function') {
+      this.bulkActions = actions(this.bulkActions);
+    } else {
+      throw new Error(
+        `Expected the \`actions\` passed to \`addBulkAction\` to be an array or a function, but received ${getPrintableType(
           actions
         )}`
       );
@@ -177,6 +220,8 @@ class ContentManagerPlugin {
         getDocumentActions: () => this.documentActions,
         getHeaderActions: () => this.headerActions,
         getEditViewSidePanels: () => this.editViewSidePanels,
+        addBulkAction: this.addBulkAction.bind(this),
+        getBulkActions: () => this.bulkActions,
       },
     } satisfies PluginConfig;
   }
@@ -207,7 +252,11 @@ const getPrintableType = (value: unknown): string => {
 
 export { ContentManagerPlugin };
 export type {
-  Context,
+  EditViewContext,
+  ListViewContext,
+  BulkActionComponent,
+  BulkActionComponentProps,
+  BulkActionDescription,
   DescriptionComponent,
   DescriptionReducer,
   PanelComponentProps,
