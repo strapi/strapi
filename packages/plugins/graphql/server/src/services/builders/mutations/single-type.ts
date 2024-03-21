@@ -1,5 +1,5 @@
 import { extendType, nonNull } from 'nexus';
-import { sanitize, errors } from '@strapi/utils';
+import { errors } from '@strapi/utils';
 import type * as Nexus from 'nexus';
 import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
@@ -47,7 +47,7 @@ export default ({ strapi }: Context) => {
         const { auth } = context.state;
 
         // Sanitize input data
-        const sanitizedInputData = await sanitize.contentAPI.input(args.data, contentType, {
+        const sanitizedInputData = await strapi.contentAPI.sanitize.input(args.data, contentType, {
           auth,
         });
 
