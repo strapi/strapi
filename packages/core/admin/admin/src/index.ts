@@ -49,7 +49,11 @@ export { useRBAC } from './hooks/useRBAC';
 export type { Store } from './core/store/configure';
 export type { SanitizedAdminUser } from '../../shared/contracts/shared';
 export type {
-  Context,
+  EditViewContext,
+  ListViewContext,
+  BulkActionComponent,
+  BulkActionComponentProps,
+  BulkActionDescription,
   DescriptionComponent,
   DescriptionReducer,
   PanelComponentProps,
