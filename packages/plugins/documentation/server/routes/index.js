@@ -23,6 +23,24 @@ module.exports = [
   },
   {
     method: 'GET',
+    path: '/swagger.json',
+    handler: 'documentation.json',
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/v:major(\\d+).:minor(\\d+).:patch(\\d+)/swagger.json',
+    handler: 'documentation.json',
+    config: {
+      auth: false,
+      middlewares: [restrictAccess],
+    },
+  },
+  {
+    method: 'GET',
     path: '/login',
     handler: 'documentation.loginView',
     config: {
