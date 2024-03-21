@@ -48,7 +48,7 @@ const config: DatabaseConfig = {
 
 describe('Database', () => {
   describe('constructor', () => {
-    it('it should intialize if config is provided', async () => {
+    it('it should initialize if config is provided', async () => {
       expect(() => Database.init(config)).toBeDefined();
     });
   });
@@ -66,7 +66,7 @@ describe('Database', () => {
       expect((db.connection as any).commit).toHaveBeenCalledTimes(1);
     });
 
-    it('rollback is called incase of error', async () => {
+    it('rollback is called in case of error', async () => {
       const db = await Database.init(config);
       try {
         await db.transaction(async () => {
@@ -81,7 +81,7 @@ describe('Database', () => {
     it('should throw error', async () => {
       const db = await Database.init(config);
 
-      expect(async () => {
+      await expect(async () => {
         await db.transaction(async () => {
           throw new Error('test');
         });
