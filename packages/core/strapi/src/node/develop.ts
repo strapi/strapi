@@ -252,7 +252,6 @@ const develop = async ({
 
     const restart = async () => {
       if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
-        strapiInstance.log.info('Restarting Strapi server');
         strapiInstance.reload.isReloading = true;
         strapiInstance.reload();
       }
@@ -315,7 +314,6 @@ const develop = async ({
             'child process has the kill message, destroying the strapi instance and sending the killed process message'
           );
           await watcher.close();
-
           await strapiInstance.destroy();
 
           if (bundleWatcher) {
