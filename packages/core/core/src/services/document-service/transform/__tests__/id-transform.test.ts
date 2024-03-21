@@ -173,8 +173,8 @@ describe('Transform relational data', () => {
 
       expect(data).toMatchObject({
         name: 'test',
-        categories: [{ id: 'doc2-en-draft' }],
-        category: [{ id: 'doc4-en-draft' }],
+        categories: { set: [{ id: 'doc2-en-draft' }] },
+        category: { set: [{ id: 'doc4-en-draft' }] },
       });
     });
   });
@@ -251,7 +251,7 @@ describe('Transform relational data', () => {
     expect(data).toMatchObject({
       name: 'test',
       categories: { connect: [{ id: 'doc1-en-draft', position: { after: 'doc2-en-draft' } }] },
-      category: { connect: 'doc4-en-draft' },
+      category: { connect: [{ id: 'doc4-en-draft' }] },
     });
   });
 
@@ -266,10 +266,12 @@ describe('Transform relational data', () => {
       status: 'draft',
     });
 
-    expect(data).toEqual({
+    expect(data).toMatchObject({
       name: 'test',
-      categories: { disconnect: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'] },
-      category: { disconnect: 'doc4-en-draft' },
+      categories: {
+        disconnect: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+      },
+      category: { disconnect: [{ id: 'doc4-en-draft' }] },
     });
   });
 
@@ -292,17 +294,17 @@ describe('Transform relational data', () => {
       status: 'draft',
     });
 
-    expect(data).toEqual({
+    expect(data).toMatchObject({
       name: 'test',
       categories: {
-        set: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
-        connect: ['doc4-en-draft', 'doc5-en-draft'],
-        disconnect: ['doc6-en-draft', 'doc7-en-draft'],
+        set: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+        connect: [{ id: 'doc4-en-draft' }, { id: 'doc5-en-draft' }],
+        disconnect: [{ id: 'doc6-en-draft' }, { id: 'doc7-en-draft' }],
       },
       category: {
-        set: 'doc8-en-draft',
-        connect: 'doc9-en-draft',
-        disconnect: 'doc10-en-draft',
+        set: [{ id: 'doc8-en-draft' }],
+        connect: [{ id: 'doc9-en-draft' }],
+        disconnect: [{ id: 'doc10-en-draft' }],
       },
     });
   });

@@ -1,11 +1,10 @@
 /* eslint-disable node/no-callback-literal */
-import { curry } from 'lodash/fp';
+import { isObject, curry, isNil } from 'lodash/fp';
 
-import { UID } from '@strapi/types';
-import { traverseEntity } from '@strapi/utils';
+import type { UID } from '@strapi/types';
+import { traverseEntity, async } from '@strapi/utils';
 
 import { Relation } from './types';
-import { traverseRelation } from './traverse-relation';
 
 const isNumeric = (value: any): value is number => {
   if (Array.isArray(value)) return false; // Handle [1, 'docId'] case
@@ -13,45 +12,112 @@ const isNumeric = (value: any): value is number => {
   return !Number.isNaN(parsed);
 };
 
+const toArray = (value: any) => {
+  // Keep value as it is if it's a nullish value
+  if (isNil(value)) return value;
+  if (Array.isArray(value)) return value;
+
+  return [value];
+};
+
+/**
+ * There are multiple ways to create Strapi relations.
+ * This is a utility to traverse and transform relation data
+ *
+ *
+ * For consistency and ease of use, the response will always be an object with the following shape:
+ * { set: [{...}], connect: [{...}], disconnect: [{...}] }
+ *
+ * @example
+ * transformRelationData({
+ *  onLongHand: (relation) => {
+ *    // Change the id of the relation
+ *    return { id: 'other' };
+ *  },
+ * }, relation)
+ */
 const mapRelation = async (
   callback: (relation: any) => any,
-  relation: Relation
+  rel: Relation,
+  isRecursive = false
 ): Promise<Relation> => {
-  /**
-   * Traverse relation input and map it with a consistent format.
-   */
-  return traverseRelation(
-    {
-      onShortHand(relation) {
-        // Assume a regular id if it's a number
-        if (isNumeric(relation)) {
-          return callback({ id: relation });
-        }
+  let relation: Relation = rel;
 
-        // Assume a documentId if it's a string
-        if (typeof relation === 'string') {
-          return callback({ documentId: relation });
-        }
+  const wrapInSet = (value: any) => {
+    // Ignore wrapping if it's a recursive call
+    if (isRecursive) {
+      return value;
+    }
+    return { set: toArray(value) };
+  };
 
-        // Not a valid relation
-        return callback(null);
-      },
-      onLongHand(relation) {
-        return callback(relation);
-      },
-      onElse(relation) {
-        // Invalid relation
-        return callback(relation);
-      },
-    },
-    relation
-  );
+  // undefined | null
+  if (isNil(relation)) {
+    return callback(relation);
+  }
+
+  // LongHand[] | ShortHand[]
+  if (Array.isArray(relation)) {
+    return async
+      .map(relation, (r: Relation) => mapRelation(callback, r, true))
+      .then((result: any) => result.flat().filter(Boolean))
+      .then(wrapInSet);
+  }
+
+  // LongHand
+  if (isObject(relation)) {
+    // { id: 1 } || { documentId: 1 }
+    if ('id' in relation || 'documentId' in relation) {
+      const result = await callback(relation);
+      return wrapInSet(result);
+    }
+
+    // If not connecting anything, return default visitor
+    if (!relation.set && !relation.disconnect && !relation.connect) {
+      return callback(relation);
+    }
+
+    // { set }
+    if (relation.set) {
+      const set: any = await mapRelation(callback, relation.set, true);
+      relation = { ...relation, set: toArray(set) };
+    }
+
+    // { disconnect}
+    if (relation.disconnect) {
+      const disconnect: any = await mapRelation(callback, relation.disconnect, true);
+      relation = { ...relation, disconnect: toArray(disconnect) };
+    }
+
+    // { connect }
+    if (relation.connect) {
+      // Transform the relation to connect
+      const connect: any = await mapRelation(callback, relation.connect, true);
+      relation = { ...relation, connect: toArray(connect) };
+    }
+
+    return relation;
+  }
+
+  // ShortHand
+  if (isNumeric(relation)) {
+    const result = await callback({ id: relation });
+    return wrapInSet(result);
+  }
+
+  if (typeof relation === 'string') {
+    const result = await callback({ documentId: relation });
+    return wrapInSet(result);
+  }
+
+  // Anything else
+  return callback(relation);
 };
 
 type TraverseEntity = Parameters<typeof traverseEntity>;
 
 /**
- * Same as `traverseEntity` but only for relations.
+ * Utility function, same as `traverseEntity` but only for relations.
  */
 const traverseEntityRelations = async (
   visitor: TraverseEntity[0],

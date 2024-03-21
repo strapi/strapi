@@ -14,83 +14,37 @@ const mapper = mapRelation(async (relation) => {
   return 'error';
 });
 
-describe('traverse relation', () => {
+describe('map relation', () => {
   describe('long hand', () => {
     it('long hand', async () => {
       const relation = { id: 1 };
-      const expectedRelation = { id: 'mapped' };
+      const expectedRelation = { set: [{ id: 'mapped' }] };
       expect(await mapper(relation)).toMatchObject(expectedRelation);
 
       const relationDocId = { documentId: 1 };
-      const expectedRelationDocId = { documentId: 'mapped' };
+      const expectedRelationDocId = { set: [{ documentId: 'mapped' }] };
       expect(await mapper(relationDocId)).toMatchObject(expectedRelationDocId);
     });
 
     describe('connect', () => {
       it('regular connect', async () => {
         const relation = { connect: { id: 1 } };
-        const expectedRelation = { connect: { id: 'mapped' } };
+        const expectedRelation = { connect: [{ id: 'mapped' }] };
         expect(await mapper(relation)).toMatchObject(expectedRelation);
 
         // It keeps the other attributes
         const relationDocId = { connect: { documentId: 1, locale: 'en' } };
-        const expectedRelationDocId = { connect: { documentId: 'mapped' } };
+        const expectedRelationDocId = { connect: [{ documentId: 'mapped' }] };
         expect(await mapper(relationDocId)).toMatchObject(expectedRelationDocId);
       });
 
-      it('connect before', async () => {
+      it('connect  array', async () => {
         const relation = {
-          connect: {
-            id: 1,
-            position: { before: 1, locale: 'es' },
-          },
+          connect: [{ id: 1 }],
         };
 
         const expectedRelation = {
-          connect: {
-            id: 'mapped',
-            position: { before: 'mapped' },
-          },
-        };
-
-        expect(await mapper(relation)).toMatchObject(expectedRelation);
-      });
-
-      it('connect after', async () => {
-        const relation = {
-          connect: {
-            id: 1,
-            position: { after: 1, locale: 'es' },
-          },
-        };
-
-        const expectedRelation = {
-          connect: {
-            id: 'mapped',
-            position: { after: 'mapped' },
-          },
-        };
-
-        expect(await mapper(relation)).toMatchObject(expectedRelation);
-      });
-
-      it('connect before array', async () => {
-        const relation = {
-          connect: [
-            {
-              id: 1,
-              position: { before: 1, locale: 'es' },
-            },
-          ],
-        };
-
-        const expectedRelation = {
-          connect: [
-            {
-              id: 'mapped',
-              position: { before: 'mapped', locale: 'es' },
-            },
-          ],
+          connect: [{ id: 'mapped' }],
         };
 
         expect(await mapper(relation)).toMatchObject(expectedRelation);
@@ -114,21 +68,21 @@ describe('traverse relation', () => {
 
     it('disconnect', async () => {
       const relation = { disconnect: { id: 1 } };
-      const expectedRelation = { disconnect: { id: 'mapped' } };
+      const expectedRelation = { disconnect: [{ id: 'mapped' }] };
       expect(await mapper(relation)).toMatchObject(expectedRelation);
 
       const relationArray = { disconnect: [{ id: 1 }, { id: 2 }] };
-      const expectedRelationArray = { disconnect: [{ id: 'other' }, { id: 'other' }] };
+      const expectedRelationArray = { disconnect: [{ id: 'mapped' }, { id: 'mapped' }] };
       expect(await mapper(relationArray)).toMatchObject(expectedRelationArray);
     });
 
     it('set', async () => {
       const relation = { set: { id: 1 } };
-      const expectedRelation = { set: { id: 'other' } };
+      const expectedRelation = { set: [{ id: 'mapped' }] };
       expect(await mapper(relation)).toMatchObject(expectedRelation);
 
       const relationArray = { set: [{ id: 1 }, { id: 2 }] };
-      const expectedRelationArray = { set: [{ id: 'other' }, { id: 'other' }] };
+      const expectedRelationArray = { set: [{ id: 'mapped' }, { id: 'mapped' }] };
       expect(await mapper(relationArray)).toMatchObject(expectedRelationArray);
     });
   });
@@ -138,7 +92,7 @@ describe('traverse relation', () => {
       const numberRelation = 1;
       const stringRelation = '1';
 
-      const expectedRelation = { id: 'mapped' };
+      const expectedRelation = { set: [{ id: 'mapped' }] };
 
       expect(await mapper(numberRelation)).toMatchObject(expectedRelation);
       expect(await mapper(stringRelation)).toMatchObject(expectedRelation);
@@ -147,7 +101,7 @@ describe('traverse relation', () => {
     it('short hand multiple', async () => {
       const relation = [1, '1', { id: 1 }] as any;
 
-      const expectedRelation = [{ id: 'mapped' }, { id: 'mapped' }, { id: 'mapped' }];
+      const expectedRelation = { set: [{ id: 'mapped' }, { id: 'mapped' }, { id: 'mapped' }] };
 
       expect(await mapper(relation)).toMatchObject(expectedRelation);
     });

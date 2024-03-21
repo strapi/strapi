@@ -79,8 +79,8 @@ describe('Transform relational data', () => {
 
       expect(data).toMatchObject({
         name: 'test',
-        products: [{ id: 'product-1-en-published' }, { id: 'product-2-en-draft' }],
-        product: { id: 'product-1-en-draft' },
+        products: { set: [{ id: 'product-1-en-published' }, { id: 'product-2-en-draft' }] },
+        product: { set: [{ id: 'product-1-en-draft' }] },
       });
     });
 
@@ -104,12 +104,14 @@ describe('Transform relational data', () => {
       // If published version is not available, it should connect to the draft version
       expect(data).toMatchObject({
         name: 'test',
-        products: [
-          { id: 'product-1-en-draft' },
-          { id: 'product-1-en-published' },
-          { id: 'product-2-en-draft' },
-        ],
-        product: [{ id: 'product-1-en-draft' }, { id: 'product-1-en-published' }],
+        products: {
+          set: [
+            { id: 'product-1-en-draft' },
+            { id: 'product-1-en-published' },
+            { id: 'product-2-en-draft' },
+          ],
+        },
+        product: { set: [{ id: 'product-1-en-draft' }, { id: 'product-1-en-published' }] },
       });
     });
 
