@@ -120,9 +120,11 @@ const releaseController = {
       model: RELEASE_MODEL_UID,
     });
 
-    ctx.body = {
-      data: await permissionsManager.sanitizeOutput(release),
-    };
+    ctx.created({
+      body: {
+        data: await permissionsManager.sanitizeOutput(release),
+      },
+    });
   },
 
   async update(ctx: Koa.Context) {

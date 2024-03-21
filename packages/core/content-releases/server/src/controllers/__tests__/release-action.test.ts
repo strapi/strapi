@@ -100,6 +100,7 @@ describe('Release Action controller', () => {
         params: {
           releaseId: 1,
         },
+        created: jest.fn(),
         request: {
           body: [
             {
@@ -123,9 +124,20 @@ describe('Release Action controller', () => {
       await releaseActionController.createMany(ctx);
 
       expect(mockCreateAction).toHaveBeenCalledTimes(2);
-      expect(ctx.body.data).toHaveLength(2);
-      expect(ctx.body.meta.totalEntries).toBe(2);
-      expect(ctx.body.meta.entriesAlreadyInRelease).toBe(0);
+
+      expect(ctx.created).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            data: expect.any(Array), // Ensure data is an array
+            meta: expect.objectContaining({
+              totalEntries: 2,
+              entriesAlreadyInRelease: 0,
+            }),
+          }),
+        })
+      );
+      const firstCallArgument = ctx.created.mock.calls[0][0];
+      expect(firstCallArgument.body.data.length).toBe(2);
     });
 
     it('should count already added entries and dont throw an error', async () => {
@@ -139,6 +151,7 @@ describe('Release Action controller', () => {
         params: {
           releaseId: 1,
         },
+        created: jest.fn(),
         request: {
           body: [
             {
@@ -155,9 +168,12 @@ describe('Release Action controller', () => {
       await releaseActionController.createMany(ctx);
 
       expect(mockCreateAction).toHaveBeenCalledTimes(1);
-      expect(ctx.body.data).toHaveLength(0);
-      expect(ctx.body.meta.totalEntries).toBe(1);
-      expect(ctx.body.meta.entriesAlreadyInRelease).toBe(1);
+      expect(ctx.created).toHaveBeenCalledWith({
+        body: {
+          data: [],
+          meta: { totalEntries: 1, entriesAlreadyInRelease: 1 },
+        },
+      });
     });
   });
 
