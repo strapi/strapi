@@ -1,10 +1,10 @@
-import type { Common, Shared, EntityService } from '@strapi/types';
+import type { UID, Modules, Schema } from '@strapi/types';
 import transforms from './transforms';
 
-const applyTransforms = <TUID extends Common.UID.ContentType>(
-  data: EntityService.Params.Data.Input<TUID>,
+const applyTransforms = <TUID extends UID.ContentType>(
+  data: Modules.EntityService.Params.Data.Input<TUID>,
   context: {
-    contentType: Shared.ContentTypes[TUID];
+    contentType: Schema.ContentType<TUID>;
   }
 ) => {
   const { contentType } = context;

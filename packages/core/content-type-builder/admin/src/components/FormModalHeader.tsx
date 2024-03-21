@@ -5,7 +5,6 @@
  */
 import { Box, Flex, ModalHeader, Typography } from '@strapi/design-system';
 import { Breadcrumbs, Crumb, Link } from '@strapi/design-system/v2';
-import { CustomFieldUID } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -17,7 +16,7 @@ import { getTrad } from '../utils';
 import { AttributeIcon, IconByType } from './AttributeIcon';
 
 import type { SchemaType } from '../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 interface Header {
   label: string;
@@ -33,8 +32,8 @@ interface FormModalHeaderProps {
   dynamicZoneTarget: string;
   forTarget: SchemaType;
   modalType: string | null;
-  targetUid: UID.Any;
-  customFieldUid?: CustomFieldUID | null;
+  targetUid: Internal.UID.Schema;
+  customFieldUid?: string | null;
   showBackLink?: boolean;
 }
 

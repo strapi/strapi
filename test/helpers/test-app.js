@@ -47,7 +47,6 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
       '@strapi/plugin-users-permissions',
       '@strapi/plugin-graphql',
       '@strapi/plugin-documentation',
-      '@strapi/plugin-i18n',
       '@strapi/plugin-cloud',
     ],
     additionalsDependencies: {

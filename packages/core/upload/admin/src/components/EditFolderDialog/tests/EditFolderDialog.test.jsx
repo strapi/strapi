@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
 import { within } from '@testing-library/dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -11,9 +11,8 @@ import { useEditFolder } from '../../../hooks/useEditFolder';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
 import { EditFolderDialog } from '../EditFolderDialog';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useQueryParams: jest.fn().mockReturnValue([{ query: {} }]),
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     put: jest.fn().mockImplementation({}),
   }),

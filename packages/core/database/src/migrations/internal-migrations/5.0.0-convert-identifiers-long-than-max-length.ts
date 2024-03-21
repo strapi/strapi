@@ -12,9 +12,11 @@ type NameDiff<T> = {
   full: T;
 };
 
-// TODO: key isn't really needed except for debugging, we can remove it
+type IndexDiff = NameDiff<{ index: number; key: string; tableName: string; indexName: string }>;
+
+// key isn't really used except for debugging, but it's helpful to track down problems
 type IdentifierDiffs = {
-  indexes: NameDiff<{ index: number; key: string; tableName: string; indexName: string }>[];
+  indexes: IndexDiff[];
   tables: NameDiff<{ index: number; key: string; tableName: string }>[];
   columns: NameDiff<{ index: number; key: string; tableName: string; columnName: string }>[];
 };
@@ -70,8 +72,6 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
     throw new Error('not implemented');
   },
 };
-
-type IndexDiff = NameDiff<{ index: number; key: string; tableName: string; indexName: string }>;
 
 const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
   const client = db.config.connection.client;
@@ -159,8 +159,7 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
 
   const shortArr = Array.from(shortMap.entries());
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  shortArr.forEach(([key, shortObj], index) => {
+  shortArr.forEach(([, shortObj], index) => {
     const fullTableName = getUnshortenedName(shortObj.tableName, options);
     if (!fullTableName) {
       throw new Error(`Missing full table name for ${shortObj.tableName}`);

@@ -1,6 +1,6 @@
-import { Strapi, Documents } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
-import { createMiddlewareManager } from './middlewares';
+import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
 
 /**
@@ -20,9 +20,11 @@ import { createContentTypeRepository } from './repository';
  *
  */
 // TODO: support global document service middleware & per repo middlewares
-export const createDocumentService = (strapi: Strapi): Documents.Service => {
-  const repositories = new Map<string, Documents.ServiceInstance>();
+export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Service => {
+  const repositories = new Map<string, Modules.Documents.ServiceInstance>();
   const middlewares = createMiddlewareManager();
+
+  middlewares.use(databaseErrorsMiddleware);
 
   const factory = function factory(uid) {
     if (repositories.has(uid)) {
@@ -35,7 +37,7 @@ export const createDocumentService = (strapi: Strapi): Documents.Service => {
     repositories.set(uid, middlewares.wrapObject(repository, { contentType }));
 
     return repository;
-  } as Documents.Service;
+  } as Modules.Documents.Service;
 
   return Object.assign(factory, {
     use: middlewares.use.bind(middlewares),

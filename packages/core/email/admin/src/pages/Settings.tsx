@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
+import { Page, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -9,19 +9,11 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
-  Main,
   Option,
   Select,
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  getYupInnerErrors,
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-} from '@strapi/helper-plugin';
 import { Envelop } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -30,6 +22,7 @@ import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { PERMISSIONS } from '../constants';
+import { getYupInnerErrors } from '../utils/getYupInnerErrors';
 import { schema } from '../utils/schema';
 
 import type { EmailSettings } from '../../../shared/types';
@@ -49,9 +42,8 @@ export const ProtectedSettingsPage = () => (
 );
 
 const SettingsPage = () => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { get, post } = useFetchClient();
 
   const [testAddress, setTestAddress] = React.useState('');
@@ -77,7 +69,7 @@ const SettingsPage = () => {
     {
       onError() {
         toggleNotification!({
-          type: 'warning',
+          type: 'danger',
           message: formatMessage(
             {
               id: 'email.Settings.email.plugin.notification.test.error',
@@ -103,8 +95,6 @@ const SettingsPage = () => {
     }
   );
 
-  useFocusWhenNavigate();
-
   React.useEffect(() => {
     schema
       .validate({ email: testAddress }, { abortEarly: false })
@@ -127,11 +117,7 @@ const SettingsPage = () => {
       }
     }
 
-    lockApp!();
-
     mutation.mutate({ to: testAddress });
-
-    unlockApp!();
   };
 
   if (isLoading) {
@@ -139,7 +125,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <Main labelledBy="title" aria-busy={isLoading || mutation.isLoading}>
+    <Page.Main labelledBy="title" aria-busy={isLoading || mutation.isLoading}>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -322,6 +308,6 @@ const SettingsPage = () => {
           </form>
         )}
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };

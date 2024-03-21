@@ -2,9 +2,9 @@ import type { Context, Next } from 'koa';
 import { resolve, join, extname, basename } from 'path';
 import fse from 'fs-extra';
 import koaStatic from 'koa-static';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-const registerAdminPanelRoute = ({ strapi }: { strapi: Strapi }) => {
+const registerAdminPanelRoute = ({ strapi }: { strapi: Core.Strapi }) => {
   let buildDir = resolve(strapi.dirs.dist.root, 'build');
 
   if (!fse.pathExistsSync(buildDir)) {

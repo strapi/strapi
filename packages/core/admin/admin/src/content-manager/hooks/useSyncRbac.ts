@@ -1,9 +1,8 @@
 import * as React from 'react';
 
 import { useTypedDispatch, useTypedSelector } from '../../core/store/hooks';
+import { useAuth, type Permission } from '../../features/Auth';
 import { resetPermissions, setPermissions } from '../modules/rbac';
-
-import type { Permission } from '@strapi/helper-plugin';
 
 type UseSyncRbac = (
   uid: string,
@@ -27,11 +26,17 @@ const useSyncRbac: UseSyncRbac = (collectionTypeUID, query, containerName = 'lis
   const [isLoading, setIsLoading] = React.useState(true);
   const dispatch = useTypedDispatch();
 
-  const collectionTypesRelatedPermissions = useTypedSelector(
-    (state) => state.rbacProvider.collectionTypesRelatedPermissions
-  );
+  const userPermissions = useAuth('useSyncRbac', (state) => state.permissions);
 
-  const relatedPermissions = collectionTypesRelatedPermissions[collectionTypeUID];
+  const relatedPermissions = React.useMemo(() => {
+    const contentTypePermissions = userPermissions.filter(
+      (permission) => permission.subject === collectionTypeUID
+    );
+    return contentTypePermissions.reduce<Record<string, Permission[]>>(
+      (acc, permission) => ({ ...acc, [permission.action]: [permission] }),
+      {}
+    );
+  }, [collectionTypeUID, userPermissions]);
 
   React.useEffect(() => {
     setIsLoading(true);

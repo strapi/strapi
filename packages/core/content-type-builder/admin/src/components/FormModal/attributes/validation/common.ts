@@ -1,4 +1,4 @@
-import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+import { translatedErrors as errorsTrads } from '@strapi/admin/strapi-admin';
 import { snakeCase } from 'lodash/fp';
 import toNumber from 'lodash/toNumber';
 import * as yup from 'yup';
@@ -12,7 +12,7 @@ const alreadyUsedAttributeNames = (
 ): yup.TestConfig<string | undefined, Record<string, unknown>> => {
   return {
     name: 'attributeNameAlreadyUsed',
-    message: errorsTrads.unique,
+    message: errorsTrads.unique.id,
     test(value: string | undefined) {
       if (!value) {
         return false;
@@ -96,11 +96,11 @@ const validators = {
       .string()
       .test(alreadyUsedAttributeNames(usedNames))
       .test(isNameAllowed(reservedNames))
-      .matches(NAME_REGEX, errorsTrads.regex)
-      .required(errorsTrads.required);
+      .matches(NAME_REGEX, errorsTrads.regex.id)
+      .required(errorsTrads.required.id);
   },
   required: () => yup.boolean(),
-  type: () => yup.string().required(errorsTrads.required),
+  type: () => yup.string().required(errorsTrads.required.id),
   unique: () => yup.boolean().nullable(),
 };
 

@@ -1,5 +1,4 @@
 import type { Readable, Writable } from 'stream';
-import type { Schema, Utils } from '@strapi/types';
 import type {
   IDestinationProviderTransferResults,
   IProviderTransferResults,
@@ -23,7 +22,7 @@ export interface IProvider {
   close?(): MaybePromise<void>; // called during transfer engine close
 
   getMetadata(): MaybePromise<IMetadata | null>; // returns the transfer metadata to be used for version validation
-  getSchemas?(): MaybePromise<Utils.StringRecord<Schema.Schema> | null>; // returns the schemas for the schema validation
+  getSchemas?(): MaybePromise<Record<string, Struct.Schema> | null>; // returns the schemas for the schema validation
 
   beforeTransfer?(): MaybePromise<void>; // called immediately before transfer stages are run
 }

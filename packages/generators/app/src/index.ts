@@ -53,7 +53,6 @@ export const generateNewApp = (projectDirectory: string, options: Partial<NewOpt
     strapiDependencies: [
       '@strapi/strapi',
       '@strapi/plugin-users-permissions',
-      '@strapi/plugin-i18n',
       '@strapi/plugin-cloud',
     ],
     additionalsDependencies: {

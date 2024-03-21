@@ -1,4 +1,4 @@
-import { translatedErrors } from '@strapi/helper-plugin';
+import { translatedErrors } from '@strapi/strapi/admin';
 import * as yup from 'yup';
 
 import { getTrad } from '../../../utils';
@@ -52,7 +52,7 @@ const forms = {
       ],
     ],
     schema: yup.object().shape({
-      enabled: yup.bool().required(translatedErrors.required),
+      enabled: yup.bool().required(translatedErrors.required.id),
     }),
   },
   providers: {
@@ -117,20 +117,20 @@ const forms = {
       ],
     ],
     schema: yup.object().shape({
-      enabled: yup.bool().required(translatedErrors.required),
+      enabled: yup.bool().required(translatedErrors.required.id),
       key: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup.string().required(translatedErrors.required.id),
         otherwise: yup.string(),
       }),
       secret: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup.string().required(translatedErrors.required.id),
         otherwise: yup.string(),
       }),
       callback: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup.string().required(translatedErrors.required.id),
         otherwise: yup.string(),
       }),
     }),
@@ -231,25 +231,25 @@ const forms = {
       ],
     ],
     schema: yup.object().shape({
-      enabled: yup.bool().required(translatedErrors.required),
+      enabled: yup.bool().required(translatedErrors.required.id),
       key: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup.string().required(translatedErrors.required.id),
         otherwise: yup.string(),
       }),
       secret: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup.string().required(translatedErrors.required.id),
         otherwise: yup.string(),
       }),
       subdomain: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup.string().required(translatedErrors.required.id),
         otherwise: yup.string(),
       }),
       callback: yup.string().when('enabled', {
         is: true,
-        then: yup.string().required(translatedErrors.required),
+        then: yup.string().required(translatedErrors.required.id),
         otherwise: yup.string(),
       }),
     }),

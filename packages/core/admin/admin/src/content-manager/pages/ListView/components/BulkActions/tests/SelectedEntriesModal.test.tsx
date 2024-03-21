@@ -1,14 +1,13 @@
-import { useQueryParams } from '@strapi/helper-plugin';
 import { waitForElementToBeRemoved, within } from '@testing-library/react';
 import { render as renderRTL, waitFor, server, screen, fireEvent } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { Table } from '../../../../../../components/Table';
+import { useQueryParams } from '../../../../../../hooks/useQueryParams';
 import { SelectedEntriesModal } from '../SelectedEntriesModal';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('../../../../../../hooks/useQueryParams', () => ({
   // TODO: get rid of this mock and use `initialEntries` to provide the base query params.
   useQueryParams: jest.fn(() => [
     {

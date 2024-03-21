@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, Flex, IconButton, Typography, useCollator } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useQueryParams, useTracking } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
@@ -13,8 +12,10 @@ import { SanitizedTransferToken } from '../../../../../../shared/contracts/trans
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { RelativeTime } from '../../../../components/RelativeTime';
 import { Table as TableImpl } from '../../../../components/Table';
+import { useTracking } from '../../../../features/Tracking';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Table
@@ -22,7 +23,7 @@ import type { Entity } from '@strapi/types';
 
 interface TableProps
   extends Pick<TableImpl.Props<SanitizedTransferToken | ApiToken>, 'headers' | 'isLoading'> {
-  onConfirmDelete: (id: Entity.ID) => void;
+  onConfirmDelete: (id: Data.ID) => void;
   permissions: {
     canRead: boolean;
     canDelete: boolean;
@@ -55,7 +56,7 @@ const Table = ({
 
   const { canDelete, canUpdate, canRead } = permissions;
 
-  const handleRowClick = (id: Entity.ID) => () => {
+  const handleRowClick = (id: Data.ID) => () => {
     if (canRead) {
       trackUsage('willEditTokenFromList', {
         tokenType,
@@ -151,7 +152,7 @@ const MESSAGES_MAP = {
 
 interface DefaultButtonProps {
   tokenName: string;
-  tokenId: Entity.ID;
+  tokenId: Data.ID;
   buttonType?: 'edit' | 'read';
   children: React.ReactNode;
 }
@@ -236,7 +237,7 @@ const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps
 
 interface ButtonProps {
   tokenName: string;
-  tokenId: Entity.ID;
+  tokenId: Data.ID;
 }
 
 const UpdateButton = ({ tokenName, tokenId }: ButtonProps) => {

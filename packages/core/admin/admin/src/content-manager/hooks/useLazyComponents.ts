@@ -1,6 +1,7 @@
 import { ComponentType, useCallback, useEffect, useState } from 'react';
 
-import { CustomField, useCustomFields } from '@strapi/helper-plugin';
+import { type CustomField } from '../../core/apis/CustomFields';
+import { useStrapiApp } from '../../features/StrapiApp';
 
 const componentStore = new Map<string, ComponentType | undefined>();
 
@@ -23,7 +24,7 @@ const useLazyComponents = (componentUids: string[] = []): UseLazyComponentsRetur
    */
   const newUids = componentUids.filter((uid) => !componentStore.get(uid));
   const [loading, setLoading] = useState(() => !!newUids.length);
-  const customFieldsRegistry = useCustomFields();
+  const getCustomField = useStrapiApp('useLazyComponents', (state) => state.customFields.get);
 
   useEffect(() => {
     const setStore = (store: Record<string, ComponentType | undefined>) => {
@@ -50,7 +51,7 @@ const useLazyComponents = (componentUids: string[] = []): UseLazyComponentsRetur
       const componentPromises = newUids.reduce<
         Array<ReturnType<CustomField['components']['Input']>>
       >((arrayOfPromises, uid) => {
-        const customField = customFieldsRegistry.get(uid);
+        const customField = getCustomField(uid);
 
         if (customField) {
           arrayOfPromises.push(customField.components.Input());
@@ -63,7 +64,7 @@ const useLazyComponents = (componentUids: string[] = []): UseLazyComponentsRetur
         lazyLoadComponents(newUids, componentPromises);
       }
     }
-  }, [newUids, customFieldsRegistry]);
+  }, [newUids, getCustomField]);
 
   /**
    * Wrap this in a callback so it can be used in

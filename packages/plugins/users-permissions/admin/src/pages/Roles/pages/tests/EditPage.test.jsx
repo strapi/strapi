@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
 import {
   fireEvent,
   render as renderRTL,
@@ -14,11 +14,6 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 
 import { EditPage } from '../EditPage';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-}));
 
 const render = () => ({
   ...renderRTL(<Route path="/settings/users-permissions/roles/:id" element={<EditPage />} />, {

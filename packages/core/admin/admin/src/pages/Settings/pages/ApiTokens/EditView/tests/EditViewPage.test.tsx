@@ -2,6 +2,8 @@ import { render } from '@tests/utils';
 
 import { EditView } from '../EditViewPage';
 
+jest.mock('../../../../../../components/GuidedTour/Provider');
+
 describe('ADMIN | Pages | API TOKENS | EditView', () => {
   it('renders and matches the snapshot when creating token', async () => {
     const { findByText } = render(<EditView />, {

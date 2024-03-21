@@ -1,4 +1,4 @@
-import { createMiddlewareManager } from '../middlewares';
+import { createMiddlewareManager } from '../middlewares/middleware-manager';
 
 describe('middlewares', () => {
   describe('wrapObject', () => {

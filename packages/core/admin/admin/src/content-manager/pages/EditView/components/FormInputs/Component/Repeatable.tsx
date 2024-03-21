@@ -15,13 +15,14 @@ import {
   KeyboardNavigable,
   useComposedRefs,
 } from '@strapi/design-system';
-import { useNotification, useQuery } from '@strapi/helper-plugin';
 import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useField, useForm } from '../../../../../../components/Form';
+import { useNotification } from '../../../../../../features/Notifications';
 import { getIn } from '../../../../../../utils/objects';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
@@ -36,7 +37,7 @@ import { ComponentProvider, useComponent } from '../ComponentContext';
 import { Initializer } from './Initializer';
 
 import type { ComponentInputProps } from './Input';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * RepeatableComponent
@@ -50,12 +51,14 @@ const RepeatableComponent = ({
   name,
   mainField,
 }: RepeatableComponentProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
+  const { search: searchString } = useLocation();
+  const search = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { components } = useDoc();
 
   const { value = [], error } =
-    useField<Attribute.ComponentValue<`${string}.${string}`, true>>(name);
+    useField<Schema.Attribute.ComponentValue<`${string}.${string}`, true>>(name);
   const addFieldRow = useForm('RepeatableComponent', (state) => state.addFieldRow);
   const moveFieldRow = useForm('RepeatableComponent', (state) => state.moveFieldRow);
   const removeFieldRow = useForm('RepeatableComponent', (state) => state.removeFieldRow);
@@ -63,8 +66,6 @@ const RepeatableComponent = ({
 
   const [collapseToOpen, setCollapseToOpen] = React.useState<number | null>(null);
   const [liveText, setLiveText] = React.useState('');
-
-  const search = useQuery();
 
   /**
    * Get the temp key of the component that has the field that is currently focussed
@@ -112,7 +113,9 @@ const RepeatableComponent = ({
     } else if (value.length >= max) {
       toggleNotification({
         type: 'info',
-        message: { id: getTranslation('components.notification.info.maximum-requirement') },
+        message: formatMessage({
+          id: getTranslation('components.notification.info.maximum-requirement'),
+        }),
       });
     }
   };
@@ -376,7 +379,7 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
     Pick<RepeatableComponentProps, 'mainField'> {
-  attribute: Attribute.Component<`${string}.${string}`, boolean>;
+  attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
   isOpen?: boolean;

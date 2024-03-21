@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import type { Permission } from '@strapi/helper-plugin';
+import type { Permission } from '../../features/Auth';
 
 interface SyncRbacState {
   permissions: Permission[] | undefined;

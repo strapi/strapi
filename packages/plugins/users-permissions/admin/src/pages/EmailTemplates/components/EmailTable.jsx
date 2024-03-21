@@ -12,7 +12,6 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Check, Pencil, Refresh } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -53,7 +52,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
         </Tr>
       </Thead>
       <Tbody>
-        <Tr {...onRowClick({ fn: () => onEditClick('reset_password') })}>
+        <Tr onClick={() => onEditClick('reset_password')}>
           <Td>
             <Icon>
               <Refresh
@@ -72,7 +71,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
               })}
             </Typography>
           </Td>
-          <Td {...stopPropagation}>
+          <Td onClick={(e) => e.stopPropagation()}>
             <IconButton
               onClick={() => onEditClick('reset_password')}
               label={formatMessage({
@@ -84,7 +83,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
             />
           </Td>
         </Tr>
-        <Tr {...onRowClick({ fn: () => onEditClick('email_confirmation') })}>
+        <Tr onClick={() => onEditClick('email_confirmation')}>
           <Td>
             <Icon>
               <Check
@@ -103,7 +102,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
               })}
             </Typography>
           </Td>
-          <Td {...stopPropagation}>
+          <Td onClick={(e) => e.stopPropagation()}>
             <IconButton
               onClick={() => onEditClick('email_confirmation')}
               label={formatMessage({

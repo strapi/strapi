@@ -102,7 +102,7 @@ class WebhookRunner {
     const activeWebhooks = webhooks.filter((webhook) => webhook.isEnabled === true);
 
     for (const webhook of activeWebhooks) {
-      await this.run(webhook, event, info).catch((error) => {
+      await this.run(webhook, event, info).catch((error: unknown) => {
         this.logger.error('Error running webhook');
         this.logger.error(error);
       });

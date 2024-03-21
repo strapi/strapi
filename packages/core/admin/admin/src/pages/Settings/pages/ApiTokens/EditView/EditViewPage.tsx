@@ -1,22 +1,18 @@
 import * as React from 'react';
 
-import { ContentLayout, Flex, Main } from '@strapi/design-system';
-import {
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useGuidedTour,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { ContentLayout, Flex } from '@strapi/design-system';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
+import { useGuidedTour } from '../../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import { useNotification } from '../../../../../features/Notifications';
+import { useTracking } from '../../../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../../../hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import {
   useCreateAPITokenMutation,
   useGetAPITokenQuery,
@@ -44,10 +40,8 @@ import type { Get, ApiToken } from '../../../../../../../shared/contracts/api-to
  * server response as the source of the truth for the data.
  */
 export const EditView = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const { state: locationState } = useLocation();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const [apiToken, setApiToken] = React.useState<ApiToken | null>(
@@ -58,7 +52,7 @@ export const EditView = () => {
       : null
   );
   const { trackUsage } = useTracking();
-  const { setCurrentStep } = useGuidedTour();
+  const setCurrentStep = useGuidedTour('EditView', (state) => state.setCurrentStep);
   const {
     allowedActions: { canCreate, canUpdate, canRegenerate },
   } = useRBAC(permissions.settings?.['api-tokens']);
@@ -83,7 +77,7 @@ export const EditView = () => {
   React.useEffect(() => {
     if (contentAPIPermissionsQuery.error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(contentAPIPermissionsQuery.error),
       });
     }
@@ -92,7 +86,7 @@ export const EditView = () => {
   React.useEffect(() => {
     if (contentAPIRoutesQuery.error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(contentAPIRoutesQuery.error),
       });
     }
@@ -150,7 +144,7 @@ export const EditView = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -192,9 +186,6 @@ export const EditView = () => {
       tokenType: API_TOKEN_TYPE,
     });
 
-    // @ts-expect-error context assertation
-    lockApp();
-
     try {
       if (isCreating) {
         const res = await createToken({
@@ -209,7 +200,7 @@ export const EditView = () => {
             formik.setErrors(formatValidtionErrors(res.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(res.error),
             });
           }
@@ -249,7 +240,7 @@ export const EditView = () => {
             formik.setErrors(formatValidtionErrors(res.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(res.error),
             });
           }
@@ -272,15 +263,12 @@ export const EditView = () => {
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'Something went wrong',
-        },
+        }),
       });
-    } finally {
-      // @ts-expect-error context assertation
-      unlockApp();
     }
   };
 
@@ -330,7 +318,7 @@ export const EditView = () => {
 
   return (
     <ApiTokenPermissionsProvider value={providerValue}>
-      <Main>
+      <Page.Main>
         <Helmet
           title={formatMessage(
             { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -397,7 +385,7 @@ export const EditView = () => {
             );
           }}
         </Formik>
-      </Main>
+      </Page.Main>
     </ApiTokenPermissionsProvider>
   );
 };

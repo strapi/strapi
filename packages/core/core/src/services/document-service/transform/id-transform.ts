@@ -1,6 +1,6 @@
 import { curry } from 'lodash/fp';
 
-import { Common, Documents } from '@strapi/types';
+import { UID, Modules } from '@strapi/types';
 
 import { transformData } from './data';
 import { transformFields } from './fields';
@@ -10,9 +10,9 @@ import { transformPopulate } from './populate';
  * Transform input of a query to map document ids to entity ids.
  */
 async function transformParamsDocumentId(
-  uid: Common.UID.Schema,
-  query: Documents.Params.All
-): Promise<Documents.Params.All> {
+  uid: UID.Schema,
+  query: Modules.Documents.Params.All
+): Promise<Modules.Documents.Params.All> {
   // Transform relational documentIds to entity ids
   let data = query.data;
   if (query.data) {

@@ -1,14 +1,15 @@
 import * as React from 'react';
 
-import { Flex, Icon, Status, Typography } from '@strapi/design-system';
-import { useNotification, useQueryParams } from '@strapi/helper-plugin';
-import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import {
   type HeaderActionComponent,
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
   type DocumentActionComponent,
-} from '@strapi/strapi/admin';
+  useNotification,
+  useQueryParams,
+} from '@strapi/admin/strapi-admin';
+import { Flex, Icon, Status, Typography } from '@strapi/design-system';
+import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -159,7 +160,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
 }) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { delete: deleteAction } = useDocumentActions();
   const { hasI18n, canDelete } = useI18n();
 
@@ -205,7 +206,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
               id: getTranslation('actions.delete.error'),
               defaultMessage: 'An error occurred while trying to delete the document locale.',
             }),
-            type: 'warning',
+            type: 'danger',
           });
 
           return;

@@ -12,20 +12,6 @@ jest.mock('../../../hooks/useDebounce', () => ({
   useDebounce: jest.fn((value) => value),
 }));
 jest.mock('../hooks/useNavigatorOnline');
-/**
- * TODO: remove this mock.
- */
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useAppInfo: jest.fn(() => ({
-    autoReload: true,
-    dependencies: {
-      '@strapi/plugin-documentation': '4.2.0',
-      '@strapi/provider-upload-cloudinary': '4.2.0',
-    },
-    useYarn: true,
-  })),
-}));
 
 const LocationDisplay = () => {
   const location = useLocation();

@@ -1,4 +1,4 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import loadSrcIndex from './src-index';
 import loadAPIs from './apis';
@@ -10,7 +10,7 @@ import loadAdmin from './admin';
 import loadSanitizers from './sanitizers';
 import loadValidators from './validators';
 
-export async function loadApplicationContext(strapi: Strapi) {
+export async function loadApplicationContext(strapi: Core.Strapi) {
   await Promise.all([
     loadSrcIndex(strapi),
     loadSanitizers(strapi),

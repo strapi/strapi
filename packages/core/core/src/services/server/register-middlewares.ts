@@ -1,5 +1,5 @@
 import { yup } from '@strapi/utils';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { resolveMiddlewares } from './middleware';
 
 type MiddlewareConfig = (string | { name?: string; resolve?: string; config?: unknown })[];
@@ -51,7 +51,7 @@ const middlewareConfigSchema = yup.array().of(
 /**
  * Register middlewares in router
  */
-const registerApplicationMiddlewares = async (strapi: Strapi) => {
+const registerApplicationMiddlewares = async (strapi: Core.Strapi) => {
   const middlewareConfig: MiddlewareConfig = strapi.config.get('middlewares', defaultConfig);
 
   await validateMiddlewareConfig(middlewareConfig);

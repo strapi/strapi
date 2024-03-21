@@ -20,13 +20,13 @@ import type { Version } from '../version';
 import type { Logger } from '../logger';
 import type { Requirement } from '../requirement';
 import type { NPM } from '../npm';
-import type { Project } from '../project';
+import type { AppProject } from '../project';
 import type { ConfirmationCallback } from '../common/types';
 
 type DependenciesEntries = Array<[name: string, version: Version.SemVer]>;
 
 export class Upgrader implements UpgraderInterface {
-  private readonly project: Project;
+  private readonly project: AppProject;
 
   private readonly npmPackage: NPM.Package;
 
@@ -42,7 +42,7 @@ export class Upgrader implements UpgraderInterface {
 
   private confirmationCallback: ConfirmationCallback | null;
 
-  constructor(project: Project, target: Version.SemVer, npmPackage: NPM.Package) {
+  constructor(project: AppProject, target: Version.SemVer, npmPackage: NPM.Package) {
     this.project = project;
     this.npmPackage = npmPackage;
 
@@ -299,7 +299,7 @@ export class Upgrader implements UpgraderInterface {
  * it calculates the range of versions for this release type and returns the latest version within this range.
  */
 const resolveNPMTarget = (
-  project: Project,
+  project: AppProject,
   target: Version.ReleaseType | Version.SemVer,
   npmPackage: NPM.Package
 ): NPM.NPMPackageVersion | undefined => {
@@ -321,7 +321,7 @@ const resolveNPMTarget = (
 };
 
 export const upgraderFactory = (
-  project: Project,
+  project: AppProject,
   target: Version.ReleaseType | Version.SemVer,
   npmPackage: NPM.Package
 ) => {

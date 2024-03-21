@@ -1,6 +1,6 @@
 import koaCors from '@koa/cors';
 
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 export type Config = {
   enabled?: boolean;
@@ -22,7 +22,7 @@ const defaults: Config = {
   keepHeadersOnError: false,
 };
 
-export const cors: Common.MiddlewareFactory<Config> = (config) => {
+export const cors: Core.MiddlewareFactory<Config> = (config) => {
   const { origin, expose, maxAge, credentials, methods, headers, keepHeadersOnError } = {
     ...defaults,
     ...config,
