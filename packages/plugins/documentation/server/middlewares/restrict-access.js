@@ -9,7 +9,7 @@ module.exports = async (ctx, next) => {
     return next();
   }
 
-  if (!ctx.session.documentation || !ctx.session.documentation.logged) {
+  if (!ctx.session?.documentation || !ctx.session?.documentation.logged) {
     const querystring = ctx.querystring ? `?${ctx.querystring}` : '';
 
     return ctx.redirect(
