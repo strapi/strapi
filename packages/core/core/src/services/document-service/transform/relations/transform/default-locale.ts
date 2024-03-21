@@ -1,10 +1,7 @@
-import { UID } from '@strapi/types';
-import { traverseEntity } from '@strapi/utils';
+import type { UID } from '@strapi/types';
+
 import { getDefaultLocale, isLocalizedContentType } from '../utils/i18n';
-
-import { traverseRelation } from '../utils/traverse-relation';
-
-type Visitor = Parameters<typeof traverseEntity>[0];
+import { mapRelation, traverseEntityRelations } from '../utils/map-relation';
 
 /**
  * In scenarios like Non i18n CT -> i18n CT
@@ -23,44 +20,37 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
   /**
    * Traverse the entity input data and set the default locale to relations
    */
-  const dataVisitor: Visitor = async ({ key, value, attribute }, { set }) => {
-    if (attribute.type !== 'relation') {
-      return;
-    }
+  return traverseEntityRelations(
+    async ({ key }, { set }) => {
+      /**
+       * Assign default locale on long hand expressed relations
+       * e.g { documentId } -> { documentId, locale }
+       */
+      const relation = await mapRelation(async (relation) => {
+        if (!relation || relation.documentId || relation.locale) {
+          return relation;
+        }
 
-    // Ignore non-18n -> non-i18n relations
-    const target = attribute.target as UID.Schema | undefined;
-    if (!target || !isLocalizedContentType(target)) {
-      return;
-    }
+        // Set default locale if not provided
+        if (!defaultLocale) {
+          defaultLocale = await getDefaultLocale();
+        }
 
-    /**
-     * Assign default locale on long hand expressed relations
-     * e.g { documentId } -> { documentId, locale }
-     */
-    const relation = await traverseRelation(
-      {
-        async onLongHand(relation) {
-          // @ts-expect-error - fix type
-          if (!relation.documentId || relation.locale) {
-            return relation;
-          }
+        // Assign default locale to the positional argument
+        const position = relation.position;
+        if (position || !position.locale) {
+          relation.position.locale = defaultLocale;
+        }
 
-          // Set default locale if not provided
-          if (!defaultLocale) {
-            defaultLocale = await getDefaultLocale();
-          }
-          return { ...relation, locale: defaultLocale };
-        },
-      },
-      value as any
-    );
+        return { ...relation, locale: defaultLocale };
+      });
 
-    // @ts-expect-error - fix type
-    set(key, relation);
-  };
-
-  return traverseEntity(dataVisitor, { schema: strapi.getModel(uid) }, data);
+      // @ts-expect-error - fix type
+      set(key, relation);
+    },
+    { schema: strapi.getModel(uid) },
+    data
+  );
 };
 
 export { setDefaultLocaleToRelations as transformDataIdsVisitor };

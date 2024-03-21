@@ -1,4 +1,5 @@
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import { PRODUCT_UID, SHOP_UID, models } from './utils';
 import { transformParamsDocumentId } from '../id-transform';
 
@@ -32,7 +33,7 @@ describe('Transform relational data', () => {
     db: {
       query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
     },
-  } as unknown as LoadedStrapi;
+  } as unknown as Core.LoadedStrapi;
 
   beforeEach(() => {
     findShops.mockReturnValue([

@@ -1,4 +1,4 @@
-import { Core } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { PRODUCT_UID, CATEGORY_UID, models } from './utils';
 import { transformParamsDocumentId } from '../id-transform';
