@@ -186,7 +186,7 @@ class ContentManagerPlugin {
       this.headerActions = actions(this.headerActions);
     } else {
       throw new Error(
-        `Expected the \`actions\` passed to \`addBulkAction\` to be an array or a function, but received ${getPrintableType(
+        `Expected the \`actions\` passed to \`addDocumentHeaderAction\` to be an array or a function, but received ${getPrintableType(
           actions
         )}`
       );
