@@ -13,7 +13,7 @@ export const createDatabaseConfig = ({ useTypescript }: { useTypescript: boolean
   return compile();
 };
 
-export const generateDbEnvariables = ({
+export const generateDbEnvVariables = ({
   connection,
   client,
 }: {
