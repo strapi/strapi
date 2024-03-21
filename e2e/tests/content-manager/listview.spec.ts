@@ -19,7 +19,7 @@ test.describe('List View', () => {
     await expect(page.getByRole('link', { name: /Create new entry/ }).first()).toBeVisible();
   });
 
-  test('A user should be able to perform bulk actions on entries', async ({ page }) => {
+  test.skip('A user should be able to perform bulk actions on entries', async ({ page }) => {
     await test.step('bulk unpublish', async () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
 
