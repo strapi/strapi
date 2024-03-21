@@ -38,6 +38,11 @@ export interface Attribute<TKind extends Kind = Kind> {
    * Options defined and used by the plugins
    */
   pluginOptions?: object;
+
+  /**
+   * searchable
+   */
+  searchable?: boolean;
 }
 
 /**
