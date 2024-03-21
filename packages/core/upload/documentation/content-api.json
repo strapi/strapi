@@ -34,7 +34,7 @@
                     "description": "The folder where the file(s) will be uploaded to (only supported on strapi-provider-upload-aws-s3)."
                   },
                   "refId": {
-                    "type": "string",
+                    "type": "integer",
                     "description": "The ID of the entry which the file(s) will be linked to"
                   },
                   "ref": {
@@ -68,7 +68,7 @@
             "description": "File id",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -153,7 +153,7 @@
             "deprecated": false,
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -180,7 +180,7 @@
             "deprecated": false,
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "integer"
             }
           }
         ],
@@ -205,7 +205,7 @@
       "UploadFile": {
         "properties": {
           "id": {
-            "type": "number"
+            "type": "integer"
           },
           "name": {
             "type": "string"

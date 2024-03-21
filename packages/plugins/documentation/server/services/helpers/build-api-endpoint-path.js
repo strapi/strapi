@@ -33,7 +33,7 @@ const parsePathWithVariables = (routePath) => {
  *
  * @param {string} routePath - The route's path property
  *
- * @returns {object } Swagger path params object
+ * @returns {object} Swagger path params object
  */
 const getPathParams = (routePath) => {
   return pathToRegexp
@@ -46,7 +46,7 @@ const getPathParams = (routePath) => {
         description: '',
         deprecated: false,
         required: true,
-        schema: { type: 'number' },
+        schema: { type: 'integer' },
       };
     });
 };

@@ -108,7 +108,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       [`${pascalCase(uniqueName)}ResponseDataObjectLocalized`]: {
         type: 'object',
         properties: {
-          id: { type: 'number' },
+          id: { type: 'integer' },
           attributes: {
             $ref: `#/components/schemas/${pascalCase(uniqueName)}`,
           },
@@ -136,7 +136,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
         [`${pascalCase(uniqueName)}ListResponseDataItemLocalized`]: {
           type: 'object',
           properties: {
-            id: { type: 'number' },
+            id: { type: 'integer' },
             attributes: {
               $ref: `#/components/schemas/${pascalCase(uniqueName)}`,
             },
@@ -175,7 +175,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
       [`${pascalCase(uniqueName)}ListResponseDataItem`]: {
         type: 'object',
         properties: {
-          id: { type: 'number' },
+          id: { type: 'integer' },
           attributes: {
             $ref: `#/components/schemas/${pascalCase(uniqueName)}`,
           },
@@ -224,7 +224,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     [`${pascalCase(uniqueName)}ResponseDataObject`]: {
       type: 'object',
       properties: {
-        id: { type: 'number' },
+        id: { type: 'integer' },
         attributes: {
           $ref: `#/components/schemas/${pascalCase(uniqueName)}`,
         },
