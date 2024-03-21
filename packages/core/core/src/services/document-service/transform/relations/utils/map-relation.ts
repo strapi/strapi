@@ -130,6 +130,11 @@ const traverseEntityRelations = async (
         return;
       }
 
+      // TODO: Handle join columns
+      if (options.attribute.useJoinTable === false) {
+        return;
+      }
+
       // TODO: Handle morph relations (they have multiple targets)
       const target = options.attribute.target as UID.Schema | undefined;
       if (!target) {
