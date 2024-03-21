@@ -89,7 +89,7 @@
     "@types/prettier": "2.7.3",
     "@types/prompts": "2.4.9",
     "eslint-config-custom": "5.0.0-beta.0",
-    "rimraf": "3.0.2"
+    "rimraf": "5.0.5"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
