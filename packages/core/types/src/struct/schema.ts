@@ -124,6 +124,12 @@ export interface ContentTypeSchema extends BaseSchema {
    * Information about schema naming and display
    */
   info: ContentTypeSchemaInfo;
+
+  /**
+   * Indexes to be created on the database
+   * @internal
+   */
+  indexes?: unknown[];
 }
 
 /**

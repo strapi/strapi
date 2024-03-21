@@ -7736,17 +7736,24 @@ __metadata:
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:5.0.0-beta.0"
     "@strapi/provider-upload-local": "npm:5.0.0-beta.0"
+    "@strapi/types": "npm:5.0.0-beta.0"
     "@strapi/utils": "npm:5.0.0-beta.0"
     "@testing-library/dom": "npm:9.2.0"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
+    "@types/koa": "npm:2.13.4"
+    "@types/koa-range": "npm:0.3.5"
+    "@types/koa-static": "npm:4.0.2"
     axios: "npm:1.6.8"
     byte-size: "npm:7.0.1"
     cropperjs: "npm:1.6.1"
     date-fns: "npm:2.30.0"
+    formidable: "npm:3.5.1"
     formik: "npm:2.4.5"
     fs-extra: "npm:10.1.0"
     immer: "npm:9.0.21"
+    koa: "npm:2.13.4"
+    koa-body: "npm:4.2.0"
     koa-range: "npm:0.3.0"
     koa-static: "npm:5.0.0"
     lodash: "npm:4.17.21"
@@ -9021,6 +9028,15 @@ __metadata:
     "@types/koa": "npm:*"
     "@types/passport": "npm:*"
   checksum: b2f58c9018d0f4e1cfeb2c59f7b0bad580f5cda20bfe9e93d9bf858abbae1142f4fb6d9005da5d329c531be2cd1ec6df7d5c75096ea79e005f722ab658a62fdf
+  languageName: node
+  linkType: hard
+
+"@types/koa-range@npm:0.3.5":
+  version: 0.3.5
+  resolution: "@types/koa-range@npm:0.3.5"
+  dependencies:
+    "@types/koa": "npm:*"
+  checksum: 6c0aafe428d69ae4b7c2dbf3c578af79bbc515e8d19b54759093399638fc5a326ad1c0f1fef90a917d4cd5bc8868a50b6ffc68ff6c55c2f570fa8ba18ef5b818
   languageName: node
   linkType: hard
 
@@ -13304,7 +13320,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-strapi-app@workspace:packages/cli/create-strapi-app":
+"create-strapi-app@npm:5.0.0-beta.0, create-strapi-app@workspace:packages/cli/create-strapi-app":
   version: 0.0.0-use.local
   resolution: "create-strapi-app@workspace:packages/cli/create-strapi-app"
   dependencies:
@@ -13336,6 +13352,16 @@ __metadata:
     tsconfig: "npm:5.0.0-beta.0"
   bin:
     create-strapi-starter: ./bin/index.js
+  languageName: unknown
+  linkType: soft
+
+"create-strapi@workspace:packages/cli/create-strapi":
+  version: 0.0.0-use.local
+  resolution: "create-strapi@workspace:packages/cli/create-strapi"
+  dependencies:
+    create-strapi-app: "npm:5.0.0-beta.0"
+  bin:
+    create-strapi: ./bin/index.js
   languageName: unknown
   linkType: soft
 
@@ -16436,6 +16462,17 @@ __metadata:
     combined-stream: "npm:^1.0.6"
     mime-types: "npm:^2.1.12"
   checksum: 1b6f3ccbf4540e535887b42218a2431a3f6cfdea320119c2affa2a7a374ad8fdd1e60166fc865181f45d49b1684c3e90e7b2190d3fe016692957afb9cf0d0d02
+  languageName: node
+  linkType: hard
+
+"formidable@npm:3.5.1":
+  version: 3.5.1
+  resolution: "formidable@npm:3.5.1"
+  dependencies:
+    dezalgo: "npm:^1.0.4"
+    hexoid: "npm:^1.0.0"
+    once: "npm:^1.4.0"
+  checksum: c9a7bbbd4ca8142893da88b51cf7797adee022344ea180cf157a108bf999bed5ad8bc07a10a28d8a39fcbfaa02e8cba07f4ba336fbeb330deb23907336ba1fc2
   languageName: node
   linkType: hard
 
