@@ -44,7 +44,6 @@ const admin: Plugin.Config.AdminInput = {
         Component: CMReleasesContainer,
       });
 
-      //TODO: Check PERMISSIONS.createAction and hasDraftAndPublish enabled to show the button
       app.plugins['content-manager'].apis.addBulkAction((actions) => {
         // We want to add this action to just before the delete action all the time
         const deleteActionIndex = actions.findIndex((action) => action.name === 'DeleteAction');

@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { type BulkActionComponent } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -13,26 +14,50 @@ import {
   useAPIErrorHandler,
   useCMEditViewDataManager,
   useNotification,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { isAxiosError } from 'axios';
+import { type FormikValues, type FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
 
 import { CreateManyReleaseActions } from '../../../shared/contracts/release-actions';
+import { PERMISSIONS as releasePermissions } from '../constants';
 import { useCreateManyReleaseActionsMutation, useGetReleasesQuery } from '../services/release';
 
 import { type FormValues, INITIAL_VALUES, RELEASE_ACTION_FORM_SCHEMA } from './CMReleasesContainer';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
-import type { BulkActionComponent } from '@strapi/admin/strapi-admin';
-import type { FormikValues, FormikErrors } from 'formik';
+const getContentPermissions = (subject: string) => {
+  const permissions = {
+    publish: [
+      {
+        action: 'plugin::content-manager.explorer.publish',
+        subject,
+        id: '',
+        actionParameters: {},
+        properties: {},
+        conditions: [],
+      },
+    ],
+  };
+
+  return permissions;
+};
 
 const ReleaseAction: BulkActionComponent = ({ ids, model }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const { modifiedData } = useCMEditViewDataManager();
+  const contentPermissions = getContentPermissions(model);
+  const {
+    allowedActions: { canPublish },
+  } = useRBAC(contentPermissions);
+  const {
+    allowedActions: { canCreate },
+  } = useRBAC(releasePermissions);
 
-  // Get all 'pending' releases that do not have the entry attached
+  // Get all the releases not published
   const response = useGetReleasesQuery();
   const releases = response.data?.data;
   const [createManyReleaseActions, { isLoading }] = useCreateManyReleaseActionsMutation();
@@ -114,6 +139,8 @@ const ReleaseAction: BulkActionComponent = ({ ids, model }) => {
       }
     }
   };
+
+  if (!canCreate || !canPublish) return null;
 
   return {
     actionType: 'release',
