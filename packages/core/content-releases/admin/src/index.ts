@@ -6,12 +6,13 @@ import { pluginId } from './pluginId';
 import { releaseApi } from './services/release';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 // eslint-disable-next-line import/no-default-export
 const admin: Plugin.Config.AdminInput = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register(app: any) {
+  register(app: StrapiApp) {
     if (window.strapi.features.isEnabled('cms-content-releases')) {
       app.addMenuLink({
         to: `plugins/${pluginId}`,
@@ -28,6 +29,7 @@ const admin: Plugin.Config.AdminInput = {
        * For some reason every middleware you pass has to a function
        * that returns the actual middleware. It's annoying but no one knows why....
        */
+      // @ts-expect-error – this API needs to be styped better.
       app.addMiddlewares([() => releaseApi.middleware]);
 
       app.addReducers({
@@ -35,7 +37,7 @@ const admin: Plugin.Config.AdminInput = {
       });
 
       // Insert the Releases container in the 'right-links' zone of the Content Manager's edit view
-      app.injectContentManagerComponent('editView', 'right-links', {
+      app.getPlugin('content-manager').injectComponent('editView', 'right-links', {
         name: `${pluginId}-link`,
         Component: CMReleasesContainer,
       });
@@ -52,7 +54,7 @@ const admin: Plugin.Config.AdminInput = {
         },
         async Component() {
           const { PurchaseContentReleases } = await import('./pages/PurchaseContentReleases');
-          return PurchaseContentReleases;
+          return { default: PurchaseContentReleases };
         },
         lockIcon: true,
       });

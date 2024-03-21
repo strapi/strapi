@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Button, Flex, PopoverPrimitives, Tag, useComposedRefs } from '@strapi/design-system';
 import { Plus, Filter as FilterIcon, Cross } from '@strapi/icons';
+import { Schema } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import {
@@ -12,7 +13,6 @@ import {
   NUMERIC_FILTERS,
   STRING_PARSE_FILTERS,
 } from '../constants/filters';
-import { MainField } from '../content-manager/utils/attributes';
 import { useControllableState } from '../hooks/useControllableState';
 import { useQueryParams } from '../hooks/useQueryParams';
 
@@ -512,6 +512,11 @@ const Filters = {
   Root,
   Trigger,
 };
+
+interface MainField {
+  name: string;
+  type: Schema.Attribute.Kind | 'custom';
+}
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace Filters {

@@ -72,7 +72,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
   const logout = useAuth('Logout', (state) => state.logout);
-  const userDisplayName = getDisplayName(user, formatMessage);
+  const userDisplayName = getDisplayName(user);
 
   const initials = userDisplayName
     .split(' ')
