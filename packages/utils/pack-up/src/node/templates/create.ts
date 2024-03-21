@@ -106,7 +106,7 @@ const createPackageFromTemplate = async (
     };
 
     try {
-      const formattedContents = prettier.format(file.contents, {
+      const formattedContents = await prettier.format(file.contents, {
         ...defaultPrettierConfig,
         filepath: filePath,
       });
