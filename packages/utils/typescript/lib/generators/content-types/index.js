@@ -47,6 +47,10 @@ const generateContentTypesDefinitions = async (options = {}) => {
 
     // Global
     generateSharedExtensionDefinition('ContentTypes', contentTypesDefinitions),
+
+    // export {}
+    factory.createIdentifier('\n'),
+    factory.createExportDeclaration([], false, factory.createNamedExports([])),
   ];
 
   const output = emitDefinitions(allDefinitions);
