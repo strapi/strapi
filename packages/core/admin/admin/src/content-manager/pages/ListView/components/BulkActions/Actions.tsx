@@ -14,16 +14,16 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useIntl } from 'react-intl';
 import { useQueryClient } from 'react-query';
 import { useParams } from 'react-router-dom';
 
-import { NotificationConfig, useNotification, useTracking } from '../../../../..';
 import { DescriptionComponentRenderer } from '../../../../../components/DescriptionComponentRenderer';
 import { useTypedSelector } from '../../../../../core/store/hooks';
+import { NotificationConfig, useNotification } from '../../../../../features/Notifications';
 import { useStrapiApp } from '../../../../../features/StrapiApp';
+import { useTracking } from '../../../../../features/Tracking';
 import { useDoc } from '../../../../hooks/useDocument';
 import { getTranslation } from '../../../../utils/translations';
 // import { useAllowedActions } from '../../hooks/useAllowedActions';
@@ -34,6 +34,7 @@ import type {
   BulkActionComponent,
   ContentManagerPlugin,
 } from '../../../../../core/apis/content-manager';
+import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
 interface BulkActionDescription {
   dialog?: DialogOptions | NotificationOptions | ModalOptions;

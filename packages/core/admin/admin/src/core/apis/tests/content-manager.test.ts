@@ -35,6 +35,10 @@ jest.mock('../../../content-manager/pages/ListView/components/TableActions', () 
   DEFAULT_TABLE_ROW_ACTIONS: [],
 }));
 
+jest.mock('../../../content-manager/pages/ListView/components/BulkActions/Actions', () => ({
+  DEFAULT_BULK_ACTIONS: [],
+}));
+
 describe('content-manager', () => {
   describe('config', () => {
     it("should export the a config shape to pretend it's a plugin", () => {
@@ -43,9 +47,11 @@ describe('content-manager', () => {
       expect(plugin.config).toMatchInlineSnapshot(`
         {
           "apis": {
+            "addBulkAction": [Function],
             "addDocumentAction": [Function],
             "addDocumentHeaderAction": [Function],
             "addEditViewSidePanel": [Function],
+            "getBulkActions": [Function],
             "getDocumentActions": [Function],
             "getEditViewSidePanels": [Function],
             "getHeaderActions": [Function],
@@ -71,6 +77,8 @@ describe('content-manager', () => {
           "getDocumentActions",
           "getHeaderActions",
           "getEditViewSidePanels",
+          "addBulkAction",
+          "getBulkActions",
         ]
       `);
     });
