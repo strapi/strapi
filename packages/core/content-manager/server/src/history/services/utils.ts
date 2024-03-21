@@ -12,10 +12,7 @@ export const getSchemaAttributesDiff = (
   contentTypeSchemaAttributes: Record<string, Schema.Attribute.AnyAttribute>
 ) => {
   // Omit the same fields that were omitted when creating a history version
-  const sanitizedContentTypeSchemaAttributes = omit(
-    FIELDS_TO_IGNORE,
-    contentTypeSchemaAttributes
-  ) as CreateHistoryVersion['schema'];
+  const sanitizedContentTypeSchemaAttributes = omit(FIELDS_TO_IGNORE, contentTypeSchemaAttributes);
 
   const reduceDifferenceToAttributesObject = (
     diffKeys: string[],
