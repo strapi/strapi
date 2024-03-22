@@ -21,13 +21,13 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
    * Traverse the entity input data and set the default locale to relations
    */
   return traverseEntityRelations(
-    async ({ key }, { set }) => {
+    async ({ key, value }, { set }) => {
       /**
        * Assign default locale on long hand expressed relations
        * e.g { documentId } -> { documentId, locale }
        */
       const relation = await mapRelation(async (relation) => {
-        if (!relation || relation.documentId || relation.locale) {
+        if (!relation || !relation?.documentId || relation?.locale) {
           return relation;
         }
 
@@ -38,12 +38,12 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
 
         // Assign default locale to the positional argument
         const position = relation.position;
-        if (position || !position.locale) {
+        if (position && typeof position === 'object' && !position.locale) {
           relation.position.locale = defaultLocale;
         }
 
         return { ...relation, locale: defaultLocale };
-      });
+      }, value as any);
 
       // @ts-expect-error - fix type
       set(key, relation);
@@ -53,4 +53,4 @@ const setDefaultLocaleToRelations = (data: Record<string, any>, uid: UID.Schema)
   );
 };
 
-export { setDefaultLocaleToRelations as transformDataIdsVisitor };
+export { setDefaultLocaleToRelations };

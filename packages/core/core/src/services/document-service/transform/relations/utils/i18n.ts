@@ -19,8 +19,7 @@ export const getRelationTargetLocale = (
     sourceLocale?: string | null;
   }
 ) => {
-  const defaultLocale = getDefaultLocale();
-  const targetLocale = relation.locale || opts.sourceLocale || defaultLocale;
+  const targetLocale = relation.locale || opts.sourceLocale;
 
   const isTargetLocalized = isLocalizedContentType(opts.targetUid);
   const isSourceLocalized = isLocalizedContentType(opts.sourceUid);
