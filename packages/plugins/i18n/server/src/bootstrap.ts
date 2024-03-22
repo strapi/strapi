@@ -1,5 +1,4 @@
-import type { Core } from '@strapi/types';
-
+import type { Schema, Core } from '@strapi/types';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
@@ -17,7 +16,7 @@ const registerModelsHooks = () => {
 
   strapi.documents.use(async (context, next) => {
     // @ts-expect-error ContentType is not typed correctly on the context
-    const schema = context.contentType;
+    const schema: Schema.ContentType = context.contentType;
 
     if (!['create', 'update', 'discardDraft', 'publish'].includes(context.action)) {
       return next(context);

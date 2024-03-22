@@ -1,32 +1,30 @@
 import { cloneDeep, isEmpty } from 'lodash/fp';
 
+import { type Schema } from '@strapi/types';
 import { async, traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
 
-const omitFieldsFromRelations = (data: any, schema: any) => {
+const omitIdAndLocale = (entry?: object | null) => {
+  if (entry && typeof entry === 'object' && 'id' in entry && 'locale' in entry) {
+    const { id, locale, ...rest } = entry;
+    return rest;
+  }
+
+  return entry;
+};
+
+const omitFieldsFromRelations = (data: any, schema: Schema.ContentType) => {
   return traverseEntity(
     ({ key, value, attribute }, { set }) => {
       if (attribute.type === 'relation') {
         if (Array.isArray(value)) {
           const newValue = value.map((entry) => {
-            if (value !== null && typeof value === 'object' && 'id' in value && 'locale' in value) {
-              const { id, locale, ...rest } = entry;
-              return rest;
-            }
-
-            return entry;
+            return omitIdAndLocale(entry);
           });
 
           set(key, newValue as any);
-        } else if (
-          value !== null &&
-          typeof value === 'object' &&
-          'id' in value &&
-          'locale' in value
-        ) {
-          const { id, locale, ...rest } = value;
-
-          set(key, rest);
+        } else if (typeof value === 'object') {
+          set(key, omitIdAndLocale(value) as any);
         }
       }
     },
@@ -38,7 +36,7 @@ const omitFieldsFromRelations = (data: any, schema: any) => {
 /**
  * Update non localized fields of all the related localizations of an entry with the entry values
  */
-const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
+const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.ContentType) => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
   const nonLocalizedAttributes = copyNonLocalizedAttributes(model, sourceEntry);
