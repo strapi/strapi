@@ -1,4 +1,4 @@
-import type { Schema, Documents, Common } from '../..';
+import type { Schema } from '../..';
 import type * as Middleware from './middleware';
 import type { ServiceInstance } from './service-instance';
 
@@ -10,11 +10,13 @@ export * from './service-instance';
 
 export type ID = string;
 
+type Data = {
+  id?: number | string;
+  [key: string]: string | number | boolean | null | undefined | Date | Data | Data[];
+};
+
 type ServiceUtils = {
-  transformParamsDocumentId: (
-    uid: Common.UID.Schema,
-    query: Documents.Params.All
-  ) => Promise<Documents.Params.All>;
+  transformData: (data: any, opts: any) => Promise<Data>;
 };
 
 export type Service = {

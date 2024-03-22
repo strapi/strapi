@@ -1,7 +1,39 @@
-import { isEmpty } from 'lodash/fp';
+import { cloneDeep, isEmpty } from 'lodash/fp';
 
-import { async } from '@strapi/utils';
+import { async, traverseEntity } from '@strapi/utils';
 import { getService } from '../utils';
+
+const omitFieldsFromRelations = (data: any, schema: any) => {
+  return traverseEntity(
+    ({ key, value, attribute }, { set }) => {
+      if (attribute.type === 'relation') {
+        if (Array.isArray(value)) {
+          const newValue = value.map((entry) => {
+            if (value !== null && typeof value === 'object' && 'id' in value && 'locale' in value) {
+              const { id, locale, ...rest } = entry;
+              return rest;
+            }
+
+            return entry;
+          });
+
+          set(key, newValue as any);
+        } else if (
+          value !== null &&
+          typeof value === 'object' &&
+          'id' in value &&
+          'locale' in value
+        ) {
+          const { id, locale, ...rest } = value;
+
+          set(key, rest);
+        }
+      }
+    },
+    { schema },
+    data
+  );
+};
 
 /**
  * Update non localized fields of all the related localizations of an entry with the entry values
@@ -21,7 +53,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
 
   // Find all the entries that need to be updated
   // this is every other entry of the document in the same status but a different locale
-  const entriesToUpdate = await strapi.db.query(uid).findMany({
+  const localeEntriesToUpdate = await strapi.db.query(uid).findMany({
     where: {
       documentId,
       publishedAt: status === 'published' ? { $ne: null } : null,
@@ -30,16 +62,21 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
     select: ['locale', 'id'],
   });
 
-  const { data: transformedData } = await strapi.documents.utils.transformParamsDocumentId(uid, {
-    data: nonLocalizedAttributes,
-    locale,
-    status,
-  });
+  const entryData = await strapi.documents(uid).omitComponentData(model, nonLocalizedAttributes);
 
-  const entryData = await strapi.documents(uid).omitComponentData(model, transformedData as any);
+  // We omit the ids and locales from the relational data so the components can
+  // be updated correctly
+  const cleanedData = await omitFieldsFromRelations(nonLocalizedAttributes, model);
 
-  await async.map(entriesToUpdate, async (entry: any) => {
-    // Update the components of the entry
+  await async.map(localeEntriesToUpdate, async (entry: any) => {
+    const transformedData = await strapi.documents.utils.transformData(cloneDeep(cleanedData), {
+      uid,
+      status,
+      locale: entry.locale,
+      allowMissingId: true,
+    });
+
+    // Update or create components for the entry
     const componentData = await strapi
       .documents(uid)
       .updateComponents(uid, entry, transformedData as any);
@@ -55,7 +92,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: any) => {
       },
       // The data we send to the update function is the entry data merged with
       // the updated component data
-      data: Object.assign(entryData, componentData),
+      data: Object.assign(cloneDeep(entryData), componentData),
     });
   });
 };

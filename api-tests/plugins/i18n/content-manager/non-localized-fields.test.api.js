@@ -43,6 +43,7 @@ const categoryModel = {
       },
     },
     nonLocalizedCompo: {
+      component: 'default.compo',
       type: 'component',
       repeatable: false,
       pluginOptions: {
@@ -50,7 +51,16 @@ const categoryModel = {
           localized: false,
         },
       },
+    },
+    nonLocalizedRepeatableCompo: {
       component: 'default.compo',
+      type: 'component',
+      repeatable: true,
+      pluginOptions: {
+        i18n: {
+          localized: false,
+        },
+      },
     },
   },
 };
@@ -120,7 +130,11 @@ const allLocales = [
   { code: 'fr', name: 'French' },
   { code: 'es-AR', name: 'Spanish (Argentina)' },
 ];
+
 const allLocaleCodes = allLocales.map((locale) => locale.code);
+// Make the tags available in all locales except one so we can test relation cases
+// when the locale relation does not exist
+const tagsAvailableIn = allLocaleCodes.slice(1);
 
 describe('i18n', () => {
   const builder = createTestBuilder();
@@ -177,88 +191,64 @@ describe('i18n', () => {
         });
       }
 
-      const tagRes = await rq({
-        method: 'POST',
-        url: `/content-manager/collection-types/api::tag.tag`,
-        body: {
-          name: `Test tag`,
-        },
-      });
-      data.tags.push(tagRes.body.data);
-
-      for (const locale of allLocaleCodes) {
-        const localeTagRes = await rq({
-          method: 'PUT',
-          url: `/content-manager/collection-types/api::tag.tag/${tagRes.body.data.documentId}`,
+      // Create 2 tags in the default locale
+      const [tag1, tag2] = await Promise.all([
+        rq({
+          method: 'POST',
+          url: `/content-manager/collection-types/api::tag.tag`,
           body: {
-            locale,
-            name: `Test tag ${locale}`,
+            name: `Test tag`,
           },
-        });
+        }),
+        rq({
+          method: 'POST',
+          url: `/content-manager/collection-types/api::tag.tag`,
+          body: {
+            name: `Test tag 2`,
+          },
+        }),
+      ]);
+      data.tags.push(tag1.body.data);
+      data.tags.push(tag2.body.data);
 
-        data.tags.push(localeTagRes.body.data);
+      for (const locale of tagsAvailableIn) {
+        // Create 2 tags for every other locale
+        const [localeTag1, localeTag2] = await Promise.all([
+          rq({
+            method: 'PUT',
+            url: `/content-manager/collection-types/api::tag.tag/${tag1.body.data.documentId}`,
+            body: {
+              locale,
+              name: `Test tag ${locale}`,
+            },
+          }),
+          rq({
+            method: 'PUT',
+            url: `/content-manager/collection-types/api::tag.tag/${tag2.body.data.documentId}`,
+            body: {
+              locale,
+              name: `Test tag ${locale} 2`,
+            },
+          }),
+        ]);
+
+        data.tags.push(localeTag1.body.data);
+        data.tags.push(localeTag2.body.data);
       }
     });
 
-    describe.each([
-      [
-        {
-          // Test that when you update a non localized field all
-          // other locales are updated accordingly
-          description: 'Modify a top level non localized field',
-          key: 'nonLocalized',
-          action: {
-            update: 'Update Test',
-          },
-        },
-      ],
-      [
-        {
-          // Test that when you change a field in a non localized compo, all
-          // others are updated accordingly
-          description: 'Modify a field within a non localized component',
-          key: 'nonLocalizedCompo',
-          action: {
-            updateAt: [{ key: 'name', value: 'Compo Name' }],
-          },
-        },
-      ],
-      [
-        {
-          // Test when you change a relation to a localized CT within a non localized component, other
-          // locales should not have the equivalent relation associated to them
-          description: 'Connect a relation to a non localized component',
-          key: 'nonLocalizedCompo',
-          action: {
-            connectRelationAt: 'tag',
-          },
-        },
-      ],
-    ])('', (params) => {
-      describe.each([['publish'], ['unpublish + discard'], ['update']])('', (method) => {
-        test(`${params.description} - Key ${params.key} - Method ${method}`, async () => {
+    // Test non localized behaviour across these actions
+    const actionsToTest = [['publish'], ['unpublish + discard'], ['update']];
+
+    describe('Scalar non localized fields', () => {
+      describe.each(actionsToTest)('', (method) => {
+        test(`Modify a scalar non localized field - Method ${method}`, async () => {
           const isPublish = method === 'publish';
           const isUnpublish = method.includes('unpublish');
 
-          const { key, action } = params;
-
-          let updatedValue;
-          if (action?.connectRelationAt) {
-            // Connect a relation to the specified component key
-            updatedValue = {
-              [action.connectRelationAt]: {
-                connect: [data.tags.find((tag) => tag.locale === 'en')],
-              },
-            };
-          } else if (action?.updateAt) {
-            // Update all specified keys in the related component
-            updatedValue = action?.updateAt.reduce((acc, { key, value }) => {
-              return set(key, `${key}::${value}::${method}`, acc);
-            }, {});
-          } else {
-            // Update the non localized field
-            updatedValue = `${key}::${action.update}::${method}`;
-          }
+          const key = 'nonLocalized';
+          // Update the non localized field
+          const updatedValue = `${key}::Update Test::${method}`;
 
           let res;
           if (isPublish) {
@@ -280,21 +270,8 @@ describe('i18n', () => {
               },
             });
 
-            let randomData;
-            if (typeof updatedValue === 'string') {
-              randomData = 'random';
-            } else if (typeof updatedValue === 'object') {
-              randomData = {};
-              Object.entries(updatedValue).forEach(([key, value]) => {
-                if (typeof value === 'string') {
-                  randomData[key] = 'random';
-                } else {
-                  randomData[key] = value;
-                }
-              });
-            }
-
             // Update the default locale draft entry with random data
+            const randomData = 'random';
             await rq({
               method: 'PUT',
               url: `/content-manager/collection-types/api::category.category/${documentId}`,
@@ -321,38 +298,239 @@ describe('i18n', () => {
             });
           }
 
-          if (action?.connectRelationAt) {
-            // If we have connected a relation, we should expect the count to
-            // equal the number of relations we have connected
+          for (const locale of allLocaleCodes) {
+            const localeRes = await strapi.db.query('api::category.category').findOne({
+              where: {
+                documentId,
+                publishedAt: null,
+                locale: { $eq: locale },
+              },
+            });
 
-            // TODO repeatables
-            expect(res.body.data[key][action.connectRelationAt].count).toEqual(
-              data.tags.filter((tag) => tag.locale === 'en').length
-            );
+            // The locale should now have the same value as the default locale.
+            expect(localeRes[key]).toEqual(updatedValue);
+          }
+        });
+      });
+    });
+
+    describe('Scalar field within a non localized component', () => {
+      describe.each(actionsToTest)('', (method) => {
+        test(`Modify a scalar field within a non localized component - Method ${method}`, async () => {
+          const isPublish = method === 'publish';
+          const isUnpublish = method.includes('unpublish');
+
+          const key = 'nonLocalizedCompo';
+          const updateAt = [{ key: 'name', value: 'Compo Name' }];
+
+          const updatedValue = updateAt.reduce((acc, { key, value }) => {
+            return set(key, `${key}::${value}::${method}`, acc);
+          }, {});
+
+          if (isPublish) {
+            // Publish the default locale entry
+            await rq({
+              method: 'POST',
+              url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
+              body: {
+                [key]: updatedValue,
+              },
+            });
+          } else if (isUnpublish) {
+            // Publish the default locale entry
+            await rq({
+              method: 'POST',
+              url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
+              body: {
+                [key]: updatedValue,
+              },
+            });
+
+            let randomData = {};
+            Object.entries(updatedValue).forEach(([key, value]) => {
+              if (typeof value === 'string') {
+                randomData[key] = 'random';
+              } else {
+                randomData[key] = value;
+              }
+            });
+
+            // Update the default locale draft entry with random data
+            await rq({
+              method: 'PUT',
+              url: `/content-manager/collection-types/api::category.category/${documentId}`,
+              body: {
+                [key]: randomData,
+              },
+            });
+
+            // Unpublish the default locale entry
+            await rq({
+              method: 'POST',
+              url: `/content-manager/collection-types/api::category.category/${documentId}/actions/unpublish`,
+              body: {
+                discardDraft: true,
+              },
+            });
+          } else {
+            await rq({
+              method: 'PUT',
+              url: `/content-manager/collection-types/api::category.category/${documentId}`,
+              body: {
+                [key]: updatedValue,
+              },
+            });
           }
 
           for (const locale of allLocaleCodes) {
-            const localeRes = await rq({
-              method: 'GET',
-              url: `/content-manager/collection-types/api::category.category/${documentId}?locale=${locale}`,
+            const localeRes = await strapi.db.query('api::category.category').findOne({
+              where: {
+                documentId,
+                publishedAt: null,
+                locale: { $eq: locale },
+              },
+              populate: [key],
             });
 
-            if (action?.connectRelationAt) {
-              // Connecting a relation to the default locale should not affect
-              // other locales
-              expect(localeRes.body.data[key][action.connectRelationAt].count).toEqual(0);
-            } else if (action?.updateAt) {
-              // We have updated the default locale at a non localized
-              // component field.
-              // Make sure other locales have been updated in the same way. Use a fuzzy
-              // match as each component will also contain ids etc.
-              expect(localeRes.body.data[key]).toEqual(expect.objectContaining(updatedValue));
-            } else {
-              // We have updated a top level non localized field.
-              // The locale should now have the same value as the default locale.
-              expect(localeRes.body.data[key]).toEqual(updatedValue);
-            }
+            // Make sure non localized component fields in other locales have been updated in the same way.
+            expect(localeRes[key]).toEqual(expect.objectContaining(updatedValue));
           }
+        });
+      });
+    });
+
+    describe.each([false, true])('', (isRepeatable) => {
+      describe('Relation within a non localized component', () => {
+        describe.each(actionsToTest)('', (method) => {
+          test(`Modify a relation within a non localized component - Method ${method} - Repeatable ${isRepeatable}`, async () => {
+            const isPublish = method === 'publish';
+            const isUnpublish = method.includes('unpublish');
+
+            const key = isRepeatable ? 'nonLocalizedRepeatableCompo' : 'nonLocalizedCompo';
+            const connectRelationAt = 'tag';
+
+            let updatedValue;
+            if (isRepeatable) {
+              const localeTags = data.tags.filter((tag) => tag.locale === 'en');
+
+              updatedValue = [
+                {
+                  [connectRelationAt]: {
+                    connect: [localeTags[0]],
+                  },
+                },
+                {
+                  [connectRelationAt]: {
+                    connect: [localeTags[1]],
+                  },
+                },
+              ];
+            } else {
+              updatedValue = {
+                [connectRelationAt]: {
+                  connect: [data.tags.find((tag) => tag.locale === 'en')],
+                },
+              };
+            }
+
+            let res;
+            if (isPublish) {
+              // Publish the default locale entry
+              res = await rq({
+                method: 'POST',
+                url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
+                body: {
+                  [key]: updatedValue,
+                },
+              });
+            } else if (isUnpublish) {
+              // Publish the default locale entry
+              await rq({
+                method: 'POST',
+                url: `/content-manager/collection-types/api::category.category/${documentId}/actions/publish`,
+                body: {
+                  [key]: updatedValue,
+                },
+              });
+
+              let randomData = {};
+              Object.entries(updatedValue).forEach(([key, value]) => {
+                if (typeof value === 'string') {
+                  randomData[key] = 'random';
+                } else {
+                  randomData[key] = value;
+                }
+              });
+
+              // Update the default locale draft entry with random data
+              await rq({
+                method: 'PUT',
+                url: `/content-manager/collection-types/api::category.category/${documentId}`,
+                body: {
+                  [key]: randomData,
+                },
+              });
+
+              // Unpublish the default locale entry
+              res = await rq({
+                method: 'POST',
+                url: `/content-manager/collection-types/api::category.category/${documentId}/actions/unpublish`,
+                body: {
+                  discardDraft: true,
+                },
+              });
+            } else {
+              res = await rq({
+                method: 'PUT',
+                url: `/content-manager/collection-types/api::category.category/${documentId}`,
+                body: {
+                  [key]: updatedValue,
+                },
+              });
+            }
+
+            // If we have connected a relation, we should expect the count to
+            // equal the number of relations we have connected
+            Array.isArray(res.body.data[key])
+              ? res.body.data[key]
+              : [res.body.data[key]].forEach((item, index) => {
+                  expect(item[connectRelationAt].count).toEqual(
+                    Array.isArray(updatedValue)
+                      ? updatedValue[index][connectRelationAt].connect.length
+                      : updatedValue[connectRelationAt].connect.length
+                  );
+                });
+
+            for (const locale of allLocaleCodes) {
+              const localeRes = await strapi.db.query('api::category.category').findOne({
+                where: {
+                  documentId,
+                  publishedAt: null,
+                  locale: { $eq: locale },
+                },
+                populate: [`${key}.${connectRelationAt}`],
+              });
+
+              // Connecting a relation to the default locale should add the
+              // equivalent locale relation if it exists to the other locales
+              (Array.isArray(localeRes[key]) ? localeRes[key] : [localeRes[key]]).forEach(
+                (item, index) => {
+                  if (!tagsAvailableIn.includes(locale)) {
+                    expect(item[connectRelationAt]).toBeNull();
+                  } else {
+                    expect(item[connectRelationAt]).toEqual(
+                      expect.objectContaining({
+                        locale,
+                        documentId: (Array.isArray(updatedValue) ? updatedValue : [updatedValue])[
+                          index
+                        ][connectRelationAt].connect[0].documentId,
+                      })
+                    );
+                  }
+                }
+              );
+            }
+          });
         });
       });
     });
