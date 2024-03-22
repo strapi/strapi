@@ -150,6 +150,8 @@ const EditView = () => {
         if (isCreating) {
           const res = await createToken({
             ...body,
+            // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
+            lifespan: body?.lifespan || null,
             permissions,
           });
 
@@ -251,7 +253,7 @@ const EditView = () => {
           {
             name: transferToken?.name || '',
             description: transferToken?.description || '',
-            lifespan: transferToken?.lifespan ?? null,
+            lifespan: transferToken?.lifespan || null,
             /**
              * We need to cast the permissions to satisfy the type for `permissions`
              * in the request body incase we don't have a transferToken and instead

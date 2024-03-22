@@ -193,10 +193,9 @@ const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
   return (
     <StyledMenuItem>
       <Link
-        as={NavLink}
-        // @ts-expect-error TODO: This component from DS is not using types from NavLink
-        to={`/plugins/content-releases/${releaseId}`}
+        href={`/admin/plugins/content-releases/${releaseId}`}
         startIcon={<Icon as={Pencil} width={3} height={3} />}
+        isExternal={false}
       >
         <Typography variant="omega">
           {formatMessage({

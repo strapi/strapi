@@ -4,6 +4,7 @@ import * as React from 'react';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin';
 import {
   Alert,
+  Badge,
   Box,
   Button,
   ContentLayout,
@@ -39,7 +40,7 @@ import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { GetReleases } from '../../../shared/contracts/releases';
+import { GetReleases, type Release } from '../../../shared/contracts/releases';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
@@ -62,9 +63,39 @@ const LinkCard = styled(Link)`
   display: block;
 `;
 
+const CapitalizeRelativeTime = styled(RelativeTime)`
+  text-transform: capitalize;
+`;
+
+const getBadgeProps = (status: Release['status']) => {
+  let color;
+  switch (status) {
+    case 'ready':
+      color = 'success';
+      break;
+    case 'blocked':
+      color = 'warning';
+      break;
+    case 'failed':
+      color = 'danger';
+      break;
+    case 'done':
+      color = 'primary';
+      break;
+    case 'empty':
+    default:
+      color = 'neutral';
+  }
+
+  return {
+    textColor: `${color}600`,
+    backgroundColor: `${color}100`,
+    borderColor: `${color}200`,
+  };
+};
+
 const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
   const { formatMessage } = useIntl();
-  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
 
   if (isError) {
     return <AnErrorOccurred />;
@@ -89,7 +120,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 
   return (
     <Grid gap={4}>
-      {releases.map(({ id, name, actions, scheduledAt }) => (
+      {releases.map(({ id, name, scheduledAt, status }) => (
         <GridItem col={3} s={6} xs={12} key={id}>
           <LinkCard href={`content-releases/${id}`} isExternal={false}>
             <Flex
@@ -102,32 +133,24 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               height="100%"
               width="100%"
               alignItems="start"
-              gap={2}
+              gap={4}
             >
-              <Typography as="h3" variant="delta" fontWeight="bold">
-                {name}
-              </Typography>
-              <Typography variant="pi" textColor="neutral600">
-                {IsSchedulingEnabled ? (
-                  scheduledAt ? (
-                    <RelativeTime timestamp={new Date(scheduledAt)} />
+              <Flex direction="column" alignItems="start" gap={1}>
+                <Typography as="h3" variant="delta" fontWeight="bold">
+                  {name}
+                </Typography>
+                <Typography variant="pi" textColor="neutral600">
+                  {scheduledAt ? (
+                    <CapitalizeRelativeTime timestamp={new Date(scheduledAt)} />
                   ) : (
                     formatMessage({
                       id: 'content-releases.pages.Releases.not-scheduled',
                       defaultMessage: 'Not scheduled',
                     })
-                  )
-                ) : (
-                  formatMessage(
-                    {
-                      id: 'content-releases.page.Releases.release-item.entries',
-                      defaultMessage:
-                        '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-                    },
-                    { number: actions.meta.count }
-                  )
-                )}
-              </Typography>
+                  )}
+                </Typography>
+              </Flex>
+              <Badge {...getBadgeProps(status)}>{status}</Badge>
             </Flex>
           </LinkCard>
         </GridItem>
@@ -156,8 +179,7 @@ const INITIAL_FORM_VALUES = {
   name: '',
   date: null,
   time: '',
-  // Remove future flag check after Scheduling Beta release and replace with true as creating new release should include scheduling by default
-  isScheduled: window.strapi.future.isEnabled('contentReleasesScheduling'),
+  isScheduled: true,
   scheduledAt: null,
   timezone: null,
 } satisfies FormValues;
@@ -405,4 +427,4 @@ const ReleasesPage = () => {
   );
 };
 
-export { ReleasesPage };
+export { ReleasesPage, getBadgeProps };

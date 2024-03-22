@@ -9,6 +9,7 @@ const RELEASE_NO_ACTIONS_HEADER_MOCK_DATA = {
     createdAt: '2023-11-16T15:18:32.560Z',
     updatedAt: '2023-11-16T15:18:32.560Z',
     releasedAt: null,
+    status: 'empty',
     createdBy: {
       id: 1,
       firstname: 'Admin',
@@ -50,6 +51,7 @@ const RELEASE_WITH_ACTIONS_HEADER_MOCK_DATA = {
     createdAt: '2023-11-16T15:18:32.560Z',
     updatedAt: '2023-11-16T15:18:32.560Z',
     releasedAt: null,
+    status: 'ready',
     createdBy: {
       id: 1,
       firstname: 'Admin',
@@ -70,11 +72,12 @@ const RELEASE_WITH_ACTIONS_HEADER_MOCK_DATA = {
 
 const PUBLISHED_RELEASE_WITH_ACTIONS_HEADER_MOCK_DATA = {
   data: {
-    id: 2,
+    id: 3,
     name: 'release with actions',
     createdAt: '2023-11-16T15:18:32.560Z',
     updatedAt: '2023-11-16T15:18:32.560Z',
     releasedAt: '2023-11-16T15:18:32.560Z',
+    status: 'done',
     createdBy: {
       id: 1,
       firstname: 'Admin',
