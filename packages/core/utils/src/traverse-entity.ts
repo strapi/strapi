@@ -61,6 +61,7 @@ const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) 
 
   return traverseEntity(visitor, traverseOptions, entry);
 };
+
 const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
   const { path = { raw: null, attribute: null }, schema } = options;
 

@@ -19,14 +19,18 @@ export interface Options {
   auth?: unknown;
 }
 
-interface Validator {
+export interface Validator {
   (schema: Model): CurriedFunction1<Data, Promise<Data>>;
 }
 export interface ValidateFunc {
   (data: unknown, schema: Model, options?: Options): Promise<void>;
 }
 
-const createContentAPIValidators = () => {
+export interface Validators {
+  input?: Validator[];
+}
+
+const createAPIValidators = (opts?: { validators: Validators }) => {
   const validateInput: ValidateFunc = async (data: unknown, schema: Model, { auth } = {}) => {
     if (!schema) {
       throw new Error('Missing schema in validateInput');
@@ -61,9 +65,7 @@ const createContentAPIValidators = () => {
     }
 
     // Apply validators from registry if exists
-    strapi.validators
-      .get('content-api.input')
-      .forEach((validator: Validator) => transforms.push(validator(schema)));
+    opts?.validators?.input?.forEach((validator: Validator) => transforms.push(validator(schema)));
 
     await pipeAsync(...transforms)(data as Data);
   };
@@ -159,10 +161,6 @@ const createContentAPIValidators = () => {
   };
 };
 
-const contentAPI = createContentAPIValidators();
+export { createAPIValidators, validators, visitors };
 
-export default {
-  contentAPI,
-  validators,
-  visitors,
-};
+export type APIValidators = ReturnType<typeof createAPIValidators>;

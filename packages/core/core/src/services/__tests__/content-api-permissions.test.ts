@@ -1,15 +1,27 @@
 import createContentAPI from '../content-api';
-import type { Utils } from '../..';
+
+const strapiMock = {
+  sanitizers: {
+    get() {
+      return [];
+    },
+  },
+  validators: {
+    get() {
+      return [];
+    },
+  },
+};
 
 describe('Content API - Permissions', () => {
-  const bindToContentAPI = (action: Utils.Function.Any) => {
+  const bindToContentAPI = (action: any) => {
     Object.assign(action, { [Symbol.for('__type__')]: ['content-api'] });
     return action;
   };
 
   describe('Get Actions Map', () => {
     test('When no API are defined, it should return an empty object', () => {
-      global.strapi = {} as any;
+      global.strapi = strapiMock as any;
 
       const contentAPI = createContentAPI(global.strapi);
       const actionsMap = contentAPI.permissions.getActionsMap();
@@ -19,6 +31,7 @@ describe('Content API - Permissions', () => {
 
     test('When no controller are defined for an API, it should ignore the API', () => {
       global.strapi = {
+        ...strapiMock,
         api: {
           foo: {},
           bar: {},
@@ -36,6 +49,7 @@ describe('Content API - Permissions', () => {
       Object.assign(actionC, { [Symbol.for('__type__')]: ['admin-api'] });
 
       global.strapi = {
+        ...strapiMock,
         api: {
           foo: {
             controllers: {
@@ -59,6 +73,7 @@ describe('Content API - Permissions', () => {
 
     test('Creates and populate a map of actions from APIs and plugins', () => {
       global.strapi = {
+        ...strapiMock,
         api: {
           foo: {
             controllers: {
@@ -130,6 +145,7 @@ describe('Content API - Permissions', () => {
   describe('Register Actions', () => {
     beforeEach(() => {
       global.strapi = {
+        ...strapiMock,
         api: {
           foo: {
             controllers: {
@@ -234,6 +250,7 @@ describe('Content API - Permissions', () => {
   describe('Engine', () => {
     test('Engine warns when registering an unknown action', async () => {
       global.strapi = {
+        ...strapiMock,
         log: {
           debug: jest.fn(),
         },
@@ -251,6 +268,7 @@ describe('Content API - Permissions', () => {
 
     test('Engine filter out invalid action when generating an ability', async () => {
       global.strapi = {
+        ...strapiMock,
         log: {
           debug: jest.fn(),
         },

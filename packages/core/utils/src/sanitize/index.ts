@@ -15,14 +15,19 @@ export interface Options {
   auth?: unknown;
 }
 
-interface Sanitizer {
+export interface Sanitizer {
   (schema: Model): CurriedFunction1<Data, Promise<Data>>;
 }
 export interface SanitizeFunc {
   (data: unknown, schema: Model, options?: Options): Promise<unknown>;
 }
 
-const createContentAPISanitizers = () => {
+export interface Sanitizers {
+  input?: Sanitizer[];
+  output?: Sanitizer[];
+}
+
+const createAPISanitizers = (opts?: { sanitizers: Sanitizers }) => {
   const sanitizeInput: SanitizeFunc = (data: unknown, schema: Model, { auth } = {}) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeInput');
@@ -47,9 +52,7 @@ const createContentAPISanitizers = () => {
     }
 
     // Apply sanitizers from registry if exists
-    strapi.sanitizers
-      .get('content-api.input')
-      .forEach((sanitizer: Sanitizer) => transforms.push(sanitizer(schema)));
+    opts?.sanitizers?.input?.forEach((sanitizer: Sanitizer) => transforms.push(sanitizer(schema)));
 
     return pipeAsync(...transforms)(data as Data);
   };
@@ -73,9 +76,7 @@ const createContentAPISanitizers = () => {
     }
 
     // Apply sanitizers from registry if exists
-    strapi.sanitizers
-      .get('content-api.output')
-      .forEach((sanitizer: Sanitizer) => transforms.push(sanitizer(schema)));
+    opts?.sanitizers?.output?.forEach((sanitizer: Sanitizer) => transforms.push(sanitizer(schema)));
 
     return pipeAsync(...transforms)(data as Data);
   };
@@ -174,10 +175,6 @@ const createContentAPISanitizers = () => {
   };
 };
 
-const contentAPI = createContentAPISanitizers();
+export { createAPISanitizers, sanitizers, visitors };
 
-export default {
-  contentAPI,
-  sanitizers,
-  visitors,
-};
+export type APISanitiers = ReturnType<typeof createAPISanitizers>;
