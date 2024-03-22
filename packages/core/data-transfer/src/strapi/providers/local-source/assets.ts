@@ -5,7 +5,7 @@ import { Duplex, PassThrough, Readable } from 'stream';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
 import type { LoadedStrapi } from '@strapi/types';
 
-import type { IAsset } from '../../../../types';
+import type { IAsset, IFile } from '../../../../types';
 
 const protocolForPath = (filepath: string) => {
   return filepath?.startsWith('https') ? https : http;
@@ -61,6 +61,28 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
       });
   });
 }
+
+async function signFile(file: IFile) {
+  const { provider } = strapi.plugins.upload;
+  const { provider: providerName } = strapi.config.get('plugin.upload') as { provider: string };
+  const isPrivate = await provider.isPrivate();
+  if (file?.provider === providerName && isPrivate) {
+    const signUrl = async (file: IFile) => {
+      const signedUrl = await provider.getSignedUrl(file);
+      file.url = signedUrl.url;
+    };
+
+    // Sign the original file
+    await signUrl(file);
+    // Sign each file format
+    if (file.formats) {
+      for (const format of Object.keys(file.formats)) {
+        await signUrl(file.formats[format]);
+      }
+    }
+  }
+}
+
 /**
  * Generate and consume assets streams in order to stream each file individually
  */
@@ -76,6 +98,9 @@ export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
 
     for await (const file of stream) {
       const isLocalProvider = file.provider === 'local';
+      if (!isLocalProvider) {
+        await signFile(file);
+      }
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
       const stats = await getFileStats(filepath, isLocalProvider);
       const stream = getFileStream(filepath, isLocalProvider);
