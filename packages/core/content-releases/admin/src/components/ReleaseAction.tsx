@@ -8,6 +8,7 @@ import {
   Flex,
   SingleSelect,
   SingleSelectOption,
+  ModalBody,
   ModalFooter,
 } from '@strapi/design-system';
 import {
@@ -17,7 +18,7 @@ import {
   useRBAC,
 } from '@strapi/helper-plugin';
 import { isAxiosError } from 'axios';
-import { type FormikValues, type FormikErrors } from 'formik';
+import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 
 import { CreateManyReleaseActions } from '../../../shared/contracts/release-actions';
@@ -25,6 +26,7 @@ import { PERMISSIONS as releasePermissions } from '../constants';
 import { useCreateManyReleaseActionsMutation, useGetReleasesQuery } from '../services/release';
 
 import { type FormValues, INITIAL_VALUES, RELEASE_ACTION_FORM_SCHEMA } from './CMReleasesContainer';
+import { NoReleases } from './CMReleasesContainer';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
 const getContentPermissions = (subject: string) => {
@@ -155,85 +157,86 @@ const ReleaseAction: BulkActionComponent = ({ ids, model }) => {
         id: 'content-manager-list-view.add-to-release',
         defaultMessage: 'Add to Release',
       }),
-      content: ({
-        values,
-        setFieldValue,
-      }: {
-        values: FormikValues;
-        setFieldValue: (
-          field: string,
-          value: unknown,
-          shouldValidate?: boolean | undefined
-        ) => Promise<void | FormikErrors<FormikValues>>;
-      }) => {
+      content: ({ onClose }) => {
         return (
-          <Flex direction="column" alignItems="stretch" gap={2}>
-            <Box paddingBottom={6}>
-              <SingleSelect
-                required
-                label={formatMessage({
-                  id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
-                  defaultMessage: 'Select a release',
-                })}
-                placeholder={formatMessage({
-                  id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
-                  defaultMessage: 'Select',
-                })}
-                onChange={(value) => setFieldValue('releaseId', value)}
-                value={values.releaseId}
-              >
-                {releases?.map((release) => (
-                  <SingleSelectOption key={release.id} value={release.id}>
-                    {release.name}
-                  </SingleSelectOption>
-                ))}
-              </SingleSelect>
-            </Box>
-            <FieldLabel>
-              {formatMessage({
-                id: 'content-releases.content-manager-list-view.add-to-release.action-type-label',
-                defaultMessage: 'What do you want to do with these entries?',
-              })}
-            </FieldLabel>
-            <ReleaseActionOptions
-              selected={values.type}
-              handleChange={(e) => setFieldValue('type', e.target.value)}
-              name="type"
-            />
-          </Flex>
+          <Formik
+            onSubmit={async (values) => {
+              const data = await handleSubmit(values);
+              if (data) {
+                return onClose();
+              }
+            }}
+            validationSchema={RELEASE_ACTION_FORM_SCHEMA}
+            initialValues={INITIAL_VALUES}
+          >
+            {({ values, setFieldValue }) => (
+              <Form>
+                {releases?.length === 0 ? (
+                  <NoReleases />
+                ) : (
+                  <ModalBody>
+                    <Flex direction="column" alignItems="stretch" gap={2}>
+                      <Box paddingBottom={6}>
+                        <SingleSelect
+                          required
+                          label={formatMessage({
+                            id: 'content-releases.content-manager-list-view.add-to-release.select-label',
+                            defaultMessage: 'Select a release',
+                          })}
+                          placeholder={formatMessage({
+                            id: 'content-releases.content-manager-list-view.add-to-release.select-placeholder',
+                            defaultMessage: 'Select',
+                          })}
+                          onChange={(value) => setFieldValue('releaseId', value)}
+                          value={values.releaseId}
+                        >
+                          {releases?.map((release) => (
+                            <SingleSelectOption key={release.id} value={release.id}>
+                              {release.name}
+                            </SingleSelectOption>
+                          ))}
+                        </SingleSelect>
+                      </Box>
+                      <FieldLabel>
+                        {formatMessage({
+                          id: 'content-releases.content-manager-list-view.add-to-release.action-type-label',
+                          defaultMessage: 'What do you want to do with these entries?',
+                        })}
+                      </FieldLabel>
+                      <ReleaseActionOptions
+                        selected={values.type}
+                        handleChange={(e) => setFieldValue('type', e.target.value)}
+                        name="type"
+                      />
+                    </Flex>
+                  </ModalBody>
+                )}
+                <ModalFooter
+                  startActions={
+                    <Button onClick={onClose} variant="tertiary" name="cancel">
+                      {formatMessage({
+                        id: 'content-releases.content-manager-list-view.add-to-release.cancel-button',
+                        defaultMessage: 'Cancel',
+                      })}
+                    </Button>
+                  }
+                  endActions={
+                    /**
+                     * TODO: Ideally we would use isValid from Formik to disable the button, however currently it always returns true
+                     * for yup.string().required(), even when the value is falsy (including empty string)
+                     */
+                    <Button type="submit" disabled={!values.releaseId} loading={isLoading}>
+                      {formatMessage({
+                        id: 'content-releases.content-manager-list-view.add-to-release.continue-button',
+                        defaultMessage: 'Continue',
+                      })}
+                    </Button>
+                  }
+                />
+              </Form>
+            )}
+          </Formik>
         );
-      },
-      footer: ({ onClose, values }) => {
-        return (
-          <ModalFooter
-            startActions={
-              <Button onClick={onClose} variant="tertiary" name="cancel">
-                {formatMessage({
-                  id: 'content-releases.content-manager-edit-view.add-to-release.cancel-button',
-                  defaultMessage: 'Cancel',
-                })}
-              </Button>
-            }
-            endActions={
-              /**
-               * TODO: Ideally we would use isValid from Formik to disable the button, however currently it always returns true
-               * for yup.string().required(), even when the value is falsy (including empty string)
-               */
-              <Button type="submit" disabled={!values.releaseId} loading={isLoading}>
-                {formatMessage({
-                  id: 'content-releases.content-manager-edit-view.add-to-release.continue-button',
-                  defaultMessage: 'Continue',
-                })}
-              </Button>
-            }
-          />
-        );
-      },
-      hasForm: true,
-      formData: {
-        handleSubmit,
-        formSchema: RELEASE_ACTION_FORM_SCHEMA,
-        initialValues: INITIAL_VALUES,
       },
     },
   };

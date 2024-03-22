@@ -24,7 +24,6 @@ import {
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { AxiosError, AxiosResponse } from 'axios';
-import { Formik, Form, type FormikValues, type FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQueryClient, useMutation } from 'react-query';
 import { useParams } from 'react-router-dom';
@@ -82,24 +81,8 @@ interface NotificationOptions {
 interface ModalOptions {
   type: 'modal';
   title: string;
-  content:
-    | React.ComponentType<{
-        values: FormikValues;
-        setFieldValue: (
-          field: string,
-          value: unknown,
-          shouldValidate?: boolean | undefined
-        ) => Promise<void | FormikErrors<FormikValues>>;
-      }>
-    | React.ReactNode;
-  footer: React.ComponentType<{ onClose: () => void; values?: FormikValues }> | React.ReactNode;
+  content: React.ComponentType<{ onClose: () => void }>;
   onClose?: () => void;
-  hasForm?: boolean;
-  formData?: {
-    formSchema: unknown;
-    handleSubmit: (values: FormikValues) => Promise<unknown> | undefined;
-    initialValues: FormikValues;
-  };
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -293,11 +276,8 @@ const BulkActionModal = ({
   isOpen,
   title,
   onClose,
-  footer: Footer,
   content: Content,
   onModalClose,
-  hasForm,
-  formData,
 }: BulkActionModalProps) => {
   const id = React.useId();
 
@@ -320,45 +300,7 @@ const BulkActionModal = ({
           {title}
         </Typography>
       </ModalHeader>
-      {/* To use form, content has to be of type function to pass params { values, setFieldValue } */}
-      {typeof Content === 'function' ? (
-        <>
-          {hasForm && formData && (
-            <Formik
-              onSubmit={async (values) => {
-                const data = await formData.handleSubmit(values);
-                if (data) {
-                  return handleClose();
-                }
-              }}
-              validationSchema={formData.formSchema}
-              initialValues={formData.initialValues}
-            >
-              {({ values, setFieldValue }) => {
-                return (
-                  <Form>
-                    <ModalBody>
-                      <Content values={values} setFieldValue={setFieldValue} />
-                    </ModalBody>
-                    <>
-                      {typeof Footer === 'function' ? (
-                        <Footer values={values} onClose={handleClose} />
-                      ) : (
-                        Footer
-                      )}
-                    </>
-                  </Form>
-                );
-              }}
-            </Formik>
-          )}
-        </>
-      ) : (
-        <>
-          <ModalBody>{Content}</ModalBody>
-          <>{typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}</>
-        </>
-      )}
+      <Content onClose={handleClose} />
     </ModalLayout>
   );
 };

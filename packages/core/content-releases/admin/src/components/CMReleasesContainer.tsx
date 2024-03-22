@@ -64,7 +64,7 @@ interface AddActionToReleaseModalProps {
   entryId: GetContentTypeEntryReleases.Request['query']['entryId'];
 }
 
-const NoReleases = () => {
+export const NoReleases = () => {
   const { formatMessage } = useIntl();
   return (
     <NoContent
