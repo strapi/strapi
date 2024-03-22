@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import produce from 'immer';
+import { produce } from 'immer';
 import set from 'lodash/set';
 
 import { Page } from '../components/PageHelpers';

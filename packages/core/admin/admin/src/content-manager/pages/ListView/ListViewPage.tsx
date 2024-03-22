@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  Main,
   ActionLayout,
   Button,
   ContentLayout,
@@ -11,7 +10,6 @@ import {
   lightTheme,
   ButtonProps,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useQueryParams, useNotification } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
@@ -27,10 +25,12 @@ import { SearchInput } from '../../../components/SearchInput';
 import { Table } from '../../../components/Table';
 import { HOOKS } from '../../../constants';
 import { BackButton } from '../../../features/BackButton';
+import { useNotification } from '../../../features/Notifications';
 import { useStrapiApp } from '../../../features/StrapiApp';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { useEnterprise } from '../../../hooks/useEnterprise';
+import { useQueryParams } from '../../../hooks/useQueryParams';
 import { getDisplayName } from '../../../utils/users';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
@@ -51,7 +51,7 @@ import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
 import { ViewSettingsMenu } from './components/ViewSettingsMenu';
 
-import type { Documents } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 const REVIEW_WORKFLOW_COLUMNS_CE = null;
@@ -68,8 +68,7 @@ const ListViewPage = () => {
   const { trackUsage } = useTracking();
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
-  useFocusWhenNavigate();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler(getTranslation);
 
   const { collectionType, model, schema } = useDoc();
@@ -119,7 +118,7 @@ const ListViewPage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -231,7 +230,7 @@ const ListViewPage = () => {
 
   const contentTypeTitle = schema?.info.displayName ?? 'Untitled';
 
-  const handleRowClick = (id: Documents.ID) => () => {
+  const handleRowClick = (id: Modules.Documents.ID) => () => {
     trackUsage('willEditEntryFromList');
     navigate({
       pathname: id.toString(),
@@ -240,7 +239,7 @@ const ListViewPage = () => {
   };
 
   return (
-    <Main>
+    <Page.Main>
       <Helmet title={`${contentTypeTitle} | Strapi`} />
       <HeaderLayout
         primaryAction={canCreate ? <CreateButton /> : null}
@@ -400,7 +399,7 @@ const ListViewPage = () => {
           </Pagination.Root>
         </Flex>
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };
 

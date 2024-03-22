@@ -10,12 +10,11 @@ import {
   Loader,
   Typography,
 } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
-import { Entity } from '@strapi/types';
 import { useIntl } from 'react-intl';
 
 import { useField } from '../../../../../../../admin/src/components/Form';
 import { useDoc } from '../../../../../../../admin/src/content-manager/hooks/useDocument';
+import { useNotification } from '../../../../../../../admin/src/features/Notifications';
 import { useAPIErrorHandler } from '../../../../../../../admin/src/hooks/useAPIErrorHandler';
 import { useLicenseLimits } from '../../../../hooks/useLicenseLimits';
 import { LimitsModal } from '../../../../pages/SettingsPage/pages/ReviewWorkflows/components/LimitsModal';
@@ -28,11 +27,13 @@ import { useGetStagesQuery, useUpdateStageMutation } from '../../../../services/
 
 import { STAGE_ATTRIBUTE_NAME } from './constants';
 
+import type { Data } from '@strapi/types';
+
 export const StageSelect = () => {
   const { collectionType, model, id } = useDoc();
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { data, isLoading } = useGetStagesQuery(
     {
       slug: collectionType,
@@ -59,7 +60,7 @@ export const StageSelect = () => {
 
   const [updateStage, { error }] = useUpdateStageMutation();
 
-  const handleChange = async (stageId: Entity.ID) => {
+  const handleChange = async (stageId: Data.ID) => {
     try {
       /**
        * If the current license has a limit:
@@ -107,10 +108,10 @@ export const StageSelect = () => {
 
             toggleNotification({
               type: 'success',
-              message: {
+              message: formatMessage({
                 id: 'content-manager.reviewWorkflows.stage.notification.saved',
                 defaultMessage: 'Review stage updated',
-              },
+              }),
             });
           }
         }

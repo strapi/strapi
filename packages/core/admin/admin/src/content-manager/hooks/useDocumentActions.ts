@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import { SerializedError } from '@reduxjs/toolkit';
-import { useNotification } from '@strapi/helper-plugin';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 
+import { useNotification } from '../../features/Notifications';
 import { TrackingEvent, useTracking } from '../../features/Tracking';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
 import { BaseQueryError } from '../../utils/baseQuery';
@@ -21,7 +22,6 @@ import { getTranslation } from '../utils/translations';
 
 import type { Document } from './useDocument';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import type { MessageDescriptor } from 'react-intl';
 
 const DEFAULT_UNEXPECTED_ERROR_MSG = {
   id: 'notification.error',
@@ -148,7 +148,8 @@ type IUseDocumentActs = ReturnType<UseDocumentActions>;
  * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document-operations} for more information
  */
 const useDocumentActions: UseDocumentActions = () => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
+  const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
@@ -167,7 +168,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
         if ('error' in res) {
           toggleNotification({
-            type: 'warning',
+            type: 'danger',
             message: formatAPIError(res.error),
           });
 
@@ -176,10 +177,10 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: {
+          message: formatMessage({
             id: getTranslation('success.record.delete'),
             defaultMessage: 'Deleted document',
-          },
+          }),
         });
 
         trackUsage('didDeleteEntry', trackerProperty);
@@ -187,8 +188,8 @@ const useDocumentActions: UseDocumentActions = () => {
         return res.data;
       } catch (err) {
         toggleNotification({
-          type: 'warning',
-          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
         });
 
         trackUsage('didNotDeleteEntry', { error: err, ...trackerProperty });
@@ -196,7 +197,7 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [trackUsage, deleteDocument, toggleNotification, formatAPIError]
+    [trackUsage, deleteDocument, toggleNotification, formatMessage, formatAPIError]
   );
 
   const [discardDocument] = useDiscardDocumentMutation();
@@ -211,7 +212,7 @@ const useDocumentActions: UseDocumentActions = () => {
 
         if ('error' in res) {
           toggleNotification({
-            type: 'warning',
+            type: 'danger',
             message: formatAPIError(res.error),
           });
 
@@ -220,23 +221,23 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: {
+          message: formatMessage({
             id: 'content-manager.success.record.discard',
             defaultMessage: 'Changes discarded',
-          },
+          }),
         });
 
         return res.data;
       } catch (err) {
         toggleNotification({
-          type: 'warning',
-          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
         });
 
         throw err;
       }
     },
-    [discardDocument, formatAPIError, toggleNotification]
+    [discardDocument, formatAPIError, formatMessage, toggleNotification]
   );
 
   const [publishDocument] = usePublishDocumentMutation();
@@ -254,7 +255,7 @@ const useDocumentActions: UseDocumentActions = () => {
         });
 
         if ('error' in res) {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
           return { error: res.error };
         }
 
@@ -262,23 +263,23 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: {
+          message: formatMessage({
             id: getTranslation('success.record.publish'),
             defaultMessage: 'Published document',
-          },
+          }),
         });
 
         return res.data;
       } catch (err) {
         toggleNotification({
-          type: 'warning',
-          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
         });
 
         throw err;
       }
     },
-    [trackUsage, publishDocument, toggleNotification, formatAPIError]
+    [trackUsage, publishDocument, toggleNotification, formatMessage, formatAPIError]
   );
 
   const [updateDocument] = useUpdateDocumentMutation();
@@ -296,7 +297,7 @@ const useDocumentActions: UseDocumentActions = () => {
         });
 
         if ('error' in res) {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           trackUsage('didNotEditEntry', { error: res.error, ...trackerProperty });
 
@@ -306,7 +307,10 @@ const useDocumentActions: UseDocumentActions = () => {
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.save'), defaultMessage: 'Saved document' },
+          message: formatMessage({
+            id: getTranslation('success.record.save'),
+            defaultMessage: 'Saved document',
+          }),
         });
 
         return res.data;
@@ -314,14 +318,14 @@ const useDocumentActions: UseDocumentActions = () => {
         trackUsage('didNotEditEntry', { error: err, ...trackerProperty });
 
         toggleNotification({
-          type: 'warning',
-          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
         });
 
         throw err;
       }
     },
-    [trackUsage, updateDocument, toggleNotification, formatAPIError]
+    [trackUsage, updateDocument, toggleNotification, formatMessage, formatAPIError]
   );
 
   const [unpublishDocument] = useUnpublishDocumentMutation();
@@ -341,7 +345,7 @@ const useDocumentActions: UseDocumentActions = () => {
         });
 
         if ('error' in res) {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           return { error: res.error };
         }
@@ -350,23 +354,23 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: {
+          message: formatMessage({
             id: getTranslation('success.record.unpublish'),
             defaultMessage: 'Unpublished document',
-          },
+          }),
         });
 
         return res.data;
       } catch (err) {
         toggleNotification({
-          type: 'warning',
-          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
         });
 
         throw err;
       }
     },
-    [trackUsage, unpublishDocument, toggleNotification, formatAPIError]
+    [trackUsage, unpublishDocument, toggleNotification, formatMessage, formatAPIError]
   );
 
   const [createDocument] = useCreateDocumentMutation();
@@ -380,7 +384,7 @@ const useDocumentActions: UseDocumentActions = () => {
         });
 
         if ('error' in res) {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           trackUsage('didNotCreateEntry', { error: res.error, ...trackerProperty });
 
@@ -391,14 +395,17 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: getTranslation('success.record.save'), defaultMessage: 'Saved document' },
+          message: formatMessage({
+            id: getTranslation('success.record.save'),
+            defaultMessage: 'Saved document',
+          }),
         });
 
         return res.data;
       } catch (err) {
         toggleNotification({
-          type: 'warning',
-          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
         });
 
         trackUsage('didNotCreateEntry', { error: err, ...trackerProperty });
@@ -406,7 +413,7 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [createDocument, formatAPIError, toggleNotification, trackUsage]
+    [createDocument, formatAPIError, formatMessage, toggleNotification, trackUsage]
   );
 
   const [autoCloneDocument] = useAutoCloneDocumentMutation();
@@ -419,30 +426,30 @@ const useDocumentActions: UseDocumentActions = () => {
         });
 
         if ('error' in res) {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           return { error: res.error };
         }
 
         toggleNotification({
           type: 'success',
-          message: {
+          message: formatMessage({
             id: getTranslation('success.record.clone'),
             defaultMessage: 'Cloned document',
-          },
+          }),
         });
 
         return res.data;
       } catch (err) {
         toggleNotification({
-          type: 'warning',
-          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
         });
 
         throw err;
       }
     },
-    [autoCloneDocument, formatAPIError, toggleNotification]
+    [autoCloneDocument, formatAPIError, formatMessage, toggleNotification]
   );
 
   const [cloneDocument] = useCloneDocumentMutation();
@@ -464,7 +471,7 @@ const useDocumentActions: UseDocumentActions = () => {
         });
 
         if ('error' in res) {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
           trackUsage('didNotCreateEntry', { error: res.error, ...trackerProperty });
 
@@ -474,17 +481,17 @@ const useDocumentActions: UseDocumentActions = () => {
         trackUsage('didCreateEntry', trackerProperty);
         toggleNotification({
           type: 'success',
-          message: {
+          message: formatMessage({
             id: getTranslation('success.record.clone'),
             defaultMessage: 'Cloned document',
-          },
+          }),
         });
 
         return res.data;
       } catch (err) {
         toggleNotification({
-          type: 'warning',
-          message: DEFAULT_UNEXPECTED_ERROR_MSG,
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
         });
 
         trackUsage('didNotCreateEntry', { error: err, ...trackerProperty });
@@ -492,7 +499,7 @@ const useDocumentActions: UseDocumentActions = () => {
         throw err;
       }
     },
-    [cloneDocument, trackUsage, toggleNotification, formatAPIError]
+    [cloneDocument, trackUsage, toggleNotification, formatMessage, formatAPIError]
   );
 
   const [getDoc] = useLazyGetDocumentQuery();

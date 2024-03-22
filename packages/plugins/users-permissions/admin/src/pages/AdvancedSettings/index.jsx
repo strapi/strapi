@@ -8,18 +8,19 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
-  Main,
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import {
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { useAPIErrorHandler, Page, Form, InputRenderer } from '@strapi/strapi/admin';
+import {
+  useAPIErrorHandler,
+  Page,
+  Form,
+  InputRenderer,
+  useNotification,
+  useFetchClient,
+  useRBAC,
+} from '@strapi/strapi/admin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
@@ -38,13 +39,11 @@ const ProtectedAdvancedSettingsPage = () => (
 
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingForPermissions,
@@ -69,8 +68,11 @@ const AdvancedSettingsPage = () => {
       },
       onError() {
         toggleNotification({
-          type: 'warning',
-          message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
+          type: 'danger',
+          message: formatMessage({
+            id: getTrad('notification.error'),
+            defaultMessage: 'An error occured',
+          }),
         });
       },
     }
@@ -84,12 +86,15 @@ const AdvancedSettingsPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('notification.success.saved'), defaultMessage: 'Saved' },
+        message: formatMessage({
+          id: getTrad('notification.success.saved'),
+          defaultMessage: 'Saved',
+        }),
       });
     },
     onError(error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     },
@@ -112,7 +117,7 @@ const AdvancedSettingsPage = () => {
   }
 
   return (
-    <Main aria-busy={isSubmittingForm}>
+    <Page.Main aria-busy={isSubmittingForm}>
       <Helmet
         title={formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -207,7 +212,7 @@ const AdvancedSettingsPage = () => {
           );
         }}
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 

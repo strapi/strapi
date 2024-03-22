@@ -1,6 +1,6 @@
-import type { Container as ContainerContract } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export class Container implements ContainerContract {
+export class Container implements Core.Container {
   private registerMap = new Map<string, unknown>();
 
   private serviceMap = new Map();
@@ -15,7 +15,7 @@ export class Container implements ContainerContract {
   }
 
   get(name: string, args?: unknown) {
-    // TODO: handle singleton vs reinstanciation everytime
+    // TODO: handle singleton vs instantiation everytime
     if (this.serviceMap.has(name)) {
       return this.serviceMap.get(name);
     }

@@ -59,7 +59,7 @@ const transform: Transform = (file, api) => {
   }
 
   const { j } = api;
-  const root = j(file.source);
+  const root = j.withParser('tsx')(file.source);
 
   root
     .find(j.ArrowFunctionExpression)

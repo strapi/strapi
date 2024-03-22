@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
+import { useQueryParams } from '@strapi/admin/strapi-admin';
 import { Loader } from '@strapi/design-system';
 import { CrumbSimpleMenu, MenuItem } from '@strapi/design-system/v2';
-import { useQueryParams } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';

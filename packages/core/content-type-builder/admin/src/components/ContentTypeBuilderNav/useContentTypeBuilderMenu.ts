@@ -1,8 +1,7 @@
 import { useState, MouseEvent } from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
+import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import { useCollator, useFilter } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 
@@ -11,7 +10,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 export const useContentTypeBuilderMenu = () => {
   const {
@@ -23,7 +22,8 @@ export const useContentTypeBuilderMenu = () => {
     modifiedData,
     initialData,
   } = useDataManager();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
+  const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const [search, setSearch] = useState('');
   const { onOpenModalCreateSchema, onOpenModalEditCategory } = useFormModalNavigation();
@@ -40,7 +40,7 @@ export const useContentTypeBuilderMenu = () => {
   const canOpenModalCreateCTorComponent =
     !Object.keys(contentTypes).some((ct) => contentTypes[ct].isTemporary === true) &&
     !Object.keys(components).some(
-      (component) => components[component as UID.Component].isTemporary === true
+      (component) => components[component as Internal.UID.Component].isTemporary === true
     ) &&
     isEqual(modifiedData, initialData);
 
@@ -98,10 +98,10 @@ export const useContentTypeBuilderMenu = () => {
   const toggleNotificationCannotCreateSchema = () => {
     toggleNotification({
       type: 'info',
-      message: {
+      message: formatMessage({
         id: getTrad('notification.info.creating.notSaved'),
         defaultMessage: 'Please save your work before creating a new collection type or component',
-      },
+      }),
     });
   };
 

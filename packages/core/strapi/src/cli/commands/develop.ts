@@ -4,7 +4,7 @@ import type { StrapiCommand } from '../types';
 import { develop as nodeDevelop, DevelopOptions } from '../../node/develop';
 import { handleUnexpectedError } from '../../node/core/errors';
 
-interface DevelopCLIOptions extends DevelopOptions {}
+type DevelopCLIOptions = DevelopOptions;
 
 const action = async (options: DevelopCLIOptions) => {
   try {

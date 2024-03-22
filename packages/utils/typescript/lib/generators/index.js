@@ -100,7 +100,7 @@ const generate = async (config = {}) => {
 
     try {
       const outPath = await saveDefinitionToFileSystem(registryPwd, filename, report.output);
-      const relativeOutPath = path.relative(__dirname, outPath);
+      const relativeOutPath = path.relative(process.cwd(), outPath);
 
       artifactFsTimer.end();
 

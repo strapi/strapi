@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { Permission, hasPermissions } from '@strapi/helper-plugin';
 import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 import { useSelector } from 'react-redux';
 
+import { useAuth, type Permission } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 
@@ -20,7 +20,8 @@ export interface Menu {
   isLoading: boolean;
 }
 
-const useMenu = (shouldUpdateStrapi: boolean, userPermissions: Permission[]) => {
+const useMenu = (shouldUpdateStrapi: boolean) => {
+  const checkUserHasPermissions = useAuth('useMenu', (state) => state.checkUserHasPermissions);
   const menu = useStrapiApp('useMenu', (state) => state.menu);
   const permissions = useSelector(selectAdminPermissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
@@ -63,12 +64,15 @@ const useMenu = (shouldUpdateStrapi: boolean, userPermissions: Permission[]) => 
 
   React.useEffect(() => {
     async function applyMenuPermissions() {
-      const authorizedPluginSectionLinks = await getPluginSectionLinks(userPermissions, menu);
+      const authorizedPluginSectionLinks = await getPluginSectionLinks(
+        menu,
+        checkUserHasPermissions
+      );
 
       const authorizedGeneralSectionLinks = await getGeneralLinks(
-        userPermissions,
         generalSectionLinksRef.current,
-        shouldUpdateStrapi
+        shouldUpdateStrapi,
+        checkUserHasPermissions
       );
 
       setMenuWithUserPermissions((state) => ({
@@ -83,10 +87,10 @@ const useMenu = (shouldUpdateStrapi: boolean, userPermissions: Permission[]) => 
   }, [
     setMenuWithUserPermissions,
     generalSectionLinksRef,
-    userPermissions,
     menu,
     permissions,
     shouldUpdateStrapi,
+    checkUserHasPermissions,
   ]);
 
   return menuWithUserPermissions;
@@ -97,12 +101,12 @@ const useMenu = (shouldUpdateStrapi: boolean, userPermissions: Permission[]) => 
  * -----------------------------------------------------------------------------------------------*/
 
 const getGeneralLinks = async (
-  userPermissions: Permission[],
   generalSectionRawLinks: MenuItem[],
-  shouldUpdateStrapi: boolean = false
+  shouldUpdateStrapi: boolean = false,
+  checkUserHasPermissions: (permissions: Permission[]) => Promise<boolean>
 ) => {
   const generalSectionLinksPermissions = await Promise.all(
-    generalSectionRawLinks.map(({ permissions }) => hasPermissions(userPermissions, permissions))
+    generalSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
   const authorizedGeneralSectionLinks = generalSectionRawLinks.filter(
@@ -125,11 +129,11 @@ const getGeneralLinks = async (
 };
 
 const getPluginSectionLinks = async (
-  userPermissions: Permission[],
-  pluginsSectionRawLinks: MenuItem[]
+  pluginsSectionRawLinks: MenuItem[],
+  checkUserHasPermissions: (permissions: Permission[]) => Promise<boolean>
 ) => {
   const pluginSectionLinksPermissions = await Promise.all(
-    pluginsSectionRawLinks.map(({ permissions }) => hasPermissions(userPermissions, permissions))
+    pluginsSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
   const authorizedPluginSectionLinks = pluginsSectionRawLinks.filter(

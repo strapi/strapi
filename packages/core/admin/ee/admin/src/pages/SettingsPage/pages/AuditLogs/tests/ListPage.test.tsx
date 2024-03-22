@@ -4,11 +4,6 @@ import { rest } from 'msw';
 
 import { ListPage } from '../ListPage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useFocusWhenNavigate: jest.fn(),
-}));
-
 describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();

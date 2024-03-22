@@ -1,7 +1,7 @@
 import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
-import type { Attribute } from '@strapi/types';
+import type { Schema as SchemaUtils } from '@strapi/types';
 
-const checkIfAttributeIsDisplayable = (attribute: Attribute.Any) => {
+const checkIfAttributeIsDisplayable = (attribute: SchemaUtils.Attribute.AnyAttribute) => {
   const { type } = attribute;
 
   if (type === 'relation') {
@@ -13,7 +13,7 @@ const checkIfAttributeIsDisplayable = (attribute: Attribute.Any) => {
 
 interface MainField {
   name: string;
-  type: Attribute.Kind | 'custom';
+  type: SchemaUtils.Attribute.Kind | 'custom';
 }
 
 /**
@@ -23,7 +23,7 @@ interface MainField {
  * of the field, we assume it's a string #sensible-defaults
  */
 const getMainField = (
-  attribute: Attribute.Any,
+  attribute: SchemaUtils.Attribute.AnyAttribute,
   mainFieldName: string | undefined,
   { schemas, components }: { schemas: Schema[]; components: ComponentsDictionary }
 ): MainField | undefined => {

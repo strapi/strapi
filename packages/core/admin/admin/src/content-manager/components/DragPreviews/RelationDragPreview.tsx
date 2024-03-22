@@ -1,6 +1,5 @@
 import { Box, Flex, Icon, IconButton, Typography } from '@strapi/design-system';
 import { Cross, Drag } from '@strapi/icons';
-import { Entity } from '@strapi/types';
 
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import {
@@ -9,10 +8,12 @@ import {
   FlexWrapper,
 } from '../../pages/EditView/components/FormInputs/Relations';
 
+import type { Data } from '@strapi/types';
+
 interface RelationDragPreviewProps {
   status?: string;
   displayedValue: string;
-  id: Entity.ID;
+  id: Data.ID;
   index: number;
   width: number;
 }

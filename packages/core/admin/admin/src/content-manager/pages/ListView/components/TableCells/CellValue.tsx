@@ -2,10 +2,10 @@ import parseISO from 'date-fns/parseISO';
 import toString from 'lodash/toString';
 import { useIntl } from 'react-intl';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface CellValueProps {
-  type: Attribute.Kind | 'custom';
+  type: Schema.Attribute.Kind | 'custom';
   value: any;
 }
 

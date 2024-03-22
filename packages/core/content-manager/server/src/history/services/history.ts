@@ -1,14 +1,15 @@
-import type { LoadedStrapi, Documents } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
 
-import { HISTORY_VERSION_UID } from '../constants';
+import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
+import { getSchemaAttributesDiff } from './utils';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
-const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
+const createHistoryService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const state: {
     deleteExpiredJob: ReturnType<typeof scheduleJob> | null;
     isInitialized: boolean;
@@ -19,7 +20,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
   const query = strapi.db.query(HISTORY_VERSION_UID);
 
-  const getRetentionDays = (strapi: LoadedStrapi) => {
+  const getRetentionDays = (strapi: Core.LoadedStrapi) => {
     const licenseRetentionDays =
       strapi.ee.features.get('cms-content-history')?.options.retentionDays;
     const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
@@ -51,7 +52,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
   const getVersionStatus = async (
     contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
-    document: Documents.AnyDocument | null
+    document: Modules.Documents.AnyDocument | null
   ) => {
     const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
     const meta = await documentMetadataService.getMetadata(contentTypeUid, document);
@@ -105,24 +106,13 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
           });
         const status = await getVersionStatus(contentTypeUid, document);
 
-        const fieldsToIgnore = [
-          'createdAt',
-          'updatedAt',
-          'publishedAt',
-          'createdBy',
-          'updatedBy',
-          'locale',
-          'strapi_stage',
-          'strapi_assignee',
-        ];
-
         // Prevent creating a history version for an action that wasn't actually executed
         await strapi.db.transaction(async ({ onCommit }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
-              data: omit(fieldsToIgnore, document),
-              schema: omit(fieldsToIgnore, strapi.contentType(contentTypeUid).attributes),
+              data: omit(FIELDS_TO_IGNORE, document),
+              schema: omit(FIELDS_TO_IGNORE, strapi.contentType(contentTypeUid).attributes),
               relatedDocumentId: documentContext.documentId,
               locale,
               status,
@@ -184,7 +174,20 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         getLocaleDictionary(),
       ]);
 
-      const sanitizedResults = results.map((result) => ({
+      const versionsWithMeta = results.map((version) => {
+        const { added, removed } = getSchemaAttributesDiff(
+          version.schema,
+          strapi.getModel(params.contentType).attributes
+        );
+        const hasSchemaDiff = Object.keys(added).length > 0 || Object.keys(removed).length > 0;
+
+        return {
+          ...version,
+          ...(hasSchemaDiff ? { meta: { unknownAttributes: { added, removed } } } : {}),
+        };
+      });
+
+      const sanitizedResults = versionsWithMeta.map((result) => ({
         ...result,
         locale: result.locale ? localeDictionary[result.locale] : null,
         createdBy: result.createdBy

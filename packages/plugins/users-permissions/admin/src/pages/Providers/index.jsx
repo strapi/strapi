@@ -6,7 +6,6 @@ import {
   HeaderLayout,
   IconButton,
   Layout,
-  Main,
   Table,
   Tbody,
   Td,
@@ -17,16 +16,14 @@ import {
   VisuallyHidden,
   useCollator,
 } from '@strapi/design-system';
-import {
-  onRowClick,
-  stopPropagation,
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { Page, useAPIErrorHandler } from '@strapi/strapi/admin';
+import {
+  Page,
+  useAPIErrorHandler,
+  useNotification,
+  useFetchClient,
+  useRBAC,
+} from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -44,14 +41,12 @@ export const ProvidersPage = () => {
   const { trackUsage } = useTracking();
   const [isOpen, setIsOpen] = React.useState(false);
   const [providerToEditName, setProviderToEditName] = React.useState(null);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
-
-  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingPermissions,
@@ -76,7 +71,7 @@ export const ProvidersPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('notification.success.submit') },
+        message: formatMessage({ id: getTrad('notification.success.submit') }),
       });
 
       trackUsage('didEditAuthenticationProvider');
@@ -85,7 +80,7 @@ export const ProvidersPage = () => {
     },
     onError(error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     },
@@ -165,7 +160,7 @@ export const ProvidersPage = () => {
           }
         )}
       />
-      <Main>
+      <Page.Main>
         <HeaderLayout
           title={formatMessage({
             id: getTrad('HeaderNav.link.providers'),
@@ -202,10 +197,7 @@ export const ProvidersPage = () => {
               {providers.map((provider) => (
                 <Tr
                   key={provider.name}
-                  {...onRowClick({
-                    fn: () => handleClickEdit(provider),
-                    condition: canUpdate,
-                  })}
+                  onClick={() => (canUpdate ? handleClickEdit(provider) : undefined)}
                 >
                   <Td width="45%">
                     <Typography fontWeight="semiBold" textColor="neutral800">
@@ -228,7 +220,7 @@ export const ProvidersPage = () => {
                           })}
                     </Typography>
                   </Td>
-                  <Td {...stopPropagation}>
+                  <Td onClick={(e) => e.stopPropagation()}>
                     {canUpdate && (
                       <IconButton
                         onClick={() => handleClickEdit(provider)}
@@ -243,7 +235,7 @@ export const ProvidersPage = () => {
             </Tbody>
           </Table>
         </ContentLayout>
-      </Main>
+      </Page.Main>
       <FormModal
         initialData={data[providerToEditName]}
         isOpen={isOpen}

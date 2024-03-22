@@ -1,5 +1,6 @@
 import { ENTITY_STAGE_ATTRIBUTE } from '../../constants/workflows';
 import stages from '../workflows/stages';
+
 import '@strapi/types';
 
 describe('Stages', () => {

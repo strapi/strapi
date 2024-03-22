@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/design-system';
-import produce from 'immer';
+import { produce } from 'immer';
 import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import has from 'lodash/has';

@@ -1,22 +1,23 @@
-import { Common } from '@strapi/types';
+import { UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { LongHandDocument } from './types';
 
-export const isLocalizedContentType = (uid: Common.UID.Schema) => {
+export const isLocalizedContentType = (uid: UID.Schema) => {
   const model = strapi.getModel(uid);
   return strapi.plugin('i18n').service('content-types').isLocalizedContentType(model);
 };
 
 export const getDefaultLocale = () => {
   // TODO: V5 make this more performant
-  return strapi.plugin('i18n').service('locales').getDefaultLocale();
+  // return strapi.plugin('i18n').service('locales').getDefaultLocale();
+  return 'en';
 };
 
 export const getRelationTargetLocale = (
   relation: LongHandDocument,
   opts: {
-    targetUid: Common.UID.Schema;
-    sourceUid: Common.UID.Schema;
+    targetUid: UID.Schema;
+    sourceUid: UID.Schema;
     sourceLocale?: string | null;
   }
 ) => {

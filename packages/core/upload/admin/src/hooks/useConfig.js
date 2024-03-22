@@ -1,5 +1,5 @@
-import { useTracking } from '@strapi/admin/strapi-admin';
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useTracking, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
@@ -9,7 +9,8 @@ const queryKey = [pluginId, 'configuration'];
 
 export const useConfig = () => {
   const { trackUsage } = useTracking();
-  const toggleNotification = useNotification();
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
   const { get, put } = useFetchClient();
 
   const config = useQuery(
@@ -22,8 +23,8 @@ export const useConfig = () => {
     {
       onError() {
         return toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
+          type: 'danger',
+          message: formatMessage({ id: 'notification.error' }),
         });
       },
       /**
@@ -44,8 +45,8 @@ export const useConfig = () => {
       },
       onError() {
         return toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
+          type: 'danger',
+          message: formatMessage({ id: 'notification.error' }),
         });
       },
     }

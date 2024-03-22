@@ -1,23 +1,26 @@
 import { contentTypes as contentTypeUtils } from '@strapi/utils';
-import type { CoreApi, Schema } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 import { createSingleTypeService } from './single-type';
 import { createCollectionTypeService } from './collection-type';
 
-const isSingleType = (contentType: Schema.ContentType): contentType is Schema.SingleType =>
-  contentTypeUtils.isSingleType(contentType);
+const isSingleType = (
+  contentType: Struct.ContentTypeSchema
+): contentType is Struct.SingleTypeSchema => contentTypeUtils.isSingleType(contentType);
 
 /**
  * Returns a core api for the provided model
  */
-function createService<T extends Schema.SingleType | Schema.CollectionType>(opts: {
+function createService<T extends Struct.SingleTypeSchema | Struct.CollectionTypeSchema>(opts: {
   contentType: T;
-}): T extends Schema.SingleType ? CoreApi.Service.SingleType : CoreApi.Service.CollectionType;
+}): T extends Struct.SingleTypeSchema
+  ? Core.CoreAPI.Service.SingleType
+  : Core.CoreAPI.Service.CollectionType;
 function createService({
   contentType,
 }: {
-  contentType: Schema.CollectionType | Schema.SingleType;
-}): CoreApi.Service.SingleType | CoreApi.Service.CollectionType {
+  contentType: Struct.CollectionTypeSchema | Struct.SingleTypeSchema;
+}): Core.CoreAPI.Service.SingleType | Core.CoreAPI.Service.CollectionType {
   if (isSingleType(contentType)) {
     return createSingleTypeService(contentType);
   }

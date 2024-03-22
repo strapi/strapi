@@ -1,4 +1,4 @@
-import { LoadedStrapi } from '@strapi/types';
+import { Core } from '@strapi/types';
 import { createIdMap } from '../id-map';
 
 const ARTICLE_UID = 'api::article.article';
@@ -27,7 +27,7 @@ describe('Extract document ids from relation data', () => {
       db: {
         query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
       },
-    } as unknown as LoadedStrapi;
+    } as unknown as Core.LoadedStrapi;
   });
 
   it('Load single document id', async () => {

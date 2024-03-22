@@ -2,7 +2,7 @@
 import _ from 'lodash';
 import { defaults } from 'lodash/fp';
 import { arrays, convertQueryParams, errors } from '@strapi/utils';
-import { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 import { createUser, hasSuperAdminRole } from '../domain/user';
 import type {
   AdminUser,
@@ -70,7 +70,7 @@ const create = async (
  * @param attributes A partial user object
  */
 const updateById = async (
-  id: Entity.ID,
+  id: Data.ID,
   attributes: Partial<AdminUserUpdatePayload>
 ): Promise<AdminUser> => {
   // Check at least one super admin remains
@@ -152,7 +152,7 @@ const resetPasswordByEmail = async (email: string, password: string) => {
  * Check if a user is the last super admin
  * @param userId user's id to look for
  */
-const isLastSuperAdminUser = async (userId: Entity.ID): Promise<boolean> => {
+const isLastSuperAdminUser = async (userId: Data.ID): Promise<boolean> => {
   const user = (await findOne(userId)) as AdminUser | null;
   if (!user) return false;
 
@@ -219,7 +219,7 @@ const register = async ({
 /**
  * Find one user
  */
-const findOne = async (id: Entity.ID, populate = ['roles']) => {
+const findOne = async (id: Data.ID, populate = ['roles']) => {
   return strapi.db.query('admin::user').findOne({ where: { id }, populate });
 };
 
@@ -251,7 +251,7 @@ const findPage = async (params = {}): Promise<unknown> => {
 /** Delete a user
  * @param id id of the user to delete
  */
-const deleteById = async (id: Entity.ID): Promise<AdminUser | null> => {
+const deleteById = async (id: Data.ID): Promise<AdminUser | null> => {
   // Check at least one super admin remains
   const userToDelete: AdminUser | null = await strapi.db.query('admin::user').findOne({
     where: { id },
@@ -337,7 +337,7 @@ const count = async (where = {}): Promise<number> => {
 /**
  * Assign some roles to several users
  */
-const assignARoleToAll = async (roleId: Entity.ID): Promise<void> => {
+const assignARoleToAll = async (roleId: Data.ID): Promise<void> => {
   const users = await strapi.db.query('admin::user').findMany({
     select: ['id'],
     where: {

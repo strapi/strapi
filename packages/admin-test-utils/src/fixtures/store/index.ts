@@ -19,7 +19,6 @@ const reducers = {
     setModifiedDataOnly: false,
     status: 'resolved',
   })),
-  rbacProvider: jest.fn(() => ({ allPermissions: null, collectionTypesRelatedPermissions: {} })),
 };
 
 const store = configureStore({

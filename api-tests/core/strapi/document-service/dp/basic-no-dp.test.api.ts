@@ -1,4 +1,4 @@
-import { LoadedStrapi, Common } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { testInTransaction as wrapInTransaction } from '../../../../utils';
 
 // Wrap "it" with a transaction
@@ -22,13 +22,13 @@ const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 
-let strapi: LoadedStrapi;
+let strapi: Core.LoadedStrapi;
 let shopDocuments;
 let shopsDB;
 let rq;
 const builder = createTestBuilder();
 
-const SHOP_UID = 'api::shop.shop' as Common.UID.ContentType;
+const SHOP_UID = 'api::shop.shop' as UID.ContentType;
 
 const shopModel = {
   attributes: {

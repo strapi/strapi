@@ -1,21 +1,21 @@
 import { has } from 'lodash/fp';
-import type { Common, Schema } from '@strapi/types';
+import type { Struct, UID } from '@strapi/types';
 
 const componentsRegistry = () => {
-  const components: Record<Common.UID.Component, Schema.Component> = {};
+  const components: Record<UID.Component, Struct.ComponentSchema> = {};
 
   return {
     /**
      * Returns this list of registered components uids
      */
-    keys(): Common.UID.Component[] {
-      return Object.keys(components) as Common.UID.Component[];
+    keys(): UID.Component[] {
+      return Object.keys(components) as UID.Component[];
     },
 
     /**
      * Returns the instance of a component. Instantiate the component if not already done
      */
-    get(uid: Common.UID.Component) {
+    get(uid: UID.Component) {
       return components[uid];
     },
 
@@ -29,7 +29,7 @@ const componentsRegistry = () => {
     /**
      * Registers a component
      */
-    set(uid: Common.UID.Component, component: Schema.Component) {
+    set(uid: UID.Component, component: Struct.ComponentSchema) {
       if (has(uid, components)) {
         throw new Error(`Component ${uid} has already been registered.`);
       }
@@ -42,8 +42,8 @@ const componentsRegistry = () => {
     /**
      * Registers a map of components for a specific namespace
      */
-    add(newComponents: Record<Common.UID.Component, Schema.Component>) {
-      for (const uid of Object.keys(newComponents) as Common.UID.Component[]) {
+    add(newComponents: Record<UID.Component, Struct.ComponentSchema>) {
+      for (const uid of Object.keys(newComponents) as UID.Component[]) {
         this.set(uid, newComponents[uid]);
       }
     },

@@ -6,16 +6,13 @@
 
 import * as React from 'react';
 
-import {
-  TranslationMessage,
-  getYupInnerErrors,
-  useNotification,
-  useQueryParams,
-} from '@strapi/helper-plugin';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
+import { useNotification } from '../../features/Notifications';
 import { useAPIErrorHandler } from '../../hooks/useAPIErrorHandler';
+import { useQueryParams } from '../../hooks/useQueryParams';
+import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 import { SINGLE_TYPES } from '../constants/collections';
 import { useGetDocumentQuery } from '../services/documents';
 import { buildValidParams } from '../utils/api';
@@ -24,6 +21,7 @@ import { createYupSchema } from '../utils/validation';
 import { useContentTypeSchema, ComponentsDictionary } from './useContentTypeSchema';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
 interface UseDocumentArgs {
   collectionType: string;
@@ -54,7 +52,9 @@ type UseDocument = (
    * This is the schema of the content type, it is not the same as the layout.
    */
   schema?: Schema;
-  validate: (document: Document) => null | Record<string, TranslationMessage>;
+  validate: (
+    document: Document
+  ) => null | Record<string, MessageDescriptor & { values?: Record<string, PrimitiveType> }>;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ type UseDocument = (
  * @see {@link https://contributor.strapi.io/docs/core/content-manager/hooks/use-document} for more information
  */
 const useDocument: UseDocument = (args, opts) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const {
@@ -104,7 +104,7 @@ const useDocument: UseDocument = (args, opts) => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }

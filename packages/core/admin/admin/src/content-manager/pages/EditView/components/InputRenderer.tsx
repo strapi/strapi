@@ -19,7 +19,7 @@ import { Wysiwyg } from './FormInputs/Wysiwyg/Field';
 
 import type { DistributiveOmit } from '../../../../types/utils';
 import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 
@@ -150,11 +150,11 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
 };
 
 const attributeHasCustomFieldProperty = (
-  attribute: Attribute.Any
-): attribute is Attribute.Any & Attribute.CustomField<string> =>
+  attribute: Schema.Attribute.AnyAttribute
+): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.CustomField<string> =>
   'customField' in attribute && typeof attribute.customField === 'string';
 
-const useFieldHint = (hint: ReactNode = undefined, attribute: Attribute.Any) => {
+const useFieldHint = (hint: ReactNode = undefined, attribute: Schema.Attribute.AnyAttribute) => {
   const { formatMessage } = useIntl();
 
   const { maximum, minimum } = getMinMax(attribute);
@@ -199,7 +199,7 @@ const useFieldHint = (hint: ReactNode = undefined, attribute: Attribute.Any) => 
   );
 };
 
-const getMinMax = (attribute: Attribute.Any) => {
+const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
   if ('min' in attribute || 'max' in attribute) {
     return {
       maximum: !Number.isNaN(Number(attribute.max)) ? Number(attribute.max) : undefined,

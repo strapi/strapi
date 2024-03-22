@@ -12,7 +12,7 @@ const getDisplayName = (
     email,
   }: Pick<SanitizedAdminUser, 'firstname' | 'lastname' | 'username' | 'email'> = {},
   formatMessage: IntlShape['formatMessage']
-) => {
+): string => {
   if (username) {
     return username;
   }
@@ -31,7 +31,7 @@ const getDisplayName = (
     ).trim();
   }
 
-  return email;
+  return email ?? '';
 };
 
 export { getDisplayName };

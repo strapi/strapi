@@ -4,7 +4,7 @@ jest.mock('../review-workflows/workflows/content-types', () => {
   }));
 });
 
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import workflowsServiceFactory from '../review-workflows/workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE, STAGE_MODEL_UID } from '../../constants/workflows';
 import workflowCT from '../../content-types/workflow';
@@ -82,7 +82,7 @@ const strapiMock = {
     query: () => dbMock,
     transaction: jest.fn((func) => func()),
   },
-} as unknown as LoadedStrapi;
+} as unknown as Core.LoadedStrapi;
 
 const ctMap: Record<string, any> = {
   [WORKFLOW_MODEL_UID]: workflowCT.schema,

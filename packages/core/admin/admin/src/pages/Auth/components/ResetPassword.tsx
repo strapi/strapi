@@ -1,8 +1,9 @@
+import * as React from 'react';
+
 import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useQuery } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate, Navigate } from 'react-router-dom';
+import { NavLink, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { ResetPassword } from '../../../../../shared/contracts/authentication';
@@ -65,7 +66,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
 const ResetPassword = () => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const query = useQuery();
+  const { search: searchString } = useLocation();
+  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const setToken = useAuth('ResetPassword', (state) => state.setToken);

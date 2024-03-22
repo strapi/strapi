@@ -11,7 +11,6 @@ import {
   HeaderLayout,
   IconButton,
   Layout,
-  Main,
   Switch,
   Table,
   Tbody,
@@ -24,7 +23,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useFocusWhenNavigate, useNotification, useRBAC } from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -34,7 +32,9 @@ import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../hooks/useRBAC';
 
 import { useWebhooks } from './hooks/useWebhooks';
 
@@ -48,8 +48,7 @@ const ListPage = () => {
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.webhooks);
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
-  useFocusWhenNavigate();
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
 
   const {
@@ -69,7 +68,7 @@ const ListPage = () => {
   React.useEffect(() => {
     if (webhooksError) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(webhooksError),
       });
 
@@ -91,17 +90,17 @@ const ListPage = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     }
   };
@@ -114,7 +113,7 @@ const ListPage = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -124,11 +123,11 @@ const ListPage = () => {
       setWebhooksToDelete([]);
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     } finally {
       setShowModal(false);
@@ -163,7 +162,7 @@ const ListPage = () => {
           }
         )}
       />
-      <Main aria-busy={isLoading}>
+      <Page.Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
           subtitle={formatMessage({
@@ -399,7 +398,7 @@ const ListPage = () => {
             />
           )}
         </ContentLayout>
-      </Main>
+      </Page.Main>
       <ConfirmDialog
         isOpen={showModal}
         onClose={() => setShowModal((prev) => !prev)}

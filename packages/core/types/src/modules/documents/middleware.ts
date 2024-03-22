@@ -1,12 +1,12 @@
 // Utility type to reuse Param definition in MiddlewareContext
-import type { Common } from '../..';
+import type * as UID from '../../uid';
 import type { ServiceInstance } from './service-instance';
 
 export interface Context<
   TAction extends keyof ServiceInstance = keyof ServiceInstance,
   TArgs = Parameters<ServiceInstance[TAction]>
 > {
-  uid: Common.UID.ContentType;
+  uid: UID.ContentType;
   action: TAction;
   args: TArgs;
 }

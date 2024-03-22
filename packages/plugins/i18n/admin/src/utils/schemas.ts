@@ -2,7 +2,7 @@ import omit from 'lodash/omit';
 
 import { LOCALIZED_FIELDS, doesPluginOptionsHaveI18nLocalized } from './fields';
 
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * mutateCTBContentTypeSchema

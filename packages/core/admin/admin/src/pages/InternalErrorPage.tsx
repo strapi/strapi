@@ -5,24 +5,17 @@
  *
  */
 
-import {
-  ContentLayout,
-  EmptyStateLayout,
-  HeaderLayout,
-  LinkButton,
-  Main,
-} from '@strapi/design-system';
-import { useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
 import { ArrowRight, EmptyPictures } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+
+import { Page } from '../components/PageHelpers';
 
 export const InternalErrorPage = () => {
   const { formatMessage } = useIntl();
 
-  useFocusWhenNavigate();
-
   return (
-    <Main labelledBy="title">
+    <Page.Main labelledBy="title">
       <HeaderLayout
         id="title"
         title={formatMessage({
@@ -49,6 +42,6 @@ export const InternalErrorPage = () => {
           shadow="tableShadow"
         />
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };

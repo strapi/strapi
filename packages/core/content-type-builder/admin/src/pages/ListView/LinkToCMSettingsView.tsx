@@ -1,7 +1,7 @@
 import { memo } from 'react';
 
+import { type Permission, useRBAC } from '@strapi/admin/strapi-admin';
 import { Button } from '@strapi/design-system';
-import { type Permission, useRBAC } from '@strapi/helper-plugin';
 import { Layer } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';

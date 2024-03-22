@@ -1,4 +1,4 @@
-import type { Entity as StrapiEntity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 // @TODO: Probably user & role types should be imported from a common package
 interface RoleInfo extends Omit<Entity, 'createdAt' | 'updatedAt'> {
@@ -20,7 +20,7 @@ export interface UserInfo extends Entity {
 }
 
 export interface Entity {
-  id: StrapiEntity.ID;
+  id: Data.ID;
   createdAt: string;
   updatedAt: string;
 }

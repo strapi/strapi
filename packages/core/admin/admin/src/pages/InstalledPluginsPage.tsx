@@ -4,7 +4,6 @@ import {
   ContentLayout,
   HeaderLayout,
   Layout,
-  Main,
   Table,
   Tbody,
   Td,
@@ -14,12 +13,12 @@ import {
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import { useFocusWhenNavigate, useNotification } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
 import { Page } from '../components/PageHelpers';
+import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../selectors';
 import { useGetPluginsQuery } from '../services/admin';
@@ -27,9 +26,8 @@ import { useGetPluginsQuery } from '../services/admin';
 const InstalledPluginsPage = () => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  useFocusWhenNavigate();
 
   const { isLoading, data, error } = useGetPluginsQuery();
 
@@ -53,7 +51,7 @@ const InstalledPluginsPage = () => {
 
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -65,7 +63,7 @@ const InstalledPluginsPage = () => {
 
   return (
     <Layout>
-      <Main>
+      <Page.Main>
         <HeaderLayout
           title={formatMessage({
             id: 'global.plugins',
@@ -124,7 +122,7 @@ const InstalledPluginsPage = () => {
             </Tbody>
           </Table>
         </ContentLayout>
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

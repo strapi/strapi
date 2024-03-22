@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import type { Duplex, Readable, Transform, Writable } from 'stream';
-import type { Schema } from '@strapi/types';
 import type { Knex } from 'knex';
 import type { IAsset, IEntity, ILink } from './common-entities';
 import type { IDestinationProvider, ISourceProvider } from './providers';
@@ -9,7 +8,7 @@ export type MaybePromise<T> = T | Promise<T>;
 
 // The data type passed in for each stage
 export type TransferStageTypeMap = {
-  schemas: Schema.Schema;
+  schemas: Struct.Schema;
   entities: IEntity;
   links: ILink;
   assets: IAsset;

@@ -1,4 +1,4 @@
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { values } from 'lodash/fp';
 
@@ -12,7 +12,7 @@ export type BuilderHelperReturn = {
   builder: Builder;
   data: any;
 
-  strapi: LoadedStrapi;
+  strapi: Core.LoadedStrapi;
   rq: {
     admin: ReturnType<typeof createAuthRequest>;
     // public: ReturnType<typeof createAuthRequest>;

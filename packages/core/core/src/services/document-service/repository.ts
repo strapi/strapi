@@ -1,7 +1,7 @@
 import { omit, assoc, curry, merge } from 'lodash/fp';
 
 import { async, convertQueryParams, contentTypes as contentTypesUtils } from '@strapi/utils';
-import { Common } from '@strapi/types';
+import type { UID } from '@strapi/types';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
@@ -23,7 +23,7 @@ import { createDocumentId } from '../../utils/transform-content-types-to-models'
 import { getDeepPopulate } from './utils/populate';
 import { transformData } from './transform/data';
 
-const transformParamsToQuery = curry((uid: Common.UID.Schema, params: any) => {
+const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
   const query = convertQueryParams.transformParamsToQuery(uid, params);
 
   return assoc('where', { ...params?.lookup, ...query.where }, query);
@@ -109,20 +109,22 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
 
     // Validation
-    if (!params.data) {
+    if (!data) {
       throw new Error('Create requires data attribute');
     }
 
-    const validData = await entityValidator.validateEntityCreation(contentType, data as object, {
+    // @ts-expect-error we need type guard to assert that data has the valid type
+    const validData = await entityValidator.validateEntityCreation(contentType, data, {
       // Note: publishedAt value will always be set when DP is disabled
       isDraft: !params?.data?.publishedAt,
       locale: params?.locale,
     });
 
     // Component handling
-    const componentData = await createComponents(uid, validData as any);
+    const componentData = await createComponents(uid, validData);
+    const contentTypeWithoutComponentData = omitComponentData(contentType, validData);
     const entryData = applyTransforms(
-      Object.assign(omitComponentData(contentType, validData), componentData),
+      Object.assign(contentTypeWithoutComponentData, componentData) as any,
       { contentType }
     );
 
@@ -209,6 +211,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     if (entryToUpdate) {
       const validData = await entityValidator.validateEntityUpdate(
         model,
+        // @ts-expect-error we need type guard to assert that data has the valid type
         data,
         {
           isDraft: !queryParams?.data?.publishedAt, // Always update the draft version
@@ -220,7 +223,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       // Component handling
       const componentData = await updateComponents(uid, entryToUpdate, validData as any);
       const entryData = applyTransforms(
-        Object.assign(omitComponentData(model, validData), componentData),
+        Object.assign(omitComponentData(model, validData), componentData as any),
         { contentType: model }
       );
 
