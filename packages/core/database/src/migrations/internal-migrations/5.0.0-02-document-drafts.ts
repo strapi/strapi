@@ -51,22 +51,21 @@ export const createDocumentDrafts: Migration = {
        * SELECT columnName1, columnName2, columnName3, ...
        * FROM tableName
        */
-      const qb = db?.getConnection();
-      await qb
+      await knex
         // INSERT INTO tableName (columnName1, columnName2, columnName3, ...)
-        .into(qb.raw(`${meta.tableName} (${attributes.join(', ')})`))
-        .insert((subQb: typeof qb) => {
+        .into(knex.raw(`${meta.tableName} (${attributes.join(', ')})`))
+        .insert((subQb: typeof knex) => {
           // SELECT columnName1, columnName2, columnName3, ...
           subQb
             .select(
               ...attributes.map((att) => {
                 // Override 'publishedAt' and 'updatedAt' attributes
                 if (att === 'published_at') {
-                  return qb.raw('NULL as published_at');
+                  return knex.raw('NULL as published_at');
                 }
 
                 if (att === 'updated_at') {
-                  return qb.raw(`? as updated_at`, [new Date()]);
+                  return knex.raw(`? as updated_at`, [new Date()]);
                 }
 
                 return att;
