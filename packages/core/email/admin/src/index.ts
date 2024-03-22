@@ -1,6 +1,5 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
-
 import { PERMISSIONS } from './constants';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 import type { Plugin } from '@strapi/types';
 

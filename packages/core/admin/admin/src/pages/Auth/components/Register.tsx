@@ -1,18 +1,10 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import {
-  auth,
-  translatedErrors,
-  useAPIErrorHandler,
-  useNotification,
-  useQuery,
-  useTracking,
-} from '@strapi/helper-plugin';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
-import { NavLink, Navigate, useNavigate, useMatch } from 'react-router-dom';
+import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 import { ValidationError } from 'yup';
@@ -27,6 +19,9 @@ import { useGuidedTour } from '../../../components/GuidedTour/Provider';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
+import { useNotification } from '../../../features/Notifications';
+import { useTracking } from '../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
 import {
   useGetRegistrationInfoQuery,
@@ -34,17 +29,15 @@ import {
   useRegisterUserMutation,
 } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { translatedErrors } from '../../../utils/translatedErrors';
 
 const REGISTER_USER_SCHEMA = yup.object().shape({
-  firstname: yup.string().trim().required({
-    id: translatedErrors.required,
-    defaultMessage: 'Firstname is required',
-  }),
+  firstname: yup.string().trim().required(translatedErrors.required),
   lastname: yup.string().nullable(),
   password: yup
     .string()
     .min(8, {
-      id: translatedErrors.minLength,
+      id: translatedErrors.minLength.id,
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
@@ -67,13 +60,13 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
       },
     })
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
     }),
   confirmPassword: yup
     .string()
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Confirm password is required',
     })
     .oneOf([yup.ref('password'), null], {
@@ -81,21 +74,21 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
       defaultMessage: 'Passwords must match',
     }),
   registrationToken: yup.string().required({
-    id: translatedErrors.required,
+    id: translatedErrors.required.id,
     defaultMessage: 'Registration token is required',
   }),
 });
 
 const REGISTER_ADMIN_SCHEMA = yup.object().shape({
   firstname: yup.string().trim().required({
-    id: translatedErrors.required,
+    id: translatedErrors.required.id,
     defaultMessage: 'Firstname is required',
   }),
   lastname: yup.string().nullable(),
   password: yup
     .string()
     .min(8, {
-      id: translatedErrors.minLength,
+      id: translatedErrors.minLength.id,
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
@@ -118,7 +111,7 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
       },
     })
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
     }),
   confirmPassword: yup
@@ -134,16 +127,16 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
   email: yup
     .string()
     .email({
-      id: translatedErrors.email,
+      id: translatedErrors.email.id,
       defaultMessage: 'Not a valid email',
     })
     .strict()
     .lowercase({
-      id: translatedErrors.lowercase,
+      id: translatedErrors.lowercase.id,
       defaultMessage: 'Email must be lowercase',
     })
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Email is required',
     }),
 });
@@ -163,14 +156,15 @@ interface RegisterFormValues {
 }
 
 const Register = ({ hasAdmin }: RegisterProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
   const [submitCount, setSubmitCount] = React.useState(0);
   const [apiError, setApiError] = React.useState<string>();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const setSkipped = useGuidedTour('Register', (state) => state.setSkipped);
-  const query = useQuery();
+  const { search: searchString } = useLocation();
+  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const match = useMatch('/auth/:authType');
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -189,7 +183,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
       const message: string = isBaseQueryError(error) ? formatAPIError(error) : error.message ?? '';
 
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message,
       });
 
@@ -216,7 +210,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
 
         if (isUserSuperAdmin) {
-          auth.set(false, 'GUIDED_TOUR_SKIPPED', true);
+          localStorage.setItem('GUIDED_TOUR_SKIPPED', JSON.stringify(false));
           setSkipped(false);
           trackUsage('didLaunchGuidedtour');
         }

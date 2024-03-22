@@ -1,5 +1,5 @@
+import type { Permission } from '../../features/Auth';
 import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
-import type { Permission } from '@strapi/helper-plugin';
 
 const testData = {
   contentType: {

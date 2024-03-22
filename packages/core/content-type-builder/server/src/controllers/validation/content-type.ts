@@ -3,7 +3,7 @@
 import { flatMap, getOr, has, snakeCase } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
-import type { Schema, UID } from '@strapi/types';
+import type { Struct, Internal } from '@strapi/types';
 import { getService } from '../../utils';
 import { modelTypes, DEFAULT_TYPES, typeKinds } from '../../services/constants';
 import { createSchema } from './model-schema';
@@ -12,18 +12,21 @@ import { nestedComponentSchema } from './component';
 
 // Input flattens some fields of the "info" into the root type
 export type CreateContentTypeInput = {
-  contentType?: Partial<Schema.ContentType> & Partial<Schema.ContentTypeInfo>;
-  components?: Array<Partial<Schema.Component> & Partial<Schema.Info> & { tmpUID?: UID.Component }>;
-  singularName: Schema.ContentTypeInfo['singularName'];
-  attributes: Schema.Attributes & Record<string, any>;
-  kind: Schema.ContentTypeKind;
-  collectionName?: Schema.CollectionType['collectionName'];
-  pluralName: Schema.ContentTypeInfo['pluralName'];
-  displayName: Schema.ContentTypeInfo['displayName'];
-  description: Schema.ContentTypeInfo['description'];
-  options?: Schema.Options;
-  draftAndPublish?: Schema.Options['draftAndPublish'];
-  pluginOptions?: Schema.ContentType['pluginOptions'];
+  contentType?: Partial<Struct.ContentTypeSchema> & Partial<Struct.ContentTypeSchemaInfo>;
+  components?: Array<
+    Partial<Struct.ComponentSchema> &
+      Partial<Struct.SchemaInfo> & { tmpUID?: Internal.UID.Component }
+  >;
+  singularName: Struct.ContentTypeSchemaInfo['singularName'];
+  attributes: Struct.SchemaAttributes & Record<string, any>;
+  kind: Struct.ContentTypeKind;
+  collectionName?: Struct.CollectionTypeSchema['collectionName'];
+  pluralName: Struct.ContentTypeSchemaInfo['pluralName'];
+  displayName: Struct.ContentTypeSchemaInfo['displayName'];
+  description: Struct.ContentTypeSchemaInfo['description'];
+  options?: Struct.SchemaOptions;
+  draftAndPublish?: Struct.SchemaOptions['draftAndPublish'];
+  pluginOptions?: Struct.ContentTypeSchema['pluginOptions'];
   config?: object;
 };
 
@@ -119,13 +122,13 @@ export const validateContentTypeInput = (data: CreateContentTypeInput) => {
 export const validateUpdateContentTypeInput = (data: CreateContentTypeInput) => {
   if (has('contentType', data)) {
     removeEmptyDefaults(data.contentType);
-    removeDeletedUIDTargetFields(data.contentType as Schema.ContentType);
+    removeDeletedUIDTargetFields(data.contentType as Struct.ContentTypeSchema);
   }
 
   if (has('components', data) && Array.isArray(data.components)) {
     data.components.forEach((comp) => {
       if (has('uid', comp)) {
-        removeEmptyDefaults(comp as Schema.Component);
+        removeEmptyDefaults(comp as Struct.ComponentSchema);
       }
     });
   }
@@ -151,7 +154,7 @@ const forbiddenContentTypeNameValidator = () => {
 
 const nameIsAvailable = (isEdition: boolean) => {
   // TODO TS: if strapi.contentTypes (ie, ContentTypes) works as an ArrayLike and is used like this, we may want to ensure it is typed so that it can be without using as
-  const usedNames = flatMap((ct: Schema.ContentType) => {
+  const usedNames = flatMap((ct: Struct.ContentTypeSchema) => {
     return [ct.info?.singularName, ct.info?.pluralName];
   })(strapi.contentTypes as any);
 
@@ -175,7 +178,7 @@ const nameIsAvailable = (isEdition: boolean) => {
 
 const nameIsNotExistingCollectionName = (isEdition: boolean) => {
   const usedNames = Object.keys(strapi.contentTypes).map(
-    (key) => strapi.contentTypes[key as UID.ContentType].collectionName
+    (key) => strapi.contentTypes[key as Internal.UID.ContentType].collectionName
   ) as string[];
 
   return {

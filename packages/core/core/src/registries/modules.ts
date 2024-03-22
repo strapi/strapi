@@ -1,10 +1,10 @@
 import { pickBy, has } from 'lodash/fp';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { createModule, RawModule, Module } from '../domain/module';
 
 type ModuleMap = { [namespace: string]: Module };
 
-const modulesRegistry = (strapi: Strapi) => {
+const modulesRegistry = (strapi: Core.Strapi) => {
   const modules: ModuleMap = {};
 
   return {

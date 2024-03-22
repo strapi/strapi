@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import type { LoadedStrapi, Common, Schema } from '@strapi/types';
+import type { Core, Struct, UID } from '@strapi/types';
 
 import { get, last } from 'lodash/fp';
 
@@ -9,8 +9,8 @@ import { json } from '../../../../../utils';
 import * as queries from '../../../../queries';
 
 interface IEntitiesRestoreStreamOptions {
-  strapi: LoadedStrapi;
-  updateMappingTable<TSchemaUID extends Common.UID.Schema>(
+  strapi: Core.LoadedStrapi;
+  updateMappingTable<TSchemaUID extends UID.Schema>(
     type: TSchemaUID,
     oldID: number,
     newID: number
@@ -32,15 +32,15 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
         const contentType = strapi.getModel(type);
 
         let cType:
-          | Schema.ContentType
-          | Schema.Component
-          | ((...opts: any[]) => Schema.ContentType | Schema.Component) = contentType;
+          | Struct.ContentTypeSchema
+          | Struct.ComponentSchema
+          | ((...opts: any[]) => Struct.Schema) = contentType;
 
         /**
          * Resolve the component UID of an entity's attribute based
          * on a given path (components & dynamic zones only)
          */
-        const resolveType = (paths: string[]): Common.UID.Schema | undefined => {
+        const resolveType = (paths: string[]): UID.Schema | undefined => {
           let value: unknown = data;
 
           for (const path of paths) {
@@ -60,7 +60,7 @@ const createEntitiesWriteStream = (options: IEntitiesRestoreStreamOptions) => {
               }
 
               if (attribute.type === 'dynamiczone') {
-                cType = ({ __component }: { __component: Common.UID.Component }) =>
+                cType = ({ __component }: { __component: UID.Component }) =>
                   strapi.getModel(__component);
               }
             }

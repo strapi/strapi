@@ -2,7 +2,7 @@ import { resolve } from 'path';
 import { statSync, existsSync } from 'fs';
 import { yup, importDefault } from '@strapi/utils';
 
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 const srcSchema = yup
   .object()
@@ -17,7 +17,7 @@ const validateSrcIndex = (srcIndex: unknown) => {
   return srcSchema.validateSync(srcIndex, { strict: true, abortEarly: false });
 };
 
-export default (strapi: Strapi) => {
+export default (strapi: Core.Strapi) => {
   if (!existsSync(strapi.dirs.dist.src)) {
     return;
   }

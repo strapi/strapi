@@ -1,6 +1,6 @@
 import { extendType, nonNull, list } from 'nexus';
 import type * as Nexus from 'nexus';
-import type { Schema } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => {
@@ -18,7 +18,7 @@ export default ({ strapi }: Context) => {
     getEntityResponseCollectionName,
   } = naming;
 
-  const buildCollectionTypeQueries = (contentType: Schema.CollectionType) => {
+  const buildCollectionTypeQueries = (contentType: Struct.CollectionTypeSchema) => {
     const findOneQueryName = `Query.${getFindOneQueryName(contentType)}`;
     const findQueryName = `Query.${getFindQueryName(contentType)}`;
     const findConnectionQueryName = `Query.${getFindConnectionQueryName(contentType)}`;
@@ -66,7 +66,7 @@ export default ({ strapi }: Context) => {
    */
   const addFindOneQuery = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
-    contentType: Schema.CollectionType
+    contentType: Struct.CollectionTypeSchema
   ) => {
     const findOneQueryName = getFindOneQueryName(contentType);
     const typeName = getTypeName(contentType);
@@ -100,7 +100,7 @@ export default ({ strapi }: Context) => {
    */
   const addFindQuery = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
-    contentType: Schema.CollectionType
+    contentType: Struct.CollectionTypeSchema
   ) => {
     const findQueryName = getFindQueryName(contentType);
     const typeName = getTypeName(contentType);
@@ -134,7 +134,7 @@ export default ({ strapi }: Context) => {
    */
   const addFindConnectionQuery = (
     t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
-    contentType: Schema.CollectionType
+    contentType: Struct.CollectionTypeSchema
   ) => {
     const { uid } = contentType;
 

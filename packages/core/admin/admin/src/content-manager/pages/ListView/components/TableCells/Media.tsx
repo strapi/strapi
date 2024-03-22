@@ -5,10 +5,10 @@ import styled from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
 
-import type { Entity } from '@strapi/types';
+import type { Data } from '@strapi/types';
 
 interface MediaFile {
-  id?: Entity.ID;
+  id?: Data.ID;
   alternativeText?: string;
   ext: string;
   formats: {

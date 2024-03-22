@@ -12,14 +12,9 @@ import * as constants from './constants';
 import type { Version } from '../version';
 import type { Codemod } from '../codemod';
 import type { Report } from '../report';
-import type {
-  Project as ProjectInterface,
-  FileExtension,
-  MinimalPackageJSON,
-  RunCodemodsOptions,
-} from './types';
+import type { FileExtension, MinimalPackageJSON, RunCodemodsOptions } from './types';
 
-export class Project implements ProjectInterface {
+export class Project {
   public cwd: string;
 
   // The following properties are assigned during the .refresh() call in the constructor.
@@ -29,8 +24,6 @@ export class Project implements ProjectInterface {
   public packageJSONPath!: string;
 
   public packageJSON!: MinimalPackageJSON;
-
-  public strapiVersion!: Version.SemVer;
 
   constructor(cwd: string) {
     if (!fse.pathExistsSync(cwd)) {
@@ -52,7 +45,6 @@ export class Project implements ProjectInterface {
 
   refresh() {
     this.refreshPackageJSON();
-    this.refreshStrapiVersion();
     this.refreshProjectFiles();
 
     return this;
@@ -75,18 +67,26 @@ export class Project implements ProjectInterface {
   }
 
   private createProjectCodemodsRunners(dry: boolean = false) {
-    const jsonFiles = this.getFilesByExtensions(['.json']);
-    const codeFiles = this.getFilesByExtensions(['.js', '.ts', '.mjs']);
+    const jsonExtensions = constants.PROJECT_DEFAULT_JSON_EXTENSIONS.map<FileExtension>(
+      (ext) => `.${ext}`
+    );
+    const codeExtensions = constants.PROJECT_DEFAULT_CODE_EXTENSIONS.map<FileExtension>(
+      (ext) => `.${ext}`
+    );
+
+    const jsonFiles = this.getFilesByExtensions(jsonExtensions);
+    const codeFiles = this.getFilesByExtensions(codeExtensions);
 
     const codeRunner = codeRunnerFactory(codeFiles, {
       dry,
+      parser: 'ts',
+      runInBand: true,
+      babel: true,
+      extensions: constants.PROJECT_DEFAULT_CODE_EXTENSIONS.join(','),
+      // Don't output any log coming from the runner
       print: false,
       silent: true,
-      extensions: 'js,ts',
-      runInBand: true,
       verbose: 0,
-      babel: true,
-      parser: 'ts',
     });
     const jsonRunner = jsonRunnerFactory(jsonFiles, { dry, cwd: this.cwd });
 
@@ -123,6 +123,23 @@ export class Project implements ProjectInterface {
     const scanner = fileScannerFactory(this.cwd);
 
     this.files = scanner.scan(patterns);
+  }
+}
+
+export class AppProject extends Project {
+  public strapiVersion!: Version.SemVer;
+
+  readonly type = 'app' as const;
+
+  constructor(cwd: string) {
+    super(cwd);
+    this.refreshStrapiVersion();
+  }
+
+  refresh() {
+    super.refresh();
+    this.refreshStrapiVersion();
+    return this;
   }
 
   private refreshStrapiVersion(): void {
@@ -187,4 +204,33 @@ const formatGlobCollectionPattern = (collection: string[]): string => {
   return collection.length === 1 ? collection[0] : `{${collection}}`;
 };
 
-export const projectFactory = (cwd: string) => new Project(cwd);
+export class PluginProject extends Project {
+  readonly type = 'plugin' as const;
+}
+
+const isPlugin = (cwd: string) => {
+  const packageJSONPath = path.join(cwd, constants.PROJECT_PACKAGE_JSON);
+
+  try {
+    fse.accessSync(packageJSONPath);
+  } catch {
+    throw new Error(`Could not find a ${constants.PROJECT_PACKAGE_JSON} file in ${cwd}`);
+  }
+
+  const packageJSONBuffer = fse.readFileSync(packageJSONPath);
+
+  const packageJSON = JSON.parse(packageJSONBuffer.toString());
+
+  return packageJSON?.strapi?.kind === 'plugin';
+};
+
+// TODO: make this async so we can use async file methods
+export const projectFactory = (cwd: string) => {
+  fse.accessSync(cwd);
+
+  if (isPlugin(cwd)) {
+    return new PluginProject(cwd);
+  }
+
+  return new AppProject(cwd);
+};

@@ -1,15 +1,15 @@
 import { omit, pipe } from 'lodash/fp';
 
 import { contentTypes, sanitize, errors } from '@strapi/utils';
-import type { LoadedStrapi as Strapi, Common, Documents } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { sumDraftCounts } from './utils/draft';
 import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
-type DocService = Documents.ServiceInstance;
+type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>;
-export type Document = Documents.Result<Common.UID.ContentType>;
+export type Document = Modules.Documents.Result<UID.ContentType>;
 
 const { ApplicationError } = errors;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
@@ -18,7 +18,7 @@ const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 const omitIdField = omit('id');
 
-const emitEvent = async (uid: Common.UID.ContentType, event: string, document: Document) => {
+const emitEvent = async (uid: UID.ContentType, event: string, document: Document) => {
   const modelDef = strapi.getModel(uid);
   const sanitizedDocument = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, document);
 
@@ -28,13 +28,9 @@ const emitEvent = async (uid: Common.UID.ContentType, event: string, document: D
   });
 };
 
-const documentManager = ({ strapi }: { strapi: Strapi }) => {
+const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   return {
-    async findOne(
-      id: string,
-      uid: Common.UID.CollectionType,
-      opts: DocServiceParams<'findOne'>[1] = {}
-    ) {
+    async findOne(id: string, uid: UID.CollectionType, opts: DocServiceParams<'findOne'>[1] = {}) {
       return strapi.documents(uid).findOne(id, opts);
     },
 
@@ -43,8 +39,11 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
      */
     async findLocales(
       id: string | undefined,
-      uid: Common.UID.CollectionType,
-      opts: { populate?: Documents.Params.Pick<any, 'populate'>; locale?: string | string[] | '*' }
+      uid: UID.CollectionType,
+      opts: {
+        populate?: Modules.Documents.Params.Pick<any, 'populate'>;
+        locale?: string | string[] | '*';
+      }
     ) {
       // Will look for a specific locale by default
       const where: any = {};
@@ -65,12 +64,12 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       return strapi.db.query(uid).findMany({ populate: opts.populate, where });
     },
 
-    async findMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
+    async findMany(opts: DocServiceParams<'findMany'>[0], uid: UID.CollectionType) {
       const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
       return strapi.documents(uid).findMany(params);
     },
 
-    async findPage(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
+    async findPage(opts: DocServiceParams<'findMany'>[0], uid: UID.CollectionType) {
       // Pagination
       const page = Number(opts?.page) || 1;
       const pageSize = Number(opts?.pageSize) || 10;
@@ -91,7 +90,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       };
     },
 
-    async create(uid: Common.UID.CollectionType, opts: DocServiceParams<'create'>[0] = {} as any) {
+    async create(uid: UID.CollectionType, opts: DocServiceParams<'create'>[0] = {} as any) {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, status: 'draft' as const, populate };
 
@@ -99,8 +98,8 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async update(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
       opts: DocServiceParams<'update'>[1] = {} as any
     ) {
       const publishData = pipe(omitPublishedAtField, omitIdField)(opts.data || {});
@@ -111,9 +110,9 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async clone(
-      id: Documents.ID,
-      body: Partial<Documents.Params.Data.Input<Common.UID.CollectionType>>,
-      uid: Common.UID.CollectionType
+      id: Modules.Documents.ID,
+      body: Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
+      uid: UID.CollectionType
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = {
@@ -133,7 +132,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     /**
      *  Check if a document exists
      */
-    async exists(uid: Common.UID.CollectionType, id?: string) {
+    async exists(uid: UID.CollectionType, id?: string) {
       // Collection type
       if (id) {
         const count = await strapi.db.query(uid).count({ where: { documentId: id } });
@@ -146,8 +145,8 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async delete(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
       opts: DocServiceParams<'delete'>[1] = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
@@ -157,7 +156,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     // FIXME: handle relations
-    async deleteMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
+    async deleteMany(opts: DocServiceParams<'findMany'>[0], uid: UID.CollectionType) {
       const docs = await strapi.documents(uid).findMany(opts);
 
       for (const doc of docs) {
@@ -168,8 +167,8 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async publish(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
       opts: DocServiceParams<'publish'>[1] = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
@@ -181,7 +180,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
         .then((result) => result?.versions.at(0));
     },
 
-    async publishMany(entities: Document[], uid: Common.UID.ContentType) {
+    async publishMany(entities: Document[], uid: UID.ContentType) {
       if (!entities.length) {
         return null;
       }
@@ -227,7 +226,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       return publishedEntitiesCount;
     },
 
-    async unpublishMany(documents: Document[], uid: Common.UID.CollectionType) {
+    async unpublishMany(documents: Document[], uid: UID.CollectionType) {
       if (!documents.length) {
         return null;
       }
@@ -263,8 +262,8 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async unpublish(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
       opts: DocServiceParams<'unpublish'>[1] = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
@@ -277,8 +276,8 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
     },
 
     async discardDraft(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
       opts: DocServiceParams<'discardDraft'>[1] = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
@@ -290,7 +289,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
         .then((result) => result?.versions.at(0));
     },
 
-    async countDraftRelations(id: string, uid: Common.UID.ContentType, locale: string) {
+    async countDraftRelations(id: string, uid: UID.ContentType, locale: string) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
@@ -305,11 +304,7 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
       return sumDraftCounts(document, uid);
     },
 
-    async countManyEntriesDraftRelations(
-      ids: number[],
-      uid: Common.UID.CollectionType,
-      locale: string
-    ) {
+    async countManyEntriesDraftRelations(ids: number[], uid: UID.CollectionType, locale: string) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {

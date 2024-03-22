@@ -2,7 +2,7 @@ import { randomUUID } from 'crypto';
 import { Writable } from 'stream';
 import { WebSocket } from 'ws';
 import { once } from 'lodash/fp';
-import type { Schema, Utils } from '@strapi/types';
+import type { Struct, Utils } from '@strapi/types';
 
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
@@ -263,7 +263,7 @@ class RemoteStrapiDestinationProvider implements IDestinationProvider {
       return Promise.resolve(null);
     }
 
-    return this.dispatcher.dispatchTransferAction<Utils.String.Dict<Schema.Schema>>('getSchemas');
+    return this.dispatcher.dispatchTransferAction<Utils.String.Dict<Struct.Schema>>('getSchemas');
   }
 
   createEntitiesWriteStream(): Writable {

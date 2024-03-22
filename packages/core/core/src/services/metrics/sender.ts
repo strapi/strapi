@@ -5,7 +5,7 @@ import isDocker from 'is-docker';
 import ciEnv from 'ci-info';
 import tsUtils from '@strapi/typescript-utils';
 import { env, machineID } from '@strapi/utils';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { generateAdminUserHash } from './admin-user-hash';
 
 export interface Payload {
@@ -30,16 +30,16 @@ const ANALYTICS_URI = 'https://analytics.strapi.io';
 /**
  * Add properties from the package.json strapi key in the metadata
  */
-const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi: Strapi) => {
+const addPackageJsonStrapiMetadata = (metadata: Record<string, unknown>, strapi: Core.Strapi) => {
   const { packageJsonStrapi = {} } = strapi.config;
 
   _.defaults(metadata, packageJsonStrapi);
 };
 
 /**
- * Create a send function for event with all the necessary metadatas
+ * Create a send function for event with all the necessary metadata
  */
-export default (strapi: Strapi): Sender => {
+export default (strapi: Core.Strapi): Sender => {
   const { uuid } = strapi.config;
   const deviceId = machineID();
 

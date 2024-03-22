@@ -1,4 +1,4 @@
-import produce from 'immer';
+import { produce } from 'immer';
 import set from 'lodash/set';
 import snakeCase from 'lodash/snakeCase';
 import pluralize from 'pluralize';

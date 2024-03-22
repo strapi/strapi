@@ -1,11 +1,5 @@
 import { Box, Flex, Icon, Tooltip, Typography, Divider, Button } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import {
-  useTracking,
-  AppInfoContextValue,
-  useNotification,
-  useClipboard,
-} from '@strapi/helper-plugin';
 import { CheckCircle, ExternalLink, Download, Github, Star, Check, Duplicate } from '@strapi/icons';
 import pluralize from 'pluralize';
 import { useIntl } from 'react-intl';
@@ -13,6 +7,10 @@ import * as semver from 'semver';
 import styled from 'styled-components';
 
 import StrapiLogo from '../../../assets/images/logo-strapi-2022.svg';
+import { AppInfoContextValue } from '../../../features/AppInfo';
+import { useNotification } from '../../../features/Notifications';
+import { useTracking } from '../../../features/Tracking';
+import { useClipboard } from '../../../hooks/useClipboard';
 
 import type { Plugin, Provider } from '../hooks/useMarketplaceData';
 import type { NpmPackageType } from '../MarketplacePage';
@@ -182,7 +180,7 @@ const InstallPluginButton = ({
   strapiPeerDepVersion,
   pluginName,
 }: InstallPluginButtonProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { copy } = useClipboard();
@@ -194,7 +192,7 @@ const InstallPluginButton = ({
       trackUsage('willInstallPlugin');
       toggleNotification({
         type: 'success',
-        message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
+        message: formatMessage({ id: 'admin.pages.MarketPlacePage.plugin.copy.success' }),
       });
     }
   };

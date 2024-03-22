@@ -1,9 +1,9 @@
-import type { Schema } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 import _ from 'lodash';
 import { hasDefaultAttribute } from '../../utils/typeguards';
 
 export const removeEmptyDefaults = (
-  data: Partial<Schema.ContentType> | Partial<Schema.Component> | undefined
+  data: Partial<Struct.ContentTypeSchema> | Partial<Struct.ComponentSchema> | undefined
 ) => {
   const { attributes } = data || {};
 
@@ -16,7 +16,7 @@ export const removeEmptyDefaults = (
   });
 };
 
-export const removeDeletedUIDTargetFields = (data: Schema.ContentType) => {
+export const removeDeletedUIDTargetFields = (data: Struct.ContentTypeSchema) => {
   if (_.has(data, 'attributes')) {
     Object.values(data.attributes).forEach((attribute) => {
       if (

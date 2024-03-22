@@ -1,29 +1,6 @@
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@tests/utils';
 
 import { useLazyComponents } from '../useLazyComponents';
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useCustomFields: () => ({
-    get: jest.fn().mockReturnValue({
-      name: 'color',
-      pluginId: 'mycustomfields',
-      type: 'text',
-      icon: jest.fn(),
-      intlLabel: {
-        id: 'mycustomfields.color.label',
-        defaultMessage: 'Color',
-      },
-      intlDescription: {
-        id: 'mycustomfields.color.description',
-        defaultMessage: 'Select any color',
-      },
-      components: {
-        Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
-      },
-    }),
-  }),
-}));
 
 describe('useLazyComponents', () => {
   test('lazy loads the components', async () => {

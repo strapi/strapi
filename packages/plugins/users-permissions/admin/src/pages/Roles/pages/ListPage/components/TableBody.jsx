@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { Flex, IconButton, Link, Tbody, Td, Tr, Typography } from '@strapi/design-system';
-import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -51,7 +50,7 @@ const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelet
   return (
     <Tbody>
       {sortedRoles?.map((role) => (
-        <Tr key={role.name} {...onRowClick({ fn: () => navigate(role.id.toString()) })}>
+        <Tr key={role.name} onClick={() => navigate(role.id.toString())}>
           <Td width="20%">
             <Typography>{role.name}</Typography>
           </Td>
@@ -70,7 +69,7 @@ const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelet
             </Typography>
           </Td>
           <Td>
-            <Flex justifyContent="end" {...stopPropagation}>
+            <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
               {canUpdate ? (
                 <EditLink
                   to={role.id.toString()}

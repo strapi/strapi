@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { BaseButton, Box, Flex, FocusTrap, Portal, Typography } from '@strapi/design-system';
-import { useLockScroll } from '@strapi/helper-plugin';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -25,7 +24,15 @@ const EditorLayout = ({
 }: EditorLayoutProps) => {
   const { formatMessage } = useIntl();
 
-  useLockScroll({ lockScroll: isExpandMode });
+  React.useEffect(() => {
+    if (isExpandMode) {
+      document.body.classList.add('lock-body-scroll');
+    }
+
+    return () => {
+      document.body.classList.remove('lock-body-scroll');
+    };
+  }, [isExpandMode]);
 
   if (isExpandMode) {
     return (

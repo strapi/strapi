@@ -2,7 +2,7 @@ import assert from 'assert/strict';
 import { has } from 'lodash/fp';
 
 import { errors } from '@strapi/utils';
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import type { ParameterizedContext } from 'koa';
 
 interface AuthenticationResponse {
@@ -21,13 +21,13 @@ interface AuthenticationInfo {
 interface Strategy {
   name: string;
   authenticate: (ctx: ParameterizedContext) => Promise<AuthenticationResponse>;
-  verify?: (auth: AuthenticationInfo, config: Common.RouteConfig['auth']) => Promise<any>;
+  verify?: (auth: AuthenticationInfo, config: Core.RouteConfig['auth']) => Promise<any>;
 }
 
 interface Authentication {
   register: (type: string, strategy: Strategy) => Authentication;
-  authenticate: Common.MiddlewareHandler;
-  verify: (auth: AuthenticationInfo, config?: Common.RouteConfig['auth']) => Promise<any>;
+  authenticate: Core.MiddlewareHandler;
+  verify: (auth: AuthenticationInfo, config?: Core.RouteConfig['auth']) => Promise<any>;
 }
 
 const INVALID_STRATEGY_MSG =
@@ -59,7 +59,7 @@ const createAuthentication = (): Authentication => {
     },
 
     async authenticate(ctx, next) {
-      const route: Common.Route = ctx.state.route;
+      const route: Core.Route = ctx.state.route;
 
       // use route strategy
       const config = route?.config?.auth;

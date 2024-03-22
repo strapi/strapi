@@ -1,3 +1,4 @@
+import type { Internal } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import {
   toSubjectTemplate,
@@ -88,7 +89,8 @@ const contentTypesBase = ({
 const subjectsHandlerFor =
   (kind: string) =>
   ({ action, section: contentTypesSection }: { action: Action; section: ContentTypesSection }) => {
-    const { subjects } = action;
+    // TODO: add a type guard for UID.ContentType
+    const subjects = action.subjects as Internal.UID.ContentType[];
 
     if (!subjects?.length) {
       return;

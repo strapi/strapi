@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import type { Strapi, Schema } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import { getGlobalId } from '../domain/content-type';
 
-export default async function loadAdmin(strapi: Strapi) {
+export default async function loadAdmin(strapi: Core.Strapi) {
   strapi.admin = require('@strapi/admin/strapi-server');
 
   strapi.get('services').add(`admin::`, strapi.admin?.services);
@@ -15,7 +15,7 @@ export default async function loadAdmin(strapi: Strapi) {
   strapi.get('config').set('admin', _.merge(strapi.admin?.config, userAdminConfig));
 }
 
-const formatContentTypes = (contentTypes: Record<string, { schema: Schema.ContentType }>) => {
+const formatContentTypes = (contentTypes: Record<string, { schema: Struct.ContentTypeSchema }>) => {
   Object.values(contentTypes).forEach((definition) => {
     const { schema } = definition;
 

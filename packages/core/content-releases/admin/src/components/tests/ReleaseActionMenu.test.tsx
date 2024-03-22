@@ -9,7 +9,7 @@ describe('ReleaseActionMenu', () => {
         <ReleaseActionMenu.DeleteReleaseActionItem releaseId="1" actionId="1" />
         <ReleaseActionMenu.ReleaseActionEntryLinkItem
           contentTypeUid="api::category.category"
-          locale="en"
+          locale="en-GB"
           entryId={1}
         />
       </ReleaseActionMenu.Root>

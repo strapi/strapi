@@ -1,9 +1,9 @@
 import _ from 'lodash';
 import slugify from '@sindresorhus/slugify';
 
-import { LoadedStrapi as Strapi, UID, Attribute } from '@strapi/types';
+import type { Core, Schema, UID } from '@strapi/types';
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   async generateUIDField({
     contentTypeUID,
     field,
@@ -18,7 +18,12 @@ export default ({ strapi }: { strapi: Strapi }) => ({
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
 
-    const { targetField, default: defaultValue, options } = attributes[field] as Attribute.UID;
+    const {
+      targetField,
+      default: defaultValue,
+      options,
+    } = attributes[field] as Schema.Attribute.UID;
+
     // @ts-expect-error targetField can be undefined
     const targetValue = _.get(data, targetField);
 

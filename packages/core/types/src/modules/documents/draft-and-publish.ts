@@ -1,24 +1,18 @@
-import type { Common, Utils } from '../../types';
+import type { Schema, UID, Utils } from '../..';
 
-export type IsDraftAndPublishEnabled<TSchemaUID extends Common.UID.Schema> =
-  Utils.Expression.MatchFirst<
+export type IsDraftAndPublishEnabled<TSchemaUID extends UID.Schema> = Utils.MatchFirst<
+  [
     [
-      [
-        Common.UID.IsContentType<TSchemaUID>,
-        Utils.Expression.IsTrue<
-          NonNullable<Common.Schemas[TSchemaUID]['options']>['draftAndPublish']
-        >
-      ],
-      [
-        // Here, we're manually excluding potential overlap between Component and ContentTypes' UIDs and thus preventing false positives
-        // e.g. api::foo.bar extends a Component UID (`${string}.${string}`) but shouldn't be considered a component
-        Utils.Expression.And<
-          Utils.Expression.Not<Utils.Expression.Extends<TSchemaUID, Common.UID.ContentType>>,
-          Common.UID.IsComponent<TSchemaUID>
-        >,
-        Utils.Expression.False
-      ]
+      UID.IsContentType<TSchemaUID>,
+      Utils.IsTrue<NonNullable<Schema.Schema<TSchemaUID>['options']>['draftAndPublish']>
     ],
-    // True by default
-    Utils.Expression.True
-  >;
+    [
+      // Here, we're manually excluding potential overlap between Component and ContentTypes' UIDs and thus preventing false positives
+      // e.g. api::foo.bar extends a Component UID (`${string}.${string}`) but shouldn't be considered a component
+      Utils.And<Utils.Not<Utils.Extends<TSchemaUID, UID.ContentType>>, UID.IsComponent<TSchemaUID>>,
+      Utils.Constants.False
+    ]
+  ],
+  // True by default
+  Utils.Constants.True
+>;

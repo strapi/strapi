@@ -1,8 +1,9 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
+import { useNotification } from '../features/Notifications';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useGetContentTypesQuery } from '../services/contentManager';
 
 export function useContentTypes(): {
@@ -11,14 +12,14 @@ export function useContentTypes(): {
   singleTypes: Contracts.ContentTypes.ContentType[];
 } {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
 
   const { data = [], isLoading, error } = useGetContentTypesQuery();
 
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }

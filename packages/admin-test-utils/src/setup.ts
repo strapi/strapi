@@ -23,6 +23,14 @@ window.ResizeObserver = ResizeObserver;
  * requestIdleCallback
  * -----------------------------------------------------------------------------------------------*/
 
+type SetTimeout = typeof window.setTimeout;
+
+window.setImmediate =
+  window.setImmediate ||
+  ((fn: Parameters<SetTimeout>[0], ...args: any[]) => window.setTimeout(fn, 0, ...args));
+
+window.clearImmediate = window.clearImmediate || window.clearTimeout;
+
 // @ts-expect-error – mocking for testing
 window.requestIdleCallback = setImmediate;
 // @ts-expect-error – mocking for testing

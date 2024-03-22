@@ -17,18 +17,21 @@ const transform: modules.runner.json.JSONTransform = (file, params) => {
 
   const j = json(file.json);
 
+  let removed = false;
+
   const targetProperties = ['sqlite3', '@vscode/sqlite3'];
 
   targetProperties.forEach((targetProperty) => {
     const oldSqliteDependency = `dependencies.${targetProperty}`;
     if (j.has(oldSqliteDependency)) {
       j.remove(oldSqliteDependency);
+      removed = true;
     }
   });
 
-  if (!j.has('dependencies.better-sqlite3')) {
+  if (removed && !j.has('dependencies.better-sqlite3')) {
     // TODO check this version when releasing V5
-    j.set('dependencies.better-sqlite3', '9.0.0');
+    j.set('dependencies.better-sqlite3', '9.4.3');
   }
 
   return j.root();

@@ -10,7 +10,6 @@ import {
   useCollator,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useTracking, useQueryParams, useRBAC } from '@strapi/helper-plugin';
 import { Cog, Layer } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -18,6 +17,9 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useTracking } from '../../../../features/Tracking';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
 import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';

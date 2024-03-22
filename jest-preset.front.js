@@ -34,11 +34,6 @@ module.exports = {
     '^.+\\.js(x)?$': [
       '@swc/jest',
       {
-        env: {
-          coreJs: '3.33.0',
-          mode: 'usage',
-        },
-
         jsc: {
           parser: {
             jsx: true,

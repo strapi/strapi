@@ -8,13 +8,13 @@ import {
   convertQueryParams,
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
-import type { Strapi, EntityService, Utils } from '@strapi/types';
+import type { Core, Modules, Utils } from '@strapi/types';
 
 const { transformParamsToQuery } = convertQueryParams;
 
 type Decoratable<T> = T & {
   decorate(
-    decorator: (old: EntityService.EntityService) => EntityService.EntityService & {
+    decorator: (old: Modules.EntityService.EntityService) => Modules.EntityService.EntityService & {
       [key: string]: unknown;
     }
   ): void;
@@ -47,9 +47,9 @@ const createDefaultImplementation = ({
   strapi,
   db,
 }: {
-  strapi: Strapi;
+  strapi: Core.Strapi;
   db: Database;
-}): EntityService.EntityService => ({
+}): Modules.EntityService.EntityService => ({
   async wrapParams(options: any = {}) {
     return options;
   },
@@ -102,7 +102,7 @@ const createDefaultImplementation = ({
 
   async create(uid, params) {
     const wrappedParams = await this.wrapParams<
-      EntityService.Params.Pick<typeof uid, 'data' | 'fields' | 'populate'>
+      Modules.EntityService.Params.Pick<typeof uid, 'data' | 'fields' | 'populate'>
     >(params, { uid, action: 'create' });
     const { data } = wrappedParams;
 
@@ -122,7 +122,7 @@ const createDefaultImplementation = ({
 
   async update(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams<
-      EntityService.Params.Pick<typeof uid, 'data:partial' | 'fields' | 'populate'>
+      Modules.EntityService.Params.Pick<typeof uid, 'data:partial' | 'fields' | 'populate'>
     >(opts, {
       uid,
       action: 'update',
@@ -193,9 +193,9 @@ const createDefaultImplementation = ({
 });
 
 export default (ctx: {
-  strapi: Strapi;
+  strapi: Core.Strapi;
   db: Database;
-}): Decoratable<EntityService.EntityService> => {
+}): Decoratable<Modules.EntityService.EntityService> => {
   const implementation = createDefaultImplementation(ctx);
 
   const service = {
@@ -216,11 +216,11 @@ export default (ctx: {
   Object.keys(service.implementation).forEach((key) => delegator.method(key));
 
   // wrap methods to handle Database Errors
-  service.decorate((oldService: EntityService.EntityService) => {
+  service.decorate((oldService: Modules.EntityService.EntityService) => {
     const newService = _.mapValues(
       oldService,
-      (method, methodName: keyof EntityService.EntityService) =>
-        async function (this: EntityService.EntityService, ...args: []) {
+      (method, methodName: keyof Modules.EntityService.EntityService) =>
+        async function (this: Modules.EntityService.EntityService, ...args: []) {
           try {
             return await (oldService[methodName] as Utils.Function.AnyPromise).call(this, ...args);
           } catch (error) {
@@ -243,5 +243,5 @@ export default (ctx: {
     return newService;
   });
 
-  return service as unknown as Decoratable<EntityService.EntityService>;
+  return service as unknown as Decoratable<Modules.EntityService.EntityService>;
 };

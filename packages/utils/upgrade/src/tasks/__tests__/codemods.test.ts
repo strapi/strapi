@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { codemods } from '../codemods/codemods';
+import { codemods } from '../codemods';
 import { Version, rangeFactory, semVerFactory } from '../../modules/version';
 import { projectFactory } from '../../modules/project';
 import { codemodRunnerFactory } from '../../modules/codemod-runner';
@@ -7,6 +7,7 @@ import { loggerFactory } from '../../modules/logger';
 
 jest.mock('../../modules/codemod-runner');
 jest.mock('../../modules/project', () => ({
+  isAppProject: jest.fn(() => true),
   projectFactory: jest.fn().mockReturnValue({
     refresh: jest.fn().mockReturnThis(),
     runCodemods: jest.fn().mockResolvedValue({ success: true }),

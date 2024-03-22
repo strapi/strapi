@@ -1,8 +1,8 @@
-import { Documents, Common } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
 
-type Document = Documents.Document<any>;
+type Document = Modules.Documents.Document<any>;
 type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
 type BY_FIELDS = 'createdBy' | 'updatedBy' | 'publishedBy';
 type DocumentMetadata = {

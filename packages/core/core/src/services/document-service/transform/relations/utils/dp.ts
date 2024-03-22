@@ -1,7 +1,7 @@
 import { isNil } from 'lodash/fp';
 
 import { contentTypes } from '@strapi/utils';
-import { Common } from '@strapi/types';
+import { UID } from '@strapi/types';
 
 import { LongHandDocument } from './types';
 
@@ -10,8 +10,8 @@ type Status = 'draft' | 'published';
 export const getRelationTargetStatus = (
   relation: Pick<LongHandDocument, 'documentId' | 'status'>,
   opts: {
-    targetUid: Common.UID.Schema;
-    sourceUid: Common.UID.Schema;
+    targetUid: UID.Schema;
+    sourceUid: UID.Schema;
     sourceStatus?: Status;
   }
 ): Status[] => {
@@ -26,21 +26,35 @@ export const getRelationTargetStatus = (
     return ['published'];
   }
 
-  // priority:
-  // DP Enabled 'relation status' -> 'source status' -> 'draft'
-  // DP Disabled 'relation status' -> 'draft' and 'published'
-  if (relation.status) {
-    return [relation.status];
+  /**
+   * If both source and target have DP enabled,
+   * connect it to the same status as the source status
+   */
+  if (sourceHasDP && !isNil(opts.sourceStatus)) {
+    return [opts.sourceStatus];
   }
 
-  // Connect to both draft and published versions if dp is disabled and relation does not specify a status
+  /**
+   * Use the status from the relation if it's set
+   */
+  if (relation.status) {
+    switch (relation.status) {
+      case 'published':
+        return ['published'];
+      default:
+        // Default to draft if it's an invalid status (e.g. modified)
+        return ['draft'];
+    }
+  }
+
+  /**
+   * If DP is disabled and relation does not specify any status
+   * Connect to both draft and published versions
+   */
   if (!sourceHasDP) {
     return ['draft', 'published'];
   }
 
-  if (!isNil(opts.sourceStatus)) {
-    return [opts.sourceStatus];
-  }
-
+  // Default to draft as a fallback
   return ['draft'];
 };

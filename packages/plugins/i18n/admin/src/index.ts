@@ -1,4 +1,3 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
@@ -20,9 +19,10 @@ import { pluginId } from './pluginId';
 import { i18nApi } from './services/api';
 import { LOCALIZED_FIELDS } from './utils/fields';
 import { getTranslation } from './utils/getTranslation';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
-import type { DocumentActionComponent } from '@strapi/strapi/admin';
+import type { DocumentActionComponent } from '@strapi/admin/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -74,11 +74,6 @@ export default {
       Component: LocalePicker,
     });
 
-    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
-      name: 'i18n-delete-bullets-in-modal',
-      Component: DeleteModalAdditionalInfo,
-    });
-
     app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
       name: 'i18n-publish-bullets-in-modal',
       Component: PublishModalAdditionalInfo,
@@ -87,6 +82,11 @@ export default {
     app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
       name: 'i18n-unpublish-bullets-in-modal',
       Component: UnpublishModalAdditionalInfo,
+    });
+
+    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
+      name: 'i18n-delete-bullets-in-modal',
+      Component: DeleteModalAdditionalInfo,
     });
 
     const ctbPlugin = app.getPlugin('content-type-builder');
