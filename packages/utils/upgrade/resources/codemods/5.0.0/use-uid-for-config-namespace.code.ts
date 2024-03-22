@@ -7,7 +7,7 @@ import { Transform } from 'jscodeshift';
  */
 const transform: Transform = (file, api) => {
   const j = api.jscodeshift;
-  const root = j(file.source);
+  const root = j.withParser('tsx')(file.source);
 
   const ignoreList = ['api.rest', 'api.responses'];
 

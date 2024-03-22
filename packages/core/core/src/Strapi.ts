@@ -343,6 +343,7 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async destroy() {
+    this.log.info('Shutting down Strapi');
     await this.server.destroy();
     await this.runLifecyclesFunctions(utils.LIFECYCLES.DESTROY);
 
@@ -357,6 +358,8 @@ class Strapi extends Container implements Core.Strapi {
 
     // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
     delete global.strapi;
+
+    this.log.info('Strapi has been shut down');
   }
 
   sendStartupTelemetry() {
@@ -403,6 +406,7 @@ class Strapi extends Container implements Core.Strapi {
 
     this.startupLogger.logStartupMessage({ isInitialized });
 
+    this.log.info('Strapi started successfully');
     this.sendStartupTelemetry();
     this.openAdmin({ isInitialized });
   }

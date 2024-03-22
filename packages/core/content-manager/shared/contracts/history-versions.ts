@@ -31,6 +31,12 @@ export interface HistoryVersionDataResponse extends Omit<CreateHistoryVersion, '
     email: string;
   };
   locale: Locale | null;
+  meta?: {
+    unknownAttributes?: {
+      added: Record<string, unknown>;
+      removed: Record<string, unknown>;
+    };
+  };
 }
 
 // Export to prevent the TS "cannot be named" error in the history service

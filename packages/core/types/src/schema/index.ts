@@ -71,7 +71,9 @@ export type AttributeValueByName<
  *
  * @template TSchemaUID - The Schema's UID used to get its attributes
  */
-export type Attributes<TSchemaUID extends UID.Schema> = Schema<TSchemaUID>['attributes'];
+export type Attributes<TSchemaUID extends UID.Schema = UID.Schema> = {
+  [TUID in TSchemaUID]: Schema<TSchemaUID>['attributes'];
+}[TSchemaUID];
 
 /**
  * Union type of every attribute name within {@link TSchemaUID}'s attributes

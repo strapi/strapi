@@ -1,5 +1,5 @@
 import { assign } from 'lodash/fp';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 
 const getSSOProvidersList = async () => {
@@ -8,7 +8,7 @@ const getSSOProvidersList = async () => {
   return providerRegistry.getAll().map(({ uid }: { uid: string }) => uid);
 };
 
-const sendUpdateProjectInformation = async (strapi: Strapi) => {
+const sendUpdateProjectInformation = async (strapi: Core.Strapi) => {
   let groupProperties = {};
 
   const numberOfActiveAdminUsers = await getService('user').count({ isActive: true });
@@ -47,7 +47,7 @@ const sendUpdateProjectInformation = async (strapi: Strapi) => {
   });
 };
 
-const startCron = (strapi: Strapi) => {
+const startCron = (strapi: Core.Strapi) => {
   strapi.cron.add({
     '0 0 0 * * *': () => sendUpdateProjectInformation(strapi),
   });

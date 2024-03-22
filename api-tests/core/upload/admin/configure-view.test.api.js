@@ -6,7 +6,7 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const { createUtils } = require('api-tests/utils');
 
-const { ALLOWED_SORT_STRINGS } = require('../../../../packages/core/upload/server/constants');
+const { ALLOWED_SORT_STRINGS } = require('../../../../packages/core/upload/server/src/constants');
 
 const builder = createTestBuilder();
 let strapi;

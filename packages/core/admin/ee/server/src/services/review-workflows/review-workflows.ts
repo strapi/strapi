@@ -1,5 +1,5 @@
-import { LoadedStrapi as Strapi } from '@strapi/types';
-import { filter, forEach, pipe, map, defaultsDeep } from 'lodash/fp';
+import type { Core } from '@strapi/types';
+import { filter, forEach, pipe, map, stubTrue, cond, defaultsDeep } from 'lodash/fp';
 import { getService } from '../../utils';
 import { getVisibleContentTypesUID, hasStageAttribute } from '../../utils/review-workflows';
 import defaultStages from '../../constants/default-stages.json';
@@ -62,7 +62,7 @@ const setReviewWorkflowAttributes = (contentType: any) => {
   setAssigneeAttribute(contentType);
 };
 
-function extendReviewWorkflowContentTypes({ strapi }: { strapi: Strapi }) {
+function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.LoadedStrapi }) {
   const extendContentType = (contentTypeUID: any) => {
     strapi.get('content-types').extend(contentTypeUID, setReviewWorkflowAttributes);
   };
@@ -74,7 +74,7 @@ function extendReviewWorkflowContentTypes({ strapi }: { strapi: Strapi }) {
   ])(strapi.contentTypes);
 }
 
-function persistStagesJoinTables({ strapi }: { strapi: Strapi }) {
+function persistStagesJoinTables({ strapi }: { strapi: Core.LoadedStrapi }) {
   return async ({ contentTypes }: any) => {
     const getStageTableToPersist = (contentTypeUID: any) => {
       // Persist the stage join table
@@ -98,12 +98,12 @@ function persistStagesJoinTables({ strapi }: { strapi: Strapi }) {
   };
 }
 
-const registerWebhookEvents = async ({ strapi }: { strapi: Strapi }) =>
+const registerWebhookEvents = async ({ strapi }: { strapi: Core.LoadedStrapi }) =>
   Object.entries(webhookEvents).forEach(([eventKey, event]) =>
     strapi.webhookStore.addAllowedEvent(eventKey, event)
   );
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
   const workflowsValidationService = getService('review-workflows-validation', { strapi });

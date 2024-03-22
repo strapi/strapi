@@ -4,11 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash/fp');
 
-jest.mock('../../../../packages/core/upload/server/config', () => {
-  const config = jest.requireActual('../../../../packages/core/upload/server/config');
-  return _.set('default.sizeLimit', 1000, config); // 1kb
-});
-
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
@@ -34,6 +29,8 @@ describe('Upload', () => {
     await builder.addContentType(dogModel).build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+
+    strapi.config.set('plugin::upload.sizeLimit', 1000);
   });
 
   afterAll(async () => {

@@ -46,10 +46,15 @@ export { useRBAC } from './hooks/useRBAC';
 /**
  * Types
  */
+export type { StrapiApp } from './StrapiApp';
 export type { Store } from './core/store/configure';
 export type { SanitizedAdminUser } from '../../shared/contracts/shared';
 export type {
-  Context,
+  EditViewContext,
+  ListViewContext,
+  BulkActionComponent,
+  BulkActionComponentProps,
+  BulkActionDescription,
   DescriptionComponent,
   DescriptionReducer,
   PanelComponentProps,
