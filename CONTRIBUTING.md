@@ -220,7 +220,7 @@ Before submitting an issue you need to make sure:
 
 - You are experiencing a technical issue with Strapi.
 - You have already searched for related [issues](https://github.com/strapi/strapi/issues) and found none open (if you found a related _closed_ issue, please link to it from your post).
-- You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
+- You are not asking a question about how to use Strapi or about whether Strapi has a certain feature. For general help using Strapi, you may:
   - Refer to the [official Strapi documentation](https://docs.strapi.io).
   - Ask a member of the community in the [Strapi Discord Community](https://discord.strapi.io/).
   - Ask a question on the [Strapi community forum](https://forum.strapi.io).

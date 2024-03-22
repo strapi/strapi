@@ -46,6 +46,7 @@ export { useRBAC } from './hooks/useRBAC';
 /**
  * Types
  */
+export type { StrapiApp } from './StrapiApp';
 export type { Store } from './core/store/configure';
 export type { SanitizedAdminUser } from '../../shared/contracts/shared';
 export type {
@@ -66,7 +67,6 @@ export type {
   HeaderActionDescription,
   HeaderActionProps,
 } from './core/apis/content-manager';
-export type { StrapiApp } from './StrapiApp';
 
 /**
  * Utils
