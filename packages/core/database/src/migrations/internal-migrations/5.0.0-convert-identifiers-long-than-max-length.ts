@@ -82,7 +82,7 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
     debug(`not renaming index ${full.indexName} because name hasn't changed`);
     return;
   }
-  debug(`renaming index from ${full} to ${short}`);
+  debug(`renaming index from ${full.indexName} to ${short.indexName}`);
 
   // If schema creation has never actually run before, none of these will exist, and they will throw an error
   // we have no way of running an "if exists" other than a per-dialect manual check, which we won't do
