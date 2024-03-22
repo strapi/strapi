@@ -2,6 +2,13 @@ import * as React from 'react';
 
 import { skipToken } from '@reduxjs/toolkit/query';
 import {
+  useAPIErrorHandler,
+  useNotification,
+  useQueryParams,
+  unstable_useDocument,
+  useRBAC,
+} from '@strapi/admin/strapi-admin';
+import {
   Box,
   Button,
   FieldLabel,
@@ -16,14 +23,7 @@ import {
   EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import {
-  useAPIErrorHandler,
-  useNotification,
-  useQueryParams,
-  useRBAC,
-} from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
-import { Common } from '@strapi/types';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -38,6 +38,8 @@ import { getTimezoneOffset } from '../utils/time';
 
 import { ReleaseActionMenu } from './ReleaseActionMenu';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
+
+import type { UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * AddActionToReleaseModal
@@ -100,7 +102,7 @@ const AddActionToReleaseModal = ({
 }: AddActionToReleaseModalProps) => {
   const releaseHeaderId = React.useId();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const locale = query.plugins?.i18n?.locale;
@@ -144,13 +146,13 @@ const AddActionToReleaseModal = ({
       if (isAxiosError(response.error)) {
         // Handle axios error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(response.error),
         });
       } else {
         // Handle generic error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       }
@@ -252,7 +254,7 @@ const AddActionToReleaseModal = ({
 export const CMReleasesContainer = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const { formatMessage, formatDate, formatTime } = useIntl();
-  const { id, slug } = useParams<{
+  const { id, slug, collectionType } = useParams<{
     id: string;
     origin: string;
     slug: string;
@@ -263,7 +265,14 @@ export const CMReleasesContainer = () => {
     allowedActions: { canCreateAction, canMain, canDeleteAction },
   } = useRBAC(PERMISSIONS);
 
-  const contentTypeUid = slug as Common.UID.ContentType;
+  const { schema } = unstable_useDocument({
+    collectionType: collectionType!,
+    model: slug!,
+  });
+
+  const hasDraftAndPublish = schema?.options?.draftAndPublish;
+
+  const contentTypeUid = slug as UID.ContentType;
   const canFetch = id != null && contentTypeUid != null;
   const fetchParams = canFetch
     ? {
@@ -286,8 +295,9 @@ export const CMReleasesContainer = () => {
 
   /**
    * - Impossible to add entry to release before it exists
+   * - Content types without draft and publish cannot add entries to release
    */
-  if (isCreatingEntry) {
+  if (isCreatingEntry || !hasDraftAndPublish) {
     return null;
   }
 

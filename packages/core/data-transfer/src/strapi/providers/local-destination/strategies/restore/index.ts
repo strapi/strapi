@@ -1,4 +1,4 @@
-import type { LoadedStrapi, Schema, Common } from '@strapi/types';
+import type { Core, UID, Struct } from '@strapi/types';
 import type { Model } from '@strapi/database';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import * as queries from '../../../../queries';
@@ -12,7 +12,7 @@ export interface IRestoreOptions {
   entities?: {
     include?: string[]; // only delete these stage entities before transfer
     exclude?: string[]; // exclude these stage entities from deletion
-    filters?: ((contentType: Schema.ContentType) => boolean)[]; // custom filters to exclude a content type from deletion
+    filters?: ((contentType: Struct.ContentTypeSchema) => boolean)[]; // custom filters to exclude a content type from deletion
     params?: { [uid: string]: unknown }; // params object passed to deleteMany before transfer for custom deletions
   };
 }
@@ -22,7 +22,7 @@ interface IDeleteResults {
   aggregate: { [uid: string]: { count: number } };
 }
 
-export const deleteRecords = async (strapi: LoadedStrapi, options: IRestoreOptions) => {
+export const deleteRecords = async (strapi: Core.LoadedStrapi, options: IRestoreOptions) => {
   const entities = await deleteEntitiesRecords(strapi, options);
   const configuration = await deleteConfigurationRecords(strapi, options);
 
@@ -34,13 +34,13 @@ export const deleteRecords = async (strapi: LoadedStrapi, options: IRestoreOptio
 };
 
 const deleteEntitiesRecords = async (
-  strapi: LoadedStrapi,
+  strapi: Core.LoadedStrapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { entities } = options;
 
   const models = strapi.get('models').get() as Model[];
-  const contentTypes = Object.values(strapi.contentTypes) as Schema.ContentType[];
+  const contentTypes = Object.values(strapi.contentTypes) as Struct.ContentTypeSchema[];
 
   const contentTypesToClear = contentTypes
     .filter((contentType) => {
@@ -66,7 +66,7 @@ const deleteEntitiesRecords = async (
 
   const modelsToClear = models
     .filter((model) => {
-      if (contentTypesToClear.includes(model.uid as Common.UID.ContentType)) {
+      if (contentTypesToClear.includes(model.uid as UID.ContentType)) {
         return false;
       }
 
@@ -112,7 +112,7 @@ const deleteEntitiesRecords = async (
 };
 
 const deleteConfigurationRecords = async (
-  strapi: LoadedStrapi,
+  strapi: Core.LoadedStrapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { coreStore = true, webhook = true } = options?.configuration ?? {};

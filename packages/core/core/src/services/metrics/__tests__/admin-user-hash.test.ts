@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import { generateAdminUserHash } from '../admin-user-hash';
 import createContext from '../../../../../../../test/helpers/create-context';
+import { generateAdminUserHash } from '../admin-user-hash';
 
 describe('user email hash', () => {
   test('should create a hash from admin user email', () => {

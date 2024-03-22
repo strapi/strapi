@@ -1,4 +1,4 @@
-import { useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { act, renderHook, screen } from '@tests/utils';
 
 import { useBulkMove } from '../useBulkMove';
@@ -29,8 +29,8 @@ const FIXTURE_FOLDERS = [
 
 const FIXTURE_DESTINATION_FOLDER_ID = 1;
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     post: jest.fn((url, payload) => {
       const res = { data: { data: {} } };

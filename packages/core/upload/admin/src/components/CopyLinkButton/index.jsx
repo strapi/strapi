@@ -1,15 +1,16 @@
 import React from 'react';
 
+import { useNotification } from '@strapi/admin/strapi-admin';
 import { IconButton } from '@strapi/design-system';
-import { useClipboard, useNotification } from '@strapi/helper-plugin';
 import { Link as LinkIcon } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
+import { useClipboard } from '../../hooks/useClipboard';
 import getTrad from '../../utils/getTrad';
 
 export const CopyLinkButton = ({ url }) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { copy } = useClipboard();
 
@@ -19,10 +20,10 @@ export const CopyLinkButton = ({ url }) => {
     if (didCopy) {
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: 'notification.link-copied',
           defaultMessage: 'Link copied into the clipboard',
-        },
+        }),
       });
     }
   };

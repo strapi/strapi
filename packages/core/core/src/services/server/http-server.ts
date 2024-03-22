@@ -1,13 +1,13 @@
 import http from 'http';
 import type { Socket } from 'net';
 import Koa from 'koa';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 export interface Server extends http.Server {
   destroy: () => Promise<void>;
 }
 
-const createHTTPServer = (strapi: Strapi, koaApp: Koa): Server => {
+const createHTTPServer = (strapi: Core.Strapi, koaApp: Koa): Server => {
   const connections = new Set<Socket>();
 
   // lazy creation of the request listener

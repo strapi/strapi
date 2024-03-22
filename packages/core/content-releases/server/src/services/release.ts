@@ -1,6 +1,6 @@
 import { setCreatorFields, errors, convertQueryParams } from '@strapi/utils';
 
-import type { LoadedStrapi, EntityService, UID, Schema } from '@strapi/types';
+import type { Core, Modules, Struct, Internal, UID } from '@strapi/types';
 
 import _ from 'lodash/fp';
 
@@ -48,7 +48,7 @@ const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
   }
 };
 
-const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
+const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const dispatchWebhook = (
     event: string,
     { isPublished, release, error }: { isPublished: boolean; release?: any; error?: unknown }
@@ -486,7 +486,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
     },
 
     async countActions(
-      query: EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
+      query: Modules.EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
     ) {
       const dbQuery = convertQueryParams.transformParamsToQuery(
         RELEASE_ACTION_MODEL_UID,
@@ -545,8 +545,10 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
         .plugin('content-manager')
         .service('content-types');
 
-      const contentTypesData: Record<UID.ContentType, { mainField: string; displayName: string }> =
-        {};
+      const contentTypesData: Record<
+        Internal.UID.ContentType,
+        { mainField: string; displayName: string }
+      > = {};
       for (const contentTypeUid of contentTypesUids) {
         const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({
           uid: contentTypeUid,
@@ -572,7 +574,7 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
       const contentTypeModelsMap = contentTypeUids.reduce(
         (
-          acc: { [key: ReleaseAction['contentType']]: Schema.ContentType },
+          acc: { [key: ReleaseAction['contentType']]: Struct.ContentTypeSchema },
           contentTypeUid: ReleaseAction['contentType']
         ) => {
           acc[contentTypeUid] = strapi.getModel(contentTypeUid);
@@ -594,8 +596,8 @@ const createReleaseService = ({ strapi }: { strapi: LoadedStrapi }) => {
 
       const componentsMap = components.reduce(
         (
-          acc: { [key: Schema.Component['uid']]: Schema.Component },
-          component: Schema.Component
+          acc: { [key: Struct.ComponentSchema['uid']]: Struct.ComponentSchema },
+          component: Struct.ComponentSchema
         ) => {
           acc[component.uid] = component;
 

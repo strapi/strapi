@@ -27,6 +27,11 @@ describe('Transform relational data', () => {
               return false;
             },
           },
+          locales: {
+            getDefaultLocale() {
+              return 'en';
+            },
+          },
         },
       },
     },

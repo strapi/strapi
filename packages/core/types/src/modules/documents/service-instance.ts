@@ -1,12 +1,10 @@
-import type { Common, Utils } from '../..';
+import type { UID, Utils } from '../..';
 import type { ID } from '.';
 import type { IsDraftAndPublishEnabled } from './draft-and-publish';
 import type * as Params from './params/document-engine';
-import type * as Result from './result/document-enigne';
+import type * as Result from './result/document-engine';
 
-export type ServiceInstance<
-  TContentTypeUID extends Common.UID.ContentType = Common.UID.ContentType
-> = {
+export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.ContentType> = {
   findMany: <TParams extends Params.FindMany<TContentTypeUID>>(
     params?: TParams
   ) => Result.FindMany<TContentTypeUID, TParams>;
@@ -46,7 +44,7 @@ export type ServiceInstance<
   count: <TParams extends Params.Count<TContentTypeUID>>(params?: TParams) => Result.Count;
 
   // Publication methods are only enabled if D&P is enabled for the content type
-  publish: Utils.Expression.If<
+  publish: Utils.If<
     // If draft and publish is enabled for the content type
     IsDraftAndPublishEnabled<TContentTypeUID>,
     // Then, publish method is enabled
@@ -58,7 +56,7 @@ export type ServiceInstance<
     undefined
   >;
 
-  unpublish: Utils.Expression.If<
+  unpublish: Utils.If<
     IsDraftAndPublishEnabled<TContentTypeUID>,
     <TParams extends Params.Unpublish<TContentTypeUID>>(
       documentId: ID,
@@ -67,7 +65,7 @@ export type ServiceInstance<
     undefined
   >;
 
-  discardDraft: Utils.Expression.If<
+  discardDraft: Utils.If<
     IsDraftAndPublishEnabled<TContentTypeUID>,
     <TParams extends Params.DiscardDraft<TContentTypeUID>>(
       documentId: ID,

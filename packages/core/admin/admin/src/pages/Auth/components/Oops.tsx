@@ -1,8 +1,9 @@
+import * as React from 'react';
+
 import { Box, Flex, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useQuery } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import {
@@ -13,7 +14,8 @@ import {
 
 const Oops = () => {
   const { formatMessage } = useIntl();
-  const query = useQuery();
+  const { search: searchString } = useLocation();
+  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
 
   const message =
     query.get('info') ||

@@ -1,11 +1,9 @@
-import React from 'react';
-
 import { Box, Flex } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
+import { useTracking } from '../../../../../../../../admin/src/features/Tracking';
 import { Stage as StageType } from '../../../../../../../../shared/contracts/review-workflows';
 import { addStage } from '../actions';
 

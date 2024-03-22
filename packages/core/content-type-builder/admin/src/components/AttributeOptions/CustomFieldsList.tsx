@@ -1,6 +1,6 @@
+import { useStrapiApp } from '@strapi/admin/strapi-admin';
 import { Flex, Grid, GridItem, KeyboardNavigable } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useCustomFields, CustomFieldUID } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
@@ -10,12 +10,9 @@ import { EmptyAttributes } from './EmptyAttributes';
 
 export const CustomFieldsList = () => {
   const { formatMessage } = useIntl();
-  const customFields = useCustomFields();
+  const getAllCustomFields = useStrapiApp('CustomFieldsList', (state) => state.customFields.getAll);
   // TODO change this once useCustomFields is typed (helper-plugin types are solved)
-  const registeredCustomFields = Object.entries(customFields.getAll()) as [
-    CustomFieldUID,
-    CustomFieldOption
-  ][];
+  const registeredCustomFields = Object.entries(getAllCustomFields());
 
   if (!registeredCustomFields.length) {
     return <EmptyAttributes />;

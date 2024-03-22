@@ -46,7 +46,7 @@ const generateContentTypesDefinitions = async (options = {}) => {
     ...formattedSchemasDefinitions,
 
     // Global
-    generateSharedExtensionDefinition('ContentTypes', contentTypesDefinitions),
+    generateSharedExtensionDefinition('ContentTypeSchemas', contentTypesDefinitions),
   ];
 
   const output = emitDefinitions(allDefinitions);

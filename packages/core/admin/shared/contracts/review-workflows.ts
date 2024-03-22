@@ -1,6 +1,6 @@
 import { errors } from '@strapi/utils';
 import { Entity, Permission } from './shared';
-import { EntityService } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 export interface StagePermission
   extends Omit<Permission, 'createdAt' | 'updatedAt' | 'properties' | 'conditions'> {
@@ -22,7 +22,10 @@ interface Workflow extends Entity {
 namespace GetAll {
   export interface Request {
     body: {};
-    query: EntityService.Params.Pick<'admin::review-workflow', 'filters' | 'populate:string'>;
+    query: Modules.EntityService.Params.Pick<
+      'admin::review-workflow',
+      'filters' | 'populate:string'
+    >;
   }
 
   export interface Response {

@@ -1,6 +1,6 @@
 import { isObject, isNil, pick } from 'lodash/fp';
 
-import { EntityService, Attribute, Common } from '@strapi/types';
+import type { Modules, Schema, UID } from '@strapi/types';
 import { traverseEntity, errors } from '@strapi/utils';
 
 import { ShortHand, LongHand, ID, GetIds } from '../utils/types';
@@ -86,10 +86,10 @@ const transformPrimitive = <T extends ShortHand | LongHand>(
  *  - connect: [docId]
  * Or using any of the other primitive representations
  */
-const transformRelationIdsVisitor = <T extends Attribute.RelationKind.Any>(
-  relation: EntityService.Params.Attribute.RelationInputValue<T>,
+const transformRelationIdsVisitor = <T extends Schema.Attribute.RelationKind.Any>(
+  relation: Modules.EntityService.Params.Attribute.RelationInputValue<T>,
   getIds: GetIds
-): EntityService.Params.Attribute.RelationInputValue<T> | undefined => {
+): Modules.EntityService.Params.Attribute.RelationInputValue<T> | undefined => {
   const map = transformPrimitive(relation as any, getIds);
   if (map) return map;
 
@@ -167,7 +167,7 @@ const transformDataIdsVisitor = (
   idMap: IdMap,
   data: Record<string, any>,
   opts: {
-    uid: Common.UID.Schema;
+    uid: UID.Schema;
     locale?: string | null;
     status?: 'draft' | 'published';
     allowMissingId?: boolean; // Whether to ignore missing ids and not throw any error
@@ -177,7 +177,7 @@ const transformDataIdsVisitor = (
     ({ key, value, attribute }, { set }) => {
       // Find relational attributes, and return the document ids
       if (attribute.type === 'relation') {
-        const target = attribute.target as Common.UID.Schema | undefined;
+        const target = attribute.target as UID.Schema | undefined;
         // TODO: Handle polymorphic relations
         if (!target) return;
         // TODO: V5 remove excluded fields and use { id: } syntax for those relations

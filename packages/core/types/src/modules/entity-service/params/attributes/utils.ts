@@ -1,20 +1,23 @@
-import type { Attribute, Common, Utils } from '../../../../types';
+import type * as Schema from '../../../../schema';
 
-export type NonFilterableKind = Extract<Attribute.Kind, 'password' | 'dynamiczone'>;
-export type FilterableKind = Exclude<Attribute.Kind, NonFilterableKind>;
+import type * as UID from '../../../../uid';
+import type { Object } from '../../../../utils';
 
-export type GetNonFilterableKeys<TSchemaUID extends Common.UID.Schema> = Utils.Object.KeysBy<
-  Attribute.GetAll<TSchemaUID>,
-  Attribute.OfType<NonFilterableKind>,
+export type NonFilterableKind = Extract<Schema.Attribute.Kind, 'password' | 'dynamiczone'>;
+export type FilterableKind = Exclude<Schema.Attribute.Kind, NonFilterableKind>;
+
+export type GetNonFilterableKeys<TSchemaUID extends UID.Schema> = Object.KeysBy<
+  Schema.Attributes<TSchemaUID>,
+  Schema.Attribute.OfType<NonFilterableKind>,
   string
 >;
 
-export type GetScalarKeys<TSchemaUID extends Common.UID.Schema> = Exclude<
-  Attribute.GetKeysByType<TSchemaUID, Attribute.NonPopulatableKind>,
+export type GetScalarKeys<TSchemaUID extends UID.Schema> = Exclude<
+  Schema.AttributeNamesByType<TSchemaUID, Schema.Attribute.NonPopulatableKind>,
   GetNonFilterableKeys<TSchemaUID>
 >;
 
-export type GetNestedKeys<TSchemaUID extends Common.UID.Schema> = Exclude<
-  Attribute.GetKeysWithTarget<TSchemaUID>,
+export type GetNestedKeys<TSchemaUID extends UID.Schema> = Exclude<
+  Schema.AttributeNamesWithTarget<TSchemaUID>,
   GetNonFilterableKeys<TSchemaUID>
 >;

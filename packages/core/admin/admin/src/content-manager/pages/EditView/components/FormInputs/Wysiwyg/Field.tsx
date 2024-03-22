@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { Field, FieldError, FieldHint, FieldLabel, Flex } from '@strapi/design-system';
-import { useLibrary } from '@strapi/helper-plugin';
 import { EditorFromTextArea } from 'codemirror5';
 
 import { useField } from '../../../../../../components/Form';
+import { useStrapiApp } from '../../../../../../features/StrapiApp';
 import { prefixFileUrlWithBackendUrl } from '../../../../../../utils/urls';
 
 import { Editor, EditorApi } from './Editor';
@@ -20,11 +20,11 @@ import { WysiwygFooter } from './WysiwygFooter';
 import { WysiwygNav } from './WysiwygNav';
 
 import type { InputProps } from '../../../../../../components/FormInputs/types';
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface WysiwygProps extends Omit<InputProps, 'type'> {
   labelAction?: React.ReactNode;
-  type: Attribute.RichText['type'];
+  type: Schema.Attribute.RichText['type'];
 }
 
 const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
@@ -37,7 +37,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     const [isPreviewMode, setIsPreviewMode] = React.useState(false);
     const [mediaLibVisible, setMediaLibVisible] = React.useState(false);
     const [isExpandMode, setIsExpandMode] = React.useState(false);
-    const { components = {} } = useLibrary();
+    const components = useStrapiApp('ImageDialog', (state) => state.components);
 
     const MediaLibraryDialog = components['media-library'];
 

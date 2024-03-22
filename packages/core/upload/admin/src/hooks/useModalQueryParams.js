@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { useTracking } from '@strapi/helper-plugin';
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { stringify } from 'qs';
 
 import { useConfig } from './useConfig';

@@ -1,7 +1,16 @@
 import * as React from 'react';
 
 // TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
-import { Page, Pagination, useLicenseLimits } from '@strapi/admin/strapi-admin';
+import {
+  Page,
+  Pagination,
+  useLicenseLimits,
+  useTracking,
+  useAPIErrorHandler,
+  useNotification,
+  useQueryParams,
+  useRBAC,
+} from '@strapi/admin/strapi-admin';
 import {
   Alert,
   Badge,
@@ -23,13 +32,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import {
-  useQueryParams,
-  useAPIErrorHandler,
-  useNotification,
-  useTracking,
-  useRBAC,
-} from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -181,7 +183,7 @@ const ReleasesPage = () => {
   const tabRef = React.useRef<any>(null);
   const location = useLocation();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { formatAPIError } = useAPIErrorHandler();
@@ -205,7 +207,7 @@ const ReleasesPage = () => {
   React.useEffect(() => {
     if (location?.state?.errors) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         title: formatMessage({
           id: 'content-releases.pages.Releases.notification.error.title',
           defaultMessage: 'Your request could not be processed.',
@@ -273,13 +275,13 @@ const ReleasesPage = () => {
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(response.error),
       });
     } else {
       // Otherwise, the response returns an object with 'error', handle a generic error
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }

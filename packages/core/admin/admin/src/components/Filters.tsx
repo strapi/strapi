@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Button, Flex, PopoverPrimitives, Tag, useComposedRefs } from '@strapi/design-system';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { Plus, Filter as FilterIcon, Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -15,6 +14,7 @@ import {
 } from '../constants/filters';
 import { MainField } from '../content-manager/utils/attributes';
 import { useControllableState } from '../hooks/useControllableState';
+import { useQueryParams } from '../hooks/useQueryParams';
 
 import { createContext } from './Context';
 import { Form, InputProps } from './Form';

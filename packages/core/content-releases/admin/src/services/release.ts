@@ -234,8 +234,9 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        invalidatesTags: [
+        invalidatesTags: (result, error, arg) => [
           { type: 'Release', id: 'LIST' },
+          { type: 'Release', id: arg.params.releaseId },
           { type: 'ReleaseAction', id: 'LIST' },
         ],
       }),

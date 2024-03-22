@@ -2,9 +2,9 @@
  * `{{ name }}` middleware
  */
 
-import { Strapi } from '@strapi/strapi';
+import type { Core } from '@strapi/strapi';
 
-export default (config, { strapi }: { strapi: Strapi }) => {
+export default (config, { strapi }: { strapi: Core.Strapi }) => {
   // Add your own logic here.
   return async (ctx, next) => {
     strapi.log.info('In {{ name }} middleware.');

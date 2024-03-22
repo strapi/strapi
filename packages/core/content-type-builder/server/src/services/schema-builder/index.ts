@@ -21,7 +21,7 @@ export default function createBuilder() {
     config: componentInput.config,
   }));
 
-  const contentTypes = Object.values(strapi.contentTypes).map((contentTypeInput) => {
+  const contentTypes = Object.values<any>(strapi.contentTypes).map((contentTypeInput) => {
     const dir = contentTypeInput.plugin
       ? join(
           strapi.dirs.app.extensions,

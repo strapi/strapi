@@ -16,7 +16,7 @@ import { outdent } from 'outdent';
 import { CLIContext } from '../../../types';
 import { gitIgnoreFile } from './files/gitIgnore';
 
-interface ActionOptions extends Pick<InitOptions, 'silent' | 'debug'> {}
+type ActionOptions = Pick<InitOptions, 'silent' | 'debug'>;
 
 export default async (
   packagePath: string,
@@ -298,7 +298,6 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
 
                 pkgJson.dependencies = {
                   ...pkgJson.dependencies,
-                  '@strapi/helper-plugin': '*',
                   '@strapi/design-system': '*',
                   '@strapi/icons': '*',
                 };

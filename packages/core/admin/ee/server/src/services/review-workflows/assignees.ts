@@ -1,4 +1,4 @@
-import { LoadedStrapi as Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { isNil } from 'lodash/fp';
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
@@ -6,7 +6,7 @@ import { getService } from '../../utils';
 
 const { ApplicationError } = errors;
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
 
   return {

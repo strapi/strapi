@@ -1,7 +1,7 @@
 import { renderHook as renderRTLHook, waitFor } from '@tests/utils';
 import { Routes, Route } from 'react-router-dom';
 
-import { Permission } from '../../../components/RBACProvider';
+import { Permission } from '../../../features/Auth';
 import { DocumentRBAC, DocumentRBACProps, useDocumentRBAC } from '../DocumentRBAC';
 
 const ALL_PERMISSIONS = [

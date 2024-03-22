@@ -27,6 +27,15 @@ jest.mock('../../format', () => ({
   highlight: jest.fn().mockImplementation((str: string) => str),
 }));
 
+// Utility function to strip ANSI codes and check for message inclusion
+const includesMessageIgnoringAnsi = (loggedCalls: string[], expectedMessage: string) => {
+  // eslint-disable-next-line no-control-regex
+  const ansiStripRegex = /\u001b\[.*?m/g;
+  return loggedCalls
+    .flat()
+    .some((call) => call.replace(ansiStripRegex, '').includes(expectedMessage));
+};
+
 const validCwd = '/__unit_tests__';
 const currentStrapiVersion = '1.0.0';
 
@@ -76,11 +85,21 @@ describe('CodemodRunner', () => {
 
   it('runs codemods successfully', async () => {
     const range = rangeFactory('1.1.1');
-    const codemodRunner = codemodRunnerFactory(projectFactory(validCwd), range).setLogger(
+    const proj = projectFactory(validCwd);
+    const codemodRunner = codemodRunnerFactory(proj, range).setLogger(
       loggerFactory({ debug: true })
     );
+
     const res = await codemodRunner.run(`${validCwd}/src`);
-    expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s) using ${range}`);
+
+    const expectedMessages = [`Found codemods for 1 version(s) using ${range}`, `- v1.1.1 (2)`];
+
+    const debugMock = loggerFactory().debug as jest.Mock;
+
+    expectedMessages.forEach((expectedMessage) =>
+      expect(includesMessageIgnoringAnsi(debugMock.mock.calls, expectedMessage)).toBe(true)
+    );
+
     expect(res.success).toBe(true);
   });
 
@@ -104,7 +123,38 @@ describe('CodemodRunner', () => {
       .onSelectCodemods(selectCodemodsCallback);
     const res = await codemodRunner.run(`${validCwd}/src`);
     expect(selectCodemodsCallback).toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s) using ${range}`);
+
+    const expectedMessages = [
+      `Found codemods for 1 version(s) using ${range}`,
+      `- v1.1.1 (2)`,
+      `- v1.1.2 (2)`,
+    ];
+
+    const debugMock = loggerFactory().debug as jest.Mock;
+
+    expectedMessages.forEach((expectedMessage) =>
+      expect(includesMessageIgnoringAnsi(debugMock.mock.calls, expectedMessage)).toBe(true)
+    );
+
+    expect(res.success).toBe(true);
+  });
+
+  it('returns all codemods when range is undefined', async () => {
+    const range = undefined;
+    const selectCodemodsCallback = jest.fn().mockImplementation((codemods) => codemods);
+    const codemodRunner = codemodRunnerFactory(projectFactory(validCwd), range)
+      .setLogger(logger)
+      .onSelectCodemods(selectCodemodsCallback);
+    const res = await codemodRunner.run(`${validCwd}/src`);
+    expect(selectCodemodsCallback).toHaveBeenCalled();
+
+    const debugMock = loggerFactory().debug as jest.Mock;
+
+    const expectedMessages = [`Found codemods for 2 version(s)`, `- v1.1.1 (2)`, `- v1.1.2 (2)`];
+
+    expectedMessages.forEach((expectedMessage) =>
+      expect(includesMessageIgnoringAnsi(debugMock.mock.calls, expectedMessage)).toBe(true)
+    );
     expect(res.success).toBe(true);
   });
 

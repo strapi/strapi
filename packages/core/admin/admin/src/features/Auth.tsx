@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { auth } from '@strapi/helper-plugin';
 import { useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
@@ -9,18 +8,33 @@ import { useTypedDispatch } from '../core/store/hooks';
 import { setLocale } from '../reducer';
 import {
   useGetMeQuery,
+  useGetMyPermissionsQuery,
+  useLazyCheckPermissionsQuery,
   useLoginMutation,
   useLogoutMutation,
   useRenewTokenMutation,
 } from '../services/auth';
 
-import type { SanitizedAdminUser } from '../../../shared/contracts/shared';
+import type {
+  Permission as PermissionContract,
+  SanitizedAdminUser,
+} from '../../../shared/contracts/shared';
+
+interface Permission
+  extends Pick<PermissionContract, 'action' | 'subject'>,
+    Partial<Omit<PermissionContract, 'action' | 'subject'>> {}
 
 interface AuthContextValue {
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
   ) => Promise<Awaited<ReturnType<ReturnType<typeof useLoginMutation>[0]>>>;
   logout: () => Promise<void>;
+  checkUserHasPermissions: (
+    permissions: Permission[],
+    passedPermissions?: Permission[]
+  ) => Promise<boolean>;
+  permissions: Permission[];
+  refetchPermissions: () => Promise<void>;
   setToken: (token: string | null) => void;
   token: string | null;
   user?: SanitizedAdminUser;
@@ -30,6 +44,10 @@ const [Provider, useAuth] = createContext<AuthContextValue>('Auth');
 
 interface AuthProviderProps {
   children: React.ReactNode;
+  /**
+   * @internal could be removed at any time.
+   */
+  _defaultPermissions?: Permission[];
 }
 
 const STORAGE_KEYS = {
@@ -37,7 +55,7 @@ const STORAGE_KEYS = {
   USER: 'userInfo',
 };
 
-const AuthProvider = ({ children }: AuthProviderProps) => {
+const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps) => {
   const dispatch = useTypedDispatch();
   const [token, setToken] = React.useState<string | null>(() => {
     const token =
@@ -57,6 +75,14 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
      */
     skip: !token,
   });
+  const {
+    data: userPermissions = _defaultPermissions,
+    refetch,
+    isUninitialized,
+  } = useGetMyPermissionsQuery(undefined, {
+    skip: !token,
+  });
+
   const navigate = useNavigate();
 
   const [loginMutation] = useLoginMutation();
@@ -92,13 +118,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [renewTokenMutation, clearStorage, navigate]);
 
-  /**
-   * Backwards compat – store the user info in the session storage
-   *
-   * TODO: V5 remove this and only explicitly set it when required.
-   */
   React.useEffect(() => {
-    auth.setUserInfo(user, true);
     if (user) {
       if (user.preferedLanguage) {
         dispatch(setLocale(user.preferedLanguage));
@@ -106,13 +126,10 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   }, [dispatch, user]);
 
-  /**
-   * Backwards compat – store the token in the session storage
-   *
-   * TODO: V5 remove this and only explicitly set it when required.
-   */
   React.useEffect(() => {
-    auth.setToken(token, false);
+    if (token) {
+      storeToken(token, false);
+    }
   }, [token]);
 
   React.useEffect(() => {
@@ -144,7 +161,7 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
       if ('data' in res) {
         const { token } = res.data;
 
-        auth.setToken(token, rememberMe);
+        storeToken(token, rememberMe);
         setToken(token);
       }
 
@@ -159,11 +176,72 @@ const AuthProvider = ({ children }: AuthProviderProps) => {
     navigate('/auth/login');
   }, [clearStorage, logoutMutation, navigate]);
 
+  const refetchPermissions = React.useCallback(async () => {
+    if (!isUninitialized) {
+      await refetch();
+    }
+  }, [isUninitialized, refetch]);
+
+  const [checkPermissions] = useLazyCheckPermissionsQuery();
+  const checkUserHasPermissions: AuthContextValue['checkUserHasPermissions'] = React.useCallback(
+    async (permissions, passedPermissions) => {
+      if (!permissions || !permissions.length) {
+        return true;
+      }
+
+      const matchingPermissions = permissions.filter(
+        (permission) =>
+          (passedPermissions || userPermissions).findIndex(
+            (perm) => perm.action === permission.action && perm.subject === permission.subject
+          ) >= 0
+      );
+
+      const shouldCheckConditions = matchingPermissions.some(
+        (perm) => Array.isArray(perm.conditions) && perm.conditions.length > 0
+      );
+
+      if (!shouldCheckConditions) {
+        return matchingPermissions.length > 0;
+      }
+
+      const { data, error } = await checkPermissions({
+        permissions: matchingPermissions.map((perm) => ({
+          action: perm.action,
+          subject: perm.subject,
+        })),
+      });
+
+      if (error) {
+        throw error;
+      } else {
+        return data?.data.every((v) => v === true) ?? false;
+      }
+    },
+    [checkPermissions, userPermissions]
+  );
+
   return (
-    <Provider token={token} user={user} login={login} logout={logout} setToken={setToken}>
+    <Provider
+      token={token}
+      user={user}
+      login={login}
+      logout={logout}
+      permissions={userPermissions}
+      checkUserHasPermissions={checkUserHasPermissions}
+      refetchPermissions={refetchPermissions}
+      setToken={setToken}
+    >
       {children}
     </Provider>
   );
 };
 
-export { AuthProvider, useAuth };
+const storeToken = (token: string, persist?: boolean) => {
+  if (!persist) {
+    return window.sessionStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+  }
+  return window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
+};
+
+export { AuthProvider, useAuth, STORAGE_KEYS };
+export type { AuthContextValue, Permission };

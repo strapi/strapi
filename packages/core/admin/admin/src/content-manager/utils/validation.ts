@@ -1,11 +1,11 @@
-import { translatedErrors } from '@strapi/helper-plugin';
 import pipe from 'lodash/fp/pipe';
 import * as yup from 'yup';
 
+import { translatedErrors } from '../../utils/translatedErrors';
 import { DOCUMENT_META_FIELDS } from '../constants/attributes';
 
 import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
-import type { Attribute } from '@strapi/types';
+import type { Schema as SchemaUtils } from '@strapi/types';
 import type { ObjectShape } from 'yup/lib/object';
 
 type AnySchema =
@@ -75,17 +75,21 @@ const createYupSchema = (
                 ...acc,
                 [name]: transformSchema(
                   yup.array().of(
-                    yup.lazy((data: Attribute.GetValue<Attribute.DynamicZone>[number]) => {
-                      const { attributes } = components[data.__component];
+                    yup.lazy(
+                      (
+                        data: SchemaUtils.Attribute.Value<SchemaUtils.Attribute.DynamicZone>[number]
+                      ) => {
+                        const { attributes } = components[data.__component];
 
-                      return yup
-                        .object()
-                        .shape({
-                          __component: yup.string().required().oneOf(Object.keys(components)),
-                        })
-                        .nullable(false)
-                        .concat(createModelSchema(attributes));
-                    }) as unknown as yup.ObjectSchema<any>
+                        return yup
+                          .object()
+                          .shape({
+                            __component: yup.string().required().oneOf(Object.keys(components)),
+                          })
+                          .nullable(false)
+                          .concat(createModelSchema(attributes));
+                      }
+                    ) as unknown as yup.ObjectSchema<any>
                   )
                 ),
               };
@@ -118,7 +122,7 @@ const createYupSchema = (
 
 const createAttributeSchema = (
   attribute: Exclude<
-    Attribute.Any,
+    SchemaUtils.Attribute.AnyAttribute,
     { type: 'dynamiczone' } | { type: 'component' } | { type: 'relation' }
   >
 ) => {
@@ -128,55 +132,38 @@ const createAttributeSchema = (
     case 'boolean':
       return yup.boolean();
     case 'blocks':
-      return yup.mixed().test(
-        'isBlocks',
-        {
-          id: translatedErrors.json,
-          defaultMessage: "This doesn't match the JSON format",
-        },
-        (value) => {
-          if (!value || Array.isArray(value)) {
-            return true;
-          } else {
-            return false;
-          }
+      return yup.mixed().test('isBlocks', translatedErrors.json, (value) => {
+        if (!value || Array.isArray(value)) {
+          return true;
+        } else {
+          return false;
         }
-      );
+      });
     case 'decimal':
     case 'float':
     case 'integer':
       return yup.number();
     case 'email':
-      return yup.string().email({
-        id: translatedErrors.email,
-        defaultMessage: 'This is not a valid email.',
-      });
+      return yup.string().email(translatedErrors.email);
     case 'enumeration':
       return yup.string().oneOf([...attribute.enum, null]);
     case 'json':
-      return yup.mixed().test(
-        'isJSON',
-        {
-          id: translatedErrors.json,
-          defaultMessage: "This doesn't match the JSON format",
-        },
-        (value) => {
-          /**
-           * We don't want to validate the JSON field if it's empty.
-           */
-          if (!value || (typeof value === 'string' && value.length === 0)) {
-            return true;
-          }
-
-          try {
-            JSON.parse(value);
-
-            return true;
-          } catch (err) {
-            return false;
-          }
+      return yup.mixed().test('isJSON', translatedErrors.json, (value) => {
+        /**
+         * We don't want to validate the JSON field if it's empty.
+         */
+        if (!value || (typeof value === 'string' && value.length === 0)) {
+          return true;
         }
-      );
+
+        try {
+          JSON.parse(value);
+
+          return true;
+        } catch (err) {
+          return false;
+        }
+      });
     case 'password':
     case 'richtext':
     case 'string':
@@ -206,7 +193,7 @@ type ValidationFn = (
 const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
   if (attribute.required) {
     return schema.required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'This field is required.',
     });
   }
@@ -224,8 +211,7 @@ const addMinLengthValidation: ValidationFn =
       'min' in schema
     ) {
       return schema.min(attribute.minLength, {
-        id: translatedErrors.minLength,
-        defaultMessage: 'The value is too short (min: {min}).',
+        ...translatedErrors.minLength,
         values: {
           min: attribute.minLength,
         },
@@ -245,8 +231,7 @@ const addMaxLengthValidation: ValidationFn =
       'max' in schema
     ) {
       return schema.max(attribute.maxLength, {
-        id: translatedErrors.maxLength,
-        defaultMessage: 'The value is too long (max: {max}).',
+        ...translatedErrors.maxLength,
         values: {
           max: attribute.maxLength,
         },
@@ -264,8 +249,7 @@ const addMinValidation: ValidationFn =
 
       if ('min' in schema && min) {
         return schema.min(min, {
-          id: translatedErrors.min,
-          defaultMessage: 'The value is too low (min: {min}).',
+          ...translatedErrors.min,
           values: {
             min,
           },
@@ -284,8 +268,7 @@ const addMaxValidation: ValidationFn =
 
       if ('max' in schema && max) {
         return schema.max(max, {
-          id: translatedErrors.max,
-          defaultMessage: 'The value is too high (max: {max}).',
+          ...translatedErrors.max,
           values: {
             max,
           },
@@ -311,9 +294,10 @@ const addRegexValidation: ValidationFn =
     if ('regex' in attribute && attribute.regex && 'matches' in schema) {
       return schema.matches(new RegExp(attribute.regex), {
         message: {
-          id: translatedErrors.regex,
+          id: translatedErrors.regex.id,
           defaultMessage: 'The value does not match the defined pattern.',
         },
+
         excludeEmptyString: !attribute.required,
       }) as TSchema;
     }

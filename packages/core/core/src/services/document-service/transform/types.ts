@@ -1,5 +1,5 @@
-import { Common } from '@strapi/types';
-import { type ID } from './relations/utils/types';
+import type { UID } from '@strapi/types';
+import type { ID } from './relations/utils/types';
 
 export type Data = {
   id?: ID | object;
@@ -8,7 +8,7 @@ export type Data = {
 };
 
 export type Options = {
-  uid: Common.UID.Schema;
+  uid: UID.Schema;
   locale?: string | null;
   status: 'draft' | 'published';
 };

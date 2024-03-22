@@ -1,18 +1,13 @@
 import React from 'react';
 
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import en from '../../../translations/en.json';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
-
-jest.mock('../../../utils/deleteRequest', () => ({
-  ...jest.requireActual('../../../utils/deleteRequest'),
-  deleteRequest: jest.fn().mockResolvedValue({ id: 1 }),
-}));
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
   acc[curr] = `upload.${en[curr]}`;

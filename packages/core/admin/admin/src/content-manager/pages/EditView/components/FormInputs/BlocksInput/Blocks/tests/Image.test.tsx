@@ -1,11 +1,11 @@
 /* eslint-disable testing-library/no-node-access */
 
-import * as React from 'react';
+import { ReactElement } from 'react';
 
-import { act, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { Transforms, createEditor } from 'slate';
+import { act, render as renderRTL, screen } from '@tests/utils';
+import { Editor, Transforms, createEditor } from 'slate';
 
+import { StrapiAppProvider } from '../../../../../../../../features/StrapiApp';
 import { mockImage } from '../../tests/mock-schema';
 import { imageBlocks } from '../Image';
 
@@ -14,27 +14,49 @@ import { Wrapper } from './Wrapper';
 const mockMediaLibraryTitle = 'dialog component';
 const mockMediaLibrarySubmitButton = 'upload images';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useLibrary: jest.fn().mockImplementation(() => ({
-    components: {
-      'media-library': ({
-        onSelectAssets,
-      }: {
-        onSelectAssets: (images: (typeof mockImage)[]) => void;
-      }) => (
-        <div>
-          <p>{mockMediaLibraryTitle}</p>
-          <button type="button" onClick={() => onSelectAssets([mockImage])}>
-            {mockMediaLibrarySubmitButton}
-          </button>
-        </div>
+const render = (ui: ReactElement, { baseEditor }: { baseEditor?: Editor } = {}) =>
+  renderRTL(ui, {
+    renderOptions: {
+      wrapper: ({ children }) => (
+        <Wrapper baseEditor={baseEditor}>
+          <StrapiAppProvider
+            components={{
+              // @ts-expect-error – test mock
+              'media-library': ({
+                onSelectAssets,
+              }: {
+                onSelectAssets: (images: (typeof mockImage)[]) => void;
+              }) => (
+                <div>
+                  <p>{mockMediaLibraryTitle}</p>
+                  <button type="button" onClick={() => onSelectAssets([mockImage])}>
+                    {mockMediaLibrarySubmitButton}
+                  </button>
+                </div>
+              ),
+            }}
+            customFields={{
+              customFields: {},
+              get: jest.fn(),
+              getAll: jest.fn(),
+              register: jest.fn(),
+            }}
+            fields={{}}
+            menu={[]}
+            getAdminInjectedComponents={jest.fn()}
+            getPlugin={jest.fn()}
+            plugins={{}}
+            runHookParallel={jest.fn()}
+            runHookWaterfall={jest.fn().mockImplementation((_name, initialValue) => initialValue)}
+            runHookSeries={jest.fn()}
+            settings={{}}
+          >
+            {children}
+          </StrapiAppProvider>
+        </Wrapper>
       ),
     },
-  })),
-}));
-
-const user = userEvent.setup();
+  });
 
 describe('Image', () => {
   it('renders an image block properly', () => {
@@ -50,10 +72,7 @@ describe('Image', () => {
           'data-slate-node': 'element',
           ref: null,
         },
-      }),
-      {
-        wrapper: Wrapper,
-      }
+      })
     );
 
     const image = screen.getByRole('img', { name: 'Some image' });
@@ -107,8 +126,8 @@ describe('Image', () => {
     const modalComponent = imageBlocks.image.handleConvert!(baseEditor);
     expect(modalComponent).toBeDefined();
     const modalUi = modalComponent!();
-    render(modalUi, {
-      wrapper: ({ children }) => <Wrapper baseEditor={baseEditor}>{children}</Wrapper>,
+    const { user } = render(modalUi, {
+      baseEditor,
     });
 
     // No changes should have been made to the editor yet
@@ -154,8 +173,8 @@ describe('Image', () => {
     const modalComponent = imageBlocks.image.handleConvert!(baseEditor);
     expect(modalComponent).toBeDefined();
     const modalUi = modalComponent!();
-    render(modalUi, {
-      wrapper: ({ children }) => <Wrapper baseEditor={baseEditor}>{children}</Wrapper>,
+    const { user } = render(modalUi, {
+      baseEditor,
     });
 
     // Fake an image upload, then nodes should be created
