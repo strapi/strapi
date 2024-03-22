@@ -7,6 +7,7 @@ import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { releaseApi } from './services/release';
 
+import type { BulkActionComponent } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 // eslint-disable-next-line import/no-default-export
@@ -44,7 +45,7 @@ const admin: Plugin.Config.AdminInput = {
         Component: CMReleasesContainer,
       });
 
-      app.plugins['content-manager'].apis.addBulkAction((actions) => {
+      app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
         // We want to add this action to just before the delete action all the time
         const deleteActionIndex = actions.findIndex((action) => action.name === 'DeleteAction');
 

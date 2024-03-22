@@ -5,6 +5,8 @@
  * main StrapiApp class.
  */
 
+import { Common } from '@strapi/types';
+
 import {
   DEFAULT_BULK_ACTIONS,
   type BulkActionDescription,
@@ -36,7 +38,7 @@ interface Context {
   /**
    * The current content-type's model.
    */
-  model: string;
+  model: Common.UID.ContentType;
 }
 
 interface BulkActionComponentProps extends Omit<Context, 'id' | 'entity'> {

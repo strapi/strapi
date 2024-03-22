@@ -100,7 +100,7 @@ const ReleaseAction: BulkActionComponent = ({ ids, model }) => {
       );
 
       const notificationWithoutMessage = {
-        type: 'success',
+        type: 'success' as const,
         title: formatMessage(
           {
             id: 'content-releases.content-manager-list-view.add-to-release.notification.success.title',
@@ -119,7 +119,6 @@ const ReleaseAction: BulkActionComponent = ({ ids, model }) => {
             message: notificationMessage,
           }
         : notificationWithoutMessage;
-
       toggleNotification(notification);
 
       return true;

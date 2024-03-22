@@ -8,7 +8,6 @@ import {
   DialogFooter,
   DialogProps,
   Flex,
-  ModalBody,
   ModalHeader,
   ModalLayout,
   Typography,
@@ -23,6 +22,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import { Common } from '@strapi/types';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useIntl } from 'react-intl';
 import { useQueryClient, useMutation } from 'react-query';
@@ -94,7 +94,7 @@ const BulkActionsRenderer = () => {
   const { selectedEntries } = useTableContext();
 
   const { slug, collectionType } = useParams<{
-    slug: string;
+    slug: Common.UID.ContentType;
     collectionType: string;
   }>();
 
