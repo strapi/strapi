@@ -6,6 +6,7 @@ import {
   createHash,
   getNameFromTokens,
   getShortenedName,
+  getUnshortenedName,
 } from '../shortener';
 
 describe('identifiers', () => {
@@ -50,7 +51,7 @@ describe('identifiers', () => {
     });
   });
 
-  describe('tokenWithHash', () => {
+  describe('getShortenedName', () => {
     test('does not add hash when len == input length', () => {
       const res = getShortenedName('1234567890', 10);
       expect(res).toEqual('1234567890');
@@ -163,6 +164,20 @@ describe('identifiers', () => {
       expect(name).toEqual('1234cd65a_12345_links');
     });
 
+    test('uses shortname when available for incompressible links', () => {
+      const name = getNameFromTokens(
+        [
+          { name: '1234567890', compressible: true },
+          { name: '12345', compressible: true },
+          { name: 'links', compressible: false, shortName: 'lnk' },
+        ],
+        {
+          maxLength: 21,
+        }
+      );
+      expect(name).toEqual('1234567890_12345_lnk');
+    });
+
     test('throws when cannot compress without violating min length rules', () => {
       expect(() =>
         getNameFromTokens(
@@ -270,65 +285,82 @@ describe('identifiers', () => {
       expect(name.length).toEqual(30);
       expect(name).toEqual('1234cd65a_12345_0984addb_links');
     });
+    test('shortens strings that do not fit in min length (three compressible, prefix)', () => {
+      const name = getNameFromTokens(
+        [
+          { name: 'inv_order', compressible: false },
+          { name: '1234567890', compressible: true },
+          { name: '12345', compressible: true },
+          { name: '0987654321', compressible: true },
+        ],
+        {
+          maxLength: 34,
+        }
+      );
+      expect(name.length).toEqual(34);
+      expect(name).toEqual('inv_order_1234cd65a_12345_0984addb');
+    });
+    test('shortens strings that do not fit in min length (three compressible, suffix, prefix, and infix)', () => {
+      const name = getNameFromTokens(
+        [
+          { name: 'pre', compressible: false },
+          { name: '1234567890', compressible: true },
+          { name: 'in', compressible: false },
+          { name: '3456789012', compressible: true },
+          { name: 'post', compressible: false },
+        ],
+        {
+          maxLength: 31,
+        }
+      );
+      expect(name.length).toEqual(31);
+      expect(name).toEqual('pre_1234cd65a_in_3456be378_post');
+    });
+    test('redistributes perfectly to max length even with same length long strings where one must be shortened (three compressible, suffix, prefix, and infix)', () => {
+      const name = getNameFromTokens(
+        [
+          { name: 'pre', compressible: false },
+          { name: '1234567890', compressible: true },
+          { name: 'in', compressible: false },
+          { name: '3456789012', compressible: true },
+          { name: 'post', compressible: false },
+        ],
+        {
+          maxLength: 32,
+        }
+      );
+      expect(name.length).toEqual(32);
+      expect(name).toEqual('pre_1234567890_in_3456be378_post');
+    });
+    test('works for max length incompressibles', () => {
+      const name = getNameFromTokens(
+        [
+          { name: '1234567890', compressible: false },
+          { name: '2345678901', compressible: false },
+          { name: '3456789012', compressible: false },
+        ],
+        {
+          maxLength: 34,
+        }
+      );
+      expect(name).toEqual('1234567890_2345678901_3456789012');
+    });
   });
-  test('shortens strings that do not fit in min length (three compressible, prefix)', () => {
-    const name = getNameFromTokens(
-      [
-        { name: 'inv_order', compressible: false },
-        { name: '1234567890', compressible: true },
-        { name: '12345', compressible: true },
-        { name: '0987654321', compressible: true },
-      ],
-      {
-        maxLength: 34,
-      }
-    );
-    expect(name.length).toEqual(34);
-    expect(name).toEqual('inv_order_1234cd65a_12345_0984addb');
-  });
-  test('shortens strings that do not fit in min length (three compressible, suffix, prefix, and infix)', () => {
-    const name = getNameFromTokens(
-      [
-        { name: 'pre', compressible: false },
-        { name: '1234567890', compressible: true },
-        { name: 'in', compressible: false },
-        { name: '3456789012', compressible: true },
-        { name: 'post', compressible: false },
-      ],
-      {
-        maxLength: 31,
-      }
-    );
-    expect(name.length).toEqual(31);
-    expect(name).toEqual('pre_1234cd65a_in_3456be378_post');
-  });
-  test('redistributes perfectly to max length even with same length long strings where one must be shortened (three compressible, suffix, prefix, and infix)', () => {
-    const name = getNameFromTokens(
-      [
-        { name: 'pre', compressible: false },
-        { name: '1234567890', compressible: true },
-        { name: 'in', compressible: false },
-        { name: '3456789012', compressible: true },
-        { name: 'post', compressible: false },
-      ],
-      {
-        maxLength: 32,
-      }
-    );
-    expect(name.length).toEqual(32);
-    expect(name).toEqual('pre_1234567890_in_3456be378_post');
-  });
-  test('works for max length incompressibles', () => {
-    const name = getNameFromTokens(
-      [
-        { name: '1234567890', compressible: false },
-        { name: '2345678901', compressible: false },
-        { name: '3456789012', compressible: false },
-      ],
-      {
-        maxLength: 34,
-      }
-    );
-    expect(name).toEqual('1234567890_2345678901_3456789012');
+  describe('full name mapping', () => {
+    test('dsfgsdfg', () => {
+      const options = { maxLength: 21 };
+
+      const name = getNameFromTokens(
+        [
+          { name: '1234567890', compressible: true },
+          { name: '12345', compressible: true },
+          { name: 'links', compressible: false, shortName: 'lnk' },
+        ],
+        options
+      );
+      expect(name).toEqual('1234567890_12345_lnk');
+      const unshortenedName = getUnshortenedName(name, options);
+      expect(unshortenedName).toEqual('1234567890_12345_links');
+    });
   });
 });
