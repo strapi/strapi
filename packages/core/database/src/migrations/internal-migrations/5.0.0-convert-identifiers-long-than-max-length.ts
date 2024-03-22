@@ -50,7 +50,7 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
         const hasColumn = await knex.schema.hasColumn(tableName, full.columnName);
 
         if (hasColumn) {
-          await knex.schema.table(tableName, async (table) => {
+          await knex.schema.alterTable(tableName, async (table) => {
             debug(`renaming column ${full.columnName} to ${short.columnName}`);
             table.renameColumn(full.columnName, short.columnName);
           });
