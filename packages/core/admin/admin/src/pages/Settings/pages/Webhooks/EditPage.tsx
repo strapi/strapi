@@ -1,8 +1,7 @@
 import * as React from 'react';
 
 import { Main } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
-import { Webhook } from '@strapi/types';
+import { Modules } from '@strapi/types';
 import { FormikHelpers } from 'formik';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
@@ -11,6 +10,8 @@ import { useNavigate, useMatch } from 'react-router-dom';
 import { CreateWebhook, TriggerWebhook } from '../../../../../../shared/contracts/webhooks';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 
@@ -25,7 +26,7 @@ const cleanData = (
   data: WebhookFormValues
 ): Omit<CreateWebhook.Request['body'], 'id' | 'isEnabled'> => ({
   ...data,
-  headers: data.headers.reduce<Webhook['headers']>((acc, { key, value }) => {
+  headers: data.headers.reduce<Modules.WebhookStore.Webhook['headers']>((acc, { key, value }) => {
     if (key !== '') {
       acc[key] = value;
     }
@@ -41,7 +42,7 @@ const EditPage = () => {
   const isCreating = id === 'create';
 
   const navigate = useNavigate();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
@@ -59,7 +60,7 @@ const EditPage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -73,7 +74,7 @@ const EditPage = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -83,11 +84,11 @@ const EditPage = () => {
       setTriggerResponse(res.data);
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     } finally {
       setIsTriggering(false);
@@ -107,7 +108,7 @@ const EditPage = () => {
             formik.setErrors(formatValidationErrors(res.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(res.error),
             });
           }
@@ -117,7 +118,7 @@ const EditPage = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: 'Settings.webhooks.created' },
+          message: formatMessage({ id: 'Settings.webhooks.created' }),
         });
 
         navigate(res.data.id, { replace: true });
@@ -129,7 +130,7 @@ const EditPage = () => {
             formik.setErrors(formatValidationErrors(res.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(res.error),
             });
           }
@@ -139,16 +140,16 @@ const EditPage = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.form.success.fields' },
+          message: formatMessage({ id: 'notification.form.success.fields' }),
         });
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     }
   };

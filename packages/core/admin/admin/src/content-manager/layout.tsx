@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { AnyAction } from '@reduxjs/toolkit';
 import { Layout as DSLayout } from '@strapi/design-system';
-import produce from 'immer';
+import { produce } from 'immer';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
@@ -137,13 +137,7 @@ function renderDraglayerItem({ type, item }: Parameters<DragLayerProps['renderIt
       return <ComponentDragPreview displayedValue={item.displayedValue} />;
 
     case ItemTypes.RELATION:
-      return (
-        <RelationDragPreview
-          displayedValue={item.displayedValue}
-          status={item.status}
-          width={item.width}
-        />
-      );
+      return <RelationDragPreview {...item} />;
 
     default:
       return null;

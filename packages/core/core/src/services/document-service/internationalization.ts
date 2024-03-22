@@ -1,15 +1,15 @@
-import type { Schema, Documents } from '@strapi/types';
+import type { Struct, Modules } from '@strapi/types';
 import { curry, assoc } from 'lodash/fp';
 
 type Transform = (
-  contentType: Schema.SingleType | Schema.CollectionType,
-  params: Documents.Params.All
-) => Documents.Params.All;
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
+  params: Modules.Documents.Params.All
+) => Modules.Documents.Params.All;
 
 type AsyncTransform = (
-  contentType: Schema.SingleType | Schema.CollectionType,
-  params: Documents.Params.All
-) => Promise<Documents.Params.All>;
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
+  params: Modules.Documents.Params.All
+) => Promise<Modules.Documents.Params.All>;
 
 const getDefaultLocale = async (): Promise<string> => {
   return strapi.plugin('i18n').service('locales').getDefaultLocale();

@@ -1,7 +1,5 @@
 import { fixtures } from '@strapi/admin-test-utils';
 
-import { Permission } from '../src/components/RBACProvider';
-
 /**
  * This is for the redux store in `utils`.
  * The more we adopt it, the bigger it will get – which is okay.
@@ -176,26 +174,6 @@ const initialState = {
     ],
     singleTypeLinks: [],
     isLoading: true,
-  },
-  rbacProvider: {
-    allPermissions: fixtures.permissions.allPermissions,
-    collectionTypesRelatedPermissions: fixtures.permissions.allPermissions
-      .filter((perm) => perm.subject)
-      .reduce<Record<string, Record<string, Permission[]>>>((acc, current) => {
-        const { subject, action } = current;
-
-        if (!subject) return acc;
-
-        if (!acc[subject]) {
-          acc[subject] = {};
-        }
-
-        acc[subject] = acc[subject][action]
-          ? { ...acc[subject], [action]: [...acc[subject][action], current] }
-          : { ...acc[subject], [action]: [current] };
-
-        return acc;
-      }, {}),
   },
 };
 

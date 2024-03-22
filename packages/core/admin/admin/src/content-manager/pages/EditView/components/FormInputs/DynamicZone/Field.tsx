@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
-import { useNotification } from '@strapi/helper-plugin';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
 import { createContext } from '../../../../../../components/Context';
 import { InputProps, useField, useForm } from '../../../../../../components/Form';
+import { useNotification } from '../../../../../../features/Notifications';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
@@ -19,7 +19,7 @@ import { ComponentPicker } from './ComponentPicker';
 import { DynamicComponent, DynamicComponentProps } from './DynamicComponent';
 import { DynamicZoneLabel } from './DynamicZoneLabel';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface DynamicZoneContextValue {
   isInDynamicZone: boolean;
@@ -59,10 +59,12 @@ const DynamicZone = ({
     })
   );
 
-  const { value = [], error } =
-    useField<Array<Attribute.GetValue<Attribute.DynamicZone>[number] & { __temp_key__: number }>>(
-      name
-    );
+  type DzWithTempKey =
+    Schema.Attribute.GetDynamicZoneValue<Schema.Attribute.DynamicZone>[number] & {
+      __temp_key__: number;
+    };
+
+  const { value = [], error } = useField<Array<DzWithTempKey>>(name);
 
   const dynamicComponentsByCategory = React.useMemo(() => {
     return attribute.components.reduce<
@@ -84,7 +86,7 @@ const DynamicZone = ({
 
   const { formatMessage } = useIntl();
 
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
 
   const dynamicDisplayedComponentsLength = value.length;
 
@@ -109,7 +111,9 @@ const DynamicZone = ({
     } else {
       toggleNotification({
         type: 'info',
-        message: { id: getTranslation('components.notification.info.maximum-requirement') },
+        message: formatMessage({
+          id: getTranslation('components.notification.info.maximum-requirement'),
+        }),
       });
     }
   };

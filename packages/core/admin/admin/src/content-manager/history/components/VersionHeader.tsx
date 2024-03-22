@@ -2,12 +2,12 @@ import * as React from 'react';
 
 import { HeaderLayout, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { ArrowLeft } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink, useParams, type To } from 'react-router-dom';
 
+import { useQueryParams } from '../../../hooks/useQueryParams';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useHistoryContext } from '../pages/History';
 

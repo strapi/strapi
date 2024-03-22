@@ -1,6 +1,6 @@
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export default async ({ strapi }: { strapi: LoadedStrapi }) => {
+export default async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const actions = [
     {
       section: 'plugins',

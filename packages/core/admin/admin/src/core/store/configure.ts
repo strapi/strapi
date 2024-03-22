@@ -6,7 +6,6 @@ import {
   combineReducers,
 } from '@reduxjs/toolkit';
 
-import { RBACReducer, RBACState } from '../../components/RBACProvider';
 import { reducer as cmAppReducer, ContentManagerAppState } from '../../content-manager/layout';
 import { reducer as contentManagerReducers } from '../../content-manager/modules/reducers';
 import { contentManagerApi } from '../../content-manager/services/api';
@@ -19,7 +18,6 @@ import { adminApi } from '../../services/api';
 const staticReducers = {
   [adminApi.reducerPath]: adminApi.reducer,
   admin_app: appReducer,
-  rbacProvider: RBACReducer,
   'content-manager_app': cmAppReducer,
   [contentManagerApi.reducerPath]: contentManagerApi.reducer,
   'content-manager': contentManagerReducers,
@@ -101,12 +99,4 @@ type RootState = ReturnType<Store['getState']>;
 type Dispatch = Store['dispatch'];
 
 export { configureStoreImpl as configureStore };
-export type {
-  RootState,
-  Dispatch,
-  AppState,
-  RBACState,
-  Store,
-  PreloadState,
-  ContentManagerAppState,
-};
+export type { RootState, Dispatch, AppState, Store, PreloadState, ContentManagerAppState };

@@ -9,6 +9,7 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
+import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManagerProvider/DataManagerProvider';
 import { FormModalNavigationProvider } from '../../components/FormModalNavigationProvider/FormModalNavigationProvider';
@@ -36,20 +37,22 @@ const App = () => {
   return (
     <Page.Protect permissions={PERMISSIONS.main}>
       <Helmet title={title} />
-      <FormModalNavigationProvider>
-        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-        {/* @ts-ignore */}
-        <DataManagerProvider>
-          <Layout sideNav={<ContentTypeBuilderNav />}>
-            <Suspense fallback={<Page.Loading />}>
-              <Routes>
-                <Route path="content-types/:uid" element={<ListView />} />
-                <Route path={`component-categories/:categoryUid/*`} element={<RecursivePath />} />
-              </Routes>
-            </Suspense>
-          </Layout>
-        </DataManagerProvider>
-      </FormModalNavigationProvider>
+      <AutoReloadOverlayBlockerProvider>
+        <FormModalNavigationProvider>
+          {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
+          {/* @ts-ignore */}
+          <DataManagerProvider>
+            <Layout sideNav={<ContentTypeBuilderNav />}>
+              <Suspense fallback={<Page.Loading />}>
+                <Routes>
+                  <Route path="content-types/:uid" element={<ListView />} />
+                  <Route path={`component-categories/:categoryUid/*`} element={<RecursivePath />} />
+                </Routes>
+              </Suspense>
+            </Layout>
+          </DataManagerProvider>
+        </FormModalNavigationProvider>
+      </AutoReloadOverlayBlockerProvider>
     </Page.Protect>
   );
 };

@@ -1,4 +1,4 @@
-import type { Common, Entity } from '@strapi/types';
+import type { UID, Data } from '@strapi/types';
 
 export const getService = (
   name: 'release' | 'release-validation' | 'scheduling' | 'release-action' | 'event-manager',
@@ -8,8 +8,8 @@ export const getService = (
 };
 
 export const getPopulatedEntry = async (
-  contentTypeUid: Common.UID.ContentType,
-  entryId: Entity.ID,
+  contentTypeUid: UID.ContentType,
+  entryId: Data.ID,
   { strapi } = { strapi: global.strapi }
 ) => {
   const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
@@ -25,8 +25,8 @@ export const getPopulatedEntry = async (
 };
 
 export const getEntryValidStatus = async (
-  contentTypeUid: Common.UID.ContentType,
-  entry: { id: Entity.ID; [key: string]: any },
+  contentTypeUid: UID.ContentType,
+  entry: { id: Data.ID; [key: string]: any },
   { strapi } = { strapi: global.strapi }
 ) => {
   try {

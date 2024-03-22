@@ -1,10 +1,10 @@
-import { Entity } from '@strapi/types';
-
 import * as Permissions from '../../../shared/contracts/permissions';
 import * as Roles from '../../../shared/contracts/roles';
 import * as Users from '../../../shared/contracts/user';
 
 import { adminApi } from './api';
+
+import type { Data } from '@strapi/types';
 
 const usersService = adminApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -199,7 +199,7 @@ type GetRolesParams =
   | Roles.FindRole.Request['params']
   | (Roles.FindRoles.Request['query'] & { id?: never });
 interface GetRolePermissionsParams {
-  id: Entity.ID;
+  id: Data.ID;
 }
 
 const {

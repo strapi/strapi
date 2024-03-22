@@ -1,13 +1,16 @@
-import type { CoreApi, Schema, Documents } from '@strapi/types';
+import type { Core, Struct, Modules } from '@strapi/types';
 
 import { getPaginationInfo, shouldCount, transformPaginationResponse } from './pagination';
 
 import { CoreService } from './core-service';
 
-export class CollectionTypeService extends CoreService implements CoreApi.Service.CollectionType {
-  private contentType: Schema.CollectionType;
+export class CollectionTypeService
+  extends CoreService
+  implements Core.CoreAPI.Service.CollectionType
+{
+  private contentType: Struct.CollectionTypeSchema;
 
-  constructor(contentType: Schema.CollectionType) {
+  constructor(contentType: Struct.CollectionTypeSchema) {
     super();
 
     this.contentType = contentType;
@@ -44,7 +47,7 @@ export class CollectionTypeService extends CoreService implements CoreApi.Servic
     };
   }
 
-  findOne(documentId: Documents.ID, params = {}) {
+  findOne(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
     return strapi.documents(uid).findOne(documentId, this.getFetchParams(params));
@@ -56,13 +59,13 @@ export class CollectionTypeService extends CoreService implements CoreApi.Servic
     return strapi.documents(uid).create(this.getFetchParams(params));
   }
 
-  update(docId: Documents.ID, params = { data: {} }) {
+  update(docId: Modules.Documents.ID, params = { data: {} }) {
     const { uid } = this.contentType;
 
     return strapi.documents(uid).update(docId, this.getFetchParams(params));
   }
 
-  async delete(docId: Documents.ID, params = {}) {
+  async delete(docId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
     return strapi.documents(uid).delete(docId, this.getFetchParams(params));
@@ -75,8 +78,8 @@ export class CollectionTypeService extends CoreService implements CoreApi.Servic
  */
 
 const createCollectionTypeService = (
-  contentType: Schema.CollectionType
-): CoreApi.Service.CollectionType => {
+  contentType: Struct.CollectionTypeSchema
+): Core.CoreAPI.Service.CollectionType => {
   return new CollectionTypeService(contentType);
 };
 

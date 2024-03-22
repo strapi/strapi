@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
-import { useCustomFields } from '@strapi/helper-plugin';
 import {
   Blocks,
   Boolean,
@@ -19,9 +18,11 @@ import {
   Uid,
 } from '@strapi/icons';
 
-import type { Attribute } from '@strapi/types';
+import { useStrapiApp } from '../../features/StrapiApp';
 
-const iconByTypes: Record<Attribute.Kind, React.ReactElement> = {
+import type { Schema } from '@strapi/types';
+
+const iconByTypes: Record<Schema.Attribute.Kind, React.ReactElement> = {
   biginteger: <Number />,
   boolean: <Boolean />,
   date: <Date />,
@@ -52,7 +53,7 @@ interface FieldTypeIconProps {
 }
 
 const FieldTypeIcon = ({ type, customFieldUid }: FieldTypeIconProps) => {
-  const customFieldsRegistry = useCustomFields();
+  const getCustomField = useStrapiApp('FieldTypeIcon', (state) => state.customFields.get);
 
   if (!type) {
     return null;
@@ -61,7 +62,7 @@ const FieldTypeIcon = ({ type, customFieldUid }: FieldTypeIconProps) => {
   let Compo = iconByTypes[type];
 
   if (customFieldUid) {
-    const customField = customFieldsRegistry.get(customFieldUid);
+    const customField = getCustomField(customFieldUid);
     const CustomFieldIcon = customField?.icon;
 
     if (CustomFieldIcon) {

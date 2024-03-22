@@ -1,6 +1,6 @@
 import { addColumnToTableHook } from '../listView';
 
-import type { ListFieldLayout, ListLayout } from '@strapi/strapi/admin';
+import type { ListFieldLayout, ListLayout } from '@strapi/admin/strapi-admin';
 
 describe('addColumnToTableHook', () => {
   const DEFAULT_FIELD: ListFieldLayout = {
@@ -24,7 +24,6 @@ describe('addColumnToTableHook', () => {
     },
     metadatas: {},
     options: {
-      // @ts-expect-error – it's injected by this plugin
       i18n: {
         localized: false,
       },
@@ -59,7 +58,6 @@ describe('addColumnToTableHook', () => {
       layout: {
         ...DEFAULT_LAYOUT,
         options: {
-          // @ts-expect-error – it's injected by this plugin
           i18n: {
             localized: true,
           },

@@ -1,18 +1,17 @@
-import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
+import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
+import { Page } from '../../components/PageHelpers';
 import { getTranslation } from '../utils/translations';
 
 const NoContentType = () => {
   const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
 
   return (
-    <Main>
+    <Page.Main>
       <HeaderLayout
         title={formatMessage({
           id: getTranslation('header.name'),
@@ -45,7 +44,7 @@ const NoContentType = () => {
           shadow="tableShadow"
         />
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };
 

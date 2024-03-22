@@ -1,14 +1,14 @@
 import React from 'react';
 
-import { useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { useFolderStructure } from '../useFolderStructure';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('@strapi/admin/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/admin/strapi-admin'),
   useFetchClient: jest.fn().mockReturnValue({
     get: jest.fn().mockResolvedValue({
       data: {

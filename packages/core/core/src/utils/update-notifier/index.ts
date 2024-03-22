@@ -5,7 +5,7 @@ import semver from 'semver';
 import boxen from 'boxen';
 import chalk from 'chalk';
 import { env } from '@strapi/utils';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const pkg = require('../../../package.json');
@@ -31,7 +31,7 @@ Check out the new releases at: ${releaseLink}
 `.trim();
 };
 
-export const createUpdateNotifier = (strapi: Strapi) => {
+export const createUpdateNotifier = (strapi: Core.Strapi) => {
   let config: InstanceType<typeof Configstore>;
 
   try {

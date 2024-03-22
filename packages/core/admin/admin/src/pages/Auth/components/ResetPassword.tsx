@@ -1,8 +1,9 @@
+import * as React from 'react';
+
 import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { translatedErrors, useAPIErrorHandler, useQuery } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate, Navigate } from 'react-router-dom';
+import { NavLink, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { ResetPassword } from '../../../../../shared/contracts/authentication';
@@ -10,6 +11,7 @@ import { Form } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import { useAuth } from '../../../features/Auth';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import {
   Column,
   LayoutContent,
@@ -17,12 +19,13 @@ import {
 } from '../../../layouts/UnauthenticatedLayout';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
+import { translatedErrors } from '../../../utils/translatedErrors';
 
 const RESET_PASSWORD_SCHEMA = yup.object().shape({
   password: yup
     .string()
     .min(8, {
-      id: translatedErrors.minLength,
+      id: translatedErrors.minLength.id,
       defaultMessage: 'Password must be at least 8 characters',
       values: { min: 8 },
     })
@@ -45,13 +48,13 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
       },
     })
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Password is required',
     }),
   confirmPassword: yup
     .string()
     .required({
-      id: translatedErrors.required,
+      id: translatedErrors.required.id,
       defaultMessage: 'Confirm password is required',
     })
     .oneOf([yup.ref('password'), null], {
@@ -63,7 +66,8 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
 const ResetPassword = () => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const query = useQuery();
+  const { search: searchString } = useLocation();
+  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const setToken = useAuth('ResetPassword', (state) => state.setToken);

@@ -3,11 +3,11 @@ import get from 'lodash/get';
 import { makeUnique } from '../../../utils/makeUnique';
 
 import type { Component, AttributeType, Components } from '../../../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 const retrieveComponentsThatHaveComponents = (allComponents: Components) => {
   const componentsThatHaveNestedComponents = Object.keys(allComponents).reduce(
-    (acc: UID.Component[], current) => {
+    (acc: Internal.UID.Component[], current) => {
       const currentComponent = get(allComponents, [current]);
       const uid = currentComponent.uid;
 

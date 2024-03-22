@@ -1,8 +1,8 @@
-import { EntityService, Common } from '@strapi/types';
+import type { UID, Modules } from '@strapi/types';
 
 import { errors } from '@strapi/utils';
 
-type Entity = EntityService.Result<Common.UID.Schema>;
+type Entity = Modules.EntityService.Result<UID.Schema>;
 
 /**
  * POST /uid/generate

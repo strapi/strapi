@@ -1,15 +1,15 @@
 import { memo, useEffect, useMemo, useRef, ReactNode } from 'react';
 
-import { Page, useGuidedTour } from '@strapi/admin/strapi-admin';
 import {
-  useAppInfo,
-  useAutoReloadOverlayBlocker,
-  useFetchClient,
-  useNotification,
-  useRBACProvider,
-  useStrapiApp,
+  Page,
+  useGuidedTour,
   useTracking,
-} from '@strapi/helper-plugin';
+  useStrapiApp,
+  useNotification,
+  useAppInfo,
+  useFetchClient,
+  useAuth,
+} from '@strapi/admin/strapi-admin';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';
 import set from 'lodash/set';
@@ -23,6 +23,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad } from '../../utils/getTrad';
 import { makeUnique } from '../../utils/makeUnique';
+import { useAutoReloadOverlayBlocker } from '../AutoReloadOverlayBlocker';
 import { FormModal } from '../FormModal/FormModal';
 
 import {
@@ -42,6 +43,7 @@ import {
   REMOVE_FIELD_FROM_DISPLAYED_COMPONENT,
   SET_MODIFIED_DATA,
   UPDATE_SCHEMA,
+  UPDATE_INITIAL_STATE,
 } from './constants';
 import { makeSelectDataManagerProvider } from './selectors';
 import { formatMainDataType, getComponentsToPost, sortContentType } from './utils/cleanData';
@@ -56,7 +58,7 @@ import { serverRestartWatcher } from './utils/serverRestartWatcher';
 import { validateSchema } from './utils/validateSchema';
 
 import type { ContentType, SchemaType, Components } from '../../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 interface DataManagerProviderProps {
   children: ReactNode;
@@ -65,7 +67,7 @@ interface DataManagerProviderProps {
 interface CustomFieldAttributeParams {
   attributeToSet: Record<string, any>;
   forTarget: SchemaType;
-  targetUid: UID.Any;
+  targetUid: Internal.UID.Schema;
   initialAttribute: Record<string, any>;
 }
 
@@ -80,17 +82,17 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     modifiedData,
     reservedNames,
   } = useSelector(makeSelectDataManagerProvider());
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const setCurrentStep = useGuidedTour('DataManagerProvider', (state) => state.setCurrentStep);
 
-  const { getPlugin } = useStrapiApp();
+  const getPlugin = useStrapiApp('DataManagerProvider', (state) => state.getPlugin);
 
   const plugin = getPlugin(pluginId);
-  const { autoReload } = useAppInfo();
+  const autoReload = useAppInfo('DataManagerProvider', (state) => state.autoReload);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { refetchPermissions } = useRBACProvider();
+  const refetchPermissions = useAuth('DataManagerProvider', (state) => state.refetchPermissions);
   const { pathname } = useLocation();
   const { onCloseModal } = useFormModalNavigation();
   const contentTypeMatch = useMatch(`/plugins/${pluginId}/content-types/:uid`);
@@ -143,8 +145,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };
@@ -172,7 +174,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     if (!autoReload) {
       toggleNotification({
         type: 'info',
-        message: { id: getTrad('notification.info.autoreaload-disable') },
+        message: formatMessage({ id: getTrad('notification.info.autoreaload-disable') }),
       });
     }
   }, [autoReload, toggleNotification]);
@@ -180,7 +182,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const addAttribute = (
     attributeToSet: Record<string, any>,
     forTarget: SchemaType,
-    targetUid: UID.Any,
+    targetUid: Internal.UID.Schema,
     isEditing = false,
     initialAttribute?: Record<string, any>,
     shouldAddComponentToData = false
@@ -241,7 +243,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const createSchema = (
     data: Record<string, any>,
     schemaType: SchemaType,
-    uid: UID.Any,
+    uid: Internal.UID.Schema,
     componentCategory?: string,
     shouldAddComponentToData = false
   ) => {
@@ -313,8 +315,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -364,8 +366,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -395,8 +397,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     } catch (err) {
       console.error({ err });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -498,7 +500,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         components: getComponentsToPost(
           modifiedData.components as Components,
           components as Components,
-          currentUid as UID.Any
+          currentUid as Internal.UID.Schema
         ),
       };
 
@@ -516,12 +518,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
         if (!isValidSchema) {
           toggleNotification({
-            type: 'warning',
-            message: {
+            type: 'danger',
+            message: formatMessage({
               id: getTrad('notification.error.dynamiczone-min.validation'),
               defaultMessage:
                 'At least one component is required in a dynamic zone to be able to save a content type',
-            },
+            }),
           });
 
           return;
@@ -552,7 +554,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       await serverRestartWatcher(true);
 
       // Unlock the app
-      await unlockAppWithAutoreload?.();
+      unlockAppWithAutoreload?.();
 
       if (
         isCreating &&
@@ -576,6 +578,10 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         trackUsage('didSaveComponent');
       }
 
+      // refetch and update initial state after the data has been saved
+      await getDataRef.current();
+      dispatch({ type: UPDATE_INITIAL_STATE });
+
       // Update the app's permissions
       await updatePermissions();
     } catch (err: any) {
@@ -585,8 +591,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
       console.error({ err: err.response });
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     } finally {
       unlockAppWithAutoreload?.();
@@ -602,7 +608,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const updateSchema = (
     data: Record<string, any>,
     schemaType: SchemaType,
-    componentUID: UID.Any
+    componentUID: Internal.UID.Schema
   ) => {
     dispatch({
       type: UPDATE_SCHEMA,

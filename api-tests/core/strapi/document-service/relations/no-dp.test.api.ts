@@ -1,23 +1,24 @@
 /**
  * Relations interactions with non DP content types.
  */
-import { LoadedStrapi, Common } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
+
 import { testInTransaction } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 
-let strapi: LoadedStrapi;
+let strapi: Core.LoadedStrapi;
 const builder = createTestBuilder();
 let productDocuments;
 let tagDocuments;
 let shopDocuments;
 let rq;
 
-const PRODUCT_UID = 'api::product.product' as Common.UID.ContentType;
-const TAG_UID = 'api::tag.tag' as Common.UID.ContentType;
-const SHOP_UID = 'api::shop.shop' as Common.UID.ContentType;
+const PRODUCT_UID = 'api::product.product' as UID.ContentType;
+const TAG_UID = 'api::tag.tag' as UID.ContentType;
+const SHOP_UID = 'api::shop.shop' as UID.ContentType;
 
 const productModel = {
   attributes: {

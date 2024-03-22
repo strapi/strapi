@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useNotification, useQueryParams } from '@strapi/helper-plugin';
-
+import { useNotification } from '../../../../../../../../admin/src/features/Notifications';
+import { useAPIErrorHandler } from '../../../../../../../../admin/src/hooks/useAPIErrorHandler';
+import { useQueryParams } from '../../../../../../../../admin/src/hooks/useQueryParams';
 import { useAdminUsers } from '../../../../../../../../admin/src/services/users';
 import { useGetAuditLogsQuery } from '../../../../../services/auditLogs';
 
@@ -12,7 +13,7 @@ export const useAuditLogsData = ({
   canReadAuditLogs: boolean;
   canReadUsers: boolean;
 }) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const [{ query }] = useQueryParams();
 
@@ -31,7 +32,7 @@ export const useAuditLogsData = ({
 
   React.useEffect(() => {
     if (error) {
-      toggleNotification({ type: 'warning', message: formatAPIError(error) });
+      toggleNotification({ type: 'danger', message: formatAPIError(error) });
     }
   }, [error, toggleNotification, formatAPIError]);
 
@@ -47,7 +48,7 @@ export const useAuditLogsData = ({
 
   React.useEffect(() => {
     if (auditLogsError) {
-      toggleNotification({ type: 'warning', message: formatAPIError(auditLogsError) });
+      toggleNotification({ type: 'danger', message: formatAPIError(auditLogsError) });
     }
   }, [auditLogsError, toggleNotification, formatAPIError]);
 

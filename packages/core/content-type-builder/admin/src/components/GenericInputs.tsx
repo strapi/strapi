@@ -25,7 +25,7 @@ import formatISO from 'date-fns/formatISO';
 import isEqual from 'lodash/isEqual';
 import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
@@ -41,13 +41,15 @@ interface InputOption {
   value: string;
 }
 
-interface CustomInputProps<TAttribute extends Attribute.Any>
+interface CustomInputProps<TAttribute extends Schema.Attribute.AnyAttribute>
   extends Omit<GenericInputProps<TAttribute>, 'customInputs'> {
   ref?: React.Ref<HTMLElement>;
   hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
 }
 
-interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
+interface GenericInputProps<
+  TAttribute extends Schema.Attribute.AnyAttribute = Schema.Attribute.AnyAttribute
+> {
   attribute?: TAttribute;
   autoComplete?: string;
   customInputs?: Record<string, React.ComponentType<CustomInputProps<TAttribute>>>;
@@ -61,7 +63,7 @@ interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
     payload: {
       target: {
         name: string;
-        value: Attribute.GetValue<TAttribute>;
+        value: Schema.Attribute.Value<TAttribute>;
         type?: string;
       };
     },
@@ -73,7 +75,7 @@ interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
   step?: number;
   type: string;
   // TODO: The value depends on the input type, too complicated to handle all cases here
-  value?: Attribute.GetValue<TAttribute>;
+  value?: Schema.Attribute.Value<TAttribute>;
   isNullable?: boolean;
 }
 
@@ -100,7 +102,10 @@ const GenericInput = ({
   const { formatMessage } = useIntl();
 
   // TODO: Workaround to get the field hint values if they exist on the type
-  const getFieldHintValue = (attribute?: Attribute.Any, key?: keyof FieldSchema) => {
+  const getFieldHintValue = (
+    attribute?: Schema.Attribute.AnyAttribute,
+    key?: keyof FieldSchema
+  ) => {
     if (!attribute) return;
 
     if (key === 'minLength' && key in attribute) {
