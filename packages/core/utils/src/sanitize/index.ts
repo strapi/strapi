@@ -22,12 +22,19 @@ export interface SanitizeFunc {
   (data: unknown, schema: Model, options?: Options): Promise<unknown>;
 }
 
+export interface APIOptions {
+  sanitizers?: Sanitizers;
+  getModel: (model: string) => Model;
+}
+
 export interface Sanitizers {
   input?: Sanitizer[];
   output?: Sanitizer[];
 }
 
-const createAPISanitizers = (opts?: { sanitizers: Sanitizers }) => {
+const createAPISanitizers = (opts: APIOptions) => {
+  const { getModel } = opts;
+
   const sanitizeInput: SanitizeFunc = (data: unknown, schema: Model, { auth } = {}) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeInput');
@@ -43,12 +50,14 @@ const createAPISanitizers = (opts?: { sanitizers: Sanitizers }) => {
       omit(constants.ID_ATTRIBUTE),
       omit(constants.DOC_ID_ATTRIBUTE),
       // Remove non-writable attributes
-      traverseEntity(visitors.removeRestrictedFields(nonWritableAttributes), { schema }),
+      traverseEntity(visitors.removeRestrictedFields(nonWritableAttributes), { schema, getModel }),
     ];
 
     if (auth) {
       // Remove restricted relations
-      transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseEntity(visitors.removeRestrictedRelations(auth), { schema, getModel })
+      );
     }
 
     // Apply sanitizers from registry if exists
@@ -69,10 +78,14 @@ const createAPISanitizers = (opts?: { sanitizers: Sanitizers }) => {
       return res;
     }
 
-    const transforms = [(data: Data) => sanitizers.defaultSanitizeOutput(schema, data)];
+    const transforms = [
+      (data: Data) => sanitizers.defaultSanitizeOutput({ schema, getModel }, data),
+    ];
 
     if (auth) {
-      transforms.push(traverseEntity(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseEntity(visitors.removeRestrictedRelations(auth), { schema, getModel })
+      );
     }
 
     // Apply sanitizers from registry if exists
@@ -120,10 +133,12 @@ const createAPISanitizers = (opts?: { sanitizers: Sanitizers }) => {
       return Promise.all(filters.map((filter) => sanitizeFilters(filter, schema, { auth })));
     }
 
-    const transforms = [sanitizers.defaultSanitizeFilters(schema)];
+    const transforms = [sanitizers.defaultSanitizeFilters({ schema, getModel })];
 
     if (auth) {
-      transforms.push(traverseQueryFilters(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQueryFilters(visitors.removeRestrictedRelations(auth), { schema, getModel })
+      );
     }
 
     return pipeAsync(...transforms)(filters);
@@ -133,10 +148,12 @@ const createAPISanitizers = (opts?: { sanitizers: Sanitizers }) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeSort');
     }
-    const transforms = [sanitizers.defaultSanitizeSort(schema)];
+    const transforms = [sanitizers.defaultSanitizeSort({ schema, getModel })];
 
     if (auth) {
-      transforms.push(traverseQuerySort(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQuerySort(visitors.removeRestrictedRelations(auth), { schema, getModel })
+      );
     }
 
     return pipeAsync(...transforms)(sort);
@@ -146,7 +163,7 @@ const createAPISanitizers = (opts?: { sanitizers: Sanitizers }) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizeFields');
     }
-    const transforms = [sanitizers.defaultSanitizeFields(schema)];
+    const transforms = [sanitizers.defaultSanitizeFields({ schema, getModel })];
 
     return pipeAsync(...transforms)(fields);
   };
@@ -155,10 +172,12 @@ const createAPISanitizers = (opts?: { sanitizers: Sanitizers }) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizePopulate');
     }
-    const transforms = [sanitizers.defaultSanitizePopulate(schema)];
+    const transforms = [sanitizers.defaultSanitizePopulate({ schema, getModel })];
 
     if (auth) {
-      transforms.push(traverseQueryPopulate(visitors.removeRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQueryPopulate(visitors.removeRestrictedRelations(auth), { schema, getModel })
+      );
     }
 
     return pipeAsync(...transforms)(populate);

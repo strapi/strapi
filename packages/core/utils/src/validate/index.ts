@@ -26,11 +26,18 @@ export interface ValidateFunc {
   (data: unknown, schema: Model, options?: Options): Promise<void>;
 }
 
+interface APIOptions {
+  validators?: Validators;
+  getModel: (model: string) => Model;
+}
+
 export interface Validators {
   input?: Validator[];
 }
 
-const createAPIValidators = (opts?: { validators: Validators }) => {
+const createAPIValidators = (opts: APIOptions) => {
+  const { getModel } = opts || {};
+
   const validateInput: ValidateFunc = async (data: unknown, schema: Model, { auth } = {}) => {
     if (!schema) {
       throw new Error('Missing schema in validateInput');
@@ -56,12 +63,17 @@ const createAPIValidators = (opts?: { validators: Validators }) => {
         }
       },
       // non-writable attributes
-      traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema }),
+      traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema, getModel }),
     ];
 
     if (auth) {
       // restricted relations
-      transforms.push(traverseEntity(visitors.throwRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseEntity(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
     }
 
     // Apply validators from registry if exists
@@ -107,10 +119,15 @@ const createAPIValidators = (opts?: { validators: Validators }) => {
       return;
     }
 
-    const transforms = [validators.defaultValidateFilters(schema)];
+    const transforms = [validators.defaultValidateFilters({ schema, getModel })];
 
     if (auth) {
-      transforms.push(traverseQueryFilters(visitors.throwRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQueryFilters(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
     }
 
     await pipeAsync(...transforms)(filters);
@@ -120,10 +137,15 @@ const createAPIValidators = (opts?: { validators: Validators }) => {
     if (!schema) {
       throw new Error('Missing schema in validateSort');
     }
-    const transforms = [validators.defaultValidateSort(schema)];
+    const transforms = [validators.defaultValidateSort({ schema, getModel })];
 
     if (auth) {
-      transforms.push(traverseQuerySort(visitors.throwRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQuerySort(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
     }
 
     await pipeAsync(...transforms)(sort);
@@ -133,7 +155,7 @@ const createAPIValidators = (opts?: { validators: Validators }) => {
     if (!schema) {
       throw new Error('Missing schema in validateFields');
     }
-    const transforms = [validators.defaultValidateFields(schema)];
+    const transforms = [validators.defaultValidateFields({ schema, getModel })];
 
     await pipeAsync(...transforms)(fields);
   };
@@ -142,10 +164,15 @@ const createAPIValidators = (opts?: { validators: Validators }) => {
     if (!schema) {
       throw new Error('Missing schema in sanitizePopulate');
     }
-    const transforms = [validators.defaultValidatePopulate(schema)];
+    const transforms = [validators.defaultValidatePopulate({ schema, getModel })];
 
     if (auth) {
-      transforms.push(traverseQueryPopulate(visitors.throwRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQueryPopulate(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
     }
 
     await pipeAsync(...transforms)(populate);

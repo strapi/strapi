@@ -14,7 +14,7 @@ import {
   convertQueryParams,
 } from '@strapi/utils';
 
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
@@ -84,7 +84,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function emitEvent(event: string, data: Record<string, any>) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
-    const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, data);
+    const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(
+      {
+        schema: modelDef,
+        getModel(uid: string) {
+          return strapi.getModel(uid as UID.Schema);
+        },
+      },
+      data
+    );
 
     strapi.eventHub.emit(event, { media: sanitizedData });
   }

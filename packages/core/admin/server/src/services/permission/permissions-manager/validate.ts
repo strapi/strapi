@@ -47,6 +47,11 @@ const throwInvalidParam = ({ key, path }: { key: string; path?: string | null })
 export default ({ action, ability, model }: any) => {
   const schema = strapi.getModel(model);
 
+  const ctx = {
+    schema,
+    getModel: strapi.getModel.bind(strapi),
+  };
+
   const createValidateQuery = (options = {} as any) => {
     const { fields } = options;
 
@@ -54,43 +59,37 @@ export default ({ action, ability, model }: any) => {
     const permittedFields = fields.shouldIncludeAll ? null : getQueryFields(fields.permitted);
 
     const validateFilters = async.pipe(
-      traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQueryFilters(throwDisallowedAdminUserFields, { schema }),
-      traverse.traverseQueryFilters(throwPassword, { schema }),
-      traverse.traverseQueryFilters(
-        ({ key, value, path }) => {
-          if (isObject(value) && isEmpty(value)) {
-            throwInvalidParam({ key, path: path.attribute });
-          }
-        },
-        { schema }
-      )
+      traverse.traverseQueryFilters(throwDisallowedFields(permittedFields), ctx),
+      traverse.traverseQueryFilters(throwDisallowedAdminUserFields, ctx),
+      traverse.traverseQueryFilters(throwPassword, ctx),
+      traverse.traverseQueryFilters(({ key, value, path }) => {
+        if (isObject(value) && isEmpty(value)) {
+          throwInvalidParam({ key, path: path.attribute });
+        }
+      }, ctx)
     );
 
     const validateSort = async.pipe(
-      traverse.traverseQuerySort(throwDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQuerySort(throwDisallowedAdminUserFields, { schema }),
-      traverse.traverseQuerySort(throwPassword, { schema }),
-      traverse.traverseQuerySort(
-        ({ key, attribute, value, path }) => {
-          if (!isScalarAttribute(attribute) && isEmpty(value)) {
-            throwInvalidParam({ key, path: path.attribute });
-          }
-        },
-        { schema }
-      )
+      traverse.traverseQuerySort(throwDisallowedFields(permittedFields), ctx),
+      traverse.traverseQuerySort(throwDisallowedAdminUserFields, ctx),
+      traverse.traverseQuerySort(throwPassword, ctx),
+      traverse.traverseQuerySort(({ key, attribute, value, path }) => {
+        if (!isScalarAttribute(attribute) && isEmpty(value)) {
+          throwInvalidParam({ key, path: path.attribute });
+        }
+      }, ctx)
     );
 
     const validateFields = async.pipe(
-      traverse.traverseQueryFields(throwDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQueryFields(throwPassword, { schema })
+      traverse.traverseQueryFields(throwDisallowedFields(permittedFields), ctx),
+      traverse.traverseQueryFields(throwPassword, ctx)
     );
 
     const validatePopulate = async.pipe(
-      traverse.traverseQueryPopulate(throwDisallowedFields(permittedFields), { schema }),
-      traverse.traverseQueryPopulate(throwDisallowedAdminUserFields, { schema }),
-      traverse.traverseQueryPopulate(throwHiddenFields, { schema }),
-      traverse.traverseQueryPopulate(throwPassword, { schema })
+      traverse.traverseQueryPopulate(throwDisallowedFields(permittedFields), ctx),
+      traverse.traverseQueryPopulate(throwDisallowedAdminUserFields, ctx),
+      traverse.traverseQueryPopulate(throwHiddenFields, ctx),
+      traverse.traverseQueryPopulate(throwPassword, ctx)
     );
 
     return async (query: any) => {
@@ -122,9 +121,9 @@ export default ({ action, ability, model }: any) => {
 
     return async.pipe(
       // Remove fields hidden from the admin
-      traverseEntity(throwHiddenFields, { schema }),
+      traverseEntity(throwHiddenFields, ctx),
       // Remove not allowed fields (RBAC)
-      traverseEntity(throwDisallowedFields(permittedFields), { schema }),
+      traverseEntity(throwDisallowedFields(permittedFields), ctx),
       // Remove roles from createdBy & updatedBy fields
       omitCreatorRoles
     );
