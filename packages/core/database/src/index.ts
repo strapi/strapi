@@ -10,8 +10,8 @@ import { createConnection } from './connection';
 import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
-import type { MetadataOptions, Model } from './types';
-import { identifiers, type Identifiers } from './utils/identifiers';
+import type { Model } from './types';
+import { type Identifiers } from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -57,10 +57,6 @@ class Database {
   lifecycles: LifecycleProvider;
 
   entityManager: EntityManager;
-
-  // TODO: instead of using a global identifiers, db should be instantiating its own
-  // However, that will require refactoring all of the metadata methods to be wrapped and instantiated so it could share this identifiers,
-  identifiers: Identifiers = identifiers;
 
   constructor(config: DatabaseConfig) {
     this.config = {
@@ -180,4 +176,4 @@ class Database {
 }
 
 export { Database, errors };
-export type { Model, MetadataOptions, Identifiers };
+export type { Model, Identifiers };

@@ -11,13 +11,14 @@ const db = new Database({
   },
   connection: {
     client: 'sqlite',
+    useNullAsDefault: true,
     connection: {
       filename: 'fake.db',
     },
   },
 });
 
-const identifiers = db.identifiers;
+const identifiers = db.metadata.identifiers;
 
 // We want to match exactly with the exception that document_id.default should be any function
 expect.extend({

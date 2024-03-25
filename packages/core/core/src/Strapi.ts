@@ -495,7 +495,7 @@ class Strapi extends Container implements Core.Strapi {
     const models = [
       ...utils.transformContentTypesToModels(
         [...Object.values(this.contentTypes), ...Object.values(this.components)],
-        this.db.identifiers
+        this.db.metadata.identifiers
       ),
       ...this.get('models').get(),
     ];

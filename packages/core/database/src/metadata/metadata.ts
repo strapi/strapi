@@ -14,6 +14,13 @@ export interface Meta extends Model {
 }
 
 export class Metadata extends Map<string, Meta> {
+  // TODO: we expose the global identifiers in this way so that in the future we can instantiate our own
+  // However, it should NOT be done until all the methods used by metadata can be part of this metadata object
+  // and access this one; currently they all access the global identifiers directly.
+  get identifiers() {
+    return identifiers;
+  }
+
   get(key: string): Meta {
     if (!super.has(key)) {
       throw new Error(`Metadata for "${key}" not found`);
