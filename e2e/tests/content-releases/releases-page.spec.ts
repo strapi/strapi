@@ -117,13 +117,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     const unpublishButton = page.getByText('unpublish', { exact: true });
     await unpublishButton.click();
     await page.getByText('continue').click();
-    expect(
-      page
-        .locator('div')
-        .filter({
-          hasText: 'Successfully added to release.',
-        })
-        .nth(2)
-    ).toBeVisible();
+    expect(page.getByText(/Successfully added to release./)).toBeVisible();
   });
 });
