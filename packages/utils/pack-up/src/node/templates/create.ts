@@ -9,7 +9,7 @@ import { Logger } from '../core/logger';
 
 import { Template, TemplateFeature, TemplateOption, TemplateOrTemplateResolver } from './types';
 
-import type  { Config as PrettierConfig } from 'prettier';
+import type { Config as PrettierConfig } from 'prettier';
 
 interface CreatePackageFromTemplateOpts {
   logger: Logger;
@@ -107,7 +107,7 @@ const createPackageFromTemplate = async (
     };
 
     const prettier = await import('prettier');
-    
+
     try {
       const formattedContents = await prettier.format(file.contents, {
         ...defaultPrettierConfig,
