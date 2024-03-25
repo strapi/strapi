@@ -495,10 +495,10 @@ class Strapi extends Container implements Core.Strapi {
 
   async bootstrap() {
     const models = [
-      ...utils.transformContentTypesToModels([
-        ...Object.values(this.contentTypes),
-        ...Object.values(this.components),
-      ]),
+      ...utils.transformContentTypesToModels(
+        [...Object.values(this.contentTypes), ...Object.values(this.components)],
+        this.db.metadata.identifiers
+      ),
       ...this.get('models').get(),
     ];
 
