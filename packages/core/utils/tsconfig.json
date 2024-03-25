@@ -3,6 +3,6 @@
   "compilerOptions": {
     "outDir": "dist"
   },
-  "include": ["src", "../core/src/configuration/urls.ts"],
+  "include": ["src"],
   "exclude": ["node_modules", "**/__tests__/**"]
 }
