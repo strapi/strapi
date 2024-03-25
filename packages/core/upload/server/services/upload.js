@@ -66,7 +66,7 @@ const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
  * It can cause issues when storing files on the filesystem.
  */
 const sanitizeString = (str) => {
-  return str.replace(/\0/g, '');
+  return str?.replace(/\0/g, '');
 };
 
 module.exports = ({ strapi }) => ({
