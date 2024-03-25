@@ -1,9 +1,9 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
+import { EditFieldLayout, EditLayout } from '@strapi/admin/strapi-admin';
 import { Flex, VisuallyHidden } from '@strapi/design-system';
 import { Earth, EarthStriked } from '@strapi/icons';
-import { EditFieldLayout, EditLayout } from '@strapi/strapi/admin';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import styled from 'styled-components';
 

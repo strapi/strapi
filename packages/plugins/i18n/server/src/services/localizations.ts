@@ -28,7 +28,7 @@ const omitFieldsFromRelations = (data: any, schema: Schema.ContentType) => {
         }
       }
     },
-    { schema },
+    { schema, getModel: strapi.getModel.bind(strapi) },
     data
   );
 };
