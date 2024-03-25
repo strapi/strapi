@@ -76,6 +76,18 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
     debug(`not renaming index ${full.indexName} because name hasn't changed`);
     return;
   }
+  // link tables are new and do not need to be migrated
+  // fk indexes can't be easily renamed, and will be recreated by db sync
+  // if this misses something due to the loose string matching, it's not critical, it just means index will be rebuilt in db sync
+  if (
+    short.indexName.includes('_lnk_') ||
+    full.indexName.includes('_lnk_') ||
+    short.indexName.endsWith('fk') ||
+    full.indexName.endsWith('fk')
+  ) {
+    return;
+  }
+
   debug(`renaming index from ${full.indexName} to ${short.indexName}`);
 
   // If schema creation has never actually run before, none of these will exist, and they will throw an error
@@ -86,14 +98,19 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
   try {
     await knex.transaction(async (trx) => {
       if (client === 'mysql' || client === 'mariadb') {
-        await trx.raw(
-          `ALTER TABLE \`${full.tableName}\` RENAME INDEX \`${full.indexName}\` TO \`${short.indexName}\``
-        );
+        await knex
+          .raw(
+            `ALTER TABLE \`${full.tableName}\` RENAME INDEX \`${full.indexName}\` TO \`${short.indexName}\``
+          )
+          .transacting(trx);
       } else if (client === 'pg' || client === 'postgres') {
-        await trx.raw(`ALTER INDEX "${full.indexName}" RENAME TO "${short.indexName}"`);
+        await knex
+          .raw(`ALTER INDEX "${full.indexName}" RENAME TO "${short.indexName}"`)
+          .transacting(trx);
       } else if (client === 'sqlite' || client === 'better') {
         // SQLite doesn't support renaming, so we have to drop and recreate it
-        await recreateIndexSqlite(trx, full.indexName, short.indexName);
+        // But we don't need to do it here because the db sync will handle it
+        // await recreateIndexSqlite(trx, full.indexName, short.indexName);
       } else {
         debug('No db client name matches, not creating index');
       }
@@ -105,44 +122,44 @@ const renameIndex = async (knex: Knex, db: Database, diff: IndexDiff) => {
 
 // Select the definition of an index, drop it, and then recreate it
 // That way, we do not reacreate from the model definition and potentially lose user modifications to it
-const recreateIndexSqlite = async (knex: Knex, oldIndexName: string, newIndexName: string) => {
-  if (oldIndexName === newIndexName) {
-    debug(`not dropping and recreating index ${oldIndexName} because it hasn't changed`);
-    return;
-  }
+// const recreateIndexSqlite = async (knex: Knex, oldIndexName: string, newIndexName: string) => {
+//   if (oldIndexName === newIndexName) {
+//     debug(`not dropping and recreating index ${oldIndexName} because it hasn't changed`);
+//     return;
+//   }
 
-  try {
-    await knex.transaction(async (trx) => {
-      // Get the CREATE INDEX statement used for this index
-      const indexInfo = await trx
-        .select('sql')
-        .from('sqlite_master')
-        .where('type', 'index')
-        .andWhere('name', oldIndexName)
-        .first();
+//   try {
+//     await knex.transaction(async (trx) => {
+//       // Get the CREATE INDEX statement used for this index
+//       const indexInfo = await trx
+//         .select('sql')
+//         .from('sqlite_master')
+//         .where('type', 'index')
+//         .andWhere('name', oldIndexName)
+//         .first();
 
-      if (indexInfo && indexInfo.sql) {
-        // Attempt to precisely target the index name in the CREATE INDEX statement
-        const pattern = new RegExp(
-          `(CREATE\\s+(UNIQUE\\s+)?INDEX\\s+(IF\\s+NOT\\s+EXISTS\\s+)?)${oldIndexName}(\\s+ON)`,
-          'i'
-        );
-        const replacement = `$1${newIndexName}$4`;
-        const newIndexSql = indexInfo.sql.replace(pattern, replacement);
+//       if (indexInfo && indexInfo.sql) {
+//         // Attempt to precisely target the index name in the CREATE INDEX statement
+//         const pattern = new RegExp(
+//           `(CREATE\\s+(UNIQUE\\s+)?INDEX\\s+(IF\\s+NOT\\s+EXISTS\\s+)?)${oldIndexName}(\\s+ON)`,
+//           'i'
+//         );
+//         const replacement = `$1${newIndexName}$4`;
+//         const newIndexSql = indexInfo.sql.replace(pattern, replacement);
 
-        // Drop the existing index
-        await trx.raw(`DROP INDEX IF EXISTS ??`, [oldIndexName]);
+//         // Drop the existing index
+//         await trx.raw(`DROP INDEX IF EXISTS ??`, [oldIndexName]);
 
-        // Recreate the index with a new name
-        await trx.raw(newIndexSql);
-      } else {
-        debug(`sqlite index ${oldIndexName} not found or could not retrieve definition.`);
-      }
-    });
-  } catch (err) {
-    debug(`error recreating sqlite index${JSON.stringify(err)}`);
-  }
-};
+//         // Recreate the index with a new name
+//         await trx.raw(newIndexSql);
+//       } else {
+//         debug(`sqlite index ${oldIndexName} not found or could not retrieve definition.`);
+//       }
+//     });
+//   } catch (err) {
+//     debug(`error recreating sqlite index${JSON.stringify(err)}`);
+//   }
+// };
 
 const findDiffs = (shortMap: Metadata) => {
   const diffs = {
