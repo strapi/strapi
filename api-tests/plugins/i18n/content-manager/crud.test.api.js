@@ -15,7 +15,7 @@ const categoryModel = {
   pluralName: 'categories',
   description: '',
   name: 'Category',
-  draftAndPublish: true,
+  options: {},
   pluginOptions: {
     i18n: {
       localized: true,
@@ -28,14 +28,6 @@ const categoryModel = {
       pluginOptions: {
         i18n: {
           localized: true,
-        },
-      },
-    },
-    nonLocalized: {
-      type: 'string',
-      pluginOptions: {
-        i18n: {
-          localized: false,
         },
       },
     },

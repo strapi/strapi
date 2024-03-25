@@ -74,14 +74,12 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
       allowMissingId: true,
     });
 
-    // Update or create components for the entry
+    // Update or create non localized components for the entry
     const componentData = await strapi
       .documents(uid)
       .updateComponents(uid, entry, transformedData as any);
 
     // Update every other locale entry of this documentId in the same status
-    // We need to support both statuses incase we are working with a content type
-    // without draft and publish enabled
     await strapi.db.query(uid).update({
       where: {
         documentId,

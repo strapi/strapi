@@ -6,6 +6,7 @@ const { createTestBuilder } = require('api-tests/builder');
 const { set } = require('lodash/fp');
 
 const modelsUtils = require('api-tests/models');
+const { cloneDeep } = require('lodash');
 
 let strapi;
 let rq;
@@ -65,25 +66,6 @@ const categoryModel = {
   },
 };
 
-const compo = (withRelations = false) => ({
-  displayName: 'compo',
-  category: 'default',
-  attributes: {
-    name: {
-      type: 'string',
-    },
-    ...(!withRelations
-      ? {}
-      : {
-          tag: {
-            type: 'relation',
-            relation: 'oneToOne',
-            target: 'api::tag.tag',
-          },
-        }),
-  },
-});
-
 const tagModel = {
   kind: 'collectionType',
   collectionName: 'tags',
@@ -120,6 +102,25 @@ const tagModel = {
   },
 };
 
+const compo = (withRelations = false) => ({
+  displayName: 'compo',
+  category: 'default',
+  attributes: {
+    name: {
+      type: 'string',
+    },
+    ...(!withRelations
+      ? {}
+      : {
+          tag: {
+            type: 'relation',
+            relation: 'oneToOne',
+            target: 'api::tag.tag',
+          },
+        }),
+  },
+});
+
 const data = {
   tags: [],
 };
@@ -132,9 +133,27 @@ const allLocales = [
 ];
 
 const allLocaleCodes = allLocales.map((locale) => locale.code);
+
 // Make the tags available in all locales except one so we can test relation cases
 // when the locale relation does not exist
 const tagsAvailableIn = allLocaleCodes.slice(1);
+
+const transformConnectToDisconnect = (data) => {
+  const transformObject = (obj) => {
+    if (obj.tag && obj.tag.connect) {
+      obj.tag.disconnect = obj.tag.connect;
+      delete obj.tag.connect;
+    }
+  };
+
+  if (Array.isArray(data)) {
+    data.forEach((item) => transformObject(item));
+  } else if (typeof data === 'object' && data !== null) {
+    transformObject(data);
+  }
+
+  return data;
+};
 
 describe('i18n', () => {
   const builder = createTestBuilder();
@@ -212,7 +231,7 @@ describe('i18n', () => {
       data.tags.push(tag2.body.data);
 
       for (const locale of tagsAvailableIn) {
-        // Create 2 tags for every other locale
+        // Create 2 tags for every other locale that supports tags
         const [localeTag1, localeTag2] = await Promise.all([
           rq({
             method: 'PUT',
@@ -453,21 +472,12 @@ describe('i18n', () => {
                 },
               });
 
-              let randomData = {};
-              Object.entries(updatedValue).forEach(([key, value]) => {
-                if (typeof value === 'string') {
-                  randomData[key] = 'random';
-                } else {
-                  randomData[key] = value;
-                }
-              });
-
-              // Update the default locale draft entry with random data
+              // Update the default locale draft entry to remove any connected tags
               await rq({
                 method: 'PUT',
                 url: `/content-manager/collection-types/api::category.category/${documentId}`,
                 body: {
-                  [key]: randomData,
+                  [key]: transformConnectToDisconnect(cloneDeep(updatedValue)),
                 },
               });
 
