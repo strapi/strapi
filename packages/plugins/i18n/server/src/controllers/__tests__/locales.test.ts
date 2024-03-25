@@ -1,14 +1,14 @@
-import { errors } from '@strapi/utils';
+import { errors, sanitize } from '@strapi/utils';
 import controller from '../locales';
 import localeModel from '../../content-types/locale';
 
 const { ApplicationError } = errors;
 
-const sanitizers = {
-  get() {
-    return [];
-  },
-} as any;
+const contentAPI = {
+  sanitize: sanitize.createAPISanitizers({
+    getModel: jest.fn(() => {}),
+  } as any),
+};
 
 describe('Locales', () => {
   describe('listLocales', () => {
@@ -30,7 +30,7 @@ describe('Locales', () => {
             },
           },
         },
-        sanitizers,
+        contentAPI,
       } as any;
 
       const ctx: any = {};
@@ -68,7 +68,7 @@ describe('Locales', () => {
             },
           },
         },
-        sanitizers,
+        contentAPI,
       } as any;
 
       const ctx: any = {
@@ -107,7 +107,7 @@ describe('Locales', () => {
             },
           },
         },
-        sanitizers,
+        contentAPI,
       } as any;
 
       const ctx: any = {
@@ -145,7 +145,7 @@ describe('Locales', () => {
             },
           },
         },
-        sanitizers,
+        contentAPI,
       } as any;
 
       const ctx: any = {
@@ -193,7 +193,7 @@ describe('Locales', () => {
             },
           },
         },
-        sanitizers,
+        contentAPI,
       } as any;
 
       const ctx: any = {
@@ -235,7 +235,7 @@ describe('Locales', () => {
             },
           },
         },
-        sanitizers,
+        contentAPI,
       } as any;
 
       const ctx: any = {
@@ -284,7 +284,7 @@ describe('Locales', () => {
             },
           },
         },
-        sanitizers,
+        contentAPI,
       } as any;
 
       const ctx: any = { params: { id: 1 } };
@@ -318,7 +318,7 @@ describe('Locales', () => {
             },
           },
         },
-        sanitizers,
+        contentAPI,
       } as any;
 
       const ctx: any = { params: { id: 1 } };

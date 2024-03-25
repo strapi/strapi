@@ -9,7 +9,7 @@ const getPoliciesConfig = propOr([], 'policies');
 
 const createPoliciesMiddleware = (resolverConfig: any, { strapi }: { strapi: Core.Strapi }) => {
   const resolverPolicies = getPoliciesConfig(resolverConfig);
-  const policies = policyUtils.resolve(resolverPolicies, {});
+  const policies = strapi.get('policies').resolve(resolverPolicies, {});
 
   return async (
     resolve: GraphQLFieldResolver<any, any>,

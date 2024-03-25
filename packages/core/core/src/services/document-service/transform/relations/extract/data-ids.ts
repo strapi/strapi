@@ -126,7 +126,7 @@ const extractDataIds = (
         });
       }
     },
-    { schema: strapi.getModel(opts.uid) },
+    { schema: strapi.getModel(opts.uid), getModel: strapi.getModel.bind(strapi) },
     data
   );
 };

@@ -22,14 +22,13 @@ const {
   validateChangePasswordBody,
 } = require('./validation/auth');
 
-const { sanitize } = utils;
 const { ApplicationError, ValidationError, ForbiddenError } = utils.errors;
 
 const sanitizeUser = (user, ctx) => {
   const { auth } = ctx.state;
   const userSchema = strapi.getModel('plugin::users-permissions.user');
 
-  return sanitize.contentAPI.output(user, userSchema, { auth });
+  return strapi.contentAPI.sanitize.output(user, userSchema, { auth });
 };
 
 module.exports = {
