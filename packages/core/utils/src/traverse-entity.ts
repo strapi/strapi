@@ -1,4 +1,5 @@
 import { clone, isObject, isArray, isNil, curry } from 'lodash/fp';
+
 import type { AnyAttribute, Model, Data } from './types';
 import { isRelationalAttribute, isMediaAttribute } from './content-types';
 
@@ -11,6 +12,7 @@ export interface VisitorOptions {
   value: Data[keyof Data];
   attribute: AnyAttribute;
   path: Path;
+  getModel(uid: string): Model;
 }
 
 export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtils) => void;
@@ -23,46 +25,48 @@ export interface Path {
 export interface TraverseOptions {
   path?: Path;
   schema: Model;
+  getModel(uid: string): Model;
 }
 
-const traverseMorphRelationTarget = async (visitor: Visitor, path: Path, entry: Data) => {
-  const targetSchema = strapi.getModel(entry.__type);
+const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
+  const { path = { raw: null, attribute: null }, schema, getModel } = options;
 
-  const traverseOptions = { schema: targetSchema, path };
+  const traverseMorphRelationTarget = async (visitor: Visitor, path: Path, entry: Data) => {
+    const targetSchema = getModel(entry.__type!);
 
-  return traverseEntity(visitor, traverseOptions, entry);
-};
-
-const traverseRelationTarget =
-  (schema: Model) => async (visitor: Visitor, path: Path, entry: Data) => {
-    const traverseOptions = { schema, path };
+    const traverseOptions = { schema: targetSchema, path, getModel };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
-const traverseMediaTarget = async (visitor: Visitor, path: Path, entry: Data) => {
-  const targetSchemaUID = 'plugin::upload.file';
-  const targetSchema = strapi.getModel(targetSchemaUID);
+  const traverseRelationTarget =
+    (schema: Model) => async (visitor: Visitor, path: Path, entry: Data) => {
+      const traverseOptions = { schema, path, getModel };
 
-  const traverseOptions = { schema: targetSchema, path };
+      return traverseEntity(visitor, traverseOptions, entry);
+    };
 
-  return traverseEntity(visitor, traverseOptions, entry);
-};
+  const traverseMediaTarget = async (visitor: Visitor, path: Path, entry: Data) => {
+    const targetSchemaUID = 'plugin::upload.file';
+    const targetSchema = getModel(targetSchemaUID);
 
-const traverseComponent = async (visitor: Visitor, path: Path, schema: Model, entry: Data) => {
-  const traverseOptions = { schema, path };
+    const traverseOptions = { schema: targetSchema, path, getModel };
 
-  return traverseEntity(visitor, traverseOptions, entry);
-};
+    return traverseEntity(visitor, traverseOptions, entry);
+  };
 
-const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) => {
-  const targetSchema = strapi.getModel(entry.__component);
-  const traverseOptions = { schema: targetSchema, path };
+  const traverseComponent = async (visitor: Visitor, path: Path, schema: Model, entry: Data) => {
+    const traverseOptions = { schema, path, getModel };
 
-  return traverseEntity(visitor, traverseOptions, entry);
-};
-const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
-  const { path = { raw: null, attribute: null }, schema } = options;
+    return traverseEntity(visitor, traverseOptions, entry);
+  };
+
+  const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) => {
+    const targetSchema = getModel(entry.__component!);
+    const traverseOptions = { schema: targetSchema, path, getModel };
+
+    return traverseEntity(visitor, traverseOptions, entry);
+  };
 
   // End recursion
   if (!isObject(entity) || isNil(schema)) {
@@ -101,6 +105,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       value: copy[key],
       attribute,
       path: newPath,
+      getModel,
     };
 
     await visitor(visitorOptions, visitorUtils);
@@ -118,7 +123,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
 
       const method = isMorphRelation
         ? traverseMorphRelationTarget
-        : traverseRelationTarget(strapi.getModel(attribute.target));
+        : traverseRelationTarget(getModel(attribute.target!));
 
       if (isArray(value)) {
         const res = new Array(value.length);
@@ -149,7 +154,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     }
 
     if (attribute.type === 'component') {
-      const targetSchema = strapi.getModel(attribute.component);
+      const targetSchema = getModel(attribute.component);
 
       if (isArray(value)) {
         const res: Data[] = new Array(value.length);

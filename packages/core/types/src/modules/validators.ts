@@ -1,8 +1,8 @@
-type Validator = unknown;
+import type { validate } from '@strapi/utils';
 
 export interface ValidatorsRegistry {
-  get(path: string): Validator[];
-  add(path: string, validator: Validator): this;
-  set(path: string, value?: Validator[]): this;
+  get(path: string): validate.Validator[];
+  add(path: string, validator: validate.Validator): this;
+  set(path: string, value?: validate.Validator[]): this;
   has(path: string): boolean;
 }
