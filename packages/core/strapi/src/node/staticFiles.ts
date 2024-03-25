@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import outdent from 'outdent';
-import { format } from 'prettier';
+// import { format } from 'prettier';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { DefaultDocument } from '@strapi/admin/_internal';
@@ -96,17 +96,18 @@ const writeStaticClientFiles = async (ctx: BuildContext) => {
           : undefined,
     })
   );
+  const prettier = await import('prettier');
 
   await fs.writeFile(
     path.join(ctx.runtimeDir, 'index.html'),
-    await format(indexHtml, {
+    await prettier.format(indexHtml, {
       parser: 'html',
     })
   );
   ctx.logger.debug('Wrote the index.html file');
   await fs.writeFile(
     path.join(ctx.runtimeDir, 'app.js'),
-    await format(getEntryModule(ctx), {
+    await prettier.format(getEntryModule(ctx), {
       parser: 'babel',
     })
   );
