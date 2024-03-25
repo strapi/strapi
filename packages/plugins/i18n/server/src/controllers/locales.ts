@@ -5,13 +5,13 @@ import { getService } from '../utils';
 import { validateCreateLocaleInput, validateUpdateLocaleInput } from '../validation/locales';
 import { formatLocale } from '../domain/locale';
 
-const { setCreatorFields, sanitize } = utils;
+const { setCreatorFields } = utils;
 const { ApplicationError } = utils.errors;
 
 const sanitizeLocale = (locale: any) => {
   const model = strapi.getModel('plugin::i18n.locale');
 
-  return sanitize.contentAPI.output(locale, model);
+  return strapi.contentAPI.sanitize.output(locale, model);
 };
 
 const controller: Core.Controller = {

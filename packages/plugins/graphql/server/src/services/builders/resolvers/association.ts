@@ -1,5 +1,5 @@
 import { get } from 'lodash/fp';
-import { sanitize, validate, async, errors } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 import type { Internal } from '@strapi/types';
 
 import type { Context } from '../../types';
@@ -46,13 +46,17 @@ export default ({ strapi }: Context) => {
           usePagination: true,
         });
 
-        await validate.contentAPI.query(transformedArgs, targetContentType, {
+        await strapi.contentAPI.validate.query(transformedArgs, targetContentType, {
           auth,
         });
 
-        const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, targetContentType, {
-          auth,
-        });
+        const sanitizedQuery = await strapi.contentAPI.sanitize.query(
+          transformedArgs,
+          targetContentType,
+          {
+            auth,
+          }
+        );
 
         const data = await strapi.db
           ?.query(contentTypeUID)
@@ -70,7 +74,7 @@ export default ({ strapi }: Context) => {
           // Helpers used for the data cleanup
           const wrapData = (dataToWrap: any) => ({ [attributeName]: dataToWrap });
           const sanitizeData = (dataToSanitize: any) => {
-            return sanitize.contentAPI.output(dataToSanitize, contentType, { auth });
+            return strapi.contentAPI.sanitize.output(dataToSanitize, contentType, { auth });
           };
           const unwrapData = get(attributeName);
 

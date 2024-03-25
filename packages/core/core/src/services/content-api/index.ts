@@ -1,5 +1,8 @@
 import _ from 'lodash';
-import type { Core } from '@strapi/types';
+import { sanitize, validate } from '@strapi/utils';
+
+import type { Core, UID } from '@strapi/types';
+
 import instantiatePermissionsUtilities from './permissions';
 
 const transformRoutePrefixFor = (pluginName: string) => (route: Core.Route) => {
@@ -66,9 +69,36 @@ const createContentAPI = (strapi: Core.Strapi) => {
     return routesMap;
   };
 
+  const sanitizer = sanitize.createAPISanitizers({
+    getModel(uid: string) {
+      return strapi.getModel(uid as UID.Schema);
+    },
+    // NOTE: use lazy access to allow registration of sanitizers after the creation of the container
+    get sanitizers() {
+      return {
+        input: strapi.sanitizers.get('content-api.input'),
+        output: strapi.sanitizers.get('content-api.output'),
+      };
+    },
+  });
+
+  const validator = validate.createAPIValidators({
+    getModel(uid: string) {
+      return strapi.getModel(uid as UID.Schema);
+    },
+    // NOTE: use lazy access to allow registration of validators after the creation of the container
+    get validators() {
+      return {
+        input: strapi.validators.get('content-api.input'),
+      };
+    },
+  });
+
   return {
     permissions: instantiatePermissionsUtilities(strapi),
     getRoutesMap,
+    sanitize: sanitizer,
+    validate: validator,
   };
 };
 
