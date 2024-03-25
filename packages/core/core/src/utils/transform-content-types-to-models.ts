@@ -1,4 +1,4 @@
-import { type Model, utils, type MetadataOptions } from '@strapi/database';
+import { type Model, utils } from '@strapi/database';
 import type { Struct, Schema } from '@strapi/types';
 import { createId } from '@paralleldrive/cuid2';
 import assert from 'node:assert';
@@ -19,59 +19,44 @@ const { identifiers } = utils;
  * Therefore, we only use the identifiers helpers in cases where we do not do any of our own shortening
  */
 
-export const getComponentJoinTableName = (collectionName: string, options: MetadataOptions) => {
-  return identifiers.getNameFromTokens(
-    [
-      { name: collectionName, compressible: true },
-      { name: 'components', shortName: 'cmps', compressible: false },
-    ],
-    options
-  );
+export const getComponentJoinTableName = (collectionName: string) => {
+  return identifiers.getNameFromTokens([
+    { name: collectionName, compressible: true },
+    { name: 'components', shortName: 'cmps', compressible: false },
+  ]);
 };
 
-export const getDzJoinTableName = (collectionName: string, options: MetadataOptions) => {
-  return identifiers.getNameFromTokens(
-    [
-      { name: collectionName, compressible: true },
-      { name: 'components', shortName: 'cmps', compressible: false },
-    ],
-    options
-  );
+export const getDzJoinTableName = (collectionName: string) => {
+  return identifiers.getNameFromTokens([
+    { name: collectionName, compressible: true },
+    { name: 'components', shortName: 'cmps', compressible: false },
+  ]);
 };
 
-export const getComponentJoinColumnEntityName = (options: MetadataOptions) => {
-  return identifiers.getNameFromTokens(
-    [
-      { name: 'entity', compressible: false },
-      { name: 'id', compressible: false },
-    ],
-    options
-  );
+export const getComponentJoinColumnEntityName = () => {
+  return identifiers.getNameFromTokens([
+    { name: 'entity', compressible: false },
+    { name: 'id', compressible: false },
+  ]);
 };
 
-export const getComponentJoinColumnInverseName = (options: MetadataOptions) => {
-  return identifiers.getNameFromTokens(
-    [
-      { name: 'component', shortName: 'cmp', compressible: false },
-      { name: 'id', compressible: false },
-    ],
-    options
-  );
+export const getComponentJoinColumnInverseName = () => {
+  return identifiers.getNameFromTokens([
+    { name: 'component', shortName: 'cmp', compressible: false },
+    { name: 'id', compressible: false },
+  ]);
 };
 
-export const getComponentTypeColumn = (options: MetadataOptions) => {
-  return identifiers.getNameFromTokens([{ name: 'component_type', compressible: false }], options);
+export const getComponentTypeColumn = () => {
+  return identifiers.getNameFromTokens([{ name: 'component_type', compressible: false }]);
 };
 
-export const getComponentFkIndexName = (contentType: string, options: MetadataOptions) => {
-  return identifiers.getNameFromTokens(
-    [
-      { name: contentType, compressible: true },
-      { name: 'entity', compressible: false },
-      { name: 'fk', compressible: false },
-    ],
-    options
-  );
+export const getComponentFkIndexName = (contentType: string) => {
+  return identifiers.getNameFromTokens([
+    { name: contentType, compressible: true },
+    { name: 'entity', compressible: false },
+    { name: 'fk', compressible: false },
+  ]);
 };
 
 const { ID_COLUMN: id, FIELD_COLUMN: field, ORDER_COLUMN: order } = identifiers;
@@ -83,8 +68,7 @@ export type LoadedContentTypeModel = Struct.ContentTypeSchema &
 export const transformAttribute = (
   name: string,
   attribute: Schema.Attribute.AnyAttribute,
-  contentType: LoadedContentTypeModel,
-  options: MetadataOptions
+  contentType: LoadedContentTypeModel
 ) => {
   switch (attribute.type) {
     case 'media': {
@@ -96,10 +80,10 @@ export const transformAttribute = (
       };
     }
     case 'component': {
-      const joinTableName = getComponentJoinTableName(contentType.collectionName, options);
-      const joinColumnEntityName = getComponentJoinColumnEntityName(options);
-      const joinColumnInverseName = getComponentJoinColumnInverseName(options);
-      const compTypeColumn = getComponentTypeColumn(options);
+      const joinTableName = getComponentJoinTableName(contentType.collectionName);
+      const joinColumnEntityName = getComponentJoinColumnEntityName();
+      const joinColumnInverseName = getComponentJoinColumnInverseName();
+      const compTypeColumn = getComponentTypeColumn();
       return {
         type: 'relation',
         relation: attribute.repeatable === true ? 'oneToMany' : 'oneToOne',
@@ -129,10 +113,10 @@ export const transformAttribute = (
       };
     }
     case 'dynamiczone': {
-      const joinTableName = getDzJoinTableName(contentType.collectionName, options);
-      const joinColumnEntityName = getComponentJoinColumnEntityName(options);
-      const joinColumnInverseName = getComponentJoinColumnInverseName(options);
-      const compTypeColumn = getComponentTypeColumn(options);
+      const joinTableName = getDzJoinTableName(contentType.collectionName);
+      const joinColumnEntityName = getComponentJoinColumnEntityName();
+      const joinColumnInverseName = getComponentJoinColumnInverseName();
+      const compTypeColumn = getComponentTypeColumn();
 
       return {
         type: 'relation',
@@ -171,19 +155,11 @@ export const transformAttribute = (
   }
 };
 
-export const transformAttributes = (
-  contentType: LoadedContentTypeModel,
-  options: MetadataOptions
-) => {
+export const transformAttributes = (contentType: LoadedContentTypeModel) => {
   return Object.keys(contentType.attributes! || {}).reduce((attrs, attrName) => {
     return {
       ...attrs,
-      [attrName]: transformAttribute(
-        attrName,
-        contentType.attributes[attrName]!,
-        contentType,
-        options
-      ),
+      [attrName]: transformAttribute(attrName, contentType.attributes[attrName]!, contentType),
     };
   }, {});
 };
@@ -198,16 +174,13 @@ export const hasComponentsOrDz = (
 
 export const createDocumentId = createId;
 
-const createCompoLinkModel = (
-  contentType: LoadedContentTypeModel,
-  options: MetadataOptions
-): Model => {
-  const name = getComponentJoinTableName(contentType.collectionName, options);
+const createCompoLinkModel = (contentType: LoadedContentTypeModel): Model => {
+  const name = getComponentJoinTableName(contentType.collectionName);
 
-  const entityId = getComponentJoinColumnEntityName(options);
-  const componentId = getComponentJoinColumnInverseName(options);
-  const compTypeColumn = getComponentTypeColumn(options);
-  const fkIndex = getComponentFkIndexName(contentType.collectionName, options);
+  const entityId = getComponentJoinColumnEntityName();
+  const componentId = getComponentJoinColumnInverseName();
+  const compTypeColumn = getComponentTypeColumn();
+  const fkIndex = getComponentFkIndexName(contentType.collectionName);
 
   return {
     // TODO: make sure there can't be any conflicts with a prefix
@@ -246,11 +219,11 @@ const createCompoLinkModel = (
     },
     indexes: [
       {
-        name: identifiers.getIndexName([contentType.collectionName, field], options),
+        name: identifiers.getIndexName([contentType.collectionName, field]),
         columns: [field],
       },
       {
-        name: identifiers.getIndexName([contentType.collectionName, compTypeColumn], options),
+        name: identifiers.getIndexName([contentType.collectionName, compTypeColumn]),
         columns: [compTypeColumn],
       },
       {
@@ -259,7 +232,7 @@ const createCompoLinkModel = (
       },
       {
         // NOTE: since we don't include attribute names, we need to be careful not to create another unique index
-        name: identifiers.getUniqueIndexName([contentType.collectionName], options),
+        name: identifiers.getUniqueIndexName([contentType.collectionName]),
         columns: [entityId, componentId, field, compTypeColumn],
         type: 'unique',
       },
@@ -269,17 +242,14 @@ const createCompoLinkModel = (
         name: fkIndex,
         columns: [entityId],
         referencedColumns: [id],
-        referencedTable: identifiers.getTableName(contentType.collectionName, options),
+        referencedTable: identifiers.getTableName(contentType.collectionName),
         onDelete: 'CASCADE',
       },
     ],
   };
 };
 
-export const transformContentTypesToModels = (
-  contentTypes: LoadedContentTypeModel[],
-  options: MetadataOptions
-): Model[] => {
+export const transformContentTypesToModels = (contentTypes: LoadedContentTypeModel[]): Model[] => {
   const models: Model[] = [];
 
   contentTypes.forEach((contentType) => {
@@ -307,7 +277,7 @@ export const transformContentTypesToModels = (
     });
 
     if (hasComponentsOrDz(contentType)) {
-      const compoLinkModel = createCompoLinkModel(contentType, options);
+      const compoLinkModel = createCompoLinkModel(contentType);
       models.push(compoLinkModel);
     }
 
@@ -320,7 +290,7 @@ export const transformContentTypesToModels = (
           type: 'increments',
         },
         ...documentIdAttribute,
-        ...transformAttributes(contentType, options),
+        ...transformAttributes(contentType),
       },
     };
 

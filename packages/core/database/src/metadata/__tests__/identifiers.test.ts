@@ -2,6 +2,7 @@ import { createMetadata } from '..';
 import { attributes, auxComponent, buildModelWith } from './resources/models';
 import { expectedMetadataResults } from './resources/expected-metadata';
 import { expectedMetadataHashedResults } from './resources/expected-hashed-metadata';
+import { Identifiers } from '../../utils/identifiers';
 
 type TestOptions = {
   auxiliarModels?: any[];
@@ -56,8 +57,6 @@ expect.extend({
 describe('metadata', () => {
   describe('createMetadata', () => {
     describe('full length identifiers', () => {
-      const options = { maxLength: 0 };
-
       test.each([
         ['string', attributes.simple.string, expectedMetadataResults.simple.string, {}],
         [
@@ -128,7 +127,9 @@ describe('metadata', () => {
           const models = opts.auxiliarModels
             ? [auxComponent, buildModelWith(modelAttributes)]
             : [buildModelWith(modelAttributes)];
-          const results = createMetadata(models as any, options);
+          // mock the options so that the 'global' identifiers created for use by createMetadata uses 0 for maxLength
+          jest.spyOn(Identifiers.prototype, 'options', 'get').mockReturnValue({ maxLength: 0 });
+          const results = createMetadata(models as any);
 
           expect(results).toBeInstanceOf(Map);
           expect(results).toEqualMap(new Map(expectedMetadata as any));
@@ -136,7 +137,6 @@ describe('metadata', () => {
       );
     });
     describe('shortened identifiers', () => {
-      const options = { maxLength: 25 };
       test.each([
         ['string', attributes.simple.string, expectedMetadataHashedResults.simple.string, {}],
         [
@@ -199,7 +199,10 @@ describe('metadata', () => {
           const models = opts.auxiliarModels
             ? [auxComponent, buildModelWith(modelAttributes)]
             : [buildModelWith(modelAttributes)];
-          const results = createMetadata(models as any, options);
+          // mock the options so that the 'global' identifiers created for use by createMetadata uses 25 for maxLength
+          jest.spyOn(Identifiers.prototype, 'options', 'get').mockReturnValue({ maxLength: 25 });
+
+          const results = createMetadata(models as any);
 
           expect(results).toBeInstanceOf(Map);
           expect(results).toEqualMap(new Map(expectedMetadata as any));

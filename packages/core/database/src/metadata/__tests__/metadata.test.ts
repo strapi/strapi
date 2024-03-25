@@ -54,9 +54,7 @@ type TestCase = [
 
 describe('metadata', () => {
   describe('createMetadata', () => {
-    describe('full length identifiers', () => {
-      const options = { maxLength: 0 };
-
+    describe('identifiers', () => {
       describe('attribute conversion', () => {
         // Define a base model structure that you'll reuse and modify for each test case
         const baseModel = (attributeName: string, attributeDetails: any) => ({
@@ -123,7 +121,7 @@ describe('metadata', () => {
             const expected = baseExpected(attributeName, expectedDetails);
 
             // Call your function to convert models to the expected format
-            const results = createMetadata(models, options);
+            const results = createMetadata(models);
 
             // Extract the attribute from the results for comparison
             const resultAttribute = results.get('admin::permission').attributes[attributeName];
@@ -160,7 +158,7 @@ describe('metadata', () => {
                 tableName: 'strapi_core_store_settings',
               },
             ] as any;
-            expect(() => createMetadata(badModels, options)).toThrow(
+            expect(() => createMetadata(badModels)).toThrow(
               'DB table "strapi_core_store_settings" already exists. Change the collectionName of the related content type'
             );
           });
@@ -185,7 +183,7 @@ describe('metadata', () => {
                 tableName: 'strapi_core_store_settings',
               },
             ] as any;
-            expect(() => createMetadata(badModels, options)).toThrow(
+            expect(() => createMetadata(badModels)).toThrow(
               'Error on attribute role in model undefined(strapi::core-store): Metadata for "admin::role" not found'
             );
           });
@@ -211,7 +209,7 @@ describe('metadata', () => {
                 tableName: 'strapi_core_store_settings',
               },
             ] as any;
-            expect(() => createMetadata(badModels, options)).toThrow(
+            expect(() => createMetadata(badModels)).toThrow(
               'Error on attribute role in model undefined(strapi::core-store): Unknown relation'
             );
           });
@@ -237,7 +235,7 @@ describe('metadata', () => {
                 tableName: 'strapi_core_store_settings',
               },
             ] as any;
-            expect(() => createMetadata(badModels, options)).toThrow(
+            expect(() => createMetadata(badModels)).toThrow(
               'Error on attribute role in model undefined(strapi::core-store): inversedBy attribute permissions not found target strapi::core-store'
             );
           });
@@ -266,7 +264,7 @@ describe('metadata', () => {
                 tableName: 'strapi_core_store_settings',
               },
             ] as any;
-            expect(() => createMetadata(badModels, options)).toThrow(
+            expect(() => createMetadata(badModels)).toThrow(
               'Error on attribute role in model undefined(strapi::core-store): inversedBy attribute permissions targets non relational attribute in strapi::core-store'
             );
           });
@@ -295,7 +293,7 @@ describe('metadata', () => {
                 tableName: 'strapi_core_store_settings',
               },
             ] as any;
-            expect(() => createMetadata(badModels, options)).toThrow(
+            expect(() => createMetadata(badModels)).toThrow(
               'Error on attribute role in model undefined(strapi::core-store): inversedBy attribute permissions targets non relational attribute in strapi::core-store'
             );
           });
@@ -318,14 +316,11 @@ describe('metadata', () => {
                 tableName: 'strapi_core_store_settings',
               },
             ] as any;
-            expect(() => createMetadata(badModels, options)).toThrow(
+            expect(() => createMetadata(badModels)).toThrow(
               'Error on attribute role in model undefined(strapi::core-store): Metadata for "missingtarget" not found'
             );
           });
         });
-      });
-      describe('shortened identifiers', () => {
-        test.todo('shortened identifier tests');
       });
     });
   });

@@ -1,8 +1,8 @@
 import _, { snakeCase } from 'lodash/fp';
 
-import * as identifiers from '../utils/identifiers';
+import { identifiers } from '../utils/identifiers';
 import type { Meta, Metadata } from './metadata';
-import type { RelationalAttribute, Relation, MorphJoinTable, MetadataOptions } from '../types';
+import type { RelationalAttribute, Relation, MorphJoinTable } from '../types';
 
 interface JoinColumnOptions {
   attribute: (Relation.OneToOne | Relation.ManyToOne) & Relation.Owner;
@@ -84,30 +84,21 @@ const createOneToOne = (
   attributeName: string,
   attribute: Relation.OneToOne,
   meta: Meta,
-  metadata: Metadata,
-  options: MetadataOptions
+  metadata: Metadata
 ) => {
   if (isOwner(attribute)) {
     if (shouldUseJoinTable(attribute)) {
-      createJoinTable(
-        metadata,
-        {
-          attribute,
-          attributeName,
-          meta,
-        },
-        options
-      );
+      createJoinTable(metadata, {
+        attribute,
+        attributeName,
+        meta,
+      });
     } else {
-      createJoinColumn(
-        metadata,
-        {
-          attribute,
-          attributeName,
-          meta,
-        },
-        options
-      );
+      createJoinColumn(metadata, {
+        attribute,
+        attributeName,
+        meta,
+      });
     }
   } else {
     // TODO: verify other side is valid
@@ -127,19 +118,14 @@ const createOneToMany = (
   attributeName: string,
   attribute: Relation.OneToMany,
   meta: Meta,
-  metadata: Metadata,
-  options: MetadataOptions
+  metadata: Metadata
 ) => {
   if (!isBidirectional(attribute)) {
-    createJoinTable(
-      metadata,
-      {
-        attribute,
-        attributeName,
-        meta,
-      },
-      options
-    );
+    createJoinTable(metadata, {
+      attribute,
+      attributeName,
+      meta,
+    });
   } else if (isOwner(attribute)) {
     throw new Error('one side of a oneToMany cannot be the owner side in a bidirectional relation');
   }
@@ -165,33 +151,24 @@ const createManyToOne = (
   attributeName: string,
   attribute: Relation.ManyToOne,
   meta: Meta,
-  metadata: Metadata,
-  options: MetadataOptions
+  metadata: Metadata
 ) => {
   if (isBidirectional(attribute) && !isOwner(attribute)) {
     throw new Error('The many side of a manyToOne must be the owning side');
   }
 
   if (shouldUseJoinTable(attribute)) {
-    createJoinTable(
-      metadata,
-      {
-        attribute,
-        attributeName,
-        meta,
-      },
-      options
-    );
+    createJoinTable(metadata, {
+      attribute,
+      attributeName,
+      meta,
+    });
   } else {
-    createJoinColumn(
-      metadata,
-      {
-        attribute,
-        attributeName,
-        meta,
-      },
-      options
-    );
+    createJoinColumn(metadata, {
+      attribute,
+      attributeName,
+      meta,
+    });
   }
 };
 
@@ -211,19 +188,14 @@ const createManyToMany = (
   attributeName: string,
   attribute: Relation.ManyToMany,
   meta: Meta,
-  metadata: Metadata,
-  options: MetadataOptions
+  metadata: Metadata
 ) => {
   if (!isBidirectional(attribute) || isOwner(attribute)) {
-    createJoinTable(
-      metadata,
-      {
-        attribute,
-        attributeName,
-        meta,
-      },
-      options
-    );
+    createJoinTable(metadata, {
+      attribute,
+      attributeName,
+      meta,
+    });
   }
 };
 
@@ -238,13 +210,9 @@ const createManyToMany = (
  * if bidirectionnal
  *  set info in the traget
  */
-const createMorphToOne = (
-  attributeName: string,
-  attribute: Relation.MorphToOne,
-  options: MetadataOptions
-) => {
-  const idColumnName = identifiers.getJoinColumnAttributeIdName('target', options);
-  const typeColumnName = identifiers.getMorphColumnTypeName('target', options);
+const createMorphToOne = (attributeName: string, attribute: Relation.MorphToOne) => {
+  const idColumnName = identifiers.getJoinColumnAttributeIdName('target');
+  const typeColumnName = identifiers.getMorphColumnTypeName('target');
 
   if ('morphColumn' in attribute && attribute.morphColumn) {
     return;
@@ -274,22 +242,18 @@ const createMorphToMany = (
   attributeName: string,
   attribute: Relation.MorphToMany,
   meta: Meta,
-  metadata: Metadata,
-  options: MetadataOptions
+  metadata: Metadata
 ) => {
   if ('joinTable' in attribute && attribute.joinTable) {
     return;
   }
 
-  const joinTableName = identifiers.getMorphTableName(meta.tableName, attributeName, options);
-  const joinColumnName = identifiers.getMorphColumnJoinTableIdName(
-    snakeCase(meta.singularName),
-    options
-  );
-  const idColumnName = identifiers.getMorphColumnAttributeIdName(attributeName, options);
-  const typeColumnName = identifiers.getMorphColumnTypeName(attributeName, options);
+  const joinTableName = identifiers.getMorphTableName(meta.tableName, attributeName);
+  const joinColumnName = identifiers.getMorphColumnJoinTableIdName(snakeCase(meta.singularName));
+  const idColumnName = identifiers.getMorphColumnAttributeIdName(attributeName);
+  const typeColumnName = identifiers.getMorphColumnTypeName(attributeName);
 
-  const fkIndexName = identifiers.getFkIndexName(joinTableName, options);
+  const fkIndexName = identifiers.getFkIndexName(joinTableName);
 
   metadata.add({
     singularName: joinTableName,
@@ -332,11 +296,11 @@ const createMorphToMany = (
         columns: [joinColumnName],
       },
       {
-        name: identifiers.getOrderIndexName(joinTableName, options),
+        name: identifiers.getOrderIndexName(joinTableName),
         columns: [ORDER],
       },
       {
-        name: identifiers.getIdColumnIndexName(joinTableName, options),
+        name: identifiers.getIdColumnIndexName(joinTableName),
         columns: [idColumnName],
       },
     ],
@@ -420,21 +384,14 @@ const createMorphMany = (
 /**
  * Creates a join column info and add them to the attribute meta
  */
-const createJoinColumn = (
-  metadata: Metadata,
-  { attribute, attributeName }: JoinColumnOptions,
-  options: MetadataOptions
-) => {
+const createJoinColumn = (metadata: Metadata, { attribute, attributeName }: JoinColumnOptions) => {
   const targetMeta = metadata.get(attribute.target);
 
   if (!targetMeta) {
     throw new Error(`Unknown target ${attribute.target}`);
   }
 
-  const joinColumnName = identifiers.getJoinColumnAttributeIdName(
-    snakeCase(attributeName),
-    options
-  );
+  const joinColumnName = identifiers.getJoinColumnAttributeIdName(snakeCase(attributeName));
   const joinColumn = {
     name: joinColumnName,
     referencedColumn: ID,
@@ -464,8 +421,7 @@ const createJoinColumn = (
  */
 const createJoinTable = (
   metadata: Metadata,
-  { attributeName, attribute, meta }: JoinTableOptions,
-  options: MetadataOptions
+  { attributeName, attribute, meta }: JoinTableOptions
 ) => {
   const targetMeta = metadata.get(attribute.target);
 
@@ -480,48 +436,33 @@ const createJoinTable = (
 
   const joinTableName = identifiers.getJoinTableName(
     snakeCase(meta.tableName),
-    snakeCase(attributeName),
-    options
+    snakeCase(attributeName)
   );
 
-  const joinColumnName = identifiers.getJoinColumnAttributeIdName(
-    snakeCase(meta.singularName),
-    options
-  );
+  const joinColumnName = identifiers.getJoinColumnAttributeIdName(snakeCase(meta.singularName));
 
   let inverseJoinColumnName = identifiers.getJoinColumnAttributeIdName(
-    snakeCase(targetMeta.singularName),
-    options
+    snakeCase(targetMeta.singularName)
   );
 
   // if relation is self referencing
   if (joinColumnName === inverseJoinColumnName) {
     inverseJoinColumnName = identifiers.getInverseJoinColumnAttributeIdName(
-      snakeCase(targetMeta.singularName),
-      options
+      snakeCase(targetMeta.singularName)
     );
   }
 
-  const orderColumnName = identifiers.getOrderColumnName(
-    snakeCase(targetMeta.singularName),
-    options
-  );
+  const orderColumnName = identifiers.getOrderColumnName(snakeCase(targetMeta.singularName));
   // TODO: should this plus the conditional below be rolled into one method?
-  let inverseOrderColumnName = identifiers.getOrderColumnName(
-    snakeCase(meta.singularName),
-    options
-  );
+  let inverseOrderColumnName = identifiers.getOrderColumnName(snakeCase(meta.singularName));
 
   // if relation is self referencing
   if (attribute.relation === 'manyToMany' && orderColumnName === inverseOrderColumnName) {
-    inverseOrderColumnName = identifiers.getInverseOrderColumnName(
-      snakeCase(meta.singularName),
-      options
-    );
+    inverseOrderColumnName = identifiers.getInverseOrderColumnName(snakeCase(meta.singularName));
   }
 
-  const fkIndexName = identifiers.getFkIndexName(joinTableName, options);
-  const invFkIndexName = identifiers.getInverseFkIndexName(joinTableName, options);
+  const fkIndexName = identifiers.getFkIndexName(joinTableName);
+  const invFkIndexName = identifiers.getInverseFkIndexName(joinTableName);
 
   const metadataSchema: Meta = {
     singularName: joinTableName,
@@ -559,7 +500,7 @@ const createJoinTable = (
         columns: [inverseJoinColumnName],
       },
       {
-        name: identifiers.getUniqueIndexName(joinTableName, options),
+        name: identifiers.getUniqueIndexName(joinTableName),
         columns: [joinColumnName, inverseJoinColumnName],
         type: 'unique',
       },
@@ -609,7 +550,7 @@ const createJoinTable = (
       },
     };
     metadataSchema.indexes.push({
-      name: identifiers.getOrderFkIndexName(joinTableName, options),
+      name: identifiers.getOrderFkIndexName(joinTableName),
       columns: [orderColumnName],
     });
     joinTable.orderColumnName = orderColumnName;
@@ -627,7 +568,7 @@ const createJoinTable = (
     };
 
     metadataSchema.indexes.push({
-      name: identifiers.getOrderInverseFkIndexName(joinTableName, options),
+      name: identifiers.getOrderInverseFkIndexName(joinTableName),
       columns: [inverseOrderColumnName],
     });
 
@@ -679,22 +620,21 @@ export const createRelation = (
   attributeName: string,
   attribute: RelationalAttribute,
   meta: Meta,
-  metadata: Metadata,
-  options: MetadataOptions
+  metadata: Metadata
 ) => {
   switch (attribute.relation) {
     case 'oneToOne':
-      return createOneToOne(attributeName, attribute, meta, metadata, options);
+      return createOneToOne(attributeName, attribute, meta, metadata);
     case 'oneToMany':
-      return createOneToMany(attributeName, attribute, meta, metadata, options);
+      return createOneToMany(attributeName, attribute, meta, metadata);
     case 'manyToOne':
-      return createManyToOne(attributeName, attribute, meta, metadata, options);
+      return createManyToOne(attributeName, attribute, meta, metadata);
     case 'manyToMany':
-      return createManyToMany(attributeName, attribute, meta, metadata, options);
+      return createManyToMany(attributeName, attribute, meta, metadata);
     case 'morphToOne':
-      return createMorphToOne(attributeName, attribute, options);
+      return createMorphToOne(attributeName, attribute);
     case 'morphToMany':
-      return createMorphToMany(attributeName, attribute, meta, metadata, options);
+      return createMorphToMany(attributeName, attribute, meta, metadata);
     case 'morphOne':
       return createMorphOne(attributeName, attribute, meta, metadata);
     case 'morphMany':

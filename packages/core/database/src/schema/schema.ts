@@ -1,8 +1,8 @@
 import * as types from '../utils/types';
-import * as identifiers from '../utils/identifiers';
+import { identifiers } from '../utils/identifiers';
 import type { Metadata, Meta } from '../metadata';
 import type { Column, Schema, Table } from './types';
-import type { Attribute, MetadataOptions } from '../types';
+import type { Attribute } from '../types';
 
 /**
  * TODO: This needs to be refactored to support incoming names such as
@@ -19,11 +19,11 @@ import type { Attribute, MetadataOptions } from '../types';
  * any other potential manipulation to it
  * */
 
-const createColumn = (name: string, attribute: Attribute, options: MetadataOptions): Column => {
+const createColumn = (name: string, attribute: Attribute): Column => {
   const { type, args = [], ...opts } = getColumnType(attribute);
 
   return {
-    name: identifiers.getName(name, options),
+    name: identifiers.getName(name),
     type,
     args,
     defaultTo: null,
@@ -34,7 +34,7 @@ const createColumn = (name: string, attribute: Attribute, options: MetadataOptio
   };
 };
 
-const createTable = (meta: Meta, options: MetadataOptions): Table => {
+const createTable = (meta: Meta): Table => {
   const table: Table = {
     name: meta.tableName,
     indexes: meta.indexes || [],
@@ -50,23 +50,19 @@ const createTable = (meta: Meta, options: MetadataOptions): Table => {
       if ('morphColumn' in attribute && attribute.morphColumn && attribute.owner) {
         const { idColumn, typeColumn } = attribute.morphColumn;
 
-        const idColumnName = identifiers.getName(idColumn.name, options);
-        const typeColumnName = identifiers.getName(typeColumn.name, options);
+        const idColumnName = identifiers.getName(idColumn.name);
+        const typeColumnName = identifiers.getName(typeColumn.name);
 
         table.columns.push(
-          createColumn(
-            idColumnName,
-            {
-              type: 'integer',
-              column: {
-                unsigned: true,
-              },
+          createColumn(idColumnName, {
+            type: 'integer',
+            column: {
+              unsigned: true,
             },
-            options
-          )
+          })
         );
 
-        table.columns.push(createColumn(typeColumnName, { type: 'string' }, options));
+        table.columns.push(createColumn(typeColumnName, { type: 'string' }));
       } else if (
         'joinColumn' in attribute &&
         attribute.joinColumn &&
@@ -82,23 +78,19 @@ const createTable = (meta: Meta, options: MetadataOptions): Table => {
           columnType = 'integer',
         } = attribute.joinColumn;
 
-        const columnName = identifiers.getName(columnNameFull, options);
+        const columnName = identifiers.getName(columnNameFull);
 
-        const column = createColumn(
-          columnName,
-          {
-            // TODO: find the column type automatically, or allow passing all the column params
-            type: columnType,
-            column: {
-              unsigned: true,
-            },
+        const column = createColumn(columnName, {
+          // TODO: find the column type automatically, or allow passing all the column params
+          type: columnType,
+          column: {
+            unsigned: true,
           },
-          options
-        );
+        });
 
         table.columns.push(column);
 
-        const fkName = identifiers.getFkIndexName([table.name, columnName], options);
+        const fkName = identifiers.getFkIndexName([table.name, columnName]);
         table.foreignKeys.push({
           name: fkName,
           columns: [column.name],
@@ -114,14 +106,14 @@ const createTable = (meta: Meta, options: MetadataOptions): Table => {
         });
       }
     } else if (types.isScalarAttribute(attribute)) {
-      const columnName = identifiers.getName(attribute.columnName || key, options);
+      const columnName = identifiers.getName(attribute.columnName || key);
 
-      const column = createColumn(columnName, attribute, options);
+      const column = createColumn(columnName, attribute);
 
       if (column.unique) {
         table.indexes.push({
           type: 'unique',
-          name: identifiers.getUniqueIndexName([table.name, column.name], options),
+          name: identifiers.getUniqueIndexName([table.name, column.name]),
           columns: [columnName],
         });
       }
@@ -129,7 +121,7 @@ const createTable = (meta: Meta, options: MetadataOptions): Table => {
       if (column.primary) {
         table.indexes.push({
           type: 'primary',
-          name: identifiers.getPrimaryIndexName([table.name, column.name], options),
+          name: identifiers.getPrimaryIndexName([table.name, column.name]),
           columns: [columnName],
         });
       }
@@ -227,13 +219,13 @@ const getColumnType = (attribute: Attribute) => {
   }
 };
 
-export const metadataToSchema = (metadata: Metadata, options: MetadataOptions): Schema => {
+export const metadataToSchema = (metadata: Metadata): Schema => {
   const schema: Schema = {
     tables: [],
   };
 
   metadata.forEach((metadata) => {
-    schema.tables.push(createTable(metadata, options));
+    schema.tables.push(createTable(metadata));
   });
 
   return schema;

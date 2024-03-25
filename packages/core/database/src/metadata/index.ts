@@ -8,7 +8,7 @@ import {
   isManyToAny,
 } from './relations';
 import { Metadata, Meta } from './metadata';
-import type { Model, MetadataOptions } from '../types';
+import type { Model } from '../types';
 
 export type { Metadata, Meta };
 export {
@@ -25,11 +25,11 @@ export {
 /**
  * Create Metadata from models configurations
  */
-export const createMetadata = (models: Model[], options: MetadataOptions): Metadata => {
+export const createMetadata = (models: Model[]): Metadata => {
   const metadata = new Metadata();
 
   if (models.length) {
-    metadata.loadModels(models, options);
+    metadata.loadModels(models);
   }
 
   return metadata;

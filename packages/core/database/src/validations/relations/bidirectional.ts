@@ -1,7 +1,7 @@
 import { snakeCase } from 'lodash/fp';
 import type { Database } from '../..';
-import type { MetadataOptions, Relation } from '../../types';
-import { getJoinTableName } from '../../utils/identifiers';
+import type { Relation } from '../../types';
+import { identifiers } from '../../utils/identifiers';
 
 type Link = {
   relation: Relation.Bidirectional & { inversedBy: string };
@@ -55,7 +55,7 @@ const isLinkTableEmpty = async (db: Database, linkTableName: string) => {
  * @param {*} db
  * @return {*}
  */
-export const validateBidirectionalRelations = async (db: Database, options: MetadataOptions) => {
+export const validateBidirectionalRelations = async (db: Database) => {
   const invalidLinks = getLinksWithoutMappedBy(db);
 
   for (const { relation, invRelation } of invalidLinks) {
@@ -63,15 +63,13 @@ export const validateBidirectionalRelations = async (db: Database, options: Meta
     const invModelMetadata = db.metadata.get(relation.target);
 
     // Generate the join table name based on the relation target table and attribute name.
-    const joinTableName = getJoinTableName(
+    const joinTableName = identifiers.getJoinTableName(
       snakeCase(modelMetadata.tableName),
-      snakeCase(invRelation.inversedBy),
-      options
+      snakeCase(invRelation.inversedBy)
     );
-    const inverseJoinTableName = getJoinTableName(
+    const inverseJoinTableName = identifiers.getJoinTableName(
       snakeCase(invModelMetadata.tableName),
-      snakeCase(relation.inversedBy),
-      options
+      snakeCase(relation.inversedBy)
     );
 
     const joinTableEmpty = await isLinkTableEmpty(db, joinTableName);

@@ -2,8 +2,8 @@ import type { Knex } from 'knex';
 import createDebug from 'debug';
 import type { Migration } from '../common';
 import type { Metadata } from '../../metadata';
-import { type Database, type MetadataOptions } from '../..';
-import { getUnshortenedName } from '../../utils/identifiers/shortener';
+import { type Database } from '../..';
+import { identifiers } from '../../utils/identifiers';
 
 const debug = createDebug('strapi::database::migration');
 
@@ -26,13 +26,7 @@ export const renameIdentifiersLongerThanMaxLength: Migration = {
   async up(knex, db) {
     const md = db.metadata;
 
-    const maxLength = db.DEFAULT_MAX_IDENTIFIER_LENGTH;
-
-    const metadataOptions = {
-      maxLength,
-    };
-
-    const diffs = findDiffs(md, metadataOptions);
+    const diffs = findDiffs(md);
     // migrate indexes before tables so we know to target the original tableName
     for (const indexDiff of diffs.indexes) {
       await renameIndex(knex, db, indexDiff);
@@ -150,7 +144,7 @@ const recreateIndexSqlite = async (knex: Knex, oldIndexName: string, newIndexNam
   }
 };
 
-const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
+const findDiffs = (shortMap: Metadata) => {
   const diffs = {
     tables: [],
     columns: [],
@@ -160,7 +154,7 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
   const shortArr = Array.from(shortMap.entries());
 
   shortArr.forEach(([, shortObj], index) => {
-    const fullTableName = getUnshortenedName(shortObj.tableName, options);
+    const fullTableName = identifiers.getUnshortenedName(shortObj.tableName);
     if (!fullTableName) {
       throw new Error(`Missing full table name for ${shortObj.tableName}`);
     }
@@ -191,7 +185,7 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
       // TODO: add more type checks so we don't need any
       const attr = shortObj.attributes[attrKey] as any;
       const shortColumnName = attr.columnName;
-      const longColumnName = getUnshortenedName(shortColumnName, options);
+      const longColumnName = identifiers.getUnshortenedName(shortColumnName);
 
       if (!shortColumnName || !longColumnName) {
         throw new Error(`missing column name(s) for attribute ${JSON.stringify(attr, null, 2)}`);
@@ -218,7 +212,7 @@ const findDiffs = (shortMap: Metadata, options: MetadataOptions) => {
     // eslint-disable-next-line guard-for-in
     for (const attrKey in shortObj.indexes) {
       const shortIndexName = shortObj.indexes[attrKey].name;
-      const longIndexName = getUnshortenedName(shortIndexName, options);
+      const longIndexName = identifiers.getUnshortenedName(shortIndexName);
       if (!longIndexName) {
         throw new Error(`Missing full index name for ${shortIndexName}`);
       }

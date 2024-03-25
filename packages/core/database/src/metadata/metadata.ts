@@ -1,8 +1,8 @@
 import { cloneDeep, snakeCase } from 'lodash/fp';
-import * as identifiers from '../utils/identifiers';
+import { identifiers } from '../utils/identifiers';
 import * as types from '../utils/types';
 import { createRelation } from './relations';
-import type { Attribute, MetadataOptions, Model } from '../types';
+import type { Attribute, Model } from '../types';
 import type { ForeignKey, Index } from '../schema/types';
 import type { Action, SubscriberFn } from '../lifecycles';
 
@@ -41,10 +41,10 @@ export class Metadata extends Map<string, Meta> {
     }
   }
 
-  loadModels(models: Model[], options: MetadataOptions) {
+  loadModels(models: Model[]) {
     // init pass
     for (const model of cloneDeep(models ?? [])) {
-      const tableName = identifiers.getTableName(model.tableName, options);
+      const tableName = identifiers.getTableName(model.tableName);
       this.add({
         ...model,
         tableName,
@@ -63,11 +63,11 @@ export class Metadata extends Map<string, Meta> {
       for (const [attributeName, attribute] of Object.entries(meta.attributes)) {
         try {
           if (types.isRelationalAttribute(attribute)) {
-            createRelation(attributeName, attribute, meta, this, options);
+            createRelation(attributeName, attribute, meta, this);
             continue;
           }
 
-          createAttribute(attributeName, attribute, options);
+          createAttribute(attributeName, attribute);
         } catch (error) {
           if (error instanceof Error) {
             throw new Error(
@@ -95,14 +95,14 @@ export class Metadata extends Map<string, Meta> {
   }
 }
 
-const createAttribute = (attributeName: string, attribute: Attribute, options: MetadataOptions) => {
+const createAttribute = (attributeName: string, attribute: Attribute) => {
   // if the attribute has already set its own column name, use that
   // this will prevent us from shortening a name twice
   if ('columnName' in attribute && attribute.columnName) {
     return;
   }
 
-  const columnName = identifiers.getColumnName(snakeCase(attributeName), options);
+  const columnName = identifiers.getColumnName(snakeCase(attributeName));
 
   Object.assign(attribute, { columnName });
 };

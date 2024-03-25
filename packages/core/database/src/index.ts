@@ -11,7 +11,7 @@ import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
 import type { MetadataOptions, Model } from './types';
-import * as identifiers from './utils/identifiers';
+import { identifiers } from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -58,8 +58,6 @@ class Database {
 
   entityManager: EntityManager;
 
-  readonly DEFAULT_MAX_IDENTIFIER_LENGTH = 55 as const;
-
   constructor(config: DatabaseConfig) {
     this.config = {
       ...config,
@@ -73,16 +71,13 @@ class Database {
     this.dialect = getDialect(this);
     this.dialect.configure();
 
-    const metadataOptions = {
-      maxLength: this.DEFAULT_MAX_IDENTIFIER_LENGTH,
-    };
-    this.metadata = createMetadata([], metadataOptions);
+    this.metadata = createMetadata([]);
 
     this.connection = createConnection(this.config.connection, {
       pool: { afterCreate: afterCreate(this) },
     });
 
-    this.schema = createSchemaProvider(this, metadataOptions);
+    this.schema = createSchemaProvider(this);
 
     this.migrations = createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
@@ -91,13 +86,8 @@ class Database {
   }
 
   async init({ models }: { models: Model[] }) {
-    const metadataOptions = {
-      maxLength: this.DEFAULT_MAX_IDENTIFIER_LENGTH,
-    };
-
-    this.metadata.loadModels(models, metadataOptions);
-
-    await validateDatabase(this, metadataOptions);
+    this.metadata.loadModels(models);
+    await validateDatabase(this);
     return this;
   }
 

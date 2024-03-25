@@ -6,7 +6,6 @@ import createSchemaStorage from './storage';
 import { metadataToSchema } from './schema';
 
 import type { Schema } from './types';
-import type { MetadataOptions } from '../types';
 import type { Database } from '..';
 
 export type * from './types';
@@ -29,14 +28,14 @@ interface State {
   schema?: Schema;
 }
 
-export const createSchemaProvider = (db: Database, options: MetadataOptions): SchemaProvider => {
+export const createSchemaProvider = (db: Database): SchemaProvider => {
   const state: State = {};
 
   return {
     get schema() {
       if (!state.schema) {
         debug('Converting metadata to database schema');
-        state.schema = metadataToSchema(db.metadata, options);
+        state.schema = metadataToSchema(db.metadata);
       }
 
       return state.schema;

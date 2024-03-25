@@ -1,6 +1,9 @@
 import { cloneDeep, merge } from 'lodash';
+import { utils } from '@strapi/database';
 import { transformContentTypesToModels } from '..';
 import { LoadedContentTypeModel } from '../transform-content-types-to-models';
+
+const { identifiers } = utils;
 
 // We want to match exactly with the exception that document_id.default should be any function
 expect.extend({
@@ -264,9 +267,13 @@ function patchContentTypes(
 
 describe('transformContentTypesToModels', () => {
   describe('full length identifiers', () => {
-    const options = { maxLength: 0 };
+    // mock the options so that the 'global' identifiers created for use by createMetadata uses 0 for maxLength
+    Object.defineProperty(identifiers, 'options', {
+      get: jest.fn(() => ({ maxLength: 0 })),
+    });
+
     test('converts valid content types to models', () => {
-      const models = transformContentTypesToModels(contentTypes, options);
+      const models = transformContentTypesToModels(contentTypes);
 
       expect(models).toMatchModels(expectedModels);
     });
@@ -283,7 +290,7 @@ describe('transformContentTypesToModels', () => {
         };
         const modifiedContentTypes = patchContentTypes('countries', changes);
 
-        expect(() => transformContentTypesToModels(modifiedContentTypes, options)).toThrow(
+        expect(() => transformContentTypesToModels(modifiedContentTypes)).toThrow(
           `The attribute "${restrictedName}" is reserved`
         );
       }
@@ -297,7 +304,7 @@ describe('transformContentTypesToModels', () => {
         };
         const modifiedContentTypes = patchContentTypes('countries', changes);
 
-        expect(() => transformContentTypesToModels(modifiedContentTypes, options)).toThrow(
+        expect(() => transformContentTypesToModels(modifiedContentTypes)).toThrow(
           `"${restrictedName}" is required`
         );
       }
