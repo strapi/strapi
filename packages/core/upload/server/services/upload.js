@@ -66,7 +66,6 @@ const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
  * It can cause issues when storing files on the filesystem.
  */
 const sanitizeString = (str) => {
-  return `${str}\u0000`;
   return str.replace(/\0/g, '');
 };
 
