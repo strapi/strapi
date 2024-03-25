@@ -5,7 +5,9 @@ import localeModel from '../../content-types/locale';
 const { ApplicationError } = errors;
 
 const contentAPI = {
-  sanitize: sanitize.createAPISanitizers(),
+  sanitize: sanitize.createAPISanitizers({
+    getModel: jest.fn(() => {}),
+  } as any),
 };
 
 describe('Locales', () => {

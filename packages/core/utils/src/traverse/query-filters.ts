@@ -55,12 +55,12 @@ const filters = traverseFactory()
   // Recursion on operators (non attributes)
   .on(
     ({ attribute }) => isNil(attribute),
-    async ({ key, visitor, path, value, schema }, { set, recurse }) => {
-      set(key, await recurse(visitor, { schema, path }, value));
+    async ({ key, visitor, path, value, schema, getModel }, { set, recurse }) => {
+      set(key, await recurse(visitor, { schema, path, getModel }, value));
     }
   )
   // Handle relation recursion
-  .onRelation(async ({ key, attribute, visitor, path, value }, { set, recurse }) => {
+  .onRelation(async ({ key, attribute, visitor, path, value, getModel }, { set, recurse }) => {
     const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
 
     if (isMorphRelation) {
@@ -68,25 +68,25 @@ const filters = traverseFactory()
     }
 
     const targetSchemaUID = attribute.target;
-    const targetSchema = strapi.getModel(targetSchemaUID);
+    const targetSchema = getModel(targetSchemaUID!);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path }, value);
+    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
 
     set(key, newValue);
   })
-  .onComponent(async ({ key, attribute, visitor, path, value }, { set, recurse }) => {
-    const targetSchema = strapi.getModel(attribute.component);
+  .onComponent(async ({ key, attribute, visitor, path, value, getModel }, { set, recurse }) => {
+    const targetSchema = getModel(attribute.component);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path }, value);
+    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
 
     set(key, newValue);
   })
   // Handle media recursion
-  .onMedia(async ({ key, visitor, path, value }, { set, recurse }) => {
+  .onMedia(async ({ key, visitor, path, value, getModel }, { set, recurse }) => {
     const targetSchemaUID = 'plugin::upload.file';
-    const targetSchema = strapi.getModel(targetSchemaUID);
+    const targetSchema = getModel(targetSchemaUID);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path }, value);
+    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
 
     set(key, newValue);
   });
