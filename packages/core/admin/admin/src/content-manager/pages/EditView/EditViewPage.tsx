@@ -16,7 +16,7 @@ import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { Blocker, Form, FormHelpers } from '../../../components/Form';
+import { Blocker, Form } from '../../../components/Form';
 import { Page } from '../../../components/PageHelpers';
 import { useNotification } from '../../../features/Notifications';
 import { useOnce } from '../../../hooks/useOnce';
@@ -144,13 +144,27 @@ const EditViewPage = () => {
     return <Page.Error />;
   }
 
-  const handleTabChange = (index: number, { resetForm }: Pick<FormHelpers, 'resetForm'>) => {
+  const switchToPublished = () => {
+    setQuery({ status: 'published' }, 'push', true);
+  };
+
+  const switchToDraft = () => {
+    setQuery({ status: 'draft' }, 'push', true);
+  };
+
+  const handleTabChange = (index: number) => {
     if (index === 0) {
-      setQuery({ status: 'draft' }, 'push', true);
+      switchToDraft();
     } else {
-      setQuery({ status: 'published' }, 'push', true);
-      // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-      resetForm();
+      switchToPublished();
+    }
+  };
+
+  const modifiedTabCancelAction = () => {
+    switchToDraft();
+
+    if (tabApi.current && hasDraftAndPublished) {
+      tabApi.current._handlers.setSelectedTabIndex(0);
     }
   };
 
@@ -188,7 +202,7 @@ const EditViewPage = () => {
               initialSelectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
               onTabChange={(index) => {
                 // TODO: remove this hack when the tabs in the DS are implemented well and we can actually use callbacks.
-                handleTabChange(index, { resetForm });
+                handleTabChange(index);
               }}
             >
               {hasDraftAndPublished ? (
@@ -223,7 +237,15 @@ const EditViewPage = () => {
                 </GridItem>
               </Grid>
             </TabGroup>
-            <Blocker />
+            <Blocker
+              onProceed={() => {
+                // We reset the form when navigating to to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
+                resetForm();
+              }}
+              // If tab navigation is aborted, we should bring the user back to
+              // the draft tab.
+              onCancel={modifiedTabCancelAction}
+            />
           </>
         )}
       </Form>

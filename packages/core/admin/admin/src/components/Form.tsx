@@ -690,17 +690,26 @@ const isErrorMessageDescriptor = (object?: string | object): object is Translati
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = () => {
+const Blocker = ({ onProceed = () => {}, onCancel = () => {} }) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
 
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      !isSubmitting && modified && currentLocation.pathname !== nextLocation.pathname
-  );
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    return (
+      !isSubmitting &&
+      modified &&
+      (currentLocation.pathname !== nextLocation.pathname ||
+        currentLocation.search !== nextLocation.search)
+    );
+  });
 
   if (blocker.state === 'blocked') {
+    const onBlockerCancel = () => {
+      onCancel();
+      blocker.reset();
+    };
+
     return (
       <Dialog
         isOpen
@@ -708,7 +717,7 @@ const Blocker = () => {
           id: 'app.components.ConfirmDialog.title',
           defaultMessage: 'Confirmation',
         })}
-        onClose={() => blocker.reset()}
+        onClose={onBlockerCancel}
       >
         <DialogBody>
           <Flex direction="column" gap={2}>
@@ -723,7 +732,7 @@ const Blocker = () => {
         </DialogBody>
         <DialogFooter
           startAction={
-            <Button onClick={() => blocker.reset()} variant="tertiary">
+            <Button onClick={onBlockerCancel} variant="tertiary">
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
@@ -731,7 +740,13 @@ const Blocker = () => {
             </Button>
           }
           endAction={
-            <Button onClick={() => blocker.proceed()} variant="danger">
+            <Button
+              onClick={() => {
+                onProceed();
+                blocker.proceed();
+              }}
+              variant="danger"
+            >
               {formatMessage({
                 id: 'app.components.Button.confirm',
                 defaultMessage: 'Confirm',
