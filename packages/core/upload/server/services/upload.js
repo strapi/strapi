@@ -61,6 +61,15 @@ const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
   return tmpWorkingDirectory;
 };
 
+/**
+ * Remove null characters from a string.
+ * It can cause issues when storing files on the filesystem.
+ */
+const sanitizeString = (str) => {
+  return `${str}\u0000`;
+  return str.replace(/\0/g, '');
+};
+
 module.exports = ({ strapi }) => ({
   async emitEvent(event, data) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
@@ -72,11 +81,13 @@ module.exports = ({ strapi }) => ({
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const fileService = getService('file');
 
-    let ext = path.extname(filename);
+    const sanitizedFilename = sanitizeString(filename);
+
+    let ext = path.extname(sanitizedFilename);
     if (!ext) {
       ext = `.${extension(type)}`;
     }
-    const usedName = (fileInfo.name || filename).normalize();
+    const usedName = (sanitizeString(fileInfo.name) || sanitizedFilename).normalize();
     const basename = path.basename(usedName, ext);
 
     const entity = {
