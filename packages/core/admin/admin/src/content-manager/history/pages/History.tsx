@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Box, Flex, Main } from '@strapi/design-system';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { stringify } from 'qs';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, useParams } from 'react-router-dom';
 
@@ -151,8 +150,8 @@ const HistoryPage = () => {
 
   return (
     <>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           {
             id: 'content-manager.history.page-title',
             defaultMessage: '{contentType} history',
@@ -161,7 +160,7 @@ const HistoryPage = () => {
             contentType: displayName,
           }
         )}
-      />
+      </Page.Title>
       <HistoryProvider
         contentType={slug}
         id={documentId}

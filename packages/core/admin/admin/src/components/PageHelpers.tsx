@@ -231,6 +231,26 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
   return typeof children === 'function' ? children({ permissions: matchingPermissions }) : children;
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * Title
+ * -----------------------------------------------------------------------------------------------*/
+export interface TitleProps {
+  children: string;
+}
+
+/**
+ * @public
+ * @description This component takes the children (must be a string) and sets
+ * it as the title of the html.
+ */
+const Title = ({ children: title }: TitleProps) => {
+  React.useEffect(() => {
+    document.title = `${title} | Strapi`;
+  }, [title]);
+
+  return null;
+};
+
 const Page = {
   Error,
   Loading,
@@ -238,6 +258,7 @@ const Page = {
   Protect,
   NoData,
   Main: PageMain,
+  Title,
 };
 
 export { Page };

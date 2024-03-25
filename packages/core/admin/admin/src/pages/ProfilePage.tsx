@@ -13,7 +13,6 @@ import {
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
@@ -146,7 +145,6 @@ const ProfilePage = () => {
         isBaseQueryError(res.error) &&
         (res.error.name === 'ValidationError' || res.error.message === 'ValidationError')
       ) {
-        // @ts-expect-error – We get a BadRequest error here instead of a ValidationError if the currentPassword is wrong.
         setErrors(formatValidationErrors(res.error));
       } else if (isBaseQueryError(res.error)) {
         toggleNotification({
@@ -181,12 +179,12 @@ const ProfilePage = () => {
 
   return (
     <Page.Main aria-busy={isSubmittingForm}>
-      <Helmet
-        title={formatMessage({
-          id: 'Settings.profile.form.section.helmet.title',
+      <Page.Title>
+        {formatMessage({
+          id: 'Settings.profile.form.section.head.title',
           defaultMessage: 'User profile',
         })}
-      />
+      </Page.Title>
       <Form
         method="PUT"
         onSubmit={handleSubmit}

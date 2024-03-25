@@ -66,7 +66,6 @@
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.1",
-    "react-helmet": "^6.1.0",
     "react-intl": "6.6.2",
     "swagger-ui-dist": "4.19.0",
     "yaml": "1.10.2",

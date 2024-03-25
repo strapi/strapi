@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { ContentLayout, Flex } from '@strapi/design-system';
 import { Formik, Form, FormikHelpers } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
@@ -319,12 +318,12 @@ export const EditView = () => {
   return (
     <ApiTokenPermissionsProvider value={providerValue}>
       <Page.Main>
-        <Helmet
-          title={formatMessage(
+        <Page.Title>
+          {formatMessage(
             { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
             { name: 'API Tokens' }
           )}
-        />
+        </Page.Title>
         <Formik
           validationSchema={schema}
           validateOnChange={false}

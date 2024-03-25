@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Main } from '@strapi/design-system';
 import { Modules } from '@strapi/types';
 import { FormikHelpers } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
 
@@ -162,14 +161,14 @@ const EditPage = () => {
 
   return (
     <Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Webhooks',
           }
         )}
-      />
+      </Page.Title>
       <WebhookForm
         data={webhook}
         handleSubmit={handleSubmit}

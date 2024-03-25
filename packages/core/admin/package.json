@@ -125,7 +125,6 @@
     "react-dnd": "16.0.1",
     "react-dnd-html5-backend": "16.0.1",
     "react-error-boundary": "3.1.4",
-    "react-helmet": "^6.1.0",
     "react-intl": "6.6.2",
     "react-is": "^18.2.0",
     "react-query": "3.39.3",
