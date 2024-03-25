@@ -1,5 +1,4 @@
 import { defaultsDeep } from 'lodash/fp';
-import { convertQueryParams } from '@strapi/utils';
 
 import type { Context } from 'koa';
 
@@ -20,7 +19,7 @@ export default {
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const { results } = await strapi.db.query(FOLDER_MODEL_UID).findPage(
-      convertQueryParams.transformParamsToQuery(
+      strapi.get('query-params').transform(
         FOLDER_MODEL_UID,
         defaultsDeep(
           {
@@ -58,7 +57,7 @@ export default {
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const results = await strapi.db.query(FOLDER_MODEL_UID).findMany(
-      convertQueryParams.transformParamsToQuery(
+      strapi.get('query-params').transform(
         FOLDER_MODEL_UID,
         defaultsDeep(
           {

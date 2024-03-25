@@ -25,6 +25,7 @@ import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
 import createEntityService from './services/entity-service';
+import createQueryParamService from './services/query-params';
 
 import createCronService from './services/cron';
 import entityValidator from './services/entity-validator';
@@ -182,6 +183,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('apis', registries.apis(this))
       .add('sanitizers', registries.sanitizers())
       .add('validators', registries.validators())
+      .add('query-params', createQueryParamService(this))
       .add('content-api', createContentAPI(this))
       .add('auth', createAuth())
       .add('models', registries.models());
