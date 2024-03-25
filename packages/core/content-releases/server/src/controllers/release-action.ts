@@ -35,19 +35,20 @@ const releaseActionController = {
     const releaseId: CreateManyReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
     const releaseActionsArgs: CreateManyReleaseActions.Request['body'] = ctx.request.body;
 
-    await Promise.all(
-      releaseActionsArgs.map((releaseActionArgs) => validateReleaseAction(releaseActionArgs))
-    );
+    const { contentType, locale, type, entries } = releaseActionsArgs;
 
     const releaseService = getService('release', { strapi });
 
     const releaseActions = await strapi.db.transaction(async () => {
       const releaseActions = await Promise.all(
-        releaseActionsArgs.map(async (releaseActionArgs) => {
+        entries.map(async (id) => {
           try {
-            const action = await releaseService.createAction(releaseId, releaseActionArgs);
+            const releaseAction = await releaseService.createAction(releaseId, {
+              type,
+              entry: { id, contentType, locale },
+            });
 
-            return action;
+            return releaseAction;
           } catch (error) {
             // If the entry is already in the release, we don't want to throw an error, so we catch and ignore it
             if (error instanceof AlreadyOnReleaseError) {

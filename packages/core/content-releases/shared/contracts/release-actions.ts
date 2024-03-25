@@ -67,14 +67,12 @@ export declare namespace CreateManyReleaseActions {
     params: {
       releaseId: Release['id'];
     };
-    body: Array<{
+    body: {
       type: ReleaseAction['type'];
-      entry: {
-        id: ReleaseActionEntry['id'];
-        locale?: ReleaseActionEntry['locale'];
-        contentType: Common.UID.ContentType;
-      };
-    }>;
+      locale: ReleaseActionEntry['locale'];
+      contentType: Common.UID.ContentType;
+      entries: Array<ReleaseActionEntry['id']>;
+    };
   }
 
   export interface Response {
