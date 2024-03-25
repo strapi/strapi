@@ -2,7 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const rimraf = require('rimraf');
+const { rimraf } = require('rimraf');
 const execa = require('execa');
 const generateNew = require('../../packages/generators/app/dist/generate-new');
 
