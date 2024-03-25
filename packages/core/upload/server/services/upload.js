@@ -226,16 +226,12 @@ module.exports = ({ strapi }) => ({
 
     const uploadPromises = [];
 
-    // Upload image
-    uploadPromises.push(getService('provider').upload(fileData));
-
     // Generate & Upload thumbnail and responsive formats
     if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
         uploadPromises.push(uploadThumbnail(thumbnailFile));
       }
-
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
@@ -245,6 +241,10 @@ module.exports = ({ strapi }) => ({
         }
       }
     }
+
+    // Upload image
+    uploadPromises.push(getService('provider').upload(fileData));
+
     // Wait for all uploads to finish
     await Promise.all(uploadPromises);
   },
