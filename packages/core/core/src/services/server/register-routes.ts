@@ -82,8 +82,8 @@ const registerPluginRoutes = (strapi: Core.Strapi) => {
  * Register api routes
  */
 const registerAPIRoutes = (strapi: Core.Strapi) => {
-  for (const apiName of Object.keys(strapi.api)) {
-    const api = strapi.api[apiName];
+  for (const apiName of Object.keys(strapi.apis)) {
+    const api = strapi.api(apiName);
 
     const generateRouteScope = createRouteScopeGenerator(`api::${apiName}`);
 

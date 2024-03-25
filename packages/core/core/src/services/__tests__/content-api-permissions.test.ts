@@ -32,7 +32,7 @@ describe('Content API - Permissions', () => {
     test('When no controller are defined for an API, it should ignore the API', () => {
       global.strapi = {
         ...strapiMock,
-        api: {
+        apis: {
           foo: {},
           bar: {},
         },
@@ -50,7 +50,7 @@ describe('Content API - Permissions', () => {
 
       global.strapi = {
         ...strapiMock,
-        api: {
+        apis: {
           foo: {
             controllers: {
               controllerA: {
@@ -74,7 +74,7 @@ describe('Content API - Permissions', () => {
     test('Creates and populate a map of actions from APIs and plugins', () => {
       global.strapi = {
         ...strapiMock,
-        api: {
+        apis: {
           foo: {
             controllers: {
               controllerA: {
@@ -146,7 +146,7 @@ describe('Content API - Permissions', () => {
     beforeEach(() => {
       global.strapi = {
         ...strapiMock,
-        api: {
+        apis: {
           foo: {
             controllers: {
               controllerA: {
@@ -273,7 +273,7 @@ describe('Content API - Permissions', () => {
           debug: jest.fn(),
         },
 
-        api: {
+        apis: {
           foo: {
             controllers: {
               bar: { foobar: bindToContentAPI(() => {}) },

@@ -20,7 +20,7 @@ const strapi = {
       },
     },
   },
-  api: {
+  apis: {
     restaurant: {
       contentTypes: {
         restaurant: {
@@ -124,7 +124,7 @@ describe('Documentation plugin | Build component schema', () => {
     (global.strapi.plugins['users-permissions'].routes as any)['content-api'].routes = [
       { method: 'GET', path: '/test', handler: 'test.find' },
     ];
-    global.strapi.api.restaurant.routes.restaurant.routes = [
+    global.strapi.apis.restaurant.routes.restaurant.routes = [
       { method: 'GET', path: '/test', handler: 'test.find' },
     ] as any;
 
@@ -271,7 +271,7 @@ describe('Documentation plugin | Build component schema', () => {
     (global.strapi.plugins['users-permissions'].routes as any)['content-api'].routes = [
       { method: 'POST', path: '/test', handler: 'test.create' },
     ];
-    global.strapi.api.restaurant.routes.restaurant.routes = [
+    global.strapi.apis.restaurant.routes.restaurant.routes = [
       { method: 'POST', path: '/test', handler: 'test.create' },
     ] as any;
 
