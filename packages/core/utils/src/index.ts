@@ -3,13 +3,13 @@ export { default as env } from './env-helper';
 export { default as setCreatorFields } from './set-creator-fields';
 export { default as providerFactory } from './provider-factory';
 export { default as traverseEntity } from './traverse-entity';
-export { default as convertQueryParams } from './convert-query-params';
 export { default as importDefault } from './import-default';
 export { default as machineID } from './machine-id';
 
 export { validateYupSchema, validateYupSchemaSync } from './validators';
 export { isOperator, isOperatorOfType } from './operators';
 
+export * as queryParams from './convert-query-params';
 export * as sanitize from './sanitize';
 export * as validate from './validate';
 export * as pagination from './pagination';
