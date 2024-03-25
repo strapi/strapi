@@ -18,7 +18,6 @@ const db = new Database({
 });
 
 const identifiers = db.identifiers;
-console.log('identifiers', identifiers);
 
 // We want to match exactly with the exception that document_id.default should be any function
 expect.extend({
