@@ -99,14 +99,14 @@ const writeStaticClientFiles = async (ctx: BuildContext) => {
 
   await fs.writeFile(
     path.join(ctx.runtimeDir, 'index.html'),
-    format(indexHtml, {
+    await format(indexHtml, {
       parser: 'html',
     })
   );
   ctx.logger.debug('Wrote the index.html file');
   await fs.writeFile(
     path.join(ctx.runtimeDir, 'app.js'),
-    format(getEntryModule(ctx), {
+    await format(getEntryModule(ctx), {
       parser: 'babel',
     })
   );
