@@ -138,7 +138,6 @@ const hasLocalizationsJoinTable = async (knex: Knex, tableName: string) => {
 export const createdDocumentId: Migration = {
   name: 'created-document-id',
   async up(knex, db) {
-    // do sth
     for (const meta of db.metadata.values()) {
       const hasTable = await knex.schema.hasTable(meta.tableName);
 
