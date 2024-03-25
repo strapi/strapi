@@ -53,7 +53,7 @@ expect.extend({
 type TestCase = [
   string,
   { type: string; required?: boolean; default?: any },
-  { type: string; columnName: string; required?: boolean; default?: any }
+  { type: string; columnName: string; required?: boolean; default?: any },
 ];
 
 describe('metadata', () => {

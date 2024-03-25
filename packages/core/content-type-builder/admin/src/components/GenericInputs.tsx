@@ -48,7 +48,7 @@ interface CustomInputProps<TAttribute extends Schema.Attribute.AnyAttribute>
 }
 
 interface GenericInputProps<
-  TAttribute extends Schema.Attribute.AnyAttribute = Schema.Attribute.AnyAttribute
+  TAttribute extends Schema.Attribute.AnyAttribute = Schema.Attribute.AnyAttribute,
 > {
   attribute?: TAttribute;
   autoComplete?: string;

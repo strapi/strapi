@@ -151,15 +151,18 @@ export function getNameFromTokens(nameTokens: NameToken[], maxLength = MAX_DB_ID
 
   // Check that it's even possible to proceed
   const minHashedLength = HASH_LENGTH + HASH_SEPARATOR.length + MIN_TOKEN_LENGTH;
-  const totalLength = nameTokens.reduce((total, token) => {
-    if (token.compressible) {
-      if (token.name.length < availablePerToken) {
-        return total + token.name.length;
+  const totalLength = nameTokens.reduce(
+    (total, token) => {
+      if (token.compressible) {
+        if (token.name.length < availablePerToken) {
+          return total + token.name.length;
+        }
+        return total + minHashedLength;
       }
-      return total + minHashedLength;
-    }
-    return total + token.name.length;
-  }, nameTokens.length * IDENTIFIER_SEPARATOR.length - 1);
+      return total + token.name.length;
+    },
+    nameTokens.length * IDENTIFIER_SEPARATOR.length - 1
+  );
 
   // Check if the maximum length is less than the total length
   if (maxLength < totalLength) {

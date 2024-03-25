@@ -473,7 +473,7 @@ describe('content-types service', () => {
               },
             },
           },
-        }[model]);
+        })[model];
 
       global.strapi = { getModel } as any;
     });

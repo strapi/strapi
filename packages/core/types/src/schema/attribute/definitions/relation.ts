@@ -7,14 +7,14 @@ import type * as UID from '../../../uid';
 //             (global search)
 export type Relation<
   TRelationKind extends RelationKind.Any = RelationKind.Any,
-  TTargetUID extends UID.ContentType = UID.ContentType
+  TTargetUID extends UID.ContentType = UID.ContentType,
 > =
   | RelationWithTarget<Extract<TRelationKind, RelationKind.WithTarget>, TTargetUID>
   | RelationWithoutTarget<Extract<TRelationKind, RelationKind.WithoutTarget>>;
 
 export type RelationWithTarget<
   TRelationKind extends RelationKind.WithTarget = RelationKind.WithTarget,
-  TTargetUID extends UID.ContentType = UID.ContentType
+  TTargetUID extends UID.ContentType = UID.ContentType,
 > = {
   // Bidirectional (oneToOne, oneToMany, manyToOne, manyToMany)
   oneToOne: OneToOne<TTargetUID>;
@@ -32,7 +32,7 @@ export type RelationWithTarget<
 }[TRelationKind];
 
 type RelationWithoutTarget<
-  TRelationKind extends RelationKind.WithoutTarget = RelationKind.WithoutTarget
+  TRelationKind extends RelationKind.WithoutTarget = RelationKind.WithoutTarget,
 > = {
   // Morph Owner (morphToOne, morphToMany)
   morphToOne: MorphToOne;
@@ -41,17 +41,17 @@ type RelationWithoutTarget<
 
 export type Bidirectional<
   TRelationKind extends RelationKind.BiDirectional = RelationKind.BiDirectional,
-  TTargetUID extends UID.ContentType = UID.ContentType
+  TTargetUID extends UID.ContentType = UID.ContentType,
 > = Relation<TRelationKind, TTargetUID>;
 
 export type XWay<
   TRelationKind extends RelationKind.XWay = RelationKind.XWay,
-  TTargetUID extends UID.ContentType = UID.ContentType
+  TTargetUID extends UID.ContentType = UID.ContentType,
 > = Relation<TRelationKind, TTargetUID>;
 
 export type MorphReference<
   TRelationKind extends RelationKind.MorphReference = RelationKind.MorphReference,
-  TTargetUID extends UID.ContentType = UID.ContentType
+  TTargetUID extends UID.ContentType = UID.ContentType,
 > = Relation<TRelationKind, TTargetUID>;
 
 export type MorphOwner<TRelationKind extends RelationKind.MorphOwner = RelationKind.MorphOwner> =
@@ -64,7 +64,7 @@ export type RelationOptions = Intersect<
     Attribute.WritableOption,
     Attribute.VisibleOption,
     Attribute.RequiredOption,
-    { useJoinTable?: boolean }
+    { useJoinTable?: boolean },
   ]
 >;
 
@@ -79,7 +79,7 @@ export type OneToOne<TTargetUID extends UID.ContentType = UID.ContentType> = Int
     Attribute.OfType<'relation'>,
     CommonBidirectionalProperties<TTargetUID>,
     RelationOptions,
-    { relation: 'oneToOne' }
+    { relation: 'oneToOne' },
   ]
 >;
 
@@ -88,7 +88,7 @@ export type OneToMany<TTargetUID extends UID.ContentType = UID.ContentType> = In
     Attribute.OfType<'relation'>,
     CommonBidirectionalProperties<TTargetUID>,
     RelationOptions,
-    { relation: 'oneToMany' }
+    { relation: 'oneToMany' },
   ]
 >;
 
@@ -97,7 +97,7 @@ export type ManyToOne<TTargetUID extends UID.ContentType = UID.ContentType> = In
     Attribute.OfType<'relation'>,
     CommonBidirectionalProperties<TTargetUID>,
     RelationOptions,
-    { relation: 'manyToOne' }
+    { relation: 'manyToOne' },
   ]
 >;
 
@@ -106,7 +106,7 @@ export type ManyToMany<TTargetUID extends UID.ContentType = UID.ContentType> = I
     Attribute.OfType<'relation'>,
     CommonBidirectionalProperties<TTargetUID>,
     RelationOptions,
-    { relation: 'manyToMany' }
+    { relation: 'manyToMany' },
   ]
 >;
 
@@ -119,7 +119,7 @@ export type OneWay<TTargetUID extends UID.ContentType = UID.ContentType> = Inter
     Attribute.OfType<'relation'>,
     XWayCommonProperties<TTargetUID>,
     RelationOptions,
-    { relation: 'oneWay' }
+    { relation: 'oneWay' },
   ]
 >;
 
@@ -128,7 +128,7 @@ export type ManyWay<TTargetUID extends UID.ContentType = UID.ContentType> = Inte
     Attribute.OfType<'relation'>,
     XWayCommonProperties<TTargetUID>,
     RelationOptions,
-    { relation: 'manyWay' }
+    { relation: 'manyWay' },
   ]
 >;
 
@@ -145,7 +145,7 @@ export type MorphOne<TTargetUID extends UID.ContentType = UID.ContentType> = Int
     Attribute.OfType<'relation'>,
     MorphReferenceCommonProperties<TTargetUID>,
     RelationOptions,
-    { relation: 'morphOne' }
+    { relation: 'morphOne' },
   ]
 >;
 
@@ -154,7 +154,7 @@ export type MorphMany<TTargetUID extends UID.ContentType = UID.ContentType> = In
     Attribute.OfType<'relation'>,
     MorphReferenceCommonProperties<TTargetUID>,
     RelationOptions,
-    { relation: 'morphMany' }
+    { relation: 'morphMany' },
   ]
 >;
 
@@ -177,16 +177,12 @@ export type IsManyRelation<TRelationKind extends RelationKind.Any> = String.Ends
   'Many'
 >;
 
-export type RelationTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Relation<
-  RelationKind.WithTarget,
-  infer TTarget
->
-  ? TTarget
-  : never;
+export type RelationTarget<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Relation<RelationKind.WithTarget, infer TTarget> ? TTarget : never;
 
 export type RelationValue<
   TRelationKind extends RelationKind.Any,
-  TTargetUID extends UID.ContentType = never
+  TTargetUID extends UID.ContentType = never,
 > = {
   // Bidirectional (oneToOne, oneToMany, manyToOne, manyToMany)
   oneToOne: ContentType<TTargetUID>;
@@ -211,8 +207,8 @@ export type GetRelationValue<TAttribute extends Attribute.Attribute> =
   TAttribute extends Relation<RelationKind.WithoutTarget>
     ? RelationValue<TAttribute['relation']>
     : TAttribute extends Relation<RelationKind.WithTarget, UID.ContentType>
-    ? RelationValue<TAttribute['relation'], TAttribute['target']>
-    : never;
+      ? RelationValue<TAttribute['relation'], TAttribute['target']>
+      : never;
 
 // TODO: [TS2] Maybe try to simplify this, so that it doesn't require a PhD to understand
 // eslint-disable-next-line @typescript-eslint/no-namespace

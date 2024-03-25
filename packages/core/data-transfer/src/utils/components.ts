@@ -48,7 +48,7 @@ function omitComponentData(
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async <
   TUID extends UID.Schema,
-  TData extends Modules.EntityService.Params.Data.Input<TUID>
+  TData extends Modules.EntityService.Params.Data.Input<TUID>,
 >(
   uid: TUID,
   data: TData
@@ -168,7 +168,7 @@ const getComponents = async <TUID extends UID.Schema>(
 */
 const updateComponents = async <
   TUID extends UID.Schema,
-  TData extends Partial<Modules.EntityService.Params.Data.Input<TUID>>
+  TData extends Partial<Modules.EntityService.Params.Data.Input<TUID>>,
 >(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
