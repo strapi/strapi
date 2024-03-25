@@ -18,6 +18,8 @@ import {
   NameTokenWithAllocation,
 } from './types';
 
+const IDENTIFIER_MAX_LENGTH = 55 as const;
+
 export class Identifiers {
   ID_COLUMN = 'id' as const;
 
@@ -441,4 +443,6 @@ export class Identifiers {
   };
 }
 
-export const identifiers = new Identifiers({ maxLength: 55 });
+// TODO: instead of instantiating this here as a global metadata should create its own to use
+// However, that would require refactoring all of the metadata methods to be instantiated to keep a centralized identifiers
+export const identifiers = new Identifiers({ maxLength: IDENTIFIER_MAX_LENGTH });

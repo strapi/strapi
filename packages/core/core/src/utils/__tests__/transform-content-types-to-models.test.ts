@@ -1,9 +1,24 @@
 import { cloneDeep, merge } from 'lodash';
-import { utils } from '@strapi/database';
+import { Database } from '@strapi/database';
 import { transformContentTypesToModels } from '..';
 import { LoadedContentTypeModel } from '../transform-content-types-to-models';
 
-const { identifiers } = utils;
+const db = new Database({
+  settings: {
+    migrations: {
+      dir: 'fakedir',
+    },
+  },
+  connection: {
+    client: 'sqlite',
+    connection: {
+      filename: 'fake.db',
+    },
+  },
+});
+
+const identifiers = db.identifiers;
+console.log('identifiers', identifiers);
 
 // We want to match exactly with the exception that document_id.default should be any function
 expect.extend({
@@ -273,7 +288,7 @@ describe('transformContentTypesToModels', () => {
     });
 
     test('converts valid content types to models', () => {
-      const models = transformContentTypesToModels(contentTypes);
+      const models = transformContentTypesToModels(contentTypes, identifiers);
 
       expect(models).toMatchModels(expectedModels);
     });
@@ -290,7 +305,7 @@ describe('transformContentTypesToModels', () => {
         };
         const modifiedContentTypes = patchContentTypes('countries', changes);
 
-        expect(() => transformContentTypesToModels(modifiedContentTypes)).toThrow(
+        expect(() => transformContentTypesToModels(modifiedContentTypes, identifiers)).toThrow(
           `The attribute "${restrictedName}" is reserved`
         );
       }
@@ -304,7 +319,7 @@ describe('transformContentTypesToModels', () => {
         };
         const modifiedContentTypes = patchContentTypes('countries', changes);
 
-        expect(() => transformContentTypesToModels(modifiedContentTypes)).toThrow(
+        expect(() => transformContentTypesToModels(modifiedContentTypes, identifiers)).toThrow(
           `"${restrictedName}" is required`
         );
       }
