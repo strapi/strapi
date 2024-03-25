@@ -12,7 +12,7 @@ const kindSchema = yup.string().oneOf(TYPES).nullable();
 
 const bulkActionInputSchema = yup
   .object({
-    ids: yup.array().of(yup.strapiID()).min(1).required(),
+    locales: yup.array().of(yup.string()).min(1).required(),
   })
   .required();
 

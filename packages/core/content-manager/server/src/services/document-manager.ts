@@ -239,24 +239,22 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         return null;
       }
 
+      const validDocuments = documents.filter((doc: Document) => doc[PUBLISHED_AT_ATTRIBUTE]);
+
       // Only unpublish entities with a published_at date
-      const entitiesToUnpublish = documents
-        .filter((doc: Document) => doc[PUBLISHED_AT_ATTRIBUTE])
-        .map((doc: Document) => doc.id);
-
-      const filters = { id: { $in: entitiesToUnpublish } };
-      const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
-      const populate = await buildDeepPopulate(uid);
-
-      // No need to validate, unpublish
-      const unpublishedEntitiesCount = await strapi.db.query(uid).updateMany({
+      const entityIdsToUnpublish = validDocuments.map((doc: Document) => doc.id);
+      const filters = { id: { $in: entityIdsToUnpublish } };
+      const unpublishedEntitiesCount = await strapi.db.query(uid).deleteMany({
         where: filters,
-        data,
       });
 
-      // Get the updated entities since updateMany only returns the count
+      const populate = await buildDeepPopulate(uid);
       const unpublishedEntities = await strapi.db.query(uid).findMany({
-        where: filters,
+        where: {
+          documentId: {
+            $in: validDocuments.map((doc: Document) => doc.documentId),
+          },
+        },
         populate,
       });
 

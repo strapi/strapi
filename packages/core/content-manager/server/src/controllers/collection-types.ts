@@ -448,9 +448,8 @@ export default {
 
   async bulkUnpublish(ctx: any) {
     const { userAbility } = ctx.state;
-    const { model } = ctx.params;
+    const { model, id } = ctx.params;
     const { body } = ctx.request;
-    const { ids } = body;
 
     await validateBulkActionInput(body);
 
@@ -466,8 +465,22 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const entityPromises = ids.map((id: any) => documentManager.findOne(id, model, { populate }));
-    const entities = await Promise.all(entityPromises);
+    const locales = body.locales || [];
+    const entities = (
+      await Promise.all(
+        locales.map((locale: string) =>
+          documentManager.findOne(id, model, {
+            populate,
+            locale,
+            status: 'published',
+          })
+        )
+      )
+    ).filter(Boolean);
+
+    if (entities.length === 0) {
+      return ctx.notFound();
+    }
 
     for (const entity of entities) {
       if (!entity) {

@@ -319,18 +319,19 @@ export declare namespace BulkPublish {
 }
 
 /**
- * POST /collection-types/:model/actions/bulkUnpublish
+ * POST /collection-types/:model/:id/actions/bulkUnpublish
  */
 export declare namespace BulkUnpublish {
   export interface Request {
     body: {
-      documentIds: Modules.Documents.ID[];
+      locales: string[];
     };
     query: {};
   }
 
   export interface Params {
     model: string;
+    id: Modules.Documents.ID;
   }
 
   export interface Response {

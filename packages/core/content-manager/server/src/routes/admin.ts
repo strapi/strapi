@@ -409,7 +409,7 @@ export default {
     },
     {
       method: 'POST',
-      path: '/collection-types/:model/actions/bulkUnpublish',
+      path: '/collection-types/:model/:id/actions/bulkUnpublish',
       handler: 'collection-types.bulkUnpublish',
       config: {
         middlewares: [routing],
