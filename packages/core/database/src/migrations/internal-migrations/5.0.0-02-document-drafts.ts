@@ -17,6 +17,23 @@ const getScalarAttributes = (metadata: Meta) => {
   }, [] as string[]);
 };
 
+// Consider draft and publish enabled if the publishedAt column exists
+export const hasDraftAndPublish = async (knex: any, meta: Meta) => {
+  const hasTable = await knex.schema.hasTable(meta.tableName);
+
+  if (!hasTable) {
+    return false;
+  }
+
+  // If the content type had draft and publish enabled (publishedAt column exists)
+  // Then we need to create a draft counterpart for all the published entries
+  if (!('publishedAt' in meta.attributes)) {
+    return false;
+  }
+
+  return true;
+};
+
 /**
  * On V4 there was no concept of document, and an entry could be in a draft or published state.
  * But not both at the same time.
@@ -31,15 +48,8 @@ export const createDocumentDrafts: Migration = {
   name: 'created-document-drafts',
   async up(knex, db) {
     for (const meta of db.metadata.values()) {
-      const hasTable = await knex.schema.hasTable(meta.tableName);
-
-      if (!hasTable) {
-        continue;
-      }
-
-      // If the content type had draft and publish enabled (publishedAt column exists)
-      // Then we need to create a draft counterpart for all the published entries
-      if (!('publishedAt' in meta.attributes)) {
+      const hasDP = await hasDraftAndPublish(knex, meta);
+      if (!hasDP) {
         continue;
       }
 
@@ -64,10 +74,6 @@ export const createDocumentDrafts: Migration = {
                   return knex.raw('NULL as published_at');
                 }
 
-                if (att === 'updated_at') {
-                  return knex.raw(`? as updated_at`, [new Date()]);
-                }
-
                 return att;
               })
             )
@@ -78,6 +84,6 @@ export const createDocumentDrafts: Migration = {
     }
   },
   async down() {
-    // no-op
+    throw new Error('not implemented');
   },
 };
