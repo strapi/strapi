@@ -249,28 +249,34 @@ module.exports = ({ strapi }) => ({
       _.set(fileData, ['formats', key], file);
     };
 
-    const uploadPromises = [];
+    /**
+     * Create an array of callbacks that will be executed in parallel.
+     *
+     * NOTE: Eagerly calling the promises and waiting for them to finish
+     *       resulted in some issues with streams and unhandled promises.
+     */
+    const uploadCallbacks = [];
 
     // Upload image
-    uploadPromises.push(() => getService('provider').upload(fileData));
+    uploadCallbacks.push(() => getService('provider').upload(fileData));
 
     // Generate & Upload thumbnail and responsive formats
     if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
-        uploadPromises.push(() => uploadThumbnail(thumbnailFile));
+        uploadCallbacks.push(() => uploadThumbnail(thumbnailFile));
       }
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
           // eslint-disable-next-line no-continue
           if (!format) continue;
-          uploadPromises.push(() => uploadResponsiveFormat(format));
+          uploadCallbacks.push(() => uploadResponsiveFormat(format));
         }
       }
     }
     // Wait for all uploads to finish
-    await Promise.all(uploadPromises.map((fn) => fn()));
+    await Promise.all(uploadCallbacks.map((fn) => fn()));
   },
 
   /**
