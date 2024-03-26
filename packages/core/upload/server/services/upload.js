@@ -60,7 +60,6 @@ module.exports = ({ strapi }) => ({
   },
 
   async sendMediaMetrics() {
-    console.log('CEqdqsdqsdqsdqdqdsqqsd');
     // Keep empty, only send events for the Enterprise Edition.
   },
 
