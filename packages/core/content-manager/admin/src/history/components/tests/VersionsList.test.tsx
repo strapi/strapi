@@ -1,16 +1,12 @@
 import * as React from 'react';
 
 import { within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { mockData } from '@tests/mockData';
 import { render as renderRTL, screen, waitFor } from '@tests/utils';
 import { useLocation } from 'react-router-dom';
 
 import { HistoryProvider } from '../../pages/History';
 import { mockHistoryVersionsData } from '../../tests/mockData';
 import { VersionsList } from '../VersionsList';
-
-const user = userEvent.setup();
 
 const LocationDisplay = () => {
   const location = useLocation();
@@ -34,7 +30,7 @@ const render = (ui: React.ReactElement) =>
 
 describe('VersionsList', () => {
   it('renders a list of history versions', async () => {
-    render(
+    const { user } = render(
       // @ts-expect-error we don't need all the context
       <HistoryProvider page={1} versions={mockHistoryVersionsData.historyVersions}>
         <VersionsList />

@@ -1,7 +1,4 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render as renderRTL } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
+import { render as renderRTL } from '@tests/utils';
 
 import { AddComponentButton, AddComponentButtonProps } from '../AddComponentButton';
 
@@ -10,18 +7,8 @@ describe('<AddComponentButton />', () => {
     ...renderRTL(
       <AddComponentButton onClick={jest.fn()} {...props}>
         test
-      </AddComponentButton>,
-      {
-        wrapper: ({ children }) => (
-          <ThemeProvider theme={lightTheme}>
-            <IntlProvider locale="en" messages={{}} defaultLocale="en">
-              {children}
-            </IntlProvider>
-          </ThemeProvider>
-        ),
-      }
+      </AddComponentButton>
     ),
-    user: userEvent.setup(),
   });
 
   it('should render the label by default', () => {

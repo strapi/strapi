@@ -6,6 +6,7 @@
  */
 
 import { INJECTION_ZONES } from './components/InjectionZone';
+import { PLUGIN_ID } from './constants/plugin';
 import { HistoryAction } from './history/components/HistoryAction';
 import {
   DEFAULT_ACTIONS,
@@ -207,7 +208,7 @@ class ContentManagerPlugin {
 
   get config() {
     return {
-      id: 'content-manager',
+      id: PLUGIN_ID,
       name: 'Content Manager',
       injectionZones: INJECTION_ZONES,
       apis: {

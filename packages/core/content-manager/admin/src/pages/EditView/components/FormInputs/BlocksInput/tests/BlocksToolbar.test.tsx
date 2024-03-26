@@ -3,10 +3,8 @@
 
 import * as React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { act, render, screen, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
+import { within } from '@testing-library/react';
+import { act, render, screen } from '@tests/utils';
 import { type Descendant, type Editor, type Location, createEditor, Transforms } from 'slate';
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
@@ -72,8 +70,6 @@ const imageInitialValue: Descendant[] = [
   },
 ];
 
-const user = userEvent.setup();
-
 const blocks: BlocksStore = {
   ...paragraphBlocks,
   ...headingBlocks,
@@ -97,22 +93,18 @@ const Wrapper = ({
   const [editor] = React.useState(() => withReact(baseEditor));
 
   return (
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider messages={{}} locale="en">
-        <Slate initialValue={initialValue} editor={editor}>
-          <BlocksEditorProvider
-            blocks={blocks}
-            modifiers={modifiers}
-            disabled={false}
-            name="blocks"
-            setLiveText={jest.fn()}
-            isExpandedMode={false}
-          >
-            {children}
-          </BlocksEditorProvider>
-        </Slate>
-      </IntlProvider>
-    </ThemeProvider>
+    <Slate initialValue={initialValue} editor={editor}>
+      <BlocksEditorProvider
+        blocks={blocks}
+        modifiers={modifiers}
+        disabled={false}
+        name="blocks"
+        setLiveText={jest.fn()}
+        isExpandedMode={false}
+      >
+        {children}
+      </BlocksEditorProvider>
+    </Slate>
   );
 };
 
@@ -133,8 +125,8 @@ const setup = (data: Descendant[] = defaultInitialValue) => {
   // so that we have no side effects due to the previous selection or children
   baseEditor = createEditor();
 
-  render(<BlocksToolbar />, {
-    wrapper: ({ children }) => <Wrapper initialValue={data}>{children}</Wrapper>,
+  return render(<BlocksToolbar />, {
+    renderOptions: { wrapper: ({ children }) => <Wrapper initialValue={data}>{children}</Wrapper> },
   });
 };
 
@@ -170,7 +162,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('toggles the modifiers on a selection', async () => {
-    setup();
+    const { user } = setup();
 
     // Simulate a selection of part of the editor
     await select({
@@ -227,7 +219,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('transforms the selection to a list and toggles the format', async () => {
-    setup();
+    const { user } = setup();
 
     await select({
       anchor: { path: [0, 0], offset: 2 },
@@ -270,7 +262,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('toggles the nested list format', async () => {
-    setup([
+    const { user } = setup([
       {
         type: 'list',
         format: 'ordered',
@@ -392,7 +384,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('transforms the selection to a heading and transforms it back to text when selected again', async () => {
-    setup();
+    const { user } = setup();
 
     await select({
       anchor: { path: [0, 0], offset: 2 },
@@ -437,7 +429,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('transforms the selection to an ordered list and to an unordered list', async () => {
-    setup();
+    const { user } = setup();
 
     await select({
       anchor: { path: [0, 0], offset: 2 },
@@ -491,7 +483,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('transforms the selection to a quote when selected and transforms it back to text', async () => {
-    setup();
+    const { user } = setup();
 
     await select({
       anchor: { path: [0, 0], offset: 0 },
@@ -549,7 +541,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('splits the parent list when converting a list item to another type', async () => {
-    setup([
+    const { user } = setup([
       {
         type: 'list',
         format: 'ordered',
@@ -641,7 +633,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('creates a new node when selecting a block if there is no selection', async () => {
-    setup([
+    const { user } = setup([
       {
         type: 'paragraph',
         children: [{ type: 'text', text: 'Some paragraph' }],
@@ -699,7 +691,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('creates a new list with empty content when you click on the button with an empty editor', async () => {
-    setup([
+    const { user } = setup([
       {
         type: 'paragraph',
         children: [{ type: 'text', text: '' }],
@@ -733,7 +725,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('creates a new list with mixed content when you click on the button and editor contains mixed content paragraph', async () => {
-    setup([
+    const { user } = setup([
       {
         type: 'paragraph',
         children: [
@@ -792,7 +784,7 @@ describe('BlocksToolbar', () => {
   });
 
   it('creates a new list with some content when you select the option in the dropdown and editor contains a heading on the last line', async () => {
-    setup(mixedInitialValue);
+    const { user } = setup(mixedInitialValue);
 
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
 

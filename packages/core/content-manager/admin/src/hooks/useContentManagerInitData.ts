@@ -14,7 +14,7 @@ import { useIntl } from 'react-intl';
 import { COLLECTION_TYPES, SINGLE_TYPES } from '../constants/collections';
 import { HOOKS } from '../constants/hooks';
 import { AppState, setInitialData } from '../modules/app';
-import { useTypedSelector } from '../modules/hooks';
+import { useTypedDispatch, useTypedSelector } from '../modules/hooks';
 import { useGetAllContentTypeSettingsQuery } from '../services/contentTypes';
 import { useGetInitialDataQuery } from '../services/init';
 import { getTranslation } from '../utils/translations';
@@ -41,6 +41,7 @@ interface ContentManagerLink {
 
 const useContentManagerInitData = (): AppState => {
   const { toggleNotification } = useNotification();
+  const dispatch = useTypedDispatch();
   const runHookWaterfall = useStrapiApp(
     'useContentManagerInitData',
     (state) => state.runHookWaterfall
@@ -150,13 +151,15 @@ const useContentManagerInitData = (): AppState => {
       models: contentTypes,
     });
 
-    setInitialData({
-      authorizedCollectionTypeLinks: ctLinks,
-      authorizedSingleTypeLinks: stLinks,
-      components,
-      contentTypeSchemas: contentTypes,
-      fieldSizes,
-    });
+    dispatch(
+      setInitialData({
+        authorizedCollectionTypeLinks: ctLinks,
+        authorizedSingleTypeLinks: stLinks,
+        components,
+        contentTypeSchemas: contentTypes,
+        fieldSizes,
+      })
+    );
   };
 
   useEffect(() => {

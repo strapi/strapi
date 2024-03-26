@@ -1,5 +1,7 @@
 import { useStrapiApp, InjectionZoneComponent } from '@strapi/admin/strapi-admin';
 
+import { PLUGIN_ID } from '../constants/plugin';
+
 const INJECTION_ZONES = {
   editView: { informations: [], 'right-links': [] },
   listView: {
@@ -58,18 +60,11 @@ const InjectionZone = ({ area, ...props }: { area: InjectionZoneArea; [key: stri
 };
 
 export const useInjectionZone = (area: InjectionZoneArea) => {
-  const getAdminInjectedComponents = useStrapiApp(
-    'useInjectioneZone',
-    (state) => state.getAdminInjectedComponents
-  );
+  const getPlugin = useStrapiApp('useInjectionZone', (state) => state.getPlugin);
+  const contentManagerPlugin = getPlugin(PLUGIN_ID);
+  const [page, position] = area.split('.') as [InjectionZoneContainer, InjectionZoneBlock];
 
-  const [moduleName, page, position] = area.split('.') as [
-    InjectionZoneModule,
-    InjectionZoneContainer,
-    InjectionZoneBlock
-  ];
-
-  return getAdminInjectedComponents(moduleName, page, position);
+  return contentManagerPlugin.getInjectedComponents(page, position);
 };
 
 export { InjectionZone, INJECTION_ZONES };

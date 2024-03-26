@@ -1,16 +1,37 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { lazy } from 'react';
 
-import { Navigate, RouteObject, useParams } from 'react-router-dom';
+import { Navigate, PathRouteProps, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from './constants/collections';
-import { routes as historyRoutes } from './history/routes';
+import { routes as historyRoutes, useIsHistoryRoute } from './history/routes';
 
 const ProtectedEditViewPage = lazy(() =>
   import('./pages/EditView/EditViewPage').then((mod) => ({ default: mod.ProtectedEditViewPage }))
 );
 const ProtectedListViewPage = lazy(() =>
   import('./pages/ListView/ListViewPage').then((mod) => ({ default: mod.ProtectedListViewPage }))
+);
+const ProtectedListConfiguration = lazy(() =>
+  import('./pages/ListConfiguration/ListConfigurationPage').then((mod) => ({
+    default: mod.ProtectedListConfiguration,
+  }))
+);
+const ProtectedEditConfigurationPage = lazy(() =>
+  import('./pages/EditConfigurationPage').then((mod) => ({
+    default: mod.ProtectedEditConfigurationPage,
+  }))
+);
+const ProtectedComponentConfigurationPage = lazy(() =>
+  import('./pages/ComponentConfigurationPage').then((mod) => ({
+    default: mod.ProtectedComponentConfigurationPage,
+  }))
+);
+const NoPermissions = lazy(() =>
+  import('./pages/NoPermissionsPage').then((mod) => ({ default: mod.NoPermissions }))
+);
+const NoContentType = lazy(() =>
+  import('./pages/NoContentTypePage').then((mod) => ({ default: mod.NoContentType }))
 );
 
 const CollectionTypePages = () => {
@@ -35,102 +56,40 @@ const CLONE_PATH = `/content-manager/${CLONE_RELATIVE_PATH}`;
 const LIST_RELATIVE_PATH = ':collectionType/:slug';
 const LIST_PATH = `/content-manager/${LIST_RELATIVE_PATH}`;
 
-const routes: RouteObject[] = [
+const routes: PathRouteProps[] = [
   {
-    path: 'content-manager/*',
-    lazy: async () => {
-      const { Layout } = await import('./layout');
-
-      return {
-        Component: Layout,
-      };
-    },
-    children: [
-      {
-        path: LIST_RELATIVE_PATH,
-        lazy: async () => {
-          return {
-            Component: CollectionTypePages,
-          };
-        },
-      },
-      {
-        path: ':collectionType/:slug/:id',
-        lazy: async () => {
-          const { ProtectedEditViewPage } = await import('./pages/EditView/EditViewPage');
-
-          return {
-            Component: ProtectedEditViewPage,
-          };
-        },
-      },
-      {
-        path: CLONE_RELATIVE_PATH,
-        lazy: async () => {
-          const { ProtectedEditViewPage } = await import('./pages/EditView/EditViewPage');
-
-          return {
-            Component: ProtectedEditViewPage,
-          };
-        },
-      },
-      {
-        path: ':collectionType/:slug/configurations/list',
-        lazy: async () => {
-          const { ProtectedListConfiguration } = await import(
-            './pages/ListConfiguration/ListConfigurationPage'
-          );
-
-          return {
-            Component: ProtectedListConfiguration,
-          };
-        },
-      },
-      {
-        path: 'components/:slug/configurations/edit',
-        lazy: async () => {
-          const { ProtectedComponentConfigurationPage } = await import(
-            './pages/ComponentConfigurationPage'
-          );
-
-          return {
-            Component: ProtectedComponentConfigurationPage,
-          };
-        },
-      },
-      {
-        path: ':collectionType/:slug/configurations/edit',
-        lazy: async () => {
-          const { ProtectedEditConfigurationPage } = await import('./pages/EditConfigurationPage');
-
-          return {
-            Component: ProtectedEditConfigurationPage,
-          };
-        },
-      },
-      {
-        path: '403',
-        lazy: async () => {
-          const { NoPermissions } = await import('./pages/NoPermissionsPage');
-
-          return {
-            Component: NoPermissions,
-          };
-        },
-      },
-      {
-        path: 'no-content-types',
-        lazy: async () => {
-          const { NoContentType } = await import('./pages/NoContentTypePage');
-
-          return {
-            Component: NoContentType,
-          };
-        },
-      },
-      ...historyRoutes,
-    ],
+    path: LIST_RELATIVE_PATH,
+    element: <CollectionTypePages />,
   },
+  {
+    path: ':collectionType/:slug/:id',
+    Component: ProtectedEditViewPage,
+  },
+  {
+    path: CLONE_RELATIVE_PATH,
+    Component: ProtectedEditViewPage,
+  },
+  {
+    path: ':collectionType/:slug/configurations/list',
+    Component: ProtectedListConfiguration,
+  },
+  {
+    path: 'components/:slug/configurations/edit',
+    Component: ProtectedComponentConfigurationPage,
+  },
+  {
+    path: ':collectionType/:slug/configurations/edit',
+    Component: ProtectedEditConfigurationPage,
+  },
+  {
+    path: '403',
+    Component: NoPermissions,
+  },
+  {
+    path: 'no-content-types',
+    Component: NoContentType,
+  },
+  ...historyRoutes,
 ];
 
 export { routes, CLONE_PATH, LIST_PATH };

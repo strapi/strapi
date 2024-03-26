@@ -144,6 +144,10 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             })}
           >
             {pluginsSectionLinks.map((link) => {
+              if (link.to === 'content-manager') {
+                return null;
+              }
+
               const LinkIcon = link.icon;
               return (
                 <NavLinkWrapper key={link.to}>

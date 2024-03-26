@@ -1,12 +1,9 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen } from '@tests/utils';
 import { ReactEditor } from 'slate-react';
 
 import { linkBlocks } from '../Link';
 
 import { Wrapper } from './Wrapper';
-
-const user = userEvent.setup();
 
 describe('Link', () => {
   beforeEach(() => {
@@ -33,7 +30,9 @@ describe('Link', () => {
         },
       }),
       {
-        wrapper: Wrapper,
+        renderOptions: {
+          wrapper: Wrapper,
+        },
       }
     );
 
@@ -43,7 +42,7 @@ describe('Link', () => {
   });
 
   it('toggles the popover when clicking on a link', async () => {
-    render(
+    const { user } = render(
       linkBlocks.link.renderElement({
         children: 'Some link',
         element: {
@@ -60,7 +59,9 @@ describe('Link', () => {
         },
       }),
       {
-        wrapper: Wrapper,
+        renderOptions: {
+          wrapper: Wrapper,
+        },
       }
     );
 
@@ -76,7 +77,7 @@ describe('Link', () => {
   });
 
   it('only enables save button in popover when content has changed', async () => {
-    render(
+    const { user } = render(
       linkBlocks.link.renderElement({
         children: 'Some link',
         element: {
@@ -93,7 +94,9 @@ describe('Link', () => {
         },
       }),
       {
-        wrapper: Wrapper,
+        renderOptions: {
+          wrapper: Wrapper,
+        },
       }
     );
 
@@ -105,11 +108,11 @@ describe('Link', () => {
     expect(saveButton).toBeDisabled();
 
     // change link text and check if save button is enabled
-    await userEvent.type(linkTextInput, 'new link');
+    await user.type(linkTextInput, 'new link');
     expect(saveButton).toBeEnabled();
 
     // Remove link text and check if save button is disabled
-    await userEvent.clear(linkTextInput);
+    await user.clear(linkTextInput);
     expect(saveButton).toBeDisabled();
   });
 });

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Page, useGuidedTour } from '@strapi/admin/strapi-admin';
 import { Layout as DSLayout } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { Navigate, Outlet, Routes, useLocation, useMatch } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from './components/DragLayer';
 import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
@@ -12,8 +12,8 @@ import { ComponentDragPreview } from './components/DragPreviews/ComponentDragPre
 import { RelationDragPreview } from './components/DragPreviews/RelationDragPreview';
 import { LeftMenu } from './components/LeftMenu';
 import { ItemTypes } from './constants/dragAndDrop';
-import { useIsHistoryRoute } from './history/routes';
 import { useContentManagerInitData } from './hooks/useContentManagerInitData';
+import { routes } from './router';
 import { getTranslation } from './utils/translations';
 
 /* -------------------------------------------------------------------------------------------------
@@ -32,9 +32,6 @@ const Layout = () => {
   const { formatMessage } = useIntl();
   const startSection = useGuidedTour('Layout', (state) => state.startSection);
   const startSectionRef = React.useRef(startSection);
-
-  // Check if we're on a history route to known if we should render the left menu
-  const isHistoryRoute = useIsHistoryRoute();
 
   React.useEffect(() => {
     if (startSectionRef.current) {
@@ -92,14 +89,14 @@ const Layout = () => {
           defaultMessage: 'Content Manager',
         })}
       </Page.Title>
-      {isHistoryRoute ? (
-        <Outlet />
-      ) : (
-        <DSLayout sideNav={<LeftMenu />}>
-          <DragLayer renderItem={renderDraglayerItem} />
-          <Routes></Routes>
-        </DSLayout>
-      )}
+      <DSLayout sideNav={<LeftMenu />}>
+        <DragLayer renderItem={renderDraglayerItem} />
+        <Routes>
+          {routes.map((route) => (
+            <Route key={route.path} {...route} />
+          ))}
+        </Routes>
+      </DSLayout>
     </>
   );
 };

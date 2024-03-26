@@ -1,7 +1,4 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { render as renderRTL } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
+import { render as renderRTL } from '@tests/utils';
 
 import { ComponentCategory, ComponentCategoryProps } from '../ComponentCategory';
 
@@ -13,18 +10,8 @@ describe('ComponentCategory', () => {
         onToggle={jest.fn()}
         category="testing"
         {...props}
-      />,
-      {
-        wrapper: ({ children }) => (
-          <ThemeProvider theme={lightTheme}>
-            <IntlProvider locale="en" messages={{}} defaultLocale="en">
-              {children}
-            </IntlProvider>
-          </ThemeProvider>
-        ),
-      }
+      />
     ),
-    user: userEvent.setup(),
   });
 
   it('should render my array of components when passed and the accordion is open', () => {

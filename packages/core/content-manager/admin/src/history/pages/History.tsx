@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useQueryParams, Page, createContext } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Main } from '@strapi/design-system';
+import { Box, Flex, FocusTrap, Main, Portal } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Navigate, useParams } from 'react-router-dom';
@@ -186,7 +186,7 @@ const HistoryPage = () => {
  * ProtectedHistoryPage
  * -----------------------------------------------------------------------------------------------*/
 
-const ProtectedHistoryPage = () => {
+const ProtectedHistoryPageImpl = () => {
   const { slug } = useParams<{
     slug: string;
   }>();
@@ -199,14 +199,30 @@ const ProtectedHistoryPage = () => {
 
   if ((!isLoading && isError) || !slug) {
     return (
-      <Box height="100vh">
+      <Box
+        height="100vh"
+        width="100vw"
+        position="fixed"
+        top={0}
+        left={0}
+        zIndex={99999}
+        background="neutral0"
+      >
         <Page.Error />
       </Box>
     );
   }
 
   return (
-    <Box height="100vh">
+    <Box
+      height="100vh"
+      width="100vw"
+      position="fixed"
+      top={0}
+      left={0}
+      zIndex={99999}
+      background="neutral0"
+    >
       <Page.Protect permissions={permissions}>
         {({ permissions }) => (
           <DocumentRBAC permissions={permissions}>
@@ -215,6 +231,16 @@ const ProtectedHistoryPage = () => {
         )}
       </Page.Protect>
     </Box>
+  );
+};
+
+const ProtectedHistoryPage = () => {
+  return (
+    <Portal>
+      <FocusTrap>
+        <ProtectedHistoryPageImpl />
+      </FocusTrap>
+    </Portal>
   );
 };
 
