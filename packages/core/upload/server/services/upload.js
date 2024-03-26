@@ -97,10 +97,15 @@ module.exports = ({ strapi }) => ({
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const fileService = getService('file');
 
+    if (isValidFilename(filename)) {
+      throw new ApplicationError('File name contains invalid characters');
+    }
+
     let ext = path.extname(filename);
     if (!ext) {
       ext = `.${extension(type)}`;
     }
+
     const usedName = (fileInfo.name || filename).normalize();
     const basename = path.basename(usedName, ext);
 
@@ -247,25 +252,25 @@ module.exports = ({ strapi }) => ({
     const uploadPromises = [];
 
     // Upload image
-    uploadPromises.push(getService('provider').upload(fileData));
+    uploadPromises.push(() => getService('provider').upload(fileData));
 
     // Generate & Upload thumbnail and responsive formats
     if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
-        uploadPromises.push(uploadThumbnail(thumbnailFile));
+        uploadPromises.push(() => uploadThumbnail(thumbnailFile));
       }
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
           // eslint-disable-next-line no-continue
           if (!format) continue;
-          uploadPromises.push(uploadResponsiveFormat(format));
+          uploadPromises.push(() => uploadResponsiveFormat(format));
         }
       }
     }
     // Wait for all uploads to finish
-    await Promise.all(uploadPromises);
+    await Promise.all(uploadPromises.map((fn) => fn()));
   },
 
   /**
