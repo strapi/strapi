@@ -44,7 +44,7 @@
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
-    "@koa/cors": "3.4.3",
+    "@koa/cors": "5.0.0",
     "@koa/router": "10.1.1",
     "@strapi/database": "4.21.0",
     "@strapi/logger": "4.21.0",
