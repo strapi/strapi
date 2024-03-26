@@ -1,10 +1,7 @@
 import { has, get, omit, isArray } from 'lodash/fp';
-import { convertQueryParams } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 
 import { getService } from '../utils';
-
-const { transformParamsToQuery } = convertQueryParams;
 
 const LOCALE_QUERY_FILTER = 'locale';
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
@@ -112,7 +109,7 @@ const decorator = (service: any) => ({
       if (opts[LOCALE_QUERY_FILTER] === 'all') {
         // TODO Fix so this won't break lower lying find many wrappers
         const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
-        const query = transformParamsToQuery(uid, wrappedParams);
+        const query = strapi.get('query-params').transform(uid, wrappedParams);
         const entities = await strapi.db.query(uid).findMany(query);
         return this.wrapResult(entities, { uid, action: 'findMany' });
       }

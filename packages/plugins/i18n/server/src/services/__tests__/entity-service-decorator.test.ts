@@ -1,3 +1,4 @@
+import { queryParams } from '@strapi/utils';
 import entityServiceDecoratorFactory from '../entity-service-decorator';
 import localizationsServiceFactory from '../localizations';
 import localesServiceFactory from '../locales';
@@ -75,6 +76,19 @@ describe('Entity service decorator', () => {
         return models[uid || 'test-model'];
       },
       store: () => ({ get: () => 'en' }),
+      get(name: string) {
+        if (name === 'query-params') {
+          const transformer = queryParams.createTransformer({
+            getModel(name: string) {
+              return strapi.getModel(name as any);
+            },
+          });
+
+          return {
+            transform: transformer.transformQueryParams,
+          };
+        }
+      },
     } as any;
   });
 

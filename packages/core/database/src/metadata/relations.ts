@@ -1,6 +1,6 @@
-import _ from 'lodash/fp';
+import _, { snakeCase } from 'lodash/fp';
 
-import * as identifiers from '../utils/identifiers';
+import { identifiers } from '../utils/identifiers';
 import type { Meta, Metadata } from './metadata';
 import type { RelationalAttribute, Relation, MorphJoinTable } from '../types';
 
@@ -94,7 +94,7 @@ const createOneToOne = (
         meta,
       });
     } else {
-      createJoinColum(metadata, {
+      createJoinColumn(metadata, {
         attribute,
         attributeName,
         meta,
@@ -164,7 +164,7 @@ const createManyToOne = (
       meta,
     });
   } else {
-    createJoinColum(metadata, {
+    createJoinColumn(metadata, {
       attribute,
       attributeName,
       meta,
@@ -249,7 +249,7 @@ const createMorphToMany = (
   }
 
   const joinTableName = identifiers.getMorphTableName(meta.tableName, attributeName);
-  const joinColumnName = identifiers.getMorphColumnJoinTableIdName(meta.singularName);
+  const joinColumnName = identifiers.getMorphColumnJoinTableIdName(snakeCase(meta.singularName));
   const idColumnName = identifiers.getMorphColumnAttributeIdName(attributeName);
   const typeColumnName = identifiers.getMorphColumnTypeName(attributeName);
 
@@ -268,6 +268,8 @@ const createMorphToMany = (
         column: {
           unsigned: true,
         },
+        // This must be set explicitly so that it is used instead of shortening the attribute name, which is already shortened
+        columnName: joinColumnName,
       },
       [idColumnName]: {
         type: 'integer',
@@ -294,11 +296,11 @@ const createMorphToMany = (
         columns: [joinColumnName],
       },
       {
-        name: `${joinTableName}_order_index`,
+        name: identifiers.getOrderIndexName(joinTableName),
         columns: [ORDER],
       },
       {
-        name: `${joinTableName}_id_column_index`,
+        name: identifiers.getIdColumnIndexName(joinTableName),
         columns: [idColumnName],
       },
     ],
@@ -307,7 +309,7 @@ const createMorphToMany = (
         name: fkIndexName,
         columns: [joinColumnName],
         referencedColumns: [ID],
-        referencedTable: identifiers.getTableName(meta.tableName),
+        referencedTable: meta.tableName,
         onDelete: 'CASCADE',
       },
     ],
@@ -382,14 +384,14 @@ const createMorphMany = (
 /**
  * Creates a join column info and add them to the attribute meta
  */
-const createJoinColum = (metadata: Metadata, { attribute, attributeName }: JoinColumnOptions) => {
+const createJoinColumn = (metadata: Metadata, { attribute, attributeName }: JoinColumnOptions) => {
   const targetMeta = metadata.get(attribute.target);
 
   if (!targetMeta) {
     throw new Error(`Unknown target ${attribute.target}`);
   }
 
-  const joinColumnName = _.snakeCase(`${attributeName}_id`);
+  const joinColumnName = identifiers.getJoinColumnAttributeIdName(snakeCase(attributeName));
   const joinColumn = {
     name: joinColumnName,
     referencedColumn: ID,
@@ -408,7 +410,7 @@ const createJoinColum = (metadata: Metadata, { attribute, attributeName }: JoinC
     Object.assign(inverseAttribute, {
       joinColumn: {
         name: joinColumn.referencedColumn,
-        referencedColumn: joinColumn.name,
+        referencedColumn: joinColumnName,
       },
     });
   }
@@ -432,28 +434,34 @@ const createJoinTable = (
     return;
   }
 
-  const joinTableName = identifiers.getJoinTableName(meta.tableName, attributeName);
+  const joinTableName = identifiers.getJoinTableName(
+    snakeCase(meta.tableName),
+    snakeCase(attributeName)
+  );
 
-  const joinColumnName = identifiers.getJoinColumnAttributeIdName(meta.singularName);
-  let inverseJoinColumnName = identifiers.getJoinColumnAttributeIdName(targetMeta.singularName);
+  const joinColumnName = identifiers.getJoinColumnAttributeIdName(snakeCase(meta.singularName));
+
+  let inverseJoinColumnName = identifiers.getJoinColumnAttributeIdName(
+    snakeCase(targetMeta.singularName)
+  );
 
   // if relation is self referencing
   if (joinColumnName === inverseJoinColumnName) {
     inverseJoinColumnName = identifiers.getInverseJoinColumnAttributeIdName(
-      targetMeta.singularName
+      snakeCase(targetMeta.singularName)
     );
   }
 
-  const orderColumnName = identifiers.getOrderColumnName(targetMeta.singularName);
+  const orderColumnName = identifiers.getOrderColumnName(snakeCase(targetMeta.singularName));
   // TODO: should this plus the conditional below be rolled into one method?
-  let inverseOrderColumnName = identifiers.getOrderColumnName(meta.singularName);
+  let inverseOrderColumnName = identifiers.getOrderColumnName(snakeCase(meta.singularName));
 
   // if relation is self referencing
   if (attribute.relation === 'manyToMany' && orderColumnName === inverseOrderColumnName) {
-    inverseOrderColumnName = identifiers.getInverseOrderColumnName(meta.singularName);
+    inverseOrderColumnName = identifiers.getInverseOrderColumnName(snakeCase(meta.singularName));
   }
 
-  const fkIndexName = identifiers.getFkIndexName(joinTableName); // TODO: joinTableName is multipart, can we re-use those parts instead of shortening the combined string?
+  const fkIndexName = identifiers.getFkIndexName(joinTableName);
   const invFkIndexName = identifiers.getInverseFkIndexName(joinTableName);
 
   const metadataSchema: Meta = {
@@ -469,12 +477,16 @@ const createJoinTable = (
         column: {
           unsigned: true,
         },
+        // This must be set explicitly so that it is used instead of shortening the attribute name, which is already shortened
+        columnName: joinColumnName,
       },
       [inverseJoinColumnName]: {
         type: 'integer',
         column: {
           unsigned: true,
         },
+        // This must be set explicitly so that it is used instead of shortening the attribute name, which is already shortened
+        columnName: inverseJoinColumnName,
       },
       // TODO: add extra pivot attributes -> user should use an intermediate entity
     },
@@ -498,14 +510,14 @@ const createJoinTable = (
         name: fkIndexName,
         columns: [joinColumnName],
         referencedColumns: [ID],
-        referencedTable: meta.tableName, // TODO: does this need to be wrapped or do we trust meta.tableName to be the right shortened version?
+        referencedTable: meta.tableName,
         onDelete: 'CASCADE',
       },
       {
         name: invFkIndexName,
         columns: [inverseJoinColumnName],
         referencedColumns: [ID],
-        referencedTable: targetMeta.tableName, // TODO: does this need to be wrapped or do we trust meta.tableName to be the right shortened version?
+        referencedTable: targetMeta.tableName,
         onDelete: 'CASCADE',
       },
     ],
@@ -538,7 +550,7 @@ const createJoinTable = (
       },
     };
     metadataSchema.indexes.push({
-      name: identifiers.getOrderFkIndexName(joinTableName), // TODO: should we send joinTableName as parts?
+      name: identifiers.getOrderFkIndexName(joinTableName),
       columns: [orderColumnName],
     });
     joinTable.orderColumnName = orderColumnName;
