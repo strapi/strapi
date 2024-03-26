@@ -37,34 +37,6 @@ const generateFileName = (name) => {
   return `${baseName}_${randomSuffix()}`;
 };
 
-const sendMediaMetrics = async (action, data) => {
-  try {
-    const totalCount = await strapi.entityService.count(FILE_MODEL_UID);
-
-    const eventProperties = {
-      totalCount,
-      hasCaption: _.has(data, 'caption') && !_.isEmpty(data.caption),
-      hasAlternativeText: _.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText),
-    };
-
-    if (action === 'add') {
-      strapi.telemetry.send('didUploadFile', {
-        eventProperties,
-      });
-    }
-
-    if (action === 'remove') {
-      eventProperties.totalCount -= eventProperties.totalCount;
-
-      strapi.telemetry.send('didDeleteFile', {
-        eventProperties,
-      });
-    }
-  } catch (e) {
-    // Silent error.
-  }
-};
-
 const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
   const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
 
@@ -85,6 +57,11 @@ module.exports = ({ strapi }) => ({
     const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, data);
 
     strapi.eventHub.emit(event, { media: sanitizedData });
+  },
+
+  async sendMediaMetrics() {
+    console.log('CEqdqsdqsdqsdqdqdsqqsd');
+    // Keep empty, only send events for the Enterprise Edition.
   },
 
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
@@ -376,7 +353,7 @@ module.exports = ({ strapi }) => ({
       fileValues[CREATED_BY_ATTRIBUTE] = user.id;
     }
 
-    sendMediaMetrics('add', fileValues);
+    strapi.service('plugin::upload.upload').sendMediaMetrics('add', fileValues);
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
 
@@ -417,7 +394,7 @@ module.exports = ({ strapi }) => ({
       where: { id: file.id },
     });
 
-    sendMediaMetrics('remove', file);
+    strapi.service('plugin::upload.upload').sendMediaMetrics('remove', file);
 
     await this.emitEvent(MEDIA_DELETE, media);
 

@@ -8,14 +8,12 @@ const routes = require('./routes');
 const config = require('./config');
 const controllers = require('./controllers');
 
-module.exports = () => {
-  return {
-    register,
-    bootstrap,
-    config,
-    routes,
-    controllers,
-    contentTypes,
-    services,
-  };
+module.exports = {
+  register,
+  bootstrap,
+  config,
+  routes,
+  controllers,
+  contentTypes,
+  services,
 };
