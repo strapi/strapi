@@ -141,10 +141,7 @@ const ProfilePage = () => {
     }
 
     if ('error' in res) {
-      if (
-        isBaseQueryError(res.error) &&
-        (res.error.name === 'ValidationError' || res.error.message === 'ValidationError')
-      ) {
+      if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
         setErrors(formatValidationErrors(res.error));
       } else if (isBaseQueryError(res.error)) {
         toggleNotification({

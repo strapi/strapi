@@ -17,7 +17,7 @@ test.describe('Login', () => {
     }) => {
       // Test without making user authentication persistent
       await login({ page });
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle('Homepage | Strapi');
 
       await page.close();
 
@@ -27,13 +27,13 @@ test.describe('Login', () => {
 
       // Test with making user authentication persistent
       await login({ page, rememberMe: true });
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle('Homepage | Strapi');
 
       await page.close();
 
       page = await context.newPage();
       await page.goto('/admin');
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle('Homepage | Strapi');
     });
   });
 
