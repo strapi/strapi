@@ -97,7 +97,7 @@ module.exports = ({ strapi }) => ({
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const fileService = getService('file');
 
-    if (isValidFilename(filename)) {
+    if (!isValidFilename(filename)) {
       throw new ApplicationError('File name contains invalid characters');
     }
 
