@@ -55,7 +55,6 @@ const admin: Plugin.Config.AdminInput = {
       });
       // Hook that adds a column into the CM's LV table
       app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
-      // app.plugins['content-manager'].apis.addColumn(addColumnToTableHook);
     } else if (
       !window.strapi.features.isEnabled('cms-content-releases') &&
       window.strapi?.flags?.promoteEE
