@@ -3,6 +3,22 @@
 const _ = require('lodash');
 const getSchemaData = require('./get-schema-data');
 const pascalCase = require('./pascal-case');
+
+function extractRequiredProperties(attributes) {
+  const required = [];
+  for (const [key, value] of Object.entries(attributes)) {
+    //console.log('key', key, 'value', value);
+    if (value.required) {
+      required.push(key);
+    }
+    // if (value.type === 'component') {
+    //   console.log('HELLO', value.type, value.component)
+    //   extractRequiredProperties(strapi.components[value.component].attributes);
+    // }
+  };
+  return required.length > 0 ? required : undefined;
+}
+
 /**
  * @description - Converts types found on attributes to OpenAPI acceptable data types
  *
@@ -104,6 +120,7 @@ const cleanSchemaAttributes = (
               isRequest,
             }),
           },
+          required: extractRequiredProperties(componentAttributes),
         };
         const refComponentSchema = {
           $ref: `#/components/schemas/${pascalCase(attribute.component)}Component`,
@@ -137,6 +154,7 @@ const cleanSchemaAttributes = (
                 didAddStrapiComponentsToSchemas,
               }),
             },
+            required: extractRequiredProperties(componentAttributes),
           };
           const refComponentSchema = {
             $ref: `#/components/schemas/${pascalCase(component)}Component`,
@@ -171,6 +189,7 @@ const cleanSchemaAttributes = (
           break;
         }
 
+        //console.log({imageAttributes})
         attributesCopy[prop] = {
           type: 'object',
           properties: {
@@ -179,6 +198,8 @@ const cleanSchemaAttributes = (
               cleanSchemaAttributes(imageAttributes, { typeMap })
             ),
           },
+          // Does nothing
+          //required: extractRequiredProperties(imageAttributes),
         };
         break;
       }
