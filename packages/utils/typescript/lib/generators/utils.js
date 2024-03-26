@@ -61,7 +61,7 @@ const saveDefinitionToFileSystem = async (dir, file, content) => {
  */
 const format = async (content) => {
   // eslint-disable-next-line node/no-unsupported-features/es-syntax
-  const prettier = await import('prettier');
+  const prettier = await import('prettier'); // ESM-only
 
   const configFile = await prettier.resolveConfigFile();
   const config = configFile

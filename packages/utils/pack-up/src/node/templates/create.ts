@@ -29,6 +29,8 @@ const createPackageFromTemplate = async (
 ) => {
   const { cwd, logger, template: templateOrResolver } = opts;
 
+  const prettier = await import('prettier'); // ESM-only
+
   const gitConfig = await parseGlobalGitConfig();
 
   const template =
@@ -105,9 +107,6 @@ const createPackageFromTemplate = async (
       singleQuote: true,
       trailingComma: 'es5',
     };
-
-    const prettier = await import('prettier');
-
     try {
       const formattedContents = await prettier.format(file.contents, {
         ...defaultPrettierConfig,
