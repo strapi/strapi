@@ -462,13 +462,14 @@ const cleanOrderColumnsForOldDatabases = async ({
 const cleanInverseOrderColumn = async ({
   id,
   attribute,
-  trx,
+  db,
+  transaction: trx,
 }: {
   id: ID;
   attribute: Relation.Bidirectional;
-  trx: Knex.Transaction;
+  db: Database;
+  transaction: Knex.Transaction;
 }) => {
-  const con = strapi.db.connection;
   const { joinTable } = attribute;
   const { joinColumn, inverseJoinColumn, inverseOrderColumnName } = joinTable;
 
@@ -488,18 +489,18 @@ const cleanInverseOrderColumn = async ({
     */
     case 'mysql': {
       // Group by the inverse join column and get the max value of the inverse order column
-      const subQuery = con(joinTable.name)
+      const subQuery = db.getConnection(joinTable.name)
         .select(inverseJoinColumn.name)
         .max(inverseOrderColumnName, { as: 'max_inv_order' })
         .groupBy(inverseJoinColumn.name)
         .as('t2');
 
       //  Update ids with the new inverse order
-      await con(`${joinTable.name} as t1`)
+      await db.getConnection(`${joinTable.name} as t1`)
         .join(subQuery, `t1.${inverseJoinColumn.name}`, '=', `t2.${inverseJoinColumn.name}`)
         .where(joinColumn.name, id)
         .update({
-          [inverseOrderColumnName]: con.raw('t2.max_inv_order + 1'),
+          [inverseOrderColumnName]: db.connection.raw('t2.max_inv_order + 1'),
         })
         .transacting(trx);
       break;
@@ -515,13 +516,13 @@ const cleanInverseOrderColumn = async ({
         WHERE `t1`.`:joinColumnName` = :id
       */
       // New inverse order will be the max value + 1
-      const selectMaxInverseOrder = con.raw(`max(${inverseOrderColumnName}) + 1`);
+      const selectMaxInverseOrder = db.connection.raw(`max(${inverseOrderColumnName}) + 1`);
 
-      const subQuery = con(`${joinTable.name} as t2`)
+      const subQuery = db.getConnection(`${joinTable.name} as t2`)
         .select(selectMaxInverseOrder)
         .whereRaw(`t2.${inverseJoinColumn.name} = t1.${inverseJoinColumn.name}`);
 
-      await con(`${joinTable.name} as t1`)
+      await db.getConnection(`${joinTable.name} as t1`)
         .where(`t1.${joinColumn.name}`, id)
         .update({ [inverseOrderColumnName]: subQuery })
         .transacting(trx);
