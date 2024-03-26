@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { screen, within } from '@testing-library/react';
 import { render, server, waitFor } from '@tests/utils';
@@ -7,7 +9,7 @@ import { CMReleasesContainer } from '../CMReleasesContainer';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  CheckPermissions: jest.fn(({ children }) => children),
+  CheckPermissions: jest.fn(({ children }: { children: ReactNode }) => children),
   useCMEditViewDataManager: jest.fn().mockReturnValue({
     isCreatingEntry: false,
     hasDraftAndPublish: true,

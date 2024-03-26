@@ -10,7 +10,7 @@ import { mockReleasesPageData } from './mockReleasesPageData';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  CheckPermissions: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+  CheckPermissions: jest.fn(({ children }: { children: ReactNode }) => children),
 }));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
