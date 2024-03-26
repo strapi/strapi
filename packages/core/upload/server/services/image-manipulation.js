@@ -26,7 +26,7 @@ const writeStreamToFile = (stream, path) =>
     writeStream.on('error', reject);
   });
 
-const getMetadata = (file) =>
+const getMetadata = async (file) =>
   new Promise((resolve, reject) => {
     const pipeline = sharp();
     pipeline.metadata().then(resolve).catch(reject);
