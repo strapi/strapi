@@ -111,7 +111,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@koa/cors": "3.4.3",
+    "@koa/cors": "5.0.0",
     "@koa/router": "10.1.1",
     "@strapi/admin": "4.21.0",
     "@strapi/content-releases": "4.21.0",
