@@ -61,14 +61,6 @@ const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
   return tmpWorkingDirectory;
 };
 
-/**
- * Remove null characters from a string.
- * It can cause issues when storing files on the filesystem.
- */
-const sanitizeString = (str) => {
-  return str?.replace(/\0/g, '');
-};
-
 module.exports = ({ strapi }) => ({
   async emitEvent(event, data) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
@@ -80,13 +72,16 @@ module.exports = ({ strapi }) => ({
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const fileService = getService('file');
 
-    const sanitizedFilename = sanitizeString(filename);
+    // Prevent null characters in file name
+    if (filename?.includes('\u0000') || fileInfo.name?.includes('\u0000')) {
+      throw new ApplicationError('File name contains null characters');
+    }
 
-    let ext = path.extname(sanitizedFilename);
+    let ext = path.extname(filename);
     if (!ext) {
       ext = `.${extension(type)}`;
     }
-    const usedName = (sanitizeString(fileInfo.name) || sanitizedFilename).normalize();
+    const usedName = (fileInfo.name || filename).normalize();
     const basename = path.basename(usedName, ext);
 
     const entity = {
@@ -226,6 +221,9 @@ module.exports = ({ strapi }) => ({
 
     const uploadPromises = [];
 
+    // Upload image
+    uploadPromises.push(getService('provider').upload(fileData));
+
     // Generate & Upload thumbnail and responsive formats
     if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
@@ -241,10 +239,6 @@ module.exports = ({ strapi }) => ({
         }
       }
     }
-
-    // Upload image
-    uploadPromises.push(getService('provider').upload(fileData));
-
     // Wait for all uploads to finish
     await Promise.all(uploadPromises);
   },
