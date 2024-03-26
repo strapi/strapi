@@ -1,0 +1,17 @@
+{
+  "Plugin.name": "Deploy",
+  "Homepage.title": "Felügyelt felhőszolgáltatás a Strapi projektedhez",
+  "Homepage.subTitle": "Kövesd ezt a 2 lépéses folyamatot, hogy mindent megkapj, amire szükséged van a Strapi projekted production környezetben történő futtatásához.",
+  "Homepage.githubBox.title.versioned": "Projekt feltöltve a GitHubra",
+  "Homepage.githubBox.title.not-versioned": "Töltsd fel a projektet a GitHubra",
+  "Homepage.githubBox.subTitle.versioned": "Sikerült! Csak egy lépésre vagy attól, hogy projektjedet online hostold.",
+  "Homepage.githubBox.subTitle.not-versioned": "A projektedet elsőként a GitHubra kell feltöltened, mielőtt a Strapi Cloud-ra telepítenéd.",
+  "Homepage.githubBox.buttonText": "Feltöltés a GitHubra",
+  "Homepage.cloudBox.title": "Telepítés a Strapi Cloud-ra",
+  "Homepage.cloudBox.subTitle": "Élvezd a Strapi-optimizált stacket, beleértve az adatbázist, az e-mail szolgáltatót és a CDN-t.",
+  "Homepage.cloudBox.buttonText": "Telepítés a Strapi Cloud-ra",
+  "Homepage.textBox.label.versioned": "Próbáld ki a Strapi Cloud-ot ingyen!",
+  "Homepage.textBox.label.not-versioned": "Miért töltsem fel a projektet a GitHubra?",
+  "Homepage.textBox.text.versioned": "A Strapi Cloud 14 napos ingyenes próbaidőszakot kínál, hogy kipróbálhasd projektjedet a felhőben, minden funkcióval együtt.",
+  "Homepage.textBox.text.not-versioned": "A Strapi Cloud le fogja tölteni és telepíti a projektet a GitHub repódból. Ez a legjobb módja annak, hogy verziózni, kezelni és telepíteni tudd a projekted. Kövesd a lépéseket a GitHubon a sikeres feltöltéshez."
+}
