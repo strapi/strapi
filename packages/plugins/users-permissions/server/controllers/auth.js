@@ -255,7 +255,7 @@ module.exports = {
       to: user.email,
       from:
         resetPasswordSettings.from.email || resetPasswordSettings.from.name
-          ? `${resetPasswordSettings.from.name} <${resetPasswordSettings.from.email}>`
+          ? `${resetPasswordSettings.from.name}`
           : undefined,
       replyTo: resetPasswordSettings.response_email,
       subject: emailObject,
