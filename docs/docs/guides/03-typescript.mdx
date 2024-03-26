@@ -1,0 +1,449 @@
+---
+title: Typescript
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Development Guidelines
+
+This document provides guidelines for contributing to the Strapi codebase using TypeScript. It covers various topics, including types location, generics, breaking changes, factories and more.
+
+## 1. Type Location
+
+When working with types on the Strapi codebase, it is essential to consider the location of types. These are the three common approaches and situations we document:
+
+### a. Colocation
+
+In the colocation approach, type definitions are colocated with the corresponding code. This means that types are defined in the same file or module where they are used.
+
+**This approach is suitable when the types are specific to a particular module**.
+
+:::info
+In some situations, colocated types can still be exported if needed by other modules (e.g. React Component Props)
+:::
+
+<Tabs>
+<TabItem value="typescript" label="TypeScript (.ts)">
+
+```ts
+// config.ts
+
+interface Config {
+  prop1: string;
+  prop2: number;
+}
+
+function update(config: Config): Config {
+  // ...
+}
+```
+
+</TabItem>
+<TabItem value="react" label="React (.tsx)">
+
+```ts
+// Box.tsx
+
+import * as React from 'react';
+
+export interface TaskProps {
+  name: string;
+  priority: 'high' | 'medium' | 'low';
+  due: Date;
+}
+
+export const TaskProps = ({ name, priority, due }: TaskProps) => {
+  // ...
+};
+```
+
+</TabItem>
+
+</Tabs>
+
+### b. Dedicated Types Files
+
+**When types are shared across multiple files or modules, or when dealing with types that do not belong to a specific module**, it is recommended to use dedicated types files (`.ts`) to separate type declarations from their usage.
+
+- Types files provide a centralized location for types, making it easier to maintain and reuse them.
+- Types files mustn't contain any declaration, they are meant to write type definitions only.
+
+:::warning
+Definition files (`.d.ts`) should be avoided in most scenarios.
+
+Only use them when dealing with module augmentation or other specific situations that you can justify.
+:::
+
+<Tabs>
+
+<TabItem value="service" label="service.ts">
+
+```ts
+export interface CommonService {
+  [key: keyof any]: unknown;
+}
+```
+
+</TabItem>
+
+<TabItem value="user" label="user.ts">
+
+```ts
+import type { CommonService } from './service';
+
+const usersService: CommonService = {
+  // ...
+};
+```
+
+</TabItem>
+
+<TabItem value="book" label="book.ts">
+
+```ts
+import type { CommonService } from './service';
+
+const bookService: CommonService = {
+  // ...
+};
+```
+
+</TabItem>
+
+</Tabs>
+
+### c. Utils
+
+**For type utilities used across different packages**, it is mandatory to place them in their related module's types definitions.
+
+- Strapi utils **must** be placed in `@strapi/strapi`'s types module
+- Packages' specific utils **must** be placed in their respective types' module
+
+Utility modules contain reusable type definitions that can be imported wherever needed. This approach promotes code reusability and separation of concerns.
+
+<Tabs>
+
+<TabItem value="core/uid.ts" label="core/uid.ts (@strapi/strapi)">
+
+```ts
+export type Admin = `admin::${string}`;
+```
+
+</TabItem>
+
+<TabItem value="admin.ts" label="admin.ts">
+
+```ts
+import type { UID } from '@strapi/strapi';
+
+function getService(uid: UID.Admin): object {
+  // ...
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+Choose the appropriate approach based on the size and complexity of your feature and the level of reusability of the types.
+
+## 2. Modules, Imports and Exports
+
+### a. Modules
+
+In TypeScript, modules can be used to organize and encapsulate related types and code. Modules provide a way to mimic namespaces and avoid polluting the global scope with numerous type declarations. By grouping related types within modules, it is possible to improve code organization and make it easier to navigate and understand the codebase.
+
+:::note
+This is especially true when working with packages' exports or utilities, where the exported components need to be scoped.
+:::
+
+#### Types
+
+<Tabs>
+
+<TabItem value="my-module.ts" label="my-module.ts" >
+
+```ts
+export * as Service from './service';
+export * as UID from './uid';
+```
+
+</TabItem>
+
+<TabItem value="service.ts" label="service.ts" >
+
+```ts
+export type Admin = Record<string, any>;
+```
+
+</TabItem>
+
+<TabItem value="uid.ts" label="uid.ts" >
+
+```ts
+export type Admin = `admin::${string}`;
+```
+
+</TabItem>
+
+</Tabs>
+
+#### Usage
+
+<Tabs>
+
+<TabItem value="src/index.ts" label="src/index.ts">
+
+```ts
+import type { Service, UID } from 'my-module';
+
+type AdminService = Record<UID.Admin, Service.Admin>;
+```
+
+</TabItem>
+
+</Tabs>
+
+### b. Imports
+
+When importing **only types** from a module, `import type` must be used.
+
+The `import type` syntax imports only the types and eliminates the runtime impact of importing the actual values. This helps reduce the bundle size and improves performance by avoiding unnecessary code execution.
+
+<Tabs>
+
+<TabItem value="do" label="✅ do">
+
+```ts
+import type { Attribute, Common } from '@strapi/strapi';
+```
+
+</TabItem>
+
+<TabItem value="don't" label="❌ don't">
+
+```ts
+import { Attribute, Common } from '@strapi/strapi';
+```
+
+</TabItem>
+
+</Tabs>
+
+When importing **both types and implementations** from a module:
+
+- `import type` must be used for types
+- `import` must be used for the rest
+
+<Tabs>
+
+<TabItem value="do" label="✅ do">
+
+```ts
+import type { User } from './user';
+import { findUser } from './user';
+
+const user: User = findUser();
+```
+
+</TabItem>
+
+<TabItem value="don't" label="❌ don't">
+
+```ts
+import { User, findUser } from './user';
+
+const user: User = findUser();
+```
+
+</TabItem>
+
+</Tabs>
+
+:::info
+We're using the [consistent-type-imports](https://typescript-eslint.io/rules/consistent-type-imports/) lint rule to enforce this.
+:::
+
+### c. Exports
+
+In most cases, it is recommended to use _named exports_ (`export`) instead of the _default export_ (`export default`). Named exports provide more flexibility and clarity when importing and using modules. They allow importing specific members of a module explicitly, which improves code readability and maintainability. However, there are a few exceptions where using default exports might be appropriate.
+
+- **Use _named exports_ when** there are **multiple entities or functions** that need to be exported from a module.
+- Consider using **_default exports_ when**:
+  - there is only a **single primary entity or class** that needs to be exported from a module.
+  - working with modules that have **natural default export**, such as configuration objects or factories.
+
+Using _named exports_ provides a clearer and more explicit interface for module consumers, promoting better code organization and maintainability. However, it is important to consider the context before deciding whether to use _default exports_.
+
+## 3. Parameters for Generics
+
+When working with generic types, it is required to follow naming conventions and use descriptive names for type parameters. This helps improve code readability and maintainability over the whole codebase.
+
+- Any generic with **one parameter** can **use `T`**
+- For **any other** generic types' parameters, it is required to **use a meaningful PascalCased variable name prefixed by `T`**
+
+<Tabs>
+
+<TabItem value="do" label="✅ do">
+
+```ts
+function query<TValue extends object, TKey extends keyof TValue>(
+  data: TValue,
+  properties: TKey[]
+): { [TIter in TKey]: TValue[TIter] } {
+  // ...
+}
+```
+
+</TabItem>
+
+<TabItem value="don't" label="❌ don't">
+
+```ts
+function query<T extends object, U extends keyof T>(data: T, properties: U[]): { [K in U]: T[K] } {
+  // ...
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+<Tabs>
+
+<TabItem value="prefer" label="✅ prefer">
+
+```ts
+type NonEmpty<T extends string> = T extends '' ? never : T;
+```
+
+</TabItem>
+
+<TabItem value="ok" label="✅ ok">
+
+```ts
+type NonEmpty<TValue extends string> = TValue extends '' ? never : TValue;
+```
+
+</TabItem>
+
+</Tabs>
+
+Choose meaningful names for type parameters that accurately describe their purpose within the context of the function or type.
+
+## 4. Avoiding Breaking Changes for Users
+
+When making changes to the Strapi types, it is important to consider the impact on existing users. To avoid breaking changes, follow these guidelines:
+
+- **Avoid removing or changing public APIs:**
+
+  Public types' APIs include functions, classes, or interfaces/types exposed to users as part of the official/documented Strapi API. Removing or changing them without providing appropriate deprecations or migration paths can break users' existing code.
+
+  This also applies to public React components (through their props).
+
+  :::warning
+  When modifying a type definition, always make sure it's not exported by the package
+  :::
+
+- **Use deprecation warnings instead:**
+
+  If you need to deprecate an existing type, provide deprecation warnings and suggest alternative approaches.
+
+  <Tabs>
+
+  <TabItem value="depecated" label="@deprecated">
+
+  ```ts
+  /**
+   * @deprecated The Writer interface is deprecated and will be removed in the next major version. Please consider using Author instead
+   */
+  export interface Writer {
+    id: string;
+    firstname: string;
+    lastname: string;
+  }
+  ```
+
+  </TabItem>
+
+  </Tabs>
+
+- **Release breaking changes in major versions:**
+
+  Breaking changes should be released as part of major version updates (e.g., from v4.x.x to v5.x.x). Major versions indicate significant changes that may require code modifications from users.
+
+By following these guidelines, you can minimize the impact on users' code when introducing changes to the Strapi types.
+
+## 5. Using Shared Type Registries for Public APIs
+
+When dealing with public-oriented APIs, it's recommended to use dynamic type registries to offer a pleasant developer experience to both maintainers and users.
+
+- Maintainers will have access to generic loose types
+- Users will benefit from detailed generated types for their applications
+
+<Tabs>
+
+<TabItem value="do" label="✅ do">
+
+```ts
+import type { Shared, Common } from '@strapi/strapi';
+
+export function contentType<T extends Common.UID.ContentType>(uid: T): Shared.ContentTypes[T] {
+  // ...
+}
+```
+
+</TabItem>
+
+<TabItem value="don't" label="❌ don't">
+
+```ts
+import type { Schema, UID } from '@strapi/strapi';
+
+export function contentType(uid: UID.Schema): Schema.Schema {
+  // ...
+}
+```
+
+</TabItem>
+
+</Tabs>
+
+:::info
+If no types are generated, shared registries will resolve to their generic representation.
+:::
+
+## 6. Lint Configurations
+
+The Strapi lint configuration includes some rules to enforce the guidelines mentioned above and can be found [here](https://github.com/strapi/strapi/blob/main/packages/utils/eslint-config-custom/typescript.js).
+
+To use it in a package, create a file named `.eslintrc.js` at the package's root and include the following:
+
+```js
+module.exports = {
+  root: true,
+  extends: ['custom/typescript'],
+};
+```
+
+It is also possible to modify the base TypeScript config by adding the following
+
+```js
+module.exports = {
+  root: true,
+  extends: ['custom/typescript'],
+  rules: {
+    // ...
+  },
+};
+```
+
+:::note
+Referencing the `custom/` eslint configs only works for packages that are part of the Strapi mono-repository
+:::
+
+## 7. TSConfig
+
+- [All](https://github.com/strapi/strapi/blob/main/packages/utils/tsconfig)
+  - [Base](https://github.com/strapi/strapi/blob/main/packages/utils/tsconfig/base.json)
