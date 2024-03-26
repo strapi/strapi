@@ -4,7 +4,7 @@ import { lazy } from 'react';
 import { Navigate, PathRouteProps, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES, SINGLE_TYPES } from './constants/collections';
-import { routes as historyRoutes, useIsHistoryRoute } from './history/routes';
+import { routes as historyRoutes } from './history/routes';
 
 const ProtectedEditViewPage = lazy(() =>
   import('./pages/EditView/EditViewPage').then((mod) => ({ default: mod.ProtectedEditViewPage }))

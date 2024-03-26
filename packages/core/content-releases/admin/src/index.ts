@@ -52,6 +52,7 @@ const admin: Plugin.Config.AdminInput = {
           id: `${pluginId}.plugin.name`,
           defaultMessage: 'Releases',
         },
+        permissions: [],
         async Component() {
           const { PurchaseContentReleases } = await import('./pages/PurchaseContentReleases');
           return { default: PurchaseContentReleases };

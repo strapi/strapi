@@ -2,13 +2,13 @@ import { Config, defineConfig } from '@strapi/pack-up';
 
 const config: Config = defineConfig({
   bundles: [
-    {
-      source: './_internal/index.ts',
-      import: './dist/_internal.mjs',
-      require: './dist/_internal.js',
-      types: './dist/_internal/index.d.ts',
-      runtime: 'web',
-    },
+    // {
+    //   source: './_internal/index.ts',
+    //   import: './dist/_internal.mjs',
+    //   require: './dist/_internal.js',
+    //   types: './dist/_internal/index.d.ts',
+    //   runtime: 'web',
+    // },
     // {
     //   source: './server/src/index.ts',
     //   import: './dist/server/index.mjs',
