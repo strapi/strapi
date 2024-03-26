@@ -1,9 +1,8 @@
-import React from 'react';
-
 import { render } from '@tests/utils';
 import qs from 'qs';
 
-import { FilterListURLQuery, FilterContent } from '../FilterListURLQuery';
+import { FilterData } from '../../types';
+import { FilterListURLQuery } from '../FilterListURLQuery';
 
 describe('FilterListURLQuery', () => {
   it('should render nothing if there is no query', () => {
@@ -13,7 +12,7 @@ describe('FilterListURLQuery', () => {
   });
 
   it('renders and matches the snapshot', () => {
-    const filtersSchema: FilterContent[] = [
+    const filtersSchema: FilterData[] = [
       {
         name: 'bool',
         metadatas: { label: 'Boolean' },
@@ -101,7 +100,7 @@ describe('FilterListURLQuery', () => {
   });
 
   it('displays the label for a custom input providing options with custom values', () => {
-    const displayedFilters: FilterContent[] = [
+    const displayedFilters: FilterData[] = [
       {
         name: 'action',
         metadatas: {

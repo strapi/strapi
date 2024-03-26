@@ -1,5 +1,5 @@
 import { useFetchClient, useNotification, useTracking } from '@strapi/helper-plugin';
-import { useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
 
@@ -7,7 +7,6 @@ const endpoint = `/${pluginId}/configuration`;
 const queryKey = [pluginId, 'configuration'];
 
 export const useConfig = () => {
-  const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { get, put } = useFetchClient();
@@ -33,18 +32,23 @@ export const useConfig = () => {
     }
   );
 
-  const putMutation = useMutation(async (body) => put(endpoint, body), {
-    onSuccess() {
-      trackUsage('didEditMediaLibraryConfig');
-      queryClient.refetchQueries(queryKey, { active: true });
+  const putMutation = useMutation(
+    async (body) => {
+      await put(endpoint, body);
     },
-    onError() {
-      return toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    },
-  });
+    {
+      onSuccess() {
+        trackUsage('didEditMediaLibraryConfig');
+        config.refetch();
+      },
+      onError() {
+        return toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      },
+    }
+  );
 
   return {
     config,

@@ -1,5 +1,6 @@
-import { getLocalScript } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
+import { runAction } from '../../../utils/helpers';
+import action from './action';
 
 /**
  * `$ strapi configuration:restore`
@@ -11,7 +12,7 @@ const command: StrapiCommand = ({ command }) => {
     .description('Restore configurations of your application')
     .option('-f, --file <file>', 'Input file, default input is stdin')
     .option('-s, --strategy <strategy>', 'Strategy name, one of: "replace", "merge", "keep"')
-    .action(getLocalScript('configuration/restore'));
+    .action(runAction('configuration:restore', action));
 };
 
 export default command;

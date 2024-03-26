@@ -36,4 +36,4 @@ export type GetComponentValue<TAttribute extends Attribute.Attribute> =
     : never;
 
 export type GetComponentTarget<TAttribute extends Attribute.Attribute> =
-  TAttribute extends Component<infer TComponentUID, infer _TRepeatable> ? TComponentUID : never;
+  TAttribute extends Component<infer TComponentUID> ? TComponentUID : never;

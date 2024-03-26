@@ -1,5 +1,3 @@
-import React from 'react';
-
 import {
   EmptyStateLayout as Layout,
   EmptyStateLayoutProps as LayoutProps,

@@ -23,8 +23,8 @@ import styled from 'styled-components';
 import { useTracking } from '../features/Tracking';
 import { useQueryParams } from '../hooks/useQueryParams';
 
-import type { EntityService } from '@strapi/strapi';
-import type { DefaultFilterInputsProps, Filter, FilterData, Operator } from 'types';
+import type { DefaultFilterInputsProps, Filter, FilterData, Operator } from '../types';
+import type { EntityService } from '@strapi/types';
 
 export interface FilterPopoverURLQueryProps extends Pick<PopoverProps, 'source'> {
   displayedFilters: FilterData[];
@@ -111,7 +111,10 @@ export const FilterPopoverURLQuery = ({
 
         let filterToAdd: Filter;
 
-        if (foundAttribute.fieldSchema.type === 'relation') {
+        if (
+          foundAttribute.fieldSchema.type === 'relation' &&
+          foundAttribute.fieldSchema.mainField
+        ) {
           filterToAdd = {
             [modifiedData.name]: {
               [foundAttribute.fieldSchema.mainField.name]: {
@@ -202,8 +205,9 @@ export const FilterPopoverURLQuery = ({
           {operator !== '$null' && operator !== '$notNull' && (
             <Box>
               <Inputs
-                {...appliedFilter.metadatas}
-                {...appliedFilter.fieldSchema}
+                label={appliedFilter.metadatas.label}
+                type={appliedFilter.fieldSchema.type}
+                options={appliedFilter.fieldSchema.options ?? appliedFilter.metadatas.options}
                 value={modifiedData.value}
                 onChange={(value) => setModifiedData((prev) => ({ ...prev, value }))}
               />
@@ -237,9 +241,9 @@ const SelectContainers = styled(Flex)`
 const DefaultInputs = ({
   label = '',
   onChange,
-  options = [],
   type,
   value = '',
+  ...restProps
 }: DefaultFilterInputsProps) => {
   const { formatMessage } = useIntl();
 
@@ -282,6 +286,7 @@ const DefaultInputs = ({
   }
 
   if (type === 'enumeration') {
+    const options = (restProps.options as FilterData['fieldSchema']['options']) ?? [];
     return (
       // @ts-expect-error from the DS V2 this won't be needed because we're only returning strings.
       <SingleSelect aria-label={label} onChange={onChange} value={value}>
@@ -339,7 +344,7 @@ const DefaultInputs = ({
 const getFilterList = (filterSchema: FilterData['fieldSchema']): Operator[] => {
   let type = filterSchema.type;
 
-  if (filterSchema.type === 'relation') {
+  if (filterSchema.type === 'relation' && filterSchema?.mainField?.schema?.type) {
     type = filterSchema.mainField.schema.type;
   }
 

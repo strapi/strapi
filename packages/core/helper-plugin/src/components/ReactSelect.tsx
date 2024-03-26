@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box } from '@strapi/design-system';
 import { Cross, CarretDown } from '@strapi/icons';
 import Select, {

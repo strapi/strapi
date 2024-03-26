@@ -5,12 +5,12 @@ import { resolveMiddlewares } from './middleware';
 type MiddlewareConfig = (string | { name?: string; resolve?: string; config?: unknown })[];
 
 const defaultConfig = [
+  'strapi::logger',
   'strapi::errors',
   'strapi::security',
   'strapi::cors',
   'strapi::poweredBy',
   'strapi::session',
-  'strapi::logger',
   'strapi::query',
   'strapi::body',
   'strapi::favicon',

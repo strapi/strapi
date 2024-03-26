@@ -11,7 +11,7 @@ test.describe('Log Out', () => {
   });
 
   test('a user should be able to logout', async ({ page }) => {
-    await page.getByText('John Smith').click();
+    await page.getByText('test testing').click();
     await page.getByText('Logout').click();
 
     await expect(page.getByText('Log in to your Strapi account')).toBeVisible();

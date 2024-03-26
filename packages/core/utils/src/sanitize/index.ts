@@ -1,5 +1,5 @@
 import { CurriedFunction1 } from 'lodash';
-import { isArray, cloneDeep } from 'lodash/fp';
+import { isArray, cloneDeep, omit } from 'lodash/fp';
 
 import { getNonWritableAttributes } from '../content-types';
 import { pipeAsync } from '../async';
@@ -34,7 +34,9 @@ const createContentAPISanitizers = () => {
     const nonWritableAttributes = getNonWritableAttributes(schema);
 
     const transforms = [
-      // Remove non writable attributes
+      // Remove first level ID in inputs
+      omit('id'),
+      // Remove non-writable attributes
       traverseEntity(visitors.removeRestrictedFields(nonWritableAttributes), { schema }),
     ];
 

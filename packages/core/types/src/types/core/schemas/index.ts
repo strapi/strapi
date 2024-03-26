@@ -47,6 +47,11 @@ export interface Schema {
    * Custom table name for the schema
    */
   collectionName?: string;
+
+  /**
+   * Information about schema naming and display
+   */
+  info: Info;
 }
 
 /**
@@ -64,7 +69,7 @@ export interface Info {
   description?: string;
 
   /**
-   * FontAwesome (v5) icon name to use for the component's icon in the admin panel
+   * @strapi/icon name to use for the component's icon in the admin panel
    */
   icon?: string;
 }
@@ -80,6 +85,10 @@ export interface Attributes {
  * Structure containing every core schema options and their associated value
  */
 export interface Options {
+  /**
+   * EE only.
+   */
+  reviewWorkflows?: boolean;
   draftAndPublish?: boolean;
   populateCreatorFields?: boolean;
   comment?: string;
@@ -105,7 +114,7 @@ export interface ContentType extends Schema {
   kind: ContentTypeKind;
 
   /**
-   * Informations about schema naming and display
+   * Information about schema naming and display
    */
   info: ContentTypeInfo;
 }
@@ -146,3 +155,5 @@ export interface Component extends Schema {
 
   category: string;
 }
+
+export type Any = SingleType | CollectionType | Component;

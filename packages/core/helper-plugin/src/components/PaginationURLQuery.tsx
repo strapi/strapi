@@ -14,8 +14,6 @@
  * 1, ... 6, `7`, 8, 9, 10
  */
 
-import React from 'react';
-
 import { Dots, NextLink, PageLink, Pagination, PreviousLink } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';

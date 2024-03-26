@@ -3,6 +3,7 @@ import type { Utils } from '../..';
 
 export interface EnumerationProperties<TValues extends string[] = []> {
   enum: TValues;
+  enumName?: string;
 }
 
 export type Enumeration<TValues extends string[] = []> = Attribute.OfType<'enumeration'> &

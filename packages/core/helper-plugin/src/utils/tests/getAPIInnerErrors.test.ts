@@ -2,7 +2,7 @@ import { AxiosError, AxiosHeaders } from 'axios';
 
 import { getAPIInnerErrors } from '../getAPIInnerErrors';
 
-import type { ApiError } from 'types';
+import type { ApiError } from '../../types';
 
 const API_VALIDATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
   undefined,

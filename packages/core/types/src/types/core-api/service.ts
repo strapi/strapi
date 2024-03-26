@@ -1,9 +1,11 @@
-import type { Common, Utils } from '..';
+import type { Common, Utils, Entity as E } from '..';
+
+type EntityID = E.ID;
 
 // TODO Use actual entities instead of regular object
-type Entity = { id: string | number } & Record<string, unknown>;
+type Entity = { id: EntityID } & Record<string, unknown>;
 
-type PaginatedEntiies = {
+type PaginatedEntities = {
   results: Entity[];
   pagination:
     | {
@@ -40,14 +42,14 @@ export type Generic = {
  * Core-API collection type service
  */
 export interface CollectionType extends Base {
-  find(params: object): Promise<PaginatedEntiies>;
-  findOne(entityId: number | `${number}`, params: object): Promise<Entity | null>;
+  find(params: object): Promise<PaginatedEntities>;
+  findOne(entityId: EntityID, params: object): Promise<Entity | null>;
   create(params: { data: Data; [key: string]: unknown }): Promise<Entity>;
   update(
-    entityId: number | `${number}`,
+    entityId: EntityID,
     params: { data: Data; [key: string]: unknown }
   ): Promise<Entity> | Entity;
-  delete(entityId: number | `${number}`, params: object): Promise<Entity> | Entity;
+  delete(entityId: EntityID, params: object): Promise<Entity> | Entity;
 }
 
 /**

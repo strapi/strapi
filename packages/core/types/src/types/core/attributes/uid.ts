@@ -20,6 +20,7 @@ export type UID<
   // TODO: V5:
   // The TOrigin was used to narrow down the list of possible target attribute for a
   // UID, but was removed due to circular dependency issues and will be removed in V5
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _TOrigin extends Common.UID.Schema = never,
   TTargetAttribute extends string = string,
   TOptions extends UIDOptions = UIDOptions
@@ -37,9 +38,6 @@ export type UID<
 
 export type UIDValue = string;
 
-export type GetUIDValue<TAttribute extends Attribute.Attribute> = TAttribute extends UID<
-  infer _TOrigin,
-  infer _TTargetAttribute
->
+export type GetUIDValue<TAttribute extends Attribute.Attribute> = TAttribute extends UID
   ? UIDValue
   : never;

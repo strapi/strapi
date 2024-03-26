@@ -2,7 +2,7 @@
 
 module.exports = {
   displayName: 'API integration tests',
-  testMatch: ['**/?(*.)+(spec|test).api.js'],
+  testMatch: ['**/?(*.)+(spec|test).api.(js|ts)'],
   testEnvironment: 'node',
   setupFilesAfterEnv: ['<rootDir>/test/setup/jest-api.setup.js'],
   coveragePathIgnorePatterns: [
@@ -11,6 +11,8 @@ module.exports = {
     '<rootDir>/out-tsc/',
     '<rootDir>/test/',
   ],
-  transform: {},
+  transform: {
+    '^.+\\.ts$': ['@swc/jest'],
+  },
   modulePathIgnorePatterns: ['.cache'],
 };

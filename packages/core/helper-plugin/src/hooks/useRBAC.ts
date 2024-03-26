@@ -2,17 +2,16 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { useQueries } from 'react-query';
 
-import { useRBACProvider } from '../features/RBAC';
+import { useRBACProvider, Permission } from '../features/RBAC';
 
 import { useFetchClient } from './useFetchClient';
 
-import type { Permission } from '@strapi/permissions';
 import type { AxiosResponse } from 'axios';
 
-type AllowedActions = Record<string, boolean>;
+export type AllowedActions = Record<string, boolean>;
 
 export const useRBAC = (
-  permissionsToCheck: Record<string, Permission[]>,
+  permissionsToCheck: Record<string, Permission[]> = {},
   passedPermissions?: Permission[]
 ): { allowedActions: AllowedActions; isLoading: boolean; setIsLoading: () => void } => {
   const [internalIsLoading, setInternalIsLoading] = useState(false);
@@ -38,7 +37,7 @@ export const useRBAC = (
 
   const queryResults = useQueries(
     permissionsToCheckEntries.map(([name, permissions]) => ({
-      queryKey: ['useRBAC', name, permissions, userPermissions],
+      queryKey: ['useRBAC', name, ...permissions, userPermissions],
       async queryFn() {
         if (!permissions || !permissions.length) {
           return { name, hasPermission: true };
@@ -69,8 +68,7 @@ export const useRBAC = (
               data: { data },
             } = await post<
               { data: { data: boolean[] } },
-              AxiosResponse<{ data: { data: boolean[] } }>,
-              { permissions: Permission[] }
+              AxiosResponse<{ data: { data: boolean[] } }>
             >('/admin/permissions/check', {
               permissions: matchingPermissions.map(({ action, subject }) => ({
                 action,

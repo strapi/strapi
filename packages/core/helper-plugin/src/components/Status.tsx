@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { StatusVariant } from '@strapi/design-system';
 import styled, { DefaultTheme } from 'styled-components';
 

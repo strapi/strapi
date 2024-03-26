@@ -2,6 +2,12 @@ import axios, { AxiosInstance } from 'axios';
 
 import { wrapAxiosInstance } from '../wrapAxiosInstance';
 
+jest.mock('axios', () => ({
+  create: jest.fn(() => ({
+    request: jest.fn(),
+  })),
+}));
+
 const axiosInstance = axios.create({
   baseURL: 'https://some-domain.com/api/',
   timeout: 1000,
@@ -9,10 +15,14 @@ const axiosInstance = axios.create({
 });
 
 describe('wrapAxiosInstance', () => {
-  const env = process.env;
+  const originalWarn = console.warn;
+
+  beforeEach(() => {
+    console.warn = jest.fn();
+  });
 
   afterEach(() => {
-    process.env = env;
+    console.warn = originalWarn;
   });
 
   it('has the right methods', () => {

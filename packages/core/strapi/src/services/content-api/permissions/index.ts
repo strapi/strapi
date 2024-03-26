@@ -5,10 +5,6 @@ import createPermissionEngine from './engine';
 
 const typeSymbol = Symbol.for('__type__');
 
-interface Action {
-  [typeSymbol]: string[];
-}
-
 interface ValidatePermissionHandler {
   (params: { permission: { action: string } }): boolean;
 }

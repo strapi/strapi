@@ -1,0 +1,17 @@
+name: 'Monorepo build (yarn)'
+description: 'Run yarn build with cache enabled'
+
+runs:
+  using: 'composite'
+
+  steps:
+    - name: ♻️ Restore build cache
+      uses: actions/cache@v4
+      id: yarn-build-cache
+      with:
+        path: packages/**/dist
+        key: yarn-build-cache-${{ github.sha }}
+    - if: ${{ steps.yarn-build-cache.outputs.cache-hit != 'true' }}
+      name: 📥 Run build
+      shell: bash
+      run: yarn nx run-many --target=build --nx-ignore-cycles --skip-nx-cache

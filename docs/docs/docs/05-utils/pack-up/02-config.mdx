@@ -1,0 +1,87 @@
+---
+title: Configuration
+tags:
+  - pack-up
+  - configuration
+  - configs
+---
+
+# Configuring pack-up
+
+By default, `pack-up` is designed to use the `package.json` as a source of truth to bundle your package.
+This creates a seemless alignment between the bundling & publishing process. However, if you require more
+flexibility, `pack-up` also supports a configuration file – `packup.config.[mtj]s`.
+
+## Usage
+
+```ts
+// package.config.ts
+import { defineConfig } from '@strapi/pack-up';
+
+export default defineConfig({
+  minify: true,
+  sourcemap: false,
+  externals: ['path', 'fs'],
+});
+```
+
+## Interface
+
+```ts
+interface Config {
+  /**
+   * An array of entry points to bundle. This is useful if you want to bundle something that should not
+   * be exported by the package, e.g. CLI scripts or Node.js workers.
+   */
+  bundles?: ConfigBundle[];
+  /**
+   * The directory to output the bundle to.
+   */
+  dist?: string;
+  /**
+   * A list of external dependencies to exclude from the bundle.
+   * We already collect the dependencies & peerDeps from the package.json.
+   */
+  externals?: string[];
+  /**
+   * Whether to minify the output or not.
+   */
+  minify?: boolean;
+  /**
+   * An array of Vite plugins to use when bundling.
+   */
+  plugins?: PluginOption[] | (({ runtime }: { runtime: Runtime }) => PluginOption[]);
+  /**
+   * @alpha
+   *
+   * @description Instead of creating as few chunks as possible, this mode
+   * will create separate chunks for all modules using the original module
+   * names as file names
+   */
+  preserveModules?: boolean;
+  /**
+   * Whether to generate sourcemaps for the output or not.
+   */
+  sourcemap?: boolean;
+  /**
+   * The transpilation target of the bundle. This is useful if you're bundling many different CLIs or
+   * Node.js workers and you want them to be transpiled for the node environment.
+   */
+  runtime?: Runtime;
+  /**
+   * Path to the tsconfig file to use for the bundle.
+   */
+  tsconfig?: string;
+}
+
+interface ConfigBundle {
+  source: string;
+  import?: string;
+  require?: string;
+  runtime?: Runtime;
+  tsconfig?: string;
+  types?: string;
+}
+
+type Runtime = '*' | 'node' | 'web';
+```

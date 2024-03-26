@@ -2,13 +2,13 @@ import * as React from 'react';
 
 import { AnySchema } from 'yup';
 
-import type { TranslationMessage } from 'types';
+import type { TranslationMessage } from '../types';
 /**
  * @TODO: Custom field types should be defined and exported from the registry:
  * packages/core/admin/admin/src/core/apis/CustomFields.js
  */
 interface CustomFieldComponents {
-  Input: () => Promise<React.ComponentType>;
+  Input: () => Promise<{ default?: React.ComponentType }>;
 }
 
 type CustomFieldType =
@@ -85,6 +85,8 @@ interface CustomField {
   options?: CustomFieldOptions;
 }
 
+type CustomFieldUID = `plugin::${string}.${string}` | `global::${string}`;
+
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
@@ -128,3 +130,12 @@ const CustomFieldsProvider = ({ children, customFields }: CustomFieldsProviderPr
 const useCustomFields = () => React.useContext(CustomFieldsContext);
 
 export { CustomFieldsContext, CustomFieldsProvider, useCustomFields };
+export type {
+  CustomFieldsProviderProps,
+  CustomField,
+  CustomFieldComponents,
+  CustomFieldOptionSection,
+  CustomFieldOption,
+  CustomFieldOptions,
+  CustomFieldUID,
+};

@@ -1,21 +1,8 @@
 import * as sift from 'sift';
 import qs from 'qs';
-import { AbilityBuilder, Ability, Subject } from '@casl/ability';
+import { AbilityBuilder, Ability } from '@casl/ability';
 import { pick, isNil, isObject } from 'lodash/fp';
-
-export interface ParametrizedAction {
-  name: string;
-  params: Record<string, unknown>;
-}
-
-export interface PermissionRule {
-  action: string | ParametrizedAction;
-  subject?: Subject | null;
-  properties?: {
-    fields?: string[];
-  };
-  condition?: Record<string, unknown>;
-}
+import type { ParametrizedAction, PermissionRule } from '../../types';
 
 export interface CustomAbilityBuilder {
   can(permission: PermissionRule): ReturnType<AbilityBuilder<Ability>['can']>;

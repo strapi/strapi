@@ -1,6 +1,6 @@
 import { propOr } from 'lodash/fp';
 import { contentTypes } from '@strapi/utils';
-import type { CoreApi, Schema } from '@strapi/types';
+import type { CoreApi, Schema, Entity } from '@strapi/types';
 
 import {
   getPaginationInfo,
@@ -62,7 +62,7 @@ const createCollectionTypeService = ({
       };
     },
 
-    findOne(entityId: number | `${number}`, params = {}) {
+    findOne(entityId: Entity.ID, params = {}) {
       return strapi.entityService?.findOne(uid, entityId, this.getFetchParams(params));
     },
 
@@ -76,13 +76,13 @@ const createCollectionTypeService = ({
       return strapi.entityService?.create(uid, { ...params, data });
     },
 
-    update(entityId: number | `${number}`, params = { data: {} }) {
+    update(entityId: Entity.ID, params = { data: {} }) {
       const { data } = params;
 
       return strapi.entityService?.update(uid, entityId, { ...params, data });
     },
 
-    delete(entityId: number | `${number}`, params = {}) {
+    delete(entityId: Entity.ID, params = {}) {
       return strapi.entityService?.delete(uid, entityId, params);
     },
   };

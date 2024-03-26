@@ -1,77 +1,48 @@
 import * as React from 'react';
 
+import { useQuery } from 'react-query';
 import { Redirect } from 'react-router-dom';
 
 import { useNotification } from '../features/Notifications';
 import { useRBACProvider } from '../features/RBAC';
-import { hasPermissions } from '../utils/hasPermissions';
+import { PermissionToCheckAgainst, hasPermissions } from '../utils/hasPermissions';
 
 import { LoadingIndicatorPage } from './LoadingIndicatorPage';
 
-import type { Permission } from '@strapi/permissions';
-
-export interface CheckPagePermissions {
+export interface CheckPagePermissionsProps {
   children: React.ReactNode;
-  permissions?: Permission[];
+  permissions?: PermissionToCheckAgainst[];
 }
 
-const CheckPagePermissions = ({ permissions = [], children }: CheckPagePermissions) => {
-  const abortController = new AbortController();
-  const { signal } = abortController;
+const CheckPagePermissions = ({
+  permissions = [],
+  children,
+}: CheckPagePermissionsProps): React.JSX.Element => {
   const { allPermissions } = useRBACProvider();
   const toggleNotification = useNotification();
 
-  const [state, setState] = React.useState({ isLoading: true, canAccess: false });
-  const isMounted = React.useRef(true);
+  const { data: canAccess, isLoading } = useQuery(
+    ['checkPagePermissions', permissions, allPermissions],
+    () => hasPermissions(allPermissions, permissions),
+    {
+      onError: () => {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      },
+    }
+  );
 
-  React.useEffect(() => {
-    const checkPermission = async () => {
-      try {
-        setState({ isLoading: true, canAccess: false });
-
-        const canAccess = await hasPermissions(allPermissions || [], permissions, signal);
-
-        if (isMounted.current) {
-          setState({ isLoading: false, canAccess });
-        }
-      } catch (err) {
-        if (isMounted.current) {
-          console.error(err);
-
-          toggleNotification?.({
-            type: 'warning',
-            message: { id: 'notification.error' },
-          });
-
-          setState({ isLoading: false, canAccess: false });
-        }
-      }
-    };
-
-    checkPermission();
-
-    return () => {
-      abortController.abort();
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [permissions]);
-
-  React.useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
-
-  if (state.isLoading) {
+  if (isLoading) {
     return <LoadingIndicatorPage />;
   }
 
-  if (!state.canAccess) {
+  if (canAccess === false) {
     return <Redirect to="/" />;
   }
 
-  return children;
+  return <>{children}</>;
 };
 
 export { CheckPagePermissions };

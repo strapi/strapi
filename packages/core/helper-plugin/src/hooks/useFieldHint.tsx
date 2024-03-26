@@ -1,6 +1,4 @@
 /* eslint-disable check-file/filename-naming-convention */ // this is disabled because the file name is correct however, we do use JSX in this file.
-import React from 'react';
-
 import { useIntl } from 'react-intl';
 
 import type { MessageDescriptor, PrimitiveType } from 'react-intl';

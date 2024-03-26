@@ -3,7 +3,7 @@ import { hooks } from '@strapi/utils';
 
 import * as domain from '../domain';
 import type { Permission } from '../domain/permission';
-import type { PermissionRule } from './abilities';
+import type { PermissionRule } from '../types';
 
 export interface PermissionEngineHooks {
   'before-format::validate.permission': ReturnType<typeof hooks.createAsyncBailHook>;

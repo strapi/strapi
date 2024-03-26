@@ -44,7 +44,9 @@ export interface NotificationsContextValue {
   toggleNotification: (config: NotificationConfig) => void;
 }
 
-const NotificationsContext = React.createContext<NotificationsContextValue | null>(null);
+const NotificationsContext = React.createContext<NotificationsContextValue>({
+  toggleNotification: () => {},
+});
 
 /* -------------------------------------------------------------------------------------------------
  * Provider
@@ -91,7 +93,6 @@ const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
     <NotificationsContext.Provider value={value}>
       <Flex
         left="50%"
-        // @ts-expect-error - TODO: We need to find a way to accept custom sizes on DS or refactor this
         marginLeft="-250px"
         position="fixed"
         direction="column"
@@ -131,7 +132,7 @@ const Notification = ({
   },
   onClose,
   timeout = 2500,
-  title = 'success',
+  title,
   type,
 }: NotificationProps) => {
   const { formatMessage } = useIntl();
@@ -255,10 +256,10 @@ const Notification = ({
  * import { useNotification } from '@strapi/helper-plugin';
  *
  * const MyComponent = () => {
- *  const { toggleNotification } = useNotification();
+ *  const toggleNotification = useNotification();
  *
  *  return <button onClick={() => toggleNotification({ message: 'Hello world!' })}>Click me</button>;
  */
-const useNotification = () => React.useContext(NotificationsContext)?.toggleNotification;
+const useNotification = () => React.useContext(NotificationsContext).toggleNotification;
 
 export { NotificationsContext, NotificationsProvider, useNotification };

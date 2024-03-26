@@ -48,6 +48,7 @@ export interface IDestinationProvider extends IProvider {
   rollback?<T extends Error = Error>(e: T): MaybePromise<void>;
 
   setMetadata?(target: ProviderType, metadata: IMetadata): IDestinationProvider;
+  onWarning?: (message: string) => void;
 
   createEntitiesWriteStream?(): MaybePromise<Writable>;
   createLinksWriteStream?(): MaybePromise<Writable>;

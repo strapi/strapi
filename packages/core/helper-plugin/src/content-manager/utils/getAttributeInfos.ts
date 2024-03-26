@@ -1,6 +1,6 @@
 import get from 'lodash/get';
 
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 const getType = (schema: Schema.Schema, attrName: string) =>
   get(schema, ['attributes', attrName, 'type'], '');

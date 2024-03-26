@@ -9,7 +9,7 @@
 
 <h3 align="center">Open-source headless CMS, self-hosted or Cloud you’re in control.</h3>
 <p align="center">The leading open-source headless CMS, 100% JavaScript/TypeScript, flexible and fully customizable.</p>
-<p align="center"><a href="https://cloud.strapi.io/signups?source=github1">Cloud</a> · <a href="https://strapi.io/demo">Try live demo</a></p>
+<p align="center"><a href="https://cloud.strapi.io/signups?source=github1">Cloud</a> · <a href="https://strapi.io/demo?utm_campaign=Growth-Experiments&utm_source=strapi%2Fstrapi%20README.md">Try live demo</a> · <a href="https://strapi.io/five?utm_campaign=Product%20Marketing%20Strapi%205%20Launch%20Q1%20Q2%202024&utm_source=GitHub&utm_medium=strapi%2Fstrapi%20README.md">Strapi 5 (coming soon)</a></p>
 <br />
 
 <p align="center">
@@ -94,6 +94,7 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 | Strapi Version  | Recommended | Minimum |
 | --------------- | ----------- | ------- |
+| 4.14.5 and up   | 20.x        | 18.x    |
 | 4.11.0 and up   | 18.x        | 16.x    |
 | 4.3.9 to 4.10.x | 18.x        | 14.x    |
 | 4.0.x to 4.3.8  | 16.x        | 14.x    |
@@ -113,7 +114,7 @@ Strapi only supports maintenance and LTS versions of Node.js. Please refer to th
 
 - **Content Types Builder**: Build the most flexible publishing experience for your content managers, by giving them the freedom to create any page on the go with [fields](https://docs.strapi.io/user-docs/content-manager/writing-content#filling-up-fields), components and [Dynamic Zones](https://docs.strapi.io/user-docs/content-manager/writing-content#dynamic-zones).
 - **Media Library**: Upload your images, videos, audio or documents to the media library. Easily find the right asset, edit and reuse it.
-- **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales
+- **Internationalization**: The Internationalization (i18n) plugin allows Strapi users to create, manage and distribute localized content in different languages, called "locales"
 - **Role Based Access Control**: Create an unlimited number of custom roles and permissions for admin and end users.
 - **GraphQL or REST**: Consume the API using REST or GraphQL
 

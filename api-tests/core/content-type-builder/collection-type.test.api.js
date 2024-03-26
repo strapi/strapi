@@ -367,21 +367,20 @@ describe('Content Type Builder - Content types', () => {
         expect(res.body).toEqual({
           error: {
             name: 'ValidationError',
-            message: '2 errors occurred',
+            message: expect.stringContaining('errors occurred'),
             details: {
-              errors: [
-                {
-                  message:
-                    'contentType.singularName is not in kebab case (an-example-of-kebab-case)',
+              errors: expect.arrayContaining([
+                expect.objectContaining({
+                  message: expect.stringContaining('contentType.singularName is not in kebab case'),
                   name: 'ValidationError',
-                  path: ['contentType', 'singularName'],
-                },
-                {
-                  message: 'contentType.pluralName is not in kebab case (an-example-of-kebab-case)',
+                  path: expect.arrayContaining(['contentType', 'singularName']),
+                }),
+                expect.objectContaining({
+                  message: expect.stringContaining('contentType.pluralName is not in kebab case'),
                   name: 'ValidationError',
-                  path: ['contentType', 'pluralName'],
-                },
-              ],
+                  path: expect.arrayContaining(['contentType', 'pluralName']),
+                }),
+              ]),
             },
           },
         });

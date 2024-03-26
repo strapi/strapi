@@ -85,6 +85,7 @@ async function serverRestartWatcher<ResponseType>(response: ResponseType): Promi
 
 const warnOnce = once(console.warn);
 
+// eslint-disable-next-line no-undef
 interface RequestOptions extends RequestInit {
   params?: Record<string, string>;
 }

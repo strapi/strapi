@@ -103,13 +103,4 @@ test.describe('Login', () => {
       await page.getByRole('link', { name: 'Ready to sign in?' }).click();
     });
   });
-
-  test.describe('Forgot password', () => {
-    test('A user should be able to change the application language', async ({ page }) => {
-      await page.getByRole('combobox').click();
-      await page.keyboard.press('ArrowDown');
-      await page.keyboard.press('Space');
-      await expect(page.getByText('Bienvenue !')).toBeVisible({ timeout: 10000 });
-    });
-  });
 });

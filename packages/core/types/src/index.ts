@@ -9,7 +9,7 @@ import type { Server } from './modules/server';
 import type { EventHub } from './modules/event-hub';
 import type { CronService } from './modules/cron';
 import type { WebhookRunner } from './modules/webhook-runner';
-import type { WebhookStore } from './modules/webhook-store';
+import type { WebhookStore, Webhook } from './modules/webhook-store';
 import type { CoreStore } from './modules/core-store';
 import type { EntityValidator } from './modules/entity-validator';
 import type * as EntityService from './modules/entity-service';
@@ -25,6 +25,7 @@ import type { SanitizersRegistry } from './modules/sanitizers';
 import type { ValidatorsRegistry } from './modules/validators';
 
 import type { Container } from './container';
+import type { FeaturesService, FeaturesConfig } from './modules/features';
 
 export type * from './types';
 
@@ -33,6 +34,7 @@ export {
   Server,
   EventHub,
   CronService,
+  Webhook,
   WebhookRunner,
   WebhookStore,
   CoreStore,
@@ -41,6 +43,8 @@ export {
   TelemetryService,
   RequestContext,
   CustomFields,
+  FeaturesService,
+  FeaturesConfig,
   Fetch,
   AuthenticationService,
   ContentApi,
@@ -107,6 +111,7 @@ export interface Strapi {
   db?: Database;
   app: any;
   EE?: boolean;
+  features: FeaturesService;
   components: Shared.Components;
   reload: Reloader;
   config: ConfigProvider;

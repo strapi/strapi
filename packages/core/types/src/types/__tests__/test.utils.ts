@@ -1,5 +1,5 @@
 import path from 'path';
-import { fromFile } from 'ts-zen';
+import { fromFile } from '@strapi/ts-zen';
 
 const DEFINITIONS_ROOT = path.join(__dirname, 'definitions');
 

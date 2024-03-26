@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { Box, Flex, Loader, Tbody, Td, Tr, RawTdProps } from '@strapi/design-system';
 
 import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';

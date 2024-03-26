@@ -13,6 +13,7 @@ import filePathToPath from './filepath-to-prop-path';
 export default async function loadFiles<T extends object>(
   dir: string,
   pattern: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   { requireFn = importDefault, shouldUseFileNameAsKey = (_: any) => true, globArgs = {} } = {}
 ): Promise<T> {
   const root = {};

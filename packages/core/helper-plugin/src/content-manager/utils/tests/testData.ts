@@ -1,4 +1,4 @@
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 
 const contentType: Schema.ContentType = {
   uid: 'api::test.test',
@@ -18,24 +18,38 @@ const contentType: Schema.ContentType = {
   },
   modelType: 'contentType',
   kind: 'collectionType',
+  modelName: 'test',
+  globalId: 'Test',
   info: {
-    displayName: 'Test',
+    singularName: 'test',
+    pluralName: 'tests',
+    displayName: 'test',
   },
 };
 
 const components: Record<string, Schema.Component> = {
   'compos.sub-compo': {
+    category: 'default',
+    modelName: 'sub-compo',
+    globalId: 'SubCompo',
+    info: {
+      displayName: 'sub-compo',
+    },
     attributes: {
       id: { type: 'integer' },
       name: { type: 'string' },
       password: { type: 'password' },
     },
     modelType: 'component',
-    info: {
-      displayName: 'Test',
-    },
+    uid: 'compos.sub-compo',
   },
   'compos.test-compo': {
+    category: 'default',
+    modelName: 'test-compo',
+    globalId: 'TestCompo',
+    info: {
+      displayName: 'test-compo',
+    },
     attributes: {
       id: { type: 'integer' },
       name: { type: 'string' },
@@ -52,9 +66,7 @@ const components: Record<string, Schema.Component> = {
       },
     },
     modelType: 'component',
-    info: {
-      displayName: 'Test',
-    },
+    uid: 'compos.test-compo',
   },
 };
 

@@ -49,8 +49,6 @@ const uploadFile: UploadFile = async (uid, entity, files) => {
         modelUID = attr.component;
         tmpModel = strapi.components[attr.component];
       } else if (attr.type === 'dynamiczone') {
-        const x = modelUID;
-
         const entryIdx = path[i + 1]; // get component index
         const value = _.get(entity, [...currentPath, entryIdx]);
 

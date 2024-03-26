@@ -449,11 +449,52 @@ describe('Test Graphql Relations API End to End', () => {
       // assign for later use
       data.labels = res.body.data.labels.data;
     });
+
     test('Deep query', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
             documents(filters: { labels: { name: { contains: "label 1" } } }) {
+              data {
+                id
+                attributes {
+                  name
+                  labels {
+                    data {
+                      id
+                      attributes {
+                        name
+                        color {
+                          name
+                          red
+                          green
+                          blue
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({
+        data: {
+          documents: {
+            data: expect.arrayContaining(data.documents),
+          },
+        },
+      });
+    });
+
+    test('Deep query with empty object param', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            documents(filters: { labels: { name: {} } }) {
               data {
                 id
                 attributes {

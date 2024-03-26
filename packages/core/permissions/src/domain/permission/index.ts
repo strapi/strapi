@@ -8,7 +8,7 @@ export interface Permission {
   action: string;
   actionParameters?: Record<string, unknown>;
   subject?: string | object | null;
-  properties?: object;
+  properties?: Record<string, any>;
   conditions?: string[];
 }
 

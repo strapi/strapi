@@ -2,12 +2,13 @@
 title: Container
 slug: /api/container
 tags:
-- module
-- public
+  - module
+  - public
 
 toc_min_heading_level: 2
 toc_max_heading_level: 5
 ---
+
 import Type from '@site/docs/api/components/type';
 
 # Container
@@ -31,8 +32,8 @@ The container module permits to generate containers.
 const container = createContainer(strapi);
 
 container.register('config', {
-    get: (configName) => {},
-    set: (configName, value) => {}
+  get: (configName) => {},
+  set: (configName, value) => {},
 });
 
 const dbConfig = container.get('config').get('database');
@@ -95,8 +96,9 @@ container.get('boolean');
 container.get('boolean', false);
 // true
 ```
+
 ### `container.extend()`
 
 :::info
-  To be developed
+To be developed
 :::

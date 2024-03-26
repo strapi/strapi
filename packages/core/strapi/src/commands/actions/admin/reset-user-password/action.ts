@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import inquirer from 'inquirer';
-import strapi from '../../../../index';
+import strapi from '../../../../Strapi';
 
 interface CmdOptions {
   email?: string;
@@ -13,7 +13,7 @@ interface Answers {
   confirm: boolean;
 }
 
-const promptQuestions: inquirer.QuestionCollection<Answers> = [
+const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
   { type: 'input', name: 'email', message: 'User email?' },
   { type: 'password', name: 'password', message: 'New password?' },
   {

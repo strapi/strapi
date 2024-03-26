@@ -1,19 +1,24 @@
 import { join } from 'path';
 import https from 'https';
+import http from 'http';
 import { Duplex, PassThrough, Readable } from 'stream';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
 import type { LoadedStrapi } from '@strapi/types';
 
 import type { IAsset } from '../../../../types';
 
+const protocolForPath = (filepath: string) => {
+  return filepath?.startsWith('https') ? https : http;
+};
+
 function getFileStream(filepath: string, isLocal = false): PassThrough | ReadStream {
   if (isLocal) {
+    // Todo: handle errors
     return createReadStream(filepath);
   }
 
   const readableStream = new PassThrough();
-
-  https
+  protocolForPath(filepath)
     .get(filepath, (res) => {
       if (res.statusCode !== 200) {
         readableStream.emit(
@@ -37,7 +42,7 @@ function getFileStats(filepath: string, isLocal = false): Promise<{ size: number
     return stat(filepath);
   }
   return new Promise((resolve, reject) => {
-    https
+    protocolForPath(filepath)
       .get(filepath, (res) => {
         if (res.statusCode !== 200) {
           reject(new Error(`Request failed with status code ${res.statusCode}`));
@@ -89,10 +94,9 @@ export const createAssetsStream = (strapi: LoadedStrapi): Duplex => {
           const fileFormatFilepath = isLocalProvider
             ? join(strapi.dirs.static.public, fileFormat.url)
             : fileFormat.url;
-
           const fileFormatStats = await getFileStats(fileFormatFilepath, isLocalProvider);
           const fileFormatStream = getFileStream(fileFormatFilepath, isLocalProvider);
-          const metadata = { ...fileFormat, type: format, mainHash: file.hash };
+          const metadata = { ...fileFormat, type: format, id: file.id, mainHash: file.hash };
           yield {
             metadata,
             filepath: fileFormatFilepath,

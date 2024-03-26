@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { lightTheme, ThemeProvider, Icon } from '@strapi/design-system';
 import { GlassesSquare, ExternalLink } from '@strapi/icons';
 import { render as renderRTL, screen } from '@testing-library/react';
@@ -29,7 +27,7 @@ describe('ContentBox', () => {
         {...props}
       />,
       {
-        wrapper: ({ children }: { children: React.JSX.Element }) => (
+        wrapper: ({ children }) => (
           <ThemeProvider theme={lightTheme}>
             <IntlProvider locale="en" messages={{}} textComponent="span">
               {children}

@@ -7,7 +7,7 @@ const {
   },
   engine: { createTransferEngine },
 } = require('@strapi/data-transfer');
-const strapi = require('@strapi/strapi');
+const strapiFactory = require('@strapi/strapi');
 const { ALLOWED_CONTENT_TYPES } = require('../constants');
 
 /**
@@ -32,7 +32,7 @@ const exportData = async () => {
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore', // for an export to file, versionStrategy will always be skipped
     schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
-    only: ['content'],
+    only: ['content', 'files'],
     transforms: {
       links: [
         {
@@ -83,8 +83,8 @@ const createDestinationProvider = (filePath) =>
   });
 
 const createStrapiInstance = async (logLevel = 'error') => {
-  const appContext = await strapi.compile();
-  const app = strapi(appContext);
+  const appContext = await strapiFactory.compile();
+  const app = strapiFactory(appContext);
 
   app.log.level = logLevel;
   const loadedApp = await app.load();

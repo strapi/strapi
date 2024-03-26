@@ -1,7 +1,7 @@
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
 import inquirer from 'inquirer';
-import strapi from '../../../../index';
+import strapi from '../../../../Strapi';
 
 interface CmdOptions {
   email?: string;
@@ -34,6 +34,12 @@ interface Answers {
   confirm: boolean;
 }
 
+/**
+ * It's not an observable, in reality this is
+ * `ReadOnlyArray<inquirer.DistinctQuestion<Answers>>`
+ * but then the logic of the validate function needs to change.
+ */
+// eslint-disable-next-line rxjs/finnish
 const promptQuestions: inquirer.QuestionCollection<Answers> = [
   {
     type: 'input',

@@ -3,7 +3,7 @@ import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import set from 'lodash/set';
 
-import { arrayMoveItem } from '../../utils';
+import { arrayMoveItem } from '../../utils/arrayMoveItem';
 
 import { formatLayout, getFieldSize, setFieldSize } from './utils/layout';
 

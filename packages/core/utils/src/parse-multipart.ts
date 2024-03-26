@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import type Koa from 'koa';
 
-export = (ctx: Koa.Context) => {
+export const parseMultipartData = (ctx: Koa.Context) => {
   if (!ctx.is('multipart')) {
     return { data: ctx.request.body, files: {} };
   }

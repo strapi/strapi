@@ -1,0 +1,33 @@
+---
+title: Introduction
+tags:
+  - pack-up
+  - bundling
+  - packages
+---
+
+## What is pack-up?
+
+Pack-Up is primarily a CLI interface to develop & build CJS/ESM interopable (meaning you can import your library in either environment with little effort)
+packages. It's built on top of [vite](https://vitejs.dev/), but also utilises [esbuild](https://esbuild.github.io/) for certain parts. It also offers a
+node API that can be used to build other tools on top of it.
+
+It's designed to have as little dependencies as possible making it easier to react to changes in the ecosystem as and when we need too.
+The configuration format at present is limited and is expected to grow with real-world requirements.
+
+## Why do we need it?
+
+Creating packages that work in both CJS and ESM environments is a pain. This tooling library aims to make it easier for _all_ developers,
+if you're creating _any_ new project you should bundle your code and therefore use this tool to initialise / build & check the project.
+We use internally to bundle all our libraries. Strapi also has it's own plugin system that realistically benefits from having the code bundled
+for both the client and server packages of said plugins. Initially we wanted to keep this inside the `@strapi/strapi` package but realised
+soon after that this package was required to be more low level than the former.
+
+## Further reading
+
+import DocCardList from '@theme/DocCardList';
+import { useCurrentSidebarCategory } from '@docusaurus/theme-common';
+
+<DocCardList
+  items={useCurrentSidebarCategory().items.filter((item) => item.label !== 'Introduction')}
+/>
