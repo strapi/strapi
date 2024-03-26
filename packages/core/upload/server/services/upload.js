@@ -37,13 +37,31 @@ const generateFileName = (name) => {
   return `${baseName}_${randomSuffix()}`;
 };
 
-const sendMediaMetrics = (data) => {
-  if (_.has(data, 'caption') && !_.isEmpty(data.caption)) {
-    strapi.telemetry.send('didSaveMediaWithCaption');
-  }
+const sendMediaMetrics = async (action, data) => {
+  try {
+    const totalCount = await strapi.entityService.count(FILE_MODEL_UID);
 
-  if (_.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText)) {
-    strapi.telemetry.send('didSaveMediaWithAlternativeText');
+    const eventProperties = {
+      totalCount,
+      hasCaption: _.has(data, 'caption') && !_.isEmpty(data.caption),
+      hasAlternativeText: _.has(data, 'alternativeText') && !_.isEmpty(data.alternativeText),
+    };
+
+    if (action === 'add') {
+      strapi.telemetry.send('didUploadFile', {
+        eventProperties,
+      });
+    }
+
+    if (action === 'remove') {
+      eventProperties.totalCount -= eventProperties.totalCount;
+
+      strapi.telemetry.send('didDeleteFile', {
+        eventProperties,
+      });
+    }
+  } catch (e) {
+    // Silent error.
   }
 };
 
@@ -344,8 +362,6 @@ module.exports = ({ strapi }) => ({
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
     }
 
-    sendMediaMetrics(fileValues);
-
     const res = await strapi.entityService.update(FILE_MODEL_UID, id, { data: fileValues });
 
     await this.emitEvent(MEDIA_UPDATE, res);
@@ -360,7 +376,7 @@ module.exports = ({ strapi }) => ({
       fileValues[CREATED_BY_ATTRIBUTE] = user.id;
     }
 
-    sendMediaMetrics(fileValues);
+    sendMediaMetrics('add', fileValues);
 
     const res = await strapi.query(FILE_MODEL_UID).create({ data: fileValues });
 
@@ -400,6 +416,8 @@ module.exports = ({ strapi }) => ({
     const media = await strapi.query(FILE_MODEL_UID).findOne({
       where: { id: file.id },
     });
+
+    sendMediaMetrics('remove', file);
 
     await this.emitEvent(MEDIA_DELETE, media);
 
