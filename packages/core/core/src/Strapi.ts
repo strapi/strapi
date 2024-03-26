@@ -306,12 +306,12 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('hooks').get(name);
   }
 
-  // api(name) {
-  //   return this.get('apis').get(name);
-  // }
-
-  get api(): Record<string, Core.Module> {
+  get apis() {
     return this.get('apis').getAll();
+  }
+
+  api(name: string): Core.Module {
+    return this.get('apis').get(name);
   }
 
   get auth() {
