@@ -955,6 +955,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             aria-disabled="false"
                             aria-labelledby=":r6:"
                             class="c15 c8 c16 c17"
+                            data-testid="crop"
                             tabindex="0"
                             type="button"
                           >
@@ -986,6 +987,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                     >
                       <img
                         alt="Screenshot 2.png"
+                        data-testid="preview"
                         src="http://localhost:1337/uploads/thumbnail_Screenshot_2_5d4a574d61.png"
                       />
                     </div>

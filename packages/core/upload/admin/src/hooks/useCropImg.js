@@ -28,7 +28,6 @@ export const useCropImg = () => {
     if (!cropperRef.current) {
       cropperRef.current = new Cropper(image, {
         modal: true,
-        initialAspectRatio: 16 / 9,
         movable: true,
         zoomable: false,
         cropBoxResizable: true,
@@ -81,5 +80,6 @@ export const useCropImg = () => {
     isCropping,
     isCropperReady: Boolean(cropperRef.current),
     ...size,
+    cropperRef,
   };
 };
