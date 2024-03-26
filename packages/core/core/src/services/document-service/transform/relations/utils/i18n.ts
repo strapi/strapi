@@ -1,5 +1,4 @@
 import { UID } from '@strapi/types';
-import { errors } from '@strapi/utils';
 import { LongHandDocument } from './types';
 
 export const isLocalizedContentType = (uid: UID.Schema) => {
@@ -31,9 +30,8 @@ export const getRelationTargetLocale = (
   if (isSourceLocalized && isTargetLocalized) {
     // Check the targetLocale matches
     if (targetLocale !== opts.sourceLocale) {
-      throw new errors.ValidationError(
-        `Relation locale does not match the source locale ${JSON.stringify(relation)}`
-      );
+      // If not, we will look for the relation that matches the source locale
+      return opts.sourceLocale;
     }
   }
 

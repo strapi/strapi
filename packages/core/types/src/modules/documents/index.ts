@@ -1,6 +1,7 @@
 import type { UID } from '../..';
 import type * as Middleware from './middleware';
 import type { ServiceInstance } from './service-instance';
+import type { AnyDocument } from './result';
 
 export * as Middleware from './middleware';
 export * as Params from './params';
@@ -10,13 +11,8 @@ export * from './service-instance';
 
 export type ID = string;
 
-type Data = {
-  id?: number | string;
-  [key: string]: string | number | boolean | null | undefined | Date | Data | Data[];
-};
-
 type ServiceUtils = {
-  transformData: (data: any, opts: any) => Promise<Data>;
+  transformData: (data: any, opts: any) => Promise<AnyDocument>;
 };
 
 export type Service = {

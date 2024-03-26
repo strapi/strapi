@@ -27,14 +27,9 @@ const registerModelsHooks = () => {
     }
 
     // Build a populate array for all non localized fields within the schema
-    const { getNestedPopulateOfNonLocalizedAttributes, getNonLocalizedAttributes } =
-      getService('content-types');
+    const { getNestedPopulateOfNonLocalizedAttributes } = getService('content-types');
 
-    const nonLocalizedAttributes = getNonLocalizedAttributes(schema);
-    const attributesToPopulate = [
-      ...nonLocalizedAttributes,
-      ...getNestedPopulateOfNonLocalizedAttributes(schema.uid),
-    ];
+    const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
 
     // Get the result of the document service action
     const result = (await next(context)) as any;

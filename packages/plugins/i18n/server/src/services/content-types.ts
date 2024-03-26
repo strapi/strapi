@@ -157,6 +157,8 @@ const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any) => {
 
   const allAttributes = [...scalarAttributes, ...nonLocalizedAttributes];
   if (schema.modelType === 'component') {
+    // When called recursively on a non localized component we
+    // need to explicitly populate that components relations
     allAttributes.push(...getRelationalAttributes(schema));
   }
 

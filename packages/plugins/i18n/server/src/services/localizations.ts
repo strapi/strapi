@@ -1,37 +1,8 @@
 import { cloneDeep, isEmpty } from 'lodash/fp';
 
 import { type Schema } from '@strapi/types';
-import { async, traverseEntity } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { getService } from '../utils';
-
-const omitIdAndLocale = (entry?: object | null) => {
-  if (entry && typeof entry === 'object' && 'id' in entry && 'locale' in entry) {
-    const { id, locale, ...rest } = entry;
-    return rest;
-  }
-
-  return entry;
-};
-
-const omitFieldsFromRelations = (data: any, schema: Schema.ContentType) => {
-  return traverseEntity(
-    ({ key, value, attribute }, { set }) => {
-      if (attribute.type === 'relation') {
-        if (Array.isArray(value)) {
-          const newValue = value.map((entry) => {
-            return omitIdAndLocale(entry);
-          });
-
-          set(key, newValue as any);
-        } else if (typeof value === 'object') {
-          set(key, omitIdAndLocale(value) as any);
-        }
-      }
-    },
-    { schema, getModel: strapi.getModel.bind(strapi) },
-    data
-  );
-};
 
 /**
  * Update non localized fields of all the related localizations of an entry with the entry values
@@ -62,17 +33,16 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
 
   const entryData = await strapi.documents(uid).omitComponentData(model, nonLocalizedAttributes);
 
-  // We omit the ids and locales from the relational data so the components can
-  // be updated correctly
-  const cleanedData = await omitFieldsFromRelations(nonLocalizedAttributes, model);
-
   await async.map(localeEntriesToUpdate, async (entry: any) => {
-    const transformedData = await strapi.documents.utils.transformData(cloneDeep(cleanedData), {
-      uid,
-      status,
-      locale: entry.locale,
-      allowMissingId: true,
-    });
+    const transformedData = await strapi.documents.utils.transformData(
+      cloneDeep(nonLocalizedAttributes),
+      {
+        uid,
+        status,
+        locale: entry.locale,
+        allowMissingId: true,
+      }
+    );
 
     // Update or create non localized components for the entry
     const componentData = await strapi
