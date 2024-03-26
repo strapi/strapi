@@ -61,6 +61,31 @@ const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
   return tmpWorkingDirectory;
 };
 
+function filenameReservedRegex() {
+  // eslint-disable-next-line no-control-regex
+  return /[<>:"/\\|?*\u0000-\u001F]/g;
+}
+
+function windowsReservedNameRegex() {
+  return /^(con|prn|aux|nul|com\d|lpt\d)$/i;
+}
+
+/**
+ * Copied from https://github.com/sindresorhus/valid-filename package
+ */
+function isValidFilename(string) {
+  if (!string || string.length > 255) {
+    return false;
+  }
+  if (filenameReservedRegex().test(string) || windowsReservedNameRegex().test(string)) {
+    return false;
+  }
+  if (string === '.' || string === '..') {
+    return false;
+  }
+  return true;
+}
+
 module.exports = ({ strapi }) => ({
   async emitEvent(event, data) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
@@ -72,17 +97,17 @@ module.exports = ({ strapi }) => ({
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const fileService = getService('file');
 
-    // Prevent null characters in file name
-    if (filename?.includes('\u0000') || fileInfo.name?.includes('\u0000')) {
-      throw new ApplicationError('File name contains null characters');
-    }
-
     let ext = path.extname(filename);
     if (!ext) {
       ext = `.${extension(type)}`;
     }
     const usedName = (fileInfo.name || filename).normalize();
     const basename = path.basename(usedName, ext);
+
+    // Prevent null characters in file name
+    if (!isValidFilename(usedName)) {
+      throw new ApplicationError('File name contains invalid characters');
+    }
 
     const entity = {
       name: usedName,
