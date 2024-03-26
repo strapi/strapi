@@ -117,6 +117,9 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     const unpublishButton = page.getByText('unpublish', { exact: true });
     await unpublishButton.click();
     await page.getByText('continue').click();
-    expect(page.getByText(/Successfully added to release./)).toBeVisible();
+    await page.getByText(/Successfully added to release./).waitFor({
+      state: 'visible',
+      timeout: 5000,
+    });
   });
 });

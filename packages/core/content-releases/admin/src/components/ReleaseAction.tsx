@@ -17,6 +17,7 @@ import {
   useNotification,
   useRBAC,
 } from '@strapi/helper-plugin';
+import { Common } from '@strapi/types';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -66,18 +67,14 @@ const ReleaseAction: BulkActionComponent = ({ ids, model }) => {
 
   const handleSubmit = async (values: FormValues) => {
     const locale = modifiedData.locale as string | undefined;
-    const releaseActionEntries: CreateManyReleaseActions.Request['body'] = [];
-
-    ids.forEach((id) => {
-      releaseActionEntries.push({
-        type: values.type,
-        entry: {
-          contentType: model,
-          id,
-          locale,
-        },
-      });
-    });
+    const releaseActionEntries: CreateManyReleaseActions.Request['body'] = ids.map((id) => ({
+      type: values.type,
+      entry: {
+        contentType: model as Common.UID.ContentType,
+        id,
+        locale,
+      },
+    }));
 
     const response = await createManyReleaseActions({
       body: releaseActionEntries,
@@ -99,7 +96,7 @@ const ReleaseAction: BulkActionComponent = ({ ids, model }) => {
         }
       );
 
-      const notificationWithoutMessage = {
+      const notification = {
         type: 'success' as const,
         title: formatMessage(
           {
@@ -111,14 +108,9 @@ const ReleaseAction: BulkActionComponent = ({ ids, model }) => {
             totalEntries: response.data.meta.totalEntries,
           }
         ),
+        message: response.data.meta.entriesAlreadyInRelease ? notificationMessage : '',
       };
 
-      const notification = response.data.meta.entriesAlreadyInRelease
-        ? {
-            ...notificationWithoutMessage,
-            message: notificationMessage,
-          }
-        : notificationWithoutMessage;
       toggleNotification(notification);
 
       return true;
