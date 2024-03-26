@@ -1,4 +1,4 @@
-import { setCreatorFields, errors, convertQueryParams } from '@strapi/utils';
+import { setCreatorFields, errors } from '@strapi/utils';
 
 import type { Core, Modules, Struct, Internal, UID } from '@strapi/types';
 
@@ -236,7 +236,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     },
 
     async findOne(id: GetRelease.Request['params']['id'], query = {}) {
-      const dbQuery = convertQueryParams.transformParamsToQuery(RELEASE_MODEL_UID, query);
+      const dbQuery = strapi.get('query-params').transform(RELEASE_MODEL_UID, query);
       const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
         ...dbQuery,
         where: { id },
@@ -246,7 +246,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     },
 
     findPage(query?: GetReleases.Request['query']) {
-      const dbQuery = convertQueryParams.transformParamsToQuery(RELEASE_MODEL_UID, query ?? {});
+      const dbQuery = strapi.get('query-params').transform(RELEASE_MODEL_UID, query ?? {});
 
       return strapi.db.query(RELEASE_MODEL_UID).findPage({
         ...dbQuery,
@@ -467,10 +467,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      const dbQuery = convertQueryParams.transformParamsToQuery(
-        RELEASE_ACTION_MODEL_UID,
-        query ?? {}
-      );
+      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
 
       return strapi.db.query(RELEASE_ACTION_MODEL_UID).findPage({
         ...dbQuery,
@@ -488,10 +485,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     async countActions(
       query: Modules.EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
     ) {
-      const dbQuery = convertQueryParams.transformParamsToQuery(
-        RELEASE_ACTION_MODEL_UID,
-        query ?? {}
-      );
+      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
 
       return strapi.db.query(RELEASE_ACTION_MODEL_UID).count(dbQuery);
     },

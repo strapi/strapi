@@ -69,7 +69,8 @@ export interface Strapi extends Container {
   plugin(name: string): Core.Plugin;
   hooks: Record<string, any>;
   hook(name: string): any;
-  api: Record<string, Core.Module>;
+  apis: Record<string, Core.Module>;
+  api(name: string): Core.Module;
   auth: Modules.Auth.AuthenticationService;
   contentAPI: Modules.ContentAPI.ContentApi;
   sanitizers: Modules.Sanitizers.SanitizersRegistry;

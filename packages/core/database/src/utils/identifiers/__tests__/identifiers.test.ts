@@ -1,20 +1,18 @@
-import {
-  HASH_LENGTH,
-  HASH_SEPARATOR,
-  IDENTIFIER_SEPARATOR,
-  MIN_TOKEN_LENGTH,
-  createHash,
-  getNameFromTokens,
-  getShortenedName,
-} from '../shortener';
+import { createHash } from '../hash';
+
+import { Identifiers } from '../index';
 
 describe('identifiers', () => {
+  const identifiers = new Identifiers({ maxLength: 55 });
+
+  // ensure nobody changes these by accident
+  // NOTE: if these contants ever change between versions, it will cause massive data loss
   describe('constants', () => {
     test('HASH_LENGTH === 5', () => {
-      expect(HASH_LENGTH).toBe(5);
+      expect(identifiers.HASH_LENGTH).toBe(5);
     });
     test('HASH_SEPARATOR === empty string', () => {
-      expect(HASH_SEPARATOR).toBe('');
+      expect(identifiers.HASH_SEPARATOR).toBe('');
     });
   });
 
@@ -50,113 +48,129 @@ describe('identifiers', () => {
     });
   });
 
-  describe('tokenWithHash', () => {
+  describe('getShortenedName', () => {
     test('does not add hash when len == input length', () => {
-      const res = getShortenedName('1234567890', 10);
+      const res = identifiers.getShortenedName('1234567890', 10);
       expect(res).toEqual('1234567890');
     });
     test('returns original string when len > input length', () => {
-      const res = getShortenedName('1234567890', 100);
+      const res = identifiers.getShortenedName('1234567890', 100);
       expect(res).toEqual('1234567890');
     });
     test('throws when len < HASH_LENGTH + MIN_TOKEN_LENGTH', () => {
-      expect(() => getShortenedName('1234567890', HASH_LENGTH + MIN_TOKEN_LENGTH - 1)).toThrow(
+      expect(() =>
+        identifiers.getShortenedName(
+          '1234567890',
+          identifiers.HASH_LENGTH + identifiers.MIN_TOKEN_LENGTH - 1
+        )
+      ).toThrow(
         'length for part of identifier too short, minimum is hash length (5) plus min token length (3), received 7'
       );
     });
     test('adds hash when len < input length (with correct length)', () => {
       const len = 9;
-      const res = getShortenedName('1234567890', len);
+      const res = identifiers.getShortenedName('1234567890', len);
       expect(res).toEqual('1234cd65a');
       expect(res.length).toBe(len);
     });
     test('adds hash when len == HASH_LENGTH + MIN_TOKEN_LENGTH', () => {
-      const res = getShortenedName('1234567890', 9);
+      const res = identifiers.getShortenedName('1234567890', 9);
       expect(res).toEqual('1234cd65a');
     });
     test('throws when len === 0', () => {
-      expect(() => getShortenedName('1234567890', 0)).toThrow('length must be a positive integer');
+      expect(() => identifiers.getShortenedName('1234567890', 0)).toThrow(
+        'length must be a positive integer'
+      );
     });
     test('throws when len < 0', () => {
-      expect(() => getShortenedName('1234567890', -3)).toThrow('length must be a positive integer');
+      expect(() => identifiers.getShortenedName('1234567890', -3)).toThrow(
+        'length must be a positive integer'
+      );
     });
     test('throws when len invalid data type', () => {
       // @ts-expect-error test bad input type
-      expect(() => getShortenedName('1234567890', '10')).toThrow(
+      expect(() => identifiers.getShortenedName('1234567890', '10')).toThrow(
         'length must be a positive integer'
       );
     });
   });
   describe('getNameFromTokens', () => {
     test('does not shorten strings that fit in min length', () => {
-      const name = getNameFromTokens(
-        [
-          { name: '1234567890', compressible: true },
-          { name: '12345', compressible: true },
-          { name: 'links', compressible: false },
-        ],
-        22
-      );
+      const id = new Identifiers({ maxLength: 22 });
+      const name = id.getNameFromTokens([
+        { name: '1234567890', compressible: true },
+        { name: '12345', compressible: true },
+        { name: 'links', compressible: false },
+      ]);
       expect(name).toEqual('1234567890_12345_links');
     });
 
     test('supports strings with separator in them already', () => {
-      const name = getNameFromTokens(
-        [
-          { name: '1234_56789', compressible: true },
-          { name: '123_4', compressible: true },
-          { name: 'links', compressible: false },
-        ],
-        22
-      );
+      const id = new Identifiers({ maxLength: 22 });
+      const name = id.getNameFromTokens([
+        { name: '1234_56789', compressible: true },
+        { name: '123_4', compressible: true },
+        { name: 'links', compressible: false },
+      ]);
       expect(name).toEqual('1234_56789_123_4_links');
     });
 
     test('shortens string that does not fit in min length (one compressible)', () => {
-      const name = getNameFromTokens([{ name: '123456789012345', compressible: true }], 13);
+      const id = new Identifiers({ maxLength: 13 });
+      const name = id.getNameFromTokens([{ name: '123456789012345', compressible: true }]);
       expect(name).toEqual('1234567878db8');
     });
 
     test('shortens strings with separator in them already (last char before hash)', () => {
-      const name = getNameFromTokens([{ name: '1234567_9012345', compressible: true }], 13);
+      const id = new Identifiers({ maxLength: 13 });
+      const name = id.getNameFromTokens([{ name: '1234567_9012345', compressible: true }]);
       expect(name).toEqual('1234567_47b4e');
     });
 
     test('shortens strings with separator in them already (past the hash)', () => {
-      const name = getNameFromTokens([{ name: '12345678_012345', compressible: true }], 13);
+      const id = new Identifiers({ maxLength: 13 });
+      const name = id.getNameFromTokens([{ name: '12345678_012345', compressible: true }]);
       expect(name).toEqual('12345678867f6');
     });
 
     test('returns original string when it fits (one compressible)', () => {
-      const name = getNameFromTokens([{ name: '12345', compressible: true }], 5);
+      const id5 = new Identifiers({ maxLength: 5 });
+      const name = id5.getNameFromTokens([{ name: '12345', compressible: true }]);
       expect(name).toEqual('12345');
 
-      const name2 = getNameFromTokens([{ name: '12345', compressible: true }], 10);
+      const id10 = new Identifiers({ maxLength: 10 });
+      const name2 = id10.getNameFromTokens([{ name: '12345', compressible: true }]);
       expect(name2).toEqual('12345');
     });
 
     test('shortens long string that do not fit in min length (two compressible one of which short, one suffix)', () => {
-      const name = getNameFromTokens(
-        [
-          { name: '1234567890', compressible: true },
-          { name: '12345', compressible: true },
-          { name: 'links', compressible: false },
-        ],
-        21
-      );
+      const id = new Identifiers({ maxLength: 21 });
+      const name = id.getNameFromTokens([
+        { name: '1234567890', compressible: true },
+        { name: '12345', compressible: true },
+        { name: 'links', compressible: false },
+      ]);
       expect(name).toEqual('1234cd65a_12345_links');
     });
 
+    test('uses shortname when available for incompressible links', () => {
+      const id = new Identifiers({ maxLength: 21 });
+      const name = id.getNameFromTokens([
+        { name: '1234567890', compressible: true },
+        { name: '12345', compressible: true },
+        { name: 'links', compressible: false, shortName: 'lnk' },
+      ]);
+      expect(name).toEqual('1234567890_12345_lnk');
+    });
+
     test('throws when cannot compress without violating min length rules', () => {
+      const id = new Identifiers({ maxLength: 21 });
       expect(() =>
-        getNameFromTokens(
-          [
-            { name: '1234567890', compressible: true },
-            { name: '1234567890', compressible: true },
-            { name: 'links', compressible: false },
-          ],
-          21
-        )
+        id.getNameFromTokens([
+          { name: '1234567890', compressible: true },
+          { name: '1234567890', compressible: true },
+          { name: 'links', compressible: false },
+        ])
       ).toThrow('Maximum length is too small to accommodate all tokens');
     });
 
@@ -165,132 +179,131 @@ describe('identifiers', () => {
       const incompressibleString = 'links';
       const compressibleStrings = 2;
       const len =
-        (MIN_TOKEN_LENGTH + HASH_LENGTH) * compressibleStrings +
+        (identifiers.MIN_TOKEN_LENGTH + identifiers.HASH_LENGTH) * compressibleStrings +
         incompressibleString.length +
-        IDENTIFIER_SEPARATOR.length * separatorsNeeded;
+        identifiers.IDENTIFIER_SEPARATOR.length * separatorsNeeded;
       expect(len).toBe(23);
 
-      const name = getNameFromTokens(
-        [
-          { name: '1234567890', compressible: true },
-          { name: '1234567890', compressible: true },
-          { name: incompressibleString, compressible: false },
-        ],
-        len
-      );
+      const id = new Identifiers({ maxLength: len });
+
+      const name = id.getNameFromTokens([
+        { name: '1234567890', compressible: true },
+        { name: '1234567890', compressible: true },
+        { name: incompressibleString, compressible: false },
+      ]);
       expect(name).toEqual('123cd65a_123cd65a_links');
     });
 
     test('works with max capacity', () => {
-      const res = getNameFromTokens(
-        [
-          { name: '12', compressible: true },
-          { name: '12', compressible: true },
-          { name: '12', compressible: true },
-          { name: '12', compressible: true },
-        ],
-        12
-      );
+      const id = new Identifiers({ maxLength: 12 });
+      const res = id.getNameFromTokens([
+        { name: '12', compressible: true },
+        { name: '12', compressible: true },
+        { name: '12', compressible: true },
+        { name: '12', compressible: true },
+      ]);
       expect(res).toBe('12_12_12_12');
     });
 
     test('throws when compressible strings cannot fit', () => {
+      const id = new Identifiers({ maxLength: 12 });
       expect(() =>
-        getNameFromTokens(
-          [
-            { name: '12', compressible: true },
-            { name: '12', compressible: true },
-            { name: '12', compressible: true },
-            { name: '1', compressible: true },
-            { name: '12', compressible: true },
-          ],
-          12
-        )
+        id.getNameFromTokens([
+          { name: '12', compressible: true },
+          { name: '12', compressible: true },
+          { name: '12', compressible: true },
+          { name: '1', compressible: true },
+          { name: '12', compressible: true },
+        ])
       ).toThrow('Maximum length is too small to accommodate all tokens');
     });
 
     test('throws when incompressible string cannot fit', () => {
-      expect(() => getNameFromTokens([{ name: '123456', compressible: false }], 5)).toThrow(
+      const id = new Identifiers({ maxLength: 5 });
+      expect(() => id.getNameFromTokens([{ name: '123456', compressible: false }])).toThrow(
         'Maximum length is too small to accommodate all tokens'
       );
     });
 
     test('throws when incompressible strings cannot fit due to separators', () => {
+      const id = new Identifiers({ maxLength: 12 });
       expect(() =>
-        getNameFromTokens(
-          [
-            { name: '123456', compressible: false },
-            { name: '123456', compressible: false },
-          ],
-          12
-        )
+        id.getNameFromTokens([
+          { name: '123456', compressible: false },
+          { name: '123456', compressible: false },
+        ])
       ).toThrow('Maximum length is too small to accommodate all tokens');
     });
 
     test('shortens strings that result in exactly maxLength (three compressible, suffix)', () => {
-      const name = getNameFromTokens(
-        [
-          { name: '1234567890', compressible: true },
-          { name: '12345', compressible: true },
-          { name: '0987654321', compressible: true },
-          { name: 'links', compressible: false },
-        ],
-        30
-      );
+      const id = new Identifiers({ maxLength: 30 });
+      const name = id.getNameFromTokens([
+        { name: '1234567890', compressible: true },
+        { name: '12345', compressible: true },
+        { name: '0987654321', compressible: true },
+        { name: 'links', compressible: false },
+      ]);
       expect(name.length).toEqual(30);
       expect(name).toEqual('1234cd65a_12345_0984addb_links');
     });
-  });
-  test('shortens strings that do not fit in min length (three compressible, prefix)', () => {
-    const name = getNameFromTokens(
-      [
+
+    test('shortens strings that do not fit in min length (three compressible, prefix)', () => {
+      const id = new Identifiers({ maxLength: 34 });
+      const name = id.getNameFromTokens([
         { name: 'inv_order', compressible: false },
         { name: '1234567890', compressible: true },
         { name: '12345', compressible: true },
         { name: '0987654321', compressible: true },
-      ],
-      34
-    );
-    expect(name.length).toEqual(34);
-    expect(name).toEqual('inv_order_1234cd65a_12345_0984addb');
-  });
-  test('shortens strings that do not fit in min length (three compressible, suffix, prefix, and infix)', () => {
-    const name = getNameFromTokens(
-      [
+      ]);
+      expect(name.length).toEqual(34);
+      expect(name).toEqual('inv_order_1234cd65a_12345_0984addb');
+    });
+    test('shortens strings that do not fit in min length (three compressible, suffix, prefix, and infix)', () => {
+      const id = new Identifiers({ maxLength: 31 });
+      const name = id.getNameFromTokens([
         { name: 'pre', compressible: false },
         { name: '1234567890', compressible: true },
         { name: 'in', compressible: false },
         { name: '3456789012', compressible: true },
         { name: 'post', compressible: false },
-      ],
-      31
-    );
-    expect(name.length).toEqual(31);
-    expect(name).toEqual('pre_1234cd65a_in_3456be378_post');
-  });
-  test('redistributes perfectly to max length even with same length long strings where one must be shortened (three compressible, suffix, prefix, and infix)', () => {
-    const name = getNameFromTokens(
-      [
+      ]);
+      expect(name.length).toEqual(31);
+      expect(name).toEqual('pre_1234cd65a_in_3456be378_post');
+    });
+    test('redistributes perfectly to max length even with same length long strings where one must be shortened (three compressible, suffix, prefix, and infix)', () => {
+      const id = new Identifiers({ maxLength: 32 });
+      const name = id.getNameFromTokens([
         { name: 'pre', compressible: false },
         { name: '1234567890', compressible: true },
         { name: 'in', compressible: false },
         { name: '3456789012', compressible: true },
         { name: 'post', compressible: false },
-      ],
-      32
-    );
-    expect(name.length).toEqual(32);
-    expect(name).toEqual('pre_1234567890_in_3456be378_post');
-  });
-  test('works for max length incompressibles', () => {
-    const name = getNameFromTokens(
-      [
+      ]);
+      expect(name.length).toEqual(32);
+      expect(name).toEqual('pre_1234567890_in_3456be378_post');
+    });
+    test('works for max length incompressibles', () => {
+      const id = new Identifiers({ maxLength: 34 });
+      const name = id.getNameFromTokens([
         { name: '1234567890', compressible: false },
         { name: '2345678901', compressible: false },
         { name: '3456789012', compressible: false },
-      ],
-      34
-    );
-    expect(name).toEqual('1234567890_2345678901_3456789012');
+      ]);
+      expect(name).toEqual('1234567890_2345678901_3456789012');
+    });
+  });
+  describe('full name mapping', () => {
+    test('dsfgsdfg', () => {
+      const id = new Identifiers({ maxLength: 21 });
+
+      const name = id.getNameFromTokens([
+        { name: '1234567890', compressible: true },
+        { name: '12345', compressible: true },
+        { name: 'links', compressible: false, shortName: 'lnk' },
+      ]);
+      expect(name).toEqual('1234567890_12345_lnk');
+      const unshortenedName = id.getUnshortenedName(name);
+      expect(unshortenedName).toEqual('1234567890_12345_links');
+    });
   });
 });

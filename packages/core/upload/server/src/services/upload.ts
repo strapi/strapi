@@ -11,7 +11,6 @@ import {
   contentTypes as contentTypesUtils,
   errors,
   file as fileUtils,
-  convertQueryParams,
 } from '@strapi/utils';
 
 import type { Core, UID } from '@strapi/types';
@@ -438,7 +437,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   function findOne(id: ID, populate = {}) {
-    const query = convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, {
+    const query = strapi.get('query-params').transform(FILE_MODEL_UID, {
       populate,
     });
 
@@ -451,13 +450,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   function findMany(query: any = {}): Promise<File[]> {
     return strapi.db
       .query(FILE_MODEL_UID)
-      .findMany(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
+      .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
   }
 
   function findPage(query: any = {}) {
     return strapi.db
       .query(FILE_MODEL_UID)
-      .findPage(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
+      .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, query));
   }
 
   async function remove(file: File) {

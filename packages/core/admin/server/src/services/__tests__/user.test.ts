@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { errors } from '@strapi/utils';
+import { errors, queryParams } from '@strapi/utils';
 import constants from '../constants';
 import userService from '../user';
 import userContentType from '../../content-types/User';
@@ -26,6 +26,19 @@ const {
 describe('User', () => {
   global.strapi = {
     getModel: jest.fn(() => userContentType),
+    get(name: string) {
+      if (name === 'query-params') {
+        const transformer = queryParams.createTransformer({
+          getModel(name: string) {
+            return strapi.getModel(name as any);
+          },
+        });
+
+        return {
+          transform: transformer.transformQueryParams,
+        };
+      }
+    },
   } as any;
 
   describe('sanitizeUser', () => {
