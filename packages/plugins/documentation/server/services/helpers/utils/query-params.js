@@ -102,4 +102,15 @@ module.exports = [
       type: 'string',
     },
   },
+  {
+    name: 'publicationState',
+    in: 'query',
+    description: 'Publication state (default: live)',
+    deprecated: false,
+    required: false,
+    schema: {
+      type: 'string',
+      enum: ['live', 'preview'],
+    },
+  },
 ];
