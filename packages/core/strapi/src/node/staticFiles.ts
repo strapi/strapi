@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import outdent from 'outdent';
-// import { format } from 'prettier';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { DefaultDocument } from '@strapi/admin/_internal';
