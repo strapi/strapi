@@ -25,7 +25,7 @@ const PurchaseSingleSignOn = () => {
             content={formatMessage({
               id: 'Settings.sso.not-available',
               defaultMessage:
-                'SSO is only available as part of the Enterprise Edition. Upgrade to configure additional sign-in & sign-up methods for your administration panel.',
+                'SSO is only available as part of a paid plan. Upgrade to configure additional sign-in & sign-up methods for your administration panel.',
             })}
             action={
               <LinkButton
