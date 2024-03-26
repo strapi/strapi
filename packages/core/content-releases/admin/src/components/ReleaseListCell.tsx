@@ -52,7 +52,6 @@ interface AddColumnToTableHookArgs {
 }
 
 const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
-  debugger;
   return {
     displayedHeaders: [
       ...displayedHeaders,
