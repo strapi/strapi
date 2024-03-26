@@ -252,7 +252,7 @@ module.exports = ({ strapi }) => ({
     /**
      * Create an array of callbacks that will be executed in parallel.
      *
-     * NOTE: Eagerly calling the promises and waiting for them to finish
+     * NOTE: Eagerly calling the promises and calling Promise.all at the end
      *       resulted in some issues with streams and unhandled promises.
      */
     const uploadCallbacks = [];
