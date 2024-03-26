@@ -148,6 +148,72 @@ describe('Attributes', () => {
         expect(addImport).toHaveBeenCalledWith('Attribute');
       };
 
+      describe('Media', () => {
+        test('Media with multiple and with no allowedTypes', () => {
+          const attribute = { type: 'media', multiple: true };
+          const typeNode = getAttributeType('foo', attribute);
+
+          defaultAssertions(typeNode, 'Attribute.Media');
+
+          expect(typeNode.typeArguments).toHaveLength(2);
+
+          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UndefinedKeyword);
+
+          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.TrueKeyword);
+        });
+
+        test('Media without multiple with allowedTypes', () => {
+          const attribute = { type: 'media', allowedTypes: ['images', 'videos'] };
+          const typeNode = getAttributeType('foo', attribute);
+
+          defaultAssertions(typeNode, 'Attribute.Media');
+
+          expect(typeNode.typeArguments).toHaveLength(1);
+
+          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UnionType);
+
+          const unionTypes = typeNode.typeArguments[0].types;
+
+          attribute.allowedTypes.forEach((value, index) => {
+            const element = unionTypes[index];
+
+            expect(element.kind).toBe(ts.SyntaxKind.StringLiteral);
+            expect(element.text).toBe(value);
+          });
+        });
+
+        test('Media with multiple and with allowedTypes', () => {
+          const attribute = { type: 'media', multiple: true, allowedTypes: ['images', 'videos'] };
+          const typeNode = getAttributeType('foo', attribute);
+
+          defaultAssertions(typeNode, 'Attribute.Media');
+
+          expect(typeNode.typeArguments).toHaveLength(2);
+
+          expect(typeNode.typeArguments[0].kind).toBe(ts.SyntaxKind.UnionType);
+
+          const unionTypes = typeNode.typeArguments[0].types;
+
+          attribute.allowedTypes.forEach((value, index) => {
+            const element = unionTypes[index];
+
+            expect(element.kind).toBe(ts.SyntaxKind.StringLiteral);
+            expect(element.text).toBe(value);
+          });
+
+          expect(typeNode.typeArguments[1].kind).toBe(ts.SyntaxKind.TrueKeyword);
+        });
+
+        test('Media without multiple and with no allowedTypes', () => {
+          const attribute = { type: 'media' };
+          const typeNode = getAttributeType('foo', attribute);
+
+          defaultAssertions(typeNode, 'Attribute.Media');
+
+          expect(typeNode.typeArguments).toBeUndefined();
+        });
+      });
+
       describe('Enumeration', () => {
         test('Enumeration with an enum property', () => {
           const attribute = { type: 'enumeration', enum: ['a', 'b', 'c'] };
