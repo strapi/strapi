@@ -82,7 +82,7 @@ module.exports = (baseURL) => ({
     key: '',
     secret: '',
     callback: `${baseURL}/linkedin/callback`,
-    scope: ['r_liteprofile', 'r_emailaddress'],
+    scope: ['profile', 'email'],
   },
   cognito: {
     enabled: false,
