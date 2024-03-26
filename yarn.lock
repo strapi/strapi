@@ -7827,7 +7827,7 @@ __metadata:
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
     "@types/react-window": "npm:1.8.8"
-    "@types/sanitize-html": "npm:2.9.5"
+    "@types/sanitize-html": "npm:2.11.0"
     "@types/webpack-bundle-analyzer": "npm:4.6.3"
     "@types/webpack-hot-middleware": "npm:2.25.9"
     "@vitejs/plugin-react-swc": "npm:3.5.0"
@@ -7906,7 +7906,7 @@ __metadata:
     read-pkg-up: "npm:7.0.1"
     resolve-from: "npm:5.0.0"
     rimraf: "npm:3.0.2"
-    sanitize-html: "npm:2.11.0"
+    sanitize-html: "npm:2.13.0"
     semver: "npm:7.5.4"
     sift: "npm:16.0.1"
     slate: "npm:0.94.1"
@@ -10425,12 +10425,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/sanitize-html@npm:2.9.5":
-  version: 2.9.5
-  resolution: "@types/sanitize-html@npm:2.9.5"
+"@types/sanitize-html@npm:2.11.0":
+  version: 2.11.0
+  resolution: "@types/sanitize-html@npm:2.11.0"
   dependencies:
     htmlparser2: "npm:^8.0.0"
-  checksum: fd0afee5dac91aa2c42391f0c8c9254204f4ee1f10b902aa04e8f7809043d785e28af2732f75277ef09e46838013ad60abedb02ba1424b6218264f3333437fb5
+  checksum: a901d55d31cd946a7fce0130cc7cf6bcf56602af9c87291be77d8149c60e7afc47c83ca74c67c2d84e6ba029fe9bbd6f14f89a8cb30fbd185766eebc5722c251
   languageName: node
   linkType: hard
 
@@ -27698,9 +27698,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sanitize-html@npm:2.11.0":
-  version: 2.11.0
-  resolution: "sanitize-html@npm:2.11.0"
+"sanitize-html@npm:2.13.0":
+  version: 2.13.0
+  resolution: "sanitize-html@npm:2.13.0"
   dependencies:
     deepmerge: "npm:^4.2.2"
     escape-string-regexp: "npm:^4.0.0"
@@ -27708,7 +27708,7 @@ __metadata:
     is-plain-object: "npm:^5.0.0"
     parse-srcset: "npm:^1.0.2"
     postcss: "npm:^8.3.11"
-  checksum: 452029f5b15ef6b41729f7f45ee853d020ed0859388534bd9b959d78bb0df6d9dcaff6103a8c16597a5a21ee63f00127ce387d16b7a6538174081abac9d34031
+  checksum: 2805259492c2a5e6fcef5e7edc35a90a8d4bc4e0e844b23117986a8c23ea6345df111595396c3a72960fea01c337ccc4f693699782aea7c52839da3e25b7e23c
   languageName: node
   linkType: hard
 
