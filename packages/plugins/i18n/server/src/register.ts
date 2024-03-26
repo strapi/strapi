@@ -26,17 +26,13 @@ export default ({ strapi }: { strapi: Strapi }) => {
 const isUrlForCreation = (url: string) => {
   if (!url) return false;
 
+  // Remove any query params
+  // /content-manager/collection-types/api::category.category/?locale=en
+  const path = url.split('?')[0];
+
   // Split path and remove empty strings
   // [ 'content-manager', 'collection-types', 'api::category.category' ]
-  const splitUrl = url.split('/').filter(Boolean);
-
-  // Checking for query params and removed in the
-  const regex: RegExp = /[?]\S/;
-  const indexQueryParam = splitUrl.findIndex((item) => regex.test(item));
-
-  if (indexQueryParam !== -1) {
-    splitUrl.splice(indexQueryParam, 1);
-  }
+  const splitUrl = path.split('/').filter(Boolean);
 
   // Get the last element of the array
   // api::category.category / 1 / publish
