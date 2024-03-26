@@ -1,10 +1,10 @@
-import { Job } from 'node-schedule';
+import { Job, RecurrenceRule, RecurrenceSpecDateRange, RecurrenceSpecObjLit } from 'node-schedule';
 import { isFunction } from 'lodash/fp';
 import type { Strapi } from '@strapi/types';
 
 interface JobSpec {
   job: Job;
-  options: string | number | Date;
+  options: RecurrenceRule | RecurrenceSpecDateRange | RecurrenceSpecObjLit | Date | string | number;
   name: string | null;
 }
 
@@ -14,7 +14,13 @@ type Task =
   | TaskFn
   | {
       task: TaskFn;
-      options: string;
+      options:
+        | RecurrenceRule
+        | RecurrenceSpecDateRange
+        | RecurrenceSpecObjLit
+        | Date
+        | string
+        | number;
     };
 
 interface Tasks {
@@ -31,7 +37,13 @@ const createCronService = () => {
         const taskValue = tasks[taskExpression];
 
         let fn: TaskFn;
-        let options: string | number | Date;
+        let options:
+          | RecurrenceRule
+          | RecurrenceSpecDateRange
+          | RecurrenceSpecObjLit
+          | Date
+          | string
+          | number;
         let taskName: string | null;
         if (isFunction(taskValue)) {
           // don't use task name if key is the rule
@@ -56,6 +68,7 @@ const createCronService = () => {
         jobsSpecs.push({ job, options, name: taskName });
 
         if (running) {
+          // @ts-ignore - can be undone if https://github.com/DefinitelyTyped/DefinitelyTyped/pull/68941 has been accepted
           job.schedule(options);
         }
       }
@@ -76,6 +89,7 @@ const createCronService = () => {
     },
 
     start() {
+      // @ts-ignore - can be undone if https://github.com/DefinitelyTyped/DefinitelyTyped/pull/68941 has been accepted
       jobsSpecs.forEach(({ job, options }) => job.schedule(options));
       running = true;
       return this;
