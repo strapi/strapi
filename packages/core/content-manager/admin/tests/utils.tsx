@@ -21,6 +21,7 @@ const storeConfig: ConfigureStoreOptions = {
   preloadedState: defaultTestStoreConfig.preloadedState,
   reducer: {
     ...defaultTestStoreConfig.reducer,
+    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
     'content-manager': reducer,
   },
   middleware: (getDefaultMiddleware) => [

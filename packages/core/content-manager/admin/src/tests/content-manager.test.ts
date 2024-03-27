@@ -47,6 +47,18 @@ describe('content-manager', () => {
             "getHeaderActions": [Function],
           },
           "id": "content-manager",
+          "injectionZones": {
+            "editView": {
+              "informations": [],
+              "right-links": [],
+            },
+            "listView": {
+              "actions": [],
+              "deleteModalAdditionalInfos": [],
+              "publishModalAdditionalInfos": [],
+              "unpublishModalAdditionalInfos": [],
+            },
+          },
           "name": "Content Manager",
         }
       `);
@@ -61,14 +73,14 @@ describe('content-manager', () => {
 
       expect(Object.keys(plugin.config.apis ?? {})).toMatchInlineSnapshot(`
         [
+          "addBulkAction",
           "addDocumentAction",
           "addDocumentHeaderAction",
           "addEditViewSidePanel",
-          "getDocumentActions",
-          "getHeaderActions",
-          "getEditViewSidePanels",
-          "addBulkAction",
           "getBulkActions",
+          "getDocumentActions",
+          "getEditViewSidePanels",
+          "getHeaderActions",
         ]
       `);
     });
@@ -78,12 +90,11 @@ describe('content-manager', () => {
     it('should let users add a panel description as an array', () => {
       const plugin = new ContentManagerPlugin();
 
-      expect(plugin.editViewSidePanels).toHaveLength(2);
+      expect(plugin.editViewSidePanels).toHaveLength(1);
 
       // ensure we have our default options
       expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          undefined,
           undefined,
         ]
       `);
@@ -95,11 +106,10 @@ describe('content-manager', () => {
         }),
       ]);
 
-      expect(plugin.editViewSidePanels).toHaveLength(3);
+      expect(plugin.editViewSidePanels).toHaveLength(2);
       // ensure we have our default options, with the new option, which will not have a type
       expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          undefined,
           undefined,
           undefined,
         ]
@@ -109,12 +119,11 @@ describe('content-manager', () => {
     it('should let you mutate the existing array of panels with a reducer function', () => {
       const plugin = new ContentManagerPlugin();
 
-      expect(plugin.editViewSidePanels).toHaveLength(2);
+      expect(plugin.editViewSidePanels).toHaveLength(1);
 
       // ensure we have our default options
       expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          undefined,
           undefined,
         ]
       `);
@@ -123,11 +132,10 @@ describe('content-manager', () => {
 
       plugin.addEditViewSidePanel((prev) => [...prev, panel]);
 
-      expect(plugin.editViewSidePanels).toHaveLength(3);
+      expect(plugin.editViewSidePanels).toHaveLength(2);
       // ensure we have our default options, with the new option, which will not have a type. The defaults should still be at the front.
       expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          undefined,
           undefined,
           undefined,
         ]
@@ -135,11 +143,10 @@ describe('content-manager', () => {
 
       plugin.addEditViewSidePanel((prev) => prev.slice(1));
 
-      expect(plugin.editViewSidePanels).toHaveLength(2);
+      expect(plugin.editViewSidePanels).toHaveLength(1);
       // We should be missing our "1st" panel, the actions panel
       expect(plugin.editViewSidePanels.map((panel) => panel.type)).toMatchInlineSnapshot(`
         [
-          undefined,
           undefined,
         ]
       `);

@@ -1,7 +1,10 @@
 import axios, { AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
 import qs from 'qs';
 
-import { STORAGE_KEYS } from '../features/Auth';
+const STORAGE_KEYS = {
+  TOKEN: 'jwtToken',
+  USER: 'userInfo',
+};
 
 const fetchClient = (): AxiosInstance => {
   const instance = axios.create({
