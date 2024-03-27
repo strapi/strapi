@@ -2,10 +2,12 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import { PaperPlane } from '@strapi/icons';
 
 import { CMReleasesContainer } from './components/CMReleasesContainer';
+import { ReleaseAction } from './components/ReleaseAction';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { releaseApi } from './services/release';
 
+import type { BulkActionComponent } from '@strapi/admin/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 // eslint-disable-next-line import/no-default-export
@@ -41,6 +43,14 @@ const admin: Plugin.Config.AdminInput = {
       app.injectContentManagerComponent('editView', 'right-links', {
         name: `${pluginId}-link`,
         Component: CMReleasesContainer,
+      });
+
+      app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
+        // We want to add this action to just before the delete action all the time
+        const deleteActionIndex = actions.findIndex((action) => action.name === 'DeleteAction');
+
+        actions.splice(deleteActionIndex, 0, ReleaseAction);
+        return actions;
       });
     } else if (
       !window.strapi.features.isEnabled('cms-content-releases') &&
