@@ -1,16 +1,13 @@
 import type { Core } from '@strapi/types';
 
-import executeCERegister from '../../../server/src/register';
-import migrateAuditLogsTable from './migrations/audit-logs-table';
-import migrateReviewWorkflowStagesColor from './migrations/review-workflows-stages-color';
-import migrateReviewWorkflowStagesRoles from './migrations/review-workflows-stages-roles';
-import migrateReviewWorkflowName from './migrations/review-workflows-workflow-name';
-import migrateWorkflowsContentTypes from './migrations/review-workflows-content-types';
-import migrateStageAttribute from './migrations/review-workflows-stage-attribute';
-import migrateDeletedCTInWorkflows from './migrations/review-workflows-deleted-ct-in-workflows';
-import createAuditLogsService from './services/audit-logs';
-import reviewWorkflowsMiddlewares from './middlewares/review-workflows';
 import { getService } from './utils';
+import migrateStageAttribute from './migrations/shorten-stage-attribute';
+import migrateReviewWorkflowStagesColor from './migrations/set-stages-default-color';
+import migrateReviewWorkflowStagesRoles from './migrations/set-stages-roles';
+import migrateReviewWorkflowName from './migrations/set-workflow-default-name';
+import migrateWorkflowsContentTypes from './migrations/multiple-workflows';
+import migrateDeletedCTInWorkflows from './migrations/handle-deleted-ct-in-workflows';
+import reviewWorkflowsMiddlewares from './middlewares/review-workflows';
 
 export default async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   if (strapi.ee.features.isEnabled('review-workflows')) {

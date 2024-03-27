@@ -1,14 +1,14 @@
-import executeCEBootstrap from '../../../server/src/bootstrap';
-import { getAdminService, getService } from '../../server/src/utils';
-import actions from './config/admin-actions';
-import { persistTablesWithPrefix } from './utils/persisted-tables';
+import { getAdminService, getService } from './utils';
+import actions from './config/actions';
+// import { persistTablesWithPrefix } from './utils/persisted-tables';
 
 export default async (args: any) => {
   // TODO: Get admin service and get RW service
   const { actionProvider } = getAdminService('permission');
 
   if (strapi.ee.features.isEnabled('review-workflows')) {
-    await persistTablesWithPrefix('strapi_workflows');
+    // TODO: Persist data with another method
+    // await persistTablesWithPrefix('strapi_workflows');
     const { bootstrap: rwBootstrap } = getService('review-workflows');
     await rwBootstrap();
     await actionProvider.registerMany(actions.reviewWorkflows);

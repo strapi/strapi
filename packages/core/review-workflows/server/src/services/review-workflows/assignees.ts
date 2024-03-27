@@ -6,7 +6,7 @@ import { getService } from '../../utils';
 
 const { ApplicationError } = errors;
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
 
   return {

@@ -8,7 +8,7 @@ import { describeOnCondition } from 'api-tests/utils';
 import {
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
-} from '../../../../packages/core/admin/ee/server/src/constants/workflows';
+} from '../../../packages/core/review-workflows/server/src/constants/workflows';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -380,17 +380,6 @@ describe.skip('Review workflows - Content Types', () => {
         where: { id: workflow1.id },
         data: { contentTypes: [] },
       });
-    });
-  });
-
-  // ⚠️⚠️⚠️ Why it's skipped ⚠️⚠️⚠️
-  // We️ can't test with a too long content type name as of today as our attribute `strapi_stage` is shorter than `created_by_id`
-  // And we do not handle too long content type name on `created_by_id` attribute, causing the tests to fail on mysql
-  describe.skip('With long content type names', () => {
-    test('Should not load Review Workflow on too long content-type name', async () => {
-      // const contentType = strapi.contentTypes[longCTUID];
-      // expect(contentType.attributes[ENTITY_STAGE_ATTRIBUTE]).toBeUndefined();
-      // Cannot test the log as it happens during the Strapi instance creation (in the beforeAll)
     });
   });
 });

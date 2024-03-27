@@ -21,7 +21,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       });
     },
 
-    findById(id: Entity.ID, { populate }: any = {}) {
+    findById(id: string | number, { populate }: any = {}) {
       return strapi.db.query(STAGE_MODEL_UID).findOne({
         where: { id },
         populate,

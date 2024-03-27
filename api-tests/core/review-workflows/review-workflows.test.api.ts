@@ -13,7 +13,7 @@ import {
   WORKFLOW_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
   ENTITY_ASSIGNEE_ATTRIBUTE,
-} from '../../../../packages/core/admin/ee/server/src/constants/workflows';
+} from '../../../packages/core/review-workflows/server/src/constants/workflows';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -35,9 +35,7 @@ const model = {
   },
 };
 
-// TODO: V5 fix review workflows
-// describeOnCondition(edition === 'EE')('Review workflows', () => {
-describe.skip('Review workflows', () => {
+describeOnCondition(edition === 'EE')('Review workflows', () => {
   const builder = createTestBuilder();
 
   const requests = {
@@ -146,8 +144,8 @@ describe.skip('Review workflows', () => {
   });
 
   describe('Get workflows', () => {
-    test("It shouldn't be available for public", async () => {
-      const res = await requests.public.get('/admin/review-workflows/workflows');
+    test.only("It shouldn't be available for public", async () => {
+      const res = await requests.public.get('/review-workflows/workflows');
 
       if (hasRW) {
         expect(res.status).toBe(401);
@@ -156,8 +154,9 @@ describe.skip('Review workflows', () => {
         expect(Array.isArray(res.body)).toBeFalsy();
       }
     });
+
     test('It should be available for every connected users (admin)', async () => {
-      const res = await requests.admin.get('/admin/review-workflows/workflows');
+      const res = await requests.admin.get('/review-workflows/workflows');
 
       if (hasRW) {
         expect(res.status).toBe(200);
@@ -173,7 +172,7 @@ describe.skip('Review workflows', () => {
 
   describe('Get one workflow', () => {
     test("It shouldn't be available for public", async () => {
-      const res = await requests.public.get(`/admin/review-workflows/workflows/${testWorkflow.id}`);
+      const res = await requests.public.get(`/review-workflows/workflows/${testWorkflow.id}`);
 
       if (hasRW) {
         expect(res.status).toBe(401);
@@ -183,7 +182,7 @@ describe.skip('Review workflows', () => {
       }
     });
     test('It should be available for every connected users (admin)', async () => {
-      const res = await requests.admin.get(`/admin/review-workflows/workflows/${testWorkflow.id}`);
+      const res = await requests.admin.get(`/review-workflows/workflows/${testWorkflow.id}`);
 
       if (hasRW) {
         expect(res.status).toBe(200);
@@ -199,7 +198,7 @@ describe.skip('Review workflows', () => {
 
   describe('Create workflow', () => {
     test('It should create a workflow without stages', async () => {
-      const res = await requests.admin.post('/admin/review-workflows/workflows', {
+      const res = await requests.admin.post('/review-workflows/workflows', {
         body: {
           data: {
             name: 'testWorkflow',
@@ -217,7 +216,7 @@ describe.skip('Review workflows', () => {
       }
     });
     test('It should create a workflow with stages', async () => {
-      const res = await requests.admin.post('/admin/review-workflows/workflows?populate=stages', {
+      const res = await requests.admin.post('/review-workflows/workflows?populate=stages', {
         body: {
           data: {
             name: 'createdWorkflow',
@@ -249,10 +248,9 @@ describe.skip('Review workflows', () => {
 
   describe('Update workflow', () => {
     test('It should update a workflow', async () => {
-      const res = await requests.admin.put(
-        `/admin/review-workflows/workflows/${createdWorkflow.id}`,
-        { body: { data: { name: 'updatedWorkflow' } } }
-      );
+      const res = await requests.admin.put(`/review-workflows/workflows/${createdWorkflow.id}`, {
+        body: { data: { name: 'updatedWorkflow' } },
+      });
 
       if (hasRW) {
         expect(res.status).toBe(200);
@@ -265,7 +263,7 @@ describe.skip('Review workflows', () => {
 
     test('It should update a workflow with stages', async () => {
       const res = await requests.admin.put(
-        `/admin/review-workflows/workflows/${createdWorkflow.id}?populate=stages`,
+        `/review-workflows/workflows/${createdWorkflow.id}?populate=stages`,
         {
           body: {
             data: {
@@ -297,19 +295,19 @@ describe.skip('Review workflows', () => {
 
   describe('Delete workflow', () => {
     test('It should delete a workflow', async () => {
-      const createdRes = await requests.admin.post('/admin/review-workflows/workflows', {
+      const createdRes = await requests.admin.post('/review-workflows/workflows', {
         body: { data: { name: 'testWorkflow', stages: [{ name: 'Stage 1' }] } },
       });
 
       const res = await requests.admin.delete(
-        `/admin/review-workflows/workflows/${createdRes.body.data.id}`
+        `/review-workflows/workflows/${createdRes.body.data.id}`
       );
 
       expect(res.status).toBe(200);
       expect(res.body.data).toMatchObject({ name: 'testWorkflow' });
     });
     test("It shouldn't delete a workflow that does not exist", async () => {
-      const res = await requests.admin.delete(`/admin/review-workflows/workflows/123456789`);
+      const res = await requests.admin.delete(`/review-workflows/workflows/123456789`);
 
       expect(res.status).toBe(404);
       expect(res.body.data).toBeNull();
@@ -319,7 +317,7 @@ describe.skip('Review workflows', () => {
   describe('Get workflow stages', () => {
     test("It shouldn't be available for public", async () => {
       const res = await requests.public.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=stages`
+        `/review-workflows/workflows/${testWorkflow.id}?populate=stages`
       );
 
       if (hasRW) {
@@ -331,7 +329,7 @@ describe.skip('Review workflows', () => {
     });
     test('It should be available for every connected users (admin)', async () => {
       const res = await requests.admin.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=stages`
+        `/review-workflows/workflows/${testWorkflow.id}?populate=stages`
       );
 
       if (hasRW) {
@@ -349,7 +347,7 @@ describe.skip('Review workflows', () => {
   describe('Get stages', () => {
     test("It shouldn't be available for public", async () => {
       const res = await requests.public.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`
+        `/review-workflows/workflows/${testWorkflow.id}/stages`
       );
 
       if (hasRW) {
@@ -360,9 +358,7 @@ describe.skip('Review workflows', () => {
       }
     });
     test('It should be available for every connected users (admin)', async () => {
-      const res = await requests.admin.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}/stages`
-      );
+      const res = await requests.admin.get(`/review-workflows/workflows/${testWorkflow.id}/stages`);
 
       if (hasRW) {
         expect(res.status).toBe(200);
@@ -378,7 +374,7 @@ describe.skip('Review workflows', () => {
   describe('Get stage by id', () => {
     test("It shouldn't be available for public", async () => {
       const res = await requests.public.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}/stages/${secondStage.id}`
+        `/review-workflows/workflows/${testWorkflow.id}/stages/${secondStage.id}`
       );
 
       if (hasRW) {
@@ -390,7 +386,7 @@ describe.skip('Review workflows', () => {
     });
     test('It should be available for every connected users (admin)', async () => {
       const res = await requests.admin.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}/stages/${secondStage.id}`
+        `/review-workflows/workflows/${testWorkflow.id}/stages/${secondStage.id}`
       );
 
       if (hasRW) {
@@ -417,7 +413,7 @@ describe.skip('Review workflows', () => {
 
     test("It should assign a default color to stages if they don't have one", async () => {
       const workflowRes = await requests.admin.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        `/review-workflows/workflows/${testWorkflow.id}?populate=*`,
         {
           body: {
             data: {
@@ -436,7 +432,7 @@ describe.skip('Review workflows', () => {
     });
     test("It shouldn't be available for public", async () => {
       const workflowRes = await requests.public.get(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`
+        `/review-workflows/workflows/${testWorkflow.id}?populate=*`
       );
 
       if (hasRW) {
@@ -448,7 +444,7 @@ describe.skip('Review workflows', () => {
     });
     test('It should be available for every connected users (admin)', async () => {
       const workflowRes = await requests.admin.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        `/review-workflows/workflows/${testWorkflow.id}?populate=*`,
         { body: { data: { stages: stagesUpdateData } } }
       );
 
@@ -473,7 +469,7 @@ describe.skip('Review workflows', () => {
     });
     test('It should throw an error if trying to delete all stages in a workflow', async () => {
       const workflowRes = await requests.admin.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        `/review-workflows/workflows/${testWorkflow.id}?populate=*`,
         { body: { data: { stages: [] } } }
       );
 
@@ -488,7 +484,7 @@ describe.skip('Review workflows', () => {
     });
     test('It should throw an error if trying to create stages with duplicated names', async () => {
       const stagesRes = await requests.admin.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        `/review-workflows/workflows/${testWorkflow.id}?populate=*`,
         {
           body: {
             data: {
@@ -507,7 +503,7 @@ describe.skip('Review workflows', () => {
     });
     test('It should throw an error if trying to create more than 200 stages', async () => {
       const stagesRes = await requests.admin.put(
-        `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
+        `/review-workflows/workflows/${testWorkflow.id}?populate=*`,
         { body: { data: { stages: Array(201).fill({ name: 'new stage' }) } } }
       );
 
@@ -524,10 +520,9 @@ describe.skip('Review workflows', () => {
     describe('Review Workflow is enabled', () => {
       beforeAll(async () => {
         // Assign Product to workflow so workflow is active on this CT
-        await requests.admin.put(
-          `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
-          { body: { data: { contentTypes: [productUID] } } }
-        );
+        await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+          body: { data: { contentTypes: [productUID] } },
+        });
       });
 
       test('Should update the assignee on an entity', async () => {
@@ -536,7 +531,7 @@ describe.skip('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
           body: {
             data: { id: user.id },
           },
@@ -552,7 +547,7 @@ describe.skip('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
           body: {
             data: { id: 1234 },
           },
@@ -597,10 +592,9 @@ describe.skip('Review workflows', () => {
     describe('Review Workflow is disabled', () => {
       beforeAll(async () => {
         // Unassign Product to workflow so workflow is inactive on this CT
-        await requests.admin.put(
-          `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
-          { body: { data: { contentTypes: [] } } }
-        );
+        await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+          body: { data: { contentTypes: [] } },
+        });
       });
 
       test('Should not update the entity', async () => {
@@ -609,7 +603,7 @@ describe.skip('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
           body: {
             data: { id: user.id },
           },
@@ -626,10 +620,9 @@ describe.skip('Review workflows', () => {
     describe('Review Workflow is enabled', () => {
       beforeAll(async () => {
         // Update workflow to assign content type
-        await requests.admin.put(
-          `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
-          { body: { data: { contentTypes: [productUID] } } }
-        );
+        await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+          body: { data: { contentTypes: [productUID] } },
+        });
       });
 
       test('Should update the accordingly on an entity', async () => {
@@ -637,7 +630,7 @@ describe.skip('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/stage`,
           body: {
             data: { id: secondStage.id },
           },
@@ -653,7 +646,7 @@ describe.skip('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/stage`,
           body: {
             data: { id: 1234 },
           },
@@ -686,17 +679,16 @@ describe.skip('Review workflows', () => {
     describe('Review Workflow is disabled', () => {
       beforeAll(async () => {
         // Update workflow to unassign content type
-        await requests.admin.put(
-          `/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`,
-          { body: { data: { contentTypes: [] } } }
-        );
+        await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+          body: { data: { contentTypes: [] } },
+        });
       });
       test('Should not update the entity', async () => {
         const entry = await createEntry(productUID, { name: 'Product' });
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/admin/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/stage`,
           body: {
             data: { id: secondStage.id },
           },
@@ -710,7 +702,8 @@ describe.skip('Review workflows', () => {
   });
 
   describe('Listing available stages for transition', () => {
-    const endpoint = (id) => `/admin/content-manager/collection-types/${productUID}/${id}/stages`;
+    const endpoint = (id) =>
+      `/review-workflows/content-manager/collection-types/${productUID}/${id}/stages`;
 
     let utils;
     let entry;
@@ -725,7 +718,7 @@ describe.skip('Review workflows', () => {
 
     beforeAll(async () => {
       // Update workflow to assign content type
-      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+      await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
         body: { data: { contentTypes: [productUID] } },
       });
 
@@ -798,7 +791,7 @@ describe.skip('Review workflows', () => {
   describe('Deleting a stage when content already exists', () => {
     beforeAll(async () => {
       // Update workflow to assign content type
-      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+      await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
         body: { data: { contentTypes: [productUID] } },
       });
     });
@@ -815,7 +808,7 @@ describe.skip('Review workflows', () => {
       );
 
       // Delete last stage stage of the default workflow
-      await requests.admin.put(`/admin/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
+      await requests.admin.put(`/review-workflows/workflows/${testWorkflow.id}?populate=*`, {
         body: { data: { stages: [defaultStage] } },
       });
 

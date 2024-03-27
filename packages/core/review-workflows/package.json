@@ -42,6 +42,9 @@
   "scripts": {
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {

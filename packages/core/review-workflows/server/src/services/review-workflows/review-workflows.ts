@@ -93,8 +93,8 @@ function persistStagesJoinTables({ strapi }: { strapi: Core.LoadedStrapi }) {
     ])(contentTypes);
 
     // TODO: Instead of removing all the tables, we should only remove the ones that are not in the joinTablesToPersist
-    await removePersistedTablesWithSuffix('_strapi_stage_links');
-    await persistTables(joinTablesToPersist);
+    // await removePersistedTablesWithSuffix('_strapi_stage_links');
+    // await persistTables(joinTablesToPersist);
   };
 }
 

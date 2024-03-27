@@ -5,7 +5,8 @@ import workflowsServiceFactory from '../review-workflows/workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE, STAGE_MODEL_UID } from '../../constants/workflows';
 import workflowCT from '../../content-types/workflow';
 import workflowStageCT from '../../content-types/workflow-stage';
-import CTS from '../../../../../server/src/content-types';
+// TODO: Fix
+// import CTS from '../../../../../server/src/content-types';
 
 jest.mock('../review-workflows/workflows/content-types', () => {
   return jest.fn(() => ({
@@ -102,8 +103,8 @@ const strapiMock = {
 const ctMap: Record<string, any> = {
   [WORKFLOW_MODEL_UID]: workflowCT.schema,
   [STAGE_MODEL_UID]: workflowStageCT.schema,
-  ['admin::permission']: CTS.permission.schema,
-  ['admin::role']: CTS.role.schema,
+  // ['admin::permission']: CTS.permission.schema,
+  // ['admin::role']: CTS.role.schema,
 };
 
 global.strapi = {

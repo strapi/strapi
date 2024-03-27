@@ -6,7 +6,7 @@ export default {
     // Review workflow
     {
       method: 'POST',
-      path: '/review-workflows/workflows',
+      path: '/workflows',
       handler: 'workflows.create',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
@@ -23,7 +23,7 @@ export default {
     },
     {
       method: 'PUT',
-      path: '/review-workflows/workflows/:id',
+      path: '/workflows/:id',
       handler: 'workflows.update',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
@@ -40,7 +40,7 @@ export default {
     },
     {
       method: 'DELETE',
-      path: '/review-workflows/workflows/:id',
+      path: '/workflows/:id',
       handler: 'workflows.delete',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
@@ -57,7 +57,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/review-workflows/workflows',
+      path: '/workflows',
       handler: 'workflows.find',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
@@ -74,7 +74,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/review-workflows/workflows/:id',
+      path: '/workflows/:id',
       handler: 'workflows.findById',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
@@ -91,7 +91,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/review-workflows/workflows/:workflow_id/stages',
+      path: '/workflows/:workflow_id/stages',
       handler: 'stages.find',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
@@ -108,7 +108,7 @@ export default {
     },
     {
       method: 'GET',
-      path: '/review-workflows/workflows/:workflow_id/stages/:id',
+      path: '/workflows/:workflow_id/stages/:id',
       handler: 'stages.findById',
       config: {
         middlewares: [enableFeatureMiddleware('review-workflows')],
