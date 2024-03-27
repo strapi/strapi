@@ -27,7 +27,7 @@ describe('Project settings', () => {
         formData: { menuLogo: fs.createReadStream(path.join(__dirname, './utils/logo.png')) },
       });
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(201);
 
       const getRes = await rq({
         url: '/admin/project-settings',

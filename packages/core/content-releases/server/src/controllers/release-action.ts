@@ -26,9 +26,11 @@ const releaseActionController = {
     const releaseService = getService('release', { strapi });
     const releaseAction = await releaseService.createAction(releaseId, releaseActionArgs);
 
-    ctx.body = {
-      data: releaseAction,
-    };
+    ctx.created({
+      body: {
+        data: releaseAction,
+      },
+    });
   },
 
   async createMany(ctx: Koa.Context) {
@@ -64,13 +66,15 @@ const releaseActionController = {
 
     const newReleaseActions = releaseActions.filter((action) => action !== null);
 
-    ctx.body = {
-      data: newReleaseActions,
-      meta: {
-        entriesAlreadyInRelease: releaseActions.length - newReleaseActions.length,
-        totalEntries: releaseActions.length,
+    ctx.created({
+      body: {
+        data: newReleaseActions,
+        meta: {
+          entriesAlreadyInRelease: releaseActions.length - newReleaseActions.length,
+          totalEntries: releaseActions.length,
+        },
       },
-    };
+    });
   },
 
   async findMany(ctx: Koa.Context) {

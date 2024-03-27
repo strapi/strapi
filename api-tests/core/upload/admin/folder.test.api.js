@@ -71,7 +71,7 @@ describe.skip('Folder', () => {
         },
       });
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(201);
       expect(res.body.data).toMatchObject({
         id: expect.anything(),
         name: 'folder 1',
