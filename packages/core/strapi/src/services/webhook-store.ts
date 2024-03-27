@@ -55,6 +55,10 @@ export interface Webhook {
   isEnabled: boolean;
 }
 
+export type CreateWebhookData = Omit<Webhook, 'id' | 'isEnabled'>;
+
+export type UpdateWebhookData = Omit<Webhook, 'id' >;
+
 const toDBObject = (data: Webhook): DBInput => {
   return {
     name: data.name,
@@ -96,8 +100,8 @@ export interface WebhookStore {
   getAllowedEvent(key: string): string | undefined;
   findWebhooks(): Promise<Webhook[]>;
   findWebhook(id: string): Promise<Webhook | null>;
-  createWebhook(data: Webhook): Promise<Webhook>;
-  updateWebhook(id: string, data: Webhook): Promise<Webhook | null>;
+  createWebhook(data: CreateWebhookData): Promise<Webhook>;
+  updateWebhook(id: string, data: UpdateWebhookData): Promise<Webhook | null>;
   deleteWebhook(id: string): Promise<Webhook | null>;
 }
 
