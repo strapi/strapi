@@ -177,9 +177,9 @@ describe('Transform relational data', () => {
       });
     });
 
-    it('Prevent connecting to invalid locales ', async () => {
+    it("Connect to source locale if the locale of the relation doesn't match", async () => {
       // Should not be able to connect to different locales than the current one
-      const promise = transformParamsDocumentId(CATEGORY_UID, {
+      const { data } = await transformParamsDocumentId(CATEGORY_UID, {
         data: {
           // Connect to another locale than the current one
           relatedCategories: [{ documentId: 'category-1', locale: 'fr' }],
@@ -188,7 +188,9 @@ describe('Transform relational data', () => {
         status: 'draft',
       });
 
-      expect(promise).rejects.toThrowError();
+      expect(data).toMatchObject({
+        relatedCategories: [{ id: 'category-1-en-draft' }],
+      });
     });
   });
 });

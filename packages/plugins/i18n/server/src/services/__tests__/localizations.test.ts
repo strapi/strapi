@@ -69,10 +69,17 @@ global.strapi = {
       client: 'sqlite',
     },
   },
-  documents: () => ({
-    updateComponents: jest.fn(),
-    omitComponentData: jest.fn(),
-  }),
+  documents: Object.assign(
+    () => ({
+      updateComponents: jest.fn(),
+      omitComponentData: jest.fn(() => ({})),
+    }),
+    {
+      utils: {
+        transformData: jest.fn(async () => ({})),
+      },
+    }
+  ),
 } as any;
 
 const findMany = jest.fn(() => [{ id: 1, locale: 'fr' }]);
@@ -100,29 +107,17 @@ describe('localizations service', () => {
       expect(update).not.toHaveBeenCalled();
     });
 
-    // TODO: Fix positive test case
-    // test('Does not update the current locale', async () => {
-    //   const update = jest.fn();
-    //   global.strapi.query = () => {
-    //     return { update } as any;
-    //   };
+    test('Does not update the current locale', async () => {
+      const entry = { id: 1, documentId: 'Doc1', stars: 10, locale: defaultLocale };
 
-    //   const transformParamsDocumentIdMock = jest.fn(async () => ({}));
-    //   global.strapi.documents.utils.transformParamsDocumentId = transformParamsDocumentIdMock;
+      await syncNonLocalizedAttributes(entry, model);
 
-    //   const entry = { id: 1, documentId: 'Doc1', stars: 10, locale: defaultLocale };
-
-    //   await syncNonLocalizedAttributes(entry, model);
-
-    //   expect(updateMany).toHaveBeenCalledWith(
-    //     expect.objectContaining({
-    //       where: {
-    //         documentId: 'Doc1',
-    //         locale: { $in: ['fr'] },
-    //         publishedAt: null,
-    //       },
-    //     })
-    //   );
-    // });
+      expect(update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {},
+          where: { documentId: 'Doc1', locale: { $eq: 'fr' }, publishedAt: null },
+        })
+      );
+    });
   });
 });
