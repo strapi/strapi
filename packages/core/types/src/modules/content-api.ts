@@ -1,5 +1,5 @@
 import permissions from '@strapi/permissions';
-import { providerFactory } from '@strapi/utils';
+import { providerFactory, sanitize, validate } from '@strapi/utils';
 
 import type { Route } from '../core';
 
@@ -34,4 +34,6 @@ export interface PermissionUtilities {
 export interface ContentApi {
   permissions: PermissionUtilities;
   getRoutesMap: () => Promise<Record<string, Route[]>>;
+  sanitize: sanitize.APISanitiers;
+  validate: validate.APIValidators;
 }

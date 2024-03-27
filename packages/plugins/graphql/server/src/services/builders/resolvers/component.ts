@@ -1,4 +1,3 @@
-import { sanitize, validate } from '@strapi/utils';
 import type { Internal, Schema } from '@strapi/types';
 
 import type { Context } from '../../types';
@@ -23,11 +22,11 @@ export default ({ strapi }: Context) => ({
       const component = strapi.getModel(componentName);
 
       const transformedArgs = transformArgs(args, { contentType: component, usePagination: true });
-      await validate.contentAPI.query(transformedArgs, component, {
+      await strapi.contentAPI.validate.query(transformedArgs, component, {
         auth: ctx?.state?.auth,
       });
 
-      const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, component, {
+      const sanitizedQuery = await strapi.contentAPI.sanitize.query(transformedArgs, component, {
         auth: ctx?.state?.auth,
       });
 

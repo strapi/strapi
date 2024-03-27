@@ -5,7 +5,7 @@ import Router from '@koa/router';
 
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
-import { resolvePolicies } from './policy';
+import { createPolicicesMiddleware } from './policy';
 
 const getMethod = (route: Core.Route) => {
   return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;
@@ -79,7 +79,6 @@ export default (strapi: Core.Strapi) => {
       const path = getPath(route);
 
       const middlewares = resolveRouteMiddlewares(route, strapi);
-      const policies = resolvePolicies(route);
 
       const action = getAction(route, strapi);
 
@@ -87,7 +86,7 @@ export default (strapi: Core.Strapi) => {
         createRouteInfoMiddleware(route),
         authenticate,
         authorize,
-        ...policies,
+        createPolicicesMiddleware(route, strapi),
         ...middlewares,
         returnBodyMiddleware,
         ...castArray(action),

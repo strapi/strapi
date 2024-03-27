@@ -10,7 +10,7 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const urlJoin = require('url-join');
 
-const { sanitize, convertQueryParams } = require('@strapi/utils');
+const { sanitize } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 const USER_MODEL_UID = 'plugin::users-permissions.user';
@@ -62,7 +62,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetch(id, params) {
-    const query = convertQueryParams.transformParamsToQuery(USER_MODEL_UID, params ?? {});
+    const query = strapi.get('query-params').transform(USER_MODEL_UID, params ?? {});
 
     return strapi.db.query(USER_MODEL_UID).findOne({
       ...query,
@@ -85,7 +85,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetchAll(params) {
-    const query = convertQueryParams.transformParamsToQuery(USER_MODEL_UID, params ?? {});
+    const query = strapi.get('query-params').transform(USER_MODEL_UID, params ?? {});
 
     return strapi.db.query(USER_MODEL_UID).findMany(query);
   },

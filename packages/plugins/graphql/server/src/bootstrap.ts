@@ -118,13 +118,6 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
       },
     };
 
-    // allow graphql playground to load without authentication
-    // WARNING: this means graphql should not accept GET requests generally
-    // TODO: find a better way and remove this, it is causing issues such as https://github.com/strapi/strapi/issues/19073
-    if (ctx.request.method === 'GET') {
-      return next();
-    }
-
     return strapi.auth.authenticate(ctx, next);
   });
 

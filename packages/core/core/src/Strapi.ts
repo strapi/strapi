@@ -25,6 +25,7 @@ import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
 import createEntityService from './services/entity-service';
+import createQueryParamService from './services/query-params';
 
 import createCronService from './services/cron';
 import entityValidator from './services/entity-validator';
@@ -182,6 +183,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('apis', registries.apis(this))
       .add('sanitizers', registries.sanitizers())
       .add('validators', registries.validators())
+      .add('query-params', createQueryParamService(this))
       .add('content-api', createContentAPI(this))
       .add('auth', createAuth())
       .add('models', registries.models());
@@ -304,12 +306,12 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('hooks').get(name);
   }
 
-  // api(name) {
-  //   return this.get('apis').get(name);
-  // }
-
-  get api(): Record<string, Core.Module> {
+  get apis() {
     return this.get('apis').getAll();
+  }
+
+  api(name: string): Core.Module {
+    return this.get('apis').get(name);
   }
 
   get auth() {
@@ -493,10 +495,10 @@ class Strapi extends Container implements Core.Strapi {
 
   async bootstrap() {
     const models = [
-      ...utils.transformContentTypesToModels([
-        ...Object.values(this.contentTypes),
-        ...Object.values(this.components),
-      ]),
+      ...utils.transformContentTypesToModels(
+        [...Object.values(this.contentTypes), ...Object.values(this.components)],
+        this.db.metadata.identifiers
+      ),
       ...this.get('models').get(),
     ];
 

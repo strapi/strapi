@@ -20,7 +20,15 @@ const omitIdField = omit('id');
 
 const emitEvent = async (uid: UID.ContentType, event: string, document: Document) => {
   const modelDef = strapi.getModel(uid);
-  const sanitizedDocument = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, document);
+  const sanitizedDocument = await sanitize.sanitizers.defaultSanitizeOutput(
+    {
+      schema: modelDef,
+      getModel(uid) {
+        return strapi.getModel(uid as UID.Schema);
+      },
+    },
+    document
+  );
 
   strapi.eventHub.emit(event, {
     model: modelDef.modelName,

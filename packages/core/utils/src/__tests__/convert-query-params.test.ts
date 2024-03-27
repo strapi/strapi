@@ -1,4 +1,4 @@
-import convertQueryParams from '../convert-query-params';
+import { createTransformer } from '../convert-query-params';
 import { Model } from '../types';
 
 const schema: Model = {
@@ -18,6 +18,10 @@ const schema: Model = {
     updatedAt: { type: 'timestamp' },
   },
 };
+
+const { private_convertFiltersQueryParams } = createTransformer({
+  getModel: () => schema,
+});
 
 describe('convert-query-params', () => {
   describe('convertFiltersQueryParams', () => {
@@ -40,7 +44,7 @@ describe('convert-query-params', () => {
     ])('keeps: %s', (key, input) => {
       const expectedOutput = { ...input };
 
-      const res = convertQueryParams.convertFiltersQueryParams(input, schema);
+      const res = private_convertFiltersQueryParams(input, schema);
       expect(res).toEqual(expectedOutput);
     });
 
@@ -50,7 +54,7 @@ describe('convert-query-params', () => {
       ['invalid operator', { $nope: 'test' }],
       ['uppercase operator', { $GT: new Date() }],
     ])('removes: %s', (key, input) => {
-      const res = convertQueryParams.convertFiltersQueryParams(input, schema);
+      const res = private_convertFiltersQueryParams(input, schema);
       expect(res).toEqual({});
     });
 

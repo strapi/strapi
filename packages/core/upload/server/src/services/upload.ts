@@ -11,10 +11,9 @@ import {
   contentTypes as contentTypesUtils,
   errors,
   file as fileUtils,
-  convertQueryParams,
 } from '@strapi/utils';
 
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
@@ -84,7 +83,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
   async function emitEvent(event: string, data: Record<string, any>) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
-    const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, data);
+    const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(
+      {
+        schema: modelDef,
+        getModel(uid: string) {
+          return strapi.getModel(uid as UID.Schema);
+        },
+      },
+      data
+    );
 
     strapi.eventHub.emit(event, { media: sanitizedData });
   }
@@ -430,7 +437,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   function findOne(id: ID, populate = {}) {
-    const query = convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, {
+    const query = strapi.get('query-params').transform(FILE_MODEL_UID, {
       populate,
     });
 
@@ -443,13 +450,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   function findMany(query: any = {}): Promise<File[]> {
     return strapi.db
       .query(FILE_MODEL_UID)
-      .findMany(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
+      .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
   }
 
   function findPage(query: any = {}) {
     return strapi.db
       .query(FILE_MODEL_UID)
-      .findPage(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
+      .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, query));
   }
 
   async function remove(file: File) {

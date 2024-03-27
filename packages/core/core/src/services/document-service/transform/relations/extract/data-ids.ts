@@ -73,7 +73,7 @@ const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options
         return relation;
       }, value as any);
     },
-    { schema: strapi.getModel(source.uid) },
+    { schema: strapi.getModel(source.uid), getModel: strapi.getModel.bind(strapi) },
     data
   );
 };

@@ -1,4 +1,3 @@
-import { sanitize, validate } from '@strapi/utils';
 import type { Context } from '../../types';
 
 export default ({ strapi }: Context) => ({
@@ -8,11 +7,11 @@ export default ({ strapi }: Context) => ({
     const safeLimit = Math.max(limit, 1);
     const contentType = strapi.getModel(resourceUID);
 
-    await validate.contentAPI.query(args, contentType, {
+    await strapi.contentAPI.validate.query(args, contentType, {
       auth: ctx?.state?.auth,
     });
 
-    const sanitizedQuery = await sanitize.contentAPI.query(args, contentType, {
+    const sanitizedQuery = await strapi.contentAPI.sanitize.query(args, contentType, {
       auth: ctx?.state?.auth,
     });
 
