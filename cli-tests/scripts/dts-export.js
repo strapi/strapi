@@ -9,7 +9,7 @@ const {
   },
   engine: { createTransferEngine },
 } = require('@strapi/data-transfer');
-const { strapiFactory } = require('@strapi/strapi');
+const { createStrapi, compileStrapi } = require('@strapi/strapi');
 const path = require('path');
 
 /**
@@ -77,8 +77,8 @@ const createDestinationProvider = (datasetPath) => {
 };
 
 const createStrapiInstance = async (logLevel = 'error') => {
-  const appContext = await strapiFactory.compile();
-  const app = strapiFactory(appContext);
+  const appContext = await compileStrapi();
+  const app = createStrapi(appContext);
 
   app.log.level = logLevel;
   return app.load();

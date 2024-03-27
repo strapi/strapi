@@ -17,7 +17,6 @@
     "json",
     "koa",
     "koajs",
-    "helmet",
     "mvc",
     "oauth",
     "oauth2",

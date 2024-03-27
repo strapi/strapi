@@ -15,7 +15,6 @@ import {
 import { Check } from '@strapi/icons';
 import { Page, useTracking, useNotification, useFetchClient } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
@@ -72,12 +71,12 @@ export const CreatePage = () => {
 
   return (
     <Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           { name: 'Roles' }
         )}
-      />
+      </Page.Title>
       <Formik
         enableReinitialize
         initialValues={{ name: '', description: '' }}

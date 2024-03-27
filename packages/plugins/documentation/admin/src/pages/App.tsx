@@ -25,7 +25,6 @@ import {
   useAPIErrorHandler,
   useNotification,
 } from '@strapi/strapi/admin';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -122,7 +121,7 @@ const App = () => {
 
   return (
     <Layout>
-      <Helmet title={title} />
+      <Page.Title>{title}</Page.Title>
       <Page.Main>
         <HeaderLayout
           title={title}

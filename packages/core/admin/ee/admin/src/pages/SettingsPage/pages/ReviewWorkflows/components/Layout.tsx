@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
 import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
+import { Page } from '../../../../../../../../admin/src/components/PageHelpers';
 import { DRAG_DROP_TYPES } from '../constants';
 
 import { StageDragPreview } from './StageDragPreview';
@@ -42,14 +42,14 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, navigationAction, prim
   const { formatMessage } = useIntl();
   return (
     <>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: title,
           }
         )}
-      />
+      </Page.Title>
       <HeaderLayout
         navigationAction={navigationAction}
         primaryAction={primaryAction}

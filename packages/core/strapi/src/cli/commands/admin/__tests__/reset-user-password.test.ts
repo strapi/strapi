@@ -17,13 +17,11 @@ const mock = {
 };
 
 jest.mock('@strapi/core', () => {
-  const strapiFactory = jest.fn(() => mock);
+  const createStrapi = jest.fn(() => mock);
 
-  Object.assign(strapiFactory, {
-    compile: jest.fn(),
-  });
+  const compileStrapi = jest.fn();
 
-  return { strapiFactory };
+  return { createStrapi, compileStrapi };
 });
 
 describe('admin:reset-password command', () => {

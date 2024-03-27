@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
-/* eslint-disable vars-on-top */
-/* eslint-disable no-var */
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -12,7 +9,6 @@ import type { Core, Modules, UID, Schema } from '@strapi/types';
 import loadConfiguration from './configuration';
 
 import * as factories from './factories';
-import compile from './compile';
 
 import * as utils from './utils';
 import * as registries from './registries';
@@ -625,25 +621,11 @@ class Strapi extends Container implements Core.Strapi {
   }
 }
 
-interface StrapiOptions {
+export interface StrapiOptions {
   appDir?: string;
   distDir?: string;
   autoReload?: boolean;
   serveAdminPanel?: boolean;
 }
 
-interface Init {
-  (options?: StrapiOptions): Core.Strapi;
-  factories: typeof factories;
-  compile: typeof compile;
-}
-
-const initFn = (options: StrapiOptions = {}): Core.Strapi => {
-  const strapi = new Strapi(options);
-  global.strapi = strapi as LoadedStrapi;
-  return strapi;
-};
-
-const init: Init = Object.assign(initFn, { factories, compile });
-
-export default init;
+export default Strapi;
