@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
@@ -204,7 +203,7 @@ const ComponentConfigurationPage = () => {
 
   return (
     <>
-      <Helmet title={`Configure ${editLayout.settings.displayName} Edit View | Strapi`} />
+      <Page.Title>{`Configure ${editLayout.settings.displayName} Edit View`}</Page.Title>
       <ConfigurationForm
         onSubmit={handleSubmit}
         attributes={schema.attributes}

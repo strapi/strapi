@@ -9,7 +9,6 @@ import {
   useFetchClient,
   useRBAC,
 } from '@strapi/strapi/admin';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -115,8 +114,8 @@ const EmailTemplatesPage = () => {
 
   return (
     <Page.Main aria-busy={submitMutation.isLoading}>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -125,7 +124,7 @@ const EmailTemplatesPage = () => {
             }),
           }
         )}
-      />
+      </Page.Title>
       <HeaderLayout
         title={formatMessage({
           id: getTrad('HeaderNav.link.emailTemplates'),

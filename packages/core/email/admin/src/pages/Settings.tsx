@@ -15,7 +15,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Envelop } from '@strapi/icons';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import styled from 'styled-components';
@@ -126,8 +125,8 @@ const SettingsPage = () => {
 
   return (
     <Page.Main labelledBy="title" aria-busy={isLoading || mutation.isLoading}>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -136,7 +135,7 @@ const SettingsPage = () => {
             }),
           }
         )}
-      />
+      </Page.Title>
       <HeaderLayout
         id="title"
         title={formatMessage({

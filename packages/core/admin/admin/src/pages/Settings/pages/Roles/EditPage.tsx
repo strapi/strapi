@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
 import { Formik, FormikHelpers } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
@@ -164,14 +163,14 @@ const EditPage = () => {
 
   return (
     <Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Roles',
           }
         )}
-      />
+      </Page.Title>
       <Formik
         enableReinitialize
         initialValues={
