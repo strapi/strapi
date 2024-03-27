@@ -19,6 +19,9 @@ const render = (
       ),
     },
     initialEntries,
+    userEventOptions: {
+      skipHover: true,
+    },
   });
 
 describe('CMReleasesContainer', () => {
