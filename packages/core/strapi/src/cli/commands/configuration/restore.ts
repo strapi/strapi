@@ -1,7 +1,7 @@
 import { createCommand } from 'commander';
 import fs from 'fs';
 import _ from 'lodash';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi, compileStrapi } from '@strapi/core';
 import type { Database } from '@strapi/database';
 
 import type { StrapiCommand } from '../../types';
@@ -20,8 +20,8 @@ interface CmdOptions {
 const action = async ({ file: filePath, strategy = 'replace' }: CmdOptions) => {
   const input = filePath ? fs.readFileSync(filePath) : await readStdin();
 
-  const appContext = await strapiFactory.compile();
-  const app = await strapiFactory(appContext).load();
+  const appContext = await compileStrapi();
+  const app = await createStrapi(appContext).load();
 
   let dataToImport;
   try {
