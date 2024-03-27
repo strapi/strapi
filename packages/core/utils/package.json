@@ -52,7 +52,8 @@
     "node-machine-id": "1.1.12",
     "p-map": "4.0.0",
     "preferred-pm": "3.1.2",
-    "yup": "0.32.9"
+    "yup": "0.32.9",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0-beta.1",
