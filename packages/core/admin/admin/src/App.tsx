@@ -3,9 +3,8 @@
  * App.js
  *
  */
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 
-import { Helmet } from 'react-helmet';
 import { Outlet } from 'react-router-dom';
 
 import { Page } from './components/PageHelpers';
@@ -21,12 +20,17 @@ interface AppProps {
 }
 
 const App = ({ strapi, store }: AppProps) => {
+  useEffect(() => {
+    const language = localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en';
+
+    if (language) {
+      document.documentElement.lang = language;
+    }
+  }, []);
+
   return (
     <Providers strapi={strapi} store={store}>
       <Suspense fallback={<Page.Loading />}>
-        <Helmet
-          htmlAttributes={{ lang: localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) || 'en' }}
-        />
         <Outlet />
       </Suspense>
     </Providers>

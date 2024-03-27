@@ -4,7 +4,6 @@ import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@stra
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
@@ -132,12 +131,12 @@ export const ListView = () => {
 
   return (
     <>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           { name: 'API Tokens' }
         )}
-      />
+      </Page.Title>
       <HeaderLayout
         title={formatMessage({ id: 'Settings.apiTokens.title', defaultMessage: 'API Tokens' })}
         subtitle={formatMessage({

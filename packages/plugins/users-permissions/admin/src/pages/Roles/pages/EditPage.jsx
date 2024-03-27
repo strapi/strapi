@@ -21,7 +21,6 @@ import {
   useFetchClient,
 } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import { useMatch } from 'react-router-dom';
@@ -89,12 +88,12 @@ export const EditPage = () => {
 
   return (
     <Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           { name: 'Roles' }
         )}
-      />
+      </Page.Title>
       <Formik
         enableReinitialize
         initialValues={{ name: role.name, description: role.description }}
