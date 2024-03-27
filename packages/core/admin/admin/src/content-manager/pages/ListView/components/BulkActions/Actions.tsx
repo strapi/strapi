@@ -8,7 +8,6 @@ import {
   DialogFooter,
   DialogProps,
   Flex,
-  ModalBody,
   ModalHeader,
   ModalLayout,
   Typography,
@@ -23,6 +22,7 @@ import {
 } from '@strapi/helper-plugin';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import { Common } from '@strapi/types';
 import { AxiosError, AxiosResponse } from 'axios';
 import { useIntl } from 'react-intl';
 import { useQueryClient, useMutation } from 'react-query';
@@ -81,8 +81,7 @@ interface NotificationOptions {
 interface ModalOptions {
   type: 'modal';
   title: string;
-  content: React.ReactNode;
-  footer: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
+  content: React.ComponentType<{ onClose: () => void }>;
   onClose?: () => void;
 }
 
@@ -95,7 +94,7 @@ const BulkActionsRenderer = () => {
   const { selectedEntries } = useTableContext();
 
   const { slug, collectionType } = useParams<{
-    slug: string;
+    slug: Common.UID.ContentType;
     collectionType: string;
   }>();
 
@@ -277,8 +276,7 @@ const BulkActionModal = ({
   isOpen,
   title,
   onClose,
-  footer: Footer,
-  content,
+  content: Content,
   onModalClose,
 }: BulkActionModalProps) => {
   const id = React.useId();
@@ -302,8 +300,7 @@ const BulkActionModal = ({
           {title}
         </Typography>
       </ModalHeader>
-      <ModalBody>{content}</ModalBody>
-      <>{typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}</>
+      <Content onClose={handleClose} />
     </ModalLayout>
   );
 };
