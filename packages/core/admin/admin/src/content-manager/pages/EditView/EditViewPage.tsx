@@ -11,7 +11,6 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -178,7 +177,7 @@ const EditViewPage = () => {
 
   return (
     <Main paddingLeft={10} paddingRight={10}>
-      <Helmet title={`${documentTitle} | Strapi`} />
+      <Page.Title>{`${documentTitle}`}</Page.Title>
       <Form
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}

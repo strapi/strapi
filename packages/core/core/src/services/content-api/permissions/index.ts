@@ -97,7 +97,7 @@ export default (strapi: Core.Strapi) => {
       });
     };
 
-    registerAPIsActions(strapi.api, 'api');
+    registerAPIsActions(strapi.apis, 'api');
     registerAPIsActions(strapi.plugins, 'plugin');
 
     return actionMap;

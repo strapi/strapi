@@ -1,12 +1,6 @@
 import { prop, uniq, uniqBy, concat, flow } from 'lodash/fp';
 
-import {
-  isOperatorOfType,
-  contentTypes,
-  relations,
-  convertQueryParams,
-  errors,
-} from '@strapi/utils';
+import { isOperatorOfType, contentTypes, relations, errors } from '@strapi/utils';
 import type { Data, Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
@@ -382,7 +376,7 @@ export default {
 
     const res = await strapi.db
       .query(targetUid)
-      .findPage(convertQueryParams.transformParamsToQuery(targetUid, queryParams));
+      .findPage(strapi.get('query-params').transform(targetUid, queryParams));
 
     ctx.body = {
       ...res,
@@ -453,7 +447,7 @@ export default {
     addFiltersClause(permissionQuery, { id: { $in: loadedIds } });
 
     const sanitizedRes = await loadRelations({ id: entryId }, targetField, {
-      ...convertQueryParams.transformParamsToQuery(targetUid, permissionQuery),
+      ...strapi.get('query-params').transform(targetUid, permissionQuery),
       ordering: 'desc',
       page: ctx.request.query.page,
       pageSize: ctx.request.query.pageSize,

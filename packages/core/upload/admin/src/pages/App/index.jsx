@@ -1,7 +1,7 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 
 import { Page, useQueryParams } from '@strapi/admin/strapi-admin';
-import { Helmet } from 'react-helmet';
+
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
@@ -31,7 +31,7 @@ const Upload = () => {
   if (isLoading) {
     return (
       <>
-        <Helmet title={title} />
+        <Page.Title>{title}</Page.Title>
         <Page.Loading />
       </>
     );

@@ -15,7 +15,6 @@ import {
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { Formik, Form, FormikHelpers } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
@@ -113,14 +112,14 @@ export const SingleSignOnPage = () => {
 
   return (
     <Layout>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'SSO',
           }
         )}
-      />
+      </Page.Title>
       <Page.Main aria-busy={isSubmittingForm || isLoadingData} tabIndex={-1}>
         <Formik
           onSubmit={handleSubmit}

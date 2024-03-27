@@ -18,7 +18,7 @@ const loopContentTypeNames = (api: Api, callback: (info: ApiInfo) => any) => {
       api.getter === 'plugin'
         ? // @ts-expect-error - This is a valid check
           strapi.plugin(api.name).routes['content-api']
-        : strapi.api[api.name].routes[contentTypeName];
+        : strapi.api(api.name).routes[contentTypeName];
 
     // Continue to next iteration if routeInfo is undefined
     if (!routeInfo) {

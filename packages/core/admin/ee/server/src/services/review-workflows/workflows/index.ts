@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 import { set, isString, map, get } from 'lodash/fp';
-import { convertQueryParams, errors } from '@strapi/utils';
+import { errors } from '@strapi/utils';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../../constants/workflows';
 import { getService } from '../../../utils';
 import { getWorkflowContentTypeFilter } from '../../../utils/review-workflows';
@@ -43,7 +43,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       const filters = processFilters({ strapi }, opts.filters);
       const populate = processPopulate(opts.populate);
 
-      const query = convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, {
+      const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, {
         ...opts,
         filters,
         populate,
@@ -61,7 +61,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     findById(id: any, opts: { populate?: any } = {}) {
       const populate = processPopulate(opts.populate);
 
-      const query = convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, { populate });
+      const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, { populate });
 
       return strapi.db.query(WORKFLOW_MODEL_UID).findOne({
         ...query,
@@ -101,7 +101,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         // Create Workflow
         return strapi.db
           .query(WORKFLOW_MODEL_UID)
-          .create(convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, createOpts));
+          .create(strapi.get('query-params').transform(WORKFLOW_MODEL_UID, createOpts));
       });
     },
 
@@ -145,7 +145,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
         metrics.sendDidEditWorkflow();
 
-        const query = convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, updateOpts);
+        const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, updateOpts);
 
         // Update Workflow
         return strapi.db.query(WORKFLOW_MODEL_UID).update({
@@ -181,7 +181,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
           destContentTypes: [],
         });
 
-        const query = convertQueryParams.transformParamsToQuery(WORKFLOW_MODEL_UID, opts);
+        const query = strapi.get('query-params').transform(WORKFLOW_MODEL_UID, opts);
         // Delete Workflow
         return strapi.db.query(WORKFLOW_MODEL_UID).delete({
           ...query,

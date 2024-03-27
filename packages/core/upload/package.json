@@ -66,7 +66,6 @@
     "prop-types": "^15.8.1",
     "qs": "6.11.1",
     "react-dnd": "16.0.1",
-    "react-helmet": "^6.1.0",
     "react-intl": "6.6.2",
     "react-query": "3.39.3",
     "react-redux": "8.1.3",

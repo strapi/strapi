@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import { set, omit, pick, prop, isArray, differenceWith, differenceBy, isEqual } from 'lodash/fp';
 
-import { dates, arrays, hooks as hooksUtils, errors, convertQueryParams } from '@strapi/utils';
+import { dates, arrays, hooks as hooksUtils, errors } from '@strapi/utils';
 import type { Data } from '@strapi/types';
 
 import permissionDomain from '../domain/permission';
@@ -118,7 +118,7 @@ const find = (params = {}, populate: unknown): Promise<AdminRole[]> => {
 const findAllWithUsersCount = async (params: any): Promise<AdminRoleWithUsersCount[]> => {
   const roles: AdminRoleWithUsersCount[] = await strapi.db
     .query('admin::role')
-    .findMany(convertQueryParams.transformParamsToQuery('admin::role', params));
+    .findMany(strapi.get('query-params').transform('admin::role', params));
 
   for (const role of roles) {
     role.usersCount = await getUsersCount(role.id);

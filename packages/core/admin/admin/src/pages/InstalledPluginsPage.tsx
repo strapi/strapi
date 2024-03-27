@@ -13,7 +13,6 @@ import {
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
@@ -133,12 +132,12 @@ const ProtectedInstalledPluginsPage = () => {
 
   return (
     <Page.Protect permissions={permissions.marketplace?.main}>
-      <Helmet
-        title={formatMessage({
+      <Page.Title>
+        {formatMessage({
           id: 'global.plugins',
           defaultMessage: 'Plugins',
         })}
-      />
+      </Page.Title>
       <InstalledPluginsPage />
     </Page.Protect>
   );

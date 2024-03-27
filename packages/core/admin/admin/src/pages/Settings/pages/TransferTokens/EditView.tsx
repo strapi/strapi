@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
@@ -227,14 +226,14 @@ const EditView = () => {
 
   return (
     <Page.Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Transfer Tokens',
           }
         )}
-      />
+      </Page.Title>
       <Formik
         validationSchema={schema}
         validateOnChange={false}

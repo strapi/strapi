@@ -24,7 +24,7 @@ const createContentAPI = (strapi: Core.Strapi) => {
   const getRoutesMap = async () => {
     const routesMap: Record<string, Core.Route[]> = {};
 
-    _.forEach(strapi.api, (api, apiName) => {
+    _.forEach(strapi.apis, (api, apiName) => {
       const routes = _.flatMap(api.routes, (route) => {
         if ('routes' in route) {
           return route.routes;

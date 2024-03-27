@@ -57,7 +57,6 @@
     "@strapi/provider-email-sendmail": "5.0.0-beta.0",
     "@strapi/utils": "5.0.0-beta.0",
     "lodash": "4.17.21",
-    "react-helmet": "6.1.0",
     "react-intl": "6.6.2",
     "react-query": "3.39.3",
     "yup": "0.32.9"
