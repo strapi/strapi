@@ -7958,7 +7958,7 @@ __metadata:
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
     "@types/koa": "npm:2.13.4"
-    "@types/styled-components": "npm:5.1.26"
+    "@types/styled-components": "npm:5.1.32"
     axios: "npm:1.6.0"
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.0"
@@ -10530,17 +10530,6 @@ __metadata:
     "@types/node": "npm:*"
     "@types/stream-chain": "npm:*"
   checksum: 42de3a044db636877c37592422dae7cd819cfd556b44b0a2b280230e044e7c4c5c7a4b6e555145db164eebe877bf9e52371880e290c5c30d423895adecb3826e
-  languageName: node
-  linkType: hard
-
-"@types/styled-components@npm:5.1.26":
-  version: 5.1.26
-  resolution: "@types/styled-components@npm:5.1.26"
-  dependencies:
-    "@types/hoist-non-react-statics": "npm:*"
-    "@types/react": "npm:*"
-    csstype: "npm:^3.0.2"
-  checksum: e40c942c97f4467310c658608e7d02d6b9571d390d0fa519bdbd37e48ed2c605a6c9e464812c36d0a1339402bff65cb473b9e785288a29419d7af994595bba33
   languageName: node
   linkType: hard
 
