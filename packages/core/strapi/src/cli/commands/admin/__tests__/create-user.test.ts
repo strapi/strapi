@@ -26,11 +26,10 @@ const mock = {
 };
 
 jest.mock('@strapi/core', () => {
-  const strapiFactory: any = jest.fn(() => mock);
+  const createStrapi: any = jest.fn(() => mock);
+  const compileStrapi = jest.fn();
 
-  strapiFactory.compile = jest.fn();
-
-  return { strapiFactory };
+  return { createStrapi, compileStrapi };
 });
 
 describe('admin:create command', () => {
