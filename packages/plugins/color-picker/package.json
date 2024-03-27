@@ -70,7 +70,7 @@
     "typescript": "5.3.2"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^4.4.0",
+    "@strapi/strapi": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
