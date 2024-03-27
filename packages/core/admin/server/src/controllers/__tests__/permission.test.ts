@@ -195,7 +195,7 @@ describe('Permission Controller', () => {
       await permissionController.check(ctx);
 
       expect(localTestData.ability.can).toHaveBeenCalled();
-      expect(strapi.admin.services.permission.engine.checkMany).toHaveBeenCalled();
+      expect(strapi.service('admin::permission').engine.checkMany).toHaveBeenCalled();
       expect(ctx.body.data).toHaveLength(localTestData.permissions.valid.length);
     });
   });

@@ -104,5 +104,5 @@ const registerPermissionActions = async () => {
     },
   ];
 
-  await strapi.admin.services.permission.actionProvider.registerMany(actions);
+  await strapi.service('admin::permission').actionProvider.registerMany(actions);
 };

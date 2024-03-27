@@ -64,7 +64,7 @@ describe('register', () => {
     strapi.ee.features.isEnabled.mockReturnValue(true);
     register({ strapi });
 
-    expect(strapi.admin.services.permission.actionProvider.registerMany).toHaveBeenCalledWith(
+    expect(strapi.service('admin::permission').actionProvider.registerMany).toHaveBeenCalledWith(
       ACTIONS
     );
   });
@@ -73,7 +73,7 @@ describe('register', () => {
     strapi.ee.features.isEnabled.mockReturnValue(false);
     register({ strapi });
 
-    expect(strapi.admin.services.permission.actionProvider.registerMany).not.toHaveBeenCalled();
+    expect(strapi.service('admin::permission').actionProvider.registerMany).not.toHaveBeenCalled();
   });
 
   it('should exclude the release and release action models from the GraphQL schema when the feature is enabled', async () => {
