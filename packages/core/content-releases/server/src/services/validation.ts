@@ -60,8 +60,10 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
   },
   async validatePendingReleasesLimit() {
     // Use the maximum releases option if it exists, otherwise default to 3
+    const featureCfg = strapi.ee.features.get('cms-content-releases');
+
     const maximumPendingReleases =
-      strapi.ee.features.get('cms-content-releases')?.options?.maximumReleases || 3;
+      (typeof featureCfg === 'object' && featureCfg?.options?.maximumReleases) || 3;
 
     const [, pendingReleasesCount] = await strapi.db.query(RELEASE_MODEL_UID).findWithCount({
       filters: {

@@ -21,8 +21,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = strapi.db.query(HISTORY_VERSION_UID);
 
   const getRetentionDays = (strapi: Core.Strapi) => {
+    const featureConfig = strapi.ee.features.get('cms-content-history');
+
     const licenseRetentionDays =
-      strapi.ee.features.get('cms-content-history')?.options.retentionDays;
+      typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
+
     const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
 
     // Allow users to override the license retention days, but not to increase it

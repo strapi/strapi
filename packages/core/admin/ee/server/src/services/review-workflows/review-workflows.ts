@@ -100,7 +100,7 @@ function persistStagesJoinTables({ strapi }: { strapi: Core.Strapi }) {
 
 const registerWebhookEvents = async ({ strapi }: { strapi: Core.Strapi }) =>
   Object.entries(webhookEvents).forEach(([eventKey, event]) =>
-    strapi.webhookStore.addAllowedEvent(eventKey, event)
+    strapi.get('webhookStore').addAllowedEvent(eventKey, event)
   );
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {

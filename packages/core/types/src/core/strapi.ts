@@ -17,8 +17,6 @@ export interface Strapi extends Container {
   eventHub: Modules.EventHub.EventHub;
   startupLogger: StartupLogger;
   cron: Modules.Cron.CronService;
-  webhookRunner: Modules.WebhookRunner.WebhookRunner;
-  webhookStore: Modules.WebhookStore.WebhookStore;
   store: Modules.CoreStore.CoreStore;
   /**
    * @deprecated will be removed in the next major
@@ -35,7 +33,7 @@ export interface Strapi extends Container {
   customFields: Modules.CustomFields.CustomFields;
   fetch: Modules.Fetch.Fetch;
   dirs: StrapiDirectories;
-  admin?: Core.Module;
+  admin: Core.Module;
   isLoaded: boolean;
   db: Database;
   app: any;
@@ -46,7 +44,7 @@ export interface Strapi extends Container {
     features: {
       isEnabled: (feature: string) => boolean;
       list: () => { name: string; [key: string]: any }[];
-      get: (feature: string) => { name: string; [key: string]: any };
+      get: (feature: string) => string | { name: string; [key: string]: any } | undefined;
     };
   };
   features: Modules.Features.FeaturesService;
@@ -84,10 +82,8 @@ export interface Strapi extends Container {
   listen(): Promise<void>;
   stopWithError(err: unknown, customMessage?: string): never;
   stop(exitCode?: number): never;
-  registerInternalHooks(): void;
   register(): Promise<Strapi>;
   bootstrap(): Promise<Strapi>;
-  startWebhooks(): Promise<void>;
   runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy'): Promise<void>;
   getModel<TSchemaUID extends UID.Schema>(
     uid: TSchemaUID
@@ -150,15 +146,4 @@ export interface StrapiDirectories {
     middlewares: string;
     config: string;
   };
-}
-
-export interface StrapiOptions {
-  appDir?: string;
-  distDir?: string;
-  autoReload?: boolean;
-  serveAdminPanel?: boolean;
-}
-
-export interface StrapiConstructor {
-  new (options?: StrapiOptions): Strapi;
 }

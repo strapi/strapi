@@ -83,21 +83,21 @@ export const createUpdateNotifier = (strapi: Core.Strapi) => {
     console.log(message);
   };
 
-  return {
-    notify({ checkInterval = CHECK_INTERVAL, notifInterval = NOTIF_INTERVAL } = {}) {
-      // TODO v6: Remove this warning
-      if (env.bool('STRAPI_DISABLE_UPDATE_NOTIFICATION', false)) {
-        strapi.log.warn(
-          'STRAPI_DISABLE_UPDATE_NOTIFICATION is no longer supported. Instead, set logger.updates.enabled to false in your server configuration.'
-        );
-      }
+  function notify({ checkInterval = CHECK_INTERVAL, notifInterval = NOTIF_INTERVAL } = {}) {
+    // TODO v6: Remove this warning
+    if (env.bool('STRAPI_DISABLE_UPDATE_NOTIFICATION', false)) {
+      strapi.log.warn(
+        'STRAPI_DISABLE_UPDATE_NOTIFICATION is no longer supported. Instead, set logger.updates.enabled to false in your server configuration.'
+      );
+    }
 
-      if (!strapi.config.get('server.logger.updates.enabled') || !config) {
-        return;
-      }
+    if (!strapi.config.get('server.logger.updates.enabled') || !config) {
+      return;
+    }
 
-      display(notifInterval);
-      checkUpdate(checkInterval); // doesn't need to await
-    },
-  };
+    display(notifInterval);
+    checkUpdate(checkInterval); // doesn't need to await
+  }
+
+  notify();
 };

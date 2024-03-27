@@ -154,7 +154,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
     Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
-      strapi.webhookStore.addAllowedEvent(key, value);
+      strapi.get('webhookStore').addAllowedEvent(key, value);
     });
   }
 };

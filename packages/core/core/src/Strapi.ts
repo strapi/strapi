@@ -3,30 +3,25 @@ import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
-import { hooks } from '@strapi/utils';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
-import loadConfiguration from './configuration';
+import { loadConfiguration } from './configuration';
 
 import * as factories from './factories';
 
 import * as utils from './utils';
-import * as registries from './registries';
-import * as loaders from './loaders';
 import { Container } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
 import { createServer } from './services/server';
-import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
-import { webhookModel, createWebhookStore } from './services/webhook-store';
-import { createCoreStore, coreStoreModel } from './services/core-store';
+import { createReloader } from './services/reloader';
+
+import { providers } from './providers';
 import createEntityService from './services/entity-service';
 import createQueryParamService from './services/query-params';
 
-import createCronService from './services/cron';
 import entityValidator from './services/entity-validator';
-import createTelemetry from './services/metrics';
 import requestContext from './services/request-context';
 import createAuth from './services/auth';
 import createCustomFields from './services/custom-fields';
@@ -35,225 +30,115 @@ import getNumberOfDynamicZones from './services/utils/dynamic-zones';
 import { FeaturesService, createFeaturesService } from './services/features';
 import { createDocumentService } from './services/document-service';
 
-// TODO: move somewhere else
-import * as draftAndPublishSync from './migrations/draft-publish';
+import { coreStoreModel } from './services/core-store';
+import { createConfigProvider } from './services/config';
 
-/**
- * Resolve the working directories based on the instance options.
- *
- * Behavior:
- * - `appDir` is the directory where Strapi will write every file (schemas, generated APIs, controllers or services)
- * - `distDir` is the directory where Strapi will read configurations, schemas and any compiled code
- *
- * Default values:
- * - If `appDir` is `undefined`, it'll be set to `process.cwd()`
- * - If `distDir` is `undefined`, it'll be set to `appDir`
- */
-const resolveWorkingDirectories = (opts: { appDir?: string; distDir?: string }) => {
-  const cwd = process.cwd();
+class Strapi extends Container implements Core.Strapi {
+  app: any;
 
-  const appDir = opts.appDir ? path.resolve(cwd, opts.appDir) : cwd;
-  const distDir = opts.distDir ? path.resolve(cwd, opts.distDir) : appDir;
+  isLoaded: boolean = false;
 
-  return { app: appDir, dist: distDir };
-};
+  internal_config: Record<string, unknown> = {};
 
-const reloader = (strapi: Strapi) => {
-  const state = {
-    shouldReload: 0,
-    isWatching: true,
-  };
+  constructor(opts: StrapiOptions) {
+    super();
 
-  function reload() {
-    if (state.shouldReload > 0) {
-      // Reset the reloading state
-      state.shouldReload -= 1;
-      reload.isReloading = false;
-      return;
-    }
+    this.internal_config = loadConfiguration(opts);
 
-    if (strapi.config.get('autoReload')) {
-      process.send?.('reload');
+    this.registerInternalServices();
+
+    for (const provider of providers) {
+      provider.init?.(this);
     }
   }
 
-  Object.defineProperty(reload, 'isWatching', {
-    configurable: true,
-    enumerable: true,
-    set(value) {
-      // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
-      if (state.isWatching === false && value === true) {
-        state.shouldReload += 1;
-      }
-      state.isWatching = value;
-    },
-    get() {
-      return state.isWatching;
-    },
-  });
+  get admin(): Core.Module {
+    return this.get('admin');
+  }
 
-  reload.isReloading = false;
-  reload.isWatching = true;
+  get EE(): boolean {
+    // @ts-expect-error: init is private
+    this.ee.init(this.dirs.app.root, this.log);
+    return utils.ee.isEE;
+  }
 
-  return reload;
-};
+  get ee(): Core.Strapi['ee'] {
+    return utils.ee;
+  }
 
-class Strapi extends Container implements Core.Strapi {
-  server: Modules.Server.Server;
+  get dirs(): Core.StrapiDirectories {
+    return this.config.get('dirs');
+  }
 
-  log: Logger;
+  get reload(): Core.Reloader {
+    return this.get('reload');
+  }
 
-  fs: Core.StrapiFS;
+  get db(): Database {
+    return this.get('db');
+  }
 
-  eventHub: Modules.EventHub.EventHub;
+  get requestContext(): Modules.RequestContext.RequestContext {
+    return this.get('requestContext');
+  }
 
-  startupLogger: Core.StartupLogger;
+  get customFields(): Modules.CustomFields.CustomFields {
+    return this.get('customFields');
+  }
 
-  cron: Modules.Cron.CronService;
-
-  webhookRunner: WebhookRunner;
-
-  webhookStore: Modules.WebhookStore.WebhookStore;
-
-  store: Modules.CoreStore.CoreStore;
-
-  entityValidator: Modules.EntityValidator.EntityValidator;
+  get entityValidator(): Modules.EntityValidator.EntityValidator {
+    return this.get('entityValidator');
+  }
 
   /**
    * @deprecated `strapi.entityService` will be removed in the next major version
    */
-  entityService: Modules.EntityService.EntityService;
+  get entityService(): Modules.EntityService.EntityService {
+    return this.get('entityService');
+  }
 
-  documents: Modules.Documents.Service;
+  get documents(): Modules.Documents.Service {
+    return this.get('documents');
+  }
 
-  telemetry: Modules.Metrics.TelemetryService;
+  get features(): FeaturesService {
+    return this.get('features');
+  }
 
-  requestContext: Modules.RequestContext.RequestContext;
+  get fetch(): Modules.Fetch.Fetch {
+    return this.get('fetch');
+  }
 
-  customFields: Modules.CustomFields.CustomFields;
+  get cron(): Modules.Cron.CronService {
+    return this.get('cron');
+  }
 
-  fetch: Modules.Fetch.Fetch;
+  get log(): Logger {
+    return this.get('logger');
+  }
 
-  dirs: Core.StrapiDirectories;
+  get startupLogger(): Core.StartupLogger {
+    return this.get('startupLogger');
+  }
 
-  admin?: Core.Module;
+  get eventHub(): Modules.EventHub.EventHub {
+    return this.get('eventHub');
+  }
 
-  isLoaded: boolean;
+  get fs(): Core.StrapiFS {
+    return this.get('fs');
+  }
 
-  db: Database;
+  get server(): Modules.Server.Server {
+    return this.get('server');
+  }
 
-  app: any;
+  get telemetry(): Modules.Metrics.TelemetryService {
+    return this.get('telemetry');
+  }
 
-  EE?: boolean;
-
-  reload: Core.Reloader;
-
-  features: FeaturesService;
-
-  // @ts-expect-error - Assigned in constructor
-  ee: Core.Strapi['ee'];
-
-  constructor(opts: StrapiOptions = {}) {
-    super();
-
-    utils.destroyOnSignal(this);
-
-    const rootDirs = resolveWorkingDirectories(opts);
-
-    // Load the app configuration from the dist directory
-    const appConfig = loadConfiguration(rootDirs, opts);
-
-    // Instantiate the Strapi container
-    this.add('config', registries.config(appConfig, this))
-      .add('content-types', registries.contentTypes())
-      .add('components', registries.components())
-      .add('services', registries.services(this))
-      .add('policies', registries.policies())
-      .add('middlewares', registries.middlewares())
-      .add('hooks', registries.hooks())
-      .add('controllers', registries.controllers(this))
-      .add('modules', registries.modules(this))
-      .add('plugins', registries.plugins(this))
-      .add('custom-fields', registries.customFields(this))
-      .add('apis', registries.apis(this))
-      .add('sanitizers', registries.sanitizers())
-      .add('validators', registries.validators())
-      .add('query-params', createQueryParamService(this))
-      .add('content-api', createContentAPI(this))
-      .add('auth', createAuth())
-      .add('models', registries.models());
-
-    // Create a mapping of every useful directory (for the app, dist and static directories)
-    this.dirs = utils.getDirs(rootDirs, { strapi: this });
-
-    // Strapi state management variables
-    this.isLoaded = false;
-    this.reload = reloader(this);
-
-    // Instantiate the Koa app & the HTTP server
-    this.server = createServer(this);
-
-    // Strapi utils instantiation
-    this.fs = createStrapiFs(this);
-    this.eventHub = createEventHub();
-    this.startupLogger = utils.createStartupLogger(this);
-
-    const logConfig = {
-      level: 'http', // Strapi defaults to level 'http'
-      ...this.config.get('logger'), // DEPRECATED
-      ...this.config.get('server.logger.config'),
-    };
-
-    this.log = createLogger(logConfig);
-    this.cron = createCronService();
-    this.telemetry = createTelemetry(this);
-    this.requestContext = requestContext;
-    this.customFields = createCustomFields(this);
-    this.fetch = utils.createStrapiFetch(this);
-    this.features = createFeaturesService(this);
-    this.db = new Database(
-      _.merge(this.config.get('database'), {
-        settings: {
-          migrations: {
-            dir: path.join(this.dirs.app.root, 'database/migrations'),
-          },
-        },
-      })
-    );
-
-    // init webhook runner
-    this.webhookRunner = createWebhookRunner({
-      eventHub: this.eventHub,
-      logger: this.log,
-      configuration: this.config.get('server.webhooks', {}),
-      fetch: this.fetch,
-    });
-
-    this.store = createCoreStore({ db: this.db });
-    this.webhookStore = createWebhookStore({ db: this.db });
-
-    this.entityValidator = entityValidator;
-    this.entityService = createEntityService({
-      strapi: this,
-      db: this.db,
-    });
-
-    this.documents = createDocumentService(this);
-
-    utils.createUpdateNotifier(this).notify();
-
-    Object.defineProperty<Strapi>(this, 'EE', {
-      get: () => {
-        utils.ee.init(this.dirs.app.root, this.log);
-        return utils.ee.isEE;
-      },
-      configurable: false,
-    });
-
-    Object.defineProperty<Strapi>(this, 'ee', {
-      get: () => utils.ee,
-      configurable: false,
-    });
+  get store(): Modules.CoreStore.CoreStore {
+    return this.get('coreStore');
   }
 
   get config() {
@@ -358,24 +243,45 @@ class Strapi extends Container implements Core.Strapi {
     }
   }
 
-  async destroy() {
-    this.log.info('Shutting down Strapi');
-    await this.server.destroy();
-    await this.runLifecyclesFunctions(utils.LIFECYCLES.DESTROY);
-
-    this.eventHub.destroy();
-
-    await this.db?.destroy();
-
-    this.telemetry.destroy();
-    this.cron.destroy();
-
-    process.removeAllListeners();
-
-    // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
-    delete global.strapi;
-
-    this.log.info('Strapi has been shut down');
+  // TODO: split into more providers
+  registerInternalServices() {
+    // Instantiate the Strapi container
+    this.add('config', () => createConfigProvider(this.internal_config, this))
+      .add('query-params', createQueryParamService(this))
+      .add('content-api', createContentAPI(this))
+      .add('auth', createAuth())
+      .add('server', () => createServer(this))
+      .add('fs', () => createStrapiFs(this))
+      .add('eventHub', () => createEventHub())
+      .add('startupLogger', () => utils.createStartupLogger(this))
+      .add('logger', () => {
+        return createLogger({
+          level: 'http', // Strapi defaults to level 'http'
+          ...this.config.get('logger'), // DEPRECATED
+          ...this.config.get('server.logger.config'),
+        });
+      })
+      .add('fetch', () => utils.createStrapiFetch(this))
+      .add('features', () => createFeaturesService(this))
+      .add('requestContext', requestContext)
+      .add('customFields', createCustomFields(this))
+      .add('entityValidator', entityValidator)
+      .add('entityService', () => createEntityService({ strapi: this, db: this.db }))
+      .add('documents', () => createDocumentService(this))
+      .add(
+        'db',
+        () =>
+          new Database(
+            _.merge(this.config.get('database'), {
+              settings: {
+                migrations: {
+                  dir: path.join(this.dirs.app.root, 'database/migrations'),
+                },
+              },
+            })
+          )
+      )
+      .add('reload', () => createReloader(this));
   }
 
   sendStartupTelemetry() {
@@ -475,24 +381,22 @@ class Strapi extends Container implements Core.Strapi {
     process.exit(exitCode);
   }
 
-  registerInternalHooks() {
-    this.get('hooks').set('strapi::content-types.beforeSync', hooks.createAsyncParallelHook());
-    this.get('hooks').set('strapi::content-types.afterSync', hooks.createAsyncParallelHook());
+  async load() {
+    await this.register();
+    await this.bootstrap();
 
-    this.hook('strapi::content-types.beforeSync').register(draftAndPublishSync.disable);
-    this.hook('strapi::content-types.afterSync').register(draftAndPublishSync.enable);
+    this.isLoaded = true;
+
+    return this;
   }
 
   async register() {
-    await loaders.loadApplicationContext(this);
-
-    this.get('models').add(coreStoreModel).add(webhookModel);
-
-    this.registerInternalHooks();
-
-    this.telemetry.register();
+    for (const provider of providers) {
+      await provider.register?.(this);
+    }
 
     await this.runLifecyclesFunctions(utils.LIFECYCLES.REGISTER);
+
     // NOTE: Swap type customField for underlying data type
     utils.convertCustomFieldType(this);
 
@@ -509,13 +413,6 @@ class Strapi extends Container implements Core.Strapi {
     ];
 
     await this.db.init({ models });
-
-    if (this.config.get('server.cron.enabled', true)) {
-      const cronTasks = this.config.get('server.cron.tasks', {});
-      this.cron.add(cronTasks);
-    }
-
-    this.telemetry.bootstrap();
 
     let oldContentTypes;
     if (await this.db.getSchemaConnection().hasTable(coreStoreModel.tableName)) {
@@ -549,8 +446,6 @@ class Strapi extends Container implements Core.Strapi {
       value: this.contentTypes,
     });
 
-    await this.startWebhooks();
-
     await this.server.initMiddlewares();
     this.server.initRouting();
 
@@ -558,40 +453,38 @@ class Strapi extends Container implements Core.Strapi {
 
     await this.runLifecyclesFunctions(utils.LIFECYCLES.BOOTSTRAP);
 
-    this.cron.start();
+    for (const provider of providers) {
+      await provider.bootstrap?.(this);
+    }
 
     return this;
   }
 
-  async load() {
-    await this.register();
-    await this.bootstrap();
+  async destroy() {
+    this.log.info('Shutting down Strapi');
+    await this.runLifecyclesFunctions(utils.LIFECYCLES.DESTROY);
 
-    this.isLoaded = true;
-
-    return this;
-  }
-
-  async startWebhooks() {
-    const webhooks = await this.webhookStore?.findWebhooks();
-    if (!webhooks) {
-      return;
+    for (const provider of providers) {
+      await provider.destroy?.(this);
     }
 
-    for (const webhook of webhooks) {
-      this.webhookRunner?.add(webhook);
-    }
+    await this.server.destroy();
+
+    this.eventHub.destroy();
+
+    await this.db?.destroy();
+
+    process.removeAllListeners();
+
+    // @ts-expect-error: Allow clean delete of global.strapi to allow re-instanciation
+    delete global.strapi;
+
+    this.log.info('Strapi has been shut down');
   }
 
   async runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
     // plugins
     await this.get('modules')[lifecycleName]();
-
-    // admin
-    const adminLifecycleFunction = this.admin && this.admin[lifecycleName];
-    if (isFunction(adminLifecycleFunction)) {
-      await adminLifecycleFunction({ strapi: this });
-    }
 
     // user
     const userLifecycleFunction = this.app && this.app[lifecycleName];
@@ -621,8 +514,8 @@ class Strapi extends Container implements Core.Strapi {
 }
 
 export interface StrapiOptions {
-  appDir?: string;
-  distDir?: string;
+  appDir: string;
+  distDir: string;
   autoReload?: boolean;
   serveAdminPanel?: boolean;
 }
