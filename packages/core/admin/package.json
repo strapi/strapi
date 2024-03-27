@@ -132,7 +132,7 @@
     "react-router-dom": "6.22.3",
     "react-select": "5.8.0",
     "react-window": "1.8.10",
-    "rimraf": "3.0.2",
+    "rimraf": "5.0.5",
     "sanitize-html": "2.11.0",
     "scheduler": "0.23.0",
     "semver": "7.5.4",

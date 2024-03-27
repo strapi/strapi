@@ -7064,7 +7064,7 @@ __metadata:
     react-router-dom: "npm:6.22.3"
     react-select: "npm:5.8.0"
     react-window: "npm:1.8.10"
-    rimraf: "npm:3.0.2"
+    rimraf: "npm:5.0.5"
     sanitize-html: "npm:2.11.0"
     scheduler: "npm:0.23.0"
     semver: "npm:7.5.4"
@@ -7236,7 +7236,7 @@ __metadata:
     lodash: "npm:4.17.21"
     ora: "npm:5.4.1"
     resolve-cwd: "npm:3.0.0"
-    rimraf: "npm:3.0.2"
+    rimraf: "npm:5.0.5"
     semver: "npm:7.5.4"
     stream-chain: "npm:2.2.5"
     stream-json: "npm:1.8.0"
@@ -7410,7 +7410,7 @@ __metadata:
     prettier: "npm:2.8.4"
     prettier-plugin-packagejson: "npm:2.4.5"
     prompts: "npm:2.4.2"
-    rimraf: "npm:3.0.2"
+    rimraf: "npm:5.0.5"
     rxjs: "npm:7.8.1"
     typescript: "npm:5.3.2"
     vite: "npm:5.1.6"
@@ -8144,7 +8144,7 @@ __metadata:
     memfs: "npm:4.6.0"
     ora: "npm:5.4.1"
     prompts: "npm:2.4.2"
-    rimraf: "npm:3.0.2"
+    rimraf: "npm:5.0.5"
     semver: "npm:7.5.4"
     simple-git: "npm:3.21.0"
   bin:
@@ -17121,7 +17121,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:10.3.10":
+"glob@npm:10.3.10, glob@npm:^10.3.7":
   version: 10.3.10
   resolution: "glob@npm:10.3.10"
   dependencies:
@@ -25881,6 +25881,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rimraf@npm:5.0.5":
+  version: 5.0.5
+  resolution: "rimraf@npm:5.0.5"
+  dependencies:
+    glob: "npm:^10.3.7"
+  bin:
+    rimraf: dist/esm/bin.mjs
+  checksum: a612c7184f96258b7d1328c486b12ca7b60aa30e04229a08bbfa7e964486deb1e9a1b52d917809311bdc39a808a4055c0f950c0280fba194ba0a09e6f0d404f6
+  languageName: node
+  linkType: hard
+
 "rimraf@npm:^2.6.3":
   version: 2.7.1
   resolution: "rimraf@npm:2.7.1"
@@ -27193,7 +27204,7 @@ __metadata:
     plop: "npm:2.7.6"
     prettier: "npm:2.8.4"
     qs: "npm:6.11.1"
-    rimraf: "npm:3.0.2"
+    rimraf: "npm:5.0.5"
     stream-chain: "npm:2.2.5"
     stream-json: "npm:1.8.0"
     supertest: "npm:6.3.3"
