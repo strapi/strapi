@@ -4,9 +4,7 @@ import { WORKFLOW_MODEL_UID } from '../constants/workflows';
 import { getWorkflowContentTypeFilter } from '../utils/review-workflows';
 
 /**
- * @param {Object} oldContentTypes
- * @param {Object} contentTypes
- * @return {Promise<void>}
+ * Remove CT references from workflows if the CT is deleted
  */
 async function migrateDeletedCTInWorkflows({ oldContentTypes, contentTypes }: any) {
   const deletedContentTypes = difference(keys(oldContentTypes), keys(contentTypes)) ?? [];

@@ -1,6 +1,9 @@
 import { STAGE_TRANSITION_UID, STAGE_MODEL_UID } from '../constants/workflows';
 import { getService } from '../utils';
 
+/**
+ * Migrate review workflow stages to have RBAC permissions for all roles.
+ */
 async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes }: any) {
   const stageUID = 'admin::workflow-stage';
   const hadRolePermissions = !!oldContentTypes?.[stageUID]?.attributes?.permissions;

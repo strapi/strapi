@@ -1,5 +1,8 @@
 import { STAGE_DEFAULT_COLOR } from '../constants/workflows';
 
+/**
+ * Set the default color for stages if the color attribute was added
+ */
 async function migrateReviewWorkflowStagesColor({ oldContentTypes, contentTypes }: any) {
   // Look for CT's color attribute
   const hadColor = !!oldContentTypes?.['admin::workflow-stage']?.attributes?.color;

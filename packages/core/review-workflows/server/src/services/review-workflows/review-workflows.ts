@@ -12,7 +12,7 @@ import {
   MAX_STAGES_PER_WORKFLOW,
 } from '../../constants/workflows';
 
-import { persistTables, removePersistedTablesWithSuffix } from '../../utils/persisted-tables';
+// import { persistTables, removePersistedTablesWithSuffix } from '../../utils/persisted-tables';
 import webhookEvents from '../../constants/webhookEvents';
 
 const DEFAULT_OPTIONS = {
@@ -115,7 +115,8 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     },
     async register({ options } = { options: {} }) {
       extendReviewWorkflowContentTypes({ strapi });
-      strapi.hook('strapi::content-types.afterSync').register(persistStagesJoinTables({ strapi }));
+      // TODO: V5 persist stage tables
+      // strapi.hook('strapi::content-types.afterSync').register(persistStagesJoinTables({ strapi }));
 
       const reviewWorkflowsOptions = defaultsDeep(DEFAULT_OPTIONS, options);
       workflowsValidationService.register(reviewWorkflowsOptions);

@@ -12,6 +12,9 @@ function checkVersionThreshold(
   return semver.gte(currentVersion, thresholdVersion) && semver.lt(startVersion, thresholdVersion);
 }
 
+/**
+ * Shorten strapi stage name
+ */
 async function migrateStageAttribute({ oldContentTypes, contentTypes }: any) {
   const getRWVersion = getOr('0.0.0', `${STAGE_MODEL_UID}.options.version`);
   const oldRWVersion = getRWVersion(oldContentTypes);
