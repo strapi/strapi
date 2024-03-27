@@ -7079,7 +7079,7 @@ __metadata:
     vite-plugin-dts: "npm:3.7.3"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/data-transfer": ^5.0.0
+    "@strapi/data-transfer": ^5.0.0 ||  ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7121,7 +7121,7 @@ __metadata:
     typescript: "npm:5.2.2"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7454,7 +7454,7 @@ __metadata:
     tsconfig: "npm:5.0.0-beta.0"
     typescript: "npm:5.2.2"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0
+    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: 6.21.1
@@ -7480,7 +7480,7 @@ __metadata:
     styled-components: "npm:5.3.11"
     typescript: "npm:5.3.2"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0
+    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7540,7 +7540,7 @@ __metadata:
     styled-components: "npm:5.3.11"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7590,7 +7590,7 @@ __metadata:
     yaml: "npm:1.10.2"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0
+    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7624,7 +7624,7 @@ __metadata:
     styled-components: "npm:5.3.11"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     koa: 2.13.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
@@ -7669,7 +7669,7 @@ __metadata:
     tsconfig: "npm:5.0.0-beta.0"
     typescript: "npm:5.3.2"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0
+    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7704,7 +7704,7 @@ __metadata:
     styled-components: "npm:5.3.11"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7726,7 +7726,7 @@ __metadata:
     react-router-dom: "npm:6.22.3"
     styled-components: "npm:5.3.11"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0
+    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7780,7 +7780,7 @@ __metadata:
     styled-components: "npm:5.3.11"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/admin": ^5.0.0
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -7822,7 +7822,7 @@ __metadata:
     url-join: "npm:4.0.1"
     yup: "npm:0.32.9"
   peerDependencies:
-    "@strapi/strapi": ^5.0.0
+    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0

@@ -54,7 +54,7 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^5.0.0",
+    "@strapi/strapi": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "6.21.1",
