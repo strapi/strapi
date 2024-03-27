@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
 import { Page } from '../../components/PageHelpers';
@@ -144,7 +143,7 @@ const EditConfigurationPage = () => {
 
   return (
     <>
-      <Helmet title={`Configure ${edit.settings.displayName} Edit View | Strapi`} />
+      <Page.Title>{`Configure ${edit.settings.displayName} Edit View`}</Page.Title>
       <ConfigurationForm
         onSubmit={handleSubmit}
         attributes={schema.attributes}

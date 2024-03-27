@@ -4,7 +4,6 @@ import * as React from 'react';
 import { AnyAction } from '@reduxjs/toolkit';
 import { Layout as DSLayout } from '@strapi/design-system';
 import { produce } from 'immer';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
@@ -53,12 +52,12 @@ const Layout = () => {
   if (isLoading) {
     return (
       <>
-        <Helmet
-          title={formatMessage({
+        <Page.Title>
+          {formatMessage({
             id: getTranslation('plugin.name'),
             defaultMessage: 'Content Manager',
           })}
-        />
+        </Page.Title>
         <Page.Loading />
       </>
     );
@@ -94,12 +93,12 @@ const Layout = () => {
 
   return (
     <>
-      <Helmet
-        title={formatMessage({
+      <Page.Title>
+        {formatMessage({
           id: getTranslation('plugin.name'),
           defaultMessage: 'Content Manager',
         })}
-      />
+      </Page.Title>
       {isHistoryRoute ? (
         <Outlet />
       ) : (

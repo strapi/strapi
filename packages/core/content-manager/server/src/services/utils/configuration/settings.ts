@@ -35,7 +35,7 @@ async function isValidDefaultSort(schema: any, value: any) {
 
   const sanitizedValue = await traverse.traverseQuerySort(
     omitNonSortableAttributes,
-    { schema },
+    { schema, getModel: strapi.getModel.bind(strapi) },
     parsedValue
   );
 

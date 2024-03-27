@@ -1,8 +1,4 @@
-jest.mock('../review-workflows/workflows/content-types', () => {
-  return jest.fn(() => ({
-    migrate: jest.fn(),
-  }));
-});
+import { queryParams } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
 import workflowsServiceFactory from '../review-workflows/workflows';
@@ -10,6 +6,12 @@ import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE, STAGE_MODEL_UID } from '../../co
 import workflowCT from '../../content-types/workflow';
 import workflowStageCT from '../../content-types/workflow-stage';
 import CTS from '../../../../../server/src/content-types';
+
+jest.mock('../review-workflows/workflows/content-types', () => {
+  return jest.fn(() => ({
+    migrate: jest.fn(),
+  }));
+});
 
 const workflowMock = {
   id: 1,
@@ -81,6 +83,19 @@ const strapiMock = {
   db: {
     query: () => dbMock,
     transaction: jest.fn((func) => func()),
+  },
+  get(name: string) {
+    if (name === 'query-params') {
+      const transformer = queryParams.createTransformer({
+        getModel(name: string) {
+          return strapi.getModel(name as any);
+        },
+      });
+
+      return {
+        transform: transformer.transformQueryParams,
+      };
+    }
   },
 } as unknown as Core.LoadedStrapi;
 

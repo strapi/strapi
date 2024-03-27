@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { queryParams } from '@strapi/utils';
 import constants from '../constants';
 import { create as createPermission, toPermission } from '../../domain/permission';
 import roleContentType from '../../content-types/Role';
@@ -24,6 +25,22 @@ const {
 
 const { SUPER_ADMIN_CODE } = constants;
 
+const strapiMock = {
+  get(name: string) {
+    if (name === 'query-params') {
+      const transformer = queryParams.createTransformer({
+        getModel(name: string) {
+          return strapi.getModel(name as any);
+        },
+      });
+
+      return {
+        transform: transformer.transformQueryParams,
+      };
+    }
+  },
+};
+
 describe('Role', () => {
   describe('create', () => {
     test('Creates a role', async () => {
@@ -31,6 +48,7 @@ describe('Role', () => {
       const dbCount = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
+        ...strapiMock,
         db: { query: () => ({ create: dbCreate, count: dbCount }) },
         eventHub: {
           emit: jest.fn(),
@@ -60,6 +78,7 @@ describe('Role', () => {
       const dbFindOne = jest.fn(({ where: { id } }) => Promise.resolve(_.find([role], { id })));
 
       global.strapi = {
+        ...strapiMock,
         db: { query: () => ({ findOne: dbFindOne }) },
       } as any;
 
@@ -81,6 +100,7 @@ describe('Role', () => {
       );
       const dbCount = jest.fn(() => Promise.resolve(0));
       global.strapi = {
+        ...strapiMock,
         db: { query: () => ({ findOne: dbFindOne, count: dbCount }) },
       } as any;
 
@@ -105,6 +125,7 @@ describe('Role', () => {
       const dbFind = jest.fn(() => Promise.resolve(roles));
 
       global.strapi = {
+        ...strapiMock,
         db: { query: () => ({ findMany: dbFind }) },
       } as any;
 
@@ -130,6 +151,7 @@ describe('Role', () => {
       const findMany = jest.fn(() => Promise.resolve(roles));
 
       global.strapi = {
+        ...strapiMock,
         getModel: () => roleContentType,
         db: { query: () => ({ count: dbCount, findMany }) },
       } as any;

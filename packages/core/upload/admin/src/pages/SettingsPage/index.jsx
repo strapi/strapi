@@ -15,7 +15,7 @@ import {
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-import { Helmet } from 'react-helmet';
+
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
@@ -95,12 +95,12 @@ export const SettingsPage = () => {
 
   return (
     <Page.Main tabIndex={-1}>
-      <Helmet
-        title={formatMessage({
+      <Page.Title>
+        {formatMessage({
           id: getTrad('page.title'),
           defaultMessage: 'Settings - Media Libray',
         })}
-      />
+      </Page.Title>
       <form onSubmit={handleSubmit}>
         <HeaderLayout
           title={formatMessage({

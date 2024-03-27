@@ -5,12 +5,9 @@ import {
   contentTypes as contentTypesUtils,
   errors,
   relations as relationUtils,
-  convertQueryParams,
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
 import type { Core, Modules, Utils } from '@strapi/types';
-
-const { transformParamsToQuery } = convertQueryParams;
 
 type Decoratable<T> = T & {
   decorate(
@@ -26,7 +23,9 @@ const transformLoadParamsToQuery = (
   params: Record<string, unknown>,
   pagination = {}
 ) => {
-  const query = transformParamsToQuery(uid, { populate: { [field]: params } as any }) as any;
+  const query = strapi
+    .get('query-params')
+    .transform(uid, { populate: { [field]: params } as any }) as any;
 
   const res = {
     ...query.populate[field],
@@ -75,7 +74,7 @@ const createDefaultImplementation = ({
   async findPage(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findPage' });
 
-    const query = transformParamsToQuery(uid, wrappedParams);
+    const query = strapi.get('query-params').transform(uid, wrappedParams);
 
     const entities = await db.query(uid).findPage(query);
     return this.wrapResult(entities, { uid, action: 'findMany' });

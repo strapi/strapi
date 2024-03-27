@@ -45,7 +45,7 @@ module.exports = ({ strapi }) => ({
       return action[Symbol.for('__type__')].includes('content-api');
     };
 
-    _.forEach(strapi.api, (api, apiName) => {
+    _.forEach(strapi.apis, (api, apiName) => {
       const controllers = _.reduce(
         api.controllers,
         (acc, controller, controllerName) => {
@@ -105,7 +105,7 @@ module.exports = ({ strapi }) => ({
   async getRoutes() {
     const routesMap = {};
 
-    _.forEach(strapi.api, (api, apiName) => {
+    _.forEach(strapi.apis, (api, apiName) => {
       const routes = _.flatMap(api.routes, (route) => {
         if (_.has(route, 'routes')) {
           return route.routes;
@@ -156,7 +156,7 @@ module.exports = ({ strapi }) => ({
 
     const permissionsFoundInDB = _.uniq(_.map(dbPermissions, 'action'));
 
-    const appActions = _.flatMap(strapi.api, (api, apiName) => {
+    const appActions = _.flatMap(strapi.apis, (api, apiName) => {
       return _.flatMap(api.controllers, (controller, controllerName) => {
         return _.keys(controller).map((actionName) => {
           return `api::${apiName}.${controllerName}.${actionName}`;

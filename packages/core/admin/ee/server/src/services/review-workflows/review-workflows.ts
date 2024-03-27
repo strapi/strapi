@@ -1,3 +1,4 @@
+import type { Core } from '@strapi/types';
 import { filter, forEach, pipe, map, stubTrue, cond, defaultsDeep } from 'lodash/fp';
 import { getService } from '../../utils';
 import { getVisibleContentTypesUID, hasStageAttribute } from '../../utils/review-workflows';
@@ -13,14 +14,6 @@ import {
 
 import { persistTables, removePersistedTablesWithSuffix } from '../../utils/persisted-tables';
 import webhookEvents from '../../constants/webhookEvents';
-
-import type { Core } from '@strapi/types';
-
-const MAX_DB_TABLE_NAME_LEN = 63; // Postgres limit
-// The longest index name that Strapi can create is prefixed with '_strapi_stage_links_inv_fk', so the content type name  should be no longer than this.
-const MAX_JOIN_TABLE_NAME_SUFFIX =
-  1 /* _ */ + ENTITY_STAGE_ATTRIBUTE.length + '_links_inv_fk'.length;
-const MAX_CONTENT_TYPE_NAME_LEN = MAX_DB_TABLE_NAME_LEN - MAX_JOIN_TABLE_NAME_SUFFIX;
 
 const DEFAULT_OPTIONS = {
   numberOfWorkflows: MAX_WORKFLOWS,
@@ -71,22 +64,7 @@ const setReviewWorkflowAttributes = (contentType: any) => {
 
 function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.LoadedStrapi }) {
   const extendContentType = (contentTypeUID: any) => {
-    const assertContentTypeCompatibility = (contentType: any) =>
-      contentType.collectionName.length <= MAX_CONTENT_TYPE_NAME_LEN;
-
-    const incompatibleContentTypeAlert = (contentType: any) => {
-      strapi.log.warn(
-        `Review Workflow cannot be activated for the content type with the name '${contentType.info.displayName}' because the name exceeds the maximum length of ${MAX_CONTENT_TYPE_NAME_LEN} characters.`
-      );
-      return contentType;
-    };
-
-    const extendContentTypeIfCompatible = cond([
-      [assertContentTypeCompatibility, setReviewWorkflowAttributes],
-      [stubTrue, incompatibleContentTypeAlert],
-    ]);
-
-    strapi.get('content-types').extend(contentTypeUID, extendContentTypeIfCompatible);
+    strapi.get('content-types').extend(contentTypeUID, setReviewWorkflowAttributes);
   };
 
   pipe([
@@ -102,7 +80,10 @@ function persistStagesJoinTables({ strapi }: { strapi: Core.LoadedStrapi }) {
       // Persist the stage join table
       const { attributes, tableName } = strapi.db.metadata.get(contentTypeUID) as any;
       const joinTableName = attributes[ENTITY_STAGE_ATTRIBUTE].joinTable.name;
-      return { name: joinTableName, dependsOn: [{ name: tableName }] };
+      return {
+        name: joinTableName,
+        dependsOn: [{ name: tableName }],
+      };
     };
 
     const joinTablesToPersist = pipe([

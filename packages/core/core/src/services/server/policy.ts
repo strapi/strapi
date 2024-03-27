@@ -1,9 +1,9 @@
 import { policy as policyUtils, errors } from '@strapi/utils';
 import type { Core } from '@strapi/types';
 
-const resolvePolicies = (route: Core.Route) => {
+const createPolicicesMiddleware = (route: Core.Route, strapi: Core.Strapi) => {
   const policiesConfig = route?.config?.policies ?? [];
-  const resolvedPolicies = policyUtils.resolve(policiesConfig, route.info);
+  const resolvedPolicies = strapi.get('policies').resolve(policiesConfig, route.info);
 
   const policiesMiddleware: Core.MiddlewareHandler = async (ctx, next) => {
     const context = policyUtils.createPolicyContext('koa', ctx);
@@ -19,7 +19,7 @@ const resolvePolicies = (route: Core.Route) => {
     await next();
   };
 
-  return [policiesMiddleware];
+  return policiesMiddleware;
 };
 
-export { resolvePolicies };
+export { createPolicicesMiddleware };

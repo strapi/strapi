@@ -1,7 +1,7 @@
 import { createCommand } from 'commander';
 import fs from 'fs';
 import tsUtils from '@strapi/typescript-utils';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../types';
 import { runAction } from '../utils/helpers';
@@ -20,7 +20,7 @@ const action = async () => {
       `${outDir} directory not found. Please run the build command before starting your application`
     );
 
-  strapiFactory({ appDir, distDir }).start();
+  createStrapi({ appDir, distDir }).start();
 };
 
 /**
