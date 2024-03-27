@@ -36,18 +36,30 @@ describe('Upload service', () => {
 
     test('Replaces reserved and unsafe characters for URLs and files in hash', async () => {
       const fileData = {
-        filename: 'File%&Näme<>:"|?*.png',
+        filename: 'File%&Näme.png',
         type: 'image/png',
         size: 1000 * 1000,
       };
 
       expect(await uploadService.formatFileInfo(fileData)).toMatchObject({
-        name: 'File%&Näme<>:"|?*.png',
+        name: 'File%&Näme.png',
         hash: expect.stringContaining('File_and_Naeme'),
         ext: '.png',
         mime: 'image/png',
         size: 1000,
       });
+    });
+
+    test('Prevents invalid characters in file name', async () => {
+      const fileData = {
+        filename: 'filename.png\u0000',
+        type: 'image/png',
+        size: 1000 * 1000,
+      };
+
+      expect(uploadService.formatFileInfo(fileData)).rejects.toThrowError(
+        'File name contains invalid characters'
+      );
     });
 
     test('Overrides name with fileInfo', async () => {

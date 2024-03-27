@@ -147,7 +147,7 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
         });
 
         await mapAsync(actions, async (action: ReleaseAction) => {
-          if (action.entry) {
+          if (action.entry && action.release) {
             const populatedEntry = await getPopulatedEntry(contentTypeUID, action.entry.id, {
               strapi,
             });
@@ -177,5 +177,66 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
         return getService('release', { strapi }).updateReleaseStatus(releaseId);
       });
     });
+  }
+}
+
+export async function disableContentTypeLocalized({ oldContentTypes, contentTypes }: Input) {
+  if (!oldContentTypes) {
+    return;
+  }
+
+  for (const uid in contentTypes) {
+    if (!oldContentTypes[uid]) {
+      continue;
+    }
+
+    const oldContentType = oldContentTypes[uid];
+    const contentType = contentTypes[uid];
+
+    const i18nPlugin = strapi.plugin('i18n');
+    const { isLocalizedContentType } = i18nPlugin.service('content-types');
+
+    // if i18N is disabled remove non default locales before sync
+    if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {
+      await strapi.db
+        .queryBuilder(RELEASE_ACTION_MODEL_UID)
+        .update({
+          locale: null,
+        })
+        .where({ contentType: uid })
+        .execute();
+    }
+  }
+}
+
+export async function enableContentTypeLocalized({ oldContentTypes, contentTypes }: Input) {
+  if (!oldContentTypes) {
+    return;
+  }
+
+  for (const uid in contentTypes) {
+    if (!oldContentTypes[uid]) {
+      continue;
+    }
+
+    const oldContentType = oldContentTypes[uid];
+    const contentType = contentTypes[uid];
+
+    const i18nPlugin = strapi.plugin('i18n');
+    const { isLocalizedContentType } = i18nPlugin.service('content-types');
+    const { getDefaultLocale } = i18nPlugin.service('locales');
+
+    // if i18N is enabled remove non default locales before sync
+    if (!isLocalizedContentType(oldContentType) && isLocalizedContentType(contentType)) {
+      const defaultLocale = await getDefaultLocale();
+
+      await strapi.db
+        .queryBuilder(RELEASE_ACTION_MODEL_UID)
+        .update({
+          locale: defaultLocale,
+        })
+        .where({ contentType: uid })
+        .execute();
+    }
   }
 }

@@ -265,7 +265,12 @@ export const ReleaseDetailsLayout = ({
   };
 
   const handleRefresh = () => {
-    dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
+    dispatch(
+      releaseApi.util.invalidateTags([
+        { type: 'ReleaseAction', id: 'LIST' },
+        { type: 'Release', id: releaseId },
+      ])
+    );
   };
 
   const getCreatedByUser = () => {
@@ -315,7 +320,6 @@ export const ReleaseDetailsLayout = ({
   const totalEntries = release.actions.meta.count || 0;
   const hasCreatedByUser = Boolean(getCreatedByUser());
 
-  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   const isScheduled = release.scheduledAt && release.timezone;
   const numberOfEntriesText = formatMessage(
     {
@@ -354,8 +358,7 @@ export const ReleaseDetailsLayout = ({
         subtitle={
           <Flex gap={2} lineHeight={6}>
             <Typography textColor="neutral600" variant="epsilon">
-              {numberOfEntriesText +
-                (IsSchedulingEnabled && isScheduled ? ` - ${scheduledText}` : '')}
+              {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
             </Typography>
             <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
           </Flex>
@@ -837,7 +840,7 @@ const ReleaseDetailsPage = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { push } = useHistory();
+  const { replace } = useHistory();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
@@ -875,7 +878,7 @@ const ReleaseDetailsPage = () => {
   const scheduledAt =
     releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
   // Just get the date and time to display without considering updated timezone time
-  const date = scheduledAt ? new Date(format(scheduledAt, 'yyyy-MM-dd')) : null;
+  const date = scheduledAt ? format(scheduledAt, 'yyyy-MM-dd') : null;
   const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
@@ -918,7 +921,7 @@ const ReleaseDetailsPage = () => {
     });
 
     if ('data' in response) {
-      push('/plugins/content-releases');
+      replace('/plugins/content-releases');
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
