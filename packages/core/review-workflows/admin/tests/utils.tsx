@@ -10,6 +10,7 @@ import {
   act,
   screen,
   type RenderOptions,
+  renderHook,
 } from '@strapi/admin/strapi-admin/test';
 
 const storeConfig: ConfigureStoreOptions = {
@@ -31,4 +32,4 @@ const render = (
     providerOptions: { storeConfig },
   });
 
-export { render, waitFor, act, screen, server };
+export { renderHook, render, waitFor, act, screen, server };

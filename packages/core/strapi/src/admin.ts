@@ -6,6 +6,8 @@ import email from '@strapi/plugin-email/strapi-admin';
 import upload from '@strapi/plugin-upload/strapi-admin';
 import i18n from '@strapi/plugin-i18n/strapi-admin';
 import contentReleases from '@strapi/content-releases/strapi-admin';
+// @ts-expect-error – No types, yet.
+import reviewWorkflows from '@strapi/review-workflows/strapi-admin';
 
 const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderAdminArgs) => {
   return renderAdmin(mountNode, {
@@ -20,6 +22,7 @@ const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderA
       // @ts-expect-error – TODO: fix this, the "types" folder has it wrong.
       contentReleases,
       i18n,
+      reviewWorkflows,
       ...plugins,
     },
   });

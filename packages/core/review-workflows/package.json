@@ -42,23 +42,25 @@
   "scripts": {
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
-    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
-    "test:ts": "run -T tsc -p tsconfig.json",
-    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
-    "test:ts:front": "run -T tsc -p admin/tsconfig.json && run -T tsc -p ee/admin/tsconfig.json",
-    "test:unit": "run -T jest",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.16.0",
     "@strapi/icons": "1.16.0",
+    "axios": "1.6.8",
+    "react-helmet": "^6.1.0",
     "react-intl": "6.6.2",
-    "react-redux": "8.1.3"
+    "react-redux": "8.1.3",
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@strapi/admin": "5.0.0-beta.0",
     "@strapi/pack-up": "5.0.0-beta.0",
+    "@strapi/plugin-content-manager": "5.0.0-beta.0",
+    "@strapi/types": "5.0.0-beta.0",
+    "@strapi/utils": "5.0.0-beta.0",
+    "msw": "1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "6.22.3",
@@ -66,6 +68,7 @@
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0",
+    "@strapi/plugin-content-manager": "^5.0.0",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
@@ -74,5 +77,12 @@
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
+  },
+  "strapi": {
+    "name": "review-workflows",
+    "description": "Review workflows for your content",
+    "kind": "plugin",
+    "displayName": "Review Workflows",
+    "required": true
   }
 }

@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { ConfirmDialog, useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
   AccordionContent,
@@ -26,11 +27,8 @@ import { useIntl } from 'react-intl';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
-import { ConfirmDialog } from '../../../../../../../../admin/src/components/ConfirmDialog';
 import { useDragAndDrop } from '../../../../../../../../admin/src/content-manager/hooks/useDragAndDrop';
 import { NotAllowedInput } from '../../../../../../../../admin/src/content-manager/pages/EditView/components/FormInputs/NotAllowed';
-import { useNotification } from '../../../../../../../../admin/src/features/Notifications';
-import { useTracking } from '../../../../../../../../admin/src/features/Tracking';
 import { StagePermission } from '../../../../../../../../shared/contracts/review-workflows';
 import {
   cloneStage,

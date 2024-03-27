@@ -3,7 +3,7 @@ import { renderHook, waitFor } from '@tests/utils';
 import { useReviewWorkflows } from '../useReviewWorkflows';
 
 describe('useReviewWorkflows', () => {
-  test('fetches many workflows', async () => {
+  it('fetches many workflows', async () => {
     const { result } = renderHook(() => useReviewWorkflows());
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -24,7 +24,7 @@ describe('useReviewWorkflows', () => {
     `);
   });
 
-  test('fetches one workflow', async () => {
+  it('fetches one workflow', async () => {
     const { result } = renderHook(() => useReviewWorkflows({ id: 1 }));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
@@ -44,4 +44,12 @@ describe('useReviewWorkflows', () => {
       ]
     `);
   });
+
+  it.todo('creates a workflow');
+
+  it.todo('updates a workflow');
+
+  it.todo('deletes a workflow');
+
+  it.todo('handles errors');
 });

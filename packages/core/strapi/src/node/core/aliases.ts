@@ -23,6 +23,7 @@ const devAliases: Record<string, string> = {
   '@strapi/plugin-i18n/strapi-admin': './packages/plugins/i18n/admin/src',
   '@strapi/plugin-sentry/strapi-admin': './packages/plugins/sentry/admin/src',
   '@strapi/plugin-users-permissions/strapi-admin': './packages/plugins/users-permissions/admin/src',
+  '@strapi/review-workflows/strapi-admin': './packages/core/review-workflows/admin/src',
 };
 
 const getMonorepoAliases = ({ monorepo }: { monorepo?: StrapiMonorepo }) => {

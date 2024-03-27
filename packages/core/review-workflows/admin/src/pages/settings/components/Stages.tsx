@@ -1,14 +1,14 @@
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
-import { useTracking } from '../../../../../../../../admin/src/features/Tracking';
-import { Stage as StageType } from '../../../../../../../../shared/contracts/review-workflows';
+import { Stage as IStage } from '../../../../../shared/contracts/review-workflows';
 import { addStage } from '../actions';
 
 import { AddStage } from './AddStage';
-import { Stage } from './Stage';
+// import { Stage } from './Stage';
 
 const Background = styled(Box)`
   transform: translateX(-50%);
@@ -17,7 +17,7 @@ const Background = styled(Box)`
 export type StagesProps = {
   canDelete?: boolean;
   canUpdate?: boolean;
-  stages?: StageType[];
+  stages?: IStage[];
 };
 
 export const Stages = ({ canDelete = true, canUpdate = true, stages = [] }: StagesProps) => {
@@ -52,7 +52,7 @@ export const Stages = ({ canDelete = true, canUpdate = true, stages = [] }: Stag
 
             return (
               <Box key={`stage-${id}`} as="li">
-                <Stage
+                {/* <Stage
                   id={id}
                   index={index}
                   isOpen={!stage.id}
@@ -60,7 +60,7 @@ export const Stages = ({ canDelete = true, canUpdate = true, stages = [] }: Stag
                   canReorder={stages.length > 1}
                   canUpdate={canUpdate}
                   stagesCount={stages.length}
-                />
+                /> */}
               </Box>
             );
           })}
