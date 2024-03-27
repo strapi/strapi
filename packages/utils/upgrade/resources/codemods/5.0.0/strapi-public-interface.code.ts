@@ -1,11 +1,44 @@
 import { Transform, JSCodeshift, Collection } from 'jscodeshift';
 
+/*
+This codemod transforms @strapi/strapi imports to use the new public interface.
+
+ESM
+Before:
+
+import strapi from '@strapi/strapi';
+strapi();
+
+After:
+
+import { createStrapi } from '@strapi/strapi'; // keeps the default import
+createStrapi();
+
+---
+
+Common JS
+Before:
+
+const strapi = require('@strapi/strapi');
+strapi();
+
+After:
+
+const strapi = require('@strapi/strapi');
+strapi.createStrapi();
+
+*/
+
 const transformStrapiImport = (root: Collection, j: JSCodeshift) => {
   root.find(j.ImportDefaultSpecifier).forEach((path) => {
     if (path.parent.value.source.value === '@strapi/strapi') {
+      const newSpecifiers = path.parent.value.specifiers.filter(
+        (specifier) => specifier.type !== 'ImportDefaultSpecifier'
+      );
+
       j(path.parent).replaceWith(
         j.importDeclaration(
-          [...path.parent.value.specifiers, j.importSpecifier(j.identifier('createStrapi'))],
+          [...newSpecifiers, j.importSpecifier(j.identifier('createStrapi'))],
           j.literal('@strapi/strapi')
         )
       );
