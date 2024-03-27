@@ -128,9 +128,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       { contentType }
     );
 
-    const doc = await strapi.db.query(uid).create({ ...query, data: entryData });
-
-    return doc;
+    return strapi.db.query(uid).create({ ...query, data: entryData });
   }
 
   async function create(params = {} as any) {
@@ -364,7 +362,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return { versions: draftEntries };
   }
 
-  return {
+  const serviceInstance = {
     findMany: wrapInTransaction(findMany),
     findFirst: wrapInTransaction(findFirst),
     findOne: wrapInTransaction(findOne),
@@ -373,8 +371,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     clone: wrapInTransaction(clone),
     update: wrapInTransaction(update),
     count: wrapInTransaction(count),
-    publish: hasDraftAndPublish ? wrapInTransaction(publish) : (undefined as any),
-    unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
-    discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
   };
+
+  if (hasDraftAndPublish) {
+    Object.assign(serviceInstance, {
+      publish: wrapInTransaction(publish),
+      unpublish: wrapInTransaction(unpublish),
+      discardDraft: wrapInTransaction(discardDraft),
+    });
+  }
+
+  return serviceInstance;
 };
