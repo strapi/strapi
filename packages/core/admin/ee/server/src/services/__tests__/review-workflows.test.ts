@@ -94,7 +94,7 @@ const strapiMock = {
   webhookStore: {
     addAllowedEvent: jest.fn(),
   },
-} as unknown as Core.LoadedStrapi;
+} as unknown as Core.Strapi;
 
 const reviewWorkflowsService = reviewWorkflowsServiceFactory({ strapi: strapiMock });
 

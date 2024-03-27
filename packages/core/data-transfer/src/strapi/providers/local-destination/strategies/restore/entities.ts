@@ -10,7 +10,7 @@ import * as queries from '../../../../queries';
 import { resolveComponentUID } from '../../../../../utils/components';
 
 interface IEntitiesRestoreStreamOptions {
-  strapi: Core.LoadedStrapi;
+  strapi: Core.Strapi;
   updateMappingTable<TSchemaUID extends UID.Schema>(
     type: TSchemaUID,
     oldID: number,

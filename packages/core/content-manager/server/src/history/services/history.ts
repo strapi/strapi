@@ -9,7 +9,7 @@ import { getSchemaAttributesDiff } from './utils';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
-const createHistoryService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const state: {
     deleteExpiredJob: ReturnType<typeof scheduleJob> | null;
     isInitialized: boolean;
@@ -20,7 +20,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
   const query = strapi.db.query(HISTORY_VERSION_UID);
 
-  const getRetentionDays = (strapi: Core.LoadedStrapi) => {
+  const getRetentionDays = (strapi: Core.Strapi) => {
     const licenseRetentionDays =
       strapi.ee.features.get('cms-content-history')?.options.retentionDays;
     const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');

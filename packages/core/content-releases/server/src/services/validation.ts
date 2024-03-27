@@ -11,7 +11,7 @@ export class AlreadyOnReleaseError extends errors.ApplicationError<'AlreadyOnRel
   }
 }
 
-const createReleaseValidationService = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
+const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => ({
   async validateUniqueEntry(
     releaseId: CreateReleaseAction.Request['params']['releaseId'],
     releaseActionArgs: CreateReleaseAction.Request['body']

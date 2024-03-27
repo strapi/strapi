@@ -17,19 +17,19 @@ export interface Strapi extends Container {
   eventHub: Modules.EventHub.EventHub;
   startupLogger: StartupLogger;
   cron: Modules.Cron.CronService;
-  webhookRunner?: Modules.WebhookRunner.WebhookRunner;
-  webhookStore?: Modules.WebhookStore.WebhookStore;
-  store?: Modules.CoreStore.CoreStore;
+  webhookRunner: Modules.WebhookRunner.WebhookRunner;
+  webhookStore: Modules.WebhookStore.WebhookStore;
+  store: Modules.CoreStore.CoreStore;
   /**
    * @deprecated will be removed in the next major
    */
-  entityValidator?: Modules.EntityValidator.EntityValidator;
-  entityService?: Modules.EntityService.EntityService;
+  entityValidator: Modules.EntityValidator.EntityValidator;
+  entityService: Modules.EntityService.EntityService;
   /**
    * @description interact with documents within Strapi, this API is currently in beta and is subject to change in the future
    * @beta
    */
-  documents?: Modules.Documents.Service;
+  documents: Modules.Documents.Service;
   telemetry: Modules.Metrics.TelemetryService;
   requestContext: Modules.RequestContext.RequestContext;
   customFields: Modules.CustomFields.CustomFields;
@@ -75,7 +75,7 @@ export interface Strapi extends Container {
   contentAPI: Modules.ContentAPI.ContentApi;
   sanitizers: Modules.Sanitizers.SanitizersRegistry;
   validators: Modules.Validators.ValidatorsRegistry;
-  load(): Promise<Strapi & Required<Strapi>>;
+  load(): Promise<Strapi>;
   start(): Promise<Strapi>;
   destroy(): Promise<void>;
   sendStartupTelemetry(): void;
@@ -162,5 +162,3 @@ export interface StrapiOptions {
 export interface StrapiConstructor {
   new (options?: StrapiOptions): Strapi;
 }
-
-export type LoadedStrapi = Required<Strapi>;

@@ -15,6 +15,9 @@ const mockGraphQlShadowCrud = jest.fn(() => ({
 }));
 describe('register', () => {
   const strapi = {
+    service() {
+      return this.admin.services.permission;
+    },
     ee: {
       features: {
         isEnabled: jest.fn(),

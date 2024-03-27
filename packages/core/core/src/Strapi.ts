@@ -4,6 +4,7 @@ import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 import { hooks } from '@strapi/utils';
+
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
 import loadConfiguration from './configuration';
@@ -97,8 +98,6 @@ const reloader = (strapi: Strapi) => {
   return reload;
 };
 
-export type LoadedStrapi = Required<Strapi>;
-
 class Strapi extends Container implements Core.Strapi {
   server: Modules.Server.Server;
 
@@ -112,20 +111,20 @@ class Strapi extends Container implements Core.Strapi {
 
   cron: Modules.Cron.CronService;
 
-  webhookRunner?: WebhookRunner;
+  webhookRunner: WebhookRunner;
 
-  webhookStore?: Modules.WebhookStore.WebhookStore;
+  webhookStore: Modules.WebhookStore.WebhookStore;
 
-  store?: Modules.CoreStore.CoreStore;
+  store: Modules.CoreStore.CoreStore;
 
-  entityValidator?: Modules.EntityValidator.EntityValidator;
+  entityValidator: Modules.EntityValidator.EntityValidator;
 
   /**
    * @deprecated `strapi.entityService` will be removed in the next major version
    */
-  entityService?: Modules.EntityService.EntityService;
+  entityService: Modules.EntityService.EntityService;
 
-  documents?: Modules.Documents.Service;
+  documents: Modules.Documents.Service;
 
   telemetry: Modules.Metrics.TelemetryService;
 
@@ -221,6 +220,25 @@ class Strapi extends Container implements Core.Strapi {
         },
       })
     );
+
+    // init webhook runner
+    this.webhookRunner = createWebhookRunner({
+      eventHub: this.eventHub,
+      logger: this.log,
+      configuration: this.config.get('server.webhooks', {}),
+      fetch: this.fetch,
+    });
+
+    this.store = createCoreStore({ db: this.db });
+    this.webhookStore = createWebhookStore({ db: this.db });
+
+    this.entityValidator = entityValidator;
+    this.entityService = createEntityService({
+      strapi: this,
+      db: this.db,
+    });
+
+    this.documents = createDocumentService(this);
 
     utils.createUpdateNotifier(this).notify();
 
@@ -470,14 +488,6 @@ class Strapi extends Container implements Core.Strapi {
 
     this.get('models').add(coreStoreModel).add(webhookModel);
 
-    // init webhook runner
-    this.webhookRunner = createWebhookRunner({
-      eventHub: this.eventHub,
-      logger: this.log,
-      configuration: this.config.get('server.webhooks', {}),
-      fetch: this.fetch,
-    });
-
     this.registerInternalHooks();
 
     this.telemetry.register();
@@ -499,17 +509,6 @@ class Strapi extends Container implements Core.Strapi {
     ];
 
     await this.db.init({ models });
-
-    this.store = createCoreStore({ db: this.db });
-    this.webhookStore = createWebhookStore({ db: this.db });
-
-    this.entityValidator = entityValidator;
-    this.entityService = createEntityService({
-      strapi: this,
-      db: this.db,
-    });
-
-    this.documents = createDocumentService(this);
 
     if (this.config.get('server.cron.enabled', true)) {
       const cronTasks = this.config.get('server.cron.tasks', {});
@@ -570,7 +569,7 @@ class Strapi extends Container implements Core.Strapi {
 
     this.isLoaded = true;
 
-    return this as this & Required<Core.Strapi>;
+    return this;
   }
 
   async startWebhooks() {

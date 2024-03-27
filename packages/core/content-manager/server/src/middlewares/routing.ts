@@ -17,7 +17,7 @@ export default async (ctx: Context, next: Next) => {
 
   let target;
   if (!ct.plugin || ct.plugin === 'admin') {
-    target = strapi.admin;
+    target = strapi.admin!;
   } else {
     target = strapi.plugin(ct.plugin);
   }
