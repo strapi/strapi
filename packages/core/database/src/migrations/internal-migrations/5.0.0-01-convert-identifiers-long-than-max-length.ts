@@ -22,7 +22,7 @@ type IdentifierDiffs = {
 };
 
 export const renameIdentifiersLongerThanMaxLength: Migration = {
-  name: '5.0.0-01-rename-identifiers-longer-than-max-length',
+  name: '5.0.0-rename-identifiers-longer-than-max-length',
   async up(knex, db) {
     const md = db.metadata;
 
