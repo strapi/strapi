@@ -63,8 +63,10 @@ const LinkCard = styled(Link)`
   display: block;
 `;
 
-const CapitalizeRelativeTime = styled(RelativeTime)`
-  text-transform: capitalize;
+const FirstLetterStyle = styled(Box)`
+  &::first-letter {
+    text-transform: uppercase;
+  }
 `;
 
 const getBadgeProps = (status: Release['status']) => {
@@ -141,7 +143,9 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">
                   {scheduledAt ? (
-                    <CapitalizeRelativeTime timestamp={new Date(scheduledAt)} />
+                    <FirstLetterStyle>
+                      <RelativeTime timestamp={new Date(scheduledAt)} />
+                    </FirstLetterStyle>
                   ) : (
                     formatMessage({
                       id: 'content-releases.pages.Releases.not-scheduled',
