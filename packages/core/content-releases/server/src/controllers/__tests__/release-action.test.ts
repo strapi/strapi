@@ -114,22 +114,12 @@ describe('Release Action controller', () => {
           releaseId: 1,
         },
         request: {
-          body: [
-            {
-              entry: {
-                id: 1,
-                contentType: 'api::contentTypeA.contentTypeA',
-              },
-              type: 'publish',
-            },
-            {
-              entry: {
-                id: 2,
-                contentType: 'api::contentTypeB.contentTypeB',
-              },
-              type: 'unpublish',
-            },
-          ],
+          body: {
+            locale: 'en',
+            type: 'publish',
+            contentType: 'api::contentTypeA.contentTypeA',
+            entries: [1, 2],
+          },
         },
       };
 
@@ -153,15 +143,12 @@ describe('Release Action controller', () => {
           releaseId: 1,
         },
         request: {
-          body: [
-            {
-              entry: {
-                id: 1,
-                contentType: 'api::contentTypeA.contentTypeA',
-              },
-              type: 'publish',
-            },
-          ],
+          body: {
+            locale: 'en',
+            type: 'publish',
+            contentType: 'api::contentTypeA.contentTypeA',
+            entries: [1],
+          },
         },
       };
 
