@@ -2,7 +2,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const rimraf = require('rimraf');
+const { rimraf } = require('rimraf');
 const execa = require('execa');
 const generateNew = require('../../packages/generators/app/dist/generate-new');
 
@@ -10,13 +10,8 @@ const generateNew = require('../../packages/generators/app/dist/generate-new');
  * Deletes a test app
  * @param {string} appPath - name of the app / folder where the app is located
  */
-const cleanTestApp = (appPath) => {
-  return new Promise((resolve, reject) => {
-    rimraf(path.resolve(appPath), (err) => {
-      if (err) reject(err);
-      resolve();
-    });
-  });
+const cleanTestApp = async (appPath) => {
+  await rimraf(path.resolve(appPath));
 };
 
 /**

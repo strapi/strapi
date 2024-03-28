@@ -14,7 +14,6 @@ import {
   Tabs,
 } from '@strapi/design-system';
 import { ExternalLink, GlassesSquare } from '@strapi/icons';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
 import { ContentBox } from '../../components/ContentBox';
@@ -166,12 +165,12 @@ const MarketplacePage = () => {
   return (
     <Layout>
       <Page.Main>
-        <Helmet
-          title={formatMessage({
-            id: 'admin.pages.MarketPlacePage.helmet',
+        <Page.Title>
+          {formatMessage({
+            id: 'admin.pages.MarketPlacePage.head',
             defaultMessage: 'Marketplace - Plugins',
           })}
-        />
+        </Page.Title>
         <PageHeader isOnline={isOnline} npmPackageType={npmPackageType} />
         <ContentLayout>
           <TabGroup

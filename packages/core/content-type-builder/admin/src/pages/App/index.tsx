@@ -5,7 +5,6 @@ import { lazy, Suspense, useEffect, useRef } from 'react';
 
 import { Page, useGuidedTour } from '@strapi/admin/strapi-admin';
 import { Layout } from '@strapi/design-system';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
@@ -34,9 +33,10 @@ const App = () => {
     }
   }, []);
 
+  // FIXME Error here
   return (
     <Page.Protect permissions={PERMISSIONS.main}>
-      <Helmet title={title} />
+      <Page.Title>{title}</Page.Title>
       <AutoReloadOverlayBlockerProvider>
         <FormModalNavigationProvider>
           {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}

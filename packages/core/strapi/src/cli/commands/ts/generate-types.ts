@@ -1,6 +1,6 @@
 import { createCommand } from 'commander';
 import tsUtils from '@strapi/typescript-utils';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
@@ -18,8 +18,8 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
     process.exit(1);
   }
 
-  const appContext = await strapiFactory.compile({ ignoreDiagnostics: true });
-  const app = await strapiFactory(appContext).register();
+  const appContext = await compileStrapi({ ignoreDiagnostics: true });
+  const app = await createStrapi(appContext).register();
 
   await tsUtils.generators.generate({
     strapi: app,

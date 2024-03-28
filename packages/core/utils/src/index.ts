@@ -24,5 +24,6 @@ export * as errors from './errors';
 export * as contentTypes from './content-types';
 export * as relations from './relations';
 export * as hooks from './hooks';
+export * from './zod';
 
 export * from './primitives';

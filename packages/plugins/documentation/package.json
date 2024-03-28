@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "5.0.0-beta.0",
+  "version": "5.0.0-beta.1",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "repository": {
     "type": "git",
@@ -53,10 +53,10 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/admin": "5.0.0-beta.0",
+    "@strapi/admin": "5.0.0-beta.1",
     "@strapi/design-system": "1.16.0",
     "@strapi/icons": "1.16.0",
-    "@strapi/utils": "5.0.0-beta.0",
+    "@strapi/utils": "5.0.0-beta.1",
     "axios": "1.6.8",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
@@ -66,7 +66,6 @@
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
     "path-to-regexp": "6.2.1",
-    "react-helmet": "^6.1.0",
     "react-intl": "6.6.2",
     "swagger-ui-dist": "4.19.0",
     "yaml": "1.10.2",
@@ -74,10 +73,10 @@
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "^10.1.0",
-    "@strapi/admin-test-utils": "5.0.0-beta.0",
-    "@strapi/pack-up": "5.0.0-beta.0",
-    "@strapi/strapi": "5.0.0-beta.0",
-    "@strapi/types": "5.0.0-beta.0",
+    "@strapi/admin-test-utils": "5.0.0-beta.1",
+    "@strapi/pack-up": "5.0.0-beta.1",
+    "@strapi/strapi": "5.0.0-beta.1",
+    "@strapi/types": "5.0.0-beta.1",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/koa": "2.13.4",
@@ -94,7 +93,7 @@
     "styled-components": "5.3.11"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^5.0.0",
+    "@strapi/strapi": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

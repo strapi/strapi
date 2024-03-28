@@ -25,7 +25,6 @@ import {
   useRBAC,
 } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -149,8 +148,8 @@ export const ProvidersPage = () => {
 
   return (
     <Layout>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -159,7 +158,7 @@ export const ProvidersPage = () => {
             }),
           }
         )}
-      />
+      </Page.Title>
       <Page.Main>
         <HeaderLayout
           title={formatMessage({

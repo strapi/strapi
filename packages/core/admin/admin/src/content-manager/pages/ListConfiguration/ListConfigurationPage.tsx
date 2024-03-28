@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { ContentLayout, Divider, Flex, Layout, Main } from '@strapi/design-system';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router-dom';
 
@@ -121,7 +120,7 @@ const ListConfiguration = () => {
 
   return (
     <Layout>
-      <Helmet title={`Configure ${list.settings.displayName} List View | Strapi`} />
+      <Page.Title>{`Configure ${list.settings.displayName} List View`}</Page.Title>
       <Main>
         <Form initialValues={initialValues} onSubmit={handleSubmit} method="PUT">
           <Header

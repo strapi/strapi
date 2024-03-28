@@ -7,7 +7,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Eye } from '@strapi/icons';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 
 import { Filters } from '../../../../../../../admin/src/components/Filters';
@@ -99,8 +98,8 @@ const ListPage = () => {
 
   return (
     <Page.Main aria-busy={isLoading}>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -109,7 +108,7 @@ const ListPage = () => {
             }),
           }
         )}
-      />
+      </Page.Title>
       <HeaderLayout
         title={formatMessage({
           id: 'global.auditLogs',

@@ -11,7 +11,6 @@ import {
 } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
-import { Helmet } from 'react-helmet';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
@@ -118,14 +117,14 @@ const ListPageCE = () => {
 
   return (
     <Page.Main aria-busy={isLoading}>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Users',
           }
         )}
-      />
+      </Page.Title>
       <HeaderLayout
         primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
         title={title}
