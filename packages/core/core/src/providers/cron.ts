@@ -1,12 +1,11 @@
-import type { Core } from '@strapi/types';
-
+import { defineProvider } from './provider';
 import createCronService from '../services/cron';
 
-export default {
-  init(strapi: Core.Strapi) {
+export default defineProvider({
+  init(strapi) {
     strapi.add('cron', () => createCronService());
   },
-  async bootstrap(strapi: Core.Strapi) {
+  async bootstrap(strapi) {
     if (strapi.config.get('server.cron.enabled', true)) {
       const cronTasks = strapi.config.get('server.cron.tasks', {});
       strapi.get('cron').add(cronTasks);
@@ -14,7 +13,7 @@ export default {
 
     strapi.get('cron').start();
   },
-  async destroy(strapi: Core.Strapi) {
+  async destroy(strapi) {
     strapi.get('cron').destroy();
   },
-};
+});

@@ -1,23 +1,22 @@
-import type { Core } from '@strapi/types';
-
+import { defineProvider } from './provider';
 import loadAdmin from '../loaders/admin';
 
-export default {
-  init(strapi: Core.Strapi) {
+export default defineProvider({
+  init(strapi) {
     strapi.add('admin', () => require('@strapi/admin/strapi-server'));
   },
 
-  async register(strapi: Core.Strapi) {
+  async register(strapi) {
     await loadAdmin(strapi);
 
     await strapi.get('admin')?.register({ strapi });
   },
 
-  async bootstrap(strapi: Core.Strapi) {
+  async bootstrap(strapi) {
     await strapi.get('admin')?.bootstrap({ strapi });
   },
 
-  async destroy(strapi: Core.Strapi) {
+  async destroy(strapi) {
     await strapi.get('admin')?.destroy({ strapi });
   },
-};
+});

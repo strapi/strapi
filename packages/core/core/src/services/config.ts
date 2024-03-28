@@ -9,7 +9,7 @@ type Config = Record<string, unknown>;
 
 export const createConfigProvider = (
   initialConfig: Record<string, unknown> = {},
-  strapi?: Core.Strapi | Core.Strapi
+  strapi?: Core.Strapi
 ): Core.ConfigProvider => {
   const state: State = {
     config: { ...initialConfig }, // not deep clone because it would break some config

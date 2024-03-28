@@ -55,7 +55,7 @@ export const createTestSetup = async (
   bootstrapBuilder(resources, builder);
   await builder.build();
 
-  const strapi = (await createStrapiInstance()) as Core.Strapi;
+  const strapi = await createStrapiInstance();
   const rqAdmin = await createAuthRequest({ strapi });
   const data = await builder.sanitizedFixtures(strapi);
 

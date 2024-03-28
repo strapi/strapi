@@ -1,18 +1,17 @@
-import type { Core } from '@strapi/types';
-
+import { defineProvider } from './provider';
 import createTelemetry from '../services/metrics';
 
-export default {
-  init(strapi: Core.Strapi) {
+export default defineProvider({
+  init(strapi) {
     strapi.add('telemetry', () => createTelemetry(strapi));
   },
-  async register(strapi: Core.Strapi) {
+  async register(strapi) {
     strapi.get('telemetry').register();
   },
-  async bootstrap(strapi: Core.Strapi) {
+  async bootstrap(strapi) {
     strapi.get('telemetry').bootstrap();
   },
-  async destroy(strapi: Core.Strapi) {
+  async destroy(strapi) {
     strapi.get('telemetry').destroy();
   },
-};
+});

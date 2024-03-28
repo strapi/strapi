@@ -43,6 +43,7 @@ export const createUpdateNotifier = (strapi: Core.Strapi) => {
   } catch {
     // we don't have write access to the file system
     // we silence the error
+    return;
   }
 
   const checkUpdate = async (checkInterval: number) => {
@@ -83,21 +84,17 @@ export const createUpdateNotifier = (strapi: Core.Strapi) => {
     console.log(message);
   };
 
-  function notify({ checkInterval = CHECK_INTERVAL, notifInterval = NOTIF_INTERVAL } = {}) {
-    // TODO v6: Remove this warning
-    if (env.bool('STRAPI_DISABLE_UPDATE_NOTIFICATION', false)) {
-      strapi.log.warn(
-        'STRAPI_DISABLE_UPDATE_NOTIFICATION is no longer supported. Instead, set logger.updates.enabled to false in your server configuration.'
-      );
-    }
-
-    if (!strapi.config.get('server.logger.updates.enabled') || !config) {
-      return;
-    }
-
-    display(notifInterval);
-    checkUpdate(checkInterval); // doesn't need to await
+  // TODO v6: Remove this warning
+  if (env.bool('STRAPI_DISABLE_UPDATE_NOTIFICATION', false)) {
+    strapi.log.warn(
+      'STRAPI_DISABLE_UPDATE_NOTIFICATION is no longer supported. Instead, set logger.updates.enabled to false in your server configuration.'
+    );
   }
 
-  notify();
+  if (!strapi.config.get('server.logger.updates.enabled') || !config) {
+    return;
+  }
+
+  display(NOTIF_INTERVAL);
+  checkUpdate(CHECK_INTERVAL); // doesn't need to await
 };

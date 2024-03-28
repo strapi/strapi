@@ -57,8 +57,6 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   get EE(): boolean {
-    // @ts-expect-error: init is private
-    this.ee.init(this.dirs.app.root, this.log);
     return utils.ee.isEE;
   }
 
@@ -391,6 +389,9 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async register() {
+    // @ts-expect-error: init is internal
+    this.ee.init(this.dirs.app.root, this.log);
+
     for (const provider of providers) {
       await provider.register?.(this);
     }

@@ -15,8 +15,13 @@ const mockGraphQlShadowCrud = jest.fn(() => ({
 }));
 describe('register', () => {
   const strapi = {
-    service() {
-      return this.admin.services.permission;
+    service(name: string) {
+      switch (name) {
+        case 'admin::permission':
+          return this.admin.services.permission;
+        default:
+          throw new Error(`Service ${name} not found`);
+      }
     },
     ee: {
       features: {

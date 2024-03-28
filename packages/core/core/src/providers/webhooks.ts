@@ -1,10 +1,9 @@
-import type { Core } from '@strapi/types';
-
+import { defineProvider } from './provider';
 import { createWebhookStore, webhookModel } from '../services/webhook-store';
 import createWebhookRunner from '../services/webhook-runner';
 
-export default {
-  init(strapi: Core.Strapi) {
+export default defineProvider({
+  init(strapi) {
     strapi.get('models').add(webhookModel);
 
     strapi.add('webhookStore', () => createWebhookStore({ db: strapi.db }));
@@ -17,7 +16,7 @@ export default {
       })
     );
   },
-  async bootstrap(strapi: Core.Strapi) {
+  async bootstrap(strapi) {
     const webhooks = await strapi.get('webhookStore').findWebhooks();
     if (!webhooks) {
       return;
@@ -27,4 +26,4 @@ export default {
       strapi.get('webhookRunner').add(webhook);
     }
   },
-};
+});

@@ -15,11 +15,11 @@ export default async (ctx: Context, next: Next) => {
     return ctx.send({ error: 'contentType.notFound' }, 404);
   }
 
-  let target;
+  let controllers;
   if (!ct.plugin || ct.plugin === 'admin') {
-    target = strapi.admin!;
+    controllers = strapi.admin.controllers;
   } else {
-    target = strapi.plugin(ct.plugin);
+    controllers = strapi.plugin(ct.plugin).controllers;
   }
 
   const { route }: { route: Core.Route } = ctx.state;
@@ -41,7 +41,7 @@ export default async (ctx: Context, next: Next) => {
     const [controller, action] = actionConfig.split('.');
 
     if (controller && action) {
-      return target.controllers[controller.toLowerCase()][action](ctx, next);
+      return controllers[controller.toLowerCase()][action](ctx, next);
     }
   }
 

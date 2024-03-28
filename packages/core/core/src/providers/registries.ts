@@ -1,12 +1,12 @@
-import type { Core } from '@strapi/types';
 import { hooks } from '@strapi/utils';
 
+import { defineProvider } from './provider';
 import * as registries from '../registries';
 import { loadApplicationContext } from '../loaders';
 import * as draftAndPublishSync from '../migrations/draft-publish';
 
-export default {
-  init(strapi: Core.Strapi) {
+export default defineProvider({
+  init(strapi) {
     strapi
       .add('content-types', () => registries.contentTypes())
       .add('components', () => registries.components())
@@ -23,7 +23,7 @@ export default {
       .add('sanitizers', registries.sanitizers())
       .add('validators', registries.validators());
   },
-  async register(strapi: Core.Strapi) {
+  async register(strapi) {
     await loadApplicationContext(strapi);
 
     strapi.get('hooks').set('strapi::content-types.beforeSync', hooks.createAsyncParallelHook());
@@ -32,7 +32,4 @@ export default {
     strapi.hook('strapi::content-types.beforeSync').register(draftAndPublishSync.disable);
     strapi.hook('strapi::content-types.afterSync').register(draftAndPublishSync.enable);
   },
-  // async bootstrap(strapi: Core.Strapi) {
-  // },
-  // async destroy(strapi: Core.Strapi) {},
-};
+});
