@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const rimraf = require('rimraf');
 const execa = require('execa');
-const generateNew = require('../../packages/generators/app/dist/generate-new');
+const generateNew = require('@strapi/generate-new/dist/generate-new');
 
 /**
  * Deletes a test app
@@ -33,7 +33,7 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
     // disable quickstart run app after creation
     runQuickstartApp: false,
     // use package version as strapiVersion (all packages have the same version);
-    strapiVersion: require(path.resolve(__dirname, '../../packages/core/strapi/package.json'))
+    strapiVersion: require(path.resolve(__dirname, '../../../packages/core/strapi/package.json'))
       .version,
     debug: false,
     quick: false,

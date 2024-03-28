@@ -7,7 +7,7 @@ const yargs = require('yargs');
 process.env.NODE_ENV = 'test';
 
 const appPath = 'test-apps/api';
-process.env.ENV_PATH = path.resolve(__dirname, '../..', appPath, '.env');
+process.env.ENV_PATH = path.resolve(__dirname, '../../..', appPath, '.env');
 
 const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
 
@@ -57,7 +57,7 @@ const jestCmd = 'jest --config jest.config.api.js --verbose --runInBand --forceE
 const runAllTests = async (args) => {
   return execa('yarn', [...jestCmd, ...args], {
     stdio: 'inherit',
-    cwd: path.resolve(__dirname, '../..'),
+    cwd: path.resolve(__dirname, '../../..'),
     env: {
       // if STRAPI_LICENSE is in the env the test will run in ee automatically
       STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
