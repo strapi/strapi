@@ -26,13 +26,9 @@ export const getRelationTargetLocale = (
   const isTargetLocalized = isLocalizedContentType(opts.targetUid);
   const isSourceLocalized = isLocalizedContentType(opts.sourceUid);
 
-  // Locale validations
+  // Both source and target locales should match
   if (isSourceLocalized && isTargetLocalized) {
-    // Check the targetLocale matches
-    if (targetLocale !== opts.sourceLocale) {
-      // If not, we will look for the relation that matches the source locale
-      return opts.sourceLocale;
-    }
+    return opts.sourceLocale;
   }
 
   if (isTargetLocalized) {
