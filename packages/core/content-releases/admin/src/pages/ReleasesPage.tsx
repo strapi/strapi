@@ -33,7 +33,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useTracking,
-  RelativeTime,
+  RelativeTime as BaseRelativeTime,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -63,7 +63,8 @@ const LinkCard = styled(Link)`
   display: block;
 `;
 
-const FirstLetterStyle = styled(Box)`
+const RelativeTime = styled(BaseRelativeTime)`
+  display: block;
   &::first-letter {
     text-transform: uppercase;
   }
@@ -143,9 +144,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">
                   {scheduledAt ? (
-                    <FirstLetterStyle>
-                      <RelativeTime timestamp={new Date(scheduledAt)} />
-                    </FirstLetterStyle>
+                    <RelativeTime timestamp={new Date(scheduledAt)} />
                   ) : (
                     formatMessage({
                       id: 'content-releases.pages.Releases.not-scheduled',
