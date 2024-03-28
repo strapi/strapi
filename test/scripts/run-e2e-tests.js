@@ -12,7 +12,8 @@ const { createConfig } = require('../../playwright.base.config');
 
 const cwd = path.resolve(__dirname, '../..');
 const testAppDirectory = path.join(cwd, 'test-apps', 'e2e');
-const testRoot = path.join(cwd, 'e2e');
+const testRoot = path.join(cwd, 'tests', 'e2e');
+const testDomainRoot = path.join(testRoot, 'tests');
 const templateDir = path.join(testRoot, 'app-template');
 
 const pathExists = async (path) => {
@@ -67,7 +68,7 @@ yargs
     command: '*',
     description: 'run the E2E test suite',
     builder: async (yarg) => {
-      const domains = await fs.readdir(path.join(cwd, 'e2e', 'tests'));
+      const domains = await fs.readdir(testDomainRoot);
 
       yarg.option('concurrency', {
         alias: 'c',
@@ -154,7 +155,7 @@ yargs
                   },
                   useNullAsDefault: true,
                 },
-                template: path.join(cwd, 'e2e', 'app-template'),
+                template: path.join(testRoot, 'app-template'),
                 link: true,
               });
 
@@ -200,7 +201,7 @@ yargs
               );
 
               const config = createConfig({
-                testDir: path.join(cwd, 'e2e', 'tests', domain),
+                testDir: path.join(testDomainRoot, domain),
                 port,
                 appDir: testAppPath,
               });

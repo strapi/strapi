@@ -1,0 +1,14 @@
+{
+  "kind": "collectionType",
+  "collectionName": "database",
+  "info": {
+    "displayName": "database",
+    "singularName": "database",
+    "pluralName": "databases",
+    "description": "",
+    "name": "database"
+  },
+  "options": {},
+  "pluginOptions": {},
+  "attributes": {}
+}
