@@ -2,6 +2,58 @@
 
 const pascalCase = require('./pascal-case');
 
+const getApiErrorResponses = () => ({
+    400: {
+      description: 'Bad Request',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/Error',
+          },
+        },
+      },
+    },
+    401: {
+      description: 'Unauthorized',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/Error',
+          },
+        },
+      },
+    },
+    403: {
+      description: 'Forbidden',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/Error',
+          },
+        },
+      },
+    },
+    404: {
+      description: 'Not Found',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/Error',
+          },
+        },
+      },
+    },
+    500: {
+      description: 'Internal Server Error',
+      content: {
+        'application/json': {
+          schema: {
+            $ref: '#/components/schemas/Error',
+          },
+        },
+      },
+    },
+});
 /**
  * @description - Builds the Swagger response object for a given api
  *
@@ -11,7 +63,7 @@ const pascalCase = require('./pascal-case');
  *
  * @returns The Swagger responses
  */
-const getApiResponse = ({
+const getApiResponses = ({
   uniqueName,
   route,
   isListOfEntities = false,
@@ -48,58 +100,12 @@ const getApiResponse = ({
           },
         },
       },
-      400: {
-        description: 'Bad Request',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Error',
-            },
-          },
-        },
-      },
-      401: {
-        description: 'Unauthorized',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Error',
-            },
-          },
-        },
-      },
-      403: {
-        description: 'Forbidden',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Error',
-            },
-          },
-        },
-      },
-      404: {
-        description: 'Not Found',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Error',
-            },
-          },
-        },
-      },
-      500: {
-        description: 'Internal Server Error',
-        content: {
-          'application/json': {
-            schema: {
-              $ref: '#/components/schemas/Error',
-            },
-          },
-        },
-      },
-    },
+      ...getApiErrorResponses(),
+    }
   };
 };
 
-module.exports = getApiResponse;
+module.exports = {
+  getApiResponses,
+  getApiErrorResponses
+};

@@ -137,6 +137,20 @@ module.exports = {
         kitchensink: contentTypes['api::kitchensink.kitchensink'],
       },
       routes: {
+        actions: {
+          routes: [
+            {
+              method: 'POST',
+              path: '/kitchensinks/:id/wash',
+              handler: 'api::kitchensink.actions.wash',
+            },
+            {
+              method: 'GET',
+              path: '/kitchensinks/empty',
+              handler: 'api::kitchensink.actions.empty',
+            }
+          ]
+        },
         kitchensink: {
           routes: [
             {
