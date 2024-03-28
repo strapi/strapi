@@ -191,7 +191,9 @@ describe('Transform relational data', () => {
       });
 
       expect(data).toMatchObject({
-        relatedCategories: [{ id: 'category-1-en-draft' }],
+        relatedCategories: {
+          set: [{ id: 'category-1-en-draft' }],
+        },
       });
     });
   });
