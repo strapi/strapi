@@ -210,6 +210,7 @@ const EditPage = () => {
                     defaultMessage: 'Edit {name}',
                   },
                   {
+                    // @ts-expect-error – issues with the Entity ID type, still.
                     name: getDisplayName(initialData),
                   }
                 )}
