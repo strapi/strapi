@@ -10,21 +10,23 @@ interface ComponentIconProps {
 
 const ComponentIcon = ({ showBackground = true, icon = 'cube' }: ComponentIconProps) => {
   return (
-    <Flex
-      alignItems="center"
-      background={showBackground ? 'neutral200' : undefined}
-      justifyContent="center"
-      height={8}
-      width={8}
-      color="neutral600"
-      borderRadius={showBackground ? '50%' : 0}
-    >
-      <Icon
-        as={COMPONENT_ICONS[icon as keyof typeof COMPONENT_ICONS] || COMPONENT_ICONS.cube}
-        height={5}
-        width={5}
-      />
-    </Flex>
+    COMPONENT_ICONS[icon as keyof typeof COMPONENT_ICONS] ?
+      <Flex
+        alignItems="center"
+        background={showBackground ? 'neutral200' : undefined}
+        justifyContent="center"
+        height={8}
+        width={8}
+        color="neutral600"
+        borderRadius={showBackground ? '50%' : 0}
+      >
+        <Icon
+          as={COMPONENT_ICONS[icon as keyof typeof COMPONENT_ICONS] || COMPONENT_ICONS.cube}
+          height={5}
+          width={5}
+        />
+      </Flex>
+    : <i className={icon}></i>
   );
 };
 
