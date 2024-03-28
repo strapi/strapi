@@ -5,7 +5,7 @@ jest.mock('../review-workflows/workflows/content-types', () => {
 });
 
 import type { Core } from '@strapi/types';
-import validationServiceFactory from '../review-workflows/validation';
+import validationServiceFactory from '../validation';
 import {
   MAX_WORKFLOWS,
   MAX_STAGES_PER_WORKFLOW,

@@ -1,8 +1,8 @@
 import '@strapi/types';
 import { isNil } from 'lodash/fp';
-import { ENTITY_STAGE_ATTRIBUTE } from '../../constants/workflows';
-import { WORKFLOW_UPDATE_STAGE } from '../../constants/webhook-events';
-import { getService } from '../../utils';
+import { ENTITY_STAGE_ATTRIBUTE } from '../constants/workflows';
+import { WORKFLOW_UPDATE_STAGE } from '../constants/webhook-events';
+import { getService } from '../utils';
 
 /**
  * Assigns the entity data to the default workflow stage if no stage is present in the data
@@ -39,9 +39,11 @@ const getEntityStage = async (uid: any, id: any) => {
 
 /**
  * Decorates the entity service with RW business logic
- * @param {object} service - entity service
  */
 const decorator = (service: any) => ({
+  /**
+   * Ensures the entity is assigned to the default workflow stage
+   */
   async create(uid: any, opts: any = {}) {
     const workflow = await getService('workflows').getAssignedWorkflow(uid, {
       populate: 'stages',
@@ -54,6 +56,10 @@ const decorator = (service: any) => ({
     const data = await getDataWithStage(workflow, opts.data);
     return service.create.call(this, uid, { ...opts, data });
   },
+
+  /**
+   * Updates the entity and emits a webhook event if the stage has changed
+   */
   async update(uid: any, entityId: any, opts: any = {}) {
     // Prevents the stage from being set to null
     const data = { ...opts.data };

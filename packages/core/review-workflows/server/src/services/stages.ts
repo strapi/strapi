@@ -1,17 +1,17 @@
 import type { Core } from '@strapi/types';
 import { async, errors } from '@strapi/utils';
 import { map, pick, isEqual } from 'lodash/fp';
-import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../../constants/workflows';
-import { getService } from '../../utils';
+import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../constants/workflows';
+import { getService } from '../utils';
 
 const { ApplicationError, ValidationError } = errors;
 const sanitizedStageFields = ['id', 'name', 'workflow', 'color'];
 const sanitizeStageFields = pick(sanitizedStageFields);
 
 export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
-  const metrics = getService('review-workflows-metrics', { strapi });
+  const metrics = getService('workflow-metrics', { strapi });
   const stagePermissionsService = getService('stage-permissions', { strapi });
-  const workflowsValidationService = getService('review-workflows-validation', { strapi });
+  const workflowValidator = getService('validation', { strapi });
 
   return {
     find({ workflowId, populate }: any) {
@@ -205,7 +205,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     async updateEntity(entityInfo: any, stageId: any) {
       const stage = await this.findById(stageId);
 
-      await workflowsValidationService.validateWorkflowCount();
+      await workflowValidator.validateWorkflowCount();
 
       if (!stage) {
         throw new ApplicationError(`Selected stage does not exist`);
@@ -244,7 +244,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       const joinColumn = joinTable.joinColumn.name;
       const invJoinColumn = joinTable.inverseJoinColumn.name;
 
-      await workflowsValidationService.validateWorkflowCount();
+      await workflowValidator.validateWorkflowCount();
 
       return strapi.db.transaction(async ({ trx }) => {
         // Update all already existing links to the new stage

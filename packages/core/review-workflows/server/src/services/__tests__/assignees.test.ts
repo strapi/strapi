@@ -1,5 +1,5 @@
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
-import assigneeFactory from '../review-workflows/assignees';
+import assigneeFactory from '../assignees';
 
 const uid = 'uid';
 const fromAssigneeId = 1;
@@ -17,7 +17,7 @@ const servicesMock: Record<string, any> = {
   'admin::user': {
     exists: jest.fn(() => true),
   },
-  'admin::review-workflows-metrics': {
+  'admin::workflow-metrics': {
     sendDidEditAssignee: jest.fn(),
   },
 };
@@ -57,7 +57,7 @@ describe('Review workflows - Stages service', () => {
       await assigneeService.updateEntityAssignee(id, uid, toId);
 
       expect(servicesMock['admin::user'].exists).toBeCalled();
-      expect(servicesMock['admin::review-workflows-metrics'].sendDidEditAssignee).toBeCalledWith(
+      expect(servicesMock['admin::workflow-metrics'].sendDidEditAssignee).toBeCalledWith(
         fromAssigneeId,
         toId
       );

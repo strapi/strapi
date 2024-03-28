@@ -1,12 +1,11 @@
 import type { Core } from '@strapi/types';
 import { set, isString, map, get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../../constants/workflows';
-import { getService } from '../../../utils';
-import { getWorkflowContentTypeFilter } from '../../../utils/review-workflows';
+import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../constants/workflows';
+import { getService } from '../../utils';
+import { getWorkflowContentTypeFilter } from '../../utils/review-workflows';
 import workflowsContentTypesFactory from './content-types';
 
-const { ApplicationError } = errors;
 const processFilters = ({ strapi }: { strapi: Core.LoadedStrapi }, filters: any = {}) => {
   const processedFilters = { ...filters };
 
@@ -29,8 +28,8 @@ const processPopulate = (populate: any) => {
 
 export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
   const workflowsContentTypes = workflowsContentTypesFactory({ strapi });
-  const workflowsValidationService = getService('review-workflows-validation', { strapi });
-  const metrics = getService('review-workflows-metrics', { strapi });
+  const workflowValidator = getService('validation', { strapi });
+  const metrics = getService('workflow-metrics', { strapi });
 
   return {
     /**
@@ -78,8 +77,8 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     async create(opts: { data: any }) {
       let createOpts = { ...opts, populate: WORKFLOW_POPULATE };
 
-      workflowsValidationService.validateWorkflowStages(opts.data.stages);
-      await workflowsValidationService.validateWorkflowCount(1);
+      workflowValidator.validateWorkflowStages(opts.data.stages);
+      await workflowValidator.validateWorkflowCount(1);
 
       return strapi.db.transaction(async () => {
         // Create stages
@@ -117,12 +116,12 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       let updateOpts = { ...opts, populate: { ...WORKFLOW_POPULATE } };
       let updatedStageIds: any;
 
-      await workflowsValidationService.validateWorkflowCount();
+      await workflowValidator.validateWorkflowCount();
 
       return strapi.db.transaction(async () => {
         // Update stages
         if (opts.data.stages) {
-          workflowsValidationService.validateWorkflowStages(opts.data.stages);
+          workflowValidator.validateWorkflowStages(opts.data.stages);
           opts.data.stages.forEach((stage: any) =>
             this.assertStageBelongsToWorkflow(stage.id, workflow)
           );
@@ -168,7 +167,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       const workflowCount = await this.count();
 
       if (workflowCount <= 1) {
-        throw new ApplicationError('Can not delete the last workflow');
+        throw new errors.ApplicationError('Can not delete the last workflow');
       }
 
       return strapi.db.transaction(async () => {
@@ -236,7 +235,9 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       });
 
       if (!workflow) {
-        throw new ApplicationError(`Review workflows is not activated on Content Type ${uid}.`);
+        throw new errors.ApplicationError(
+          `Review workflows is not activated on Content Type ${uid}.`
+        );
       }
 
       return workflow;
@@ -256,7 +257,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       const belongs = workflow.stages.some((stage: any) => stage.id === stageId);
       if (!belongs) {
-        throw new ApplicationError(`Stage does not belong to workflow "${workflow.name}"`);
+        throw new errors.ApplicationError(`Stage does not belong to workflow "${workflow.name}"`);
       }
     },
   };

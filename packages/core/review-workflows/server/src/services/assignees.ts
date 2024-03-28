@@ -1,13 +1,13 @@
 import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { isNil } from 'lodash/fp';
-import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
-import { getService } from '../../utils';
+import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../constants/workflows';
+import { getService, getAdminService } from '../utils';
 
 const { ApplicationError } = errors;
 
 export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
-  const metrics = getService('review-workflows-metrics', { strapi });
+  const metrics = getService('workflow-metrics', { strapi });
 
   return {
     async findEntityAssigneeId(id: any, model: any) {
@@ -28,7 +28,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         return this.deleteEntityAssignee(id, model);
       }
 
-      const userExists = await getService('user', { strapi }).exists({ id: assigneeId });
+      const userExists = await getAdminService('user', { strapi }).exists({ id: assigneeId });
 
       if (!userExists) {
         throw new ApplicationError(`Selected user does not exist`);

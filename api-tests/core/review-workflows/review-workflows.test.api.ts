@@ -56,7 +56,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       body: data,
     });
 
-    return body;
+    return body.data;
   };
 
   const updateEntry = async (uid, id, data) => {
@@ -65,7 +65,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       url: `/content-manager/collection-types/${uid}/${id}`,
       body: data,
     });
-    return body;
+    return body.data;
   };
 
   const findAll = async (uid) => {
@@ -144,7 +144,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   });
 
   describe('Get workflows', () => {
-    test.only("It shouldn't be available for public", async () => {
+    test("It shouldn't be available for public", async () => {
       const res = await requests.public.get('/review-workflows/workflows');
 
       if (hasRW) {
@@ -207,13 +207,8 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         },
       });
 
-      if (hasRW) {
-        expect(res.status).toBe(400);
-        expect(res.body.error.message).toBe('Can not create a workflow without stages');
-      } else {
-        expect(res.status).toBe(404);
-        expect(res.body.data).toBeUndefined();
-      }
+      expect(res.status).toBe(400);
+      expect(res.body.error.message).toBe('Can not create a workflow without stages');
     });
     test('It should create a workflow with stages', async () => {
       const res = await requests.admin.post('/review-workflows/workflows?populate=stages', {
@@ -542,23 +537,6 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(assignee).not.toHaveProperty('password');
       });
 
-      test('Should throw an error if user does not exist', async () => {
-        const entry = await createEntry(productUID, { name: 'Product' });
-
-        const response = await requests.admin({
-          method: 'PUT',
-          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
-          body: {
-            data: { id: 1234 },
-          },
-        });
-
-        expect(response.status).toBe(400);
-        expect(response.body.error).toBeDefined();
-        expect(response.body.error.name).toEqual('ApplicationError');
-        expect(response.body.error.message).toEqual('Selected user does not exist');
-      });
-
       test('Correctly sanitize private fields of assignees in the content API', async () => {
         const assigneeAttribute = 'strapi_assignee';
 
@@ -581,11 +559,28 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         // Assert that every assignee returned is sanitized correctly
         body.data.forEach((item) => {
-          expect(item.attributes).toHaveProperty(assigneeAttribute);
+          expect(item).toHaveProperty(assigneeAttribute);
           privateUserFields.forEach((field) => {
-            expect(item.attributes[assigneeAttribute]).not.toHaveProperty(field);
+            expect(item[assigneeAttribute]).not.toHaveProperty(field);
           });
         });
+      });
+
+      test('Should throw an error if user does not exist', async () => {
+        const entry = await createEntry(productUID, { name: 'Product' });
+
+        const response = await requests.admin({
+          method: 'PUT',
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          body: {
+            data: { id: 1234 },
+          },
+        });
+
+        expect(response.status).toBe(400);
+        expect(response.body.error).toBeDefined();
+        expect(response.body.error.name).toEqual('ApplicationError');
+        expect(response.body.error.message).toEqual('Selected user does not exist');
       });
     });
 
@@ -641,6 +636,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
           expect.objectContaining({ id: secondStage.id })
         );
       });
+
       test('Should throw an error if stage does not belong to the workflow', async () => {
         const entry = await createEntry(productUID, { name: 'Product' });
 
@@ -669,9 +665,9 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
         expect(body.data.length).toBeGreaterThan(0);
 
         body.data.forEach((item) => {
-          expect(item.attributes).toHaveProperty(stageAttribute);
-          expect(item.attributes[stageAttribute]).not.toBeNull();
-          expect(item.attributes[stageAttribute].data.attributes).toHaveProperty('name');
+          expect(item).toHaveProperty(stageAttribute);
+          expect(item[stageAttribute]).not.toBeNull();
+          expect(item[stageAttribute]).toHaveProperty('name');
         });
       });
     });

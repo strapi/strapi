@@ -1,8 +1,8 @@
 import { omit } from 'lodash/fp';
-import { WORKFLOW_UPDATE_STAGE } from '../../../constants/webhook-events';
-import { ENTITY_STAGE_ATTRIBUTE } from '../../../constants/workflows';
+import { WORKFLOW_UPDATE_STAGE } from '../../constants/webhook-events';
+import { ENTITY_STAGE_ATTRIBUTE } from '../../constants/workflows';
 import entityServiceDecorator from '../entity-service-decorator';
-import utils from '../../../utils';
+import utils from '../../utils';
 
 const { decorator } = entityServiceDecorator();
 

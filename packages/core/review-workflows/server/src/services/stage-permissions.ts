@@ -1,15 +1,15 @@
 import type { Core } from '@strapi/types';
 import { prop } from 'lodash/fp';
 import { async, errors } from '@strapi/utils';
-import { getService } from '../../utils';
-import { STAGE_TRANSITION_UID } from '../../constants/workflows';
+import { getService, getAdminService } from '../utils';
+import { STAGE_TRANSITION_UID } from '../constants/workflows';
 
 const { ApplicationError } = errors;
 const validActions = [STAGE_TRANSITION_UID];
 
 export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
-  const roleService = getService('role');
-  const permissionService = getService('permission');
+  const roleService = getAdminService('role');
+  const permissionService = getAdminService('permission');
 
   return {
     async register({ roleId, action, fromStage }: any) {

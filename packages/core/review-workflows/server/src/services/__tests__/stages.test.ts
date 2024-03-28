@@ -1,6 +1,6 @@
 import type { Core } from '@strapi/types';
 import { cloneDeep } from 'lodash/fp';
-import stageFactory from '../review-workflows/stages';
+import stageFactory from '../stages';
 import { STAGE_MODEL_UID } from '../../constants/workflows';
 
 const stageMock = {
@@ -49,13 +49,13 @@ const servicesMock: Record<string, any> = {
     findById: jest.fn(() => workflowMock),
     update: jest.fn((id, data) => data),
   },
-  'review-workflows-metrics': {
+  'workflow-metrics': {
     sendDidCreateStage: jest.fn(),
     sendDidEditStage: jest.fn(),
     sendDidDeleteStage: jest.fn(),
     sendDidChangeEntryStage: jest.fn(),
   },
-  'review-workflows-validation': {
+  validation: {
     register: jest.fn(),
     validateWorkflowCount: jest.fn().mockResolvedValue(true),
     validateWorkflowStages: jest.fn(),

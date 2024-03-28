@@ -19,7 +19,7 @@ const reviewWorkflowsValidationMock = {
 const getServiceMock: Record<string, any> = {
   stages: stagesServiceMock,
   workflows: workflowsServiceMock,
-  'review-workflows-validation': reviewWorkflowsValidationMock,
+  validation: reviewWorkflowsValidationMock,
 };
 
 jest.mock('../../../../utils', () => {

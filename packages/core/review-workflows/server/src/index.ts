@@ -20,8 +20,6 @@ const getPlugin = () => {
   }
 
   return {
-    // Always return register, it handles its own feature check
-    register,
     // Always return contentTypes to avoid losing data when the feature is disabled
     // or downgrading the license
     contentTypes,

@@ -1,7 +1,7 @@
 import { queryParams } from '@strapi/utils';
 
 import type { Core } from '@strapi/types';
-import workflowsServiceFactory from '../review-workflows/workflows';
+import workflowsServiceFactory from '../workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE, STAGE_MODEL_UID } from '../../constants/workflows';
 import workflowCT from '../../content-types/workflow';
 import workflowStageCT from '../../content-types/workflow-stage';
@@ -50,8 +50,8 @@ const stagesMock = [
 ];
 
 const servicesMock: Record<string, any> = {
-  'admin::review-workflows-validation': reviewWorkflowsValidationMock,
-  'admin::review-workflows-metrics': {
+  'admin::validation': reviewWorkflowsValidationMock,
+  'admin::workflow-metrics': {
     sendDidCreateWorkflow: jest.fn(),
     sendDidEditWorkflow: jest.fn(),
   },
@@ -205,7 +205,7 @@ describe('Review workflows - Workflows service', () => {
           },
         },
       });
-      expect(servicesMock['admin::review-workflows-metrics'].sendDidEditWorkflow).toBeCalled();
+      expect(servicesMock['admin::workflow-metrics'].sendDidEditWorkflow).toBeCalled();
     });
   });
 
@@ -247,7 +247,7 @@ describe('Review workflows - Workflows service', () => {
           },
         },
       });
-      expect(servicesMock['admin::review-workflows-metrics'].sendDidCreateWorkflow).toBeCalled();
+      expect(servicesMock['admin::workflow-metrics'].sendDidCreateWorkflow).toBeCalled();
     });
   });
 });

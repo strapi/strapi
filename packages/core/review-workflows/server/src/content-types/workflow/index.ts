@@ -32,7 +32,7 @@ export default {
       contentTypes: {
         type: 'json',
         required: true,
-        default: [],
+        default: '[]',
       },
     },
   },

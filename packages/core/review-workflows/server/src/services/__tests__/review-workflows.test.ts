@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import reviewWorkflowsServiceFactory from '../review-workflows/review-workflows';
+import reviewWorkflowsServiceFactory from '../review-workflows';
 import { ENTITY_STAGE_ATTRIBUTE, ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
 
 const workflowMock = {
@@ -85,7 +85,7 @@ const strapiMock = {
         return stagesServiceMock;
       case 'workflows':
         return workflowsServiceMock;
-      case 'review-workflows-validation':
+      case 'validation':
         return reviewWorkflowsValidationMock;
       default:
         return null;

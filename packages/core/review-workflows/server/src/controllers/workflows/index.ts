@@ -1,8 +1,9 @@
 import type { Context } from 'koa';
-import type { Core } from '@strapi/types';
-
 import { update, map, property } from 'lodash/fp';
-import { async } from '@strapi/utils';
+
+import type { Core } from '@strapi/types';
+import { async, errors } from '@strapi/utils';
+
 import { getService } from '../../utils';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../constants/workflows';
