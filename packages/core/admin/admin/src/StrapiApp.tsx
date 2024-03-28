@@ -15,20 +15,10 @@ import { getEERoutes as getSettingsEERoutes } from '../../ee/admin/src/pages/Set
 import { App } from './App';
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ErrorElement } from './components/ErrorElement';
-import {
-  INJECTION_ZONES,
-  InjectionZoneBlock,
-  InjectionZoneComponent,
-  InjectionZoneContainer,
-  InjectionZoneModule,
-  InjectionZones,
-} from './components/InjectionZone';
 import { LanguageProvider } from './components/LanguageProvider';
 import { Page } from './components/PageHelpers';
 import { Theme } from './components/Theme';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
-import { routes as cmRoutes } from './content-manager/router';
-import { ContentManagerPlugin } from './core/apis/content-manager';
 import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RootState, Store, configureStore } from './core/store/configure';
@@ -81,20 +71,22 @@ interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCoun
 
 interface StrapiAppPlugin {
   bootstrap: (
-    args: Pick<
-      StrapiApp,
-      | 'addSettingsLink'
-      | 'addSettingsLinks'
-      | 'getPlugin'
-      | 'injectContentManagerComponent'
-      | 'injectAdminComponent'
-      | 'registerHook'
-    >
+    args: Pick<StrapiApp, 'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'registerHook'>
   ) => void;
   register: (app: StrapiApp) => void;
   registerTrads: (args: {
     locales: string[];
   }) => Promise<{ data: Record<string, string>; locale: string }[]>;
+}
+
+interface InjectionZoneComponent {
+  Component: React.ComponentType;
+  name: string;
+  // TODO: in theory this could receive and forward any React component prop
+  // but in practice there only seems to be once instance, where `slug` is
+  // forwarded. The type needs to become either more generic or we disallow
+  // prop spreading and offer a different way to access context data.
+  slug: string;
 }
 
 interface UnloadedSettingsLink extends Omit<StrapiAppSettingLink, 'Component'> {
@@ -130,7 +122,7 @@ class StrapiApp {
   hooksDict: Record<string, ReturnType<typeof createHook>> = {};
 
   admin = {
-    injectionZones: INJECTION_ZONES,
+    injectionZones: {},
   };
 
   translations: StrapiApp['configurations']['translations'] = {};
@@ -164,7 +156,6 @@ class StrapiApp {
   /**
    * APIs
    */
-  private contentManager = new ContentManagerPlugin();
   library: Library = {
     components: {},
     fields: {},
@@ -177,8 +168,6 @@ class StrapiApp {
     this.appPlugins = appPlugins || {};
 
     this.createCustomConfigurations(config ?? {});
-
-    this.registerPlugin(this.contentManager.config);
 
     this.createHook(INJECT_COLUMN_IN_TABLE);
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
@@ -370,8 +359,6 @@ class StrapiApp {
           addSettingsLink: this.addSettingsLink,
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
-          injectContentManagerComponent: this.injectContentManagerComponent,
-          injectAdminComponent: this.injectAdminComponent,
           registerHook: this.registerHook,
         });
       }
@@ -386,8 +373,6 @@ class StrapiApp {
         addSettingsLink: this.addSettingsLink,
         addSettingsLinks: this.addSettingsLinks,
         getPlugin: this.getPlugin,
-        injectContentManagerComponent: this.injectContentManagerComponent,
-        injectAdminComponent: this.injectAdminComponent,
         registerHook: this.registerHook,
       });
     }
@@ -460,9 +445,9 @@ class StrapiApp {
   };
 
   getAdminInjectedComponents = (
-    moduleName: InjectionZoneModule,
-    containerName: InjectionZoneContainer,
-    blockName: InjectionZoneBlock
+    moduleName: string,
+    containerName: string,
+    blockName: string
   ): InjectionZoneComponent[] => {
     try {
       // @ts-expect-error – we have a catch block so if you don't pass it correctly we still return an array.
@@ -481,42 +466,6 @@ class StrapiApp {
       this.appPlugins[plugin].register(this);
     });
   }
-
-  injectContentManagerComponent = <TContainerName extends keyof InjectionZones['contentManager']>(
-    containerName: TContainerName,
-    blockName: keyof InjectionZones['contentManager'][TContainerName],
-    component: InjectionZoneComponent
-  ) => {
-    invariant(
-      this.admin.injectionZones.contentManager[containerName]?.[blockName],
-      `The ${containerName} ${String(blockName)} zone is not defined in the content manager`
-    );
-    invariant(component, 'A Component must be provided');
-
-    if (containerName === 'editView' && blockName === 'right-links') {
-      console.warn(
-        `Injecting components into editView.right-links is deprecated. Please use the \`addEditViewSidePanel\` API instead.`
-      );
-    }
-
-    // @ts-expect-error – we've alredy checked above that the block exists.
-    this.admin.injectionZones.contentManager[containerName][blockName].push(component);
-  };
-
-  injectAdminComponent = <TContainerName extends keyof InjectionZones['admin']>(
-    containerName: TContainerName,
-    blockName: keyof InjectionZones['admin'][TContainerName],
-    component: InjectionZoneComponent
-  ) => {
-    invariant(
-      this.admin.injectionZones.admin[containerName]?.[blockName],
-      `The ${containerName} ${String(blockName)} zone is not defined in the admin`
-    );
-    invariant(component, 'A Component must be provided');
-
-    // @ts-expect-error – we've alredy checked above that the block exists.
-    this.admin.injectionZones.admin[containerName][blockName].push(component);
-  };
 
   async loadAdminTrads() {
     const adminLocales = await Promise.all(
@@ -776,7 +725,6 @@ class StrapiApp {
                   ),
                 })),
                 ...getBaseEERoutes(),
-                ...cmRoutes,
               ],
             },
             {
@@ -802,4 +750,5 @@ export type {
   StrapiAppSetting,
   MenuItem,
   StrapiAppConstructorArgs,
+  InjectionZoneComponent,
 };

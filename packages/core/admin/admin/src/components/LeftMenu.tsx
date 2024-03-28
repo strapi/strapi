@@ -72,7 +72,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
   const logout = useAuth('Logout', (state) => state.logout);
-  const userDisplayName = getDisplayName(user, formatMessage);
+  const userDisplayName = getDisplayName(user);
 
   const initials = userDisplayName
     .split(' ')
@@ -144,6 +144,10 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             })}
           >
             {pluginsSectionLinks.map((link) => {
+              if (link.to === 'content-manager') {
+                return null;
+              }
+
               const LinkIcon = link.icon;
               return (
                 <NavLinkWrapper key={link.to}>

@@ -77,7 +77,7 @@ export const getDisplayedFilters = ({
         name: 'user',
         operators,
         options: users.map((user) => ({
-          label: getDisplayName(user, formatMessage),
+          label: getDisplayName(user),
           value: user.id.toString(),
         })),
         type: 'relation',
