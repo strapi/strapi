@@ -172,17 +172,17 @@ const getInitialProviders = ({ purest }) => ({
         email: `${body.username}@strapi.io`, // dummy email as Instagram does not provide user email
       }));
   },
-  async vk({ accessToken, query }) {
+  async vk({ accessToken }) {
     const vk = purest({ provider: 'vk' });
 
     return vk
       .get('users')
       .auth(accessToken)
-      .qs({ id: query.raw.user_id, v: '5.122' })
+      .qs({ v: '5.199' })
       .request()
       .then(({ body }) => ({
         username: `${body.response[0].last_name} ${body.response[0].first_name}`,
-        email: query.raw.email,
+        email: `${body.response[0].id}@strapi.io`, // dummy email as VK does not provide user email
       }));
   },
   async twitch({ accessToken, providers }) {
