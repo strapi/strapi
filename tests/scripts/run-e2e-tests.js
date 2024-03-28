@@ -8,7 +8,7 @@ const yargs = require('yargs');
 const chalk = require('chalk');
 const dotenv = require('dotenv');
 const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
-const { createConfig } = require('../../../playwright.base.config');
+const { createConfig } = require('../../playwright.base.config');
 
 const cwd = path.resolve(__dirname, '../../..');
 const testAppDirectory = path.join(cwd, 'test-apps', 'e2e');

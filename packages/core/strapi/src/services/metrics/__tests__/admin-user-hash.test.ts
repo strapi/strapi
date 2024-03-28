@@ -1,6 +1,6 @@
 import crypto from 'crypto';
+import createContext from 'strapi/tests/helpers/create-context';
 import { generateAdminUserHash } from '../admin-user-hash';
-import createContext from '../../../../../../../tests/scripts/helpers/create-context';
 
 describe('user email hash', () => {
   test('should create a hash from admin user email', () => {
