@@ -690,7 +690,7 @@ const isErrorMessageDescriptor = (object?: string | object): object is Translati
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({ onProceed = () => {}, onCancel = () => {} }) => {
+const Blocker = ({ onProceed = () => {} }) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
@@ -705,11 +705,6 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }) => {
   });
 
   if (blocker.state === 'blocked') {
-    const onBlockerCancel = () => {
-      onCancel();
-      blocker.reset();
-    };
-
     return (
       <Dialog
         isOpen
@@ -717,7 +712,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }) => {
           id: 'app.components.ConfirmDialog.title',
           defaultMessage: 'Confirmation',
         })}
-        onClose={onBlockerCancel}
+        onClose={blocker.reset}
       >
         <DialogBody>
           <Flex direction="column" gap={2}>
@@ -732,7 +727,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }) => {
         </DialogBody>
         <DialogFooter
           startAction={
-            <Button onClick={onBlockerCancel} variant="tertiary">
+            <Button onClick={blocker.reset} variant="tertiary">
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',

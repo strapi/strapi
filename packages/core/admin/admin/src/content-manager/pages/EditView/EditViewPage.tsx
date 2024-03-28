@@ -15,7 +15,7 @@ import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { Blocker, Form } from '../../../components/Form';
+import { Blocker, Form, FormHelpers } from '../../../components/Form';
 import { Page } from '../../../components/PageHelpers';
 import { useNotification } from '../../../features/Notifications';
 import { useOnce } from '../../../hooks/useOnce';
@@ -67,12 +67,6 @@ const EditViewPage = () => {
   } = useDoc();
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
-
-  React.useEffect(() => {
-    if (tabApi.current && hasDraftAndPublished) {
-      tabApi.current._handlers.setSelectedTabIndex(!status || status === 'draft' ? 0 : 1);
-    }
-  }, [hasDraftAndPublished, status]);
 
   useOnce(() => {
     /**
@@ -143,27 +137,11 @@ const EditViewPage = () => {
     return <Page.Error />;
   }
 
-  const switchToPublished = () => {
-    setQuery({ status: 'published' }, 'push', true);
-  };
-
-  const switchToDraft = () => {
-    setQuery({ status: 'draft' }, 'push', true);
-  };
-
   const handleTabChange = (index: number) => {
     if (index === 0) {
-      switchToDraft();
+      setQuery({ status: 'draft' }, 'push', true);
     } else {
-      switchToPublished();
-    }
-  };
-
-  const modifiedTabCancelAction = () => {
-    switchToDraft();
-
-    if (tabApi.current && hasDraftAndPublished) {
-      tabApi.current._handlers.setSelectedTabIndex(0);
+      setQuery({ status: 'published' }, 'push', true);
     }
   };
 
@@ -198,7 +176,7 @@ const EditViewPage = () => {
                 id: getTranslation('containers.edit.tabs.label'),
                 defaultMessage: 'Document status',
               })}
-              initialSelectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
+              selectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
               onTabChange={(index) => {
                 // TODO: remove this hack when the tabs in the DS are implemented well and we can actually use callbacks.
                 handleTabChange(index);
@@ -237,13 +215,8 @@ const EditViewPage = () => {
               </Grid>
             </TabGroup>
             <Blocker
-              onProceed={() => {
-                // We reset the form when navigating to to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-                resetForm();
-              }}
-              // If tab navigation is aborted, we should bring the user back to
-              // the draft tab.
-              onCancel={modifiedTabCancelAction}
+              // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
+              onProceed={resetForm}
             />
           </>
         )}
