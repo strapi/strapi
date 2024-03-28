@@ -29,7 +29,6 @@ import {
   useFetchClient,
   useRBAC,
 } from '@strapi/strapi/admin';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { NavLink } from 'react-router-dom';
@@ -158,12 +157,12 @@ export const RolesListPage = () => {
 
   return (
     <Layout>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           { name: pageTitle }
         )}
-      />
+      </Page.Title>
       <Page.Main>
         <HeaderLayout
           title={formatMessage({

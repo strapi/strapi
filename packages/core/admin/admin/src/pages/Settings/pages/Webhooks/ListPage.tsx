@@ -24,7 +24,6 @@ import {
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 
@@ -154,14 +153,14 @@ const ListPage = () => {
 
   return (
     <Layout>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Webhooks',
           }
         )}
-      />
+      </Page.Title>
       <Page.Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}

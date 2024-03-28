@@ -1,4 +1,4 @@
-import { LoadedStrapi } from '@strapi/types';
+import { Core } from '@strapi/types';
 import { PRODUCT_UID, CATEGORY_UID, models } from './utils';
 
 import { transformPopulate } from '../populate';
@@ -23,7 +23,7 @@ describe('transformPopulate', () => {
           })),
         },
       },
-    } as unknown as LoadedStrapi;
+    } as unknown as Core.LoadedStrapi;
   });
 
   // TODO: Are these all realistic formats for populate?

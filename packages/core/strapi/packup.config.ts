@@ -13,7 +13,9 @@ export default defineConfig({
     },
     {
       source: './src/cli/index.ts',
+      import: './dist/cli/index.ts',
       require: './dist/cli/index.js',
+      types: './dist/cli/index.d.ts',
       runtime: 'node',
     },
     {
