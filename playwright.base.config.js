@@ -64,11 +64,6 @@ const createConfig = ({ port, testDir, appDir }) => ({
 
     /* Default time each action such as `click()` can take to 20s */
     actionTimeout: getEnvNum(process.env.PLAYWRIGHT_ACTION_TIMEOUT, 20 * 1000),
-
-    /* Collect trace when a test failed on the CI. See https://playwright.dev/docs/trace-viewer
-       Until https://github.com/strapi/strapi/issues/18196 is fixed we can't enable this locally,
-       because the Strapi server restarts every time a new file (trace) is created.
-    */
     trace: 'retain-on-failure',
     video: getEnvBool(process.env.PLAYWRIGHT_VIDEO, false)
       ? {
@@ -105,8 +100,10 @@ const createConfig = ({ port, testDir, appDir }) => ({
     },
   ],
 
-  /* Folder for test artifacts such as screenshots, videos, traces, etc. */
-  outputDir: getEnvString(process.env.PLAYWRIGHT_OUTPUT_DIR, '../test-results/'), // in the test-apps/e2e dir, to avoid writing files to the running Strapi project dir
+  /* Folder for test artifacts such as screenshots, videos, traces, etc.
+   * Must be outside the project itself or develop mode will restart when files are written
+   * */
+  outputDir: getEnvString(process.env.PLAYWRIGHT_OUTPUT_DIR, '../test-results/'),
 
   /* Run your local dev server before starting the tests */
   webServer: {
