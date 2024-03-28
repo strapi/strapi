@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../scripts/dts-import';
-import { navToHeader, delay } from '../../../utils/shared';
+import { navToHeader } from '../../../utils/shared';
 
 const createTransferToken = async (page, tokenName, duration, type) => {
   await navToHeader(
@@ -27,7 +27,7 @@ const createTransferToken = async (page, tokenName, duration, type) => {
 
 test.describe('Transfer Tokens', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
     await login({ page });
   });

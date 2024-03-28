@@ -7,7 +7,7 @@ import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 
 test.describe('List View', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
+    await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
     await login({ page });
   });

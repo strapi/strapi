@@ -1,4 +1,4 @@
-import { resolve } from 'path';
+import { resolve, join } from 'path';
 import { ALLOWED_CONTENT_TYPES, CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } from '../constants';
 
 const {
@@ -17,7 +17,8 @@ const {
  * see: https://docs.strapi.io/developer-docs/latest/developer-resources/data-management.html
  * @param {String} filePath the path to a DTS backup
  */
-export const resetDatabaseAndImportDataFromPath = async (filePath) => {
+export const resetDatabaseAndImportDataFromPath = async (file) => {
+  const filePath = join('./tests/e2e/data/', file);
   const source = createSourceProvider(filePath);
   const destination = createDestinationProvider();
 
