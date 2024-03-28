@@ -57,13 +57,7 @@ const extractRelationIds = <T extends Schema.Attribute.RelationKind.Any>(
     // handle positional arguments
     const connect = Array.isArray(relation.connect) ? relation.connect : [relation.connect];
     connect.forEach((relation) => {
-      if (
-        isShortHand(relation) ||
-        relation === undefined ||
-        relation === null ||
-        !('position' in relation)
-      )
-        return;
+      if (!relation || isShortHand(relation) || !('position' in relation)) return;
 
       const { position } = relation;
 
