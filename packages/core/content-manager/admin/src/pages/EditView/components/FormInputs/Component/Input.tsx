@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { InputProps, useField } from '@strapi/admin/strapi-admin';
 import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
@@ -15,7 +17,9 @@ import { RepeatableComponent } from './Repeatable';
 
 interface ComponentInputProps
   extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
-    Pick<InputProps, 'hint'> {}
+    Pick<InputProps, 'hint'> {
+  labelAction?: React.ReactNode;
+}
 
 const ComponentInput = ({
   label,
@@ -23,6 +27,7 @@ const ComponentInput = ({
   name,
   attribute,
   disabled,
+  labelAction,
   ...props
 }: ComponentInputProps) => {
   const { formatMessage } = useIntl();
@@ -57,7 +62,7 @@ const ComponentInput = ({
             )}
             {required && <Typography textColor="danger600">*</Typography>}
           </Typography>
-          {/* {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>} */}
+          {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
         </Flex>
 
         {showResetComponent && (

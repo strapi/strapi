@@ -376,5 +376,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     publish: hasDraftAndPublish ? wrapInTransaction(publish) : (undefined as any),
     unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
     discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
+    /**
+     * @internal
+     * Exposed for use within document service middlewares
+     */
+    updateComponents,
+    /**
+     * @internal
+     * Exposed for use within document service middlewares
+     */
+    omitComponentData,
   };
 };

@@ -16,7 +16,6 @@ export const bootstrap = async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       async afterDelete(event) {
         try {
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           const { model, result } = event;
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
@@ -107,7 +106,6 @@ export const bootstrap = async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       async afterUpdate(event) {
         try {
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           const { model, result } = event;
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {

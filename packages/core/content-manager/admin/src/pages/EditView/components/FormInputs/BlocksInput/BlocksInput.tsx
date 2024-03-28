@@ -8,18 +8,19 @@ import { BlocksEditor } from './BlocksEditor';
 import type { Schema } from '@strapi/types';
 
 interface BlocksInputProps extends Omit<InputProps, 'type'> {
+  labelAction?: React.ReactNode;
   type: Schema.Attribute.Blocks['type'];
 }
 
 const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
-  ({ label, name, required = false, hint, ...editorProps }, forwardedRef) => {
+  ({ label, name, required = false, hint, labelAction, ...editorProps }, forwardedRef) => {
     const id = React.useId();
     const field = useField(name);
 
     return (
       <Field id={id} name={name} hint={hint} error={field.error} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <FieldLabel>{label}</FieldLabel>
+          <FieldLabel action={labelAction}>{label}</FieldLabel>
           <BlocksEditor
             name={name}
             error={field.error}

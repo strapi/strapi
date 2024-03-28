@@ -92,6 +92,7 @@ const dogs = [
     description: 'A good girl',
     myCompo: { name: 'my compo' },
     myDz: [{ name: 'my compo', __component: 'default.simple' }],
+    locale: 'en',
   },
 ];
 
@@ -121,14 +122,20 @@ describe('i18n - Content API', () => {
 
     data.dogs = await builder.sanitizedFixturesFor(dogSchema.singularName, strapi);
     data.categories = await builder.sanitizedFixturesFor(categoryModel.singularName, strapi);
-    const { body } = await rq({
+
+    // Create a new locale of the same document
+    const { locale, name, ...partialDog } = dogs[0];
+    await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/api::dog.dog/${data.dogs[0].id}`,
+      url: `/content-manager/collection-types/api::dog.dog/${data.dogs[0].documentId}`,
       body: {
+        ...partialDog,
         categories: [data.categories[0].id],
       },
+      qs: {
+        locale: 'fr',
+      },
     });
-    data.dogs[0] = body;
   });
 
   afterAll(async () => {
@@ -139,8 +146,7 @@ describe('i18n - Content API', () => {
     await builder.cleanup();
   });
 
-  // V5: Fix non localized attributes
-  describe.skip('Test content-types', () => {
+  describe('Test content-types', () => {
     describe('getNonLocalizedAttributes', () => {
       test('Get non localized attributes (including compo and dz)', async () => {
         const res = await rq({
@@ -148,7 +154,7 @@ describe('i18n - Content API', () => {
           url: '/i18n/content-manager/actions/get-non-localized-fields',
           body: {
             id: data.dogs[0].id,
-            locale: 'fr',
+            locale: data.dogs[0].locale,
             model: 'api::dog.dog',
           },
         });
@@ -165,7 +171,10 @@ describe('i18n - Content API', () => {
               },
             ],
           },
-          localizations: [{ id: 1, locale: 'en' }],
+          localizations: [
+            { id: 2, locale: 'fr' },
+            { id: 1, locale: 'en' },
+          ],
         });
       });
     });

@@ -1,10 +1,7 @@
 import { has, get, omit, isArray } from 'lodash/fp';
-import { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 
 import { getService } from '../utils';
-
-const { ApplicationError } = errors;
 
 const LOCALE_QUERY_FILTER = 'locale';
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
@@ -58,24 +55,6 @@ const wrapParams = async (params: any = {}, ctx: any = {}) => {
 };
 
 /**
- * Assigns a valid locale or the default one if not define
- * @param {object} data
- */
-const assignValidLocale = async (data: any) => {
-  const { getValidLocale } = getService('content-types');
-
-  if (!data) {
-    return;
-  }
-
-  try {
-    data.locale = await getValidLocale(data.locale);
-  } catch (e) {
-    throw new ApplicationError("This locale doesn't exist");
-  }
-};
-
-/**
  * Decorates the entity service with I18N business logic
  * @param {object} service - entity service
  */
@@ -108,57 +87,6 @@ const decorator = (service: any) => ({
     }
 
     return wrapParams(wrappedParams, ctx);
-  },
-
-  /**
-   * Creates an entry & make links between it and its related localizations
-   * @param {string} uid - Model uid
-   * @param {object} opts - Query options object (params, data, files, populate)
-   */
-  async create(uid: any, opts: any = {}) {
-    const model = strapi.getModel(uid);
-
-    const { syncNonLocalizedAttributes } = getService('localizations');
-    const { isLocalizedContentType } = getService('content-types');
-
-    if (!isLocalizedContentType(model)) {
-      return service.create.call(this, uid, opts);
-    }
-
-    const { data } = opts;
-    await assignValidLocale(data);
-
-    const entry = await service.create.call(this, uid, opts);
-
-    await syncNonLocalizedAttributes(entry, { model });
-    return entry;
-  },
-
-  /**
-   * Updates an entry & update related localizations fields
-   * @param {string} uid
-   * @param {string} entityId
-   * @param {object} opts - Query options object (params, data, files, populate)
-   */
-  async update(uid: any, entityId: any, opts: any = {}) {
-    const model = strapi.getModel(uid);
-
-    const { syncNonLocalizedAttributes } = getService('localizations');
-    const { isLocalizedContentType } = getService('content-types');
-
-    if (!isLocalizedContentType(model)) {
-      return service.update.call(this, uid, entityId, opts);
-    }
-
-    const { data, ...restOptions } = opts;
-
-    const entry = await service.update.call(this, uid, entityId, {
-      ...restOptions,
-      data: omit(['locale', 'localizations'], data),
-    });
-
-    await syncNonLocalizedAttributes(entry, { model });
-    return entry;
   },
 
   /**

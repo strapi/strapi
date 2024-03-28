@@ -95,7 +95,8 @@ const createHistoryService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
           context.action === 'create'
             ? // @ts-expect-error The context args are not typed correctly
               { documentId: result.documentId, locale: context.args[0]?.locale }
-            : { documentId: context.args[0], locale: context.args[1]?.locale };
+            : // @ts-expect-error The context args are not typed correctly
+              { documentId: context.args[0], locale: context.args[1]?.locale };
 
         const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
         const document = await strapi

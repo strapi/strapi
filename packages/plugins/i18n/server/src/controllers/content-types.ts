@@ -35,14 +35,14 @@ const controller = {
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(model);
 
     if (!isLocalizedContentType(modelDef)) {
-      throw new ApplicationError('model.not.localized');
+      throw new ApplicationError(`Model ${model} is not localized`);
     }
 
     const params = modelDef.kind === 'singleType' ? {} : { id };
 
     const entity = await strapi.db
       .query(model)
-      .findOne({ where: params, populate: [...attributesToPopulate, 'localizations'] });
+      .findOne({ where: params, populate: attributesToPopulate });
 
     if (!entity) {
       return ctx.notFound();
@@ -67,9 +67,19 @@ const controller = {
     const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
     const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);
 
+    const availableLocalesResult = await strapi.plugins['content-manager']
+      .service('document-metadata')
+      .getMetadata(model, entity, {
+        availableLocales: true,
+      });
+
+    const availableLocales = availableLocalesResult.availableLocales.map((localeResult: any) =>
+      pick(['id', 'locale', PUBLISHED_AT_ATTRIBUTE], localeResult)
+    );
+
     ctx.body = {
       nonLocalizedFields: sanitizedNonLocalizedFields,
-      localizations: entity.localizations.concat(
+      localizations: availableLocales.concat(
         pick(['id', 'locale', PUBLISHED_AT_ATTRIBUTE], entity)
       ),
     };
