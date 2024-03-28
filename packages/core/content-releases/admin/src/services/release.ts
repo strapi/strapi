@@ -2,6 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 
 import {
   CreateReleaseAction,
+  CreateManyReleaseActions,
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import { pluginId } from '../pluginId';
@@ -185,6 +186,22 @@ const releaseApi = createApi({
           { type: 'ReleaseAction', id: 'LIST' },
         ],
       }),
+      createManyReleaseActions: build.mutation<
+        CreateManyReleaseActions.Response,
+        CreateManyReleaseActions.Request
+      >({
+        query({ body, params }) {
+          return {
+            url: `/content-releases/${params.releaseId}/actions/bulk`,
+            method: 'POST',
+            data: body,
+          };
+        },
+        invalidatesTags: [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ],
+      }),
       updateReleaseAction: build.mutation<
         UpdateReleaseAction.Response,
         UpdateReleaseAction.Request & { query: GetReleaseActions.Request['query'] } & {
@@ -269,6 +286,7 @@ const {
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
+  useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
@@ -283,6 +301,7 @@ export {
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
+  useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,

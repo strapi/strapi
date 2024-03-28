@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
 import { rest } from 'msw';
@@ -8,8 +10,7 @@ import { mockReleasesPageData } from './mockReleasesPageData';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
+  CheckPermissions: jest.fn(({ children }: { children: ReactNode }) => children),
 }));
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
