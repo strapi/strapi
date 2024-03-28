@@ -15,7 +15,7 @@ import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { Blocker, Form } from '../../../components/Form';
+import { Blocker, ConfirmationDialog, Form, FormHelpers } from '../../../components/Form';
 import { Page } from '../../../components/PageHelpers';
 import { useNotification } from '../../../features/Notifications';
 import { useOnce } from '../../../hooks/useOnce';
@@ -54,6 +54,7 @@ const EditViewPage = () => {
       setSelectedTabIndex: SetSelectedTabIndexHandler;
     };
   }>(null);
+  const [showConfirmModal, setShowConfirmModal] = React.useState(false);
 
   const {
     document,
@@ -143,27 +144,12 @@ const EditViewPage = () => {
     return <Page.Error />;
   }
 
-  const switchToPublished = () => {
-    setQuery({ status: 'published' }, 'push', true);
-  };
-
-  const switchToDraft = () => {
-    setQuery({ status: 'draft' }, 'push', true);
-  };
-
-  const handleTabChange = (index: number) => {
+  const handleTabChange = (index: number, { resetForm }: Pick<FormHelpers, 'resetForm'>) => {
     if (index === 0) {
-      switchToDraft();
+      setQuery({ status: 'draft' }, 'push', true);
     } else {
-      switchToPublished();
-    }
-  };
-
-  const modifiedTabCancelAction = () => {
-    switchToDraft();
-
-    if (tabApi.current && hasDraftAndPublished) {
-      tabApi.current._handlers.setSelectedTabIndex(0);
+      setQuery({ status: 'published' }, 'push', true);
+      resetForm();
     }
   };
 
@@ -184,69 +170,89 @@ const EditViewPage = () => {
         method={isCreatingDocument ? 'POST' : 'PUT'}
         validationSchema={createYupSchema(schema?.attributes, components)}
       >
-        {({ resetForm }) => (
-          <>
-            <Header
-              isCreating={isCreatingDocument}
-              status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
-              title={documentTitle}
-            />
-            <TabGroup
-              ref={tabApi}
-              variant="simple"
-              label={formatMessage({
-                id: getTranslation('containers.edit.tabs.label'),
-                defaultMessage: 'Document status',
-              })}
-              initialSelectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
-              onTabChange={(index) => {
-                // TODO: remove this hack when the tabs in the DS are implemented well and we can actually use callbacks.
-                handleTabChange(index);
-              }}
-            >
-              {hasDraftAndPublished ? (
-                <Tabs>
-                  <StatusTab>
-                    {formatMessage({
-                      id: getTranslation('containers.edit.tabs.draft'),
-                      defaultMessage: 'draft',
-                    })}
-                  </StatusTab>
-                  <StatusTab disabled={!meta || meta.availableStatus.length === 0}>
-                    {formatMessage({
-                      id: getTranslation('containers.edit.tabs.published'),
-                      defaultMessage: 'published',
-                    })}
-                  </StatusTab>
-                </Tabs>
-              ) : null}
-              <Grid paddingTop={8} gap={4}>
-                <GridItem col={9} s={12}>
-                  <TabPanels>
-                    <TabPanel>
-                      <FormLayout layout={layout} />
-                    </TabPanel>
-                    <TabPanel>
-                      <FormLayout layout={layout} />
-                    </TabPanel>
-                  </TabPanels>
-                </GridItem>
-                <GridItem col={3} s={12}>
-                  <Panels />
-                </GridItem>
-              </Grid>
-            </TabGroup>
-            <Blocker
-              onProceed={() => {
-                // We reset the form when navigating to to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-                resetForm();
-              }}
-              // If tab navigation is aborted, we should bring the user back to
-              // the draft tab.
-              onCancel={modifiedTabCancelAction}
-            />
-          </>
-        )}
+        {({ resetForm, modified }) => {
+          const blockTabNavigation =
+            // We block the tab navigation if the form is modified and we're on the draft tab
+            modified && hasDraftAndPublished && (!status || status === 'draft');
+
+          return (
+            <>
+              <Header
+                isCreating={isCreatingDocument}
+                status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
+                title={documentTitle}
+              />
+              <TabGroup
+                ref={tabApi}
+                variant="simple"
+                label={formatMessage({
+                  id: getTranslation('containers.edit.tabs.label'),
+                  defaultMessage: 'Document status',
+                })}
+                initialSelectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
+                onTabChange={(index) => {
+                  if (blockTabNavigation && index === 1) {
+                    // When trying to navigate to the published tab from a
+                    // modifed form, we show a confirmation modal.
+                    setShowConfirmModal(true);
+                  } else {
+                    // TODO: remove this hack when the tabs in the DS are
+                    // implemented well and we can actually use callbacks.
+                    handleTabChange(index, { resetForm });
+                  }
+                }}
+              >
+                {hasDraftAndPublished ? (
+                  <Tabs>
+                    <StatusTab>
+                      {formatMessage({
+                        id: getTranslation('containers.edit.tabs.draft'),
+                        defaultMessage: 'draft',
+                      })}
+                    </StatusTab>
+                    <StatusTab disabled={!meta || meta.availableStatus.length === 0}>
+                      {formatMessage({
+                        id: getTranslation('containers.edit.tabs.published'),
+                        defaultMessage: 'published',
+                      })}
+                    </StatusTab>
+                  </Tabs>
+                ) : null}
+                <Grid paddingTop={8} gap={4}>
+                  <GridItem col={9} s={12}>
+                    <TabPanels>
+                      <TabPanel>
+                        <FormLayout layout={layout} />
+                      </TabPanel>
+                      <TabPanel>
+                        <FormLayout layout={layout} />
+                      </TabPanel>
+                    </TabPanels>
+                  </GridItem>
+                  <GridItem col={3} s={12}>
+                    <Panels />
+                  </GridItem>
+                </Grid>
+              </TabGroup>
+              <Blocker />
+              {showConfirmModal && (
+                <ConfirmationDialog
+                  onConfirm={() => {
+                    handleTabChange(1, { resetForm });
+                    setShowConfirmModal(false);
+                  }}
+                  onClose={() => {
+                    if (tabApi.current) {
+                      tabApi.current._handlers.setSelectedTabIndex(0);
+                    }
+
+                    setShowConfirmModal(false);
+                  }}
+                />
+              )}
+            </>
+          );
+        }}
       </Form>
     </Main>
   );

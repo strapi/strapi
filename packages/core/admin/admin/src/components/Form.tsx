@@ -687,81 +687,79 @@ const isErrorMessageDescriptor = (object?: string | object): object is Translati
   );
 };
 
+const ConfirmationDialog = ({
+  onConfirm,
+  onClose,
+  isOpen = true,
+}: {
+  onConfirm: () => void;
+  onClose: () => void;
+  isOpen?: boolean;
+}) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <Dialog
+      isOpen={isOpen}
+      title={formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      })}
+      onClose={onClose}
+    >
+      <DialogBody>
+        <Flex direction="column" gap={2}>
+          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+          <Typography as="p" variant="omega" textAlign="center">
+            {formatMessage({
+              id: 'global.prompt.unsaved',
+              defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+            })}
+          </Typography>
+        </Flex>
+      </DialogBody>
+      <DialogFooter
+        startAction={
+          <Button onClick={onClose} variant="tertiary">
+            {formatMessage({
+              id: 'app.components.Button.cancel',
+              defaultMessage: 'Cancel',
+            })}
+          </Button>
+        }
+        endAction={
+          <Button onClick={onConfirm} variant="danger">
+            {formatMessage({
+              id: 'app.components.Button.confirm',
+              defaultMessage: 'Confirm',
+            })}
+          </Button>
+        }
+      />
+    </Dialog>
+  );
+};
+
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({ onProceed = () => {}, onCancel = () => {} }) => {
-  const { formatMessage } = useIntl();
+const Blocker = () => {
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
 
-  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
-    return (
-      !isSubmitting &&
-      modified &&
-      (currentLocation.pathname !== nextLocation.pathname ||
-        currentLocation.search !== nextLocation.search)
-    );
-  });
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      !isSubmitting && modified && currentLocation.pathname !== nextLocation.pathname
+  );
 
   if (blocker.state === 'blocked') {
-    const onBlockerCancel = () => {
-      onCancel();
-      blocker.reset();
-    };
-
-    return (
-      <Dialog
-        isOpen
-        title={formatMessage({
-          id: 'app.components.ConfirmDialog.title',
-          defaultMessage: 'Confirmation',
-        })}
-        onClose={onBlockerCancel}
-      >
-        <DialogBody>
-          <Flex direction="column" gap={2}>
-            <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
-            <Typography as="p" variant="omega" textAlign="center">
-              {formatMessage({
-                id: 'global.prompt.unsaved',
-                defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
-              })}
-            </Typography>
-          </Flex>
-        </DialogBody>
-        <DialogFooter
-          startAction={
-            <Button onClick={onBlockerCancel} variant="tertiary">
-              {formatMessage({
-                id: 'app.components.Button.cancel',
-                defaultMessage: 'Cancel',
-              })}
-            </Button>
-          }
-          endAction={
-            <Button
-              onClick={() => {
-                onProceed();
-                blocker.proceed();
-              }}
-              variant="danger"
-            >
-              {formatMessage({
-                id: 'app.components.Button.confirm',
-                defaultMessage: 'Confirm',
-              })}
-            </Button>
-          }
-        />
-      </Dialog>
-    );
+    return <ConfirmationDialog onConfirm={blocker.proceed} onClose={blocker.reset} />;
   }
 
   return null;
 };
 
-export { Form, Blocker, useField, useForm };
+export { Form, Blocker, ConfirmationDialog, useField, useForm };
 export type {
   FormHelpers,
   FormProps,
