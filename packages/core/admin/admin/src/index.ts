@@ -9,6 +9,9 @@ export * from './render';
  */
 export { BackButton, type BackButtonProps } from './features/BackButton';
 export * from './components/ConfirmDialog';
+export * from './components/Context';
+export * from './components/DescriptionComponentRenderer';
+export * from './components/Filters';
 export * from './components/Form';
 export * from './components/FormInputs/Renderer';
 export * from './components/PageHelpers';
@@ -36,42 +39,22 @@ export { type Permission, useAuth, type AuthContextValue } from './features/Auth
  * Hooks
  */
 export { useInjectReducer } from './hooks/useInjectReducer';
-// TODO: Replace this export with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
-export { useLicenseLimits } from '../../ee/admin/src/hooks/useLicenseLimits';
 export { useAPIErrorHandler, type ApiError } from './hooks/useAPIErrorHandler';
 export { useQueryParams } from './hooks/useQueryParams';
 export { useFetchClient } from './hooks/useFetchClient';
+export { useFocusInputField } from './hooks/useFocusInputField';
 export { useRBAC } from './hooks/useRBAC';
+export { useAdminUsers } from './services/users';
 
 /**
  * Types
  */
-export type { StrapiApp } from './StrapiApp';
+export type { StrapiApp, MenuItem, InjectionZoneComponent } from './StrapiApp';
 export type { Store } from './core/store/configure';
+export type { Plugin, PluginConfig } from './core/apis/Plugin';
 export type { SanitizedAdminUser } from '../../shared/contracts/shared';
-export type {
-  EditViewContext,
-  ListViewContext,
-  BulkActionComponent,
-  BulkActionComponentProps,
-  BulkActionDescription,
-  DescriptionComponent,
-  DescriptionReducer,
-  PanelComponentProps,
-  PanelComponent,
-  PanelDescription,
-  DocumentActionComponent,
-  DocumentActionDescription,
-  DocumentActionProps,
-  HeaderActionComponent,
-  HeaderActionDescription,
-  HeaderActionProps,
-} from './core/apis/content-manager';
-
 /**
  * Utils
  */
 export { translatedErrors } from './utils/translatedErrors';
 export { getFetchClient } from './utils/getFetchClient';
-
-export * from './content-manager/exports';

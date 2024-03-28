@@ -124,6 +124,7 @@
     "@strapi/plugin-email": "5.0.0-beta.1",
     "@strapi/plugin-i18n": "5.0.0-beta.1",
     "@strapi/plugin-upload": "5.0.0-beta.1",
+    "@strapi/review-workflows": "5.0.0-beta.1",
     "@strapi/types": "5.0.0-beta.1",
     "@strapi/typescript-utils": "5.0.0-beta.1",
     "@strapi/utils": "5.0.0-beta.1",

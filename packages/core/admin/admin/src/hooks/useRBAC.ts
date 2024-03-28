@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 
 import isEqual from 'lodash/isEqual';
 
-import { usePrev } from '../content-manager/hooks/usePrev';
 import { useAuth, Permission } from '../features/Auth';
 import { capitalise } from '../utils/strings';
+
+import { usePrev } from './usePrev';
 
 type AllowedActions = Record<string, boolean>;
 

@@ -5,7 +5,6 @@ import {
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
-  unstable_useDocument,
   useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -24,6 +23,7 @@ import {
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { EmptyDocuments, Plus } from '@strapi/icons';
+import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';

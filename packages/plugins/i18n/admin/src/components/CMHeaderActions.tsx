@@ -1,15 +1,14 @@
 import * as React from 'react';
 
+import { useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
+import { Flex, Icon, Status, Typography } from '@strapi/design-system';
+import { ExclamationMarkCircle, Trash } from '@strapi/icons';
 import {
   type HeaderActionComponent,
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
   type DocumentActionComponent,
-  useNotification,
-  useQueryParams,
-} from '@strapi/admin/strapi-admin';
-import { Flex, Icon, Status, Typography } from '@strapi/design-system';
-import { ExclamationMarkCircle, Trash } from '@strapi/icons';
+} from '@strapi/plugin-content-manager/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';

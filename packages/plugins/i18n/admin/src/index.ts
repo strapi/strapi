@@ -22,7 +22,7 @@ import { getTranslation } from './utils/getTranslation';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
-import type { DocumentActionComponent } from '@strapi/admin/strapi-admin';
+import type { DocumentActionComponent } from '@strapi/plugin-content-manager/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -69,22 +69,22 @@ export default {
       return actions;
     });
 
-    app.injectContentManagerComponent('listView', 'actions', {
+    contentManager.injectComponent('listView', 'actions', {
       name: 'i18n-locale-filter',
       Component: LocalePicker,
     });
 
-    app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
+    contentManager.injectComponent('listView', 'publishModalAdditionalInfos', {
       name: 'i18n-publish-bullets-in-modal',
       Component: PublishModalAdditionalInfo,
     });
 
-    app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
+    contentManager.injectComponent('listView', 'unpublishModalAdditionalInfos', {
       name: 'i18n-unpublish-bullets-in-modal',
       Component: UnpublishModalAdditionalInfo,
     });
 
-    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
+    contentManager.injectComponent('listView', 'deleteModalAdditionalInfos', {
       name: 'i18n-delete-bullets-in-modal',
       Component: DeleteModalAdditionalInfo,
     });
