@@ -53,5 +53,5 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
     },
   ];
 
-  await strapi.admin!.services.permission.actionProvider.registerMany(actions);
+  await strapi.service('admin::permission').actionProvider.registerMany(actions);
 };

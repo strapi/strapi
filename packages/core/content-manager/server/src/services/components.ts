@@ -21,7 +21,7 @@ const configurationService = createConfigurationService({
   },
 });
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   findAllComponents() {
     const { toContentManagerModel } = getService('data-mapper');
 

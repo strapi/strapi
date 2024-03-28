@@ -35,6 +35,7 @@ const RESTRICTED_FILENAMES = [
   'packageJsonStrapi',
   'info',
   'autoReload',
+  'dirs',
 
   // probably mistaken/typo filenames
   ...Object.keys(MISTAKEN_FILENAMES),

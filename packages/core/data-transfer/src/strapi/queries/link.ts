@@ -6,7 +6,7 @@ import { ILink } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: Core.LoadedStrapi, trx?: Knex.Transaction) => {
+export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => {
   const query = () => {
     const { connection } = strapi.db;
 

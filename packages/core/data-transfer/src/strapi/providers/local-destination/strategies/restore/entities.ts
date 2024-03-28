@@ -9,7 +9,7 @@ import { json } from '../../../../../utils';
 import * as queries from '../../../../queries';
 
 interface IEntitiesRestoreStreamOptions {
-  strapi: Core.LoadedStrapi;
+  strapi: Core.Strapi;
   updateMappingTable<TSchemaUID extends UID.Schema>(
     type: TSchemaUID,
     oldID: number,

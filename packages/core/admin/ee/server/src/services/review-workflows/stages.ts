@@ -8,7 +8,7 @@ const { ApplicationError, ValidationError } = errors;
 const sanitizedStageFields = ['id', 'name', 'workflow', 'color'];
 const sanitizeStageFields = pick(sanitizedStageFields);
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
   const stagePermissionsService = getService('stage-permissions', { strapi });
   const workflowsValidationService = getService('review-workflows-validation', { strapi });

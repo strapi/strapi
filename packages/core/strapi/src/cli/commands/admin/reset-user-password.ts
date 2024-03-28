@@ -31,7 +31,7 @@ async function changePassword({ email, password }: CmdOptions) {
   const appContext = await compileStrapi();
   const app = await createStrapi(appContext).load();
 
-  await app.admin.services.user.resetPasswordByEmail(email, password);
+  await app.admin!.services.user.resetPasswordByEmail(email, password);
 
   console.log(`Successfully reset user's password`);
   process.exit(0);

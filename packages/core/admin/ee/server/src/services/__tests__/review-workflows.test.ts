@@ -60,6 +60,10 @@ const containerMock = {
     switch (container) {
       case 'content-types':
         return contentTypesContainer;
+      case 'webhookStore':
+        return {
+          addAllowedEvent: jest.fn(),
+        };
       default:
         return null;
     }
@@ -91,10 +95,7 @@ const strapiMock = {
         return null;
     }
   },
-  webhookStore: {
-    addAllowedEvent: jest.fn(),
-  },
-} as unknown as Core.LoadedStrapi;
+} as unknown as Core.Strapi;
 
 const reviewWorkflowsService = reviewWorkflowsServiceFactory({ strapi: strapiMock });
 

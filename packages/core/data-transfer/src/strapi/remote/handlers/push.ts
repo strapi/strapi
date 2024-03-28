@@ -449,7 +449,7 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
     this.provider = createLocalStrapiDestinationProvider({
       ...params.options,
       autoDestroy: false,
-      getStrapi: () => strapi as Core.LoadedStrapi,
+      getStrapi: () => strapi as Core.Strapi,
     });
 
     this.provider.onWarning = (message) => {

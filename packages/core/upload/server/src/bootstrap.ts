@@ -50,7 +50,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
 
 const registerWebhookEvents = async () =>
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
-    strapi.webhookStore.addAllowedEvent(key, value);
+    strapi.get('webhookStore').addAllowedEvent(key, value);
   });
 
 const registerPermissionActions = async () => {
@@ -104,5 +104,5 @@ const registerPermissionActions = async () => {
     },
   ];
 
-  await strapi.admin.services.permission.actionProvider.registerMany(actions);
+  await strapi.service('admin::permission').actionProvider.registerMany(actions);
 };

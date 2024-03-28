@@ -11,7 +11,7 @@ import * as utils from '../../../utils';
 import { assertValidStrapi } from '../../../utils/providers';
 
 export interface ILocalStrapiSourceProviderOptions {
-  getStrapi(): Core.LoadedStrapi | Promise<Core.LoadedStrapi>; // return an initialized instance of Strapi
+  getStrapi(): Core.Strapi | Promise<Core.Strapi>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
 }
@@ -27,7 +27,7 @@ class LocalStrapiSourceProvider implements ISourceProvider {
 
   options: ILocalStrapiSourceProviderOptions;
 
-  strapi?: Core.LoadedStrapi;
+  strapi?: Core.Strapi;
 
   constructor(options: ILocalStrapiSourceProviderOptions) {
     this.options = options;

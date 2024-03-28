@@ -29,7 +29,7 @@ const controller = {
 
     const {
       default: { READ_ACTION, CREATE_ACTION },
-    } = strapi.admin.services.constants;
+    } = strapi.service('admin::constants');
 
     const modelDef = strapi.contentType(model);
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(model);

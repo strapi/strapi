@@ -33,7 +33,7 @@ describe('Transform relational data', () => {
     db: {
       query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
     },
-  } as unknown as Core.LoadedStrapi;
+  } as unknown as Core.Strapi;
 
   beforeEach(() => {
     findCategories.mockReturnValue([

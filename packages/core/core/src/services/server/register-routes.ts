@@ -31,7 +31,7 @@ export default (strapi: Core.Strapi) => {
 const registerAdminRoutes = (strapi: Core.Strapi) => {
   const generateRouteScope = createRouteScopeGenerator(`admin::`);
 
-  _.forEach(strapi.admin?.routes, (router) => {
+  _.forEach(strapi.admin.routes, (router) => {
     router.type = router.type || 'admin';
     router.prefix = router.prefix || `/admin`;
     router.routes.forEach((route) => {

@@ -17,10 +17,14 @@ const findEntityAndCheckPermissions = async (
     throw new errors.NotFoundError();
   }
 
-  const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
+  const pm = strapi
+    .service('admin::permission')
+    .createPermissionsManager({ ability, action, model });
 
   const creatorId = _.get(file, [contentTypesUtils.constants.CREATED_BY_ATTRIBUTE, 'id']);
-  const author = creatorId ? await strapi.admin.services.user.findOne(creatorId, ['roles']) : null;
+  const author = creatorId
+    ? await strapi.service('admin::user').findOne(creatorId, ['roles'])
+    : null;
 
   const fileWithRoles = _.set(_.cloneDeep(file), 'createdBy', author);
 

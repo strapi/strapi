@@ -1,13 +1,19 @@
 import type { Core } from '@strapi/types';
 import { get, set, has, isString, isNumber, isArray, type PropertyPath } from 'lodash';
 
+type State = {
+  config: Config;
+};
+
 type Config = Record<string, unknown>;
 
-export default (
-  initialConfig = {},
-  strapi?: Core.Strapi | Core.LoadedStrapi
+export const createConfigProvider = (
+  initialConfig: Record<string, unknown> = {},
+  strapi?: Core.Strapi
 ): Core.ConfigProvider => {
-  const _config: Config = { ...initialConfig }; // not deep clone because it would break some config
+  const state: State = {
+    config: { ...initialConfig }, // not deep clone because it would break some config
+  };
 
   // Accessing model configs with dot (.) was deprecated between v4->v5, but to avoid a major breaking change
   // we will still support certain namespaces, currently only 'plugin.'
@@ -42,16 +48,16 @@ export default (
   };
 
   return {
-    ..._config, // TODO: to remove
+    ...state.config, // TODO: to remove
     get(path: PropertyPath, defaultValue?: unknown) {
-      return get(_config, transformDeprecatedPaths(path), defaultValue);
+      return get(state.config, transformDeprecatedPaths(path), defaultValue);
     },
     set(path: PropertyPath, val: unknown) {
-      set(_config, transformDeprecatedPaths(path), val);
+      set(state.config, transformDeprecatedPaths(path), val);
       return this;
     },
     has(path: PropertyPath) {
-      return has(_config, transformDeprecatedPaths(path));
+      return has(state.config, transformDeprecatedPaths(path));
     },
   };
 };

@@ -12,10 +12,10 @@ describe('Admin API Token v2 CRUD (api)', () => {
   let nowSpy;
 
   const deleteAllTokens = async () => {
-    const tokens = await strapi.admin.services['api-token'].list();
+    const tokens = await strapi.service('admin::api-token').list();
     const promises = [];
     tokens.forEach(({ id }) => {
-      promises.push(strapi.admin.services['api-token'].revoke(id));
+      promises.push(strapi.service('admin::api-token').revoke(id));
     });
     await Promise.all(promises);
   };

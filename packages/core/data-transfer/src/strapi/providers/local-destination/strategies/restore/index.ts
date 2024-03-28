@@ -22,7 +22,7 @@ interface IDeleteResults {
   aggregate: { [uid: string]: { count: number } };
 }
 
-export const deleteRecords = async (strapi: Core.LoadedStrapi, options: IRestoreOptions) => {
+export const deleteRecords = async (strapi: Core.Strapi, options: IRestoreOptions) => {
   const entities = await deleteEntitiesRecords(strapi, options);
   const configuration = await deleteConfigurationRecords(strapi, options);
 
@@ -34,7 +34,7 @@ export const deleteRecords = async (strapi: Core.LoadedStrapi, options: IRestore
 };
 
 const deleteEntitiesRecords = async (
-  strapi: Core.LoadedStrapi,
+  strapi: Core.Strapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { entities } = options;
@@ -112,7 +112,7 @@ const deleteEntitiesRecords = async (
 };
 
 const deleteConfigurationRecords = async (
-  strapi: Core.LoadedStrapi,
+  strapi: Core.Strapi,
   options: IRestoreOptions = {}
 ): Promise<IDeleteResults> => {
   const { coreStore = true, webhook = true } = options?.configuration ?? {};

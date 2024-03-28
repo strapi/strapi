@@ -304,7 +304,7 @@ export const createPullController = handlerControllerFactory<Partial<PullHandler
 
     this.provider = createLocalStrapiSourceProvider({
       autoDestroy: false,
-      getStrapi: () => strapi as Core.LoadedStrapi,
+      getStrapi: () => strapi as Core.Strapi,
     });
 
     return { transferID: this.transferID };

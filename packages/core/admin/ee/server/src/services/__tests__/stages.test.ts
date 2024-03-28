@@ -116,7 +116,7 @@ const strapiMock = {
       },
     },
   },
-} as unknown as Core.LoadedStrapi;
+} as unknown as Core.Strapi;
 
 const stagesService = stageFactory({ strapi: strapiMock });
 

@@ -6,7 +6,7 @@ import { CATEGORY_UID, Category } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
-  let strapi: Core.LoadedStrapi;
+  let strapi: Core.Strapi;
 
   let testName;
   let createdCategory;

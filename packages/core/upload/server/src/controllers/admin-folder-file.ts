@@ -18,12 +18,12 @@ export default {
       state: { userAbility },
     } = ctx;
 
-    const pmFolder = strapi.admin.services.permission.createPermissionsManager({
+    const pmFolder = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });
 
-    const pmFile = strapi.admin.services.permission.createPermissionsManager({
+    const pmFile = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
       action: ACTIONS.read,
       model: FILE_MODEL_UID,
@@ -65,12 +65,12 @@ export default {
       state: { userAbility },
     } = ctx;
 
-    const pmFolder = strapi.admin.services.permission.createPermissionsManager({
+    const pmFolder = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });
 
-    const pmFile = strapi.admin.services.permission.createPermissionsManager({
+    const pmFile = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
       action: ACTIONS.read,
       model: FILE_MODEL_UID,

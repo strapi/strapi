@@ -4,7 +4,7 @@ import adminAuthStrategy from './strategies/admin';
 import apiTokenAuthStrategy from './strategies/api-token';
 
 export default ({ strapi }: { strapi: Core.Strapi }) => {
-  const passportMiddleware = strapi.admin?.services.passport.init();
+  const passportMiddleware = strapi.service('admin::passport').init();
 
   strapi.server.api('admin').use(passportMiddleware);
   strapi.get('auth').register('admin', adminAuthStrategy);

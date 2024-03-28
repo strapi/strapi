@@ -103,9 +103,9 @@ module.exports = async ({ strapi }) => {
   await initEmails(pluginStore);
   await initAdvancedOptions(pluginStore);
 
-  await strapi.admin.services.permission.actionProvider.registerMany(
-    usersPermissionsActions.actions
-  );
+  await strapi
+    .service('admin::permission')
+    .actionProvider.registerMany(usersPermissionsActions.actions);
 
   await getService('users-permissions').initialize();
 

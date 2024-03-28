@@ -19,9 +19,9 @@ type Query = {
 };
 
 const createPermissionChecker =
-  (strapi: Core.LoadedStrapi) =>
+  (strapi: Core.Strapi) =>
   ({ userAbility, model }: { userAbility: any; model: string }) => {
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
       model,
     });
@@ -113,6 +113,6 @@ const createPermissionChecker =
     };
   };
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   create: createPermissionChecker(strapi),
 });

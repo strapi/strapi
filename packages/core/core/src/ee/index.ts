@@ -11,7 +11,7 @@ interface EE {
   enabled: boolean;
   licenseInfo: {
     licenseKey?: string;
-    features?: Array<{ name: string } | string>;
+    features?: Array<{ name: string; [key: string]: any } | string>;
     expireAt?: string;
     seats?: number;
     type?: string;

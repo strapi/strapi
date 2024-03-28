@@ -10,7 +10,7 @@ import { getService } from '../../utils';
  * @return {Promise<void>}
  */
 const localesPropertyHandler = async ({ action, section }: any) => {
-  const { actionProvider } = strapi.admin.services.permission;
+  const { actionProvider } = strapi.service('admin::permission');
 
   const locales = await getService('locales').find();
 
@@ -36,7 +36,7 @@ const localesPropertyHandler = async ({ action, section }: any) => {
 };
 
 const registerLocalesPropertyHandler = () => {
-  const { sectionsBuilder } = strapi.admin.services.permission;
+  const { sectionsBuilder } = strapi.service('admin::permission');
 
   sectionsBuilder.addHandler('singleTypes', localesPropertyHandler);
   sectionsBuilder.addHandler('collectionTypes', localesPropertyHandler);

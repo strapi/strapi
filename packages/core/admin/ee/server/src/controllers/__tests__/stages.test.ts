@@ -104,7 +104,7 @@ describe('Stages', () => {
     });
 
     test('cannot transition', async () => {
-      global.strapi.admin.services['stage-permissions'].can.mockReturnValueOnce(false);
+      global.strapi.service('admin::stage-permissions').can.mockReturnValueOnce(false);
 
       const ctx: any = {
         ...baseCtx,
@@ -145,7 +145,7 @@ describe('Stages', () => {
     });
 
     test('cannot transition', async () => {
-      global.strapi.admin.services['stage-permissions'].can.mockReturnValueOnce(false);
+      global.strapi.service('admin::stage-permissions').can.mockReturnValueOnce(false);
 
       const ctx: any = {
         ...baseCtx,

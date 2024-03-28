@@ -1,31 +1,31 @@
-import configProvider from '../config';
+import { createConfigProvider } from '../../services/config';
 
 const logLevel = 'warn';
 
 describe('config', () => {
   test('returns objects for partial paths', () => {
-    const config = configProvider({ default: { child: 'val' } });
+    const config = createConfigProvider({ default: { child: 'val' } });
     expect(config.get('default')).toEqual({ child: 'val' });
   });
 
   test('supports full string paths', () => {
-    const config = configProvider({ default: { child: 'val' } });
+    const config = createConfigProvider({ default: { child: 'val' } });
     expect(config.get('default.child')).toEqual('val');
   });
 
   test('supports array paths', () => {
-    const config = configProvider({ default: { child: 'val' } });
+    const config = createConfigProvider({ default: { child: 'val' } });
     expect(config.get(['default', 'child'])).toEqual('val');
   });
 
   test('accepts initial values', () => {
-    const config = configProvider({ default: 'val', foo: 'bar' });
+    const config = createConfigProvider({ default: 'val', foo: 'bar' });
     expect(config.get('default')).toEqual('val');
     expect(config.get('foo')).toEqual('bar');
   });
 
   test('accepts uid in paths', () => {
-    const config = configProvider({
+    const config = createConfigProvider({
       'api::myapi': { foo: 'val' },
       'plugin::myplugin': { foo: 'bar' },
     });
@@ -39,7 +39,7 @@ describe('config', () => {
   test('`get` supports `plugin::` prefix', () => {
     const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-    const config = configProvider({
+    const config = createConfigProvider({
       'plugin::myplugin': { foo: 'bar' },
     });
 
@@ -51,7 +51,7 @@ describe('config', () => {
   test('`get` supports `plugin::model` in array path', () => {
     const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-    const config = configProvider({
+    const config = createConfigProvider({
       'plugin::myplugin': { foo: 'bar' },
     });
 
@@ -64,7 +64,7 @@ describe('config', () => {
     test('`get` supports `plugin.` prefix in string path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-      const config = configProvider({
+      const config = createConfigProvider({
         'plugin::myplugin': { foo: 'bar' },
       });
 
@@ -76,7 +76,7 @@ describe('config', () => {
     test('`get` supports `plugin.model` prefix in array path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-      const config = configProvider({
+      const config = createConfigProvider({
         'plugin::myplugin': { foo: 'bar' },
       });
 
@@ -88,7 +88,7 @@ describe('config', () => {
     test('`get` supports `plugin` + `model` in array path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-      const config = configProvider({
+      const config = createConfigProvider({
         'plugin::myplugin': { foo: 'bar' },
       });
 
@@ -99,7 +99,7 @@ describe('config', () => {
     test('`set` supports `plugin.` prefix in string path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-      const config = configProvider({
+      const config = createConfigProvider({
         'plugin::myplugin': { foo: 'bar' },
       });
       config.set('plugin.myplugin.thing', 'val');
@@ -112,7 +112,7 @@ describe('config', () => {
     test('`set` supports `plugin.` prefix in array path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-      const config = configProvider({
+      const config = createConfigProvider({
         'plugin::myplugin': { foo: 'bar' },
       });
       config.set(['plugin.myplugin', 'thing'], 'val');
@@ -125,7 +125,7 @@ describe('config', () => {
     test('`has` supports `plugin.` prefix in string path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-      const config = configProvider({
+      const config = createConfigProvider({
         'plugin::myplugin': { foo: 'bar' },
       });
 
@@ -138,7 +138,7 @@ describe('config', () => {
     test('`has` supports `plugin.` prefix in array path', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
-      const config = configProvider({
+      const config = createConfigProvider({
         'plugin::myplugin': { foo: 'bar' },
       });
 
@@ -152,7 +152,7 @@ describe('config', () => {
       const consoleSpy = jest.spyOn(console, logLevel).mockImplementation(() => {});
 
       const logSpy = jest.fn();
-      const config = configProvider(
+      const config = createConfigProvider(
         {
           'plugin::myplugin': { foo: 'bar' },
         },
@@ -166,7 +166,7 @@ describe('config', () => {
     });
 
     test('get does NOT support deprecation for other prefixes', () => {
-      const config = configProvider({
+      const config = createConfigProvider({
         'api::myapi': { foo: 'bar' },
       });
 
@@ -174,7 +174,7 @@ describe('config', () => {
     });
 
     test('set does NOT support deprecation for other prefixes', () => {
-      const config = configProvider({
+      const config = createConfigProvider({
         'api::myapi': { foo: 'bar' },
       });
 

@@ -3,7 +3,7 @@ import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 
 const getSSOProvidersList = async () => {
-  const { providerRegistry } = strapi.admin.services.passport;
+  const { providerRegistry } = strapi.service('admin::passport');
 
   return providerRegistry.getAll().map(({ uid }: { uid: string }) => uid);
 };

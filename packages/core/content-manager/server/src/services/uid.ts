@@ -3,7 +3,7 @@ import slugify from '@sindresorhus/slugify';
 
 import type { Core, Schema, UID } from '@strapi/types';
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async generateUIDField({
     contentTypeUID,
     field,

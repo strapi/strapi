@@ -18,7 +18,7 @@ const createContentAPIRequest = ({ strapi, auth = {} } = {}) => {
   return createAgent(strapi, { urlPrefix: CONTENT_API_URL_PREFIX, token: 'test-token' });
 };
 
-const createAuthRequest = ({ strapi, userInfo = superAdmin.credentials, state }) => {
+const createAuthRequest = ({ strapi, userInfo = superAdmin.credentials, state = {} }) => {
   return createAgent(strapi, state).login(userInfo);
 };
 

@@ -48,7 +48,7 @@ const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
   }
 };
 
-const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
     event: string,
     { isPublished, release, error }: { isPublished: boolean; release?: any; error?: unknown }

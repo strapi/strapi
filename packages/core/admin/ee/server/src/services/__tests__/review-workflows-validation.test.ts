@@ -29,7 +29,7 @@ const strapiMock = {
       },
     },
   },
-} as unknown as Core.LoadedStrapi;
+} as unknown as Core.Strapi;
 
 let validationService: any;
 

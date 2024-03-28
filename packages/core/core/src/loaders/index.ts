@@ -6,7 +6,6 @@ import loadMiddlewares from './middlewares';
 import loadComponents from './components';
 import loadPolicies from './policies';
 import loadPlugins from './plugins';
-import loadAdmin from './admin';
 import loadSanitizers from './sanitizers';
 import loadValidators from './validators';
 
@@ -16,7 +15,6 @@ export async function loadApplicationContext(strapi: Core.Strapi) {
     loadSanitizers(strapi),
     loadValidators(strapi),
     loadPlugins(strapi),
-    loadAdmin(strapi),
     loadAPIs(strapi),
     loadComponents(strapi),
     loadMiddlewares(strapi),

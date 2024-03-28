@@ -16,7 +16,7 @@ const willRegisterPermission = (context: any) => {
   const { permission, condition, user } = context;
   const { subject, properties } = permission;
 
-  const isSuperAdmin = strapi.admin.services.role.hasSuperAdminRole(user);
+  const isSuperAdmin = strapi.service('admin::role').hasSuperAdminRole(user);
 
   if (isSuperAdmin) {
     return;
@@ -50,7 +50,7 @@ const willRegisterPermission = (context: any) => {
 };
 
 const registerI18nPermissionsHandlers = () => {
-  const { engine } = strapi.admin.services.permission;
+  const { engine } = strapi.service('admin::permission');
 
   engine.hooks['before-register.permission'].register(willRegisterPermission);
 };

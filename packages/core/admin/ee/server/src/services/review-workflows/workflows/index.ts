@@ -7,7 +7,7 @@ import { getWorkflowContentTypeFilter } from '../../../utils/review-workflows';
 import workflowsContentTypesFactory from './content-types';
 
 const { ApplicationError } = errors;
-const processFilters = ({ strapi }: { strapi: Core.LoadedStrapi }, filters: any = {}) => {
+const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) => {
   const processedFilters = { ...filters };
 
   if (isString(filters.contentTypes)) {
@@ -27,7 +27,7 @@ const processPopulate = (populate: any) => {
   return WORKFLOW_POPULATE;
 };
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const workflowsContentTypes = workflowsContentTypesFactory({ strapi });
   const workflowsValidationService = getService('review-workflows-validation', { strapi });
   const metrics = getService('review-workflows-metrics', { strapi });

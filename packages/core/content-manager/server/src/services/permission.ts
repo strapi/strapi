@@ -4,7 +4,7 @@ import { contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 import { getService } from '../utils';
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   canConfigureContentType({
     userAbility,
     contentType,
@@ -91,6 +91,6 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
       },
     ];
 
-    await strapi.admin.services.permission.actionProvider.registerMany(actions);
+    await strapi.service('admin::permission').actionProvider.registerMany(actions);
   },
 });

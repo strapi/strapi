@@ -7,7 +7,7 @@ import { clampMaxWorkflows, clampMaxStagesPerWorkflow } from '../../utils/review
 
 const { ValidationError } = errors;
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     limits: {
       numberOfWorkflows: MAX_WORKFLOWS,
