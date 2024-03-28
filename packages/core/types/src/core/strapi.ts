@@ -94,8 +94,8 @@ export interface Strapi extends Container {
   ): TSchemaUID extends UID.ContentType
     ? Schema.ContentType<TSchemaUID>
     : TSchemaUID extends UID.Component
-    ? Schema.Component<TSchemaUID>
-    : never;
+      ? Schema.Component<TSchemaUID>
+      : never;
   query(uid: UID.Schema): ReturnType<Database['query']>;
 }
 

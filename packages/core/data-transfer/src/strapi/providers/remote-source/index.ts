@@ -268,9 +268,8 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await this.dispatcher?.dispatchTransferAction<Utils.String.Dict<Struct.Schema>>(
-      'getSchemas'
-    );
+    const schemas =
+      await this.dispatcher?.dispatchTransferAction<Utils.String.Dict<Struct.Schema>>('getSchemas');
 
     return schemas ?? null;
   }

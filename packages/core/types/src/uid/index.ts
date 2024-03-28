@@ -26,9 +26,8 @@ export type Component = Internal.Registry.Keys<Public.ComponentSchemas, Internal
 /**
  * Union of every components' category, based on the public component registry
  */
-export type ComponentCategory = Component extends Internal.UID.Component<infer TCategory>
-  ? TCategory
-  : never;
+export type ComponentCategory =
+  Component extends Internal.UID.Component<infer TCategory> ? TCategory : never;
 
 /**
  * Collection-Types' UIDs based on the public content-type registry.

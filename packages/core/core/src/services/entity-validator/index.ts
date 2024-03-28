@@ -53,7 +53,7 @@ const addMinMax = <
   T extends {
     min(value: number): T;
     max(value: number): T;
-  }
+  },
 >(
   validator: T,
   {
@@ -283,20 +283,23 @@ const createModelValidator =
   ({ model, data, entity }: ModelValidatorMetas, options: ValidatorContext) => {
     const writableAttributes = model ? getWritableAttributes(model as any) : [];
 
-    const schema = writableAttributes.reduce((validators, attributeName) => {
-      const metas = {
-        attr: model.attributes[attributeName],
-        updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
-        model,
-        entity,
-      };
+    const schema = writableAttributes.reduce(
+      (validators, attributeName) => {
+        const metas = {
+          attr: model.attributes[attributeName],
+          updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
+          model,
+          entity,
+        };
 
-      const validator = createAttributeValidator(createOrUpdate)(metas, options);
+        const validator = createAttributeValidator(createOrUpdate)(metas, options);
 
-      validators[attributeName] = validator;
+        validators[attributeName] = validator;
 
-      return validators;
-    }, {} as Record<string, strapiUtils.yup.BaseSchema>);
+        return validators;
+      },
+      {} as Record<string, strapiUtils.yup.BaseSchema>
+    );
 
     return yup.object().shape(schema);
   };
@@ -304,7 +307,7 @@ const createModelValidator =
 const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
   return async <
     TUID extends UID.ContentType,
-    TData extends Modules.EntityService.Params.Data.Input<TUID>
+    TData extends Modules.EntityService.Params.Data.Input<TUID>,
   >(
     model: Schema.ContentType<TUID>,
     data: TData | Partial<TData> | undefined,
@@ -366,105 +369,108 @@ const buildRelationsStore = <TUID extends UID.Schema>({
 
   const currentModel = strapi.getModel(uid);
 
-  return Object.keys(currentModel.attributes).reduce((result, attributeName: string) => {
-    const attribute = currentModel.attributes[attributeName];
-    const value = data[attributeName];
+  return Object.keys(currentModel.attributes).reduce(
+    (result, attributeName: string) => {
+      const attribute = currentModel.attributes[attributeName];
+      const value = data[attributeName];
 
-    if (isNil(value)) {
-      return result;
-    }
+      if (isNil(value)) {
+        return result;
+      }
 
-    switch (attribute.type) {
-      case 'relation':
-      case 'media': {
-        if (
-          attribute.type === 'relation' &&
-          (attribute.relation === 'morphToMany' || attribute.relation === 'morphToOne')
-        ) {
-          // TODO: handle polymorphic relations
+      switch (attribute.type) {
+        case 'relation':
+        case 'media': {
+          if (
+            attribute.type === 'relation' &&
+            (attribute.relation === 'morphToMany' || attribute.relation === 'morphToOne')
+          ) {
+            // TODO: handle polymorphic relations
+            break;
+          }
+
+          const target =
+            // eslint-disable-next-line no-nested-ternary
+            attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
+          // As there are multiple formats supported for associating relations
+          // with an entity, the value here can be an: array, object or number.
+          let source: RelationSource[];
+          if (Array.isArray(value)) {
+            source = value;
+          } else if (isObject(value)) {
+            if ('connect' in value && !isNil(value.connect)) {
+              source = value.connect as RelationSource[];
+            } else if ('set' in value && !isNil(value.set)) {
+              source = value.set as RelationSource[];
+            } else {
+              source = [];
+            }
+          } else {
+            source = castArray(value as RelationSource);
+          }
+          const idArray = source.map((v) => ({
+            id: typeof v === 'object' ? v.id : v,
+          }));
+
+          // Update the relationStore to keep track of all associations being made
+          // with relations and media.
+          result[target] = result[target] || [];
+          result[target].push(...idArray);
           break;
         }
+        case 'component': {
+          return castArray(value).reduce((relationsStore, componentValue) => {
+            if (!attribute.component) {
+              throw new ValidationError(
+                `Cannot build relations store from component, component identifier is undefined`
+              );
+            }
 
-        const target =
-          // eslint-disable-next-line no-nested-ternary
-          attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
-        // As there are multiple formats supported for associating relations
-        // with an entity, the value here can be an: array, object or number.
-        let source: RelationSource[];
-        if (Array.isArray(value)) {
-          source = value;
-        } else if (isObject(value)) {
-          if ('connect' in value && !isNil(value.connect)) {
-            source = value.connect as RelationSource[];
-          } else if ('set' in value && !isNil(value.set)) {
-            source = value.set as RelationSource[];
-          } else {
-            source = [];
-          }
-        } else {
-          source = castArray(value as RelationSource);
+            return mergeWith(
+              relationsStore,
+              buildRelationsStore({
+                uid: attribute.component,
+                data: componentValue as Record<string, unknown>,
+              }),
+              (objValue, srcValue) => {
+                if (isArray(objValue)) {
+                  return objValue.concat(srcValue);
+                }
+              }
+            );
+          }, result) as Record<string, ID[]>;
         }
-        const idArray = source.map((v) => ({
-          id: typeof v === 'object' ? v.id : v,
-        }));
-
-        // Update the relationStore to keep track of all associations being made
-        // with relations and media.
-        result[target] = result[target] || [];
-        result[target].push(...idArray);
-        break;
-      }
-      case 'component': {
-        return castArray(value).reduce((relationsStore, componentValue) => {
-          if (!attribute.component) {
-            throw new ValidationError(
-              `Cannot build relations store from component, component identifier is undefined`
-            );
-          }
-
-          return mergeWith(
-            relationsStore,
-            buildRelationsStore({
-              uid: attribute.component,
-              data: componentValue as Record<string, unknown>,
-            }),
-            (objValue, srcValue) => {
-              if (isArray(objValue)) {
-                return objValue.concat(srcValue);
-              }
+        case 'dynamiczone': {
+          return castArray(value).reduce((relationsStore, dzValue) => {
+            const value = dzValue as Record<string, unknown>;
+            if (!value.__component) {
+              throw new ValidationError(
+                `Cannot build relations store from dynamiczone, component identifier is undefined`
+              );
             }
-          );
-        }, result) as Record<string, ID[]>;
-      }
-      case 'dynamiczone': {
-        return castArray(value).reduce((relationsStore, dzValue) => {
-          const value = dzValue as Record<string, unknown>;
-          if (!value.__component) {
-            throw new ValidationError(
-              `Cannot build relations store from dynamiczone, component identifier is undefined`
-            );
-          }
 
-          return mergeWith(
-            relationsStore,
-            buildRelationsStore({
-              uid: value.__component as UID.Component,
-              data: value,
-            }),
-            (objValue, srcValue) => {
-              if (isArray(objValue)) {
-                return objValue.concat(srcValue);
+            return mergeWith(
+              relationsStore,
+              buildRelationsStore({
+                uid: value.__component as UID.Component,
+                data: value,
+              }),
+              (objValue, srcValue) => {
+                if (isArray(objValue)) {
+                  return objValue.concat(srcValue);
+                }
               }
-            }
-          );
-        }, result) as Record<string, ID[]>;
+            );
+          }, result) as Record<string, ID[]>;
+        }
+        default:
+          break;
       }
-      default:
-        break;
-    }
 
-    return result;
-  }, {} as Record<string, ID[]>);
+      return result;
+    },
+    {} as Record<string, ID[]>
+  );
 };
 
 /**

@@ -497,7 +497,7 @@ const Table = {
 namespace Table {
   export type Props<
     TData extends BaseRow,
-    THeader extends TableHeader<TData, THeader> = TableHeader<TData, TableHeader>
+    THeader extends TableHeader<TData, THeader> = TableHeader<TData, TableHeader>,
   > = RootProps<TData, THeader>;
   export interface ActionBarProps {
     children?: React.ReactNode;

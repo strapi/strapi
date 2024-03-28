@@ -31,14 +31,14 @@ export type Any<TSchemaUID extends UID.Schema> = ObjectNotation<TSchemaUID>;
  * It is used to define the structure of filters objects in a specific schema.
  * @template TSchemaUID The UID of the schema defining the object notation.
  */
-export type ObjectNotation<TSchemaUID extends UID.Schema> =
-  TSchemaUID extends infer TUIDs extends UID.Schema
-    ? // The intermediary mapping step below allows TypeScript's generic inference to correctly distribute the
-      // TSchemaUID union into the individual keys of AttributesFiltering and RootLevelOperatorFiltering types
-      {
-        [TUID in TUIDs]: RootLevelOperatorFiltering<TUID> & AttributesFiltering<TUID>;
-      }[TSchemaUID]
-    : never;
+export type ObjectNotation<TSchemaUID extends UID.Schema> = TSchemaUID extends infer TUIDs extends
+  UID.Schema
+  ? // The intermediary mapping step below allows TypeScript's generic inference to correctly distribute the
+    // TSchemaUID union into the individual keys of AttributesFiltering and RootLevelOperatorFiltering types
+    {
+      [TUID in TUIDs]: RootLevelOperatorFiltering<TUID> & AttributesFiltering<TUID>;
+    }[TSchemaUID]
+  : never;
 
 /**
  * Object for root level operator filtering.
@@ -91,24 +91,25 @@ type IDFiltering = { id?: AttributeCondition<never, IDKey> };
  */
 type AttributeCondition<
   TSchemaUID extends UID.Schema,
-  TAttributeName extends IDKey | AttributeUtils.GetScalarKeys<TSchemaUID>
-> = GetScalarAttributeValue<TSchemaUID, TAttributeName> extends infer TAttributeValue
-  ?
-      | TAttributeValue // Implicit $eq operator
-      | ({
-          [TIter in Operator.BooleanValue]?: boolean;
-        } & {
-          [TIter in Operator.DynamicValue]?: TAttributeValue;
-        } & {
-          [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
-        } & {
-          [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
-        } & {
-          [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
-        } & {
-          [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
-        })
-  : never;
+  TAttributeName extends IDKey | AttributeUtils.GetScalarKeys<TSchemaUID>,
+> =
+  GetScalarAttributeValue<TSchemaUID, TAttributeName> extends infer TAttributeValue
+    ?
+        | TAttributeValue // Implicit $eq operator
+        | ({
+            [TIter in Operator.BooleanValue]?: boolean;
+          } & {
+            [TIter in Operator.DynamicValue]?: TAttributeValue;
+          } & {
+            [TIter in Operator.DynamicArrayValue]?: TAttributeValue[];
+          } & {
+            [TIter in Operator.DynamicBoundValue]?: [TAttributeValue, TAttributeValue];
+          } & {
+            [TIter in Operator.Logical]?: AttributeCondition<TSchemaUID, TAttributeName>;
+          } & {
+            [TIter in Operator.Group]?: AttributeCondition<TSchemaUID, TAttributeName>[];
+          })
+    : never;
 
 /**
  * Utility type that retrieves the value of a scalar attribute in a schema.
@@ -117,7 +118,7 @@ type AttributeCondition<
  */
 type GetScalarAttributeValue<
   TSchemaUID extends UID.Schema,
-  TAttributeName extends IDKey | AttributeUtils.GetScalarKeys<TSchemaUID>
+  TAttributeName extends IDKey | AttributeUtils.GetScalarKeys<TSchemaUID>,
 > = MatchFirst<
   [
     // Checks and captures for manually added ID attributes
@@ -132,8 +133,8 @@ type GetScalarAttributeValue<
           // Cast attribute name to a scalar key if possible
           Cast<TAttributeName, AttributeUtils.GetScalarKeys<TSchemaUID>>
         >
-      >
-    ]
+      >,
+    ],
   ],
   // Fallback to the list of all possible scalar attributes' value if the attribute is not valid (never)
   AttributeUtils.ScalarValues
@@ -146,7 +147,7 @@ type GetScalarAttributeValue<
  */
 type NestedAttributeCondition<
   TSchemaUID extends UID.Schema,
-  TAttributeName extends Schema.AttributeNames<TSchemaUID>
+  TAttributeName extends Schema.AttributeNames<TSchemaUID>,
 > = ObjectNotation<
   // Ensure the resolved target isn't `never`, else, fallback to UID.Schema
   Guard.Never<

@@ -75,11 +75,14 @@ const createBuildContext = async ({
     web: ['esnext'],
   };
 
-  const parsedExports = parseExports({ extMap, pkg }).reduce((acc, x) => {
-    const { _path: exportPath, ...exportEntry } = x;
+  const parsedExports = parseExports({ extMap, pkg }).reduce(
+    (acc, x) => {
+      const { _path: exportPath, ...exportEntry } = x;
 
-    return { ...acc, [exportPath]: exportEntry };
-  }, {} as Record<string, Export>);
+      return { ...acc, [exportPath]: exportEntry };
+    },
+    {} as Record<string, Export>
+  );
 
   const exports = resolveConfigProperty(config.exports, parsedExports);
 

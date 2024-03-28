@@ -11,7 +11,7 @@ export type Password = Intersect<
     Attribute.PrivateOption,
     Attribute.RequiredOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

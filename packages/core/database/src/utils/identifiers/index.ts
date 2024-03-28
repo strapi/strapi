@@ -331,16 +331,19 @@ export class Identifiers {
 
     // Check that it's even possible to proceed
     const minHashedLength = this.HASH_LENGTH + this.HASH_SEPARATOR.length + this.MIN_TOKEN_LENGTH;
-    const totalLength = nameTokens.reduce((total, token) => {
-      if (token.compressible) {
-        if (token.name.length < availablePerToken) {
-          return total + token.name.length;
+    const totalLength = nameTokens.reduce(
+      (total, token) => {
+        if (token.compressible) {
+          if (token.name.length < availablePerToken) {
+            return total + token.name.length;
+          }
+          return total + minHashedLength;
         }
-        return total + minHashedLength;
-      }
-      const tokenName = token.shortName ?? token.name;
-      return total + tokenName.length;
-    }, nameTokens.length * this.IDENTIFIER_SEPARATOR.length - 1);
+        const tokenName = token.shortName ?? token.name;
+        return total + tokenName.length;
+      },
+      nameTokens.length * this.IDENTIFIER_SEPARATOR.length - 1
+    );
 
     // TODO: this is the weakest thing of the shortener, but fortunately it can be improved later without a breaking change if it turns out to be a problem (for example, if there is some case we need 6+ name parts in one identifier). We could take this "shortest string we could generate" that is too long and apply the hash directly to that, which would work fine even though it would be very difficult to determine what it was actually referring to
     // Check if the maximum length is less than the total length

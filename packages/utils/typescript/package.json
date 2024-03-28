@@ -39,7 +39,7 @@
     "cli-table3": "0.6.2",
     "fs-extra": "10.1.0",
     "lodash": "4.17.21",
-    "prettier": "2.8.4",
+    "prettier": "3.2.5",
     "typescript": "5.3.2"
   },
   "engines": {

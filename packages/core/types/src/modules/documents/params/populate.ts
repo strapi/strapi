@@ -65,7 +65,7 @@ export type Fragment<TMaybeTargets extends UID.Schema> = {
 
 type PopulateClause<
   TSchemaUID extends UID.Schema,
-  TKeys extends Schema.PopulatableAttributeNames<TSchemaUID>
+  TKeys extends Schema.PopulatableAttributeNames<TSchemaUID>,
 > = {
   [TKey in TKeys]?:
     | boolean
@@ -83,10 +83,10 @@ type PopulateClause<
  */
 export type ObjectNotation<TSchemaUID extends UID.Schema> = [
   GetPopulatableKeysWithTarget<TSchemaUID>,
-  GetPopulatableKeysWithoutTarget<TSchemaUID>
+  GetPopulatableKeysWithoutTarget<TSchemaUID>,
 ] extends [
   infer TKeysWithTarget extends Schema.PopulatableAttributeNames<TSchemaUID>,
-  infer TKeysWithoutTarget extends Schema.PopulatableAttributeNames<TSchemaUID>
+  infer TKeysWithoutTarget extends Schema.PopulatableAttributeNames<TSchemaUID>,
 ]
   ? If<
       And<

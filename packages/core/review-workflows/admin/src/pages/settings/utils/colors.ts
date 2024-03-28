@@ -15,13 +15,16 @@ export function getStageColorByHex(hex: string) {
     lightTheme.colors
   ).filter(([, value]) => value.toUpperCase() === hex.toUpperCase());
 
-  const themeColorName = themeColors.reduce((acc, [name]) => {
-    if (STAGE_COLORS?.[name]) {
-      acc = name;
-    }
+  const themeColorName = themeColors.reduce(
+    (acc, [name]) => {
+      if (STAGE_COLORS?.[name]) {
+        acc = name;
+      }
 
-    return acc;
-  }, null as keyof typeof STAGE_COLORS | null);
+      return acc;
+    },
+    null as keyof typeof STAGE_COLORS | null
+  );
 
   if (!themeColorName) {
     return null;

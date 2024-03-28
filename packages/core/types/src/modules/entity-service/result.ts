@@ -24,7 +24,7 @@ type AnyEntity = { id: Params.Attribute.ID } & { [key: string]: any };
 
 export type Result<
   TSchemaUID extends UID.Schema,
-  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never
+  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = If<
   Constants.AreSchemaRegistriesExtended,
   GetValues<
@@ -40,7 +40,7 @@ export type Result<
 
 export type Entity<
   TSchemaUID extends UID.Schema,
-  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never
+  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = If<
   Constants.AreSchemaRegistriesExtended,
   GetValues<
@@ -59,12 +59,12 @@ export type Entity<
 
 export type PartialEntity<
   TSchemaUID extends UID.Schema,
-  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never
+  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = Partial<Entity<TSchemaUID, TParams>>;
 
 export type PaginatedResult<
   TSchemaUID extends UID.Schema,
-  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never
+  TParams extends Params.Pick<TSchemaUID, 'fields' | 'populate'> = never,
 > = {
   results: Entity<TSchemaUID, TParams>[];
   pagination: Pagination;
@@ -77,14 +77,14 @@ export type PaginatedResult<
  */
 export type GetValues<
   TSchemaUID extends UID.Schema,
-  TFields extends Schema.AttributeNames<TSchemaUID> = Schema.NonPopulatableAttributeNames<TSchemaUID>,
-  TPopulate extends Schema.AttributeNames<TSchemaUID> = Schema.PopulatableAttributeNames<TSchemaUID>
+  TFields extends
+    Schema.AttributeNames<TSchemaUID> = Schema.NonPopulatableAttributeNames<TSchemaUID>,
+  TPopulate extends
+    Schema.AttributeNames<TSchemaUID> = Schema.PopulatableAttributeNames<TSchemaUID>,
 > = If<
   Constants.AreSchemaRegistriesExtended,
-  Guard.Never<
-    TFields | TPopulate,
+  Guard.Never<TFields | TPopulate, Schema.AttributeNames<TSchemaUID>> extends infer TKeys extends
     Schema.AttributeNames<TSchemaUID>
-  > extends infer TKeys extends Schema.AttributeNames<TSchemaUID>
     ? Data.Entity<TSchemaUID, TKeys>
     : never,
   AnyEntity
@@ -92,7 +92,7 @@ export type GetValues<
 
 type ExtractFields<
   TSchemaUID extends UID.Schema,
-  TFields extends Params.Fields.Any<TSchemaUID> | undefined
+  TFields extends Params.Fields.Any<TSchemaUID> | undefined,
 > = Extract<
   MatchFirst<
     // No fields provided
@@ -102,13 +102,13 @@ type ExtractFields<
           StrictEqual<TFields, Params.Fields.Any<TSchemaUID>>,
           Or<IsNever<TFields>, StrictEqual<TFields, undefined>>
         >,
-        never
+        never,
       ],
       // string
       [
         Extends<TFields, Params.Fields.StringNotation<TSchemaUID>>,
-        ParseStringFields<TSchemaUID, Extract<TFields, Params.Fields.StringNotation<TSchemaUID>>>
-      ]
+        ParseStringFields<TSchemaUID, Extract<TFields, Params.Fields.StringNotation<TSchemaUID>>>,
+      ],
     ],
     // string array
     [
@@ -119,7 +119,7 @@ type ExtractFields<
           Array.Values<Cast<TFields, Params.Fields.ArrayNotation<TSchemaUID>>>,
           Params.Fields.StringNotation<TSchemaUID>
         >
-      >
+      >,
     ]
   >,
   Schema.NonPopulatableAttributeNames<TSchemaUID>
@@ -127,7 +127,7 @@ type ExtractFields<
 
 type ParseStringFields<
   TSchemaUID extends UID.Schema,
-  TFields extends Params.Fields.StringNotation<TSchemaUID>
+  TFields extends Params.Fields.StringNotation<TSchemaUID>,
 > = TFields;
 // type C = MatchFirst<
 //   [
@@ -145,7 +145,7 @@ type ParseStringFields<
 
 type ExtractPopulate<
   TSchemaUID extends UID.Schema,
-  TPopulate extends Params.Populate.Any<TSchemaUID> | undefined
+  TPopulate extends Params.Populate.Any<TSchemaUID> | undefined,
 > = Extract<
   MatchFirst<
     [
@@ -154,7 +154,10 @@ type ExtractPopulate<
       // string notation
       [
         Extends<TPopulate, Params.Populate.StringNotation<TSchemaUID>>,
-        ParseStringPopulate<TSchemaUID, Cast<TPopulate, Params.Populate.StringNotation<TSchemaUID>>>
+        ParseStringPopulate<
+          TSchemaUID,
+          Cast<TPopulate, Params.Populate.StringNotation<TSchemaUID>>
+        >,
       ],
       // Array notation
       [
@@ -165,7 +168,7 @@ type ExtractPopulate<
             Array.Values<Cast<TPopulate, Params.Populate.ArrayNotation<TSchemaUID>>>,
             Params.Populate.StringNotation<TSchemaUID>
           >
-        >
+        >,
       ],
       // object notation
       [
@@ -174,8 +177,8 @@ type ExtractPopulate<
           TSchemaUID,
           // TODO: Handle relations set to false in object notation
           Cast<keyof TPopulate, Params.Populate.StringNotation<TSchemaUID>>
-        >
-      ]
+        >,
+      ],
     ]
   >,
   Schema.NonPopulatableAttributeNames<TSchemaUID>
@@ -183,7 +186,7 @@ type ExtractPopulate<
 
 type ParsePopulateDotNotation<
   TSchemaUID extends UID.Schema,
-  TPopulate extends Params.Populate.StringNotation<TSchemaUID>
+  TPopulate extends Params.Populate.StringNotation<TSchemaUID>,
 > = Cast<
   String.Split<Cast<TPopulate, string>, '.'>[0],
   Schema.PopulatableAttributeNames<TSchemaUID>
@@ -191,12 +194,12 @@ type ParsePopulateDotNotation<
 
 type ParseStringPopulate<
   TSchemaUID extends UID.Schema,
-  TPopulate extends Params.Populate.StringNotation<TSchemaUID>
+  TPopulate extends Params.Populate.StringNotation<TSchemaUID>,
 > = MatchFirst<
   [
     [
       StrictEqual<Params.Populate.WildcardNotation, TPopulate>,
-      Schema.PopulatableAttributeNames<TSchemaUID>
+      Schema.PopulatableAttributeNames<TSchemaUID>,
     ],
     [
       Extends<TPopulate, `${string},${string}`>,
@@ -206,9 +209,9 @@ type ParseStringPopulate<
           Array.Values<String.Split<Cast<TPopulate, string>, ','>>,
           Params.Populate.StringNotation<TSchemaUID>
         >
-      >
+      >,
     ],
-    [Extends<TPopulate, `${string}.${string}`>, ParsePopulateDotNotation<TSchemaUID, TPopulate>]
+    [Extends<TPopulate, `${string}.${string}`>, ParsePopulateDotNotation<TSchemaUID, TPopulate>],
   ],
   TPopulate
 >;

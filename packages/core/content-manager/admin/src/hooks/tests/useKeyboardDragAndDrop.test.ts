@@ -9,7 +9,7 @@ describe('useKeyboardDragAndDrop', () => {
     ({
       preventDefault: jest.fn(),
       key,
-    } as unknown as KeyboardEvent<HTMLButtonElement>);
+    }) as unknown as KeyboardEvent<HTMLButtonElement>;
 
   describe('onGrabItem', () => {
     it('should be called when the event is the enter key', () => {

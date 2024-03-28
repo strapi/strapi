@@ -63,7 +63,7 @@ describe('Admin Controller', () => {
                 },
                 uuid: 'testuuid',
                 environment: 'development',
-              }[key] || value)
+              })[key] || value
           ),
         },
         EE: true,

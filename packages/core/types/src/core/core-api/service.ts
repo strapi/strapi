@@ -72,7 +72,7 @@ export interface SingleType extends Base {
 export type ContentType<TContentTypeUID extends UID.ContentType> = Utils.MatchFirst<
   [
     Utils.Test<UID.IsCollectionType<TContentTypeUID>, CollectionType>,
-    Utils.Test<UID.IsSingleType<TContentTypeUID>, SingleType>
+    Utils.Test<UID.IsSingleType<TContentTypeUID>, SingleType>,
   ],
   Base
 >;

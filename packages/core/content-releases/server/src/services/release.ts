@@ -498,9 +498,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
         return acc;
       }, []);
-      const allReleaseContentTypesDictionary = await this.getContentTypesDataForActions(
-        contentTypeUids
-      );
+      const allReleaseContentTypesDictionary =
+        await this.getContentTypesDataForActions(contentTypeUids);
       const allLocalesDictionary = await this.getLocalesDataForActions();
 
       const formattedData = actions.map((action: ReleaseAction) => {
@@ -683,9 +682,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
           try {
             strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
 
-            const { collectionTypeActions, singleTypeActions } = await getFormattedActions(
-              releaseId
-            );
+            const { collectionTypeActions, singleTypeActions } =
+              await getFormattedActions(releaseId);
 
             await strapi.db.transaction(async () => {
               // First we publish all the singleTypes

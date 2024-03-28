@@ -12,7 +12,7 @@ export type Integer = Intersect<
     Attribute.RequiredOption,
     Attribute.WritableOption,
     Attribute.VisibleOption,
-    Attribute.UniqueOption
+    Attribute.UniqueOption,
   ]
 >;
 

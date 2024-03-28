@@ -43,26 +43,29 @@ const sortConnectArray = (connectArr: Link[], initialArr: Link[] = [], strictSor
     {} as Record<ID, boolean>
   );
   // Map to store the first index where a relation id is connected
-  const mappedRelations = connectArr.reduce((mapper, relation: Link) => {
-    const adjacentRelId = relation.position?.before || relation.position?.after;
+  const mappedRelations = connectArr.reduce(
+    (mapper, relation: Link) => {
+      const adjacentRelId = relation.position?.before || relation.position?.after;
 
-    if (!adjacentRelId || (!relationInInitialArray[adjacentRelId] && !mapper[adjacentRelId])) {
-      needsSorting = true;
-    }
+      if (!adjacentRelId || (!relationInInitialArray[adjacentRelId] && !mapper[adjacentRelId])) {
+        needsSorting = true;
+      }
 
-    // If the relation is already in the array, throw an error
-    if (mapper[relation.id]) {
-      throw new InvalidRelationError(
-        `The relation with id ${relation.id} is already connected. ` +
-          'You cannot connect the same relation twice.'
-      );
-    }
+      // If the relation is already in the array, throw an error
+      if (mapper[relation.id]) {
+        throw new InvalidRelationError(
+          `The relation with id ${relation.id} is already connected. ` +
+            'You cannot connect the same relation twice.'
+        );
+      }
 
-    return {
-      [relation.id]: { ...relation, computed: false },
-      ...mapper,
-    };
-  }, {} as Record<ID, Link & { computed: boolean }>);
+      return {
+        [relation.id]: { ...relation, computed: false },
+        ...mapper,
+      };
+    },
+    {} as Record<ID, Link & { computed: boolean }>
+  );
 
   // If we don't need to sort the connect array, we can return it as is
   if (!needsSorting) return connectArr;
@@ -240,13 +243,16 @@ const relationsOrderer = <TRelation extends Record<string, ID | number | null>>(
     getOrderMap() {
       return _(computedRelations)
         .groupBy('order')
-        .reduce((acc, relations) => {
-          if (relations[0]?.init) return acc;
-          relations.forEach((relation, idx) => {
-            acc[relation.id] = Math.floor(relation.order) + (idx + 1) / (relations.length + 1);
-          });
-          return acc;
-        }, {} as Record<ID, number>);
+        .reduce(
+          (acc, relations) => {
+            if (relations[0]?.init) return acc;
+            relations.forEach((relation, idx) => {
+              acc[relation.id] = Math.floor(relation.order) + (idx + 1) / (relations.length + 1);
+            });
+            return acc;
+          },
+          {} as Record<ID, number>
+        );
     },
   };
 };

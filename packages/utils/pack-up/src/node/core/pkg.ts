@@ -86,43 +86,46 @@ const packageJsonSchema = yup.object({
     yup
       .object(
         typeof value === 'object'
-          ? Object.entries(value).reduce((acc, [key, value]) => {
-              if (typeof value === 'object') {
-                // @ts-expect-error yup is not typed correctly
-                acc[key] = yup
-                  .object({
-                    types: yup.string().optional(),
-                    source: yup.string().required(),
-                    browser: yup
-                      .object({
-                        source: yup.string().required(),
-                        import: yup.string().optional(),
-                        require: yup.string().optional(),
-                      })
-                      .optional(),
-                    node: yup
-                      .object({
-                        source: yup.string().optional(),
-                        module: yup.string().optional(),
-                        import: yup.string().optional(),
-                        require: yup.string().optional(),
-                      })
-                      .optional(),
-                    module: yup.string().optional(),
-                    import: yup.string().optional(),
-                    require: yup.string().optional(),
-                    default: yup.string().required(),
-                  })
-                  .noUnknown(true);
-              } else {
-                acc[key] = yup
-                  .string()
-                  .matches(/^\.\/.*\.json$/)
-                  .required();
-              }
+          ? Object.entries(value).reduce(
+              (acc, [key, value]) => {
+                if (typeof value === 'object') {
+                  // @ts-expect-error yup is not typed correctly
+                  acc[key] = yup
+                    .object({
+                      types: yup.string().optional(),
+                      source: yup.string().required(),
+                      browser: yup
+                        .object({
+                          source: yup.string().required(),
+                          import: yup.string().optional(),
+                          require: yup.string().optional(),
+                        })
+                        .optional(),
+                      node: yup
+                        .object({
+                          source: yup.string().optional(),
+                          module: yup.string().optional(),
+                          import: yup.string().optional(),
+                          require: yup.string().optional(),
+                        })
+                        .optional(),
+                      module: yup.string().optional(),
+                      import: yup.string().optional(),
+                      require: yup.string().optional(),
+                      default: yup.string().required(),
+                    })
+                    .noUnknown(true);
+                } else {
+                  acc[key] = yup
+                    .string()
+                    .matches(/^\.\/.*\.json$/)
+                    .required();
+                }
 
-              return acc;
-            }, {} as Record<string, yup.SchemaOf<string> | yup.SchemaOf<Export>>)
+                return acc;
+              },
+              {} as Record<string, yup.SchemaOf<string> | yup.SchemaOf<Export>>
+            )
           : undefined
       )
       .optional()

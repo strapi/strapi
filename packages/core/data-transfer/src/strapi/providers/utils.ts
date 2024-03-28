@@ -117,7 +117,7 @@ export const createDispatcher = (
   const dispatchTransferStep = async <
     T,
     A extends Client.TransferPushMessage['action'] = Client.TransferPushMessage['action'],
-    S extends Client.TransferPushStep = Client.TransferPushStep
+    S extends Client.TransferPushStep = Client.TransferPushStep,
   >(
     payload: {
       step: S;

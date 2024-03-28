@@ -218,14 +218,14 @@ export const BrowseStep = ({
                     defaultMessage: 'There are no assets with the applied filters',
                   })
                 : canCreate && !isSearching
-                ? formatMessage({
-                    id: getTrad('list.assets.empty'),
-                    defaultMessage: 'Upload your first assets...',
-                  })
-                : formatMessage({
-                    id: getTrad('list.assets.empty.no-permissions'),
-                    defaultMessage: 'The asset list is empty',
-                  })
+                  ? formatMessage({
+                      id: getTrad('list.assets.empty'),
+                      defaultMessage: 'Upload your first assets...',
+                    })
+                  : formatMessage({
+                      id: getTrad('list.assets.empty.no-permissions'),
+                      defaultMessage: 'The asset list is empty',
+                    })
             }
           />
         </Box>

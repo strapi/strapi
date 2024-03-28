@@ -22,7 +22,7 @@ export interface EntityService {
   wrapParams<
     TResult extends object = object,
     TContentTypeUID extends UID.ContentType = UID.ContentType,
-    TParams extends object = object
+    TParams extends object = object,
   >(
     params?: TParams,
     options?: { uid: TContentTypeUID; action: WrapAction }
@@ -41,7 +41,7 @@ export interface EntityService {
     TParams extends Params.Pick<
       TContentTypeUID,
       'fields' | 'filters' | '_q' | 'pagination:offset' | 'sort' | 'populate' | 'plugin'
-    >
+    >,
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -49,7 +49,7 @@ export interface EntityService {
     Utils.MatchFirst<
       [
         [UID.IsCollectionType<TContentTypeUID>, Result<TContentTypeUID, TParams>[]],
-        [UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null]
+        [UID.IsSingleType<TContentTypeUID>, Result<TContentTypeUID, TParams> | null],
       ],
       (Result<TContentTypeUID, TParams> | null) | Result<TContentTypeUID, TParams>[]
     >
@@ -60,7 +60,7 @@ export interface EntityService {
    */
   findOne<
     TContentTypeUID extends UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>,
   >(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
@@ -72,7 +72,7 @@ export interface EntityService {
    */
   delete<
     TContentTypeUID extends UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'fields' | 'populate'>,
   >(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
@@ -84,7 +84,7 @@ export interface EntityService {
    */
   create<
     TContentTypeUID extends UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data' | 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'data' | 'fields' | 'populate'>,
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -95,7 +95,7 @@ export interface EntityService {
    */
   update<
     TContentTypeUID extends UID.ContentType,
-    TParams extends Params.Pick<TContentTypeUID, 'data:partial' | 'fields' | 'populate'>
+    TParams extends Params.Pick<TContentTypeUID, 'data:partial' | 'fields' | 'populate'>,
   >(
     uid: TContentTypeUID,
     entityId: Params.Attribute.ID,
@@ -110,7 +110,7 @@ export interface EntityService {
     TParams extends Params.Pick<
       TContentTypeUID,
       'fields' | 'populate' | 'pagination' | 'sort' | 'filters' | '_q' | 'plugin'
-    >
+    >,
   >(
     uid: TContentTypeUID,
     params?: TParams
@@ -130,7 +130,7 @@ export interface EntityService {
    */
   load<
     TContentTypeUID extends UID.ContentType,
-    TField extends Schema.PopulatableAttributeNames<TContentTypeUID>
+    TField extends Schema.PopulatableAttributeNames<TContentTypeUID>,
   >(
     uid: TContentTypeUID,
     entity: PartialEntity<TContentTypeUID>,
@@ -144,7 +144,7 @@ export interface EntityService {
    */
   loadPages<
     TContentTypeUID extends UID.ContentType,
-    TField extends Schema.PopulatableAttributeNames<TContentTypeUID>
+    TField extends Schema.PopulatableAttributeNames<TContentTypeUID>,
   >(
     uid: TContentTypeUID,
     entity: PartialEntity<TContentTypeUID>,
@@ -156,14 +156,14 @@ export interface EntityService {
 
 type GetPopulatableFieldParams<
   TContentTypeUID extends UID.ContentType,
-  TField extends Schema.PopulatableAttributeNames<TContentTypeUID>
+  TField extends Schema.PopulatableAttributeNames<TContentTypeUID>,
 > = Utils.MatchFirst<
   [
     [
       Schema.Attribute.HasTarget<Schema.AttributeByName<TContentTypeUID, TField>>,
       Params.Populate.NestedParams<
         Schema.Attribute.Target<Schema.AttributeByName<TContentTypeUID, TField>>
-      >
+      >,
     ],
     [
       Schema.Attribute.HasMorphTargets<Schema.AttributeByName<TContentTypeUID, TField>>,
@@ -172,8 +172,8 @@ type GetPopulatableFieldParams<
             Schema.Attribute.MorphTargets<Schema.AttributeByName<TContentTypeUID, TField>>
           >
         | Params.Populate.NestedParams<UID.Schema>
-      )
-    ]
+      ),
+    ],
   ],
   Params.Populate.Fragment<UID.Schema> | Params.Populate.NestedParams<UID.Schema>
 >;

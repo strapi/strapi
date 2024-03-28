@@ -25,9 +25,8 @@ import type { Extends, Not } from '.';
  * type ArrayValues = Values<MyArray>; // ArrayValues: string | number
  * ```
  */
-export type Values<TCollection extends Array<unknown>> = TCollection extends Array<infer TValues>
-  ? TValues
-  : never;
+export type Values<TCollection extends Array<unknown>> =
+  TCollection extends Array<infer TValues> ? TValues : never;
 
 /**
  * Checks if a given array ({@link TCollection}) is empty.

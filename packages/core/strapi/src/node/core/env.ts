@@ -33,11 +33,14 @@ const loadEnv = async (cwd: string) => {
 const getStrapiAdminEnvVars = (defaultEnv: DefaultEnv): Record<string, string> => {
   return Object.keys(process.env)
     .filter((key) => key.toUpperCase().startsWith('STRAPI_ADMIN_'))
-    .reduce((acc, key) => {
-      acc[key] = process.env[key] as string;
+    .reduce(
+      (acc, key) => {
+        acc[key] = process.env[key] as string;
 
-      return acc;
-    }, defaultEnv as unknown as Record<string, string>);
+        return acc;
+      },
+      defaultEnv as unknown as Record<string, string>
+    );
 };
 
 export { getStrapiAdminEnvVars, loadEnv };

@@ -13,7 +13,7 @@ type WithStrapiCallback<T> = T | (<S extends { strapi: Core.Strapi }>(params: S)
 
 const createCoreController = <
   TUID extends UID.ContentType,
-  TController extends Core.CoreAPI.Controller.Extendable<TUID>
+  TController extends Core.CoreAPI.Controller.Extendable<TUID>,
 >(
   uid: TUID,
   cfg?: WithStrapiCallback<
@@ -52,7 +52,7 @@ const createCoreController = <
 
 function createCoreService<
   TUID extends UID.ContentType,
-  TService extends Core.CoreAPI.Service.Extendable<TUID>
+  TService extends Core.CoreAPI.Service.Extendable<TUID>,
 >(
   uid: TUID,
   cfg?: WithStrapiCallback<Utils.PartialWithThis<Core.CoreAPI.Service.Extendable<TUID> & TService>>

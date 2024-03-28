@@ -65,22 +65,21 @@ const fixtures = {
   a: (file) => [{ cover: file.id }],
   b:
     (file) =>
-    ({ a }) =>
-      [
-        {
-          name: 'one',
-          number: 1,
-          restricted: 'restricted',
-          password: 'password',
-          relA: a[0].id,
-          cp: { name: 'cp_one' },
-          dz: [
-            { __component: 'default.cp-a', name: 'cp_two' },
-            { __component: 'default.cp-b', title: 'cp_three' },
-          ],
-          img: file.id,
-        },
-      ],
+    ({ a }) => [
+      {
+        name: 'one',
+        number: 1,
+        restricted: 'restricted',
+        password: 'password',
+        relA: a[0].id,
+        cp: { name: 'cp_one' },
+        dz: [
+          { __component: 'default.cp-a', name: 'cp_two' },
+          { __component: 'default.cp-b', title: 'cp_three' },
+        ],
+        img: file.id,
+      },
+    ],
 };
 
 const uploadFile = async () => {

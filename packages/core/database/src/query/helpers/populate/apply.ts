@@ -115,10 +115,13 @@ const XtoOne = async (
         .groupBy(joinColAlias)
         .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
-      const map = rows.reduce((map, row) => {
-        map[row[joinColumnName]] = { count: Number(row.count) };
-        return map;
-      }, {} as Record<string, { count: number }>);
+      const map = rows.reduce(
+        (map, row) => {
+          map[row[joinColumnName]] = { count: Number(row.count) };
+          return map;
+        },
+        {} as Record<string, { count: number }>
+      );
 
       results.forEach((result) => {
         result[attributeName] = map[result[referencedColumnName] as string] || { count: 0 };
@@ -231,10 +234,13 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
         .groupBy(joinColAlias)
         .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
-      const map = rows.reduce((map, row) => {
-        map[row[joinColumnName]] = { count: Number(row.count) };
-        return map;
-      }, {} as Record<string, { count: number }>);
+      const map = rows.reduce(
+        (map, row) => {
+          map[row[joinColumnName]] = { count: Number(row.count) };
+          return map;
+        },
+        {} as Record<string, { count: number }>
+      );
 
       results.forEach((result) => {
         result[attributeName] = map[result[referencedColumnName] as string] || { count: 0 };
@@ -314,10 +320,13 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
       .groupBy(joinColAlias)
       .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
-    const map = rows.reduce((map, row) => {
-      map[row[joinColumnName]] = { count: Number(row.count) };
-      return map;
-    }, {} as Record<string, { count: number }>);
+    const map = rows.reduce(
+      (map, row) => {
+        map[row[joinColumnName]] = { count: Number(row.count) };
+        return map;
+      },
+      {} as Record<string, { count: number }>
+    );
 
     results.forEach((result) => {
       result[attributeName] = map[result[referencedColumnName] as string] || { count: 0 };

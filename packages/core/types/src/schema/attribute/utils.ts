@@ -10,7 +10,7 @@ import type { Attribute } from '..';
  */
 export type IsOfType<
   TAttribute extends Attribute.Attribute,
-  TKind extends Attribute.Kind
+  TKind extends Attribute.Kind,
 > = TAttribute extends {
   type: TKind;
 }

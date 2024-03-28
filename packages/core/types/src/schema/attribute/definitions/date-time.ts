@@ -11,7 +11,7 @@ export type DateTime = Intersect<
     Attribute.RequiredOption,
     Attribute.UniqueOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

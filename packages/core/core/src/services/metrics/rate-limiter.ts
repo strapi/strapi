@@ -4,9 +4,8 @@ interface Options {
   limitedEvents?: string[];
 }
 
-type TailParams<T extends (...args: any[]) => any> = Parameters<T> extends [unknown, ...infer U]
-  ? U
-  : never;
+type TailParams<T extends (...args: any[]) => any> =
+  Parameters<T> extends [unknown, ...infer U] ? U : never;
 
 export default (sender: Sender, { limitedEvents = [] }: Options = {}) => {
   let currentDay = new Date().getDate();
