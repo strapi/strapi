@@ -3,7 +3,7 @@
 import { omit } from 'lodash';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
-import constants from '@strapi/admin/server/src/services/constants';
+import constants from '../../../../packages/core/admin/server/src/services/constants';
 
 describe('Admin API Token v2 CRUD (api)', () => {
   let rq;
