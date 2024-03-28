@@ -64,7 +64,7 @@ const LinkCard = styled(Link)`
 `;
 
 const RelativeTime = styled(BaseRelativeTime)`
-  display: block;
+  display: inline-block;
   &::first-letter {
     text-transform: uppercase;
   }
