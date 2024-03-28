@@ -317,6 +317,17 @@ export const transformContentTypesToModels = (
       },
     };
 
+    // Add indexes to model
+    if (contentType.modelType === 'contentType') {
+      model.indexes = [
+        {
+          name: identifiers.getUniqueIndexName([contentType.collectionName, 'document_id']),
+          // Filter attributes that are not in the schema
+          columns: ['document_id', 'locale', 'published_at'].filter((n) => model.attributes[n]),
+        },
+      ];
+    }
+
     models.push(model);
   });
 
