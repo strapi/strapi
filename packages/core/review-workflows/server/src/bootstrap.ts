@@ -12,10 +12,10 @@ export default async (args: any) => {
     const { bootstrap: rwBootstrap } = getService('review-workflows');
     await rwBootstrap();
     await actionProvider.registerMany(actions.reviewWorkflows);
-    // Decorate the entity service with review workflow logic
-    const { decorator } = getService('review-workflows-decorator');
 
     // TODO: use document service middleware
+    // Decorate the entity service with review workflow logic
+    // const { decorator } = getService('review-workflows-decorator');
     // strapi.entityService.decorate(decorator);
 
     await getService('review-workflows-weekly-metrics').registerCron();

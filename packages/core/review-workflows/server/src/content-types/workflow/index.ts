@@ -25,7 +25,7 @@ export default {
       },
       stages: {
         type: 'relation',
-        target: 'admin::workflow-stage',
+        target: 'plugin::review-workflows.workflow-stage',
         relation: 'oneToMany',
         mappedBy: 'workflow',
       },

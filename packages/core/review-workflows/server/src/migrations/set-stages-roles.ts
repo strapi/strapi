@@ -5,9 +5,8 @@ import { getService } from '../utils';
  * Migrate review workflow stages to have RBAC permissions for all roles.
  */
 async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes }: any) {
-  const stageUID = 'admin::workflow-stage';
-  const hadRolePermissions = !!oldContentTypes?.[stageUID]?.attributes?.permissions;
-  const hasRolePermissions = !!contentTypes?.[stageUID]?.attributes?.permissions;
+  const hadRolePermissions = !!oldContentTypes?.[STAGE_MODEL_UID]?.attributes?.permissions;
+  const hasRolePermissions = !!contentTypes?.[STAGE_MODEL_UID]?.attributes?.permissions;
 
   // If the stage content type did not have permissions in the previous version
   // then we set the permissions of every stage to be every current role in the app.
@@ -20,7 +19,7 @@ async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes 
 
     const stagePermissionsService = getService('stage-permissions');
 
-    const stages = await strapi.db.query(stageUID).findMany();
+    const stages = await strapi.db.query(STAGE_MODEL_UID).findMany();
     const roles = await strapi.db.query(roleUID).findMany();
 
     // Collect the permissions to add and group them by stage id.
@@ -48,7 +47,7 @@ async function migrateReviewWorkflowStagesRoles({ oldContentTypes, contentTypes 
 
       if (Number.isNaN(numericalStageId)) {
         strapi.log.warn(
-          `Unable to apply ${roleUID} migration for ${stageUID} with id ${stageId}. The stage does not have a numerical id.`
+          `Unable to apply ${roleUID} migration for ${STAGE_MODEL_UID} with id ${stageId}. The stage does not have a numerical id.`
         );
         continue;
       }

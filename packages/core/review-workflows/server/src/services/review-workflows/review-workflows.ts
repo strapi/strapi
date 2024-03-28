@@ -13,7 +13,7 @@ import {
 } from '../../constants/workflows';
 
 // import { persistTables, removePersistedTablesWithSuffix } from '../../utils/persisted-tables';
-import webhookEvents from '../../constants/webhookEvents';
+import webhookEvents from '../../constants/webhook-events';
 
 const DEFAULT_OPTIONS = {
   numberOfWorkflows: MAX_WORKFLOWS,

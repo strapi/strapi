@@ -45,22 +45,22 @@ const dbMock = {
 };
 
 const servicesMock: Record<string, any> = {
-  'admin::workflows': {
+  workflows: {
     findById: jest.fn(() => workflowMock),
     update: jest.fn((id, data) => data),
   },
-  'admin::review-workflows-metrics': {
+  'review-workflows-metrics': {
     sendDidCreateStage: jest.fn(),
     sendDidEditStage: jest.fn(),
     sendDidDeleteStage: jest.fn(),
     sendDidChangeEntryStage: jest.fn(),
   },
-  'admin::review-workflows-validation': {
+  'review-workflows-validation': {
     register: jest.fn(),
     validateWorkflowCount: jest.fn().mockResolvedValue(true),
     validateWorkflowStages: jest.fn(),
   },
-  'admin::stage-permissions': {
+  'stage-permissions': {
     register: jest.fn(),
     registerMany: jest.fn(),
     unregister: jest.fn(),
@@ -209,7 +209,7 @@ describe('Review workflows - Stages service', () => {
         { id: newStageID, name: 'newStage', workflow: 1 },
       ]);
 
-      expect(servicesMock['admin::workflows'].findById).toBeCalled();
+      expect(servicesMock['workflows'].findById).toBeCalled();
       expect(dbMock.create).toBeCalled();
       expect(dbMock.delete).toBeCalled();
 
@@ -221,8 +221,8 @@ describe('Review workflows - Stages service', () => {
         });
       }
 
-      expect(servicesMock['admin::workflows'].update).toBeCalled();
-      expect(servicesMock['admin::workflows'].update).toBeCalledWith(workflowMock.id, {
+      expect(servicesMock['workflows'].update).toBeCalled();
+      expect(servicesMock['workflows'].update).toBeCalledWith(workflowMock.id, {
         stages: [newStageID],
       });
 

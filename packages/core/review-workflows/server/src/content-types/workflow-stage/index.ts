@@ -33,7 +33,7 @@ export default {
       },
       workflow: {
         type: 'relation',
-        target: 'admin::workflow',
+        target: 'plugin::review-workflows.workflow',
         relation: 'manyToOne',
         inversedBy: 'stages',
         configurable: false,

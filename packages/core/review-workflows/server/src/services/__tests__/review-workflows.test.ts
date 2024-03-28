@@ -81,11 +81,11 @@ const strapiMock = {
   query: jest.fn(() => queryMock),
   service(serviceName: string) {
     switch (serviceName) {
-      case 'admin::stages':
+      case 'stages':
         return stagesServiceMock;
-      case 'admin::workflows':
+      case 'workflows':
         return workflowsServiceMock;
-      case 'admin::review-workflows-validation':
+      case 'review-workflows-validation':
         return reviewWorkflowsValidationMock;
       default:
         return null;
@@ -153,7 +153,7 @@ describe('Review workflows service', () => {
         attributes: {
           [ENTITY_STAGE_ATTRIBUTE]: expect.objectContaining({
             relation: 'oneToOne',
-            target: 'admin::workflow-stage',
+            target: 'plugin::review-workflows.workflow-stage',
             type: 'relation',
           }),
           [ENTITY_ASSIGNEE_ATTRIBUTE]: expect.objectContaining({

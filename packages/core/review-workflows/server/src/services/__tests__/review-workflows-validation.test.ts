@@ -6,14 +6,18 @@ jest.mock('../review-workflows/workflows/content-types', () => {
 
 import type { Core } from '@strapi/types';
 import validationServiceFactory from '../review-workflows/validation';
-import { MAX_WORKFLOWS, MAX_STAGES_PER_WORKFLOW } from '../../constants/workflows';
+import {
+  MAX_WORKFLOWS,
+  MAX_STAGES_PER_WORKFLOW,
+  WORKFLOW_MODEL_UID,
+} from '../../constants/workflows';
 
 const workflowsServiceMock = {
   count: jest.fn(() => 1),
 };
 
 const servicesMock: Record<string, any> = {
-  'admin::workflows': workflowsServiceMock,
+  [WORKFLOW_MODEL_UID]: workflowsServiceMock,
 };
 
 const strapiMock = {
