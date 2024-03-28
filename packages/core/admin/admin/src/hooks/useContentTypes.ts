@@ -1,15 +1,15 @@
 import * as React from 'react';
 
-import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-
 import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useGetContentTypesQuery } from '../services/contentManager';
 
+import type { ContentType } from '../../../shared/contracts/content-types';
+
 export function useContentTypes(): {
   isLoading: boolean;
-  collectionTypes: Contracts.ContentTypes.ContentType[];
-  singleTypes: Contracts.ContentTypes.ContentType[];
+  collectionTypes: ContentType[];
+  singleTypes: ContentType[];
 } {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();

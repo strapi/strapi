@@ -23,6 +23,7 @@ export default defineConfig({
       // Could also be a dictionary or array of multiple entry points
       entry: {
         index: './admin/src/index.ts',
+        ee: './admin/src/ee.ts',
         test: './admin/tests/index.ts',
       },
     },

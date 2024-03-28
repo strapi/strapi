@@ -163,16 +163,6 @@ export const ROUTES_CE: RouteObject[] = [
   },
   {
     lazy: async () => {
-      const { PurchaseReviewWorkflows } = await import('./pages/PurchaseReviewWorkflows');
-
-      return {
-        Component: PurchaseReviewWorkflows,
-      };
-    },
-    path: 'purchase-review-workflows',
-  },
-  {
-    lazy: async () => {
       const { PurchaseSingleSignOn } = await import('./pages/PurchaseSingleSignOn');
 
       return {

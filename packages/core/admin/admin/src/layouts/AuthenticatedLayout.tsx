@@ -17,7 +17,6 @@ import { Onboarding } from '../components/Onboarding';
 import { Page } from '../components/PageHelpers';
 import { PluginsInitializer } from '../components/PluginsInitializer';
 import { PrivateRoute } from '../components/PrivateRoute';
-import { useIsHistoryRoute } from '../content-manager/history/routes';
 import { AppInfoProvider } from '../features/AppInfo';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
@@ -105,9 +104,6 @@ const AdminLayout = () => {
     trackUsage('didAccessAuthenticatedAdministration');
   });
 
-  // Check if we're on a history route to know if we should render the left menu
-  const isHistoryRoute = useIsHistoryRoute();
-
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions
   if (isLoadingMenu || isLoadingAppInfo) {
@@ -129,12 +125,10 @@ const AdminLayout = () => {
               {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
             </SkipToContent>
             <Flex alignItems="flex-start">
-              {!isHistoryRoute && (
-                <LeftMenu
-                  generalSectionLinks={generalSectionLinks}
-                  pluginsSectionLinks={pluginsSectionLinks}
-                />
-              )}
+              <LeftMenu
+                generalSectionLinks={generalSectionLinks}
+                pluginsSectionLinks={pluginsSectionLinks}
+              />
               <Box flex={1}>
                 <Outlet />
                 <GuidedTourModal />
