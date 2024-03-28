@@ -342,8 +342,8 @@ const getDiffHandler = (
 
         // Catch known features
         if (
-          uid === 'admin::workflow' ||
-          uid === 'admin::workflow-stage' ||
+          uid === 'plugin::review-workflows.workflow' ||
+          uid === 'plugin::review-workflows.workflow-stage' ||
           endPath?.startsWith('strapi_stage') ||
           endPath?.startsWith('strapi_assignee')
         ) {
