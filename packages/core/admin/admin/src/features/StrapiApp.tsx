@@ -1,4 +1,5 @@
 import { createContext } from '../components/Context';
+import { RBAC } from '../core/apis/rbac';
 
 import type { StrapiApp } from '../StrapiApp';
 
@@ -19,6 +20,7 @@ interface StrapiAppContextValue
   > {
   components: StrapiApp['library']['components'];
   fields: StrapiApp['library']['fields'];
+  rbac: RBAC;
   runHookWaterfall: <TData>(
     name: Parameters<StrapiApp['runHookWaterfall']>[0],
     initialValue: TData

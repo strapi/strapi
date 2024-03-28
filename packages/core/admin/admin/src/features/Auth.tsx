@@ -1,10 +1,11 @@
 import * as React from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
 import { useTypedDispatch } from '../core/store/hooks';
+import { useStrapiApp } from '../features/StrapiApp';
 import { setLocale } from '../reducer';
 import {
   useGetMeQuery,
@@ -24,6 +25,10 @@ interface Permission
   extends Pick<PermissionContract, 'action' | 'subject'>,
     Partial<Omit<PermissionContract, 'action' | 'subject'>> {}
 
+interface User
+  extends Pick<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>,
+    Partial<Omit<SanitizedAdminUser, 'email' | 'firstname' | 'lastname' | 'username' | 'roles'>> {}
+
 interface AuthContextValue {
   login: (
     body: Login.Request['body'] & { rememberMe: boolean }
@@ -37,7 +42,7 @@ interface AuthContextValue {
   refetchPermissions: () => Promise<void>;
   setToken: (token: string | null) => void;
   token: string | null;
-  user?: SanitizedAdminUser;
+  user?: User;
 }
 
 const [Provider, useAuth] = createContext<AuthContextValue>('Auth');
@@ -57,6 +62,8 @@ const STORAGE_KEYS = {
 
 const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps) => {
   const dispatch = useTypedDispatch();
+  const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
+  const location = useLocation();
   const [token, setToken] = React.useState<string | null>(() => {
     const token =
       localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN);
@@ -196,16 +203,26 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
           ) >= 0
       );
 
-      const shouldCheckConditions = matchingPermissions.some(
+      const middlewaredPermissions = await runRbacMiddleware(
+        {
+          user,
+          permissions: userPermissions,
+          pathname: location.pathname,
+          search: location.search.split('?')[1] ?? '',
+        },
+        matchingPermissions
+      );
+
+      const shouldCheckConditions = middlewaredPermissions.some(
         (perm) => Array.isArray(perm.conditions) && perm.conditions.length > 0
       );
 
       if (!shouldCheckConditions) {
-        return matchingPermissions.length > 0;
+        return middlewaredPermissions.length > 0;
       }
 
       const { data, error } = await checkPermissions({
-        permissions: matchingPermissions.map((perm) => ({
+        permissions: middlewaredPermissions.map((perm) => ({
           action: perm.action,
           subject: perm.subject,
         })),
@@ -217,7 +234,7 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
         return data?.data.every((v) => v === true) ?? false;
       }
     },
-    [checkPermissions, userPermissions]
+    [checkPermissions, location.pathname, location.search, runRbacMiddleware, user, userPermissions]
   );
 
   return (
@@ -244,4 +261,4 @@ const storeToken = (token: string, persist?: boolean) => {
 };
 
 export { AuthProvider, useAuth, STORAGE_KEYS };
-export type { AuthContextValue, Permission };
+export type { AuthContextValue, Permission, User };

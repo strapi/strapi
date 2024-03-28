@@ -67,6 +67,7 @@ export type {
   HeaderActionDescription,
   HeaderActionProps,
 } from './core/apis/content-manager';
+export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 
 /**
  * Utils

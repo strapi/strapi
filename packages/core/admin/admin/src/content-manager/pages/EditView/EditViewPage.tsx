@@ -20,6 +20,7 @@ import { Page } from '../../../components/PageHelpers';
 import { useNotification } from '../../../features/Notifications';
 import { useOnce } from '../../../hooks/useOnce';
 import { useQueryParams } from '../../../hooks/useQueryParams';
+import { useRBAC } from '../../../hooks/useRBAC';
 import { SINGLE_TYPES } from '../../constants/collections';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';
@@ -273,7 +274,8 @@ const ProtectedEditViewPage = () => {
     slug: string;
   }>();
   const [{ query }] = useQueryParams();
-  const { permissions = [], isLoading, isError } = useSyncRbac(slug ?? '', query, 'editView');
+  const {} = useRBAC;
+  const { permissions = [], isLoading, isError } = useRBAC(slug ?? '', query, 'editView');
 
   if (isLoading) {
     return <Page.Loading />;

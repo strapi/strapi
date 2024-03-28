@@ -31,6 +31,7 @@ import { routes as cmRoutes } from './content-manager/router';
 import { ContentManagerPlugin } from './core/apis/content-manager';
 import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
+import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
@@ -165,6 +166,7 @@ class StrapiApp {
    * APIs
    */
   private contentManager = new ContentManagerPlugin();
+  rbac = new RBAC();
   library: Library = {
     components: {},
     fields: {},
@@ -281,6 +283,14 @@ class StrapiApp {
     middlewares.forEach((middleware) => {
       this.middlewares.push(middleware);
     });
+  };
+
+  addRBACMiddleware = (m: RBACMiddleware | RBACMiddleware[]) => {
+    if (Array.isArray(m)) {
+      this.rbac.use(m);
+    } else {
+      this.rbac.use(m);
+    }
   };
 
   addReducers = (reducers: ReducersMapObject) => {
