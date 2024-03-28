@@ -31,4 +31,5 @@ const documentation = [
 
 type Documentation = typeof documentation;
 
-export { documentation, Documentation };
+export type { Documentation };
+export { documentation };

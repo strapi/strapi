@@ -1,4 +1,5 @@
-import sendmailFactory, { Options, MailInput } from 'sendmail';
+import type { Options, MailInput } from 'sendmail';
+import sendmailFactory from 'sendmail';
 
 interface Settings {
   defaultFrom: string;

@@ -29,7 +29,7 @@ import type { FeaturesService, FeaturesConfig } from './modules/features';
 
 export type * from './types';
 
-export {
+export type {
   Container,
   Server,
   EventHub,
@@ -39,10 +39,8 @@ export {
   WebhookStore,
   CoreStore,
   EntityValidator,
-  EntityService,
   TelemetryService,
   RequestContext,
-  CustomFields,
   FeaturesService,
   FeaturesConfig,
   Fetch,
@@ -51,6 +49,7 @@ export {
   SanitizersRegistry,
   ValidatorsRegistry,
 };
+export { EntityService, CustomFields };
 
 declare global {
   var strapi: LoadedStrapi;

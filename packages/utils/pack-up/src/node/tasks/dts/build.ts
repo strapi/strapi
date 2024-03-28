@@ -7,8 +7,8 @@ import { isError } from '../../core/errors';
 import { loadTsConfig } from '../../core/tsconfig';
 
 import { printDiagnostic } from './diagnostic';
-import { DtsBaseTask } from './types';
 
+import type { DtsBaseTask } from './types';
 import type { TaskHandler } from '../index';
 
 interface DtsBuildTask extends DtsBaseTask {

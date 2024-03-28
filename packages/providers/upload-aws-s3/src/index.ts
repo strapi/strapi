@@ -1,14 +1,16 @@
 import type { ReadStream } from 'node:fs';
 import { getOr } from 'lodash/fp';
-import {
-  S3Client,
-  GetObjectCommand,
-  DeleteObjectCommand,
+import type {
   DeleteObjectCommandOutput,
   PutObjectCommandInput,
   CompleteMultipartUploadCommandOutput,
   AbortMultipartUploadCommandOutput,
   S3ClientConfig,
+} from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  GetObjectCommand,
+  DeleteObjectCommand,
   ObjectCannedACL,
 } from '@aws-sdk/client-s3';
 import type { AwsCredentialIdentity } from '@aws-sdk/types';

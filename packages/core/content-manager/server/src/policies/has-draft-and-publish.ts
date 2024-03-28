@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 import { contentTypes } from '@strapi/utils';
-import { Strapi, UID } from '@strapi/types';
+import type { Strapi, UID } from '@strapi/types';
 
 const { hasDraftAndPublish } = contentTypes;
 

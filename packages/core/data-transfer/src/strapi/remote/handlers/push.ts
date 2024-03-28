@@ -8,7 +8,7 @@ import type { TransferStage, IAsset, Protocol } from '../../../../types';
 import { ProviderTransferError } from '../../../errors/providers';
 import { createLocalStrapiDestinationProvider } from '../../providers';
 import { createFlow, DEFAULT_TRANSFER_FLOW } from '../flows';
-import { Handler } from './abstract';
+import type { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
 
 const VALID_TRANSFER_ACTIONS = [

@@ -1,6 +1,7 @@
-import { PassThrough, Readable, Writable } from 'stream';
+import type { Readable, Writable } from 'stream';
+import { PassThrough } from 'stream';
 import type { Schema, Utils } from '@strapi/types';
-import { WebSocket } from 'ws';
+import type { WebSocket } from 'ws';
 import { castArray } from 'lodash/fp';
 
 import type {
@@ -13,10 +14,10 @@ import type {
   ProviderType,
   TransferStage,
 } from '../../../../types';
-import { Client, Server, Auth } from '../../../../types/remote/protocol';
+import type { Client, Server, Auth } from '../../../../types/remote/protocol';
 import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
 import { TRANSFER_PATH } from '../../remote/constants';
-import { ILocalStrapiSourceProviderOptions } from '../local-source';
+import type { ILocalStrapiSourceProviderOptions } from '../local-source';
 import { createDispatcher, connectToWebsocket, trimTrailingSlash } from '../utils';
 
 export interface IRemoteStrapiSourceProviderOptions extends ILocalStrapiSourceProviderOptions {

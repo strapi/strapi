@@ -16,7 +16,8 @@ import {
   setSignalHandler,
 } from '../data-transfer';
 import { exitWith } from '../helpers';
-import { TransferGroupFilter, createTransferEngine, ITransferResults, errors } from '../../engine';
+import type { TransferGroupFilter, ITransferResults } from '../../engine';
+import { createTransferEngine, errors } from '../../engine';
 import * as strapiDatatransfer from '../../strapi';
 import * as file from '../../file';
 

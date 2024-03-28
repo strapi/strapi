@@ -2,12 +2,13 @@ import { Readable } from 'stream';
 import { randomUUID } from 'crypto';
 import type { LoadedStrapi } from '@strapi/types';
 
-import { Handler } from './abstract';
+import type { Handler } from './abstract';
 import { handlerControllerFactory, isDataTransferMessage } from './utils';
-import { createLocalStrapiSourceProvider, ILocalStrapiSourceProvider } from '../../providers';
+import type { ILocalStrapiSourceProvider } from '../../providers';
+import { createLocalStrapiSourceProvider } from '../../providers';
 import { ProviderTransferError } from '../../../errors/providers';
 import type { IAsset, TransferStage, Protocol } from '../../../../types';
-import { Client } from '../../../../types/remote/protocol';
+import type { Client } from '../../../../types/remote/protocol';
 
 const TRANSFER_KIND = 'pull';
 const VALID_TRANSFER_ACTIONS = ['bootstrap', 'close', 'getMetadata', 'getSchemas'] as const;

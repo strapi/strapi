@@ -1,4 +1,4 @@
-import { env } from '@strapi/utils';
+import type { env } from '@strapi/utils';
 
 import type { Common, Shared, Utils, Schema } from '../..';
 import type { Strapi } from '../../..';

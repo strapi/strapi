@@ -1,5 +1,5 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
-import { Knex } from 'knex';
+import type { Knex } from 'knex';
 
 export type Callback = (...args: any[]) => Promise<any> | any;
 

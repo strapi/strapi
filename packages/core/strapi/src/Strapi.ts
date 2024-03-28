@@ -4,7 +4,8 @@
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
-import { Logger, createLogger } from '@strapi/logger';
+import type { Logger } from '@strapi/logger';
+import { createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
 import { hooks } from '@strapi/utils';
 import type {
@@ -40,7 +41,8 @@ import { createContainer } from './container';
 import createStrapiFs from './services/fs';
 import createEventHub from './services/event-hub';
 import { createServer } from './services/server';
-import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
+import type { WebhookRunner } from './services/webhook-runner';
+import createWebhookRunner from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
 import createEntityService from './services/entity-service';
@@ -77,7 +79,8 @@ import convertCustomFieldType from './utils/convert-custom-field-type';
 
 // TODO: move somewhere else
 import * as draftAndPublishSync from './migrations/draft-publish';
-import { FeaturesService, createFeaturesService } from './services/features';
+import type { FeaturesService } from './services/features';
+import { createFeaturesService } from './services/features';
 
 /**
  * Resolve the working directories based on the instance options.

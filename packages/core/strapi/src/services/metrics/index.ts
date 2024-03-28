@@ -3,7 +3,8 @@
  * You can learn more at https://docs.strapi.io/developer-docs/latest/getting-started/usage-information.html
  */
 
-import { Job, scheduleJob } from 'node-schedule';
+import type { Job } from 'node-schedule';
+import { scheduleJob } from 'node-schedule';
 import type { Strapi } from '@strapi/types';
 
 import wrapWithRateLimit from './rate-limiter';

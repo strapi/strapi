@@ -1,5 +1,7 @@
-import nodeFetch, { RequestInit, Response } from 'node-fetch';
-import { HttpsProxyAgent, HttpsProxyAgentOptions } from 'https-proxy-agent';
+import type { RequestInit, Response } from 'node-fetch';
+import nodeFetch from 'node-fetch';
+import type { HttpsProxyAgentOptions } from 'https-proxy-agent';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 
 import type { Strapi } from '@strapi/types';
 

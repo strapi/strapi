@@ -1,4 +1,4 @@
-import { Middleware } from '../../types';
+import type { Middleware } from '../../types';
 
 export const runMiddleware = async <T>(context: T, middlewares: Middleware<T>[]): Promise<void> => {
   if (!middlewares.length) {

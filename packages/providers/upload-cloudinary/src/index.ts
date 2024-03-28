@@ -1,5 +1,6 @@
 import type { ReadStream } from 'node:fs';
-import { v2 as cloudinary, ConfigOptions, UploadApiOptions } from 'cloudinary';
+import type { ConfigOptions, UploadApiOptions } from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 import intoStream from 'into-stream';
 import * as utils from '@strapi/utils';
 

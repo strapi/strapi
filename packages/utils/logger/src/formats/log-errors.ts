@@ -1,4 +1,5 @@
-import { format, Logform } from 'winston';
+import type { Logform } from 'winston';
+import { format } from 'winston';
 
 const logErrors: Logform.FormatWrap = format((info) => {
   if (info instanceof Error) {

@@ -1,14 +1,20 @@
 import { mkdir, writeFile } from 'fs/promises';
 import os from 'os';
 import { relative, resolve, dirname } from 'path';
-import prettier, { Config as PrettierConfig } from 'prettier';
+import prettier from 'prettier';
 import prompts from 'prompts';
 
 import { isError } from '../core/errors';
 import { parseGlobalGitConfig } from '../core/git';
-import { Logger } from '../core/logger';
 
-import { Template, TemplateFeature, TemplateOption, TemplateOrTemplateResolver } from './types';
+import type {
+  Template,
+  TemplateFeature,
+  TemplateOption,
+  TemplateOrTemplateResolver,
+} from './types';
+import type { Logger } from '../core/logger';
+import type { Config as PrettierConfig } from 'prettier';
 
 interface CreatePackageFromTemplateOpts {
   logger: Logger;

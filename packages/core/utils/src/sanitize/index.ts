@@ -1,4 +1,4 @@
-import { CurriedFunction1 } from 'lodash';
+import type { CurriedFunction1 } from 'lodash';
 import { isArray, cloneDeep, omit } from 'lodash/fp';
 
 import { getNonWritableAttributes } from '../content-types';

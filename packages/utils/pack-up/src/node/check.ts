@@ -1,18 +1,20 @@
 import chalk from 'chalk';
-import esbuild, { BuildFailure, Format, Message } from 'esbuild';
+import esbuild from 'esbuild';
 import ora from 'ora';
 import os from 'os';
 import { resolve } from 'path';
-
-import { CommonCLIOptions } from '../types';
 
 import { loadConfig } from './core/config';
 import { isError } from './core/errors';
 import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { pathExists } from './core/files';
-import { Logger, createLogger } from './core/logger';
+import { createLogger } from './core/logger';
 import { loadPkg, validatePkg } from './core/pkg';
 import { createBuildContext } from './createBuildContext';
+
+import type { Logger } from './core/logger';
+import type { CommonCLIOptions } from '../types';
+import type { BuildFailure, Format, Message } from 'esbuild';
 
 export interface CheckOptions extends CommonCLIOptions {
   cwd?: string;

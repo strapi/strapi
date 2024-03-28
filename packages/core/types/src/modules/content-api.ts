@@ -1,6 +1,6 @@
-import permissions from '@strapi/permissions';
-import { providerFactory } from '@strapi/utils';
-import { Common } from '../types';
+import type permissions from '@strapi/permissions';
+import type { providerFactory } from '@strapi/utils';
+import type { Common } from '../types';
 
 export interface Condition {
   name: string;

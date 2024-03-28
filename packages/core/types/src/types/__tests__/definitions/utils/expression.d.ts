@@ -1,4 +1,4 @@
-import { Utils } from '../../..';
+import type { Utils } from '../../..';
 
 // IsNever
 type IsNeverGivenNever = Utils.Expression.IsNever<never>;
@@ -194,7 +194,7 @@ type OrTrueFalse = Utils.Expression.Or<
   Utils.Expression.IsTrue<Utils.Expression.False>
 >;
 
-export {
+export type {
   // IsNever
   IsNeverGivenNever,
   IsNeverNotGivenNever,

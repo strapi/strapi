@@ -3,13 +3,14 @@ import gitUrlParse from 'git-url-parse';
 import { outdent } from 'outdent';
 
 import { isError } from '../../core/errors';
-import { PackageJson } from '../../core/pkg';
 import { definePackageFeature, definePackageOption, defineTemplate } from '../create';
-import { TemplateFile } from '../types';
 
 import { editorConfigFile } from './files/editorConfig';
 import { gitIgnoreFile } from './files/gitIgnore';
 import { prettierFile, prettierIgnoreFile } from './files/prettier';
+
+import type { PackageJson } from '../../core/pkg';
+import type { TemplateFile } from '../types';
 
 const PACKAGE_NAME_REGEXP = /^(?:@(?:[a-z0-9-*~][a-z0-9-*._~]*)\/)?[a-z0-9-~][a-z0-9-._~]*$/i;
 

@@ -1,8 +1,10 @@
 import { join } from 'path';
 import https from 'https';
 import http from 'http';
-import { Duplex, PassThrough, Readable } from 'stream';
-import { stat, createReadStream, ReadStream } from 'fs-extra';
+import type { Readable } from 'stream';
+import { Duplex, PassThrough } from 'stream';
+import type { ReadStream } from 'fs-extra';
+import { stat, createReadStream } from 'fs-extra';
 import type { LoadedStrapi } from '@strapi/types';
 
 import type { IAsset, IFile } from '../../../../types';

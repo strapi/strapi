@@ -1,5 +1,6 @@
 import { defaultsDeep, merge } from 'lodash/fp';
-import helmet, { KoaHelmet } from 'koa-helmet';
+import type { KoaHelmet } from 'koa-helmet';
+import helmet from 'koa-helmet';
 
 import type { Common } from '@strapi/types';
 

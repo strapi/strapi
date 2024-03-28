@@ -2,16 +2,18 @@ import fs from 'fs/promises';
 import ora from 'ora';
 import os from 'os';
 
-import { CommonCLIOptions } from '../types';
-
 import { loadConfig, type Config } from './core/config';
 import { isError } from './core/errors';
 import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createLogger } from './core/logger';
 import { loadPkg, validatePkg } from './core/pkg';
 import { createBuildContext } from './createBuildContext';
-import { BuildTask, createBuildTasks } from './createTasks';
-import { TaskHandler, taskHandlers } from './tasks';
+import { createBuildTasks } from './createTasks';
+import { taskHandlers } from './tasks';
+
+import type { BuildTask } from './createTasks';
+import type { TaskHandler } from './tasks';
+import type { CommonCLIOptions } from '../types';
 
 interface BuildCLIOptions extends CommonCLIOptions {
   minify?: boolean;

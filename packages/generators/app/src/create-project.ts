@@ -17,7 +17,8 @@ import adminTsconfig from './resources/json/ts/tsconfig-admin.json';
 import serverTsconfig from './resources/json/ts/tsconfig-server.json';
 import { createDatabaseConfig, generateDbEnvariables } from './resources/templates/database';
 import createEnvFile from './resources/templates/env';
-import { Configuration, Scope, isStderrError } from './types';
+import type { Configuration, Scope } from './types';
+import { isStderrError } from './types';
 
 export default async function createProject(
   scope: Scope,

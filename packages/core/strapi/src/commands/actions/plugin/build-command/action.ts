@@ -1,9 +1,11 @@
 import boxen from 'boxen';
 import chalk from 'chalk';
-import { BuildCLIOptions, ConfigBundle, build } from '@strapi/pack-up';
+import type { BuildCLIOptions, ConfigBundle } from '@strapi/pack-up';
+import { build } from '@strapi/pack-up';
 import { notifyExperimentalCommand } from '../../../utils/helpers';
-import { Export, loadPkg, validatePkg } from '../../../utils/pkg';
-import { CLIContext } from '../../../types';
+import type { Export } from '../../../utils/pkg';
+import { loadPkg, validatePkg } from '../../../utils/pkg';
+import type { CLIContext } from '../../../types';
 
 interface ActionOptions extends BuildCLIOptions {
   force?: boolean;

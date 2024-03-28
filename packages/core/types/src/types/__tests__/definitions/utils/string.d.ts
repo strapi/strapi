@@ -56,7 +56,7 @@ type SplitBySpace = Utils.String.Split<'Hello World, How are you?', ' '>;
 type SplitByEmptyString = Utils.String.Split<'Hello', ''>;
 type SplitByString = Utils.String.Split<'Hello', string>;
 
-export {
+export type {
   // String
   // String > Dict
   NumberDict,

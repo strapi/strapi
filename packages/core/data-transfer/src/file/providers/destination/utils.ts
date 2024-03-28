@@ -1,6 +1,6 @@
 import { Writable } from 'stream';
 import { posix } from 'path';
-import tar from 'tar-stream';
+import type tar from 'tar-stream';
 
 /**
  * Create a file path factory for a given path & prefix.

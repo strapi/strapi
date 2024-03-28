@@ -3,7 +3,7 @@ import os from 'os';
 import pkgUp from 'pkg-up';
 import * as yup from 'yup';
 import chalk from 'chalk';
-import { Logger } from './logger';
+import type { Logger } from './logger';
 
 interface Export {
   types?: string;

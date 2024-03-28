@@ -2,10 +2,11 @@ import browserslistToEsbuild from 'browserslist-to-esbuild';
 import path from 'path';
 
 import { resolveConfigProperty } from './core/config';
-import { parseExports, ExtMap, Export } from './core/exports';
+import { parseExports } from './core/exports';
 import { loadTsConfig } from './core/tsconfig';
 
 import type { Config } from './core/config';
+import type { ExtMap, Export } from './core/exports';
 import type { Logger } from './core/logger';
 import type { PackageJson } from './core/pkg';
 import type { ParsedCommandLine } from 'typescript';

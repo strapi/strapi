@@ -1,4 +1,5 @@
-import awsProvider, { File } from '../index';
+import type { File } from '../index';
+import awsProvider from '../index';
 
 jest.mock('../utils', () => ({
   ...jest.requireActual('../utils'),

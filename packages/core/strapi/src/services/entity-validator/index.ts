@@ -6,7 +6,14 @@
 import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
-import { EntityValidator, Common, Schema, Attribute, Shared, EntityService } from '@strapi/types';
+import type {
+  EntityValidator,
+  Common,
+  Schema,
+  Attribute,
+  Shared,
+  EntityService,
+} from '@strapi/types';
 import validators from './validators';
 
 type CreateOrUpdate = 'creation' | 'update';

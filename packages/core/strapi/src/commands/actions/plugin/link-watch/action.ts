@@ -7,7 +7,7 @@ import nodemon from 'nodemon';
 import { outdent } from 'outdent';
 
 import { notifyExperimentalCommand } from '../../../utils/helpers';
-import { CLIContext } from '../../../types';
+import type { CLIContext } from '../../../types';
 import { loadPkg, validatePkg } from '../../../utils/pkg';
 
 interface ActionOptions {}

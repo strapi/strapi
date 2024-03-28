@@ -1,5 +1,5 @@
 import { watchAdmin } from '@strapi/admin';
-import { CLIContext } from '../../types';
+import type { CLIContext } from '../../types';
 
 interface WatchAdminOptions {
   browser: boolean;

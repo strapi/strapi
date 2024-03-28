@@ -1,4 +1,4 @@
-import { NodePlopAPI } from 'plop';
+import type { NodePlopAPI } from 'plop';
 import chalk from 'chalk';
 import tsUtils from '@strapi/typescript-utils';
 import * as utils from '@strapi/utils';

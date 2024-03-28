@@ -1,5 +1,6 @@
 import path from 'path';
-import { Command, Option } from 'commander';
+import type { Command } from 'commander';
+import { Option } from 'commander';
 import inquirer from 'inquirer';
 import { excludeOption, onlyOption, throttleOption, validateExcludeOnly } from '../data-transfer';
 import { getCommanderConfirmMessage, forceOption } from '../commander';

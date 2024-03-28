@@ -2,7 +2,8 @@ import os from 'os';
 import _ from 'lodash';
 import fetch from 'node-fetch';
 import sentry, { Severity } from '@sentry/node';
-import { Scope, StderrError, isStderrError } from '../types';
+import type { Scope, StderrError } from '../types';
+import { isStderrError } from '../types';
 
 type TrackError = Error | string | StderrError;
 

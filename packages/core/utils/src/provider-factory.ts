@@ -1,10 +1,6 @@
 import { cloneDeep } from 'lodash/fp';
-import {
-  createAsyncSeriesHook,
-  createAsyncParallelHook,
-  AsyncSeriesHook,
-  AsyncParallelHook,
-} from './hooks';
+import type { AsyncSeriesHook, AsyncParallelHook } from './hooks';
+import { createAsyncSeriesHook, createAsyncParallelHook } from './hooks';
 
 export interface ProviderHooksMap {
   willRegister: AsyncSeriesHook;

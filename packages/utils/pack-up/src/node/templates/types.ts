@@ -1,7 +1,6 @@
-import { PromptObject } from 'prompts';
-
-import { GitConfig } from '../core/git';
-import { Logger } from '../core/logger';
+import type { GitConfig } from '../core/git';
+import type { Logger } from '../core/logger';
+import type { PromptObject } from 'prompts';
 
 interface TemplateFeature<T extends string = string> extends Pick<PromptObject<T>, 'initial'> {
   /**

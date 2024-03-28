@@ -1,4 +1,4 @@
-import { CurriedFunction1 } from 'lodash';
+import type { CurriedFunction1 } from 'lodash';
 import { isArray, isObject } from 'lodash/fp';
 
 import { getNonWritableAttributes } from '../content-types';
@@ -11,7 +11,7 @@ import traverseEntity from '../traverse-entity';
 
 import { traverseQueryFilters, traverseQuerySort } from '../traverse';
 
-import { Model, Data } from '../types';
+import type { Model, Data } from '../types';
 
 export interface Options {
   auth?: unknown;

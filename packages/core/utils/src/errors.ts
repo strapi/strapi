@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 
-import yup from 'yup';
+import type yup from 'yup';
 import { HttpError } from 'http-errors';
 import { formatYupErrors } from './format-yup-error';
 

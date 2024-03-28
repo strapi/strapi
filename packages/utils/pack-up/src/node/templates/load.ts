@@ -2,9 +2,8 @@ import { register } from 'esbuild-register/dist/node';
 import { existsSync } from 'fs';
 import { resolve } from 'path';
 
-import { Logger } from '../core/logger';
-
-import { TemplateOrTemplateResolver } from './types';
+import type { TemplateOrTemplateResolver } from './types';
+import type { Logger } from '../core/logger';
 
 /**
  * @internal

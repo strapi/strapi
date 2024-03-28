@@ -1,7 +1,7 @@
 import os from 'os';
 
-import { Logger } from './logger';
-import { PackageJson } from './pkg';
+import type { Logger } from './logger';
+import type { PackageJson } from './pkg';
 
 /**
  * @description validate the `exports` property of the package.json against a set of rules.

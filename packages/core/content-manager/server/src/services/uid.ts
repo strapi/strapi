@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import slugify from '@sindresorhus/slugify';
 
-import { LoadedStrapi as Strapi, UID, Attribute } from '@strapi/types';
+import type { LoadedStrapi as Strapi, UID, Attribute } from '@strapi/types';
 
 export default ({ strapi }: { strapi: Strapi }) => ({
   async generateUIDField({

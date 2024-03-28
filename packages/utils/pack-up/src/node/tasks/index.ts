@@ -1,13 +1,15 @@
-import ts from 'typescript';
+import { dtsBuildTask } from './dts/build';
+import { dtsWatchTask } from './dts/watch';
+import { viteBuildTask } from './vite/build';
+import { viteWatchTask } from './vite/watch';
 
-import { BuildContext } from '../createBuildContext';
-
-import { dtsBuildTask, DtsBuildTask } from './dts/build';
-import { dtsWatchTask, DtsWatchTask } from './dts/watch';
-import { viteBuildTask, ViteBuildTask } from './vite/build';
-import { RollupWatcherEvent, viteWatchTask, ViteWatchTask } from './vite/watch';
-
+import type { DtsBuildTask } from './dts/build';
+import type { DtsWatchTask } from './dts/watch';
+import type { ViteBuildTask } from './vite/build';
+import type { RollupWatcherEvent, ViteWatchTask } from './vite/watch';
+import type { BuildContext } from '../createBuildContext';
 import type { Observable } from 'rxjs';
+import type ts from 'typescript';
 
 interface TaskHandler<Task, Result = void> {
   print(ctx: BuildContext, task: Task): void;

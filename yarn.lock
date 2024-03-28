@@ -8073,9 +8073,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/eslint-config@npm:0.2.0":
-  version: 0.2.0
-  resolution: "@strapi/eslint-config@npm:0.2.0"
+"@strapi/eslint-config@npm:0.2.1":
+  version: 0.2.1
+  resolution: "@strapi/eslint-config@npm:0.2.1"
   dependencies:
     "@babel/eslint-parser": "npm:^7.19.1"
     "@typescript-eslint/eslint-plugin": "npm:^5.62.0"
@@ -8100,7 +8100,7 @@ __metadata:
   peerDependenciesMeta:
     typescript:
       optional: true
-  checksum: e0c5d3ade2d5c4c46533535784d964bad53023ffacab7c4692ea876b64e72aeb54469926a0c88d64399aaeb41c18fed9133698fac606712bc3376c836b8e813a
+  checksum: 753438ee07d25ea9bad11f1c6d533676110c067d1583dfe3690972736806316c52d0c09f0ebdcb46757f8c85f621b96d56a485cff3053eb7a1c8afb4e9ddb0da
   languageName: node
   linkType: hard
 
@@ -28713,7 +28713,7 @@ __metadata:
     "@babel/preset-react": "npm:7.18.6"
     "@playwright/test": "npm:1.38.1"
     "@strapi/admin-test-utils": "workspace:*"
-    "@strapi/eslint-config": "npm:0.2.0"
+    "@strapi/eslint-config": "npm:0.2.1"
     "@swc/cli": "npm:0.1.62"
     "@swc/core": "npm:1.3.58"
     "@swc/helpers": "npm:0.5.1"

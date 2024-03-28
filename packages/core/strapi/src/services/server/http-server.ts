@@ -1,6 +1,6 @@
 import http from 'http';
 import type { Socket } from 'net';
-import Koa from 'koa';
+import type Koa from 'koa';
 import type { Strapi } from '@strapi/types';
 
 export interface Server extends http.Server {

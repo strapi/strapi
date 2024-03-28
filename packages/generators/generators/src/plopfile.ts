@@ -1,5 +1,5 @@
 import pluralize from 'pluralize';
-import { NodePlopAPI } from 'plop';
+import type { NodePlopAPI } from 'plop';
 
 import generateApi from './plops/api';
 import generateController from './plops/controller';

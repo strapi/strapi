@@ -1,4 +1,5 @@
-import sendgrid, { MailDataRequired } from '@sendgrid/mail';
+import type { MailDataRequired } from '@sendgrid/mail';
+import sendgrid from '@sendgrid/mail';
 
 interface Settings {
   defaultFrom: string;

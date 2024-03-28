@@ -1,19 +1,26 @@
 import type { Knex } from 'knex';
 
-import { Dialect, getDialect } from './dialects';
-import { createSchemaProvider, SchemaProvider } from './schema';
-import { createMetadata, Metadata } from './metadata';
-import { createEntityManager, EntityManager } from './entity-manager';
-import { createMigrationsProvider, MigrationProvider } from './migrations';
-import { createLifecyclesProvider, LifecycleProvider } from './lifecycles';
+import type { Dialect } from './dialects';
+import { getDialect } from './dialects';
+import type { SchemaProvider } from './schema';
+import { createSchemaProvider } from './schema';
+import type { Metadata } from './metadata';
+import { createMetadata } from './metadata';
+import type { EntityManager } from './entity-manager';
+import { createEntityManager } from './entity-manager';
+import type { MigrationProvider } from './migrations';
+import { createMigrationsProvider } from './migrations';
+import type { LifecycleProvider } from './lifecycles';
+import { createLifecyclesProvider } from './lifecycles';
 import { createConnection } from './connection';
 import * as errors from './errors';
-import { Callback, transactionCtx, TransactionObject } from './transaction-context';
+import type { Callback, TransactionObject } from './transaction-context';
+import { transactionCtx } from './transaction-context';
 
 // TODO: move back into strapi
 import { transformContentTypes } from './utils/content-types';
 import { validateDatabase } from './validations';
-import { Model } from './types';
+import type { Model } from './types';
 
 export { isKnexQuery } from './utils/knex';
 

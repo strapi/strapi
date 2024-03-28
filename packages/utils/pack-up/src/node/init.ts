@@ -1,14 +1,14 @@
 import { resolve } from 'path';
 
-import { CommonCLIOptions } from '../types';
-
 import { isError } from './core/errors';
 import { ensurePackagePathIsViable } from './core/files';
 import { createLogger } from './core/logger';
 import { createPackageFromTemplate } from './templates/create';
 import { defaultTemplate } from './templates/internal/default';
 import { loadTemplate } from './templates/load';
-import { TemplateOrTemplateResolver } from './templates/types';
+
+import type { TemplateOrTemplateResolver } from './templates/types';
+import type { CommonCLIOptions } from '../types';
 
 export interface InitOptions extends CommonCLIOptions {
   cwd?: string;

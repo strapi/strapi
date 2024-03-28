@@ -1,5 +1,6 @@
 import { validateExportsOrdering, parseExports, getExportExtensionMap } from '../exports';
-import { PackageJson } from '../pkg';
+
+import type { PackageJson } from '../pkg';
 
 const loggerMock = {
   debug: jest.fn(),

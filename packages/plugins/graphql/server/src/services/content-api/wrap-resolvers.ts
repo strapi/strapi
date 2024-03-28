@@ -1,10 +1,6 @@
 import { get, getOr, isFunction, first, isNil } from 'lodash/fp';
-import {
-  GraphQLObjectType,
-  GraphQLResolveInfo,
-  GraphQLSchema,
-  GraphQLFieldResolver,
-} from 'graphql';
+import type { GraphQLResolveInfo, GraphQLSchema, GraphQLFieldResolver } from 'graphql';
+import { GraphQLObjectType } from 'graphql';
 import { errors } from '@strapi/utils';
 import type { Strapi, Common } from '@strapi/types';
 

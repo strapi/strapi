@@ -1,4 +1,5 @@
-import { DataTransferError, Severity, SeverityKind } from '../errors';
+import type { Severity } from '../errors';
+import { DataTransferError, SeverityKind } from '../errors';
 
 type TransferEngineStep = 'initialization' | 'validation' | 'transfer';
 

@@ -1,6 +1,7 @@
 import path from 'path';
 
-import { AssertTypeSelector, t } from '@strapi/ts-zen';
+import type { AssertTypeSelector } from '@strapi/ts-zen';
+import { t } from '@strapi/ts-zen';
 
 import { createTypeSelector } from '../test.utils';
 import type StringUtils from '../definitions/utils/string';

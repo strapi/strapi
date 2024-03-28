@@ -1,4 +1,4 @@
-import { Common, Schema } from '@strapi/types';
+import type { Common, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import type { Entity } from '../entity-manager';
 

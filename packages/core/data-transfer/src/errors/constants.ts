@@ -1,4 +1,4 @@
-import { ErrorDiagnosticSeverity } from '../engine/diagnostic';
+import type { ErrorDiagnosticSeverity } from '../engine/diagnostic';
 
 export const SeverityKind: Record<string, ErrorDiagnosticSeverity> = {
   FATAL: 'fatal',

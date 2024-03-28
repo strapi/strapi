@@ -9,9 +9,8 @@ import os from 'os';
 import pkgUp from 'pkg-up';
 import * as yup from 'yup';
 
-import { Logger } from './logger';
-
 import type { Export } from './exports';
+import type { Logger } from './logger';
 
 const record = (value: unknown) =>
   yup

@@ -6,8 +6,8 @@ import { Observable } from 'rxjs';
 import { isError } from '../../core/errors';
 
 import { resolveViteConfig } from './config';
-import { ViteBaseTask } from './types';
 
+import type { ViteBaseTask } from './types';
 import type { TaskHandler } from '../index';
 
 export type InputOption = string | string[] | { [entryAlias: string]: string };

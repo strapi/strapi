@@ -1,6 +1,6 @@
 import { prop } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import { LoadedStrapi as Strapi, Schema } from '@strapi/types';
+import type { LoadedStrapi as Strapi, Schema } from '@strapi/types';
 
 import { getService } from '../utils';
 

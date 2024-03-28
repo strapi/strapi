@@ -1,4 +1,4 @@
-import { Utils } from '../../..';
+import type { Utils } from '../../..';
 
 // Never Guard
 type NeverGuardGetsNeverWithDefaultFallback = Utils.Guard.Never<never>;
@@ -34,7 +34,7 @@ type OfTypesStringAndNumberGetsUnionOfStringNumber = Utils.Guard.OfTypes<
 >;
 type OfTypesStringAndNumberGetsBoolean = Utils.Guard.OfTypes<[string, number], boolean>;
 
-export {
+export type {
   // Never
   NeverGuardGetsNeverWithDefaultFallback,
   NeverGuardGetsNeverWithCustomFallback,

@@ -2,17 +2,20 @@ import chokidar from 'chokidar';
 import path from 'path';
 import { Observable, distinctUntilChanged, scan, startWith, switchMap } from 'rxjs';
 
-import { CommonCLIOptions } from '../types';
-
-import { CONFIG_FILE_NAMES, Config, loadConfig } from './core/config';
+import { CONFIG_FILE_NAMES, loadConfig } from './core/config';
 import { getExportExtensionMap, validateExportsOrdering } from './core/exports';
 import { createLogger } from './core/logger';
 import { loadPkg, validatePkg } from './core/pkg';
 import { createBuildContext } from './createBuildContext';
-import { WatchTask, createWatchTasks } from './createTasks';
-import { TaskHandler, taskHandlers } from './tasks';
+import { createWatchTasks } from './createTasks';
+import { taskHandlers } from './tasks';
 
-interface WatchCLIOptions extends CommonCLIOptions {}
+import type { Config } from './core/config';
+import type { WatchTask } from './createTasks';
+import type { TaskHandler } from './tasks';
+import type { CommonCLIOptions } from '../types';
+
+type WatchCLIOptions = CommonCLIOptions;
 
 interface WatchOptionsWithoutConfig extends WatchCLIOptions {
   configFile?: true;

@@ -1,7 +1,7 @@
 import { isNil, mapValues } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
-import { LoadedStrapi as Strapi, UID, Schema } from '@strapi/types';
+import type { LoadedStrapi as Strapi, UID, Schema } from '@strapi/types';
 
 import type { ConfigurationUpdate } from './configuration';
 

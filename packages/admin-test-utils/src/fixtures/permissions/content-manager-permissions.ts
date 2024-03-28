@@ -60,4 +60,5 @@ const contentManager = [
 
 type ContentManager = typeof contentManager;
 
-export { contentManager, ContentManager };
+export type { ContentManager };
+export { contentManager };

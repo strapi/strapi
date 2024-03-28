@@ -2,7 +2,12 @@ import { stripColor } from '../../tests/console';
 import { createWorkspace } from '../../tests/workspaces';
 import { init } from '../node/init';
 import { defaultTemplate } from '../node/templates/internal/default';
-import { Template, TemplateOrTemplateResolver, TemplateResolver } from '../node/templates/types';
+
+import type {
+  Template,
+  TemplateOrTemplateResolver,
+  TemplateResolver,
+} from '../node/templates/types';
 
 const loggerMock = {
   debug: jest.fn(),

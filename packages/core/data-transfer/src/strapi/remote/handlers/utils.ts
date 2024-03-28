@@ -1,14 +1,15 @@
 import type { IncomingMessage } from 'http';
 import { randomUUID } from 'crypto';
 import type { Context } from 'koa';
-import type { RawData, ServerOptions } from 'ws';
-import { WebSocket, WebSocketServer } from 'ws';
+import type { RawData, ServerOptions, WebSocketServer } from 'ws';
+import { WebSocket } from 'ws';
 
 import type { Handler, TransferState } from './abstract';
 import type { Protocol } from '../../../../types';
 import { ProviderError, ProviderTransferError } from '../../../errors/providers';
-import { VALID_TRANSFER_COMMANDS, ValidTransferCommand } from './constants';
-import { TransferMethod } from '../constants';
+import type { ValidTransferCommand } from './constants';
+import { VALID_TRANSFER_COMMANDS } from './constants';
+import type { TransferMethod } from '../constants';
 
 type WSCallback = (client: WebSocket, request: IncomingMessage) => void;
 

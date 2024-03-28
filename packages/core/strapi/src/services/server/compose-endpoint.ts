@@ -1,7 +1,7 @@
 import { toLower, castArray, trim, prop, isNil } from 'lodash/fp';
 import type { Strapi, Common } from '@strapi/types';
 import { errors } from '@strapi/utils';
-import Router from '@koa/router';
+import type Router from '@koa/router';
 
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';

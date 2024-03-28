@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-loop-func */
 import { isNil, pick } from 'lodash/fp';
-import {
+import type {
   AnyAttribute,
   Attribute,
   ComponentAttribute,

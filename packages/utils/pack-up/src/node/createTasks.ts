@@ -1,14 +1,13 @@
 import path from 'path';
 
-import { DtsWatchTask } from './tasks/dts/watch';
-import { ViteBaseTask, ViteTaskEntry } from './tasks/vite/types';
-import { ViteWatchTask } from './tasks/vite/watch';
-
 import type { Extensions } from './core/exports';
 import type { BuildContext, Runtime } from './createBuildContext';
 import type { DtsBuildTask } from './tasks/dts/build';
 import type { DtsBaseTask } from './tasks/dts/types';
+import type { DtsWatchTask } from './tasks/dts/watch';
 import type { ViteBuildTask } from './tasks/vite/build';
+import type { ViteBaseTask, ViteTaskEntry } from './tasks/vite/types';
+import type { ViteWatchTask } from './tasks/vite/watch';
 
 type BuildTask = DtsBuildTask | ViteBuildTask;
 type WatchTask = ViteWatchTask | DtsWatchTask;

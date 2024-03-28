@@ -1,6 +1,6 @@
 import { pick, getOr } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
-import { Attribute, Schema } from '@strapi/types';
+import type { Attribute, Schema } from '@strapi/types';
 
 const dtoFields = [
   'uid',

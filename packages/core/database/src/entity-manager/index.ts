@@ -53,7 +53,7 @@ import { DatabaseError } from '../errors';
 import type { Database } from '..';
 import type { Meta } from '../metadata';
 import type { ID } from '../types';
-import { EntityManager, Repository, Entity } from './types';
+import type { EntityManager, Repository, Entity } from './types';
 
 export * from './types';
 

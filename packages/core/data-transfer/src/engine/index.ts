@@ -1,4 +1,5 @@
-import { PassThrough, Transform, Readable, Writable } from 'stream';
+import type { Readable, Writable } from 'stream';
+import { PassThrough, Transform } from 'stream';
 import { extname } from 'path';
 import { EOL } from 'os';
 import type Chain from 'stream-chain';
@@ -36,12 +37,9 @@ import type { Diff } from '../utils/json';
 import { compareSchemas, validateProvider } from './validation';
 
 import { TransferEngineError, TransferEngineValidationError } from './errors';
-import {
-  createDiagnosticReporter,
-  IDiagnosticReporter,
-  ErrorDiagnosticSeverity,
-} from './diagnostic';
-import { DataTransferError } from '../errors';
+import type { IDiagnosticReporter, ErrorDiagnosticSeverity } from './diagnostic';
+import { createDiagnosticReporter } from './diagnostic';
+import type { DataTransferError } from '../errors';
 import * as utils from '../utils';
 import { ProviderTransferError } from '../errors/providers';
 
