@@ -27,3 +27,15 @@ jobs:
       - uses: ./.github/actions/security/lockfile
         with:
           allowedHosts: 'yarn'
+
+  install-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+      - name: 👬🏽 Check for duplicated deps
+        run: yarn dedupe --check
