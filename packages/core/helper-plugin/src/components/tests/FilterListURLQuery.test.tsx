@@ -50,7 +50,7 @@ describe('FilterListURLQuery', () => {
           type: 'relation',
           mainField: {
             name: 'postal_code',
-            schema: { type: 'string', pluginOptions: { i18n: { localized: true } } },
+            type: 'string',
           },
         },
       },
