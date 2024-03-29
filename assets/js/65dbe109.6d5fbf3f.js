@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[4809],{2295:e=>{e.exports=JSON.parse('{"label":"develop","permalink":"/tags/develop","allTagsPath":"/tags","count":1,"items":[{"id":"docs/core/admin/commands/develop","title":"Develop","description":"How it works","permalink":"/docs/core/admin/commands/develop"}],"unlisted":false}')}}]);

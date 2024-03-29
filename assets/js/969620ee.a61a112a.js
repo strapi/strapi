@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[6599],{5284:e=>{e.exports=JSON.parse('{"label":"playwright","permalink":"/tags/playwright","allTagsPath":"/tags","count":1,"items":[{"id":"guides/e2e/setup","title":"Setup","description":"Overview","permalink":"/guides/e2e/setup"}],"unlisted":false}')}}]);

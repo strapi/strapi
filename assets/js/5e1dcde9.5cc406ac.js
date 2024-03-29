@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[4633],{5751:s=>{s.exports=JSON.parse('{"label":"nps","permalink":"/tags/nps","allTagsPath":"/tags","count":1,"items":[{"id":"docs/core/admin/features/nps","title":"NPS","description":"What does it do","permalink":"/docs/core/admin/features/nps"}],"unlisted":false}')}}]);

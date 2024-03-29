@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunkdocs=self.webpackChunkdocs||[]).push([[7453],{9662:s=>{s.exports=JSON.parse('{"label":"bundling","permalink":"/tags/bundling","allTagsPath":"/tags","count":1,"items":[{"id":"docs/utils/pack-up/intro","title":"Introduction","description":"What is pack-up?","permalink":"/docs/utils/pack-up/intro"}],"unlisted":false}')}}]);

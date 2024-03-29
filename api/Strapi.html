@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en" dir="ltr" class="docs-wrapper plugin-docs plugin-id-default docs-version-current docs-doc-page docs-doc-id-api/Strapi" data-has-hydrated="false">
+<head>
+<meta charset="UTF-8">
+<meta name="generator" content="Docusaurus v3.1.1">
+<title data-rh="true">Strapi (WIP) | Doc</title><meta data-rh="true" name="viewport" content="width=device-width,initial-scale=1"><meta data-rh="true" name="twitter:card" content="summary_large_image"><meta data-rh="true" property="og:url" content="https://contributor.strapi.io/api/Strapi"><meta data-rh="true" property="og:locale" content="en"><meta data-rh="true" name="docusaurus_locale" content="en"><meta data-rh="true" name="docsearch:language" content="en"><meta data-rh="true" name="docusaurus_version" content="current"><meta data-rh="true" name="docusaurus_tag" content="docs-default-current"><meta data-rh="true" name="docsearch:version" content="current"><meta data-rh="true" name="docsearch:docusaurus_tag" content="docs-default-current"><meta data-rh="true" property="og:title" content="Strapi (WIP) | Doc"><meta data-rh="true" name="description" content="Current state: Stable"><meta data-rh="true" property="og:description" content="Current state: Stable"><link data-rh="true" rel="icon" href="/img/favicon.png"><link data-rh="true" rel="canonical" href="https://contributor.strapi.io/api/Strapi"><link data-rh="true" rel="alternate" href="https://contributor.strapi.io/api/Strapi" hreflang="en"><link data-rh="true" rel="alternate" href="https://contributor.strapi.io/api/Strapi" hreflang="x-default"><link rel="stylesheet" href="/assets/css/styles.0b21fedb.css">
+<script src="/assets/js/runtime~main.da0b6ed4.js" defer="defer"></script>
+<script src="/assets/js/main.6a32b4cd.js" defer="defer"></script>
+</head>
+<body class="navigation-with-keyboard">
+<script>!function(){function t(t){document.documentElement.setAttribute("data-theme",t)}var e=function(){try{return new URLSearchParams(window.location.search).get("docusaurus-theme")}catch(t){}}()||function(){try{return localStorage.getItem("theme")}catch(t){}}();t(null!==e?e:"light")}(),function(){try{const c=new URLSearchParams(window.location.search).entries();for(var[t,e]of c)if(t.startsWith("docusaurus-data-")){var a=t.replace("docusaurus-data-","data-");document.documentElement.setAttribute(a,e)}}catch(t){}}()</script><div id="__docusaurus"><div role="region" aria-label="Skip to main content"><a class="skipToContent_fXgn" href="#__docusaurus_skipToContent_fallback">Skip to main content</a></div><nav aria-label="Main" class="navbar navbar--fixed-top navbarHideable_m1mJ"><div class="navbar__inner"><div class="navbar__items"><button aria-label="Toggle navigation bar" aria-expanded="false" class="navbar__toggle clean-btn" type="button"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-linecap="round" stroke-miterlimit="10" stroke-width="2" d="M4 7h22M4 15h22M4 23h22"></path></svg></button><a class="navbar__brand" href="/"><div class="navbar__logo"><img src="/img/logo.svg" alt="Doc" class="themedComponent_mlkZ themedComponent--light_NVdE" width="100"><img src="/img/logo_dark.svg" alt="Doc" class="themedComponent_mlkZ themedComponent--dark_xIcU" width="100"></div><b class="navbar__title text--truncate">Contributor documentation</b></a><a class="navbar__item navbar__link" href="/guides/contributing">Guides</a><a class="navbar__item navbar__link" href="/docs/intro">Docs</a><a aria-current="page" class="navbar__item navbar__link navbar__link--active" href="/api/Strapi">API Reference</a><a class="navbar__item navbar__link" href="/rfcs/intro">RFCs</a></div><div class="navbar__items navbar__items--right"><div class="toggle_vylO colorModeToggle_DEke"><button class="clean-btn toggleButton_gllP toggleButtonDisabled_aARS" type="button" disabled="" title="Switch between dark and light mode (currently light mode)" aria-label="Switch between dark and light mode (currently light mode)" aria-live="polite"><svg viewBox="0 0 24 24" width="24" height="24" class="lightToggleIcon_pyhR"><path fill="currentColor" d="M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9 M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5 S14.76,7,12,7L12,7z M2,13l2,0c0.55,0,1-0.45,1-1s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S1.45,13,2,13z M20,13l2,0c0.55,0,1-0.45,1-1 s-0.45-1-1-1l-2,0c-0.55,0-1,0.45-1,1S19.45,13,20,13z M11,2v2c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,20v2c0,0.55,0.45,1,1,1s1-0.45,1-1v-2c0-0.55-0.45-1-1-1C11.45,19,11,19.45,11,20z M5.99,4.58c-0.39-0.39-1.03-0.39-1.41,0 c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0s0.39-1.03,0-1.41L5.99,4.58z M18.36,16.95 c-0.39-0.39-1.03-0.39-1.41,0c-0.39,0.39-0.39,1.03,0,1.41l1.06,1.06c0.39,0.39,1.03,0.39,1.41,0c0.39-0.39,0.39-1.03,0-1.41 L18.36,16.95z M19.42,5.99c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06c-0.39,0.39-0.39,1.03,0,1.41 s1.03,0.39,1.41,0L19.42,5.99z M7.05,18.36c0.39-0.39,0.39-1.03,0-1.41c-0.39-0.39-1.03-0.39-1.41,0l-1.06,1.06 c-0.39,0.39-0.39,1.03,0,1.41s1.03,0.39,1.41,0L7.05,18.36z"></path></svg><svg viewBox="0 0 24 24" width="24" height="24" class="darkToggleIcon_wfgR"><path fill="currentColor" d="M9.37,5.51C9.19,6.15,9.1,6.82,9.1,7.5c0,4.08,3.32,7.4,7.4,7.4c0.68,0,1.35-0.09,1.99-0.27C17.45,17.19,14.93,19,12,19 c-3.86,0-7-3.14-7-7C5,9.07,6.81,6.55,9.37,5.51z M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9s9-4.03,9-9c0-0.46-0.04-0.92-0.1-1.36 c-0.98,1.37-2.58,2.26-4.4,2.26c-2.98,0-5.4-2.42-5.4-5.4c0-1.81,0.89-3.42,2.26-4.4C12.92,3.04,12.46,3,12,3L12,3z"></path></svg></button></div><div class="navbarSearchContainer_Bca1"></div></div></div><div role="presentation" class="navbar-sidebar__backdrop"></div></nav><div id="__docusaurus_skipToContent_fallback" class="main-wrapper mainWrapper_z2l0"><div class="docsWrapper_hBAB"><button aria-label="Scroll back to top" class="clean-btn theme-back-to-top-button backToTopButton_sjWU" type="button"></button><div class="docRoot_UBD9"><aside class="theme-doc-sidebar-container docSidebarContainer_YfHR"><div class="sidebarViewport_aRkj"><div class="sidebar_njMd sidebarWithHideableNavbar_wUlq"><a tabindex="-1" class="sidebarLogo_isFc" href="/"><img src="/img/logo.svg" alt="Doc" class="themedComponent_mlkZ themedComponent--light_NVdE" width="100"><img src="/img/logo_dark.svg" alt="Doc" class="themedComponent_mlkZ themedComponent--dark_xIcU" width="100"><b>Contributor documentation</b></a><nav aria-label="Docs sidebar" class="menu thin-scrollbar menu_SIkG"><ul class="theme-doc-sidebar-menu menu__list"><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link menu__link--active" aria-current="page" href="/api/Strapi">Strapi (WIP)</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/api/API">API (WIP)</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/api/container">Container</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/api/Cron">Cron Service</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/api/EventHub">EventHub (WIP)</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/api/StartupLogger">Startup Logger</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/api/StrapiFS">StrapiFS (WIP)</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/api/strapi-server">Strapi server (WIP)</a></li><li class="theme-doc-sidebar-item-link theme-doc-sidebar-item-link-level-1 menu__list-item"><a class="menu__link" href="/api/Telemetry">Telemetry Service</a></li></ul></nav></div></div></aside><main class="docMainContainer_TBSr"><div class="container padding-top--md padding-bottom--lg"><div class="row"><div class="col docItemCol_VOVn"><div class="docItemContainer_Djhp"><article><nav class="theme-doc-breadcrumbs breadcrumbsContainer_Z_bl" aria-label="Breadcrumbs"><ul class="breadcrumbs" itemscope="" itemtype="https://schema.org/BreadcrumbList"><li class="breadcrumbs__item"><a aria-label="Home page" class="breadcrumbs__link" href="/"><svg viewBox="0 0 24 24" class="breadcrumbHomeIcon_YNFT"><path d="M10 19v-5h4v5c0 .55.45 1 1 1h3c.55 0 1-.45 1-1v-7h1.7c.46 0 .68-.57.33-.87L12.67 3.6c-.38-.34-.96-.34-1.34 0l-8.36 7.53c-.34.3-.13.87.33.87H5v7c0 .55.45 1 1 1h3c.55 0 1-.45 1-1z" fill="currentColor"></path></svg></a></li><li itemscope="" itemprop="itemListElement" itemtype="https://schema.org/ListItem" class="breadcrumbs__item breadcrumbs__item--active"><span class="breadcrumbs__link" itemprop="name">Strapi (WIP)</span><meta itemprop="position" content="1"></li></ul></nav><div class="tocCollapsible_ETCw theme-doc-toc-mobile tocMobile_ITEo"><button type="button" class="clean-btn tocCollapsibleButton_TO0P">On this page</button></div><div class="theme-doc-markdown markdown"><h1>Strapi</h1>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>Current state: <strong>Stable</strong></p></div></div>
+<p>The Strapi class is the main object used in Strapi projects.
+An instance of Strapi class is available as a global in any Strapi project: <code>global.strapi</code>.</p>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="class-strapi">Class: Strapi<a href="#class-strapi" class="hash-link" aria-label="Direct link to Class: Strapi" title="Direct link to Class: Strapi">​</a></h2>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="new-strapiopts"><code>new Strapi(opts)</code><a href="#new-strapiopts" class="hash-link" aria-label="Direct link to new-strapiopts" title="Direct link to new-strapiopts">​</a></h3>
+<ul>
+<li><code>opts</code>: <span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span> Options that can be used on Strapi startup<!-- -->
+<ul>
+<li><code>autoReload</code>: <span style="color:#017501">&lt;<!-- -->Boolean<!-- -->&gt;</span> <strong>Default:</strong> true<!-- -->
+<ul>
+<li>If false, deactivate auto reload</li>
+<li>If you modify any file in your Strapi project, it reloads your nodejs app</li>
+<li>If any content-type is changed, it will reload the nodejs app</li>
+</ul>
+</li>
+<li><code>serveAdminPanel</code>: <span style="color:#017501">&lt;<!-- -->Boolean<!-- -->&gt;</span> <strong>Default:</strong> true<!-- -->
+<ul>
+<li>Should the admin panel be loaded and serve as a web client</li>
+<li>The admin panel build will not be delivered if false</li>
+</ul>
+</li>
+<li><code>appDir</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> <strong>Default:</strong> <code>process.cwd()</code>
+<ul>
+<li>The directory relative or absolute path where Strapi will write every file (schemas, generated APIs, controllers or services)</li>
+</ul>
+</li>
+<li><code>distDir</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> <strong>Default:</strong> appDir value<!-- -->
+<ul>
+<li>The directory relative or absolute path where Strapi will read configurations, schemas and any compiled code</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Instances of the Strapi class can be created using the new keyword.</p>
+<div class="language-javascript codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-javascript codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token keyword" style="color:#00009f">const</span><span class="token plain"> strapiInstance </span><span class="token operator" style="color:#393A34">=</span><span class="token plain"> </span><span class="token keyword" style="color:#00009f">new</span><span class="token plain"> </span><span class="token class-name">Strapi</span><span class="token punctuation" style="color:#393A34">(</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapicontainer"><code>strapi.container</code><a href="#strapicontainer" class="hash-link" aria-label="Direct link to strapicontainer" title="Direct link to strapicontainer">​</a></h3>
+<ul>
+<li><a href="/api/container"><span style="color:#017501">&lt;<!-- -->Container<!-- -->&gt;</span></a></li>
+</ul>
+<p>The container provides a simple and efficient way to register and manage resources, making it easy to access and use them throughout the application.
+By registering a registry with the container, it can be easily retrieved by other parts of the application, making it a powerful tool for organizing and reusing code across the entire codebase.</p>
+<p>See <a href="/api/container">Container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapidirs"><code>strapi.dirs</code><a href="#strapidirs" class="hash-link" aria-label="Direct link to strapidirs" title="Direct link to strapidirs">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Stored paths of file system.</p>
+<ul>
+<li><code>dirs.dist</code>: <span style="color:#017501">&lt;<a href="#strapipathobject">StrapiPathObject</a>&gt;</span>
+<ul>
+<li>Build folder</li>
+</ul>
+</li>
+<li><code>dirs.app</code>: <span style="color:#017501">&lt;<a href="#strapipathobject">StrapiPathObject</a>&gt;</span>
+<ul>
+<li>Sources folder</li>
+</ul>
+</li>
+<li><code>dirs.static</code>: <span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span> Define path to directories involving web client display<!-- -->
+<ul>
+<li><code>public</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> Path to the folder to serve publicly (like files, images, etc..)</li>
+</ul>
+</li>
+</ul>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapipathobject">StrapiPathObject<a href="#strapipathobject" class="hash-link" aria-label="Direct link to StrapiPathObject" title="Direct link to StrapiPathObject">​</a></h4>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+</li>
+</ul>
+<p>A set of paths to specific Strapi project parts.</p>
+<ul>
+<li><code>root</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> Root path</li>
+<li><code>src</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> Sources route path to project files</li>
+<li><code>api</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> Path to the folder containing project developers&#x27; API files (content-types, controllers, services, routes, etc..)</li>
+<li><code>components</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> Path to the folder containing project developers&#x27; components</li>
+<li><code>policies</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> Path to the folder where the Strapi project developers&#x27; policies are stored<!-- -->
+<ul>
+<li>A set of functions that check the state of the data and prevent the access to the API accordingly</li>
+</ul>
+</li>
+<li><code>middlewares</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> Path to the folder where the Strapi project developers&#x27; middlewares are stored<!-- -->
+<ul>
+<li>A set of function that wrap around routes and requests</li>
+</ul>
+</li>
+<li><code>config</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> Path to the folder containing project developers&#x27; config files</li>
+</ul>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiisloaded"><code>strapi.isLoaded</code><a href="#strapiisloaded" class="hash-link" aria-label="Direct link to strapiisloaded" title="Direct link to strapiisloaded">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Boolean<!-- -->&gt;</span>
+<ul>
+<li><code>true</code>: Everything (all <code>register</code> and <code>bootstrap</code> functions available in your strapi project) has been loaded</li>
+<li><code>false</code>: There is something loading</li>
+</ul>
+</li>
+</ul>
+<p>Note: <code>register</code> functions are called before the <code>bootstrap</code> functions.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapireload"><code>strapi.reload()</code><a href="#strapireload" class="hash-link" aria-label="Direct link to strapireload" title="Direct link to strapireload">​</a></h3>
+<p>Reload the app.</p>
+<p>This function defines itself at the construction of the Strapi class.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiserver"><code>strapi.server</code><a href="#strapiserver" class="hash-link" aria-label="Direct link to strapiserver" title="Direct link to strapiserver">​</a></h3>
+<ul>
+<li><a href="/api/strapi-server"><span style="color:#017501">&lt;<!-- -->StrapiServer<!-- -->&gt;</span></a></li>
+</ul>
+<p>Strapi server object.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapifs"><code>strapi.fs</code><a href="#strapifs" class="hash-link" aria-label="Direct link to strapifs" title="Direct link to strapifs">​</a></h3>
+<ul>
+<li><a href="/api/StrapiFS"><span style="color:#017501">&lt;<!-- -->StrapiFS<!-- -->&gt;</span></a></li>
+</ul>
+<p>Wrapper around <a href="https://nodejs.org/docs/latest-v18.x/api/fs.html" target="_blank" rel="noopener noreferrer">FS NodeJS module</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapieventhub"><code>strapi.eventHub</code><a href="#strapieventhub" class="hash-link" aria-label="Direct link to strapieventhub" title="Direct link to strapieventhub">​</a></h3>
+<ul>
+<li><a href="/api/EventHub"><span style="color:#017501">&lt;<!-- -->EventHub<!-- -->&gt;</span></a></li>
+</ul>
+<p>The <code>strapi.eventHub</code> object is used to manipulate events within a Strapi project. It is an instance of the built-in EventEmitter class from Node.js, which provides a simple way to emit and listen for events.</p>
+<p>The <code>strapi.eventHub</code> object is created using the <code>createEventHub()</code> function in the <a href="/api/EventHub">EventHub</a> module of the Strapi core. This function returns a new instance of the EventHub class, which extends the EventEmitter class and adds some additional functionality specific to Strapi.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="examples">Examples:<a href="#examples" class="hash-link" aria-label="Direct link to Examples:" title="Direct link to Examples:">​</a></h4>
+<div class="language-javascript codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-javascript codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token comment" style="color:#999988;font-style:italic">// Listen for a &#x27;user.updated&#x27; event and log the data</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">strapi</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">eventHub</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">on</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;user.updated&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">(</span><span class="token parameter">data</span><span class="token punctuation" style="color:#393A34">)</span><span class="token plain"> </span><span class="token arrow operator" style="color:#393A34">=&gt;</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token console class-name">console</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">log</span><span class="token punctuation" style="color:#393A34">(</span><span class="token template-string template-punctuation string" style="color:#e3116c">`</span><span class="token template-string string" style="color:#e3116c">User </span><span class="token template-string interpolation interpolation-punctuation punctuation" style="color:#393A34">${</span><span class="token template-string interpolation">data</span><span class="token template-string interpolation punctuation" style="color:#393A34">.</span><span class="token template-string interpolation property-access">id</span><span class="token template-string interpolation interpolation-punctuation punctuation" style="color:#393A34">}</span><span class="token template-string string" style="color:#e3116c"> has been updated</span><span class="token template-string template-punctuation string" style="color:#e3116c">`</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// Emit a &#x27;user.created&#x27; event with some data</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">strapi</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">eventHub</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">emit</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;user.created&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">username</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;johndoe&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">email</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;johndoe@example.com&#x27;</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>In this example, we are emitting a <code>user.created</code> event with some data attached to it, and then listening for a user.updated event and logging the data. These events can be used to trigger actions within the Strapi application or to communicate with external systems.</p>
+<p>For more information on how to use the EventEmitter class and its methods, see the <a href="ttps://nodejs.org/docs/latest-v18.x/api/events.html#class-eventemitter" target="_blank" rel="noopener noreferrer">Node.js documentation</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapistartuplogger"><code>strapi.startupLogger</code><a href="#strapistartuplogger" class="hash-link" aria-label="Direct link to strapistartuplogger" title="Direct link to strapistartuplogger">​</a></h3>
+<ul>
+<li><a href="/api/StartupLogger"><span style="color:#017501">&lt;<!-- -->StartupLogger<!-- -->&gt;</span></a></li>
+</ul>
+<p>Object containing predefined logger functions. Used for Strapi startup. (do not use as a logger elsewhere)</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapilog"><code>strapi.log</code><a href="#strapilog" class="hash-link" aria-label="Direct link to strapilog" title="Direct link to strapilog">​</a></h3>
+<ul>
+<li><a href="https://github.com/winstonjs/winston#creating-your-own-logger" target="_blank" rel="noopener noreferrer"><span style="color:#017501">&lt;<!-- -->Winston<!-- -->&gt;</span></a></li>
+</ul>
+<p>A logger provided by Strapi that uses the Winston logging library. It is the result of calling the <code>winston.createLogger()</code> function with the configuration defined by the user of the Strapi application.</p>
+<p>The logger provides various methods for logging messages at different levels of severity, including error, warn, info, verbose, debug, and silly. The logging level can be set via the configuration to control which messages are logged.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="examples-1">Examples<a href="#examples-1" class="hash-link" aria-label="Direct link to Examples" title="Direct link to Examples">​</a></h4>
+<div class="language-javascript codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-javascript codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token comment" style="color:#999988;font-style:italic">// Log an error message</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">strapi</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">log</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">error</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;Failed to start server&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">error</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> err </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// Log a warning message</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">strapi</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">log</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">warn</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;Server is running in development mode&#x27;</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// Log an informational message</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">strapi</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">log</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">info</span><span class="token punctuation" style="color:#393A34">(</span><span class="token template-string template-punctuation string" style="color:#e3116c">`</span><span class="token template-string string" style="color:#e3116c">Server started on port </span><span class="token template-string interpolation interpolation-punctuation punctuation" style="color:#393A34">${</span><span class="token template-string interpolation constant" style="color:#36acaa">PORT</span><span class="token template-string interpolation interpolation-punctuation punctuation" style="color:#393A34">}</span><span class="token template-string template-punctuation string" style="color:#e3116c">`</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// Log a verbose message</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">strapi</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">log</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">verbose</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;Application state&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">user</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> currentUser </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// Log a debug message</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">strapi</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">log</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">debug</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;API request received&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">method</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> req</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">method</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">path</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> req</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">path</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain" style="display:inline-block"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token comment" style="color:#999988;font-style:italic">// Log a silly message</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">strapi</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">log</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">silly</span><span class="token punctuation" style="color:#393A34">(</span><span class="token string" style="color:#e3116c">&#x27;Entered loop&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"> </span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"> </span><span class="token literal-property property" style="color:#36acaa">count</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> i </span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<p>In these examples, we are logging messages at different levels of severity, including error, warn, info, verbose, debug, and silly. We are also passing in metadata as an object in the second parameter of each logging method.</p>
+<p>The messages logged by strapi.log will be output according to the logging configuration set by the user of the Strapi application. This configuration determines which messages are logged and where they are logged (e.g. console, file, etc.).</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapicron"><code>strapi.cron</code><a href="#strapicron" class="hash-link" aria-label="Direct link to strapicron" title="Direct link to strapicron">​</a></h3>
+<ul>
+<li><a href="/api/Cron"><span style="color:#017501">&lt;<!-- -->CronService<!-- -->&gt;</span></a></li>
+</ul>
+<p>Module to schedule cron jobs for Strapi project. It is an instance of a custom Cron object.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapitelemetry"><code>strapi.telemetry</code><a href="#strapitelemetry" class="hash-link" aria-label="Direct link to strapitelemetry" title="Direct link to strapitelemetry">​</a></h3>
+<ul>
+<li><a href="/api/Telemetry"><span style="color:#017501">&lt;<!-- -->TelemetryService<!-- -->&gt;</span></a></li>
+</ul>
+<p>The <code>strapi.telemetry</code> property provides access to the telemetry service instance. This service collects anonymous usage data about your Strapi application to help the Strapi team improve the product.</p>
+<p>By default, the telemetry service is enabled, but you can disable it by setting the telemetryDisabled property to true in your application&#x27;s package.json file, or by setting the <code>STRAPI_TELEMETRY_DISABLED</code> environment variable to true. You can also disable telemetry programmatically by setting the isDisabled property of the <code>strapi.telemetry</code> instance to true.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapirequestcontext"><code>strapi.requestContext</code><a href="#strapirequestcontext" class="hash-link" aria-label="Direct link to strapirequestcontext" title="Direct link to strapirequestcontext">​</a></h3>
+<ul>
+<li>
+<p><span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span> Context Storage</p>
+<ul>
+<li><code>run(store, cb)</code>: <span style="color:#017501">&lt;<!-- -->Function<!-- -->&gt;</span>
+<ul>
+<li><code>store</code>: <span style="color:#017501">&lt;<!-- -->Any<!-- -->&gt;</span> Value that should be retrieved</li>
+<li><code>cb</code>: <span style="color:#017501">&lt;<!-- -->Function<!-- -->&gt;</span> Callback</li>
+</ul>
+</li>
+<li><code>get()</code> <span style="color:#017501">&lt;<!-- -->Function<!-- -->&gt;</span></li>
+</ul>
+</li>
+</ul>
+<p>The request context stores the ctx object from KoaJS on each request. This allows users to have access to the context from anywhere through the Strapi instance.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapicustomfields"><code>strapi.customFields</code><a href="#strapicustomfields" class="hash-link" aria-label="Direct link to strapicustomfields" title="Direct link to strapicustomfields">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+<ul>
+<li><code>register(customField)</code>: <span style="color:#017501">&lt;<!-- -->Function<!-- -->&gt;</span> Register a new custom field</li>
+</ul>
+</li>
+</ul>
+<p>This property is a shortcut to <code>strapi.container.get(&#x27;custom-fields&#x27;).add(customField)</code>.</p>
+<h4 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="examples-2">Examples<a href="#examples-2" class="hash-link" aria-label="Direct link to Examples" title="Direct link to Examples">​</a></h4>
+<div class="language-javascript codeBlockContainer_Ckt0 theme-code-block" style="--prism-color:#393A34;--prism-background-color:#f6f8fa"><div class="codeBlockContent_biex"><pre tabindex="0" class="prism-code language-javascript codeBlock_bY9V thin-scrollbar" style="color:#393A34;background-color:#f6f8fa"><code class="codeBlockLines_e6Vv"><span class="token-line" style="color:#393A34"><span class="token plain">strapi</span><span class="token punctuation" style="color:#393A34">.</span><span class="token property-access">customFields</span><span class="token punctuation" style="color:#393A34">.</span><span class="token method function property-access" style="color:#d73a49">register</span><span class="token punctuation" style="color:#393A34">(</span><span class="token punctuation" style="color:#393A34">{</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token literal-property property" style="color:#36acaa">name</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;color&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token literal-property property" style="color:#36acaa">plugin</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;color-picker&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain">  </span><span class="token literal-property property" style="color:#36acaa">type</span><span class="token operator" style="color:#393A34">:</span><span class="token plain"> </span><span class="token string" style="color:#e3116c">&#x27;string&#x27;</span><span class="token punctuation" style="color:#393A34">,</span><span class="token plain"></span><br></span><span class="token-line" style="color:#393A34"><span class="token plain"></span><span class="token punctuation" style="color:#393A34">}</span><span class="token punctuation" style="color:#393A34">)</span><span class="token punctuation" style="color:#393A34">;</span><br></span></code></pre><div class="buttonGroup__atx"><button type="button" aria-label="Copy code to clipboard" title="Copy" class="clean-btn"><span class="copyButtonIcons_eSgA" aria-hidden="true"><svg viewBox="0 0 24 24" class="copyButtonIcon_y97N"><path fill="currentColor" d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z"></path></svg><svg viewBox="0 0 24 24" class="copyButtonSuccessIcon_LjdS"><path fill="currentColor" d="M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z"></path></svg></span></button></div></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiconfig"><code>strapi.config</code><a href="#strapiconfig" class="hash-link" aria-label="Direct link to strapiconfig" title="Direct link to strapiconfig">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;config&#x27;)</code>.</p>
+<p>See the <a href="#config">config container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiservices"><code>strapi.services</code><a href="#strapiservices" class="hash-link" aria-label="Direct link to strapiservices" title="Direct link to strapiservices">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object[]<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;services&#x27;).getAll()</code>.</p>
+<p>See the <a href="#services">services&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiserviceuid"><code>strapi.service(uid)</code><a href="#strapiserviceuid" class="hash-link" aria-label="Direct link to strapiserviceuid" title="Direct link to strapiserviceuid">​</a></h3>
+<ul>
+<li><code>uid</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;services&#x27;).get(uid)</code>.</p>
+<p>See the <a href="#services">services&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapicontrollers"><code>strapi.controllers</code><a href="#strapicontrollers" class="hash-link" aria-label="Direct link to strapicontrollers" title="Direct link to strapicontrollers">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object[]<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;controllers&#x27;).getAll()</code>.</p>
+<p>See the <a href="#controllers">controllers&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapicontrolleruid"><code>strapi.controller(uid)</code><a href="#strapicontrolleruid" class="hash-link" aria-label="Direct link to strapicontrolleruid" title="Direct link to strapicontrolleruid">​</a></h3>
+<ul>
+<li><code>uid</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;controllers&#x27;).get(uid)</code>.</p>
+<p>See the <a href="#controllers">controllers&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapicontenttypes"><code>strapi.contentTypes</code><a href="#strapicontenttypes" class="hash-link" aria-label="Direct link to strapicontenttypes" title="Direct link to strapicontenttypes">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object[]<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;content-types&#x27;).getAll()</code>.</p>
+<p>See the <a href="#content-types">content-types&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapicontenttypename"><code>strapi.contentType(name)</code><a href="#strapicontenttypename" class="hash-link" aria-label="Direct link to strapicontenttypename" title="Direct link to strapicontenttypename">​</a></h3>
+<ul>
+<li><code>name</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;content-types&#x27;).get(name)</code>.</p>
+<p>See the <a href="#content-types">content-types&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapipolicies"><code>strapi.policies</code><a href="#strapipolicies" class="hash-link" aria-label="Direct link to strapipolicies" title="Direct link to strapipolicies">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object[]<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;policies&#x27;).getAll()</code>.</p>
+<p>See the <a href="#policies">policies&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapipolicyname"><code>strapi.policy(name)</code><a href="#strapipolicyname" class="hash-link" aria-label="Direct link to strapipolicyname" title="Direct link to strapipolicyname">​</a></h3>
+<ul>
+<li><code>name</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;policies&#x27;).get(name)</code>.</p>
+<p>See the <a href="#policies">policies&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapimiddlewares"><code>strapi.middlewares</code><a href="#strapimiddlewares" class="hash-link" aria-label="Direct link to strapimiddlewares" title="Direct link to strapimiddlewares">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object[]<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;middlewares&#x27;).getAll()</code>.</p>
+<p>See the <a href="#middlewares">middlewares container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapimiddlewarename"><code>strapi.middleware(name)</code><a href="#strapimiddlewarename" class="hash-link" aria-label="Direct link to strapimiddlewarename" title="Direct link to strapimiddlewarename">​</a></h3>
+<ul>
+<li><code>name</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;middlewares&#x27;).get(name)</code>.</p>
+<p>See the <a href="#middlewares">middlewares container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiplugins"><code>strapi.plugins</code><a href="#strapiplugins" class="hash-link" aria-label="Direct link to strapiplugins" title="Direct link to strapiplugins">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object[]<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;plugins&#x27;).getAll()</code>.</p>
+<p>See the <a href="#plugins">plugins&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapipluginname"><code>strapi.plugin(name)</code><a href="#strapipluginname" class="hash-link" aria-label="Direct link to strapipluginname" title="Direct link to strapipluginname">​</a></h3>
+<ul>
+<li><code>name</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;plugins&#x27;).get(name)</code>.</p>
+<p>See the <a href="#plugins">plugins&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapihooks"><code>strapi.hooks</code><a href="#strapihooks" class="hash-link" aria-label="Direct link to strapihooks" title="Direct link to strapihooks">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object[]<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;hooks&#x27;).getAll()</code>.</p>
+<p>See the <a href="#hooks">hooks&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapihookname"><code>strapi.hook(name)</code><a href="#strapihookname" class="hash-link" aria-label="Direct link to strapihookname" title="Direct link to strapihookname">​</a></h3>
+<ul>
+<li><code>name</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;hooks&#x27;).get(name)</code>.</p>
+<p>See the <a href="#hooks">hooks&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiapi"><code>strapi.api</code><a href="#strapiapi" class="hash-link" aria-label="Direct link to strapiapi" title="Direct link to strapiapi">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object[]<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;apis&#x27;).getAll()</code>.</p>
+<p>See the <a href="#apis">apis container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiauth"><code>strapi.auth</code><a href="#strapiauth" class="hash-link" aria-label="Direct link to strapiauth" title="Direct link to strapiauth">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;auth&#x27;)</code>.</p>
+<p>See the <a href="#auth">auth&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapicontentapi"><code>strapi.contentAPI</code><a href="#strapicontentapi" class="hash-link" aria-label="Direct link to strapicontentapi" title="Direct link to strapicontentapi">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;content-api&#x27;)</code>.</p>
+<p>See the <a href="#content-api">content-api container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapisanitizers"><code>strapi.sanitizers</code><a href="#strapisanitizers" class="hash-link" aria-label="Direct link to strapisanitizers" title="Direct link to strapisanitizers">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;sanitizers&#x27;)</code>.</p>
+<p>See the <a href="#sanitizers">sanitizers&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapivalidators"><code>strapi.validators</code><a href="#strapivalidators" class="hash-link" aria-label="Direct link to strapivalidators" title="Direct link to strapivalidators">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+</li>
+</ul>
+<p>Shortcut to <code>strapi.container.get(&#x27;validators&#x27;)</code>.</p>
+<p>See the <a href="#validators">validators&#x27; container</a>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapistart"><code>strapi.start()</code><a href="#strapistart" class="hash-link" aria-label="Direct link to strapistart" title="Direct link to strapistart">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapidestroy"><code>strapi.destroy()</code><a href="#strapidestroy" class="hash-link" aria-label="Direct link to strapidestroy" title="Direct link to strapidestroy">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapisendstartuptelemetry"><code>strapi.sendStartupTelemetry()</code><a href="#strapisendstartuptelemetry" class="hash-link" aria-label="Direct link to strapisendstartuptelemetry" title="Direct link to strapisendstartuptelemetry">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiopenadmin-isinitialized-"><code>strapi.openAdmin({ isInitialized })</code><a href="#strapiopenadmin-isinitialized-" class="hash-link" aria-label="Direct link to strapiopenadmin-isinitialized-" title="Direct link to strapiopenadmin-isinitialized-">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapipostlisten"><code>strapi.postListen()</code><a href="#strapipostlisten" class="hash-link" aria-label="Direct link to strapipostlisten" title="Direct link to strapipostlisten">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapilisten"><code>strapi.listen()</code><a href="#strapilisten" class="hash-link" aria-label="Direct link to strapilisten" title="Direct link to strapilisten">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapistopwitherror"><code>strapi.stopWithError()</code><a href="#strapistopwitherror" class="hash-link" aria-label="Direct link to strapistopwitherror" title="Direct link to strapistopwitherror">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapistopexitcode"><code>strapi.stop(exitCode)</code><a href="#strapistopexitcode" class="hash-link" aria-label="Direct link to strapistopexitcode" title="Direct link to strapistopexitcode">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiloadadmin"><code>strapi.loadAdmin()</code><a href="#strapiloadadmin" class="hash-link" aria-label="Direct link to strapiloadadmin" title="Direct link to strapiloadadmin">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiloadplugins"><code>strapi.loadPlugins()</code><a href="#strapiloadplugins" class="hash-link" aria-label="Direct link to strapiloadplugins" title="Direct link to strapiloadplugins">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiloadpolicies"><code>strapi.loadPolicies()</code><a href="#strapiloadpolicies" class="hash-link" aria-label="Direct link to strapiloadpolicies" title="Direct link to strapiloadpolicies">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiloadapis"><code>strapi.loadAPIs()</code><a href="#strapiloadapis" class="hash-link" aria-label="Direct link to strapiloadapis" title="Direct link to strapiloadapis">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiloadcomponents"><code>strapi.loadComponents()</code><a href="#strapiloadcomponents" class="hash-link" aria-label="Direct link to strapiloadcomponents" title="Direct link to strapiloadcomponents">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiloadmiddlewares"><code>strapi.loadMiddlewares()</code><a href="#strapiloadmiddlewares" class="hash-link" aria-label="Direct link to strapiloadmiddlewares" title="Direct link to strapiloadmiddlewares">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiloadapp"><code>strapi.loadApp()</code><a href="#strapiloadapp" class="hash-link" aria-label="Direct link to strapiloadapp" title="Direct link to strapiloadapp">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiloadsanitizers"><code>strapi.loadSanitizers()</code><a href="#strapiloadsanitizers" class="hash-link" aria-label="Direct link to strapiloadsanitizers" title="Direct link to strapiloadsanitizers">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiregisterinternalhooks"><code>strapi.registerInternalHooks()</code><a href="#strapiregisterinternalhooks" class="hash-link" aria-label="Direct link to strapiregisterinternalhooks" title="Direct link to strapiregisterinternalhooks">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiregister"><code>strapi.register()</code><a href="#strapiregister" class="hash-link" aria-label="Direct link to strapiregister" title="Direct link to strapiregister">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapibootstrap"><code>strapi.bootstrap()</code><a href="#strapibootstrap" class="hash-link" aria-label="Direct link to strapibootstrap" title="Direct link to strapibootstrap">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiload"><code>strapi.load()</code><a href="#strapiload" class="hash-link" aria-label="Direct link to strapiload" title="Direct link to strapiload">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapistartwebhooks"><code>strapi.startWebhooks()</code><a href="#strapistartwebhooks" class="hash-link" aria-label="Direct link to strapistartwebhooks" title="Direct link to strapistartwebhooks">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapireload-1"><code>strapi.reload()</code><a href="#strapireload-1" class="hash-link" aria-label="Direct link to strapireload-1" title="Direct link to strapireload-1">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapirunlifecyclesfunctions"><code>strapi.runLifecyclesFunctions()</code><a href="#strapirunlifecyclesfunctions" class="hash-link" aria-label="Direct link to strapirunlifecyclesfunctions" title="Direct link to strapirunlifecyclesfunctions">​</a></h3>
+<ul>
+<li>Returns: Promise</li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapigetmodeluid"><code>strapi.getModel(uid)</code><a href="#strapigetmodeluid" class="hash-link" aria-label="Direct link to strapigetmodeluid" title="Direct link to strapigetmodeluid">​</a></h3>
+<ul>
+<li><code>uid</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapiqueryuid"><code>strapi.query(uid)</code><a href="#strapiqueryuid" class="hash-link" aria-label="Direct link to strapiqueryuid" title="Direct link to strapiqueryuid">​</a></h3>
+<ul>
+<li><code>uid</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+</ul>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h2 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="strapi-containers">Strapi containers<a href="#strapi-containers" class="hash-link" aria-label="Direct link to Strapi containers" title="Direct link to Strapi containers">​</a></h2>
+<p>The strapi containers are accessible via <code>strapi.container.get(&#x27;name-of-the-container&#x27;)</code>.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="config"><code>config</code><a href="#config" class="hash-link" aria-label="Direct link to config" title="Direct link to config">​</a></h3>
+<ul>
+<li>
+<span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+<ul>
+<li><code>get(path, defaultValue)</code>: <span style="color:#017501">&lt;<!-- -->Function<!-- -->&gt;</span>
+<ul>
+<li><code>path</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+<li><code>defaultValue</code>: <span style="color:#017501">&lt;<!-- -->Any<!-- -->&gt;</span></li>
+<li>Returns: <span style="color:#017501">&lt;<!-- -->Any<!-- -->&gt;</span> - The value located at <code>path</code> or, if undefined, <code>defaultValue</code>.</li>
+</ul>
+</li>
+<li><code>set(path, value)</code>: <span style="color:#017501">&lt;<!-- -->Function<!-- -->&gt;</span>
+<ul>
+<li><code>path</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> - Where the value should be stored</li>
+<li><code>value</code>: <span style="color:#017501">&lt;<!-- -->Any<!-- -->&gt;</span></li>
+</ul>
+</li>
+<li><code>has(path)</code>: <span style="color:#017501">&lt;<!-- -->Function<!-- -->&gt;</span>
+<ul>
+<li><code>path</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span></li>
+<li>Returns: <span style="color:#017501">&lt;<!-- -->Boolean<!-- -->&gt;</span> - Does the <code>path</code> match a value stored in the config container.</li>
+</ul>
+</li>
+<li><code>launchedAt</code>: <span style="color:#017501">&lt;<!-- -->Number<!-- -->&gt;</span> <strong>Default:</strong> <code>Date.now()</code>
+Date in milliseconds when the server has started</li>
+<li><code>serveAdminPanel</code>: <span style="color:#017501">&lt;<!-- -->Boolean<!-- -->&gt;</span> <strong>Default:</strong> <code>true</code>
+See <a href="#new-strapiopts">Strapi constructor</a> options</li>
+<li><code>autoReload</code>: <span style="color:#017501">&lt;<!-- -->Boolean<!-- -->&gt;</span> <strong>Default:</strong> <code>false</code>
+See <a href="#new-strapiopts">Strapi constructor</a> options</li>
+<li><code>environment</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> - process.env.NODE_ENV</li>
+<li><code>uuid</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> - string extracted from <code>package.json</code> located in <code>strapi.uuid</code></li>
+<li><code>packageJsonStrapi</code>: <span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span> - object extracted from <code>package.json</code> located in <code>strapi</code> (except uuid)</li>
+<li><code>info</code>: <span style="color:#017501">&lt;<!-- -->Object<!-- -->&gt;</span>
+<ul>
+<li>everything stored in the <code>package.json</code></li>
+<li><code>strapi</code>: <span style="color:#017501">&lt;<!-- -->String<!-- -->&gt;</span> - Current version of Strapi</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>Every file stored under the <code>config</code> folder will be injected in this config container object.</p>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="services"><code>services</code><a href="#services" class="hash-link" aria-label="Direct link to services" title="Direct link to services">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="controllers"><code>controllers</code><a href="#controllers" class="hash-link" aria-label="Direct link to controllers" title="Direct link to controllers">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="content-types"><code>content-types</code><a href="#content-types" class="hash-link" aria-label="Direct link to content-types" title="Direct link to content-types">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="policies"><code>policies</code><a href="#policies" class="hash-link" aria-label="Direct link to policies" title="Direct link to policies">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="plugins"><code>plugins</code><a href="#plugins" class="hash-link" aria-label="Direct link to plugins" title="Direct link to plugins">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="hooks"><code>hooks</code><a href="#hooks" class="hash-link" aria-label="Direct link to hooks" title="Direct link to hooks">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="apis"><code>apis</code><a href="#apis" class="hash-link" aria-label="Direct link to apis" title="Direct link to apis">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="auth"><code>auth</code><a href="#auth" class="hash-link" aria-label="Direct link to auth" title="Direct link to auth">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="content-api"><code>content-api</code><a href="#content-api" class="hash-link" aria-label="Direct link to content-api" title="Direct link to content-api">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="sanitizers"><code>sanitizers</code><a href="#sanitizers" class="hash-link" aria-label="Direct link to sanitizers" title="Direct link to sanitizers">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div>
+<h3 class="anchor anchorWithHideOnScrollNavbar_WYt5" id="validators"><code>validators</code><a href="#validators" class="hash-link" aria-label="Direct link to validators" title="Direct link to validators">​</a></h3>
+<div class="theme-admonition theme-admonition-info admonition_xJq3 alert alert--info"><div class="admonitionHeading_Gvgb"><span class="admonitionIcon_Rf37"><svg viewBox="0 0 14 16"><path fill-rule="evenodd" d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg></span>info</div><div class="admonitionContent_BuS1"><p>TODO</p></div></div></div><footer class="theme-doc-footer docusaurus-mt-lg"><div class="theme-doc-footer-tags-row row margin-bottom--sm"><div class="col"><b>Tags:</b><ul class="tags_jXut padding--none margin-left--sm"><li class="tag_QGVx"><a class="tag_zVej tagRegular_sFm0" href="/tags/class">class</a></li><li class="tag_QGVx"><a class="tag_zVej tagRegular_sFm0" href="/tags/public">public</a></li><li class="tag_QGVx"><a class="tag_zVej tagRegular_sFm0" href="/tags/global">global</a></li></ul></div></div><div class="theme-doc-footer-edit-meta-row row"><div class="col"><a href="https://github.com/strapi/strapi/tree/main/docs/docs/api/Strapi.mdx" target="_blank" rel="noopener noreferrer" class="theme-edit-this-page"><svg fill="currentColor" height="20" width="20" viewBox="0 0 40 40" class="iconEdit_Z9Sw" aria-hidden="true"><g><path d="m34.5 11.7l-3 3.1-6.3-6.3 3.1-3q0.5-0.5 1.2-0.5t1.1 0.5l3.9 3.9q0.5 0.4 0.5 1.1t-0.5 1.2z m-29.5 17.1l18.4-18.5 6.3 6.3-18.4 18.4h-6.3v-6.2z"></path></g></svg>Edit this page</a></div><div class="col lastUpdated_vwxv"></div></div></footer></article><nav class="pagination-nav docusaurus-mt-lg" aria-label="Docs pages"><a class="pagination-nav__link pagination-nav__link--next" href="/api/API"><div class="pagination-nav__sublabel">Next</div><div class="pagination-nav__label">API (WIP)</div></a></nav></div></div><div class="col col--3"><div class="tableOfContents_bqdL thin-scrollbar theme-doc-toc-desktop"><ul class="table-of-contents table-of-contents__left-border"><li><a href="#class-strapi" class="table-of-contents__link toc-highlight">Class: Strapi</a><ul><li><a href="#new-strapiopts" class="table-of-contents__link toc-highlight"><code>new Strapi(opts)</code></a></li><li><a href="#strapicontainer" class="table-of-contents__link toc-highlight"><code>strapi.container</code></a></li><li><a href="#strapidirs" class="table-of-contents__link toc-highlight"><code>strapi.dirs</code></a></li><li><a href="#strapiisloaded" class="table-of-contents__link toc-highlight"><code>strapi.isLoaded</code></a></li><li><a href="#strapireload" class="table-of-contents__link toc-highlight"><code>strapi.reload()</code></a></li><li><a href="#strapiserver" class="table-of-contents__link toc-highlight"><code>strapi.server</code></a></li><li><a href="#strapifs" class="table-of-contents__link toc-highlight"><code>strapi.fs</code></a></li><li><a href="#strapieventhub" class="table-of-contents__link toc-highlight"><code>strapi.eventHub</code></a></li><li><a href="#strapistartuplogger" class="table-of-contents__link toc-highlight"><code>strapi.startupLogger</code></a></li><li><a href="#strapilog" class="table-of-contents__link toc-highlight"><code>strapi.log</code></a></li><li><a href="#strapicron" class="table-of-contents__link toc-highlight"><code>strapi.cron</code></a></li><li><a href="#strapitelemetry" class="table-of-contents__link toc-highlight"><code>strapi.telemetry</code></a></li><li><a href="#strapirequestcontext" class="table-of-contents__link toc-highlight"><code>strapi.requestContext</code></a></li><li><a href="#strapicustomfields" class="table-of-contents__link toc-highlight"><code>strapi.customFields</code></a></li><li><a href="#strapiconfig" class="table-of-contents__link toc-highlight"><code>strapi.config</code></a></li><li><a href="#strapiservices" class="table-of-contents__link toc-highlight"><code>strapi.services</code></a></li><li><a href="#strapiserviceuid" class="table-of-contents__link toc-highlight"><code>strapi.service(uid)</code></a></li><li><a href="#strapicontrollers" class="table-of-contents__link toc-highlight"><code>strapi.controllers</code></a></li><li><a href="#strapicontrolleruid" class="table-of-contents__link toc-highlight"><code>strapi.controller(uid)</code></a></li><li><a href="#strapicontenttypes" class="table-of-contents__link toc-highlight"><code>strapi.contentTypes</code></a></li><li><a href="#strapicontenttypename" class="table-of-contents__link toc-highlight"><code>strapi.contentType(name)</code></a></li><li><a href="#strapipolicies" class="table-of-contents__link toc-highlight"><code>strapi.policies</code></a></li><li><a href="#strapipolicyname" class="table-of-contents__link toc-highlight"><code>strapi.policy(name)</code></a></li><li><a href="#strapimiddlewares" class="table-of-contents__link toc-highlight"><code>strapi.middlewares</code></a></li><li><a href="#strapimiddlewarename" class="table-of-contents__link toc-highlight"><code>strapi.middleware(name)</code></a></li><li><a href="#strapiplugins" class="table-of-contents__link toc-highlight"><code>strapi.plugins</code></a></li><li><a href="#strapipluginname" class="table-of-contents__link toc-highlight"><code>strapi.plugin(name)</code></a></li><li><a href="#strapihooks" class="table-of-contents__link toc-highlight"><code>strapi.hooks</code></a></li><li><a href="#strapihookname" class="table-of-contents__link toc-highlight"><code>strapi.hook(name)</code></a></li><li><a href="#strapiapi" class="table-of-contents__link toc-highlight"><code>strapi.api</code></a></li><li><a href="#strapiauth" class="table-of-contents__link toc-highlight"><code>strapi.auth</code></a></li><li><a href="#strapicontentapi" class="table-of-contents__link toc-highlight"><code>strapi.contentAPI</code></a></li><li><a href="#strapisanitizers" class="table-of-contents__link toc-highlight"><code>strapi.sanitizers</code></a></li><li><a href="#strapivalidators" class="table-of-contents__link toc-highlight"><code>strapi.validators</code></a></li><li><a href="#strapistart" class="table-of-contents__link toc-highlight"><code>strapi.start()</code></a></li><li><a href="#strapidestroy" class="table-of-contents__link toc-highlight"><code>strapi.destroy()</code></a></li><li><a href="#strapisendstartuptelemetry" class="table-of-contents__link toc-highlight"><code>strapi.sendStartupTelemetry()</code></a></li><li><a href="#strapiopenadmin-isinitialized-" class="table-of-contents__link toc-highlight"><code>strapi.openAdmin({ isInitialized })</code></a></li><li><a href="#strapipostlisten" class="table-of-contents__link toc-highlight"><code>strapi.postListen()</code></a></li><li><a href="#strapilisten" class="table-of-contents__link toc-highlight"><code>strapi.listen()</code></a></li><li><a href="#strapistopwitherror" class="table-of-contents__link toc-highlight"><code>strapi.stopWithError()</code></a></li><li><a href="#strapistopexitcode" class="table-of-contents__link toc-highlight"><code>strapi.stop(exitCode)</code></a></li><li><a href="#strapiloadadmin" class="table-of-contents__link toc-highlight"><code>strapi.loadAdmin()</code></a></li><li><a href="#strapiloadplugins" class="table-of-contents__link toc-highlight"><code>strapi.loadPlugins()</code></a></li><li><a href="#strapiloadpolicies" class="table-of-contents__link toc-highlight"><code>strapi.loadPolicies()</code></a></li><li><a href="#strapiloadapis" class="table-of-contents__link toc-highlight"><code>strapi.loadAPIs()</code></a></li><li><a href="#strapiloadcomponents" class="table-of-contents__link toc-highlight"><code>strapi.loadComponents()</code></a></li><li><a href="#strapiloadmiddlewares" class="table-of-contents__link toc-highlight"><code>strapi.loadMiddlewares()</code></a></li><li><a href="#strapiloadapp" class="table-of-contents__link toc-highlight"><code>strapi.loadApp()</code></a></li><li><a href="#strapiloadsanitizers" class="table-of-contents__link toc-highlight"><code>strapi.loadSanitizers()</code></a></li><li><a href="#strapiregisterinternalhooks" class="table-of-contents__link toc-highlight"><code>strapi.registerInternalHooks()</code></a></li><li><a href="#strapiregister" class="table-of-contents__link toc-highlight"><code>strapi.register()</code></a></li><li><a href="#strapibootstrap" class="table-of-contents__link toc-highlight"><code>strapi.bootstrap()</code></a></li><li><a href="#strapiload" class="table-of-contents__link toc-highlight"><code>strapi.load()</code></a></li><li><a href="#strapistartwebhooks" class="table-of-contents__link toc-highlight"><code>strapi.startWebhooks()</code></a></li><li><a href="#strapireload-1" class="table-of-contents__link toc-highlight"><code>strapi.reload()</code></a></li><li><a href="#strapirunlifecyclesfunctions" class="table-of-contents__link toc-highlight"><code>strapi.runLifecyclesFunctions()</code></a></li><li><a href="#strapigetmodeluid" class="table-of-contents__link toc-highlight"><code>strapi.getModel(uid)</code></a></li><li><a href="#strapiqueryuid" class="table-of-contents__link toc-highlight"><code>strapi.query(uid)</code></a></li></ul></li><li><a href="#strapi-containers" class="table-of-contents__link toc-highlight">Strapi containers</a><ul><li><a href="#config" class="table-of-contents__link toc-highlight"><code>config</code></a></li><li><a href="#services" class="table-of-contents__link toc-highlight"><code>services</code></a></li><li><a href="#controllers" class="table-of-contents__link toc-highlight"><code>controllers</code></a></li><li><a href="#content-types" class="table-of-contents__link toc-highlight"><code>content-types</code></a></li><li><a href="#policies" class="table-of-contents__link toc-highlight"><code>policies</code></a></li><li><a href="#plugins" class="table-of-contents__link toc-highlight"><code>plugins</code></a></li><li><a href="#hooks" class="table-of-contents__link toc-highlight"><code>hooks</code></a></li><li><a href="#apis" class="table-of-contents__link toc-highlight"><code>apis</code></a></li><li><a href="#auth" class="table-of-contents__link toc-highlight"><code>auth</code></a></li><li><a href="#content-api" class="table-of-contents__link toc-highlight"><code>content-api</code></a></li><li><a href="#sanitizers" class="table-of-contents__link toc-highlight"><code>sanitizers</code></a></li><li><a href="#validators" class="table-of-contents__link toc-highlight"><code>validators</code></a></li></ul></li></ul></div></div></div></div></main></div></div></div></div>
+</body>
+</html>
