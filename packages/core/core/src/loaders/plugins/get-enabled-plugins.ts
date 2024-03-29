@@ -36,6 +36,7 @@ const INTERNAL_PLUGINS = [
   '@strapi/plugin-upload',
   '@strapi/plugin-i18n',
   '@strapi/content-releases',
+  '@strapi/review-workflows',
 ];
 
 const isStrapiPlugin = (info: PluginInfo) => get('strapi.kind', info) === 'plugin';

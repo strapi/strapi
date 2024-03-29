@@ -19,44 +19,6 @@ export const getEERoutes = (): RouteObject[] => [
         },
       ]
     : []),
-  ...(window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)
-    ? [
-        {
-          path: 'review-workflows',
-          lazy: async () => {
-            const { ProtectedReviewWorkflowsPage } = await import(
-              './pages/ReviewWorkflows/ListPage'
-            );
-
-            return {
-              Component: ProtectedReviewWorkflowsPage,
-            };
-          },
-        },
-        {
-          path: 'review-workflows/create',
-          lazy: async () => {
-            const { ReviewWorkflowsCreatePage } = await import(
-              './pages/ReviewWorkflows/CreatePage'
-            );
-
-            return {
-              Component: ReviewWorkflowsCreatePage,
-            };
-          },
-        },
-        {
-          path: 'review-workflows/:workflowId',
-          lazy: async () => {
-            const { ReviewWorkflowsEditPage } = await import('./pages/ReviewWorkflows/EditPage');
-
-            return {
-              Component: ReviewWorkflowsEditPage,
-            };
-          },
-        },
-      ]
-    : []),
   ...(window.strapi.features.isEnabled(window.strapi.features.SSO)
     ? [
         {

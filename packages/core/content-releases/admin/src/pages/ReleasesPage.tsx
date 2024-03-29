@@ -1,16 +1,15 @@
 import * as React from 'react';
 
-// TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
 import {
   Page,
   Pagination,
-  useLicenseLimits,
   useTracking,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
   useRBAC,
 } from '@strapi/admin/strapi-admin';
+import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import {
   Alert,
   Badge,
