@@ -177,7 +177,7 @@ test.describe('Edit View', () => {
       await expect(page.getByText('Success:Published')).not.toBeVisible();
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
       await page.getByRole('button', { name: 'Save' }).click();
-   
+
       await findAndClose(page, 'Saved');
 
       await page.getByRole('button', { name: 'More document actions' }).click();
@@ -273,7 +273,7 @@ test.describe('Edit View', () => {
           "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
         );
       await page.getByRole('button', { name: 'Save' }).click();
-      
+
       await findAndClose(page, 'Saved');
 
       // the title should update post save because it's the `mainField` of the content-type
@@ -330,7 +330,7 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
       await page.getByRole('button', { name: 'Save' }).click();
-      
+
       await findAndClose(page, 'Saved');
 
       await page.getByRole('button', { name: 'More document actions' }).click();
