@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const fse = require('fs-extra');
 const _ = require('lodash');
+const sharp = require('sharp');
 const uploadService = require('../../upload')({});
 
 const imageFilePath = path.join(__dirname, './image.png');
@@ -50,7 +51,7 @@ const getFileData = (filePath) => ({
   ext: '.png',
   folder: null,
   folderPath: '/',
-  getStream: () => fs.createReadStream(filePath),
+  getStream: () => fs.createReadStream(filePath).pipe(sharp()),
   hash: 'image_d9b4f84424',
   height: 1000,
   size: 4,

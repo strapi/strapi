@@ -1,9 +1,6 @@
 'use strict';
 
-const path = require('path');
-const os = require('os');
 const mime = require('mime-types');
-const fse = require('fs-extra');
 const {
   file: { getStreamSize },
 } = require('@strapi/utils');
@@ -107,30 +104,19 @@ module.exports = ({ strapi }) => {
           },
 
           async resolve(parent, args) {
-            // create temporary folder to store files for stream manipulation
-            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-            let sanitizedEntity;
+            const { file: upload, info = {}, ...metas } = args;
 
-            try {
-              const { file: upload, info = {}, ...metas } = args;
+            const apiUploadFolderService = getUploadService('api-upload-folder');
 
-              const apiUploadFolderService = getUploadService('api-upload-folder');
+            const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+            info.folder = apiUploadFolder.id;
 
-              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
-              info.folder = apiUploadFolder.id;
-
-              const file = await formatFile(upload, info, { ...metas, tmpWorkingDirectory });
-              const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file, {});
-              sanitizedEntity = await toEntityResponse(uploadedFile, {
-                args,
-                resourceUID: fileTypeName,
-              });
-            } finally {
-              // delete temporary folder
-              await fse.remove(tmpWorkingDirectory);
-            }
-
-            return sanitizedEntity;
+            const file = await formatFile(upload, info, metas);
+            const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file, {});
+            return toEntityResponse(uploadedFile, {
+              args,
+              resourceUID: fileTypeName,
+            });
           },
         });
 
@@ -148,42 +134,25 @@ module.exports = ({ strapi }) => {
           },
 
           async resolve(parent, args) {
-            // create temporary folder to store files for stream manipulation
-            const tmpWorkingDirectory = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-upload-'));
-            let sanitizedEntities = [];
+            const { files: uploads, ...metas } = args;
 
-            try {
-              const { files: uploads, ...metas } = args;
+            const apiUploadFolderService = getUploadService('api-upload-folder');
 
-              const apiUploadFolderService = getUploadService('api-upload-folder');
+            const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
 
-              const apiUploadFolder = await apiUploadFolderService.getAPIUploadFolder();
+            const files = await Promise.all(
+              uploads.map((upload) => formatFile(upload, { folder: apiUploadFolder.id }, metas))
+            );
 
-              const files = await Promise.all(
-                uploads.map((upload) =>
-                  formatFile(
-                    upload,
-                    { folder: apiUploadFolder.id },
-                    { ...metas, tmpWorkingDirectory }
-                  )
-                )
-              );
+            const uploadService = getUploadService('upload');
 
-              const uploadService = getUploadService('upload');
+            const uploadedFiles = await Promise.all(
+              files.map((file) => uploadService.uploadFileAndPersist(file, {}))
+            );
 
-              const uploadedFiles = await Promise.all(
-                files.map((file) => uploadService.uploadFileAndPersist(file, {}))
-              );
-
-              sanitizedEntities = uploadedFiles.map((file) =>
-                toEntityResponse(file, { args, resourceUID: fileTypeName })
-              );
-            } finally {
-              // delete temporary folder
-              await fse.remove(tmpWorkingDirectory);
-            }
-
-            return sanitizedEntities;
+            return uploadedFiles.map((file) =>
+              toEntityResponse(file, { args, resourceUID: fileTypeName })
+            );
           },
         });
 

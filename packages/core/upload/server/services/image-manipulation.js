@@ -3,8 +3,6 @@
 /**
  * Image manipulation functions
  */
-const fs = require('fs');
-const { join } = require('path');
 const sharp = require('sharp');
 
 const {
@@ -16,22 +14,17 @@ const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
 
-const writeStreamToFile = (stream, path) =>
-  new Promise((resolve, reject) => {
-    const writeStream = fs.createWriteStream(path);
-    // Reject promise if there is an error with the provided stream
-    stream.on('error', reject);
-    stream.pipe(writeStream);
-    writeStream.on('close', resolve);
-    writeStream.on('error', reject);
-  });
+const getMetadata = async (file) => {
+  const streamOrPipeline = file.getStream();
 
-const getMetadata = async (file) =>
-  new Promise((resolve, reject) => {
-    const pipeline = sharp();
-    pipeline.metadata().then(resolve).catch(reject);
-    file.getStream().pipe(pipeline);
-  });
+  if ('metadata' in streamOrPipeline) {
+    return streamOrPipeline.metadata();
+  }
+
+  const pipeline = sharp();
+  streamOrPipeline.pipe(pipeline);
+  return pipeline.metadata();
+};
 
 const getDimensions = async (file) => {
   const { width = null, height = null } = await getMetadata(file);
@@ -45,16 +38,15 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 };
 
 const resizeFileTo = async (file, options, { name, hash }) => {
-  const filePath = join(file.tmpWorkingDirectory, hash);
+  const resizedStream = file.getStream().pipe(sharp().resize(options));
 
-  await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
   const newFile = {
     name,
     hash,
     ext: file.ext,
     mime: file.mime,
     path: file.path || null,
-    getStream: () => fs.createReadStream(filePath),
+    getStream: () => resizedStream.clone(),
   };
 
   const { width, height, size } = await getMetadata(newFile);
@@ -101,11 +93,10 @@ const optimize = async (file) => {
     if (autoOrientation) {
       transformer.rotate();
     }
-    const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
 
-    await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    const optimizedStream = file.getStream().pipe(transformer);
 
-    newFile.getStream = () => fs.createReadStream(filePath);
+    newFile.getStream = () => optimizedStream.clone();
   }
 
   const { width: newWidth, height: newHeight, size: newSize } = await getMetadata(newFile);
@@ -219,6 +210,7 @@ const isResizableImage = async (file) => {
     // throw when the file is not a supported image
     return false;
   }
+
   return format && FORMATS_TO_RESIZE.includes(format);
 };
 
@@ -226,6 +218,7 @@ const isImage = async (file) => {
   let format;
   try {
     const metadata = await getMetadata(file);
+
     format = metadata.format;
   } catch (e) {
     // throw when the file is not a supported image
