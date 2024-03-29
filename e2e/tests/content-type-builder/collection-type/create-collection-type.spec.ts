@@ -21,7 +21,7 @@ test.describe('Create collection type', () => {
   });
 
   // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
-  test.afterAll(async ({ page }) => {
+  test.afterAll(async () => {
     await resetFiles();
   });
 
