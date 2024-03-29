@@ -101,7 +101,7 @@ Start the administration panel server for development:
 
 ```bash
 cd ./packages/core/admin
-yarn develop
+yarn watch
 ```
 
 The administration panel should now be available at http://localhost:4000/admin. Make sure the example application (step 4) is still running.
