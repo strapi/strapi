@@ -90,7 +90,7 @@ module.exports = (baseURL) => ({
     key: '',
     secret: '',
     callback: `${baseURL}/linkedin_openid/callback`,
-  },    
+  },
   cognito: {
     enabled: false,
     icon: 'aws',
