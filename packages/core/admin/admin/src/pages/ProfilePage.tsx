@@ -191,7 +191,7 @@ const ProfilePage = () => {
         {({ isSubmitting, modified }) => (
           <>
             <HeaderLayout
-              title={getDisplayName(user, formatMessage)}
+              title={getDisplayName(user)}
               primaryAction={
                 <Button
                   startIcon={<Check />}
