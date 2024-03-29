@@ -78,7 +78,7 @@
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/koa": "2.13.4",
-    "@types/styled-components": "5.1.26",
+    "@types/styled-components": "5.1.32",
     "koa": "2.13.4",
     "msw": "1.3.0",
     "react": "^18.2.0",

@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { findAndClose } from '../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -9,6 +10,9 @@ test.describe('Edit View', () => {
     await login({ page });
   });
 
+  /**
+   * TODO: we should split these tests into smaller ones.
+   */
   test.describe('Collection Type', () => {
     test('A user should be able to navigate to the EditView of the content manager to create, save, publish, unpublish & delete a new entry', async ({
       page,
@@ -27,7 +31,7 @@ test.describe('Edit View', () => {
 
       await page.getByRole('button', { name: 'Save' }).click();
 
-      await expect(page.getByText('Saved')).toBeVisible();
+      await findAndClose(page, 'Saved');
 
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
 
@@ -64,7 +68,9 @@ test.describe('Edit View', () => {
 
       await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
       await page.getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByText('Saved')).toBeVisible();
+
+      await findAndClose(page, 'Saved');
+
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
 
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
@@ -136,7 +142,7 @@ test.describe('Edit View', () => {
 
       await page.getByRole('button', { name: 'Save' }).click();
 
-      await expect(page.getByText('Saved')).toBeVisible();
+      await findAndClose(page, 'Saved');
 
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
 
