@@ -23,3 +23,24 @@ export const navToHeader = async (page: Page, navItems: string[], headerText: st
   await expect(header).toBeVisible();
   return header;
 };
+
+/**
+ * Look for an element containing text, and then click a sibling close button
+ */
+export const findAndClose = async (
+  page: Page,
+  text: string,
+  role: string = 'status',
+  closeLabel: string = 'Close'
+) => {
+  // Verify the popup text is visible.
+  await expect(page.locator(`:has-text("${text}")[role="${role}"]`)).toBeVisible();
+
+  // Find the 'Close' button that is a sibling of the element containing the specified text.
+  const closeBtn = await page.locator(
+    `:has-text("${text}")[role="${role}"] ~ button[aria-label="${closeLabel}"]`
+  );
+
+  // Click the 'Close' button.
+  await closeBtn.click();
+};

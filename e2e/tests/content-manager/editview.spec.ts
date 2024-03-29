@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { findAndClose } from '../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -61,11 +62,7 @@ test.describe('Edit View', () => {
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas City');
       await page.getByRole('button', { name: 'Save' }).click();
 
-      // Check that the "saved" box appears
-      await expect(page.getByText('Saved')).toBeVisible();
-
-      // close it, or it's still open for the next save click
-      await page.getByRole('button', { name: 'Close' }).click();
+      await findAndClose(page, 'Saved');
 
       // the title should update post save because it's the `mainField` of the content-type
       await expect(page.getByRole('heading', { name: 'Being from Kansas City' })).toBeVisible();
@@ -148,11 +145,7 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
       await page.getByRole('button', { name: 'Save' }).click();
 
-      // Check that the "saved" box appears
-      await expect(page.getByText('Saved')).toBeVisible();
-
-      // close it, or it's still open for the next save click
-      await page.getByRole('button', { name: 'Close' }).click();
+      await findAndClose(page, 'Saved');
 
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
@@ -184,12 +177,8 @@ test.describe('Edit View', () => {
       await expect(page.getByText('Success:Published')).not.toBeVisible();
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
       await page.getByRole('button', { name: 'Save' }).click();
-
-      // Check that the "saved" box appears
-      await expect(page.getByText('Saved')).toBeVisible();
-
-      // close it, or it's still open for the next save click
-      await page.getByRole('button', { name: 'Close' }).click();
+   
+      await findAndClose(page, 'Saved');
 
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
@@ -284,12 +273,8 @@ test.describe('Edit View', () => {
           "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
         );
       await page.getByRole('button', { name: 'Save' }).click();
-
-      // Check that the "saved" box appears
-      await expect(page.getByText('Saved')).toBeVisible();
-
-      // close it, or it's still open for the next save click
-      await page.getByRole('button', { name: 'Close' }).click();
+      
+      await findAndClose(page, 'Saved');
 
       // the title should update post save because it's the `mainField` of the content-type
       await expect(page.getByRole('heading', { name: 'Welcome to AFC Richmond' })).toBeVisible();
@@ -345,12 +330,8 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
       await page.getByRole('button', { name: 'Save' }).click();
-
-      // Check that the "saved" box appears
-      await expect(page.getByText('Saved')).toBeVisible();
-
-      // close it, or it's still open for the next save click
-      await page.getByRole('button', { name: 'Close' }).click();
+      
+      await findAndClose(page, 'Saved');
 
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
@@ -383,11 +364,7 @@ test.describe('Edit View', () => {
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
       await page.getByRole('button', { name: 'Save' }).click();
 
-      // Check that the "saved" box appears
-      await expect(page.getByText('Saved')).toBeVisible();
-
-      // close it, or it's still open for the next save click
-      await page.getByRole('button', { name: 'Close' }).click();
+      await findAndClose(page, 'Saved');
 
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
