@@ -1,6 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 import { login } from '../../utils/login';
+import { findAndClose } from '../../utils/shared';
 
 test.describe('Cloning', () => {
   test.beforeEach(async ({ page }) => {
