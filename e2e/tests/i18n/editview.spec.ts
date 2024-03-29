@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 import { login } from '../../utils/login';
+import { findAndClose } from '../../utils/shared';
 
 test.describe('Edit view', () => {
   test.beforeEach(async ({ page }) => {
@@ -86,7 +87,7 @@ test.describe('Edit view', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await expect(page.getByText('Success:Published')).toBeVisible();
+    await findAndClose(page, 'Success:Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated
@@ -205,7 +206,7 @@ test.describe('Edit view', () => {
      * Publish the document
      */
     await page.getByRole('button', { name: 'Publish' }).click();
-    await expect(page.getByText('Success:Published')).toBeVisible();
+    await findAndClose(page, 'Success:Published');
 
     /**
      * Now we'll go back to the list view to ensure the content has been updated

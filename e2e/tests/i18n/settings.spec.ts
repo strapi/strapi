@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 import { login } from '../../utils/login';
 import { prunePermissions } from '../../scripts/endpoints';
+import { findAndClose } from '../../utils/shared';
 
 test.describe('Settings', () => {
   test.beforeEach(async ({ page }) => {
@@ -89,7 +90,7 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'There is 1 missing component' }).click();
     await page.getByRole('button', { name: 'Hero image' }).click();
     await page.getByRole('button', { name: 'Publish' }).click();
-    await expect(page.getByText('Success:Published')).toBeVisible();
+    await findAndClose(page, 'Success:Published');
   });
 
   test('As a user I want to delete an existing locale and have the content deleted as well', async ({

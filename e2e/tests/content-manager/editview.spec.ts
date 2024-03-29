@@ -103,7 +103,7 @@ test.describe('Edit View', () => {
        * available.
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Success:Published')).toBeVisible();
+      await findAndClose(page, 'Success:Published');
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
         'aria-selected',
         'true'
@@ -173,7 +173,7 @@ test.describe('Edit View', () => {
        * discard draft flow
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Success:Published')).toBeVisible();
+      await findAndClose(page, 'Success:Published');
       await expect(page.getByText('Success:Published')).not.toBeVisible();
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
       await page.getByRole('button', { name: 'Save' }).click();
@@ -289,7 +289,7 @@ test.describe('Edit View', () => {
        * available.
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Success:Published')).toBeVisible();
+      await findAndClose(page, 'Success:Published');
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
         'aria-selected',
         'true'
@@ -359,7 +359,7 @@ test.describe('Edit View', () => {
        * discard draft flow
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Success:Published')).toBeVisible();
+      await findAndClose(page, 'Success:Published');
       await expect(page.getByText('Success:Published')).not.toBeVisible();
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
       await page.getByRole('button', { name: 'Save' }).click();
