@@ -26,7 +26,7 @@ const writeStreamToFile = (stream, path) =>
     writeStream.on('error', reject);
   });
 
-const getMetadata = (file) =>
+const getMetadata = async (file) =>
   new Promise((resolve, reject) => {
     const pipeline = sharp();
     pipeline.metadata().then(resolve).catch(reject);
@@ -59,7 +59,7 @@ const resizeFileTo = async (file, options, { name, hash }) => {
 
   const { width, height, size } = await getMetadata(newFile);
 
-  Object.assign(newFile, { width, height, size: bytesToKbytes(size) });
+  Object.assign(newFile, { width, height, size: bytesToKbytes(size), sizeInBytes: size });
   return newFile;
 };
 
@@ -112,13 +112,14 @@ const optimize = async (file) => {
 
   if (newSize > size) {
     // Ignore optimization if output is bigger than original
-    return { ...file, width, height, size: bytesToKbytes(size) };
+    return { ...file, width, height, size: bytesToKbytes(size), sizeInBytes: size };
   }
 
   return Object.assign(newFile, {
     width: newWidth,
     height: newHeight,
     size: bytesToKbytes(newSize),
+    sizeInBytes: newSize,
   });
 };
 

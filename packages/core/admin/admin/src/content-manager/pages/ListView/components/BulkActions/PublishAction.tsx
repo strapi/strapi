@@ -4,8 +4,6 @@ import {
   Box,
   Button,
   Typography,
-  ModalLayout,
-  ModalHeader,
   ModalBody,
   ModalFooter,
   Tr,
@@ -31,7 +29,7 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { Entity } from '@strapi/types';
 import { AxiosError, AxiosResponse } from 'axios';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { UseQueryResult, useMutation, useQuery } from 'react-query';
+import { UseQueryResult, useMutation, useQuery, useQueryClient } from 'react-query';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
@@ -39,9 +37,12 @@ import { ValidationError } from 'yup';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { getTranslation } from '../../../../utils/translations';
 import { createYupSchema } from '../../../../utils/validation';
+import { useAllowedActions } from '../../hooks/useAllowedActions';
 import { Table } from '../Table';
 
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
+
+import type { BulkActionComponent } from '../../../../../core/apis/content-manager';
 
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
@@ -362,15 +363,7 @@ const SelectedEntriesModalContent = ({
   }, [rows]);
 
   return (
-    <ModalLayout onClose={toggleModal} labelledBy="title">
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
-          {formatMessage({
-            id: getTranslation('containers.ListPage.selectedEntriesModal.title'),
-            defaultMessage: 'Publish entries',
-          })}
-        </Typography>
-      </ModalHeader>
+    <>
       <ModalBody>
         <Typography>{getFormattedCountMessage()}</Typography>
         <Box marginTop={5}>
@@ -416,26 +409,31 @@ const SelectedEntriesModalContent = ({
         isConfirmButtonLoading={bulkPublishMutation.isLoading}
         onConfirm={handleConfirmBulkPublish}
       />
-    </ModalLayout>
+    </>
   );
 };
 
 /* -------------------------------------------------------------------------------------------------
- * SelectedEntriesModal
+ * PublishAction
  * -----------------------------------------------------------------------------------------------*/
 
-interface SelectedEntriesModalProps {
-  onToggle: SelectedEntriesModalContentProps['toggleModal'];
-}
-
-const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
+const PublishAction: BulkActionComponent = ({ model: slug }) => {
+  const { formatMessage } = useIntl();
+  const queryClient = useQueryClient();
+  const { selectedEntries } = useTableContext();
+  const {
+    data: list,
+    contentType,
+    components,
+  } = useTypedSelector((state) => state['content-manager_listView']);
+  const selectedEntriesObjects = list.filter((entry) => selectedEntries.includes(entry.id));
+  const hasPublishPermission = useAllowedActions(slug).canPublish;
+  const showPublishButton =
+    hasPublishPermission && selectedEntriesObjects.some((entry) => !entry.publishedAt);
   const {
     selectedEntries: selectedListViewEntries,
     setSelectedEntries: setSelectedListViewEntries,
   } = useTableContext();
-  const { contentType, components } = useTypedSelector(
-    (state) => state['content-manager_listView']
-  );
   // The child table will update this value based on the entries that were published
   const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
   // We want to keep the selected entries order same as the list view
@@ -512,23 +510,54 @@ const SelectedEntriesModal = ({ onToggle }: SelectedEntriesModalProps) => {
     };
   }, [components, contentType, data]);
 
-  return (
-    <HelperPluginTable.Root
-      rows={rows}
-      defaultSelectedEntries={selectedListViewEntries}
-      colCount={4}
-      isLoading={isLoading}
-      isFetching={isFetching}
-    >
-      <SelectedEntriesModalContent
-        setSelectedListViewEntries={setSelectedListViewEntries}
-        setEntriesToFetch={setEntriesToFetch}
-        toggleModal={onToggle}
-        refetchModalData={refetch}
-        validationErrors={validationErrors}
-      />
-    </HelperPluginTable.Root>
-  );
+  const refetchList = () => {
+    queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
+  };
+
+  // If all the entries are published, we want to refetch the list view
+  if (rows.length === 0) {
+    refetchList();
+  }
+
+  if (!showPublishButton) return null;
+
+  return {
+    actionType: 'publish',
+    variant: 'tertiary',
+    label: formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' }),
+    dialog: {
+      type: 'modal',
+      title: formatMessage({
+        id: getTranslation('containers.ListPage.selectedEntriesModal.title'),
+        defaultMessage: 'Publish entries',
+      }),
+      content: ({ onClose }) => {
+        return (
+          <HelperPluginTable.Root
+            rows={rows}
+            defaultSelectedEntries={selectedListViewEntries}
+            colCount={4}
+            isLoading={isLoading}
+            isFetching={isFetching}
+          >
+            <SelectedEntriesModalContent
+              setSelectedListViewEntries={setSelectedListViewEntries}
+              setEntriesToFetch={setEntriesToFetch}
+              toggleModal={() => {
+                onClose();
+                refetchList();
+              }}
+              refetchModalData={refetch}
+              validationErrors={validationErrors}
+            />
+          </HelperPluginTable.Root>
+        );
+      },
+      onClose: () => {
+        refetchList();
+      },
+    },
+  };
 };
 
-export { SelectedEntriesModal };
+export { PublishAction, SelectedEntriesModalContent };

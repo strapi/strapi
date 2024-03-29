@@ -10,13 +10,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await resetDatabaseAndImportDataFromPath('./e2e/data/with-admin.tar');
     await page.goto('/admin');
     await login({ page });
-
-    await page.evaluate(() => {
-      // Remove after Scheduling Beta release
-      window.strapi.future = {
-        isEnabled: () => true,
-      };
-    });
   });
 
   test('A user should be able to create a release without scheduling it and view their pending and done releases', async ({
@@ -70,15 +63,25 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
         name: 'Date',
       })
       .click();
-    await page.getByRole('gridcell', { name: 'Sunday, March 3, 2024' }).click();
+
+    const date = new Date();
+    date.setDate(date.getDate() + 1);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+    await page.getByRole('gridcell', { name: formattedDate }).click();
 
     await page
       .getByRole('combobox', {
         name: 'Time *',
       })
       .click();
-    await page.getByRole('option', { name: '14:00' }).click();
 
+    await page.getByRole('option', { name: '14:00' }).click();
     await page.getByRole('button', { name: 'Continue' }).click();
     // Wait for client side redirect to created release
     await page.waitForURL('/admin/plugins/content-releases/*');
@@ -87,5 +90,36 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     // Navigate back to the release page to see the newly created release
     await page.getByRole('link', { name: 'Releases' }).click();
     await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
+  });
+
+  test('A user should be able to perform bulk release on entries', async ({ page }) => {
+    await page.getByRole('link', { name: 'Content Manager' }).click();
+
+    await expect(page).toHaveTitle('Content Manager');
+    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+    const publishedItems = page.getByRole('gridcell', { name: 'published' });
+    expect(publishedItems).toHaveCount(2);
+    const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
+
+    // Select all entries to release
+    await checkbox.check();
+    const addToRelease = page.getByRole('button', { name: 'add to release' });
+    await addToRelease.click();
+
+    // Wait for the add to release dialog to appear
+    await page
+      .getByRole('combobox', {
+        name: 'Select a release',
+      })
+      .click();
+
+    await page.getByRole('option', { name: 'Trent Crimm: The Independent' }).click();
+    const unpublishButton = page.getByText('unpublish', { exact: true });
+    await unpublishButton.click();
+    await page.getByText('continue').click();
+    await page.getByText(/Successfully added to release./).waitFor({
+      state: 'visible',
+      timeout: 5000,
+    });
   });
 });

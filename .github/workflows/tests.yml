@@ -45,7 +45,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run lint
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -94,7 +94,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -122,7 +122,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -144,7 +144,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -189,7 +189,7 @@ jobs:
         if: failure()
         with:
           name: ce-playwright-trace
-          path: test-apps/e2e/**/test-results/**/trace.zip
+          path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
   e2e_ee:
@@ -225,13 +225,14 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
+          enableFutureFeatures: true
           jestOptions: --project=${{ matrix.project }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: ee-playwright-trace
-          path: test-apps/e2e/**/test-results/**/trace.zip
+          path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
   api_ce_pg:
