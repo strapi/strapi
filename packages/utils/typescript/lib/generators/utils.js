@@ -3,7 +3,6 @@
 const path = require('path');
 const assert = require('assert');
 const ts = require('typescript');
-const prettier = require('prettier');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 
@@ -61,6 +60,9 @@ const saveDefinitionToFileSystem = async (dir, file, content) => {
  * @returns {Promise<string>}
  */
 const format = async (content) => {
+  // eslint-disable-next-line node/no-unsupported-features/es-syntax
+  const prettier = await import('prettier'); // ESM-only
+
   const configFile = await prettier.resolveConfigFile();
   const config = configFile
     ? await prettier.resolveConfig(configFile)

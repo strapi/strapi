@@ -86,9 +86,9 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = If<
       ? // First level sort (scalar attributes, id, ...)
         OrderKind.Any
       : TKey extends Schema.AttributeNamesWithTarget<TSchemaUID>
-      ? // Deep sort (relations with a target, components, media, ...)
-        ObjectNotation<Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TKey>>>
-      : never;
+        ? // Deep sort (relations with a target, components, media, ...)
+          ObjectNotation<Schema.Attribute.Target<Schema.AttributeByName<TSchemaUID, TKey>>>
+        : never;
   },
   {
     [key: string]: OrderKind.Any | ObjectNotation<TSchemaUID>;

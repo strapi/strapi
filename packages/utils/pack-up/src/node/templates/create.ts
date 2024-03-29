@@ -1,7 +1,6 @@
 import { mkdir, writeFile } from 'fs/promises';
 import os from 'os';
 import { relative, resolve, dirname } from 'path';
-import prettier, { Config as PrettierConfig } from 'prettier';
 import prompts from 'prompts';
 
 import { isError } from '../core/errors';
@@ -9,6 +8,8 @@ import { parseGlobalGitConfig } from '../core/git';
 import { Logger } from '../core/logger';
 
 import { Template, TemplateFeature, TemplateOption, TemplateOrTemplateResolver } from './types';
+
+import type { Config as PrettierConfig } from 'prettier';
 
 interface CreatePackageFromTemplateOpts {
   logger: Logger;
@@ -27,6 +28,8 @@ const createPackageFromTemplate = async (
   opts: CreatePackageFromTemplateOpts
 ) => {
   const { cwd, logger, template: templateOrResolver } = opts;
+
+  const prettier = await import('prettier'); // ESM-only
 
   const gitConfig = await parseGlobalGitConfig();
 
@@ -104,9 +107,8 @@ const createPackageFromTemplate = async (
       singleQuote: true,
       trailingComma: 'es5',
     };
-
     try {
-      const formattedContents = prettier.format(file.contents, {
+      const formattedContents = await prettier.format(file.contents, {
         ...defaultPrettierConfig,
         filepath: filePath,
       });

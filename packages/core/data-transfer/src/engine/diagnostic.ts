@@ -23,10 +23,10 @@ export type DiagnosticEvent = 'diagnostic' | `diagnostic.${DiagnosticKind}`;
 export type GetEventListener<E extends DiagnosticEvent> = E extends 'diagnostic'
   ? DiagnosticListener
   : E extends `diagnostic.${infer K}`
-  ? K extends DiagnosticKind
-    ? DiagnosticListener<K>
-    : never
-  : never;
+    ? K extends DiagnosticKind
+      ? DiagnosticListener<K>
+      : never
+    : never;
 
 export type Diagnostic = ErrorDiagnostic | WarningDiagnostic | InfoDiagnostic;
 

@@ -9,7 +9,7 @@ export type Blocks = Intersect<
     Attribute.PrivateOption,
     Attribute.RequiredOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 
