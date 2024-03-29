@@ -43,7 +43,7 @@ test.describe('Settings', () => {
     await page.getByRole('option', { name: 'Italian (it)' }).click();
     await expect(page.getByRole('button', { name: 'Save' })).toBeEnabled();
     await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByText('Success:Locale successfully added')).toBeVisible();
+    await findAndClose(page, 'Success:Locale successfully added');
 
     /**
      * Next, we'll navigate to our shop single type & add the a localised version of this document.
@@ -125,7 +125,7 @@ test.describe('Settings', () => {
 
     await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
     await page.getByRole('button', { name: 'Confirm' }).click();
-    await expect(page.getByText('Success:Locale successfully deleted')).toBeVisible();
+    await findAndClose(page, 'Success:Locale successfully deleted');
 
     /**
      * Finally, go back to the list view, the english articles should be there,
@@ -177,7 +177,7 @@ test.describe('Settings', () => {
     await page.getByRole('textbox', { name: 'Locale display name' }).fill('');
     await page.getByRole('textbox', { name: 'Locale display name' }).fill('UK English');
     await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByText('Success:Locale successfully edited')).toBeVisible();
+    await findAndClose(page, 'Success:Locale successfully edited');
 
     /**
      * Lets go back to the list view and assert that the changes are reflected.
