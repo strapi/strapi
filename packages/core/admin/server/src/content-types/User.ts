@@ -29,6 +29,8 @@ export default {
       minLength: 1,
       configurable: false,
       required: false,
+      nullable:true,
+
     },
     username: {
       type: 'string',
