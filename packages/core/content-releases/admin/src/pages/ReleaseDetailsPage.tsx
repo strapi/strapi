@@ -32,7 +32,7 @@ import {
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
 import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
-import format from 'date-fns/format';
+import { format } from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';

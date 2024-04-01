@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Typography } from '@strapi/design-system';
-import parseISO from 'date-fns/parseISO';
+import { parseISO } from 'date-fns/parseISO';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 

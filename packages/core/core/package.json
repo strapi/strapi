@@ -52,8 +52,8 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@koa/cors": "3.4.3",
-    "@koa/router": "10.1.1",
+    "@koa/cors": "5.0.0",
+    "@koa/router": "12.0.1",
     "@paralleldrive/cuid2": "2.2.2",
     "@strapi/admin": "5.0.0-beta.1",
     "@strapi/database": "5.0.0-beta.1",
@@ -70,7 +70,7 @@
     "chalk": "4.1.2",
     "ci-info": "3.8.0",
     "cli-table3": "0.6.2",
-    "commander": "8.3.0",
+    "commander": "12.0.0",
     "configstore": "5.0.1",
     "copyfiles": "2.4.1",
     "debug": "4.3.4",

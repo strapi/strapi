@@ -136,7 +136,7 @@
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
     "cli-table3": "0.6.2",
-    "commander": "8.3.0",
+    "commander": "12.0.0",
     "concurrently": "8.2.2",
     "copyfiles": "2.4.1",
     "css-loader": "^6.10.0",

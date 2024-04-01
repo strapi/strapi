@@ -1,3 +1,4 @@
+/* eslint-disable import/namespace */
 import { addDays, format } from 'date-fns';
 import * as locales from 'date-fns/locale';
 

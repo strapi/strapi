@@ -21,7 +21,7 @@ import {
   ToggleInput,
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
-import formatISO from 'date-fns/formatISO';
+import { formatISO } from 'date-fns/formatISO';
 import isEqual from 'lodash/isEqual';
 import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 

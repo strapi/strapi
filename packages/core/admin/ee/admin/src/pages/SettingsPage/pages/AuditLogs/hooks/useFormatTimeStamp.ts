@@ -1,4 +1,4 @@
-import parseISO from 'date-fns/parseISO';
+import { parseISO } from 'date-fns/parseISO';
 import { useIntl } from 'react-intl';
 
 export const useFormatTimeStamp = () => {

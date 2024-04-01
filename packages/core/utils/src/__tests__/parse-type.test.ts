@@ -1,4 +1,4 @@
-import format from 'date-fns/format';
+import { format } from 'date-fns';
 import parseType from '../parse-type';
 
 describe('parseType', () => {

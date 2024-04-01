@@ -44,13 +44,13 @@
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
-    "@koa/cors": "3.4.3",
-    "@koa/router": "10.1.1",
+    "@koa/cors": "5.0.0",
+    "@koa/router": "12.0.1",
     "@strapi/database": "5.0.0-beta.1",
     "@strapi/logger": "5.0.0-beta.1",
     "@strapi/permissions": "5.0.0-beta.1",
     "@strapi/utils": "5.0.0-beta.1",
-    "commander": "8.3.0",
+    "commander": "12.0.0",
     "koa": "2.13.4",
     "node-schedule": "2.1.0",
     "typedoc": "0.25.10"

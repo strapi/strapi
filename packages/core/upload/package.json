@@ -55,7 +55,7 @@
     "axios": "1.6.8",
     "byte-size": "7.0.1",
     "cropperjs": "1.6.1",
-    "date-fns": "2.30.0",
+    "date-fns": "3.6.0",
     "formik": "2.4.5",
     "fs-extra": "10.1.0",
     "immer": "9.0.21",
