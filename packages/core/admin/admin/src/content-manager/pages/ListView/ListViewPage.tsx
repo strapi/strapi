@@ -13,7 +13,6 @@ import {
 import { Plus } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
 import styled from 'styled-components';
@@ -240,7 +239,7 @@ const ListViewPage = () => {
 
   return (
     <Page.Main>
-      <Helmet title={`${contentTypeTitle} | Strapi`} />
+      <Page.Title>{`${contentTypeTitle}`}</Page.Title>
       <HeaderLayout
         primaryAction={canCreate ? <CreateButton /> : null}
         subtitle={formatMessage(

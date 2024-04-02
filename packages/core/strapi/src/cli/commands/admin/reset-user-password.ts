@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import inquirer from 'inquirer';
 import { createCommand } from 'commander';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
@@ -28,8 +28,8 @@ const promptQuestions: ReadonlyArray<inquirer.DistinctQuestion<Answers>> = [
 ];
 
 async function changePassword({ email, password }: CmdOptions) {
-  const appContext = await strapiFactory.compile();
-  const app = await strapiFactory(appContext).load();
+  const appContext = await compileStrapi();
+  const app = await createStrapi(appContext).load();
 
   await app.admin.services.user.resetPasswordByEmail(email, password);
 

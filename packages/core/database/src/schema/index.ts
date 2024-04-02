@@ -28,15 +28,13 @@ interface State {
   schema?: Schema;
 }
 
-/**
- * @type {import('.').default}
- */
 export const createSchemaProvider = (db: Database): SchemaProvider => {
   const state: State = {};
 
   return {
     get schema() {
       if (!state.schema) {
+        debug('Converting metadata to database schema');
         state.schema = metadataToSchema(db.metadata);
       }
 

@@ -8,7 +8,7 @@ const transform: Transform = (file, api) => {
   // Extract the jscodeshift API
   const { j } = api;
   // Parse the file content
-  const root = j(file.source);
+  const root = j.withParser('tsx')(file.source);
 
   root
     // Find console.log calls expressions

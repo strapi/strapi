@@ -263,7 +263,7 @@ const getQueryPopulate = async (uid: UID.Schema, query: object): Promise<Populat
         populateQuery = set(populatePath, {}, populateQuery);
       }
     },
-    { schema: strapi.getModel(uid) },
+    { schema: strapi.getModel(uid), getModel: strapi.getModel.bind(strapi) },
     query
   );
 

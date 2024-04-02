@@ -95,7 +95,6 @@
     "@types/prettier": "2.7.3",
     "@types/react": "18.2.66",
     "@types/react-dom": "18.2.22",
-    "@types/react-helmet": "6.1.11",
     "@types/styled-components": "5.1.34",
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",

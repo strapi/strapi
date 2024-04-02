@@ -2,7 +2,7 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 import { Core, Modules } from '@strapi/types';
 
 import type { CLIContext } from '../cli/types';
@@ -66,7 +66,7 @@ const createBuildContext = async <TOptions extends BaseOptions>({
    */
   const strapiInstance =
     strapi ??
-    strapiFactory({
+    createStrapi({
       // Directories
       appDir: cwd,
       distDir: tsconfig?.config.options.outDir ?? '',

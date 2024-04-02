@@ -64,8 +64,12 @@ const signEntityMediaVisitor: SignEntityMediaVisitor = async (
  */
 const signEntityMedia = async (entity: any, uid: UID.Schema) => {
   const model = strapi.getModel(uid);
-  // @ts-expect-error - FIXME: fix traverseEntity using wrong types
-  return traverseEntity(signEntityMediaVisitor, { schema: model }, entity);
+  return traverseEntity(
+    // @ts-expect-error - FIXME: fix traverseEntity using wrong types
+    signEntityMediaVisitor,
+    { schema: model, getModel: strapi.getModel.bind(strapi) },
+    entity
+  );
 };
 
 export { signEntityMedia };

@@ -14,7 +14,7 @@ test.describe('List View', () => {
   }) => {
     await page.getByRole('link', { name: 'Content Manager' }).click();
 
-    await expect(page).toHaveTitle('Content Manager');
+    await expect(page).toHaveTitle('Article | Strapi');
     await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
     await expect(page.getByRole('link', { name: /Create new entry/ }).first()).toBeVisible();
   });
@@ -23,7 +23,7 @@ test.describe('List View', () => {
     await test.step('bulk unpublish', async () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
 
-      await expect(page).toHaveTitle('Content Manager');
+      await expect(page).toHaveTitle('Article | Strapi');
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
       const publishedItems = page.getByRole('gridcell', { name: 'published' });
       expect(publishedItems).toHaveCount(2);

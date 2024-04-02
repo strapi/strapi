@@ -4,6 +4,11 @@ const errors = require('@strapi/utils');
 const auth = require('../../auth');
 
 const mockStrapi = {
+  contentAPI: {
+    sanitize: {
+      output: jest.fn((input) => input),
+    },
+  },
   store: jest.fn(() => {
     return {
       get: jest.fn(() => {

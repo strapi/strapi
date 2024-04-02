@@ -4,6 +4,7 @@ import type { Knex } from 'knex';
 import type { Migration } from '../common';
 import type { Database } from '../..';
 import type { Meta } from '../../metadata';
+import { identifiers } from '../../utils/identifiers';
 
 interface Params {
   joinColumn: string;
@@ -94,8 +95,9 @@ const getNextIdsToCreateDocumentId = async (
 
 // Migrate document ids for tables that have localizations
 const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, meta: Meta) => {
-  const joinColumn = `${meta.singularName.toLowerCase()}_id`;
-  const inverseJoinColumn = `inv_${meta.singularName.toLowerCase()}_id`;
+  const singularName = meta.singularName.toLowerCase();
+  const joinColumn = identifiers.getJoinColumnAttributeIdName(singularName);
+  const inverseJoinColumn = identifiers.getInverseJoinColumnAttributeIdName(singularName);
 
   let ids: number[];
 
@@ -104,7 +106,7 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
       joinColumn,
       inverseJoinColumn,
       tableName: meta.tableName,
-      joinTableName: `${meta.tableName}_localizations_links`,
+      joinTableName: identifiers.getJoinTableName(meta.tableName, `localizations`),
     });
 
     if (ids.length > 0) {
@@ -115,14 +117,19 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
 
 // Migrate document ids for tables that don't have localizations
 const migrationDocumentIds = async (db: Database, knex: Knex, meta: Meta) => {
-  let res;
-  do {
-    res = await knex.select('id').from(meta.tableName).whereNull('document_id').limit(1).first();
+  let run = true;
 
-    if (res) {
-      await knex(meta.tableName).update({ document_id: createId() }).whereIn('id', res.id);
+  do {
+    const updatedRows = await knex(meta.tableName)
+      .update({ document_id: createId() })
+      .whereIn('id', (builder) => {
+        return builder.whereNull('document_id').select('id').limit(1);
+      });
+
+    if (updatedRows <= 0) {
+      run = false;
     }
-  } while (res !== null);
+  } while (run);
 };
 
 const createDocumentIdColumn = async (knex: Knex, tableName: string) => {
@@ -132,11 +139,12 @@ const createDocumentIdColumn = async (knex: Knex, tableName: string) => {
 };
 
 const hasLocalizationsJoinTable = async (knex: Knex, tableName: string) => {
-  return knex.schema.hasTable(`${tableName}_localizations_links`);
+  const joinTableName = identifiers.getJoinTableName(tableName, 'localizations');
+  return knex.schema.hasTable(joinTableName);
 };
 
 export const createdDocumentId: Migration = {
-  name: 'created-document-id',
+  name: '5.0.0-02-created-document-id',
   async up(knex, db) {
     for (const meta of db.metadata.values()) {
       const hasTable = await knex.schema.hasTable(meta.tableName);

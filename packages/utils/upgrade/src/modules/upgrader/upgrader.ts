@@ -155,6 +155,11 @@ export class Upgrader implements UpgraderInterface {
       this.logger?.info(f.upgradeStep('Applying the latest code modifications', [2, 4]));
       await this.runCodemods(codemodsRange);
 
+      // We need to refresh the project files to make sure we have
+      // the latest version of each file (including package.json) for the next steps
+      this.logger?.debug('Refreshing project information...');
+      this.project.refresh();
+
       this.logger?.info(f.upgradeStep('Upgrading Strapi dependencies', [3, 4]));
       await this.updateDependencies();
 

@@ -15,7 +15,6 @@ import {
 } from '@strapi/design-system';
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
@@ -167,14 +166,14 @@ const CreatePage = () => {
 
   return (
     <Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Roles',
           }
         )}
-      />
+      </Page.Title>
       <Formik
         initialValues={
           {

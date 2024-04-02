@@ -7,8 +7,16 @@ export type PolicyContext = Omit<ExtendableContext, 'is'> & {
   is(name: string): boolean;
 };
 
-export type Policy<T = unknown> = (
+export type PolicyHandler<TConfig = unknown> = (
   ctx: PolicyContext,
-  cfg: T,
-  { strapi }: { strapi: Strapi }
+  cfg: TConfig,
+  opts: { strapi: Strapi }
 ) => boolean | undefined;
+
+export type Policy<TConfig = unknown> =
+  | {
+      name: string;
+      validator?: (config: unknown) => boolean;
+      handler: PolicyHandler<TConfig>;
+    }
+  | PolicyHandler<TConfig>;

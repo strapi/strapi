@@ -229,7 +229,7 @@ const transformDataIdsVisitor = (
         set(key, newRelation as any);
       }
     },
-    { schema: strapi.getModel(opts.uid) },
+    { schema: strapi.getModel(opts.uid), getModel: strapi.getModel.bind(strapi) },
     data
   );
 };

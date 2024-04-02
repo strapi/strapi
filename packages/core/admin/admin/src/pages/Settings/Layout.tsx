@@ -1,5 +1,4 @@
 import { Layout as DSLayout } from '@strapi/design-system';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useMatch } from 'react-router-dom';
 
@@ -29,12 +28,12 @@ const Layout = () => {
 
   return (
     <DSLayout sideNav={<SettingsNav menu={menu} />}>
-      <Helmet
-        title={formatMessage({
+      <Page.Title>
+        {formatMessage({
           id: 'global.settings',
           defaultMessage: 'Settings',
         })}
-      />
+      </Page.Title>
       <Outlet />
     </DSLayout>
   );

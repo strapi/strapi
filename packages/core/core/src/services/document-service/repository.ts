@@ -1,6 +1,6 @@
 import { omit, assoc, curry, merge } from 'lodash/fp';
 
-import { async, convertQueryParams, contentTypes as contentTypesUtils } from '@strapi/utils';
+import { async, contentTypes as contentTypesUtils } from '@strapi/utils';
 import type { UID } from '@strapi/types';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
@@ -24,7 +24,7 @@ import { getDeepPopulate } from './utils/populate';
 import { transformData } from './transform/data';
 
 const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
-  const query = convertQueryParams.transformParamsToQuery(uid, params);
+  const query = strapi.get('query-params').transform(uid, params);
 
   return assoc('where', { ...params?.lookup, ...query.where }, query);
 });

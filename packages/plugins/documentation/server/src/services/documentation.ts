@@ -94,11 +94,11 @@ const createService = ({ strapi }: { strapi: Core.Strapi }) => {
         };
       });
 
-      const apisToDocument = Object.keys(strapi.api).map((api) => {
+      const apisToDocument = Object.keys(strapi.apis).map((api) => {
         return {
           name: api,
           getter: 'api',
-          ctNames: Object.keys(strapi.api[api].contentTypes),
+          ctNames: Object.keys(strapi.api(api).contentTypes),
         };
       });
 

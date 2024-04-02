@@ -76,7 +76,7 @@ export default {
         },
       };
 
-      if (_.isEmpty(strapi.api)) {
+      if (_.isEmpty(strapi.apis)) {
         await strapi.telemetry.send('didCreateFirstContentType', metricsPayload);
       } else {
         await strapi.telemetry.send('didCreateContentType', metricsPayload);

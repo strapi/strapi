@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-namespace */
-/* eslint-disable vars-on-top */
-/* eslint-disable no-var */
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -12,7 +9,6 @@ import type { Core, Modules, UID, Schema } from '@strapi/types';
 import loadConfiguration from './configuration';
 
 import * as factories from './factories';
-import compile from './compile';
 
 import * as utils from './utils';
 import * as registries from './registries';
@@ -25,6 +21,7 @@ import createWebhookRunner, { WebhookRunner } from './services/webhook-runner';
 import { webhookModel, createWebhookStore } from './services/webhook-store';
 import { createCoreStore, coreStoreModel } from './services/core-store';
 import createEntityService from './services/entity-service';
+import createQueryParamService from './services/query-params';
 
 import createCronService from './services/cron';
 import entityValidator from './services/entity-validator';
@@ -182,6 +179,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('apis', registries.apis(this))
       .add('sanitizers', registries.sanitizers())
       .add('validators', registries.validators())
+      .add('query-params', createQueryParamService(this))
       .add('content-api', createContentAPI(this))
       .add('auth', createAuth())
       .add('models', registries.models());
@@ -304,12 +302,12 @@ class Strapi extends Container implements Core.Strapi {
     return this.get('hooks').get(name);
   }
 
-  // api(name) {
-  //   return this.get('apis').get(name);
-  // }
-
-  get api(): Record<string, Core.Module> {
+  get apis() {
     return this.get('apis').getAll();
+  }
+
+  api(name: string): Core.Module {
+    return this.get('apis').get(name);
   }
 
   get auth() {
@@ -493,10 +491,10 @@ class Strapi extends Container implements Core.Strapi {
 
   async bootstrap() {
     const models = [
-      ...utils.transformContentTypesToModels([
-        ...Object.values(this.contentTypes),
-        ...Object.values(this.components),
-      ]),
+      ...utils.transformContentTypesToModels(
+        [...Object.values(this.contentTypes), ...Object.values(this.components)],
+        this.db.metadata.identifiers
+      ),
       ...this.get('models').get(),
     ];
 
@@ -623,25 +621,11 @@ class Strapi extends Container implements Core.Strapi {
   }
 }
 
-interface StrapiOptions {
+export interface StrapiOptions {
   appDir?: string;
   distDir?: string;
   autoReload?: boolean;
   serveAdminPanel?: boolean;
 }
 
-interface Init {
-  (options?: StrapiOptions): Core.Strapi;
-  factories: typeof factories;
-  compile: typeof compile;
-}
-
-const initFn = (options: StrapiOptions = {}): Core.Strapi => {
-  const strapi = new Strapi(options);
-  global.strapi = strapi as LoadedStrapi;
-  return strapi;
-};
-
-const init: Init = Object.assign(initFn, { factories, compile });
-
-export default init;
+export default Strapi;

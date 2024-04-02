@@ -9,10 +9,10 @@ const sqlite = {
 const postgres = {
   client: 'postgres',
   connection: {
-    database: 'postgres',
-    user: 'postgres',
-    password: 'test',
-    port: 54321,
+    database: 'strapi',
+    user: 'strapi',
+    password: 'strapi',
+    port: 5432,
     host: 'localhost',
   },
 };

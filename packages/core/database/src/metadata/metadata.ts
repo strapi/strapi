@@ -1,5 +1,5 @@
-import _ from 'lodash/fp';
-import * as identifiers from '../utils/identifiers';
+import { cloneDeep, snakeCase } from 'lodash/fp';
+import { identifiers } from '../utils/identifiers';
 import * as types from '../utils/types';
 import { createRelation } from './relations';
 import type { Attribute, Model } from '../types';
@@ -14,6 +14,13 @@ export interface Meta extends Model {
 }
 
 export class Metadata extends Map<string, Meta> {
+  // TODO: we expose the global identifiers in this way so that in the future we can instantiate our own
+  // However, it should NOT be done until all the methods used by metadata can be part of this metadata object
+  // and access this one; currently they all access the global identifiers directly.
+  get identifiers() {
+    return identifiers;
+  }
+
   get(key: string): Meta {
     if (!super.has(key)) {
       throw new Error(`Metadata for "${key}" not found`);
@@ -41,11 +48,13 @@ export class Metadata extends Map<string, Meta> {
     }
   }
 
-  loadModels(models: Model[] = []) {
+  loadModels(models: Model[]) {
     // init pass
-    for (const model of _.cloneDeep(models)) {
+    for (const model of cloneDeep(models ?? [])) {
+      const tableName = identifiers.getTableName(model.tableName);
       this.add({
         ...model,
+        tableName,
         attributes: {
           ...model.attributes,
         },
@@ -94,6 +103,13 @@ export class Metadata extends Map<string, Meta> {
 }
 
 const createAttribute = (attributeName: string, attribute: Attribute) => {
-  const columnName = identifiers.getColumnName(attributeName);
+  // if the attribute has already set its own column name, use that
+  // this will prevent us from shortening a name twice
+  if ('columnName' in attribute && attribute.columnName) {
+    return;
+  }
+
+  const columnName = identifiers.getColumnName(snakeCase(attributeName));
+
   Object.assign(attribute, { columnName });
 };

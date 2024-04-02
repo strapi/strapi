@@ -21,7 +21,7 @@ import {
   useFetchClient,
   useRBAC,
 } from '@strapi/strapi/admin';
-import { Helmet } from 'react-helmet';
+
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -118,8 +118,8 @@ const AdvancedSettingsPage = () => {
 
   return (
     <Page.Main aria-busy={isSubmittingForm}>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -128,7 +128,7 @@ const AdvancedSettingsPage = () => {
             }),
           }
         )}
-      />
+      </Page.Title>
       <Form onSubmit={handleSubmit} initialValues={data.settings} validationSchema={schema}>
         {({ values, isSubmitting, modified }) => {
           return (
