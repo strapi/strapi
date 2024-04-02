@@ -10,6 +10,11 @@ export type LongHandDocument = {
   status?: 'draft' | 'published';
   position?: object;
 };
+
 export type LongHand = LongHandEntity | LongHandDocument;
+export type RelationPrimitives = ShortHand | LongHand | ShortHand[] | LongHand[] | null | undefined;
+export type Relation =
+  | RelationPrimitives
+  | { connect?: RelationPrimitives; disconnect?: RelationPrimitives; set?: RelationPrimitives };
 
 export type GetIds = (relation: ID) => ID[] | null;

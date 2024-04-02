@@ -185,5 +185,5 @@ export type DeepPartial<TObject> = TObject extends object
  */
 export type Replace<
   TObject extends object,
-  TNew extends Partial<{ [key in keyof TObject]: unknown }>
+  TNew extends Partial<{ [key in keyof TObject]: unknown }>,
 > = Omit<TObject, keyof TNew> & TNew;

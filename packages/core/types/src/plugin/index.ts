@@ -9,7 +9,7 @@ import type { Constants, Extends, Or, Not } from '../utils';
 
 export type IsEnabled<
   TName extends keyof any,
-  TSchemaUID extends UID.Schema
+  TSchemaUID extends UID.Schema,
 > = TName extends keyof Public.PluginActivation
   ? // Only if the plugin is enabled
     Public.PluginActivation[TName] extends infer TRule

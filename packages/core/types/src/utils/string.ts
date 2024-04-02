@@ -62,8 +62,8 @@ export type Split<TValue extends string, TSeparator extends string> = {
   [TSep in TSeparator]: TValue extends `${infer TLeft}${TSep}${infer TRight}`
     ? [TLeft, ...Split<TRight, TSep>]
     : TValue extends ''
-    ? []
-    : [TValue];
+      ? []
+      : [TValue];
 }[TSeparator];
 
 /**

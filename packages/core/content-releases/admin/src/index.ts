@@ -29,7 +29,7 @@ const admin: Plugin.Config.AdminInput = {
        * For some reason every middleware you pass has to a function
        * that returns the actual middleware. It's annoying but no one knows why....
        */
-      // @ts-expect-error – this API needs to be styped better.
+      // @ts-expect-error – this API needs to be typed better.
       app.addMiddlewares([() => releaseApi.middleware]);
 
       app.addReducers({

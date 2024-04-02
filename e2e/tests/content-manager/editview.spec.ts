@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { findAndClose } from '../../utils/shared';
 
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
@@ -60,7 +61,9 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas City');
       await page.getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByText('Saved')).toBeVisible();
+
+      await findAndClose(page, 'Saved');
+
       // the title should update post save because it's the `mainField` of the content-type
       await expect(page.getByRole('heading', { name: 'Being from Kansas City' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Create an entry' })).not.toBeVisible();
@@ -100,7 +103,7 @@ test.describe('Edit View', () => {
        * available.
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Success:Published')).toBeVisible();
+      await findAndClose(page, 'Success:Published');
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
         'aria-selected',
         'true'
@@ -141,14 +144,16 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
       await page.getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByText('Saved')).toBeVisible();
+
+      await findAndClose(page, 'Saved');
+
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
       await page.getByRole('menuitem', { name: 'Discard changes' }).click();
       await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
-      await expect(page.getByText('Success:Changes discarded')).toBeVisible();
+      await findAndClose(page, 'Success:Changes discarded');
       await expect(page.getByLabel('title')).toHaveValue('Being an American'); // ensure the form has updated.
 
       /**
@@ -158,7 +163,7 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
       await page.getByRole('menuitem', { name: 'Unpublish' }).click();
-      await expect(page.getByText('Success:Unpublished')).toBeVisible();
+      await findAndClose(page, 'Success:Unpublished');
       // wait for the all the notifications to clear.
       await expect(page.getByText('Success:Unpublished')).not.toBeVisible();
       await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
@@ -168,11 +173,13 @@ test.describe('Edit View', () => {
        * discard draft flow
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Success:Published')).toBeVisible();
+      await findAndClose(page, 'Success:Published');
       await expect(page.getByText('Success:Published')).not.toBeVisible();
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
       await page.getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByText('Saved')).toBeVisible();
+
+      await findAndClose(page, 'Saved');
+
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
@@ -188,7 +195,7 @@ test.describe('Edit View', () => {
         page.getByRole('radio', { name: 'Unpublish and replace last draft' })
       ).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
-      await expect(page.getByText('Success:Unpublished')).toBeVisible();
+      await findAndClose(page, 'Success:Unpublished');
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
@@ -204,7 +211,7 @@ test.describe('Edit View', () => {
       await page.getByRole('menuitem', { name: 'Delete document' }).click();
       await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
-      await expect(page.getByText('Success:Deleted')).toBeVisible();
+      await findAndClose(page, 'Success:Deleted');
 
       /**
        * We're back on the list view and we can asser the document was correctly deleted.
@@ -266,7 +273,9 @@ test.describe('Edit View', () => {
           "We're a premier league football club based in South West London with a vicious rivalry with Fulham. Because who doens't hate them?"
         );
       await page.getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByText('Saved')).toBeVisible();
+
+      await findAndClose(page, 'Saved');
+
       // the title should update post save because it's the `mainField` of the content-type
       await expect(page.getByRole('heading', { name: 'Welcome to AFC Richmond' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Untitled' })).not.toBeVisible();
@@ -280,7 +289,7 @@ test.describe('Edit View', () => {
        * available.
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Success:Published')).toBeVisible();
+      await findAndClose(page, 'Success:Published');
       await expect(page.getByRole('tab', { name: 'Draft' })).toHaveAttribute(
         'aria-selected',
         'true'
@@ -321,14 +330,16 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
       await page.getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByText('Saved')).toBeVisible();
+
+      await findAndClose(page, 'Saved');
+
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
       await page.getByRole('menuitem', { name: 'Discard changes' }).click();
       await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
-      await expect(page.getByText('Success:Changes discarded')).toBeVisible();
+      await findAndClose(page, 'Success:Changes discarded');
       await expect(page.getByLabel('title')).toHaveValue('Welcome to AFC Richmond'); // ensure the form has updated.
 
       /**
@@ -338,8 +349,7 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).toBeDisabled();
       await page.getByRole('menuitem', { name: 'Unpublish' }).click();
-      await expect(page.getByText('Success:Unpublished')).toBeVisible();
-      // wait for the all the notifications to clear.
+      await findAndClose(page, 'Success:Unpublished');
       await expect(page.getByText('Success:Unpublished')).not.toBeVisible();
       await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
 
@@ -348,11 +358,13 @@ test.describe('Edit View', () => {
        * discard draft flow
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      await expect(page.getByText('Success:Published')).toBeVisible();
+      await findAndClose(page, 'Success:Published');
       await expect(page.getByText('Success:Published')).not.toBeVisible();
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American in the UK');
       await page.getByRole('button', { name: 'Save' }).click();
-      await expect(page.getByText('Saved')).toBeVisible();
+
+      await findAndClose(page, 'Saved');
+
       await page.getByRole('button', { name: 'More document actions' }).click();
       await expect(page.getByRole('menuitem', { name: 'Unpublish' })).not.toBeDisabled();
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
@@ -368,7 +380,7 @@ test.describe('Edit View', () => {
         page.getByRole('radio', { name: 'Unpublish and replace last draft' })
       ).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
-      await expect(page.getByText('Success:Unpublished')).toBeVisible();
+      await findAndClose(page, 'Success:Unpublished');
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
@@ -384,7 +396,7 @@ test.describe('Edit View', () => {
       await page.getByRole('menuitem', { name: 'Delete document' }).click();
       await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
-      await expect(page.getByText('Success:Deleted')).toBeVisible();
+      await findAndClose(page, 'Success:Deleted');
 
       /**
        * The form should be completely reset.

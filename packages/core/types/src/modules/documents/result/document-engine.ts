@@ -7,17 +7,17 @@ export type CountResult = { count: number };
 
 export type FindMany<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.FindMany<TContentTypeUID>
+  TParams extends Params.FindMany<TContentTypeUID>,
 > = Promise<Result<TContentTypeUID, TParams>[]>;
 
 export type FindFirst<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.FindFirst<TContentTypeUID>
+  TParams extends Params.FindFirst<TContentTypeUID>,
 > = Promise<Result<TContentTypeUID, TParams> | null>;
 
 export type FindOne<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.FindFirst<TContentTypeUID>
+  TParams extends Params.FindFirst<TContentTypeUID>,
 > = Promise<Result<TContentTypeUID, TParams> | null>;
 
 export type Delete = Promise<{
@@ -28,12 +28,12 @@ export type DeleteMany = Promise<CountResult | null>;
 
 export type Create<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.Create<TContentTypeUID>
+  TParams extends Params.Create<TContentTypeUID>,
 > = Promise<Result<TContentTypeUID, TParams>>;
 
 export type Clone<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.Clone<TContentTypeUID>
+  TParams extends Params.Clone<TContentTypeUID>,
 > = Promise<{
   documentId: string;
   versions: Result<TContentTypeUID, TParams>[];
@@ -41,28 +41,28 @@ export type Clone<
 
 export type Update<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.Update<TContentTypeUID>
+  TParams extends Params.Update<TContentTypeUID>,
 > = Promise<Result<TContentTypeUID, TParams> | null>;
 
 export type Count = Promise<number>;
 
 export type Publish<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.Publish<TContentTypeUID>
+  TParams extends Params.Publish<TContentTypeUID>,
 > = Promise<{
   versions: Result<TContentTypeUID, TParams>[];
 }>;
 
 export type Unpublish<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.Unpublish<TContentTypeUID>
+  TParams extends Params.Unpublish<TContentTypeUID>,
 > = Promise<{
   versions: Result<TContentTypeUID, TParams>[];
 }>;
 
 export type DiscardDraft<
   TContentTypeUID extends UID.ContentType,
-  TParams extends Params.DiscardDraft<TContentTypeUID>
+  TParams extends Params.DiscardDraft<TContentTypeUID>,
 > = Promise<{
   versions: Result<TContentTypeUID, TParams>[];
 }>;
