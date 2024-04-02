@@ -27,20 +27,20 @@ We store order values for all type of relations, except for:
 - Polymorphic relations (too complicated to implement).
 - One to one relations (as there is only one relation per pair)
 
-### Many to many (Addresses <-> Categories)
+### Many to many (Addresses &lt;-&gt; Categories)
 
 <img src="/img/database/m2m-example.png" alt="many to many relation" />
 
 - `category_order` is the order value of the categories relations in an address entity.
 - `address_order` is the order value of the addresses relations in a category entity.
 
-### One to one (Kitchensinks <-> Tags)
+### One to one (Kitchensinks &lt;-&gt; Tags)
 
 <img src="/img/database/o2o-example.png" alt="one to one relation" />
 
 - there is no `order` fields as there is only one relation per pair.
 
-### One way relation (Restaurants <-> Categories)
+### One way relation (Restaurants &lt;-&gt; Categories)
 
 Where a restaurant has many categories:
 
@@ -108,7 +108,7 @@ From the `connect` array:
     - If an **id** was **already in this array, remove the previous one**
 - **Grouping by the order value**, and ignoring init relations
   - Recalculate order values for each group, so there are no repeated numbers & they keep the same order.
-    - Example : [ {id: 5 , order: 1.5}, {id: 3, order: 1.5 } ] → [ {id: 5 , order: 1.33}, {id: 3, order: 1.66 } ]
+    - Example : `[ {id: 5 , order: 1.5}, {id: 3, order: 1.5 } ]` → `[ {id: 5 , order: 1.33}, {id: 3, order: 1.66 } ]`
   - **Insert values in the database**
   - **Update database order based on their order position.** (using ROW_NUMBER() clause)
 
