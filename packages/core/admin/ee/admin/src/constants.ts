@@ -61,19 +61,6 @@ export const SETTINGS_LINKS_EE = (): SettingsMenu => ({
           },
         ]
       : []),
-
-    ...(window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS)
-      ? [
-          {
-            intlLabel: {
-              id: 'Settings.review-workflows.page.title',
-              defaultMessage: 'Review Workflows',
-            },
-            to: '/settings/review-workflows',
-            id: 'review-workflows',
-          },
-        ]
-      : []),
   ],
 
   admin: [

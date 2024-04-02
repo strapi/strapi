@@ -13,7 +13,7 @@ export type JSON = Intersect<
     Attribute.VisibleOption,
     // TODO: should be JSONValue but it breaks the admin build
     // TODO: [TS2] Investigate before V5
-    Attribute.DefaultOption<JSONPrimitive>
+    Attribute.DefaultOption<JSONPrimitive>,
   ]
 >;
 

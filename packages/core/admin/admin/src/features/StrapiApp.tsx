@@ -10,8 +10,8 @@ interface StrapiAppContextValue
     StrapiApp,
     | 'customFields'
     | 'menu'
-    | 'getAdminInjectedComponents'
     | 'getPlugin'
+    | 'getAdminInjectedComponents'
     | 'plugins'
     | 'runHookParallel'
     | 'runHookSeries'

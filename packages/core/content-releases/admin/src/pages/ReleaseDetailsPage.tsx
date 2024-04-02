@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import {
   Page,
-  unstable_useDocument,
   Pagination,
   Table,
   BackButton,
@@ -32,6 +31,7 @@ import {
 } from '@strapi/design-system';
 import { LinkButton, Menu } from '@strapi/design-system/v2';
 import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
+import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
@@ -873,7 +873,7 @@ const ReleaseDetailsPage = () => {
   const scheduledAt =
     releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
   // Just get the date and time to display without considering updated timezone time
-  const date = scheduledAt ? new Date(format(scheduledAt, 'yyyy-MM-dd')) : null;
+  const date = scheduledAt ? format(scheduledAt, 'yyyy-MM-dd') : null;
   const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {

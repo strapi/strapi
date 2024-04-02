@@ -18,7 +18,7 @@ export type Text = Intersect<
     Attribute.UniqueOption,
     Attribute.RequiredOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

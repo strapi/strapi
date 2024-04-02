@@ -22,15 +22,18 @@ const flattenDeep = <T>(
   array?: ArrayOfRecursiveArraysOrValues<T> | null | undefined
 ): Array<Flat<T>> => {
   if (Array.isArray(array)) {
-    return array.reduce((acc, value) => {
-      if (Array.isArray(value)) {
-        acc.push(...flattenDeep(value));
-      } else {
-        acc.push(value);
-      }
+    return array.reduce(
+      (acc, value) => {
+        if (Array.isArray(value)) {
+          acc.push(...flattenDeep(value));
+        } else {
+          acc.push(value);
+        }
 
-      return acc;
-    }, [] as Array<Flat<T>>);
+        return acc;
+      },
+      [] as Array<Flat<T>>
+    );
   } else {
     return [];
   }

@@ -1,17 +1,20 @@
 import { PaperPlane } from '@strapi/icons';
 
 import { CMReleasesContainer } from './components/CMReleasesContainer';
+import { ReleaseAction } from './components/ReleaseAction';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { releaseApi } from './services/release';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
+import type { BulkActionComponent } from '@strapi/plugin-content-manager/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 // eslint-disable-next-line import/no-default-export
 const admin: Plugin.Config.AdminInput = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  register(app: any) {
+  register(app: StrapiApp) {
     if (window.strapi.features.isEnabled('cms-content-releases')) {
       app.addMenuLink({
         to: `plugins/${pluginId}`,
@@ -28,6 +31,7 @@ const admin: Plugin.Config.AdminInput = {
        * For some reason every middleware you pass has to a function
        * that returns the actual middleware. It's annoying but no one knows why....
        */
+      // @ts-expect-error – this API needs to be typed better.
       app.addMiddlewares([() => releaseApi.middleware]);
 
       app.addReducers({
@@ -35,9 +39,18 @@ const admin: Plugin.Config.AdminInput = {
       });
 
       // Insert the Releases container in the 'right-links' zone of the Content Manager's edit view
-      app.injectContentManagerComponent('editView', 'right-links', {
+      app.getPlugin('content-manager').injectComponent('editView', 'right-links', {
         name: `${pluginId}-link`,
         Component: CMReleasesContainer,
+      });
+
+      // @ts-expect-error – plugins are not typed on the StrapiApp, fix this.
+      app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
+        // We want to add this action to just before the delete action all the time
+        const deleteActionIndex = actions.findIndex((action) => action.name === 'DeleteAction');
+
+        actions.splice(deleteActionIndex, 0, ReleaseAction);
+        return actions;
       });
     } else if (
       !window.strapi.features.isEnabled('cms-content-releases') &&
@@ -50,9 +63,10 @@ const admin: Plugin.Config.AdminInput = {
           id: `${pluginId}.plugin.name`,
           defaultMessage: 'Releases',
         },
+        permissions: [],
         async Component() {
           const { PurchaseContentReleases } = await import('./pages/PurchaseContentReleases');
-          return PurchaseContentReleases;
+          return { default: PurchaseContentReleases };
         },
         lockIcon: true,
       });

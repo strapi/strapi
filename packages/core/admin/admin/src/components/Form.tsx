@@ -474,8 +474,8 @@ type FormErrors<TFormValues extends FormValues = FormValues> = {
       ? FormErrors<TFormValues[Key][number]>[] | string | string[]
       : string // this would let us support errors for the dynamic zone or repeatable component not the components within.
     : TFormValues[Key] extends object // is it a regular component?
-    ? FormErrors<TFormValues[Key]> // handles nested components
-    : string; // otherwise its just a field.
+      ? FormErrors<TFormValues[Key]> // handles nested components
+      : string; // otherwise its just a field.
 };
 
 interface FormState<TFormValues extends FormValues = FormValues> {
@@ -674,8 +674,8 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
           error.values
         )
       : typeof error === 'string'
-      ? error
-      : undefined,
+        ? error
+        : undefined,
     onChange: handleChange,
     value: value,
   };

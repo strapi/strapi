@@ -12,8 +12,6 @@ const adminApi = createApi({
     'Me',
     'ProjectSettings',
     'ProvidersOptions',
-    'ReviewWorkflow',
-    'ReviewWorkflowStage',
     'Role',
     'RolePermissions',
     'TransferToken',
