@@ -1,4 +1,4 @@
-const { createTestTransferToken } = require('./create-transfer-token.ts');
+const { createTestTransferToken } = require('./create-transfer-token');
 
 module.exports = {
   /**
