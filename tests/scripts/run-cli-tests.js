@@ -10,7 +10,7 @@ const { cleanTestApp, generateTestApp } = require('../helpers/test-app');
 
 const cwd = path.resolve(__dirname, '../..');
 const testAppDirectory = path.join(cwd, 'test-apps', 'cli');
-const testRoot = path.join(cwd, 'cli-tests');
+const testRoot = path.join(cwd, 'tests', 'cli');
 const testsDir = path.join(testRoot, 'tests');
 const templateDir = path.join(testRoot, 'app-template');
 
@@ -222,7 +222,7 @@ yargs
                   'jest',
                   [
                     '--config',
-                    '../../../jest.config.cli.js',
+                    '../../../../jest.config.cli.js',
                     '--rootDir',
                     domainDir,
                     '--color',
