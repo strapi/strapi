@@ -17,5 +17,9 @@ describe('urls', () => {
         `"http://localhost:1337/example"`
       );
     });
+
+    it('should handle protocol relative URLs', () => {
+      expect(createAbsoluteUrl('//example.com')).toMatchInlineSnapshot(`"http://example.com/"`);
+    });
   });
 });
