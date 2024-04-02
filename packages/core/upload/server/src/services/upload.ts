@@ -85,11 +85,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // eslint-disable-next-line no-control-regex
     return /[<>:"/\\|?*\u0000-\u001F]/g;
   }
-  
+
   function windowsReservedNameRegex() {
     return /^(con|prn|aux|nul|com\d|lpt\d)$/i;
   }
-  
+
   /**
    * Copied from https://github.com/sindresorhus/valid-filename package
    */
@@ -105,7 +105,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     }
     return true;
   }
-  
+
   async function emitEvent(event: string, data: Record<string, any>) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
     const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(
