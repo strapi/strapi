@@ -4,7 +4,7 @@ import type { ServiceInstance } from './service-instance';
 
 export interface Context<
   TAction extends keyof ServiceInstance = keyof ServiceInstance,
-  TArgs = Parameters<ServiceInstance[TAction]>
+  TArgs = Parameters<ServiceInstance[TAction]>,
 > {
   uid: UID.ContentType;
   action: TAction;

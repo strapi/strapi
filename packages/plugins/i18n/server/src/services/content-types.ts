@@ -1,10 +1,15 @@
 import _ from 'lodash';
-import { pick, pipe, has, prop, isNil, cloneDeep, isArray, difference } from 'lodash/fp';
+import { pick, pipe, has, prop, isNil, cloneDeep, isArray } from 'lodash/fp';
 import { errors, contentTypes as contentTypeUtils } from '@strapi/utils';
 import { getService } from '../utils';
 
-const { isRelationalAttribute, getVisibleAttributes, isTypedAttribute, getScalarAttributes } =
-  contentTypeUtils;
+const {
+  isRelationalAttribute,
+  getVisibleAttributes,
+  isTypedAttribute,
+  getScalarAttributes,
+  getRelationalAttributes,
+} = contentTypeUtils;
 const { ApplicationError } = errors;
 
 const hasLocalizedOption = (modelOrAttribute: any) => {
@@ -149,9 +154,19 @@ const getNestedPopulateOfNonLocalizedAttributes = (modelUID: any) => {
   const schema = strapi.getModel(modelUID);
   const scalarAttributes = getScalarAttributes(schema);
   const nonLocalizedAttributes = getNonLocalizedAttributes(schema);
-  const currentAttributesToPopulate = difference(nonLocalizedAttributes, scalarAttributes);
-  const attributesToPopulate = [...currentAttributesToPopulate];
 
+  const allAttributes = [...scalarAttributes, ...nonLocalizedAttributes];
+  if (schema.modelType === 'component') {
+    // When called recursively on a non localized component we
+    // need to explicitly populate that components relations
+    allAttributes.push(...getRelationalAttributes(schema));
+  }
+
+  const currentAttributesToPopulate = allAttributes.filter((value, index, self) => {
+    return self.indexOf(value) === index && self.lastIndexOf(value) === index;
+  });
+
+  const attributesToPopulate = [...currentAttributesToPopulate];
   for (const attrName of currentAttributesToPopulate) {
     const attr = schema.attributes[attrName];
     if (attr.type === 'component') {

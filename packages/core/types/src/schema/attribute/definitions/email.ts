@@ -12,7 +12,7 @@ export type Email = Intersect<
     Attribute.RequiredOption,
     Attribute.UniqueOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

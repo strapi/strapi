@@ -9,7 +9,7 @@ type TransferEngineErrorDetails<P extends TransferEngineStep = TransferEngineSte
 class TransferEngineError<
   P extends TransferEngineStep = TransferEngineStep,
   U = never,
-  T extends TransferEngineErrorDetails<P, U> = TransferEngineErrorDetails<P, U>
+  T extends TransferEngineErrorDetails<P, U> = TransferEngineErrorDetails<P, U>,
 > extends DataTransferError<T> {
   constructor(severity: Severity, message?: string, details?: T | null) {
     super('engine', severity, message, details);
@@ -23,7 +23,7 @@ class TransferEngineInitializationError extends TransferEngineError<'initializat
 }
 
 class TransferEngineValidationError<
-  T extends { check: string } = { check: string }
+  T extends { check: string } = { check: string },
 > extends TransferEngineError<'validation', T> {
   constructor(message?: string, details?: T) {
     super(SeverityKind.FATAL, message, { step: 'validation', details });
@@ -31,7 +31,7 @@ class TransferEngineValidationError<
 }
 
 class TransferEngineTransferError<
-  T extends { check: string } = { check: string }
+  T extends { check: string } = { check: string },
 > extends TransferEngineError<'transfer', T> {
   constructor(message?: string, details?: T) {
     super(SeverityKind.FATAL, message, { step: 'transfer', details });

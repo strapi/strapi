@@ -5,7 +5,6 @@ import {
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
-  unstable_useDocument,
   useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -24,6 +23,7 @@ import {
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
 import { EmptyDocuments, Plus } from '@strapi/icons';
+import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -45,17 +45,17 @@ import type { UID } from '@strapi/types';
  * AddActionToReleaseModal
  * -----------------------------------------------------------------------------------------------*/
 
-const RELEASE_ACTION_FORM_SCHEMA = yup.object().shape({
+export const RELEASE_ACTION_FORM_SCHEMA = yup.object().shape({
   type: yup.string().oneOf(['publish', 'unpublish']).required(),
   releaseId: yup.string().required(),
 });
 
-interface FormValues {
+export interface FormValues {
   type: CreateReleaseAction.Request['body']['type'];
   releaseId: CreateReleaseAction.Request['params']['releaseId'];
 }
 
-const INITIAL_VALUES = {
+export const INITIAL_VALUES = {
   type: 'publish',
   releaseId: '',
 } satisfies FormValues;
@@ -66,7 +66,7 @@ interface AddActionToReleaseModalProps {
   entryId: GetContentTypeEntryReleases.Request['query']['entryId'];
 }
 
-const NoReleases = () => {
+export const NoReleases = () => {
   const { formatMessage } = useIntl();
   return (
     <EmptyStateLayout

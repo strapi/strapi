@@ -2,6 +2,7 @@ import type { Core, Modules } from '@strapi/types';
 
 import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
+import { transformData } from './transform/data';
 
 /**
  * Repository to :
@@ -40,6 +41,9 @@ export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Se
   } as Modules.Documents.Service;
 
   return Object.assign(factory, {
+    utils: {
+      transformData,
+    },
     use: middlewares.use.bind(middlewares),
   });
 };
