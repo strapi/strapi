@@ -3,11 +3,11 @@ import React from 'react';
 import { useRBAC } from '@strapi/helper-plugin';
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { mockData } from '@tests/mockData';
-import { render, waitFor, server } from '@tests/utils';
+import { render, waitFor, server, screen } from '@tests/utils';
 import { rest } from 'msw';
+import { useLocation } from 'react-router-dom';
 
 import { ListPage } from '../ListPage';
-
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
@@ -18,17 +18,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   useFocusWhenNavigate: jest.fn(),
 }));
 
-jest.mock('react-router-dom', () => ({
-  ...jest.requireActual('react-router-dom'), 
-  useHistory: () => ({
-    push: mockedPush
-  }),
-  useLocation: jest.fn().mockReturnValue({
-    pathname: '/admin/settings/webhooks',
-  })
-}));
-const mockedPush = jest.fn();
+const LocationDisplay = () => {
+  const location = useLocation();
 
+  return <span data-testId="location">{location.pathname}</span>;
+};
 
 describe('Webhooks | ListPage', () => {
   beforeEach(() => {
@@ -173,16 +167,22 @@ describe('Webhooks | ListPage', () => {
       })
     );
 
-    const { getByText, getByRole } = render(<ListPage />);
-
-    await waitFor(() => {
-      expect(getByText('No webhooks found')).toBeInTheDocument();
+    const { getByRole, findByText, user } = render(<ListPage />, {
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <>
+              {children}
+              <LocationDisplay />
+            </>
+          );
+        },
+      },
     });
 
-    fireEvent.click(getByRole('button', {name: 'Create new webhook'}));
-
-
-
-    expect(mockedPush).toHaveBeenCalledWith('/admin/settings/webhooks/create')
+    await findByText('No webhooks found');
+    expect(screen.getByTestId('location')).not.toHaveTextContent('/create');
+    await user.click(getByRole('button', { name: 'Create new webhook' }));
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/create'));
   });
 });
