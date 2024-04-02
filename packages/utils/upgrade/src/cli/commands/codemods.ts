@@ -1,12 +1,11 @@
 import prompts from 'prompts';
 
+import type { Command } from 'commander';
 import { loggerFactory } from '../../modules/logger';
 import { Version } from '../../modules/version';
 import { handleError } from '../errors';
 import * as tasks from '../../tasks';
 import { debugOption, dryOption, projectPathOption, rangeOption, silentOption } from '../options';
-
-import type { Command } from 'commander';
 
 import type {
   CLIListCodemodsOptions,

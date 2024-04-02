@@ -2,7 +2,7 @@ import * as f from '../../modules/format';
 import { timerFactory } from '../../modules/timer';
 import { projectFactory } from '../../modules/project';
 import { codemodRunnerFactory } from '../../modules/codemod-runner';
-import { findRangeFromTarget, getRangeFromTarget, resolvePath } from './utils';
+import { findRangeFromTarget, resolvePath } from './utils';
 
 import type { RunCodemodsOptions } from './types';
 import type { CodemodRunnerReport } from '../../modules/codemod-runner';

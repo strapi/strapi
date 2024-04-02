@@ -1,6 +1,6 @@
 import { vol, fs } from 'memfs';
 
-import { Range, SemVer } from 'semver';
+import { SemVer } from 'semver';
 import {
   CodemodRepository,
   parseCodemodKindFromFilename,

@@ -40,7 +40,7 @@ export const findRangeFromTarget = (
 
   // If the current project is a Strapi application
   // Get the range from the given target
-  else if (isApplicationProject(project)) {
+  if (isApplicationProject(project)) {
     return getRangeFromTarget(project.strapiVersion, target);
   }
 

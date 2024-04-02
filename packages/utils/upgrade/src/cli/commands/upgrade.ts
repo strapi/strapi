@@ -1,6 +1,7 @@
 import prompts from 'prompts';
 import { InvalidArgumentError, Option } from 'commander';
 
+import type { Command } from 'commander';
 import { loggerFactory } from '../../modules/logger';
 import { Version, isLiteralSemVer, isValidSemVer, semVerFactory } from '../../modules/version';
 import { handleError } from '../errors';
@@ -12,8 +13,6 @@ import {
   projectPathOption,
   silentOption,
 } from '../options';
-
-import type { Command } from 'commander';
 
 import type { CLIUpgradeOptions, CLIUpgradeToOptions, UpgradeCommand } from '../types';
 
