@@ -8359,6 +8359,8 @@ __metadata:
     node-schedule: "npm:2.1.0"
     tsconfig: "npm:5.0.0-beta.1"
     typedoc: "npm:0.25.10"
+    typedoc-github-wiki-theme: "npm:1.1.0"
+    typedoc-plugin-markdown: "npm:3.17.1"
     typescript: "npm:5.3.2"
     undici: "npm:5.27.2"
   languageName: unknown
@@ -29036,6 +29038,27 @@ __metadata:
   version: 0.0.6
   resolution: "typedarray@npm:0.0.6"
   checksum: 2cc1bcf7d8c1237f6a16c04efc06637b2c5f2d74e58e84665445cf87668b85a21ab18dd751fa49eee6ae024b70326635d7b79ad37b1c370ed2fec6aeeeb52714
+  languageName: node
+  linkType: hard
+
+"typedoc-github-wiki-theme@npm:1.1.0":
+  version: 1.1.0
+  resolution: "typedoc-github-wiki-theme@npm:1.1.0"
+  peerDependencies:
+    typedoc: ">=0.24.0"
+    typedoc-plugin-markdown: ">=3.15.0"
+  checksum: 84661e8c1a4540929b5a23bd8fcd81fdbdbf7f2d9338751bcb6861307fde08de7ddb876870e114aac34773590ced24de0b4c456fabc411bd9a41830ea069833f
+  languageName: node
+  linkType: hard
+
+"typedoc-plugin-markdown@npm:3.17.1":
+  version: 3.17.1
+  resolution: "typedoc-plugin-markdown@npm:3.17.1"
+  dependencies:
+    handlebars: "npm:^4.7.7"
+  peerDependencies:
+    typedoc: ">=0.24.0"
+  checksum: 21bfe7fba60e3c27e15700196b1b4abdf5b63bfdc9a4af57cf6f0891f9d359ac561435773709c6ea3555bae402b7a81b637d055e767afd33e2c0dc717d0449d2
   languageName: node
   linkType: hard
 

@@ -2,11 +2,10 @@
   "$schema": "https://typedoc.org/schema.json",
   "entryPoints": ["./src/index.ts"],
   "out": "./docs",
-  "theme": "default",
-  "plugin": [],
+  "theme": "github-wiki",
+  "plugin": ["typedoc-plugin-markdown", "typedoc-github-wiki-theme"],
   "includeVersion": true,
   "cleanOutputDir": true,
   "emit": "docs",
-  "name": "Strapi Type System",
-  "readme": "./README.md"
+  "name": "Strapi Type System"
 }
