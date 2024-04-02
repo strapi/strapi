@@ -1,6 +1,6 @@
 import type { Migration } from '../common';
 import { createdDocumentId } from './5.0.0-01-document-id';
-import { createDocumentDrafts } from './5.0.0-02-document-drafts';
+// import { createDocumentDrafts } from './5.0.0-02-document-drafts';
 import { discardDocumentDrafts } from './5.0.0-03-document-discard-drafts';
 
 /**
@@ -14,6 +14,6 @@ import { discardDocumentDrafts } from './5.0.0-03-document-discard-drafts';
  */
 export const internalMigrations: Migration[] = [
   createdDocumentId,
-  createDocumentDrafts,
+  // createDocumentDrafts,
   discardDocumentDrafts,
 ];

@@ -80,6 +80,8 @@ export const createDocumentDrafts: Migration = {
             .from(meta.tableName)
             // Only select entries that were published
             .whereNotNull('published_at');
+          // TODO: Do not create draft if there is already a draft for the document
+          // && NOT EXISTS (SELECT id from table as alias WHERE table.doc_id=alias.doc_id & alias.published_at IS NULL)
         });
     }
   },

@@ -33,7 +33,6 @@ async function* getBatchToDiscard({
       .limit(batchSize)
       .offset(offset)
       .orderBy('id')
-      // .forUpdate() // Could this be enough to horizontally scale the migration?
       .execute();
 
     if (batch.length < batchSize) {
