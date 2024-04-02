@@ -687,10 +687,19 @@ const isErrorMessageDescriptor = (object?: string | object): object is Translati
   );
 };
 
+/**
+ * Props for the Blocker component.
+ * @param onProceed Function to be called when the user confirms the action that triggered the blocker.
+ * @param onCancel Function to be called when the user cancels the action that triggered the blocker.
+ */
+interface BlockerProps {
+  onProceed?: () => void;
+  onCancel?: () => void;
+}
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = ({ onProceed = () => {} }) => {
+const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
@@ -705,6 +714,11 @@ const Blocker = ({ onProceed = () => {} }) => {
   });
 
   if (blocker.state === 'blocked') {
+    const handleCancel = () => {
+      onCancel();
+      blocker.reset();
+    };
+
     return (
       <Dialog
         isOpen
@@ -712,7 +726,7 @@ const Blocker = ({ onProceed = () => {} }) => {
           id: 'app.components.ConfirmDialog.title',
           defaultMessage: 'Confirmation',
         })}
-        onClose={blocker.reset}
+        onClose={handleCancel}
       >
         <DialogBody>
           <Flex direction="column" gap={2}>
@@ -727,7 +741,7 @@ const Blocker = ({ onProceed = () => {} }) => {
         </DialogBody>
         <DialogFooter
           startAction={
-            <Button onClick={blocker.reset} variant="tertiary">
+            <Button onClick={handleCancel} variant="tertiary">
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
