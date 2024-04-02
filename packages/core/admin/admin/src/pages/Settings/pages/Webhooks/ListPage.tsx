@@ -44,6 +44,7 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 
 import { useWebhooks } from './hooks/useWebhooks';
 
+
 /* -------------------------------------------------------------------------------------------------
  * ListPage
  * -----------------------------------------------------------------------------------------------*/
@@ -383,7 +384,8 @@ const ListPage = () => {
                 <Button
                   variant="secondary"
                   startIcon={<Plus />}
-                  onClick={() => (canCreate ? goTo('create') : {})}
+                  disabled={!canCreate}
+                  onClick={canCreate ? goTo('create') : undefined}
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.list.button.add',

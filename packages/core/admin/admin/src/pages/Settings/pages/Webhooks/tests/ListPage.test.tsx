@@ -8,6 +8,7 @@ import { rest } from 'msw';
 
 import { ListPage } from '../ListPage';
 
+
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useRBAC: jest.fn().mockImplementation(() => ({
@@ -16,6 +17,18 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
   useFocusWhenNavigate: jest.fn(),
 }));
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'), 
+  useHistory: () => ({
+    push: mockedPush
+  }),
+  useLocation: jest.fn().mockReturnValue({
+    pathname: '/admin/settings/webhooks',
+  })
+}));
+const mockedPush = jest.fn();
+
 
 describe('Webhooks | ListPage', () => {
   beforeEach(() => {
@@ -147,5 +160,29 @@ describe('Webhooks | ListPage', () => {
     await waitFor(async () => {
       expect(enableSwitches[0]).toHaveAttribute('aria-checked', 'false');
     });
+  });
+
+  it('should allow to create a new webhook on empty state screen by clicking on the button', async () => {
+    server.use(
+      rest.get('/admin/webhooks', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            data: [],
+          })
+        );
+      })
+    );
+
+    const { getByText, getByRole } = render(<ListPage />);
+
+    await waitFor(() => {
+      expect(getByText('No webhooks found')).toBeInTheDocument();
+    });
+
+    fireEvent.click(getByRole('button', {name: 'Create new webhook'}));
+
+
+
+    expect(mockedPush).toHaveBeenCalledWith('/admin/settings/webhooks/create')
   });
 });
