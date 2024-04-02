@@ -78,9 +78,8 @@ const migrateUp = async (db: Database) => {
  *
  * This migration creates the document draft counterpart for all the entries that were in a published state.
  */
-const MIGRATION_NAME = 'discard-drafts';
 export const discardDocumentDrafts: Migration = {
-  name: MIGRATION_NAME,
+  name: '5.0.0-03-discard drafts',
   async up(_, db) {
     // TODO: Do not await, run this asynchronously
     // TODO: Log to inform the user that the migration is running in the background
