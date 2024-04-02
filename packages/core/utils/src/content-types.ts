@@ -181,6 +181,17 @@ const getScalarAttributes = (schema: Model) => {
   );
 };
 
+const getRelationalAttributes = (schema: Model) => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isRelationalAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    [] as string[]
+  );
+};
+
 /**
  * Checks if an attribute is of type `type`
  * @param {object} attribute
@@ -215,6 +226,7 @@ export {
   getNonWritableAttributes,
   getComponentAttributes,
   getScalarAttributes,
+  getRelationalAttributes,
   getWritableAttributes,
   isWritableAttribute,
   getNonVisibleAttributes,

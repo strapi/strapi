@@ -132,7 +132,7 @@ export declare namespace Clone {
 }
 
 /**
- * POST /collection-types/:model/:id
+ * PUT /collection-types/:model/:id
  */
 export declare namespace Update {
   export interface Request {

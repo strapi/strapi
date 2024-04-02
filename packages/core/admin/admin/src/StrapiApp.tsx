@@ -725,11 +725,11 @@ class StrapiApp {
                   ),
                 })),
                 ...getBaseEERoutes(),
+                {
+                  path: '*',
+                  element: <NotFoundPage />,
+                },
               ],
-            },
-            {
-              path: '*',
-              element: <NotFoundPage />,
             },
           ],
         },

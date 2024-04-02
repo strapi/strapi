@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import { has, omit, pipe, assign } from 'lodash/fp';
+import { get, has, omit, pipe, assign } from 'lodash/fp';
 
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
-import type { Modules, UID, Data, Utils, Schema } from '@strapi/types';
+import type { Modules, UID, Data, Utils, Schema, Core } from '@strapi/types';
 
 type LoadedComponents<TUID extends UID.Schema> = Data.Entity<
   TUID,
@@ -477,6 +477,55 @@ const deleteComponent = async <TUID extends UID.Component>(
   await strapi.db.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
+/**
+ * Resolve the component UID of an entity's attribute based
+ * on a given path (components & dynamic zones only)
+ */
+const resolveComponentUID = ({
+  paths,
+  strapi,
+  data,
+  contentType,
+}: {
+  paths: string[];
+  strapi: Core.LoadedStrapi;
+  data: any;
+  contentType: Schema.ContentType;
+}): UID.Schema | undefined => {
+  let value: unknown = data;
+  let cType:
+    | Schema.ContentType
+    | Schema.Component
+    | ((...opts: any[]) => Schema.ContentType | Schema.Component) = contentType;
+  for (const path of paths) {
+    value = get(path, value);
+
+    // Needed when the value of cType should be computed
+    // based on the next value (eg: dynamic zones)
+    if (typeof cType === 'function') {
+      cType = cType(value);
+    }
+
+    if (path in cType.attributes) {
+      const attribute: Schema.Attribute.AnyAttribute = cType.attributes[path];
+
+      if (attribute.type === 'component') {
+        cType = strapi.getModel(attribute.component);
+      }
+
+      if (attribute.type === 'dynamiczone') {
+        cType = ({ __component }: { __component: UID.Component }) => strapi.getModel(__component);
+      }
+    }
+  }
+
+  if ('uid' in cType) {
+    return cType.uid;
+  }
+
+  return undefined;
+};
+
 export {
   omitComponentData,
   getComponents,
@@ -484,4 +533,5 @@ export {
   updateComponents,
   deleteComponents,
   deleteComponent,
+  resolveComponentUID,
 };
