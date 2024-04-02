@@ -1,4 +1,3 @@
-import { isNil } from 'lodash/fp';
 import { createId } from '@paralleldrive/cuid2';
 import type { Knex } from 'knex';
 
@@ -123,8 +122,9 @@ const migrationDocumentIds = async (db: Database, knex: Knex, meta: Meta) => {
   do {
     const updatedRows = await knex(meta.tableName)
       .update({ document_id: createId() })
-      .whereNull('document_id')
-      .limit(1);
+      .whereIn('id', (builder) => {
+        return builder.whereNull('document_id').select('id').limit(1);
+      });
 
     if (updatedRows <= 0) {
       run = false;
