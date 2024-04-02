@@ -147,6 +147,8 @@ playwright-report
 test-results
 !tests/e2e/data/*.tar
 tests/e2e/.env
+!tests/cli/data/*.tar.gz
+tests/cli/.env
 
 ############################
 # Strapi
