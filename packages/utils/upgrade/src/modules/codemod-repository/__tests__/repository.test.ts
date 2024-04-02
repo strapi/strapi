@@ -59,47 +59,6 @@ describe('CodemodRepository', () => {
     expect(repo.count(version)).toBe(2);
   });
 
-  test.each([
-    ['>=1.0.0 <=2.0.0', 2],
-    ['>=1.0.0 <=1.0.0', 1],
-    ['>=1.0.0', 2],
-    ['<1.0.0', 0],
-    ['>2.0.0', 0],
-  ])(
-    'countRange method returns the number of codemods for range %s',
-    (rangeStr, expectedCountRange) => {
-      const range = new Range(rangeStr);
-      const repo = new CodemodRepository(validCwd);
-
-      expect(repo.countRange(range)).toBe(0);
-
-      expect(() => repo.refresh()).not.toThrow();
-
-      expect(repo.countRange(range)).toBe(expectedCountRange);
-    }
-  );
-
-  test.each([
-    ['>=1.0.0 <=2.0.0', ['1.0.0', '2.0.0']],
-    ['>=1.0.0 <=1.0.0', ['1.0.0']],
-    ['>=1.0.0', ['1.0.0', '2.0.0']],
-    ['<1.0.0', []],
-    ['>2.0.0', []],
-  ])('findByRange method returns the codemods for range %s', (rangeStr, rawVersions) => {
-    const range = new Range(rangeStr);
-    const repo = new CodemodRepository(validCwd);
-
-    expect(repo.findByRange(range)).toHaveLength(0);
-
-    expect(() => repo.refresh()).not.toThrow();
-
-    const codemods = repo.findByRange(range);
-    expect(codemods).toHaveLength(rawVersions.length);
-    rawVersions.forEach((rawVersion, i) => {
-      expect(codemods[i].version.raw).toBe(rawVersion);
-    });
-  });
-
   test('findByVersion method returns the codemods for a given version', () => {
     const version = new SemVer('1.0.0');
     const repo = new CodemodRepository(validCwd);
@@ -125,26 +84,26 @@ test('parseCodemodKindFromFilename throws for invalid filename', () => {
   expect(() => parseCodemodKindFromFilename('test.js')).toThrow();
 });
 
-test('exists method returns true if the version exists', () => {
+test('versionExists method returns true if the version exists', () => {
   const version = new SemVer('1.0.0');
   const repo = new CodemodRepository(validCwd);
 
-  expect(repo.exists(version)).toBe(false);
+  expect(repo.versionExists(version)).toBe(false);
 
   expect(() => repo.refresh()).not.toThrow();
 
-  expect(repo.exists(version)).toBe(true);
+  expect(repo.versionExists(version)).toBe(true);
 });
 
-test('exists method returns false if the version does not exist', () => {
+test('versionExists method returns false if the version does not exist', () => {
   const version = new SemVer('3.0.0');
   const repo = new CodemodRepository(validCwd);
 
-  expect(repo.exists(version)).toBe(false);
+  expect(repo.versionExists(version)).toBe(false);
 
   expect(() => repo.refresh()).not.toThrow();
 
-  expect(repo.exists(version)).toBe(false);
+  expect(repo.versionExists(version)).toBe(false);
 });
 
 describe('parseCodemodKindFromFilename', () => {

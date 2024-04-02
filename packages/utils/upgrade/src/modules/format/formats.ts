@@ -3,6 +3,8 @@ import chalk from 'chalk';
 
 import { constants as timerConstants } from '../timer';
 
+import type { ProjectType } from '../project';
+import type { Codemod } from '../codemod';
 import type { Version } from '../version';
 import type { Report } from '../report';
 
@@ -11,6 +13,8 @@ export const path = (path: string) => chalk.blue(path);
 export const version = (version: Version.LiteralVersion | Version.SemVer) => {
   return chalk.italic.yellow(`v${version}`);
 };
+
+export const projectType = (type: ProjectType) => chalk.cyan(type);
 
 export const versionRange = (range: Version.Range) => chalk.italic.yellow(range);
 
@@ -48,6 +52,35 @@ export const reports = (reports: Report.CodemodReport[]) => {
       chalk.bold.green('Affected'),
       chalk.bold.red('Unchanged'),
       chalk.bold.blue('Duration'),
+    ],
+  });
+
+  table.push(...rows);
+
+  return table.toString();
+};
+
+export const codemodList = (codemods: Codemod.List) => {
+  type Row = [index: string, version: string, kind: string, name: string, uid: string];
+
+  const rows = codemods.map<Row>((codemod, index) => {
+    const fIndex = chalk.grey(index);
+    const fVersion = chalk.magenta(codemod.version);
+    const fKind = chalk.yellow(codemod.kind);
+    const fName = chalk.blue(codemod.format());
+    const fUID = chalk.cyan(codemod.uid);
+
+    return [fIndex, fVersion, fKind, fName, fUID];
+  });
+
+  const table = new CliTable3({
+    style: { compact: true },
+    head: [
+      chalk.bold.grey('N°'),
+      chalk.bold.magenta('Version'),
+      chalk.bold.yellow('Kind'),
+      chalk.bold.blue('Name'),
+      chalk.bold.cyan('UID'),
     ],
   });
 

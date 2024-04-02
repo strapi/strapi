@@ -4,7 +4,7 @@ import * as requirements from './requirements';
 import { timerFactory } from '../../modules/timer';
 import { upgraderFactory, constants as upgraderConstants } from '../../modules/upgrader';
 import { npmPackageFactory } from '../../modules/npm';
-import { projectFactory, isAppProject } from '../../modules/project';
+import { projectFactory, isApplicationProject } from '../../modules/project';
 import * as f from '../../modules/format';
 import { Version } from '../../modules/version';
 
@@ -19,7 +19,7 @@ export const upgrade = async (options: UpgradeOptions) => {
 
   const project = projectFactory(cwd);
 
-  if (!isAppProject(project)) {
+  if (!isApplicationProject(project)) {
     throw new Error(
       `The "${options.target}" upgrade can only be run on a Strapi project; for plugins, please use "codemods".`
     );
