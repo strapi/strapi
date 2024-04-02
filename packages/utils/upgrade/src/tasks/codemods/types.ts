@@ -1,7 +1,5 @@
-import { SelectCodemodsCallback } from '../../modules/codemod-runner/types';
-import { ConfirmationCallback } from '../../modules/common/types';
-
-import type { Codemod } from '../../modules/codemod';
+import type { SelectCodemodsCallback } from '../../modules/codemod-runner';
+import type { ConfirmationCallback } from '../../modules/common/types';
 import type { Logger } from '../../modules/logger';
 import type { Version } from '../../modules/version';
 
