@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('./constants');
 
