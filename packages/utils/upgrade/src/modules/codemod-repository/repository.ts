@@ -4,12 +4,14 @@ import semver from 'semver';
 import path from 'node:path';
 
 import { codemodFactory, constants } from '../codemod';
-import { semVerFactory } from '../version';
+import { isRangeInstance, semVerFactory } from '../version';
+
+import { INTERNAL_CODEMODS_DIRECTORY } from './constants';
 
 import type { Codemod } from '../codemod';
 import type { Version } from '../version';
 
-import type { CodemodRepository as CodemodRepositoryInterface } from './types';
+import type { CodemodRepository as CodemodRepositoryInterface, FindQuery } from './types';
 
 export class CodemodRepository implements CodemodRepositoryInterface {
   private groups: Record<Version.LiteralSemVer, Codemod.Codemod[]>;
@@ -38,23 +40,54 @@ export class CodemodRepository implements CodemodRepositoryInterface {
     return this.findByVersion(version).length;
   }
 
-  countRange(range: Version.Range) {
-    return this.findByRange(range).length;
-  }
-
-  exists(version: Version.SemVer) {
+  versionExists(version: Version.SemVer) {
     return version.raw in this.groups;
   }
 
-  findByRange(range: Version.Range) {
+  has(uid: string) {
+    const result = this.find({ uids: [uid] });
+
+    if (result.length !== 1) {
+      return false;
+    }
+
+    const { codemods } = result[0];
+
+    return codemods.length === 1 && codemods[0].uid === uid;
+  }
+
+  find(q: FindQuery) {
     const entries = Object.entries(this.groups) as Array<[Version.LiteralSemVer, Codemod.List]>;
 
-    return entries
-      .filter(([version]) => range.test(version))
-      .map<Codemod.VersionedCollection>(([version, codemods]) => ({
-        version: semVerFactory(version),
-        codemods,
-      }));
+    return (
+      entries
+        // Filter by range if provided in the query
+        .filter(maybeFilterByRange)
+        // Transform version/codemods tuples into regular objects
+        .map<Codemod.VersionedCollection>(([version, codemods]) => ({
+          version: semVerFactory(version),
+          // Filter by UID if provided in the query
+          codemods: codemods.filter(maybeFilterByUIDs),
+        }))
+        // Only return groups with at least 1 codemod
+        .filter(({ codemods }) => codemods.length > 0)
+    );
+
+    function maybeFilterByRange([version]: [Version.LiteralSemVer, Codemod.List]) {
+      if (!isRangeInstance(q.range)) {
+        return true;
+      }
+
+      return q.range.test(version);
+    }
+
+    function maybeFilterByUIDs(codemod: Codemod.Codemod) {
+      if (q.uids === undefined) {
+        return true;
+      }
+
+      return q.uids.includes(codemod.uid);
+    }
   }
 
   findByVersion(version: Version.SemVer) {
@@ -128,4 +161,6 @@ export const parseCodemodKindFromFilename = (filename: string): Codemod.Kind => 
   return kind;
 };
 
-export const codemodRepositoryFactory = (cwd: string) => new CodemodRepository(cwd);
+export const codemodRepositoryFactory = (cwd: string = INTERNAL_CODEMODS_DIRECTORY) => {
+  return new CodemodRepository(cwd);
+};

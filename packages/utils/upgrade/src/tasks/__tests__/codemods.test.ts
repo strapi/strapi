@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { codemods } from '../codemods';
+import { runCodemods } from '../codemods';
 import { Version, rangeFactory, semVerFactory } from '../../modules/version';
 import { projectFactory } from '../../modules/project';
 import { codemodRunnerFactory } from '../../modules/codemod-runner';
@@ -7,7 +7,7 @@ import { loggerFactory } from '../../modules/logger';
 
 jest.mock('../../modules/codemod-runner');
 jest.mock('../../modules/project', () => ({
-  isAppProject: jest.fn(() => true),
+  isApplicationProject: jest.fn(() => true),
   projectFactory: jest.fn().mockReturnValue({
     refresh: jest.fn().mockReturnThis(),
     runCodemods: jest.fn().mockResolvedValue({ success: true }),
@@ -58,7 +58,7 @@ describe('codemods task', () => {
   });
 
   it('completes codemod execution successfully', async () => {
-    await expect(codemods(options)).resolves.toBeUndefined();
+    await expect(runCodemods(options)).resolves.toBeUndefined();
   });
 
   it('throws an error on codemod execution failure', async () => {
@@ -69,7 +69,7 @@ describe('codemods task', () => {
       error: new Error('Mock error'),
     });
 
-    await expect(codemods(options)).rejects.toThrow('Mock error');
+    await expect(runCodemods(options)).rejects.toThrow('Mock error');
   });
 
   it('handles invalid target version', async () => {
@@ -81,6 +81,6 @@ describe('codemods task', () => {
     };
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    await expect(codemods(options)).rejects.toThrow('Invalid target set');
+    await expect(runCodemods(options)).rejects.toThrow('Invalid target set');
   });
 });
