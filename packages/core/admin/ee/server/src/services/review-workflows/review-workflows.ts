@@ -62,7 +62,7 @@ const setReviewWorkflowAttributes = (contentType: any) => {
   setAssigneeAttribute(contentType);
 };
 
-function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.LoadedStrapi }) {
+function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.Strapi }) {
   const extendContentType = (contentTypeUID: any) => {
     strapi.get('content-types').extend(contentTypeUID, setReviewWorkflowAttributes);
   };
@@ -74,7 +74,7 @@ function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.LoadedStrap
   ])(strapi.contentTypes);
 }
 
-function persistStagesJoinTables({ strapi }: { strapi: Core.LoadedStrapi }) {
+function persistStagesJoinTables({ strapi }: { strapi: Core.Strapi }) {
   return async ({ contentTypes }: any) => {
     const getStageTableToPersist = (contentTypeUID: any) => {
       // Persist the stage join table
@@ -98,12 +98,12 @@ function persistStagesJoinTables({ strapi }: { strapi: Core.LoadedStrapi }) {
   };
 }
 
-const registerWebhookEvents = async ({ strapi }: { strapi: Core.LoadedStrapi }) =>
+const registerWebhookEvents = async ({ strapi }: { strapi: Core.Strapi }) =>
   Object.entries(webhookEvents).forEach(([eventKey, event]) =>
-    strapi.webhookStore.addAllowedEvent(eventKey, event)
+    strapi.get('webhookStore').addAllowedEvent(eventKey, event)
   );
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const workflowsService = getService('workflows', { strapi });
   const stagesService = getService('stages', { strapi });
   const workflowsValidationService = getService('review-workflows-validation', { strapi });

@@ -12,10 +12,10 @@ describe('Admin Transfer Token CRUD (api)', () => {
   const FULL_ACCESS = ['push', 'pull'];
 
   const deleteAllTokens = async () => {
-    const tokens = await strapi.admin.services.transfer.token.list();
+    const tokens = await strapi.service('admin::transfer').token.list();
     const promises = [];
     tokens.forEach(({ id }) => {
-      promises.push(strapi.admin.services.transfer.token.revoke(id));
+      promises.push(strapi.service('admin::transfer').token.revoke(id));
     });
     await Promise.all(promises);
   };

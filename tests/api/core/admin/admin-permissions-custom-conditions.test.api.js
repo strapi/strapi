@@ -172,9 +172,9 @@ describe.skip('Admin Permissions - Conditions', () => {
     strapi = await createStrapiInstance({
       bootstrap: ({ strapi }) => {
         // Create custom conditions
-        return strapi.admin.services.permission.conditionProvider.registerMany(
-          localTestData.customConditions
-        );
+        return strapi
+          .service('admin::permission')
+          .conditionProvider.registerMany(localTestData.customConditions);
       },
     });
     utils = createUtils(strapi);

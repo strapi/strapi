@@ -154,3 +154,4 @@ tests/cli/.env
 # Strapi
 ############################
 examples/**/types/generated
+.nx/cache

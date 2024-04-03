@@ -7,7 +7,7 @@ import { IEntity } from '../../../../types';
 /**
  * Generate and consume content-types streams in order to stream each entity individually
  */
-export const createEntitiesStream = (strapi: Core.LoadedStrapi): Readable => {
+export const createEntitiesStream = (strapi: Core.Strapi): Readable => {
   const contentTypes: Struct.ContentTypeSchema[] = Object.values(strapi.contentTypes);
 
   async function* contentTypeStreamGenerator() {

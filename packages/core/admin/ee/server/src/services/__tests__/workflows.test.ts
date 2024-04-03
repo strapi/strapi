@@ -97,7 +97,7 @@ const strapiMock = {
       };
     }
   },
-} as unknown as Core.LoadedStrapi;
+} as unknown as Core.Strapi;
 
 const ctMap: Record<string, any> = {
   [WORKFLOW_MODEL_UID]: workflowCT.schema,

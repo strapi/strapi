@@ -10,7 +10,7 @@ import { testInTransaction } from '../../../../utils';
 
 describe('Document Service relations', () => {
   let testUtils;
-  let strapi: Core.LoadedStrapi;
+  let strapi: Core.Strapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);

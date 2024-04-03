@@ -8,7 +8,7 @@ const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('./constants');
  * @returns {Promise<void>}
  */
 const createTestTransferToken = async (strapi) => {
-  const { token: transferTokenService } = strapi.admin.services.transfer;
+  const { token: transferTokenService } = strapi.service('admin::transfer');
 
   const accessKeyHash = transferTokenService.hash(CUSTOM_TRANSFER_TOKEN_ACCESS_KEY);
   const exists = await transferTokenService.exists({ accessKey: accessKeyHash });

@@ -26,7 +26,7 @@ const isForeignKeyConstraintError = (e: Error) => {
 
 export const createLinksWriteStream = (
   mapID: (uid: string, id: number) => number | undefined,
-  strapi: Core.LoadedStrapi,
+  strapi: Core.Strapi,
   transaction?: Transaction,
   onWarning?: (message: string) => void
 ) => {

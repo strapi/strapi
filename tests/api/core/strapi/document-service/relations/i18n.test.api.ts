@@ -4,7 +4,7 @@
  * TODO: Move to i18n tests
  * TODO: Test for every relation type
  */
-import { LoadedStrapi } from '@strapi/types';
+import { Core } from '@strapi/types';
 import { testInTransaction } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
@@ -12,7 +12,7 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 const modelsUtils = require('api-tests/models');
 
-let strapi: LoadedStrapi;
+let strapi: Core.Strapi;
 const builder = createTestBuilder();
 let rq;
 
