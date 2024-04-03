@@ -8,13 +8,7 @@ import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
 import { transformParamsDocumentId } from './transform/id-transform';
 
-import {
-  createComponents,
-  deleteComponents,
-  getComponents,
-  omitComponentData,
-  updateComponents,
-} from '../entity-service/components';
+import * as components from '../entity-service/components';
 
 import { pickSelectionParams } from './params';
 import entityValidator from '../entity-validator';
@@ -75,11 +69,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function deleteEntry(id: number) {
-    const componentsToDelete = await getComponents(uid, { id });
+    const componentsToDelete = await getComponents({ id });
 
     await strapi.db.query(uid).delete({ where: { id } });
 
-    await deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
+    await deleteComponents(componentsToDelete as any, { loadComponents: false });
   }
 
   async function deleteFn(documentId: string, params = {} as any) {
@@ -121,8 +115,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     });
 
     // Component handling
-    const componentData = await createComponents(uid, validData);
-    const contentTypeWithoutComponentData = omitComponentData(contentType, validData);
+    const componentData = await createComponents(validData);
+    const contentTypeWithoutComponentData = omitComponentData(validData);
     const entryData = applyTransforms(
       Object.assign(contentTypeWithoutComponentData, componentData) as any,
       { contentType }
@@ -221,9 +215,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       );
 
       // Component handling
-      const componentData = await updateComponents(uid, entryToUpdate, validData as any);
+      const componentData = await updateComponents(entryToUpdate, validData as any);
       const entryData = applyTransforms(
-        Object.assign(omitComponentData(model, validData), componentData as any),
+        Object.assign(omitComponentData(validData), componentData as any),
         { contentType: model }
       );
 
@@ -364,6 +358,29 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return { versions: draftEntries };
   }
 
+  /**
+   * Component handling
+   */
+  async function createComponents(data: any) {
+    return components.createComponents(uid, data);
+  }
+
+  async function updateComponents(entry: any, data: any) {
+    return components.updateComponents(uid, entry, data);
+  }
+
+  async function getComponents(entry: any) {
+    return components.getComponents(uid, entry);
+  }
+
+  async function deleteComponents(entry: any, opts: any) {
+    return components.deleteComponents(uid, entry, opts);
+  }
+
+  function omitComponentData(data: any) {
+    return components.omitComponentData(contentType, data);
+  }
+
   return {
     findMany: wrapInTransaction(findMany),
     findFirst: wrapInTransaction(findFirst),
@@ -376,15 +393,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     publish: hasDraftAndPublish ? wrapInTransaction(publish) : (undefined as any),
     unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
     discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
-    /**
-     * @internal
-     * Exposed for use within document service middlewares
-     */
+
+    // createComponents,
     updateComponents,
-    /**
-     * @internal
-     * Exposed for use within document service middlewares
-     */
+    // deleteComponents,
+    // getComponents,
     omitComponentData,
   };
 };

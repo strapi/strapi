@@ -11,8 +11,6 @@ import { transformData } from './transform/data';
  * - Apply default parameters to document actions
  *
  * @param strapi
- * @param options.defaults - Default parameters to apply to all actions
- * @param options.parent - Parent repository, used when creating a new repository with .with()
  * @returns DocumentService
  *
  * @example Access documents
@@ -47,3 +45,32 @@ export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Se
     use: middlewares.use.bind(middlewares),
   });
 };
+
+/*
+
+-> make all function receive a param object so we can have a simple object inside the middlewares to manipulate
+
+strapi.documents('api::x.x').findOne({
+  id: 1,
+  populate: ['author'],
+});
+
+strapi.documents('api::x.x').findMany({
+  limit: 10,
+  sort: 'createdAt:desc',
+});
+
+strapi.documents('api::x.x').update({
+  id: 1,
+  data: { title: 'New title' },
+});
+
+
+-> expose some entry apis
+
+-> expose some component apis
+
+-> hide transformations
+
+
+*/

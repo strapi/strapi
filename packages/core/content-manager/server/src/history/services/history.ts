@@ -144,7 +144,6 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           return next();
         }
 
-        // @ts-expect-error ContentType is not typed correctly on the context
         const contentTypeUid = context.contentType.uid;
         // Ignore content types not created by the user
         if (!contentTypeUid.startsWith('api::')) {
@@ -157,8 +156,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           context.action === 'create'
             ? // @ts-expect-error The context args are not typed correctly
               { documentId: result.documentId, locale: context.args[0]?.locale }
-            : // @ts-expect-error The context args are not typed correctly
-              { documentId: context.args[0], locale: context.args[1]?.locale };
+            : { documentId: context.args[0], locale: context.args[1]?.locale };
 
         const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
         const document = await strapi
