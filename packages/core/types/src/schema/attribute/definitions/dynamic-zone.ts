@@ -18,7 +18,7 @@ export type DynamicZone<TComponentsUID extends UID.Component[] = UID.Component[]
     Attribute.MinMaxOption,
     Attribute.RequiredOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

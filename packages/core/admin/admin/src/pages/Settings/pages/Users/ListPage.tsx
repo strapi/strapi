@@ -192,7 +192,7 @@ const ListPageCE = () => {
                             to={user.id.toString()}
                             label={formatMessage(
                               { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
-                              { target: getDisplayName(user, formatMessage) }
+                              { target: getDisplayName(user) }
                             )}
                             noBorder
                             icon={<Pencil />}
@@ -203,7 +203,7 @@ const ListPageCE = () => {
                             onClick={handleDeleteClick(user.id)}
                             label={formatMessage(
                               { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
-                              { target: getDisplayName(user, formatMessage) }
+                              { target: getDisplayName(user) }
                             )}
                             noBorder
                             icon={<Trash />}

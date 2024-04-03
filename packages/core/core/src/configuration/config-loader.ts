@@ -130,11 +130,14 @@ export default (dir: string) => {
     return acc;
   }, [] as fs.Dirent[]);
 
-  return configFiles.reduce((acc, file) => {
-    const key = path.basename(file.name, path.extname(file.name));
+  return configFiles.reduce(
+    (acc, file) => {
+      const key = path.basename(file.name, path.extname(file.name));
 
-    acc[key] = loadConfigFile(path.resolve(dir, file.name));
+      acc[key] = loadConfigFile(path.resolve(dir, file.name));
 
-    return acc;
-  }, {} as Record<string, unknown>);
+      return acc;
+    },
+    {} as Record<string, unknown>
+  );
 };

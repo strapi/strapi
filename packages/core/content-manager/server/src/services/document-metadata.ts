@@ -157,9 +157,9 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
     const isDraft = version.publishedAt === null;
 
-    // It can only be a draft if there are no other versions
     if (!otherDocumentStatuses?.length) {
-      return CONTENT_MANAGER_STATUS.DRAFT;
+      // It there are no other versions we take the current version status
+      return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
     }
 
     // Check if there is only a draft version

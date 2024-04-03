@@ -28,7 +28,7 @@ export type CreateActionPayload = Utils.Intersect<
       // Options is filled with default values
       'options'
     >,
-    { uid: string }
+    { uid: string },
   ]
 >;
 

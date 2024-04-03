@@ -68,7 +68,7 @@ export type ContentType = StringSuffix<
  */
 export type Component<
   TCategory extends string = string,
-  TName extends string = string
+  TName extends string = string,
 > = `${TCategory}.${TName}`;
 
 /**
@@ -88,7 +88,7 @@ export type AnyUID = Service | Controller | Policy | Middleware | ContentType | 
  */
 export interface ParsedUID<
   TNamespace extends Namespace.AnyNamespace = Namespace.AnyNamespace,
-  TName extends string = string
+  TName extends string = string,
 > {
   raw: `${TNamespace}${Namespace.GetSeparator<TNamespace>}${TName}`;
   namespace: TNamespace;
@@ -115,7 +115,8 @@ export interface ParsedUID<
  */
 export type ParseUID<TUID extends AnyUID> =
   ExtractNamespace<TUID> extends infer TExtractedNamespace extends Namespace.AnyNamespace
-    ? Namespace.GetSeparator<TExtractedNamespace> extends infer TSeparator extends Namespace.Separator
+    ? Namespace.GetSeparator<TExtractedNamespace> extends infer TSeparator extends
+        Namespace.Separator
       ? TUID extends `${infer TInferredNamespace extends TExtractedNamespace}${TSeparator}${infer TName extends string}`
         ? ParsedUID<TInferredNamespace, TName>
         : never
@@ -137,10 +138,8 @@ export type ParseUID<TUID extends AnyUID> =
  * type T = EnsureNamespaceMatches<'api::foo.bar', Namespace.Plugin>
  * // ^ never
  */
-export type EnsureNamespaceMatches<
-  TUID extends AnyUID,
-  TNamespace extends Namespace.AnyNamespace
-> = TUID extends StringSuffix<Namespace.WithSeparator<TNamespace>> ? TNamespace : never;
+export type EnsureNamespaceMatches<TUID extends AnyUID, TNamespace extends Namespace.AnyNamespace> =
+  TUID extends StringSuffix<Namespace.WithSeparator<TNamespace>> ? TNamespace : never;
 
 /**
  * Get parsed properties from a given raw UID

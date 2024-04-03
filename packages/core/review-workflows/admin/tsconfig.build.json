@@ -1,0 +1,10 @@
+{
+  "extends": "tsconfig/client.json",
+  "compilerOptions": {
+    "rootDir": "../",
+    "baseUrl": ".",
+    "outDir": "./dist"
+  },
+  "include": ["./src", "./custom.d.ts", "../shared", "./module.d.ts"],
+  "exclude": ["**/__mocks__", "**/*.test.*"]
+}

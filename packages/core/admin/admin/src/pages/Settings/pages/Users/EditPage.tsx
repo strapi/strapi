@@ -210,7 +210,7 @@ const EditPage = () => {
                     defaultMessage: 'Edit {name}',
                   },
                   {
-                    name: getDisplayName(initialData, formatMessage),
+                    name: getDisplayName(initialData),
                   }
                 )}
                 navigationAction={<BackButton />}

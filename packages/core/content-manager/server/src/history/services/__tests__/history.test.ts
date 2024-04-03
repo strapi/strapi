@@ -1,4 +1,4 @@
-import type { UID } from '@strapi/types';
+import type { Struct, UID } from '@strapi/types';
 import { scheduleJob } from 'node-schedule';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createHistoryService } from '../history';
@@ -188,7 +188,7 @@ describe('history-version service', () => {
           title: {
             type: 'string',
           },
-        },
+        } as Struct.SchemaAttributes,
         status: 'draft' as const,
       };
 
@@ -216,7 +216,7 @@ describe('history-version service', () => {
           title: {
             type: 'string',
           },
-        },
+        } as Struct.SchemaAttributes,
         status: null,
       };
 

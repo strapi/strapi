@@ -6,7 +6,7 @@ import type * as UID from '../uid';
 
 export type Component<
   TComponentUID extends UID.Component = UID.Component,
-  TComponentKeys extends AttributeNames<TComponentUID> = AttributeNames<TComponentUID>
+  TComponentKeys extends AttributeNames<TComponentUID> = AttributeNames<TComponentUID>,
 > = Intersect<[{ id: ID }, Pick<AttributeValues<TComponentUID>, TComponentKeys>]>;
 
 type AttributeValues<TComponentUID extends UID.Component = UID.Component> = {

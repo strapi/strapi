@@ -26,9 +26,6 @@ import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-rou
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
-import { reducer as cmAppReducer } from '../src/content-manager/layout';
-import { reducer as contentManagerReducer } from '../src/content-manager/modules/reducers';
-import { contentManagerApi } from '../src/content-manager/services/api';
 import { AppInfoProvider } from '../src/features/AppInfo';
 import { AuthProvider, type Permission } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
@@ -58,9 +55,6 @@ const defaultTestStoreConfig = {
   reducer: {
     [adminApi.reducerPath]: adminApi.reducer,
     admin_app: appReducer,
-    'content-manager_app': cmAppReducer,
-    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-    'content-manager': contentManagerReducer,
   },
   // @ts-expect-error – this fails.
   middleware: (getDefaultMiddleware) => [
@@ -70,7 +64,6 @@ const defaultTestStoreConfig = {
       serializableCheck: false,
     }),
     adminApi.middleware,
-    contentManagerApi.middleware,
   ],
 };
 
@@ -245,7 +238,7 @@ const renderHook = <
   Props,
   Q extends Queries,
   Container extends Element | DocumentFragment = HTMLElement,
-  BaseElement extends Element | DocumentFragment = Container
+  BaseElement extends Element | DocumentFragment = Container,
 >(
   hook: (initialProps: Props) => Result,
   options?: RenderHookOptions<Props, Q, Container, BaseElement> &

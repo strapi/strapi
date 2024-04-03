@@ -1,4 +1,5 @@
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import { PRODUCT_UID, CATEGORY_UID, models } from './utils';
 import { transformParamsDocumentId } from '../id-transform';
 
@@ -38,7 +39,7 @@ describe('Transform relational data', () => {
     db: {
       query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
     },
-  } as unknown as LoadedStrapi;
+  } as unknown as Core.LoadedStrapi;
 
   beforeEach(() => {
     findCategories.mockReturnValue([
@@ -65,7 +66,6 @@ describe('Transform relational data', () => {
 
   describe('Non I18n (products) -> I18n (categories)', () => {
     it('Connect to locales of the same category document', async () => {
-      //
       const { data } = await transformParamsDocumentId(PRODUCT_UID, {
         data: {
           name: 'test',
@@ -83,13 +83,15 @@ describe('Transform relational data', () => {
 
       expect(data).toMatchObject({
         name: 'test',
-        categories: [
-          { id: 'category-1-en-draft' },
-          { id: 'category-1-fr-draft' },
-          { id: 'category-2-en-draft' },
-        ],
-        category: { id: 'category-4-en-draft' },
-        relatedProducts: [{ id: 'product-1-draft' }, { id: 'product-2-draft' }],
+        categories: {
+          set: [
+            { id: 'category-1-en-draft' },
+            { id: 'category-1-fr-draft' },
+            { id: 'category-2-en-draft' },
+          ],
+        },
+        category: { set: [{ id: 'category-4-en-draft' }] },
+        relatedProducts: { set: [{ id: 'product-1-draft' }, { id: 'product-2-draft' }] },
       });
     });
 
@@ -105,7 +107,7 @@ describe('Transform relational data', () => {
 
       expect(data).toMatchObject({
         name: 'test',
-        categories: [{ id: 'category-1-en-draft' }],
+        categories: { set: [{ id: 'category-1-en-draft' }] },
       });
     });
 
@@ -156,7 +158,7 @@ describe('Transform relational data', () => {
       });
 
       expect(data).toMatchObject({
-        products: [{ id: 'product-1-draft' }, { id: 'product-2-draft' }],
+        products: { set: [{ id: 'product-1-draft' }, { id: 'product-2-draft' }] },
       });
     });
   });
@@ -173,13 +175,13 @@ describe('Transform relational data', () => {
       });
 
       expect(data).toMatchObject({
-        relatedCategories: [{ id: 'category-1-fr-draft' }],
+        relatedCategories: { set: [{ id: 'category-1-fr-draft' }] },
       });
     });
 
-    it('Prevent connecting to invalid locales ', async () => {
+    it("Connect to source locale if the locale of the relation doesn't match", async () => {
       // Should not be able to connect to different locales than the current one
-      const promise = transformParamsDocumentId(CATEGORY_UID, {
+      const { data } = await transformParamsDocumentId(CATEGORY_UID, {
         data: {
           // Connect to another locale than the current one
           relatedCategories: [{ documentId: 'category-1', locale: 'fr' }],
@@ -188,7 +190,11 @@ describe('Transform relational data', () => {
         status: 'draft',
       });
 
-      expect(promise).rejects.toThrowError();
+      expect(data).toMatchObject({
+        relatedCategories: {
+          set: [{ id: 'category-1-en-draft' }],
+        },
+      });
     });
   });
 });

@@ -12,7 +12,7 @@ export type BigInteger = Intersect<
     Attribute.RequiredOption,
     Attribute.WritableOption,
     Attribute.VisibleOption,
-    Attribute.UniqueOption
+    Attribute.UniqueOption,
   ]
 >;
 

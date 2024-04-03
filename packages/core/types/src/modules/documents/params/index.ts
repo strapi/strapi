@@ -52,7 +52,7 @@ export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIn
     // Search
     [HasMember<TKind, '_q'>, { _q?: Search.Q }],
     // Look Up - For internal use only
-    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }]
+    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }],
   ]
 >;
 
