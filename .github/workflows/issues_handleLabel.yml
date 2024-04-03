@@ -45,7 +45,7 @@ jobs:
           actions: 'add-assignees'
           token: ${{ secrets.GITHUB_TOKEN }}
           issue-number: ${{ github.event.issue.number }}
-          assignees: 'derrickmehaffy, kasonde, bolg55, Eventyret'
+          assignees: 'derrickmehaffy, kasonde, bolg55, Eventyret, dennism501, n-alonso'
           random-to: 1
 
       # v3 Legacy Issues
@@ -106,6 +106,38 @@ jobs:
             Thank you for your insight and have a good day.
       - name: 'Close: redirect feature request to canny'
         if: "${{ github.event.label.name == 'issue: feature request' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'close-issue'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          close-reason: 'completed'
+
+      # Enhancement request redirections
+      - name: 'Comment: redirect enhancement to canny'
+        if: "${{ github.event.label.name == 'issue: enhancement' }}"
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: 'create-comment'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            > This is a templated message
+
+            Hello @${{ github.event.issue.user.login }},
+
+            First thank you for reporting this enhancement need.
+            To manage enhancement requests and the Strapi roadmap, we are using Canny.
+            You will be able to access the Public Roadmap here: https://feedback.strapi.io.
+
+            In your message, please mention the URL of this thread in case some messages are posted there. But the most important is to have your feedback posted on our feedback/roadmap site.
+            The product team is reading EVERY comment, that really helps us to develop the project in the right direction. We are keeping all feature requests and project insights in one place, our feedback website.
+
+            In order to keep our GitHub issues clean and for valid bug reports this issue will be marked as closed, but please feel free to continue the discussion with other community members here.
+
+            Thank you for your insight and have a good day.
+      - name: 'Close: redirect enhancement to canny'
+        if: "${{ github.event.label.name == 'issue: enhancement' }}"
         uses: actions-cool/issues-helper@v3
         with:
           actions: 'close-issue'
@@ -184,24 +216,24 @@ jobs:
       #     SLACK_FOOTER: Triggered by GitHub Actions
 
       # Auto assign issues to projects based on source
-      - name: assign issues to Content squad project
-        uses: actions/add-to-project@v0.4.1
-        with:
-          project-url: https://github.com/orgs/strapi/projects/11
-          github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: core:admin, source: core:content-manager, source: core:upload, source: plugin:i18n'
-          label-operator: OR
+      # - name: assign issues to Content squad project
+      #   uses: actions/add-to-project@v0.4.1
+      #   with:
+      #     project-url: https://github.com/orgs/strapi/projects/11
+      #     github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
+      #     labeled: 'source: core:admin, source: core:content-manager, source: core:upload, source: plugin:i18n'
+      #     label-operator: OR
       - name: assign issues to DevExp squad project
         uses: actions/add-to-project@v0.4.1
         with:
           project-url: https://github.com/orgs/strapi/projects/13
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: core:content-type-builder, source: core:database, source: core:email, source: core:strapi, source: core:utils, source: plugin:graphql, source: plugin:users-permissions, source: typescript, source: core:data-transfer'
+          labeled: 'source: cli, source: core:content-type-builder, source: core:core, source: core:data-transfer, source: core:database, source: core:strapi, source: core:utils, source: dependencies, source: docs, source: external, source: generators:app, source: generators, source: marketplace, source: plugin:graphql, source: plugin:users-permissions, source: tooling, source: typescript, source: utils:pack-up, source: utils:upgrade'
           label-operator: OR
       - name: assign issues to Expansions squad project
         uses: actions/add-to-project@v0.4.1
         with:
           project-url: https://github.com/orgs/strapi/projects/4
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
-          labeled: 'source: marketplace, source: plugin:sentry, source: plugin:documentation'
+          labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:email, source: core:helper-plugin, source: core:permissions, source: core:review-workflows, source: core:upload, source: plugin:cloud, source: plugin:color-picker, source:  plugin:documentation, source: , plugin:i18n, source: plugin:sentry, source: providers'
           label-operator: OR
