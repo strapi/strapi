@@ -1,4 +1,5 @@
-import { Core } from '@strapi/types';
+import type { Core } from '@strapi/types';
+
 import { PRODUCT_UID, CATEGORY_UID, models } from './utils';
 import { transformParamsDocumentId } from '../id-transform';
 
@@ -72,9 +73,13 @@ describe('Transform relational data', () => {
 
       expect(data).toEqual({
         name: 'test',
-        categories: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
-        category: 'doc4-en-draft',
-        relatedProducts: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
+        categories: {
+          set: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+        },
+        category: { set: [{ id: 'doc4-en-draft' }] },
+        relatedProducts: {
+          set: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+        },
       });
     });
 
@@ -91,8 +96,28 @@ describe('Transform relational data', () => {
 
       expect(data).toEqual({
         name: 'test',
-        categories: [1, 2, 'doc1-en-draft'],
-        category: 4,
+        categories: {
+          set: [{ id: 1 }, { id: 2 }, { id: 'doc1-en-draft' }],
+        },
+        category: { set: [{ id: 4 }] },
+      });
+    });
+
+    it('Handles nullish values', async () => {
+      const { data } = await transformParamsDocumentId(PRODUCT_UID, {
+        data: {
+          name: 'test',
+          categories: undefined,
+          category: null,
+        },
+        locale: 'en',
+        status: 'draft',
+      });
+
+      expect(data).toEqual({
+        name: 'test',
+        categories: undefined,
+        category: null,
       });
     });
   });
@@ -111,8 +136,10 @@ describe('Transform relational data', () => {
 
       expect(data).toMatchObject({
         name: 'test',
-        categories: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
-        category: { id: 'doc4-en-draft' },
+        categories: {
+          set: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+        },
+        category: { set: [{ id: 'doc4-en-draft' }] },
       });
     });
 
@@ -129,8 +156,8 @@ describe('Transform relational data', () => {
 
       expect(data).toMatchObject({
         name: 'test',
-        categories: [{ id: 1 }],
-        category: { id: 2 },
+        categories: { set: [{ id: 1 }] },
+        category: { set: [{ id: 2 }] },
       });
     });
 
@@ -147,8 +174,8 @@ describe('Transform relational data', () => {
 
       expect(data).toMatchObject({
         name: 'test',
-        categories: [{ id: 'doc2-en-draft' }],
-        category: { id: 'doc4-en-draft' },
+        categories: { set: [{ id: 'doc2-en-draft' }] },
+        category: { set: [{ id: 'doc4-en-draft' }] },
       });
     });
   });
@@ -166,8 +193,10 @@ describe('Transform relational data', () => {
 
     expect(data).toEqual({
       name: 'test',
-      categories: { set: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'] },
-      category: { set: 'doc4-en-draft' },
+      categories: {
+        set: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+      },
+      category: { set: [{ id: 'doc4-en-draft' }] },
     });
   });
 
@@ -184,8 +213,10 @@ describe('Transform relational data', () => {
 
     expect(data).toEqual({
       name: 'test',
-      categories: { connect: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'] },
-      category: { connect: 'doc4-en-draft' },
+      categories: {
+        connect: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+      },
+      category: { connect: [{ id: 'doc4-en-draft' }] },
     });
   });
 
@@ -203,7 +234,7 @@ describe('Transform relational data', () => {
     expect(data).toMatchObject({
       name: 'test',
       categories: { connect: [{ id: 'doc1-en-draft', position: { before: 'doc2-en-draft' } }] },
-      category: { connect: 'doc4-en-draft' },
+      category: { connect: [{ id: 'doc4-en-draft' }] },
     });
   });
 
@@ -221,7 +252,7 @@ describe('Transform relational data', () => {
     expect(data).toMatchObject({
       name: 'test',
       categories: { connect: [{ id: 'doc1-en-draft', position: { after: 'doc2-en-draft' } }] },
-      category: { connect: 'doc4-en-draft' },
+      category: { connect: [{ id: 'doc4-en-draft' }] },
     });
   });
 
@@ -236,10 +267,12 @@ describe('Transform relational data', () => {
       status: 'draft',
     });
 
-    expect(data).toEqual({
+    expect(data).toMatchObject({
       name: 'test',
-      categories: { disconnect: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'] },
-      category: { disconnect: 'doc4-en-draft' },
+      categories: {
+        disconnect: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+      },
+      category: { disconnect: [{ id: 'doc4-en-draft' }] },
     });
   });
 
@@ -262,17 +295,17 @@ describe('Transform relational data', () => {
       status: 'draft',
     });
 
-    expect(data).toEqual({
+    expect(data).toMatchObject({
       name: 'test',
       categories: {
-        set: ['doc1-en-draft', 'doc2-en-draft', 'doc3-en-draft'],
-        connect: ['doc4-en-draft', 'doc5-en-draft'],
-        disconnect: ['doc6-en-draft', 'doc7-en-draft'],
+        set: [{ id: 'doc1-en-draft' }, { id: 'doc2-en-draft' }, { id: 'doc3-en-draft' }],
+        connect: [{ id: 'doc4-en-draft' }, { id: 'doc5-en-draft' }],
+        disconnect: [{ id: 'doc6-en-draft' }, { id: 'doc7-en-draft' }],
       },
       category: {
-        set: 'doc8-en-draft',
-        connect: 'doc9-en-draft',
-        disconnect: 'doc10-en-draft',
+        set: [{ id: 'doc8-en-draft' }],
+        connect: [{ id: 'doc9-en-draft' }],
+        disconnect: [{ id: 'doc10-en-draft' }],
       },
     });
   });

@@ -6,7 +6,7 @@ export type MediaKind = 'images' | 'videos' | 'files' | 'audios';
 
 export interface MediaProperties<
   TKind extends MediaKind | undefined = undefined,
-  TMultiple extends Constants.BooleanValue = Constants.False
+  TMultiple extends Constants.BooleanValue = Constants.False,
 > {
   allowedTypes?: TKind | TKind[];
   multiple?: TMultiple;
@@ -14,7 +14,7 @@ export interface MediaProperties<
 
 export type Media<
   TKind extends MediaKind | undefined = undefined,
-  TMultiple extends Constants.BooleanValue = Constants.False
+  TMultiple extends Constants.BooleanValue = Constants.False,
 > = Intersect<
   [
     Attribute.OfType<'media'>,
@@ -25,7 +25,7 @@ export type Media<
     Attribute.RequiredOption,
     Attribute.PrivateOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 
@@ -36,14 +36,15 @@ export type MediaValue<TMultiple extends Constants.BooleanValue = Constants.Fals
   any
 >;
 
-export type GetMediaValue<TAttribute extends Attribute.Attribute> = TAttribute extends Media<
-  // Unused as long as the media value is any
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  infer _TKind,
-  infer TMultiple
->
-  ? MediaValue<TMultiple>
-  : never;
+export type GetMediaValue<TAttribute extends Attribute.Attribute> =
+  TAttribute extends Media<
+    // Unused as long as the media value is any
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    infer _TKind,
+    infer TMultiple
+  >
+    ? MediaValue<TMultiple>
+    : never;
 
 export type MediaTarget<TAttribute extends Attribute.Attribute> = TAttribute extends Media
   ? MediaTargetUID

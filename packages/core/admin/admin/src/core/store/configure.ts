@@ -6,9 +6,6 @@ import {
   combineReducers,
 } from '@reduxjs/toolkit';
 
-import { reducer as cmAppReducer, ContentManagerAppState } from '../../content-manager/layout';
-import { reducer as contentManagerReducers } from '../../content-manager/modules/reducers';
-import { contentManagerApi } from '../../content-manager/services/api';
 import { reducer as appReducer, AppState } from '../../reducer';
 import { adminApi } from '../../services/api';
 
@@ -18,9 +15,6 @@ import { adminApi } from '../../services/api';
 const staticReducers = {
   [adminApi.reducerPath]: adminApi.reducer,
   admin_app: appReducer,
-  'content-manager_app': cmAppReducer,
-  [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-  'content-manager': contentManagerReducers,
 } as const;
 
 const injectReducerStoreEnhancer: (appReducers: Record<string, Reducer>) => StoreEnhancer =
@@ -80,7 +74,6 @@ const configureStoreImpl = (
     middleware: (getDefaultMiddleware) => [
       ...getDefaultMiddleware(defaultMiddlewareOptions),
       adminApi.middleware,
-      contentManagerApi.middleware,
       ...appMiddlewares.map((m) => m()),
     ],
     enhancers: [injectReducerStoreEnhancer(coreReducers)],
@@ -99,4 +92,4 @@ type RootState = ReturnType<Store['getState']>;
 type Dispatch = Store['dispatch'];
 
 export { configureStoreImpl as configureStore };
-export type { RootState, Dispatch, AppState, Store, PreloadState, ContentManagerAppState };
+export type { RootState, Dispatch, AppState, Store, PreloadState };

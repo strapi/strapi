@@ -18,7 +18,7 @@ type StringAttribute = Intersect<
     Attribute.UniqueOption,
     Attribute.RequiredOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

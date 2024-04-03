@@ -51,7 +51,7 @@ export type RouterConfig<TContentTypeUID extends UID.ContentType> = {
   config?: MatchFirst<
     [
       Test<UID.IsCollectionType<TContentTypeUID>, CollectionTypeRouterConfig>,
-      Test<UID.IsSingleType<TContentTypeUID>, SingleTypeRouterConfig>
+      Test<UID.IsSingleType<TContentTypeUID>, SingleTypeRouterConfig>,
     ],
     Generic
   >;
