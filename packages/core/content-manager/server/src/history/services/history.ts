@@ -1,4 +1,4 @@
-import type { LoadedStrapi, Documents, Common, Entity } from '@strapi/types';
+import type { LoadedStrapi, Documents, Common, Entity, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import { omit, pick } from 'lodash/fp';
 
@@ -81,7 +81,7 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         case 'relation': {
           const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
           if (isVisible) {
-            acc[attributeName] = { fields: ['documentId', 'locale'] };
+            acc[attributeName] = { fields: ['documentId', 'locale', 'publishedAt'] };
           }
           break;
         }
@@ -271,95 +271,112 @@ const createHistoryService = ({ strapi }: { strapi: LoadedStrapi }) => {
         getLocaleDictionary(),
       ]);
 
+      type EntryToPopulate =
+        | {
+            documentId: string;
+            locale: string | null;
+          }
+        | { id: Entity.ID }
+        | null;
+
+      const buildRelationReponse = async (
+        values: EntryToPopulate[],
+        attributeSchema: Schema.Attributes[keyof Schema.Attributes]
+      ): Promise<{ results: any[]; meta: { missingCount: number } }> => {
+        return (
+          values
+            // Until we implement proper pagination, limit relations to an arbitrary amount
+            .slice(0, 25)
+            .reduce(
+              async (currentRelationDataPromise, entry) => {
+                const currentRelationData = await currentRelationDataPromise;
+
+                // Entry can be null if it's a toOne relation
+                if (!entry) {
+                  return currentRelationData;
+                }
+
+                const isNormalRelation =
+                  attributeSchema.type === 'relation' &&
+                  attributeSchema.relation !== 'morphToOne' &&
+                  attributeSchema.relation !== 'morphToMany';
+
+                /**
+                 * Adapt the query depending on if the attribute is a media
+                 * or a normal relation. The extra checks are only for type narrowing
+                 */
+                let relatedEntry;
+                if (isNormalRelation) {
+                  if ('documentId' in entry) {
+                    relatedEntry = await strapi
+                      .documents(attributeSchema.target)
+                      .findOne(entry.documentId, { locale: entry.locale || undefined });
+                  }
+                } else if ('id' in entry) {
+                  relatedEntry = await strapi.db
+                    .query('plugin::upload.file')
+                    .findOne({ where: { id: entry.id } });
+                }
+
+                if (relatedEntry) {
+                  currentRelationData.results.push({
+                    ...relatedEntry,
+                    ...(isNormalRelation
+                      ? {
+                          status: await getVersionStatus(attributeSchema.target, relatedEntry),
+                        }
+                      : {}),
+                  });
+                } else {
+                  // The related content has been deleted
+                  currentRelationData.meta.missingCount += 1;
+                }
+
+                return currentRelationData;
+              },
+              Promise.resolve({
+                results: [] as any[],
+                meta: { missingCount: 0 },
+              })
+            )
+        );
+      };
+
+      const populateEntryRelations = async (
+        entry: HistoryVersionQueryResult
+      ): Promise<CreateHistoryVersion['data']> => {
+        const entryWithRelations = await Object.entries(entry.schema).reduce(
+          async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
+            // TODO: handle nested content structures
+            if (['relation', 'media'].includes(attributeSchema.type)) {
+              const attributeValue = entry.data[attributeKey];
+              const relationResponse = await buildRelationReponse(
+                (Array.isArray(attributeValue)
+                  ? attributeValue
+                  : [attributeValue]) as EntryToPopulate[],
+                attributeSchema
+              );
+
+              return {
+                ...(await currentDataWithRelations),
+                [attributeKey]: relationResponse,
+              };
+            }
+
+            // Not a media or relation, nothing to change
+            return currentDataWithRelations;
+          },
+          Promise.resolve(entry.data)
+        );
+
+        return entryWithRelations;
+      };
+
       const sanitizedResults = await Promise.all(
         (results as HistoryVersionQueryResult[]).map(async (result) => {
-          const dataWithRelations = await Object.entries(result.schema).reduce(
-            async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
-              const isNormalRelation =
-                attributeSchema.type === 'relation' &&
-                attributeSchema.relation !== 'morphToOne' &&
-                attributeSchema.relation !== 'morphToMany';
-
-              // TODO: handle nested content structures
-              if (isNormalRelation || attributeSchema.type === 'media') {
-                const attributeValue = result.data[attributeKey];
-                const relationDataPromise = (
-                  (Array.isArray(attributeValue) ? attributeValue : [attributeValue]) as Array<
-                    | {
-                        documentId: string;
-                        locale: string | null;
-                      }
-                    | { id: Entity.ID }
-                    | null
-                  >
-                )
-                  // Until we implement proper pagination, limit relations to an arbitrary amount
-                  .slice(0, 25)
-                  .reduce(
-                    async (currentRelationDataPromise, entry) => {
-                      const currentRelationData = await currentRelationDataPromise;
-
-                      // Entry can be null if it's a toOne relation
-                      if (!entry) {
-                        return currentRelationData;
-                      }
-
-                      /**
-                       * Adapt the query depending on if the attribute is a media
-                       * or a normal relation. The extra checks are only for type narrowing
-                       */
-                      let relatedEntry;
-                      if (isNormalRelation) {
-                        if ('documentId' in entry) {
-                          relatedEntry = await strapi
-                            .documents(attributeSchema.target)
-                            .findOne(entry.documentId, { locale: entry.locale || undefined });
-                        }
-                      } else if ('id' in entry) {
-                        relatedEntry = await strapi.db
-                          .query('plugin::upload.file')
-                          .findOne({ where: { id: entry.id } });
-                      }
-
-                      if (relatedEntry) {
-                        currentRelationData.results.push({
-                          ...relatedEntry,
-                          ...(isNormalRelation
-                            ? {
-                                status: await getVersionStatus(
-                                  attributeSchema.target,
-                                  relatedEntry
-                                ),
-                              }
-                            : {}),
-                        });
-                      } else {
-                        // The related content has been deleted
-                        currentRelationData.meta.missingCount += 1;
-                      }
-
-                      return currentRelationData;
-                    },
-                    Promise.resolve({
-                      results: [] as any[],
-                      meta: { missingCount: 0 },
-                    })
-                  );
-                return {
-                  ...(await currentDataWithRelations),
-                  [attributeKey]: await relationDataPromise,
-                };
-              }
-
-              // Not a media or relation, nothing to change
-              return currentDataWithRelations;
-            },
-            Promise.resolve(result.data)
-          );
-
           return {
             ...result,
-            data: dataWithRelations,
+            data: await populateEntryRelations(result),
             locale: result.locale ? localeDictionary[result.locale] : null,
             createdBy: result.createdBy
               ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
