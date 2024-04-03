@@ -68,7 +68,6 @@
     "@strapi/admin-test-utils": "5.0.0-beta.1",
     "@strapi/pack-up": "5.0.0-beta.1",
     "@strapi/plugin-content-manager": "5.0.0-beta.1",
-    "@strapi/strapi": "5.0.0-beta.1",
     "@strapi/types": "5.0.0-beta.1",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
