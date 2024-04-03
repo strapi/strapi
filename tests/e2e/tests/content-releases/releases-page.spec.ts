@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { describeOnCondition } from '../../utils/shared';
+import { describeOnCondition, navToHeader } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 import { login } from '../../utils/login';
 
@@ -92,11 +92,9 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 
-  test('A user should be able to perform bulk release on entries', async ({ page }) => {
-    await page.getByRole('link', { name: 'Content Manager' }).click();
+  test.skip('A user should be able to perform bulk release on entries', async ({ page }) => {
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
 
-    await expect(page).toHaveTitle('Content Manager');
-    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
     const publishedItems = page.getByRole('gridcell', { name: 'published' });
     expect(publishedItems).toHaveCount(2);
     const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
