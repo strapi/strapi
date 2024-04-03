@@ -23,7 +23,13 @@ import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
-type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
+type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
+  /**
+   * In the context of content history, deleted fields need to ignore RBAC
+   * @default false
+   */
+  isRBACDisabled?: boolean;
+};
 
 /**
  * @internal
@@ -33,7 +39,12 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
+const InputRenderer = ({
+  visible,
+  hint: providedHint,
+  isRBACDisabled = false,
+  ...props
+}: InputRendererProps) => {
   const { id } = useDoc();
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
@@ -67,7 +78,7 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   /**
    * If the user can't read the field then we don't want to ever render it.
    */
-  if (!canUserReadField && !isInDynamicZone) {
+  if (!isRBACDisabled && !canUserReadField && !isInDynamicZone) {
     return <NotAllowedInput hint={hint} {...props} />;
   }
 
@@ -85,13 +96,15 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
       // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
       return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
     } else {
-      <FormInputRenderer
-        {...props}
-        hint={hint}
-        // @ts-expect-error – this workaround lets us display that the custom field is missing.
-        type={props.attribute.customField}
-        disabled={fieldIsDisabled}
-      />;
+      return (
+        <FormInputRenderer
+          {...props}
+          hint={hint}
+          // @ts-expect-error – this workaround lets us display that the custom field is missing.
+          type={props.attribute.customField}
+          disabled={fieldIsDisabled}
+        />
+      );
     }
   }
 
