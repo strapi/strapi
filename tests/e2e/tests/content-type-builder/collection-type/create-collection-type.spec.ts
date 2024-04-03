@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../../utils/login';
-import { resetDatabaseAndImportDataFromPath, resetFiles } from '../../../scripts/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
+import { resetFiles } from '../../../utils/file-reset';
 
 test.describe('Create collection type', () => {
   test.beforeEach(async ({ page }) => {
