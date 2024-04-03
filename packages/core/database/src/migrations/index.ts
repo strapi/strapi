@@ -12,7 +12,9 @@ export const createMigrationsProvider = (db: Database): MigrationProvider => {
   const providers = [userProvider, internalProvider];
 
   return {
-    internal: internalProvider,
+    providers: {
+      internal: internalProvider,
+    },
     async shouldRun() {
       const shouldRunResponses = await Promise.all(
         providers.map((provider) => provider.shouldRun())

@@ -10,8 +10,13 @@ import type { Database } from '..';
 export const createInternalMigrationProvider = (db: Database): InternalMigrationProvider => {
   const context = { db };
   const migrations: Migration[] = [...internalMigrations];
+  let umzug: Umzug;
 
-  const createProvider = () => {
+  const getUmzug = () => {
+    if (umzug) {
+      return umzug;
+    }
+
     return new Umzug({
       storage: createStorage({ db, tableName: 'strapi_migrations_internal' }),
       logger: console,
@@ -26,23 +31,23 @@ export const createInternalMigrationProvider = (db: Database): InternalMigration
     });
   };
 
-  let umzugProvider = createProvider();
-
   return {
     async register(migration: Migration) {
+      if (umzug !== undefined) {
+        throw new Error('Cannot register new migrations after the provider has been created');
+      }
+
       migrations.push(migration);
-      // Recreate the umzug provider to include the new migration
-      umzugProvider = createProvider();
     },
     async shouldRun() {
-      const pendingMigrations = await umzugProvider.pending();
+      const pendingMigrations = await getUmzug().pending();
       return pendingMigrations.length > 0;
     },
     async up() {
-      await umzugProvider.up();
+      await getUmzug().up();
     },
     async down() {
-      await umzugProvider.down();
+      await getUmzug().down();
     },
   };
 };

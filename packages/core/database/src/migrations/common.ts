@@ -16,7 +16,7 @@ export interface InternalMigrationProvider {
   down(): Promise<void>;
 }
 export interface MigrationProvider {
-  internal: InternalMigrationProvider;
+  providers: { internal: InternalMigrationProvider };
   shouldRun(): Promise<boolean>;
   up(): Promise<void>;
   down(): Promise<void>;
