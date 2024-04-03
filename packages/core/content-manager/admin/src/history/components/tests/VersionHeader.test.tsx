@@ -56,6 +56,12 @@ describe('VersionHeader', () => {
       data: {
         title: 'Test Title',
       },
+      meta: {
+        unknownAttributes: {
+          added: {},
+          removed: {},
+        },
+      },
     };
 
     it('should display the correct title and subtitle for a non-localized entry', () => {
@@ -129,6 +135,12 @@ describe('VersionHeader', () => {
       locale: null,
       data: {
         title: 'Test Title',
+      },
+      meta: {
+        unknownAttributes: {
+          added: {},
+          removed: {},
+        },
       },
     };
 

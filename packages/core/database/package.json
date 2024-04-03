@@ -39,6 +39,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
+    "@paralleldrive/cuid2": "2.2.2",
     "@strapi/utils": "5.0.0-beta.1",
     "date-fns": "2.30.0",
     "debug": "4.3.4",

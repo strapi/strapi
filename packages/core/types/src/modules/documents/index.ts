@@ -20,9 +20,9 @@ export type Service = {
   utils: ServiceUtils;
   /** Add a middleware for all uid's and a specific action
    *  @example - Add a default locale
-   *  strapi.documents.use('findMany', (ctx, next) => {
+   *  strapi.documents.use((ctx, next) => {
    *    if (!params.locale) params.locale = 'en'
-   *    return next(ctx)
+   *    return next()
    *  })
    */
   use: (cb: Middleware.Middleware) => Service;
