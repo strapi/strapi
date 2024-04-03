@@ -18,6 +18,16 @@ describe('Upload plugin bootstrap function', () => {
     const registerMany = jest.fn(() => {});
 
     global.strapi = {
+      get(name: string) {
+        switch (name) {
+          case 'webhookStore':
+            return {
+              addAllowedEvent: jest.fn(),
+            };
+          default:
+            return null;
+        }
+      },
       dirs: {
         dist: { root: process.cwd() },
         app: { root: process.cwd() },
@@ -64,9 +74,6 @@ describe('Upload plugin bootstrap function', () => {
           },
           set: setStore,
         };
-      },
-      webhookStore: {
-        addAllowedEvent: jest.fn(),
       },
     } as any;
 

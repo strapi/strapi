@@ -8,7 +8,7 @@ const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 const getWeeklyCronScheduleAt = (date: Date) =>
   `${date.getSeconds()} ${date.getMinutes()} ${date.getHours()} * * ${date.getDay()}`;
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
   const workflowsService = getService('workflows', { strapi });
 

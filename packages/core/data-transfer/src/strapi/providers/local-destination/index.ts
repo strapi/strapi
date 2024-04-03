@@ -25,7 +25,7 @@ export const VALID_CONFLICT_STRATEGIES = ['restore'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 export interface ILocalStrapiDestinationProviderOptions {
-  getStrapi(): Core.LoadedStrapi | Promise<Core.LoadedStrapi>; // return an initialized instance of Strapi
+  getStrapi(): Core.Strapi | Promise<Core.Strapi>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
   restore?: restore.IRestoreOptions; // erase data in strapi database before transfer; required if strategy is 'restore'
@@ -39,7 +39,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   options: ILocalStrapiDestinationProviderOptions;
 
-  strapi?: Core.LoadedStrapi;
+  strapi?: Core.Strapi;
 
   transaction?: Transaction;
 

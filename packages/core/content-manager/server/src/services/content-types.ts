@@ -19,7 +19,7 @@ const configurationService = createConfigurationService({
   },
 });
 
-const service = ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
+const service = ({ strapi }: { strapi: Core.Strapi }) => ({
   findAllContentTypes() {
     const { toContentManagerModel } = getService('data-mapper');
 

@@ -9,7 +9,7 @@ const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
 
-let strapi: Core.LoadedStrapi;
+let strapi: Core.Strapi;
 const builder = createTestBuilder();
 let productDocuments;
 let tagDocuments;
