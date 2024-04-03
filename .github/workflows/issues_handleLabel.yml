@@ -233,7 +233,7 @@ jobs:
       - name: assign issues to Expansions squad project
         uses: actions/add-to-project@v0.4.1
         with:
-          project-url: https://github.com/orgs/strapi/projects/4
+          project-url: https://github.com/orgs/strapi/projects/23
           github-token: ${{ secrets.PROJECT_TRANSFER_TOKEN }}
           labeled: 'source: core:admin, source: core:content-manager, source: core:content-releases, source: core:email, source: core:helper-plugin, source: core:permissions, source: core:review-workflows, source: core:upload, source: plugin:cloud, source: plugin:color-picker, source:  plugin:documentation, source: , plugin:i18n, source: plugin:sentry, source: providers'
           label-operator: OR
