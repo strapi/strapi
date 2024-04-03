@@ -1,10 +1,10 @@
 import { createUserMigrationProvider } from './users';
 import { createInternalMigrationProvider } from './internal';
 
-import type { MigrationProvider } from './common';
+import type { MigrationProvider, Migration } from './common';
 import type { Database } from '..';
 
-export type { MigrationProvider };
+export type { MigrationProvider, Migration };
 
 export const createMigrationsProvider = (db: Database): MigrationProvider => {
   const userProvider = createUserMigrationProvider(db);

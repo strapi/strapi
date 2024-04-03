@@ -1,10 +1,10 @@
 /* eslint-disable no-continue */
+import type { UID } from '@strapi/types';
+import type { Database, Migration } from '@strapi/database';
 import { async, contentTypes } from '@strapi/utils';
 
-import type { Database } from '../..';
-import type { Migration } from '../common';
-
 type DocumentVersion = { documentId: string; locale: string };
+type Knex = Parameters<Migration['up']>[0];
 
 /**
  * Load a batch of versions to discard.
@@ -14,10 +14,12 @@ type DocumentVersion = { documentId: string; locale: string };
  */
 async function* getBatchToDiscard({
   db,
+  trx,
   uid,
   batchSize = 1000,
 }: {
   db: Database;
+  trx: Knex;
   uid: string;
   batchSize?: number;
 }) {
@@ -33,6 +35,7 @@ async function* getBatchToDiscard({
       .limit(batchSize)
       .offset(offset)
       .orderBy('id')
+      .transacting(trx)
       .execute();
 
     if (batch.length < batchSize) {
@@ -44,9 +47,10 @@ async function* getBatchToDiscard({
   }
 }
 
-const migrateUp = async (db: Database) => {
+const migrateUp = async (trx: Knex, db: Database) => {
   for (const meta of db.metadata.values()) {
-    const model = strapi.getModel(meta.uid);
+    const uid = meta.uid as UID.ContentType;
+    const model = strapi.getModel(uid);
     const hasDP = contentTypes.hasDraftAndPublish(model);
     if (!hasDP) {
       continue;
@@ -54,7 +58,7 @@ const migrateUp = async (db: Database) => {
 
     const discardDraft = async (entry: DocumentVersion) => {
       strapi
-        .documents(meta.uid)
+        .documents(uid)
         // Discard draft by referencing the documentId and locale
         .discardDraft(entry.documentId, { locale: entry.locale });
     };
@@ -63,7 +67,7 @@ const migrateUp = async (db: Database) => {
      * Load a batch of entries (batched to prevent loading millions of rows at once ),
      * and discard them using the document service.
      */
-    for await (const batch of getBatchToDiscard({ db, uid: meta.uid })) {
+    for await (const batch of getBatchToDiscard({ db, trx, uid: meta.uid })) {
       await async.map(batch, discardDraft, { concurrency: 10 });
     }
   }
@@ -79,11 +83,11 @@ const migrateUp = async (db: Database) => {
  * This migration creates the document draft counterpart for all the entries that were in a published state.
  */
 export const discardDocumentDrafts: Migration = {
-  name: '5.0.0-03-discard drafts',
-  async up(_, db) {
+  name: 'core::5.0.0-discard-drafts',
+  async up(trx, db) {
     // TODO: Do not await, run this asynchronously
     // TODO: Log to inform the user that the migration is running in the background
-    await migrateUp(db);
+    await migrateUp(trx, db);
   },
   async down() {
     throw new Error('not implemented');
