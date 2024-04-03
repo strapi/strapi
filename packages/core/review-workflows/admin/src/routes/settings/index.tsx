@@ -4,18 +4,17 @@ import * as React from 'react';
 
 import { Page, useTracking, ConfirmDialog, useRBAC, Table } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Flex, IconButton, TFooter, Typography, VisuallyHidden } from '@strapi/design-system';
+import { Flex, IconButton, TFooter, Typography } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { Workflow } from '../../../../shared/contracts/review-workflows';
 import { LimitsModal } from '../../components/LimitsModal';
 import { CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME } from '../../constants';
 import { useTypedSelector } from '../../modules/hooks';
-import { useGetContentTypesQuery } from '../../services/content-manager';
+import { ContentType, useGetContentTypesQuery } from '../../services/content-manager';
 
 import * as Layout from './components/Layout';
 import { useReviewWorkflows } from './hooks/useReviewWorkflows';
@@ -26,7 +25,7 @@ export const ReviewWorkflowsListView = () => {
   const { trackUsage } = useTracking();
   const [workflowToDelete, setWorkflowToDelete] = React.useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = React.useState<boolean>(false);
-  const { data = [], isLoading: isLoadingModels } = useGetContentTypesQuery();
+  const { data, isLoading: isLoadingModels } = useGetContentTypesQuery();
   const { meta, workflows, isLoading, delete: deleteAction } = useReviewWorkflows();
   const { getFeature, isLoading: isLicenseLoading } = useLicenseLimits();
   const permissions = useTypedSelector(
@@ -126,6 +125,11 @@ export const ReviewWorkflowsListView = () => {
     return <Page.Loading />;
   }
 
+  const contentTypes = Object.values(data ?? {}).reduce<ContentType[]>((acc, curr) => {
+    acc.push(...curr);
+    return acc;
+  }, []);
+
   return (
     <>
       <Layout.Header
@@ -199,7 +203,9 @@ export const ReviewWorkflowsListView = () => {
                     <Typography textColor="neutral800">
                       {workflow.contentTypes
                         .map((uid: string) => {
-                          const contentType = data.find((contentType) => contentType.uid === uid);
+                          const contentType = contentTypes.find(
+                            (contentType) => contentType.uid === uid
+                          );
 
                           return contentType?.info.displayName ?? '';
                         })

@@ -43,7 +43,6 @@
   "scripts": {
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
-    "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",

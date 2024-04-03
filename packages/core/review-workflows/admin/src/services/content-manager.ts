@@ -8,9 +8,10 @@ import type {
 } from '../../../shared/contracts/review-workflows';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
+type ContentType = Contracts.ContentTypes.ContentType;
 interface ContentTypes {
-  collectionType: Contracts.ContentTypes.ContentType[];
-  singleType: Contracts.ContentTypes.ContentType[];
+  collectionType: ContentType[];
+  singleType: ContentType[];
 }
 
 const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
@@ -93,3 +94,4 @@ export {
   useUpdateAssigneeMutation,
   useGetContentTypesQuery,
 };
+export type { ContentTypes, ContentType };

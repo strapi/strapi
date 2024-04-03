@@ -6,5 +6,5 @@
     "rootDir": "../",
     "baseUrl": ".",
     "outDir": "./dist"
-  },
+  }
 }

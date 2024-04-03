@@ -1,31 +1,14 @@
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
-import { render } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { IntlProvider } from 'react-intl';
+import { render } from '@tests/utils';
 
 import { LimitsModal, LimitsModalProps } from '../../../../components/LimitsModal';
 
-const setup = (props?: Partial<LimitsModalProps>) => ({
-  ...render(
+const setup = (props?: Partial<LimitsModalProps>) =>
+  render(
     <LimitsModal.Root isOpen onClose={() => {}} {...props}>
       <LimitsModal.Title>Title</LimitsModal.Title>
       <LimitsModal.Body>Body</LimitsModal.Body>
-    </LimitsModal.Root>,
-    {
-      wrapper({ children }) {
-        return (
-          <ThemeProvider theme={lightTheme}>
-            <IntlProvider locale="en" messages={{}}>
-              {children}
-            </IntlProvider>
-          </ThemeProvider>
-        );
-      },
-    }
-  ),
-
-  user: userEvent.setup(),
-});
+    </LimitsModal.Root>
+  );
 
 describe('Admin | Settings | Review Workflow | LimitsModal', () => {
   it('should not render the modal if isOpen=false', () => {

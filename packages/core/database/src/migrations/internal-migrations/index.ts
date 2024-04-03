@@ -1,5 +1,6 @@
 import type { Migration } from '../common';
-import { renameIdentifiersLongerThanMaxLength } from './5.0.0-convert-identifiers-long-than-max-length';
+import { createdDocumentId } from './5.0.0-02-document-id';
+import { renameIdentifiersLongerThanMaxLength } from './5.0.0-01-convert-identifiers-long-than-max-length';
 
 /**
  * List of all the internal migrations. The array order will be the order in which they are executed.
@@ -10,4 +11,7 @@ import { renameIdentifiersLongerThanMaxLength } from './5.0.0-convert-identifier
  *   async down(knex: Knex, db: Database) {},
  * },
  */
-export const internalMigrations: Migration[] = [renameIdentifiersLongerThanMaxLength];
+export const internalMigrations: Migration[] = [
+  renameIdentifiersLongerThanMaxLength,
+  createdDocumentId,
+];

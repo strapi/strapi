@@ -13,5 +13,5 @@ export interface Context<
 
 export type Middleware = (
   ctx: Context,
-  next: (ctx: Context) => ReturnType<ServiceInstance[keyof ServiceInstance]>
+  next: () => ReturnType<ServiceInstance[keyof ServiceInstance]>
 ) => ReturnType<ServiceInstance[keyof ServiceInstance]>;
