@@ -15,19 +15,19 @@ const admin: Plugin.Config.AdminInput = {
       // @ts-expect-error TS doesn't want you to extend the middleware.
       app.addMiddlewares([() => reviewWorkflowsApi.middleware]);
 
-      // app.addSettingsLink('global', {
-      //   id: PLUGIN_ID,
-      //   to: `review-workflows`,
-      //   intlLabel: {
-      //     id: `${PLUGIN_ID}.plugin.name`,
-      //     defaultMessage: 'Review Workflows',
-      //   },
-      //   permissions: [],
-      //   async Component() {
-      //     const { Router } = await import('./router');
-      //     return { default: Router };
-      //   },
-      // });
+      app.addSettingsLink('global', {
+        id: PLUGIN_ID,
+        to: `review-workflows`,
+        intlLabel: {
+          id: `${PLUGIN_ID}.plugin.name`,
+          defaultMessage: 'Review Workflows',
+        },
+        permissions: [],
+        async Component() {
+          const { Router } = await import('./router');
+          return { default: Router };
+        },
+      });
     } else if (!window.strapi.features.isEnabled(FEATURE_ID) && window.strapi?.flags?.promoteEE) {
       app.addSettingsLink('global', {
         id: PLUGIN_ID,
@@ -38,7 +38,7 @@ const admin: Plugin.Config.AdminInput = {
         },
         permissions: [],
         async Component() {
-          const { PurchaseReviewWorkflows } = await import('./pages/purchase-review-workflows');
+          const { PurchaseReviewWorkflows } = await import('./routes/purchase-review-workflows');
           return { default: PurchaseReviewWorkflows };
         },
         lockIcon: true,

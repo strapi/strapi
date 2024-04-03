@@ -21,7 +21,7 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
         const { id, ...params } = args ?? {};
 
         return {
-          url: `/admin/review-workflows/workflows/${id ?? ''}`,
+          url: `/review-workflows/workflows${id ? `/${id}` : ''}`,
           method: 'GET',
           config: {
             params,
@@ -55,7 +55,7 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
     }),
     createWorkflow: builder.mutation<Create.Response['data'], Create.Request['body']>({
       query: (data) => ({
-        url: '/admin/review-workflows/workflows',
+        url: '/review-workflows/workflows',
         method: 'POST',
         data,
       }),
@@ -67,7 +67,7 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
       Update.Request['body'] & Update.Params
     >({
       query: ({ id, ...data }) => ({
-        url: `/admin/review-workflows/workflows/${id}`,
+        url: `/review-workflows/workflows/${id}`,
         method: 'PUT',
         data,
       }),
@@ -76,7 +76,7 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
     }),
     deleteWorkflow: builder.mutation<Delete.Response['data'], Delete.Params>({
       query: ({ id }) => ({
-        url: `/admin/review-workflows/workflows/${id}`,
+        url: `/review-workflows/workflows/${id}`,
         method: 'DELETE',
       }),
       transformResponse: (res: Delete.Response) => res.data,

@@ -8,6 +8,11 @@ import type {
 } from '../../../shared/contracts/review-workflows';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
+interface ContentTypes {
+  collectionType: Contracts.ContentTypes.ContentType[];
+  singleType: Contracts.ContentTypes.ContentType[];
+}
+
 const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
   endpoints: (builder) => ({
     getStages: builder.query<
@@ -54,12 +59,23 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
       }),
       transformResponse: (res: UpdateAssignee.Response) => res.data,
     }),
-    getContentTypes: builder.query<Contracts.ContentTypes.ContentType[], void>({
+    getContentTypes: builder.query<ContentTypes, void>({
       query: () => ({
         url: `/content-manager/content-types`,
         method: 'GET',
       }),
-      transformResponse: (res: { data: Contracts.ContentTypes.ContentType[] }) => res.data,
+      transformResponse: (res: { data: Contracts.ContentTypes.ContentType[] }) => {
+        return res.data.reduce<ContentTypes>(
+          (acc, curr) => {
+            acc[curr.kind].push(curr);
+            return acc;
+          },
+          {
+            collectionType: [],
+            singleType: [],
+          }
+        );
+      },
     }),
   }),
 });
