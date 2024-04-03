@@ -20,6 +20,6 @@ describe('Test Graphql Utils', () => {
     const res = await supertestAgent.get('/graphql').set('accept', 'text/html');
 
     expect(res.statusCode).toBe(200);
-    expect(res.text).toContain('<title>GraphQL Playground</title>');
+    expect(res.text).toContain('<title>Apollo Server</title>');
   });
 });
