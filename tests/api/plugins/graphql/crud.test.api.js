@@ -158,7 +158,7 @@ describe('Test Graphql API End to End', () => {
       const res = await graphqlQueryGET({
         query: /* GraphQL */ `
           {
-            posts {
+            posts: posts_connection {
               data {
                 id
                 attributes {
