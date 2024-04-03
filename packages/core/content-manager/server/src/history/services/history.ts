@@ -72,24 +72,24 @@ const createHistoryService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       strapi.documents.use(async (context, next) => {
         // Ignore requests that are not related to the content manager
         if (!strapi.requestContext.get()?.request.url.startsWith('/content-manager')) {
-          return next(context);
+          return next();
         }
 
         // Ignore actions that don't mutate documents
         if (
           !['create', 'update', 'publish', 'unpublish', 'discardDraft'].includes(context.action)
         ) {
-          return next(context);
+          return next();
         }
 
         // @ts-expect-error ContentType is not typed correctly on the context
         const contentTypeUid = context.contentType.uid;
         // Ignore content types not created by the user
         if (!contentTypeUid.startsWith('api::')) {
-          return next(context);
+          return next();
         }
 
-        const result = (await next(context)) as any;
+        const result = (await next()) as any;
 
         const documentContext =
           context.action === 'create'
@@ -175,15 +175,14 @@ const createHistoryService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       ]);
 
       const versionsWithMeta = results.map((version) => {
-        const { added, removed } = getSchemaAttributesDiff(
-          version.schema,
-          strapi.getModel(params.contentType).attributes
-        );
-        const hasSchemaDiff = Object.keys(added).length > 0 || Object.keys(removed).length > 0;
-
         return {
           ...version,
-          ...(hasSchemaDiff ? { meta: { unknownAttributes: { added, removed } } } : {}),
+          meta: {
+            unknownAttributes: getSchemaAttributesDiff(
+              version.schema,
+              strapi.getModel(params.contentType).attributes
+            ),
+          },
         };
       });
 

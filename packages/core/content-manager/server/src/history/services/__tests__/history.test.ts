@@ -1,4 +1,4 @@
-import type { UID } from '@strapi/types';
+import type { Struct, UID } from '@strapi/types';
 import { scheduleJob } from 'node-schedule';
 import { HISTORY_VERSION_UID } from '../../constants';
 import { createHistoryService } from '../history';
@@ -124,7 +124,7 @@ describe('history-version service', () => {
 
       // Check that we don't break the middleware chain
       await historyMiddlewareFunction(context, next);
-      expect(next).toHaveBeenCalledWith(context);
+      expect(next).toHaveBeenCalled();
 
       // Create and update actions should be saved in history
       expect(createMock).toHaveBeenCalled();
@@ -157,7 +157,7 @@ describe('history-version service', () => {
       // Don't break middleware chain even if we don't save the action in history
       next.mockClear();
       await historyMiddlewareFunction(context, next);
-      expect(next).toHaveBeenCalledWith(context);
+      expect(next).toHaveBeenCalled();
     });
 
     it('should create a cron job that runs once a day', async () => {
@@ -188,7 +188,7 @@ describe('history-version service', () => {
           title: {
             type: 'string',
           },
-        },
+        } as Struct.SchemaAttributes,
         status: 'draft' as const,
       };
 
@@ -216,7 +216,7 @@ describe('history-version service', () => {
           title: {
             type: 'string',
           },
-        },
+        } as Struct.SchemaAttributes,
         status: null,
       };
 
