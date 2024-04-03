@@ -61,7 +61,7 @@
     "@types/node": "18.19.24",
     "eslint-config-custom": "5.0.0-beta.2",
     "koa": "2.15.2",
-    "koa-body": "4.2.0",
+    "koa-body": "6.0.1",
     "tsconfig": "5.0.0-beta.2"
   },
   "engines": {
