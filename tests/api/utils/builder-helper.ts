@@ -12,7 +12,7 @@ export type BuilderHelperReturn = {
   builder: Builder;
   data: any;
 
-  strapi: Core.LoadedStrapi;
+  strapi: Core.Strapi;
   rq: {
     admin: ReturnType<typeof createAuthRequest>;
     // public: ReturnType<typeof createAuthRequest>;
@@ -55,7 +55,7 @@ export const createTestSetup = async (
   bootstrapBuilder(resources, builder);
   await builder.build();
 
-  const strapi = (await createStrapiInstance()) as LoadedStrapi;
+  const strapi = await createStrapiInstance();
   const rqAdmin = await createAuthRequest({ strapi });
   const data = await builder.sanitizedFixtures(strapi);
 

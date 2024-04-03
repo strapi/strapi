@@ -92,7 +92,7 @@ describe('CodemodRunner', () => {
 
     const res = await codemodRunner.run(`${validCwd}/src`);
 
-    const expectedMessages = [`Found codemods for 1 version(s) using ${range}`, `- v1.1.1 (2)`];
+    const expectedMessages = [`Found 2 codemods for 1 version(s) using ${range}`, `- v1.1.1 (2)`];
 
     const debugMock = loggerFactory().debug as jest.Mock;
 
@@ -124,11 +124,7 @@ describe('CodemodRunner', () => {
     const res = await codemodRunner.run(`${validCwd}/src`);
     expect(selectCodemodsCallback).toHaveBeenCalled();
 
-    const expectedMessages = [
-      `Found codemods for 1 version(s) using ${range}`,
-      `- v1.1.1 (2)`,
-      `- v1.1.2 (2)`,
-    ];
+    const expectedMessages = [`Found 2 codemods for 1 version(s) using ${range}`, `- v1.1.2 (2)`];
 
     const debugMock = loggerFactory().debug as jest.Mock;
 
@@ -150,7 +146,7 @@ describe('CodemodRunner', () => {
 
     const debugMock = loggerFactory().debug as jest.Mock;
 
-    const expectedMessages = [`Found codemods for 2 version(s)`, `- v1.1.1 (2)`, `- v1.1.2 (2)`];
+    const expectedMessages = [`Found 4 codemods for 2 version(s)`, `- v1.1.1 (2)`, `- v1.1.2 (2)`];
 
     expectedMessages.forEach((expectedMessage) =>
       expect(includesMessageIgnoringAnsi(debugMock.mock.calls, expectedMessage)).toBe(true)
@@ -164,7 +160,7 @@ describe('CodemodRunner', () => {
       .setLogger(logger)
       .dry();
     const res = await codemodRunner.run(`${validCwd}/src`);
-    expect(logger.debug).toHaveBeenCalledWith(`Found codemods for 1 version(s) using ${range}`);
+    expect(logger.debug).toHaveBeenCalledWith(`Found 2 codemods for 1 version(s) using ${range}`);
     expect(res.success).toBe(true);
   });
 });

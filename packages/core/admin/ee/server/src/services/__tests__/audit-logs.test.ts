@@ -130,7 +130,7 @@ describe('Audit logs service', () => {
     const mockFindMany = jest.fn();
     const mockDeleteExpiredEvents = jest.fn();
 
-    let strapi = {} as Core.LoadedStrapi;
+    let strapi = {} as Core.Strapi;
 
     beforeAll(() => {
       // @ts-expect-error - register is a mock
@@ -178,7 +178,7 @@ describe('Audit logs service', () => {
             return cb(opt);
           },
         },
-      } as unknown as Core.LoadedStrapi;
+      } as unknown as Core.Strapi;
     });
 
     afterEach(() => {

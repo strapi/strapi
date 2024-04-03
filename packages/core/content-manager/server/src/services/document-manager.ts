@@ -36,7 +36,7 @@ const emitEvent = async (uid: UID.ContentType, event: string, document: Document
   });
 };
 
-const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async findOne(id: string, uid: UID.CollectionType, opts: DocServiceParams<'findOne'>[1] = {}) {
       return strapi.documents(uid).findOne(id, opts);

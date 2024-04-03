@@ -50,7 +50,7 @@ const fieldSizes: Record<string, FieldSize> = {
   uid: defaultSize,
 };
 
-const createFieldSizesService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+const createFieldSizesService = ({ strapi }: { strapi: Core.Strapi }) => {
   const fieldSizesService = {
     getAllFieldSizes() {
       return fieldSizes;

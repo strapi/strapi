@@ -1,5 +1,8 @@
 import { join, resolve } from 'path';
+import { get } from 'lodash/fp';
+
 import type { Core } from '@strapi/types';
+import type { StrapiOptions } from '../Strapi';
 
 export type Options = {
   app: string;
@@ -7,8 +10,8 @@ export type Options = {
 };
 
 export const getDirs = (
-  { app: appDir, dist: distDir }: Options,
-  { strapi }: { strapi: Core.Strapi }
+  { appDir, distDir }: StrapiOptions,
+  config: { server: Partial<Core.Config.Server> }
 ): Core.StrapiDirectories => ({
   dist: {
     root: distDir,
@@ -31,6 +34,6 @@ export const getDirs = (
     config: join(appDir, 'config'),
   },
   static: {
-    public: resolve(appDir, strapi.config.get('server.dirs.public')),
+    public: resolve(appDir, get('server.dirs.public', config)),
   },
 });

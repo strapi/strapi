@@ -1,16 +1,22 @@
 import type { Codemod } from '../codemod';
 import type { Version } from '../version';
 
+export interface FindQuery {
+  range?: Version.Range;
+  uids?: string[];
+}
+
 export interface CodemodRepository {
   cwd: string;
 
   refresh(): this;
 
-  findByRange(range: Version.Range): Codemod.VersionedCollection[];
+  find(query: FindQuery): Codemod.VersionedCollection[];
+
   findByVersion(version: Version.SemVer): Codemod.List;
 
-  exists(version: Version.SemVer): boolean;
+  versionExists(version: Version.SemVer): boolean;
+  has(uid: string): boolean;
 
   count(version: Version.SemVer): number;
-  countRange(range: Version.Range): number;
 }

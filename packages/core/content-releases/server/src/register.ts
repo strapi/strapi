@@ -11,9 +11,9 @@ import {
   enableContentTypeLocalized,
 } from './migrations';
 
-export const register = async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
-    await strapi.admin.services.permission.actionProvider.registerMany(ACTIONS);
+    await strapi.service('admin::permission').actionProvider.registerMany(ACTIONS);
 
     strapi
       .hook('strapi::content-types.beforeSync')

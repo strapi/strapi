@@ -47,3 +47,9 @@ export const rangeFromVersions = (
 
   throw new Error(`Invalid target set: ${target}`); // TODO: better errors
 };
+
+export const isValidStringifiedRange = (str: string) => semver.validRange(str) !== null;
+
+export const isRangeInstance = (range: unknown): range is semver.Range => {
+  return range instanceof semver.Range;
+};
