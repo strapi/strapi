@@ -56,12 +56,11 @@ const migrateUp = async (trx: Knex, db: Database) => {
       continue;
     }
 
-    const discardDraft = async (entry: DocumentVersion) => {
+    const discardDraft = async (entry: DocumentVersion) =>
       strapi
         .documents(uid)
         // Discard draft by referencing the documentId and locale
         .discardDraft(entry.documentId, { locale: entry.locale });
-    };
 
     /**
      * Load a batch of entries (batched to prevent loading millions of rows at once ),
