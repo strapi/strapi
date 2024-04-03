@@ -46,6 +46,8 @@ yarn test:e2e --domains=admin -- login.spec.ts
 npm run test:e2e --domains=admin -- login.spec.ts
 ```
 
+Note that you must still include a domain, otherwise playwright will attempt to run every domain filtering by that filename, and any domains that do not contain that filename will fail with "no tests found"
+
 ### Running specific browsers
 
 To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium`, `firefox`, or `webkit`
