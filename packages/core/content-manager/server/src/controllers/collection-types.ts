@@ -166,7 +166,6 @@ export default {
     // @ts-expect-error populate builder needs to be called with a UID
     const populate = await getService('populate-builder')(model)
       .populateFromQuery(permissionQuery)
-      .populateDeep(Infinity)
       .build();
 
     const entity = await entityManager.findOne(id, model, { populate });

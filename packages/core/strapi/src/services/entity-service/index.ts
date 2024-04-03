@@ -373,11 +373,17 @@ const createDefaultImplementation = ({
 
     const model = strapi.getModel(uid);
 
-    const populateValue = getMediaPopulate(uid);
+    /**
+     * Media attributes are not automatically cloned in the db layer,
+     * this populate ensures media is cloned in case user does not provide
+     * any override value
+     */
+    const populate = getMediaPopulate(uid);
 
-    const entityToClone = await db
-      .query(uid)
-      .findOne({ where: { id: cloneId }, populate: populateValue });
+    const entityToClone = await db.query(uid).findOne({
+      where: { id: cloneId },
+      populate,
+    });
 
     if (!entityToClone) {
       return null;
