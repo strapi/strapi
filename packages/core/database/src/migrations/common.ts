@@ -26,7 +26,7 @@ export type Context = { db: Database };
 
 export type MigrationResolver = Resolver<Context>;
 
-export type MigrationFn = (knex: Knex, db: Database) => Promise<void>;
+export type MigrationFn = (knex: Knex.Transaction, db: Database) => Promise<void>;
 
 export type Migration = {
   name: string;
@@ -35,5 +35,5 @@ export type Migration = {
 };
 
 export const wrapTransaction = (db: Database) => (fn: MigrationFn) => () => {
-  return db.connection.transaction((trx) => Promise.resolve(fn(trx, db)));
+  return db.transaction(({ trx }) => Promise.resolve(fn(trx, db)));
 };
