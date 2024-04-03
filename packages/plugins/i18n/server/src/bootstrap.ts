@@ -19,11 +19,11 @@ const registerModelsHooks = () => {
     const schema: Schema.ContentType = context.contentType;
 
     if (!['create', 'update', 'discardDraft', 'publish'].includes(context.action)) {
-      return next(context);
+      return next();
     }
 
     if (!getService('content-types').isLocalizedContentType(schema)) {
-      return next(context);
+      return next();
     }
 
     // Build a populate array for all non localized fields within the schema
@@ -32,7 +32,7 @@ const registerModelsHooks = () => {
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
 
     // Get the result of the document service action
-    const result = (await next(context)) as any;
+    const result = (await next()) as any;
 
     // We may not have received a result with everything populated that we need
     // Use the id and populate built from non localized fields to get the full
