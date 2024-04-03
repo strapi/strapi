@@ -85,6 +85,7 @@ export interface Strapi extends Container {
   stopWithError(err: unknown, customMessage?: string): never;
   stop(exitCode?: number): never;
   registerInternalHooks(): void;
+  registerDatabaseMigrations(): void;
   register(): Promise<Strapi>;
   bootstrap(): Promise<Strapi>;
   startWebhooks(): Promise<void>;

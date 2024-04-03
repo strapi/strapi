@@ -38,7 +38,6 @@ import { createDocumentService } from './services/document-service';
 import * as draftAndPublishSync from './migrations/draft-publish';
 import { discardDocumentDrafts } from './migrations/database/5.0.0-discard-drafts';
 
-
 /**
  * Resolve the working directories based on the instance options.
  *
