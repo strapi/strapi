@@ -4,11 +4,7 @@ import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 import { navToHeader } from '../../utils/shared';
 
 const createAPIToken = async (page, tokenName, duration, type) => {
-  await navToHeader(
-    page,
-    ['Settings', 'API Tokens', 'Create new API Token'],
-    'Create API Token'
-  );
+  await navToHeader(page, ['Settings', 'API Tokens', 'Create new API Token'], 'Create API Token');
 
   await page.getByLabel('Name*').click();
   await page.getByLabel('Name*').fill(tokenName);
