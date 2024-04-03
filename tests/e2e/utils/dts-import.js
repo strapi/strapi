@@ -11,10 +11,6 @@ const {
   engine: { createTransferEngine },
 } = require('@strapi/data-transfer');
 
-function delay(seconds) {
-  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-}
-
 /**
  * Reset the DB and import data from a DTS backup
  * This function ensures we keep all admin user's and roles in the DB

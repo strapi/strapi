@@ -2,6 +2,10 @@ import execa from 'execa';
 
 const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
 
+function delay(seconds) {
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+}
+
 export const pollHealthCheck = async (interval = 1000, timeout = 30000) => {
   const url = `http://127.0.0.1:${process.env.PORT ?? 1337}/_health`;
   console.log(`Starting to poll: ${url}`);
