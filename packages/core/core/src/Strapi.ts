@@ -388,10 +388,6 @@ class Strapi extends Container implements Core.Strapi {
     return this;
   }
 
-  registerDatabaseMigrations() {
-    this.db.migrations.providers.internal.register(discardDocumentDrafts);
-  }
-
   async register() {
     // @ts-expect-error: init is internal
     this.ee.init(this.dirs.app.root, this.log);
