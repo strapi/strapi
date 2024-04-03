@@ -7,9 +7,14 @@ import type { Database } from '..';
 export type { MigrationProvider };
 
 export const createMigrationsProvider = (db: Database): MigrationProvider => {
-  const providers = [createUserMigrationProvider(db), createInternalMigrationProvider(db)];
+  const userProvider = createUserMigrationProvider(db);
+  const internalProvider = createInternalMigrationProvider(db);
+  const providers = [userProvider, internalProvider];
 
   return {
+    providers: {
+      internal: internalProvider,
+    },
     async shouldRun() {
       const shouldRunResponses = await Promise.all(
         providers.map((provider) => provider.shouldRun())
