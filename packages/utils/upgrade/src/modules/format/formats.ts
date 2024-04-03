@@ -14,9 +14,13 @@ export const version = (version: Version.LiteralVersion | Version.SemVer) => {
   return chalk.italic.yellow(`v${version}`);
 };
 
+export const codemodUID = (uid: string) => {
+  return chalk.bold.cyan(uid);
+};
+
 export const projectType = (type: ProjectType) => chalk.cyan(type);
 
-export const versionRange = (range: Version.Range) => chalk.italic.yellow(range);
+export const versionRange = (range: Version.Range) => chalk.italic.yellow(range.raw);
 
 export const transform = (transformFilePath: string) => chalk.cyan(transformFilePath);
 
@@ -68,7 +72,7 @@ export const codemodList = (codemods: Codemod.List) => {
     const fVersion = chalk.magenta(codemod.version);
     const fKind = chalk.yellow(codemod.kind);
     const fName = chalk.blue(codemod.format());
-    const fUID = chalk.cyan(codemod.uid);
+    const fUID = codemodUID(codemod.uid);
 
     return [fIndex, fVersion, fKind, fName, fUID];
   });

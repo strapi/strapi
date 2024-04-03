@@ -1,8 +1,11 @@
+import { groupBy, size } from 'lodash/fp';
+
 import {
   codemodRepositoryFactory,
   constants as codemodRepositoryConstants,
 } from '../codemod-repository';
 import { unknownToError } from '../error';
+import { semVerFactory } from '../version';
 import * as f from '../format';
 
 import type { Codemod } from '../codemod';
@@ -76,6 +79,16 @@ export class CodemodRunner implements CodemodRunnerInterface {
 
       this.logger?.raw?.(f.reports(reports));
 
+      if (!this.isDry) {
+        const nbAffectedTotal = reports
+          .flatMap((report) => report.report.ok)
+          .reduce((acc, nb) => acc + nb, 0);
+
+        this.logger?.debug?.(
+          `Successfully ran ${f.highlight(codemods.length)} codemod(s), ${f.highlight(nbAffectedTotal)} change(s) have been detected`
+        );
+      }
+
       return successReport();
     } catch (e: unknown) {
       return erroredReport(unknownToError(e));
@@ -113,16 +126,20 @@ export class CodemodRunner implements CodemodRunnerInterface {
       return successReport();
     }
 
-    this.logger?.debug?.(
-      `Found codemods for ${f.highlight(selectedCodemods.length)} version(s) using ${this.range}`
-    );
-
-    selectedCodemods.forEach(({ version, codemods }) =>
-      this.logger?.debug?.(`- ${f.version(version)} (${codemods.length})`)
-    );
-
     // Flatten the collection to a single list of codemods, the original list should already be sorted by version
     const codemods = selectedCodemods.flatMap(({ codemods }) => codemods);
+
+    // Log (debug) the codemods by version
+    const codemodsByVersion = groupBy('version', codemods);
+    const fRange = f.versionRange(this.range);
+
+    this.logger?.debug?.(
+      `Found ${f.highlight(codemods.length)} codemods for ${f.highlight(size(codemodsByVersion))} version(s) using ${fRange}`
+    );
+
+    for (const [version, codemods] of Object.entries(codemodsByVersion)) {
+      this.logger?.debug?.(`- ${f.version(semVerFactory(version))} (${codemods.length})`);
+    }
 
     return this.safeRunAndReport(codemods);
   }

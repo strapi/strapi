@@ -29,7 +29,7 @@ export const runCodemods = async (options: RunCodemodsOptions) => {
 
   // If uid is defined, only run the selected codemod
   if (uid !== undefined) {
-    logger.debug(`Running a single codemod: "${uid}"`);
+    logger.debug(`Running a single codemod: ${f.codemodUID(uid)}`);
     report = await codemodRunner.runByUID(uid);
   }
 
