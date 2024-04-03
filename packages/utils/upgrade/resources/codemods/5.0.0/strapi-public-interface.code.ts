@@ -90,7 +90,7 @@ const transformFunctionCalls = (identifier: string, root: Collection, j: JSCodes
       },
     })
     .forEach((path) => {
-      // we do a again to avoid ts issues
+      // we a type guard again to avoid ts issues
       if (path.value.callee.type === 'Identifier') {
         path.value.callee.name = 'createStrapi';
       }

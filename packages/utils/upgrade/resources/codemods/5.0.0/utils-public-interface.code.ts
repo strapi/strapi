@@ -2,7 +2,7 @@ import { Transform, JSCodeshift, Collection } from 'jscodeshift';
 
 /*
 
-This codemod transforms @strapi/utils imports to change method calls to math the new public interface.
+This codemod transforms @strapi/utils imports to change method calls to match the new public interface.
 It will also warn about removed functions to avoid breaking user code.
 
 ESM
@@ -111,14 +111,18 @@ const transformImports = (root: Collection, j: JSCodeshift) => {
       source: { value: '@strapi/utils' },
     })
     .forEach((path) => {
-      path.value.specifiers?.forEach((specifier) => {
+      if (!j.ImportDeclaration.check(path.value)) {
+        return;
+      }
+
+      path.value.specifiers.forEach((specifier) => {
         if (!j.ImportSpecifier.check(specifier)) {
           return false;
         }
 
         if (removed.includes(specifier.imported.name)) {
           console.warn(
-            `Function "${specifier.imported.name}" as removed. You will have to remove it from your code.`
+            `Function "${specifier.imported.name}" was removed. You will have to remove it from your code.`
           );
 
           return false;
@@ -128,16 +132,16 @@ const transformImports = (root: Collection, j: JSCodeshift) => {
       for (const primitive of Object.keys(changes)) {
         const functions = Object.keys(changes[primitive]);
 
-        const specifiersToRefactor = path.value.specifiers?.filter((specifier) => {
+        const specifiersToRefactor = path.value.specifiers.filter((specifier) => {
           return j.ImportSpecifier.check(specifier) && functions.includes(specifier.imported.name);
         });
 
-        if (specifiersToRefactor?.length > 0) {
-          path.value.specifiers?.unshift(j.importSpecifier(j.identifier(primitive)));
+        if (specifiersToRefactor.length > 0) {
+          path.value.specifiers.unshift(j.importSpecifier(j.identifier(primitive)));
 
           specifiersToRefactor.forEach((specifier) => {
-            const index = path.value.specifiers?.indexOf(specifier);
-            path.value.specifiers?.splice(index, 1);
+            const index = path.value.specifiers.indexOf(specifier);
+            path.value.specifiers.splice(index, 1);
           });
         }
       }
@@ -193,7 +197,8 @@ const transformImports = (root: Collection, j: JSCodeshift) => {
       },
     })
     .forEach((path) => {
-      // destrucured require
+      // destructured require
+
       if (j.ObjectPattern.check(path.value.id)) {
         const properties = path.value.id.properties;
 
@@ -204,7 +209,7 @@ const transformImports = (root: Collection, j: JSCodeshift) => {
 
           if (removed.includes(property.value.name)) {
             console.warn(
-              `Function "${property.value.name}" as removed. You will have to remove it from your code.`
+              `Function "${property.value.name}" was removed. You will have to remove it from your code.`
             );
 
             return false;

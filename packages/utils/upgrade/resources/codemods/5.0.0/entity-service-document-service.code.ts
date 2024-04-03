@@ -144,6 +144,8 @@ strapi.entityService.findOne(...[...objectParam_10]);
 
 */
 
+const movedFunctions = ['findOne', 'find', 'count', 'create', 'update', 'delete'];
+
 const transformDeclaration = (path: ASTPath<any>, name: any, j: JSCodeshift) => {
   const declaration = findClosesDeclaration(path, name, j);
 
@@ -283,6 +285,10 @@ const transform: Transform = (file, api) => {
             type: 'Identifier',
             name: 'entityService',
           },
+        },
+        property: {
+          type: 'Identifier',
+          name: (name) => movedFunctions.includes(name),
         },
       },
     })
