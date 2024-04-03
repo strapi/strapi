@@ -60,7 +60,7 @@
     "@types/koa": "2.13.4",
     "@types/node": "18.19.24",
     "eslint-config-custom": "5.0.0-beta.2",
-    "koa": "2.13.4",
+    "koa": "2.15.2",
     "koa-body": "4.2.0",
     "tsconfig": "5.0.0-beta.2"
   },

@@ -4270,6 +4270,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@koa/router@npm:12.0.1":
+  version: 12.0.1
+  resolution: "@koa/router@npm:12.0.1"
+  dependencies:
+    debug: "npm:^4.3.4"
+    http-errors: "npm:^2.0.0"
+    koa-compose: "npm:^4.1.0"
+    methods: "npm:^1.1.2"
+    path-to-regexp: "npm:^6.2.1"
+  checksum: f9427c8eb21a2d7c880dae192b7298ecb243af32a8270b5e3e32c4420da157111bc326ab0bc75ff0f17320b9d9ab9df235295fc2d53d8681b5a14103c27ad22d
+  languageName: node
+  linkType: hard
+
 "@kwsites/file-exists@npm:^1.1.1":
   version: 1.1.1
   resolution: "@kwsites/file-exists@npm:1.1.1"
@@ -6872,12 +6885,12 @@ __metadata:
     invariant: "npm:^2.2.4"
     js-cookie: "npm:2.2.1"
     jsonwebtoken: "npm:9.0.0"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     koa-body: "npm:4.2.0"
     koa-compose: "npm:4.1.0"
-    koa-passport: "npm:5.0.0"
+    koa-passport: "npm:6.0.0"
     koa-static: "npm:5.0.0"
-    koa2-ratelimit: "npm:^1.1.2"
+    koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     node-schedule: "npm:2.1.0"
@@ -6939,7 +6952,7 @@ __metadata:
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.1"
     formik: "npm:2.4.5"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     node-schedule: "npm:2.1.0"
@@ -6966,8 +6979,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/core@workspace:packages/core/core"
   dependencies:
-    "@koa/cors": "npm:3.4.3"
-    "@koa/router": "npm:10.1.1"
+    "@koa/cors": "npm:5.0.0"
+    "@koa/router": "npm:12.0.1"
     "@paralleldrive/cuid2": "npm:2.2.2"
     "@strapi/admin": "npm:5.0.0-beta.2"
     "@strapi/database": "npm:5.0.0-beta.2"
@@ -7012,13 +7025,13 @@ __metadata:
     http-errors: "npm:1.8.1"
     inquirer: "npm:8.2.5"
     is-docker: "npm:2.2.1"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     koa-body: "npm:4.2.0"
     koa-compose: "npm:4.1.0"
-    koa-compress: "npm:5.1.0"
+    koa-compress: "npm:5.1.1"
     koa-favicon: "npm:2.1.0"
     koa-helmet: "npm:7.0.2"
-    koa-ip: "npm:^2.1.2"
+    koa-ip: "npm:^2.1.3"
     koa-session: "npm:6.4.0"
     koa-static: "npm:5.0.0"
     lodash: "npm:4.17.21"
@@ -7065,7 +7078,7 @@ __metadata:
     fs-extra: "npm:10.1.0"
     inquirer: "npm:8.2.5"
     knex: "npm:3.0.1"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     lodash: "npm:4.17.21"
     ora: "npm:5.4.1"
     resolve-cwd: "npm:3.0.0"
@@ -7344,7 +7357,7 @@ __metadata:
     fractional-indexing: "npm:3.2.0"
     highlight.js: "npm:^10.4.1"
     immer: "npm:9.0.21"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     koa-body: "npm:4.2.0"
     lodash: "npm:4.17.21"
     markdown-it: "npm:^12.3.2"
@@ -7404,7 +7417,7 @@ __metadata:
     date-fns: "npm:2.30.0"
     fs-extra: "npm:10.1.0"
     immer: "npm:9.0.21"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     koa-body: "npm:4.2.0"
     lodash: "npm:4.17.21"
     pluralize: "npm:8.0.0"
@@ -7451,7 +7464,7 @@ __metadata:
     formik: "npm:2.4.5"
     fs-extra: "npm:10.1.0"
     immer: "npm:9.0.21"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     koa-body: "npm:4.2.0"
     koa-session: "npm:6.4.0"
     koa-static: "npm:^5.0.0"
@@ -7490,7 +7503,7 @@ __metadata:
     "@testing-library/react": "npm:14.0.0"
     "@types/koa": "npm:2.13.4"
     "@types/lodash": "npm:^4.14.191"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     koa-body: "npm:4.2.0"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
@@ -7519,7 +7532,7 @@ __metadata:
     "@as-integrations/koa": "npm:1.1.1"
     "@graphql-tools/schema": "npm:8.5.1"
     "@graphql-tools/utils": "npm:^8.13.1"
-    "@koa/cors": "npm:3.4.3"
+    "@koa/cors": "npm:5.0.0"
     "@strapi/design-system": "npm:1.16.0"
     "@strapi/icons": "npm:1.16.0"
     "@strapi/strapi": "npm:5.0.0-beta.2"
@@ -7534,7 +7547,7 @@ __metadata:
     graphql-depth-limit: "npm:^1.1.0"
     graphql-playground-middleware-koa: "npm:^1.6.21"
     graphql-scalars: "npm:1.22.2"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     koa-bodyparser: "npm:4.4.1"
     koa-compose: "npm:^4.1.0"
     lodash: "npm:4.17.21"
@@ -7639,7 +7652,7 @@ __metadata:
     formik: "npm:2.4.5"
     fs-extra: "npm:10.1.0"
     immer: "npm:9.0.21"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     koa-body: "npm:4.2.0"
     koa-range: "npm:0.3.0"
     koa-static: "npm:5.0.0"
@@ -7686,8 +7699,8 @@ __metadata:
     immer: "npm:9.0.21"
     jsonwebtoken: "npm:9.0.0"
     jwk-to-pem: "npm:2.0.5"
-    koa: "npm:2.13.4"
-    koa2-ratelimit: "npm:^1.1.2"
+    koa: "npm:2.15.2"
+    koa2-ratelimit: "npm:^1.1.3"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
     prop-types: "npm:^15.8.1"
@@ -7969,7 +7982,7 @@ __metadata:
   dependencies:
     "@casl/ability": "npm:6.5.0"
     "@koa/cors": "npm:5.0.0"
-    "@koa/router": "npm:10.1.1"
+    "@koa/router": "npm:12.0.1"
     "@strapi/database": "npm:5.0.0-beta.2"
     "@strapi/logger": "npm:5.0.0-beta.2"
     "@strapi/pack-up": "npm:5.0.0-beta.2"
@@ -7982,7 +7995,7 @@ __metadata:
     "@types/node-schedule": "npm:2.1.0"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:5.0.0-beta.2"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     lodash: "npm:4.17.21"
     node-schedule: "npm:2.1.0"
     tsconfig: "npm:5.0.0-beta.2"
@@ -8077,7 +8090,7 @@ __metadata:
     eslint-config-custom: "npm:5.0.0-beta.2"
     execa: "npm:5.1.1"
     http-errors: "npm:1.8.1"
-    koa: "npm:2.13.4"
+    koa: "npm:2.15.2"
     koa-body: "npm:4.2.0"
     lodash: "npm:4.17.21"
     node-machine-id: "npm:1.1.12"
@@ -11746,7 +11759,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bytes@npm:3.1.2, bytes@npm:^3.0.0":
+"bytes@npm:3.1.2, bytes@npm:^3.0.0, bytes@npm:^3.1.2":
   version: 3.1.2
   resolution: "bytes@npm:3.1.2"
   checksum: a10abf2ba70c784471d6b4f58778c0beeb2b5d405148e66affa91f23a9f13d07603d0a0354667310ae1d6dc141474ffd44e2a074be0f6e2254edb8fc21445388
@@ -12682,7 +12695,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"compressible@npm:^2.0.0":
+"compressible@npm:^2.0.0, compressible@npm:^2.0.18":
   version: 2.0.18
   resolution: "compressible@npm:2.0.18"
   dependencies:
@@ -12989,6 +13002,16 @@ __metadata:
     depd: "npm:~2.0.0"
     keygrip: "npm:~1.1.0"
   checksum: 5da4d72ba81c2740511751ac8ea9506e10e2366b9ad3360333581e4667fd8d063d02c5be0bef16177de3e366b8128ed2b72921e2952c79cbca084d177e529bba
+  languageName: node
+  linkType: hard
+
+"cookies@npm:~0.9.0":
+  version: 0.9.1
+  resolution: "cookies@npm:0.9.1"
+  dependencies:
+    depd: "npm:~2.0.0"
+    keygrip: "npm:~1.1.0"
+  checksum: 4816461a38d907b20f3fb7a2bc4741fe580e7a195f3e248ef7025cb3be56a07638a0f4e72553a5f535554ca30172c8a3245c63ac72c9737cec034e9a47773392
   languageName: node
   linkType: hard
 
@@ -17635,7 +17658,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-errors@npm:1.8.1, http-errors@npm:^1.6.3, http-errors@npm:^1.7.3, http-errors@npm:^1.8.0, http-errors@npm:~1.8.0":
+"http-errors@npm:1.8.1, http-errors@npm:^1.6.3, http-errors@npm:^1.7.3, http-errors@npm:^1.8.0, http-errors@npm:^1.8.1, http-errors@npm:~1.8.0":
   version: 1.8.1
   resolution: "http-errors@npm:1.8.1"
   dependencies:
@@ -17648,7 +17671,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-errors@npm:2.0.0":
+"http-errors@npm:2.0.0, http-errors@npm:^2.0.0":
   version: 2.0.0
   resolution: "http-errors@npm:2.0.0"
   dependencies:
@@ -20143,6 +20166,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"koa-compress@npm:5.1.1":
+  version: 5.1.1
+  resolution: "koa-compress@npm:5.1.1"
+  dependencies:
+    bytes: "npm:^3.1.2"
+    compressible: "npm:^2.0.18"
+    http-errors: "npm:^1.8.1"
+    koa-is-json: "npm:^1.0.0"
+  checksum: e768d336756e2009cd65db28c48472827a0eb503cdf3055bdb0af0e5d74b821bb8b9820dfdcb956e359fdea3c302286d2a17eef28bd4683217a6e8d503749e68
+  languageName: node
+  linkType: hard
+
 "koa-convert@npm:^2.0.0":
   version: 2.0.0
   resolution: "koa-convert@npm:2.0.0"
@@ -20182,6 +20217,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"koa-ip@npm:^2.1.3":
+  version: 2.1.3
+  resolution: "koa-ip@npm:2.1.3"
+  dependencies:
+    debug: "npm:4.3.4"
+    lodash.isplainobject: "npm:4.0.6"
+    request-ip: "npm:3.3.0"
+  checksum: 67fe264367cc513ca8cb91472c5719102384fd29daac31ce93ebf9ffc15a69779d99924e7b34e03ec765be59a2bc287493d1534eba3223ab1fcc8a275909a827
+  languageName: node
+  linkType: hard
+
 "koa-is-json@npm:^1.0.0":
   version: 1.0.0
   resolution: "koa-is-json@npm:1.0.0"
@@ -20195,6 +20241,15 @@ __metadata:
   dependencies:
     passport: "npm:^0.6.0"
   checksum: 9aef68b54a5d931b0f5324c1934be8f56ee84bf131d940082418bcd4ee5bc6142ecf2493d6710a56ed68a0610e44fa6d43412caf7dfa0e51807c35adb6443dcd
+  languageName: node
+  linkType: hard
+
+"koa-passport@npm:6.0.0":
+  version: 6.0.0
+  resolution: "koa-passport@npm:6.0.0"
+  dependencies:
+    passport: "npm:^0.6.0"
+  checksum: 4482e4b3d2d847ebbee07408390edc76859389128e9544d79a616de5fb6c5bfc62ef14a52257e62b6f2d77bd9f602d749e8bf412ac676c3e58f0d74081619b5e
   languageName: node
   linkType: hard
 
@@ -20258,6 +20313,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"koa2-ratelimit@npm:^1.1.3":
+  version: 1.1.3
+  resolution: "koa2-ratelimit@npm:1.1.3"
+  peerDependencies:
+    mongoose: ">= 5"
+    redis: ">= 4.0.0"
+    sequelize: ">=5.8.7"
+  peerDependenciesMeta:
+    mongoose:
+      optional: true
+    redis:
+      optional: true
+    sequelize:
+      optional: true
+  checksum: 7dcd8d9b0b356cfe419c93bac72a0e80370a9cd671a910e5b264370cfbdcb176c753be2f0a0df309c2bdf10febd8c58a9cc8fae817f9277c044eaba0132a6a20
+  languageName: node
+  linkType: hard
+
 "koa@npm:2.13.4":
   version: 2.13.4
   resolution: "koa@npm:2.13.4"
@@ -20286,6 +20359,37 @@ __metadata:
     type-is: "npm:^1.6.16"
     vary: "npm:^1.1.2"
   checksum: 5ddd5a08dcfc17f87a90fd8717a158f6f42ac8113d8328d487cbdb1cf73797e9be199e1b1c5f67c9b6e5f0daef96654fb94ed244dea5500d8197b0f81f2dc652
+  languageName: node
+  linkType: hard
+
+"koa@npm:2.15.2":
+  version: 2.15.2
+  resolution: "koa@npm:2.15.2"
+  dependencies:
+    accepts: "npm:^1.3.5"
+    cache-content-type: "npm:^1.0.0"
+    content-disposition: "npm:~0.5.2"
+    content-type: "npm:^1.0.4"
+    cookies: "npm:~0.9.0"
+    debug: "npm:^4.3.2"
+    delegates: "npm:^1.0.0"
+    depd: "npm:^2.0.0"
+    destroy: "npm:^1.0.4"
+    encodeurl: "npm:^1.0.2"
+    escape-html: "npm:^1.0.3"
+    fresh: "npm:~0.5.2"
+    http-assert: "npm:^1.3.0"
+    http-errors: "npm:^1.6.3"
+    is-generator-function: "npm:^1.0.7"
+    koa-compose: "npm:^4.1.0"
+    koa-convert: "npm:^2.0.0"
+    on-finished: "npm:^2.3.0"
+    only: "npm:~0.0.2"
+    parseurl: "npm:^1.3.2"
+    statuses: "npm:^1.5.0"
+    type-is: "npm:^1.6.16"
+    vary: "npm:^1.1.2"
+  checksum: edafa18bbbef420c557c678998252a4f448c211fdd0ff1e70eddd4f689fe1f7363fa5a05849cef5f1bcb2c3adc1ae360e68b0bcc1432cd58c5c75fb840204fe0
   languageName: node
   linkType: hard
 
@@ -23619,7 +23723,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:6.2.1, path-to-regexp@npm:^6.1.0, path-to-regexp@npm:^6.2.0":
+"path-to-regexp@npm:6.2.1, path-to-regexp@npm:^6.1.0, path-to-regexp@npm:^6.2.0, path-to-regexp@npm:^6.2.1":
   version: 6.2.1
   resolution: "path-to-regexp@npm:6.2.1"
   checksum: 1e266be712d1a08086ee77beab12a1804842ec635dfed44f9ee1ba960a0e01cec8063fb8c92561115cdc0ce73158cdc7766e353ffa039340b4a85b370084c4d4
@@ -25166,6 +25270,13 @@ __metadata:
   dependencies:
     is_js: "npm:^0.9.0"
   checksum: b7c82f61f841ba9715dd6f7df51c8bf2317ac5e5e9235bde3b08e3d9f416f75b3815971189095f0d24debce7cbf8e016af3204eae53c91f9b3181aff2718f79b
+  languageName: node
+  linkType: hard
+
+"request-ip@npm:3.3.0":
+  version: 3.3.0
+  resolution: "request-ip@npm:3.3.0"
+  checksum: 9ca26f814201da19cb6f1a18da4f036803b770665ec0e7c556ea975ba553321922a5f04909f6dfc2371f695ca8aaa3c66f02c00a5e902c76435029804cdc4964
   languageName: node
   linkType: hard
 
