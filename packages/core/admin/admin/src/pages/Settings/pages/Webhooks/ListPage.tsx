@@ -229,7 +229,7 @@ const ListPage = () => {
               colCount={5}
               rowCount={numberOfWebhooks + 1}
               footer={
-                <TFooter onClick={canCreate ? goTo('create') : undefined} icon={<Plus />}>
+                <TFooter onClick={goTo('create')} icon={<Plus />}>
                   {formatMessage({
                     id: 'Settings.webhooks.list.button.add',
                     defaultMessage: 'Create new webhook',
@@ -383,7 +383,8 @@ const ListPage = () => {
                 <Button
                   variant="secondary"
                   startIcon={<Plus />}
-                  onClick={() => (canCreate ? goTo('create') : {})}
+                  disabled={!canCreate}
+                  onClick={canCreate ? goTo('create') : undefined}
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.list.button.add',
