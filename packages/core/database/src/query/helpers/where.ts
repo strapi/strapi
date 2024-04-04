@@ -91,7 +91,7 @@ const processRelationWhere = (where: unknown, ctx: WhereCtx) => {
 
   if (operatorKeys.length > 1) {
     throw new Error(
-      `Only one operator key is allowed in a relation where clause found ${operatorKeys}`
+      `Only one operator key is allowed in a relation where clause, but found: ${operatorKeys}`
     );
   }
 
