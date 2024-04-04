@@ -232,6 +232,7 @@ module.exports = config
               await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
 
               console.log(`Running ${chalk.blue(domain)} e2e tests`);
+
               await execa(
                 'yarn',
                 ['playwright', 'test', '--config', pathToPlaywrightConfig, ...debugFlag, ...argv._],
