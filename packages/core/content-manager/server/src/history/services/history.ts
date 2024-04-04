@@ -1,4 +1,4 @@
-import type { Core, Modules, UID, Data, Struct } from '@strapi/types';
+import type { Core, Modules, UID, Data, Schema } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
 import { omit, pick } from 'lodash/fp';
 
@@ -280,7 +280,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
        */
       const buildRelationReponse = async (
         values: EntryToPopulate[],
-        attributeSchema: Struct.SchemaAttributes[keyof Struct.SchemaAttributes]
+        attributeSchema: Schema.Attribute.AnyAttribute
       ): Promise<{ results: any[]; meta: { missingCount: number } }> => {
         return (
           values
@@ -311,6 +311,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                       .documents(attributeSchema.target)
                       .findOne(entry.documentId, { locale: entry.locale || undefined });
                   }
+                  // For media assets, only the id is available, double check that we have it
                 } else if ('id' in entry) {
                   relatedEntry = await strapi.db
                     .query('plugin::upload.file')

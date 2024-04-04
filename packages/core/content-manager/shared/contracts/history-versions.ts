@@ -12,8 +12,8 @@ export interface CreateHistoryVersion {
   locale: string | null;
   status: 'draft' | 'published' | 'modified' | null;
   data: Record<string, unknown>;
-  schema: Schema.Attributes;
-  componentsSchemas: Record<`${string}.${string}`, Schema.Attributes>;
+  schema: Struct.SchemaAttributes;
+  componentsSchemas: Record<`${string}.${string}`, Struct.SchemaAttributes>;
 }
 
 interface Locale {
