@@ -1,5 +1,15 @@
-import { Form } from '@strapi/admin/strapi-admin';
-import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import * as React from 'react';
+
+import { Form, useField, useStrapiApp } from '@strapi/admin/strapi-admin';
+import {
+  Box,
+  ContentLayout,
+  FieldLabel,
+  Flex,
+  Grid,
+  GridItem,
+  Typography,
+} from '@strapi/design-system';
 
 import {
   InputRenderer,
@@ -7,19 +17,84 @@ import {
 } from '../../pages/EditView/components/InputRenderer';
 import { useHistoryContext } from '../pages/History';
 
+import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
+
+/* -------------------------------------------------------------------------------------------------
+ * CustomRelationInput
+ * -----------------------------------------------------------------------------------------------*/
+
+const CustomRelationInput = (props: RelationsFieldProps) => {
+  const field = useField(props.name);
+
+  return (
+    <Box>
+      <FieldLabel>{props.label}</FieldLabel>
+      {field.value.results.length === 0 ? (
+        <Typography>No content</Typography>
+      ) : (
+        <Flex direction="column" gap={2} alignItems="stretch">
+          {(field.value.results as Record<string, unknown>[]).map((relationData, index) => {
+            return (
+              <Flex
+                key={index}
+                paddingTop={2}
+                paddingBottom={2}
+                paddingLeft={4}
+                paddingRight={4}
+                hasRadius
+                borderColor="neutral200"
+                background="neutral150"
+                justifyContent="space-between"
+              >
+                <pre>
+                  <Typography as="code">{JSON.stringify(relationData, null, 2)}</Typography>
+                </pre>
+              </Flex>
+            );
+          })}
+          <Typography>{field.value.meta.missingCount} missing relations</Typography>
+        </Flex>
+      )}
+    </Box>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * CustomMediaInput
+ * -----------------------------------------------------------------------------------------------*/
+
+const CustomMediaInput = (props: InputRendererProps) => {
+  const field = useField(props.name);
+  const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);
+  const MediaLibrary = fields.media as React.ComponentType<
+    InputRendererProps & { multiple: boolean }
+  >;
+
+  return (
+    <Box>
+      <Flex direction="column" gap={2} alignItems="stretch">
+        <Form method="PUT" disabled={true} initialValues={{ [props.name]: field.value.results }}>
+          <MediaLibrary {...props} disabled={true} multiple={field.value.results.length > 1} />
+        </Form>
+        <Typography>{field.value.meta.missingCount} missing relations</Typography>
+      </Flex>
+    </Box>
+  );
+};
+
 /* -------------------------------------------------------------------------------------------------
  * CustomInputRenderer
  * -----------------------------------------------------------------------------------------------*/
 
-// The renderers for these types will be added in future PRs, they need special handling
-const UNSUPPORTED_TYPES = ['media', 'relation'];
-
 const CustomInputRenderer = (props: InputRendererProps) => {
-  if (UNSUPPORTED_TYPES.includes(props.type)) {
-    return <Typography>TODO: support {props.type}</Typography>;
+  switch (props.type) {
+    case 'media':
+      return <CustomMediaInput {...props} />;
+    case 'relation':
+      return <CustomRelationInput {...props} />;
+    default:
+      return <InputRenderer {...props} />;
   }
-
-  return <InputRenderer {...props} />;
 };
 
 /* -------------------------------------------------------------------------------------------------
