@@ -10,7 +10,7 @@ const setup = (props?: Partial<LimitsModalProps>) =>
     </LimitsModal.Root>
   );
 
-describe('Admin | Settings | Review Workflow | LimitsModal', () => {
+describe('LimitsModal', () => {
   it('should not render the modal if isOpen=false', () => {
     const { queryByText } = setup({ isOpen: false });
 

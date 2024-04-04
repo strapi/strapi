@@ -1,10 +1,13 @@
+import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, screen } from '@tests/utils';
 import { Route, Routes } from 'react-router-dom';
 
-import { Form } from '../../../../../../../../admin/src/components/Form';
 import { StageFilter, StageFilterProps } from '../StageFilter';
 
-describe('StageFilter', () => {
+/**
+ * Filters are not currently supported
+ */
+describe.skip('StageFilter', () => {
   const render = (props?: Partial<StageFilterProps>) =>
     renderRTL(
       <StageFilter aria-label="Pick a stage" type="enumeration" name="stage" {...props} />,

@@ -1,16 +1,21 @@
 import { Form } from '@strapi/admin/strapi-admin';
 import { waitForElementToBeRemoved } from '@testing-library/react';
-import { render as renderRTL, waitFor, server } from '@tests/utils';
+import { render as renderRTL, waitFor, server, screen } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { StageSelect } from '../StageSelect';
 
-/**
- * Reimplement when we have review-workflows working with V5 again – see  https://strapi-inc.atlassian.net/browse/CONTENT-2030
- */
-describe.skip('EE | Content Manager | EditView | InformationBox | StageSelect', () => {
-  const render = () =>
+describe('StageSelect', () => {
+  const render = (
+    initialValues = {
+      strapi_stage: {
+        id: 1,
+        color: '#4945FF',
+        name: 'Stage 1',
+      },
+    }
+  ) =>
     renderRTL(<StageSelect />, {
       renderOptions: {
         wrapper: ({ children }) => {
@@ -19,7 +24,7 @@ describe.skip('EE | Content Manager | EditView | InformationBox | StageSelect', 
               <Route
                 path="/content-manager/:collectionType/:slug/:id"
                 element={
-                  <Form method="PUT" onSubmit={jest.fn()}>
+                  <Form method="PUT" onSubmit={jest.fn()} initialValues={initialValues}>
                     {children}
                   </Form>
                 }
@@ -32,15 +37,17 @@ describe.skip('EE | Content Manager | EditView | InformationBox | StageSelect', 
     });
 
   it('renders a select input, if a workflow stage is assigned to the entity', async () => {
-    const { getByRole, queryByTestId, user, findByText } = render();
+    const { user } = render();
 
-    await waitForElementToBeRemoved(() => queryByTestId('loader'));
+    await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
 
-    await findByText('Stage 1');
+    await screen.findByRole('combobox');
 
-    await user.click(getByRole('combobox'));
+    expect(screen.getByRole('combobox')).toHaveTextContent('Stage 1');
 
-    await findByText('Stage 2');
+    await user.click(screen.getByRole('combobox'));
+
+    expect(screen.getAllByRole('option')).toHaveLength(2);
   });
 
   it("renders the select as disabled with a hint, if there aren't any stages", async () => {
@@ -50,11 +57,13 @@ describe.skip('EE | Content Manager | EditView | InformationBox | StageSelect', 
       })
     );
 
-    const { queryByRole, queryByTestId, findByText } = render();
+    render();
 
-    await waitForElementToBeRemoved(() => queryByTestId('loader'));
+    await waitForElementToBeRemoved(() => screen.queryByTestId('loader'));
 
-    await waitFor(() => expect(queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true'));
-    await findByText('You don’t have the permission to update this stage.');
+    await waitFor(() =>
+      expect(screen.queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true')
+    );
+    await screen.findByText('You don’t have the permission to update this stage.');
   });
 });

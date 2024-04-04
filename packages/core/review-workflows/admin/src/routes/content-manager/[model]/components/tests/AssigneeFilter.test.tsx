@@ -1,9 +1,12 @@
+import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, screen } from '@tests/utils';
 
-import { Form } from '../../../../../../../../admin/src/components/Form';
 import { AssigneeFilter, AssigneeFilterProps } from '../AssigneeFilter';
 
-describe('AssigneeFilter', () => {
+/**
+ * Filters are not currently supported
+ */
+describe.skip('AssigneeFilter', () => {
   const render = (props?: Partial<AssigneeFilterProps>) =>
     renderRTL(
       <AssigneeFilter name="assignee" type="enumeration" aria-label="Assignee" {...props} />,

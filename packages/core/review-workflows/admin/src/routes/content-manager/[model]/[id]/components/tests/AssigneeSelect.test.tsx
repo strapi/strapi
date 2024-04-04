@@ -1,15 +1,12 @@
+import { Form } from '@strapi/admin/strapi-admin';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
-import { Form } from '../../../../../../../../admin/src/components/Form';
 import { AssigneeSelect } from '../AssigneeSelect';
 import { ASSIGNEE_ATTRIBUTE_NAME } from '../constants';
 
-/**
- * Reimplement when we have review-workflows working with V5 again – see  https://strapi-inc.atlassian.net/browse/CONTENT-2031
- */
-describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect', () => {
+describe('AssigneeSelect', () => {
   const render = (initialValues = {}) =>
     renderRTL(<AssigneeSelect />, {
       renderOptions: {
@@ -111,7 +108,7 @@ describe.skip('EE | Content Manager | EditView | InformationBox | AssigneeSelect
 
     server.use(
       rest.put(
-        '/admin/content-manager/collection-types/:contentType/:id/assignee',
+        '/review-workflows/content-manager/collection-types/:contentType/:id/assignee',
         (req, res, ctx) => {
           return res.once(
             ctx.status(500),

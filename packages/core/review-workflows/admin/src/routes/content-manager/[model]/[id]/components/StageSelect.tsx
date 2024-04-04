@@ -134,6 +134,7 @@ export const StageSelect = () => {
     <>
       <Field
         hint={
+          !isLoading &&
           stages.length === 0 &&
           formatMessage({
             id: 'content-manager.reviewWorkflows.stages.no-transition',
@@ -174,16 +175,18 @@ export const StageSelect = () => {
               )
             }
             // @ts-expect-error – `customizeContent` is not correctly typed in the DS.
-            customizeContent={() => (
-              <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
-                <Typography textColor="neutral800" ellipsis>
-                  {activeWorkflowStage?.name ?? ''}
-                </Typography>
-                {isLoading ? (
-                  <Loader small style={{ display: 'flex' }} data-testid="loader" />
-                ) : null}
-              </Flex>
-            )}
+            customizeContent={() => {
+              return (
+                <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
+                  <Typography textColor="neutral800" ellipsis>
+                    {activeWorkflowStage?.name ?? ''}
+                  </Typography>
+                  {isLoading ? (
+                    <Loader small style={{ display: 'flex' }} data-testid="loader" />
+                  ) : null}
+                </Flex>
+              );
+            }}
           >
             {stages.map(({ id, color, name }) => {
               const { themeColorName } = getStageColorByHex(color) ?? {};
