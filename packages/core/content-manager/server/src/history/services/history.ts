@@ -10,6 +10,7 @@ import {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
+import { getSchemaAttributesDiff } from './utils';
 
 // Needed because the query engine doesn't return any types yet
 type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
@@ -375,6 +376,12 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           return {
             ...result,
             data: await populateEntryRelations(result),
+            meta: {
+              unknownAttributes: getSchemaAttributesDiff(
+                result.schema,
+                strapi.getModel(params.contentType).attributes
+              ),
+            },
             locale: result.locale ? localeDictionary[result.locale] : null,
             createdBy: result.createdBy
               ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
