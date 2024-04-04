@@ -19,7 +19,7 @@ type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
 const releaseController = {
   async findMany(ctx: Koa.Context) {
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: RELEASE_MODEL_UID,
     });
@@ -89,7 +89,7 @@ const releaseController = {
     const sanitizedRelease = {
       ...release,
       createdBy: release.createdBy
-        ? strapi.admin.services.user.sanitizeUser(release.createdBy)
+        ? strapi.service('admin::user').sanitizeUser(release.createdBy)
         : null,
     };
 
@@ -115,7 +115,7 @@ const releaseController = {
     const releaseService = getService('release', { strapi });
     const release = await releaseService.create(releaseArgs, { user });
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: RELEASE_MODEL_UID,
     });
@@ -135,7 +135,7 @@ const releaseController = {
     const releaseService = getService('release', { strapi });
     const release = await releaseService.update(id, releaseArgs, { user });
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: RELEASE_MODEL_UID,
     });

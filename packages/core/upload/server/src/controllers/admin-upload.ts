@@ -75,7 +75,7 @@ export default {
     } = ctx;
 
     const uploadService = getService('upload');
-    const pm = strapi.admin.services.permission.createPermissionsManager({
+    const pm = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
       action: ACTIONS.create,
       model: FILE_MODEL_UID,

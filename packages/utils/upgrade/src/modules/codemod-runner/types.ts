@@ -22,4 +22,5 @@ export interface CodemodRunnerInterface {
   onSelectCodemods(callback: SelectCodemodsCallback | null): this;
 
   run(codemodsDirectory?: string): Promise<CodemodRunnerReport>;
+  runByUID(uid: string, codemodsDirectory?: string): Promise<CodemodRunnerReport>;
 }
