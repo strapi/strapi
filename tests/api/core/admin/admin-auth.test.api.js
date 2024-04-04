@@ -517,7 +517,7 @@ describe('Admin Auth End to End', () => {
 
   describe('POST /forgot-password', () => {
     test('Always returns en empty response', async () => {
-      global.strapi.admin.services.auth.forgotPassword = jest.fn(() => {});
+      global.strapi.service('admin::auth').forgotPassword = jest.fn(() => {});
 
       const res = await rq({
         url: '/admin/forgot-password',
