@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
+import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
@@ -154,7 +155,7 @@ export const ListView = () => {
                   tokenType: API_TOKEN_TYPE,
                 })
               }
-              to="/settings/api-tokens/create"
+              href="/settings/api-tokens/create"
             >
               {formatMessage({
                 id: 'Settings.apiTokens.create',
@@ -190,7 +191,7 @@ export const ListView = () => {
                   <LinkButton
                     variant="secondary"
                     startIcon={<Plus />}
-                    to="/settings/api-tokens/create"
+                    href="/settings/api-tokens/create"
                   >
                     {formatMessage({
                       id: 'Settings.apiTokens.addNewToken',

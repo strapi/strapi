@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
+import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
@@ -167,7 +168,7 @@ const ListView = () => {
                   tokenType: TRANSFER_TOKEN_TYPE,
                 })
               }
-              to="/settings/transfer-tokens/create"
+              href="/settings/transfer-tokens/create"
             >
               {formatMessage({
                 id: 'Settings.transferTokens.create',
@@ -198,7 +199,7 @@ const ListView = () => {
                   <LinkButton
                     variant="secondary"
                     startIcon={<Plus />}
-                    to="/settings/transfer-tokens/create"
+                    href="/settings/transfer-tokens/create"
                   >
                     {formatMessage({
                       id: 'Settings.transferTokens.addNewToken',
