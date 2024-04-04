@@ -1,4 +1,4 @@
-import { filter, pipe, map, defaultsDeep } from 'lodash/fp';
+import { defaultsDeep } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
 
@@ -11,7 +11,7 @@ import migrateWorkflowsContentTypes from './migrations/multiple-workflows';
 import migrateDeletedCTInWorkflows from './migrations/handle-deleted-ct-in-workflows';
 import reviewWorkflowsMiddlewares from './middlewares/review-workflows';
 
-import { getVisibleContentTypesUID, hasStageAttribute } from './utils/review-workflows';
+import { getVisibleContentTypesUID } from './utils/review-workflows';
 
 import {
   ENTITY_STAGE_ATTRIBUTE,
@@ -43,7 +43,7 @@ const setRelation = (attributeName: any, target: any, contentType: any) => {
 /**
  * Add the stage and assignee attributes to content types
  */
-function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.LoadedStrapi }) {
+function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.Strapi }) {
   const contentTypeToExtend = getVisibleContentTypesUID(strapi.contentTypes);
 
   for (const contentTypeUID of contentTypeToExtend) {
@@ -80,7 +80,7 @@ function extendReviewWorkflowContentTypes({ strapi }: { strapi: Core.LoadedStrap
 // };
 // }
 
-export default async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   // Data Migrations
   strapi.hook('strapi::content-types.beforeSync').register(migrateStageAttribute);
   strapi

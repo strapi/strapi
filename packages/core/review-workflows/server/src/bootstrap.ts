@@ -35,7 +35,7 @@ async function initDefaultWorkflow() {
  */
 const registerWebhookEvents = async () =>
   Object.entries(webhookEvents).forEach(([eventKey, event]) =>
-    strapi.webhookStore.addAllowedEvent(eventKey, event)
+    strapi.get('webhookStore').addAllowedEvent(eventKey, event)
   );
 
 export default async (args: any) => {
@@ -49,8 +49,9 @@ export default async (args: any) => {
 
   // Data initialization
   await initDefaultWorkflow();
-  // TODO: use document service middleware
-  // Decorate the entity service with review workflow logic
-  // const { decorator } = getService('review-workflows-decorator');
-  // strapi.entityService.decorate(decorator);
+
+  // Document service middleware
+  const docsMiddlewares = getService('document-service-middlewares');
+  strapi.documents.use(docsMiddlewares.assignStageOnCreate);
+  strapi.documents.use(docsMiddlewares.handleStageOnUpdate);
 };
