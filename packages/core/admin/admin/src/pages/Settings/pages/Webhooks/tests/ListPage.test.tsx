@@ -1,21 +1,12 @@
-import React from 'react';
-
-import { useRBAC } from '@strapi/helper-plugin';
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { mockData } from '@tests/mockData';
 import { render, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import { ListPage } from '../ListPage';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn().mockImplementation(() => ({
-    isLoading: false,
-    allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-  })),
-  useFocusWhenNavigate: jest.fn(),
-}));
+jest.mock('../../../../../hooks/useRBAC');
 
 describe('Webhooks | ListPage', () => {
   beforeEach(() => {
@@ -68,7 +59,7 @@ describe('Webhooks | ListPage', () => {
     fireEvent.click(getByRole('button', { name: 'Delete' }));
 
     await waitFor(async () => {
-      expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
+      expect(await findByText('Are you sure?')).toBeInTheDocument();
     });
 
     server.use(
@@ -98,7 +89,7 @@ describe('Webhooks | ListPage', () => {
     await user.click(deleteButtons[0]);
 
     await waitFor(async () => {
-      expect(await findByText('Are you sure you want to delete this?')).toBeInTheDocument();
+      expect(await findByText('Are you sure?')).toBeInTheDocument();
     });
 
     server.use(

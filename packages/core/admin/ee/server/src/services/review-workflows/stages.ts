@@ -1,5 +1,5 @@
-import { Entity, LoadedStrapi as Strapi } from '@strapi/types';
-import { mapAsync, reduceAsync, errors } from '@strapi/utils';
+import type { Core } from '@strapi/types';
+import { async, errors } from '@strapi/utils';
 import { map, pick, isEqual } from 'lodash/fp';
 import { STAGE_MODEL_UID, ENTITY_STAGE_ATTRIBUTE, ERRORS } from '../../constants/workflows';
 import { getService } from '../../utils';
@@ -8,34 +8,32 @@ const { ApplicationError, ValidationError } = errors;
 const sanitizedStageFields = ['id', 'name', 'workflow', 'color'];
 const sanitizeStageFields = pick(sanitizedStageFields);
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
   const stagePermissionsService = getService('stage-permissions', { strapi });
   const workflowsValidationService = getService('review-workflows-validation', { strapi });
 
   return {
     find({ workflowId, populate }: any) {
-      const params = {
-        filters: { workflow: workflowId },
+      return strapi.db.query(STAGE_MODEL_UID).findMany({
+        where: { workflow: workflowId },
         populate,
-      };
-      return strapi.entityService.findMany(STAGE_MODEL_UID, params);
+      });
     },
 
     findById(id: Entity.ID, { populate }: any = {}) {
-      const params = {
+      return strapi.db.query(STAGE_MODEL_UID).findOne({
+        where: { id },
         populate,
-      };
-      return strapi.entityService.findOne(STAGE_MODEL_UID, id, params);
+      });
     },
 
     async createMany(stagesList: any, { fields }: any = {}) {
       const params = { select: fields ?? '*' };
 
-      // TODO: pick the fields from the stage
       const stages = await Promise.all(
         stagesList.map((stage: any) =>
-          strapi.entityService.create(STAGE_MODEL_UID, {
+          strapi.db.query(STAGE_MODEL_UID).create({
             data: sanitizeStageFields(stage),
             ...params,
           })
@@ -43,7 +41,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       );
 
       // Create stage permissions
-      await reduceAsync(stagesList)(async (_, stage, idx) => {
+      await async.reduce(stagesList)(async (_, stage, idx) => {
         // Ignore stages without permissions
         if (!stage.permissions || stage.permissions.length === 0) {
           return;
@@ -52,7 +50,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
         const stagePermissions = stage.permissions;
         const stageId = stages[idx].id;
 
-        const permissions = await mapAsync(
+        const permissions = await async.map(
           stagePermissions,
           // Register each stage permission
           (permission: any) =>
@@ -64,7 +62,8 @@ export default ({ strapi }: { strapi: Strapi }) => {
         );
 
         // Update stage with the new permissions
-        await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
+        await strapi.db.query(STAGE_MODEL_UID).update({
+          where: { id: stageId },
           data: {
             permissions: permissions.flat().map((p: any) => p.id),
           },
@@ -83,7 +82,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       if (destStage.permissions) {
         await this.deleteStagePermissions([srcStage]);
 
-        const permissions = await mapAsync(destStage.permissions, (permission: any) =>
+        const permissions = await async.map(destStage.permissions, (permission: any) =>
           stagePermissionsService.register({
             roleId: permission.role,
             action: permission.action,
@@ -93,7 +92,8 @@ export default ({ strapi }: { strapi: Strapi }) => {
         stagePermissions = permissions.flat().map((p: any) => p.id);
       }
 
-      const stage = await strapi.entityService.update(STAGE_MODEL_UID, stageId, {
+      const stage = await strapi.db.query(STAGE_MODEL_UID).update({
+        where: { id: stageId },
         data: {
           ...destStage,
           permissions: stagePermissions,
@@ -109,7 +109,9 @@ export default ({ strapi }: { strapi: Strapi }) => {
       // Unregister all permissions related to this stage id
       await this.deleteStagePermissions([stage]);
 
-      const deletedStage = await strapi.entityService.delete(STAGE_MODEL_UID, stage.id);
+      const deletedStage = await strapi.db.query(STAGE_MODEL_UID).delete({
+        where: { id: stage.id },
+      });
 
       metrics.sendDidDeleteStage();
 
@@ -119,8 +121,8 @@ export default ({ strapi }: { strapi: Strapi }) => {
     async deleteMany(stages: any) {
       await this.deleteStagePermissions(stages);
 
-      return strapi.entityService.deleteMany(STAGE_MODEL_UID, {
-        filters: { id: { $in: stages.map((s: any) => s.id) } },
+      return strapi.db.query(STAGE_MODEL_UID).deleteMany({
+        where: { id: { $in: stages.map((s: any) => s.id) } },
       });
     },
 
@@ -138,7 +140,8 @@ export default ({ strapi }: { strapi: Strapi }) => {
           workflow: workflowId,
         };
       }
-      return strapi.entityService.count(STAGE_MODEL_UID, opts);
+
+      return strapi.db.query(STAGE_MODEL_UID).count(opts);
     },
 
     async replaceStages(srcStages: any, destStages: any, contentTypesToMigrate = []) {
@@ -154,14 +157,14 @@ export default ({ strapi }: { strapi: Strapi }) => {
         const createdStagesIds = map('id', createdStages);
 
         // Update the workflow stages
-        await mapAsync(updated, (destStage: any) => {
+        await async.map(updated, (destStage: any) => {
           const srcStage = srcStages.find((s: any) => s.id === destStage.id);
 
           return this.update(srcStage, destStage);
         });
 
         // Delete the stages that are not in the new stages list
-        await mapAsync(deleted, async (stage: any) => {
+        await async.map(deleted, async (stage: any) => {
           // Find the nearest stage in the workflow and newly created stages
           // that is not deleted, prioritizing the previous stages
           const nearestStage = findNearestMatchingStage(
@@ -173,7 +176,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
           );
 
           // Assign the new stage to entities that had the deleted stage
-          await mapAsync(contentTypesToMigrate, (contentTypeUID: any) => {
+          await async.map(contentTypesToMigrate, (contentTypeUID: any) => {
             this.updateEntitiesStage(contentTypeUID, {
               fromStageId: stage.id,
               toStageId: nearestStage.id,
@@ -208,8 +211,10 @@ export default ({ strapi }: { strapi: Strapi }) => {
         throw new ApplicationError(`Selected stage does not exist`);
       }
 
-      const entity = await strapi.entityService.update(entityInfo.modelUID, entityInfo.id, {
-        // @ts-expect-error - entity service can not receive any type of attribute
+      const entity = await strapi.db.query(entityInfo.modelUID).update({
+        where: {
+          id: entityInfo.id,
+        },
         data: { [ENTITY_STAGE_ATTRIBUTE]: stageId },
         populate: [ENTITY_STAGE_ATTRIBUTE],
       });

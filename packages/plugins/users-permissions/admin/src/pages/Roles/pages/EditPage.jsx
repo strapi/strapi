@@ -12,19 +12,15 @@ import {
   GridItem,
   Grid,
 } from '@strapi/design-system';
+import { Check } from '@strapi/icons';
 import {
-  CheckPagePermissions,
-  useOverlayBlocker,
-  SettingsPageTitle,
-  LoadingIndicatorPage,
-  Form,
+  Page,
+  BackButton,
   useAPIErrorHandler,
-  useFetchClient,
   useNotification,
-  Link,
-} from '@strapi/helper-plugin';
-import { ArrowLeft, Check } from '@strapi/icons';
-import { Formik } from 'formik';
+  useFetchClient,
+} from '@strapi/strapi/admin';
+import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import { useMatch } from 'react-router-dom';
@@ -37,8 +33,7 @@ import { usePlugins } from '../hooks/usePlugins';
 
 export const EditPage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const {
     params: { id },
   } = useMatch(`/settings/users-permissions/roles/:id`);
@@ -63,7 +58,7 @@ export const EditPage = () => {
   const mutation = useMutation((body) => put(`/users-permissions/roles/${id}`, body), {
     onError(error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     },
@@ -71,10 +66,10 @@ export const EditPage = () => {
     async onSuccess() {
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTrad('Settings.roles.created'),
           defaultMessage: 'Role edited',
-        },
+        }),
       });
 
       await refetchRole();
@@ -82,24 +77,23 @@ export const EditPage = () => {
   });
 
   const handleEditRoleSubmit = async (data) => {
-    // Set loading state
-    lockApp();
-
     const permissions = permissionsRef.current.getPermissions();
 
     await mutation.mutate({ ...data, ...permissions, users: [] });
-
-    unlockApp();
   };
 
   if (isLoadingRole) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   return (
     <Main>
-      {/* TODO: this needs to be translated */}
-      <SettingsPageTitle name="Roles" />
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'Roles' }
+        )}
+      </Page.Title>
       <Formik
         enableReinitialize
         initialValues={{ name: role.name, description: role.description }}
@@ -110,7 +104,7 @@ export const EditPage = () => {
           <Form noValidate onSubmit={handleSubmit}>
             <HeaderLayout
               primaryAction={
-                !isLoadingPlugins && (
+                !isLoadingPlugins ? (
                   <Button
                     disabled={role.code === 'strapi-super-admin'}
                     type="submit"
@@ -122,18 +116,11 @@ export const EditPage = () => {
                       defaultMessage: 'Save',
                     })}
                   </Button>
-                )
+                ) : null
               }
               title={role.name}
               subtitle={role.description}
-              navigationAction={
-                <Link startIcon={<ArrowLeft />} to="/settings/users-permissions/roles">
-                  {formatMessage({
-                    id: 'global.back',
-                    defaultMessage: 'Back',
-                  })}
-                </Link>
-              }
+              navigationAction={<BackButton />}
             />
             <ContentLayout>
               <Flex
@@ -214,7 +201,7 @@ export const EditPage = () => {
 };
 
 export const ProtectedRolesEditPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.updateRole}>
+  <Page.Protect permissions={PERMISSIONS.updateRole}>
     <EditPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );

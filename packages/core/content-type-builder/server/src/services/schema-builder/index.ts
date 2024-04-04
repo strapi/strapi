@@ -21,7 +21,7 @@ export default function createBuilder() {
     config: componentInput.config,
   }));
 
-  const contentTypes = Object.values(strapi.contentTypes).map((contentTypeInput) => {
+  const contentTypes = Object.values<any>(strapi.contentTypes).map((contentTypeInput) => {
     const dir = contentTypeInput.plugin
       ? join(
           strapi.dirs.app.extensions,
@@ -84,57 +84,60 @@ function createSchemaBuilder({ components, contentTypes }: SchemaBuilderOptions)
      * Convert Attributes received from the API to the right syntax
      */
     convertAttributes(attributes: any) {
-      return Object.keys(attributes).reduce((acc, key) => {
-        const attribute = attributes[key];
+      return Object.keys(attributes).reduce(
+        (acc, key) => {
+          const attribute = attributes[key];
 
-        const { configurable, private: isPrivate } = attribute;
+          const { configurable, private: isPrivate } = attribute;
 
-        const baseProperties = {
-          private: isPrivate === true ? true : undefined,
-          configurable: configurable === false ? false : undefined,
-        };
-
-        if (attribute.type === 'relation') {
-          const { target, relation, targetAttribute, dominant, ...restOfProperties } = attribute;
-
-          const attr = {
-            type: 'relation',
-            relation,
-            target,
-            ...restOfProperties,
-            ...baseProperties,
+          const baseProperties = {
+            private: isPrivate === true ? true : undefined,
+            configurable: configurable === false ? false : undefined,
           };
 
-          acc[key] = attr;
+          if (attribute.type === 'relation') {
+            const { target, relation, targetAttribute, dominant, ...restOfProperties } = attribute;
 
-          if (target && !this.contentTypes.has(target)) {
-            throw new errors.ApplicationError(`target: ${target} does not exist`);
-          }
+            const attr = {
+              type: 'relation',
+              relation,
+              target,
+              ...restOfProperties,
+              ...baseProperties,
+            };
 
-          if (_.isNil(targetAttribute)) {
+            acc[key] = attr;
+
+            if (target && !this.contentTypes.has(target)) {
+              throw new errors.ApplicationError(`target: ${target} does not exist`);
+            }
+
+            if (_.isNil(targetAttribute)) {
+              return acc;
+            }
+
+            if (['oneToOne', 'manyToMany'].includes(relation) && dominant === true) {
+              attr.inversedBy = targetAttribute;
+            } else if (['oneToOne', 'manyToMany'].includes(relation) && dominant === false) {
+              attr.mappedBy = targetAttribute;
+            } else if (['oneToOne', 'manyToOne', 'manyToMany'].includes(relation)) {
+              attr.inversedBy = targetAttribute;
+            } else if (['oneToMany'].includes(relation)) {
+              attr.mappedBy = targetAttribute;
+            }
+
             return acc;
           }
 
-          if (['oneToOne', 'manyToMany'].includes(relation) && dominant === true) {
-            attr.inversedBy = targetAttribute;
-          } else if (['oneToOne', 'manyToMany'].includes(relation) && dominant === false) {
-            attr.mappedBy = targetAttribute;
-          } else if (['oneToOne', 'manyToOne', 'manyToMany'].includes(relation)) {
-            attr.inversedBy = targetAttribute;
-          } else if (['oneToMany'].includes(relation)) {
-            attr.mappedBy = targetAttribute;
-          }
+          acc[key] = {
+            ...attribute,
+            ...baseProperties,
+          };
 
           return acc;
-        }
-
-        acc[key] = {
-          ...attribute,
-          ...baseProperties,
-        };
-
-        return acc;
-      }, {} as Record<string, unknown>);
+        },
+        {} as Record<string, unknown>
+      );
     },
 
     ...createComponentBuilder(),

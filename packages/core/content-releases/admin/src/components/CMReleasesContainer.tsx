@@ -2,6 +2,12 @@ import * as React from 'react';
 
 import { skipToken } from '@reduxjs/toolkit/query';
 import {
+  useAPIErrorHandler,
+  useNotification,
+  useQueryParams,
+  useRBAC,
+} from '@strapi/admin/strapi-admin';
+import {
   Box,
   Button,
   FieldLabel,
@@ -13,46 +19,43 @@ import {
   SingleSelectOption,
   Typography,
   ModalFooter,
+  EmptyStateLayout,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import {
-  CheckPermissions,
-  NoContent,
-  useAPIErrorHandler,
-  useCMEditViewDataManager,
-  useNotification,
-} from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
-import { Common } from '@strapi/types';
+import { EmptyDocuments, Plus } from '@strapi/icons';
+import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { Link as ReactRouterLink } from 'react-router-dom';
+import { Link as ReactRouterLink, useParams } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { GetContentTypeEntryReleases } from '../../../shared/contracts/releases';
 import { PERMISSIONS } from '../constants';
 import { useCreateReleaseActionMutation, useGetReleasesForEntryQuery } from '../services/release';
+import { getTimezoneOffset } from '../utils/time';
 
 import { ReleaseActionMenu } from './ReleaseActionMenu';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
+
+import type { UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * AddActionToReleaseModal
  * -----------------------------------------------------------------------------------------------*/
 
-const RELEASE_ACTION_FORM_SCHEMA = yup.object().shape({
+export const RELEASE_ACTION_FORM_SCHEMA = yup.object().shape({
   type: yup.string().oneOf(['publish', 'unpublish']).required(),
   releaseId: yup.string().required(),
 });
 
-interface FormValues {
+export interface FormValues {
   type: CreateReleaseAction.Request['body']['type'];
   releaseId: CreateReleaseAction.Request['params']['releaseId'];
 }
 
-const INITIAL_VALUES = {
+export const INITIAL_VALUES = {
   type: 'publish',
   releaseId: '',
 } satisfies FormValues;
@@ -63,15 +66,16 @@ interface AddActionToReleaseModalProps {
   entryId: GetContentTypeEntryReleases.Request['query']['entryId'];
 }
 
-const NoReleases = () => {
+export const NoReleases = () => {
   const { formatMessage } = useIntl();
   return (
-    <NoContent
-      content={{
+    <EmptyStateLayout
+      icon={<EmptyDocuments width="10rem" />}
+      content={formatMessage({
         id: 'content-releases.content-manager-edit-view.add-to-release.no-releases-message',
         defaultMessage:
           'No available releases. Open the list of releases and create a new one from there.',
-      }}
+      })}
       action={
         <LinkButton
           // @ts-expect-error - types are not inferred correctly through the as prop.
@@ -98,9 +102,10 @@ const AddActionToReleaseModal = ({
 }: AddActionToReleaseModalProps) => {
   const releaseHeaderId = React.useId();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { modifiedData } = useCMEditViewDataManager();
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
+  const locale = query.plugins?.i18n?.locale;
 
   // Get all 'pending' releases that do not have the entry attached
   const response = useGetReleasesForEntryQuery({
@@ -113,7 +118,6 @@ const AddActionToReleaseModal = ({
   const [createReleaseAction, { isLoading }] = useCreateReleaseActionMutation();
 
   const handleSubmit = async (values: FormValues) => {
-    const locale = modifiedData.locale as string | undefined;
     const releaseActionEntry = {
       contentType: contentTypeUid,
       id: entryId,
@@ -142,13 +146,13 @@ const AddActionToReleaseModal = ({
       if (isAxiosError(response.error)) {
         // Handle axios error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(response.error),
         });
       } else {
         // Handle generic error
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
       }
@@ -249,24 +253,36 @@ const AddActionToReleaseModal = ({
 
 export const CMReleasesContainer = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatDate, formatTime } = useIntl();
+  const { id, slug, collectionType } = useParams<{
+    id: string;
+    origin: string;
+    slug: string;
+    collectionType: string;
+  }>();
+  const isCreatingEntry = id === 'create';
   const {
-    isCreatingEntry,
-    initialData: { id: entryId },
-    slug,
-  } = useCMEditViewDataManager();
+    allowedActions: { canCreateAction, canMain, canDeleteAction },
+  } = useRBAC(PERMISSIONS);
 
-  const contentTypeUid = slug as Common.UID.ContentType;
+  const { schema } = unstable_useDocument({
+    collectionType: collectionType!,
+    model: slug!,
+  });
 
-  const canFetch = entryId != null && contentTypeUid != null;
+  const hasDraftAndPublish = schema?.options?.draftAndPublish;
+
+  const contentTypeUid = slug as UID.ContentType;
+  const canFetch = id != null && contentTypeUid != null;
   const fetchParams = canFetch
     ? {
         contentTypeUid: contentTypeUid,
-        entryId: entryId,
+        entryId: id,
         hasEntryAttached: true,
       }
     : skipToken;
   // Get all 'pending' releases that have the entry attached
+  // @ts-expect-error – we'll fix this when we fix content-releases for v5
   const response = useGetReleasesForEntryQuery(fetchParams);
   const releases = response.data?.data;
 
@@ -279,8 +295,9 @@ export const CMReleasesContainer = () => {
 
   /**
    * - Impossible to add entry to release before it exists
+   * - Content types without draft and publish cannot add entries to release
    */
-  if (isCreatingEntry) {
+  if (isCreatingEntry || !hasDraftAndPublish) {
     return null;
   }
 
@@ -297,103 +314,135 @@ export const CMReleasesContainer = () => {
     return `success${shade}`;
   };
 
+  if (!canMain) {
+    return null;
+  }
+
   return (
-    <CheckPermissions permissions={PERMISSIONS.main}>
-      <Box
-        as="aside"
-        aria-label={formatMessage({
-          id: 'content-releases.plugin.name',
-          defaultMessage: 'Releases',
-        })}
-        background="neutral0"
-        borderColor="neutral150"
-        hasRadius
-        padding={4}
-        shadow="tableShadow"
-      >
-        <Flex direction="column" alignItems="stretch" gap={3}>
-          <Typography variant="sigma" textColor="neutral600" textTransform="uppercase">
-            {formatMessage({
-              id: 'content-releases.plugin.name',
-              defaultMessage: 'Releases',
-            })}
-          </Typography>
-          {releases?.map((release) => {
-            return (
-              <Flex
-                key={release.id}
-                direction="column"
-                alignItems="start"
-                borderWidth="1px"
-                borderStyle="solid"
-                borderColor={getReleaseColorVariant(release.action.type, '200')}
-                overflow="hidden"
-                hasRadius
+    <Box
+      as="aside"
+      aria-label={formatMessage({
+        id: 'content-releases.plugin.name',
+        defaultMessage: 'Releases',
+      })}
+      background="neutral0"
+      borderColor="neutral150"
+      hasRadius
+      padding={4}
+      shadow="tableShadow"
+    >
+      <Flex direction="column" alignItems="stretch" gap={3}>
+        <Typography variant="sigma" textColor="neutral600" textTransform="uppercase">
+          {formatMessage({
+            id: 'content-releases.plugin.name',
+            defaultMessage: 'Releases',
+          })}
+        </Typography>
+        {releases?.map((release) => {
+          return (
+            <Flex
+              key={release.id}
+              direction="column"
+              alignItems="start"
+              borderWidth="1px"
+              borderStyle="solid"
+              borderColor={getReleaseColorVariant(release.action.type, '200')}
+              overflow="hidden"
+              hasRadius
+            >
+              <Box
+                paddingTop={3}
+                paddingBottom={3}
+                paddingLeft={4}
+                paddingRight={4}
+                background={getReleaseColorVariant(release.action.type, '100')}
+                width="100%"
               >
-                <Box
-                  paddingTop={3}
-                  paddingBottom={3}
-                  paddingLeft={4}
-                  paddingRight={4}
-                  background={getReleaseColorVariant(release.action.type, '100')}
-                  width="100%"
+                <Typography
+                  fontSize={1}
+                  variant="pi"
+                  textColor={getReleaseColorVariant(release.action.type, '600')}
                 >
-                  <Typography
-                    fontSize={1}
-                    variant="pi"
-                    textColor={getReleaseColorVariant(release.action.type, '600')}
-                  >
-                    {formatMessage(
-                      {
-                        id: 'content-releases.content-manager-edit-view.list-releases.title',
-                        defaultMessage:
-                          '{isPublish, select, true {Will be published in} other {Will be unpublished in}}',
-                      },
-                      { isPublish: release.action.type === 'publish' }
-                    )}
-                  </Typography>
-                </Box>
-                <Flex padding={4} direction="column" gap={3} width="100%" alignItems="flex-start">
+                  {formatMessage(
+                    {
+                      id: 'content-releases.content-manager-edit-view.list-releases.title',
+                      defaultMessage:
+                        '{isPublish, select, true {Will be published in} other {Will be unpublished in}}',
+                    },
+                    { isPublish: release.action.type === 'publish' }
+                  )}
+                </Typography>
+              </Box>
+              <Flex padding={4} direction="column" gap={2} width="100%" alignItems="flex-start">
+                <Flex padding={4} direction="column" gap={2} width="100%" alignItems="flex-start">
                   <Typography fontSize={2} fontWeight="bold" variant="omega" textColor="neutral700">
                     {release.name}
                   </Typography>
-                  <CheckPermissions permissions={PERMISSIONS.deleteAction}>
+                  {release.scheduledAt && release.timezone && (
+                    <Typography variant="pi" textColor="neutral600">
+                      {formatMessage(
+                        {
+                          id: 'content-releases.content-manager-edit-view.scheduled.date',
+                          defaultMessage: '{date} at {time} ({offset})',
+                        },
+                        {
+                          date: formatDate(new Date(release.scheduledAt), {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            timeZone: release.timezone,
+                          }),
+                          time: formatTime(new Date(release.scheduledAt), {
+                            hourCycle: 'h23',
+                            timeZone: release.timezone,
+                          }),
+                          offset: getTimezoneOffset(
+                            release.timezone,
+                            new Date(release.scheduledAt)
+                          ),
+                        }
+                      )}
+                    </Typography>
+                  )}
+                  {canDeleteAction ? (
                     <ReleaseActionMenu.Root hasTriggerBorder>
+                      <ReleaseActionMenu.EditReleaseItem releaseId={release.id} />
                       <ReleaseActionMenu.DeleteReleaseActionItem
                         releaseId={release.id}
                         actionId={release.action.id}
                       />
                     </ReleaseActionMenu.Root>
-                  </CheckPermissions>
+                  ) : null}
                 </Flex>
               </Flex>
-            );
-          })}
-          <CheckPermissions permissions={PERMISSIONS.createAction}>
-            <Button
-              justifyContent="center"
-              paddingLeft={4}
-              paddingRight={4}
-              color="neutral700"
-              variant="tertiary"
-              startIcon={<Plus />}
-              onClick={toggleModal}
-            >
-              {formatMessage({
-                id: 'content-releases.content-manager-edit-view.add-to-release',
-                defaultMessage: 'Add to release',
-              })}
-            </Button>
-          </CheckPermissions>
-        </Flex>
-        {isModalOpen && (
-          <AddActionToReleaseModal
-            handleClose={toggleModal}
-            contentTypeUid={contentTypeUid}
-            entryId={entryId}
-          />
-        )}
-      </Box>
-    </CheckPermissions>
+            </Flex>
+          );
+        })}
+        {canCreateAction ? (
+          <Button
+            justifyContent="center"
+            paddingLeft={4}
+            paddingRight={4}
+            color="neutral700"
+            variant="tertiary"
+            startIcon={<Plus />}
+            onClick={toggleModal}
+          >
+            {formatMessage({
+              id: 'content-releases.content-manager-edit-view.add-to-release',
+              defaultMessage: 'Add to release',
+            })}
+          </Button>
+        ) : null}
+      </Flex>
+      {isModalOpen && (
+        <AddActionToReleaseModal
+          handleClose={toggleModal}
+          contentTypeUid={contentTypeUid}
+          // @ts-expect-error – we'll fix this when we fix content-releases for v5
+          entryId={id}
+        />
+      )}
+    </Box>
   );
 };

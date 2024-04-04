@@ -1,17 +1,21 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { Plugin as IPlugin } from '@strapi/helper-plugin';
+import * as React from 'react';
 
 export interface PluginConfig
-  extends Pick<IPlugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady' | 'name'> {
+  extends Partial<Pick<Plugin, 'apis' | 'initializer' | 'injectionZones' | 'isReady'>> {
+  name: string;
   id: string;
 }
 
-export class Plugin implements IPlugin {
-  apis: PluginConfig['apis'];
-  initializer: PluginConfig['initializer'];
-  injectionZones: PluginConfig['injectionZones'];
-  isReady: PluginConfig['isReady'];
-  name: PluginConfig['name'];
+export class Plugin {
+  apis: Record<string, unknown>;
+  initializer: React.ComponentType<{ setPlugin(pluginId: string): void }> | null;
+  injectionZones: Record<
+    string,
+    Record<string, Array<{ name: string; Component: React.ComponentType }>>
+  >;
+  isReady: boolean;
+  name: string;
   pluginId: PluginConfig['id'];
 
   constructor(pluginConf: PluginConfig) {
@@ -36,7 +40,7 @@ export class Plugin implements IPlugin {
   injectComponent(
     containerName: string,
     blockName: string,
-    component: ReturnType<IPlugin['getInjectedComponents']>[number]
+    component: { name: string; Component: React.ComponentType }
   ) {
     try {
       this.injectionZones[containerName][blockName].push(component);

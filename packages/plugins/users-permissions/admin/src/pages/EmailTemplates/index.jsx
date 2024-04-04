@@ -1,18 +1,14 @@
 import * as React from 'react';
 
-import { ContentLayout, HeaderLayout, Main, useNotifyAT } from '@strapi/design-system';
+import { useTracking } from '@strapi/admin/strapi-admin';
+import { ContentLayout, HeaderLayout, useNotifyAT } from '@strapi/design-system';
 import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
+  Page,
   useAPIErrorHandler,
-  useFetchClient,
-  useFocusWhenNavigate,
   useNotification,
-  useOverlayBlocker,
+  useFetchClient,
   useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
+} from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -23,22 +19,18 @@ import EmailForm from './components/EmailForm';
 import EmailTable from './components/EmailTable';
 
 const ProtectedEmailTemplatesPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.readEmailTemplates}>
+  <Page.Protect permissions={PERMISSIONS.readEmailTemplates}>
     <EmailTemplatesPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );
-
 const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { notifyStatus } = useNotifyAT();
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [templateToEdit, setTemplateToEdit] = React.useState(null);
@@ -66,7 +58,7 @@ const EmailTemplatesPage = () => {
       },
       onError(error) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(error),
         });
       },
@@ -92,29 +84,24 @@ const EmailTemplatesPage = () => {
 
         toggleNotification({
           type: 'success',
-          message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+          message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
         });
 
         trackUsage('didEditEmailTemplates');
 
-        unlockApp();
         handleToggle();
       },
       onError(error) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(error),
         });
-
-        unlockApp();
       },
       refetchActive: true,
     }
   );
 
   const handleSubmit = (body) => {
-    lockApp();
-
     trackUsage('willEditEmailTemplates');
 
     const editedTemplates = { ...data, [templateToEdit]: body };
@@ -122,35 +109,22 @@ const EmailTemplatesPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <Main aria-busy="true">
-        <SettingsPageTitle
-          name={formatMessage({
-            id: getTrad('HeaderNav.link.emailTemplates'),
-            defaultMessage: 'Email templates',
-          })}
-        />
-        <HeaderLayout
-          title={formatMessage({
-            id: getTrad('HeaderNav.link.emailTemplates'),
-            defaultMessage: 'Email templates',
-          })}
-        />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   return (
-    <Main aria-busy={submitMutation.isLoading}>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: getTrad('HeaderNav.link.emailTemplates'),
-          defaultMessage: 'Email templates',
-        })}
-      />
+    <Page.Main aria-busy={submitMutation.isLoading}>
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: getTrad('HeaderNav.link.emailTemplates'),
+              defaultMessage: 'Email templates',
+            }),
+          }
+        )}
+      </Page.Title>
       <HeaderLayout
         title={formatMessage({
           id: getTrad('HeaderNav.link.emailTemplates'),
@@ -167,8 +141,8 @@ const EmailTemplatesPage = () => {
           />
         )}
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };
 
-export default ProtectedEmailTemplatesPage;
+export { ProtectedEmailTemplatesPage, EmailTemplatesPage };

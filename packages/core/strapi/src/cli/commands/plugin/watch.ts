@@ -7,7 +7,7 @@ import { runAction } from '../../utils/helpers';
 import { Export, loadPkg, validatePkg } from '../../utils/pkg';
 import type { StrapiCommand, CLIContext } from '../../types';
 
-interface ActionOptions extends WatchCLIOptions {}
+type ActionOptions = WatchCLIOptions;
 
 const action = async (opts: ActionOptions, _cmd: unknown, { cwd, logger }: CLIContext) => {
   try {

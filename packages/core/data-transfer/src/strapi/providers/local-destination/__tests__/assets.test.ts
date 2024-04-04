@@ -24,7 +24,7 @@ const transaction = jest.fn(async (cb) => {
   await cb({ trx, rollback });
 });
 
-const strapiFactory = getStrapiFactory({
+const createStrapi = getStrapiFactory({
   dirs: {
     static: {
       public: 'static/public/assets',
@@ -33,7 +33,7 @@ const strapiFactory = getStrapiFactory({
   db: { transaction },
   config: {
     get(service) {
-      if (service === 'plugin.upload') {
+      if (service === 'plugin::upload') {
         return {
           provider: 'local',
         };
@@ -57,7 +57,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
 
   test('Returns a stream when assets restore is true', async () => {
     const provider = createLocalStrapiDestinationProvider({
-      getStrapi: () => strapiFactory(),
+      getStrapi: () => createStrapi(),
       strategy: 'restore',
       restore: {
         assets: true,
@@ -72,7 +72,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
 
   test('Throw an error if attempting to create stream while restore assets is false', async () => {
     const provider = createLocalStrapiDestinationProvider({
-      getStrapi: () => strapiFactory(),
+      getStrapi: () => createStrapi(),
       strategy: 'restore',
       restore: {
         assets: false,
@@ -96,7 +96,7 @@ describe('Local Strapi Destination Provider - Get Assets Stream', () => {
     };
     const provider = createLocalStrapiDestinationProvider({
       getStrapi: () =>
-        strapiFactory({
+        createStrapi({
           dirs: {
             static: {
               public: assetsDirectory,

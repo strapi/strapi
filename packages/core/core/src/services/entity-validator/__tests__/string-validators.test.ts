@@ -25,9 +25,11 @@ describe('String validator', () => {
     const fakeFindFirst = jest.fn();
 
     global.strapi = {
-      documents: () => ({
-        findFirst: fakeFindFirst,
-      }),
+      db: {
+        query: () => ({
+          findOne: fakeFindFirst,
+        }),
+      },
     } as any;
 
     afterEach(() => {
@@ -173,9 +175,11 @@ describe('String validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: { attrStringUnique: valueToCheck },
-        locale: 'en',
-        status: 'draft',
+        where: {
+          locale: 'en',
+          attrStringUnique: valueToCheck,
+          publishedAt: null,
+        },
       });
     });
 
@@ -201,14 +205,14 @@ describe('String validator', () => {
       await validator(valueToCheck);
 
       expect(fakeFindFirst).toHaveBeenCalledWith({
-        filters: {
+        where: {
           attrStringUnique: valueToCheck,
           id: {
             $ne: 1,
           },
+          locale: 'en',
+          publishedAt: null,
         },
-        locale: 'en',
-        status: 'draft',
       });
     });
   });

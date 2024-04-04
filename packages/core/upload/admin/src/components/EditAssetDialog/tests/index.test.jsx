@@ -6,8 +6,8 @@
 
 import React from 'react';
 
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, TrackingProvider } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -101,21 +101,13 @@ const queryClient = new QueryClient({
 const renderCompo = () =>
   render(
     <QueryClientProvider client={queryClient}>
-      <TrackingProvider>
-        <ThemeProvider theme={lightTheme}>
-          <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-            <NotificationsProvider>
-              <EditAssetDialog
-                asset={asset}
-                onClose={jest.fn()}
-                canUpdate
-                canCopyLink
-                canDownload
-              />
-            </NotificationsProvider>
-          </IntlProvider>
-        </ThemeProvider>
-      </TrackingProvider>
+      <ThemeProvider theme={lightTheme}>
+        <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
+          <NotificationsProvider>
+            <EditAssetDialog asset={asset} onClose={jest.fn()} canUpdate canCopyLink canDownload />
+          </NotificationsProvider>
+        </IntlProvider>
+      </ThemeProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );
@@ -144,7 +136,7 @@ describe('<EditAssetDialog />', () => {
       fireEvent.click(screen.getByLabelText('Delete'));
 
       expect(screen.getByText('Confirmation')).toBeVisible();
-      expect(screen.getByText('Are you sure you want to delete this?')).toBeVisible();
+      expect(screen.getByText('Are you sure?')).toBeVisible();
     });
 
     it('copies the link and shows a notification when pressing "Copy link"', async () => {

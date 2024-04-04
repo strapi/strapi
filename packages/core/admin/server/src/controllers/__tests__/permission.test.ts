@@ -1,6 +1,6 @@
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../test/helpers/create-context';
+import createContext from '../../../../../../../tests/helpers/create-context';
 import permissionController from '../permission';
 
 describe('Permission Controller', () => {
@@ -195,7 +195,7 @@ describe('Permission Controller', () => {
       await permissionController.check(ctx);
 
       expect(localTestData.ability.can).toHaveBeenCalled();
-      expect(strapi.admin.services.permission.engine.checkMany).toHaveBeenCalled();
+      expect(strapi.service('admin::permission').engine.checkMany).toHaveBeenCalled();
       expect(ctx.body.data).toHaveLength(localTestData.permissions.valid.length);
     });
   });

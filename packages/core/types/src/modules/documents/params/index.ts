@@ -1,4 +1,6 @@
-import { Common, Utils } from '../../..';
+import type * as UID from '../../../uid';
+import { Extends, MatchAllIntersect } from '../../../utils';
+
 import type { GetPluginParams } from '..';
 
 // Params
@@ -7,17 +9,16 @@ import type * as Pagination from './pagination';
 import type * as Fields from './fields';
 import type * as Filters from './filters';
 import type * as Populate from './populate';
-import type * as PublicationState from './status';
+import type * as PublicationStatus from './status';
 import type * as Data from './data';
 import type * as Search from './search';
 
 // Utils
 import type * as Attribute from './attributes';
 
-export type Pick<
-  TSchemaUID extends Common.UID.Schema,
-  TKind extends Kind
-> = Utils.Expression.MatchAllIntersect<
+export type Locale = string;
+
+export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIntersect<
   [
     // Sort
     [HasMember<TKind, 'sort'>, { sort?: Sort.Any<TSchemaUID> }],
@@ -39,21 +40,19 @@ export type Pick<
     [HasMember<TKind, 'pagination'>, Pagination.Any],
     [HasMember<TKind, 'pagination:offset'>, Pagination.OffsetNotation],
     [HasMember<TKind, 'pagination:page'>, Pagination.PageNotation],
-    // Publication State
-    [HasMember<TKind, 'status'>, PublicationState.Param],
+    // Publication Status
+    [HasMember<TKind, 'status'>, PublicationStatus.Param],
     // Locale
-    [HasMember<TKind, 'locale'>, { locale?: string }],
+    [HasMember<TKind, 'locale'>, { locale?: Locale }], // TODO: also allow arrays ?
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data
     [HasMember<TKind, 'data'>, { data?: Data.Input<TSchemaUID> }],
     [HasMember<TKind, 'data:partial'>, { data?: Partial<Data.Input<TSchemaUID>> }],
-    // Files
-    [HasMember<TKind, 'files'>, { files?: Record<string, unknown> }], // TODO
     // Search
     [HasMember<TKind, '_q'>, { _q?: Search.Q }],
     // Look Up - For internal use only
-    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }]
+    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }],
   ]
 >;
 
@@ -78,10 +77,11 @@ export type Kind =
   | 'plugin'
   | 'data'
   | 'data:partial'
-  | 'files'
   | '_q'
   | 'lookup';
 
-type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Extends<TTest, TValue>;
+type HasMember<TValue extends Kind, TTest extends Kind> = Extends<TTest, TValue>;
 
-export type { Sort, Pagination, Fields, Filters, Populate, PublicationState, Data, Attribute };
+export type All = Pick<UID.Schema, Kind>;
+
+export type { Sort, Pagination, Fields, Filters, Populate, Data, Attribute, PublicationStatus };

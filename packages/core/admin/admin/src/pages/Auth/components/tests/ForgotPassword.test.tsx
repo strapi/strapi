@@ -27,7 +27,7 @@ describe('ResetPassword', () => {
 
       fireEvent.click(getByRole('button', { name: 'Send Email' }));
 
-      expect(await findByText('This email is invalid.')).toBeInTheDocument();
+      expect(await findByText(/This is not a valid email./)).toBeInTheDocument();
     });
   });
 });

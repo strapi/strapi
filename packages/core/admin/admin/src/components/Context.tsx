@@ -2,6 +2,12 @@ import * as React from 'react';
 
 import * as ContextSelector from 'use-context-selector';
 
+/**
+ * @experimental
+ * @description Create a context provider and a hook to consume the context.
+ *
+ * @warning this may be removed to the design-system instead of becoming stable.
+ */
 function createContext<ContextValueType extends object | null>(
   rootComponentName: string,
   defaultContext?: ContextValueType

@@ -1,15 +1,15 @@
-import type { Strapi, Schema } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import type { TypeRegistry } from '../../type-registry';
 
 const registerCollectionType = (
-  contentType: Schema.CollectionType,
+  contentType: Struct.CollectionTypeSchema,
   {
     registry,
     strapi,
     builders,
   }: {
     registry: TypeRegistry;
-    strapi: Strapi;
+    strapi: Core.Strapi;
     builders: any;
   }
 ) => {

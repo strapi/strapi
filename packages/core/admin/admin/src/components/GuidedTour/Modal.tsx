@@ -10,29 +10,33 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { GuidedTourContextValue, pxToRem, useGuidedTour, useTracking } from '@strapi/helper-plugin';
 import { ArrowRight, Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { useTracking } from '../../features/Tracking';
+
 import { LAYOUT_DATA, STATES } from './constants';
 import { Number, VerticalDivider } from './Ornaments';
+import { GuidedTourContextValue, useGuidedTour } from './Provider';
 
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourModal
  * -----------------------------------------------------------------------------------------------*/
 
 const GuidedTourModal = () => {
-  const {
-    currentStep,
-    guidedTourState,
-    setCurrentStep,
-    setStepState,
-    isGuidedTourVisible,
-    setSkipped,
-  } = useGuidedTour();
+  const currentStep = useGuidedTour('GuidedTourModal', (state) => state.currentStep);
+  const guidedTourState = useGuidedTour('GuidedTourModal', (state) => state.guidedTourState);
+  const setCurrentStep = useGuidedTour('GuidedTourModal', (state) => state.setCurrentStep);
+  const setStepState = useGuidedTour('GuidedTourModal', (state) => state.setStepState);
+  const isGuidedTourVisible = useGuidedTour(
+    'GuidedTourModal',
+    (state) => state.isGuidedTourVisible
+  );
+  const setSkipped = useGuidedTour('GuidedTourModal', (state) => state.setSkipped);
+
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
@@ -44,7 +48,7 @@ const GuidedTourModal = () => {
   const sectionKeys = Object.keys(guidedTourState);
   const [sectionName, stepName] = currentStep.split('.') as [
     keyof GuidedTourContextValue['guidedTourState'],
-    string
+    string,
   ];
   const sectionIndex = sectionKeys.indexOf(sectionName);
   const stepIndex = Object.keys(guidedTourState[sectionName]).indexOf(stepName);
@@ -75,7 +79,7 @@ const GuidedTourModal = () => {
             direction="column"
             alignItems="stretch"
             background="neutral0"
-            width={pxToRem(660)}
+            width={`${660 / 16}rem`}
             shadow="popupShadow"
             hasRadius
             padding={4}
@@ -171,8 +175,10 @@ const GuidedTourStepper = ({
   return (
     <>
       <Flex alignItems="stretch">
-        <Flex marginRight={8} justifyContent="center" minWidth={pxToRem(30)}>
-          {hasSectionBefore && <VerticalDivider state={STATES.IS_DONE} minHeight={pxToRem(24)} />}
+        <Flex marginRight={8} justifyContent="center" minWidth={`${30 / 16}rem`}>
+          {hasSectionBefore && (
+            <VerticalDivider state={STATES.IS_DONE} minHeight={`${24 / 16}rem`} />
+          )}
         </Flex>
         <Typography variant="sigma" textColor="primary600">
           {formatMessage({
@@ -182,7 +188,7 @@ const GuidedTourStepper = ({
         </Typography>
       </Flex>
       <Flex>
-        <Flex marginRight={8} minWidth={pxToRem(30)}>
+        <Flex marginRight={8} minWidth={`${30 / 16}rem`}>
           <Number
             state={hasStepsBefore ? STATES.IS_DONE : STATES.IS_ACTIVE}
             paddingTop={3}
@@ -198,7 +204,7 @@ const GuidedTourStepper = ({
         )}
       </Flex>
       <Flex alignItems="stretch">
-        <Flex marginRight={8} direction="column" justifyContent="center" minWidth={pxToRem(30)}>
+        <Flex marginRight={8} direction="column" justifyContent="center" minWidth={`${30 / 16}rem`}>
           {hasSectionAfter && (
             <>
               <VerticalDivider state={STATES.IS_DONE} />
@@ -232,8 +238,8 @@ const GuidedTourStepper = ({
       </Flex>
       {hasStepsBefore && hasSectionAfter && (
         <Box paddingTop={3}>
-          <Flex marginRight={8} justifyContent="center" width={pxToRem(30)}>
-            <VerticalDivider state={STATES.IS_DONE} minHeight={pxToRem(24)} />
+          <Flex marginRight={8} justifyContent="center" width={`${30 / 16}rem`}>
+            <VerticalDivider state={STATES.IS_DONE} minHeight={`${24 / 16}rem`} />
           </Flex>
         </Box>
       )}

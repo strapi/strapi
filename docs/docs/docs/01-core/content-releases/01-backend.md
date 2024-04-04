@@ -197,6 +197,34 @@ Exposes methods to schedule release date for releases.
 packages/core/content-releases/server/src/services/scheduling.ts
 ```
 
+### Release status update triggers:
+
+Considering that retrieving the status of all entries in a release is a heavy operation, we don't fetch it every time a user wants to access a release. Instead, we store the status in a field within the Release Content Type, and we only update it when an action that changes the status is triggered. These actions include:
+
+#### Creating a release:
+
+When creating a release, its status is automatically set to "Empty" as there are no entries initially.
+
+#### Adding an entry to a release:
+
+Upon adding an entry to a release, its status is recalculated to either "Ready" or "Blocked" based on the validity of the added entry.
+
+#### Removing an entry from a release:
+
+After removing an entry from a release, the status is recalculated to determine if the release is now "Ready", "Blocked", or "Empty".
+
+#### Updating a release:
+
+Whenever a release is updated, its status is recalculated based on the validity of the actions performed during the update.
+
+#### Publishing a release:
+
+During the publishing process, if successful, the status changes to "Done"; otherwise, it changes to "Failed".
+
+#### Listening to events on entries:
+
+When an entry is updated or deleted, the status of all releases containing that entry is recalculated to reflect any changes in validity.
+
 ## Migrations
 
 We have two migrations that we run every time we sync the content types.

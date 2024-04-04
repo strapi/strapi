@@ -1,17 +1,13 @@
 import React, { useReducer, useState } from 'react';
 
-import { Button, ContentLayout, HeaderLayout, Layout, Main } from '@strapi/design-system';
-import {
-  ConfirmDialog,
-  Link,
-  useFocusWhenNavigate,
-  useNotification,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { ConfirmDialog, useTracking, useNotification, Page } from '@strapi/admin/strapi-admin';
+import { Button, ContentLayout, HeaderLayout, Layout } from '@strapi/design-system';
+import { Link } from '@strapi/design-system/v2';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 
 import { useConfig } from '../../../hooks/useConfig';
 import pluginID from '../../../pluginId';
@@ -25,7 +21,7 @@ import reducer from './state/reducer';
 const ConfigureTheView = ({ config }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { mutateConfig } = useConfig();
   const { isLoading: isSubmittingForm } = mutateConfig;
 
@@ -47,10 +43,10 @@ const ConfigureTheView = ({ config }) => {
     dispatch(setLoaded());
     toggleNotification({
       type: 'success',
-      message: {
+      message: formatMessage({
         id: 'notification.form.success.fields',
         defaultMessage: 'Changes saved',
-      },
+      }),
     });
   };
 
@@ -58,15 +54,13 @@ const ConfigureTheView = ({ config }) => {
     dispatch(onChange({ name, value }));
   };
 
-  useFocusWhenNavigate();
-
   return (
     <Layout>
-      <Main aria-busy={isSubmittingForm}>
+      <Page.Main aria-busy={isSubmittingForm}>
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             navigationAction={
-              <Link startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
+              <Link as={NavLink} startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
                 {formatMessage({ id: getTrad('config.back'), defaultMessage: 'Back' })}
               </Link>
             }
@@ -100,19 +94,18 @@ const ConfigureTheView = ({ config }) => {
           </ContentLayout>
 
           <ConfirmDialog
-            bodyText={{
+            isOpen={showWarningSubmit}
+            onClose={toggleWarningSubmit}
+            onConfirm={handleConfirm}
+            variant="success-light"
+          >
+            {formatMessage({
               id: getTrad('config.popUpWarning.warning.updateAllSettings'),
               defaultMessage: 'This will modify all your settings',
-            }}
-            iconRightButton={<Check />}
-            isConfirmButtonLoading={isSubmittingForm}
-            isOpen={showWarningSubmit}
-            onToggleDialog={toggleWarningSubmit}
-            onConfirm={handleConfirm}
-            variantRightButton="success-light"
-          />
+            })}
+          </ConfirmDialog>
         </form>
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };

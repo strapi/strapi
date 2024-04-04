@@ -1,6 +1,6 @@
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export default async ({ strapi }: { strapi: LoadedStrapi }) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const actions = [
     {
       section: 'plugins',
@@ -10,5 +10,5 @@ export default async ({ strapi }: { strapi: LoadedStrapi }) => {
     },
   ];
 
-  await strapi.admin.services.permission.actionProvider.registerMany(actions);
+  await strapi.service('admin::permission').actionProvider.registerMany(actions);
 };

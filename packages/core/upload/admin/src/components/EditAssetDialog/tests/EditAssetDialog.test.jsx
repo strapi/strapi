@@ -1,7 +1,7 @@
 import React from 'react';
 
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -173,7 +173,7 @@ describe('<EditAssetDialog />', () => {
       fireEvent.click(screen.getByLabelText('Delete'));
 
       expect(screen.getByText('Confirmation')).toBeVisible();
-      expect(screen.getByText('Are you sure you want to delete this?')).toBeVisible();
+      expect(screen.getByText('Are you sure?')).toBeVisible();
     });
 
     it('does not open the delete dialog when the user is not allowed to update', () => {

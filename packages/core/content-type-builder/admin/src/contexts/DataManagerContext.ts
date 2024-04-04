@@ -2,19 +2,20 @@
 import { createContext } from 'react';
 
 import type { SchemaType, Component } from '../types';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
+
 // TODO V5 Convert this any types to real types
 export interface CustomFieldAttributeParams {
   attributeToSet: Record<string, any>;
   forTarget: SchemaType;
-  targetUid: UID.Any;
+  targetUid: Internal.UID.Schema;
   initialAttribute: Record<string, any>;
 }
 export interface DataManagerContextValue {
   addAttribute: (
     attributeToSet: Record<string, any>,
     forTarget: SchemaType,
-    targetUid: UID.Any,
+    targetUid: Internal.UID.Schema,
     isEditing?: boolean,
     initialAttribute?: Record<string, any>,
     shouldAddComponentToData?: boolean
@@ -25,7 +26,7 @@ export interface DataManagerContextValue {
   createSchema: (
     data: Record<string, any>,
     schemaType: SchemaType,
-    uid: UID.Any,
+    uid: Internal.UID.Schema,
     componentCategory?: string,
     shouldAddComponentToData?: boolean
   ) => void;
@@ -41,9 +42,13 @@ export interface DataManagerContextValue {
   removeComponentFromDynamicZone: (dzName: string, componentToRemoveIndex: number) => void;
   setModifiedData: () => void;
   sortedContentTypesList: any[]; // Define the actual type
-  submitData: (additionalContentTypeData?: Record<string, any>) => void;
-  updateSchema: (data: Record<string, any>, schemaType: SchemaType, componentUID: UID.Any) => void;
-  components: Record<UID.Component, Component>;
+  submitData: (additionalContentTypeData?: Record<string, any>) => Promise<void>;
+  updateSchema: (
+    data: Record<string, any>,
+    schemaType: SchemaType,
+    componentUID: Internal.UID.Component
+  ) => void;
+  components: Record<Internal.UID.Component, Component>;
   componentsGroupedByCategory: Record<string, Component[]>;
   componentsThatHaveOtherComponentInTheirAttributes: any[]; // Define the actual type
   contentTypes: Record<string, any>;

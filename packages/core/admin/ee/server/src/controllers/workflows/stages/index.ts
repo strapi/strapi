@@ -1,7 +1,7 @@
 import type { Context } from 'koa';
+import type { Core } from '@strapi/types';
 
-import { Strapi } from '@strapi/types';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { getService } from '../../../utils';
 import { validateUpdateStageOnEntity } from '../../../validation/review-workflows';
 import {
@@ -12,11 +12,11 @@ import {
 
 /**
  *
- * @param { Strapi } strapi - Strapi instance
+ * @param { Core.Strapi } strapi - Strapi instance
  * @param userAbility
  * @return { (Stage) => SanitizedStage }
  */
-function sanitizeStage({ strapi }: { strapi: Strapi }, userAbility: unknown) {
+function sanitizeStage({ strapi }: { strapi: Core.Strapi }, userAbility: unknown) {
   const permissionChecker = strapi
     .plugin('content-manager')
     .service('permission-checker')
@@ -42,7 +42,7 @@ export default {
     });
 
     ctx.body = {
-      data: await mapAsync(stages, sanitizer),
+      data: await async.map(stages, sanitizer),
     };
   },
   /**
@@ -92,7 +92,8 @@ export default {
       .create({ userAbility: ctx.state.userAbility, model: modelUID });
 
     // Load entity
-    const entity = (await strapi.entityService.findOne(modelUID, Number(id), {
+    const entity = (await strapi.db.query(modelUID).findOne({
+      where: { id },
       populate: [ENTITY_STAGE_ATTRIBUTE],
     })) as any;
 
@@ -149,7 +150,8 @@ export default {
     }
 
     // Load entity
-    const entity = (await strapi.entityService.findOne(modelUID, Number(id), {
+    const entity = (await strapi.db.query(modelUID).findOne({
+      where: { id },
       populate: [ENTITY_STAGE_ATTRIBUTE],
     })) as any;
 

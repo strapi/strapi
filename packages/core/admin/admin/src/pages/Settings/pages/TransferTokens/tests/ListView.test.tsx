@@ -1,19 +1,9 @@
-import { useRBAC } from '@strapi/helper-plugin';
 import { render, waitFor } from '@tests/utils';
 
+import { useRBAC } from '../../../../../hooks/useRBAC';
 import { ListView } from '../ListView';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useRBAC: jest.fn(),
-  useQueryParams: jest.fn().mockReturnValue([
-    {
-      query: {
-        sort: 'test:ASC',
-      },
-    },
-  ]),
-}));
+jest.mock('../../../../../hooks/useRBAC');
 
 describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
   afterAll(() => {
@@ -77,23 +67,5 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       // eslint-disable-next-line testing-library/no-container
       expect(container.querySelector('button[name="delete"]')).toBeInTheDocument()
     );
-  });
-
-  it('should show the read button when the user have the rights to read and not to update', async () => {
-    // @ts-expect-error this is fine
-    useRBAC.mockReturnValue({
-      allowedActions: {
-        canCreate: false,
-        canDelete: true,
-        canRead: true,
-        canUpdate: false,
-        canRegenerate: false,
-      },
-    });
-
-    const { container } = render(<ListView />);
-
-    // eslint-disable-next-line testing-library/no-container
-    await waitFor(() => expect(container.querySelector('a[title*="Read"]')).toBeInTheDocument());
   });
 });

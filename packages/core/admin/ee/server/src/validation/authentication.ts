@@ -11,7 +11,7 @@ const providerOptionsUpdateSchema = yup.object().shape({
       if (roleId === null) {
         return true;
       }
-      return strapi.admin.services.role.exists({ id: roleId });
+      return strapi.service('admin::role').exists({ id: roleId });
     }),
   ssoLockedRoles: yup
     .array()
@@ -23,7 +23,7 @@ const providerOptionsUpdateSchema = yup.object().shape({
           'is-valid-role',
           'You must submit a valid role for the SSO Locked roles',
           (roleId) => {
-            return strapi.admin.services.role.exists({ id: roleId });
+            return strapi.service('admin::role').exists({ id: roleId });
           }
         )
     ),

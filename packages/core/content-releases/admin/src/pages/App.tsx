@@ -1,4 +1,4 @@
-import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { Page } from '@strapi/admin/strapi-admin';
 import { Route, Routes } from 'react-router-dom';
 
 import { PERMISSIONS } from '../constants';
@@ -8,11 +8,11 @@ import { ReleasesPage } from './ReleasesPage';
 
 export const App = () => {
   return (
-    <CheckPagePermissions permissions={PERMISSIONS.main}>
+    <Page.Protect permissions={PERMISSIONS.main}>
       <Routes>
         <Route index element={<ReleasesPage />} />
         <Route path={':releaseId'} element={<ReleaseDetailsPage />} />
       </Routes>
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };

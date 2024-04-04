@@ -1,6 +1,6 @@
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { mergeConfigWithUserConfig, resolveDevelopmentConfig } from './config';
 
@@ -18,28 +18,21 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
 
   const { createServer } = await import('vite');
 
-  const vite = await createServer(config);
+  const vite = await createServer(finalConfig);
 
-  ctx.strapi.server.app.use(async (ctx, next) => {
-    const url = ctx.url;
-
-    // Check if the URL points to a file that Vite can handle
-    const file = await vite.moduleGraph.getModuleByUrl(url);
-
-    if (file || url.startsWith('/@')) {
-      // If Vite can handle the file, pass the request to the Vite middleware
-      return new Promise((resolve, reject) => {
-        vite.middlewares(ctx.req, ctx.res, (err: unknown) => {
-          if (err) reject(err);
-          else resolve(next());
-        });
+  ctx.strapi.server.app.use((ctx, next) => {
+    return new Promise((resolve, reject) => {
+      vite.middlewares(ctx.req, ctx.res, (err: unknown) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(next());
+        }
       });
-    }
-
-    await next();
+    });
   });
 
-  const serveAdmin: Common.MiddlewareHandler = async (koaCtx, next) => {
+  const serveAdmin: Core.MiddlewareHandler = async (koaCtx, next) => {
     await next();
 
     if (koaCtx.method !== 'HEAD' && koaCtx.method !== 'GET') {

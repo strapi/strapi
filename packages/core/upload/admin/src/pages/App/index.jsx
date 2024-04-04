@@ -1,8 +1,7 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 
-import { Main } from '@strapi/design-system';
-import { LoadingIndicatorPage, useFocusWhenNavigate, useQueryParams } from '@strapi/helper-plugin';
-import { Helmet } from 'react-helmet';
+import { Page, useQueryParams } from '@strapi/admin/strapi-admin';
+
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
@@ -29,21 +28,26 @@ const Upload = () => {
     setQuery({ sort: config.sort, page: 1, pageSize: config.pageSize });
   }, [isLoading, isError, config, rawQuery, setQuery]);
 
-  useFocusWhenNavigate();
+  if (isLoading) {
+    return (
+      <>
+        <Page.Title>{title}</Page.Title>
+        <Page.Loading />
+      </>
+    );
+  }
 
   return (
-    <Main aria-busy={isLoading}>
-      <Helmet title={title} />
-      {isLoading && <LoadingIndicatorPage />}
+    <Page.Main>
       {rawQuery ? (
-        <Suspense fallback={<LoadingIndicatorPage />}>
+        <Suspense fallback={<Page.Loading />}>
           <Routes>
             <Route index element={<MediaLibrary />} />
             <Route path="configuration" element={<ConfigureTheView config={config} />} />
           </Routes>
         </Suspense>
       ) : null}
-    </Main>
+    </Page.Main>
   );
 };
 

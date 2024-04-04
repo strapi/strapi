@@ -1,5 +1,5 @@
 import { Writable } from 'stream';
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { ProviderTransferError } from '../../../../../errors/providers';
 import { ILink, Transaction } from '../../../../../../types';
 import { createLinkQuery } from '../../../../queries/link';
@@ -26,7 +26,7 @@ const isForeignKeyConstraintError = (e: Error) => {
 
 export const createLinksWriteStream = (
   mapID: (uid: string, id: number) => number | undefined,
-  strapi: LoadedStrapi,
+  strapi: Core.Strapi,
   transaction?: Transaction,
   onWarning?: (message: string) => void
 ) => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { Page } from '@strapi/admin/strapi-admin';
 import {
   Badge,
   Button,
@@ -16,7 +17,6 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { AnErrorOccurred, NoPermissions, pxToRem, useSelectionState } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -26,6 +26,7 @@ import { useAssets } from '../../hooks/useAssets';
 import { useFolders } from '../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
 import useModalQueryParams from '../../hooks/useModalQueryParams';
+import { useSelectionState } from '../../hooks/useSelectionState';
 import { containsAssetFilter, getTrad } from '../../utils';
 import getAllowedFiles from '../../utils/getAllowedFiles';
 import { moveElement } from '../../utils/moveElement';
@@ -38,7 +39,7 @@ import { SelectedStep } from './SelectedStep';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + ${pxToRem(80)})`};
+  min-height: ${() => `calc(60vh + ${80 / 16}rem)`};
 `;
 
 export const AssetDialog = ({
@@ -162,7 +163,7 @@ export const AssetDialog = ({
             })}
           </Typography>
         </ModalHeader>
-        <AnErrorOccurred />
+        <Page.Error />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );
@@ -179,7 +180,7 @@ export const AssetDialog = ({
             })}
           </Typography>
         </ModalHeader>
-        <NoPermissions />
+        <Page.NoPermissions />
         <DialogFooter onClose={onClose} />
       </ModalLayout>
     );

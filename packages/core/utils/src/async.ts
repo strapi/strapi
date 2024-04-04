@@ -8,16 +8,27 @@ type AnyFunc = (...args: any) => any;
  For a list of functions it will return a new list of function but will answer the return type of the previous is the arg type of the next function
 */
 type PipeArgs<F extends AnyFunc[], PrevReturn = Parameters<F[0]>[0]> = F extends [
-  (arg: any) => infer B
+  (arg: any) => infer B,
 ]
-  ? [(arg: PrevReturn) => B]
+  ? [
+      (
+        arg: PrevReturn extends Promise<infer PrevResolvedReturn> ? PrevResolvedReturn : PrevReturn
+      ) => B,
+    ]
   : F extends [(arg: any) => infer B, ...infer Tail]
-  ? Tail extends AnyFunc[]
-    ? [(arg: PrevReturn) => B, ...PipeArgs<Tail, B>]
-    : []
-  : [];
+    ? Tail extends AnyFunc[]
+      ? [
+          (
+            arg: PrevReturn extends Promise<infer PrevResolvedReturn>
+              ? PrevResolvedReturn
+              : PrevReturn
+          ) => B,
+          ...PipeArgs<Tail, B>,
+        ]
+      : []
+    : [];
 
-export function pipeAsync<F extends AnyFunc[], FirstFn extends F[0]>(
+export function pipe<F extends AnyFunc[], FirstFn extends F[0]>(
   ...fns: PipeArgs<F> extends F ? F : PipeArgs<F>
 ) {
   type Args = Parameters<FirstFn>;
@@ -40,9 +51,9 @@ export function pipeAsync<F extends AnyFunc[], FirstFn extends F[0]>(
   };
 }
 
-export const mapAsync = curry(pMap);
+export const map = curry(pMap);
 
-export const reduceAsync =
+export const reduce =
   (mixedArray: any[]) =>
   async <T>(iteratee: AnyFunc, initialValue?: T) => {
     let acc = initialValue;
@@ -51,11 +62,3 @@ export const reduceAsync =
     }
     return acc;
   };
-
-export const forEachAsync = async <T, R>(
-  array: T[],
-  func: pMap.Mapper<T, R>,
-  options: pMap.Options
-) => {
-  await pMap(array, func, options);
-};

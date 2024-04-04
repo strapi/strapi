@@ -9,6 +9,7 @@ export const getReservedNames = () => {
       'upload',
       'then', // https://github.com/strapi/strapi/issues/15557
       'rest', // https://github.com/strapi/strapi/issues/13643
+      'document',
     ],
     // attributes are compared with snake_case(name), so only snake_case is needed here and camelCase + UPPER_CASE matches will still be caught
     attributes: [
@@ -21,8 +22,7 @@ export const getReservedNames = () => {
       'published_at',
       'created_by_id',
       'updated_by_id',
-
-      // TODO v5: restricting 'locale' would be a breaking change in v4 but we will need it if this is not resolved: https://github.com/strapi/strapi/issues/10181
+      'locale', // conflicts with internal locale field
 
       // not actually breaking but we'll leave it to avoid confusion
       'created_by',

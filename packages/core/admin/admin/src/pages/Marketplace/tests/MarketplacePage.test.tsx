@@ -1,15 +1,20 @@
 /* eslint-disable testing-library/no-node-access */
-import { useAppInfo, useTracking } from '@strapi/helper-plugin';
+
 import { screen, within, fireEvent } from '@testing-library/react';
 import { render as renderRTL, waitFor } from '@tests/utils';
 
+import { useAppInfo } from '../../../features/AppInfo';
+import { useTracking } from '../../../features/Tracking';
 import { MarketplacePage } from '../MarketplacePage';
 
 jest.mock('../hooks/useNavigatorOnline');
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('../../../features/Tracking', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+}));
+
+jest.mock('../../../features/AppInfo', () => ({
+  ...jest.requireActual('../../../features/AppInfo'),
   useAppInfo: jest.fn(() => ({
     autoReload: true,
     dependencies: {
@@ -24,7 +29,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 const render = () => renderRTL(<MarketplacePage />);
 
 const waitForReload = async () => {
-  await waitFor(() => expect(screen.queryByText('Loading content...')).not.toBeInTheDocument());
+  await waitFor(() => expect(screen.queryByText('Loading content.')).not.toBeInTheDocument());
 };
 
 describe('Marketplace page - layout', () => {

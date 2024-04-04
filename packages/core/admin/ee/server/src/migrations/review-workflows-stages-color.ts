@@ -7,7 +7,7 @@ async function migrateReviewWorkflowStagesColor({ oldContentTypes, contentTypes 
 
   // Add the default stage color if color attribute was added
   if (!hadColor && hasColor) {
-    await strapi.query('admin::workflow-stage').updateMany({
+    await strapi.db.query('admin::workflow-stage').updateMany({
       data: {
         color: STAGE_DEFAULT_COLOR,
       },

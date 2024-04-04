@@ -3,13 +3,6 @@ import * as React from 'react';
 import { Box, Button, Flex, Grid, GridItem, Layout, Main, Typography } from '@strapi/design-system';
 import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
-  ContentBox,
-  LoadingIndicatorPage,
-  useAppInfo,
-  useGuidedTour,
-  useTracking,
-} from '@strapi/helper-plugin';
-import {
   ArrowRight,
   CodeSquare,
   Discord,
@@ -23,12 +16,16 @@ import {
   Strapi,
   Twitter,
 } from '@strapi/icons';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { ContentBox } from '../components/ContentBox';
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
+import { useGuidedTour } from '../components/GuidedTour/Provider';
+import { Page } from '../components/PageHelpers';
+import { useAppInfo } from '../features/AppInfo';
+import { useTracking } from '../features/Tracking';
 import { useContentTypes } from '../hooks/useContentTypes';
 import { useEnterprise } from '../hooks/useEnterprise';
 
@@ -44,7 +41,10 @@ const HomePageCE = () => {
   const { formatMessage } = useIntl();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();
-  const { guidedTourState, isGuidedTourVisible, isSkipped } = useGuidedTour();
+  const guidedTourState = useGuidedTour('HomePage', (state) => state.guidedTourState);
+  const isGuidedTourVisible = useGuidedTour('HomePage', (state) => state.isGuidedTourVisible);
+  const isSkipped = useGuidedTour('HomePage', (state) => state.isSkipped);
+
   const showGuidedTour =
     !Object.values(guidedTourState).every((section) =>
       Object.values(section).every((step) => step)
@@ -61,17 +61,17 @@ const HomePageCE = () => {
   const hasAlreadyCreatedContentTypes = collectionTypes.length > 1 || singleTypes.length > 0;
 
   if (isLoadingForModels) {
-    return <LoadingIndicatorPage />;
+    return <Page.Loading />;
   }
 
   return (
     <Layout>
-      <Helmet
-        title={formatMessage({
-          id: 'HomePage.helmet.title',
+      <Page.Title>
+        {formatMessage({
+          id: 'HomePage.head.title',
           defaultMessage: 'Homepage',
         })}
-      />
+      </Page.Title>
       <Main>
         <LogoContainer>
           <img alt="" aria-hidden src={cornerOrnamentPath} />
@@ -314,7 +314,7 @@ const CloudIconWrapper = styled(Flex)`
 
 const SocialLinks = () => {
   const { formatMessage } = useIntl();
-  const { communityEdition } = useAppInfo();
+  const communityEdition = useAppInfo('SocialLinks', (state) => state.communityEdition);
 
   const socialLinksExtended = [
     ...SOCIAL_LINKS,

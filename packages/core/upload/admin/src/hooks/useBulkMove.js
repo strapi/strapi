@@ -1,11 +1,13 @@
-import { useFetchClient, useNotification } from '@strapi/helper-plugin';
+import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
 import { getTrad } from '../utils';
 
 export const useBulkMove = () => {
-  const toggleNotification = useNotification();
+  const { formatMessage } = useIntl();
+  const { toggleNotification } = useNotification();
   const queryClient = useQueryClient();
   const { post } = useFetchClient();
 
@@ -43,10 +45,10 @@ export const useBulkMove = () => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTrad('modal.move.success-label'),
           defaultMessage: 'Elements have been moved successfully.',
-        },
+        }),
       });
     },
   });

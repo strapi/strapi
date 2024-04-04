@@ -3,8 +3,8 @@ import { dirname, join, resolve } from 'path';
 import { statSync, existsSync } from 'fs';
 import _ from 'lodash';
 import { get, pickBy, defaultsDeep, map, prop, pipe } from 'lodash/fp';
-import { isKebabCase } from '@strapi/utils';
-import type { Strapi } from '@strapi/types';
+import { strings } from '@strapi/utils';
+import type { Core } from '@strapi/types';
 import { getUserPluginsConfig } from './get-user-plugins-config';
 
 interface PluginMeta {
@@ -34,13 +34,15 @@ const INTERNAL_PLUGINS = [
   '@strapi/plugin-content-type-builder',
   '@strapi/plugin-email',
   '@strapi/plugin-upload',
+  '@strapi/plugin-i18n',
   '@strapi/content-releases',
+  '@strapi/review-workflows',
 ];
 
 const isStrapiPlugin = (info: PluginInfo) => get('strapi.kind', info) === 'plugin';
 
 const validatePluginName = (pluginName: string) => {
-  if (!isKebabCase(pluginName)) {
+  if (!strings.isKebabCase(pluginName)) {
     throw new Error(`Plugin name "${pluginName}" is not in kebab (an-example-of-kebab-case)`);
   }
 };
@@ -80,7 +82,7 @@ const toDetailedDeclaration = (declaration: boolean | PluginDeclaration) => {
   return detailedDeclaration;
 };
 
-export const getEnabledPlugins = async (strapi: Strapi, { client } = { client: false }) => {
+export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { client: false }) => {
   const internalPlugins: PluginMetas = {};
 
   for (const dep of INTERNAL_PLUGINS) {

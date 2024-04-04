@@ -11,7 +11,6 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { pxToRem, useNotification } from '@strapi/helper-plugin';
 import { parse } from 'qs';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -20,6 +19,7 @@ import styled from 'styled-components';
 import { PrivateRoute } from '../components/PrivateRoute';
 import { Logo } from '../components/UnauthenticatedLogo';
 import { useAuth } from '../features/Auth';
+import { useNotification } from '../features/Notifications';
 import { LayoutContent, UnauthenticatedLayout } from '../layouts/UnauthenticatedLayout';
 
 export const options = [
@@ -72,7 +72,7 @@ const TypographyCenter = styled(Typography)`
 `;
 
 const UseCasePage = () => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const location = useLocation();
   const navigate = useNavigate();
   const { formatMessage } = useIntl();
@@ -104,10 +104,10 @@ const UseCasePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: 'Usecase.notification.success.project-created',
           defaultMessage: 'Project has been successfully created',
-        },
+        }),
       });
       navigate('/');
     } catch (err) {
@@ -122,7 +122,7 @@ const UseCasePage = () => {
           <form onSubmit={(e) => handleSubmit(e, false)}>
             <Flex direction="column" paddingBottom={7}>
               <Logo />
-              <Box paddingTop={6} paddingBottom={1} width={pxToRem(250)}>
+              <Box paddingTop={6} paddingBottom={1} width={`${250 / 16}rem`}>
                 <TypographyCenter variant="alpha" as="h1" id="usecase-title">
                   {formatMessage({
                     id: 'Usecase.title',

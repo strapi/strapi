@@ -4,23 +4,17 @@
  * This is the page we show when the user visits a url that doesn't have a route
  *
  */
-import {
-  ContentLayout,
-  EmptyStateLayout,
-  HeaderLayout,
-  LinkButton,
-  Main,
-} from '@strapi/design-system';
-import { useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
 import { ArrowRight, EmptyPictures } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
+import { Page } from '../components/PageHelpers';
+
 export const NotFoundPage = () => {
   const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
 
   return (
-    <Main labelledBy="title">
+    <Page.Main labelledBy="title">
       <HeaderLayout
         id="title"
         title={formatMessage({
@@ -47,6 +41,6 @@ export const NotFoundPage = () => {
           shadow="tableShadow"
         />
       </ContentLayout>
-    </Main>
+    </Page.Main>
   );
 };

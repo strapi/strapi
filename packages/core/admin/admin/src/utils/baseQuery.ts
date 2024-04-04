@@ -1,7 +1,10 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
-import { ApiError, getFetchClient } from '@strapi/helper-plugin';
 import { isAxiosError, type AxiosRequestConfig } from 'axios';
+
+import { getFetchClient } from '../utils/getFetchClient';
+
+import type { ApiError } from '../hooks/useAPIErrorHandler';
 
 /* -------------------------------------------------------------------------------------------------
  * Axios data

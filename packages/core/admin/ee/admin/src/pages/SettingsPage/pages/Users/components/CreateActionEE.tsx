@@ -1,7 +1,6 @@
 import { Button, Flex, Icon, Tooltip } from '@strapi/design-system';
 import { Envelop, ExclamationMarkCircle } from '@strapi/icons';
 import isNil from 'lodash/isNil';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
@@ -50,8 +49,4 @@ export const CreateActionEE = ({ onClick }: CreateActionCEProps) => {
       </Button>
     </Flex>
   );
-};
-
-CreateActionEE.propTypes = {
-  onClick: PropTypes.func.isRequired,
 };

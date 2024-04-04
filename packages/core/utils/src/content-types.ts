@@ -23,10 +23,6 @@ const UPDATED_BY_ATTRIBUTE = 'updatedBy';
 const CREATED_AT_ATTRIBUTE = 'createdAt';
 const UPDATED_AT_ATTRIBUTE = 'updatedAt';
 
-const DP_PUB_STATE_LIVE = 'live';
-const DP_PUB_STATE_PREVIEW = 'preview';
-const DP_PUB_STATES = [DP_PUB_STATE_LIVE, DP_PUB_STATE_PREVIEW];
-
 const constants = {
   ID_ATTRIBUTE,
   DOC_ID_ATTRIBUTE,
@@ -35,9 +31,6 @@ const constants = {
   UPDATED_BY_ATTRIBUTE,
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
-  DP_PUB_STATES,
-  DP_PUB_STATE_LIVE,
-  DP_PUB_STATE_PREVIEW,
   SINGLE_TYPE,
   COLLECTION_TYPE,
 };
@@ -115,9 +108,14 @@ const isVisibleAttribute = (model: Model, attributeName: string) => {
   return getVisibleAttributes(model).includes(attributeName);
 };
 
-const getOptions = (model: Model) => _.get(model, 'options', {});
+const getOptions = (model: Model) =>
+  _.assign({ draftAndPublish: false }, _.get(model, 'options', {}));
 
-const isDraft = <T extends object>(data: T) => _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
+const hasDraftAndPublish = (model: Model) =>
+  _.get(model, 'options.draftAndPublish', false) === true;
+
+const isDraft = <T extends object>(data: T, model: Model) =>
+  hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
 
 const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
 const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
@@ -183,6 +181,17 @@ const getScalarAttributes = (schema: Model) => {
   );
 };
 
+const getRelationalAttributes = (schema: Model) => {
+  return _.reduce(
+    schema.attributes,
+    (acc, attr, attrName) => {
+      if (isRelationalAttribute(attr)) acc.push(attrName);
+      return acc;
+    },
+    [] as string[]
+  );
+};
+
 /**
  * Checks if an attribute is of type `type`
  * @param {object} attribute
@@ -217,6 +226,7 @@ export {
   getNonWritableAttributes,
   getComponentAttributes,
   getScalarAttributes,
+  getRelationalAttributes,
   getWritableAttributes,
   isWritableAttribute,
   getNonVisibleAttributes,
@@ -226,6 +236,7 @@ export {
   isVisibleAttribute,
   getOptions,
   isDraft,
+  hasDraftAndPublish,
   isSingleType,
   isCollectionType,
   isKind,

@@ -1,13 +1,13 @@
 import REPL from 'repl';
 import { createCommand } from 'commander';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../types';
 import { runAction } from '../utils/helpers';
 
 const action = async () => {
-  const appContext = await strapiFactory.compile();
-  const app = await strapiFactory(appContext).load();
+  const appContext = await compileStrapi();
+  const app = await createStrapi(appContext).load();
 
   app.start().then(() => {
     const repl = REPL.start(app.config.info.name + ' > ' || 'strapi > '); // eslint-disable-line prefer-template

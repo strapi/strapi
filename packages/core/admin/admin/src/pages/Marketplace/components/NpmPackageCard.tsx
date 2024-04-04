@@ -1,12 +1,5 @@
 import { Box, Flex, Icon, Tooltip, Typography, Divider, Button } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import {
-  useTracking,
-  pxToRem,
-  AppInfoContextValue,
-  useNotification,
-  useClipboard,
-} from '@strapi/helper-plugin';
 import { CheckCircle, ExternalLink, Download, Github, Star, Check, Duplicate } from '@strapi/icons';
 import pluralize from 'pluralize';
 import { useIntl } from 'react-intl';
@@ -14,6 +7,10 @@ import * as semver from 'semver';
 import styled from 'styled-components';
 
 import StrapiLogo from '../../../assets/images/logo-strapi-2022.svg';
+import { AppInfoContextValue } from '../../../features/AppInfo';
+import { useNotification } from '../../../features/Notifications';
+import { useTracking } from '../../../features/Tracking';
+import { useClipboard } from '../../../hooks/useClipboard';
 
 import type { Plugin, Provider } from '../hooks/useMarketplaceData';
 import type { NpmPackageType } from '../MarketplacePage';
@@ -183,7 +180,7 @@ const InstallPluginButton = ({
   strapiPeerDepVersion,
   pluginName,
 }: InstallPluginButtonProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { copy } = useClipboard();
@@ -195,7 +192,7 @@ const InstallPluginButton = ({
       trackUsage('willInstallPlugin');
       toggleNotification({
         type: 'success',
-        message: { id: 'admin.pages.MarketPlacePage.plugin.copy.success' },
+        message: formatMessage({ id: 'admin.pages.MarketPlacePage.plugin.copy.success' }),
       });
     }
   };
@@ -323,8 +320,14 @@ const PackageStats = ({ githubStars = 0, npmDownloads = 0, npmPackageType }: Pac
     <Flex gap={1}>
       {!!githubStars && (
         <>
-          <Icon as={Github} height={pxToRem(12)} width={pxToRem(12)} aria-hidden />
-          <Icon as={Star} height={pxToRem(12)} width={pxToRem(12)} color="warning500" aria-hidden />
+          <Icon as={Github} height={`${12 / 16}rem`} width={`${12 / 16}rem`} aria-hidden />
+          <Icon
+            as={Star}
+            height={`${12 / 16}rem`}
+            width={`${12 / 16}rem`}
+            color="warning500"
+            aria-hidden
+          />
           <p
             aria-label={formatMessage(
               {
@@ -344,7 +347,7 @@ const PackageStats = ({ githubStars = 0, npmDownloads = 0, npmPackageType }: Pac
           <VerticalDivider unsetMargin={false} />
         </>
       )}
-      <Icon as={Download} height={pxToRem(12)} width={pxToRem(12)} aria-hidden />
+      <Icon as={Download} height={`${12 / 16}rem`} width={`${12 / 16}rem`} aria-hidden />
       <p
         aria-label={formatMessage(
           {
@@ -366,7 +369,7 @@ const PackageStats = ({ githubStars = 0, npmDownloads = 0, npmPackageType }: Pac
 };
 
 const VerticalDivider = styled(Divider)`
-  width: ${pxToRem(12)};
+  width: ${12 / 16}rem;
   transform: rotate(90deg);
 `;
 

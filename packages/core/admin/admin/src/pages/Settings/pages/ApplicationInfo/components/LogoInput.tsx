@@ -36,13 +36,12 @@ import {
   TextInputProps,
   Typography,
 } from '@strapi/design-system';
-import { pxToRem } from '@strapi/helper-plugin';
 import { PicturePlus, Plus, Refresh } from '@strapi/icons';
 import axios, { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import { ConfigurationProviderProps } from '../../../../../features/Configuration';
+import { ConfigurationContextValue } from '../../../../../features/Configuration';
 import { ACCEPTED_FORMAT, DIMENSION, SIZE } from '../utils/constants';
 import { ImageAsset, ParsingFileError, parseFileMetadatas } from '../utils/files';
 
@@ -68,7 +67,7 @@ interface LogoInputProps
   extends Pick<PendingLogoDialogProps, 'onChangeLogo'>,
     Pick<CarouselInputProps, 'label' | 'hint'> {
   canUpdate: boolean;
-  customLogo?: ConfigurationProviderProps['authLogo']['custom'];
+  customLogo?: ConfigurationContextValue['logos']['auth']['custom'];
   defaultLogo: string;
 }
 
@@ -375,8 +374,8 @@ const ComputerForm = () => {
               >
                 <Icon
                   color="primary600"
-                  width={pxToRem(60)}
-                  height={pxToRem(60)}
+                  width={`${60 / 16}rem`}
+                  height={`${60 / 16}rem`}
                   as={PicturePlus}
                   aria-hidden
                 />
@@ -494,7 +493,7 @@ const PendingLogoDialog = ({ onChangeLogo }: PendingLogoDialogProps) => {
             })}
           </Button>
         </Flex>
-        <Box maxWidth={pxToRem(180)}>
+        <Box maxWidth={`${180 / 16}rem`}>
           {localImage?.url ? <ImageCardAsset asset={localImage} /> : null}
         </Box>
       </Box>

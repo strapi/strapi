@@ -1,19 +1,19 @@
 import type { Context } from 'koa';
+import type { Core } from '@strapi/types';
 
-import { Strapi } from '@strapi/types';
 import { update, map, property } from 'lodash/fp';
-import { mapAsync } from '@strapi/utils';
+import { async } from '@strapi/utils';
 import { getService } from '../../utils';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../../validation/review-workflows';
 import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../constants/workflows';
 
 /**
  *
- * @param { Strapi } strapi - Strapi instance
+ * @param { Core.Strapi } strapi - Strapi instance
  * @param userAbility
  * @return { PermissionChecker }
  */
-function getWorkflowsPermissionChecker({ strapi }: { strapi: Strapi }, userAbility: unknown) {
+function getWorkflowsPermissionChecker({ strapi }: { strapi: Core.Strapi }, userAbility: unknown) {
   return strapi
     .plugin('content-manager')
     .service('permission-checker')
@@ -149,7 +149,7 @@ export default {
     ]);
 
     ctx.body = {
-      data: await mapAsync(workflows, sanitizeOutput),
+      data: await async.map(workflows, sanitizeOutput),
       meta: {
         workflowCount,
       },

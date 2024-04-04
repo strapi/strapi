@@ -5,7 +5,6 @@ import {
   Button,
   ContentLayout,
   HeaderLayout,
-  Main,
   Table,
   Tbody,
   TFooter,
@@ -15,37 +14,31 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import {
-  ConfirmDialog,
-  getFetchClient,
-  LoadingIndicatorPage,
-  SearchURLQuery,
-  SettingsPageTitle,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useQueryParams,
-  useNotification,
-  useRBAC,
-  CheckPagePermissions,
-} from '@strapi/helper-plugin';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
 import { AxiosError } from 'axios';
-import produce from 'immer';
+import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Page } from '../../../../components/PageHelpers';
+import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
 import { useAdminRoles, AdminRole } from '../../../../hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useFetchClient } from '../../../../hooks/useFetchClient';
+import { useQueryParams } from '../../../../hooks/useQueryParams';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
 
 const ListPage = () => {
   const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
   const permissions = useTypedSelector(selectAdminPermissions);
   const { formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = React.useState(false);
   const [{ query }] = useQueryParams<{ _q?: string }>();
   const {
@@ -62,12 +55,8 @@ const ListPage = () => {
   );
 
   const navigate = useNavigate();
-  const [{ showModalConfirmButtonLoading, roleToDelete }, dispatch] = React.useReducer(
-    reducer,
-    initialState
-  );
-
-  const { post } = getFetchClient();
+  const [{ roleToDelete }, dispatch] = React.useReducer(reducer, initialState);
+  const { post } = useFetchClient();
 
   const handleDeleteData = async () => {
     try {
@@ -87,7 +76,7 @@ const ListPage = () => {
     } catch (error) {
       if (error instanceof AxiosError) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(error),
         });
       }
@@ -106,7 +95,7 @@ const ListPage = () => {
     if (role.usersCount) {
       toggleNotification({
         type: 'info',
-        message: { id: 'Roles.ListPage.notification.delete-not-allowed' },
+        message: formatMessage({ id: 'Roles.ListPage.notification.delete-not-allowed' }),
       });
     } else {
       dispatch({
@@ -129,16 +118,19 @@ const ListPage = () => {
   const colCount = 6;
 
   if (isLoadingForPermissions) {
-    return (
-      <Main>
-        <LoadingIndicatorPage />
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   return (
-    <Main>
-      <SettingsPageTitle name="Roles" />
+    <Page.Main>
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Roles',
+          }
+        )}
+      </Page.Title>
       <HeaderLayout
         primaryAction={
           canCreate ? (
@@ -163,7 +155,7 @@ const ListPage = () => {
       {canRead && (
         <ActionLayout
           startActions={
-            <SearchURLQuery
+            <SearchInput
               label={formatMessage(
                 { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
                 {
@@ -273,10 +265,9 @@ const ListPage = () => {
       <ConfirmDialog
         isOpen={isWarningDeleteAllOpened}
         onConfirm={handleDeleteData}
-        isConfirmButtonLoading={showModalConfirmButtonLoading}
-        onToggleDialog={handleToggleModal}
+        onClose={handleToggleModal}
       />
-    </Main>
+    </Page.Main>
   );
 };
 
@@ -355,12 +346,12 @@ const reducer = (state: State, action: Action) =>
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedListPage = () => {
-  const permissions = useTypedSelector(selectAdminPermissions);
+  const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.roles.read);
 
   return (
-    <CheckPagePermissions permissions={permissions.settings?.roles.main}>
+    <Page.Protect permissions={permissions}>
       <ListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

@@ -1,7 +1,7 @@
-import { getJoinTableName } from '../../metadata';
-
+import { snakeCase } from 'lodash/fp';
 import type { Database } from '../..';
 import type { Relation } from '../../types';
+import { identifiers } from '../../utils/identifiers';
 
 type Link = {
   relation: Relation.Bidirectional & { inversedBy: string };
@@ -63,8 +63,14 @@ export const validateBidirectionalRelations = async (db: Database) => {
     const invModelMetadata = db.metadata.get(relation.target);
 
     // Generate the join table name based on the relation target table and attribute name.
-    const joinTableName = getJoinTableName(modelMetadata.tableName, invRelation.inversedBy);
-    const inverseJoinTableName = getJoinTableName(invModelMetadata.tableName, relation.inversedBy);
+    const joinTableName = identifiers.getJoinTableName(
+      snakeCase(modelMetadata.tableName),
+      snakeCase(invRelation.inversedBy)
+    );
+    const inverseJoinTableName = identifiers.getJoinTableName(
+      snakeCase(invModelMetadata.tableName),
+      snakeCase(relation.inversedBy)
+    );
 
     const joinTableEmpty = await isLinkTableEmpty(db, joinTableName);
     const inverseJoinTableEmpty = await isLinkTableEmpty(db, inverseJoinTableName);

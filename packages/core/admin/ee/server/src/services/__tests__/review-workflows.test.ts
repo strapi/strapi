@@ -1,4 +1,4 @@
-import { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import reviewWorkflowsServiceFactory from '../review-workflows/review-workflows';
 import { ENTITY_STAGE_ATTRIBUTE, ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
 
@@ -60,6 +60,10 @@ const containerMock = {
     switch (container) {
       case 'content-types':
         return contentTypesContainer;
+      case 'webhookStore':
+        return {
+          addAllowedEvent: jest.fn(),
+        };
       default:
         return null;
     }
@@ -91,10 +95,7 @@ const strapiMock = {
         return null;
     }
   },
-  webhookStore: {
-    addAllowedEvent: jest.fn(),
-  },
-} as unknown as LoadedStrapi;
+} as unknown as Core.Strapi;
 
 const reviewWorkflowsService = reviewWorkflowsServiceFactory({ strapi: strapiMock });
 
@@ -144,7 +145,11 @@ describe('Review workflows service', () => {
 
       const extendFunc = contentTypesContainer.extend.mock.calls[0][1];
 
-      expect(extendFunc({ collectionName: 'toto' })).toEqual({
+      const contentType = { collectionName: 'toto', attributes: {} };
+
+      extendFunc(contentType);
+
+      expect(contentType).toEqual({
         collectionName: 'toto',
         attributes: {
           [ENTITY_STAGE_ATTRIBUTE]: expect.objectContaining({

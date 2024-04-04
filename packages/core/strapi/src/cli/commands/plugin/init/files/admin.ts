@@ -10,7 +10,7 @@ export { PluginIcon };
 `;
 
 const APP_CODE = outdent`
-import { AnErrorOccurred } from '@strapi/helper-plugin';
+import { Page } from '@strapi/strapi/admin';
 import { Switch, Route } from 'react-router-dom';
 
 import { PLUGIN_ID } from '../pluginId';
@@ -21,7 +21,7 @@ const App = () => {
   return (
     <Switch>
       <Route index element={<HomePage />} />
-      <Route path="*" element={<AnErrorOccurred />} />
+      <Route path="*" element={<Page.Error />} />
     </Switch>
   );
 };
@@ -52,7 +52,7 @@ const TYPESCRIPT: TemplateFile[] = [
   {
     name: 'admin/src/index.ts',
     contents: outdent`
-        import { prefixPluginTranslations } from '@strapi/helper-plugin';
+        import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
         import { PLUGIN_ID } from './pluginId';
         import { Initializer } from './components/Initializer';
         import { PluginIcon } from './components/PluginIcon';
@@ -175,7 +175,7 @@ const JAVASCRIPT: TemplateFile[] = [
   {
     name: 'admin/src/index.js',
     contents: outdent`
-            import { prefixPluginTranslations } from '@strapi/helper-plugin';
+            import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
             import { PLUGIN_ID } from './pluginId';
             import { Initializer } from './components/Initializer';
             import { PluginIcon } from './components/PluginIcon';

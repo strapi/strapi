@@ -1,5 +1,4 @@
-import { sanitize, validate } from '@strapi/utils';
-import type { Attribute, UID } from '@strapi/types';
+import type { Internal, Schema } from '@strapi/types';
 
 import type { Context } from '../../types';
 
@@ -8,7 +7,7 @@ export default ({ strapi }: Context) => ({
     contentTypeUID,
     attributeName,
   }: {
-    contentTypeUID: UID.ContentType;
+    contentTypeUID: Internal.UID.ContentType;
     attributeName: string;
   }) {
     const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
@@ -18,17 +17,20 @@ export default ({ strapi }: Context) => ({
 
       const { component: componentName } = contentType.attributes[
         attributeName
-      ] as Attribute.Component;
+      ] as Schema.Attribute.Component;
+
       const component = strapi.getModel(componentName);
 
       const transformedArgs = transformArgs(args, { contentType: component, usePagination: true });
-      await validate.contentAPI.query(transformedArgs, component, {
+      await strapi.contentAPI.validate.query(transformedArgs, component, {
         auth: ctx?.state?.auth,
       });
-      const sanitizedQuery = await sanitize.contentAPI.query(transformedArgs, component, {
+
+      const sanitizedQuery = await strapi.contentAPI.sanitize.query(transformedArgs, component, {
         auth: ctx?.state?.auth,
       });
-      return strapi.entityService!.load(contentTypeUID, parent, attributeName, sanitizedQuery);
+
+      return strapi.db?.query(contentTypeUID).load(parent, attributeName, sanitizedQuery);
     };
   },
 });

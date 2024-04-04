@@ -8,27 +8,20 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
-  Main,
-  Option,
-  Select,
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  Form,
-  GenericInput,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
-  useAPIErrorHandler,
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-} from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Formik } from 'formik';
+import {
+  useAPIErrorHandler,
+  Page,
+  Form,
+  InputRenderer,
+  useNotification,
+  useFetchClient,
+  useRBAC,
+} from '@strapi/strapi/admin';
+
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -39,21 +32,18 @@ import layout from './utils/layout';
 import schema from './utils/schema';
 
 const ProtectedAdvancedSettingsPage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.readAdvancedSettings}>
+  <Page.Protect permissions={PERMISSIONS.readAdvancedSettings}>
     <AdvancedSettingsPage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );
 
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingForPermissions,
@@ -78,8 +68,11 @@ const AdvancedSettingsPage = () => {
       },
       onError() {
         toggleNotification({
-          type: 'warning',
-          message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
+          type: 'danger',
+          message: formatMessage({
+            id: getTrad('notification.error'),
+            defaultMessage: 'An error occured',
+          }),
         });
       },
     }
@@ -93,18 +86,17 @@ const AdvancedSettingsPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('notification.success.saved'), defaultMessage: 'Saved' },
+        message: formatMessage({
+          id: getTrad('notification.success.saved'),
+          defaultMessage: 'Saved',
+        }),
       });
-
-      unlockApp();
     },
     onError(error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
-
-      unlockApp();
     },
     refetchActive: true,
   });
@@ -112,8 +104,6 @@ const AdvancedSettingsPage = () => {
   const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleSubmit = async (body) => {
-    lockApp();
-
     submitMutation.mutate({
       ...body,
       email_confirmation_redirection: body.email_confirmation
@@ -123,45 +113,26 @@ const AdvancedSettingsPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <Main aria-busy="true">
-        <SettingsPageTitle
-          name={formatMessage({
-            id: getTrad('HeaderNav.link.advancedSettings'),
-            defaultMessage: 'Advanced Settings',
-          })}
-        />
-        <HeaderLayout
-          title={formatMessage({
-            id: getTrad('HeaderNav.link.advancedSettings'),
-            defaultMessage: 'Advanced Settings',
-          })}
-        />
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </Main>
-    );
+    return <Page.Loading />;
   }
 
   return (
-    <Main aria-busy={isSubmittingForm}>
-      <SettingsPageTitle
-        name={formatMessage({
-          id: getTrad('HeaderNav.link.advancedSettings'),
-          defaultMessage: 'Advanced Settings',
-        })}
-      />
-      <Formik
-        onSubmit={handleSubmit}
-        initialValues={data.settings}
-        validateOnChange={false}
-        validationSchema={schema}
-        enableReinitialize
-      >
-        {({ errors, values, handleChange, isSubmitting, dirty }) => {
+    <Page.Main aria-busy={isSubmittingForm}>
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: formatMessage({
+              id: getTrad('HeaderNav.link.advancedSettings'),
+              defaultMessage: 'Advanced Settings',
+            }),
+          }
+        )}
+      </Page.Title>
+      <Form onSubmit={handleSubmit} initialValues={data.settings} validationSchema={schema}>
+        {({ values, isSubmitting, modified }) => {
           return (
-            <Form>
+            <>
               <HeaderLayout
                 title={formatMessage({
                   id: getTrad('HeaderNav.link.advancedSettings'),
@@ -171,7 +142,7 @@ const AdvancedSettingsPage = () => {
                   <Button
                     loading={isSubmitting}
                     type="submit"
-                    disabled={canUpdate ? !dirty : !canUpdate}
+                    disabled={!modified || !canUpdate}
                     startIcon={<Check />}
                     size="S"
                   >
@@ -197,63 +168,52 @@ const AdvancedSettingsPage = () => {
                       })}
                     </Typography>
                     <Grid gap={6}>
-                      <GridItem col={6} s={12}>
-                        <Select
-                          label={formatMessage({
+                      {[
+                        {
+                          label: {
                             id: getTrad('EditForm.inputSelect.label.role'),
                             defaultMessage: 'Default role for authenticated users',
-                          })}
-                          value={values.default_role}
-                          hint={formatMessage({
+                          },
+                          hint: {
                             id: getTrad('EditForm.inputSelect.description.role'),
                             defaultMessage:
                               'It will attach the new authenticated user to the selected role.',
-                          })}
-                          onChange={(e) =>
-                            handleChange({ target: { name: 'default_role', value: e } })
-                          }
-                        >
-                          {data.roles.map((role) => {
-                            return (
-                              <Option key={role.type} value={role.type}>
-                                {role.name}
-                              </Option>
-                            );
-                          })}
-                        </Select>
-                      </GridItem>
-                      {layout.map((input) => {
-                        let value = values[input.name];
-
-                        if (!value) {
-                          value = input.type === 'bool' ? false : '';
-                        }
-
-                        return (
-                          <GridItem key={input.name} {...input.size}>
-                            <GenericInput
-                              {...input}
-                              value={value}
-                              error={errors[input.name]}
-                              disabled={
-                                input.name === 'email_confirmation_redirection' &&
-                                values.email_confirmation === false
-                              }
-                              onChange={handleChange}
-                            />
-                          </GridItem>
-                        );
-                      })}
+                          },
+                          options: data.roles.map((role) => ({
+                            label: role.name,
+                            value: role.type,
+                          })),
+                          name: 'default_role',
+                          size: 6,
+                          type: 'enumeration',
+                        },
+                        ...layout,
+                      ].map(({ size, ...field }) => (
+                        <GridItem key={field.name} col={size}>
+                          <InputRenderer
+                            {...field}
+                            disabled={
+                              field.name === 'email_confirmation_redirection' &&
+                              values.email_confirmation === false
+                            }
+                            label={formatMessage(field.label)}
+                            hint={field.hint ? formatMessage(field.hint) : undefined}
+                            placeholder={
+                              field.placeholder ? formatMessage(field.placeholder) : undefined
+                            }
+                          />
+                        </GridItem>
+                      ))}
                     </Grid>
                   </Flex>
                 </Box>
               </ContentLayout>
-            </Form>
+            </>
           );
         }}
-      </Formik>
-    </Main>
+      </Form>
+    </Page.Main>
   );
 };
 
-export default ProtectedAdvancedSettingsPage;
+export { ProtectedAdvancedSettingsPage, AdvancedSettingsPage };

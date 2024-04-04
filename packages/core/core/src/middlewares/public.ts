@@ -1,6 +1,6 @@
 import { defaultsDeep } from 'lodash/fp';
 import koaStatic from 'koa-static';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 type Config = koaStatic.Options;
 
@@ -8,9 +8,9 @@ const defaults = {
   maxAge: 60000,
 };
 
-export const publicStatic: Common.MiddlewareFactory = (
+export const publicStatic: Core.MiddlewareFactory = (
   config: Config,
-  { strapi }: { strapi: Strapi }
+  { strapi }: { strapi: Core.Strapi }
 ) => {
   const { maxAge } = defaultsDeep(defaults, config);
 
@@ -19,7 +19,7 @@ export const publicStatic: Common.MiddlewareFactory = (
       method: 'GET',
       path: '/',
       handler(ctx) {
-        ctx.redirect('/admin');
+        ctx.redirect(strapi.config.get('admin.url', '/admin'));
       },
       config: { auth: false },
     },

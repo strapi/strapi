@@ -11,7 +11,6 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { usePersistentState } from '@strapi/helper-plugin';
 import { Grid, List, Pencil, Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -24,6 +23,7 @@ import {
   viewOptions,
 } from '../../../constants';
 import { useFolder } from '../../../hooks/useFolder';
+import { usePersistentState } from '../../../hooks/usePersistentState';
 import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import getTrad from '../../../utils/getTrad';
@@ -218,14 +218,14 @@ export const BrowseStep = ({
                     defaultMessage: 'There are no assets with the applied filters',
                   })
                 : canCreate && !isSearching
-                ? formatMessage({
-                    id: getTrad('list.assets.empty'),
-                    defaultMessage: 'Upload your first assets...',
-                  })
-                : formatMessage({
-                    id: getTrad('list.assets.empty.no-permissions'),
-                    defaultMessage: 'The asset list is empty',
-                  })
+                  ? formatMessage({
+                      id: getTrad('list.assets.empty'),
+                      defaultMessage: 'Upload your first assets...',
+                    })
+                  : formatMessage({
+                      id: getTrad('list.assets.empty.no-permissions'),
+                      defaultMessage: 'The asset list is empty',
+                    })
             }
           />
         </Box>

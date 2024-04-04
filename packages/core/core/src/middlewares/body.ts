@@ -1,11 +1,11 @@
 import fse from 'fs-extra';
 import { defaultsDeep } from 'lodash/fp';
-import body from 'koa-body';
+import body, { KoaBodyMiddlewareOptions } from 'koa-body';
 import mime from 'mime-types';
 import type Koa from 'koa';
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export type Config = body.IKoaBodyOptions;
+export type Config = KoaBodyMiddlewareOptions;
 
 const defaults = {
   multipart: true,
@@ -22,7 +22,7 @@ function getFiles(ctx: Koa.Context) {
   return ctx?.request?.files?.files;
 }
 
-const bodyMiddleware: Common.MiddlewareFactory<Config> = (config, { strapi }) => {
+const bodyMiddleware: Core.MiddlewareFactory<Config> = (config, { strapi }) => {
   const bodyConfig: Config = defaultsDeep(defaults, config);
 
   let gqlEndpoint: string | undefined;
@@ -37,7 +37,7 @@ const bodyMiddleware: Common.MiddlewareFactory<Config> = (config, { strapi }) =>
       await next();
     } else {
       try {
-        await body({ patchKoa: true, ...bodyConfig })(ctx, async () => {});
+        await body(bodyConfig)(ctx, async () => {});
 
         const files = getFiles(ctx);
 
@@ -73,10 +73,10 @@ const bodyMiddleware: Common.MiddlewareFactory<Config> = (config, { strapi }) =>
     if (files) {
       if (Array.isArray(files)) {
         // not awaiting to not slow the request
-        Promise.all(files.map((file) => fse.remove(file.path)));
-      } else if (files && files.path) {
+        Promise.all(files.map((file) => fse.remove(file.filepath)));
+      } else if (files && files.filepath) {
         // not awaiting to not slow the request
-        fse.remove(files.path);
+        fse.remove(files.filepath);
       }
       delete ctx.request.files;
     }

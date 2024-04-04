@@ -3,11 +3,13 @@
 const path = require('path');
 const assert = require('assert');
 const ts = require('typescript');
-const prettier = require('prettier');
 const fse = require('fs-extra');
 const chalk = require('chalk');
 
 const { factory } = ts;
+
+const MODULE_DECLARATION = '@strapi/strapi';
+const PUBLIC_NAMESPACE = 'Public';
 
 /**
  * Aggregate the given TypeScript nodes into a single string
@@ -58,6 +60,9 @@ const saveDefinitionToFileSystem = async (dir, file, content) => {
  * @returns {Promise<string>}
  */
 const format = async (content) => {
+  // eslint-disable-next-line node/no-unsupported-features/es-syntax
+  const prettier = await import('prettier'); // ESM-only
+
   const configFile = await prettier.resolveConfigFile();
   const config = configFile
     ? await prettier.resolveConfig(configFile)
@@ -92,11 +97,11 @@ const generateSharedExtensionDefinition = (registry, definitions) => {
 
   return factory.createModuleDeclaration(
     [factory.createModifier(ts.SyntaxKind.DeclareKeyword)],
-    factory.createStringLiteral('@strapi/types', true),
+    factory.createStringLiteral(MODULE_DECLARATION, true),
     factory.createModuleBlock([
       factory.createModuleDeclaration(
         [factory.createModifier(ts.SyntaxKind.ExportKeyword)],
-        factory.createIdentifier('Shared'),
+        factory.createIdentifier(PUBLIC_NAMESPACE),
         factory.createModuleBlock(
           properties.length > 0
             ? [

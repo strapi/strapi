@@ -44,5 +44,30 @@ export const server = setupServer(
 
       return res(ctx.json(newLocale));
     }),
+    rest.put('/i18n/locales/:id', (req, res, ctx) => {
+      return res(ctx.status(200));
+    }),
+    rest.delete('/i18n/locales/:id', (req, res, ctx) => {
+      if (req.params.id === '1') {
+        return res(ctx.status(200));
+      }
+
+      return res(ctx.status(404));
+    }),
+    /**
+     *
+     * iso-locales
+     *
+     */
+    rest.get('/i18n/iso-locales', (req, res, ctx) => {
+      return res(
+        ctx.json([
+          { code: 'af', name: 'Afrikaans (af)' },
+          { code: 'af-NA', name: 'Afrikaans (Namibia) (af-NA)' },
+          { code: 'af-ZA', name: 'Afrikaans (South Africa) (af-ZA)' },
+          { code: 'agq', name: 'Aghem (agq)' },
+        ])
+      );
+    }),
   ]
 );

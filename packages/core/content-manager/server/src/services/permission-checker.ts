@@ -1,5 +1,5 @@
-import { pipeAsync } from '@strapi/utils';
-import { LoadedStrapi as Strapi, EntityService, Common } from '@strapi/types';
+import { async } from '@strapi/utils';
+import type { Core, UID, Modules } from '@strapi/types';
 
 const ACTIONS = {
   read: 'plugin::content-manager.explorer.read',
@@ -8,9 +8,10 @@ const ACTIONS = {
   delete: 'plugin::content-manager.explorer.delete',
   publish: 'plugin::content-manager.explorer.publish',
   unpublish: 'plugin::content-manager.explorer.publish',
+  discard: 'plugin::content-manager.explorer.update',
 } as const;
 
-type Entity = EntityService.Result<Common.UID.ContentType>;
+type Entity = Modules.EntityService.Result<UID.ContentType>;
 type Query = {
   page?: string;
   pageSize?: string;
@@ -18,9 +19,9 @@ type Query = {
 };
 
 const createPermissionChecker =
-  (strapi: Strapi) =>
+  (strapi: Core.Strapi) =>
   ({ userAbility, model }: { userAbility: any; model: string }) => {
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
       model,
     });
@@ -75,7 +76,7 @@ const createPermissionChecker =
     };
 
     const sanitizedQuery = (query: Query, action: { action?: string } = {}) => {
-      return pipeAsync(
+      return async.pipe(
         (q: Query) => sanitizeQuery(q, action),
         (q: Query) => buildPermissionQuery(q, action)
       )(query);
@@ -112,6 +113,6 @@ const createPermissionChecker =
     };
   };
 
-export default ({ strapi }: { strapi: Strapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   create: createPermissionChecker(strapi),
 });

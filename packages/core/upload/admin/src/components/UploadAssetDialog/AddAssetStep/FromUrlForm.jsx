@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, ModalFooter, Textarea } from '@strapi/design-system';
-import { Form, useTracking } from '@strapi/helper-plugin';
-import { Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 

@@ -1,6 +1,6 @@
+import { BackButton, useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, ContentLayout, Flex, HeaderLayout } from '@strapi/design-system';
-import { Link, useTracking } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, Pencil, Plus } from '@strapi/icons';
+import { Check, Pencil, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
@@ -139,7 +139,7 @@ const ListView = () => {
               )}
               <Button
                 startIcon={<Check />}
-                onClick={() => submitData()}
+                onClick={async () => await submitData()}
                 type="submit"
                 disabled={isEqual(modifiedData, initialData)}
               >
@@ -168,14 +168,7 @@ const ListView = () => {
           id: getTrad('listView.headerLayout.description'),
           defaultMessage: 'Build the data architecture of your content',
         })}
-        navigationAction={
-          <Link startIcon={<ArrowLeft />} to="/plugins/content-type-builder/">
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
+        navigationAction={<BackButton />}
       />
       <ContentLayout>
         <Flex direction="column" alignItems="stretch" gap={4}>

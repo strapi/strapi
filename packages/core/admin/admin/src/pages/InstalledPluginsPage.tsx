@@ -4,7 +4,6 @@ import {
   ContentLayout,
   HeaderLayout,
   Layout,
-  Main,
   Table,
   Tbody,
   Td,
@@ -14,26 +13,20 @@ import {
   Typography,
   useNotifyAT,
 } from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  LoadingIndicatorPage,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-} from '@strapi/helper-plugin';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { Page } from '../components/PageHelpers';
+import { useNotification } from '../features/Notifications';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../selectors';
 import { useGetPluginsQuery } from '../services/admin';
 
 const InstalledPluginsPage = () => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  useFocusWhenNavigate();
 
   const { isLoading, data, error } = useGetPluginsQuery();
 
@@ -57,25 +50,19 @@ const InstalledPluginsPage = () => {
 
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
   }, [data, error, formatAPIError, formatMessage, notifyStatus, toggleNotification]);
 
   if (isLoading) {
-    return (
-      <Layout>
-        <Main aria-busy>
-          <LoadingIndicatorPage />
-        </Main>
-      </Layout>
-    );
+    return <Page.Loading />;
   }
 
   return (
     <Layout>
-      <Main>
+      <Page.Main>
         <HeaderLayout
           title={formatMessage({
             id: 'global.plugins',
@@ -134,7 +121,7 @@ const InstalledPluginsPage = () => {
             </Tbody>
           </Table>
         </ContentLayout>
-      </Main>
+      </Page.Main>
     </Layout>
   );
 };
@@ -144,15 +131,15 @@ const ProtectedInstalledPluginsPage = () => {
   const permissions = useSelector(selectAdminPermissions);
 
   return (
-    <CheckPagePermissions permissions={permissions.marketplace?.main}>
-      <Helmet
-        title={formatMessage({
+    <Page.Protect permissions={permissions.marketplace?.main}>
+      <Page.Title>
+        {formatMessage({
           id: 'global.plugins',
           defaultMessage: 'Plugins',
         })}
-      />
+      </Page.Title>
       <InstalledPluginsPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

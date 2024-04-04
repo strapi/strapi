@@ -4,7 +4,7 @@ import type { StrapiCommand } from '../types';
 import { build as nodeBuild, BuildOptions } from '../../node/build';
 import { handleUnexpectedError } from '../../node/core/errors';
 
-interface BuildCLIOptions extends BuildOptions {}
+type BuildCLIOptions = BuildOptions;
 
 const action = async (options: BuildCLIOptions) => {
   try {
@@ -38,7 +38,6 @@ const command: StrapiCommand = ({ ctx }) => {
   return createCommand('build')
     .option('--bundler [bundler]', 'Bundler to use (webpack or vite)', 'vite')
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
-    .option('--ignore-prompts', 'Ignore all prompts', false)
     .option('--minify', 'Minify the output', true)
     .option('--silent', "Don't log anything", false)
     .option('--sourcemap', 'Produce sourcemaps', false)

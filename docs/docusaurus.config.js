@@ -1,8 +1,9 @@
 // @ts-check
 // Note: type annotations allow type checking and IDEs autocompletion
 const path = require('path');
-const lightCodeTheme = require('prism-react-renderer/themes/github');
-const darkCodeTheme = require('prism-react-renderer/themes/dracula');
+const {
+  themes: { github: lightCodeTheme, dracula: darkCodeTheme },
+} = require('prism-react-renderer');
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -37,6 +38,17 @@ const config = {
         };
       },
     }),
+    [
+      'docusaurus-plugin-typedoc',
+      // Plugin / TypeDoc options
+      {
+        entryPoints: ['../packages/core/strapi/src/admin.ts'],
+        tsconfig: '../packages/core/strapi/tsconfig.build.json',
+        entryDocument: null,
+        out: 'exports',
+        watch: process.env.TYPEDOC_WATCH,
+      },
+    ],
   ],
   presets: [
     [
@@ -83,6 +95,12 @@ const config = {
             position: 'left',
             sidebarId: 'api',
             label: 'API Reference',
+          },
+          {
+            type: 'docSidebar',
+            position: 'left',
+            sidebarId: 'exports',
+            label: 'Exports',
           },
           {
             type: 'docSidebar',

@@ -11,3 +11,6 @@ export { default as getFolderParents } from './getFolderParents';
 export { default as getFolderURL } from './getFolderURL';
 export { default as getTrad } from './getTrad';
 export { default as toSingularTypes } from './toSingularTypes';
+export { default as getFileExtension } from './getFileExtension';
+export { default as prefixFileUrlWithBackendUrl } from './prefixFileUrlWithBackendUrl';
+export { default as getAPIInnerErrors } from './getAPIInnerErrors';

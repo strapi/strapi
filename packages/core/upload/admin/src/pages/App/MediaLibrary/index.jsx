@@ -1,6 +1,13 @@
 import React, { useRef, useState } from 'react';
 
 import {
+  Page,
+  SearchInput,
+  Pagination,
+  useTracking,
+  useQueryParams,
+} from '@strapi/admin/strapi-admin';
+import {
   ActionLayout,
   BaseCheckbox,
   Box,
@@ -10,21 +17,9 @@ import {
   GridItem,
   IconButton,
   Layout,
-  Main,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import {
-  AnErrorOccurred,
-  CheckPermissions,
-  LoadingIndicatorPage,
-  SearchURLQuery,
-  useFocusWhenNavigate,
-  usePersistentState,
-  useQueryParams,
-  useSelectionState,
-  useTracking,
-} from '@strapi/helper-plugin';
 import { Cog, Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -41,15 +36,16 @@ import {
   FolderCardCheckbox,
 } from '../../../components/FolderCard';
 import { FolderGridList } from '../../../components/FolderGridList';
-import { PaginationFooter } from '../../../components/PaginationFooter';
 import SortPicker from '../../../components/SortPicker';
 import { TableList } from '../../../components/TableList';
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
-import { localStorageKeys, PERMISSIONS, viewOptions } from '../../../constants';
+import { localStorageKeys, viewOptions } from '../../../constants';
 import { useAssets } from '../../../hooks/useAssets';
 import { useFolder } from '../../../hooks/useFolder';
 import { useFolders } from '../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { usePersistentState } from '../../../hooks/usePersistentState';
+import { useSelectionState } from '../../../hooks/useSelectionState';
 import { containsAssetFilter, getBreadcrumbDataML, getFolderURL, getTrad } from '../../../utils';
 
 import { BulkActions } from './components/BulkActions';
@@ -83,6 +79,7 @@ export const MediaLibrary = () => {
     canUpdate,
     canCopyLink,
     canDownload,
+    canConfigureView,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
   const currentFolderToEditRef = useRef();
@@ -211,11 +208,17 @@ export const MediaLibrary = () => {
     handleAssetDeleted(selected.length);
   };
 
-  useFocusWhenNavigate();
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
+  if (assetsError || foldersError) {
+    return <Page.Error />;
+  }
 
   return (
     <Layout>
-      <Main aria-busy={isLoading}>
+      <Page.Main>
         <Header
           breadcrumbs={
             !isCurrentFolderLoading && getBreadcrumbDataML(currentFolder, { pathname, query })
@@ -258,7 +261,7 @@ export const MediaLibrary = () => {
           }
           endActions={
             <>
-              <CheckPermissions permissions={PERMISSIONS.configureView}>
+              {canConfigureView ? (
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
                     forwardedAs={ReactRouterLink}
@@ -273,7 +276,7 @@ export const MediaLibrary = () => {
                     })}
                   />
                 </ActionContainer>
-              </CheckPermissions>
+              ) : null}
               <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
                   icon={isGridView ? <List /> : <Grid />}
@@ -291,7 +294,7 @@ export const MediaLibrary = () => {
                   onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
                 />
               </ActionContainer>
-              <SearchURLQuery
+              <SearchInput
                 label={formatMessage({
                   id: getTrad('search.label'),
                   defaultMessage: 'Search for an asset',
@@ -311,10 +314,6 @@ export const MediaLibrary = () => {
               onSuccess={handleBulkActionSuccess}
             />
           )}
-
-          {isLoading && <LoadingIndicatorPage />}
-
-          {(assetsError || foldersError) && <AnErrorOccurred />}
 
           {folderCount === 0 && assetCount === 0 && (
             <EmptyOrNoPermissions
@@ -475,10 +474,12 @@ export const MediaLibrary = () => {
               )}
             </>
           )}
-
-          {assetsData?.pagination && <PaginationFooter pagination={assetsData.pagination} />}
+          <Pagination.Root {...assetsData.pagination}>
+            <Pagination.PageSize />
+            <Pagination.Links />
+          </Pagination.Root>
         </ContentLayout>
-      </Main>
+      </Page.Main>
 
       {showUploadAssetDialog && (
         <UploadAssetDialog

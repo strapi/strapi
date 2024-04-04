@@ -35,15 +35,15 @@ const parseFilesData = async (files: UpdateProjectSettings.Request['files']) => 
         return;
       }
 
-      const getStream = () => fs.createReadStream(file.path);
+      const getStream = () => fs.createReadStream(file.filepath);
 
       // Add formated data for the upload provider
       formatedFilesData[inputName] = await strapi
         .plugin('upload')
         .service('upload')
         .formatFileInfo({
-          filename: file.name,
-          type: file.type,
+          filename: file.originalFilename,
+          type: file.mimetype,
           size: file.size,
         });
 
@@ -56,10 +56,10 @@ const parseFilesData = async (files: UpdateProjectSettings.Request['files']) => 
       // Add file path, and stream
       Object.assign(formatedFilesData[inputName]!, {
         stream: getStream(),
-        tmpPath: file.path,
+        tmpPath: file.filepath,
         // TODO
         // @ts-expect-error define the correct return type
-        provider: strapi.config.get('plugin.upload').provider,
+        provider: strapi.config.get('plugin::upload').provider,
       });
     })
   );
@@ -134,7 +134,7 @@ const deleteOldFiles = async ({ previousSettings, newSettings }: any) => {
       // Skip if the file was not uploaded with the current provider
       // TODO
       // @ts-expect-error define the correct return type
-      if (strapi.config.get('plugin.upload').provider !== previousSettings[inputName].provider) {
+      if (strapi.config.get('plugin::upload').provider !== previousSettings[inputName].provider) {
         return;
       }
 

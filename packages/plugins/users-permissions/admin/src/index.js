@@ -1,9 +1,8 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
-
 import pluginPkg from '../../package.json';
 
 import { PERMISSIONS } from './constants';
 import getTrad from './utils/getTrad';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 const name = pluginPkg.strapi.name;
 
@@ -46,7 +45,10 @@ export default {
           },
           id: 'email-templates',
           to: `users-permissions/email-templates`,
-          Component: () => import('./pages/EmailTemplates'),
+          Component: () =>
+            import('./pages/EmailTemplates').then((mod) => ({
+              default: mod.ProtectedEmailTemplatesPage,
+            })),
           permissions: PERMISSIONS.readEmailTemplates,
         },
         {
@@ -56,7 +58,10 @@ export default {
           },
           id: 'advanced-settings',
           to: `users-permissions/advanced-settings`,
-          Component: () => import('./pages/AdvancedSettings'),
+          Component: () =>
+            import('./pages/AdvancedSettings').then((mod) => ({
+              default: mod.ProtectedAdvancedSettingsPage,
+            })),
           permissions: PERMISSIONS.readAdvancedSettings,
         },
       ]

@@ -25,6 +25,23 @@ describe('Release Validation service', () => {
         'No content type found for uid api::plop.plop'
       );
     });
+
+    it('throws an error if the content type does not have draftAndPublish enabled', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        contentType: jest.fn().mockReturnValue({
+          options: {},
+        }),
+      };
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      expect(() =>
+        releaseValidationService.validateEntryContentType('api::category.category')
+      ).toThrow(
+        'Content type with uid api::category.category does not have draftAndPublish enabled'
+      );
+    });
   });
 
   describe('validateUniqueEntry', () => {
@@ -36,8 +53,12 @@ describe('Release Validation service', () => {
             draftAndPublish: true,
           },
         }),
-        entityService: {
-          findOne: jest.fn().mockReturnValue(null),
+        db: {
+          query() {
+            return {
+              findOne: jest.fn().mockReturnValue(null),
+            };
+          },
         },
       };
       // @ts-expect-error Ignore missing properties
@@ -64,17 +85,21 @@ describe('Release Validation service', () => {
             draftAndPublish: true,
           },
         }),
-        entityService: {
-          findOne: jest.fn().mockReturnValue({
-            actions: [
-              {
-                contentType: 'api::category.category',
-                entry: {
-                  id: 1,
-                },
-              },
-            ],
-          }),
+        db: {
+          query() {
+            return {
+              findOne: jest.fn().mockReturnValue({
+                actions: [
+                  {
+                    contentType: 'api::category.category',
+                    entry: {
+                      id: 1,
+                    },
+                  },
+                ],
+              }),
+            };
+          },
         },
       };
       // @ts-expect-error Ignore missing properties
@@ -187,12 +212,16 @@ describe('Release Validation service', () => {
     it('should throw an error if a release with the same name already exists', async () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findMany: jest.fn().mockReturnValue([
-            {
-              name: 'release1',
-            },
-          ]),
+        db: {
+          query() {
+            return {
+              findMany: jest.fn().mockReturnValue([
+                {
+                  name: 'release1',
+                },
+              ]),
+            };
+          },
         },
       };
 
@@ -207,8 +236,10 @@ describe('Release Validation service', () => {
     it('should pass if a release with the same name does NOT already exist', async () => {
       const strapiMock = {
         ...baseStrapiMock,
-        entityService: {
-          findMany: jest.fn().mockReturnValue([]),
+        db: {
+          query() {
+            return { findMany: jest.fn().mockReturnValue([]) };
+          },
         },
       };
 

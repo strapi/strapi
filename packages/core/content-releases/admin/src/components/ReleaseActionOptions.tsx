@@ -58,6 +58,10 @@ const FieldWrapper = styled(Field)<FieldWrapperProps>`
     color: ${({ theme }) => theme.colors.neutral700};
     background-color: ${({ theme }) => theme.colors.neutral100};
     border-color: ${({ theme }) => theme.colors.neutral200};
+
+    & > label {
+      cursor: pointer;
+    }
   }
 
   &[data-disabled='true'] {

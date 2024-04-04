@@ -8,6 +8,7 @@ import {
   type RegistrationInfo,
   ForgotPassword,
 } from '../../../shared/contracts/authentication';
+import { Check } from '../../../shared/contracts/permissions';
 import { GetProviders, IsSSOLocked } from '../../../shared/contracts/providers';
 import { type GetOwnPermissions, type GetMe, type UpdateMe } from '../../../shared/contracts/users';
 
@@ -47,6 +48,16 @@ const authService = adminApi.injectEndpoints({
         return res.data;
       },
       invalidatesTags: ['Me'],
+    }),
+    /**
+     * Permissions
+     */
+    checkPermissions: builder.query<Check.Response, Check.Request['body']>({
+      query: (permissions) => ({
+        method: 'POST',
+        url: '/admin/permissions/check',
+        data: permissions,
+      }),
     }),
     /**
      * Auth methods
@@ -176,6 +187,8 @@ const authService = adminApi.injectEndpoints({
 });
 
 const {
+  useCheckPermissionsQuery,
+  useLazyCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
   useRenewTokenMutation,
@@ -194,6 +207,8 @@ const {
 } = authService;
 
 export {
+  useCheckPermissionsQuery,
+  useLazyCheckPermissionsQuery,
   useGetMeQuery,
   useLoginMutation,
   useRenewTokenMutation,

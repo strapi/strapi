@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Button,
   FieldLabel,
@@ -13,8 +14,7 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { Form, getAPIInnerErrors, useNotification, useTracking } from '@strapi/helper-plugin';
-import { Formik } from 'formik';
+import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -25,7 +25,7 @@ import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { findRecursiveFolderByValue, getTrad } from '../../utils';
+import { findRecursiveFolderByValue, getTrad, getAPIInnerErrors } from '../../utils';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 
@@ -52,7 +52,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
   const { trackUsage } = useTracking();
   const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
   const { remove } = useBulkRemove();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const isLoading = isLoadingPermissions || folderStructureIsLoading;
   const isEditing = !!folder;
   const formDisabled = (folder && !canUpdate) || (!folder && !canCreate);

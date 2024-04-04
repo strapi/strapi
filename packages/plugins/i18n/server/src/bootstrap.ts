@@ -1,27 +1,7 @@
-import type { Strapi } from '@strapi/types';
-
+import type { Schema, Core } from '@strapi/types';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
-  const i18nModelUIDs = Object.values(strapi.contentTypes)
-    .filter((contentType) => getService('content-types').isLocalizedContentType(contentType))
-    .map((contentType) => contentType.uid);
-
-  if (i18nModelUIDs.length > 0) {
-    // TODO V5 : to remove ?
-    // Should this code exist? It's putting business logic on the query engine
-    // whereas it should maybe stay on the entity service layer ?
-    strapi.db.lifecycles.subscribe({
-      models: i18nModelUIDs,
-      async beforeCreate(event) {
-        await getService('localizations').assignDefaultLocaleToEntries(event.params.data);
-      },
-      async beforeCreateMany(event) {
-        await getService('localizations').assignDefaultLocaleToEntries(event.params.data);
-      },
-    });
-  }
-
   strapi.db.lifecycles.subscribe({
     models: ['plugin::i18n.locale'],
 
@@ -33,14 +13,58 @@ const registerModelsHooks = () => {
       await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
     },
   });
+
+  strapi.documents.use(async (context, next) => {
+    // @ts-expect-error ContentType is not typed correctly on the context
+    const schema: Schema.ContentType = context.contentType;
+
+    if (!['create', 'update', 'discardDraft', 'publish'].includes(context.action)) {
+      return next();
+    }
+
+    if (!getService('content-types').isLocalizedContentType(schema)) {
+      return next();
+    }
+
+    // Build a populate array for all non localized fields within the schema
+    const { getNestedPopulateOfNonLocalizedAttributes } = getService('content-types');
+
+    const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
+
+    // Get the result of the document service action
+    const result = (await next()) as any;
+
+    // We may not have received a result with everything populated that we need
+    // Use the id and populate built from non localized fields to get the full
+    // result
+    let resultID;
+    if (Array.isArray(result?.versions)) {
+      resultID = result.versions[0].id;
+    } else if (result?.id) {
+      resultID = result.id;
+    } else {
+      return result;
+    }
+
+    if (attributesToPopulate.length > 0) {
+      const populatedResult = await strapi.db
+        .query(schema.uid)
+        .findOne({ where: { id: resultID }, populate: attributesToPopulate });
+
+      await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+    }
+
+    return result;
+  });
 };
 
-export default async ({ strapi }: { strapi: Strapi }) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const { sendDidInitializeEvent } = getService('metrics');
   const { decorator } = getService('entity-service-decorator');
   const { initDefaultLocale } = getService('locales');
   const { sectionsBuilder, actions, engine } = getService('permissions');
 
+  // TODO: v5 handled in the document service or via document service middlewares
   // Entity Service
   (strapi.entityService as any).decorate(decorator);
 

@@ -25,7 +25,7 @@ export const createDispatcher = (
   ws: WebSocket,
   retryMessageOptions = {
     retryMessageMaxRetries: 5,
-    retryMessageTimeout: 15000,
+    retryMessageTimeout: 30000,
   }
 ) => {
   const state: IDispatcherState = {};
@@ -117,7 +117,7 @@ export const createDispatcher = (
   const dispatchTransferStep = async <
     T,
     A extends Client.TransferPushMessage['action'] = Client.TransferPushMessage['action'],
-    S extends Client.TransferPushStep = Client.TransferPushStep
+    S extends Client.TransferPushStep = Client.TransferPushStep,
   >(
     payload: {
       step: S;

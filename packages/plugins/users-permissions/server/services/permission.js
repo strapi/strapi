@@ -11,11 +11,7 @@ module.exports = ({ strapi }) => ({
    * @return {object[]}
    */
   async findRolePermissions(roleID) {
-    return strapi.entityService.load(
-      'plugin::users-permissions.role',
-      { id: roleID },
-      'permissions'
-    );
+    return strapi.db.query('plugin::users-permissions.role').load({ id: roleID }, 'permissions');
   },
 
   /**
@@ -24,8 +20,8 @@ module.exports = ({ strapi }) => ({
    * @return {object[]}
    */
   async findPublicPermissions() {
-    return strapi.entityService.findMany('plugin::users-permissions.permission', {
-      filters: PUBLIC_ROLE_FILTER,
+    return strapi.db.query('plugin::users-permissions.permission').findMany({
+      where: PUBLIC_ROLE_FILTER,
     });
   },
 

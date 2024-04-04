@@ -1,20 +1,20 @@
 import { toLower, castArray, trim, prop, isNil } from 'lodash/fp';
-import type { Strapi, Common } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import Router from '@koa/router';
 
 import compose from 'koa-compose';
 import { resolveRouteMiddlewares } from './middleware';
-import { resolvePolicies } from './policy';
+import { createPolicicesMiddleware } from './policy';
 
-const getMethod = (route: Common.Route) => {
-  return trim(toLower(route.method)) as Lowercase<Common.Route['method']>;
+const getMethod = (route: Core.Route) => {
+  return trim(toLower(route.method)) as Lowercase<Core.Route['method']>;
 };
 
-const getPath = (route: Common.Route) => trim(route.path);
+const getPath = (route: Core.Route) => trim(route.path);
 
 const createRouteInfoMiddleware =
-  (routeInfo: Common.Route): Common.MiddlewareHandler =>
+  (routeInfo: Core.Route): Core.MiddlewareHandler =>
   (ctx, next) => {
     const route = {
       ...routeInfo,
@@ -28,7 +28,7 @@ const createRouteInfoMiddleware =
 const getAuthConfig = prop('config.auth');
 
 const createAuthorizeMiddleware =
-  (strapi: Strapi): Common.MiddlewareHandler =>
+  (strapi: Core.Strapi): Core.MiddlewareHandler =>
   async (ctx, next) => {
     const { auth, route } = ctx.state;
 
@@ -56,12 +56,12 @@ const createAuthorizeMiddleware =
   };
 
 const createAuthenticateMiddleware =
-  (strapi: Strapi): Common.MiddlewareHandler =>
+  (strapi: Core.Strapi): Core.MiddlewareHandler =>
   async (ctx, next) => {
     return strapi.get('auth').authenticate(ctx, next);
   };
 
-const returnBodyMiddleware: Common.MiddlewareHandler = async (ctx, next) => {
+const returnBodyMiddleware: Core.MiddlewareHandler = async (ctx, next) => {
   const values = await next();
 
   if (isNil(ctx.body) && !isNil(values)) {
@@ -69,17 +69,16 @@ const returnBodyMiddleware: Common.MiddlewareHandler = async (ctx, next) => {
   }
 };
 
-export default (strapi: Strapi) => {
+export default (strapi: Core.Strapi) => {
   const authenticate = createAuthenticateMiddleware(strapi);
   const authorize = createAuthorizeMiddleware(strapi);
 
-  return (route: Common.Route, { router }: { router: Router }) => {
+  return (route: Core.Route, { router }: { router: Router }) => {
     try {
       const method = getMethod(route);
       const path = getPath(route);
 
       const middlewares = resolveRouteMiddlewares(route, strapi);
-      const policies = resolvePolicies(route);
 
       const action = getAction(route, strapi);
 
@@ -87,7 +86,7 @@ export default (strapi: Strapi) => {
         createRouteInfoMiddleware(route),
         authenticate,
         authorize,
-        ...policies,
+        createPolicicesMiddleware(route, strapi),
         ...middlewares,
         returnBodyMiddleware,
         ...castArray(action),
@@ -104,8 +103,12 @@ export default (strapi: Strapi) => {
   };
 };
 
-const getController = (name: string, { pluginName, apiName }: Common.RouteInfo, strapi: Strapi) => {
-  let ctrl: Common.Controller | undefined;
+const getController = (
+  name: string,
+  { pluginName, apiName }: Core.RouteInfo,
+  strapi: Core.Strapi
+) => {
+  let ctrl: Core.Controller | undefined;
 
   if (pluginName) {
     if (pluginName === 'admin') {
@@ -118,7 +121,7 @@ const getController = (name: string, { pluginName, apiName }: Common.RouteInfo, 
   }
 
   if (!ctrl) {
-    return strapi.controller(name as Common.UID.Controller);
+    return strapi.controller(name as UID.Controller);
   }
 
   return ctrl;
@@ -131,7 +134,7 @@ const extractHandlerParts = (name: string) => {
   return { controllerName, actionName };
 };
 
-const getAction = (route: Common.Route, strapi: Strapi) => {
+const getAction = (route: Core.Route, strapi: Core.Strapi) => {
   const { handler, info } = route;
   const { pluginName, apiName, type } = info ?? {};
 

@@ -1,14 +1,14 @@
 import { assign } from 'lodash/fp';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 
 const getSSOProvidersList = async () => {
-  const { providerRegistry } = strapi.admin.services.passport;
+  const { providerRegistry } = strapi.service('admin::passport');
 
   return providerRegistry.getAll().map(({ uid }: { uid: string }) => uid);
 };
 
-const sendUpdateProjectInformation = async (strapi: Strapi) => {
+const sendUpdateProjectInformation = async (strapi: Core.Strapi) => {
   let groupProperties = {};
 
   const numberOfActiveAdminUsers = await getService('user').count({ isActive: true });
@@ -24,15 +24,15 @@ const sendUpdateProjectInformation = async (strapi: Strapi) => {
   }
 
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
-    const numberOfContentReleases = await strapi.entityService?.count(
-      'plugin::content-releases.release'
-    );
-    const numberOfPublishedContentReleases = await strapi.entityService?.count(
-      'plugin::content-releases.release',
-      {
-        filters: { $not: { releasedAt: null } },
-      }
-    );
+    const numberOfContentReleases = await strapi
+      .db!.query('plugin::content-releases.release')
+      .count();
+
+    const numberOfPublishedContentReleases = await strapi
+      .db!.query('plugin::content-releases.release')
+      .count({
+        where: { $not: { releasedAt: null } },
+      });
 
     groupProperties = assign(groupProperties, {
       numberOfContentReleases,
@@ -47,7 +47,7 @@ const sendUpdateProjectInformation = async (strapi: Strapi) => {
   });
 };
 
-const startCron = (strapi: Strapi) => {
+const startCron = (strapi: Core.Strapi) => {
   strapi.cron.add({
     '0 0 0 * * *': () => sendUpdateProjectInformation(strapi),
   });

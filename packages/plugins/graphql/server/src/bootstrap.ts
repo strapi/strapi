@@ -6,12 +6,10 @@ import {
 } from '@apollo/server/plugin/landingPage/default';
 import { koaMiddleware } from '@as-integrations/koa';
 import depthLimit from 'graphql-depth-limit';
-// eslint-disable-next-line import/extensions
-import graphqlUploadKoa from 'graphql-upload/graphqlUploadKoa.js';
 import bodyParser from 'koa-bodyparser';
 import cors from '@koa/cors';
 
-import type { Strapi, Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import type { BaseContext, DefaultContextExtends, DefaultStateExtends } from 'koa';
 
 import { formatGraphqlError } from './format-graphql-error';
@@ -22,24 +20,7 @@ const merge = mergeWith((a, b) => {
   }
 });
 
-/**
- * Register the upload middleware powered by graphql-upload in Strapi
- * @param {object} strapi
- * @param {string} path
- */
-const useUploadMiddleware = (strapi: Strapi, path: string): void => {
-  const uploadMiddleware = graphqlUploadKoa();
-
-  strapi.server.app.use((ctx, next) => {
-    if (ctx.path === path) {
-      return uploadMiddleware(ctx, next);
-    }
-
-    return next();
-  });
-};
-
-export async function bootstrap({ strapi }: { strapi: Strapi }) {
+export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   // Generate the GraphQL schema for the content API
   const schema = strapi.plugin('graphql').service('content-api').buildSchema();
 
@@ -100,9 +81,6 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
   // Create a new Apollo server
   const server = new ApolloServer(serverConfig);
 
-  // Register the upload middleware
-  useUploadMiddleware(strapi, path);
-
   try {
     // server.start() must be called before using server.applyMiddleware()
     await server.start();
@@ -115,7 +93,7 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
   }
 
   // Create the route handlers for Strapi
-  const handler: Common.MiddlewareHandler[] = [];
+  const handler: Core.MiddlewareHandler[] = [];
 
   // add cors middleware
   if (cors) {
@@ -139,13 +117,6 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
         type: 'content-api',
       },
     };
-
-    // allow graphql playground to load without authentication
-    // WARNING: this means graphql should not accept GET requests generally
-    // TODO: find a better way and remove this, it is causing issues such as https://github.com/strapi/strapi/issues/19073
-    if (ctx.request.method === 'GET') {
-      return next();
-    }
 
     return strapi.auth.authenticate(ctx, next);
   });

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useCallbackRef } from '@strapi/helper-plugin';
+import { useCallbackRef } from '@strapi/design-system';
 
 function isEnterprise() {
   return window.strapi.isEE;
@@ -21,7 +21,7 @@ export const useEnterprise = <
   TCEData,
   TEEData = TCEData,
   TCombinedValue = TEEData,
-  TDefaultValue = TCEData
+  TDefaultValue = TCEData,
 >(
   ceData: TCEData,
   eeCallback: () => Promise<TEEData>,

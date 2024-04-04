@@ -1,9 +1,9 @@
 import path from 'path';
-import type { UID } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 import _ from 'lodash';
 import pluralize from 'pluralize';
 
-import { nameToSlug, nameToCollectionName, errors } from '@strapi/utils';
+import { strings, errors } from '@strapi/utils';
 import { isConfigurable } from '../../utils/attributes';
 import createSchemaHandler from './schema-handler';
 
@@ -12,7 +12,7 @@ const { ApplicationError } = errors;
 export default function createComponentBuilder() {
   return {
     createComponentUID({ category, displayName }: any) {
-      return `${nameToSlug(category)}.${nameToSlug(displayName)}`;
+      return `${strings.nameToSlug(category)}.${strings.nameToSlug(displayName)}`;
     },
 
     createNewComponentUIDMap(components: object[]) {
@@ -33,15 +33,15 @@ export default function createComponentBuilder() {
       }
 
       const handler = createSchemaHandler({
-        dir: path.join(strapi.dirs.app.components, nameToSlug(infos.category)),
-        filename: `${nameToSlug(infos.displayName)}.json`,
+        dir: path.join(strapi.dirs.app.components, strings.nameToSlug(infos.category)),
+        filename: `${strings.nameToSlug(infos.displayName)}.json`,
       });
 
       // TODO: create a utility for this
       // Duplicate in admin/src/components/FormModal/forms/utils/createCollectionName.ts
-      const collectionName = `components_${nameToCollectionName(
+      const collectionName = `components_${strings.nameToCollectionName(
         infos.category
-      )}_${nameToCollectionName(pluralize(infos.displayName))}`;
+      )}_${strings.nameToCollectionName(pluralize(infos.displayName))}`;
 
       this.components.forEach((compo: any) => {
         if (compo.schema.collectionName === collectionName) {
@@ -84,7 +84,7 @@ export default function createComponentBuilder() {
 
       const [, nameUID] = uid.split('.');
 
-      const newCategory = nameToSlug(infos.category);
+      const newCategory = strings.nameToSlug(infos.category);
       const newUID = `${newCategory}.${nameUID}`;
 
       if (newUID !== uid && this.components.has(newUID)) {
@@ -121,7 +121,7 @@ export default function createComponentBuilder() {
       return component;
     },
 
-    deleteComponent(this: any, uid: UID.Component) {
+    deleteComponent(this: any, uid: Internal.UID.Component) {
       if (!this.components.has(uid)) {
         throw new errors.ApplicationError('component.notFound');
       }

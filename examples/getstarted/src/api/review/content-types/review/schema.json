@@ -8,7 +8,8 @@
     "description": ""
   },
   "options": {
-    "comment": ""
+    "comment": "",
+    "draftAndPublish": false
   },
   "attributes": {
     "comment": {

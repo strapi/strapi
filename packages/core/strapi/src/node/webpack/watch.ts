@@ -4,7 +4,7 @@ import { promisify } from 'node:util';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import { webpack } from 'webpack';
-import { Common } from '@strapi/types';
+import { Core } from '@strapi/types';
 import type { BuildContext } from '../create-build-context';
 import { mergeConfigWithUserConfig, resolveDevelopmentConfig } from './config';
 
@@ -23,6 +23,7 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
 
     const devMiddleware = webpackDevMiddleware(compiler);
 
+    // @ts-expect-error incompatible types between hotMiddleware and webpack
     const hotMiddleware = webpackHotMiddleware(compiler, {
       log: false,
       path: '/__webpack_hmr',
@@ -67,7 +68,7 @@ const watch = async (ctx: BuildContext): Promise<WebpackWatcher> => {
       return Promise.all([ready, init]);
     });
 
-    const serveAdmin: Common.MiddlewareHandler = async (ctx, next) => {
+    const serveAdmin: Core.MiddlewareHandler = async (ctx, next) => {
       await next();
 
       if (devMiddleware.context.outputFileSystem.createReadStream) {

@@ -1,4 +1,3 @@
-import { pxToRem } from '@strapi/helper-plugin';
 import styled from 'styled-components';
 
 interface TrProps {
@@ -18,12 +17,12 @@ export const Tr = styled.tr<TrProps>`
     }
 
     > td:first-of-type {
-      padding: 0 0 0 ${pxToRem(20)};
+      padding: 0 0 0 ${20 / 16}rem;
       position: relative;
 
       &::before {
         content: '';
-        width: ${pxToRem(4)};
+        width: ${4 / 16}rem;
         height: calc(100% - 40px);
         position: absolute;
         top: -7px;

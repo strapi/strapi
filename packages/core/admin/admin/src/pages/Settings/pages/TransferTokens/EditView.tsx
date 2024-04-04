@@ -1,43 +1,25 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Main,
-  Typography,
-} from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  Form,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useGuidedTour,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-  useTracking,
-  translatedErrors,
-} from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
-import { Formik, FormikErrors, FormikHelpers } from 'formik';
+import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
+import { useTracking } from '../../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../hooks/useRBAC';
 import {
   useCreateTransferTokenMutation,
   useGetTransferTokenQuery,
   useUpdateTransferTokenMutation,
 } from '../../../../services/transferTokens';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 import { TRANSFER_TOKEN_TYPE } from '../../components/Tokens/constants';
 import { FormHead } from '../../components/Tokens/FormHead';
 import { LifeSpanInput } from '../../components/Tokens/LifeSpanInput';
@@ -52,10 +34,10 @@ import type {
 } from '../../../../../../shared/contracts/transfer';
 
 const schema = yup.object().shape({
-  name: yup.string().max(100).required(translatedErrors.required),
+  name: yup.string().max(100).required(translatedErrors.required.id),
   description: yup.string().nullable(),
-  lifespan: yup.number().integer().min(0).nullable().defined(translatedErrors.required),
-  permissions: yup.string().required(translatedErrors.required),
+  lifespan: yup.number().integer().min(0).nullable().defined(translatedErrors.required.id),
+  permissions: yup.string().required(translatedErrors.required.id),
 });
 
 /* -------------------------------------------------------------------------------------------------
@@ -63,10 +45,8 @@ const schema = yup.object().shape({
  * -----------------------------------------------------------------------------------------------*/
 
 const EditView = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const { lockApp, unlockApp } = useOverlayBlocker();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
   const { state: locationState } = useLocation();
   const [transferToken, setTransferToken] = React.useState<
@@ -79,7 +59,7 @@ const EditView = () => {
       : null
   );
   const { trackUsage } = useTracking();
-  const { setCurrentStep } = useGuidedTour();
+  const setCurrentStep = useGuidedTour('EditView', (state) => state.setCurrentStep);
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.settings?.['transfer-tokens']
   );
@@ -109,7 +89,7 @@ const EditView = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -128,8 +108,6 @@ const EditView = () => {
     trackUsage(isCreating ? 'willCreateToken' : 'willEditToken', {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
-    // @ts-expect-error context assertation
-    lockApp();
 
     const permissions = body.permissions.split('-');
 
@@ -150,6 +128,11 @@ const EditView = () => {
         if (isCreating) {
           const res = await createToken({
             ...body,
+            // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
+            lifespan:
+              body?.lifespan && body.lifespan !== '0'
+                ? parseInt(body.lifespan.toString(), 10)
+                : null,
             permissions,
           });
 
@@ -158,7 +141,7 @@ const EditView = () => {
               formik.setErrors(formatValidationErrors(res.error));
             } else {
               toggleNotification({
-                type: 'warning',
+                type: 'danger',
                 message: formatAPIError(res.error),
               });
             }
@@ -181,7 +164,7 @@ const EditView = () => {
             tokenType: TRANSFER_TOKEN_TYPE,
           });
 
-          navigate(res.data.id.toString(), {
+          navigate(`../transfer-tokens/${res.data.id.toString()}`, {
             replace: true,
             state: { transferToken: res.data },
           });
@@ -199,7 +182,7 @@ const EditView = () => {
               formik.setErrors(formatValidationErrors(res.error));
             } else {
               toggleNotification({
-                type: 'warning',
+                type: 'danger',
                 message: formatAPIError(res.error),
               });
             }
@@ -224,15 +207,12 @@ const EditView = () => {
         }
       } catch (err) {
         toggleNotification({
-          type: 'warning',
-          message: {
+          type: 'danger',
+          message: formatMessage({
             id: 'notification.error',
             defaultMessage: 'Something went wrong',
-          },
+          }),
         });
-      } finally {
-        // @ts-expect-error context assertation
-        unlockApp();
       }
     }
   };
@@ -241,12 +221,19 @@ const EditView = () => {
   const isLoading = !isCreating && !transferToken;
 
   if (isLoading) {
-    return <LoadingView />;
+    return <Page.Loading />;
   }
 
   return (
-    <Main>
-      <SettingsPageTitle name="Transfer Tokens" />
+    <Page.Main>
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Transfer Tokens',
+          }
+        )}
+      </Page.Title>
       <Formik
         validationSchema={schema}
         validateOnChange={false}
@@ -254,7 +241,7 @@ const EditView = () => {
           {
             name: transferToken?.name || '',
             description: transferToken?.description || '',
-            lifespan: transferToken?.lifespan ?? null,
+            lifespan: transferToken?.lifespan || null,
             /**
              * We need to cast the permissions to satisfy the type for `permissions`
              * in the request body incase we don't have a transferToken and instead
@@ -270,7 +257,6 @@ const EditView = () => {
           return (
             <Form>
               <FormHead
-                backUrl="/settings/transfer-tokens"
                 title={{
                   id: 'Settings.transferTokens.createPage.title',
                   defaultMessage: 'TokenCreate Transfer Token',
@@ -303,7 +289,7 @@ const EditView = () => {
           );
         }}
       </Formik>
-    </Main>
+    </Page.Main>
   );
 };
 
@@ -317,9 +303,9 @@ const ProtectedEditView = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <EditView />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 
@@ -437,41 +423,6 @@ const FormTransferTokenContainer = ({
         </Grid>
       </Flex>
     </Box>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * LoadingView
- * -----------------------------------------------------------------------------------------------*/
-interface LoadingViewProps {
-  transferTokenName?: string;
-}
-
-export const LoadingView = ({ transferTokenName }: LoadingViewProps) => {
-  const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
-
-  return (
-    <Main aria-busy="true">
-      <SettingsPageTitle name="Transfer Tokens" />
-      <HeaderLayout
-        primaryAction={
-          <Button disabled startIcon={<Check />} type="button" size="L">
-            {formatMessage({ id: 'global.save', defaultMessage: 'Save' })}
-          </Button>
-        }
-        title={
-          transferTokenName ||
-          formatMessage({
-            id: 'Settings.transferTokens.createPage.title',
-            defaultMessage: 'Create Transfer Token',
-          })
-        }
-      />
-      <ContentLayout>
-        <LoadingIndicatorPage />
-      </ContentLayout>
-    </Main>
   );
 };
 

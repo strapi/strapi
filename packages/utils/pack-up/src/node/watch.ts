@@ -12,7 +12,7 @@ import { createBuildContext } from './createBuildContext';
 import { WatchTask, createWatchTasks } from './createTasks';
 import { TaskHandler, taskHandlers } from './tasks';
 
-interface WatchCLIOptions extends CommonCLIOptions {}
+type WatchCLIOptions = CommonCLIOptions;
 
 interface WatchOptionsWithoutConfig extends WatchCLIOptions {
   configFile?: true;

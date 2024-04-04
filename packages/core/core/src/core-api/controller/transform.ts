@@ -1,12 +1,10 @@
 import { isNil, isPlainObject } from 'lodash/fp';
-import { parseMultipartData } from '@strapi/utils';
-import type Koa from 'koa';
-import type { Common, Schema, UID } from '@strapi/types';
+import type { UID, Struct, Data } from '@strapi/types';
 
 type TransformedEntry = {
   id: string;
+  documentId?: Data.DocumentID | null;
   attributes: Record<string, unknown>;
-  meta?: Record<string, unknown>;
 };
 
 type TransformedComponent = {
@@ -16,6 +14,7 @@ type TransformedComponent = {
 
 type Entry = {
   id: string;
+  documentId: Data.DocumentID | null;
   [key: string]: Entry | Entry[] | string | number | null | boolean | Date;
 };
 
@@ -27,38 +26,42 @@ function isDZEntries(property: unknown): property is (Entry & { __component: UID
   return Array.isArray(property);
 }
 
-const parseBody = (ctx: Koa.Context) => {
-  if (ctx.is('multipart')) {
-    return parseMultipartData(ctx);
-  }
-
-  const { data } = ctx.request.body || {};
-
-  return { data };
-};
+interface TransformOptions {
+  contentType?: Struct.ContentTypeSchema | Struct.ComponentSchema;
+  /**
+   * @deprecated this option is deprecated and will be removed in the next major version
+   */
+  useJsonAPIFormat?: boolean;
+}
 
 const transformResponse = (
   resource: any,
   meta: unknown = {},
-  opts: { contentType?: Schema.ContentType | Schema.Component } = {}
+  opts: TransformOptions = {
+    useJsonAPIFormat: false,
+  }
 ) => {
   if (isNil(resource)) {
     return resource;
   }
 
+  if (!isPlainObject(resource) && !Array.isArray(resource)) {
+    throw new Error('Entry must be an object or an array of objects');
+  }
+
   return {
-    data: transformEntry(resource, opts?.contentType),
+    data: opts.useJsonAPIFormat ? transformEntry(resource, opts?.contentType) : resource,
     meta,
   };
 };
 
 function transformComponent<T extends Entry | Entry[] | null>(
   data: T,
-  component: Schema.Component
+  component: Struct.ComponentSchema
 ): T extends Entry[] ? TransformedComponent[] : T extends Entry ? TransformedComponent : null;
 function transformComponent(
   data: Entry | Entry[] | null,
-  component: Schema.Component
+  component: Struct.ComponentSchema
 ): TransformedComponent | TransformedComponent[] | null {
   if (Array.isArray(data)) {
     return data.map((datum) => transformComponent(datum, component));
@@ -76,11 +79,11 @@ function transformComponent(
 
 function transformEntry<T extends Entry | Entry[] | null>(
   entry: T,
-  type?: Schema.ContentType | Schema.Component
+  type?: Struct.Schema
 ): T extends Entry[] ? TransformedEntry[] : T extends Entry ? TransformedEntry : null;
 function transformEntry(
   entry: Entry | Entry[] | null,
-  type?: Schema.ContentType | Schema.Component
+  type?: Struct.Schema
 ): TransformedEntry | TransformedEntry[] | null {
   if (isNil(entry)) {
     return entry;
@@ -94,7 +97,7 @@ function transformEntry(
     throw new Error('Entry must be an object');
   }
 
-  const { id, ...properties } = entry;
+  const { id, documentId, ...properties } = entry;
 
   const attributeValues: Record<string, unknown> = {};
 
@@ -103,10 +106,7 @@ function transformEntry(
     const attribute = type && type.attributes[key];
 
     if (attribute && attribute.type === 'relation' && isEntry(property) && 'target' in attribute) {
-      const data = transformEntry(
-        property,
-        strapi.contentType(attribute.target as Common.UID.ContentType)
-      );
+      const data = transformEntry(property, strapi.contentType(attribute.target));
 
       attributeValues[key] = { data };
     } else if (attribute && attribute.type === 'component' && isEntry(property)) {
@@ -130,10 +130,9 @@ function transformEntry(
 
   return {
     id,
+    documentId,
     attributes: attributeValues,
-    // NOTE: not necessary for now
-    // meta: {},
   };
 }
 
-export { parseBody, transformResponse };
+export { transformResponse };

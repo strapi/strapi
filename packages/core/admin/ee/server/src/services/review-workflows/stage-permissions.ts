@@ -1,13 +1,13 @@
-import { LoadedStrapi as Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { prop } from 'lodash/fp';
-import { mapAsync, errors } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 import { getService } from '../../utils';
 import { STAGE_TRANSITION_UID } from '../../constants/workflows';
 
 const { ApplicationError } = errors;
 const validActions = [STAGE_TRANSITION_UID];
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const roleService = getService('role');
   const permissionService = getService('permission');
 
@@ -29,7 +29,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       return permissions;
     },
     async registerMany(permissions: any) {
-      return mapAsync(permissions, this.register);
+      return async.map(permissions, this.register);
     },
     async unregister(permissions: any) {
       const permissionIds = permissions.map(prop('id'));

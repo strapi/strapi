@@ -1,10 +1,10 @@
 import * as tsUtils from '@strapi/typescript-utils';
-import { joinBy } from '@strapi/utils';
+import { strings } from '@strapi/utils';
 import chokidar from 'chokidar';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import cluster from 'node:cluster';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 
 import type { CLIContext } from '../cli/types';
 import { checkRequiredDependencies } from './core/dependencies';
@@ -16,10 +16,6 @@ import type { ViteWatcher } from './vite/watch';
 import { writeStaticClientFiles } from './staticFiles';
 
 interface DevelopOptions extends CLIContext {
-  /**
-   * @default false
-   */
-  ignorePrompts?: boolean;
   /**
    * Which bundler to use for building.
    *
@@ -78,19 +74,16 @@ const develop = async ({
   polling,
   logger,
   tsconfig,
-  ignorePrompts,
   watchAdmin,
   ...options
 }: DevelopOptions) => {
   const timer = getTimer();
 
   if (cluster.isPrimary) {
-    const { didInstall } = await checkRequiredDependencies({ cwd, logger, ignorePrompts }).catch(
-      (err) => {
-        logger.error(err.message);
-        process.exit(1);
-      }
-    );
+    const { didInstall } = await checkRequiredDependencies({ cwd, logger }).catch((err) => {
+      logger.error(err.message);
+      process.exit(1);
+    });
 
     if (didInstall) {
       return;
@@ -173,7 +166,7 @@ const develop = async ({
     timer.start('loadStrapi');
     const loadStrapiSpinner = logger.spinner(`Loading Strapi`).start();
 
-    const strapi = strapiFactory({
+    const strapi = createStrapi({
       appDir: cwd,
       distDir: tsconfig?.config.options.outDir ?? '',
       autoReload: true,
@@ -281,17 +274,23 @@ const develop = async ({
           '**/plugins.json',
           '**/build',
           '**/build/**',
+          '**/log',
+          '**/log/**',
+          '**/logs',
+          '**/logs/**',
+          '**/*.log',
           '**/index.html',
           '**/public',
           '**/public/**',
           strapiInstance.dirs.static.public,
-          joinBy('/', strapiInstance.dirs.static.public, '**'),
+          strings.joinBy('/', strapiInstance.dirs.static.public, '**'),
           '**/*.db*',
           '**/exports/**',
           '**/dist/**',
           '**/*.d.ts',
           '**/.yalc/**',
           '**/yalc.lock',
+          // TODO v6: watch only src folder by default, and flip this to watchIncludeFiles
           ...strapiInstance.config.get('admin.watchIgnoreFiles', []),
         ],
       })

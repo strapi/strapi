@@ -1,5 +1,4 @@
 import { Box, Flex, IconButton, IconButtonProps, Td, Tr, Typography } from '@strapi/design-system';
-import { onRowClick, pxToRem, stopPropagation } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import type { AdminRole } from '../../../../../hooks/useAdminRoles';
@@ -34,19 +33,15 @@ const RoleRow = ({
     <Tr
       aria-rowindex={rowIndex}
       key={id}
-      {...(canUpdate
-        ? onRowClick({
-            // @ts-expect-error – the prop uses `HTMLButtonElement` but we just specify `HTMLElement`
-            fn: editObject.onClick,
-          })
-        : {})}
+      // @ts-expect-error – the prop uses `HTMLButtonElement` but we just specify `HTMLElement`
+      onClick={canUpdate ? editObject.onClick : undefined}
     >
-      <Td maxWidth={pxToRem(130)}>
+      <Td maxWidth={`${130 / 16}rem`}>
         <Typography ellipsis textColor="neutral800">
           {name}
         </Typography>
       </Td>
-      <Td maxWidth={pxToRem(250)}>
+      <Td maxWidth={`${250 / 16}rem`}>
         <Typography ellipsis textColor="neutral800">
           {description}
         </Typography>
@@ -55,7 +50,7 @@ const RoleRow = ({
         <Typography textColor="neutral800">{usersCountText}</Typography>
       </Td>
       <Td>
-        <Flex justifyContent="flex-end" {...stopPropagation}>
+        <Flex justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
           {icons.map((icon, i) =>
             icon ? (
               <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>

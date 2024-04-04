@@ -6,6 +6,7 @@ export type ID = string | number;
 export interface ColumnInfo {
   unsigned?: boolean;
   defaultTo?: unknown;
+  notNullable?: boolean;
 }
 
 export type Attribute = ScalarAttribute | RelationalAttribute;
@@ -34,6 +35,7 @@ export interface BaseAttribute {
     args: unknown[];
   };
   searchable?: boolean;
+  enum?: string[];
 }
 
 export interface ScalarAttribute extends BaseAttribute {
@@ -75,6 +77,7 @@ export interface BaseJoinTable {
   inverseJoinColumn: {
     name: string;
     referencedColumn: string;
+    referencedTable?: string;
   };
 }
 
@@ -222,3 +225,7 @@ export interface Model {
   foreignKeys?: ForeignKey[];
   lifecycles?: Partial<Record<Action, SubscriberFn>>;
 }
+
+export type MetadataOptions = {
+  maxLength: number;
+};

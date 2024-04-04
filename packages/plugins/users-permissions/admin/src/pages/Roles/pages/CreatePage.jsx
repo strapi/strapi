@@ -12,17 +12,9 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import {
-  CheckPagePermissions,
-  Form,
-  SettingsPageTitle,
-  useFetchClient,
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-} from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Formik } from 'formik';
+import { Page, useTracking, useNotification, useFetchClient } from '@strapi/strapi/admin';
+import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
@@ -35,9 +27,8 @@ import { usePlugins } from '../hooks/usePlugins';
 
 export const CreatePage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
   const { trackUsage } = useTracking();
   const permissionsRef = React.useRef();
@@ -45,11 +36,11 @@ export const CreatePage = () => {
   const mutation = useMutation((body) => post(`/users-permissions/roles`, body), {
     onError() {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     },
 
@@ -58,10 +49,10 @@ export const CreatePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTrad('Settings.roles.created'),
           defaultMessage: 'Role created',
-        },
+        }),
       });
 
       // Forcing redirecting since we don't have the id in the response
@@ -70,22 +61,22 @@ export const CreatePage = () => {
   });
 
   const handleCreateRoleSubmit = async (data) => {
-    lockApp();
-
     // TODO: refactor. Child -> parent component communication is evil;
     // We should either move the provider one level up or move the state
     // straight into redux.
     const permissions = permissionsRef.current.getPermissions();
 
     await mutation.mutate({ ...data, ...permissions, users: [] });
-
-    unlockApp();
   };
 
   return (
     <Main>
-      {/* TODO: This needs to be translated */}
-      <SettingsPageTitle name="Roles" />
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          { name: 'Roles' }
+        )}
+      </Page.Title>
       <Formik
         enableReinitialize
         initialValues={{ name: '', description: '' }}
@@ -193,7 +184,7 @@ export const CreatePage = () => {
 };
 
 export const ProtectedRolesCreatePage = () => (
-  <CheckPagePermissions permissions={PERMISSIONS.createRole}>
+  <Page.Protect permissions={PERMISSIONS.createRole}>
     <CreatePage />
-  </CheckPagePermissions>
+  </Page.Protect>
 );

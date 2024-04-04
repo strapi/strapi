@@ -1,8 +1,8 @@
 import path from 'path';
 import _ from 'lodash';
 
-import { nameToCollectionName, errors } from '@strapi/utils';
-import type { Attribute, UID } from '@strapi/types';
+import { strings, errors } from '@strapi/utils';
+import type { Schema, Internal } from '@strapi/types';
 import { isRelation, isConfigurable } from '../../utils/attributes';
 import { typeKinds } from '../constants';
 import createSchemaHandler from './schema-handler';
@@ -10,7 +10,10 @@ import { CreateContentTypeInput } from '../../controllers/validation/content-typ
 
 const { ApplicationError } = errors;
 
-const reuseUnsetPreviousProperties = (newAttribute: Attribute.Any, oldAttribute: Attribute.Any) => {
+const reuseUnsetPreviousProperties = (
+  newAttribute: Schema.Attribute.AnyAttribute,
+  oldAttribute: Schema.Attribute.AnyAttribute
+) => {
   _.defaults(
     newAttribute,
     _.omit(oldAttribute, [
@@ -94,14 +97,20 @@ export default function createComponentBuilder() {
       contentType
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
-        .set('collectionName', infos.collectionName || nameToCollectionName(infos.pluralName))
+        .set(
+          'collectionName',
+          infos.collectionName || strings.nameToCollectionName(infos.pluralName)
+        )
         .set('info', {
           singularName: infos.singularName,
           pluralName: infos.pluralName,
           displayName: infos.displayName,
           description: infos.description,
         })
-        .set('options', infos.options ?? {})
+        .set('options', {
+          ...(infos.options ?? {}),
+          draftAndPublish: infos.draftAndPublish,
+        })
         .set('pluginOptions', infos.pluginOptions)
         .set('config', infos.config)
         .setAttributes(this.convertAttributes(infos.attributes));
@@ -220,7 +229,10 @@ export default function createComponentBuilder() {
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
-        .set('options', infos.options ?? {})
+        .set('options', {
+          ...(infos.options ?? {}),
+          draftAndPublish: infos.draftAndPublish,
+        })
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 
@@ -252,8 +264,11 @@ export default function createComponentBuilder() {
  * @param {string} options.singularName content-type singularName
  * @returns {string} uid
  */
-const createContentTypeUID = ({ singularName }: { singularName: string }): UID.ContentType =>
-  `api::${singularName}.${singularName}`;
+const createContentTypeUID = ({
+  singularName,
+}: {
+  singularName: string;
+}): Internal.UID.ContentType => `api::${singularName}.${singularName}`;
 
 const generateRelation = ({ key, attribute, uid, targetAttribute = {} }: any) => {
   const opts: any = {

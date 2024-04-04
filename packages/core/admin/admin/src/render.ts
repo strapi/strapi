@@ -1,15 +1,18 @@
 /* eslint-disable no-undef */
-import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
+import { getFetchClient } from './utils/getFetchClient';
 
-import type { FeaturesService } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 interface RenderAdminArgs {
-  customisations: StrapiAppConstructorArgs['adminConfig'];
+  customisations: {
+    bootstrap?: (app: StrapiApp) => Promise<void> | void;
+    config?: StrapiAppConstructorArgs['config'];
+  };
   plugins: StrapiAppConstructorArgs['appPlugins'];
-  features?: FeaturesService['config'];
+  features?: Modules.Features.FeaturesService['config'];
 }
 
 const renderAdmin = async (
@@ -29,9 +32,9 @@ const renderAdmin = async (
      */
     backendURL: process.env.STRAPI_ADMIN_BACKEND_URL || window.location.origin,
     isEE: false,
-    telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
+    telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
     future: {
-      isEnabled: (name: keyof FeaturesService['config']) => {
+      isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => {
         return features?.future?.[name] === true;
       },
     },
@@ -85,14 +88,13 @@ const renderAdmin = async (
   }
 
   const app = new StrapiApp({
-    adminConfig: customisations,
+    config: customisations?.config,
     appPlugins: plugins,
   });
 
-  await app.bootstrapAdmin();
-  await app.initialize();
-  await app.bootstrap();
-  await app.loadTrads();
+  await app.register();
+  await app.bootstrap(customisations?.bootstrap);
+  await app.loadTrads(customisations?.config?.translations);
 
   createRoot(mountNode).render(app.render());
 

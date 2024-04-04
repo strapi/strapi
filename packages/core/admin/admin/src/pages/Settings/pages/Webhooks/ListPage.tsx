@@ -4,7 +4,6 @@ import {
   useNotifyAT,
   ActionLayout,
   BaseCheckbox,
-  Box,
   Button,
   ContentLayout,
   EmptyStateLayout,
@@ -12,7 +11,6 @@ import {
   HeaderLayout,
   IconButton,
   Layout,
-  Main,
   Switch,
   Table,
   Tbody,
@@ -25,22 +23,17 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import {
-  CheckPagePermissions,
-  ConfirmDialog,
-  LoadingIndicatorPage,
-  SettingsPageTitle,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
 import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../hooks/useRBAC';
 
 import { useWebhooks } from './hooks/useWebhooks';
 
@@ -50,13 +43,11 @@ import { useWebhooks } from './hooks/useWebhooks';
 
 const ListPage = () => {
   const [showModal, setShowModal] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
   const [webhooksToDelete, setWebhooksToDelete] = React.useState<string[]>([]);
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.webhooks);
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
-  useFocusWhenNavigate();
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
 
   const {
@@ -76,7 +67,7 @@ const ListPage = () => {
   React.useEffect(() => {
     if (webhooksError) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(webhooksError),
       });
 
@@ -98,31 +89,30 @@ const ListPage = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     }
   };
 
   const confirmDelete = async () => {
     try {
-      setIsDeleting(true);
       const res = await deleteManyWebhooks({
         ids: webhooksToDelete,
       });
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -132,14 +122,13 @@ const ListPage = () => {
       setWebhooksToDelete([]);
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     } finally {
-      setIsDeleting(false);
       setShowModal(false);
     }
   };
@@ -158,10 +147,21 @@ const ListPage = () => {
   const numberOfWebhooks = webhooks?.length ?? 0;
   const webhooksToDeleteLength = webhooksToDelete.length;
 
+  if (isLoading) {
+    return <Page.Loading />;
+  }
+
   return (
     <Layout>
-      <SettingsPageTitle name="Webhooks" />
-      <Main aria-busy={isLoading}>
+      <Page.Title>
+        {formatMessage(
+          { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+          {
+            name: 'Webhooks',
+          }
+        )}
+      </Page.Title>
+      <Page.Main aria-busy={isLoading}>
         <HeaderLayout
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
           subtitle={formatMessage({
@@ -217,11 +217,7 @@ const ListPage = () => {
           />
         )}
         <ContentLayout>
-          {isLoading ? (
-            <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-              <LoadingIndicatorPage />
-            </Box>
-          ) : numberOfWebhooks > 0 ? (
+          {numberOfWebhooks > 0 ? (
             <Table
               colCount={5}
               rowCount={numberOfWebhooks + 1}
@@ -401,12 +397,11 @@ const ListPage = () => {
             />
           )}
         </ContentLayout>
-      </Main>
+      </Page.Main>
       <ConfirmDialog
         isOpen={showModal}
-        onToggleDialog={() => setShowModal((prev) => !prev)}
+        onClose={() => setShowModal((prev) => !prev)}
         onConfirm={confirmDelete}
-        isConfirmButtonLoading={isDeleting}
       />
     </Layout>
   );
@@ -422,9 +417,9 @@ const ProtectedListPage = () => {
   );
 
   return (
-    <CheckPagePermissions permissions={permissions}>
+    <Page.Protect permissions={permissions}>
       <ListPage />
-    </CheckPagePermissions>
+    </Page.Protect>
   );
 };
 

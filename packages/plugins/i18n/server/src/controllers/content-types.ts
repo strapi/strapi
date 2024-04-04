@@ -1,6 +1,6 @@
 import { pick, uniq, prop, getOr, flatten, pipe, map } from 'lodash/fp';
 import { contentTypes as contentTypesUtils, errors } from '@strapi/utils';
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { getService } from '../utils';
 import { validateGetNonLocalizedAttributesInput } from '../validation/content-types';
 
@@ -29,20 +29,20 @@ const controller = {
 
     const {
       default: { READ_ACTION, CREATE_ACTION },
-    } = strapi.admin.services.constants;
+    } = strapi.service('admin::constants');
 
     const modelDef = strapi.contentType(model);
     const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(model);
 
     if (!isLocalizedContentType(modelDef)) {
-      throw new ApplicationError('model.not.localized');
+      throw new ApplicationError(`Model ${model} is not localized`);
     }
 
     const params = modelDef.kind === 'singleType' ? {} : { id };
 
-    const entity = await strapi
+    const entity = await strapi.db
       .query(model)
-      .findOne({ where: params, populate: [...attributesToPopulate, 'localizations'] });
+      .findOne({ where: params, populate: attributesToPopulate });
 
     if (!entity) {
       return ctx.notFound();
@@ -67,13 +67,23 @@ const controller = {
     const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
     const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);
 
+    const availableLocalesResult = await strapi.plugins['content-manager']
+      .service('document-metadata')
+      .getMetadata(model, entity, {
+        availableLocales: true,
+      });
+
+    const availableLocales = availableLocalesResult.availableLocales.map((localeResult: any) =>
+      pick(['id', 'locale', PUBLISHED_AT_ATTRIBUTE], localeResult)
+    );
+
     ctx.body = {
       nonLocalizedFields: sanitizedNonLocalizedFields,
-      localizations: entity.localizations.concat(
+      localizations: availableLocales.concat(
         pick(['id', 'locale', PUBLISHED_AT_ATTRIBUTE], entity)
       ),
     };
   },
-} satisfies Common.Controller;
+} satisfies Core.Controller;
 
 export default controller;

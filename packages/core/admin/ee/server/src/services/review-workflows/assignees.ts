@@ -1,4 +1,4 @@
-import { LoadedStrapi as Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { errors } from '@strapi/utils';
 import { isNil } from 'lodash/fp';
 import { ENTITY_ASSIGNEE_ATTRIBUTE } from '../../constants/workflows';
@@ -6,15 +6,16 @@ import { getService } from '../../utils';
 
 const { ApplicationError } = errors;
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
 
   return {
     async findEntityAssigneeId(id: any, model: any) {
-      const entity = (await strapi.entityService.findOne(model, id, {
+      const entity = await strapi.db.query(model).findOne({
+        where: { id },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        fields: [],
-      })) as any;
+        select: [],
+      });
 
       return entity?.[ENTITY_ASSIGNEE_ATTRIBUTE]?.id ?? null;
     },
@@ -35,22 +36,22 @@ export default ({ strapi }: { strapi: Strapi }) => {
 
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(id, model), assigneeId);
 
-      return strapi.entityService.update(model, id, {
-        // @ts-expect-error check entity service types
+      return strapi.db.query(model).update({
+        where: { id },
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        fields: [],
+        select: [],
       });
     },
 
     async deleteEntityAssignee(id: any, model: any) {
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(id, model), null);
 
-      return strapi.entityService.update(model, id, {
-        // @ts-expect-error check entity service types
+      return strapi.db.query(model).update({
+        where: { id },
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: null },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        fields: [],
+        select: [],
       });
     },
   };
