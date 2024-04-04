@@ -155,7 +155,7 @@ export const ListView = () => {
                   tokenType: API_TOKEN_TYPE,
                 })
               }
-              href="/settings/api-tokens/create"
+              href="api-tokens/create"
             >
               {formatMessage({
                 id: 'Settings.apiTokens.create',
@@ -188,11 +188,7 @@ export const ListView = () => {
                   defaultMessage: 'Add your first API Token',
                 })}
                 action={
-                  <LinkButton
-                    variant="secondary"
-                    startIcon={<Plus />}
-                    href="/settings/api-tokens/create"
-                  >
+                  <LinkButton variant="secondary" startIcon={<Plus />} href="api-tokens/create">
                     {formatMessage({
                       id: 'Settings.apiTokens.addNewToken',
                       defaultMessage: 'Add new API Token',

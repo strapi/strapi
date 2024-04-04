@@ -60,7 +60,7 @@ export const EmptyAttributes = () => {
             </Box>
           </Box>
           <LinkButton
-            href={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
+            href={`/admin/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
             variant="secondary"
             startIcon={<Plus />}
           >

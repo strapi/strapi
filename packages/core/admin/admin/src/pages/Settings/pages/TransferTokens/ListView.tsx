@@ -168,7 +168,7 @@ const ListView = () => {
                   tokenType: TRANSFER_TOKEN_TYPE,
                 })
               }
-              href="/settings/transfer-tokens/create"
+              href="transfer-tokens/create"
             >
               {formatMessage({
                 id: 'Settings.transferTokens.create',
@@ -199,7 +199,7 @@ const ListView = () => {
                   <LinkButton
                     variant="secondary"
                     startIcon={<Plus />}
-                    href="/settings/transfer-tokens/create"
+                    href="transfer-tokens/create"
                   >
                     {formatMessage({
                       id: 'Settings.transferTokens.addNewToken',
