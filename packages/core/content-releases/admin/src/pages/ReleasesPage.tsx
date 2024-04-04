@@ -1,6 +1,10 @@
 import * as React from 'react';
 
+// TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
+import { useLicenseLimits } from '@strapi/admin/strapi-admin';
 import {
+  Alert,
+  Badge,
   Box,
   Button,
   ContentLayout,
@@ -28,13 +32,15 @@ import {
   useQueryParams,
   useAPIErrorHandler,
   useNotification,
+  useTracking,
+  RelativeTime as BaseRelativeTime,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { GetReleases } from '../../../shared/contracts/releases';
+import { GetReleases, type Release } from '../../../shared/contracts/releases';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
@@ -43,57 +49,6 @@ import {
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
-
-/* -------------------------------------------------------------------------------------------------
- * ReleasesLayout
- * -----------------------------------------------------------------------------------------------*/
-interface ReleasesLayoutProps {
-  isLoading?: boolean;
-  totalReleases?: number;
-  onClickAddRelease: () => void;
-  children: React.ReactNode;
-}
-
-export const ReleasesLayout = ({
-  isLoading,
-  totalReleases,
-  onClickAddRelease,
-  children,
-}: ReleasesLayoutProps) => {
-  const { formatMessage } = useIntl();
-  return (
-    <Main aria-busy={isLoading}>
-      <HeaderLayout
-        title={formatMessage({
-          id: 'content-releases.pages.Releases.title',
-          defaultMessage: 'Releases',
-        })}
-        subtitle={
-          !isLoading &&
-          formatMessage(
-            {
-              id: 'content-releases.pages.Releases.header-subtitle',
-              defaultMessage:
-                '{number, plural, =0 {No releases} one {# release} other {# releases}}',
-            },
-            { number: totalReleases }
-          )
-        }
-        primaryAction={
-          <CheckPermissions permissions={PERMISSIONS.create}>
-            <Button startIcon={<Plus />} onClick={onClickAddRelease}>
-              {formatMessage({
-                id: 'content-releases.header.actions.add-release',
-                defaultMessage: 'New release',
-              })}
-            </Button>
-          </CheckPermissions>
-        }
-      />
-      {children}
-    </Main>
-  );
-};
 
 /* -------------------------------------------------------------------------------------------------
  * ReleasesGrid
@@ -107,6 +62,40 @@ interface ReleasesGridProps {
 const LinkCard = styled(Link)`
   display: block;
 `;
+
+const RelativeTime = styled(BaseRelativeTime)`
+  display: inline-block;
+  &::first-letter {
+    text-transform: uppercase;
+  }
+`;
+
+const getBadgeProps = (status: Release['status']) => {
+  let color;
+  switch (status) {
+    case 'ready':
+      color = 'success';
+      break;
+    case 'blocked':
+      color = 'warning';
+      break;
+    case 'failed':
+      color = 'danger';
+      break;
+    case 'done':
+      color = 'primary';
+      break;
+    case 'empty':
+    default:
+      color = 'neutral';
+  }
+
+  return {
+    textColor: `${color}600`,
+    backgroundColor: `${color}100`,
+    borderColor: `${color}200`,
+  };
+};
 
 const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
   const { formatMessage } = useIntl();
@@ -134,7 +123,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 
   return (
     <Grid gap={4}>
-      {releases.map(({ id, name, actions }) => (
+      {releases.map(({ id, name, scheduledAt, status }) => (
         <GridItem col={3} s={6} xs={12} key={id}>
           <LinkCard href={`content-releases/${id}`} isExternal={false}>
             <Flex
@@ -147,21 +136,24 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               height="100%"
               width="100%"
               alignItems="start"
-              gap={2}
+              gap={4}
             >
-              <Typography as="h3" variant="delta" fontWeight="bold">
-                {name}
-              </Typography>
-              <Typography variant="pi">
-                {formatMessage(
-                  {
-                    id: 'content-releases.page.Releases.release-item.entries',
-                    defaultMessage:
-                      '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-                  },
-                  { number: actions.meta.count }
-                )}
-              </Typography>
+              <Flex direction="column" alignItems="start" gap={1}>
+                <Typography as="h3" variant="delta" fontWeight="bold">
+                  {name}
+                </Typography>
+                <Typography variant="pi" textColor="neutral600">
+                  {scheduledAt ? (
+                    <RelativeTime timestamp={new Date(scheduledAt)} />
+                  ) : (
+                    formatMessage({
+                      id: 'content-releases.pages.Releases.not-scheduled',
+                      defaultMessage: 'Not scheduled',
+                    })
+                  )}
+                </Typography>
+              </Flex>
+              <Badge {...getBadgeProps(status)}>{status}</Badge>
             </Flex>
           </LinkCard>
         </GridItem>
@@ -177,8 +169,22 @@ interface CustomLocationState {
   errors?: Record<'code', string>[];
 }
 
+const StyledAlert = styled(Alert)`
+  button {
+    display: none;
+  }
+  p + div {
+    margin-left: auto;
+  }
+`;
+
 const INITIAL_FORM_VALUES = {
   name: '',
+  date: null,
+  time: '',
+  isScheduled: true,
+  scheduledAt: null,
+  timezone: null,
 } satisfies FormValues;
 
 const ReleasesPage = () => {
@@ -192,6 +198,11 @@ const ReleasesPage = () => {
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
+  const { getFeature } = useLicenseLimits();
+  const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
+    maximumReleases: number;
+  };
+  const { trackUsage } = useTracking();
 
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
@@ -229,15 +240,14 @@ const ReleasesPage = () => {
 
   if (isLoading) {
     return (
-      <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} isLoading>
-        <ContentLayout>
-          <LoadingIndicatorPage />
-        </ContentLayout>
-      </ReleasesLayout>
+      <Main aria-busy={isLoading}>
+        <LoadingIndicatorPage />
+      </Main>
     );
   }
 
-  const totalReleases = (isSuccess && response.currentData?.meta?.pagination?.total) || 0;
+  const totalPendingReleases = (isSuccess && response.currentData?.meta?.pendingReleasesCount) || 0;
+  const hasReachedMaximumPendingReleases = totalPendingReleases >= maximumReleases;
 
   const handleTabChange = (index: number) => {
     setQuery({
@@ -252,9 +262,11 @@ const ReleasesPage = () => {
     });
   };
 
-  const handleAddRelease = async (values: FormValues) => {
+  const handleAddRelease = async ({ name, scheduledAt, timezone }: FormValues) => {
     const response = await createRelease({
-      name: values.name,
+      name,
+      scheduledAt,
+      timezone,
     });
     if ('data' in response) {
       // When the response returns an object with 'data', handle success
@@ -265,6 +277,8 @@ const ReleasesPage = () => {
           defaultMessage: 'Release created.',
         }),
       });
+
+      trackUsage('didCreateRelease');
 
       push(`/plugins/content-releases/${response.data.data.id}`);
     } else if (isAxiosError(response.error)) {
@@ -283,9 +297,61 @@ const ReleasesPage = () => {
   };
 
   return (
-    <ReleasesLayout onClickAddRelease={toggleAddReleaseModal} totalReleases={totalReleases}>
+    <Main aria-busy={isLoading}>
+      <HeaderLayout
+        title={formatMessage({
+          id: 'content-releases.pages.Releases.title',
+          defaultMessage: 'Releases',
+        })}
+        subtitle={formatMessage({
+          id: 'content-releases.pages.Releases.header-subtitle',
+          defaultMessage: 'Create and manage content updates',
+        })}
+        primaryAction={
+          <CheckPermissions permissions={PERMISSIONS.create}>
+            <Button
+              startIcon={<Plus />}
+              onClick={toggleAddReleaseModal}
+              disabled={hasReachedMaximumPendingReleases}
+            >
+              {formatMessage({
+                id: 'content-releases.header.actions.add-release',
+                defaultMessage: 'New release',
+              })}
+            </Button>
+          </CheckPermissions>
+        }
+      />
       <ContentLayout>
         <>
+          {hasReachedMaximumPendingReleases && (
+            <StyledAlert
+              marginBottom={6}
+              action={
+                <Link href="https://strapi.io/pricing-cloud" isExternal>
+                  {formatMessage({
+                    id: 'content-releases.pages.Releases.max-limit-reached.action',
+                    defaultMessage: 'Explore plans',
+                  })}
+                </Link>
+              }
+              title={formatMessage(
+                {
+                  id: 'content-releases.pages.Releases.max-limit-reached.title',
+                  defaultMessage:
+                    'You have reached the {number} pending {number, plural, one {release} other {releases}} limit.',
+                },
+                { number: maximumReleases }
+              )}
+              onClose={() => {}}
+              closeLabel=""
+            >
+              {formatMessage({
+                id: 'content-releases.pages.Releases.max-limit-reached.message',
+                defaultMessage: 'Upgrade to manage an unlimited number of releases.',
+              })}
+            </StyledAlert>
+          )}
           <TabGroup
             label={formatMessage({
               id: 'content-releases.pages.Releases.tab-group.label',
@@ -299,10 +365,15 @@ const ReleasesPage = () => {
             <Box paddingBottom={8}>
               <Tabs>
                 <Tab>
-                  {formatMessage({
-                    id: 'content-releases.pages.Releases.tab.pending',
-                    defaultMessage: 'Pending',
-                  })}
+                  {formatMessage(
+                    {
+                      id: 'content-releases.pages.Releases.tab.pending',
+                      defaultMessage: 'Pending ({count})',
+                    },
+                    {
+                      count: totalPendingReleases,
+                    }
+                  )}
                 </Tab>
                 <Tab>
                   {formatMessage({
@@ -332,7 +403,7 @@ const ReleasesPage = () => {
               </TabPanel>
             </TabPanels>
           </TabGroup>
-          {totalReleases > 0 && (
+          {response.currentData?.meta?.pagination?.total ? (
             <Flex paddingTop={4} alignItems="flex-end" justifyContent="space-between">
               <PageSizeURLQuery
                 options={['8', '16', '32', '64']}
@@ -344,7 +415,7 @@ const ReleasesPage = () => {
                 }}
               />
             </Flex>
-          )}
+          ) : null}
         </>
       </ContentLayout>
       {releaseModalShown && (
@@ -355,8 +426,8 @@ const ReleasesPage = () => {
           initialValues={INITIAL_FORM_VALUES}
         />
       )}
-    </ReleasesLayout>
+    </Main>
   );
 };
 
-export { ReleasesPage };
+export { ReleasesPage, getBadgeProps };

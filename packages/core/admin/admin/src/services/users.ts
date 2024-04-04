@@ -17,6 +17,7 @@ const usersService = adminApi.injectEndpoints({
         method: 'POST',
         data: body,
       }),
+      transformResponse: (response: Users.Create.Response) => response.data,
       invalidatesTags: ['LicenseLimits', { type: 'User', id: 'LIST' }],
     }),
     updateUser: builder.mutation<

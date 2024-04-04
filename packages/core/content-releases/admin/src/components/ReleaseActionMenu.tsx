@@ -10,6 +10,7 @@ import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
+import { Release } from '../../../shared/contracts/releases';
 import { PERMISSIONS } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
 import { useTypedSelector } from '../store/hooks';
@@ -104,7 +105,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
     <CheckPermissions permissions={PERMISSIONS.deleteAction}>
       <StyledMenuItem variant="danger" onSelect={handleDeleteAction}>
         <Flex gap={2}>
-          <Icon as={Cross} padding={1} />
+          <Icon as={Cross} width={3} height={3} />
           <Typography textColor="danger600" variant="omega">
             {formatMessage({
               id: 'content-releases.content-manager-edit-view.remove-from-release',
@@ -164,7 +165,7 @@ const ReleaseActionEntryLinkItem = ({
               pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
               search: locale && `?plugins[i18n][locale]=${locale}`,
             }}
-            startIcon={<Icon as={Pencil} padding={1} />}
+            startIcon={<Icon as={Pencil} width={3} height={3} />}
           >
             <Typography variant="omega">
               {formatMessage({
@@ -176,6 +177,34 @@ const ReleaseActionEntryLinkItem = ({
         </StyledMenuItem>
       )}
     </CheckPermissions>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * EditReleaseItem
+ * -----------------------------------------------------------------------------------------------*/
+interface EditReleaseItemProps {
+  releaseId: Release['id'];
+}
+
+const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <StyledMenuItem>
+      <Link
+        href={`/admin/plugins/content-releases/${releaseId}`}
+        startIcon={<Icon as={Pencil} width={3} height={3} />}
+        isExternal={false}
+      >
+        <Typography variant="omega">
+          {formatMessage({
+            id: 'content-releases.content-manager-edit-view.edit-release',
+            defaultMessage: 'Edit release',
+          })}
+        </Typography>
+      </Link>
+    </StyledMenuItem>
   );
 };
 
@@ -225,6 +254,7 @@ const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
 
 export const ReleaseActionMenu = {
   Root,
+  EditReleaseItem,
   DeleteReleaseActionItem,
   ReleaseActionEntryLinkItem,
 };

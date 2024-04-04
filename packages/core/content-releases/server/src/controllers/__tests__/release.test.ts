@@ -7,7 +7,7 @@ const mockCountActions = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
-    findOne: jest.fn(() => ({ id: 1 })),
+    findOne: jest.fn(() => ({ id: 1, createdBy: { firstname: 'test' } })),
     findPage: mockFindPage,
     findManyWithContentTypeEntryAttached: mockFindManyWithContentTypeEntryAttached,
     findManyWithoutContentTypeEntryAttached: mockFindManyWithoutContentTypeEntryAttached,
@@ -47,6 +47,9 @@ describe('Release controller', () => {
             },
           },
         },
+        query: jest.fn().mockReturnValue({
+          count: jest.fn().mockResolvedValue(2),
+        }),
       };
 
       // @ts-expect-error partial context
@@ -155,20 +158,18 @@ describe('Release controller', () => {
 
   describe('findOne', () => {
     beforeAll(() => {
+      // @ts-expect-error Ignore global error
       global.strapi = {
+        // @ts-expect-error Ignore global error
         ...global.strapi,
-        // @ts-expect-error Ignore missing properties
         admin: {
           services: {
-            permission: {
-              createPermissionsManager: jest.fn(() => ({
-                sanitizeOutput: jest.fn(),
-              })),
+            user: {
+              sanitizeUser: jest.fn(),
             },
           },
         },
         plugins: {
-          // @ts-expect-error Ignore missing properties
           'content-manager': {
             services: {
               'content-types': {
@@ -214,7 +215,7 @@ describe('Release controller', () => {
       expect(() => releaseController.findOne(ctx).rejects.toThrow('Release not found for id: 1'));
     });
 
-    it('returns the right meta object', async () => {
+    it('should have a body with meta including actions count', async () => {
       const ctx = {
         state: {
           userAbility: {
@@ -238,7 +239,6 @@ describe('Release controller', () => {
       };
       // We mock the count all actions
       mockCountActions.mockResolvedValueOnce(2);
-
       // We mock the count hidden actions
       mockCountActions.mockResolvedValueOnce(1);
 
@@ -247,6 +247,24 @@ describe('Release controller', () => {
       expect(ctx.body.data.actions.meta).toEqual({
         count: 2,
       });
+    });
+
+    it('should call sanitize user', async () => {
+      const ctx = {
+        state: {
+          userAbility: {
+            can: jest.fn(() => true),
+          },
+        },
+        params: {
+          id: 1,
+        },
+        user: {},
+      };
+
+      // @ts-expect-error partial context
+      await releaseController.findOne(ctx);
+      expect(strapi.admin.services.user.sanitizeUser).toHaveBeenCalled();
     });
   });
 });

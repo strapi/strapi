@@ -118,7 +118,7 @@ export default ({ action, ability, model }: any) => {
   const wrapValidate = (createValidateFunction: any) => {
     // TODO
     // @ts-expect-error define the correct return type
-    const wrappedValidate = async (data, options = {}) => {
+    const wrappedValidate = async (data, options = {}): Promise<unknown> => {
       if (isArray(data)) {
         return Promise.all(data.map((entity: unknown) => wrappedValidate(entity, options)));
       }
@@ -187,12 +187,7 @@ export default ({ action, ability, model }: any) => {
 
     const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
 
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      ...nonVisibleWritableAttributes,
-    ]);
+    return uniq([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes]);
   };
 
   const getQueryFields = (fields = []) => {

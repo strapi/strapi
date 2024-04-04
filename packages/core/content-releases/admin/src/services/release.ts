@@ -2,6 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 
 import {
   CreateReleaseAction,
+  CreateManyReleaseActions,
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import { pluginId } from '../pluginId';
@@ -185,9 +186,27 @@ const releaseApi = createApi({
           { type: 'ReleaseAction', id: 'LIST' },
         ],
       }),
+      createManyReleaseActions: build.mutation<
+        CreateManyReleaseActions.Response,
+        CreateManyReleaseActions.Request
+      >({
+        query({ body, params }) {
+          return {
+            url: `/content-releases/${params.releaseId}/actions/bulk`,
+            method: 'POST',
+            data: body,
+          };
+        },
+        invalidatesTags: [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ],
+      }),
       updateReleaseAction: build.mutation<
         UpdateReleaseAction.Response,
-        UpdateReleaseAction.Request
+        UpdateReleaseAction.Request & { query: GetReleaseActions.Request['query'] } & {
+          actionPath: [string, number];
+        }
       >({
         query({ body, params }) {
           return {
@@ -197,6 +216,30 @@ const releaseApi = createApi({
           };
         },
         invalidatesTags: () => [{ type: 'ReleaseAction', id: 'LIST' }],
+        async onQueryStarted({ body, params, query, actionPath }, { dispatch, queryFulfilled }) {
+          // We need to mimic the same params received by the getReleaseActions query
+          const paramsWithoutActionId = {
+            releaseId: params.releaseId,
+            ...query,
+          };
+
+          const patchResult = dispatch(
+            releaseApi.util.updateQueryData('getReleaseActions', paramsWithoutActionId, (draft) => {
+              const [key, index] = actionPath;
+              const action = draft.data[key][index];
+
+              if (action) {
+                action.type = body.type;
+              }
+            })
+          );
+
+          try {
+            await queryFulfilled;
+          } catch {
+            patchResult.undo();
+          }
+        },
       }),
       deleteReleaseAction: build.mutation<
         DeleteReleaseAction.Response,
@@ -208,8 +251,9 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        invalidatesTags: [
+        invalidatesTags: (result, error, arg) => [
           { type: 'Release', id: 'LIST' },
+          { type: 'Release', id: arg.params.releaseId },
           { type: 'ReleaseAction', id: 'LIST' },
         ],
       }),
@@ -229,7 +273,7 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        invalidatesTags: (result, error, arg) => [{ type: 'Release', id: arg.id }],
+        invalidatesTags: () => [{ type: 'Release', id: 'LIST' }],
       }),
     };
   },
@@ -242,6 +286,7 @@ const {
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
+  useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
@@ -256,6 +301,7 @@ export {
   useGetReleaseActionsQuery,
   useCreateReleaseMutation,
   useCreateReleaseActionMutation,
+  useCreateManyReleaseActionsMutation,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,

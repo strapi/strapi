@@ -21,3 +21,4 @@ export const REMOVE_COMPONENT_FROM_DYNAMIC_ZONE =
 export const REMOVE_FIELD = 'ContentTypeBuilder/DataManagerProvider/REMOVE_FIELD';
 export const SET_MODIFIED_DATA = 'ContentTypeBuilder/DataManagerProvider/SET_MODIFIED_DATA';
 export const UPDATE_SCHEMA = 'ContentTypeBuilder/DataManagerProvider/UPDATE_SCHEMA';
+export const UPDATE_INITIAL_STATE = 'ContentTypeBuilder/DataManagerProvider/UPDATE_INITIAL_STATE';

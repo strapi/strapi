@@ -8,17 +8,17 @@ const ONE_WEEK = 7 * 24 * 60 * 60 * 1000;
 const getWeeklyCronScheduleAt = (date: Date) =>
   `${date.getSeconds()} ${date.getMinutes()} ${date.getHours()} * * ${date.getDay()}`;
 
-const getMetricsStoreValue = async () => {
-  const value = await strapi.store.get({ type: 'plugin', name: 'ee', key: 'metrics' });
-  return defaultTo({}, value);
-};
-
-const setMetricsStoreValue = (value: unknown) =>
-  strapi.store.set({ type: 'plugin', name: 'ee', key: 'metrics', value });
-
 export default ({ strapi }: { strapi: Strapi }) => {
   const metrics = getService('review-workflows-metrics', { strapi });
   const workflowsService = getService('workflows', { strapi });
+
+  const getMetricsStoreValue = async () => {
+    const value = await strapi.store.get({ type: 'plugin', name: 'ee', key: 'metrics' });
+    return defaultTo({}, value);
+  };
+
+  const setMetricsStoreValue = (value: unknown) =>
+    strapi.store.set({ type: 'plugin', name: 'ee', key: 'metrics', value });
 
   return {
     async computeMetrics() {

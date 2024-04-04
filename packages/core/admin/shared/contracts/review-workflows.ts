@@ -50,7 +50,9 @@ namespace Get {
 
 namespace Update {
   export interface Request {
-    body: Partial<Workflow>;
+    body: {
+      data: Partial<Workflow>;
+    };
     query: {};
   }
 
@@ -66,7 +68,9 @@ namespace Update {
 
 namespace Create {
   export interface Request {
-    body: Omit<Workflow, 'id' | 'createdAt' | 'updatedAt'>;
+    body: {
+      data: Omit<Workflow, 'id' | 'createdAt' | 'updatedAt'>;
+    };
     query: {};
   }
 

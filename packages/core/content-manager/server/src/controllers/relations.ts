@@ -254,7 +254,7 @@ export default {
     const permissionQuery = await permissionChecker.sanitizedQuery.read(queryParams);
 
     if (isAnyToMany(attribute)) {
-      const resWithOnlyIds = await strapi.entityService.loadPages(
+      const res = await strapi.entityService.loadPages(
         model,
         { id },
         targetField,
@@ -267,11 +267,11 @@ export default {
           pageSize: ctx.request.query.pageSize,
         }
       );
-      const ids = resWithOnlyIds.results.map((item: any) => item.id);
+      const ids = res.results.map((item: any) => item.id);
 
       addFiltersClause(permissionQuery, { id: { $in: ids } });
 
-      const res = await strapi.entityService.loadPages(
+      const sanitizedRes = await strapi.entityService.loadPages(
         model,
         { id },
         targetField,
@@ -280,12 +280,12 @@ export default {
           ordering: 'desc',
         } as any,
         {
-          page: ctx.request.query.page,
-          pageSize: ctx.request.query.pageSize,
+          page: 1,
+          pageSize: ids.length,
         }
       );
 
-      res.results = uniqBy('id', concat(res.results, resWithOnlyIds.results));
+      res.results = uniqBy('id', concat(sanitizedRes.results, res.results));
 
       ctx.body = res;
     } else {

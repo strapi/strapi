@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import { render, screen } from '@testing-library/react';
 import { Editor, Transforms, createEditor } from 'slate';
+import { ReactEditor } from 'slate-react';
 
 import { listBlocks } from '../List';
 
@@ -241,6 +242,185 @@ describe('List', () => {
 
     // Should remove the empty list and create a paragraph instead
     expect(baseEditor.children).toEqual([
+      {
+        type: 'paragraph',
+        children: [
+          {
+            type: 'text',
+            text: '',
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles enter key on a nested empty list item', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'item 1',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'one',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'two',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: '',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the nested empty list item
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 1, 2, 0], offset: 0 },
+      focus: { path: [0, 1, 2, 0], offset: 0 },
+    });
+
+    // Simulate the enter key
+    listBlocks['list-ordered'].handleEnterKey!(baseEditor);
+
+    // Should go back to the parent list just above and create new list item there
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'item 1',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'one',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'two',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    // Set the cursor on the empty list item created
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 2, 0], offset: 0 },
+      focus: { path: [0, 2, 0], offset: 0 },
+    });
+
+    // Simulate the enter key
+    listBlocks['list-ordered'].handleEnterKey!(baseEditor);
+
+    // Should remove the empty list and create a paragraph instead
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'item 1',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'one',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'two',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
       {
         type: 'paragraph',
         children: [
@@ -689,6 +869,440 @@ describe('List', () => {
                 type: 'text',
                 text: 'code',
                 code: true,
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles the backspace key on a nested list and merge list items at same level', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'item 1',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'one',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'two',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: '',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'three',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'four',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor on the second list item of parent list
+    Transforms.select(baseEditor, {
+      anchor: { path: [0, 2, 0], offset: 0 },
+      focus: { path: [0, 2, 0], offset: 0 },
+    });
+
+    // Simulate the backspace key
+    listBlocks['list-ordered'].handleBackspaceKey?.(
+      baseEditor,
+      mockEvent as unknown as React.KeyboardEvent<HTMLDivElement>
+    );
+
+    // Should merge both list items at indentLevel 1
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'item 1',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'one',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'two',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'three',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'four',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles the tab on a simple list and creates a nested list', () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Second list item',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the first list item
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, [0, 0]),
+      focus: Editor.end(baseEditor, [0, 0]),
+    });
+
+    // Simulate the enter key
+    listBlocks['list-unordered'].handleTab!(baseEditor);
+
+    // Should do nothing as tabbing works from second list item
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Second list item',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+
+    // Set the cursor at the end of the last list item
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, [0, 1]),
+      focus: Editor.end(baseEditor, [0, 1]),
+    });
+
+    // Simulate the enter key
+    listBlocks['list-unordered'].handleTab!(baseEditor);
+
+    // Should convert second list item to nested list
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'unordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list item',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'unordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'Second list item',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('handles the tab on a nested item and merge item into nested list', () => {
+    const baseEditor = createEditor();
+    ReactEditor.findPath = jest.fn().mockReturnValue([0, 1]);
+
+    baseEditor.children = [
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'one',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'two',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'Second list',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'three',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'four',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    // Set the cursor at the first list item
+    Transforms.select(baseEditor, {
+      anchor: Editor.end(baseEditor, [0, 2, 0]),
+      focus: Editor.end(baseEditor, [0, 2, 0]),
+    });
+
+    // Simulate the enter key
+    listBlocks['list-ordered'].handleTab!(baseEditor);
+
+    // Should do nothing as tabbing works from second list item
+    expect(baseEditor.children).toEqual([
+      {
+        type: 'list',
+        format: 'ordered',
+        children: [
+          {
+            type: 'list-item',
+            children: [
+              {
+                type: 'text',
+                text: 'First list',
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'one',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'two',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'Second list',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            type: 'list',
+            format: 'ordered',
+            indentLevel: 1,
+            children: [
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'three',
+                  },
+                ],
+              },
+              {
+                type: 'list-item',
+                children: [
+                  {
+                    type: 'text',
+                    text: 'four',
+                  },
+                ],
               },
             ],
           },
