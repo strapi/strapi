@@ -87,6 +87,8 @@ const XtoOne = async (
 
     const alias = qb.getAlias();
     const joinColAlias = `${alias}.${joinColumnName}`;
+    const joinColRenameAs = `strapi_join_${joinColumnName}`;
+    const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
     const referencedValues = _.uniq(
       results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
@@ -146,11 +148,11 @@ const XtoOne = async (
         on: joinTable.on,
         orderBy: joinTable.orderBy,
       })
-      .addSelect(joinColAlias)
+      .addSelect(joinColSelect)
       .where({ [joinColAlias]: referencedValues })
       .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row>(joinColumnName)(rows);
+    const map = _.groupBy<Row>(joinColRenameAs)(rows);
 
     results.forEach((result) => {
       result[attributeName] = fromTargetRow(_.first(map[result[referencedColumnName] as string]));
