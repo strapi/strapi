@@ -1,4 +1,4 @@
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
 
 import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
@@ -24,7 +24,7 @@ export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Se
 
   middlewares.use(databaseErrorsMiddleware);
 
-  const factory = function factory(uid) {
+  const factory = function factory(uid: UID.ContentType) {
     if (repositories.has(uid)) {
       return repositories.get(uid)!;
     }
@@ -32,7 +32,7 @@ export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Se
     const contentType = strapi.contentType(uid);
     const repository = createContentTypeRepository(uid);
 
-    repositories.set(uid, middlewares.wrapObject(repository, { contentType }));
+    repositories.set(uid, middlewares.wrapObject(repository, { uid, contentType }));
 
     return repository;
   } as Modules.Documents.Service;

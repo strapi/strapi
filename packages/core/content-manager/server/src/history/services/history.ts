@@ -137,9 +137,13 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           return next();
         }
 
-        // Ignore actions that don't mutate documents
+        // NOTE: can do type narrowing with array includes
         if (
-          !['create', 'update', 'publish', 'unpublish', 'discardDraft'].includes(context.action)
+          context.action !== 'create' &&
+          context.action !== 'update' &&
+          context.action !== 'publish' &&
+          context.action !== 'unpublish' &&
+          context.action !== 'discardDraft'
         ) {
           return next();
         }
@@ -154,9 +158,8 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const documentContext =
           context.action === 'create'
-            ? // @ts-expect-error The context args are not typed correctly
-              { documentId: result.documentId, locale: context.args[0]?.locale }
-            : { documentId: context.args[0], locale: context.args[1]?.locale };
+            ? { documentId: result.documentId, locale: context.params?.locale }
+            : { documentId: context.params.documentId, locale: context.params?.locale };
 
         const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
         const document = await strapi.documents(contentTypeUid).findOne({
