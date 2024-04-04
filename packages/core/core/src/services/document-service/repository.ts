@@ -51,7 +51,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   // TODO: do we really want to add filters on the findOne now that we have findFirst ?
-  async function findOne(documentId: string, params = {} as any) {
+  async function findOne(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const query = await async.pipe(
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
@@ -65,7 +67,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return strapi.db.query(uid).findOne(query);
   }
 
-  async function deleteFn(documentId: string, params = {} as any) {
+  async function deleteDocument(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const query = await async.pipe(
       omit('status'),
       i18n.defaultLocale(contentType),
@@ -86,7 +90,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return { deletedEntries: entriesToDelete };
   }
 
-  async function create(params = {} as any) {
+  async function create(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       DP.setStatusToDraft(contentType),
@@ -98,13 +104,18 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const doc = await entries.create(queryParams);
 
     if (hasDraftAndPublish && params.status === 'published') {
-      return publish(doc.documentId, params).then((doc) => doc.versions[0]);
+      return publish({
+        ...params,
+        documentId: doc.documentId,
+      }).then((doc) => doc.versions[0]);
     }
 
     return doc;
   }
 
-  async function clone(documentId: string, params = {} as any) {
+  async function clone(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       i18n.defaultLocale(contentType),
@@ -138,7 +149,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return { documentId: clonedEntries.at(0)?.documentId, versions: clonedEntries };
   }
 
-  async function update(documentId: string, params = {} as any) {
+  async function update(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       DP.setStatusToDraft(contentType),
@@ -199,7 +212,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     }
 
     if (hasDraftAndPublish && updatedDraft && params.status === 'published') {
-      return publish(documentId, params).then((doc) => doc.versions[0]);
+      return publish({
+        ...params,
+        documentId,
+      }).then((doc) => doc.versions[0]);
     }
 
     return updatedDraft;
@@ -217,14 +233,17 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return strapi.db.query(uid).count(query);
   }
 
-  async function publish(documentId: string, params = {} as any) {
+  async function publish(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    await deleteFn(documentId, {
+    await deleteDocument({
       ...queryParams,
+      documentId,
       lookup: { ...queryParams?.lookup, publishedAt: { $ne: null } },
     });
 
@@ -261,29 +280,35 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return { versions: publishedEntries };
   }
 
-  async function unpublish(documentId: string, params = {} as any) {
+  async function unpublish(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const { deletedEntries } = await deleteFn(documentId, {
+    const { deletedEntries } = await deleteDocument({
       ...params,
+      documentId,
       lookup: { ...queryParams?.lookup, publishedAt: { $ne: null } },
     });
 
     return { versions: deletedEntries };
   }
 
-  async function discardDraft(documentId: string, params = {} as any) {
+  async function discardDraft(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    await deleteFn(documentId, {
+    // Delete all drafts that match query
+    await deleteDocument({
       ...queryParams,
-      // Delete all drafts that match query
+      documentId,
       lookup: { ...queryParams?.lookup, publishedAt: null },
     });
 
@@ -329,7 +354,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     findMany: wrapInTransaction(findMany),
     findFirst: wrapInTransaction(findFirst),
     findOne: wrapInTransaction(findOne),
-    delete: wrapInTransaction(deleteFn),
+    delete: wrapInTransaction(deleteDocument),
     create: wrapInTransaction(create),
     clone: wrapInTransaction(clone),
     update: wrapInTransaction(update),

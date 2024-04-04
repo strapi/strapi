@@ -4,7 +4,6 @@ import type * as EntityService from '../entity-service';
 import type * as AttributeUtils from './params/attributes';
 import type * as UID from '../../uid';
 
-import type { ID } from '.';
 import type { IsDraftAndPublishEnabled } from './draft-and-publish';
 import type * as Params from './params/document-engine';
 import type * as Result from './result/document-engine';
@@ -28,14 +27,10 @@ export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.Conten
   ) => Result.FindFirst<TContentTypeUID, TParams>;
 
   findOne: <TParams extends Params.FindOne<TContentTypeUID>>(
-    id: ID,
-    params?: TParams
+    params: TParams
   ) => Result.FindOne<TContentTypeUID, TParams>;
 
-  delete: <TParams extends Params.Delete<TContentTypeUID>>(
-    documentId: ID,
-    params?: TParams
-  ) => Result.Delete;
+  delete: <TParams extends Params.Delete<TContentTypeUID>>(params: TParams) => Result.Delete;
 
   create: <TParams extends Params.Create<TContentTypeUID>>(
     params: TParams
@@ -46,12 +41,10 @@ export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.Conten
    * Exposed for use within the Strapi Admin Panel
    */
   clone: <TParams extends Params.Clone<TContentTypeUID>>(
-    documentId: ID,
     params: TParams
   ) => Result.Clone<TContentTypeUID, TParams>;
 
   update: <TParams extends Params.Update<TContentTypeUID>>(
-    documentId: ID,
     params: TParams
   ) => Result.Update<TContentTypeUID, TParams>;
 
@@ -63,8 +56,7 @@ export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.Conten
     IsDraftAndPublishEnabled<TContentTypeUID>,
     // Then, publish method is enabled
     <TParams extends Params.Publish<TContentTypeUID>>(
-      documentId: ID,
-      params?: TParams
+      params: TParams
     ) => Result.Publish<TContentTypeUID, TParams>,
     // Otherwise, disable it
     undefined
@@ -73,8 +65,7 @@ export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.Conten
   unpublish: Utils.If<
     IsDraftAndPublishEnabled<TContentTypeUID>,
     <TParams extends Params.Unpublish<TContentTypeUID>>(
-      documentId: ID,
-      params?: TParams
+      params: TParams
     ) => Result.Unpublish<TContentTypeUID, TParams>,
     undefined
   >;
@@ -82,8 +73,7 @@ export type ServiceInstance<TContentTypeUID extends UID.ContentType = UID.Conten
   discardDraft: Utils.If<
     IsDraftAndPublishEnabled<TContentTypeUID>,
     <TParams extends Params.DiscardDraft<TContentTypeUID>>(
-      documentId: ID,
-      params?: TParams
+      params: TParams
     ) => Result.DiscardDraft<TContentTypeUID, TParams>,
     undefined
   >;

@@ -159,13 +159,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             : { documentId: context.args[0], locale: context.args[1]?.locale };
 
         const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
-        const document = await strapi
-          .documents(contentTypeUid)
-          .findOne(documentContext.documentId, {
-            locale,
-            populate: getDeepPopulate(contentTypeUid),
-          });
-
+        const document = await strapi.documents(contentTypeUid).findOne({
+          documentId: documentContext.documentId,
+          locale,
+          populate: getDeepPopulate(contentTypeUid),
+        });
         const status = await getVersionStatus(contentTypeUid, document);
 
         /**
