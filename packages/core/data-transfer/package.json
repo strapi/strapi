@@ -73,7 +73,7 @@
     "@types/tar-stream": "2.2.2",
     "@types/ws": "^8.5.4",
     "knex": "3.0.1",
-    "koa": "2.13.4",
+    "koa": "2.15.2",
     "rimraf": "5.0.5",
     "typescript": "5.3.2"
   },
