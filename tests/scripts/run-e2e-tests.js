@@ -62,7 +62,7 @@ yargs
      * This lets us pass any other arguments to playwright
      * e.g. the name of a specific test or the project we want to run
      */
-    'unknown-options-as-args': true,
+    'unknown-options-as-args': false,
   })
   .command({
     command: '*',
@@ -86,6 +86,13 @@ yargs
         default: domains,
       });
 
+      yarg.option('debug', {
+        alias: 'debug',
+        describe: 'Run playwright in debug mode',
+        type: 'boolean',
+        default: false,
+      });
+
       yarg.option('setup', {
         alias: 'f',
         describe: 'Force the setup process of the test apps',
@@ -100,7 +107,7 @@ yargs
           dotenv.config({ path: path.join(testRoot, '.env') });
         }
 
-        const { concurrency, domains, setup } = argv;
+        const { concurrency, domains, setup, debug } = argv;
 
         /**
          * Publishing all packages to the yalc store
@@ -191,6 +198,8 @@ yargs
           return acc;
         }, []);
 
+        const debugFlag = debug ? ['--debug'] : [];
+
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < chunkedDomains.length; i++) {
           const domains = chunkedDomains[i];
@@ -223,10 +232,9 @@ module.exports = config
               await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
 
               console.log(`Running ${chalk.blue(domain)} e2e tests`);
-
               await execa(
                 'yarn',
-                ['playwright', 'test', '--config', pathToPlaywrightConfig, ...argv._],
+                ['playwright', 'test', '--config', pathToPlaywrightConfig, ...debugFlag, ...argv._],
                 {
                   stdio: 'inherit',
                   cwd,
