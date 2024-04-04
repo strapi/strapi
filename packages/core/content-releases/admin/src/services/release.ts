@@ -22,6 +22,7 @@ import type {
   UpdateRelease,
   GetRelease,
   PublishRelease,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 
 export interface GetReleasesQueryParams {
@@ -275,6 +276,20 @@ const releaseApi = createApi({
         },
         invalidatesTags: () => [{ type: 'Release', id: 'LIST' }],
       }),
+      getMappedEntriesInReleases: build.query<
+        MapEntriesToReleases.Response,
+        MapEntriesToReleases.Request['query']
+      >({
+        query(params) {
+          return {
+            url: '/content-releases/mapEntriesToReleases',
+            method: 'GET',
+            config: {
+              params,
+            },
+          };
+        },
+      }),
     };
   },
 });
@@ -292,6 +307,7 @@ const {
   usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
+  useGetMappedEntriesInReleasesQuery,
 } = releaseApi;
 
 export {
@@ -307,5 +323,6 @@ export {
   usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
+  useGetMappedEntriesInReleasesQuery,
   releaseApi,
 };

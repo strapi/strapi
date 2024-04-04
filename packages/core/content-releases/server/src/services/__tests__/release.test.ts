@@ -481,7 +481,7 @@ describe('release service', () => {
         1
       );
 
-      expect(releases).toEqual([{ name: 'test release', action: { type: 'publish' } }]);
+      expect(releases).toEqual([{ name: 'test release', actions: [{ type: 'publish' }] }]);
     });
   });
 

@@ -5,8 +5,11 @@ import { Link } from '@strapi/design-system/v2';
 import { SortIcon } from '@strapi/helper-plugin';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 
 import type { CMAdminConfiguration, ListLayoutRow } from '@strapi/admin/strapi-admin';
+import { useTypedSelector } from '../store/hooks';
+import { useGetMappedEntriesInReleasesQuery } from '../services/release';
 
 const Button = styled.button`
   svg {
@@ -40,6 +43,24 @@ const ActionWrapper = styled(Flex)`
 `;
 
 /* -------------------------------------------------------------------------------------------------
+ * useReleasesList
+ * -----------------------------------------------------------------------------------------------*/
+
+const useReleasesList = (entryId) => {
+  const { uid: contentTypeUid } = useTypedSelector(
+    (state) => state['content-manager_listView'].contentType
+  );
+  const listViewData = useTypedSelector((state) => state['content-manager_listView'].data);
+  const entriesIds = listViewData.map((entry) => entry.id);
+
+  const response = useGetMappedEntriesInReleasesQuery({ contentTypeUid, entriesIds });
+
+  const mappedEntriesInReleases = response.data?.data || {};
+
+  return mappedEntriesInReleases?.[entryId] || [];
+};
+
+/* -------------------------------------------------------------------------------------------------
  * addColumnToTableHook
  * -----------------------------------------------------------------------------------------------*/
 
@@ -52,6 +73,12 @@ interface AddColumnToTableHookArgs {
 }
 
 const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
+  const { contentType } = layout;
+
+  if (!contentType.options.draftAndPublish) {
+    return { displayedHeaders, layout };
+  }
+
   return {
     displayedHeaders: [
       ...displayedHeaders,
@@ -74,16 +101,10 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
 interface ReleaseListCellProps {}
 
 const ReleaseListCell = (props: any) => {
-  const {
-    // releases,
-  } = props;
+  const releases = useReleasesList(props.id);
   const [visible, setVisible] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
-  const releases = [
-    { title: 'R2', id: 68 },
-    { title: 'R3', id: 69 },
-  ];
-  const totalReleases = `${releases.length} release`;
+  const { formatMessage } = useIntl();
 
   const handleTogglePopover = () => setVisible((prev) => !prev);
 
@@ -92,7 +113,15 @@ const ReleaseListCell = (props: any) => {
       <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
         <ActionWrapper height="2rem" width="2rem">
           <Typography style={{ maxWidth: '252px', cursor: 'pointer' }} textColor="neutral800">
-            {totalReleases}
+            {formatMessage(
+              {
+                id: 'content-releases.content-manager.list-view.releases-number',
+                defaultMessage: '{number} {number, plural, one {release} other {releases}}',
+              },
+              {
+                number: releases.length,
+              }
+            )}
           </Typography>
           <Flex>
             <SortIcon />
@@ -103,11 +132,11 @@ const ReleaseListCell = (props: any) => {
                 spacing={16}
               >
                 <ul>
-                  {releases.map(({ id, title }) => (
+                  {releases.map(({ id, name }) => (
                     <Box key={id} padding={3} as="li">
                       {/* @ts-expect-error – error with inferring the props from the as component */}
                       <Link to={`/plugins/content-releases/${id}`} as={NavLink} isExternal={false}>
-                        {title}
+                        {name}
                       </Link>
                     </Box>
                   ))}
