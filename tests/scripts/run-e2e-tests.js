@@ -198,7 +198,10 @@ yargs
           return acc;
         }, []);
 
-        const debugFlag = debug ? ['--debug'] : [];
+        const optionFlags = [];
+        if (debug) {
+          optionFlags.push('--debug');
+        }
 
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < chunkedDomains.length; i++) {
@@ -235,7 +238,14 @@ module.exports = config
 
               await execa(
                 'yarn',
-                ['playwright', 'test', '--config', pathToPlaywrightConfig, ...debugFlag, ...argv._],
+                [
+                  'playwright',
+                  'test',
+                  '--config',
+                  pathToPlaywrightConfig,
+                  ...optionFlags,
+                  ...argv._,
+                ],
                 {
                   stdio: 'inherit',
                   cwd,
