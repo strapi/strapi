@@ -3,13 +3,17 @@ import * as React from 'react';
 import { Box, Flex, Popover, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { SortIcon } from '@strapi/helper-plugin';
+import { EntityService, Common } from '@strapi/types';
+import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
-import { useIntl } from 'react-intl';
+
+import { useGetMappedEntriesInReleasesQuery } from '../services/release';
+import { useTypedSelector } from '../store/hooks';
 
 import type { CMAdminConfiguration, ListLayoutRow } from '@strapi/admin/strapi-admin';
-import { useTypedSelector } from '../store/hooks';
-import { useGetMappedEntriesInReleasesQuery } from '../services/release';
+
+type Entity = EntityService.Result<Common.UID.Schema>;
 
 const Button = styled.button`
   svg {
@@ -87,7 +91,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
         fieldSchema: { type: 'string' },
         metadatas: { label: 'To be released in', searchable: true, sortable: false },
         name: 'releasedAt',
-        cellFormatter: (props: object) => <ReleaseListCell {...props} />,
+        cellFormatter: (props: Entity) => <ReleaseListCell {...props} />,
       },
     ],
     layout,
@@ -98,10 +102,12 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
  * ReleaseListCell
  * -----------------------------------------------------------------------------------------------*/
 
-interface ReleaseListCellProps {}
+interface ReleaseListCellProps {
+  id: Entity['id'];
+}
 
-const ReleaseListCell = (props: any) => {
-  const releases = useReleasesList(props.id);
+const ReleaseListCell = ({ id }: ReleaseListCellProps) => {
+  const releases = useReleasesList(id);
   const [visible, setVisible] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement>(null);
   const { formatMessage } = useIntl();
@@ -113,18 +119,20 @@ const ReleaseListCell = (props: any) => {
       <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
         <ActionWrapper height="2rem" width="2rem">
           <Typography style={{ maxWidth: '252px', cursor: 'pointer' }} textColor="neutral800">
-            {formatMessage(
-              {
-                id: 'content-releases.content-manager.list-view.releases-number',
-                defaultMessage: '{number} {number, plural, one {release} other {releases}}',
-              },
-              {
-                number: releases.length,
-              }
-            )}
+            {releases.length > 0
+              ? formatMessage(
+                  {
+                    id: 'content-releases.content-manager.list-view.releases-number',
+                    defaultMessage: '{number} {number, plural, one {release} other {releases}}',
+                  },
+                  {
+                    number: releases.length,
+                  }
+                )
+              : '-'}
           </Typography>
           <Flex>
-            <SortIcon />
+            {releases.length > 0 && <SortIcon />}
             {visible && (
               <Popover
                 onDismiss={handleTogglePopover}
