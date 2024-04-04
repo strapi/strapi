@@ -62,7 +62,7 @@ yargs
      * This lets us pass any other arguments to playwright
      * e.g. the name of a specific test or the project we want to run
      */
-    'unknown-options-as-args': false,
+    'unknown-options-as-args': true,
   })
   .command({
     command: '*',
