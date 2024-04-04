@@ -37,26 +37,15 @@ const localeToLookup: Transform = (contentType, params) => {
   }
 
   if (params.locale) {
-    return assoc(['lookup', 'locale'], params.locale, params);
-  }
+    if (typeof params.locale === 'string') {
+      if (params.locale === '*') {
+        return params;
+      }
 
-  return params;
-};
-
-/**
- * Add locale lookup query to the params
- */
-const multiLocaleToLookup: Transform = (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
-    return params;
-  }
-
-  if (params.locale) {
-    if (params.locale === '*') {
-      return params;
+      return assoc(['lookup', 'locale'], params.locale, params);
     }
 
-    return assoc(['lookup', 'locale'], params.locale, params);
+    return assoc(['lookup', 'locale', '$in'], params.locale, params);
   }
 
   return params;
@@ -70,7 +59,7 @@ const localeToData: Transform = (contentType, params) => {
     return params;
   }
 
-  if (params.locale) {
+  if (params.locale && typeof params.locale === 'string') {
     return assoc(['data', 'locale'], params.locale, params);
   }
 
@@ -79,12 +68,10 @@ const localeToData: Transform = (contentType, params) => {
 
 const defaultLocaleCurry = curry(defaultLocale);
 const localeToLookupCurry = curry(localeToLookup);
-const multiLocaleToLookupCurry = curry(multiLocaleToLookup);
 const localeToDataCurry = curry(localeToData);
 
 export {
   defaultLocaleCurry as defaultLocale,
   localeToLookupCurry as localeToLookup,
   localeToDataCurry as localeToData,
-  multiLocaleToLookupCurry as multiLocaleToLookup,
 };

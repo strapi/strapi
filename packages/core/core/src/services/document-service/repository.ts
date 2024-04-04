@@ -86,7 +86,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const query = await async.pipe(
       omit('status'),
       i18n.defaultLocale(contentType),
-      i18n.multiLocaleToLookup(contentType),
+      i18n.localeToLookup(contentType),
       transformParamsToQuery(uid),
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
@@ -155,7 +155,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       i18n.defaultLocale(contentType),
-      i18n.multiLocaleToLookup(contentType)
+      i18n.localeToLookup(contentType)
     )(params);
 
     // Get deep populate
@@ -267,7 +267,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   async function publish(documentId: string, params = {} as any) {
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
-      i18n.multiLocaleToLookup(contentType)
+      i18n.localeToLookup(contentType)
     )(params);
 
     await deleteFn(documentId, {
@@ -311,7 +311,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   async function unpublish(documentId: string, params = {} as any) {
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
-      i18n.multiLocaleToLookup(contentType)
+      i18n.localeToLookup(contentType)
     )(params);
 
     const { deletedEntries } = await deleteFn(documentId, {
@@ -325,7 +325,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   async function discardDraft(documentId: string, params = {} as any) {
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
-      i18n.multiLocaleToLookup(contentType)
+      i18n.localeToLookup(contentType)
     )(params);
 
     await deleteFn(documentId, {

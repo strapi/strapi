@@ -140,5 +140,38 @@ describe('Document Service', () => {
         expect(publishedArticlesDb[0].locale).toBe('en');
       })
     );
+
+    it(
+      'publish multiple locales',
+      testInTransaction(async () => {
+        const articlesDb = await findArticlesDb({ documentId: 'Article1', publishedAt: null });
+        const documentId = articlesDb.at(0)!.documentId;
+
+        const result = await strapi.documents(ARTICLE_UID).publish(documentId, {
+          locale: ['en', 'it'], // should only publish the locales provided
+        });
+
+        expect(result).not.toBeNull();
+
+        const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
+          findArticlesDb({
+            documentId,
+            publishedAt: { $null: true },
+          }),
+          findArticlesDb({
+            documentId,
+            publishedAt: { $notNull: true },
+          }),
+        ]);
+
+        // Original drafts should still be there
+        expect(draftArticlesDb.length).toBe(articlesDb.length);
+
+        expect(publishedArticlesDb.length).toBe(2);
+        publishedArticlesDb.forEach((article) => {
+          expect(['en', 'it']).toContain(article.locale);
+        });
+      })
+    );
   });
 });

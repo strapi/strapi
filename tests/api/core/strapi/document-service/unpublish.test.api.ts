@@ -56,5 +56,30 @@ describe('Document Service', () => {
         });
       })
     );
+
+    it(
+      'unpublish multiple locales of a document',
+      testInTransaction(async () => {
+        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+
+        // Publish first all locales
+        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId, { locale: '*' });
+        const publishedArticlesBefore = await findPublishedArticlesDb(articleDb.documentId);
+
+        await strapi.documents(ARTICLE_UID).unpublish(articleDb.documentId, {
+          locale: ['en', 'it'],
+        });
+
+        const publishedArticlesAfter = await findPublishedArticlesDb(articleDb.documentId);
+
+        // Sanity check to validate there are multiple locales
+        expect(publishedArticlesBefore.length).toBeGreaterThan(1);
+        // Only the english locale should have been unpublished
+        expect(publishedArticlesAfter.length).toBe(publishedArticlesBefore.length - 2);
+        publishedArticlesAfter.forEach((article) => {
+          expect(['en', 'it']).not.toContain(article.locale);
+        });
+      })
+    );
   });
 });

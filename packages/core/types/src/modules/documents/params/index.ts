@@ -43,7 +43,7 @@ export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIn
     // Publication Status
     [HasMember<TKind, 'status'>, PublicationStatus.Param],
     // Locale
-    [HasMember<TKind, 'locale'>, { locale?: Locale }], // TODO: also allow arrays ?
+    [HasMember<TKind, 'locale'>, { locale?: Locale | Locale[] }],
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data
