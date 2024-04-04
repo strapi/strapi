@@ -38,6 +38,9 @@ const config = {
         };
       },
     }),
+    ["@cmfcmf/docusaurus-search-local", {
+      indexBlog: false,
+    }]
   ],
   presets: [
     [
