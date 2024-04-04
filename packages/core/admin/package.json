@@ -161,10 +161,10 @@
     "style-loader": "3.3.4",
     "typescript": "5.2.2",
     "use-context-selector": "1.4.1",
-    "vite": "5.0.11",
+    "vite": "5.0.13",
     "webpack": "^5.89.0",
     "webpack-bundle-analyzer": "^4.10.1",
-    "webpack-dev-middleware": "6.1.1",
+    "webpack-dev-middleware": "6.1.2",
     "webpack-hot-middleware": "2.26.0",
     "yup": "0.32.9"
   },
