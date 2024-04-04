@@ -1,5 +1,7 @@
 import { PLUGIN_ID, FEATURE_ID } from './constants';
+import { Panel } from './routes/content-manager/[model]/[id]/components/Panel';
 import { reviewWorkflowsApi } from './services/api';
+import { addColumnToTableHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
@@ -14,6 +16,17 @@ const admin: Plugin.Config.AdminInput = {
 
       // @ts-expect-error TS doesn't want you to extend the middleware.
       app.addMiddlewares([() => reviewWorkflowsApi.middleware]);
+
+      app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
+
+      const contentManagerPluginApis = app.getPlugin('content-manager').apis;
+
+      if (
+        'addEditViewSidePanel' in contentManagerPluginApis &&
+        typeof contentManagerPluginApis.addEditViewSidePanel === 'function'
+      ) {
+        contentManagerPluginApis.addEditViewSidePanel([Panel]);
+      }
 
       app.addSettingsLink('global', {
         id: PLUGIN_ID,

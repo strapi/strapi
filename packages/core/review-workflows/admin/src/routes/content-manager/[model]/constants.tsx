@@ -1,12 +1,13 @@
 import { ASSIGNEE_ATTRIBUTE_NAME, STAGE_ATTRIBUTE_NAME } from './[id]/components/constants';
 import { AssigneeFilter } from './components/AssigneeFilter';
 import { StageFilter } from './components/StageFilter';
+import { AssigneeColumn, StageColumn } from './components/TableColumns';
 
 import type { Filters } from '@strapi/admin/strapi-admin';
 import type { ListFieldLayout } from '@strapi/plugin-content-manager/strapi-admin';
 import type { MessageDescriptor } from 'react-intl';
 
-export const REVIEW_WORKFLOW_COLUMNS_EE = [
+export const REVIEW_WORKFLOW_COLUMNS = [
   {
     name: STAGE_ATTRIBUTE_NAME,
     attribute: {
@@ -24,6 +25,7 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
       name: 'name',
       type: 'string',
     },
+    cellFormatter: (props) => <StageColumn {...props} />,
   },
   {
     name: ASSIGNEE_ATTRIBUTE_NAME,
@@ -42,6 +44,7 @@ export const REVIEW_WORKFLOW_COLUMNS_EE = [
       name: 'firstname',
       type: 'string',
     },
+    cellFormatter: (props) => <AssigneeColumn {...props} />,
   },
 ] satisfies Array<Omit<ListFieldLayout, 'label'> & { label: MessageDescriptor }>;
 

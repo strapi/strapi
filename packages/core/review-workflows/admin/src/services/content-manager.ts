@@ -24,7 +24,7 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
       GetStages.Params & { slug: string }
     >({
       query: ({ model, slug, id }) => ({
-        url: `/admin/content-manager/${slug}/${model}/${id}/stages`,
+        url: `/review-workflows/content-manager/${slug}/${model}/${id}/stages`,
         method: 'GET',
       }),
       transformResponse: (res: GetStages.Response) => {
@@ -42,7 +42,7 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
       UpdateStage.Request['body'] & UpdateStage.Params & { slug: string }
     >({
       query: ({ model, slug, id, ...data }) => ({
-        url: `/admin/content-manager/${slug}/${model}/${id}/stage`,
+        url: `/review-workflows/content-manager/${slug}/${model}/${id}/stage`,
         method: 'PUT',
         data,
       }),
@@ -54,7 +54,7 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
       UpdateAssignee.Request['body'] & UpdateAssignee.Params & { slug: string }
     >({
       query: ({ model, slug, id, ...data }) => ({
-        url: `/admin/content-manager/${slug}/${model}/${id}/assignee`,
+        url: `/review-workflows/content-manager/${slug}/${model}/${id}/assignee`,
         method: 'PUT',
         data,
       }),
@@ -68,7 +68,9 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
       transformResponse: (res: { data: Contracts.ContentTypes.ContentType[] }) => {
         return res.data.reduce<ContentTypes>(
           (acc, curr) => {
-            acc[curr.kind].push(curr);
+            if (curr.isDisplayed) {
+              acc[curr.kind].push(curr);
+            }
             return acc;
           },
           {

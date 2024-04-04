@@ -29,12 +29,9 @@ const AssigneeSelect = () => {
     allowedActions: { canRead },
     isLoading: isLoadingPermissions,
   } = useRBAC(permissions.settings?.users);
-  const { data, isLoading, isError } = useAdminUsers(
-    { id },
-    {
-      skip: isLoadingPermissions || !canRead || !id,
-    }
-  );
+  const { data, isLoading, isError } = useAdminUsers(undefined, {
+    skip: isLoadingPermissions || !canRead,
+  });
 
   const users = data?.users || [];
 

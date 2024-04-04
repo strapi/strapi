@@ -6,11 +6,16 @@ import { getStageColorByHex } from '../../../../utils/colors';
 import { getDisplayName } from '../../../../utils/users';
 
 interface StageColumnProps {
-  color?: string;
-  name: string;
+  documentId: string;
+  id: number;
+  strapi_stage?: {
+    color?: string;
+    name: string;
+  };
 }
 
-const StageColumn = ({ color = STAGE_COLOR_DEFAULT, name }: StageColumnProps) => {
+const StageColumn = (props: StageColumnProps) => {
+  const { color = STAGE_COLOR_DEFAULT, name } = props.strapi_stage ?? {};
   const { themeColorName } = getStageColorByHex(color) ?? {};
 
   return (
@@ -32,11 +37,17 @@ const StageColumn = ({ color = STAGE_COLOR_DEFAULT, name }: StageColumnProps) =>
 };
 
 interface AssigneeColumnProps {
-  user: Pick<SanitizedAdminUser, 'firstname' | 'lastname' | 'username' | 'email'>;
+  documentId: string;
+  id: number;
+  strapi_assignee?: Pick<
+    SanitizedAdminUser,
+    'firstname' | 'lastname' | 'username' | 'email'
+  > | null;
 }
 
-const AssigneeColumn = ({ user }: AssigneeColumnProps) => {
-  return <Typography textColor="neutral800">{getDisplayName(user)}</Typography>;
+const AssigneeColumn = (props: AssigneeColumnProps) => {
+  const { strapi_assignee: user } = props;
+  return <Typography textColor="neutral800">{user ? getDisplayName(user) : '-'}</Typography>;
 };
 
 export { StageColumn, AssigneeColumn };

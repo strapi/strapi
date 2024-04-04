@@ -9,9 +9,14 @@ import { StageSelect } from './StageSelect';
 import type { PanelComponent } from '@strapi/plugin-content-manager/strapi-admin';
 
 const Panel: PanelComponent = () => {
-  const { collectionType = '', slug = '' } = useParams<{
+  const {
+    collectionType = '',
+    slug = '',
+    id,
+  } = useParams<{
     collectionType: string;
     slug: string;
+    id: string;
   }>();
 
   const { schema } = useDocument({
@@ -20,7 +25,7 @@ const Panel: PanelComponent = () => {
   });
   const { formatMessage } = useIntl();
 
-  if (!window.strapi.isEE || !schema?.options?.reviewWorkflows) {
+  if (!window.strapi.isEE || !schema?.options?.reviewWorkflows || !id || id === 'create') {
     return null;
   }
 

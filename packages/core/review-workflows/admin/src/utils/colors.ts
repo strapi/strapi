@@ -18,7 +18,7 @@ const STAGE_COLORS: Record<string, string> = {
   neutral0: 'White',
 };
 
-const getStageColorByHex = (hex: string) => {
+const getStageColorByHex = (hex?: string) => {
   if (!hex) {
     return null;
   }

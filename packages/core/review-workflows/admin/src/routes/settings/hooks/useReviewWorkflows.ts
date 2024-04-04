@@ -51,9 +51,9 @@ const useReviewWorkflows = (params: UseReviewWorkflowsArgs = {}) => {
 
   const [createWorkflow] = useCreateWorkflowMutation();
   const create = React.useCallback(
-    async (data: Create.Request['body']) => {
+    async (data: Create.Request['body']['data']) => {
       try {
-        const res = await createWorkflow(data);
+        const res = await createWorkflow({ data });
 
         if ('error' in res) {
           toggleNotification({
@@ -61,7 +61,7 @@ const useReviewWorkflows = (params: UseReviewWorkflowsArgs = {}) => {
             message: formatAPIError(res.error),
           });
 
-          return;
+          return res;
         }
 
         toggleNotification({
@@ -69,7 +69,7 @@ const useReviewWorkflows = (params: UseReviewWorkflowsArgs = {}) => {
           message: formatMessage({ id: 'actions.created', defaultMessage: 'Created workflow' }),
         });
 
-        return res.data;
+        return res;
       } catch (err) {
         toggleNotification({
           type: 'danger',

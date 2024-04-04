@@ -51,9 +51,10 @@ interface WorkflowStage extends Pick<IStage, 'id' | 'name' | 'permissions' | 'co
 interface StagesProps {
   canDelete?: boolean;
   canUpdate?: boolean;
+  isCreating?: boolean;
 }
 
-const Stages = ({ canDelete = true, canUpdate = true }: StagesProps) => {
+const Stages = ({ canDelete = true, canUpdate = true, isCreating = false }: StagesProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const addFieldRow = useForm('Stages', (state) => state.addFieldRow);
@@ -89,6 +90,7 @@ const Stages = ({ canDelete = true, canUpdate = true }: StagesProps) => {
                   canReorder={stages.length > 1}
                   canUpdate={canUpdate}
                   stagesCount={stages.length}
+                  isOpen={isCreating}
                   {...stage}
                 />
               </Box>
@@ -455,7 +457,7 @@ interface ColorSelectorProps
 
 const ColorSelector = ({ disabled, label, name, required }: ColorSelectorProps) => {
   const { formatMessage } = useIntl();
-  const { value, error, onChange } = useField(name);
+  const { value, error, onChange } = useField<string>(name);
 
   const colorOptions = AVAILABLE_COLORS.map(({ hex, name }) => ({
     value: hex,
@@ -478,10 +480,10 @@ const ColorSelector = ({ disabled, label, name, required }: ColorSelectorProps) 
       required={required}
       // @ts-expect-error – ReactNode is fine for the `label` prop.
       label={label}
-      onChange={(value) => {
-        onChange(name, value);
+      onChange={(v) => {
+        onChange(name, v.toString());
       }}
-      value={value.toUpperCase()}
+      value={value?.toUpperCase()}
       startIcon={
         <Flex
           as="span"
@@ -601,7 +603,7 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
               // we must coerce the string value back to an object
               const permissions = values.map((value) => ({
                 role: parseInt(value, 10),
-                action: 'admin::review-workflows.stage.transition',
+                action: 'plugin::review-workflows.review-workflows.stage.transition',
               }));
 
               onChange(name, permissions);

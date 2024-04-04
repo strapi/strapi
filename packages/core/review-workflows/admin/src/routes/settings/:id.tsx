@@ -16,7 +16,7 @@ import { Button, Flex, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { LimitsModal } from '../../components/LimitsModal';
@@ -110,6 +110,7 @@ const EditPage = () => {
   const isCreatingWorkflow = id === 'create';
   const { formatMessage } = useIntl();
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
+  const navigate = useNavigate();
   const { toggleNotification } = useNotification();
   const {
     isLoading: isLoadingWorkflow,
@@ -117,6 +118,7 @@ const EditPage = () => {
     workflows,
     error,
     update,
+    create,
   } = useReviewWorkflows({ id: isCreatingWorkflow ? undefined : id });
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions['settings']?.['review-workflows']
@@ -148,7 +150,7 @@ const EditPage = () => {
 
   const submitForm = async (data: FormValues, helpers: Pick<FormHelpers, 'setErrors'>) => {
     try {
-      if (id) {
+      if (!isCreatingWorkflow) {
         const res = await update(id, {
           ...data,
           // compare permissions of stages and only submit them if at least one has
@@ -179,6 +181,14 @@ const EditPage = () => {
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         }
+      } else {
+        const res = await create(data);
+
+        if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
+          helpers.setErrors(formatValidationErrors(res.error));
+        } else if ('data' in res) {
+          navigate(`../${res.data.id}`);
+        }
       }
     } catch (error) {
       toggleNotification({
@@ -205,9 +215,11 @@ const EditPage = () => {
     const isContentTypeReassignment = data.contentTypes.some((contentType) =>
       contentTypesFromOtherWorkflows?.includes(contentType)
     );
-    const hasDeletedServerStages = currentWorkflow?.stages.every((stage) =>
-      data.stages.some((newStage) => newStage.id === stage.id)
-    );
+    const hasDeletedServerStages =
+      !isCreatingWorkflow &&
+      !currentWorkflow?.stages.every((stage) =>
+        data.stages.some((newStage) => newStage.id === stage.id)
+      );
 
     if (meta && numberOfWorkflows && meta?.workflowCount > parseInt(numberOfWorkflows, 10)) {
       /**
@@ -320,7 +332,7 @@ const EditPage = () => {
                     startIcon={<Check />}
                     type="submit"
                     size="M"
-                    disabled={!modified || isSubmitting}
+                    disabled={!modified || isSubmitting || values.stages.length === 0}
                     // if the confirm dialog is open the loading state is on
                     // the confirm button already
                     loading={!Boolean(Object.keys(savePrompts).length > 0) && isSubmitting}
@@ -350,7 +362,11 @@ const EditPage = () => {
             <Layout.Root>
               <Flex alignItems="stretch" direction="column" gap={7}>
                 <WorkflowAttributes canUpdate={canUpdate} />
-                <Stages canDelete={canDelete} canUpdate={canUpdate} />
+                <Stages
+                  canDelete={canDelete}
+                  canUpdate={canUpdate}
+                  isCreating={isCreatingWorkflow}
+                />
               </Flex>
             </Layout.Root>
             <ConfirmDialog
