@@ -43,6 +43,7 @@ const Panel: PanelComponent = () => {
   };
 };
 
+// @ts-expect-error – this is fine, we like to label the core panels / actions.
 Panel.type = 'review-workflows';
 
 export { Panel };
