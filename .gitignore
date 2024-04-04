@@ -101,17 +101,13 @@ test-apps
 coverage
 
 ############################
-# Documentation
-############################
-
-dist
-
-############################
 # Builds
 ############################
 
 packages/generators/app/files/public/
 schema.graphql
+dist
+.nx
 
 ############################
 # Example app
