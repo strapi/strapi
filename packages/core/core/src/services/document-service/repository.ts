@@ -1,31 +1,28 @@
-import { omit, assoc, curry, merge } from 'lodash/fp';
+import { omit, assoc, merge } from 'lodash/fp';
 
 import { async, contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { UID } from '@strapi/types';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
 import { transformParamsDocumentId } from './transform/id-transform';
 
-import * as components from '../entity-service/components';
+import * as components from './components';
+import { createEntriesService } from './entries';
 
 import { pickSelectionParams } from './params';
+import { applyTransforms } from './attributes';
 import entityValidator from '../entity-validator';
-import { applyTransforms } from '../entity-service/attributes';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
 import { getDeepPopulate } from './utils/populate';
 import { transformData } from './transform/data';
-
-const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
-  const query = strapi.get('query-params').transform(uid, params);
-
-  return assoc('where', { ...params?.lookup, ...query.where }, query);
-});
+import { transformParamsToQuery } from './transform/query';
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
+
+  const entries = createEntriesService(uid);
 
   async function findMany(params = {} as any) {
     const query = await async.pipe(
@@ -68,14 +65,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return strapi.db.query(uid).findOne(query);
   }
 
-  async function deleteEntry(id: number) {
-    const componentsToDelete = await getComponents({ id });
-
-    await strapi.db.query(uid).delete({ where: { id } });
-
-    await deleteComponents(componentsToDelete as any, { loadComponents: false });
-  }
-
   async function deleteFn(documentId: string, params = {} as any) {
     const query = await async.pipe(
       omit('status'),
@@ -92,39 +81,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const entriesToDelete = await strapi.db.query(uid).findMany(query);
 
     // Delete all matched entries and its components
-    await async.map(entriesToDelete, (entryToDelete: any) => deleteEntry(entryToDelete.id));
+    await async.map(entriesToDelete, (entryToDelete: any) => entries.delete(entryToDelete.id));
 
     return { deletedEntries: entriesToDelete };
-  }
-
-  async function createEntry(params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
-
-    const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
-
-    // Validation
-    if (!data) {
-      throw new Error('Create requires data attribute');
-    }
-
-    // @ts-expect-error we need type guard to assert that data has the valid type
-    const validData = await entityValidator.validateEntityCreation(contentType, data, {
-      // Note: publishedAt value will always be set when DP is disabled
-      isDraft: !params?.data?.publishedAt,
-      locale: params?.locale,
-    });
-
-    // Component handling
-    const componentData = await createComponents(validData);
-    const contentTypeWithoutComponentData = omitComponentData(validData);
-    const entryData = applyTransforms(
-      Object.assign(contentTypeWithoutComponentData, componentData) as any,
-      { contentType }
-    );
-
-    const doc = await strapi.db.query(uid).create({ ...query, data: entryData });
-
-    return doc;
   }
 
   async function create(params = {} as any) {
@@ -136,7 +95,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.localeToData(contentType)
     )(params);
 
-    const doc = await createEntry(queryParams);
+    const doc = await entries.create(queryParams);
 
     if (hasDraftAndPublish && params.status === 'published') {
       return publish(doc.documentId, params).then((doc) => doc.versions[0]);
@@ -172,7 +131,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         assoc('documentId', createDocumentId()),
         // Merge new data into it
         (data) => merge(data, queryParams.data),
-        (data) => createEntry({ ...queryParams, data, status: 'draft' })
+        (data) => entries.create({ ...queryParams, data, status: 'draft' })
       )
     );
 
@@ -232,7 +191,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         .findOne({ where: { documentId } });
 
       if (documentExists) {
-        updatedDraft = await createEntry({
+        updatedDraft = await entries.create({
           ...queryParams,
           data: { ...queryParams.data, documentId },
         });
@@ -295,7 +254,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
           return transformData(entry, opts);
         },
         // Create the published entry
-        (data) => createEntry({ ...queryParams, data, locale: data.locale, status: 'published' })
+        (data) => entries.create({ ...queryParams, data, locale: data.locale, status: 'published' })
       )
     );
 
@@ -351,30 +310,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
           return transformData(entry, opts);
         },
         // Create the draft entry
-        (data) => createEntry({ ...queryParams, locale: data.locale, data, status: 'draft' })
+        (data) => entries.create({ ...queryParams, locale: data.locale, data, status: 'draft' })
       )
     );
 
     return { versions: draftEntries };
   }
 
-  /**
-   * Component handling
-   */
-  async function createComponents(data: any) {
-    return components.createComponents(uid, data);
-  }
-
   async function updateComponents(entry: any, data: any) {
     return components.updateComponents(uid, entry, data);
-  }
-
-  async function getComponents(entry: any) {
-    return components.getComponents(uid, entry);
-  }
-
-  async function deleteComponents(entry: any, opts: any) {
-    return components.deleteComponents(uid, entry, opts);
   }
 
   function omitComponentData(data: any) {
@@ -394,10 +338,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
     discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
 
-    // createComponents,
     updateComponents,
-    // deleteComponents,
-    // getComponents,
     omitComponentData,
   };
 };

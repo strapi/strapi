@@ -18,7 +18,6 @@ import { transformData } from './transform/data';
  * const allArticles = strapi.documents('api::article.article').findMany(params)
  *
  */
-// TODO: support global document service middleware & per repo middlewares
 export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Service => {
   const repositories = new Map<string, Modules.Documents.ServiceInstance>();
   const middlewares = createMiddlewareManager();
@@ -51,7 +50,7 @@ export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Se
 -> make all function receive a param object so we can have a simple object inside the middlewares to manipulate
 
 strapi.documents('api::x.x').findOne({
-  id: 1,
+  documentId: 1,
   populate: ['author'],
 });
 
@@ -61,9 +60,23 @@ strapi.documents('api::x.x').findMany({
 });
 
 strapi.documents('api::x.x').update({
-  id: 1,
+  documentId: 1,
   data: { title: 'New title' },
 });
+
+strapi.documents('api::x.x').findOne({ documentId: 1 });
+strapi.documents('api::x.x').findOne({ id: 1});
+
+const ctx = {
+ params,
+ contentType,
+ action
+}
+
+
+-> make all functions async
+
+??????  allowing to pass an entry id inside the document methods ??????
 
 
 -> expose some entry apis
