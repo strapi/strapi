@@ -2,12 +2,17 @@ import * as React from 'react';
 
 import {
   useTracking,
+  useFetchClient,
   useStrapiApp,
   useNotification,
   NotificationConfig,
   DescriptionComponentRenderer,
+  useAPIErrorHandler,
+  useTable,
+  useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
+  Box,
   Button,
   Dialog,
   DialogBody,
@@ -19,11 +24,15 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
+import { AxiosError, AxiosResponse } from 'axios';
 import { useIntl } from 'react-intl';
+import { useQueryClient, useMutation } from 'react-query';
 
+import { Contracts } from '../../../../../../shared';
 import { useDoc } from '../../../../hooks/useDocument';
+import { getTranslation } from '../../../../utils/translations';
 
-// import { PublishAction } from './PublishAction';
+import { PublishAction } from './PublishAction';
 
 import type { BulkActionComponent, ContentManagerPlugin } from '../../../../content-manager';
 
@@ -80,6 +89,8 @@ const BulkActionsRenderer = () => {
   const plugins = useStrapiApp('BulkActionsRenderer', (state) => state.plugins);
 
   const { model, collectionType } = useDoc();
+  const { selectedRows } = useTable('BulkActionsRenderer', (state) => state);
+  const documentIds = selectedRows.map((entry) => entry.id.toString());
 
   return (
     <Flex gap={2}>
@@ -87,7 +98,7 @@ const BulkActionsRenderer = () => {
         props={{
           model,
           collectionType,
-          documentIds: [],
+          documentIds,
         }}
         descriptions={(
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
@@ -292,187 +303,219 @@ const BulkActionModal = ({
  * DefaultBulkActions
  * -----------------------------------------------------------------------------------------------*/
 
-// const DeleteAction: BulkActionComponent = ({ ids, model: slug }) => {
-//   const { formatMessage } = useIntl();
-//   const { post } = useFetchClient();
-//   const toggleNotification = useNotification();
-//   const { formatAPIError } = useAPIErrorHandler(getTranslation);
-//   const contentType = useTypedSelector((state) => state['content-manager_listView'].contentType);
-//   const { setSelectedEntries } = useTableContext();
+const DeleteAction: BulkActionComponent = ({ documentIds, model: slug }) => {
+  const { formatMessage } = useIntl();
+  const { post } = useFetchClient();
+  const { toggleNotification } = useNotification();
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
+  const { selectRow } = useTable('deleteAction', (state) => state);
+  const { schema } = useDoc();
 
-//   const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
-//   const queryClient = useQueryClient();
-//   const { trackUsage } = useTracking();
-//   const hasDeletePermission = useAllowedActions(slug).canDelete;
+  const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
+  const queryClient = useQueryClient();
+  const { trackUsage } = useTracking();
+  const contentPermissions = getContentPermissions(slug);
+  const {
+    allowedActions: { canDelete: hasDeletePermission },
+  } = useRBAC(contentPermissions);
 
-//   const handleConfirmDeleteAllData = async () => {
-//     try {
-//       await post<
-//         Contracts.CollectionTypes.BulkDelete.Response,
-//         AxiosResponse<Contracts.CollectionTypes.BulkDelete.Response>,
-//         Contracts.CollectionTypes.BulkDelete.Request['body']
-//       >(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
-//         ids,
-//       });
+  const handleConfirmDeleteAllData = async () => {
+    try {
+      await post<
+        Contracts.CollectionTypes.BulkDelete.Response,
+        AxiosResponse<Contracts.CollectionTypes.BulkDelete.Response>,
+        Contracts.CollectionTypes.BulkDelete.Request['body']
+      >(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
+        documentIds,
+      });
 
-//       queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
-//       setSelectedEntries([]);
-//       trackUsage('didBulkDeleteEntries');
-//     } catch (err) {
-//       if (err instanceof AxiosError) {
-//         toggleNotification({
-//           type: 'warning',
-//           message: formatAPIError(err),
-//         });
-//       }
-//     }
-//   };
+      queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
+      selectRow([]);
+      trackUsage('didBulkDeleteEntries');
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(err),
+        });
+      }
+    }
+  };
 
-//   if (!hasDeletePermission) return null;
+  if (!hasDeletePermission) return null;
 
-//   return {
-//     actionType: 'delete',
-//     variant: 'danger-light',
-//     label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
-//     dialog: {
-//       type: 'dialog',
-//       title: formatMessage({
-//         id: 'app.components.ConfirmDialog.title',
-//         defaultMessage: 'Confirmation',
-//       }),
-//       content: (
-//         <Flex direction="column" alignItems="stretch" gap={2}>
-//           <Typography id="confirm-description" textAlign="center">
-//             {formatMessage({
-//               id: 'popUpWarning.bodyMessage.contentType.delete.all',
-//               defaultMessage: 'Are you sure you want to delete these entries?',
-//             })}
-//           </Typography>
-//           {hasI18nEnabled && (
-//             <Box textAlign="center" padding={3}>
-//               <Typography textColor="danger500">
-//                 {formatMessage(
-//                   {
-//                     id: getTranslation('Settings.list.actions.deleteAdditionalInfos'),
-//                     defaultMessage:
-//                       'This will delete the active locale versions <em>(from Internationalization)</em>',
-//                   },
-//                   {
-//                     em: Emphasis,
-//                   }
-//                 )}
-//               </Typography>
-//             </Box>
-//           )}
-//         </Flex>
-//       ),
-//       onConfirm: handleConfirmDeleteAllData,
-//     },
-//   };
-// };
+  return {
+    actionType: 'delete',
+    variant: 'danger-light',
+    label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      }),
+      content: (
+        <Flex direction="column" alignItems="stretch" gap={2}>
+          <Typography id="confirm-description" textAlign="center">
+            {formatMessage({
+              id: 'popUpWarning.bodyMessage.contentType.delete.all',
+              defaultMessage: 'Are you sure you want to delete these entries?',
+            })}
+          </Typography>
+          {hasI18nEnabled && (
+            <Box textAlign="center" padding={3}>
+              <Typography textColor="danger500">
+                {formatMessage(
+                  {
+                    id: getTranslation('Settings.list.actions.deleteAdditionalInfos'),
+                    defaultMessage:
+                      'This will delete the active locale versions <em>(from Internationalization)</em>',
+                  },
+                  {
+                    em: Emphasis,
+                  }
+                )}
+              </Typography>
+            </Box>
+          )}
+        </Flex>
+      ),
+      onConfirm: handleConfirmDeleteAllData,
+    },
+  };
+};
 
-// const UnpublishAction: BulkActionComponent = ({ ids, model: slug }) => {
-//   const { formatMessage } = useIntl();
-//   const { post } = useFetchClient();
-//   const toggleNotification = useNotification();
-//   const { formatAPIError } = useAPIErrorHandler(getTranslation);
-//   const { selectedEntries, setSelectedEntries } = useTableContext();
-//   const { data, contentType } = useTypedSelector((state) => state['content-manager_listView']);
-//   const selectedEntriesObjects = data.filter((entry) => selectedEntries.includes(entry.id));
+const UnpublishAction: BulkActionComponent = ({ documentIds, model: slug }) => {
+  const { formatMessage } = useIntl();
+  const { post } = useFetchClient();
+  const { toggleNotification } = useNotification();
+  const { formatAPIError } = useAPIErrorHandler(getTranslation);
+  const { selectRow, selectedRows } = useTable('unpublishAction', (state) => state);
+  const { schema } = useDoc();
+  const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
+  const contentPermissions = getContentPermissions(slug);
+  const {
+    allowedActions: { canPublish: hasPublishPermission },
+  } = useRBAC(contentPermissions);
 
-//   const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
-//   const queryClient = useQueryClient();
-//   const hasPublishPermission = useAllowedActions(slug).canPublish;
+  const queryClient = useQueryClient();
 
-//   const bulkUnpublishMutation = useMutation<
-//     Contracts.CollectionTypes.BulkUnpublish.Response,
-//     AxiosError<Required<Pick<Contracts.CollectionTypes.BulkUnpublish.Response, 'error'>>>,
-//     Contracts.CollectionTypes.BulkUnpublish.Request['body']
-//   >(
-//     async (body) => {
-//       const { data } = await post<
-//         Contracts.CollectionTypes.BulkUnpublish.Response,
-//         AxiosResponse<Contracts.CollectionTypes.BulkUnpublish.Response>,
-//         Contracts.CollectionTypes.BulkUnpublish.Request['body']
-//       >(`/content-manager/collection-types/${slug}/actions/bulkUnpublish`, body);
+  const bulkUnpublishMutation = useMutation<
+    Contracts.CollectionTypes.BulkUnpublish.Response,
+    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkUnpublish.Response, 'error'>>>,
+    Contracts.CollectionTypes.BulkUnpublish.Request['body']
+  >(
+    async (body) => {
+      const { data } = await post<
+        Contracts.CollectionTypes.BulkUnpublish.Response,
+        AxiosResponse<Contracts.CollectionTypes.BulkUnpublish.Response>,
+        Contracts.CollectionTypes.BulkUnpublish.Request['body']
+      >(`/content-manager/collection-types/${slug}/actions/bulkUnpublish`, body);
 
-//       return data;
-//     },
-//     {
-//       onSuccess() {
-//         toggleNotification({
-//           type: 'success',
-//           message: {
-//             id: 'content-manager.success.record.unpublish',
-//             defaultMessage: 'Unpublished',
-//           },
-//         });
+      return data;
+    },
+    {
+      onSuccess() {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'content-manager.success.record.unpublish',
+            defaultMessage: 'Unpublished',
+          }),
+        });
 
-//         queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
-//         setSelectedEntries([]);
-//       },
-//       onError(error) {
-//         toggleNotification({
-//           type: 'warning',
-//           message: formatAPIError(error),
-//         });
-//       },
-//     }
-//   );
+        queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
+        selectRow([]);
+      },
+      onError(error) {
+        toggleNotification({
+          type: 'warning',
+          message: formatAPIError(error),
+        });
+      },
+    }
+  );
 
-//   const handleConfirmUnpublishAllData = async () => {
-//     await bulkUnpublishMutation.mutateAsync({ ids });
-//   };
+  const handleConfirmUnpublishAllData = async () => {
+    await bulkUnpublishMutation.mutateAsync({ documentIds });
+  };
 
-//   const showUnpublishButton =
-//     hasPublishPermission && selectedEntriesObjects.some((entry) => entry.publishedAt);
+  const showUnpublishButton =
+    hasPublishPermission && selectedRows.some((entry) => entry.status === 'published');
 
-//   if (!showUnpublishButton) return null;
+  if (!showUnpublishButton) return null;
 
-//   return {
-//     actionType: 'unpublish',
-//     variant: 'tertiary',
-//     label: formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' }),
-//     dialog: {
-//       type: 'dialog',
-//       title: formatMessage({
-//         id: 'app.components.ConfirmDialog.title',
-//         defaultMessage: 'Confirmation',
-//       }),
-//       content: (
-//         <Flex direction="column" alignItems="stretch" gap={2}>
-//           <Typography id="confirm-description" textAlign="center">
-//             {formatMessage({
-//               id: 'popUpWarning.bodyMessage.contentType.unpublish.all',
-//               defaultMessage: 'Are you sure you want to unpublish these entries?',
-//             })}
-//           </Typography>
-//           {hasI18nEnabled && (
-//             <Box textAlign="center" padding={3}>
-//               <Typography textColor="danger500">
-//                 {formatMessage(
-//                   {
-//                     id: getTranslation('Settings.list.actions.unpublishAdditionalInfos'),
-//                     defaultMessage:
-//                       'This will unpublish the active locale versions <em>(from Internationalization)</em>',
-//                   },
-//                   {
-//                     em: Emphasis,
-//                   }
-//                 )}
-//               </Typography>
-//             </Box>
-//           )}
-//         </Flex>
-//       ),
-//       confirmButton: formatMessage({
-//         id: 'app.utils.unpublish',
-//         defaultMessage: 'Unpublish',
-//       }),
-//       onConfirm: handleConfirmUnpublishAllData,
-//     },
-//   };
-// };
+  return {
+    actionType: 'unpublish',
+    variant: 'tertiary',
+    label: formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' }),
+    dialog: {
+      type: 'dialog',
+      title: formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      }),
+      content: (
+        <Flex direction="column" alignItems="stretch" gap={2}>
+          <Typography id="confirm-description" textAlign="center">
+            {formatMessage({
+              id: 'popUpWarning.bodyMessage.contentType.unpublish.all',
+              defaultMessage: 'Are you sure you want to unpublish these entries?',
+            })}
+          </Typography>
+          {hasI18nEnabled && (
+            <Box textAlign="center" padding={3}>
+              <Typography textColor="danger500">
+                {formatMessage(
+                  {
+                    id: getTranslation('Settings.list.actions.unpublishAdditionalInfos'),
+                    defaultMessage:
+                      'This will unpublish the active locale versions <em>(from Internationalization)</em>',
+                  },
+                  {
+                    em: Emphasis,
+                  }
+                )}
+              </Typography>
+            </Box>
+          )}
+        </Flex>
+      ),
+      confirmButton: formatMessage({
+        id: 'app.utils.unpublish',
+        defaultMessage: 'Unpublish',
+      }),
+      onConfirm: handleConfirmUnpublishAllData,
+    },
+  };
+};
+
+export const getContentPermissions = (subject: string) => {
+  const permissions = {
+    delete: [
+      {
+        action: 'plugin::content-manager.explorer.delete',
+        subject,
+        id: '',
+        actionParameters: {},
+        properties: {},
+        conditions: [],
+      },
+    ],
+    publish: [
+      {
+        action: 'plugin::content-manager.explorer.publish',
+        subject,
+        id: '',
+        actionParameters: {},
+        properties: {},
+        conditions: [],
+      },
+    ],
+  };
+
+  return permissions;
+};
 
 const Emphasis = (chunks: React.ReactNode) => (
   <Typography fontWeight="semiBold" textColor="danger500">
@@ -480,7 +523,7 @@ const Emphasis = (chunks: React.ReactNode) => (
   </Typography>
 );
 
-const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [];
+const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [PublishAction, UnpublishAction, DeleteAction];
 
 export { DEFAULT_BULK_ACTIONS, BulkActionsRenderer, Emphasis };
 export type { BulkActionDescription };
