@@ -1,25 +1,61 @@
 import * as React from 'react';
 
 import { Page } from '@strapi/admin/strapi-admin';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system';
+import { Box, ContentLayout, HeaderLayout } from '@strapi/design-system';
+import { XYCoord, useDragLayer } from 'react-dnd';
 import { useIntl } from 'react-intl';
 
-// import { DragLayer } from '../../../../../../../../admin/src/components/DragLayer';
 import { DRAG_DROP_TYPES } from '../constants';
 
 import { StageDragPreview } from './StageDragPreview';
 
+function getStyle(
+  initialOffset: XYCoord | null,
+  currentOffset: XYCoord | null,
+  mouseOffset: XYCoord | null
+) {
+  if (!initialOffset || !currentOffset || !mouseOffset) {
+    return { display: 'none' };
+  }
+
+  const { x, y } = mouseOffset;
+
+  return {
+    transform: `translate(${x}px, ${y}px)`,
+  };
+}
+
 const DragLayerRendered = () => {
-  return null;
-  // return (
-  //   <DragLayer
-  //     renderItem={(item) => {
-  //       if (item.type === DRAG_DROP_TYPES.STAGE) {
-  //         return <StageDragPreview name={typeof item.item === 'string' ? item.item : null} />;
-  //       }
-  //     }}
-  //   />
-  // );
+  const { itemType, isDragging, item, initialOffset, currentOffset, mouseOffset } = useDragLayer(
+    (monitor) => ({
+      item: monitor.getItem(),
+      itemType: monitor.getItemType(),
+      initialOffset: monitor.getInitialSourceClientOffset(),
+      currentOffset: monitor.getSourceClientOffset(),
+      isDragging: monitor.isDragging(),
+      mouseOffset: monitor.getClientOffset(),
+    })
+  );
+
+  if (!isDragging || itemType !== DRAG_DROP_TYPES.STAGE) {
+    return null;
+  }
+
+  return (
+    <Box
+      height="100%"
+      left={0}
+      position="fixed"
+      pointerEvents="none"
+      top={0}
+      zIndex={100}
+      width="100%"
+    >
+      <Box style={getStyle(initialOffset, currentOffset, mouseOffset)}>
+        <StageDragPreview name={typeof item.item === 'string' ? item.item : null} />;
+      </Box>
+    </Box>
+  );
 };
 
 const Root: React.FC<React.PropsWithChildren> = ({ children }) => {
