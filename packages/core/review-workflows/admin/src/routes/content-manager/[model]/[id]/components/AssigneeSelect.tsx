@@ -1,9 +1,12 @@
+import * as React from 'react';
+
 import {
   useField,
   useNotification,
   useAPIErrorHandler,
   useRBAC,
   useAdminUsers,
+  useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import { Combobox, ComboboxOption, Field, Flex } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -11,6 +14,7 @@ import { useParams } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../../../modules/hooks';
 import { useUpdateAssigneeMutation } from '../../../../../services/content-manager';
+import { buildValidParams } from '../../../../../utils/api';
 import { getDisplayName } from '../../../../../utils/users';
 
 import { ASSIGNEE_ATTRIBUTE_NAME } from './constants';
@@ -29,6 +33,8 @@ const AssigneeSelect = () => {
     allowedActions: { canRead },
     isLoading: isLoadingPermissions,
   } = useRBAC(permissions.settings?.users);
+  const [{ query }] = useQueryParams();
+  const params = React.useMemo(() => buildValidParams(query), [query]);
   const { data, isLoading, isError } = useAdminUsers(undefined, {
     skip: isLoadingPermissions || !canRead,
   });
@@ -53,6 +59,7 @@ const AssigneeSelect = () => {
       slug: collectionType,
       model,
       id,
+      params,
       data: {
         id: assigneeId ? parseInt(assigneeId, 10) : null,
       },

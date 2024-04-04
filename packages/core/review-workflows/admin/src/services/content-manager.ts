@@ -21,11 +21,14 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         stages: NonNullable<GetStages.Response['data']>;
         meta: NonNullable<GetStages.Response['meta']>;
       },
-      GetStages.Params & { slug: string }
+      GetStages.Params & { slug: string; params?: object }
     >({
-      query: ({ model, slug, id }) => ({
+      query: ({ model, slug, id, params }) => ({
         url: `/review-workflows/content-manager/${slug}/${model}/${id}/stages`,
         method: 'GET',
+        config: {
+          params,
+        },
       }),
       transformResponse: (res: GetStages.Response) => {
         return {
@@ -39,24 +42,30 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
     }),
     updateStage: builder.mutation<
       UpdateStage.Response['data'],
-      UpdateStage.Request['body'] & UpdateStage.Params & { slug: string }
+      UpdateStage.Request['body'] & UpdateStage.Params & { slug: string; params?: object }
     >({
-      query: ({ model, slug, id, ...data }) => ({
+      query: ({ model, slug, id, params, ...data }) => ({
         url: `/review-workflows/content-manager/${slug}/${model}/${id}/stage`,
         method: 'PUT',
         data,
+        config: {
+          params,
+        },
       }),
       transformResponse: (res: UpdateStage.Response) => res.data,
       invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflowStage' as const, id: arg.id }],
     }),
     updateAssignee: builder.mutation<
       UpdateAssignee.Response['data'],
-      UpdateAssignee.Request['body'] & UpdateAssignee.Params & { slug: string }
+      UpdateAssignee.Request['body'] & UpdateAssignee.Params & { slug: string; params?: object }
     >({
-      query: ({ model, slug, id, ...data }) => ({
+      query: ({ model, slug, id, params, ...data }) => ({
         url: `/review-workflows/content-manager/${slug}/${model}/${id}/assignee`,
         method: 'PUT',
         data,
+        config: {
+          params,
+        },
       }),
       transformResponse: (res: UpdateAssignee.Response) => res.data,
     }),

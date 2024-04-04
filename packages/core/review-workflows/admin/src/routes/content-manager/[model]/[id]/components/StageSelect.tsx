@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-import { useField, useNotification, useAPIErrorHandler } from '@strapi/admin/strapi-admin';
+import {
+  useField,
+  useNotification,
+  useAPIErrorHandler,
+  useQueryParams,
+} from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import {
   SingleSelect,
@@ -21,6 +26,7 @@ import {
   CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME,
 } from '../../../../../constants';
 import { useGetStagesQuery, useUpdateStageMutation } from '../../../../../services/content-manager';
+import { buildValidParams } from '../../../../../utils/api';
 import { getStageColorByHex } from '../../../../../utils/colors';
 
 import { STAGE_ATTRIBUTE_NAME } from './constants';
@@ -40,11 +46,14 @@ export const StageSelect = () => {
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
+  const [{ query }] = useQueryParams();
+  const params = React.useMemo(() => buildValidParams(query), [query]);
   const { data, isLoading } = useGetStagesQuery(
     {
       slug: collectionType,
       model: model,
       id: id!,
+      params,
     },
     {
       skip: !id,
@@ -104,6 +113,7 @@ export const StageSelect = () => {
             model,
             id,
             slug: collectionType,
+            params,
             data: { id: stageId },
           });
 
