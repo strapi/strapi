@@ -76,7 +76,7 @@ export const ProvidersPage = () => {
 
   const submitMutation = useMutation((body) => put('/users-permissions/providers', body), {
     async onSuccess() {
-      await queryClient.invalidateQueries(['users-permissions', 'providers']);
+      await queryClient.invalidateQueries(['users-permissions', 'get-providers']);
 
       toggleNotification({
         type: 'success',
