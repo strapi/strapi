@@ -193,8 +193,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   ): Promise<UploadableFile> {
     const currentFile = (await formatFileInfo(
       {
-        filename: file.name ?? 'unamed',
-        type: file.type ?? 'application/octet-stream',
+        filename: file.originalFilename ?? 'unamed',
+        type: file.mimetype ?? 'application/octet-stream',
         size: file.size,
       },
       fileInfo,
@@ -204,7 +204,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
     )) as UploadableFile;
 
-    currentFile.getStream = () => fs.createReadStream(file.path);
+    currentFile.getStream = () => fs.createReadStream(file.filepath);
 
     const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
       .plugin('upload')

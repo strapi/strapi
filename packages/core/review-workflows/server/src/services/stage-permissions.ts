@@ -7,7 +7,7 @@ import { STAGE_TRANSITION_UID } from '../constants/workflows';
 const { ApplicationError } = errors;
 const validActions = [STAGE_TRANSITION_UID];
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const roleService = getAdminService('role');
   const permissionService = getAdminService('permission');
 

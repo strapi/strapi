@@ -4,7 +4,7 @@ import history from './history';
 
 export default async () => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
-    strapi.webhookStore.addAllowedEvent(key, value);
+    strapi.get('webhookStore').addAllowedEvent(key, value);
   });
 
   getService('field-sizes').setCustomFieldInputSizes();

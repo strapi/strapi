@@ -5,7 +5,7 @@ import migrateAuditLogsTable from './migrations/audit-logs-table';
 import createAuditLogsService from './services/audit-logs';
 import { getService } from './utils';
 
-export default async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const auditLogsIsEnabled = strapi.config.get('admin.auditLogs.enabled', true);
 
   if (auditLogsIsEnabled) {
