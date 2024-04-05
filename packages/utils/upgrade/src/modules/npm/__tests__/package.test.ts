@@ -57,15 +57,16 @@ describe('Package class', () => {
     expect(packageInstance.versionExists).toBeTruthy();
   });
 
-  jest.spyOn(global, 'fetch').mockImplementation(
-    () =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve(mockNpmPackage),
-      }) as Promise<Response>
-  );
-
   beforeAll(async () => {
+    const mockFetchPromise = Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve(mockNpmPackage),
+    }) as Promise<Response>;
+
+    Object.defineProperty(global, 'fetch', {
+      value: jest.fn().mockImplementation(() => mockFetchPromise),
+    });
+
     await packageInstance.refresh();
   });
 
