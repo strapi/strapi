@@ -57,7 +57,7 @@ describe('Package class', () => {
     expect(packageInstance.versionExists).toBeTruthy();
   });
 
-  global.fetch = jest.fn(
+  jest.spyOn(global, 'fetch').mockImplementation(
     () =>
       Promise.resolve({
         ok: true,
