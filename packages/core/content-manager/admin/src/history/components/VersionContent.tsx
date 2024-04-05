@@ -9,18 +9,25 @@ import {
   Flex,
   Grid,
   GridItem,
+  Link,
+  Tooltip,
   Typography,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { COLLECTION_TYPES } from '../../constants/collections';
+import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import {
   InputRenderer,
   type InputRendererProps,
 } from '../../pages/EditView/components/InputRenderer';
+import { getRelationLabel } from '../../utils/relations';
 import { useHistoryContext } from '../pages/History';
 
 import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
+import type { RelationResult } from '../../services/relations';
 
 const StyledAlert = styled(Alert)`
   button {
@@ -31,6 +38,17 @@ const StyledAlert = styled(Alert)`
 /* -------------------------------------------------------------------------------------------------
  * CustomRelationInput
  * -----------------------------------------------------------------------------------------------*/
+
+const LinkEllipsis = styled(Link)`
+  display: block;
+
+  & > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+`;
 
 const CustomRelationInput = (props: RelationsFieldProps) => {
   const { formatMessage } = useIntl();
@@ -46,6 +64,10 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       ) : (
         <Flex direction="column" gap={2} alignItems="stretch">
           {(results as Record<string, unknown>[]).map((relationData, index) => {
+            // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+            const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
+            const label = getRelationLabel(relationData as RelationResult, props.mainField);
+
             return (
               <Flex
                 key={index}
@@ -58,9 +80,14 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
                 background="neutral150"
                 justifyContent="space-between"
               >
-                <pre>
-                  <Typography as="code">{JSON.stringify(relationData, null, 2)}</Typography>
-                </pre>
+                <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+                  <Tooltip description={label}>
+                    <LinkEllipsis forwardedAs={NavLink} to={href}>
+                      {label}
+                    </LinkEllipsis>
+                  </Tooltip>
+                </Box>
+                <DocumentStatus status={relationData.status as string} />
               </Flex>
             );
           })}
