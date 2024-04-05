@@ -72,12 +72,6 @@ const EditViewPage = () => {
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
 
-  React.useEffect(() => {
-    if (tabApi.current && hasDraftAndPublished) {
-      tabApi.current._handlers.setSelectedTabIndex(!status || status === 'draft' ? 0 : 1);
-    }
-  }, [hasDraftAndPublished, status]);
-
   useOnce(() => {
     /**
      * We only ever want to fire the notification once otherwise
@@ -147,13 +141,11 @@ const EditViewPage = () => {
     return <Page.Error />;
   }
 
-  const handleTabChange = (index: number, { resetForm }: Pick<FormHelpers, 'resetForm'>) => {
+  const handleTabChange = (index: number) => {
     if (index === 0) {
       setQuery({ status: 'draft' }, 'push', true);
     } else {
       setQuery({ status: 'published' }, 'push', true);
-      // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-      resetForm();
     }
   };
 
@@ -188,10 +180,10 @@ const EditViewPage = () => {
                 id: getTranslation('containers.edit.tabs.label'),
                 defaultMessage: 'Document status',
               })}
-              initialSelectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
+              selectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
               onTabChange={(index) => {
                 // TODO: remove this hack when the tabs in the DS are implemented well and we can actually use callbacks.
-                handleTabChange(index, { resetForm });
+                handleTabChange(index);
               }}
             >
               {hasDraftAndPublished ? (
@@ -226,7 +218,10 @@ const EditViewPage = () => {
                 </GridItem>
               </Grid>
             </TabGroup>
-            <Blocker />
+            <Blocker
+              // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
+              onProceed={resetForm}
+            />
           </>
         )}
       </Form>
