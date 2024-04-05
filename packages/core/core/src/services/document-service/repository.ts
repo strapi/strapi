@@ -5,18 +5,15 @@ import { async, contentTypes as contentTypesUtils } from '@strapi/utils';
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
-import { transformParamsDocumentId } from './transform/id-transform';
-
 import * as components from './components';
-import { createEntriesService } from './entries';
 
+import { createEntriesService } from './entries';
 import { pickSelectionParams } from './params';
-import { applyTransforms } from './attributes';
-import entityValidator from '../entity-validator';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
 import { getDeepPopulate } from './utils/populate';
 import { transformData } from './transform/data';
 import { transformParamsToQuery } from './transform/query';
+import { transformParamsDocumentId } from './transform/id-transform';
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
@@ -167,7 +164,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation
-    const model = strapi.contentType(uid);
     // Find if document exists
     const entryToUpdate = await strapi.db
       .query(uid)
@@ -175,27 +171,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     let updatedDraft = null;
     if (entryToUpdate) {
-      const validData = await entityValidator.validateEntityUpdate(
-        model,
-        // @ts-expect-error we need type guard to assert that data has the valid type
-        data,
-        {
-          isDraft: !queryParams?.data?.publishedAt, // Always update the draft version
-          locale: queryParams?.locale,
-        },
-        entryToUpdate
-      );
-
-      // Component handling
-      const componentData = await updateComponents(entryToUpdate, validData as any);
-      const entryData = applyTransforms(
-        Object.assign(omitComponentData(validData), componentData as any),
-        { contentType: model }
-      );
-
-      updatedDraft = await strapi.db
-        .query(uid)
-        .update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
+      updatedDraft = await entries.update(entryToUpdate, queryParams);
     }
 
     if (!updatedDraft) {

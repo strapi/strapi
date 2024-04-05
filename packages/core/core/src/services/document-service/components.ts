@@ -19,8 +19,6 @@ type ComponentBody = {
   [key: string]: ComponentValue | DynamicZoneValue;
 };
 
-const isDialectMySQL = () => strapi.db?.dialect.client === 'mysql';
-
 function omitComponentData(
   contentType: Struct.ContentTypeSchema,
   data: Modules.EntityService.Params.Data.Input<Struct.ContentTypeSchema['uid']>
@@ -83,11 +81,9 @@ const createComponents = async <
         }
 
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const components = (await async.map(
-          componentValue,
-          (value: any) => createComponent(componentUID, value),
-          { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
-        )) as RepeatableComponentValue;
+        const components: RepeatableComponentValue = await async.map(componentValue, (value: any) =>
+          createComponent(componentUID, value)
+        );
 
         componentBody[attributeName] = components.map(({ id }) => {
           return {
@@ -103,6 +99,7 @@ const createComponents = async <
           componentUID,
           componentValue as Modules.EntityService.Params.Data.Input<UID.Component>
         );
+
         componentBody[attributeName] = {
           id: component.id,
           __pivot: {
@@ -140,8 +137,7 @@ const createComponents = async <
       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
       componentBody[attributeName] = await async.map(
         dynamiczoneValues,
-        createDynamicZoneComponents,
-        { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
+        createDynamicZoneComponents
       );
 
       continue;
@@ -200,11 +196,9 @@ const updateComponents = async <
         }
 
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        const components = (await async.map(
-          componentValue,
-          (value: any) => updateOrCreateComponent(componentUID, value),
-          { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
-        )) as RepeatableComponentValue;
+        const components: RepeatableComponentValue = await async.map(componentValue, (value: any) =>
+          updateOrCreateComponent(componentUID, value)
+        );
 
         componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => {
           return {
@@ -235,21 +229,17 @@ const updateComponents = async <
       }
 
       // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-      componentBody[attributeName] = await async.map(
-        dynamiczoneValues,
-        async (value: any) => {
-          const { id } = await updateOrCreateComponent(value.__component, value);
+      componentBody[attributeName] = await async.map(dynamiczoneValues, async (value: any) => {
+        const { id } = await updateOrCreateComponent(value.__component, value);
 
-          return {
-            id,
-            __component: value.__component,
-            __pivot: {
-              field: attributeName,
-            },
-          };
-        },
-        { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
-      );
+        return {
+          id,
+          __component: value.__component,
+          __pivot: {
+            field: attributeName,
+          },
+        };
+      });
     }
   }
 
@@ -379,20 +369,14 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        await async.map(
-          _.castArray(value),
-          (subValue: any) => deleteComponent(componentUID, subValue),
-          {
-            concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity,
-          }
+        await async.map(_.castArray(value), (subValue: any) =>
+          deleteComponent(componentUID, subValue)
         );
       } else {
         // delete dynamic zone components
         // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
-        await async.map(
-          _.castArray(value),
-          (subValue: any) => deleteComponent(subValue.__component, subValue),
-          { concurrency: isDialectMySQL() && !strapi.db?.inTransaction() ? 1 : Infinity }
+        await async.map(_.castArray(value), (subValue: any) =>
+          deleteComponent(subValue.__component, subValue)
         );
       }
 
@@ -469,8 +453,21 @@ const deleteComponent = async <TUID extends UID.Component>(
   await strapi.db.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
+const assignComponentData = <TUID extends UID.ContentType>(
+  data: Modules.EntityService.Params.Data.Input<TUID>,
+  componentData: ComponentBody,
+  {
+    contentType,
+  }: {
+    contentType: Schema.ContentType<TUID>;
+  }
+) => {
+  return Object.assign(omitComponentData(contentType, data), componentData);
+};
+
 export {
   omitComponentData,
+  assignComponentData,
   getComponents,
   createComponents,
   updateComponents,

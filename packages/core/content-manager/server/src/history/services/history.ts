@@ -308,7 +308,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                   if ('documentId' in entry) {
                     relatedEntry = await strapi
                       .documents(attributeSchema.target)
-                      .findOne(entry.documentId, { locale: entry.locale || undefined });
+                      .findOne({ documentId: entry.documentId, locale: entry.locale || undefined });
                   }
                   // For media assets, only the id is available, double check that we have it
                 } else if ('id' in entry) {
