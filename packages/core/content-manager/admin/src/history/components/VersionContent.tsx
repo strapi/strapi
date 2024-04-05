@@ -63,14 +63,14 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
         <Typography>No content</Typography>
       ) : (
         <Flex direction="column" gap={2} alignItems="stretch">
-          {(results as Record<string, unknown>[]).map((relationData, index) => {
+          {(results as RelationResult[]).map((relationData) => {
             // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
             const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
-            const label = getRelationLabel(relationData as RelationResult, props.mainField);
+            const label = getRelationLabel(relationData, props.mainField);
 
             return (
               <Flex
-                key={index}
+                key={relationData.documentId}
                 paddingTop={2}
                 paddingBottom={2}
                 paddingLeft={4}
