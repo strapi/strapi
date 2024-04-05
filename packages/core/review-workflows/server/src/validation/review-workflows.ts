@@ -84,16 +84,20 @@ const validateUpdateAssigneeOnEntitySchema = yup
   })
   .required();
 
+const validateLocaleSchema = yup.string();
+
 export const validateWorkflowCreate = validateYupSchema(validateWorkflowCreateSchema);
 export const validateUpdateStageOnEntity = validateYupSchema(validateUpdateStageOnEntitySchema);
 export const validateUpdateAssigneeOnEntity = validateYupSchema(
   validateUpdateAssigneeOnEntitySchema
 );
 export const validateWorkflowUpdate = validateYupSchema(validateWorkflowUpdateSchema);
+export const validateLocale = validateYupSchema(validateLocaleSchema);
 
 export default {
   validateWorkflowCreate,
   validateUpdateStageOnEntity,
   validateUpdateAssigneeOnEntity,
   validateWorkflowUpdate,
+  validateLocale,
 };

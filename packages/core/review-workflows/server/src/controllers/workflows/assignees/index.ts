@@ -1,7 +1,10 @@
 import type { Context } from 'koa';
 
 import { getService } from '../../../utils';
-import { validateUpdateAssigneeOnEntity } from '../../../validation/review-workflows';
+import {
+  validateUpdateAssigneeOnEntity,
+  validateLocale,
+} from '../../../validation/review-workflows';
 
 export default {
   /**
@@ -21,7 +24,8 @@ export default {
     const assigneeService = getService('assignees');
     const workflowService = getService('workflows');
 
-    const { model_uid: model, id } = ctx.params;
+    const { model_uid: model, id: documentId } = ctx.params;
+    const { locale } = ctx.request.query || {};
 
     const { sanitizeOutput } = strapi
       .plugin('content-manager')
@@ -34,10 +38,16 @@ export default {
       ctx.request?.body?.data,
       'You should pass a valid id to the body of the put request.'
     );
+    await validateLocale(locale);
 
     await workflowService.assertContentTypeBelongsToWorkflow(model);
 
-    const entity = await assigneeService.updateEntityAssignee(id, model, assigneeId);
+    const entity = await assigneeService.updateEntityAssignee(
+      documentId,
+      locale || null,
+      model,
+      assigneeId
+    );
 
     ctx.body = { data: await sanitizeOutput(entity) };
   },

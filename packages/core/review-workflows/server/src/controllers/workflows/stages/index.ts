@@ -1,9 +1,9 @@
 import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
-import { async } from '@strapi/utils';
+import { async, validate } from '@strapi/utils';
 import { getService } from '../../../utils';
-import { validateUpdateStageOnEntity } from '../../../validation/review-workflows';
+import { validateUpdateStageOnEntity, validateLocale } from '../../../validation/review-workflows';
 import {
   STAGE_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
@@ -83,8 +83,8 @@ export default {
     const stagePermissions = getService('stage-permissions');
     const workflowService = getService('workflows');
 
-    const { model_uid: modelUID, id } = ctx.params;
-    const { body } = ctx.request;
+    const { model_uid: modelUID, id: documentId } = ctx.params;
+    const { body, query = {} } = ctx.request;
 
     const { sanitizeOutput } = strapi
       .plugin('content-manager')
@@ -92,10 +92,10 @@ export default {
       .create({ userAbility: ctx.state.userAbility, model: modelUID });
 
     // Load entity
-    const entity = (await strapi.db.query(modelUID).findOne({
-      where: { id },
-      populate: [ENTITY_STAGE_ATTRIBUTE],
-    })) as any;
+    const locale = await validateLocale(query?.locale);
+    const entity = await strapi
+      .documents(modelUID)
+      .findOne(documentId, { locale, populate: [ENTITY_STAGE_ATTRIBUTE] });
 
     if (!entity) {
       ctx.throw(404, 'Entity not found');
@@ -137,7 +137,8 @@ export default {
     const stagePermissions = getService('stage-permissions');
     const workflowService = getService('workflows');
 
-    const { model_uid: modelUID, id } = ctx.params;
+    const { model_uid: modelUID, id: documentId } = ctx.params;
+    const { query = {} } = ctx.request;
 
     if (
       strapi
@@ -150,10 +151,10 @@ export default {
     }
 
     // Load entity
-    const entity = (await strapi.db.query(modelUID).findOne({
-      where: { id },
-      populate: [ENTITY_STAGE_ATTRIBUTE],
-    })) as any;
+    const locale = await validateLocale(query?.locale);
+    const entity = await strapi
+      .documents(modelUID)
+      .findOne(documentId, { locale, populate: [ENTITY_STAGE_ATTRIBUTE] });
 
     if (!entity) {
       ctx.throw(404, 'Entity not found');

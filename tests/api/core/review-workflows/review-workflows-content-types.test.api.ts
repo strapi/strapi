@@ -48,8 +48,7 @@ const articleModel = {
 };
 
 // TODO: V5 fix review workflows
-// describeOnCondition(edition === 'EE').skip('Review workflows - Content Types', () => {
-describe.skip('Review workflows - Content Types', () => {
+describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => {
   const builder = createTestBuilder();
 
   const requests = { admin: null };
@@ -57,30 +56,30 @@ describe.skip('Review workflows - Content Types', () => {
 
   const createWorkflow = async (data) => {
     const name = `workflow-${Math.random().toString(36)}`;
-    return requests.admin.post('/admin/review-workflows/workflows?populate=*', {
+    return requests.admin.post('/review-workflows/workflows?populate=*', {
       body: { data: { ...baseWorkflow, name, ...data } },
     });
   };
 
   const updateWorkflow = async (id, data) => {
-    return requests.admin.put(`/admin/review-workflows/workflows/${id}?populate=stages`, {
+    return requests.admin.put(`/review-workflows/workflows/${id}?populate=stages`, {
       body: { data },
     });
   };
 
   const deleteWorkflow = async (id) => {
-    return requests.admin.delete(`/admin/review-workflows/workflows/${id}`);
+    return requests.admin.delete(`/review-workflows/workflows/${id}`);
   };
 
   const getWorkflow = async (id) => {
-    const { body } = await requests.admin.get(`/admin/review-workflows/workflows/${id}?populate=*`);
+    const { body } = await requests.admin.get(`/review-workflows/workflows/${id}?populate=*`);
     return body.data;
   };
 
   const getWorkflows = async (filters) => {
     const result = await requests.admin({
       method: 'GET',
-      url: '/admin/review-workflows/workflows',
+      url: '/review-workflows/workflows',
       qs: { filters },
     });
     return result.body.data;
@@ -92,7 +91,7 @@ describe.skip('Review workflows - Content Types', () => {
       url: `/content-manager/collection-types/${uid}`,
       body: data,
     });
-    return body;
+    return body.data;
   };
 
   const findAll = async (uid) => {

@@ -2,7 +2,6 @@ import semver from 'semver';
 import { getOr } from 'lodash/fp';
 import { async } from '@strapi/utils';
 import { STAGE_MODEL_UID } from '../constants/workflows';
-// import { findTables } from '../utils/persisted-tables';
 
 function checkVersionThreshold(
   startVersion: string,

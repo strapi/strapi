@@ -45,7 +45,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
   const createWorkflow = async (data) => {
     const name = `workflow-${Math.random().toString(36)}`;
-    const req = await rq.post('/admin/review-workflows/workflows?populate=*', {
+    const req = await rq.post('/review-workflows/workflows?populate=*', {
       body: { data: { name, ...data } },
     });
 
@@ -57,7 +57,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   };
 
   const updateWorkflow = async (id, data) => {
-    const req = await rq.put(`/admin/review-workflows/workflows/${id}?populate=stages`, {
+    const req = await rq.put(`/review-workflows/workflows/${id}?populate=stages`, {
       body: { data },
     });
 
@@ -69,7 +69,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
   };
 
   const deleteWorkflow = async (id) => {
-    const req = await rq.delete(`/admin/review-workflows/workflows/${id}`);
+    const req = await rq.delete(`/review-workflows/workflows/${id}`);
 
     const status = req.statusCode;
     const error = req.body.error;
