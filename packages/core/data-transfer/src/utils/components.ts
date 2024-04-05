@@ -488,7 +488,7 @@ const resolveComponentUID = ({
   contentType,
 }: {
   paths: string[];
-  strapi: Core.LoadedStrapi;
+  strapi: Core.Strapi;
   data: any;
   contentType: Schema.ContentType;
 }): UID.Schema | undefined => {

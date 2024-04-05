@@ -75,7 +75,7 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.17.0-typescript.0",
+    "@strapi/design-system": "1.18.0-typescript.0",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
@@ -135,11 +135,12 @@
     "lerna": "8.1.2",
     "lint-staged": "13.3.0",
     "lodash": "4.17.21",
-    "nx": "16.8.1",
+    "nx": "18.2.2",
     "plop": "2.7.6",
     "prettier": "3.2.5",
     "qs": "6.11.1",
     "rimraf": "5.0.5",
+    "semver": "7.5.4",
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
     "supertest": "6.3.3",

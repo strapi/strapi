@@ -101,7 +101,7 @@ const baseProvider = {
   checkFileSize(file: InputFile, { sizeLimit }: { sizeLimit: number }) {
     if (sizeLimit && kbytesToBytes(file.size) > sizeLimit) {
       throw new PayloadTooLargeError(
-        `${file.name} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
+        `${file.originalFilename} exceeds size limit of ${bytesToHumanReadable(sizeLimit)}.`
       );
     }
   },

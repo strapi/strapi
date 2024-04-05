@@ -8,7 +8,7 @@ import type { IAsset, IFile } from '../../../../types';
 
 function getFileStream(
   filepath: string,
-  strapi: Core.LoadedStrapi,
+  strapi: Core.Strapi,
   isLocal = false
 ): PassThrough | ReadStream {
   if (isLocal) {
@@ -43,7 +43,7 @@ function getFileStream(
 
 function getFileStats(
   filepath: string,
-  strapi: Core.LoadedStrapi,
+  strapi: Core.Strapi,
   isLocal = false
 ): Promise<{ size: number }> {
   if (isLocal) {
@@ -95,7 +95,7 @@ async function signFile(file: IFile) {
 /**
  * Generate and consume assets streams in order to stream each file individually
  */
-export const createAssetsStream = (strapi: Core.LoadedStrapi): Duplex => {
+export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
     const stream: Readable = strapi.db
       .queryBuilder('plugin::upload.file')

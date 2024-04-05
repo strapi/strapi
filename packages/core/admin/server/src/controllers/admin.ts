@@ -64,11 +64,13 @@ export default {
       },
     } satisfies Init.Response;
   },
+
   async getProjectSettings() {
     return getService(
       'project-settings'
     ).getProjectSettings() satisfies Promise<GetProjectSettings.Response>;
   },
+
   async updateProjectSettings(ctx: Context) {
     const {
       request: { files, body },
@@ -87,6 +89,7 @@ export default {
       ...formatedFiles,
     }) satisfies Promise<UpdateProjectSettings.Response>;
   },
+
   async telemetryProperties(ctx: Context) {
     // If the telemetry is disabled, ignore the request and return early
     if (strapi.telemetry.isDisabled) {
@@ -123,6 +126,7 @@ export default {
       },
     } satisfies TelemetryProperties.Response;
   },
+
   async information() {
     const currentEnvironment: string = strapi.config.get('environment');
     const autoReload = strapi.config.get('autoReload', false);
@@ -147,6 +151,7 @@ export default {
       },
     } satisfies Information.Response;
   },
+
   async plugins(ctx: Context) {
     const enabledPlugins = strapi.config.get('enabledPlugins') as any;
 

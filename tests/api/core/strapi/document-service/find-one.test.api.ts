@@ -6,7 +6,7 @@ import { ARTICLE_UID, findArticleDb, AUTHOR_UID, findAuthorDb } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
-  let strapi: Core.LoadedStrapi;
+  let strapi: Core.Strapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);

@@ -262,7 +262,7 @@ describe('Release controller', () => {
 
       // @ts-expect-error partial context
       await releaseController.findOne(ctx);
-      expect(strapi.admin.services.user.sanitizeUser).toHaveBeenCalled();
+      expect(strapi.service('admin::user').sanitizeUser).toHaveBeenCalled();
     });
   });
 });
