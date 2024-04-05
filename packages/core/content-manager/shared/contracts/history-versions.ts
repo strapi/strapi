@@ -1,4 +1,4 @@
-import type { Data, Struct, UID } from '@strapi/types';
+import type { Data, Schema, Struct, UID } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
 /**
@@ -13,6 +13,7 @@ export interface CreateHistoryVersion {
   status: 'draft' | 'published' | 'modified' | null;
   data: Record<string, unknown>;
   schema: Struct.SchemaAttributes;
+  componentsSchemas: Record<`${string}.${string}`, Struct.SchemaAttributes>;
 }
 
 interface Locale {

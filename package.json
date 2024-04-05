@@ -75,7 +75,7 @@
     "watch": "nx run-many --target=watch --nx-ignore-cycles"
   },
   "resolutions": {
-    "@strapi/design-system": "1.17.0-typescript.0",
+    "@strapi/design-system": "1.18.0-typescript.0",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
@@ -140,6 +140,7 @@
     "prettier": "3.2.5",
     "qs": "6.11.1",
     "rimraf": "5.0.5",
+    "semver": "7.5.4",
     "stream-chain": "2.2.5",
     "stream-json": "1.8.0",
     "supertest": "6.3.3",
