@@ -538,32 +538,6 @@ const DEFAULT_RELEASE_DETAILS_HEADER: ReleaseHeaderItem[] = [
     },
     name: 'name',
   },
-  {
-    key: '__content_type__',
-    fieldSchema: { type: 'string' },
-    metadatas: {
-      label: {
-        id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
-        defaultMessage: 'content-type',
-      },
-      searchable: false,
-      sortable: false,
-    },
-    name: 'content-type',
-  },
-  {
-    key: '__action__',
-    fieldSchema: { type: 'string' },
-    metadatas: {
-      label: {
-        id: 'content-releases.page.ReleaseDetails.table.header.label.action',
-        defaultMessage: 'action',
-      },
-      searchable: false,
-      sortable: false,
-    },
-    name: 'action',
-  },
 ];
 
 const ReleaseDetailsBody = () => {
@@ -775,6 +749,22 @@ const ReleaseDetailsBody = () => {
                       name={name}
                     />
                   ))}
+                  <Table.HeaderCell
+                    fieldSchemaType="string"
+                    label={formatMessage({
+                      id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
+                      defaultMessage: 'content-type',
+                    })}
+                    name="content-type"
+                  />
+                  <Table.HeaderCell
+                    fieldSchemaType="string"
+                    label={formatMessage({
+                      id: 'content-releases.page.ReleaseDetails.table.header.label.action',
+                      defaultMessage: 'action',
+                    })}
+                    name="action"
+                  />
                   {!release.releasedAt && (
                     <Table.HeaderCell
                       fieldSchemaType="string"

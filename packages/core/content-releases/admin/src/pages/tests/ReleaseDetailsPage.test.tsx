@@ -33,32 +33,6 @@ jest.mock('@strapi/helper-plugin', () => ({
           name: 'name',
         },
         {
-          key: '__content_type__',
-          fieldSchema: { type: 'string' },
-          metadatas: {
-            label: {
-              id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
-              defaultMessage: 'content-type',
-            },
-            searchable: false,
-            sortable: false,
-          },
-          name: 'content-type',
-        },
-        {
-          key: '__action__',
-          fieldSchema: { type: 'string' },
-          metadatas: {
-            label: {
-              id: 'content-releases.page.ReleaseDetails.table.header.label.action',
-              defaultMessage: 'action',
-            },
-            searchable: false,
-            sortable: false,
-          },
-          name: 'action',
-        },
-        {
           key: '__locale__',
           fieldSchema: { type: 'string' },
           metadatas: {
