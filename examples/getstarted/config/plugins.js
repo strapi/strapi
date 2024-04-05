@@ -28,4 +28,11 @@ module.exports = () => ({
       testConf: 3,
     },
   },
+  upload: {
+    enabled: true,
+    config: {
+      provider: 'local',
+      sizeLimit: 10 * 1024 * 1024 * 1024, // 10GB
+    },
+  },
 });

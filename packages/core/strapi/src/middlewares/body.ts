@@ -35,6 +35,8 @@ const bodyMiddleware: Common.MiddlewareFactory<Config> = (config, { strapi }) =>
     // TODO: find a better way later
     if (gqlEndpoint && ctx.url === gqlEndpoint) {
       await next();
+    } else if ((ctx.method === 'POST' && ctx.url === '/upload') || ctx.url === '/api/upload') {
+      await next();
     } else {
       try {
         await body({ patchKoa: true, ...bodyConfig })(ctx, async () => {});
