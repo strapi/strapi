@@ -37,15 +37,11 @@ const localeToLookup: Transform = (contentType, params) => {
   }
 
   if (params.locale) {
-    if (typeof params.locale === 'string') {
-      if (params.locale === '*') {
-        return params;
-      }
-
-      return assoc(['lookup', 'locale'], params.locale, params);
+    if (typeof params.locale === 'string' && params.locale === '*') {
+      return params;
     }
 
-    return assoc(['lookup', 'locale', '$in'], params.locale, params);
+    return assoc(['lookup', 'locale'], params.locale, params);
   }
 
   return params;
