@@ -94,8 +94,22 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
   test('A user should be able to perform bulk release on entries', async ({ page }) => {
     await test.step('bulk release', async () => {
-      await page.getByRole('link', { name: 'Content Manager' }).click();
+      // Navigate to the releases page
+      await page.getByRole('link', { name: 'Releases' }).click();
+      await page.getByRole('button', { name: 'New release' }).click();
+      await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
+      // Create a new release
+      const newReleaseName = 'The Diamond Dogs';
+      await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
+      // Uncheck default scheduling of a release and save
+      await page.getByRole('checkbox', { name: 'Schedule release' }).uncheck();
+      await page.getByRole('button', { name: 'Continue' }).click();
+      // Wait for client side redirect to created release
+      await page.waitForURL('/admin/plugins/content-releases/*');
+      await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
 
+      // Navigate to the content manager
+      await page.getByRole('link', { name: 'Open the Content Manager' }).click();
       await expect(page).toHaveTitle('Content Manager');
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
       const publishedItems = page.getByRole('gridcell', { name: 'published' });
@@ -114,7 +128,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
         })
         .click();
 
-      await page.getByRole('option', { name: 'Trent Crimm: The Independent' }).click();
+      await page.getByRole('option', { name: 'The Diamond Dogs' }).click();
       const unpublishButton = page.getByText('unpublish', { exact: true });
       await unpublishButton.click();
       await page.getByText('continue').click();
@@ -125,10 +139,11 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     });
 
     await test.step('releases should be updated in the release column of list view', async () => {
-      const releaseColumn = page.getByRole('button', { name: '1 release' });
+      const releaseColumn = page.getByRole('button', { name: '2 releases' });
       expect(releaseColumn).toHaveCount(2);
 
       await releaseColumn.first().click();
+      expect(page.getByText('The Diamond Dogs')).toBeVisible();
       expect(page.getByText('Trent Crimm: The Independent')).toBeVisible();
     });
   });
