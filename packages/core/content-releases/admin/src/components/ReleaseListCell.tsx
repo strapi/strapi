@@ -50,7 +50,8 @@ const ActionWrapper = styled(Flex)`
  * useReleasesList
  * -----------------------------------------------------------------------------------------------*/
 
-const useReleasesList = (entryId) => {
+const useReleasesList = (entryId: string | number) => {
+  // @ts-expect-error TODO: fix Property 'uid' does not exist on type 'FormattedContentTypeLayout | null'
   const { uid: contentTypeUid } = useTypedSelector(
     (state) => state['content-manager_listView'].contentType
   );
@@ -79,7 +80,7 @@ interface AddColumnToTableHookArgs {
 const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
   const { contentType } = layout;
 
-  if (!contentType.options.draftAndPublish) {
+  if (!contentType.options?.draftAndPublish) {
     return { displayedHeaders, layout };
   }
 

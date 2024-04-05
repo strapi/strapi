@@ -93,33 +93,43 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
   });
 
   test('A user should be able to perform bulk release on entries', async ({ page }) => {
-    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await test.step('bulk release', async () => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
 
-    await expect(page).toHaveTitle('Content Manager');
-    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-    const publishedItems = page.getByRole('gridcell', { name: 'published' });
-    expect(publishedItems).toHaveCount(2);
-    const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
+      await expect(page).toHaveTitle('Content Manager');
+      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+      const publishedItems = page.getByRole('gridcell', { name: 'published' });
+      expect(publishedItems).toHaveCount(2);
+      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
 
-    // Select all entries to release
-    await checkbox.check();
-    const addToRelease = page.getByRole('button', { name: 'add to release' });
-    await addToRelease.click();
+      // Select all entries to release
+      await checkbox.check();
+      const addToRelease = page.getByRole('button', { name: 'add to release' });
+      await addToRelease.click();
 
-    // Wait for the add to release dialog to appear
-    await page
-      .getByRole('combobox', {
-        name: 'Select a release',
-      })
-      .click();
+      // Wait for the add to release dialog to appear
+      await page
+        .getByRole('combobox', {
+          name: 'Select a release',
+        })
+        .click();
 
-    await page.getByRole('option', { name: 'Trent Crimm: The Independent' }).click();
-    const unpublishButton = page.getByText('unpublish', { exact: true });
-    await unpublishButton.click();
-    await page.getByText('continue').click();
-    await page.getByText(/Successfully added to release./).waitFor({
-      state: 'visible',
-      timeout: 5000,
+      await page.getByRole('option', { name: 'Trent Crimm: The Independent' }).click();
+      const unpublishButton = page.getByText('unpublish', { exact: true });
+      await unpublishButton.click();
+      await page.getByText('continue').click();
+      await page.getByText(/Successfully added to release./).waitFor({
+        state: 'visible',
+        timeout: 5000,
+      });
+    });
+
+    await test.step('releases should be updated in the release column of list view', async () => {
+      const releaseColumn = page.getByRole('button', { name: '1 release' });
+      expect(releaseColumn).toHaveCount(2);
+
+      await releaseColumn.first().click();
+      expect(page.getByText('Trent Crimm: The Independent')).toBeVisible();
     });
   });
 });
