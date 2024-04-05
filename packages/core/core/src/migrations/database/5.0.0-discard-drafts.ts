@@ -49,6 +49,12 @@ async function* getBatchToDiscard({
 
 const migrateUp = async (trx: Knex, db: Database) => {
   for (const meta of db.metadata.values()) {
+    const hasTable = await trx.schema.hasTable(meta.tableName);
+
+    if (!hasTable) {
+      continue;
+    }
+
     const uid = meta.uid as UID.ContentType;
     const model = strapi.getModel(uid);
     const hasDP = contentTypes.hasDraftAndPublish(model);
