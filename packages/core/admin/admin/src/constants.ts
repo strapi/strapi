@@ -121,6 +121,14 @@ export const HOOKS = {
    * @type {string}
    */
   MUTATE_SINGLE_TYPES_LINKS: 'Admin/CM/pages/App/mutate-single-types-links',
+
+  /**
+   * Hook that adds the locale column in the Release Details table
+   * @constant
+   * @type {string}
+   */
+  ADD_LOCALE_TO_RELEASE_DETAILS_TABLE:
+    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
 };
 
 export interface SettingsMenuLink

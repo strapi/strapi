@@ -39,6 +39,7 @@ const {
   MUTATE_COLLECTION_TYPES_LINKS,
   MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
+  ADD_LOCALE_TO_RELEASE_DETAILS_TABLE,
 } = HOOKS;
 
 interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>> {
@@ -291,6 +292,7 @@ class StrapiApp {
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     this.createHook(MUTATE_SINGLE_TYPES_LINKS);
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
+    this.createHook(ADD_LOCALE_TO_RELEASE_DETAILS_TABLE);
 
     return Promise.resolve();
   };
