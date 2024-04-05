@@ -52,6 +52,7 @@ describe('VersionHeader', () => {
       createdAt: '2022-01-01T00:00:00Z',
       status: 'draft' as const,
       schema: {},
+      componentsSchemas: {},
       locale: null,
       data: {
         title: 'Test Title',
@@ -132,6 +133,7 @@ describe('VersionHeader', () => {
       createdAt: '2022-01-01T00:00:00Z',
       status: 'draft' as const,
       schema: {},
+      componentsSchemas: {},
       locale: null,
       data: {
         title: 'Test Title',
