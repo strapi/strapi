@@ -29,7 +29,7 @@ import { useHistoryContext } from '../pages/History';
 import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
 import type { RelationResult } from '../../services/relations';
 
-const StyledAlert = styled(Alert)`
+const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {} })`
   button {
     display: none;
   }
@@ -60,9 +60,16 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
     <Box>
       <FieldLabel>{props.label}</FieldLabel>
       {results.length === 0 ? (
-        <Typography>No content</Typography>
+        <Box marginTop={1}>
+          <StyledAlert variant="default">
+            {formatMessage({
+              id: 'content-manager.history.content.no-relations',
+              defaultMessage: 'No relations.',
+            })}
+          </StyledAlert>
+        </Box>
       ) : (
-        <Flex direction="column" gap={2} alignItems="stretch">
+        <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
           {(results as RelationResult[]).map((relationData) => {
             // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
             const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
@@ -94,11 +101,9 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
           {meta.missingCount > 0 && (
             <StyledAlert
               variant="warning"
-              closeLabel="Close"
-              onClose={() => {}}
               title={formatMessage(
                 {
-                  id: 'content-manager.history.content.missing-relation.title',
+                  id: 'content-manager.history.content.missing-relations.title',
                   defaultMessage:
                     '{number, plural, =1 {Missing relation} other {{number} missing relations}}',
                 },
@@ -107,7 +112,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
             >
               {formatMessage(
                 {
-                  id: 'content-manager.history.content.missing-relation.message',
+                  id: 'content-manager.history.content.missing-relations.message',
                   defaultMessage:
                     "{number, plural, =1 {It has} other {They have}} been deleted and can't be restored.",
                 },
@@ -136,37 +141,35 @@ const CustomMediaInput = (props: InputRendererProps) => {
     InputRendererProps & { multiple: boolean }
   >;
   return (
-    <Box>
-      <Flex direction="column" gap={2} alignItems="stretch">
-        <Form method="PUT" disabled={true} initialValues={{ [props.name]: results }}>
-          <MediaLibrary {...props} disabled={true} multiple={results.length > 1} />
-        </Form>
-        {meta.missingCount > 0 && (
-          <StyledAlert
-            variant="warning"
-            closeLabel="Close"
-            onClose={() => {}}
-            title={formatMessage(
-              {
-                id: 'content-manager.history.content.missing-asset.title',
-                defaultMessage:
-                  '{number, plural, =1 {Missing asset} other {{number} missing assets}}',
-              },
-              { number: meta.missingCount }
-            )}
-          >
-            {formatMessage(
-              {
-                id: 'content-manager.history.content.missing-asset.message',
-                defaultMessage:
-                  "{number, plural, =1 {It has} other {They have}} been deleted in the Media Library and can't be restored.",
-              },
-              { number: meta.missingCount }
-            )}
-          </StyledAlert>
-        )}
-      </Flex>
-    </Box>
+    <Flex direction="column" gap={2} alignItems="stretch">
+      <Form method="PUT" disabled={true} initialValues={{ [props.name]: results }}>
+        <MediaLibrary {...props} disabled={true} multiple={results.length > 1} />
+      </Form>
+      {meta.missingCount > 0 && (
+        <StyledAlert
+          variant="warning"
+          closeLabel="Close"
+          onClose={() => {}}
+          title={formatMessage(
+            {
+              id: 'content-manager.history.content.missing-assets.title',
+              defaultMessage:
+                '{number, plural, =1 {Missing asset} other {{number} missing assets}}',
+            },
+            { number: meta.missingCount }
+          )}
+        >
+          {formatMessage(
+            {
+              id: 'content-manager.history.content.missing-assets.message',
+              defaultMessage:
+                "{number, plural, =1 {It has} other {They have}} been deleted in the Media Library and can't be restored.",
+            },
+            { number: meta.missingCount }
+          )}
+        </StyledAlert>
+      )}
+    </Flex>
   );
 };
 
