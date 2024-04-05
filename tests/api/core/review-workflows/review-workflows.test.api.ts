@@ -526,10 +526,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/assignee`,
           body: {
             data: { id: user.id },
           },
+          // TODO: Test with other locales
+          qs: { locale: undefined },
         });
         expect(response.status).toBe(200);
         const assignee = response.body.data[ENTITY_ASSIGNEE_ATTRIBUTE];
@@ -571,7 +573,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/assignee`,
           body: {
             data: { id: 1234 },
           },
@@ -598,7 +600,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/assignee`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/assignee`,
           body: {
             data: { id: user.id },
           },
@@ -625,10 +627,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/stage`,
           body: {
             data: { id: secondStage.id },
           },
+          // TODO: Test with other locales
+          qs: { locale: entry.locale },
         });
 
         expect(response.status).toBe(200);
@@ -642,10 +646,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/stage`,
           body: {
             data: { id: 1234 },
           },
+          // TODO: Test with other locales
+          qs: { locale: entry.locale },
         });
 
         expect(response.status).toBe(400);
@@ -684,10 +690,12 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
 
         const response = await requests.admin({
           method: 'PUT',
-          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.id}/stage`,
+          url: `/review-workflows/content-manager/collection-types/${productUID}/${entry.documentId}/stage`,
           body: {
             data: { id: secondStage.id },
           },
+          // TODO: Test with other locales
+          qs: { locale: entry.locale },
         });
 
         expect(response.status).toBe(400);
@@ -746,7 +754,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     test("It shouldn't be available for public", async () => {
-      const res = await requests.public.get(endpoint(entry.id));
+      const res = await requests.public.get(endpoint(entry.documentId));
 
       if (hasRW) {
         expect(res.status).toBe(401);
@@ -757,14 +765,14 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
     });
 
     test('It should return available stages for an admin user', async () => {
-      const res = await requests.admin.get(endpoint(entry.id));
+      const res = await requests.admin.get(endpoint(entry.documentId));
 
       expect(res.body.data).toHaveLength(1);
       expect(res.body.data[0]).toMatchObject(secondStage);
     });
 
     test('It should be forbidden when the user cannot read the content type', async () => {
-      const res = await restrictedRequest.get(endpoint(entry.id));
+      const res = await restrictedRequest.get(endpoint(entry.documentId));
 
       expect(res.status).toBe(403);
     });
@@ -778,7 +786,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       };
       await utils.assignPermissionsToRole(restrictedRole.id, [permission]);
 
-      const res = await restrictedRequest.get(endpoint(entry.id));
+      const res = await restrictedRequest.get(endpoint(entry.documentId));
 
       expect(res.body.data).toHaveLength(0);
     });

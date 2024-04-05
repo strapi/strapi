@@ -41,22 +41,22 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(documentId, model), assigneeId);
 
-      return strapi.db.query(model).update({
-        where: { documentId, locale, publishedAt: null },
+      return strapi.documents(model).update(documentId, {
+        locale,
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        select: [],
+        fields: [],
       });
     },
 
     async deleteEntityAssignee(documentId: string, locale: string, model: UID.ContentType) {
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(documentId, model), null);
 
-      return strapi.db.query(model).update({
-        where: { documentId, locale, publishedAt: null },
+      return strapi.documents(model).update(documentId, {
+        locale,
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: null },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
-        select: [],
+        fields: [],
       });
     },
   };
