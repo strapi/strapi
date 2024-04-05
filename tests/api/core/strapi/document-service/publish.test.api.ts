@@ -26,7 +26,7 @@ describe('Document Service', () => {
 
         const result = await strapi
           .documents(ARTICLE_UID)
-          .publish(articleDb.documentId, { locale: '*' });
+          .publish({ documentId: articleDb.documentId, locale: '*' });
 
         expect(result).not.toBeNull();
 
@@ -57,8 +57,8 @@ describe('Document Service', () => {
 
         // Publish twice should not create two new published versions,
         // the second published version should replace the first one
-        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
-        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+        await strapi.documents(ARTICLE_UID).publish({ documentId: articleDb.documentId });
+        await strapi.documents(ARTICLE_UID).publish({ documentId: articleDb.documentId });
 
         const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
           findArticlesDb({
@@ -85,7 +85,9 @@ describe('Document Service', () => {
     it('should publish default locale if no locale is provided', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-      const result = await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+      const result = await strapi
+        .documents(ARTICLE_UID)
+        .publish({ documentId: articleDb.documentId });
 
       expect(result).not.toBeNull();
 
@@ -114,7 +116,8 @@ describe('Document Service', () => {
         const articlesDb = await findArticlesDb({ documentId: 'Article1', publishedAt: null });
         const documentId = articlesDb.at(0)!.documentId;
 
-        const result = await strapi.documents(ARTICLE_UID).publish(documentId, {
+        const result = await strapi.documents(ARTICLE_UID).publish({
+          documentId,
           locale: 'en', // should only publish the english locale
         });
 
