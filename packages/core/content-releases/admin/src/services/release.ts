@@ -51,7 +51,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
 const releaseApi = createApi({
   reducerPath: pluginId,
   baseQuery: axiosBaseQuery,
-  tagTypes: ['Release', 'ReleaseAction'],
+  tagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease'],
   endpoints: (build) => {
     return {
       getReleasesForEntry: build.query<
@@ -201,6 +201,7 @@ const releaseApi = createApi({
         invalidatesTags: [
           { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
+          { type: 'EntriesInRelease', id: 'LIST' },
         ],
       }),
       updateReleaseAction: build.mutation<
@@ -255,7 +256,7 @@ const releaseApi = createApi({
         invalidatesTags: (result, error, arg) => [
           { type: 'Release', id: 'LIST' },
           { type: 'Release', id: arg.params.releaseId },
-          { type: 'ReleaseAction', id: 'LIST' },
+          { type: 'EntriesInRelease', id: 'LIST' },
         ],
       }),
       publishRelease: build.mutation<PublishRelease.Response, PublishRelease.Request['params']>({
@@ -274,7 +275,10 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        invalidatesTags: () => [{ type: 'Release', id: 'LIST' }],
+        invalidatesTags: () => [
+          { type: 'Release', id: 'LIST' },
+          { type: 'EntriesInRelease', id: 'LIST' },
+        ],
       }),
       getMappedEntriesInReleases: build.query<
         MapEntriesToReleases.Response,
@@ -289,6 +293,7 @@ const releaseApi = createApi({
             },
           };
         },
+        providesTags: [{ type: 'EntriesInRelease', id: 'LIST' }],
       }),
     };
   },
