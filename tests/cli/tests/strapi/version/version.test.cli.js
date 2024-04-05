@@ -17,7 +17,7 @@ describe('--version', () => {
 
   it('should output version with argument', async () => {
     const { stdout } = await coffee
-      .spawn('npm', ['run', '-s', 'strapi', '--', '--version'], { cwd: appPath })
+      .spawn('npm', ['run', '-s', 'strapi', '--', 'version'], { cwd: appPath })
       .expect('code', 0)
       .end();
 
