@@ -8100,10 +8100,10 @@ __metadata:
     styled-components: "npm:5.3.3"
     typescript: "npm:5.2.2"
     use-context-selector: "npm:1.4.1"
-    vite: "npm:5.0.11"
+    vite: "npm:5.0.13"
     webpack: "npm:^5.89.0"
     webpack-bundle-analyzer: "npm:^4.10.1"
-    webpack-dev-middleware: "npm:6.1.1"
+    webpack-dev-middleware: "npm:6.1.2"
     webpack-hot-middleware: "npm:2.26.0"
     yup: "npm:0.32.9"
   peerDependencies:
@@ -8356,7 +8356,7 @@ __metadata:
     storybook: "npm:7.5.3"
     styled-components: "npm:5.3.3"
     typescript: "npm:5.2.2"
-    vite: "npm:5.0.11"
+    vite: "npm:5.0.13"
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/design-system": 1.16.0
@@ -8419,7 +8419,7 @@ __metadata:
     rimraf: "npm:3.0.2"
     rxjs: "npm:7.8.1"
     typescript: "npm:5.2.2"
-    vite: "npm:5.0.11"
+    vite: "npm:5.0.13"
     yup: "npm:0.32.9"
   bin:
     pack-up: ./bin/pack-up.js
@@ -30989,9 +30989,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:5.0.11":
-  version: 5.0.11
-  resolution: "vite@npm:5.0.11"
+"vite@npm:5.0.13":
+  version: 5.0.13
+  resolution: "vite@npm:5.0.13"
   dependencies:
     esbuild: "npm:^0.19.3"
     fsevents: "npm:~2.3.3"
@@ -31025,7 +31025,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: f1a8fea35ed9f162d7a10fd13efb2c96637028b0a319d726aeec8b31e20e4d047272bda5df82167618e7774a520236c66f3093ed172802660aec5227814072f4
+  checksum: e0da15142ecbe3e88dbb2682c86c7e468927ea35a04c6a57dae623c575d632f3150a1098905af2da5a598b604a5762bdf45f904d00a2ecc6e93042d904b01077
   languageName: node
   linkType: hard
 
@@ -31139,9 +31139,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack-dev-middleware@npm:6.1.1":
-  version: 6.1.1
-  resolution: "webpack-dev-middleware@npm:6.1.1"
+"webpack-dev-middleware@npm:6.1.2":
+  version: 6.1.2
+  resolution: "webpack-dev-middleware@npm:6.1.2"
   dependencies:
     colorette: "npm:^2.0.10"
     memfs: "npm:^3.4.12"
@@ -31153,7 +31153,7 @@ __metadata:
   peerDependenciesMeta:
     webpack:
       optional: true
-  checksum: b0637584f18b02174fd7fc2e6278efb8e2fb5308abe4ffe73658e59ff53a62c05686f161b06bd5c41d42611aa395b8c8f087d7ff8cf2304232c097a694a5b94e
+  checksum: 043d9b7b6b2ec433515da138d6527573828f79e164722410038ba96a5d65be0e28241161a90168471c13231e5e8a84c0f7cd215433828bc64087b0bdab8aa553
   languageName: node
   linkType: hard
 
