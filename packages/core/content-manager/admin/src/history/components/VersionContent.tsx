@@ -11,7 +11,6 @@ import {
   GridItem,
   Link,
   Tooltip,
-  Typography,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -52,9 +51,8 @@ const LinkEllipsis = styled(Link)`
 
 const CustomRelationInput = (props: RelationsFieldProps) => {
   const { formatMessage } = useIntl();
-  const {
-    value: { results, meta },
-  } = useField(props.name);
+  const field = useField<{ results: RelationResult[]; meta: { missingCount: number } }>(props.name);
+  const { results, meta } = field.value!;
 
   return (
     <Box>
@@ -70,7 +68,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
         </Box>
       ) : (
         <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
-          {(results as RelationResult[]).map((relationData) => {
+          {results.map((relationData) => {
             // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
             const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
             const label = getRelationLabel(relationData, props.mainField);
