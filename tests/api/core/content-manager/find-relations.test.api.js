@@ -255,8 +255,8 @@ describe('Find Relations', () => {
 
     // Publish Skate and Chair
     const [publishedSkate, publishedChair] = await Promise.all([
-      strapi.documents(productUid).publish(productMapping.skate.documentId),
-      strapi.documents(productUid).publish(productMapping.chair.documentId),
+      strapi.documents(productUid).publish({ documentId: productMapping.skate.documentId }),
+      strapi.documents(productUid).publish({ documentId: productMapping.chair.documentId }),
     ]);
     data[productUid].published.push(publishedSkate.versions[0], publishedChair.versions[0]);
 
@@ -311,10 +311,11 @@ describe('Find Relations', () => {
 
     // Publish both shops
     const [publishedShop, publishedEmptyShop] = await Promise.all([
-      strapi.documents(shopUid).publish(draftShop.documentId, {
+      strapi.documents(shopUid).publish({
+        documentId: draftShop.documentId,
         populate: Object.keys(allRelations),
       }),
-      strapi.documents(shopUid).publish(draftEmptyShop.documentId),
+      strapi.documents(shopUid).publish({ documentId: draftEmptyShop.documentId }),
     ]);
     data[shopUid].published.push(publishedShop.versions[0], publishedEmptyShop.versions[0]);
 

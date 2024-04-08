@@ -54,8 +54,9 @@ export default ({ strapi }: Context) => {
         const document = await strapi.db?.query(uid).findOne();
 
         if (document) {
-          return strapi.documents!(uid).update(document.documentId, {
+          return strapi.documents!(uid).update({
             ...args,
+            documentId: document.documentId,
             data: sanitizedInputData,
           });
         }
@@ -95,7 +96,7 @@ export default ({ strapi }: Context) => {
           throw new NotFoundError('Document not found');
         }
 
-        await strapi.documents!(uid).delete(document.documentId, args);
+        await strapi.documents!(uid).delete({ ...args, documentId: document.documentId });
 
         return document;
       },

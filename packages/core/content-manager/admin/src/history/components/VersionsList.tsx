@@ -10,7 +10,7 @@ import { RelativeTime } from '../../components/RelativeTime';
 import { getDisplayName } from '../../utils/users';
 import { useHistoryContext } from '../pages/History';
 
-import type { HistoryVersionDataResponse } from '../../../../shared/contracts/history-versions';
+import type { HistoryVersions } from '../../../../shared/contracts';
 
 /* -------------------------------------------------------------------------------------------------
  * BlueText
@@ -32,7 +32,7 @@ interface StatusData {
 }
 
 interface VersionCardProps {
-  version: HistoryVersionDataResponse;
+  version: HistoryVersions.HistoryVersionDataResponse;
   isCurrent: boolean;
 }
 

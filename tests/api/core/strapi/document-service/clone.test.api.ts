@@ -24,7 +24,8 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
+        const result = await strapi.documents(ARTICLE_UID).clone({
+          documentId: articleDb.documentId,
           locale: 'en', // should only clone the english locale
           data: { title: 'Cloned Document' },
         });
@@ -55,7 +56,8 @@ describe('Document Service', () => {
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const result = await strapi.documents(ARTICLE_UID).clone(articleDb.documentId, {
+        const result = await strapi.documents(ARTICLE_UID).clone({
+          documentId: articleDb.documentId,
           data: {
             title: 'Cloned Document', // Clone all locales
           },
@@ -100,7 +102,8 @@ describe('Document Service', () => {
         } as const;
 
         // update article
-        const clonedArticle = await strapi.documents(ARTICLE_UID).clone(documentId, {
+        const clonedArticle = await strapi.documents(ARTICLE_UID).clone({
+          documentId,
           locale: 'en',
           data: {
             comp: componentData.comp,
@@ -122,7 +125,8 @@ describe('Document Service', () => {
     it.todo('clone a document with relations');
 
     it('clone non existing document', async () => {
-      const resultPromise = await strapi.documents(ARTICLE_UID).clone('1234', {
+      const resultPromise = await strapi.documents(ARTICLE_UID).clone({
+        documentId: '1234',
         data: {
           title: 'Cloned Document',
         },
