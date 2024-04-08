@@ -24,7 +24,7 @@ export const createMiddlewareManager = () => {
       return next();
     },
 
-    wrapObject<TSource extends Record<string, any>>(source: TSource, ctxDefaults = {}): TSource {
+    wrapObject<TSource>(source: TSource, ctxDefaults = {}): TSource {
       const facade: TSource = {} as TSource;
 
       for (const key in source) {
