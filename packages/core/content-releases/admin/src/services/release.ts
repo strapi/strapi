@@ -7,7 +7,7 @@ import {
 } from '../../../shared/contracts/release-actions';
 import { pluginId } from '../pluginId';
 
-import { axiosBaseQuery } from './axios';
+import { fetchBaseQuery } from './baseQuery';
 
 import type {
   GetReleaseActions,
@@ -24,6 +24,7 @@ import type {
   PublishRelease,
 } from '../../../shared/contracts/releases';
 
+// NEED TO LOOK AT THE PARAMS HERE
 export interface GetReleasesQueryParams {
   page?: number;
   pageSize?: number;
@@ -49,7 +50,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
 
 const releaseApi = createApi({
   reducerPath: pluginId,
-  baseQuery: axiosBaseQuery,
+  baseQuery: fetchBaseQuery,
   tagTypes: ['Release', 'ReleaseAction'],
   endpoints: (build) => {
     return {
@@ -62,7 +63,9 @@ const releaseApi = createApi({
             url: '/content-releases',
             method: 'GET',
             config: {
-              params,
+              options: {
+                params,
+              },
             },
           };
         },
@@ -90,12 +93,14 @@ const releaseApi = createApi({
             url: '/content-releases',
             method: 'GET',
             config: {
-              params: {
-                page: page || 1,
-                pageSize: pageSize || 16,
-                filters: filters || {
-                  releasedAt: {
-                    $notNull: false,
+              options: {
+                params: {
+                  page: page || 1,
+                  pageSize: pageSize || 16,
+                  filters: filters || {
+                    releasedAt: {
+                      $notNull: false,
+                    },
                   },
                 },
               },
@@ -141,7 +146,9 @@ const releaseApi = createApi({
             url: `/content-releases/${releaseId}/actions`,
             method: 'GET',
             config: {
-              params,
+              options: {
+                params,
+              },
             },
           };
         },

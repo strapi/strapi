@@ -30,7 +30,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         url: `/content-manager/collection-types/${model}/auto-clone/${sourceId}`,
         method: 'POST',
         config: {
-          params: query,
+          options: {
+            params: query,
+          },
         },
       }),
       invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
@@ -47,7 +49,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         method: 'POST',
         data,
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
       invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
@@ -68,7 +72,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         method: 'POST',
         data,
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
       invalidatesTags: (result, _error, { model }) => [
@@ -90,7 +96,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         }`,
         method: 'DELETE',
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
       invalidatesTags: (_result, _error, { collectionType, model }) => [
@@ -125,7 +133,9 @@ const documentApi = contentManagerApi.injectEndpoints({
           : `/content-manager/${collectionType}/${model}/actions/discard`,
         method: 'POST',
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
       invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
@@ -155,7 +165,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         url: `/content-manager/collection-types/${model}`,
         method: 'GET',
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
       providesTags: (result, _error, arg) => {
@@ -186,7 +198,9 @@ const documentApi = contentManagerApi.injectEndpoints({
           : `/content-manager/${collectionType}/${model}/actions/countDraftRelations`,
         method: 'GET',
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
     }),
@@ -209,7 +223,9 @@ const documentApi = contentManagerApi.injectEndpoints({
           url: `/content-manager/${collectionType}/${model}${documentId ? `/${documentId}` : ''}`,
           method: 'GET',
           config: {
-            params,
+            options: {
+              params,
+            },
           },
         });
 
@@ -247,7 +263,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         url: `/content-manager/collection-types/${model}/actions/countManyEntriesDraftRelations`,
         method: 'GET',
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
       transformResponse: (response: CountManyEntriesDraftRelations.Response) => response.data,
@@ -271,7 +289,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         method: 'POST',
         data,
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
       invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
@@ -311,7 +331,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         method: 'PUT',
         data,
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
       invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {
@@ -340,7 +362,9 @@ const documentApi = contentManagerApi.injectEndpoints({
         method: 'POST',
         data,
         config: {
-          params,
+          options: {
+            params,
+          },
         },
       }),
       invalidatesTags: (_result, _error, { collectionType, model, documentId }) => {

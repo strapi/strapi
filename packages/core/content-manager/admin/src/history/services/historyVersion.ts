@@ -12,7 +12,9 @@ const historyVersionsApi = contentManagerApi.injectEndpoints({
           url: `/content-manager/history-versions`,
           method: 'GET',
           config: {
-            params,
+            options: {
+              params,
+            },
           },
         };
       },

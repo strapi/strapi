@@ -45,7 +45,9 @@ const relationsApi = contentManagerApi.injectEndpoints({
           url: `/content-manager/relations/${model}/${id}/${targetField}`,
           method: 'GET',
           config: {
-            params,
+            options: {
+              params,
+            },
           },
         };
       },
@@ -115,7 +117,9 @@ const relationsApi = contentManagerApi.injectEndpoints({
           url: `/content-manager/relations/${model}/${targetField}`,
           method: 'GET',
           config: {
-            params,
+            options: {
+              params,
+            },
           },
         };
       },

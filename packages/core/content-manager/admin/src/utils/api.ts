@@ -1,7 +1,11 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
-import { getFetchClient, ApiError } from '@strapi/admin/strapi-admin';
-import { isAxiosError, type AxiosRequestConfig } from 'axios';
+import {
+  getFetchClient,
+  ApiError,
+  isFetchError,
+  type FetchConfig,
+} from '@strapi/admin/strapi-admin';
 
 interface Query {
   plugins?: Record<string, unknown>;
@@ -43,14 +47,11 @@ const buildValidParams = <TQuery extends Query>(query: TQuery): TransformedQuery
   return validQueryParams;
 };
 
-/* -------------------------------------------------------------------------------------------------
- * Axios data
- * -----------------------------------------------------------------------------------------------*/
 export interface QueryArguments {
   url: string;
-  method?: AxiosRequestConfig['method'];
-  data?: AxiosRequestConfig['data'];
-  config?: AxiosRequestConfig;
+  method?: string;
+  data?: unknown;
+  config?: FetchConfig;
 }
 
 export interface UnknownApiError {
@@ -62,37 +63,51 @@ export interface UnknownApiError {
 
 export type BaseQueryError = ApiError | UnknownApiError;
 
-const axiosBaseQuery =
+const fetchBaseQuery =
   (): BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> =>
   async (query, { signal }) => {
     try {
       const { get, post, del, put } = getFetchClient();
 
       if (typeof query === 'string') {
-        const result = await get(query, { signal });
+        const result = await get(query, {
+          fetchConfig: { signal },
+        });
         return { data: result.data };
       } else {
         const { url, method = 'GET', data, config } = query;
 
         if (method === 'POST') {
-          const result = await post(url, data, { ...config, signal });
+          const result = await post(url, data, {
+            options: { ...config?.options },
+            fetchConfig: { ...config?.fetchConfig, signal },
+          });
           return { data: result.data };
         }
 
         if (method === 'DELETE') {
-          const result = await del(url, { ...config, signal });
+          const result = await del(url, {
+            options: { ...config?.options },
+            fetchConfig: { ...config?.fetchConfig, signal },
+          });
           return { data: result.data };
         }
 
         if (method === 'PUT') {
-          const result = await put(url, data, { ...config, signal });
+          const result = await put(url, data, {
+            options: { ...config?.options },
+            fetchConfig: { ...config?.fetchConfig, signal },
+          });
           return { data: result.data };
         }
 
         /**
          * Default is GET.
          */
-        const result = await get(url, { ...config, signal });
+        const result = await get(url, {
+          options: { ...config?.options },
+          fetchConfig: { ...config?.fetchConfig, signal },
+        });
         return { data: result.data };
       }
     } catch (err) {
@@ -106,7 +121,7 @@ const axiosBaseQuery =
        * NOTE – passing the whole response will highlight this "serializability" issue.
        */
 
-      if (isAxiosError(err)) {
+      if (isFetchError(err)) {
         if (
           typeof err.response?.data === 'object' &&
           err.response?.data !== null &&
@@ -122,7 +137,7 @@ const axiosBaseQuery =
             error: {
               name: 'UnknownError',
               message: 'There was an unknown error response from the API',
-              details: err.response?.data,
+              details: err.response,
               status: err.response?.status,
             } as UnknownApiError,
           };
@@ -145,4 +160,4 @@ const isBaseQueryError = (error: BaseQueryError | SerializedError): error is Bas
   return error.name !== undefined;
 };
 
-export { axiosBaseQuery, isBaseQueryError, buildValidParams };
+export { fetchBaseQuery, isBaseQueryError, buildValidParams };

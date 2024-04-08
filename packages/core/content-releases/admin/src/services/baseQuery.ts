@@ -1,18 +1,15 @@
-import { getFetchClient } from '@strapi/admin/strapi-admin';
+import { getFetchClient, type FetchResponse, type FetchConfig } from '@strapi/admin/strapi-admin';
 
-import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
+import type { AxiosError } from 'axios';
 
-/* -------------------------------------------------------------------------------------------------
- * Axios data
- * -----------------------------------------------------------------------------------------------*/
 export interface QueryArguments<TSend> {
   url: string;
   method: 'PUT' | 'GET' | 'POST' | 'DELETE';
   data?: TSend;
-  config?: AxiosRequestConfig<TSend>;
+  config?: FetchConfig;
 }
 
-const axiosBaseQuery = async <TData = any, TSend = any>({
+const fetchBaseQuery = async <TData = unknown, TSend = unknown>({
   url,
   method,
   data,
@@ -22,24 +19,24 @@ const axiosBaseQuery = async <TData = any, TSend = any>({
     const { get, post, del, put } = getFetchClient();
 
     if (method === 'POST') {
-      const result = await post<TData, AxiosResponse<TData>, TSend>(url, data, config);
+      const result = await post<TData, FetchResponse<TData>, TSend>(url, data, config);
       return { data: result.data };
     }
 
     if (method === 'DELETE') {
-      const result = await del<TData, AxiosResponse<TData>, TSend>(url, config);
+      const result = await del<TData, FetchResponse<TData>>(url, config);
       return { data: result.data };
     }
 
     if (method === 'PUT') {
-      const result = await put<TData, AxiosResponse<TData>, TSend>(url, data, config);
+      const result = await put<TData, FetchResponse<TData>, TSend>(url, data, config);
       return { data: result.data };
     }
 
     /**
      * Default is GET.
      */
-    const result = await get<TData, AxiosResponse<TData>, TSend>(url, config);
+    const result = await get<TData, FetchResponse<TData>>(url, config);
     return { data: result.data };
   } catch (error) {
     const err = error as AxiosError;
@@ -84,4 +81,4 @@ const isAxiosError = (err: unknown): err is AxiosError<{ error: any }> => {
   );
 };
 
-export { isAxiosError, axiosBaseQuery };
+export { isAxiosError, fetchBaseQuery };

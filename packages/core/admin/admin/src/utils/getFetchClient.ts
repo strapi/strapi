@@ -1,4 +1,3 @@
-import axios, { AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
 import qs from 'qs';
 
 const STORAGE_KEYS = {
@@ -6,61 +5,48 @@ const STORAGE_KEYS = {
   USER: 'userInfo',
 };
 
-const fetchClient = (): AxiosInstance => {
-  const instance = axios.create({
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    paramsSerializer: (params) => {
-      return qs.stringify(params, { encode: false });
-    },
-  });
+type FetchParams = Parameters<typeof fetch>;
+type FetchURL = FetchParams[0];
+export type FetchOptions = FetchParams[1];
 
-  // Add a request interceptor to add authorization token to headers, rejects errors
-  instance.interceptors.request.use(
-    async (config) => {
-      config.headers.Authorization = `Bearer ${getToken()}`;
-
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
-
-  // Add a response interceptor to return the response or handle the error
-  instance.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (error?.response?.status === 401) {
-        clearItem(STORAGE_KEYS.TOKEN);
-        clearItem(STORAGE_KEYS.USER);
-
-        window.location.reload();
-      }
-
-      throw error;
-    }
-  );
-
-  return instance;
+export type FetchResponse<TData = unknown> = {
+  data: TData;
+};
+type Options = {
+  params?: any;
+  baseURL?: string;
+};
+export type FetchConfig = {
+  options?: Options;
+  fetchConfig?: FetchParams[1];
 };
 
-const clearItem = (key: string) => {
-  if (window.localStorage.getItem(key)) {
-    return window.localStorage.removeItem(key);
-  }
+export class FetchError extends Error {
+  public name: string;
+  public message: string;
+  public response?: Response;
 
-  if (window.sessionStorage.getItem(key)) {
-    return window.sessionStorage.removeItem(key);
+  constructor(message: string, response?: Response) {
+    super(message);
+    this.name = 'FetchError';
+    this.message = message;
+    this.response = response;
+
+    // Ensure correct stack trace in error object
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, FetchError);
+    }
   }
+}
+
+export const isFetchError = (error: unknown): error is FetchError => {
+  return error instanceof FetchError;
 };
 
 const getToken = () =>
   JSON.parse(
     localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN) ?? '""'
   );
-
-const instance = fetchClient();
 
 const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
 
@@ -71,31 +57,25 @@ const hasProtocol = (url: string) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(ur
 const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
 
 type FetchClient = {
-  get: <TData = any, R = AxiosResponse<TData>, TSend = any>(
-    url: string,
-    config?: AxiosRequestConfig<TSend>
-  ) => Promise<R>;
-  put: <TData = any, R = AxiosResponse<TData>, TSend = any>(
+  get: <TData = unknown, R = FetchResponse<TData>>(url: string, config?: FetchConfig) => Promise<R>;
+  put: <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
     url: string,
     data?: TSend,
-    config?: AxiosRequestConfig<TSend>
+    config?: FetchConfig
   ) => Promise<R>;
-  post: <TData = any, R = AxiosResponse<TData>, TSend = any>(
+  post: <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
     url: string,
     data?: TSend,
-    config?: AxiosRequestConfig<TSend>
+    config?: FetchConfig
   ) => Promise<R>;
-  del: <TData = any, R = AxiosResponse<TData>, TSend = any>(
-    url: string,
-    config?: AxiosRequestConfig<TSend>
-  ) => Promise<R>;
+  del: <TData = unknown, R = FetchResponse<TData>>(url: string, config?: FetchConfig) => Promise<R>;
 };
 
 /**
  * @public
- * @param {AxiosRequestConfig} [defaultOptions={}] - Default options for Axios requests.
+ * @param {FetchConfig} [defaultOptions={}] - Fetch Configs.
  * @returns {FetchClient} A fetch client object with methods for making HTTP requests.
- * @description This is an abstraction around the axios instance exposed by a function. It provides a simple interface to handle API calls
+ * @description This is an abstraction around the native fetch exposed by a function. It provides a simple interface to handle API calls
  * to the Strapi backend.
  * @example
  * ```tsx
@@ -111,20 +91,133 @@ type FetchClient = {
  * };
  * ```
  */
-const getFetchClient = (defaultOptions: AxiosRequestConfig = {}): FetchClient => {
-  instance.defaults.baseURL = window.strapi.backendURL;
-  return {
-    get: (url, config) =>
-      instance.get(normalizeUrl(url), {
-        ...defaultOptions,
-        ...config,
-      }),
-    put: (url, data, config) =>
-      instance.put(normalizeUrl(url), data, { ...defaultOptions, ...config }),
-    post: (url, data, config) =>
-      instance.post(normalizeUrl(url), data, { ...defaultOptions, ...config }),
-    del: (url, config) => instance.delete(normalizeUrl(url), { ...defaultOptions, ...config }),
+const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
+  const { options } = defaultOptions;
+  const headers = new Headers({
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${getToken()}`,
+  });
+
+  // Add a response interceptor to return the response
+  const responseInterceptor = async <TData = unknown>(
+    response: Response
+  ): Promise<FetchResponse<TData>> => {
+    const result = await response.json();
+
+    return {
+      data: result,
+    };
   };
+
+  const paramsSerializer = <Param = unknown>(url: string, params?: Param) => {
+    if (params) {
+      const serializedParams = qs.stringify(params, { encode: false });
+      return `${url}?${serializedParams}`;
+    }
+    return url;
+  };
+
+  const addBaseUrl = (url: FetchURL, clientBaseURL?: string) => {
+    if (clientBaseURL) {
+      return `${clientBaseURL}${url}`;
+    }
+    if (options?.baseURL) {
+      return `${options?.baseURL}${url}`;
+    }
+    const baseURL = window.strapi.backendURL;
+    return `${baseURL}${url}`;
+  };
+
+  const fetchHandler = async (url: string, options?: FetchOptions) => {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new FetchError(`Failed to fetch data: ${response.statusText}`, response);
+    }
+
+    return response;
+  };
+
+  const fetchClient: FetchClient = {
+    get: async <TData = unknown, R = FetchResponse<TData>>(
+      url: string,
+      options?: FetchConfig
+    ): Promise<R> => {
+      const response = await fetchHandler(
+        paramsSerializer(
+          addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
+          options?.options?.params
+        ),
+        {
+          ...defaultOptions.fetchConfig,
+          ...options?.fetchConfig,
+          method: 'GET',
+          headers,
+        }
+      );
+      return responseInterceptor<TData>(response) as Promise<R>;
+    },
+    post: async <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
+      url: string,
+      data?: TSend,
+      options?: FetchConfig
+    ): Promise<R> => {
+      const response = await fetchHandler(
+        paramsSerializer(
+          addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
+          options?.options?.params
+        ),
+        {
+          ...defaultOptions?.fetchConfig,
+          ...options?.fetchConfig,
+          method: 'POST',
+          headers,
+          body: JSON.stringify(data),
+        }
+      );
+      return responseInterceptor<TData>(response) as Promise<R>;
+    },
+    put: async <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
+      url: string,
+      data?: TSend,
+      options?: FetchConfig
+    ): Promise<R> => {
+      const response = await fetchHandler(
+        paramsSerializer(
+          addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
+          options?.options?.params
+        ),
+        {
+          ...defaultOptions?.fetchConfig,
+          ...options?.fetchConfig,
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(data),
+        }
+      );
+      return responseInterceptor<TData>(response) as Promise<R>;
+    },
+    del: async <TData = unknown, R = FetchResponse<TData>>(
+      url: string,
+      options?: FetchConfig
+    ): Promise<R> => {
+      const response = await fetchHandler(
+        paramsSerializer(
+          addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
+          options?.options?.params
+        ),
+        {
+          ...defaultOptions?.fetchConfig,
+          ...options?.fetchConfig,
+          method: 'DELETE',
+          headers,
+        }
+      );
+      return responseInterceptor<TData>(response) as Promise<R>;
+    },
+  };
+
+  return fetchClient;
 };
 
-export { instance, getFetchClient };
+export { getFetchClient };

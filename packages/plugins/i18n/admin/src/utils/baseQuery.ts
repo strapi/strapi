@@ -1,16 +1,16 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
-import { getFetchClient, ApiError } from '@strapi/admin/strapi-admin';
-import { isAxiosError, type AxiosRequestConfig } from 'axios';
+import { getFetchClient, ApiError, type FetchConfig } from '@strapi/admin/strapi-admin';
+import { isAxiosError } from 'axios';
 
 /* -------------------------------------------------------------------------------------------------
  * Axios data
  * -----------------------------------------------------------------------------------------------*/
 export interface QueryArguments {
   url: string;
-  method?: AxiosRequestConfig['method'];
-  data?: AxiosRequestConfig['data'];
-  config?: AxiosRequestConfig;
+  method?: string;
+  data?: unknown;
+  config?: FetchConfig;
 }
 
 export interface UnknownApiError {
@@ -29,30 +29,42 @@ const axiosBaseQuery =
       const { get, post, del, put } = getFetchClient();
 
       if (typeof query === 'string') {
-        const result = await get(query, { signal });
+        const result = await get(query, { fetchConfig: { signal } });
         return { data: result.data };
       } else {
         const { url, method = 'GET', data, config } = query;
 
         if (method === 'POST') {
-          const result = await post(url, data, { ...config, signal });
+          const result = await post(url, data, {
+            options: { ...config?.options },
+            fetchConfig: { ...config?.fetchConfig, signal },
+          });
           return { data: result.data };
         }
 
         if (method === 'DELETE') {
-          const result = await del(url, { ...config, signal });
+          const result = await del(url, {
+            options: { ...config?.options },
+            fetchConfig: { ...config?.fetchConfig, signal },
+          });
           return { data: result.data };
         }
 
         if (method === 'PUT') {
-          const result = await put(url, data, { ...config, signal });
+          const result = await put(url, data, {
+            options: { ...config?.options },
+            fetchConfig: { ...config?.fetchConfig, signal },
+          });
           return { data: result.data };
         }
 
         /**
          * Default is GET.
          */
-        const result = await get(url, { ...config, signal });
+        const result = await get(url, {
+          options: { ...config?.options },
+          fetchConfig: { ...config?.fetchConfig, signal },
+        });
         return { data: result.data };
       }
     } catch (err) {

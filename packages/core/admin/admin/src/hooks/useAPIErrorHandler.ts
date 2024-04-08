@@ -3,6 +3,7 @@ import * as React from 'react';
 import { AxiosError } from 'axios';
 import { IntlFormatters, useIntl } from 'react-intl';
 
+import { FetchError } from '../utils/getFetchClient';
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
 

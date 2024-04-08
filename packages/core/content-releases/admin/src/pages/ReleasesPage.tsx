@@ -40,7 +40,7 @@ import { GetReleases, type Release } from '../../../shared/contracts/releases';
 import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { isAxiosError } from '../services/axios';
+import { isAxiosError } from '../services/baseQuery';
 import {
   useGetReleasesQuery,
   GetReleasesQueryParams,

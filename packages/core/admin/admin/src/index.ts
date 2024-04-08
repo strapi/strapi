@@ -53,8 +53,9 @@ export type { StrapiApp, MenuItem, InjectionZoneComponent } from './StrapiApp';
 export type { Store } from './core/store/configure';
 export type { Plugin, PluginConfig } from './core/apis/Plugin';
 export type { SanitizedAdminUser } from '../../shared/contracts/shared';
+export type { FetchOptions, FetchResponse, FetchConfig } from './utils/getFetchClient';
 /**
  * Utils
  */
 export { translatedErrors } from './utils/translatedErrors';
-export { getFetchClient } from './utils/getFetchClient';
+export { getFetchClient, isFetchError, FetchError } from './utils/getFetchClient';

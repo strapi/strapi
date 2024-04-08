@@ -11,7 +11,9 @@ type SettingsInput = {
 const api = createApi({
   reducerPath: 'plugin::documentation',
   baseQuery: axiosBaseQuery({
-    baseURL: '/documentation',
+    options: {
+      baseURL: '/documentation',
+    },
   }),
   tagTypes: ['DocumentInfos'],
   endpoints: (builder) => {

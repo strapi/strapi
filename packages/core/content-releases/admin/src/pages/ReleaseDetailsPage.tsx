@@ -43,7 +43,7 @@ import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { isAxiosError } from '../services/axios';
+import { isAxiosError } from '../services/baseQuery';
 import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
