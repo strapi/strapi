@@ -35,7 +35,6 @@ To run only one domain, meaning a top-level directory in e2e/tests such as "admi
 
 ```shell
 yarn test:e2e --domains admin
-yarn test:e2e --domain admin
 ```
 
 To run a specific file, you can pass arguments and options to playwright using `--` between the test:e2e options and the playwright options, such as:
@@ -43,6 +42,14 @@ To run a specific file, you can pass arguments and options to playwright using `
 ```shell
 # to run just the login.spec.ts file in the admin domain
 yarn test:e2e --domains admin -- login.spec.ts
+```
+
+To debug your tests with a browser instance and the playwright debugger, you can pass the
+`--debug` option like this:
+
+```shell
+yarn test:e2e --domains admin -- --debug
+yarn test:e2e --domains admin -- login.spec.ts --debug
 ```
 
 ### Concurrency / parallellization
