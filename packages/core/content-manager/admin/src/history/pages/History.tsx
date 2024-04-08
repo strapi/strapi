@@ -171,7 +171,14 @@ const HistoryPage = () => {
         mainField={mainField}
       >
         <Flex direction="row" alignItems="flex-start">
-          <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
+          <Main
+            grow={1}
+            height="100vh"
+            background="neutral100"
+            paddingBottom={6}
+            overflow="auto"
+            labelledBy={headerId}
+          >
             <VersionHeader headerId={headerId} />
             <VersionContent />
           </Main>

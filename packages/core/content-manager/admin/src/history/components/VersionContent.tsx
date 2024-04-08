@@ -2,41 +2,80 @@ import * as React from 'react';
 
 import { Form, useField, useStrapiApp } from '@strapi/admin/strapi-admin';
 import {
+  Alert,
   Box,
   ContentLayout,
   FieldLabel,
   Flex,
   Grid,
   GridItem,
-  Typography,
+  Link,
+  Tooltip,
 } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
+import styled from 'styled-components';
 
+import { COLLECTION_TYPES } from '../../constants/collections';
+import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import {
   InputRenderer,
   type InputRendererProps,
 } from '../../pages/EditView/components/InputRenderer';
+import { getRelationLabel } from '../../utils/relations';
 import { useHistoryContext } from '../pages/History';
 
 import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
+import type { RelationResult } from '../../services/relations';
+
+const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {} })`
+  button {
+    display: none;
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * CustomRelationInput
  * -----------------------------------------------------------------------------------------------*/
 
+const LinkEllipsis = styled(Link)`
+  display: block;
+
+  & > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+`;
+
 const CustomRelationInput = (props: RelationsFieldProps) => {
-  const field = useField(props.name);
+  const { formatMessage } = useIntl();
+  const field = useField<{ results: RelationResult[]; meta: { missingCount: number } }>(props.name);
+  const { results, meta } = field.value!;
 
   return (
     <Box>
       <FieldLabel>{props.label}</FieldLabel>
-      {field.value.results.length === 0 ? (
-        <Typography>No content</Typography>
+      {results.length === 0 ? (
+        <Box marginTop={1}>
+          <StyledAlert variant="default">
+            {formatMessage({
+              id: 'content-manager.history.content.no-relations',
+              defaultMessage: 'No relations.',
+            })}
+          </StyledAlert>
+        </Box>
       ) : (
-        <Flex direction="column" gap={2} alignItems="stretch">
-          {(field.value.results as Record<string, unknown>[]).map((relationData, index) => {
+        <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
+          {results.map((relationData) => {
+            // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+            const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
+            const label = getRelationLabel(relationData, props.mainField);
+
             return (
               <Flex
-                key={index}
+                key={relationData.documentId}
                 paddingTop={2}
                 paddingBottom={2}
                 paddingLeft={4}
@@ -46,13 +85,39 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
                 background="neutral150"
                 justifyContent="space-between"
               >
-                <pre>
-                  <Typography as="code">{JSON.stringify(relationData, null, 2)}</Typography>
-                </pre>
+                <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+                  <Tooltip description={label}>
+                    <LinkEllipsis forwardedAs={NavLink} to={href}>
+                      {label}
+                    </LinkEllipsis>
+                  </Tooltip>
+                </Box>
+                <DocumentStatus status={relationData.status as string} />
               </Flex>
             );
           })}
-          <Typography>{field.value.meta.missingCount} missing relations</Typography>
+          {meta.missingCount > 0 && (
+            <StyledAlert
+              variant="warning"
+              title={formatMessage(
+                {
+                  id: 'content-manager.history.content.missing-relations.title',
+                  defaultMessage:
+                    '{number, plural, =1 {Missing relation} other {{number} missing relations}}',
+                },
+                { number: meta.missingCount }
+              )}
+            >
+              {formatMessage(
+                {
+                  id: 'content-manager.history.content.missing-relations.message',
+                  defaultMessage:
+                    "{number, plural, =1 {It has} other {They have}} been deleted and can't be restored.",
+                },
+                { number: meta.missingCount }
+              )}
+            </StyledAlert>
+          )}
         </Flex>
       )}
     </Box>
@@ -64,21 +129,45 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const CustomMediaInput = (props: InputRendererProps) => {
-  const field = useField(props.name);
+  const {
+    value: { results, meta },
+  } = useField(props.name);
+  const { formatMessage } = useIntl();
+
   const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);
   const MediaLibrary = fields.media as React.ComponentType<
     InputRendererProps & { multiple: boolean }
   >;
-
   return (
-    <Box>
-      <Flex direction="column" gap={2} alignItems="stretch">
-        <Form method="PUT" disabled={true} initialValues={{ [props.name]: field.value.results }}>
-          <MediaLibrary {...props} disabled={true} multiple={field.value.results.length > 1} />
-        </Form>
-        <Typography>{field.value.meta.missingCount} missing relations</Typography>
-      </Flex>
-    </Box>
+    <Flex direction="column" gap={2} alignItems="stretch">
+      <Form method="PUT" disabled={true} initialValues={{ [props.name]: results }}>
+        <MediaLibrary {...props} disabled={true} multiple={results.length > 1} />
+      </Form>
+      {meta.missingCount > 0 && (
+        <StyledAlert
+          variant="warning"
+          closeLabel="Close"
+          onClose={() => {}}
+          title={formatMessage(
+            {
+              id: 'content-manager.history.content.missing-assets.title',
+              defaultMessage:
+                '{number, plural, =1 {Missing asset} other {{number} missing assets}}',
+            },
+            { number: meta.missingCount }
+          )}
+        >
+          {formatMessage(
+            {
+              id: 'content-manager.history.content.missing-assets.message',
+              defaultMessage:
+                "{number, plural, =1 {It has} other {They have}} been deleted in the Media Library and can't be restored.",
+            },
+            { number: meta.missingCount }
+          )}
+        </StyledAlert>
+      )}
+    </Flex>
   );
 };
 
