@@ -95,17 +95,17 @@ const InputRenderer = ({
     if (CustomInput) {
       // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
       return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
-    } else {
-      return (
-        <FormInputRenderer
-          {...props}
-          hint={hint}
-          // @ts-expect-error – this workaround lets us display that the custom field is missing.
-          type={props.attribute.customField}
-          disabled={fieldIsDisabled}
-        />
-      );
     }
+
+    return (
+      <FormInputRenderer
+        {...props}
+        hint={hint}
+        // @ts-expect-error – this workaround lets us display that the custom field is missing.
+        type={props.attribute.customField}
+        disabled={fieldIsDisabled}
+      />
+    );
   }
 
   /**

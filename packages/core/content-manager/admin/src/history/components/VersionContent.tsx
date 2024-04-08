@@ -65,7 +65,7 @@ const CustomInputRenderer = (props: InputRendererProps) => {
           {formatMessage({
             id: 'content-manager.history.content.new-field.message',
             defaultMessage:
-              'This field didn’t exist when this version was saved. If you restore this version, it will be empty.',
+              "This field didn't exist when this version was saved. If you restore this version, it will be empty.",
           })}
         </StyledAlert>
       </Flex>
