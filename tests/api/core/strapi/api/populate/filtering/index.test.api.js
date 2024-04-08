@@ -63,33 +63,6 @@ const schemas = {
         third: { type: 'relation', target: 'api::a.a', relation: 'oneToMany' },
       },
     },
-    shirt: {
-      attributes: {
-        name: {
-          type: 'string',
-        },
-        shirtId: {
-          type: 'string',
-        },
-        variants: {
-          type: 'relation',
-          relation: 'oneToMany',
-          target: 'api::shirt.shirt',
-          mappedBy: 'variantOf',
-        },
-        variantOf: {
-          type: 'relation',
-          relation: 'manyToOne',
-          target: 'api::shirt.shirt',
-          inversedBy: 'variants',
-        },
-      },
-      displayName: 'Shirt',
-      singularName: 'shirt',
-      pluralName: 'shirts',
-      description: '',
-      collectionName: '',
-    },
   },
 };
 
