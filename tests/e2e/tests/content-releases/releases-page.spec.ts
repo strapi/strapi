@@ -136,11 +136,11 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     await test.step('releases should be updated in the release column of list view', async () => {
       const releaseColumn = page.getByRole('button', { name: '2 releases' });
-      expect(page.getByRole('button', { name: '2 releases' })).toHaveCount(2);
+      expect(releaseColumn).toHaveCount(2);
 
       await releaseColumn.first().click();
-      expect(page.getByText('The Diamond Dogs')).toBeVisible();
-      expect(page.getByText('Trent Crimm: The Independent')).toBeVisible();
+      await expect(page.getByText('The Diamond Dogs')).toBeVisible();
+      await expect(page.getByText('Trent Crimm: The Independent')).toBeVisible();
     });
   });
 });
