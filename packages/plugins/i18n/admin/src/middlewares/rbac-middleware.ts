@@ -4,7 +4,7 @@ import { matchPath } from 'react-router-dom';
 
 import type { RBACMiddleware } from '@strapi/admin/strapi-admin';
 
-const localeMiddleware: RBACMiddleware = (ctx) => (next, permissions) => {
+const localeMiddleware: RBACMiddleware = (ctx) => (next) => (permissions) => {
   const match = matchPath('/content-manager/:collectionType/:model?/:id', ctx.pathname);
 
   if (!match) {

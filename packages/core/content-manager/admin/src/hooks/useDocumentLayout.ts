@@ -143,9 +143,14 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { isLoading: isLoadingSchemas, schemas } = useContentTypeSchema();
 
-  const { data, isLoading: isLoadingConfigs, error } = useGetContentTypeConfigurationQuery(model);
+  const {
+    data,
+    isLoading: isLoadingConfigs,
+    error,
+    isFetching: isFetchingConfigs,
+  } = useGetContentTypeConfigurationQuery(model);
 
-  const isLoading = isLoadingSchemas || isLoadingConfigs;
+  const isLoading = isLoadingSchemas || isFetchingConfigs || isLoadingConfigs;
 
   React.useEffect(() => {
     if (error) {
@@ -158,7 +163,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
 
   const editLayout = React.useMemo(
     () =>
-      data
+      data && !isLoading
         ? formatEditLayout(data, { schemas, schema, components })
         : ({
             layout: [],
@@ -167,11 +172,11 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
             options: {},
             settings: DEFAULT_SETTINGS,
           } as EditLayout),
-    [data, schema, components, schemas]
+    [data, isLoading, schemas, schema, components]
   );
 
   const listLayout = React.useMemo(() => {
-    return data
+    return data && !isLoading
       ? formatListLayout(data, { schemas, schema, components })
       : ({
           layout: [],
@@ -179,7 +184,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
           options: {},
           settings: DEFAULT_SETTINGS,
         } as ListLayout);
-  }, [data, schema, schemas, components]);
+  }, [data, isLoading, schemas, schema, components]);
 
   const { layout: edit } = React.useMemo(
     () =>

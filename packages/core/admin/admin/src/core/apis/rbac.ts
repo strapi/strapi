@@ -17,9 +17,8 @@ interface RBACMiddleware {
   (
     ctx: RBACContext
   ): (
-    next: (permissions: Permission[]) => Promise<Permission[]> | Permission[],
-    permissions: Permission[]
-  ) => Promise<Permission[]> | Permission[];
+    next: (permissions: Permission[]) => Promise<Permission[]> | Permission[]
+  ) => (permissions: Permission[]) => Promise<Permission[]> | Permission[];
 }
 
 class RBAC {
@@ -44,7 +43,7 @@ class RBAC {
 
     const next = async (permissions: Permission[]) => {
       if (index < this.middlewares.length) {
-        return middlewaresToRun[index++](next, permissions);
+        return middlewaresToRun[index++](next)(permissions);
       }
 
       return permissions;
