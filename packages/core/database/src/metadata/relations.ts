@@ -220,8 +220,7 @@ const createMorphToOne = (attributeName: string, attribute: Relation.MorphToOne)
 
   Object.assign(attribute, {
     owner: true,
-    morphColumn: {
-      // TODO: add referenced column
+    morphColumn: attribute.morphColumn ?? {
       typeColumn: {
         name: typeColumnName,
       },
@@ -231,8 +230,6 @@ const createMorphToOne = (attributeName: string, attribute: Relation.MorphToOne)
       },
     },
   });
-
-  // TODO: implement bidirectional
 };
 
 /**
