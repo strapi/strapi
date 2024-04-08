@@ -1,7 +1,7 @@
 import { render as baseRender, screen } from '@tests/utils';
 import { Route, Routes, useLocation } from 'react-router-dom';
 
-import { AppInfoProvider } from '../../../features/AppInfo';
+import { RBAC } from '../../../core/apis/rbac';
 import { StrapiAppContextValue, StrapiAppProvider } from '../../../features/StrapiApp';
 import { useSettingsMenu } from '../../../hooks/useSettingsMenu';
 import { Layout } from '../Layout';
@@ -31,6 +31,7 @@ const render = (settings: StrapiAppContextValue['settings']) =>
             }}
             settings={settings}
             plugins={{}}
+            rbac={new RBAC()}
             getPlugin={jest.fn()}
             getAdminInjectedComponents={jest.fn()}
             runHookParallel={jest.fn()}
