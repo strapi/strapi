@@ -2,78 +2,22 @@ import * as React from 'react';
 
 import { Form } from '@strapi/admin/strapi-admin';
 import {
-  Alert,
   Box,
   ContentLayout,
   Divider,
-  FieldLabel,
   Flex,
   Grid,
   GridItem,
   Typography,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
 import { useTypedSelector } from '../../modules/hooks';
-import {
-  InputRenderer,
-  type InputRendererProps,
-} from '../../pages/EditView/components/InputRenderer';
 import { useHistoryContext } from '../pages/History';
 
+import { VersionInputRenderer } from './VersionInputRenderer';
+
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
-
-/* -------------------------------------------------------------------------------------------------
- * CustomInputRenderer
- * -----------------------------------------------------------------------------------------------*/
-const StyledAlert = styled(Alert)`
-  button {
-    display: none;
-  }
-`;
-
-// The renderers for these types will be added in future PRs, they need special handling
-const UNSUPPORTED_TYPES = ['media', 'relation'];
-
-const CustomInputRenderer = (props: InputRendererProps) => {
-  const { formatMessage } = useIntl();
-  const { version } = useHistoryContext('VersionContent', (state) => ({
-    version: state.selectedVersion,
-  }));
-
-  if (UNSUPPORTED_TYPES.includes(props.type)) {
-    return <Typography>TODO: support {props.type}</Typography>;
-  }
-
-  // Handle new fields
-  const addedAttributes = version.meta.unknownAttributes.added;
-  if (Object.keys(addedAttributes).includes(props.name)) {
-    return (
-      <Flex direction="column" alignItems="flex-start" gap={1}>
-        <FieldLabel>{props.label}</FieldLabel>
-        <StyledAlert
-          width="100%"
-          closeLabel="Close"
-          onClose={() => {}}
-          variant="warning"
-          title={formatMessage({
-            id: 'content-manager.history.content.new-field.title',
-            defaultMessage: 'New field',
-          })}
-        >
-          {formatMessage({
-            id: 'content-manager.history.content.new-field.message',
-            defaultMessage:
-              "This field didn't exist when this version was saved. If you restore this version, it will be empty.",
-          })}
-        </StyledAlert>
-      </Flex>
-    );
-  }
-
-  return <InputRenderer {...props} />;
-};
 
 /* -------------------------------------------------------------------------------------------------
  * FormPanel
@@ -87,7 +31,7 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
     return (
       <Grid key={field.name} gap={4}>
         <GridItem col={12} s={12} xs={12}>
-          <CustomInputRenderer {...field} />
+          <VersionInputRenderer {...field} />
         </GridItem>
       </Grid>
     );
@@ -110,7 +54,7 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
             {row.map(({ size, ...field }) => {
               return (
                 <GridItem col={size} key={field.name} s={12} xs={12}>
-                  <CustomInputRenderer {...field} />
+                  <VersionInputRenderer {...field} />
                 </GridItem>
               );
             })}
@@ -124,6 +68,7 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
 /* -------------------------------------------------------------------------------------------------
  * VersionContent
  * -----------------------------------------------------------------------------------------------*/
+
 type UnknownFieldLayout = EditFieldLayout & { isRBACDisabled: boolean };
 const VersionContent = () => {
   const { formatMessage } = useIntl();
@@ -138,9 +83,8 @@ const VersionContent = () => {
     ([attributeName, attribute]) => {
       return {
         attribute,
+        shouldIgnoreRBAC: true,
         type: attribute.type,
-        // TODO: Find a better way to render inputs without RBAC?
-        isRBACDisabled: true,
         visible: true,
         disabled: true,
         label: attributeName,
@@ -152,7 +96,7 @@ const VersionContent = () => {
   const unknownFieldsLayout = removedAttributesAsFields
     .reduce<Array<UnknownFieldLayout[]>>((rows, field) => {
       if (field.type === 'dynamiczone') {
-        // Dynamic zones take up an entire row
+        // Dynamic zones take up all the columns in a row
         // @ts-expect-error Fix the type error
         rows.push([field]);
 
@@ -164,7 +108,7 @@ const VersionContent = () => {
         rows.push([]);
       }
 
-      // Push fields to the current row
+      // Push fields to the current row, they wrap and handle their own column size
       // @ts-expect-error Fix the type error
       rows[rows.length - 1].push(field);
 
