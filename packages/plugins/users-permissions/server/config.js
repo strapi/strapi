@@ -19,15 +19,26 @@ module.exports = {
       },
     },
     callback: {
-      validate(callbackURL, provider) {
-        const defaultCallbackURL = provider.callback;
+      validate(callback, provider) {
+        const uCallback = new URL(callback);
+        const uProviderCallback = new URL(provider.callback);
 
-        if (callbackURL !== defaultCallbackURL) {
+        // Make sure the different origin matches
+        if(uCallback.origin !== uProviderCallback.origin)  {
           throw new Error(
-            `Forbidden callback provided: ${callbackURL} !== ${defaultCallbackURL})`
+            `Forbidden callback provided: origins don't match ${uCallback.origin} !== ${uProviderCallback.origin})`
           );
         }
-      },
+
+        // Make sure the different pathname matches
+        if(uCallback.pathname !== uProviderCallback.pathname)  {
+          throw new Error(
+            `Forbidden callback provided: pathname don't match ${uCallback.pathname} !== ${uProviderCallback.pathname})`
+          );
+        }
+
+        // NOTE: We're not checking the search parameters on purpose to allow passing different states
+      }
     },
   }),
   validator() {},
