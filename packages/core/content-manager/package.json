@@ -60,7 +60,7 @@
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.16.0",
+    "@strapi/design-system": "1.17.0",
     "@strapi/icons": "1.16.0",
     "@strapi/types": "5.0.0-beta.2",
     "@strapi/utils": "5.0.0-beta.2",
@@ -112,7 +112,7 @@
     "styled-components": "5.3.11"
   },
   "peerDependencies": {
-    "@strapi/admin": "^5.0.0",
+    "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
