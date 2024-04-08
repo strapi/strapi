@@ -86,13 +86,6 @@ yargs
         default: domains,
       });
 
-      yarg.option('debug', {
-        alias: 'debug',
-        describe: 'Run playwright in debug mode',
-        type: 'boolean',
-        default: false,
-      });
-
       yarg.option('setup', {
         alias: 'f',
         describe: 'Force the setup process of the test apps',
@@ -107,7 +100,7 @@ yargs
           dotenv.config({ path: path.join(testRoot, '.env') });
         }
 
-        const { concurrency, domains, setup, debug } = argv;
+        const { concurrency, domains, setup } = argv;
 
         /**
          * Publishing all packages to the yalc store
@@ -198,11 +191,6 @@ yargs
           return acc;
         }, []);
 
-        const optionFlags = [];
-        if (debug) {
-          optionFlags.push('--debug');
-        }
-
         // eslint-disable-next-line no-plusplus
         for (let i = 0; i < chunkedDomains.length; i++) {
           const domains = chunkedDomains[i];
@@ -238,14 +226,7 @@ module.exports = config
 
               await execa(
                 'yarn',
-                [
-                  'playwright',
-                  'test',
-                  '--config',
-                  pathToPlaywrightConfig,
-                  ...optionFlags,
-                  ...argv._,
-                ],
+                ['playwright', 'test', '--config', pathToPlaywrightConfig, ...argv._],
                 {
                   stdio: 'inherit',
                   cwd,
