@@ -458,7 +458,7 @@ describe('Populate filters', () => {
       expect(body.data[1].attributes.dz).toMatchObject(filter(fixtures.b[1].dz));
     });
 
-    test('Populate with {content_type}_id suffix attribute in parent and relation', async () => {
+    test('Populate with attribute named {content_type}_id in parent', async () => {
       const qs = {
         filters: {
           name: 'Shirt A',
