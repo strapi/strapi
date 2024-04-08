@@ -120,7 +120,7 @@ const useSettingsMenu = (): {
         Promise.all(
           sections.reduce<Promise<MenuLinkPermission>[]>((acc, section, sectionIndex) => {
             const linksWithPermissions = section.links.map(async (link, linkIndex) => ({
-              hasPermission: await checkUserHasPermission(link.permissions),
+              hasPermission: (await checkUserHasPermission(link.permissions)).length > 0,
               sectionIndex,
               linkIndex,
             }));
