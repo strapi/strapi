@@ -279,7 +279,7 @@ const releaseApi = createApi({
         invalidatesTags: () => [{ type: 'Release', id: 'LIST' }, { type: 'EntriesInRelease' }],
       }),
       getMappedEntriesInReleases: build.query<
-        MapEntriesToReleases.Response,
+        MapEntriesToReleases.Response['data'],
         MapEntriesToReleases.Request['query']
       >({
         query(params) {
@@ -290,6 +290,9 @@ const releaseApi = createApi({
               params,
             },
           };
+        },
+        transformResponse(response: MapEntriesToReleases.Response) {
+          return response.data;
         },
         providesTags: [{ type: 'EntriesInRelease' }],
       }),

@@ -57,9 +57,12 @@ const useReleasesList = (entryId: string | number) => {
   const listViewData = useTypedSelector((state) => state['content-manager_listView'].data);
   const entriesIds = listViewData.map((entry) => entry.id);
 
-  const response = useGetMappedEntriesInReleasesQuery({ contentTypeUid, entriesIds });
+  const response = useGetMappedEntriesInReleasesQuery(
+    { contentTypeUid, entriesIds },
+    { skip: !entriesIds || !contentTypeUid || entriesIds.length === 0 }
+  );
 
-  const mappedEntriesInReleases = response.data?.data || {};
+  const mappedEntriesInReleases = response.data || {};
 
   return mappedEntriesInReleases?.[entryId] || [];
 };
