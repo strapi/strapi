@@ -87,7 +87,10 @@ const XtoOne = async (
 
     const alias = qb.getAlias();
     const joinColAlias = `${alias}.${joinColumnName}`;
-    const joinColRenameAs = `strapi_join_${joinColumnName}`;
+    // We must select the join column id, however whatever it is named will overwrite an attribute of the same name
+    // Therefore, we will use something unlikely to conflict (strapi_{content type name}_id)
+    // TODO: ...and completely restrict the strapi_ prefix for an attribute name in the future
+    const joinColRenameAs = `strapi_${joinColumnName}`;
     const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
     const referencedValues = _.uniq(
