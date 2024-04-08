@@ -112,9 +112,9 @@ const fetchBaseQuery =
       }
     } catch (err) {
       /**
-       * Handle error of type AxiosError
+       * Handle error of type FetchError
        *
-       * This format mimics what we want from an AxiosError which is what the
+       * This format mimics what we want from an FetchError which is what the
        * rest of the app works with, except this format is "serializable" since
        * it goes into the redux store.
        *
@@ -130,7 +130,7 @@ const fetchBaseQuery =
           /**
            * This will most likely be ApiError
            */
-          return { data: undefined, error: err.response?.data.error };
+          return { data: undefined, error: err.response?.data.error as any };
         } else {
           return {
             data: undefined,
@@ -138,7 +138,7 @@ const fetchBaseQuery =
               name: 'UnknownError',
               message: 'There was an unknown error response from the API',
               details: err.response,
-              status: err.response?.status,
+              status: err.response?.error.status,
             } as UnknownApiError,
           };
         }

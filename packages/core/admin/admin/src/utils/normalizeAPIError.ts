@@ -1,8 +1,8 @@
 import { getPrefixedId } from './getPrefixedId';
 
 import type { ApiError } from '../hooks/useAPIErrorHandler';
+import type { FetchError } from '../utils/getFetchClient';
 import type { errors } from '@strapi/utils';
-import type { AxiosError } from 'axios';
 
 export interface NormalizeErrorOptions {
   name?: string;
@@ -53,7 +53,7 @@ const validateErrorIsYupValidationError = (
  * (e.g. outside of a React component).
  */
 export function normalizeAPIError(
-  apiError: AxiosError<{ error: ApiError }>,
+  apiError: FetchError,
   intlMessagePrefixCallback?: NormalizeErrorOptions['intlMessagePrefixCallback']
 ):
   | NormalizeErrorReturn

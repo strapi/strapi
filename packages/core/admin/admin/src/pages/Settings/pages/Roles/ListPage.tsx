@@ -15,7 +15,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
-import { AxiosError } from 'axios';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -31,6 +30,7 @@ import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
+import { isFetchError } from '../../../../utils/getFetchClient';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
 
@@ -74,7 +74,7 @@ const ListPage = () => {
         type: 'RESET_DATA_TO_DELETE',
       });
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (isFetchError(error)) {
         toggleNotification({
           type: 'danger',
           message: formatAPIError(error),

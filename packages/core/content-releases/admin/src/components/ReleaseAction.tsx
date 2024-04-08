@@ -5,6 +5,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  isFetchError,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -17,7 +18,6 @@ import {
   ModalFooter,
 } from '@strapi/design-system';
 import { UID } from '@strapi/types';
-import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 
@@ -121,7 +121,7 @@ const ReleaseAction: BulkActionComponent = ({ documentIds, model }) => {
     }
 
     if ('error' in response) {
-      if (isAxiosError(response.error)) {
+      if (isFetchError(response.error)) {
         // Handle axios error
         toggleNotification({
           type: 'warning',

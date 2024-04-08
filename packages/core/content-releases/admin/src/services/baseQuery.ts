@@ -1,6 +1,9 @@
-import { getFetchClient, type FetchResponse, type FetchConfig } from '@strapi/admin/strapi-admin';
-
-import type { AxiosError } from 'axios';
+import {
+  getFetchClient,
+  type FetchResponse,
+  type FetchConfig,
+  type FetchError,
+} from '@strapi/admin/strapi-admin';
 
 export interface QueryArguments<TSend> {
   url: string;
@@ -39,11 +42,11 @@ const fetchBaseQuery = async <TData = unknown, TSend = unknown>({
     const result = await get<TData, FetchResponse<TData>>(url, config);
     return { data: result.data };
   } catch (error) {
-    const err = error as AxiosError;
+    const err = error as FetchError;
     /**
-     * Handle error of type AxiosError
+     * Handle error of type FetchError
      *
-     * This format mimics what we want from an AxiosError which is what the
+     * This format mimics what we want from an FetchError which is what the
      * rest of the app works with, except this format is "serializable" since
      * it goes into the redux store.
      *
@@ -51,7 +54,7 @@ const fetchBaseQuery = async <TData = unknown, TSend = unknown>({
      */
     return {
       error: {
-        status: err.response?.status,
+        status: err.response?.error.status,
         code: err.code,
         response: {
           data: err.response?.data,
@@ -61,24 +64,4 @@ const fetchBaseQuery = async <TData = unknown, TSend = unknown>({
   }
 };
 
-/* -------------------------------------------------------------------------------------------------
- * Axios error
- * -----------------------------------------------------------------------------------------------*/
-
-/**
- * This asserts the errors from redux-toolkit-query are
- * axios errors so we can pass them to our utility functions
- * to correctly render error messages.
- */
-const isAxiosError = (err: unknown): err is AxiosError<{ error: any }> => {
-  return (
-    typeof err === 'object' &&
-    err !== null &&
-    'response' in err &&
-    typeof err.response === 'object' &&
-    err.response !== null &&
-    'data' in err.response
-  );
-};
-
-export { isAxiosError, fetchBaseQuery };
+export { fetchBaseQuery };

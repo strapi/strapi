@@ -2,7 +2,7 @@ import { server } from '@tests/utils';
 import { AxiosError } from 'axios';
 import { rest } from 'msw';
 
-import { getFetchClient, instance } from '../getFetchClient';
+import { getFetchClient, FetchError } from '../getFetchClient';
 
 describe('fetchClient', () => {
   it('should contain a paramsSerializer that can serialize a params object to a string', async () => {
@@ -70,7 +70,7 @@ describe('getFetchClient', () => {
     try {
       await response.get('test-fetch-client');
     } catch (err) {
-      const url = (err as AxiosError).config?.url;
+      const url = (err as FetchError).config?.url;
       expect(url).toBe('/test-fetch-client');
     }
   });

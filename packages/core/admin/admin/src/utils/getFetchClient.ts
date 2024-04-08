@@ -1,5 +1,7 @@
 import qs from 'qs';
 
+import type { ApiError } from '../hooks/useAPIErrorHandler';
+
 const STORAGE_KEYS = {
   TOKEN: 'jwtToken',
   USER: 'userInfo',
@@ -21,16 +23,23 @@ export type FetchConfig = {
   fetchConfig?: FetchParams[1];
 };
 
+type ErrorResponse = {
+  data: any;
+  error: ApiError & { status: number };
+};
+
 export class FetchError extends Error {
   public name: string;
   public message: string;
-  public response?: Response;
+  public response?: ErrorResponse;
+  public code?: number;
 
-  constructor(message: string, response?: Response) {
+  constructor(message: string, response?: ErrorResponse) {
     super(message);
     this.name = 'FetchError';
     this.message = message;
     this.response = response;
+    this.code = response?.error.status;
 
     // Ensure correct stack trace in error object
     if (Error.captureStackTrace) {
@@ -104,7 +113,9 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     response: Response
   ): Promise<FetchResponse<TData>> => {
     const result = await response.json();
-
+    if (result.error) {
+      throw new FetchError(result.error.message, result);
+    }
     return {
       data: result,
     };
@@ -129,21 +140,12 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     return `${baseURL}${url}`;
   };
 
-  const fetchHandler = async (url: string, options?: FetchOptions) => {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      throw new FetchError(`Failed to fetch data: ${response.statusText}`, response);
-    }
-
-    return response;
-  };
-
   const fetchClient: FetchClient = {
     get: async <TData = unknown, R = FetchResponse<TData>>(
       url: string,
       options?: FetchConfig
     ): Promise<R> => {
-      const response = await fetchHandler(
+      const response = await fetch(
         paramsSerializer(
           addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
           options?.options?.params
@@ -162,7 +164,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       data?: TSend,
       options?: FetchConfig
     ): Promise<R> => {
-      const response = await fetchHandler(
+      const response = await fetch(
         paramsSerializer(
           addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
           options?.options?.params
@@ -182,7 +184,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       data?: TSend,
       options?: FetchConfig
     ): Promise<R> => {
-      const response = await fetchHandler(
+      const response = await fetch(
         paramsSerializer(
           addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
           options?.options?.params
@@ -201,7 +203,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       url: string,
       options?: FetchConfig
     ): Promise<R> => {
-      const response = await fetchHandler(
+      const response = await fetch(
         paramsSerializer(
           addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
           options?.options?.params

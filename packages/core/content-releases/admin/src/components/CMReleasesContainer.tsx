@@ -25,7 +25,6 @@ import {
 import { LinkButton } from '@strapi/design-system/v2';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
-import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useParams } from 'react-router-dom';
@@ -144,7 +143,7 @@ const AddActionToReleaseModal = ({
     }
 
     if ('error' in response) {
-      if (isAxiosError(response.error)) {
+      if (isFetchError(response.error)) {
         // Handle axios error
         toggleNotification({
           type: 'danger',

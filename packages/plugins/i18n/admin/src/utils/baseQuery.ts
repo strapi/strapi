@@ -1,11 +1,12 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
-import { getFetchClient, ApiError, type FetchConfig } from '@strapi/admin/strapi-admin';
-import { isAxiosError } from 'axios';
+import {
+  getFetchClient,
+  isFetchError,
+  type ApiError,
+  type FetchConfig,
+} from '@strapi/admin/strapi-admin';
 
-/* -------------------------------------------------------------------------------------------------
- * Axios data
- * -----------------------------------------------------------------------------------------------*/
 export interface QueryArguments {
   url: string;
   method?: string;
@@ -22,7 +23,7 @@ export interface UnknownApiError {
 
 export type BaseQueryError = ApiError | UnknownApiError;
 
-const axiosBaseQuery =
+const fetchBaseQuery =
   (): BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> =>
   async (query, { signal }) => {
     try {
@@ -69,16 +70,16 @@ const axiosBaseQuery =
       }
     } catch (err) {
       /**
-       * Handle error of type AxiosError
+       * Handle error of type FetchError
        *
-       * This format mimics what we want from an AxiosError which is what the
+       * This format mimics what we want from an FetchError which is what the
        * rest of the app works with, except this format is "serializable" since
        * it goes into the redux store.
        *
        * NOTE – passing the whole response will highlight this "serializability" issue.
        */
 
-      if (isAxiosError(err)) {
+      if (isFetchError(err)) {
         if (
           typeof err.response?.data === 'object' &&
           err.response?.data !== null &&
@@ -95,7 +96,7 @@ const axiosBaseQuery =
               name: 'UnknownError',
               message: 'There was an unknown error response from the API',
               details: err.response?.data,
-              status: err.response?.status,
+              status: err.response?.error.status,
             } as UnknownApiError,
           };
         }
@@ -117,4 +118,4 @@ const isBaseQueryError = (error: BaseQueryError | SerializedError): error is Bas
   return error.name !== undefined;
 };
 
-export { axiosBaseQuery, isBaseQueryError };
+export { fetchBaseQuery, isBaseQueryError };

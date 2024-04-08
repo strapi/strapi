@@ -1,7 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { DocumentInfos } from '../types';
-import { axiosBaseQuery } from '../utils/baseQuery';
+import { baseQuery } from '../utils/baseQuery';
 
 type SettingsInput = {
   restrictedAccess: boolean;
@@ -10,7 +10,7 @@ type SettingsInput = {
 
 const api = createApi({
   reducerPath: 'plugin::documentation',
-  baseQuery: axiosBaseQuery({
+  baseQuery: baseQuery({
     options: {
       baseURL: '/documentation',
     },

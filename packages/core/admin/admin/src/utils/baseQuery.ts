@@ -5,9 +5,6 @@ import { getFetchClient, isFetchError, type FetchConfig } from '../utils/getFetc
 
 import type { ApiError } from '../hooks/useAPIErrorHandler';
 
-/* -------------------------------------------------------------------------------------------------
- * Axios data
- * -----------------------------------------------------------------------------------------------*/
 export interface QueryArguments {
   url: string;
   method?: string;
@@ -73,16 +70,26 @@ const fetchBaseQuery =
       // Handle error of type FetchError
 
       if (isFetchError(err)) {
-        return {
-          data: undefined,
-          error: {
-            name: 'UnknownError',
-            message: err.message,
-            details: err.response,
-            status: err.response?.status,
-            stack: err.stack,
-          } as UnknownApiError,
-        };
+        if (
+          typeof err.response?.data === 'object' &&
+          err.response?.data !== null &&
+          'error' in err.response?.data
+        ) {
+          /**
+           * This will most likely be ApiError
+           */
+          return { data: undefined, error: err.response?.data.error as any };
+        } else {
+          return {
+            data: undefined,
+            error: {
+              name: 'UnknownError',
+              message: err.message,
+              details: err.response,
+              status: err.response?.error.status,
+            } as UnknownApiError,
+          };
+        }
       }
 
       const error = err as Error;

@@ -1,10 +1,15 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useNotification, useAuth, useRBAC } from '@strapi/admin/strapi-admin';
+import {
+  useAPIErrorHandler,
+  useNotification,
+  useAuth,
+  useRBAC,
+  isFetchError,
+} from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Typography, Icon } from '@strapi/design-system';
 import { Menu, Link } from '@strapi/design-system/v2';
 import { Cross, More, Pencil } from '@strapi/icons';
-import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
@@ -85,7 +90,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
     }
 
     if ('error' in response) {
-      if (isAxiosError(response.error)) {
+      if (isFetchError(response.error)) {
         // Handle axios error
         toggleNotification({
           type: 'danger',

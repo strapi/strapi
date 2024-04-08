@@ -11,6 +11,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  isFetchError,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -43,7 +44,6 @@ import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { isAxiosError } from '../services/baseQuery';
 import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
@@ -253,7 +253,7 @@ const ReleaseDetailsLayout = ({
         totalPublishedEntries,
         totalUnpublishedEntries,
       });
-    } else if (isAxiosError(response.error)) {
+    } else if (isFetchError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
         type: 'danger',
@@ -556,7 +556,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     });
 
     if ('error' in response) {
-      if (isAxiosError(response.error)) {
+      if (isFetchError(response.error)) {
         // When the response returns an object with 'error', handle axios error
         toggleNotification({
           type: 'danger',
@@ -894,7 +894,7 @@ const ReleaseDetailsPage = () => {
         }),
       });
       toggleEditReleaseModal();
-    } else if (isAxiosError(response.error)) {
+    } else if (isFetchError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
         type: 'danger',
@@ -916,8 +916,8 @@ const ReleaseDetailsPage = () => {
 
     if ('data' in response) {
       navigate('..');
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
