@@ -69,7 +69,7 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
  * VersionContent
  * -----------------------------------------------------------------------------------------------*/
 
-type UnknownFieldLayout = EditFieldLayout & { isRBACDisabled: boolean };
+type UnknownField = EditFieldLayout & { shouldIgnoreRBAC: boolean };
 const VersionContent = () => {
   const { formatMessage } = useIntl();
   const { fieldSizes } = useTypedSelector((state) => state['content-manager'].app);
@@ -81,7 +81,7 @@ const VersionContent = () => {
   const removedAttributes = version.meta.unknownAttributes.removed;
   const removedAttributesAsFields = Object.entries(removedAttributes).map(
     ([attributeName, attribute]) => {
-      return {
+      const field = {
         attribute,
         shouldIgnoreRBAC: true,
         type: attribute.type,
@@ -90,14 +90,15 @@ const VersionContent = () => {
         label: attributeName,
         name: attributeName,
         size: fieldSizes[attribute.type].default ?? 12,
-      };
+      } as UnknownField;
+
+      return field;
     }
   );
   const unknownFieldsLayout = removedAttributesAsFields
-    .reduce<Array<UnknownFieldLayout[]>>((rows, field) => {
+    .reduce<Array<UnknownField[]>>((rows, field) => {
       if (field.type === 'dynamiczone') {
         // Dynamic zones take up all the columns in a row
-        // @ts-expect-error Fix the type error
         rows.push([field]);
 
         return rows;
@@ -109,7 +110,6 @@ const VersionContent = () => {
       }
 
       // Push fields to the current row, they wrap and handle their own column size
-      // @ts-expect-error Fix the type error
       rows[rows.length - 1].push(field);
 
       return rows;

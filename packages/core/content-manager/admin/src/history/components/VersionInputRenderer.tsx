@@ -218,7 +218,7 @@ const VersionInputRenderer = ({
 
   /**
    * Since media fields use a custom input via the upload plugin provided by the useLibrary hook,
-   * we need to the them before other custom inputs coming from the useLibrary hook.
+   * we need to handle the them before other custom inputs coming from the useLibrary hook.
    */
   if (props.type === 'media') {
     return <CustomMediaInput {...props} disabled={fieldIsDisabled} />;
