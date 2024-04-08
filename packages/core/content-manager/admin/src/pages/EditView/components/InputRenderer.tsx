@@ -23,14 +23,7 @@ import type { EditFieldLayout } from '../../../hooks/useDocumentLayout';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
-type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
-  /**
-   * In the context of content history, deleted fields need to ignore RBAC
-   * @default false
-   */
-  isRBACDisabled?: boolean;
-};
-
+type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
 /**
  * @internal
  *
@@ -39,12 +32,7 @@ type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  * the complete EditFieldLayout and will handle RBAC conditions and rendering CM specific
  * components such as Blocks / Relations.
  */
-const InputRenderer = ({
-  visible,
-  hint: providedHint,
-  isRBACDisabled = false,
-  ...props
-}: InputRendererProps) => {
+const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererProps) => {
   const { id } = useDoc();
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
@@ -78,7 +66,7 @@ const InputRenderer = ({
   /**
    * If the user can't read the field then we don't want to ever render it.
    */
-  if (!isRBACDisabled && !canUserReadField && !isInDynamicZone) {
+  if (!canUserReadField && !isInDynamicZone) {
     return <NotAllowedInput hint={hint} {...props} />;
   }
 
