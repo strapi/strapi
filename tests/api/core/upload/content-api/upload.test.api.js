@@ -375,4 +375,201 @@ describe('Upload plugin', () => {
       data.dogs[0] = res.body;
     });
   });
+
+  describe('Filtering data based on media attributes', () => {
+    let uploadRes;
+    let dogRes;
+
+    beforeAll(async () => {
+      await Promise.all(
+        data.dogs.map((dog) => {
+          return strapi.entityService.delete('api::dog.dog', dog.data.id);
+        })
+      );
+
+      uploadRes = await rq({
+        method: 'POST',
+        url: '/upload',
+        formData: {
+          files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')),
+          fileInfo: JSON.stringify({
+            alternativeText: 'rec',
+            caption: 'my caption',
+          }),
+        },
+      });
+
+      dogRes = await rq({
+        method: 'POST',
+        url: '/dogs',
+        body: {
+          data: {
+            profilePicture: {
+              id: uploadRes.body[0].id,
+            },
+          },
+        },
+      });
+    });
+
+    afterAll(async () => {
+      await rq({
+        method: 'DELETE',
+        url: `/dogs/${dogRes.body.data.id}`,
+      });
+
+      await rq({
+        method: 'DELETE',
+        url: `/upload/files/${uploadRes.body[0].id}`,
+      });
+    });
+
+    test('can filter on notNull', async () => {
+      let res;
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: { $notNull: true },
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(1);
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: { $notNull: false },
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(0);
+    });
+
+    test('can filter on null', async () => {
+      let res;
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: { $null: true },
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(0);
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: { $null: false },
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(1);
+    });
+
+    test('can filter on id', async () => {
+      let res;
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: uploadRes.body[0].id,
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(1);
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: 999999999,
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(0);
+    });
+
+    test('can filter media attribute', async () => {
+      let res;
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: { ext: '.jpg' },
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(1);
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: { ext: '.pdf' },
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(0);
+    });
+
+    test('can filter media attribute with operators', async () => {
+      let res;
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: {
+              caption: {
+                $contains: 'my',
+              },
+            },
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(1);
+
+      res = await rq({
+        method: 'GET',
+        url: '/dogs',
+        qs: {
+          filters: {
+            profilePicture: {
+              caption: {
+                $contains: 'not',
+              },
+            },
+          },
+        },
+      });
+
+      expect(res.body.data.length).toBe(0);
+    });
+  });
 });

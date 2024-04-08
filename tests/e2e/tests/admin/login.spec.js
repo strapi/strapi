@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
-import { toggleRateLimiting } from '../../scripts/rate-limit';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { toggleRateLimiting } from '../../utils/rate-limit';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
 import { login } from '../../utils/login';
 
