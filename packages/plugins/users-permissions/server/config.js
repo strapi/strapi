@@ -19,14 +19,12 @@ module.exports = {
       },
     },
     callback: {
-      validate(url, provider) {
-        const uCallback = new URL(url);
-        const uRedirect = new URL(provider.redirectUri);
+      validate(callbackURL, provider) {
+        const defaultCallbackURL = provider.callback;
 
-        // The default validation checks that the provided callback's origin matches the provider redirectUri origin
-        if (uCallback.origin !== uRedirect.origin) {
+        if (callbackURL !== defaultCallbackURL) {
           throw new Error(
-            `Forbidden callback provided: origins don't match (${uCallback.origin} !== ${uRedirect.origin})`
+            `Forbidden callback provided: ${callbackURL} !== ${defaultCallbackURL})`
           );
         }
       },
