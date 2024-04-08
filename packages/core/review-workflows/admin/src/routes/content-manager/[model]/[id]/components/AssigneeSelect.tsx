@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  useField,
   useNotification,
   useAPIErrorHandler,
   useRBAC,
@@ -9,7 +8,9 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import { Combobox, ComboboxOption, Field, Flex } from '@strapi/design-system';
+import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../../../modules/hooks';
@@ -21,10 +22,11 @@ import { ASSIGNEE_ATTRIBUTE_NAME } from './constants';
 
 const AssigneeSelect = () => {
   const {
-    collectionType,
+    collectionType = '',
     id,
-    slug: model,
+    slug: model = '',
   } = useParams<{ collectionType: string; slug: string; id: string }>();
+  const dispatch = useDispatch();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -38,15 +40,20 @@ const AssigneeSelect = () => {
   const { data, isLoading, isError } = useAdminUsers(undefined, {
     skip: isLoadingPermissions || !canRead,
   });
+  const { document } = unstable_useDocument(
+    {
+      collectionType,
+      model,
+      documentId: id,
+    },
+    {
+      skip: !id,
+    }
+  );
 
   const users = data?.users || [];
 
-  /**
-   * TODO: type this value when we can test it.
-   */
-  const field = useField(ASSIGNEE_ATTRIBUTE_NAME);
-
-  const currentAssignee = field.value ?? null;
+  const currentAssignee = document ? document[ASSIGNEE_ATTRIBUTE_NAME] : null;
 
   const [updateAssignee, { error, isLoading: isMutating }] = useUpdateAssigneeMutation();
 
@@ -55,6 +62,11 @@ const AssigneeSelect = () => {
   }
 
   const handleChange = async (assigneeId: string | null) => {
+    // a simple way to avoid erroneous updates
+    if (currentAssignee?.id === assigneeId) {
+      return;
+    }
+
     const res = await updateAssignee({
       slug: collectionType,
       model,
@@ -66,9 +78,16 @@ const AssigneeSelect = () => {
     });
 
     if ('data' in res) {
-      // initialData and modifiedData have to stay in sync, otherwise the entity would be flagged
-      // as modified, which is what the boolean flag is for
-      field.onChange(ASSIGNEE_ATTRIBUTE_NAME, res.data[ASSIGNEE_ATTRIBUTE_NAME]);
+      // Invalidates the content-manager's API cache for the document to update the stage.
+      dispatch({
+        type: 'contentManagerApi/invalidateTags',
+        payload: [
+          {
+            type: 'Document',
+            id: `${model}_${id}`,
+          },
+        ],
+      });
 
       toggleNotification({
         type: 'success',

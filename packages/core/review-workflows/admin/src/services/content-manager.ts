@@ -36,9 +36,7 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
           stages: res.data ?? [],
         };
       },
-      providesTags: (_res, _err, arg) => {
-        return [{ type: 'ReviewWorkflowStage' as const, id: arg.id }];
-      },
+      providesTags: ['ReviewWorkflowStages'],
     }),
     updateStage: builder.mutation<
       UpdateStage.Response['data'],
@@ -53,7 +51,6 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         },
       }),
       transformResponse: (res: UpdateStage.Response) => res.data,
-      invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflowStage' as const, id: arg.id }],
     }),
     updateAssignee: builder.mutation<
       UpdateAssignee.Response['data'],

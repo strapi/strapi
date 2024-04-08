@@ -28,11 +28,11 @@ import type { DocumentActionComponent } from '@strapi/plugin-content-manager/str
 // eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {
-    app.addMiddlewares([
-      extendCTBAttributeInitialDataMiddleware,
-      extendCTBInitialDataMiddleware,
-      localePermissionMiddleware,
-    ]);
+    // app.addMiddlewares([
+    //   extendCTBAttributeInitialDataMiddleware,
+    //   extendCTBInitialDataMiddleware,
+    //   localePermissionMiddleware,
+    // ]);
     app.addMiddlewares([() => i18nApi.middleware]);
     app.addReducers({
       [i18nApi.reducerPath]: i18nApi.reducer,

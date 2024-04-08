@@ -1,11 +1,6 @@
 import * as React from 'react';
 
-import {
-  useField,
-  useNotification,
-  useAPIErrorHandler,
-  useQueryParams,
-} from '@strapi/admin/strapi-admin';
+import { useNotification, useAPIErrorHandler, useQueryParams } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import {
   SingleSelect,
@@ -17,7 +12,9 @@ import {
   Loader,
   Typography,
 } from '@strapi/design-system';
+import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { useIntl } from 'react-intl';
+import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { LimitsModal } from '../../../../../components/LimitsModal';
@@ -37,12 +34,13 @@ export const StageSelect = () => {
   const {
     collectionType = '',
     slug: model = '',
-    id,
+    id = '',
   } = useParams<{
     collectionType: string;
     slug: string;
     id: string;
   }>();
+  const dispatch = useDispatch();
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
@@ -59,6 +57,16 @@ export const StageSelect = () => {
       skip: !id,
     }
   );
+  const { document } = unstable_useDocument(
+    {
+      collectionType,
+      model,
+      documentId: id,
+    },
+    {
+      skip: !id,
+    }
+  );
 
   const { meta, stages = [] } = data ?? {};
 
@@ -66,12 +74,8 @@ export const StageSelect = () => {
   const [showLimitModal, setShowLimitModal] = React.useState<'stage' | 'workflow' | null>(null);
 
   const limits = getFeature<string>('review-workflows') ?? {};
-  // it is possible to rely on initialData here, because it always will
-  // be updated at the same time when modifiedData is updated, otherwise
-  // the entity is flagged as modified
-  const field = useField(STAGE_ATTRIBUTE_NAME);
 
-  const activeWorkflowStage = field.value ?? null;
+  const activeWorkflowStage = document ? document[STAGE_ATTRIBUTE_NAME] : null;
 
   const [updateStage, { error }] = useUpdateStageMutation();
 
@@ -118,9 +122,16 @@ export const StageSelect = () => {
           });
 
           if ('data' in res) {
-            // initialData and modifiedData have to stay in sync, otherwise the entity would be flagged
-            // as modified, which is what the boolean flag is for
-            field.onChange(STAGE_ATTRIBUTE_NAME, res.data[STAGE_ATTRIBUTE_NAME]);
+            // Invalidates the content-manager's API cache for the document to update the stage.
+            dispatch({
+              type: 'contentManagerApi/invalidateTags',
+              payload: [
+                {
+                  type: 'Document',
+                  id: `${model}_${id}`,
+                },
+              ],
+            });
 
             toggleNotification({
               type: 'success',
@@ -133,8 +144,13 @@ export const StageSelect = () => {
         }
       }
     } catch (error) {
-      // react-query@v3: the error doesn't have to be handled here
-      // see: https://github.com/TanStack/query/issues/121
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: 'content-manager.reviewWorkflows.stage.notification.error',
+          defaultMessage: 'An error occurred while updating the review stage',
+        }),
+      });
     }
   };
 

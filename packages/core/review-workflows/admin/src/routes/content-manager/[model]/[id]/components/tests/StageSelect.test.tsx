@@ -1,4 +1,3 @@
-import { Form } from '@strapi/admin/strapi-admin';
 import { waitForElementToBeRemoved } from '@testing-library/react';
 import { render as renderRTL, waitFor, server, screen } from '@tests/utils';
 import { rest } from 'msw';
@@ -7,28 +6,13 @@ import { Route, Routes } from 'react-router-dom';
 import { StageSelect } from '../StageSelect';
 
 describe('StageSelect', () => {
-  const render = (
-    initialValues = {
-      strapi_stage: {
-        id: 1,
-        color: '#4945FF',
-        name: 'Stage 1',
-      },
-    }
-  ) =>
+  const render = () =>
     renderRTL(<StageSelect />, {
       renderOptions: {
         wrapper: ({ children }) => {
           return (
             <Routes>
-              <Route
-                path="/content-manager/:collectionType/:slug/:id"
-                element={
-                  <Form method="PUT" onSubmit={jest.fn()} initialValues={initialValues}>
-                    {children}
-                  </Form>
-                }
-              />
+              <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
             </Routes>
           );
         },

@@ -60,7 +60,7 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
         data,
       }),
       transformResponse: (res: Create.Response) => res.data,
-      invalidatesTags: [{ type: 'ReviewWorkflow' as const, id: 'LIST' }],
+      invalidatesTags: [{ type: 'ReviewWorkflow' as const, id: 'LIST' }, 'ReviewWorkflowStages'],
     }),
     updateWorkflow: builder.mutation<
       Update.Response['data'],
@@ -72,7 +72,10 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
         data,
       }),
       transformResponse: (res: Update.Response) => res.data,
-      invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflow' as const, id: arg.id }],
+      invalidatesTags: (res, _err, arg) => [
+        { type: 'ReviewWorkflow' as const, id: arg.id },
+        'ReviewWorkflowStages',
+      ],
     }),
     deleteWorkflow: builder.mutation<Delete.Response['data'], Delete.Params>({
       query: ({ id }) => ({
@@ -80,7 +83,10 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
         method: 'DELETE',
       }),
       transformResponse: (res: Delete.Response) => res.data,
-      invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflow' as const, id: arg.id }],
+      invalidatesTags: (res, _err, arg) => [
+        { type: 'ReviewWorkflow' as const, id: arg.id },
+        'ReviewWorkflowStages',
+      ],
     }),
   }),
   overrideExisting: false,
