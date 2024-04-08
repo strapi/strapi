@@ -1,11 +1,13 @@
-import { ReactNode } from 'react';
+import * as React from 'react';
 
 import {
   useStrapiApp,
   useForm,
   InputRenderer as FormInputRenderer,
+  useField,
+  Form,
 } from '@strapi/admin/strapi-admin';
-import { Alert, FieldLabel, Flex, Typography } from '@strapi/design-system';
+import { Alert, Box, FieldLabel, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -19,12 +21,12 @@ import {
   useDynamicZone,
 } from '../../pages/EditView/components/FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from '../../pages/EditView/components/FormInputs/NotAllowed';
-import { RelationsInput } from '../../pages/EditView/components/FormInputs/Relations';
 import { UIDInput } from '../../pages/EditView/components/FormInputs/UID';
 import { Wysiwyg } from '../../pages/EditView/components/FormInputs/Wysiwyg/Field';
 import { useHistoryContext } from '../pages/History';
 
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
+import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
 import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
@@ -34,6 +36,69 @@ const StyledAlert = styled(Alert)`
   }
 `;
 
+/* -------------------------------------------------------------------------------------------------
+ * CustomRelationInput
+ * -----------------------------------------------------------------------------------------------*/
+
+const CustomRelationInput = (props: RelationsFieldProps) => {
+  const field = useField(props.name);
+
+  return (
+    <Box>
+      <FieldLabel>{props.label}</FieldLabel>
+      {field.value.results.length === 0 ? (
+        <Typography>No content</Typography>
+      ) : (
+        <Flex direction="column" gap={2} alignItems="stretch">
+          {(field.value.results as Record<string, unknown>[]).map((relationData, index) => {
+            return (
+              <Flex
+                key={index}
+                paddingTop={2}
+                paddingBottom={2}
+                paddingLeft={4}
+                paddingRight={4}
+                hasRadius
+                borderColor="neutral200"
+                background="neutral150"
+                justifyContent="space-between"
+              >
+                <pre>
+                  <Typography as="code">{JSON.stringify(relationData, null, 2)}</Typography>
+                </pre>
+              </Flex>
+            );
+          })}
+          <Typography>{field.value.meta.missingCount} missing relations</Typography>
+        </Flex>
+      )}
+    </Box>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * CustomMediaInput
+ * -----------------------------------------------------------------------------------------------*/
+
+const CustomMediaInput = (props: VersionInputRendererProps) => {
+  const field = useField(props.name);
+  const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);
+  const MediaLibrary = fields.media as React.ComponentType<
+    VersionInputRendererProps & { multiple: boolean }
+  >;
+
+  return (
+    <Box>
+      <Flex direction="column" gap={2} alignItems="stretch">
+        <Form method="PUT" disabled={true} initialValues={{ [props.name]: field.value.results }}>
+          <MediaLibrary {...props} disabled={true} multiple={field.value.results.length > 1} />
+        </Form>
+        <Typography>{field.value.meta.missingCount} missing relations</Typography>
+      </Flex>
+    </Box>
+  );
+};
+
 type VersionInputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
   /**
    * In the context of content history, deleted fields need to ignore RBAC
@@ -42,15 +107,12 @@ type VersionInputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
   shouldIgnoreRBAC?: boolean;
 };
 
-// The renderers for these types will be added in future PRs, they need special handling
-const UNSUPPORTED_TYPES = ['media', 'relation'];
-
 /**
  * @internal
  *
- * @description An abstraction around the regular form input renderer designed
- * specifically to be used on the History page in the content-manager. It understands how to render
- * specific inputs within the context of a history version (i.e. relations, media, ignored RBAC, etc...)
+ * @description An abstraction around the regular form input renderer designed specifically
+ * to be used on the History page in the content-manager. It understands how to render specific
+ * inputs within the context of a history version (i.e. relations, media, ignored RBAC, etc...)
  */
 const VersionInputRenderer = ({
   visible,
@@ -101,10 +163,6 @@ const VersionInputRenderer = ({
 
   const fieldIsDisabled =
     (!canUserEditField && !isInDynamicZone) || props.disabled || isFormDisabled;
-
-  if (UNSUPPORTED_TYPES.includes(props.type)) {
-    return <Typography>TODO: support {props.type}</Typography>;
-  }
 
   /**
    * Attributes found on the current content-type schema cannot be restored. We handle
@@ -159,6 +217,13 @@ const VersionInputRenderer = ({
   }
 
   /**
+   * Since media fields use a custom input via the upload plugin provided by the useLibrary hook,
+   * we need to the them before other custom inputs coming from the useLibrary hook.
+   */
+  if (props.type === 'media') {
+    return <CustomMediaInput {...props} disabled={fieldIsDisabled} />;
+  }
+  /**
    * This is where we handle ONLY the fields from the `useLibrary` hook.
    */
   const addedInputTypes = Object.keys(fields);
@@ -180,7 +245,7 @@ const VersionInputRenderer = ({
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
-      return <RelationsInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return <CustomRelationInput {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'richtext':
       return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'uid':
@@ -219,7 +284,10 @@ const attributeHasCustomFieldProperty = (
 ): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.CustomField<string> =>
   'customField' in attribute && typeof attribute.customField === 'string';
 
-const useFieldHint = (hint: ReactNode = undefined, attribute: Schema.Attribute.AnyAttribute) => {
+const useFieldHint = (
+  hint: React.ReactNode = undefined,
+  attribute: Schema.Attribute.AnyAttribute
+) => {
   const { formatMessage } = useIntl();
 
   const { maximum, minimum } = getMinMax(attribute);
