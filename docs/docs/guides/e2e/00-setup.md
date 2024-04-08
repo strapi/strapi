@@ -44,7 +44,7 @@ To run a specific file, you can pass arguments and options to playwright using `
 yarn test:e2e --domains admin -- login.spec.ts
 ```
 
-To open a browser instance and and the playwright debugger, you can pass the
+To debug your tests with a browser instance and the playwright debugger, you can pass the
 `--debug` option like this:
 
 ```shell
