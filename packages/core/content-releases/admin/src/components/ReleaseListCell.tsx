@@ -5,7 +5,6 @@ import { Link } from '@strapi/design-system/v2';
 import { SortIcon } from '@strapi/helper-plugin';
 import { EntityService, Common } from '@strapi/types';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useGetMappedEntriesInReleasesQuery } from '../services/release';
@@ -143,8 +142,7 @@ const ReleaseListCell = ({ id }: ReleaseListCellProps) => {
                 <ul>
                   {releases.map(({ id, name }) => (
                     <Box key={id} padding={3} as="li">
-                      {/* @ts-expect-error – error with inferring the props from the as component */}
-                      <Link to={`/plugins/content-releases/${id}`} as={NavLink} isExternal={false}>
+                      <Link href={`/admin/plugins/content-releases/${id}`} isExternal={false}>
                         {name}
                       </Link>
                     </Box>

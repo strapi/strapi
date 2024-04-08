@@ -201,7 +201,7 @@ const releaseApi = createApi({
         invalidatesTags: [
           { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
-          { type: 'EntriesInRelease', id: 'LIST' },
+          { type: 'EntriesInRelease' },
         ],
       }),
       updateReleaseAction: build.mutation<
@@ -256,7 +256,7 @@ const releaseApi = createApi({
         invalidatesTags: (result, error, arg) => [
           { type: 'Release', id: 'LIST' },
           { type: 'Release', id: arg.params.releaseId },
-          { type: 'EntriesInRelease', id: 'LIST' },
+          { type: 'EntriesInRelease' },
         ],
       }),
       publishRelease: build.mutation<PublishRelease.Response, PublishRelease.Request['params']>({
@@ -275,10 +275,7 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        invalidatesTags: () => [
-          { type: 'Release', id: 'LIST' },
-          { type: 'EntriesInRelease', id: 'LIST' },
-        ],
+        invalidatesTags: () => [{ type: 'Release', id: 'LIST' }, { type: 'EntriesInRelease' }],
       }),
       getMappedEntriesInReleases: build.query<
         MapEntriesToReleases.Response,
@@ -293,7 +290,7 @@ const releaseApi = createApi({
             },
           };
         },
-        providesTags: [{ type: 'EntriesInRelease', id: 'LIST' }],
+        providesTags: [{ type: 'EntriesInRelease' }],
       }),
     };
   },

@@ -112,14 +112,11 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       await page.getByRole('link', { name: 'Open the Content Manager' }).click();
       await expect(page).toHaveTitle('Content Manager');
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      const publishedItems = page.getByRole('gridcell', { name: 'published' });
-      expect(publishedItems).toHaveCount(2);
-      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
+      expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
 
       // Select all entries to release
-      await checkbox.check();
-      const addToRelease = page.getByRole('button', { name: 'add to release' });
-      await addToRelease.click();
+      await page.getByRole('checkbox', { name: 'Select all entries' }).check();
+      await page.getByRole('button', { name: 'add to release' }).click();
 
       // Wait for the add to release dialog to appear
       await page
@@ -129,8 +126,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
         .click();
 
       await page.getByRole('option', { name: 'The Diamond Dogs' }).click();
-      const unpublishButton = page.getByText('unpublish', { exact: true });
-      await unpublishButton.click();
+      await page.getByText('unpublish', { exact: true }).click();
       await page.getByText('continue').click();
       await page.getByText(/Successfully added to release./).waitFor({
         state: 'visible',
@@ -140,7 +136,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     await test.step('releases should be updated in the release column of list view', async () => {
       const releaseColumn = page.getByRole('button', { name: '2 releases' });
-      expect(releaseColumn).toHaveCount(2);
+      expect(page.getByRole('button', { name: '2 releases' })).toHaveCount(2);
 
       await releaseColumn.first().click();
       expect(page.getByText('The Diamond Dogs')).toBeVisible();
