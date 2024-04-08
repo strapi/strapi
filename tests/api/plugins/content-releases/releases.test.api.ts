@@ -5,6 +5,8 @@ import { createAuthRequest } from 'api-tests/request';
 import { describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
 
+import { CreateRelease } from '../../../../packages/core/content-releases/shared/contracts/releases';
+
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const productUID = 'api::product.product';
@@ -32,6 +34,18 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   let rq;
   const data = {
     releases: [],
+  };
+
+  const createRelease = async (params: Partial<CreateRelease.Request['body']> = {}) => {
+    return rq({
+      method: 'POST',
+      url: '/content-releases/',
+      body: {
+        name: 'Test Release',
+        scheduledAt: null,
+        ...params,
+      },
+    });
   };
 
   const deleteAllReleases = async () => {
@@ -87,14 +101,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
   describe('Create Release', () => {
     test('Create a release', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/content-releases/',
-        body: {
-          name: 'Test Release',
-          scheduledAt: null,
-        },
-      });
+      const res = await createRelease();
 
       data.releases.push(res.body.data);
 
@@ -102,31 +109,16 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('cannot create a release with the same name', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/content-releases/',
-        body: {
-          name: 'Test Release',
-          scheduledAt: null,
-        },
-      });
+      const res = await createRelease();
 
       expect(res.statusCode).toBe(400);
       expect(res.body.error.message).toBe('Release with name Test Release already exists');
     });
 
     test('cannot create a scheduled release without timezone', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/content-releases/',
-        body: {
-          name: 'Test Scheduled Release',
-          scheduledAt: '2024-10-10T00:00:00.000Z',
-          isScheduled: true,
-          time: '00:00',
-          date: '2024-10-10',
-          timezone: null,
-        },
+      const res = await createRelease({
+        name: 'Test Scheduled Release',
+        scheduledAt: new Date('2024-10-10T00:00:00.000Z'),
       });
 
       expect(res.statusCode).toBe(400);
@@ -134,17 +126,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('create a scheduled release', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/content-releases/',
-        body: {
-          name: 'Test Scheduled Release',
-          scheduledAt: '2024-10-10T00:00:00.000Z',
-          isScheduled: true,
-          time: '00:00',
-          date: '2024-10-10',
-          timezone: 'Europe/Madrid',
-        },
+      const res = await createRelease({
+        name: 'Test Scheduled Release',
+        scheduledAt: new Date('2024-10-10T00:00:00.000Z'),
+        timezone: 'Europe/Madrid',
       });
 
       data.releases.push(res.body.data);
@@ -153,17 +138,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('cannot create a scheduled release with date in the past', async () => {
-      const res = await rq({
-        method: 'POST',
-        url: '/content-releases/',
-        body: {
-          name: 'Test Scheduled Release',
-          scheduledAt: '2022-10-10T00:00:00.000Z',
-          isScheduled: true,
-          time: '00:00',
-          date: '2022-01-01',
-          timezone: 'Europe/Madrid',
-        },
+      const res = await createRelease({
+        name: 'Test Scheduled Release',
+        scheduledAt: new Date('2022-10-10T00:00:00.000Z'),
+        timezone: 'Europe/Madrid',
       });
 
       expect(res.statusCode).toBe(400);
@@ -563,13 +541,9 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
   // Depends on the previous test
   describe('Find Many Releases', () => {
     test('Find many not published releases', async () => {
-      const createRes = await rq({
-        method: 'POST',
-        url: '/content-releases/',
-        body: {
-          name: 'Test Release 3',
-          scheduledAt: null,
-        },
+      const createRes = await createRelease({
+        name: 'Test Release 3',
+        scheduledAt: null,
       });
 
       data.releases.push(createRes.body.data);

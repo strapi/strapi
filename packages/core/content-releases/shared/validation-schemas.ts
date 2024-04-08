@@ -24,3 +24,13 @@ export const RELEASE_SCHEMA = yup
   })
   .required()
   .noUnknown();
+
+export const RELEASE_API_SCHEMA = yup.object().shape({
+  name: yup.string().trim().required(),
+  scheduledAt: yup.string().nullable(),
+  timezone: yup.string().when('scheduledAt', {
+    is: (value: string) => !!value,
+    then: yup.string().required(),
+    otherwise: yup.string().nullable(),
+  }),
+});
