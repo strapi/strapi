@@ -50,7 +50,10 @@ export class CollectionTypeService
   findOne(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).findOne(documentId, this.getFetchParams(params));
+    return strapi.documents(uid).findOne({
+      ...this.getFetchParams(params),
+      documentId,
+    });
   }
 
   async create(params = { data: {} }) {
@@ -59,16 +62,22 @@ export class CollectionTypeService
     return strapi.documents(uid).create(this.getFetchParams(params));
   }
 
-  update(docId: Modules.Documents.ID, params = { data: {} }) {
+  update(documentId: Modules.Documents.ID, params = { data: {} }) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).update(docId, this.getFetchParams(params));
+    return strapi.documents(uid).update({
+      ...this.getFetchParams(params),
+      documentId,
+    });
   }
 
-  async delete(docId: Modules.Documents.ID, params = {}) {
+  async delete(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).delete(docId, this.getFetchParams(params));
+    return strapi.documents(uid).delete({
+      ...this.getFetchParams(params),
+      documentId,
+    });
   }
 }
 

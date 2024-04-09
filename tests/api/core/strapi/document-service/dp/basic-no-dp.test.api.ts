@@ -83,7 +83,8 @@ describe('Document Service relations', () => {
     // Update a shop and check publishedAt value is a date
     const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
-    const updatedShop = await shopDocuments.update(shop.documentId, {
+    const updatedShop = await shopDocuments.update({
+      documentId: shop.documentId,
       data: { name: 'Shop2' },
     });
 
@@ -96,7 +97,7 @@ describe('Document Service relations', () => {
     // Delete a shop and check there are no other references in db
     const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
-    await shopDocuments.delete(shop.documentId);
+    await shopDocuments.delete({ documentId: shop.documentId });
 
     // Shop should be deleted
     const databaseShops = await shopsDB.findMany({ where: { documentId: shop.documentId } });
@@ -107,7 +108,7 @@ describe('Document Service relations', () => {
     // Find a shop and check publishedAt value is a date
     const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
-    const foundShop = await shopDocuments.findOne(shop.documentId);
+    const foundShop = await shopDocuments.findOne({ documentId: shop.documentId });
 
     // Published version should be found
     expect(foundShop.name).toBe('Shop1');

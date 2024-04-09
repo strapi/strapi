@@ -23,7 +23,9 @@ describe('Document Service', () => {
       'delete an entire document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
-        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, { locale: '*' });
+        await strapi
+          .documents(ARTICLE_UID)
+          .delete({ documentId: articleDb.documentId, locale: '*' });
 
         const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
@@ -46,7 +48,8 @@ describe('Document Service', () => {
 
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
       // update article
-      const updatedArticle = await strapi.documents(ARTICLE_UID).update(articleDb.documentId, {
+      const updatedArticle = await strapi.documents(ARTICLE_UID).update({
+        documentId: articleDb.documentId,
         locale: 'en',
         data: {
           comp: componentData.comp,
@@ -56,7 +59,10 @@ describe('Document Service', () => {
       });
 
       // delete article
-      await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, { locale: 'en' });
+      await strapi.documents(ARTICLE_UID).delete({
+        documentId: articleDb.documentId,
+        locale: 'en',
+      });
 
       // Components should not be in the database anymore
       const compTable = strapi.db.metadata.get('article.comp').tableName;
@@ -79,7 +85,8 @@ describe('Document Service', () => {
       'delete a document locale',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
-        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
+        await strapi.documents(ARTICLE_UID).delete({
+          documentId: articleDb.documentId,
           locale: 'nl',
         });
 
@@ -97,7 +104,8 @@ describe('Document Service', () => {
       'status is ignored when deleting a document',
       testInTransaction(async () => {
         const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
-        await strapi.documents(ARTICLE_UID).delete(articleDb.documentId, {
+        await strapi.documents(ARTICLE_UID).delete({
+          documentId: articleDb.documentId,
           status: 'published',
         });
 

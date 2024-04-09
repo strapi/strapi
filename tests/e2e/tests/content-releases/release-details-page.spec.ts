@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { describeOnCondition } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';

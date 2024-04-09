@@ -60,6 +60,11 @@ const Loading = ({ children = 'Loading content.' }: LoadingProps) => {
 interface ErrorProps extends Partial<EmptyStateLayoutProps> {}
 
 /**
+ * TODO: should we start passing our errors here so they're persisted on the screen?
+ * This could follow something similar to how the global app error works...?
+ */
+
+/**
  * @public
  * @description An error component that should be rendered as the page
  * when an error occurs.

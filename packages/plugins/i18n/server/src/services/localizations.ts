@@ -31,7 +31,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
     select: ['locale', 'id'],
   });
 
-  const entryData = await strapi.documents(uid).omitComponentData(model, nonLocalizedAttributes);
+  const entryData = await strapi.documents(uid).omitComponentData(nonLocalizedAttributes);
 
   await async.map(localeEntriesToUpdate, async (entry: any) => {
     const transformedData = await strapi.documents.utils.transformData(
@@ -47,7 +47,7 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
     // Update or create non localized components for the entry
     const componentData = await strapi
       .documents(uid)
-      .updateComponents(uid, entry, transformedData as any);
+      .updateComponents(entry, transformedData as any);
 
     // Update every other locale entry of this documentId in the same status
     await strapi.db.query(uid).update({

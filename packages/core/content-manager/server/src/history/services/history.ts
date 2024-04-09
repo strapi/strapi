@@ -137,14 +137,17 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           return next();
         }
 
-        // Ignore actions that don't mutate documents
+        // NOTE: can do type narrowing with array includes
         if (
-          !['create', 'update', 'publish', 'unpublish', 'discardDraft'].includes(context.action)
+          context.action !== 'create' &&
+          context.action !== 'update' &&
+          context.action !== 'publish' &&
+          context.action !== 'unpublish' &&
+          context.action !== 'discardDraft'
         ) {
           return next();
         }
 
-        // @ts-expect-error ContentType is not typed correctly on the context
         const contentTypeUid = context.contentType.uid;
         // Ignore content types not created by the user
         if (!contentTypeUid.startsWith('api::')) {
@@ -155,19 +158,15 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const documentContext =
           context.action === 'create'
-            ? // @ts-expect-error The context args are not typed correctly
-              { documentId: result.documentId, locale: context.args[0]?.locale }
-            : // @ts-expect-error The context args are not typed correctly
-              { documentId: context.args[0], locale: context.args[1]?.locale };
+            ? { documentId: result.documentId, locale: context.params?.locale }
+            : { documentId: context.params.documentId, locale: context.params?.locale };
 
         const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
-        const document = await strapi
-          .documents(contentTypeUid)
-          .findOne(documentContext.documentId, {
-            locale,
-            populate: getDeepPopulate(contentTypeUid),
-          });
-
+        const document = await strapi.documents(contentTypeUid).findOne({
+          documentId: documentContext.documentId,
+          locale,
+          populate: getDeepPopulate(contentTypeUid),
+        });
         const status = await getVersionStatus(contentTypeUid, document);
 
         /**
@@ -309,7 +308,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                   if ('documentId' in entry) {
                     relatedEntry = await strapi
                       .documents(attributeSchema.target)
-                      .findOne(entry.documentId, { locale: entry.locale || undefined });
+                      .findOne({ documentId: entry.documentId, locale: entry.locale || undefined });
                   }
                   // For media assets, only the id is available, double check that we have it
                 } else if ('id' in entry) {
