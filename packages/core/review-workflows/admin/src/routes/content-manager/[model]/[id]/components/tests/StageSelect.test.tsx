@@ -5,6 +5,20 @@ import { Route, Routes } from 'react-router-dom';
 
 import { StageSelect } from '../StageSelect';
 
+jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
+  unstable_useDocument: jest.fn().mockReturnValue({
+    document: {
+      documentId: '12345',
+      id: 12345,
+      ['strapi_stage']: {
+        id: 1,
+        color: '#4945FF',
+        name: 'Stage 1',
+      },
+    },
+  }),
+}));
+
 describe('StageSelect', () => {
   const render = () =>
     renderRTL(<StageSelect />, {

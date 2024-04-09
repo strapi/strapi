@@ -1,26 +1,32 @@
-import { Form } from '@strapi/admin/strapi-admin';
+import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { AssigneeSelect } from '../AssigneeSelect';
-import { ASSIGNEE_ATTRIBUTE_NAME } from '../constants';
+
+jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
+  unstable_useDocument: jest.fn().mockReturnValue({
+    document: {
+      documentId: '12345',
+      id: 12345,
+      ['strapi_assignee']: {
+        id: 1,
+        firstname: 'John',
+        lastname: 'Doe',
+      },
+    },
+  }),
+}));
 
 describe('AssigneeSelect', () => {
-  const render = (initialValues = {}) =>
+  const render = () =>
     renderRTL(<AssigneeSelect />, {
       renderOptions: {
         wrapper: ({ children }) => {
           return (
             <Routes>
-              <Route
-                path="/content-manager/:collectionType/:slug/:id"
-                element={
-                  <Form initialValues={initialValues} method="PUT" onSubmit={jest.fn()}>
-                    {children}
-                  </Form>
-                }
-              />
+              <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
             </Routes>
           );
         },
@@ -39,13 +45,7 @@ describe('AssigneeSelect', () => {
   });
 
   it('renders a select with users, first user is selected', async () => {
-    const { queryByRole } = render({
-      [ASSIGNEE_ATTRIBUTE_NAME]: {
-        id: 1,
-        firstname: 'John',
-        lastname: 'Doe',
-      },
-    });
+    const { queryByRole } = render();
 
     await waitFor(() => expect(queryByRole('combobox')).toHaveValue('John Doe'));
   });
@@ -63,13 +63,7 @@ describe('AssigneeSelect', () => {
       })
     );
 
-    const { queryByRole } = render({
-      [ASSIGNEE_ATTRIBUTE_NAME]: {
-        id: 1,
-        firstname: 'John',
-        lastname: 'Doe',
-      },
-    });
+    const { queryByRole } = render();
 
     await waitFor(() => expect(queryByRole('combobox')).toHaveAttribute('aria-disabled', 'true'));
   });
@@ -102,6 +96,17 @@ describe('AssigneeSelect', () => {
   });
 
   it('renders an error message, when the assignee update fails', async () => {
+    jest.mocked(unstable_useDocument).mockReturnValue({
+      components: {},
+      isLoading: false,
+      validate: jest.fn(),
+      document: {
+        documentId: '12345',
+        id: 12345,
+        ['strapi_assignee']: null,
+      },
+    });
+
     const origConsoleError = console.error;
 
     console.error = jest.fn();
@@ -124,9 +129,7 @@ describe('AssigneeSelect', () => {
       )
     );
 
-    const { getByRole, getByText, user, findByText } = render({
-      [ASSIGNEE_ATTRIBUTE_NAME]: null,
-    });
+    const { getByRole, getByText, user, findByText } = render();
 
     await user.click(getByRole('combobox'));
     await user.click(getByText('John Doe'));
