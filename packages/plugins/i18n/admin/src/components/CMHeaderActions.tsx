@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
-import { Flex, Icon, Status, Typography } from '@strapi/design-system';
-import { ExclamationMarkCircle, Trash } from '@strapi/icons';
+import { useNotification, useQueryParams, Table } from '@strapi/admin/strapi-admin';
+import { Flex, Icon, Status, Typography, Button } from '@strapi/design-system';
+import { ExclamationMarkCircle, Layer, Trash } from '@strapi/icons';
 import {
   type HeaderActionComponent,
   unstable_useDocument as useDocument,
@@ -17,6 +17,8 @@ import { useI18n } from '../hooks/useI18n';
 import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
+
+import { BulkLocaleActionModal } from './BulkLocaleActionModal';
 
 import type { I18nBaseQuery } from '../types';
 
@@ -226,6 +228,149 @@ const DeleteLocaleAction: DocumentActionComponent = ({
   };
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * BulkPublishAction
+ * -----------------------------------------------------------------------------------------------*/
+
+// TODO fix types
+type LocaleStatus = {
+  locale: string;
+  status: 'published' | 'draft' | 'modified';
+};
+
+const BulkPublishAction: DocumentActionComponent = ({
+  document,
+  documentId,
+  model,
+  collectionType,
+}) => {
+  const { formatMessage } = useIntl();
+  const { hasI18n, canPublish } = useI18n();
+  const { publish: publishAction, unpublish: unpublishAction } = useDocumentActions();
+  const { meta: documentMeta } = useDocument({ model, collectionType, documentId });
+  const availableLocales = documentMeta?.availableLocales ?? [];
+
+  const [selectedLocales, setSelectedLocales] = React.useState<string[]>([]);
+
+  if (!hasI18n) {
+    // This button can always be enabled given that draft and publish and i18n are
+    // enabled. In the modal that follows, the user will be able to see which
+    // locales are available for publication
+    return null;
+  }
+
+  if (!documentId) {
+    return null;
+  }
+
+  if (!canPublish) {
+    return null;
+  }
+
+  const isUnpublish = document?.status === 'published';
+
+  const allAvailableLocales: LocaleStatus[] = availableLocales.map((doc) => {
+    const { locale, status } = doc;
+
+    return { locale, status };
+  });
+  // TODO broken for non default locales allAvailableLocales will not include
+  // the defualt locale find a better way to build this
+  allAvailableLocales.unshift({
+    locale: document?.locale ?? '',
+    status: document?.status ?? 'draft',
+  });
+
+  const handleAction = () => {
+    // TODO api call
+    //eslint-disable-next-line
+    console.log(['I18N handleAction'], selectedLocales);
+  };
+
+  const headers = [
+    {
+      label: formatMessage({
+        id: 'TODO.name.title',
+        defaultMessage: 'Name',
+      }),
+      name: 'name',
+    },
+    {
+      label: formatMessage({
+        id: 'TODO.status.title',
+        defaultMessage: 'Status',
+      }),
+      name: 'stages',
+    },
+    {
+      label: formatMessage({
+        id: 'TODO.publication-status.title',
+        defaultMessage: 'Publication status',
+      }),
+      name: 'publication-status',
+    },
+  ];
+
+  const rows = allAvailableLocales.map((entry) => ({
+    id: entry.locale,
+    ...entry,
+  }));
+
+  if (isUnpublish) {
+    console.error(['I18N bulk unpublish modal not implemented']);
+    return {
+      label: formatMessage({
+        id: 'TODO translation key',
+        defaultMessage: 'Unpublish multiple locales',
+      }),
+      icon: <Layer />,
+      position: ['panel'],
+      variant: 'secondary',
+      onClick: () => {},
+    };
+  }
+
+  return {
+    label: formatMessage({
+      id: 'TODO translation key',
+      defaultMessage: 'Publish multiple locales',
+    }),
+    icon: <Layer />,
+    position: ['panel'],
+    variant: 'secondary',
+    dialog: {
+      type: 'modal',
+      title: formatMessage({
+        id: getTranslation('actions.publish.dialog.title'),
+        defaultMessage: 'Publish multiple locales',
+      }),
+      content: (
+        <Table.Root
+          onSelectedRowsChange={(selectedRows) => {
+            setSelectedLocales(selectedRows.map((row) => row.id));
+          }}
+          headers={headers}
+          rows={rows}
+        >
+          <BulkLocaleActionModal headers={headers} rows={rows} />
+        </Table.Root>
+      ),
+      footer: () => {
+        return (
+          <Flex justifyContent="flex-end">
+            <Button variant="default" onClick={handleAction}>
+              {formatMessage({
+                id: 'TODO translation key',
+                defaultMessage: 'Publish',
+              })}
+            </Button>
+          </Flex>
+        );
+      },
+    },
+  };
+};
+
 /**
  * Because the icon system is completely broken, we have to do
  * this to remove the fill from the cog.
@@ -236,4 +381,4 @@ const StyledTrash = styled(Trash)`
   }
 `;
 
-export { DeleteLocaleAction, LocalePickerAction };
+export { BulkPublishAction, DeleteLocaleAction, LocalePickerAction };

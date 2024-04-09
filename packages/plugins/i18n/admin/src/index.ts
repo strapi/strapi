@@ -2,7 +2,11 @@ import get from 'lodash/get';
 import * as yup from 'yup';
 
 import { CheckboxConfirmation } from './components/CheckboxConfirmation';
-import { DeleteLocaleAction, LocalePickerAction } from './components/CMHeaderActions';
+import {
+  BulkPublishAction,
+  DeleteLocaleAction,
+  LocalePickerAction,
+} from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
   PublishModalAdditionalInfo,
@@ -68,6 +72,19 @@ export default {
     contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
       actions.splice(indexOfDeleteAction, 0, DeleteLocaleAction);
+      return actions;
+    });
+
+    contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
+      const hasPublishAction = actions.find((action) => action.type === 'publish');
+      if (!hasPublishAction) {
+        return actions;
+      }
+
+      actions.push(BulkPublishAction);
+      // TODO add to the right place in the list
+      // actions.splice(indexOfPublishAction, 0, BulkPublishAction);
+
       return actions;
     });
 
