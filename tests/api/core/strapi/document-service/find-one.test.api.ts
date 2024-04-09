@@ -21,7 +21,9 @@ describe('Document Service', () => {
     it('find one document returns defaults', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-      const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {});
+      const article = await strapi
+        .documents(ARTICLE_UID)
+        .findOne({ documentId: articleDb.documentId });
 
       expect(article).toMatchObject(articleDb);
     });
@@ -29,9 +31,9 @@ describe('Document Service', () => {
     it('find one document in english', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-      const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {
-        locale: 'en',
-      });
+      const article = await strapi
+        .documents(ARTICLE_UID)
+        .findOne({ documentId: articleDb.documentId, locale: 'en' });
 
       expect(article).toMatchObject(articleDb);
     });
@@ -39,9 +41,9 @@ describe('Document Service', () => {
     it('find one published document', async () => {
       const articleDb = await findArticleDb({ title: 'Article2-Published-EN' });
 
-      const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {
-        status: 'published',
-      });
+      const article = await strapi
+        .documents(ARTICLE_UID)
+        .findOne({ documentId: articleDb.documentId, status: 'published' });
 
       expect(article).toMatchObject(articleDb);
     });
@@ -49,9 +51,9 @@ describe('Document Service', () => {
     it('find one draft document', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-      const article = await strapi.documents(ARTICLE_UID).findOne(articleDb.documentId, {
-        status: 'draft',
-      });
+      const article = await strapi
+        .documents(ARTICLE_UID)
+        .findOne({ documentId: articleDb.documentId, status: 'draft' });
 
       expect(article).toMatchObject(articleDb);
     });
@@ -60,9 +62,9 @@ describe('Document Service', () => {
       const authorDb = await findAuthorDb({ name: 'Author1-Draft' });
 
       // Locale should be ignored on non-localized content types
-      const author = await strapi.documents(AUTHOR_UID).findOne(authorDb.documentId, {
-        locale: 'en',
-      });
+      const author = await strapi
+        .documents(AUTHOR_UID)
+        .findOne({ documentId: authorDb.documentId, locale: 'en' });
 
       expect(author).toMatchObject(authorDb);
     });

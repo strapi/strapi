@@ -15,7 +15,6 @@ const registerModelsHooks = () => {
   });
 
   strapi.documents.use(async (context, next) => {
-    // @ts-expect-error ContentType is not typed correctly on the context
     const schema: Schema.ContentType = context.contentType;
 
     if (!['create', 'update', 'discardDraft', 'publish'].includes(context.action)) {

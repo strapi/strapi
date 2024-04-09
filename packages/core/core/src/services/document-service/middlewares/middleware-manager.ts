@@ -24,7 +24,7 @@ export const createMiddlewareManager = () => {
       return next();
     },
 
-    wrapObject<TSource extends Record<string, any>>(source: TSource, ctxDefaults = {}): TSource {
+    wrapObject<TSource>(source: TSource, ctxDefaults = {}): TSource {
       const facade: TSource = {} as TSource;
 
       for (const key in source) {
@@ -32,14 +32,14 @@ export const createMiddlewareManager = () => {
           const prop = source[key];
 
           if (typeof prop === 'function') {
-            const newMethod = async (...args: any[]) => {
+            const newMethod = async (params: any) => {
               const ctx = {
                 ...ctxDefaults,
                 action: key,
-                args,
+                params,
               };
 
-              return manager.run(ctx, () => prop(...ctx.args));
+              return manager.run(ctx, () => prop(ctx.params));
             };
 
             facade[key] = newMethod as typeof prop;

@@ -2,7 +2,7 @@
 
 const { isFunction, isNil, prop } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
-const componentData = require('../../core/core/src/services/entity-service/components');
+const componentData = require('../../core/core/src/services/document-service/components');
 
 const toContentTypeUID = (name) => {
   return name.includes('::') ? name : `api::${name}.${name}`;

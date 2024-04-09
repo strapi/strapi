@@ -1,12 +1,18 @@
 import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { mockData } from '@tests/mockData';
-import { render, waitFor, server } from '@tests/utils';
+import { render, waitFor, server, screen } from '@tests/utils';
 import { rest } from 'msw';
+import { useLocation } from 'react-router-dom';
 
-import { useRBAC } from '../../../../../hooks/useRBAC';
 import { ListPage } from '../ListPage';
 
 jest.mock('../../../../../hooks/useRBAC');
+
+const LocationDisplay = () => {
+  const location = useLocation();
+
+  return <span data-testId="location">{location.pathname}</span>;
+};
 
 describe('Webhooks | ListPage', () => {
   beforeEach(() => {
@@ -28,12 +34,6 @@ describe('Webhooks | ListPage', () => {
   });
 
   it('should show a loader when permissions are loading', async () => {
-    // @ts-expect-error – mocking for test
-    useRBAC.mockImplementationOnce(() => ({
-      isLoading: true,
-      allowedActions: { canUpdate: true, canCreate: true, canDelete: true },
-    }));
-
     const { queryByText, getByText } = render(<ListPage />);
 
     expect(getByText('Loading content.')).toBeInTheDocument();
@@ -138,5 +138,35 @@ describe('Webhooks | ListPage', () => {
     await waitFor(async () => {
       expect(enableSwitches[0]).toHaveAttribute('aria-checked', 'false');
     });
+  });
+
+  it('should allow to create a new webhook on empty state screen by clicking on the button', async () => {
+    server.use(
+      rest.get('/admin/webhooks', (req, res, ctx) => {
+        return res(
+          ctx.json({
+            data: [],
+          })
+        );
+      })
+    );
+
+    const { getAllByRole, findByText, user } = render(<ListPage />, {
+      renderOptions: {
+        wrapper({ children }) {
+          return (
+            <>
+              {children}
+              <LocationDisplay />
+            </>
+          );
+        },
+      },
+    });
+
+    await findByText('No webhooks found');
+    expect(screen.getByTestId('location')).not.toHaveTextContent('/create');
+    await user.click(getAllByRole('link', { name: 'Create new webhook' })[1]);
+    await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/create'));
   });
 });

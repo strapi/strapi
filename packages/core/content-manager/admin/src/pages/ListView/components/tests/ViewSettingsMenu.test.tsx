@@ -47,11 +47,9 @@ describe('ViewSettingsMenu', () => {
       })
     );
 
-    expect(
-      screen.getByRole('link', {
-        name: 'Configure the view',
-      })
-    ).toBeInTheDocument();
+    await screen.findByRole('link', {
+      name: 'Configure the view',
+    });
 
     expect(screen.getByText('Displayed fields')).toBeInTheDocument();
 
