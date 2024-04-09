@@ -4,7 +4,7 @@ import {
   Page,
   Blocker,
   Form,
-  FormHelpers,
+  useRBAC,
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
@@ -24,12 +24,12 @@ import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { SINGLE_TYPES } from '../../constants/collections';
+import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
-import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
@@ -268,17 +268,25 @@ const getDocumentStatus = (
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedEditViewPage = () => {
-  const { slug } = useParams<{
+  const { slug = '' } = useParams<{
     slug: string;
   }>();
-  const [{ query }] = useQueryParams();
-  const { permissions = [], isLoading, isError } = useSyncRbac(slug ?? '', query, 'editView');
+  const {
+    permissions = [],
+    isLoading,
+    error,
+  } = useRBAC(
+    PERMISSIONS.map((action) => ({
+      action,
+      subject: slug,
+    }))
+  );
 
   if (isLoading) {
     return <Page.Loading />;
   }
 
-  if ((!isLoading && isError) || !slug) {
+  if (error || !slug) {
     return <Page.Error />;
   }
 

@@ -214,10 +214,6 @@ const createMorphToOne = (attributeName: string, attribute: Relation.MorphToOne)
   const idColumnName = identifiers.getJoinColumnAttributeIdName('target');
   const typeColumnName = identifiers.getMorphColumnTypeName('target');
 
-  if ('morphColumn' in attribute && attribute.morphColumn) {
-    return;
-  }
-
   Object.assign(attribute, {
     owner: true,
     morphColumn: attribute.morphColumn ?? {

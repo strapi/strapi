@@ -59,6 +59,8 @@ export type {
   AdminRole,
   Entity,
 } from '../../shared/contracts/shared';
+export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
+
 /**
  * Utils
  */
