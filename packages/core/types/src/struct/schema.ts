@@ -149,9 +149,9 @@ export interface SchemaOptions {
  * Using `SchemaPluginOptions` in the schema definition:
  *
  * ```typescript
- * import type { BaseSchema, SchemaPluginOptions } from '@strapi/types';
+ * import type { Struct } from '@strapi/types';
  *
- * const strapiPluginOptions: SchemaPluginOptions = {
+ * const strapiPluginOptions: Struct.SchemaPluginOptions = {
  *   'plugin-foo': {
  *     prop1: string;
  *     prop2: boolean;
@@ -162,7 +162,7 @@ export interface SchemaOptions {
  *   },
  * };
  *
- * const articleSchema: BaseSchema = {
+ * const articleSchema: Struct.BaseSchema = {
  *   uid: 'article',
  *   modelType: 'contentType',
  *   modelName: 'Article',
