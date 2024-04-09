@@ -90,7 +90,6 @@ const migrateUp = async (trx: Knex, db: Database) => {
 export const discardDocumentDrafts: Migration = {
   name: 'core::5.0.0-discard-drafts',
   async up(trx, db) {
-    // TODO: Do not await, run this asynchronously
     // TODO: Log to inform the user that the migration is running in the background
     await migrateUp(trx, db);
   },
