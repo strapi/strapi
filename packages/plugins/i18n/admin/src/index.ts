@@ -15,6 +15,7 @@ import { PERMISSIONS } from './constants';
 import { addLocaleToLinksHook } from './contentManagerHooks/app';
 import { mutateEditViewLayoutHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
+import { addLocaleToReleasesHook } from './contentReleasesHooks/releaseDetailsView';
 import { addCommonFieldsToInitialDataMiddleware } from './middlewares/addCommonFieldsToInitialData';
 import { extendCTBAttributeInitialDataMiddleware } from './middlewares/extendCTBAttributeInitialData';
 import { extendCTBInitialDataMiddleware } from './middlewares/extendCTBInitialData';
@@ -61,6 +62,11 @@ export default {
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     // Hooks that mutates the edit view layout
     app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewLayoutHook);
+    // Hooks that checks if the locale is present in the release
+    app.registerHook(
+      'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+      addLocaleToReleasesHook
+    );
     // Add the settings link
     app.addSettingsLink('global', {
       intlLabel: {
