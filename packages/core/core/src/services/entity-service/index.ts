@@ -89,7 +89,10 @@ const createDefaultImplementation = ({
       return this.wrapResult(null, { uid, action: 'findOne' });
     }
 
-    const entity = await strapi.documents!(uid).findOne(res.documentId, wrappedParams);
+    const entity = await strapi.documents!(uid).findOne({
+      ...wrappedParams,
+      documentId: res.documentId,
+    });
     return this.wrapResult(entity, { uid, action: 'findOne' });
   },
 
@@ -134,9 +137,10 @@ const createDefaultImplementation = ({
 
     const shouldPublish = !contentTypesUtils.isDraft(entityToUpdate, strapi.getModel(uid));
 
-    const entity = strapi.documents!(uid).update(entityToUpdate.documentId, {
+    const entity = strapi.documents!(uid).update({
       ...(wrappedParams as any),
       status: shouldPublish ? 'published' : 'draft',
+      documentId: entityToUpdate.documentId,
     });
 
     return this.wrapResult(entity, { uid, action: 'update' });
@@ -151,7 +155,10 @@ const createDefaultImplementation = ({
       return this.wrapResult(null, { uid, action: 'delete' });
     }
 
-    await strapi.documents!(uid).delete(entityToDelete.documentId, wrappedParams);
+    await strapi.documents!(uid).delete({
+      ...wrappedParams,
+      documentId: entityToDelete.documentId,
+    });
 
     return this.wrapResult(entityToDelete, { uid, action: 'delete' });
   },

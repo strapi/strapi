@@ -84,14 +84,14 @@ export default ({ strapi }: Context) => {
       async resolve(parent, args, context) {
         const { auth } = context.state;
 
-        const { data, documentId, ...restParams } = args;
+        const { data, ...restParams } = args;
 
         // Sanitize input data
         const sanitizedInputData = await strapi.contentAPI.sanitize.input(data, contentType, {
           auth,
         });
 
-        return strapi.documents!(uid).update(documentId, {
+        return strapi.documents!(uid).update({
           ...restParams,
           data: sanitizedInputData,
         });
@@ -125,7 +125,7 @@ export default ({ strapi }: Context) => {
       async resolve(parent, args) {
         const { documentId } = args;
 
-        await strapi.documents!(uid).delete(documentId);
+        await strapi.documents!(uid).delete({ documentId });
 
         return { documentId };
       },

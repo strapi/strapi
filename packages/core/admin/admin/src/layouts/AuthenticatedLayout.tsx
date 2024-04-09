@@ -24,7 +24,7 @@ import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
 import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
-import { hashAdminUserEmail } from '../utils/hashAdminUserEmail';
+import { hashAdminUserEmail } from '../utils/users';
 
 const strapiVersion = packageJSON.version;
 

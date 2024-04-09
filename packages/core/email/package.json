@@ -52,7 +52,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.16.0",
+    "@strapi/design-system": "1.17.0",
     "@strapi/icons": "1.16.0",
     "@strapi/provider-email-sendmail": "5.0.0-beta.2",
     "@strapi/utils": "5.0.0-beta.2",

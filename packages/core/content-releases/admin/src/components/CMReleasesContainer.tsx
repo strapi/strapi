@@ -261,9 +261,9 @@ export const CMReleasesContainer = () => {
     collectionType: string;
   }>();
   const isCreatingEntry = id === 'create';
-  const {
-    allowedActions: { canCreateAction, canMain, canDeleteAction },
-  } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(PERMISSIONS);
+
+  const { canCreateAction, canRead: canMain, canDeleteAction } = allowedActions;
 
   const { schema } = unstable_useDocument({
     collectionType: collectionType!,

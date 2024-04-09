@@ -32,16 +32,20 @@ export default ({ strapi }: Context) => ({
       },
 
       async findOne(parent: any, args: any, ctx: any) {
+        const { documentId } = args;
+
         await strapi.contentAPI.validate.query(args, contentType, {
           auth: ctx?.state?.auth,
         });
+
         const sanitizedQuery = await strapi.contentAPI.sanitize.query(args, contentType, {
           auth: ctx?.state?.auth,
         });
 
-        return strapi.documents!(uid).findOne(args.documentId, {
+        return strapi.documents!(uid).findOne({
           status: 'published',
           ...omit(['id', 'documentId'], sanitizedQuery),
+          documentId,
         });
       },
     };

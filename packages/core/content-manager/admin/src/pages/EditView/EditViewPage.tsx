@@ -4,7 +4,7 @@ import {
   Page,
   Blocker,
   Form,
-  FormHelpers,
+  useRBAC,
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
@@ -24,12 +24,12 @@ import { useLocation, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { SINGLE_TYPES } from '../../constants/collections';
+import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useOnce } from '../../hooks/useOnce';
-import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
@@ -71,12 +71,6 @@ const EditViewPage = () => {
   } = useDoc();
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
-
-  React.useEffect(() => {
-    if (tabApi.current && hasDraftAndPublished) {
-      tabApi.current._handlers.setSelectedTabIndex(!status || status === 'draft' ? 0 : 1);
-    }
-  }, [hasDraftAndPublished, status]);
 
   useOnce(() => {
     /**
@@ -147,13 +141,11 @@ const EditViewPage = () => {
     return <Page.Error />;
   }
 
-  const handleTabChange = (index: number, { resetForm }: Pick<FormHelpers, 'resetForm'>) => {
+  const handleTabChange = (index: number) => {
     if (index === 0) {
       setQuery({ status: 'draft' }, 'push', true);
     } else {
       setQuery({ status: 'published' }, 'push', true);
-      // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
-      resetForm();
     }
   };
 
@@ -188,10 +180,10 @@ const EditViewPage = () => {
                 id: getTranslation('containers.edit.tabs.label'),
                 defaultMessage: 'Document status',
               })}
-              initialSelectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
+              selectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
               onTabChange={(index) => {
                 // TODO: remove this hack when the tabs in the DS are implemented well and we can actually use callbacks.
-                handleTabChange(index, { resetForm });
+                handleTabChange(index);
               }}
             >
               {hasDraftAndPublished ? (
@@ -226,7 +218,10 @@ const EditViewPage = () => {
                 </GridItem>
               </Grid>
             </TabGroup>
-            <Blocker />
+            <Blocker
+              // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
+              onProceed={resetForm}
+            />
           </>
         )}
       </Form>
@@ -273,17 +268,25 @@ const getDocumentStatus = (
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedEditViewPage = () => {
-  const { slug } = useParams<{
+  const { slug = '' } = useParams<{
     slug: string;
   }>();
-  const [{ query }] = useQueryParams();
-  const { permissions = [], isLoading, isError } = useSyncRbac(slug ?? '', query, 'editView');
+  const {
+    permissions = [],
+    isLoading,
+    error,
+  } = useRBAC(
+    PERMISSIONS.map((action) => ({
+      action,
+      subject: slug,
+    }))
+  );
 
   if (isLoading) {
     return <Page.Loading />;
   }
 
-  if ((!isLoading && isError) || !slug) {
+  if (error || !slug) {
     return <Page.Error />;
   }
 

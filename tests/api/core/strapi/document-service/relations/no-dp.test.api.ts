@@ -227,16 +227,18 @@ describe('Relations interactions with disabled DP content types', () => {
           });
 
           // Publish connected product
-          await productDocuments.publish('Skate', { locale: 'en' });
+          await productDocuments.publish({ documentId: 'Skate', locale: 'en' });
 
           // Get shop again to check if it's product relations are updated to the published version,
           // the draft relation should still be in place
-          const draftShop = await shopDocuments.findOne(shop.documentId, {
+          const draftShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
             populate: allRelations,
             status: 'draft',
           });
 
-          const publishedShop = await shopDocuments.findOne(shop.documentId, {
+          const publishedShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
             populate: allRelations,
             status: 'published',
           });
@@ -273,13 +275,15 @@ describe('Relations interactions with disabled DP content types', () => {
             populate: xToOneRelations,
           });
 
-          const draftShop = await shopDocuments.findOne(shop.documentId, {
+          const draftShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
             // should only populate the draft versions of relations
             status: 'draft',
             populate: xToOneRelations,
           });
 
-          const publishedShop = await shopDocuments.findOne(shop.documentId, {
+          const publishedShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
             // should only populate the published versions of relations
             status: 'published',
             populate: xToOneRelations,
@@ -314,7 +318,8 @@ describe('Relations interactions with disabled DP content types', () => {
           });
 
           // Update to connect to the published version too
-          await shopDocuments.update(shop.documentId, {
+          await shopDocuments.update({
+            documentId: shop.documentId,
             data: {
               products_ow: {
                 connect: [{ documentId: 'Skate', locale: 'en', status: 'published' }],
@@ -329,12 +334,14 @@ describe('Relations interactions with disabled DP content types', () => {
           });
 
           // Fetch the shop to check if the relations are connected to the draft and published versions
-          const draftShop = await shopDocuments.findOne(shop.documentId, {
+          const draftShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
             populate: xToOneRelations,
             status: 'draft',
           });
 
-          const publishedShop = await shopDocuments.findOne(shop.documentId, {
+          const publishedShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
             populate: xToOneRelations,
             status: 'published',
           });
@@ -386,12 +393,14 @@ describe('Relations interactions with disabled DP content types', () => {
           // expect(shop.products_om).toMatchObject([publishedRelation]);
           // expect(shop.products_mw).toMatchObject([publishedRelation]);
 
-          const draftShop = await shopDocuments.findOne(shop.documentId, {
+          const draftShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
             populate: xToManyRelations,
             status: 'draft',
           });
 
-          const publishedShop = await shopDocuments.findOne(shop.documentId, {
+          const publishedShop = await shopDocuments.findOne({
+            documentId: shop.documentId,
             populate: xToManyRelations,
             status: 'published',
           });
