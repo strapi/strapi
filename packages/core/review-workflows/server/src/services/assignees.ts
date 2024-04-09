@@ -41,7 +41,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(documentId, model), assigneeId);
 
-      return strapi.documents(model).update(documentId, {
+      return strapi.documents(model).update({
+        documentId,
         locale,
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: assigneeId },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
@@ -52,7 +53,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     async deleteEntityAssignee(documentId: string, locale: string, model: UID.ContentType) {
       metrics.sendDidEditAssignee(await this.findEntityAssigneeId(documentId, model), null);
 
-      return strapi.documents(model).update(documentId, {
+      return strapi.documents(model).update({
+        documentId,
         locale,
         data: { [ENTITY_ASSIGNEE_ATTRIBUTE]: null },
         populate: [ENTITY_ASSIGNEE_ATTRIBUTE],
