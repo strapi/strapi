@@ -33,10 +33,8 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
   const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
   const { formatMessage } = useIntl();
   const {
-    allowedActions: { canViewConfiguration },
-  } = useRBAC({
-    viewConfiguration: permissions,
-  });
+    allowedActions: { canConfigureView },
+  } = useRBAC(permissions);
 
   const handleToggle = () => {
     setIsVisible((prev) => !prev);
@@ -62,7 +60,7 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
           padding={3}
         >
           <Flex alignItems="stretch" direction="column" gap={3}>
-            {canViewConfiguration ? (
+            {canConfigureView ? (
               <LinkButton
                 size="S"
                 startIcon={<Layer />}

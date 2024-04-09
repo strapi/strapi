@@ -75,7 +75,7 @@ const releaseActionController = {
 
   async findMany(ctx: Koa.Context) {
     const releaseId: GetReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: RELEASE_ACTION_MODEL_UID,
     });
@@ -97,8 +97,9 @@ const releaseActionController = {
         return acc;
       }
 
-      const contentTypePermissionsManager =
-        strapi.admin.services.permission.createPermissionsManager({
+      const contentTypePermissionsManager = strapi
+        .service('admin::permission')
+        .createPermissionsManager({
           ability: ctx.state.userAbility,
           model: action.contentType,
         });

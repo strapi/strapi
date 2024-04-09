@@ -12,7 +12,7 @@ import * as constants from './constants';
 import type { Version } from '../version';
 import type { Codemod } from '../codemod';
 import type { Report } from '../report';
-import type { FileExtension, MinimalPackageJSON, RunCodemodsOptions } from './types';
+import type { FileExtension, MinimalPackageJSON, ProjectType, RunCodemodsOptions } from './types';
 
 export class Project {
   public cwd: string;
@@ -129,7 +129,7 @@ export class Project {
 export class AppProject extends Project {
   public strapiVersion!: Version.SemVer;
 
-  readonly type = 'app' as const;
+  readonly type = 'application' as const satisfies ProjectType;
 
   constructor(cwd: string) {
     super(cwd);
@@ -205,7 +205,7 @@ const formatGlobCollectionPattern = (collection: string[]): string => {
 };
 
 export class PluginProject extends Project {
-  readonly type = 'plugin' as const;
+  readonly type = 'plugin' as const satisfies ProjectType;
 }
 
 const isPlugin = (cwd: string) => {

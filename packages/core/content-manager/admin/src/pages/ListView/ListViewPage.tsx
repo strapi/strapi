@@ -11,6 +11,7 @@ import {
   useTracking,
   useAPIErrorHandler,
   useQueryParams,
+  useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
   ActionLayout,
@@ -25,11 +26,12 @@ import { Plus } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate, Link as ReactRouterLink } from 'react-router-dom';
+import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
 import { HOOKS } from '../../constants/hooks';
+import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
 import {
@@ -38,7 +40,6 @@ import {
   useDocumentLayout,
 } from '../../hooks/useDocumentLayout';
 import { usePrev } from '../../hooks/usePrev';
-import { useSyncRbac } from '../../hooks/useSyncRbac';
 import { useGetAllDocumentsQuery } from '../../services/documents';
 import { buildValidParams } from '../../utils/api';
 import { getTranslation } from '../../utils/translations';
@@ -372,15 +373,25 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const ProtectedListViewPage = () => {
-  const { model } = useDoc();
-  const [{ query }] = useQueryParams();
-  const { permissions = [], isLoading, isError } = useSyncRbac(model, query, 'editView');
+  const { slug = '' } = useParams<{
+    slug: string;
+  }>();
+  const {
+    permissions = [],
+    isLoading,
+    error,
+  } = useRBAC(
+    PERMISSIONS.map((action) => ({
+      action,
+      subject: slug,
+    }))
+  );
 
   if (isLoading) {
     return <Page.Loading />;
   }
 
-  if (isError) {
+  if (error || !slug) {
     return <Page.Error />;
   }
 

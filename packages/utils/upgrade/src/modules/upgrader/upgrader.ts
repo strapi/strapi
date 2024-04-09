@@ -71,7 +71,7 @@ export class Upgrader implements UpgraderInterface {
     // Extract the <major>.<minor>.<patch> version from the target and assign it to the codemods target
     //
     // This is useful when dealing with alphas, betas or release candidates:
-    // e.g. "5.0.0-beta.1" becomes "5.0.0"
+    // e.g. "5.0.0-beta.2" becomes "5.0.0"
     //
     // For experimental versions (e.g. "0.0.0-experimental.hex"), it is necessary to
     // override the codemods target manually in order to run the appropriate ones.
@@ -79,7 +79,7 @@ export class Upgrader implements UpgraderInterface {
       `${this.target.major}.${this.target.minor}.${this.target.patch}`
     );
 
-    this.logger?.debug(
+    this.logger?.debug?.(
       `The codemods target has been synced with the upgrade target. The codemod runner will now look for ${f.version(
         this.codemodsTarget
       )}`
@@ -91,7 +91,7 @@ export class Upgrader implements UpgraderInterface {
   overrideCodemodsTarget(target: Version.SemVer) {
     this.codemodsTarget = target;
 
-    this.logger?.debug(
+    this.logger?.debug?.(
       `Overriding the codemods target. The codemod runner will now look for ${f.version(target)}`
     );
 
@@ -117,7 +117,7 @@ export class Upgrader implements UpgraderInterface {
     this.requirements.push(requirement);
 
     const fRequired = requirement.isRequired ? '(required)' : '(optional)';
-    this.logger?.debug(
+    this.logger?.debug?.(
       `Added a new requirement to the upgrade: ${f.highlight(requirement.name)} ${fRequired}`
     );
 
@@ -125,12 +125,12 @@ export class Upgrader implements UpgraderInterface {
   }
 
   async upgrade(): Promise<UpgradeReport> {
-    this.logger?.info(
+    this.logger?.info?.(
       `Upgrading from ${f.version(this.project.strapiVersion)} to ${f.version(this.target)}`
     );
 
     if (this.isDry) {
-      this.logger?.warn(
+      this.logger?.warn?.(
         'Running the upgrade in dry mode. No files will be modified during the process.'
       );
     }
@@ -140,30 +140,30 @@ export class Upgrader implements UpgraderInterface {
 
     const npmVersionsMatches = this.npmPackage?.findVersionsInRange(range) ?? [];
 
-    this.logger?.debug(
+    this.logger?.debug?.(
       `Found ${f.highlight(npmVersionsMatches.length)} versions satisfying ${f.versionRange(range)}`
     );
 
     try {
-      this.logger?.info(f.upgradeStep('Checking requirement', [1, 4]));
+      this.logger?.info?.(f.upgradeStep('Checking requirement', [1, 4]));
       await this.checkRequirements(this.requirements, {
         npmVersionsMatches,
         project: this.project,
         target: this.target,
       });
 
-      this.logger?.info(f.upgradeStep('Applying the latest code modifications', [2, 4]));
+      this.logger?.info?.(f.upgradeStep('Applying the latest code modifications', [2, 4]));
       await this.runCodemods(codemodsRange);
 
       // We need to refresh the project files to make sure we have
       // the latest version of each file (including package.json) for the next steps
-      this.logger?.debug('Refreshing project information...');
+      this.logger?.debug?.('Refreshing project information...');
       this.project.refresh();
 
-      this.logger?.info(f.upgradeStep('Upgrading Strapi dependencies', [3, 4]));
+      this.logger?.info?.(f.upgradeStep('Upgrading Strapi dependencies', [3, 4]));
       await this.updateDependencies();
 
-      this.logger?.info(f.upgradeStep('Installing dependencies', [4, 4]));
+      this.logger?.info?.(f.upgradeStep('Installing dependencies', [4, 4]));
       await this.installDependencies();
     } catch (e) {
       return erroredReport(unknownToError(e));
@@ -214,7 +214,7 @@ export class Upgrader implements UpgraderInterface {
       throw error;
     }
 
-    this.logger?.warn(warningMessage);
+    this.logger?.warn?.(warningMessage);
 
     const response = await this.confirmationCallback?.(confirmationMessage);
 
@@ -231,9 +231,11 @@ export class Upgrader implements UpgraderInterface {
     const dependencies = json.get<Record<string, string>>('dependencies', {});
     const strapiDependencies = this.getScopedStrapiDependencies(dependencies);
 
-    this.logger?.debug(`Found ${f.highlight(strapiDependencies.length)} dependency(ies) to update`);
+    this.logger?.debug?.(
+      `Found ${f.highlight(strapiDependencies.length)} dependency(ies) to update`
+    );
     strapiDependencies.forEach((dependency) =>
-      this.logger?.debug(`- ${dependency[0]} (${dependency[1]} -> ${this.target})`)
+      this.logger?.debug?.(`- ${dependency[0]} (${dependency[1]} -> ${this.target})`)
     );
 
     if (strapiDependencies.length === 0) {
@@ -245,7 +247,7 @@ export class Upgrader implements UpgraderInterface {
     const updatedPackageJSON = json.root();
 
     if (this.isDry) {
-      this.logger?.debug(`Skipping dependencies update (${chalk.italic('dry mode')})`);
+      this.logger?.debug?.(`Skipping dependencies update (${chalk.italic('dry mode')})`);
       return;
     }
 
@@ -275,10 +277,10 @@ export class Upgrader implements UpgraderInterface {
 
     const packageManagerName = await packageManager.getPreferred(projectPath);
 
-    this.logger?.debug(`Using ${f.highlight(packageManagerName)} as package manager`);
+    this.logger?.debug?.(`Using ${f.highlight(packageManagerName)} as package manager`);
 
     if (this.isDry) {
-      this.logger?.debug(`Skipping dependencies installation (${chalk.italic('dry mode')}`);
+      this.logger?.debug?.(`Skipping dependencies installation (${chalk.italic('dry mode')}`);
       return;
     }
 

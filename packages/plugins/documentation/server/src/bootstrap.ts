@@ -32,7 +32,7 @@ const RBAC_ACTIONS = [
 ];
 
 export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
-  await strapi.admin?.services.permission.actionProvider.registerMany(RBAC_ACTIONS);
+  await strapi.service('admin::permission').actionProvider.registerMany(RBAC_ACTIONS);
 
   const pluginStore = strapi.store!({
     environment: '',

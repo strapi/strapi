@@ -5,7 +5,7 @@ const conditions = [
     plugin: 'i18n',
     handler(user: any, options: any) {
       const { locales } = options.permission.properties || {};
-      const { superAdminCode } = strapi.admin.services.role.constants;
+      const { superAdminCode } = strapi.service('admin::role').constants;
 
       const isSuperAdmin = user.roles.some((role: any) => role.code === superAdminCode);
 
@@ -23,7 +23,7 @@ const conditions = [
 ];
 
 const registerI18nConditions = async () => {
-  const { conditionProvider } = strapi.admin.services.permission;
+  const { conditionProvider } = strapi.service('admin::permission');
 
   await conditionProvider.registerMany(conditions);
 };

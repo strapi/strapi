@@ -568,6 +568,7 @@ namespace Filters {
        *    }
        *  }
        * }
+       * ```
        */
       $and?: Array<Record<string, Record<string, string | Record<string, string>>>>;
     };
