@@ -16,7 +16,7 @@ import {
   Combobox,
   ComboboxOption,
 } from '@strapi/design-system';
-import { formatISO, parse } from 'date-fns';
+import { formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { Formik, Form, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';

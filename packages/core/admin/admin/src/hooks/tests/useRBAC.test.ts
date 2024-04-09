@@ -75,25 +75,23 @@ describe('useRBAC', () => {
 
   it('should return falsey values if after matching the permissions and no match is found', async () => {
     const { result } = renderHook(() =>
-      useRBAC({
-        create: [
-          {
-            id: 1,
-            actionParameters: {},
-            action: 'apples.something.unacceptable',
-            subject: null,
-            conditions: [],
-            properties: {},
-          },
-        ],
-      })
+      useRBAC([
+        {
+          id: 1,
+          actionParameters: {},
+          action: 'apples.something.unacceptable',
+          subject: null,
+          conditions: [],
+          properties: {},
+        },
+      ])
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     expect(result.current.allowedActions).toMatchInlineSnapshot(`
       {
-        "canCreate": false,
+        "canUnacceptable": false,
       }
     `);
   });
@@ -129,20 +127,32 @@ describe('useRBAC', () => {
         rest.post('/admin/permissions/check', (req, res, ctx) => res(ctx.json({ data: [false] })))
       );
 
-      const { result } = renderHook(() => {
-        return useRBAC({
-          create: [
-            {
-              id: 1,
-              actionParameters: {},
-              action: 'admin::roles.create',
-              subject: null,
-              conditions: ['willFail'],
-              properties: {},
-            },
-          ],
-        });
-      });
+      const { result } = renderHook(
+        () => {
+          return useRBAC({
+            create: [
+              {
+                action: 'admin::roles.create',
+                subject: null,
+              },
+            ],
+          });
+        },
+        {
+          providerOptions: {
+            permissions: () => [
+              {
+                id: 1,
+                actionParameters: {},
+                action: 'admin::roles.create',
+                subject: null,
+                conditions: ['willFail'],
+                properties: {},
+              },
+            ],
+          },
+        }
+      );
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -160,40 +170,53 @@ describe('useRBAC', () => {
         rest.post('/admin/permissions/check', async (req, res, ctx) => {
           const { permissions } = await req.json();
 
-          const [{ action }] = permissions;
-
-          if (action === 'admin::roles.create') {
-            return res(ctx.json({ data: [false] }));
-          }
-
-          return res(ctx.json({ data: [true] }));
+          return res(
+            ctx.json({
+              // @ts-expect-error – shhh
+              data: permissions.map(({ action }) =>
+                action === 'admin::roles.create' ? false : true
+              ),
+            })
+          );
         })
       );
 
-      const { result } = renderHook(() => {
-        return useRBAC({
-          create: [
+      const { result } = renderHook(
+        () => {
+          return useRBAC([
             {
-              id: 1,
-              actionParameters: {},
               action: 'admin::roles.create',
               subject: null,
-              conditions: ['willFail'],
-              properties: {},
             },
-          ],
-          update: [
             {
-              id: 2,
-              actionParameters: {},
               action: 'admin::roles.update',
               subject: null,
-              conditions: ['willPass'],
-              properties: {},
             },
-          ],
-        });
-      });
+          ]);
+        },
+        {
+          providerOptions: {
+            permissions: () => [
+              {
+                id: 1,
+                actionParameters: {},
+                action: 'admin::roles.create',
+                subject: null,
+                conditions: ['willFail'],
+                properties: {},
+              },
+              {
+                id: 2,
+                actionParameters: {},
+                action: 'admin::roles.update',
+                subject: null,
+                conditions: ['willPass'],
+                properties: {},
+              },
+            ],
+          },
+        }
+      );
 
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 

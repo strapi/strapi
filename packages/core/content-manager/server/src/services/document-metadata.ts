@@ -69,7 +69,7 @@ export interface GetMetadataOptions {
   availableStatus?: boolean;
 }
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */

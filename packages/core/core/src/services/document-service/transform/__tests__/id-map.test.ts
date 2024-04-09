@@ -27,7 +27,7 @@ describe('Extract document ids from relation data', () => {
       db: {
         query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
       },
-    } as unknown as Core.LoadedStrapi;
+    } as unknown as Core.Strapi;
   });
 
   it('Load single document id', async () => {

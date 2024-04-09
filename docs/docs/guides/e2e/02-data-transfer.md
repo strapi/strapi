@@ -79,7 +79,7 @@ import { resetDatabaseAndImportDataFromPath } from './scripts/dts-import';
 
 test.describe('Strapi Application', () => {
   test.beforeEach(async ({ page }) => {
-    await resetDatabaseAndImportDataFromPath('./e2e/data/backup.tar');
+    await resetDatabaseAndImportDataFromPath('backup.tar');
     await page.goto('/admin');
   });
 

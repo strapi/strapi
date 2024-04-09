@@ -19,7 +19,7 @@ export const publicStatic: Core.MiddlewareFactory = (
       method: 'GET',
       path: '/',
       handler(ctx) {
-        ctx.redirect('/admin');
+        ctx.redirect(strapi.config.get('admin.url', '/admin'));
       },
       config: { auth: false },
     },

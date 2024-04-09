@@ -1,4 +1,4 @@
-import type { LoadedStrapi, Schema } from '@strapi/types';
+import type { Core, Schema } from '@strapi/types';
 import { resolveComponentUID } from '../components';
 
 const baseContentType: Schema.ContentType = {
@@ -43,7 +43,7 @@ describe('resolveComponentUID', () => {
         },
         uid,
       }),
-    } as unknown as LoadedStrapi;
+    } as unknown as Core.Strapi;
     const paths = ['relsRepeatable', '0', 'id'];
 
     const data = {
@@ -74,7 +74,7 @@ describe('resolveComponentUID', () => {
         },
         uid,
       }),
-    } as unknown as LoadedStrapi;
+    } as unknown as Core.Strapi;
     const paths = ['rels', 'id'];
 
     const data = {
@@ -104,7 +104,7 @@ describe('resolveComponentUID', () => {
         },
         uid,
       }),
-    } as unknown as LoadedStrapi;
+    } as unknown as Core.Strapi;
     const paths = ['dz', '0', 'id'];
 
     const data = {

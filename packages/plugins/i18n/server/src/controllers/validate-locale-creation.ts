@@ -9,15 +9,15 @@ const { ApplicationError } = errors;
 const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
   const { model } = ctx.params;
   const { query } = ctx.request;
+
+  // Prevent empty body
+  if (!ctx.request.body) {
+    ctx.request.body = {};
+  }
+
   const body = ctx.request.body as any;
 
-  const {
-    getValidLocale,
-
-    isLocalizedContentType,
-
-    // fillNonLocalizedAttributes,
-  } = getService('content-types');
+  const { getValidLocale, isLocalizedContentType } = getService('content-types');
 
   const modelDef = strapi.getModel(model) as Struct.ContentTypeSchema;
 
@@ -52,9 +52,6 @@ const validateLocaleCreation: Core.MiddlewareHandler = async (ctx, next) => {
       return next();
     }
   }
-
-  // TODO V5 - non localized attributes
-  // fillNonLocalizedAttributes(body, relatedEntity, { model });
 
   return next();
 };

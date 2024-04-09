@@ -153,7 +153,7 @@ const ReleaseActionEntryLinkItem = ({
   }, [contentTypeUid, locale, userPermissions]);
 
   const {
-    allowedActions: { canUpdateContentType },
+    allowedActions: { canUpdate: canUpdateContentType },
   } = useRBAC({
     updateContentType: [
       {
