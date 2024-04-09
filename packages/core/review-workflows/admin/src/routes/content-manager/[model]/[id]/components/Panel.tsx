@@ -1,5 +1,5 @@
 import { Flex } from '@strapi/design-system';
-import { unstable_useDocument as useDocument } from '@strapi/plugin-content-manager/strapi-admin';
+import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/plugin-content-manager/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
@@ -9,23 +9,18 @@ import { StageSelect } from './StageSelect';
 import type { PanelComponent } from '@strapi/plugin-content-manager/strapi-admin';
 
 const Panel: PanelComponent = () => {
-  const {
-    collectionType = '',
-    slug = '',
-    id,
-  } = useParams<{
+  const { slug = '', id } = useParams<{
     collectionType: string;
     slug: string;
     id: string;
   }>();
 
-  const { schema } = useDocument({
-    collectionType,
-    model: slug,
-  });
+  const {
+    edit: { options },
+  } = useDocumentLayout(slug);
   const { formatMessage } = useIntl();
 
-  if (!window.strapi.isEE || !schema?.options?.reviewWorkflows || !id || id === 'create') {
+  if (!window.strapi.isEE || !options?.reviewWorkflows || !id || id === 'create') {
     return null;
   }
 
