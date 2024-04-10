@@ -395,6 +395,26 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         pagination,
       };
     },
+
+    async restoreVersion(versionId: Data.ID) {
+      // Get the version to restore
+      const version = await query.findOne({ where: { id: versionId } });
+      // Get the schema of the content-type
+      // TODO: const contentTypeSchemaAttribute = strapi.getModel(version.contentType).attributes;
+      // Diff the version schema attributes against the current content-type schema attributes
+      // TODO: const schemaDiff = getSchemaAttributesDiff(version.schema, contentTypeSchemaAttribute);
+      // TODO: Filter out any attributes in the diff
+      // TODO: handle relations and media if the related doesn't exist anymore (only populate if entries exist?)
+
+      // Create a new draft with the version data
+      const data = omit(['id'], version.data);
+      const restoredDocument = await strapi.documents(version.contentType).update({
+        documentId: version.relatedDocumentId,
+        data,
+      });
+
+      return restoredDocument;
+    },
   };
 };
 

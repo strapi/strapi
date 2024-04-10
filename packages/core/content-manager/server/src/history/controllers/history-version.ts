@@ -3,6 +3,7 @@ import type { Core, UID } from '@strapi/types';
 import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import { HistoryVersions } from '../../../../shared/contracts';
+import { RestoreHistoryVersion } from '../../../../shared/contracts/history-versions';
 
 /**
  * Parses pagination params and makes sure they're within valid ranges
@@ -67,6 +68,14 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
       });
 
       return { data: results, meta: { pagination } };
+    },
+
+    async restoreVersion(ctx) {
+      const versionId: RestoreHistoryVersion.Request['params']['versionId'] = ctx.params.versionId;
+
+      const restoredDocument = await getService(strapi, 'history').restoreVersion(versionId);
+
+      return { data: { documentId: restoredDocument.documentId } };
     },
   } satisfies Core.Controller;
 };
