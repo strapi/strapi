@@ -34,6 +34,18 @@ const schemas = {
           target: 'api::shirt.shirt',
           inversedBy: 'variants',
         },
+        similar: {
+          type: 'relation',
+          relation: 'manyToMany',
+          target: 'api::shirt.shirt',
+          mappedBy: 'similarMap',
+        },
+        similarMap: {
+          type: 'relation',
+          relation: 'manyToMany',
+          target: 'api::shirt.shirt',
+          inversedBy: 'similar',
+        },
       },
       displayName: 'Shirt',
       singularName: 'shirt',
@@ -53,8 +65,18 @@ const fixtures = {
   ],
   shirtRelations: (fixtures) => {
     return [
-      { name: 'Shirt B', shirtId: 'B', variantOf: fixtures.shirt[0].id },
-      { name: 'Shirt C', shirtId: 'C', variantOf: fixtures.shirt[0].id },
+      {
+        name: 'Shirt B',
+        shirtId: 'B',
+        variantOf: fixtures.shirt[0].id,
+        similar: [fixtures.shirt[0].id],
+      },
+      {
+        name: 'Shirt C',
+        shirtId: 'C',
+        variantOf: fixtures.shirt[0].id,
+        similar: [fixtures.shirt[0].id],
+      },
     ];
   },
 };
@@ -77,11 +99,9 @@ describe('Populate', () => {
     await builder.cleanup();
   });
 
-  test('Populate with attribute named {content_type}_id in parent', async () => {
+  // the relation types below (eg, XtoOne) reference the type of join(s) being performed, not the relation type of the attribute
+  test('Populate with attribute named {content_type}_id in parent with oneToMany/XtoOne relation', async () => {
     const qs = {
-      filters: {
-        name: 'Shirt A',
-      },
       populate: {
         variants: true,
         variantOf: true,
@@ -90,8 +110,9 @@ describe('Populate', () => {
     const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
 
     expect(status).toBe(200);
-    expect(body.data).toHaveLength(1);
-    const shirtA = body.data[0];
+    expect(body.data).toHaveLength(3);
+    const shirtA = body.data.find((item) => item.attributes.name === 'Shirt A');
+    const shirtB = body.data.find((item) => item.attributes.name === 'Shirt B');
 
     // Check that shirtA contains shirtB and shirtC as variants
     expect(shirtA.attributes.variants.data).toMatchObject(
@@ -104,5 +125,51 @@ describe('Populate', () => {
         }),
       ])
     );
+
+    // Check that shirtB contains shirtA as variantOf
+    expect(shirtB.attributes.variantOf.data).toMatchObject(
+      expect.objectContaining({
+        attributes: expect.objectContaining({ shirtId: 'A', name: 'Shirt A' }),
+      })
+    );
   });
+
+  test('Populate with attribute named {content_type}_id in parent with manyToMany relation', async () => {
+    const qs = {
+      populate: {
+        similar: true,
+        similarMap: true,
+      },
+    };
+    const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+    expect(status).toBe(200);
+    expect(body.data).toHaveLength(3);
+    console.log('result', JSON.stringify(body, undefined, 2));
+    const shirtA = body.data.find((item) => item.attributes.name === 'Shirt A');
+    const shirtB = body.data.find((item) => item.attributes.name === 'Shirt B');
+
+    // Check that shirtA contains shirtB and shirtC as variants
+    expect(shirtA.attributes.similarMap.data).toMatchObject(
+      expect.arrayContaining([
+        expect.objectContaining({
+          attributes: expect.objectContaining({ shirtId: 'B', name: 'Shirt B' }),
+        }),
+        expect.objectContaining({
+          attributes: expect.objectContaining({ shirtId: 'C', name: 'Shirt C' }),
+        }),
+      ])
+    );
+
+    // Check that shirtB contains shirtA as variantOf
+    expect(shirtB.attributes.similar.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          attributes: expect.objectContaining({ shirtId: 'A', name: 'Shirt A' }),
+        }),
+      ])
+    );
+  });
+
+  test.todo('morphX, morphyToMany, morphToOne');
 });
