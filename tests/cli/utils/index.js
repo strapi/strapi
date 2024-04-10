@@ -2,6 +2,6 @@
 
 module.exports = {
   fs: require('./fs'),
-  seed: require('../utils/dts-import'),
+  seed: require('../scripts/dts-import'),
   instances: require('./test-app'),
 };
