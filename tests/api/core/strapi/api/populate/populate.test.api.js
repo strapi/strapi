@@ -9,6 +9,7 @@ const { createContentAPIRequest } = require('api-tests/request');
 const builder = createTestBuilder();
 
 let strapi;
+let data;
 let rq;
 
 const schemas = {
