@@ -185,6 +185,11 @@ export async function disableContentTypeLocalized({ oldContentTypes, contentType
     return;
   }
 
+  const i18nPlugin = strapi.plugin('i18n');
+  if (!i18nPlugin) {
+    return;
+  }
+
   for (const uid in contentTypes) {
     if (!oldContentTypes[uid]) {
       continue;
@@ -193,11 +198,7 @@ export async function disableContentTypeLocalized({ oldContentTypes, contentType
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes[uid];
 
-    const i18nPlugin = strapi.plugin('i18n');
 
-    if (!i18nPlugin) {
-      continue;
-    }
 
     const { isLocalizedContentType } = i18nPlugin.service('content-types');
 
@@ -219,6 +220,11 @@ export async function enableContentTypeLocalized({ oldContentTypes, contentTypes
     return;
   }
 
+  const i18nPlugin = strapi.plugin('i18n');
+  if (!i18nPlugin) {
+    return;
+  }
+
   for (const uid in contentTypes) {
     if (!oldContentTypes[uid]) {
       continue;
@@ -226,12 +232,6 @@ export async function enableContentTypeLocalized({ oldContentTypes, contentTypes
 
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes[uid];
-
-    const i18nPlugin = strapi.plugin('i18n');
-
-    if (!i18nPlugin) {
-      continue;
-    }
 
     const { isLocalizedContentType } = i18nPlugin.service('content-types');
     const { getDefaultLocale } = i18nPlugin.service('locales');
