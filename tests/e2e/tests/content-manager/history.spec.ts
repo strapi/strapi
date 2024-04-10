@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
 import { describeOnCondition } from '../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 
 const hasFutureFlag = process.env.STRAPI_FEATURES_FUTURE_CONTENT_HISTORY === 'true';
 
@@ -129,6 +129,58 @@ describeOnCondition(hasFutureFlag)('History', () => {
       // Assert the current version is the modified version
       await expect(currentVersion.getByText('Modified')).toBeVisible();
       await expect(titleInput).toHaveValue('Being from Kansas City, Missouri');
+    });
+
+    test('Relations should be displayed in history versions', async ({ page }) => {
+      const AUTHOR_CREATE_URL =
+        /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
+      const AUTHOR_EDIT_URL =
+        /\/admin\/content-manager\/collection-types\/api::author.author\/[^/]+(\?.*)?/;
+      const ARTICLE_CREATE_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
+      const ARTICLE_EDIT_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
+      const ARTICLE_HISTORY_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+\/history(\?.*)?/;
+
+      // Create new author
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Author' }).click();
+      await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+      await page.waitForURL(AUTHOR_CREATE_URL);
+      await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      // Create new article and add authors to it
+      await page.getByRole('link', { name: 'Article' }).click();
+      await page.getByRole('link', { name: 'Create new entry' }).click();
+      await page.waitForURL(ARTICLE_CREATE_URL);
+      await page.getByRole('textbox', { name: 'title' }).fill('Zava retires');
+      await page.getByRole('combobox', { name: 'Authors' }).click();
+      await page.getByText('Will Kitman').click();
+      await page.getByRole('combobox', { name: 'Authors' }).click();
+      await page.getByText('Coach Beard').click();
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      // Delete one of the authors, leaving only Coach Beard
+      await page.getByRole('link', { name: 'Will Kitman' }).click();
+      await page.waitForURL(AUTHOR_EDIT_URL);
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /delete document/i }).click();
+      await page.getByRole('button', { name: /confirm/i }).click();
+
+      // Go to the the article's history page
+      await page.getByRole('link', { name: 'Article' }).click();
+      await page.getByRole('gridcell', { name: 'Zava retires' }).click();
+      await page.waitForURL(ARTICLE_EDIT_URL);
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await page.waitForURL(ARTICLE_HISTORY_URL);
+
+      // Assert that the unknown relation alert is displayed
+      await expect(page.getByRole('link', { name: 'Coach Beard' })).toBeVisible();
+      await expect(page.getByText('Will Kitman')).not.toBeVisible();
+      await expect(page.getByText(/missing relation/i)).toBeVisible();
     });
   });
 
