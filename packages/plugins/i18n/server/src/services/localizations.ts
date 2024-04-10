@@ -48,7 +48,6 @@ const syncNonLocalizedAttributes = async (sourceEntry: any, model: Schema.Conten
 
     // Update or create non localized components for the entry
     const componentData = await strapi.documents(uid).updateComponents({
-      uid,
       entityToUpdate: entry,
       data: transformedData as any,
     });

@@ -319,7 +319,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   async function updateComponents(opts = {} as any) {
-    const { uid, entityToUpdate, data } = opts;
+    const { entityToUpdate, data } = opts;
     return components.updateComponents(uid, entityToUpdate, data);
   }
 
