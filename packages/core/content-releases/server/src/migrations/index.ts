@@ -194,6 +194,11 @@ export async function disableContentTypeLocalized({ oldContentTypes, contentType
     const contentType = contentTypes[uid];
 
     const i18nPlugin = strapi.plugin('i18n');
+
+    if (!i18nPlugin) {
+      continue;
+    }
+
     const { isLocalizedContentType } = i18nPlugin.service('content-types');
 
     // if i18N is disabled remove non default locales before sync
@@ -223,6 +228,11 @@ export async function enableContentTypeLocalized({ oldContentTypes, contentTypes
     const contentType = contentTypes[uid];
 
     const i18nPlugin = strapi.plugin('i18n');
+
+    if (!i18nPlugin) {
+      continue;
+    }
+
     const { isLocalizedContentType } = i18nPlugin.service('content-types');
     const { getDefaultLocale } = i18nPlugin.service('locales');
 
