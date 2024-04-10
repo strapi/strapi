@@ -89,20 +89,20 @@ export type ServiceInstance<
    * @internal
    * Exposed for use within document service middlewares
    */
-  updateComponents: (
-    uid: UID.Schema,
+  updateComponents: (opts: {
+    uid: UID.Schema;
     entityToUpdate: {
       id: EntityService.Params.Attribute.ID;
-    },
-    data: EntityService.Params.Data.Input<UID.Schema>
-  ) => Promise<ComponentBody>;
+    };
+    data: EntityService.Params.Data.Input<UID.Schema>;
+  }) => Promise<ComponentBody>;
 
   /**
    * @internal
    * Exposed for use within document service middlewares
    */
-  omitComponentData: (
-    contentType: Schema.ContentType,
-    data: EntityService.Params.Data.Input<Schema.ContentType['uid']>
-  ) => Partial<EntityService.Params.Data.Input<Schema.ContentType['uid']>>;
+  omitComponentData: (opts: {
+    contentType: Schema.ContentType;
+    data: EntityService.Params.Data.Input<Schema.ContentType['uid']>;
+  }) => Promise<Partial<EntityService.Params.Data.Input<Schema.ContentType['uid']>>>;
 };
