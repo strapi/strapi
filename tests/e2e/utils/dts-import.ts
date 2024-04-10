@@ -28,7 +28,6 @@ export const resetDatabaseAndImportDataFromPath = async (
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore',
     schemaStrategy: 'ignore',
-    only: ['content', 'files'],
     transforms: {
       links: [
         {
