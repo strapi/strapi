@@ -14,10 +14,21 @@ const ALLOWED_CONTENT_TYPES = [
   'api::shop.shop',
   'api::upcoming-match.upcoming-match',
   'api::unique.unique',
-  'plugin::i18n.locale',
   'plugin::content-manager.history-version',
+  /**
+   * I18N
+   */
+  'plugin::i18n.locale',
+  /**
+   * CONTENT RELEASES
+   */
   'plugin::content-releases.release',
   'plugin::content-releases.release-action',
+  /**
+   * REVIEW WORKFLOWS
+   */
+  'plugin::review-workflows.workflow-stage',
+  'plugin::review-workflows.workflow',
   /**
    * UPLOADS
    */
