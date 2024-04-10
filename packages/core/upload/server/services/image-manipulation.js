@@ -8,7 +8,7 @@ const { join } = require('path');
 const sharp = require('sharp');
 
 const {
-  file: { bytesToKbytes, writableDiscardStream },
+  file: { bytesToKbytes },
 } = require('@strapi/utils');
 const { getService } = require('../utils');
 
@@ -16,25 +16,13 @@ const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
 
-const writeStreamToFile = (stream, path) =>
-  new Promise((resolve, reject) => {
-    const writeStream = fs.createWriteStream(path);
-    // Reject promise if there is an error with the provided stream
-    stream.on('error', reject);
-    stream.pipe(writeStream);
-    writeStream.on('close', resolve);
-    writeStream.on('error', reject);
-  });
-
-const getMetadata = async (file) =>
-  new Promise((resolve, reject) => {
-    const pipeline = sharp();
-    pipeline.metadata().then(resolve).catch(reject);
-    file.getStream().pipe(pipeline);
-  });
+const getMetadata = async (file) => {
+  return sharp(file.filepath).metadata();
+};
 
 const getDimensions = async (file) => {
   const { width = null, height = null } = await getMetadata(file);
+
   return { width, height };
 };
 
@@ -47,17 +35,17 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 const resizeFileTo = async (file, options, { name, hash }) => {
   const filePath = join(file.tmpWorkingDirectory, hash);
 
-  await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
+  const { width, height, size } = await sharp(file.filepath).resize(options).toFile(filePath);
+
   const newFile = {
     name,
     hash,
     ext: file.ext,
     mime: file.mime,
+    filepath: filePath,
     path: file.path || null,
     getStream: () => fs.createReadStream(filePath),
   };
-
-  const { width, height, size } = await getMetadata(newFile);
 
   Object.assign(newFile, { width, height, size: bytesToKbytes(size), sizeInBytes: size });
   return newFile;
@@ -89,12 +77,10 @@ const optimize = async (file) => {
     'upload'
   ).getSettings();
 
-  const newFile = { ...file };
-
-  const { width, height, size, format } = await getMetadata(newFile);
+  const { format, size } = await getMetadata(file);
 
   if (sizeOptimization || autoOrientation) {
-    const transformer = sharp();
+    const transformer = sharp(file.filepath);
     // reduce image quality
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
     // rotate image based on EXIF data
@@ -103,24 +89,31 @@ const optimize = async (file) => {
     }
     const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
 
-    await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    const {
+      width: newWidth,
+      height: newHeight,
+      size: newSize,
+    } = await transformer.toFile(filePath);
+
+    const newFile = { ...file };
 
     newFile.getStream = () => fs.createReadStream(filePath);
+    newFile.filepath = filePath;
+
+    if (newSize > size) {
+      // Ignore optimization if output is bigger than original
+      return file;
+    }
+
+    return Object.assign(newFile, {
+      width: newWidth,
+      height: newHeight,
+      size: bytesToKbytes(newSize),
+      sizeInBytes: newSize,
+    });
   }
 
-  const { width: newWidth, height: newHeight, size: newSize } = await getMetadata(newFile);
-
-  if (newSize > size) {
-    // Ignore optimization if output is bigger than original
-    return { ...file, width, height, size: bytesToKbytes(size), sizeInBytes: size };
-  }
-
-  return Object.assign(newFile, {
-    width: newWidth,
-    height: newHeight,
-    size: bytesToKbytes(newSize),
-    sizeInBytes: newSize,
-  });
+  return file;
 };
 
 const DEFAULT_BREAKPOINTS = {
@@ -187,16 +180,14 @@ const isSupportedImage = (...args) => {
 /**
  *  Applies a simple image transformation to see if the image is faulty/corrupted.
  */
-const isFaultyImage = (file) =>
-  new Promise((resolve) => {
-    file
-      .getStream()
-      .pipe(sharp().rotate())
-      .on('error', () => resolve(true))
-      .pipe(writableDiscardStream())
-      .on('error', () => resolve(true))
-      .on('close', () => resolve(false));
-  });
+const isFaultyImage = async (file) => {
+  try {
+    await sharp(file.filepath).stats();
+    return false;
+  } catch (e) {
+    return true;
+  }
+};
 
 const isOptimizableImage = async (file) => {
   let format;
