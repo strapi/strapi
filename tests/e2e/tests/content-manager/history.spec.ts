@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { describeOnCondition } from '../../utils/shared';
 
 const hasFutureFlag = process.env.STRAPI_FEATURES_FUTURE_CONTENT_HISTORY === 'true';
