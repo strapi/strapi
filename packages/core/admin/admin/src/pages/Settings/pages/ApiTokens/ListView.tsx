@@ -6,7 +6,7 @@ import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
@@ -147,6 +147,7 @@ export const ListView = () => {
         primaryAction={
           canCreate && (
             <LinkButton
+              as={Link}
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="S"
@@ -155,7 +156,8 @@ export const ListView = () => {
                   tokenType: API_TOKEN_TYPE,
                 })
               }
-              href="api-tokens/create"
+              // @ts-expect-error We need to accept the props of the component passed in the `as` prop
+              to="/settings/api-tokens/create"
             >
               {formatMessage({
                 id: 'Settings.apiTokens.create',
@@ -188,7 +190,13 @@ export const ListView = () => {
                   defaultMessage: 'Add your first API Token',
                 })}
                 action={
-                  <LinkButton variant="secondary" startIcon={<Plus />} href="api-tokens/create">
+                  <LinkButton
+                    as={Link}
+                    variant="secondary"
+                    startIcon={<Plus />}
+                    // @ts-expect-error We need to accept the props of the component passed in the `as` prop
+                    to="/settings/api-tokens/create"
+                  >
                     {formatMessage({
                       id: 'Settings.apiTokens.addNewToken',
                       defaultMessage: 'Add new API Token',

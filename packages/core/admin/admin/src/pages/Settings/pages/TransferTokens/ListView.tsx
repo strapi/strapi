@@ -6,7 +6,7 @@ import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -160,6 +160,7 @@ const ListView = () => {
         primaryAction={
           canCreate ? (
             <LinkButton
+              forwardedAs={Link}
               data-testid="create-transfer-token-button"
               startIcon={<Plus />}
               size="S"
@@ -168,7 +169,8 @@ const ListView = () => {
                   tokenType: TRANSFER_TOKEN_TYPE,
                 })
               }
-              href="transfer-tokens/create"
+              // @ts-expect-error We need to accept the props of the component passed in the `as` prop
+              to="/settings/transfer-tokens/create"
             >
               {formatMessage({
                 id: 'Settings.transferTokens.create',
@@ -197,9 +199,11 @@ const ListView = () => {
               <EmptyStateLayout
                 action={
                   <LinkButton
+                    as={Link}
                     variant="secondary"
                     startIcon={<Plus />}
-                    href="transfer-tokens/create"
+                    // @ts-expect-error We need to accept the props of the component passed in the `as` prop
+                    to="/settings/transfer-tokens/create"
                   >
                     {formatMessage({
                       id: 'Settings.transferTokens.addNewToken',
