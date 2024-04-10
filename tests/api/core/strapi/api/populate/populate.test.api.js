@@ -9,7 +9,6 @@ const { createContentAPIRequest } = require('api-tests/request');
 const builder = createTestBuilder();
 
 let strapi;
-let data;
 let rq;
 
 const schemas = {
@@ -46,6 +45,26 @@ const schemas = {
           target: 'api::shirt.shirt',
           inversedBy: 'similar',
         },
+        morph_to_one: {
+          type: 'relation',
+          relation: 'morphToOne',
+        },
+        morph_one: {
+          type: 'relation',
+          relation: 'morphOne',
+          target: 'api::shirt.shirt',
+          morphBy: 'morph_to_one',
+        },
+        morph_to_many: {
+          type: 'relation',
+          relation: 'morphToMany',
+        },
+        morph_many: {
+          type: 'relation',
+          relation: 'morphMany',
+          target: 'api::shirt.shirt',
+          morphBy: 'morph_to_many',
+        },
       },
       displayName: 'Shirt',
       singularName: 'shirt',
@@ -64,18 +83,21 @@ const fixtures = {
     },
   ],
   shirtRelations: (fixtures) => {
+    const shirtA = fixtures.shirt[0];
     return [
       {
         name: 'Shirt B',
         shirtId: 'B',
-        variantOf: fixtures.shirt[0].id,
-        similar: [fixtures.shirt[0].id],
+        variantOf: shirtA.id,
+        similar: [shirtA.id],
+        morph_many: [{ __type: 'api::shirt.shirt', id: shirtA.id }],
       },
       {
         name: 'Shirt C',
         shirtId: 'C',
-        variantOf: fixtures.shirt[0].id,
-        similar: [fixtures.shirt[0].id],
+        variantOf: shirtA.id,
+        similar: [shirtA.id],
+        morph_one: [{ __type: 'api::shirt.shirt', id: shirtA.id }],
       },
     ];
   },
@@ -161,7 +183,7 @@ describe('Populate', () => {
       ])
     );
 
-    // Check that shirtB contains shirtA as variantOf
+    // Check that shirtB contains shirtA shirtId
     expect(shirtB.attributes.similar.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -171,5 +193,61 @@ describe('Populate', () => {
     );
   });
 
-  test.todo('morphX, morphyToMany, morphToOne');
+  test('Populate with attribute named {content_type}_id in parent with morphOne relation', async () => {
+    const qs = {
+      populate: {
+        morph_one: { on: { 'api::shirt.shirt': true } },
+        // TODO: populate morph_to_one has a bug that needs to be fixed before we can use it
+        // morph_to_one: { on: { 'api::shirt.shirt': true } },
+      },
+    };
+    const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+    expect(status).toBe(200);
+    expect(body.data).toHaveLength(3);
+
+    const shirtC = body.data.find((item) => item.attributes.name === 'Shirt C');
+
+    // TODO: test the morph_to_one side on shirtA
+
+    // Check that shirtC contains shirtA as shirtId
+    expect(shirtC.attributes.morph_one.data).toEqual(
+      // expect.arrayContaining([
+      expect.objectContaining({
+        attributes: expect.objectContaining({ shirtId: 'A', name: 'Shirt A' }),
+      })
+      // ])
+    );
+  });
+
+  test('Populate with attribute named {content_type}_id in parent with morphMany/morphToMany relation', async () => {
+    const qs = {
+      populate: {
+        morph_many: { on: { 'api::shirt.shirt': true } },
+        morph_to_many: { on: { 'api::shirt.shirt': true } },
+      },
+    };
+    const { status, body } = await rq.get(`/${schemas.contentTypes.shirt.pluralName}`, { qs });
+
+    expect(status).toBe(200);
+    expect(body.data).toHaveLength(3);
+
+    const shirtA = body.data.find((item) => item.attributes.name === 'Shirt A');
+    const shirtB = body.data.find((item) => item.attributes.name === 'Shirt B');
+
+    // Check that shirtA contains shirtB with shirtId
+    // TODO v6: standardize the returned data from morph relationships. morph_to_many returns `[{ ...attributes }]` instead of `data: [{ attributes }]`
+    expect(shirtA.attributes.morph_to_many).toEqual(
+      expect.arrayContaining([expect.objectContaining({ shirtId: 'B', name: 'Shirt B' })])
+    );
+
+    // Check that shirtB contains shirtA with shirtId
+    expect(shirtB.attributes.morph_many.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          attributes: expect.objectContaining({ shirtId: 'A', name: 'Shirt A' }),
+        }),
+      ])
+    );
+  });
 });
