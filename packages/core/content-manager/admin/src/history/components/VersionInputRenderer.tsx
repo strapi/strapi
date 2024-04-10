@@ -65,16 +65,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
   return (
     <Box>
       <FieldLabel>{props.label}</FieldLabel>
-      {results.length === 0 ? (
-        <Box marginTop={1}>
-          <StyledAlert variant="default">
-            {formatMessage({
-              id: 'content-manager.history.content.no-relations',
-              defaultMessage: 'No relations.',
-            })}
-          </StyledAlert>
-        </Box>
-      ) : (
+      {results.length > 0 && (
         <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
           {results.map((relationData) => {
             // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
@@ -104,29 +95,40 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
               </Flex>
             );
           })}
-          {meta.missingCount > 0 && (
-            <StyledAlert
-              variant="warning"
-              title={formatMessage(
-                {
-                  id: 'content-manager.history.content.missing-relations.title',
-                  defaultMessage:
-                    '{number, plural, =1 {Missing relation} other {{number} missing relations}}',
-                },
-                { number: meta.missingCount }
-              )}
-            >
-              {formatMessage(
-                {
-                  id: 'content-manager.history.content.missing-relations.message',
-                  defaultMessage:
-                    "{number, plural, =1 {It has} other {They have}} been deleted and can't be restored.",
-                },
-                { number: meta.missingCount }
-              )}
-            </StyledAlert>
-          )}
         </Flex>
+      )}
+      {meta.missingCount > 0 && (
+        <StyledAlert
+          marginTop={1}
+          variant="warning"
+          title={formatMessage(
+            {
+              id: 'content-manager.history.content.missing-relations.title',
+              defaultMessage:
+                '{number, plural, =1 {Missing relation} other {{number} missing relations}}',
+            },
+            { number: meta.missingCount }
+          )}
+        >
+          {formatMessage(
+            {
+              id: 'content-manager.history.content.missing-relations.message',
+              defaultMessage:
+                "{number, plural, =1 {It has} other {They have}} been deleted and can't be restored.",
+            },
+            { number: meta.missingCount }
+          )}
+        </StyledAlert>
+      )}
+      {results.length === 0 && meta.missingCount === 0 && (
+        <Box marginTop={1}>
+          <StyledAlert variant="default">
+            {formatMessage({
+              id: 'content-manager.history.content.no-relations',
+              defaultMessage: 'No relations.',
+            })}
+          </StyledAlert>
+        </Box>
       )}
     </Box>
   );
