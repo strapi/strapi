@@ -147,7 +147,7 @@ export const ListView = () => {
         primaryAction={
           canCreate && (
             <LinkButton
-              as={Link}
+              forwardedAs={Link}
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="S"
@@ -191,7 +191,7 @@ export const ListView = () => {
                 })}
                 action={
                   <LinkButton
-                    as={Link}
+                    forwardedAs={Link}
                     variant="secondary"
                     startIcon={<Plus />}
                     // @ts-expect-error We need to accept the props of the component passed in the `as` prop
