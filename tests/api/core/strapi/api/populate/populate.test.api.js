@@ -145,7 +145,7 @@ describe('Populate', () => {
 
     expect(status).toBe(200);
     expect(body.data).toHaveLength(3);
-    console.log('result', JSON.stringify(body, undefined, 2));
+
     const shirtA = body.data.find((item) => item.attributes.name === 'Shirt A');
     const shirtB = body.data.find((item) => item.attributes.name === 'Shirt B');
 
