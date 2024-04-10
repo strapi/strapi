@@ -199,7 +199,7 @@ const ListView = () => {
               <EmptyStateLayout
                 action={
                   <LinkButton
-                    as={Link}
+                    forwardedAs={Link}
                     variant="secondary"
                     startIcon={<Plus />}
                     // @ts-expect-error We need to accept the props of the component passed in the `as` prop

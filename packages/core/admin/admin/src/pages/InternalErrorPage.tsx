@@ -29,7 +29,7 @@ export const InternalErrorPage = () => {
         <EmptyStateLayout
           action={
             // @ts-expect-error We need to accept the props of the component passed in the `as` prop
-            <LinkButton as={Link} variant="secondary" endIcon={<ArrowRight />} to="/">
+            <LinkButton forwardedAs={Link} variant="secondary" endIcon={<ArrowRight />} to="/">
               {formatMessage({
                 id: 'app.components.NotFoundPage.back',
                 defaultMessage: 'Back to homepage',
