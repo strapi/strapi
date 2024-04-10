@@ -22,7 +22,7 @@ const PurchaseAuditLogs = () => {
             content={formatMessage({
               id: 'Settings.permissions.auditLogs.not-available',
               defaultMessage:
-                'Audit Logs is only available as part of the Enterprise Edition. Upgrade to get a searchable and filterable display of all activities.',
+                'Audit Logs is only available as part of a paid plan. Upgrade to get a searchable and filterable display of all activities.',
             })}
             action={
               <LinkButton

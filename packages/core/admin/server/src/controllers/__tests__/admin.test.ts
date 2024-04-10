@@ -38,7 +38,7 @@ describe('Admin Controller', () => {
         'packageJsonStrapi.telemetryDisabled',
         null
       );
-      expect(global.strapi.admin.services.user.exists).toHaveBeenCalled();
+      expect(global.strapi.service('admin::user').exists).toHaveBeenCalled();
       expect(result.data).toBeDefined();
       expect(result.data).toStrictEqual({
         uuid: 'foo',
@@ -63,7 +63,7 @@ describe('Admin Controller', () => {
                 },
                 uuid: 'testuuid',
                 environment: 'development',
-              }[key] || value)
+              })[key] || value
           ),
         },
         EE: true,

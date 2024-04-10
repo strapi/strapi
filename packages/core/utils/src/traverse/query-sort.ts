@@ -135,7 +135,7 @@ const sort = traverseFactory()
     },
   }))
   // Handle deep sort on relation
-  .onRelation(async ({ key, value, attribute, visitor, path }, { set, recurse }) => {
+  .onRelation(async ({ key, value, attribute, visitor, path, getModel }, { set, recurse }) => {
     const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
 
     if (isMorphRelation) {
@@ -143,26 +143,26 @@ const sort = traverseFactory()
     }
 
     const targetSchemaUID = attribute.target;
-    const targetSchema = strapi.getModel(targetSchemaUID);
+    const targetSchema = getModel(targetSchemaUID!);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path }, value);
+    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
 
     set(key, newValue);
   })
   // Handle deep sort on media
-  .onMedia(async ({ key, path, visitor, value }, { recurse, set }) => {
+  .onMedia(async ({ key, path, visitor, value, getModel }, { recurse, set }) => {
     const targetSchemaUID = 'plugin::upload.file';
-    const targetSchema = strapi.getModel(targetSchemaUID);
+    const targetSchema = getModel(targetSchemaUID);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path }, value);
+    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
 
     set(key, newValue);
   })
   // Handle deep sort on components
-  .onComponent(async ({ key, value, visitor, path, attribute }, { recurse, set }) => {
-    const targetSchema = strapi.getModel(attribute.component);
+  .onComponent(async ({ key, value, visitor, path, attribute, getModel }, { recurse, set }) => {
+    const targetSchema = getModel(attribute.component);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path }, value);
+    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
 
     set(key, newValue);
   });

@@ -13,11 +13,15 @@ import { mockReleaseDetailsPageData } from './mockReleaseDetailsPageData';
  */
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
-  unstable_useDocument: jest.fn().mockReturnValue({ validate: jest.fn().mockReturnValue({}) }),
   useRBAC: jest.fn(() => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canDelete: true, canPublish: true },
   })),
+}));
+
+jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/plugin-content-manager/strapi-admin'),
+  unstable_useDocument: jest.fn().mockReturnValue({ validate: jest.fn().mockReturnValue({}) }),
 }));
 
 describe('Releases details page', () => {

@@ -661,8 +661,15 @@ export default {
       return ctx.forbidden();
     }
 
-    // @ts-expect-error - ids are not in .find
-    const entities = await documentManager.findMany({ ids, locale }, model);
+    const entities = await documentManager.findMany(
+      {
+        filters: {
+          id: ids,
+        },
+        locale,
+      },
+      model
+    );
 
     if (!entities) {
       return ctx.notFound();

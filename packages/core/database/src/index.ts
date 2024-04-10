@@ -11,7 +11,7 @@ import * as errors from './errors';
 import { Callback, transactionCtx, TransactionObject } from './transaction-context';
 import { validateDatabase } from './validations';
 import type { Model } from './types';
-import * as identifiers from './utils/identifiers';
+import { type Identifiers } from './utils/identifiers';
 
 export { isKnexQuery } from './utils/knex';
 
@@ -71,7 +71,7 @@ class Database {
     this.dialect = getDialect(this);
     this.dialect.configure();
 
-    this.metadata = createMetadata();
+    this.metadata = createMetadata([]);
 
     this.connection = createConnection(this.config.connection, {
       pool: { afterCreate: afterCreate(this) },
@@ -87,7 +87,6 @@ class Database {
 
   async init({ models }: { models: Model[] }) {
     this.metadata.loadModels(models);
-
     await validateDatabase(this);
     return this;
   }
@@ -176,7 +175,5 @@ class Database {
   }
 }
 
-const utils = { identifiers };
-
-export { Database, errors, utils };
-export type { Model };
+export { Database, errors };
+export type { Model, Identifiers };

@@ -1,0 +1,368 @@
+import * as React from 'react';
+
+import {
+  useStrapiApp,
+  useForm,
+  InputRenderer as FormInputRenderer,
+  useField,
+  Form,
+} from '@strapi/admin/strapi-admin';
+import { Alert, Box, FieldLabel, Flex, Link, Tooltip } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
+import { NavLink } from 'react-router-dom';
+import styled from 'styled-components';
+
+import { COLLECTION_TYPES } from '../../constants/collections';
+import { useDocumentRBAC } from '../../features/DocumentRBAC';
+import { useDoc } from '../../hooks/useDocument';
+import { useLazyComponents } from '../../hooks/useLazyComponents';
+import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
+import { BlocksInput } from '../../pages/EditView/components/FormInputs/BlocksInput/BlocksInput';
+import { ComponentInput } from '../../pages/EditView/components/FormInputs/Component/Input';
+import {
+  DynamicZone,
+  useDynamicZone,
+} from '../../pages/EditView/components/FormInputs/DynamicZone/Field';
+import { NotAllowedInput } from '../../pages/EditView/components/FormInputs/NotAllowed';
+import { UIDInput } from '../../pages/EditView/components/FormInputs/UID';
+import { Wysiwyg } from '../../pages/EditView/components/FormInputs/Wysiwyg/Field';
+import { useFieldHint } from '../../pages/EditView/components/InputRenderer';
+import { getRelationLabel } from '../../utils/relations';
+import { useHistoryContext } from '../pages/History';
+
+import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
+import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
+import type { RelationResult } from '../../services/relations';
+import type { Schema } from '@strapi/types';
+import type { DistributiveOmit } from 'react-redux';
+
+const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {} })`
+  button {
+    display: none;
+  }
+`;
+
+/* -------------------------------------------------------------------------------------------------
+ * CustomRelationInput
+ * -----------------------------------------------------------------------------------------------*/
+
+const LinkEllipsis = styled(Link)`
+  display: block;
+
+  & > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+  }
+`;
+
+const CustomRelationInput = (props: RelationsFieldProps) => {
+  const { formatMessage } = useIntl();
+  const field = useField<{ results: RelationResult[]; meta: { missingCount: number } }>(props.name);
+  const { results, meta } = field.value!;
+
+  return (
+    <Box>
+      <FieldLabel>{props.label}</FieldLabel>
+      {results.length === 0 ? (
+        <Box marginTop={1}>
+          <StyledAlert variant="default">
+            {formatMessage({
+              id: 'content-manager.history.content.no-relations',
+              defaultMessage: 'No relations.',
+            })}
+          </StyledAlert>
+        </Box>
+      ) : (
+        <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
+          {results.map((relationData) => {
+            // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+            const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
+            const label = getRelationLabel(relationData, props.mainField);
+
+            return (
+              <Flex
+                key={relationData.documentId}
+                paddingTop={2}
+                paddingBottom={2}
+                paddingLeft={4}
+                paddingRight={4}
+                hasRadius
+                borderColor="neutral200"
+                background="neutral150"
+                justifyContent="space-between"
+              >
+                <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
+                  <Tooltip description={label}>
+                    <LinkEllipsis forwardedAs={NavLink} to={href}>
+                      {label}
+                    </LinkEllipsis>
+                  </Tooltip>
+                </Box>
+                <DocumentStatus status={relationData.status as string} />
+              </Flex>
+            );
+          })}
+          {meta.missingCount > 0 && (
+            <StyledAlert
+              variant="warning"
+              title={formatMessage(
+                {
+                  id: 'content-manager.history.content.missing-relations.title',
+                  defaultMessage:
+                    '{number, plural, =1 {Missing relation} other {{number} missing relations}}',
+                },
+                { number: meta.missingCount }
+              )}
+            >
+              {formatMessage(
+                {
+                  id: 'content-manager.history.content.missing-relations.message',
+                  defaultMessage:
+                    "{number, plural, =1 {It has} other {They have}} been deleted and can't be restored.",
+                },
+                { number: meta.missingCount }
+              )}
+            </StyledAlert>
+          )}
+        </Flex>
+      )}
+    </Box>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * CustomMediaInput
+ * -----------------------------------------------------------------------------------------------*/
+
+const CustomMediaInput = (props: VersionInputRendererProps) => {
+  const {
+    value: { results, meta },
+  } = useField(props.name);
+  const { formatMessage } = useIntl();
+
+  const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);
+  const MediaLibrary = fields.media as React.ComponentType<
+    VersionInputRendererProps & { multiple: boolean }
+  >;
+  return (
+    <Flex direction="column" gap={2} alignItems="stretch">
+      <Form method="PUT" disabled={true} initialValues={{ [props.name]: results }}>
+        <MediaLibrary {...props} disabled={true} multiple={results.length > 1} />
+      </Form>
+      {meta.missingCount > 0 && (
+        <StyledAlert
+          variant="warning"
+          closeLabel="Close"
+          onClose={() => {}}
+          title={formatMessage(
+            {
+              id: 'content-manager.history.content.missing-assets.title',
+              defaultMessage:
+                '{number, plural, =1 {Missing asset} other {{number} missing assets}}',
+            },
+            { number: meta.missingCount }
+          )}
+        >
+          {formatMessage(
+            {
+              id: 'content-manager.history.content.missing-assets.message',
+              defaultMessage:
+                "{number, plural, =1 {It has} other {They have}} been deleted in the Media Library and can't be restored.",
+            },
+            { number: meta.missingCount }
+          )}
+        </StyledAlert>
+      )}
+    </Flex>
+  );
+};
+
+type VersionInputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
+  /**
+   * In the context of content history, deleted fields need to ignore RBAC
+   * @default false
+   */
+  shouldIgnoreRBAC?: boolean;
+};
+
+/**
+ * @internal
+ *
+ * @description An abstraction around the regular form input renderer designed specifically
+ * to be used on the History page in the content-manager. It understands how to render specific
+ * inputs within the context of a history version (i.e. relations, media, ignored RBAC, etc...)
+ */
+const VersionInputRenderer = ({
+  visible,
+  hint: providedHint,
+  shouldIgnoreRBAC = false,
+  ...props
+}: VersionInputRendererProps) => {
+  const { formatMessage } = useIntl();
+  const { version } = useHistoryContext('VersionContent', (state) => ({
+    version: state.selectedVersion,
+  }));
+  const { id } = useDoc();
+  const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
+
+  const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
+
+  const canCreateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canCreateFields);
+  const canReadFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canReadFields);
+  const canUpdateFields = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUpdateFields);
+  const canUserAction = useDocumentRBAC('InputRenderer', (rbac) => rbac.canUserAction);
+
+  const editableFields = id ? canUpdateFields : canCreateFields;
+  const readableFields = id ? canReadFields : canCreateFields;
+  /**
+   * Component fields are always readable and editable,
+   * however the fields within them may not be.
+   */
+  const canUserReadField = canUserAction(props.name, readableFields, props.type);
+  const canUserEditField = canUserAction(props.name, editableFields, props.type);
+
+  const fields = useStrapiApp('InputRenderer', (app) => app.fields);
+  const { lazyComponentStore } = useLazyComponents(
+    attributeHasCustomFieldProperty(props.attribute) ? [props.attribute.customField] : undefined
+  );
+
+  const hint = useFieldHint(providedHint, props.attribute);
+
+  if (!visible) {
+    return null;
+  }
+
+  /**
+   * Don't render the field if the user can't read it.
+   */
+  if (!shouldIgnoreRBAC && !canUserReadField && !isInDynamicZone) {
+    return <NotAllowedInput hint={hint} {...props} />;
+  }
+
+  const fieldIsDisabled =
+    (!canUserEditField && !isInDynamicZone) || props.disabled || isFormDisabled;
+
+  /**
+   * Attributes found on the current content-type schema cannot be restored. We handle
+   * this by displaying a warning alert to the user instead of the input for that field type.
+   */
+  const addedAttributes = version.meta.unknownAttributes.added;
+  if (Object.keys(addedAttributes).includes(props.name)) {
+    return (
+      <Flex direction="column" alignItems="flex-start" gap={1}>
+        <FieldLabel>{props.label}</FieldLabel>
+        <StyledAlert
+          width="100%"
+          closeLabel="Close"
+          onClose={() => {}}
+          variant="warning"
+          title={formatMessage({
+            id: 'content-manager.history.content.new-field.title',
+            defaultMessage: 'New field',
+          })}
+        >
+          {formatMessage({
+            id: 'content-manager.history.content.new-field.message',
+            defaultMessage:
+              "This field didn't exist when this version was saved. If you restore this version, it will be empty.",
+          })}
+        </StyledAlert>
+      </Flex>
+    );
+  }
+
+  /**
+   * Because a custom field has a unique prop but the type could be confused with either
+   * the useField hook or the type of the field we need to handle it separately and first.
+   */
+  if (attributeHasCustomFieldProperty(props.attribute)) {
+    const CustomInput = lazyComponentStore[props.attribute.customField];
+
+    if (CustomInput) {
+      // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
+      return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+    }
+
+    return (
+      <FormInputRenderer
+        {...props}
+        hint={hint}
+        // @ts-expect-error – this workaround lets us display that the custom field is missing.
+        type={props.attribute.customField}
+        disabled={fieldIsDisabled}
+      />
+    );
+  }
+
+  /**
+   * Since media fields use a custom input via the upload plugin provided by the useLibrary hook,
+   * we need to handle the them before other custom inputs coming from the useLibrary hook.
+   */
+  if (props.type === 'media') {
+    return <CustomMediaInput {...props} disabled={fieldIsDisabled} />;
+  }
+  /**
+   * This is where we handle ONLY the fields from the `useLibrary` hook.
+   */
+  const addedInputTypes = Object.keys(fields);
+  if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
+    const CustomInput = fields[props.type];
+    // @ts-expect-error – TODO: fix this type error in the useLibrary hook.
+    return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+  }
+
+  /**
+   * These include the content-manager specific fields, failing that we fall back
+   * to the more generic form input renderer.
+   */
+  switch (props.type) {
+    case 'blocks':
+      return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+    case 'component':
+      return <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+    case 'dynamiczone':
+      return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
+    case 'relation':
+      return <CustomRelationInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+    case 'richtext':
+      return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+    case 'uid':
+      return <UIDInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+    /**
+     * Enumerations are a special case because they require options.
+     */
+    case 'enumeration':
+      return (
+        <FormInputRenderer
+          {...props}
+          hint={hint}
+          options={props.attribute.enum.map((value) => ({ value }))}
+          // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
+          type={props.customField ? 'custom-field' : props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
+    default:
+      // These props are not needed for the generic form input renderer.
+      const { unique: _unique, mainField: _mainField, ...restProps } = props;
+      return (
+        <FormInputRenderer
+          {...restProps}
+          hint={hint}
+          // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
+          type={props.customField ? 'custom-field' : props.type}
+          disabled={fieldIsDisabled}
+        />
+      );
+  }
+};
+
+const attributeHasCustomFieldProperty = (
+  attribute: Schema.Attribute.AnyAttribute
+): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.CustomField<string> =>
+  'customField' in attribute && typeof attribute.customField === 'string';
+
+export type { VersionInputRendererProps };
+export { VersionInputRenderer };

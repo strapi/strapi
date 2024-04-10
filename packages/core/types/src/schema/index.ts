@@ -52,7 +52,7 @@ export type ModelType<TSchemaUID extends UID.Schema> = Schema<TSchemaUID>['model
  */
 export type AttributeByName<
   TSchemaUID extends UID.Schema,
-  TAttributeName extends AttributeNames<TSchemaUID>
+  TAttributeName extends AttributeNames<TSchemaUID>,
 > = Attributes<TSchemaUID>[TAttributeName];
 
 /**
@@ -63,7 +63,7 @@ export type AttributeByName<
  */
 export type AttributeValueByName<
   TSchemaUID extends UID.Schema,
-  TAttributeName extends AttributeNames<TSchemaUID>
+  TAttributeName extends AttributeNames<TSchemaUID>,
 > = Attribute.Value<AttributeByName<TSchemaUID, TAttributeName>>;
 
 /**
@@ -71,7 +71,9 @@ export type AttributeValueByName<
  *
  * @template TSchemaUID - The Schema's UID used to get its attributes
  */
-export type Attributes<TSchemaUID extends UID.Schema> = Schema<TSchemaUID>['attributes'];
+export type Attributes<TSchemaUID extends UID.Schema = UID.Schema> = {
+  [TUID in TSchemaUID]: Schema<TSchemaUID>['attributes'];
+}[TSchemaUID];
 
 /**
  * Union type of every attribute name within {@link TSchemaUID}'s attributes
@@ -87,13 +89,13 @@ export type AttributeNames<TSchemaUID extends UID.Schema> = Extract<
 export type AttributesByType<
   TSchemaUID extends UID.Schema,
   TKind extends Attribute.Kind,
-  TCondition = never
+  TCondition = never,
 > = Object.PickBy<Attributes<TSchemaUID>, Attribute.OfType<TKind> & Guard.Never<TCondition>>;
 
 export type AttributeNamesByType<
   TSchemaUID extends UID.Schema,
   TKind extends Attribute.Kind,
-  TCondition = never
+  TCondition = never,
 > = Object.KeysBy<
   Attributes<TSchemaUID>,
   Attribute.OfType<TKind> & Guard.Never<TCondition, unknown>,

@@ -16,7 +16,7 @@ import {
   Combobox,
   ComboboxOption,
 } from '@strapi/design-system';
-import { formatISO, parse } from 'date-fns';
+import { formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { Formik, Form, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
@@ -28,7 +28,7 @@ import { getTimezoneOffset } from '../utils/time';
 
 export interface FormValues {
   name: string;
-  date: Date | null;
+  date: string | null;
   time: string;
   timezone: string | null;
   isScheduled?: boolean;
@@ -62,9 +62,8 @@ export const ReleaseModal = ({
   const getScheduledTimestamp = (values: FormValues) => {
     const { date, time, timezone } = values;
     if (!date || !time || !timezone) return null;
-    const formattedDate = parse(time, 'HH:mm', new Date(date));
     const timezoneWithoutOffset = timezone.split('&')[1];
-    return zonedTimeToUtc(formattedDate, timezoneWithoutOffset);
+    return zonedTimeToUtc(`${date} ${time}`, timezoneWithoutOffset);
   };
 
   /**

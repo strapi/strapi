@@ -78,15 +78,15 @@ describe('Project setting', () => {
       const files = {
         menuLogo: {
           size: 123,
-          path: '/tmp/filename_123',
-          name: 'file.png',
-          type: 'image/png',
+          filepath: '/tmp/filename_123',
+          originalFilename: 'file.png',
+          mimetype: 'image/png',
         },
         authLogo: {
           size: 123,
-          path: '/tmp/filename_123',
-          name: 'file.png',
-          type: 'image/png',
+          filepath: '/tmp/filename_123',
+          originalFilename: 'file.png',
+          mimetype: 'image/png',
         },
       };
 

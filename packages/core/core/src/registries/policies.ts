@@ -1,48 +1,128 @@
-import { pickBy, has } from 'lodash/fp';
-import type { Core, UID } from '@strapi/types';
+import { pickBy, has, castArray } from 'lodash/fp';
+import type { Core } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
-type PolicyExtendFn = (policy: Core.Policy) => Core.Policy;
-type PolicyMap = Record<string, Core.Policy>;
+const PLUGIN_PREFIX = 'plugin::';
+const API_PREFIX = 'api::';
 
-// TODO: move instantiation part here instead of in the policy utils
+interface PolicyInfo {
+  name: string;
+  config: unknown;
+}
+
+type PolicyConfig = string | PolicyInfo;
+
+interface NamespaceInfo {
+  pluginName?: string;
+  apiName?: string;
+}
+
+const parsePolicy = (policy: string | PolicyInfo) => {
+  if (typeof policy === 'string') {
+    return { policyName: policy, config: {} };
+  }
+
+  const { name, config } = policy;
+  return { policyName: name, config };
+};
+
 const policiesRegistry = () => {
-  const policies: PolicyMap = {};
+  const policies = new Map<string, Core.Policy>();
+
+  const find = (name: string, namespaceInfo?: NamespaceInfo) => {
+    const { pluginName, apiName } = namespaceInfo ?? {};
+
+    // try to resolve a full name to avoid extra prefixing
+    const policy = policies.get(name);
+
+    if (policy) {
+      return policy;
+    }
+
+    if (pluginName) {
+      return policies.get(`${PLUGIN_PREFIX}${pluginName}.${name}`);
+    }
+
+    if (apiName) {
+      return policies.get(`${API_PREFIX}${apiName}.${name}`);
+    }
+  };
+
+  function resolveHandler(policyConfig: PolicyConfig, namespaceInfo?: NamespaceInfo): Core.Policy;
+  function resolveHandler(
+    policyConfig: PolicyConfig[],
+    namespaceInfo?: NamespaceInfo
+  ): Core.Policy[];
+  function resolveHandler(
+    policyConfig: PolicyConfig | PolicyConfig[],
+    namespaceInfo?: NamespaceInfo
+  ): Core.Policy | Core.Policy[] {
+    if (Array.isArray(policyConfig)) {
+      return policyConfig.map((config) => {
+        return resolveHandler(config, namespaceInfo);
+      });
+    }
+
+    const { policyName, config } = parsePolicy(policyConfig);
+
+    const policy = find(policyName, namespaceInfo);
+
+    if (!policy) {
+      throw new Error(`Policy ${policyName} not found.`);
+    }
+
+    if (typeof policy === 'function') {
+      return policy;
+    }
+
+    if (policy.validator) {
+      policy.validator(config);
+    }
+
+    return policy.handler;
+  }
 
   return {
     /**
      * Returns this list of registered policies uids
      */
     keys() {
-      return Object.keys(policies);
+      return policies.keys();
     },
 
     /**
      * Returns the instance of a policy. Instantiate the policy if not already done
      */
-    get(uid: UID.Policy) {
-      return policies[uid];
+    get(name: string, namespaceInfo?: NamespaceInfo) {
+      return find(name, namespaceInfo);
+    },
+    /**
+     * Checks if a policy is registered
+     */
+    has(name: string, namespaceInfo?: NamespaceInfo) {
+      const res = find(name, namespaceInfo);
+      return !!res;
     },
 
     /**
      * Returns a map with all the policies in a namespace
      */
     getAll(namespace: string) {
-      return pickBy((_, uid) => hasNamespace(uid, namespace))(policies);
+      return pickBy((_, uid) => hasNamespace(uid, namespace))(Object.fromEntries(policies));
     },
 
     /**
      * Registers a policy
      */
     set(uid: string, policy: Core.Policy) {
-      policies[uid] = policy;
+      policies.set(uid, policy);
       return this;
     },
 
     /**
      * Registers a map of policies for a specific namespace
      */
-    add(namespace: string, newPolicies: PolicyMap) {
+    add(namespace: string, newPolicies: Record<string, Core.Policy>) {
       for (const policyName of Object.keys(newPolicies)) {
         const policy = newPolicies[policyName];
         const uid = addNamespace(policyName, namespace);
@@ -50,26 +130,23 @@ const policiesRegistry = () => {
         if (has(uid, policies)) {
           throw new Error(`Policy ${uid} has already been registered.`);
         }
-        policies[uid] = policy;
+
+        policies.set(uid, policy);
       }
     },
 
     /**
-     * Wraps a policy to extend it
-     * @param {string} uid
-     * @param {(policy: Policy) => Policy} extendFn
+     * Resolves a list of policies
      */
-    extend(uid: UID.Policy, extendFn: PolicyExtendFn) {
-      const currentPolicy = this.get(uid);
+    resolve(config: PolicyConfig | PolicyConfig[], namespaceInfo?: NamespaceInfo) {
+      const { pluginName, apiName } = namespaceInfo ?? {};
 
-      if (!currentPolicy) {
-        throw new Error(`Policy ${uid} doesn't exist`);
-      }
-
-      const newPolicy = extendFn(currentPolicy);
-      policies[uid] = newPolicy;
-
-      return this;
+      return castArray(config).map((policyConfig) => {
+        return {
+          handler: resolveHandler(policyConfig, { pluginName, apiName }),
+          config: (typeof policyConfig === 'object' && policyConfig.config) || {},
+        };
+      });
     },
   };
 };

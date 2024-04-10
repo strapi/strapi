@@ -474,8 +474,8 @@ type FormErrors<TFormValues extends FormValues = FormValues> = {
       ? FormErrors<TFormValues[Key][number]>[] | string | string[]
       : string // this would let us support errors for the dynamic zone or repeatable component not the components within.
     : TFormValues[Key] extends object // is it a regular component?
-    ? FormErrors<TFormValues[Key]> // handles nested components
-    : string; // otherwise its just a field.
+      ? FormErrors<TFormValues[Key]> // handles nested components
+      : string; // otherwise its just a field.
 };
 
 interface FormState<TFormValues extends FormValues = FormValues> {
@@ -674,8 +674,8 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
           error.values
         )
       : typeof error === 'string'
-      ? error
-      : undefined,
+        ? error
+        : undefined,
     onChange: handleChange,
     value: value,
   };
@@ -687,20 +687,38 @@ const isErrorMessageDescriptor = (object?: string | object): object is Translati
   );
 };
 
+/**
+ * Props for the Blocker component.
+ * @param onProceed Function to be called when the user confirms the action that triggered the blocker.
+ * @param onCancel Function to be called when the user cancels the action that triggered the blocker.
+ */
+interface BlockerProps {
+  onProceed?: () => void;
+  onCancel?: () => void;
+}
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = () => {
+const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
 
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      !isSubmitting && modified && currentLocation.pathname !== nextLocation.pathname
-  );
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    return (
+      !isSubmitting &&
+      modified &&
+      (currentLocation.pathname !== nextLocation.pathname ||
+        currentLocation.search !== nextLocation.search)
+    );
+  });
 
   if (blocker.state === 'blocked') {
+    const handleCancel = () => {
+      onCancel();
+      blocker.reset();
+    };
+
     return (
       <Dialog
         isOpen
@@ -708,7 +726,7 @@ const Blocker = () => {
           id: 'app.components.ConfirmDialog.title',
           defaultMessage: 'Confirmation',
         })}
-        onClose={() => blocker.reset()}
+        onClose={handleCancel}
       >
         <DialogBody>
           <Flex direction="column" gap={2}>
@@ -723,7 +741,7 @@ const Blocker = () => {
         </DialogBody>
         <DialogFooter
           startAction={
-            <Button onClick={() => blocker.reset()} variant="tertiary">
+            <Button onClick={handleCancel} variant="tertiary">
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
@@ -731,7 +749,13 @@ const Blocker = () => {
             </Button>
           }
           endAction={
-            <Button onClick={() => blocker.proceed()} variant="danger">
+            <Button
+              onClick={() => {
+                onProceed();
+                blocker.proceed();
+              }}
+              variant="danger"
+            >
               {formatMessage({
                 id: 'app.components.Button.confirm',
                 defaultMessage: 'Confirm',

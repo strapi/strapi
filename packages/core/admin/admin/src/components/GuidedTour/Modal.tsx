@@ -48,7 +48,7 @@ const GuidedTourModal = () => {
   const sectionKeys = Object.keys(guidedTourState);
   const [sectionName, stepName] = currentStep.split('.') as [
     keyof GuidedTourContextValue['guidedTourState'],
-    string
+    string,
   ];
   const sectionIndex = sectionKeys.indexOf(sectionName);
   const stepIndex = Object.keys(guidedTourState[sectionName]).indexOf(stepName);

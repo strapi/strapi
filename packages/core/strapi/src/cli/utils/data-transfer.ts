@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
 import { configs, createLogger } from '@strapi/logger';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi, compileStrapi } from '@strapi/core';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
 import type { Core } from '@strapi/types';
@@ -125,7 +125,7 @@ const abortTransfer = async ({
   strapi,
 }: {
   engine: engineDataTransfer.TransferEngine;
-  strapi: Core.LoadedStrapi;
+  strapi: Core.Strapi;
 }) => {
   try {
     await engine.abortTransfer();
@@ -149,12 +149,10 @@ const setSignalHandler = async (
   });
 };
 
-const createStrapiInstance = async (
-  opts: { logLevel?: string } = {}
-): Promise<Core.Strapi & Required<Core.Strapi>> => {
+const createStrapiInstance = async (opts: { logLevel?: string } = {}): Promise<Core.Strapi> => {
   try {
-    const appContext = await strapiFactory.compile();
-    const app = strapiFactory({ ...opts, ...appContext });
+    const appContext = await compileStrapi();
+    const app = createStrapi({ ...opts, ...appContext });
 
     app.log.level = opts.logLevel || 'error';
     return await app.load();
@@ -328,7 +326,7 @@ const getDiffHandler = (
   ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
-      await abortTransfer({ engine, strapi: strapi as Core.LoadedStrapi });
+      await abortTransfer({ engine, strapi: strapi as Core.Strapi });
       exitWith(1, exitMessageText(action, true));
     });
 
@@ -385,7 +383,7 @@ const getDiffHandler = (
     );
 
     // reset handler back to normal
-    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Core.LoadedStrapi }));
+    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Core.Strapi }));
 
     if (confirmed) {
       context.ignoredDiffs = merge(context.diffs, context.ignoredDiffs);
@@ -411,7 +409,7 @@ const getAssetsBackupHandler = (
   ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
-      await abortTransfer({ engine, strapi: strapi as Core.LoadedStrapi });
+      await abortTransfer({ engine, strapi: strapi as Core.Strapi });
       exitWith(1, exitMessageText(action, true));
     });
 
@@ -430,7 +428,7 @@ const getAssetsBackupHandler = (
     }
 
     // reset handler back to normal
-    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Core.LoadedStrapi }));
+    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Core.Strapi }));
     return next(context);
   };
 };

@@ -6,7 +6,11 @@ const { traverseEntity, async } = require('@strapi/utils');
 const { removeUserRelationFromRoleEntities } = require('./visitors');
 
 const sanitizeUserRelationFromRoleEntities = curry((schema, entity) => {
-  return traverseEntity(removeUserRelationFromRoleEntities, { schema }, entity);
+  return traverseEntity(
+    removeUserRelationFromRoleEntities,
+    { schema, getModel: strapi.getModel.bind(strapi) },
+    entity
+  );
 });
 
 const defaultSanitizeOutput = curry((schema, entity) => {

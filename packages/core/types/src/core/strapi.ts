@@ -17,25 +17,23 @@ export interface Strapi extends Container {
   eventHub: Modules.EventHub.EventHub;
   startupLogger: StartupLogger;
   cron: Modules.Cron.CronService;
-  webhookRunner?: Modules.WebhookRunner.WebhookRunner;
-  webhookStore?: Modules.WebhookStore.WebhookStore;
-  store?: Modules.CoreStore.CoreStore;
+  store: Modules.CoreStore.CoreStore;
   /**
    * @deprecated will be removed in the next major
    */
-  entityValidator?: Modules.EntityValidator.EntityValidator;
-  entityService?: Modules.EntityService.EntityService;
+  entityValidator: Modules.EntityValidator.EntityValidator;
+  entityService: Modules.EntityService.EntityService;
   /**
    * @description interact with documents within Strapi, this API is currently in beta and is subject to change in the future
    * @beta
    */
-  documents?: Modules.Documents.Service;
+  documents: Modules.Documents.Service;
   telemetry: Modules.Metrics.TelemetryService;
   requestContext: Modules.RequestContext.RequestContext;
   customFields: Modules.CustomFields.CustomFields;
   fetch: Modules.Fetch.Fetch;
   dirs: StrapiDirectories;
-  admin?: Core.Module;
+  admin: Core.Module;
   isLoaded: boolean;
   db: Database;
   app: any;
@@ -46,7 +44,7 @@ export interface Strapi extends Container {
     features: {
       isEnabled: (feature: string) => boolean;
       list: () => { name: string; [key: string]: any }[];
-      get: (feature: string) => { name: string; [key: string]: any };
+      get: (feature: string) => string | { name: string; [key: string]: any } | undefined;
     };
   };
   features: Modules.Features.FeaturesService;
@@ -69,12 +67,13 @@ export interface Strapi extends Container {
   plugin(name: string): Core.Plugin;
   hooks: Record<string, any>;
   hook(name: string): any;
-  api: Record<string, Core.Module>;
+  apis: Record<string, Core.Module>;
+  api(name: string): Core.Module;
   auth: Modules.Auth.AuthenticationService;
   contentAPI: Modules.ContentAPI.ContentApi;
   sanitizers: Modules.Sanitizers.SanitizersRegistry;
   validators: Modules.Validators.ValidatorsRegistry;
-  load(): Promise<Strapi & Required<Strapi>>;
+  load(): Promise<Strapi>;
   start(): Promise<Strapi>;
   destroy(): Promise<void>;
   sendStartupTelemetry(): void;
@@ -83,18 +82,16 @@ export interface Strapi extends Container {
   listen(): Promise<void>;
   stopWithError(err: unknown, customMessage?: string): never;
   stop(exitCode?: number): never;
-  registerInternalHooks(): void;
   register(): Promise<Strapi>;
   bootstrap(): Promise<Strapi>;
-  startWebhooks(): Promise<void>;
   runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy'): Promise<void>;
   getModel<TSchemaUID extends UID.Schema>(
     uid: TSchemaUID
   ): TSchemaUID extends UID.ContentType
     ? Schema.ContentType<TSchemaUID>
     : TSchemaUID extends UID.Component
-    ? Schema.Component<TSchemaUID>
-    : never;
+      ? Schema.Component<TSchemaUID>
+      : never;
   query(uid: UID.Schema): ReturnType<Database['query']>;
 }
 
@@ -150,16 +147,3 @@ export interface StrapiDirectories {
     config: string;
   };
 }
-
-export interface StrapiOptions {
-  appDir?: string;
-  distDir?: string;
-  autoReload?: boolean;
-  serveAdminPanel?: boolean;
-}
-
-export interface StrapiConstructor {
-  new (options?: StrapiOptions): Strapi;
-}
-
-export type LoadedStrapi = Required<Strapi>;

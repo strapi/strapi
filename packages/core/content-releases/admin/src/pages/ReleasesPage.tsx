@@ -1,16 +1,15 @@
 import * as React from 'react';
 
-// TODO: Replace this import with the same hook exported from the @strapi/admin/strapi-admin/ee in another iteration of this solution
 import {
   Page,
   Pagination,
-  useLicenseLimits,
   useTracking,
   useAPIErrorHandler,
   useNotification,
   useQueryParams,
   useRBAC,
 } from '@strapi/admin/strapi-admin';
+import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import {
   Alert,
   Badge,
@@ -38,7 +37,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { GetReleases, type Release } from '../../../shared/contracts/releases';
-import { RelativeTime } from '../components/RelativeTime';
+import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import { isAxiosError } from '../services/axios';
@@ -61,8 +60,11 @@ const LinkCard = styled(Link)`
   display: block;
 `;
 
-const CapitalizeRelativeTime = styled(RelativeTime)`
-  text-transform: capitalize;
+const RelativeTime = styled(BaseRelativeTime)`
+  display: inline-block;
+  &::first-letter {
+    text-transform: uppercase;
+  }
 `;
 
 const getBadgeProps = (status: Release['status']) => {
@@ -139,7 +141,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">
                   {scheduledAt ? (
-                    <CapitalizeRelativeTime timestamp={new Date(scheduledAt)} />
+                    <RelativeTime timestamp={new Date(scheduledAt)} />
                   ) : (
                     formatMessage({
                       id: 'content-releases.pages.Releases.not-scheduled',

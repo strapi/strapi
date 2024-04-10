@@ -23,7 +23,7 @@ const mockGetRequestContext = jest.fn(() => {
     },
   };
 });
-
+const mockFindOne = jest.fn();
 const mockStrapi = {
   plugins: {
     'content-manager': {
@@ -64,7 +64,7 @@ const mockStrapi = {
     },
   },
   documents: jest.fn(() => ({
-    findOne: jest.fn(),
+    findOne: mockFindOne,
   })),
   config: {
     get: () => undefined,
@@ -72,12 +72,41 @@ const mockStrapi = {
   requestContext: {
     get: mockGetRequestContext,
   },
-  contentType(uid: UID.ContentType) {
+  getModel(uid: UID.Schema) {
     if (uid === 'api::article.article') {
       return {
         attributes: {
           title: {
             type: 'string',
+          },
+          relation: {
+            type: 'relation',
+            target: 'api::category.category',
+          },
+          component: {
+            type: 'component',
+            component: 'some.component',
+          },
+          media: {
+            type: 'media',
+          },
+        },
+      };
+    }
+
+    if (uid === 'some.component') {
+      return {
+        attributes: {
+          title: {
+            type: 'string',
+          },
+          relation: {
+            type: 'relation',
+            target: 'api::restaurant.restaurant',
+          },
+          medias: {
+            type: 'media',
+            multiple: true,
           },
         },
       };
@@ -108,11 +137,9 @@ describe('history-version service', () => {
       contentType: {
         uid: 'api::article.article',
       },
-      args: [
-        {
-          locale: 'fr',
-        },
-      ],
+      params: {
+        locale: 'fr',
+      },
     };
 
     const next = jest.fn((context) => ({ ...context, documentId: 'document-id' }));
@@ -122,10 +149,65 @@ describe('history-version service', () => {
 
     // Check that we don't break the middleware chain
     await historyMiddlewareFunction(context, next);
-    expect(next).toHaveBeenCalledWith(context);
+    expect(next).toHaveBeenCalled();
+
+    // Ensure we're only storing the data we need in the database
+    expect(mockFindOne).toHaveBeenLastCalledWith({
+      documentId: 'document-id',
+      locale: 'fr',
+      populate: {
+        component: {
+          populate: {
+            relation: {
+              fields: ['documentId', 'locale', 'publishedAt'],
+            },
+            medias: {
+              fields: ['id'],
+            },
+          },
+        },
+        relation: {
+          fields: ['documentId', 'locale', 'publishedAt'],
+        },
+        media: {
+          fields: ['id'],
+        },
+      },
+    });
 
     // Create and update actions should be saved in history
-    expect(createMock).toHaveBeenCalled();
+    const createPayload = createMock.mock.calls.at(-1)[0].data;
+    expect(createPayload.schema).toEqual({
+      title: {
+        type: 'string',
+      },
+      relation: {
+        type: 'relation',
+        target: 'api::category.category',
+      },
+      component: {
+        type: 'component',
+        component: 'some.component',
+      },
+      media: {
+        type: 'media',
+      },
+    });
+    expect(createPayload.componentsSchemas).toEqual({
+      'some.component': {
+        title: {
+          type: 'string',
+        },
+        relation: {
+          type: 'relation',
+          target: 'api::restaurant.restaurant',
+        },
+        medias: {
+          type: 'media',
+          multiple: true,
+        },
+      },
+    });
     context.action = 'update';
     await historyMiddlewareFunction(context, next);
     expect(createMock).toHaveBeenCalledTimes(2);
@@ -155,7 +237,7 @@ describe('history-version service', () => {
     // Don't break middleware chain even if we don't save the action in history
     next.mockClear();
     await historyMiddlewareFunction(context, next);
-    expect(next).toHaveBeenCalledWith(context);
+    expect(next).toHaveBeenCalled();
   });
 
   it('creates a history version with the author', async () => {
@@ -170,9 +252,10 @@ describe('history-version service', () => {
       relatedDocumentId: 'randomid',
       schema: {
         title: {
-          type: 'string',
+          type: 'string' as const,
         },
       },
+      componentsSchemas: {},
       status: 'draft' as const,
     };
 
@@ -196,9 +279,10 @@ describe('history-version service', () => {
       },
       locale: 'en',
       relatedDocumentId: 'randomid',
+      componentsSchemas: {},
       schema: {
         title: {
-          type: 'string',
+          type: 'string' as const,
         },
       },
       status: null,

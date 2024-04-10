@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { screen, within } from '@testing-library/react';
 import { render as renderRTL, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
@@ -5,18 +7,32 @@ import { Route, Routes } from 'react-router-dom';
 
 import { CMReleasesContainer } from '../CMReleasesContainer';
 
+jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/plugin-content-manager/strapi-admin'),
+  unstable_useDocument: jest.fn().mockReturnValue({
+    schema: {
+      options: {
+        draftAndPublish: true,
+      },
+    },
+  }),
+}));
+
 const render = (
   initialEntries: string[] = ['/content-manager/collection-types/api::article.article/12345']
 ) =>
   renderRTL(<CMReleasesContainer />, {
     renderOptions: {
-      wrapper: ({ children }) => (
+      wrapper: ({ children }: { children: React.ReactNode }) => (
         <Routes>
           <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
         </Routes>
       ),
     },
     initialEntries,
+    userEventOptions: {
+      skipHover: true,
+    },
   });
 
 describe('CMReleasesContainer', () => {
@@ -114,7 +130,7 @@ describe('CMReleasesContainer', () => {
   });
 
   /**
-   * TODO: this needs re-implmenting without the act warning appearing.
+   * TODO: this needs re-implementing without the act warning appearing.
    */
   it.skip('should show the scheduled date for a release', async () => {
     // Mock the response from the server

@@ -4,7 +4,7 @@ import type { Core, Data, UID } from '@strapi/types';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { getEntryValidStatus, getService } from './utils';
 
-export const bootstrap = async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
     const contentTypesWithDraftAndPublish = Object.keys(strapi.contentTypes).filter(
       (uid: any) => strapi.contentTypes[uid]?.options?.draftAndPublish
@@ -16,7 +16,6 @@ export const bootstrap = async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       async afterDelete(event) {
         try {
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           const { model, result } = event;
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
@@ -107,7 +106,6 @@ export const bootstrap = async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       async afterUpdate(event) {
         try {
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           const { model, result } = event;
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
@@ -156,7 +154,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       });
 
     Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
-      strapi.webhookStore.addAllowedEvent(key, value);
+      strapi.get('webhookStore').addAllowedEvent(key, value);
     });
   }
 };

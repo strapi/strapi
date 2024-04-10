@@ -12,7 +12,6 @@ import {
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
@@ -176,14 +175,14 @@ const EditPage = () => {
 
   return (
     <Page.Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Users',
           }
         )}
-      />
+      </Page.Title>
       <Form
         method="PUT"
         onSubmit={handleSubmit}
@@ -211,7 +210,8 @@ const EditPage = () => {
                     defaultMessage: 'Edit {name}',
                   },
                   {
-                    name: getDisplayName(initialData, formatMessage),
+                    // @ts-expect-error – issues with the Entity ID type, still.
+                    name: getDisplayName(initialData),
                   }
                 )}
                 navigationAction={<BackButton />}

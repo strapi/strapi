@@ -341,7 +341,7 @@ const flattenTokenPermissions = (token: DatabaseTransferToken): TransferToken =>
  * Assert that a token's permissions are valid
  */
 const assertTokenPermissionsValidity = (attributes: TokenUpdatePayload) => {
-  const permissionService = strapi.admin.services.transfer.permission;
+  const permissionService = strapi.service('admin::transfer').permission;
   const validPermissions = permissionService.providers.action.keys();
   const invalidPermissions = difference(attributes.permissions, validPermissions);
 

@@ -89,7 +89,7 @@ export type EmptyObject<TValue, TFallback = unknown> = OfTypes<[{}], TValue, TFa
  */
 export type OfTypes<TTypes extends unknown[], TValue, TFallback = unknown> = TTypes extends [
   infer THead extends unknown,
-  ...infer TTail extends unknown[]
+  ...infer TTail extends unknown[],
 ]
   ? If<
       StrictEqual<TValue, THead>,

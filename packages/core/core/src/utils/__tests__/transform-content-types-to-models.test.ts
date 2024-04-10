@@ -1,6 +1,24 @@
 import { cloneDeep, merge } from 'lodash';
+import { Database } from '@strapi/database';
 import { transformContentTypesToModels } from '..';
 import { LoadedContentTypeModel } from '../transform-content-types-to-models';
+
+const db = new Database({
+  settings: {
+    migrations: {
+      dir: 'fakedir',
+    },
+  },
+  connection: {
+    client: 'sqlite',
+    useNullAsDefault: true,
+    connection: {
+      filename: 'fake.db',
+    },
+  },
+});
+
+const identifiers = db.metadata.identifiers;
 
 // We want to match exactly with the exception that document_id.default should be any function
 expect.extend({
@@ -263,41 +281,48 @@ function patchContentTypes(
 }
 
 describe('transformContentTypesToModels', () => {
-  test('converts valid content types to models', () => {
-    const models = transformContentTypesToModels(contentTypes);
+  describe('full length identifiers', () => {
+    // mock the options so that the 'global' identifiers created for use by createMetadata uses 0 for maxLength
+    Object.defineProperty(identifiers, 'options', {
+      get: jest.fn(() => ({ maxLength: 0 })),
+    });
 
-    expect(models).toMatchModels(expectedModels);
-  });
+    test('converts valid content types to models', () => {
+      const models = transformContentTypesToModels(contentTypes, identifiers);
 
-  test.each(['id', 'document_id', 'ID', 'documentId'])(
-    'throws on restricted attribute name: %s',
-    (restrictedName) => {
-      const changes = {
-        attributes: {
-          [restrictedName]: {
-            type: 'string',
+      expect(models).toMatchModels(expectedModels);
+    });
+
+    test.each(['id', 'document_id', 'ID', 'documentId'])(
+      'throws on restricted attribute name: %s',
+      (restrictedName) => {
+        const changes = {
+          attributes: {
+            [restrictedName]: {
+              type: 'string',
+            },
           },
-        },
-      };
-      const modifiedContentTypes = patchContentTypes('countries', changes);
+        };
+        const modifiedContentTypes = patchContentTypes('countries', changes);
 
-      expect(() => transformContentTypesToModels(modifiedContentTypes)).toThrow(
-        `The attribute "${restrictedName}" is reserved`
-      );
-    }
-  );
+        expect(() => transformContentTypesToModels(modifiedContentTypes, identifiers)).toThrow(
+          `The attribute "${restrictedName}" is reserved`
+        );
+      }
+    );
 
-  test.each(['collectionName', 'uid', 'modelName'])(
-    'throws on missing name: %s',
-    (restrictedName) => {
-      const changes = {
-        [restrictedName]: null,
-      };
-      const modifiedContentTypes = patchContentTypes('countries', changes);
+    test.each(['collectionName', 'uid', 'modelName'])(
+      'throws on missing name: %s',
+      (restrictedName) => {
+        const changes = {
+          [restrictedName]: null,
+        };
+        const modifiedContentTypes = patchContentTypes('countries', changes);
 
-      expect(() => transformContentTypesToModels(modifiedContentTypes)).toThrow(
-        `"${restrictedName}" is required`
-      );
-    }
-  );
+        expect(() => transformContentTypesToModels(modifiedContentTypes, identifiers)).toThrow(
+          `"${restrictedName}" is required`
+        );
+      }
+    );
+  });
 });

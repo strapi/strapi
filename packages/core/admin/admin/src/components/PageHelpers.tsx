@@ -60,6 +60,11 @@ const Loading = ({ children = 'Loading content.' }: LoadingProps) => {
 interface ErrorProps extends Partial<EmptyStateLayoutProps> {}
 
 /**
+ * TODO: should we start passing our errors here so they're persisted on the screen?
+ * This could follow something similar to how the global app error works...?
+ */
+
+/**
  * @public
  * @description An error component that should be rendered as the page
  * when an error occurs.
@@ -231,6 +236,26 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
   return typeof children === 'function' ? children({ permissions: matchingPermissions }) : children;
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * Title
+ * -----------------------------------------------------------------------------------------------*/
+export interface TitleProps {
+  children: string;
+}
+
+/**
+ * @public
+ * @description This component takes the children (must be a string) and sets
+ * it as the title of the html.
+ */
+const Title = ({ children: title }: TitleProps) => {
+  React.useEffect(() => {
+    document.title = `${title} | Strapi`;
+  }, [title]);
+
+  return null;
+};
+
 const Page = {
   Error,
   Loading,
@@ -238,6 +263,7 @@ const Page = {
   Protect,
   NoData,
   Main: PageMain,
+  Title,
 };
 
 export { Page };

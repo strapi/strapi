@@ -19,14 +19,25 @@ export interface Options {
   auth?: unknown;
 }
 
-interface Validator {
+export interface Validator {
   (schema: Model): CurriedFunction1<Data, Promise<Data>>;
 }
 export interface ValidateFunc {
   (data: unknown, schema: Model, options?: Options): Promise<void>;
 }
 
-const createContentAPIValidators = () => {
+interface APIOptions {
+  validators?: Validators;
+  getModel: (model: string) => Model;
+}
+
+export interface Validators {
+  input?: Validator[];
+}
+
+const createAPIValidators = (opts: APIOptions) => {
+  const { getModel } = opts || {};
+
   const validateInput: ValidateFunc = async (data: unknown, schema: Model, { auth } = {}) => {
     if (!schema) {
       throw new Error('Missing schema in validateInput');
@@ -52,18 +63,21 @@ const createContentAPIValidators = () => {
         }
       },
       // non-writable attributes
-      traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema }),
+      traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema, getModel }),
     ];
 
     if (auth) {
       // restricted relations
-      transforms.push(traverseEntity(visitors.throwRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseEntity(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
     }
 
     // Apply validators from registry if exists
-    strapi.validators
-      .get('content-api.input')
-      .forEach((validator: Validator) => transforms.push(validator(schema)));
+    opts?.validators?.input?.forEach((validator: Validator) => transforms.push(validator(schema)));
 
     await pipeAsync(...transforms)(data as Data);
   };
@@ -105,10 +119,15 @@ const createContentAPIValidators = () => {
       return;
     }
 
-    const transforms = [validators.defaultValidateFilters(schema)];
+    const transforms = [validators.defaultValidateFilters({ schema, getModel })];
 
     if (auth) {
-      transforms.push(traverseQueryFilters(visitors.throwRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQueryFilters(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
     }
 
     await pipeAsync(...transforms)(filters);
@@ -118,10 +137,15 @@ const createContentAPIValidators = () => {
     if (!schema) {
       throw new Error('Missing schema in validateSort');
     }
-    const transforms = [validators.defaultValidateSort(schema)];
+    const transforms = [validators.defaultValidateSort({ schema, getModel })];
 
     if (auth) {
-      transforms.push(traverseQuerySort(visitors.throwRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQuerySort(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
     }
 
     await pipeAsync(...transforms)(sort);
@@ -131,7 +155,7 @@ const createContentAPIValidators = () => {
     if (!schema) {
       throw new Error('Missing schema in validateFields');
     }
-    const transforms = [validators.defaultValidateFields(schema)];
+    const transforms = [validators.defaultValidateFields({ schema, getModel })];
 
     await pipeAsync(...transforms)(fields);
   };
@@ -140,10 +164,15 @@ const createContentAPIValidators = () => {
     if (!schema) {
       throw new Error('Missing schema in sanitizePopulate');
     }
-    const transforms = [validators.defaultValidatePopulate(schema)];
+    const transforms = [validators.defaultValidatePopulate({ schema, getModel })];
 
     if (auth) {
-      transforms.push(traverseQueryPopulate(visitors.throwRestrictedRelations(auth), { schema }));
+      transforms.push(
+        traverseQueryPopulate(visitors.throwRestrictedRelations(auth), {
+          schema,
+          getModel,
+        })
+      );
     }
 
     await pipeAsync(...transforms)(populate);
@@ -159,10 +188,6 @@ const createContentAPIValidators = () => {
   };
 };
 
-const contentAPI = createContentAPIValidators();
+export { createAPIValidators, validators, visitors };
 
-export default {
-  contentAPI,
-  validators,
-  visitors,
-};
+export type APIValidators = ReturnType<typeof createAPIValidators>;

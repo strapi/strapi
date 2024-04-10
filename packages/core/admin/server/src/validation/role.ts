@@ -18,7 +18,7 @@ const rolesDeleteSchema = yup
       .required()
       .test('roles-deletion-checks', 'Roles deletion checks have failed', async function (ids) {
         try {
-          await strapi.admin.services.role.checkRolesIdForDeletion(ids);
+          await strapi.service('admin::role').checkRolesIdForDeletion(ids);
         } catch (e) {
           // @ts-expect-error yup types
           return this.createError({ path: 'ids', message: e.message });
@@ -34,7 +34,7 @@ const roleDeleteSchema = yup
   .required()
   .test('no-admin-single-delete', 'Role deletion checks have failed', async function (id) {
     try {
-      await strapi.admin.services.role.checkRolesIdForDeletion([id]);
+      await strapi.service('admin::role').checkRolesIdForDeletion([id]);
     } catch (e) {
       // @ts-expect-error yup types
       return this.createError({ path: 'id', message: e.message });

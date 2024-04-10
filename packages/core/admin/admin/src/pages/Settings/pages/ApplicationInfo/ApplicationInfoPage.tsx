@@ -13,7 +13,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { Check, ExternalLink } from '@strapi/icons';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
@@ -111,8 +110,8 @@ const ApplicationInfoPage = () => {
 
   return (
     <Layout>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -121,7 +120,7 @@ const ApplicationInfoPage = () => {
             }),
           }
         )}
-      />
+      </Page.Title>
       <Page.Main>
         <form onSubmit={handleSubmit}>
           <HeaderLayout

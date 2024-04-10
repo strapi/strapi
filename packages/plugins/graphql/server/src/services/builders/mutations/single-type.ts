@@ -1,5 +1,5 @@
 import { extendType, nonNull } from 'nexus';
-import { sanitize, errors } from '@strapi/utils';
+import { errors } from '@strapi/utils';
 import type * as Nexus from 'nexus';
 import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
@@ -47,15 +47,16 @@ export default ({ strapi }: Context) => {
         const { auth } = context.state;
 
         // Sanitize input data
-        const sanitizedInputData = await sanitize.contentAPI.input(args.data, contentType, {
+        const sanitizedInputData = await strapi.contentAPI.sanitize.input(args.data, contentType, {
           auth,
         });
 
         const document = await strapi.db?.query(uid).findOne();
 
         if (document) {
-          return strapi.documents!(uid).update(document.documentId, {
+          return strapi.documents!(uid).update({
             ...args,
+            documentId: document.documentId,
             data: sanitizedInputData,
           });
         }
@@ -95,7 +96,7 @@ export default ({ strapi }: Context) => {
           throw new NotFoundError('Document not found');
         }
 
-        await strapi.documents!(uid).delete(document.documentId, args);
+        await strapi.documents!(uid).delete({ ...args, documentId: document.documentId });
 
         return document;
       },

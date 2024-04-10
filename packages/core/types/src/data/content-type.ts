@@ -8,7 +8,7 @@ export type DocumentID = string;
 
 export type ContentType<
   TContentTypeUID extends UID.ContentType = UID.ContentType,
-  TContentTypeKeys extends AttributeNames<TContentTypeUID> = AttributeNames<TContentTypeUID>
+  TContentTypeKeys extends AttributeNames<TContentTypeUID> = AttributeNames<TContentTypeUID>,
 > = Intersect<
   [{ id: ID; documentId: DocumentID }, Pick<AttributeValues<TContentTypeUID>, TContentTypeKeys>]
 >;
