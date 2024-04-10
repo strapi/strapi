@@ -34,15 +34,27 @@ If you need to clean the test-apps folder because they are not working as expect
 To run only one domain, meaning a top-level directory in e2e/tests such as "admin" or "content-manager", use the `--domains` option.
 
 ```shell
-yarn test:e2e --domains admin
-yarn test:e2e --domain admin
+yarn test:e2e --domains=admin
+npm run test:e2e --domains=admin
 ```
 
 To run a specific file, you can pass arguments and options to playwright using `--` between the test:e2e options and the playwright options, such as:
 
 ```shell
 # to run just the login.spec.ts file in the admin domain
-yarn test:e2e --domains admin -- login.spec.ts
+yarn test:e2e --domains=admin -- login.spec.ts
+npm run test:e2e --domains=admin -- login.spec.ts
+```
+
+Note that you must still include a domain, otherwise playwright will attempt to run every domain filtering by that filename, and any domains that do not contain that filename will fail with "no tests found"
+
+### Running specific browsers
+
+To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium`, `firefox`, or `webkit`
+
+```shell
+yarn test:e2e --domains=admin -- login.spec.ts --project=chromium
+npm run test:e2e --domains=admin -- login.spec.ts --project=chromium
 ```
 
 ### Concurrency / parallellization
