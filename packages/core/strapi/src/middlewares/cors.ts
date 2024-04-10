@@ -51,7 +51,7 @@ export const cors: Common.MiddlewareFactory<Config> = (config) => {
       }
 
       if (Array.isArray(originList)) {
-        return originList.join(',');
+        return originList.includes(ctx.get('Origin')) ? ctx.get('Origin') : false;
       }
 
       return originList;
