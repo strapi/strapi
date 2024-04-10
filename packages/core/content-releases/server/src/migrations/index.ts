@@ -198,8 +198,6 @@ export async function disableContentTypeLocalized({ oldContentTypes, contentType
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes[uid];
 
-
-
     const { isLocalizedContentType } = i18nPlugin.service('content-types');
 
     // if i18N is disabled remove non default locales before sync
