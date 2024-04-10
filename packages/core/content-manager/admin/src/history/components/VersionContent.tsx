@@ -1,249 +1,171 @@
 import * as React from 'react';
 
-import { Form, useField, useStrapiApp } from '@strapi/admin/strapi-admin';
+import { Form } from '@strapi/admin/strapi-admin';
 import {
-  Alert,
   Box,
   ContentLayout,
-  FieldLabel,
+  Divider,
   Flex,
   Grid,
   GridItem,
-  Link,
-  Tooltip,
+  Typography,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
 
-import { COLLECTION_TYPES } from '../../constants/collections';
-import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
-import {
-  InputRenderer,
-  type InputRendererProps,
-} from '../../pages/EditView/components/InputRenderer';
-import { getRelationLabel } from '../../utils/relations';
+import { useTypedSelector } from '../../modules/hooks';
 import { useHistoryContext } from '../pages/History';
 
-import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
-import type { RelationResult } from '../../services/relations';
+import { VersionInputRenderer } from './VersionInputRenderer';
 
-const StyledAlert = styled(Alert).attrs({ closeLabel: 'Close', onClose: () => {} })`
-  button {
-    display: none;
-  }
-`;
+import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
 
 /* -------------------------------------------------------------------------------------------------
- * CustomRelationInput
+ * FormPanel
  * -----------------------------------------------------------------------------------------------*/
 
-const LinkEllipsis = styled(Link)`
-  display: block;
+const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
+  if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
+    const [row] = panel;
+    const [field] = row;
 
-  & > span {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    display: block;
+    return (
+      <Grid key={field.name} gap={4}>
+        <GridItem col={12} s={12} xs={12}>
+          <VersionInputRenderer {...field} />
+        </GridItem>
+      </Grid>
+    );
   }
-`;
-
-const CustomRelationInput = (props: RelationsFieldProps) => {
-  const { formatMessage } = useIntl();
-  const field = useField<{ results: RelationResult[]; meta: { missingCount: number } }>(props.name);
-  const { results, meta } = field.value!;
 
   return (
-    <Box>
-      <FieldLabel>{props.label}</FieldLabel>
-      {results.length === 0 ? (
-        <Box marginTop={1}>
-          <StyledAlert variant="default">
-            {formatMessage({
-              id: 'content-manager.history.content.no-relations',
-              defaultMessage: 'No relations.',
+    <Box
+      hasRadius
+      background="neutral0"
+      shadow="tableShadow"
+      paddingLeft={6}
+      paddingRight={6}
+      paddingTop={6}
+      paddingBottom={6}
+      borderColor="neutral150"
+    >
+      <Flex direction="column" alignItems="stretch" gap={6}>
+        {panel.map((row, gridRowIndex) => (
+          <Grid key={gridRowIndex} gap={4}>
+            {row.map(({ size, ...field }) => {
+              return (
+                <GridItem col={size} key={field.name} s={12} xs={12}>
+                  <VersionInputRenderer {...field} />
+                </GridItem>
+              );
             })}
-          </StyledAlert>
-        </Box>
-      ) : (
-        <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
-          {results.map((relationData) => {
-            // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
-            const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
-            const label = getRelationLabel(relationData, props.mainField);
-
-            return (
-              <Flex
-                key={relationData.documentId}
-                paddingTop={2}
-                paddingBottom={2}
-                paddingLeft={4}
-                paddingRight={4}
-                hasRadius
-                borderColor="neutral200"
-                background="neutral150"
-                justifyContent="space-between"
-              >
-                <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
-                  <Tooltip description={label}>
-                    <LinkEllipsis forwardedAs={NavLink} to={href}>
-                      {label}
-                    </LinkEllipsis>
-                  </Tooltip>
-                </Box>
-                <DocumentStatus status={relationData.status as string} />
-              </Flex>
-            );
-          })}
-          {meta.missingCount > 0 && (
-            <StyledAlert
-              variant="warning"
-              title={formatMessage(
-                {
-                  id: 'content-manager.history.content.missing-relations.title',
-                  defaultMessage:
-                    '{number, plural, =1 {Missing relation} other {{number} missing relations}}',
-                },
-                { number: meta.missingCount }
-              )}
-            >
-              {formatMessage(
-                {
-                  id: 'content-manager.history.content.missing-relations.message',
-                  defaultMessage:
-                    "{number, plural, =1 {It has} other {They have}} been deleted and can't be restored.",
-                },
-                { number: meta.missingCount }
-              )}
-            </StyledAlert>
-          )}
-        </Flex>
-      )}
+          </Grid>
+        ))}
+      </Flex>
     </Box>
   );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * CustomMediaInput
- * -----------------------------------------------------------------------------------------------*/
-
-const CustomMediaInput = (props: InputRendererProps) => {
-  const {
-    value: { results, meta },
-  } = useField(props.name);
-  const { formatMessage } = useIntl();
-
-  const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);
-  const MediaLibrary = fields.media as React.ComponentType<
-    InputRendererProps & { multiple: boolean }
-  >;
-  return (
-    <Flex direction="column" gap={2} alignItems="stretch">
-      <Form method="PUT" disabled={true} initialValues={{ [props.name]: results }}>
-        <MediaLibrary {...props} disabled={true} multiple={results.length > 1} />
-      </Form>
-      {meta.missingCount > 0 && (
-        <StyledAlert
-          variant="warning"
-          closeLabel="Close"
-          onClose={() => {}}
-          title={formatMessage(
-            {
-              id: 'content-manager.history.content.missing-assets.title',
-              defaultMessage:
-                '{number, plural, =1 {Missing asset} other {{number} missing assets}}',
-            },
-            { number: meta.missingCount }
-          )}
-        >
-          {formatMessage(
-            {
-              id: 'content-manager.history.content.missing-assets.message',
-              defaultMessage:
-                "{number, plural, =1 {It has} other {They have}} been deleted in the Media Library and can't be restored.",
-            },
-            { number: meta.missingCount }
-          )}
-        </StyledAlert>
-      )}
-    </Flex>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * CustomInputRenderer
- * -----------------------------------------------------------------------------------------------*/
-
-const CustomInputRenderer = (props: InputRendererProps) => {
-  switch (props.type) {
-    case 'media':
-      return <CustomMediaInput {...props} />;
-    case 'relation':
-      return <CustomRelationInput {...props} />;
-    default:
-      return <InputRenderer {...props} />;
-  }
 };
 
 /* -------------------------------------------------------------------------------------------------
  * VersionContent
  * -----------------------------------------------------------------------------------------------*/
 
+type UnknownField = EditFieldLayout & { shouldIgnoreRBAC: boolean };
 const VersionContent = () => {
+  const { formatMessage } = useIntl();
+  const { fieldSizes } = useTypedSelector((state) => state['content-manager'].app);
   const { version, layout } = useHistoryContext('VersionContent', (state) => ({
     version: state.selectedVersion,
     layout: state.layout,
   }));
 
+  const removedAttributes = version.meta.unknownAttributes.removed;
+  const removedAttributesAsFields = Object.entries(removedAttributes).map(
+    ([attributeName, attribute]) => {
+      const field = {
+        attribute,
+        shouldIgnoreRBAC: true,
+        type: attribute.type,
+        visible: true,
+        disabled: true,
+        label: attributeName,
+        name: attributeName,
+        size: fieldSizes[attribute.type].default ?? 12,
+      } as UnknownField;
+
+      return field;
+    }
+  );
+  const unknownFieldsLayout = removedAttributesAsFields
+    .reduce<Array<UnknownField[]>>((rows, field) => {
+      if (field.type === 'dynamiczone') {
+        // Dynamic zones take up all the columns in a row
+        rows.push([field]);
+
+        return rows;
+      }
+
+      if (!rows[rows.length - 1]) {
+        // Create a new row if there isn't one available
+        rows.push([]);
+      }
+
+      // Push fields to the current row, they wrap and handle their own column size
+      rows[rows.length - 1].push(field);
+
+      return rows;
+    }, [])
+    // Map the rows to panels
+    .map((row) => [row]);
+
   return (
     <ContentLayout>
-      <Form disabled={true} method="PUT" initialValues={version.data}>
-        <Flex direction="column" alignItems="stretch" gap={6} position="relative">
-          {layout.map((panel, index) => {
-            if (panel.some((row) => row.some((field) => field.type === 'dynamiczone'))) {
-              const [row] = panel;
-              const [field] = row;
-
-              return (
-                <Grid key={field.name} gap={4}>
-                  <GridItem col={12} s={12} xs={12}>
-                    <CustomInputRenderer {...field} />
-                  </GridItem>
-                </Grid>
-              );
-            }
-
-            return (
-              <Box
-                key={index}
-                hasRadius
-                background="neutral0"
-                shadow="tableShadow"
-                paddingLeft={6}
-                paddingRight={6}
-                paddingTop={6}
-                paddingBottom={6}
-                borderColor="neutral150"
-              >
-                <Flex direction="column" alignItems="stretch" gap={6}>
-                  {panel.map((row, gridRowIndex) => (
-                    <Grid key={gridRowIndex} gap={4}>
-                      {row.map(({ size, ...field }) => {
-                        return (
-                          <GridItem col={size} key={field.name} s={12} xs={12}>
-                            <CustomInputRenderer {...field} />
-                          </GridItem>
-                        );
-                      })}
-                    </Grid>
-                  ))}
-                </Flex>
-              </Box>
-            );
-          })}
-        </Flex>
-      </Form>
+      <Box paddingBottom={8}>
+        <Form disabled={true} method="PUT" initialValues={version.data}>
+          <Flex direction="column" alignItems="stretch" gap={6} position="relative">
+            {layout.map((panel, index) => {
+              return <FormPanel key={index} panel={panel} />;
+            })}
+          </Flex>
+        </Form>
+      </Box>
+      {removedAttributesAsFields.length > 0 && (
+        <>
+          <Divider />
+          <Box paddingTop={8}>
+            <Flex direction="column" alignItems="flex-start" paddingBottom={6} gap={1}>
+              <Typography variant="delta">
+                {formatMessage({
+                  id: 'content-manager.history.content.unknown-fields.title',
+                  defaultMessage: 'Unknown fields',
+                })}
+              </Typography>
+              <Typography variant="pi">
+                {formatMessage(
+                  {
+                    id: 'content-manager.history.content.unknown-fields.message',
+                    defaultMessage:
+                      'These fields have been deleted or renamed in the Content-Type Builder. <b>These fields will not be restored.</b>',
+                  },
+                  {
+                    b: (chunks: React.ReactNode) => (
+                      <Typography variant="pi" fontWeight="bold">
+                        {chunks}
+                      </Typography>
+                    ),
+                  }
+                )}
+              </Typography>
+            </Flex>
+            <Form disabled={true} method="PUT" initialValues={version.data}>
+              <Flex direction="column" alignItems="stretch" gap={6} position="relative">
+                {unknownFieldsLayout.map((panel, index) => {
+                  return <FormPanel key={index} panel={panel} />;
+                })}
+              </Flex>
+            </Form>
+          </Box>
+        </>
+      )}
     </ContentLayout>
   );
 };
