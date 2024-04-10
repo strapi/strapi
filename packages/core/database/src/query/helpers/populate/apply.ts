@@ -6,6 +6,11 @@ import type { Database } from '../../..';
 import type { Meta } from '../../../metadata';
 import { ID, RelationalAttribute, Relation } from '../../../types';
 
+// We must select the join column id, however whatever it is named will overwrite an attribute of the same name
+// Therefore, we will prefix with something unlikely to conflict with a user attribute
+// TODO: ...and completely restrict the strapi_ prefix for an attribute name in the future
+const joinColPrefix = 'strapi_jn' as const;
+
 type Context = {
   db: Database;
   qb: QueryBuilder;
@@ -87,10 +92,7 @@ const XtoOne = async (
 
     const alias = qb.getAlias();
     const joinColAlias = `${alias}.${joinColumnName}`;
-    // We must select the join column id, however whatever it is named will overwrite an attribute of the same name
-    // Therefore, we will use something unlikely to conflict (strapi_{content type name}_id)
-    // TODO: ...and completely restrict the strapi_ prefix for an attribute name in the future
-    const joinColRenameAs = `strapi_${joinColumnName}`;
+    const joinColRenameAs = `${joinColPrefix}${joinColumnName}`;
     const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
     const referencedValues = _.uniq(
@@ -208,7 +210,7 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
 
     const alias = qb.getAlias();
     const joinColAlias = `${alias}.${joinColumnName}`;
-    const joinColRenameAs = `strapi_${joinColumnName}`;
+    const joinColRenameAs = `${joinColPrefix}${joinColumnName}`;
     const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
     const referencedValues = _.uniq(
@@ -294,7 +296,7 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
 
   const alias = populateQb.getAlias();
   const joinColAlias = `${alias}.${joinColumnName}`;
-  const joinColRenameAs = `strapi_${joinColumnName}`;
+  const joinColRenameAs = `${joinColPrefix}${joinColumnName}`;
   const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
   const referencedValues = _.uniq(
