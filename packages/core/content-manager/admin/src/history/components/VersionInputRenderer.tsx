@@ -7,7 +7,7 @@ import {
   useField,
   Form,
 } from '@strapi/admin/strapi-admin';
-import { Alert, Box, FieldLabel, Flex, Link, Tooltip, Typography } from '@strapi/design-system';
+import { Alert, Box, FieldLabel, Flex, Link, Tooltip } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
@@ -26,6 +26,7 @@ import {
 import { NotAllowedInput } from '../../pages/EditView/components/FormInputs/NotAllowed';
 import { UIDInput } from '../../pages/EditView/components/FormInputs/UID';
 import { Wysiwyg } from '../../pages/EditView/components/FormInputs/Wysiwyg/Field';
+import { useFieldHint } from '../../pages/EditView/components/InputRenderer';
 import { getRelationLabel } from '../../utils/relations';
 import { useHistoryContext } from '../pages/History';
 
@@ -362,67 +363,6 @@ const attributeHasCustomFieldProperty = (
   attribute: Schema.Attribute.AnyAttribute
 ): attribute is Schema.Attribute.AnyAttribute & Schema.Attribute.CustomField<string> =>
   'customField' in attribute && typeof attribute.customField === 'string';
-
-const useFieldHint = (
-  hint: React.ReactNode = undefined,
-  attribute: Schema.Attribute.AnyAttribute
-) => {
-  const { formatMessage } = useIntl();
-
-  const { maximum, minimum } = getMinMax(attribute);
-
-  if (!maximum && !minimum) {
-    return hint;
-  }
-
-  const units = !['biginteger', 'integer', 'number'].includes(attribute.type)
-    ? formatMessage(
-        {
-          id: 'content-manager.form.Input.hint.character.unit',
-          defaultMessage: '{maxValue, plural, one { character} other { characters}}',
-        },
-        {
-          maxValue: Math.max(minimum || 0, maximum || 0),
-        }
-      )
-    : null;
-
-  const hasMinAndMax = typeof minimum === 'number' && typeof maximum === 'number';
-
-  return formatMessage(
-    {
-      id: 'content-manager.form.Input.hint.text',
-      defaultMessage:
-        '{min, select, undefined {} other {min. {min}}}{divider}{max, select, undefined {} other {max. {max}}}{unit}{br}{description}',
-    },
-    {
-      min: minimum,
-      max: maximum,
-      description: hint,
-      unit: units,
-      divider: hasMinAndMax
-        ? formatMessage({
-            id: 'content-manager.form.Input.hint.minMaxDivider',
-            defaultMessage: ' / ',
-          })
-        : null,
-      br: <br />,
-    }
-  );
-};
-
-const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
-  if ('min' in attribute || 'max' in attribute) {
-    return {
-      maximum: !Number.isNaN(Number(attribute.max)) ? Number(attribute.max) : undefined,
-      minimum: !Number.isNaN(Number(attribute.min)) ? Number(attribute.min) : undefined,
-    };
-  } else if ('maxLength' in attribute || 'minLength' in attribute) {
-    return { maximum: attribute.maxLength, minimum: attribute.minLength };
-  } else {
-    return { maximum: undefined, minimum: undefined };
-  }
-};
 
 export type { VersionInputRendererProps };
 export { VersionInputRenderer };

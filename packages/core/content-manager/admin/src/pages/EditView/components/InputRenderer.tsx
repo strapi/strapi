@@ -216,4 +216,4 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
 };
 
 export type { InputRendererProps };
-export { InputRenderer };
+export { InputRenderer, useFieldHint };
