@@ -1,6 +1,9 @@
 export const WORKFLOW_MODEL_UID = 'plugin::review-workflows.workflow';
 export const STAGE_MODEL_UID = 'plugin::review-workflows.workflow-stage';
-export const STAGE_TRANSITION_UID = 'plugin::review-workflows.review-workflows.stage.transition';
+/**
+ * TODO: For V4 compatibility, the old UID was kept, when review workflows was in the admin package
+ */
+export const STAGE_TRANSITION_UID = 'admin::review-workflows.stage.transition';
 
 export const STAGE_DEFAULT_COLOR = '#4945FF';
 export const ENTITY_STAGE_ATTRIBUTE = 'strapi_stage';
