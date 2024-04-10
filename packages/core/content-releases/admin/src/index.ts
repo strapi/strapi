@@ -3,6 +3,7 @@ import { PaperPlane } from '@strapi/icons';
 
 import { CMReleasesContainer } from './components/CMReleasesContainer';
 import { ReleaseAction } from './components/ReleaseAction';
+import { addColumnToTableHook } from './components/ReleaseListCell';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { releaseApi } from './services/release';
@@ -58,6 +59,8 @@ const admin: Plugin.Config.AdminInput = {
         actions.splice(deleteActionIndex, 0, ReleaseAction);
         return actions;
       });
+      // Hook that adds a column into the CM's LV table
+      app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     } else if (
       !window.strapi.features.isEnabled('cms-content-releases') &&
       window.strapi?.flags?.promoteEE
