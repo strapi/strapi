@@ -40,7 +40,8 @@ export const resetFiles = async () => {
       stdio: 'inherit',
       cwd: process.env.TEST_APP_PATH,
     });
-    const dryRun = await execa('git', [...gitUser, 'clean', '-fd'], {
+
+    await execa('git', [...gitUser, 'clean', '-fd'], {
       stdio: 'inherit',
       cwd: process.env.TEST_APP_PATH,
     });
