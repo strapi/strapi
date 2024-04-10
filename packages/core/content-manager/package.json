@@ -57,7 +57,7 @@
     "qs": "6.11.1"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
+    "@strapi/pack-up": "4.23.0",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191"
   },
