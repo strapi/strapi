@@ -90,6 +90,7 @@ export type ServiceInstance<
    * Exposed for use within document service middlewares
    */
   updateComponents: (
+    uid: UID.Schema,
     entityToUpdate: {
       id: EntityService.Params.Attribute.ID;
     },
@@ -101,6 +102,7 @@ export type ServiceInstance<
    * Exposed for use within document service middlewares
    */
   omitComponentData: (
+    contentType: Schema.ContentType,
     data: EntityService.Params.Data.Input<Schema.ContentType['uid']>
   ) => Partial<EntityService.Params.Data.Input<Schema.ContentType['uid']>>;
 };

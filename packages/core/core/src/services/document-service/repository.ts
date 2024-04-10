@@ -318,11 +318,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return { versions: draftEntries };
   }
 
-  async function updateComponents(entry: any, data: any) {
+  async function updateComponents(uid: any, entry: any, data: any) {
     return components.updateComponents(uid, entry, data);
   }
 
-  function omitComponentData(data: any) {
+  async function omitComponentData(contentType: any, data: any) {
     return components.omitComponentData(contentType, data);
   }
 
@@ -338,8 +338,15 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     publish: hasDraftAndPublish ? wrapInTransaction(publish) : (undefined as any),
     unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
     discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
-
+    /**
+     * @internal
+     * Exposed for use within document service middlewares
+     */
     updateComponents,
+    /**
+     * @internal
+     * Exposed for use within document service middlewares
+     */
     omitComponentData,
   };
 };
