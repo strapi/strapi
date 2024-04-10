@@ -318,13 +318,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return { versions: draftEntries };
   }
 
-  async function updateComponents(opts = {} as any) {
-    const { entityToUpdate, data } = opts;
-    return components.updateComponents(uid, entityToUpdate, data);
+  async function updateComponents(entry: any, data: any) {
+    return components.updateComponents(uid, entry, data);
   }
 
-  async function omitComponentData(opts = {} as any) {
-    const { contentType, data } = opts;
+  async function omitComponentData(contentType: any, data: any) {
     return components.omitComponentData(contentType, data);
   }
 

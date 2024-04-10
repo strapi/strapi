@@ -32,14 +32,14 @@ export const createMiddlewareManager = () => {
           const prop = source[key];
 
           if (typeof prop === 'function') {
-            const newMethod = async (params: any) => {
+            const newMethod = async (...params: any[]) => {
               const ctx = {
                 ...ctxDefaults,
                 action: key,
                 params,
               };
 
-              return manager.run(ctx, () => prop(ctx.params));
+              return manager.run(ctx, () => prop(...ctx.params));
             };
 
             facade[key] = newMethod as typeof prop;
