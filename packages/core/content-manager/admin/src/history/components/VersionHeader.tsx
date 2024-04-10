@@ -46,7 +46,6 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
 
   const handleRestore = async () => {
     await restoreVersion({ params: { versionId: version.id } });
-    // console.log(response);
   };
 
   return (

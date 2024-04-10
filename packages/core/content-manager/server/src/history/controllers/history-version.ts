@@ -75,6 +75,10 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
 
       const restoredDocument = await getService(strapi, 'history').restoreVersion(versionId);
 
+      if (!restoredDocument) {
+        throw new errors.ApplicationError('Failed to restore version');
+      }
+
       return { data: { documentId: restoredDocument.documentId } };
     },
   } satisfies Core.Controller;

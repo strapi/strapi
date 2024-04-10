@@ -4,8 +4,9 @@ import { CreateHistoryVersion } from '../../../../shared/contracts/history-versi
 import { FIELDS_TO_IGNORE } from '../constants';
 
 /**
+ * @description
  * Get the difference between the version schema and the content type schema
- * Returns the attributes with their original shape
+ * @returns the attributes with their original shape
  */
 export const getSchemaAttributesDiff = (
   versionSchemaAttributes: CreateHistoryVersion['schema'],
