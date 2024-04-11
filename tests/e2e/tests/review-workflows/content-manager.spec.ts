@@ -35,12 +35,12 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
      * the document is not updated with the assignee as we
      * refetch said document.
      */
-    await expect(page.getByRole('combobox', { name: 'Assignee' })).toHaveText('editor testing');
+    await expect(page.getByRole('combobox', { name: 'Assignee' })).toHaveValue('editor testing');
 
     /**
      * Go back to ensure the list view has correctly updated
      */
-    await page.getByRole('button', { name: 'Back' }).click();
+    await page.getByRole('link', { name: 'Back' }).click();
     await expect(page.getByRole('gridcell', { name: 'editor testing' })).toBeVisible();
 
     /**
@@ -48,7 +48,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
      */
     await page.getByRole('gridcell', { name: 'West Ham post match analysis' }).click();
     await expect(page.getByRole('combobox', { name: 'Assignee' })).toBeVisible();
-    await expect(page.getByRole('combobox', { name: 'Assignee' })).toHaveText('editor testing');
+    await expect(page.getByRole('combobox', { name: 'Assignee' })).toHaveValue('editor testing');
   });
 
   test('as a user I want to change the stage of a document and see this update in the list-view afterwards', async ({
@@ -79,7 +79,7 @@ describeOnCondition(edition === 'EE')('content-manager', () => {
     /**
      * Go back to ensure the list view has correctly updated
      */
-    await page.getByRole('button', { name: 'Back' }).click();
+    await page.getByRole('link', { name: 'Back' }).click();
     await expect(page.getByRole('gridcell', { name: 'In progress' })).toBeVisible();
 
     /**

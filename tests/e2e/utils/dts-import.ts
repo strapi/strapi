@@ -92,7 +92,7 @@ const createDestinationProvider = (includedTypes = []) => {
         include: includedTypes,
       },
       configuration: {
-        coreStore: false,
+        coreStore: true,
         webhook: false,
       },
     },

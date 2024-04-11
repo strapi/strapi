@@ -501,6 +501,7 @@ test.describe('Edit View', () => {
 
     /**
      * You can't discard changes on single-types due to a bug.
+     * @see https://github.com/strapi/strapi/issues/20085
      */
     test.fixme('as a user I want to be able to discard my changes', async ({ page }) => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
