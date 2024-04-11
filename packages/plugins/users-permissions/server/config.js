@@ -26,14 +26,14 @@ module.exports = {
         // Make sure the different origin matches
         if(uCallback.origin !== uProviderCallback.origin)  {
           throw new Error(
-            `Forbidden callback provided: origins don't match ${uCallback.origin} !== ${uProviderCallback.origin})`
+            `Forbidden callback provided: origins don't match. Please verify your config.`
           );
         }
 
         // Make sure the different pathname matches
         if(uCallback.pathname !== uProviderCallback.pathname)  {
           throw new Error(
-            `Forbidden callback provided: pathname don't match ${uCallback.pathname} !== ${uProviderCallback.pathname})`
+            `Forbidden callback provided: pathname don't match. Please verify your config.`
           );
         }
 
