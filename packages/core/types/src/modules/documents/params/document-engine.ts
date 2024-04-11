@@ -16,8 +16,7 @@ export type FindMany<TContentTypeUID extends UID.ContentType> = Pick<
   | 'sort'
   | 'populate'
   | 'status'
-  | 'locale:string'
-  | 'locale:array'
+  | 'locale'
   | 'plugin'
   | 'lookup'
 >;
@@ -78,12 +77,12 @@ export type Update<TContentTypeUID extends UID.ContentType> = Pick<
 
 export type Publish<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'filters' | 'locale:string' | 'locale:array' | 'lookup'
+  'filters' | 'locale' | 'lookup'
 >;
 
 export type Unpublish<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'filters' | 'locale:string' | 'locale:array' | 'lookup'
+  'filters' | 'locale' | 'lookup'
 >;
 
 export type DiscardDraft<TContentTypeUID extends UID.ContentType> = Pick<

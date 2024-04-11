@@ -4,7 +4,12 @@
  * but should still export the same things.
  */
 
-export { DocumentStatus } from './pages/EditView/components/DocumentStatus';
+export * from './pages/EditView/components/DocumentStatus';
+export {
+  useGetDraftRelationCountQuery,
+  useGetManyDraftRelationCountQuery,
+} from './services/documents';
+
 export { useDocument as unstable_useDocument } from './hooks/useDocument';
 export { useDocumentActions as unstable_useDocumentActions } from './hooks/useDocumentActions';
 export { useDocumentLayout as unstable_useDocumentLayout } from './hooks/useDocumentLayout';

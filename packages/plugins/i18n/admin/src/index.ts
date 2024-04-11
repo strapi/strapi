@@ -3,7 +3,7 @@ import * as yup from 'yup';
 
 import { CheckboxConfirmation } from './components/CheckboxConfirmation';
 import {
-  BulkPublishAction,
+  BulkLocalePublishAction,
   DeleteLocaleAction,
   LocalePickerAction,
 } from './components/CMHeaderActions';
@@ -76,14 +76,9 @@ export default {
     });
 
     contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
-      const hasPublishAction = actions.find((action) => action.type === 'publish');
-      if (!hasPublishAction) {
-        return actions;
-      }
-
-      actions.push(BulkPublishAction);
       // TODO add to the right place in the list
       // actions.splice(indexOfPublishAction, 0, BulkPublishAction);
+      actions.push(BulkLocalePublishAction);
 
       return actions;
     });

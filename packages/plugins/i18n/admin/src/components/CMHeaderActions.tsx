@@ -8,7 +8,10 @@ import {
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
   type DocumentActionComponent,
+  // useGetDraftRelationCountQuery,
+  useGetManyDraftRelationCountQuery,
 } from '@strapi/plugin-content-manager/strapi-admin';
+import { Modules } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -232,13 +235,12 @@ const DeleteLocaleAction: DocumentActionComponent = ({
  * BulkPublishAction
  * -----------------------------------------------------------------------------------------------*/
 
-// TODO fix types
 type LocaleStatus = {
   locale: string;
-  status: 'published' | 'draft' | 'modified';
+  status: Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 };
 
-const BulkPublishAction: DocumentActionComponent = ({
+const BulkLocalePublishAction: DocumentActionComponent = ({
   document,
   documentId,
   model,
@@ -246,16 +248,42 @@ const BulkPublishAction: DocumentActionComponent = ({
 }) => {
   const { formatMessage } = useIntl();
   const { hasI18n, canPublish } = useI18n();
-  const { publish: publishAction, unpublish: unpublishAction } = useDocumentActions();
-  const { meta: documentMeta } = useDocument({ model, collectionType, documentId });
+  const { publish: publishAction } = useDocumentActions();
+  const { meta: documentMeta, schema } = useDocument({
+    model,
+    collectionType,
+    documentId,
+    params: {
+      locale: document?.locale,
+    },
+  });
+
+  // TODO
+  // const {
+  //   data: countDraftRelations = 0,
+  //   isLoading,
+  //   error,
+  // } = useGetManyDraftRelationCountQuery(
+  //   {
+  //     model,
+  //     documentIds: selectedEntries.map((id) => id.toString()),
+  //     locale: query?.plugins?.i18n?.locale,
+  //   },
+  //   {
+  //     skip: selectedEntries.length === 0,
+  //   }
+  // );
+
   const availableLocales = documentMeta?.availableLocales ?? [];
 
   const [selectedLocales, setSelectedLocales] = React.useState<string[]>([]);
+  const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
+
+  if (!schema?.options?.draftAndPublish ?? false) {
+    return null;
+  }
 
   if (!hasI18n) {
-    // This button can always be enabled given that draft and publish and i18n are
-    // enabled. In the modal that follows, the user will be able to see which
-    // locales are available for publication
     return null;
   }
 
@@ -267,66 +295,127 @@ const BulkPublishAction: DocumentActionComponent = ({
     return null;
   }
 
-  const isUnpublish = document?.status === 'published';
+  // This document action can be enabled given that draft and publish and i18n are
+  // enabled and we can publish the current locale.
+  // In the modal that follows, the user will be able to see which locales are available for publication.
 
-  const allAvailableLocales: LocaleStatus[] = availableLocales.map((doc) => {
+  const rows: LocaleStatus[] = availableLocales.map((doc) => {
     const { locale, status } = doc;
 
     return { locale, status };
   });
-  // TODO broken for non default locales allAvailableLocales will not include
-  // the defualt locale find a better way to build this
-  allAvailableLocales.unshift({
+  rows.unshift({
     locale: document?.locale ?? '',
     status: document?.status ?? 'draft',
   });
 
-  const handleAction = () => {
-    // TODO api call
-    //eslint-disable-next-line
-    console.log(['I18N handleAction'], selectedLocales);
+  const publish = async () => {
+    const res = await publishAction(
+      {
+        documentId,
+        model,
+        collectionType,
+        params: {
+          locale: selectedLocales,
+        },
+      },
+      {
+        documentId,
+      }
+    );
+    // Handle the response and set the errors if needed
+    // Setting errors returned from the API so we can highlight the locales that
+    // need action
+  };
+
+  const draftRelationCheck = async () => {
+    // TODO: Implement this
+    // await
+
+    return true;
+  };
+
+  const handleAction = async () => {
+    const someLocalesHaveDraftRelations = await draftRelationCheck();
+
+    if (someLocalesHaveDraftRelations) {
+      setIsConfirmationOpen(true);
+    } else {
+      await publish();
+    }
   };
 
   const headers = [
     {
       label: formatMessage({
-        id: 'TODO.name.title',
+        id: 'TODO translation key',
         defaultMessage: 'Name',
       }),
       name: 'name',
     },
     {
       label: formatMessage({
-        id: 'TODO.status.title',
+        id: 'TODO translation key',
         defaultMessage: 'Status',
       }),
       name: 'stages',
     },
     {
       label: formatMessage({
-        id: 'TODO.publication-status.title',
+        id: 'TODO translation key',
         defaultMessage: 'Publication status',
       }),
       name: 'publication-status',
     },
   ];
-
-  const rows = allAvailableLocales.map((entry) => ({
-    id: entry.locale,
-    ...entry,
-  }));
-
+  const isUnpublish = document?.status === 'published';
   if (isUnpublish) {
     console.error(['I18N bulk unpublish modal not implemented']);
+    return null;
+  }
+
+  if (isConfirmationOpen) {
     return {
       label: formatMessage({
         id: 'TODO translation key',
-        defaultMessage: 'Unpublish multiple locales',
+        defaultMessage: 'Confirmation',
       }),
-      icon: <Layer />,
-      position: ['panel'],
-      variant: 'secondary',
-      onClick: () => {},
+      dialog: {
+        onCancel: () => {
+          setIsConfirmationOpen(false);
+        },
+        type: 'dialog',
+        title: formatMessage({
+          id: getTranslation('actions.publish.dialog.title'),
+          defaultMessage: 'Confirmation',
+        }),
+        content: (
+          <>
+            <Flex direction="column" alignItems="stretch" gap={2}>
+              <ExclamationMarkCircle />
+              {null}
+            </Flex>
+          </>
+        ),
+        footer: () => {
+          return (
+            <Flex justifyContent="flex-end">
+              <Button
+                onClick={async () => {
+                  await publish();
+                  setIsConfirmationOpen(false);
+                }}
+                variant={'danger'}
+              >
+                {formatMessage({
+                  id: 'app.components.Button.confirm',
+                  defaultMessage: 'Confirm',
+                })}
+              </Button>
+            </Flex>
+          );
+        },
+      },
     };
   }
 
@@ -347,10 +436,13 @@ const BulkPublishAction: DocumentActionComponent = ({
       content: (
         <Table.Root
           onSelectedRowsChange={(selectedRows) => {
-            setSelectedLocales(selectedRows.map((row) => row.id));
+            setSelectedLocales(selectedRows.map((row) => row.locale));
           }}
           headers={headers}
-          rows={rows}
+          rows={rows.map((row) => ({
+            ...row,
+            id: row.locale,
+          }))}
         >
           <BulkLocaleActionModal headers={headers} rows={rows} />
         </Table.Root>
@@ -358,7 +450,11 @@ const BulkPublishAction: DocumentActionComponent = ({
       footer: () => {
         return (
           <Flex justifyContent="flex-end">
-            <Button variant="default" onClick={handleAction}>
+            <Button
+              disabled={selectedLocales.length === 0}
+              variant="default"
+              onClick={handleAction}
+            >
               {formatMessage({
                 id: 'TODO translation key',
                 defaultMessage: 'Publish',
@@ -381,4 +477,4 @@ const StyledTrash = styled(Trash)`
   }
 `;
 
-export { BulkPublishAction, DeleteLocaleAction, LocalePickerAction };
+export { BulkLocalePublishAction, DeleteLocaleAction, LocalePickerAction };
