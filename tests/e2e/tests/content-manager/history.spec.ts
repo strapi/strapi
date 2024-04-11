@@ -379,6 +379,73 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(currentVersion.getByText('Modified')).toBeVisible();
     });
 
+    test('A user should see the relations and whether some are missing', async ({ page }) => {
+      const AUTHOR_CREATE_URL =
+        /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
+      const AUTHOR_EDIT_URL =
+        /\/admin\/content-manager\/collection-types\/api::author.author\/[^/]+(\?.*)?/;
+      const HOMEPAGE_EDIT_URL =
+        /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
+      const HOMEPAGE_HISTORY_URL =
+        /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
+
+      // Create relation in Content-Type Builder
+      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+      const skipTheTour = await page.getByRole('button', { name: 'Skip the tour' });
+      if (skipTheTour.isVisible()) {
+        skipTheTour.click();
+      }
+      await page.getByRole('link', { name: 'Homepage' }).click();
+      await page.waitForURL(
+        '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
+      );
+      await page.getByRole('button', { name: /add another field to this single type/i }).click();
+      await page.getByRole('button', { name: /relation/i }).click();
+      await page.getByLabel('Basic settings').getByRole('button').nth(1).click();
+      await page.getByRole('button', { name: /article/i }).click();
+      await page.getByRole('menuitem', { name: /author/i }).click();
+      await page.getByRole('button', { name: 'Finish' }).click();
+      await page.getByRole('button', { name: 'Save' }).click();
+      await waitForRestart(page);
+      await expect(page.getByRole('cell', { name: 'authors', exact: true })).toBeVisible();
+
+      // Create new author
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Author' }).click();
+      await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+      await page.waitForURL(AUTHOR_CREATE_URL);
+      await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      // Add author to homepage
+      await page.getByRole('link', { name: 'Homepage' }).click();
+      await page.waitForURL(HOMEPAGE_EDIT_URL);
+      await page.getByRole('combobox', { name: 'Authors' }).click();
+      await page.getByText('Will Kitman').click();
+      await page.getByRole('combobox', { name: 'Authors' }).click();
+      await page.getByText('Coach Beard').click();
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      // Delete one of the authors, leaving only Coach Beard
+      await page.getByRole('link', { name: 'Will Kitman' }).click();
+      await page.waitForURL(AUTHOR_EDIT_URL);
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /delete document/i }).click();
+      await page.getByRole('button', { name: /confirm/i }).click();
+
+      // Go to the the article's history page
+      await page.getByRole('link', { name: 'Homepage' }).click();
+      await page.waitForURL(HOMEPAGE_EDIT_URL);
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await page.waitForURL(HOMEPAGE_HISTORY_URL);
+
+      // Assert that the unknown relation alert is displayed
+      await expect(page.getByRole('link', { name: 'Coach Beard' })).toBeVisible();
+      await expect(page.getByText('Will Kitman')).not.toBeVisible();
+      await expect(page.getByText(/missing relation/i)).toBeVisible();
+    });
+
     test('A user should be able to rename (delete + create) a field in the content-type builder and see the changes as "unknown fields" in concerned history versions', async ({
       page,
     }) => {
