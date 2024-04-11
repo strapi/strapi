@@ -67,7 +67,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.3",
+    "@strapi/pack-up": "5.0.0",
     "@strapi/strapi": "5.0.0-beta.3",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",

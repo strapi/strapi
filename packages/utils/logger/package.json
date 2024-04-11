@@ -42,7 +42,7 @@
     "winston": "3.10.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.3",
+    "@strapi/pack-up": "5.0.0",
     "eslint-config-custom": "5.0.0-beta.3",
     "tsconfig": "5.0.0-beta.3"
   },
