@@ -206,7 +206,7 @@ export declare namespace Publish {
   export interface Request {
     body: Partial<Document>;
     query: {
-      locale?: string | null;
+      locale?: string | string[] | null;
     };
   }
 
@@ -235,7 +235,7 @@ export declare namespace Unpublish {
       discardDraft?: boolean;
     };
     query: {
-      locale?: string | null;
+      locale?: string | string[] | null;
     };
   }
 
@@ -348,6 +348,7 @@ export declare namespace CountDraftRelations {
   export interface Request {
     body: {};
     query: {
+      // Count the draft relations of one entity, locale + documentId
       locale?: string | null;
     };
   }
@@ -369,8 +370,10 @@ export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
     body: {};
     query: {
+      // We can use this endpoint to count the draft relations across multiple
+      // entities (documents + locales).
       documentIds?: Modules.Documents.ID[];
-      locale?: string;
+      locale?: string | string[] | null;
     };
   }
 

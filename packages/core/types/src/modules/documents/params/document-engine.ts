@@ -17,6 +17,7 @@ export type FindMany<TContentTypeUID extends UID.ContentType> = Pick<
   | 'populate'
   | 'status'
   | 'locale:string'
+  | 'locale:array'
   | 'plugin'
   | 'lookup'
 >;

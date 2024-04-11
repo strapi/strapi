@@ -312,18 +312,27 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       return sumDraftCounts(document, uid);
     },
 
-    async countManyEntriesDraftRelations(ids: number[], uid: UID.CollectionType, locale: string) {
+    async countManyEntriesDraftRelations(
+      ids: number[],
+      uid: UID.CollectionType,
+      locale: string | string[]
+    ) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
         return 0;
       }
 
+      let localeFilter = {};
+      if (locale) {
+        localeFilter = Array.isArray(locale) ? { locale: { $in: locale } } : { locale };
+      }
+
       const entities = await strapi.db.query(uid).findMany({
         populate,
         where: {
           id: { $in: ids },
-          ...(locale ? { locale } : {}),
+          ...localeFilter,
         },
       });
 
