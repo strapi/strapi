@@ -67,7 +67,7 @@ describe('Uploads folder', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
 
       const { body: file } = await rqAdmin({
         method: 'GET',
@@ -308,7 +308,7 @@ describe('Uploads folder', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
 
       const {
         body: { results: files },
@@ -370,7 +370,7 @@ describe('Uploads folder', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
 
       const {
         body: { results: files },
