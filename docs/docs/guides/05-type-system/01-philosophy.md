@@ -28,7 +28,7 @@ One of its key advantages is the plethora of utilities it provides, which simpli
 
 Another significant advantage is the consistency it enforces within the codebase. This is achieved by defining shared types once and reusing them throughout the codebase.
 
-Moreover, the type system can effectively handle high levels of customization, thus allowing developers to focus their efforts on feature development and not TypeScript headaches.
+Moreover, the type system can effectively handle high levels of customization, thus allowing developers to focus their efforts on feature development rather than TypeScript headaches.
 
 #### For Users
 
