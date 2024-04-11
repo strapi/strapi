@@ -385,6 +385,7 @@ export default {
         .countRelations()
         .build();
 
+      // TODO If locale is an array map this async?
       const document = id
         ? await updateDocument(ctx, { populate })
         : await createDocument(ctx, { populate });
@@ -394,7 +395,7 @@ export default {
       }
 
       // TODO: Publish many locales at once
-      const { locale } = getDocumentLocaleAndStatus(body);
+      const { locale } = getDocumentLocaleAndStatus(body, { allowMultipleLocales: true });
       return documentManager.publish(document!.documentId, model, {
         locale,
         // TODO: Allow setting creator fields on publish
@@ -509,6 +510,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
+    // TODO allow multiple locales for bulk locale unpublish
     const { locale } = getDocumentLocaleAndStatus(body);
     const document = await documentManager.findOne(id, model, {
       populate,
