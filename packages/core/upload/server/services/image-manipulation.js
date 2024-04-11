@@ -16,7 +16,25 @@ const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
 const FORMATS_TO_OPTIMIZE = ['jpeg', 'png', 'webp', 'tiff', 'avif'];
 
+const writeStreamToFile = (stream, path) =>
+  new Promise((resolve, reject) => {
+    const writeStream = fs.createWriteStream(path);
+    // Reject promise if there is an error with the provided stream
+    stream.on('error', reject);
+    stream.pipe(writeStream);
+    writeStream.on('close', resolve);
+    writeStream.on('error', reject);
+  });
+
 const getMetadata = async (file) => {
+  if (!file.filepath) {
+    return new Promise((resolve, reject) => {
+      const pipeline = sharp();
+      pipeline.metadata().then(resolve).catch(reject);
+      file.getStream().pipe(pipeline);
+    });
+  }
+
   return sharp(file.filepath).metadata();
 };
 
@@ -35,7 +53,20 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 const resizeFileTo = async (file, options, { name, hash }) => {
   const filePath = join(file.tmpWorkingDirectory, hash);
 
-  const { width, height, size } = await sharp(file.filepath).resize(options).toFile(filePath);
+  let newInfo;
+  if (!file.filepath) {
+    const transform = sharp()
+      .resize(options)
+      .on('info', (info) => {
+        newInfo = info;
+      });
+
+    await writeStreamToFile(file.getStream().pipe(transform), filePath);
+  } else {
+    newInfo = await sharp(file.filepath).resize(options).toFile(filePath);
+  }
+
+  const { width, height, size } = newInfo;
 
   const newFile = {
     name,
@@ -80,7 +111,13 @@ const optimize = async (file) => {
   const { format, size } = await getMetadata(file);
 
   if (sizeOptimization || autoOrientation) {
-    const transformer = sharp(file.filepath);
+    let transformer;
+    if (!file.filepath) {
+      transformer = sharp();
+    } else {
+      transformer = sharp(file.filepath);
+    }
+
     // reduce image quality
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
     // rotate image based on EXIF data
@@ -89,11 +126,18 @@ const optimize = async (file) => {
     }
     const filePath = join(file.tmpWorkingDirectory, `optimized-${file.hash}`);
 
-    const {
-      width: newWidth,
-      height: newHeight,
-      size: newSize,
-    } = await transformer.toFile(filePath);
+    let newInfo;
+    if (!file.filepath) {
+      transformer.on('info', (info) => {
+        newInfo = info;
+      });
+
+      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    } else {
+      newInfo = await transformer.toFile(filePath);
+    }
+
+    const { width: newWidth, height: newHeight, size: newSize } = newInfo;
 
     const newFile = { ...file };
 
@@ -181,6 +225,14 @@ const isSupportedImage = (...args) => {
  *  Applies a simple image transformation to see if the image is faulty/corrupted.
  */
 const isFaultyImage = async (file) => {
+  if (!file.filepath) {
+    return new Promise((resolve, reject) => {
+      const pipeline = sharp();
+      pipeline.stats().then(resolve).catch(reject);
+      file.getStream().pipe(pipeline);
+    });
+  }
+
   try {
     await sharp(file.filepath).stats();
     return false;
