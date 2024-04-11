@@ -190,7 +190,8 @@ export const EditView = () => {
         const res = await createToken({
           ...body,
           // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
-          lifespan: body?.lifespan || null,
+          lifespan:
+            body?.lifespan && body.lifespan !== '0' ? parseInt(body.lifespan.toString(), 10) : null,
           permissions: body.type === 'custom' ? state.selectedActions : null,
         });
 
@@ -220,7 +221,7 @@ export const EditView = () => {
           tokenType: API_TOKEN_TYPE,
         });
 
-        navigate(res.data.id.toString(), {
+        navigate(`../api-tokens/${res.data.id.toString()}`, {
           state: { apiToken: res.data },
           replace: true,
         });

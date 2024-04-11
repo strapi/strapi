@@ -1,4 +1,4 @@
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
 
 import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
@@ -11,8 +11,6 @@ import { transformData } from './transform/data';
  * - Apply default parameters to document actions
  *
  * @param strapi
- * @param options.defaults - Default parameters to apply to all actions
- * @param options.parent - Parent repository, used when creating a new repository with .with()
  * @returns DocumentService
  *
  * @example Access documents
@@ -20,14 +18,13 @@ import { transformData } from './transform/data';
  * const allArticles = strapi.documents('api::article.article').findMany(params)
  *
  */
-// TODO: support global document service middleware & per repo middlewares
 export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Service => {
   const repositories = new Map<string, Modules.Documents.ServiceInstance>();
   const middlewares = createMiddlewareManager();
 
   middlewares.use(databaseErrorsMiddleware);
 
-  const factory = function factory(uid) {
+  const factory = function factory(uid: UID.ContentType) {
     if (repositories.has(uid)) {
       return repositories.get(uid)!;
     }
@@ -35,7 +32,16 @@ export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Se
     const contentType = strapi.contentType(uid);
     const repository = createContentTypeRepository(uid);
 
-    repositories.set(uid, middlewares.wrapObject(repository, { contentType }));
+    repositories.set(
+      uid,
+      middlewares.wrapObject(
+        repository,
+        { uid, contentType },
+        {
+          exclude: ['updateComponents', 'omitComponentData'],
+        }
+      )
+    );
 
     return repository;
   } as Modules.Documents.Service;

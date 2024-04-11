@@ -43,7 +43,8 @@ describe('Document Service relations', () => {
   // TODO
   describe.skip('Update', () => {
     it('Can update a document with relations', async () => {
-      const article = await strapi.documents(ARTICLE_UID).update('Article1', {
+      const article = await strapi.documents(ARTICLE_UID).update({
+        documentId: 'Article1',
         locale: 'en',
         data: {
           title: 'Article with author',
@@ -67,7 +68,8 @@ describe('Document Service relations', () => {
           populate: { categories: true },
         });
 
-        const publishedArticles = await strapi.documents(ARTICLE_UID).publish(article.documentId, {
+        const publishedArticles = await strapi.documents(ARTICLE_UID).publish({
+          documentId: article.documentId,
           populate: { categories: true },
         });
         const publishedArticle = publishedArticles.versions[0];
@@ -87,9 +89,10 @@ describe('Document Service relations', () => {
         });
 
         // Publish connected category
-        await strapi.documents(CATEGORY_UID).publish('Cat1', { locale: 'en' });
+        await strapi.documents(CATEGORY_UID).publish({ documentId: 'Cat1', locale: 'en' });
 
-        const publishedArticles = await strapi.documents(ARTICLE_UID).publish(article.documentId, {
+        const publishedArticles = await strapi.documents(ARTICLE_UID).publish({
+          documentId: article.documentId,
           locale: article.locale,
           populate: { categories: true },
         });
@@ -113,18 +116,18 @@ describe('Document Service relations', () => {
       const id = draftArticle.documentId;
 
       // Publish documents
-      await strapi.documents(CATEGORY_UID).publish('Cat1');
-      await strapi.documents(ARTICLE_UID).publish(id);
+      await strapi.documents(CATEGORY_UID).publish({ documentId: 'Cat1' });
+      await strapi.documents(ARTICLE_UID).publish({ documentId: id });
 
       // Update the draft article
       await strapi
         .documents(ARTICLE_UID)
-        .update(id, { data: { title: 'Updated Article with author', categories: [] } });
+        .update({ documentId: id, data: { title: 'Updated Article with author', categories: [] } });
 
       // Discard the draft
       const newDraftArticles = await strapi
         .documents(ARTICLE_UID)
-        .discardDraft(id, { populate: ['categories'] });
+        .discardDraft({ documentId: id, populate: ['categories'] });
 
       // Validate the draft is discarded
       const newDraftArticle = newDraftArticles.versions[0];

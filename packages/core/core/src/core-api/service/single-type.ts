@@ -31,7 +31,10 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
     const documentId = await this.getDocumentId();
 
     if (documentId) {
-      return strapi.documents(uid).update(documentId, this.getFetchParams(params));
+      return strapi.documents(uid).update({
+        ...this.getFetchParams(params),
+        documentId,
+      });
     }
 
     return strapi.documents(uid).create(this.getFetchParams(params));
@@ -43,7 +46,10 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
     const documentId = await this.getDocumentId();
     if (!documentId) return { deletedEntries: 0 };
 
-    return strapi.documents(uid).delete(documentId, this.getFetchParams(params));
+    return strapi.documents(uid).delete({
+      ...this.getFetchParams(params),
+      documentId,
+    });
   }
 }
 
