@@ -20,7 +20,7 @@ It is in this context that a type system becomes an essential tool, as it provid
 
 On top of this, it offers a wide range of utilities to manipulate those types, and creates a unified, typed developer experience across the whole codebase.
 
-### Application 
+### Application
 
 #### For Contributors
 
@@ -53,12 +53,12 @@ Contributors expect to create and/or use APIs that handle very generic data stru
 Users expects to have a TypeScript experience tailored around their own application, with their content-types, components, and plugins being strongly typed and recognized by the Strapi APIs.
 
 :::warning
-Creating such experiences without slowing down developers (both contributors and users) is a huge undertaking and should be considered a top priority everytime the type system is modified. 
+Creating such experiences without slowing down developers (both contributors and users) is a huge undertaking and should be considered a top priority everytime the type system is modified.
 :::
 
 ### Key Principles
 
-#### 🧩 Flexibility and Extensibility 
+#### 🧩 Flexibility and Extensibility
 
 Strapi's strength lies in its ability to handle a wide range of content and customizations, the types should reflect and adapt to that.
 
