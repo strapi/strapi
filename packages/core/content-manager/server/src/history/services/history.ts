@@ -1,6 +1,6 @@
-import type { Core, Modules, UID, Data, Schema } from '@strapi/types';
+import type { Core, Modules, UID, Data, Schema, Struct } from '@strapi/types';
 import { contentTypes } from '@strapi/utils';
-import { omit, pick, intersection } from 'lodash/fp';
+import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
 
@@ -396,8 +396,6 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       };
     },
 
-    // TODO: Restore media without missing media assets
-
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
       const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
@@ -412,19 +410,22 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         // Clone to avoid mutating the original version data
         structuredClone(version.data)
       );
+      const sanitizedSchemaAttributes = omit(
+        FIELDS_TO_IGNORE,
+        contentTypeSchemaAttributes
+      ) as Struct.SchemaAttributes;
       // Set all deleted relation values to null
-      const commonAttributes = intersection(
-        Object.keys(version.data),
-        Object.keys(contentTypeSchemaAttributes)
-      );
-      const dataWithoutMissingRelationsPromise = Object.entries(contentTypeSchemaAttributes).reduce(
+      const dataWithoutMissingRelationsPromise = Object.entries(sanitizedSchemaAttributes).reduce(
         async (
           previousRelationAttributesPromise: Promise<Record<string, unknown>>,
           [name, attribute]: [string, Schema.Attribute.AnyAttribute]
         ) => {
           const previousRelationAttributes = await previousRelationAttributesPromise;
 
-          if (!commonAttributes.includes(name)) return previousRelationAttributes;
+          const relationData = version.data[name];
+          if (relationData === null) {
+            return previousRelationAttributes;
+          }
 
           if (
             attribute.type === 'relation' &&
@@ -432,11 +433,6 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             attribute.relation !== 'morphToOne' &&
             attribute.relation !== 'morphToMany'
           ) {
-            const relationData = version.data[name];
-            if (relationData === null) {
-              return previousRelationAttributes;
-            }
-
             if (Array.isArray(relationData)) {
               if (relationData.length === 0) return previousRelationAttributes;
 
@@ -460,6 +456,29 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
               });
 
               if (!existingRelation) {
+                previousRelationAttributes[name] = null;
+              }
+            }
+          }
+
+          if (attribute.type === 'media') {
+            if (attribute.multiple) {
+              const existingAndMissingMedias = await Promise.all(
+                relationData.map((media) => {
+                  return strapi.db
+                    .query('plugin::upload.file')
+                    .findOne({ where: { id: media.id } });
+                })
+              );
+
+              const existingMedias = existingAndMissingMedias.filter((media) => media != null);
+              previousRelationAttributes[name] = existingMedias;
+            } else {
+              const existingMedia = await strapi.db
+                .query('plugin::upload.file')
+                .findOne({ where: { id: version.data[name].id } });
+
+              if (!existingMedia) {
                 previousRelationAttributes[name] = null;
               }
             }
