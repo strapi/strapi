@@ -1,7 +1,9 @@
-import { Box, Flex, Icon, LinkButton, Typography } from '@strapi/design-system';
+import { Box, Flex, Icon, Typography } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { getTrad } from '../../utils';
@@ -59,6 +61,8 @@ export const EmptyAttributes = () => {
             </Box>
           </Box>
           <LinkButton
+            forwardedAs={Link}
+            // @ts-expect-error We need to accept the props of the component passed in the `as` prop
             to={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
             variant="secondary"
             startIcon={<Plus />}

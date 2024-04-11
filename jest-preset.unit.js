@@ -10,6 +10,7 @@ module.exports = {
     '__tests__/resources',
     'tests/resources',
   ],
+  prettierPath: require.resolve('prettier-2'),
   testMatch: ['**/__tests__/**/*.{js,ts,jsx,tsx}'],
   transform: {
     '^.+\\.(t|j)sx?$': ['@swc/jest'],
