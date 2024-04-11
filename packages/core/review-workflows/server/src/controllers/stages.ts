@@ -2,13 +2,13 @@ import type { Context } from 'koa';
 import type { Core } from '@strapi/types';
 
 import { async, validate } from '@strapi/utils';
-import { getService } from '../../../utils';
-import { validateUpdateStageOnEntity, validateLocale } from '../../../validation/review-workflows';
+import { getService } from '../utils';
+import { validateUpdateStageOnEntity, validateLocale } from '../validation/review-workflows';
 import {
   STAGE_MODEL_UID,
   ENTITY_STAGE_ATTRIBUTE,
   STAGE_TRANSITION_UID,
-} from '../../../constants/workflows';
+} from '../constants/workflows';
 
 /**
  *

@@ -1,10 +1,10 @@
 import type { Core } from '@strapi/types';
 import { set, isString, map, get } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../../constants/workflows';
-import { getService } from '../../utils';
-import { getWorkflowContentTypeFilter } from '../../utils/review-workflows';
-import workflowsContentTypesFactory from './content-types';
+import { WORKFLOW_MODEL_UID, WORKFLOW_POPULATE } from '../constants/workflows';
+import { getService } from '../utils';
+import { getWorkflowContentTypeFilter } from '../utils/review-workflows';
+import workflowsContentTypesFactory from './workflow-content-types';
 
 const processFilters = ({ strapi }: { strapi: Core.Strapi }, filters: any = {}) => {
   const processedFilters = { ...filters };

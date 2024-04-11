@@ -1,8 +1,8 @@
 import type {} from 'koa-body';
 
 import workflows from './workflows';
-import stages from './workflows/stages';
-import assignees from './workflows/assignees';
+import stages from './stages';
+import assignees from './assignees';
 
 export default {
   workflows,

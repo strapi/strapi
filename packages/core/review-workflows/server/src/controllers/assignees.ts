@@ -1,10 +1,7 @@
 import type { Context } from 'koa';
 
-import { getService } from '../../../utils';
-import {
-  validateUpdateAssigneeOnEntity,
-  validateLocale,
-} from '../../../validation/review-workflows';
+import { getService } from '../utils';
+import { validateUpdateAssigneeOnEntity, validateLocale } from '../validation/review-workflows';
 
 export default {
   /**
@@ -33,7 +30,6 @@ export default {
       .create({ userAbility: ctx.state.userAbility, model });
 
     // TODO: check if user has update permission on the entity
-
     const { id: assigneeId } = await validateUpdateAssigneeOnEntity(
       ctx.request?.body?.data,
       'You should pass a valid id to the body of the put request.'
