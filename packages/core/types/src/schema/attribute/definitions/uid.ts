@@ -17,6 +17,9 @@ export interface UIDProperties<
   options?: UIDOptions & TOptions;
 }
 
+/**
+ * Represents a UID Strapi attribute along with its options
+ */
 export type UID<
   TTargetAttribute extends string = string,
   TOptions extends UIDOptions = UIDOptions,

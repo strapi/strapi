@@ -1,6 +1,9 @@
 import type { Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
+/**
+ * Represents a block Strapi attribute along with its options
+ */
 export type Blocks = Intersect<
   [
     Attribute.OfType<'blocks'>,

@@ -1,8 +1,15 @@
 import type * as UID from '../../uid';
 import type { Attribute } from '..';
 
-// TODO: [TS2] Where to move this? Common doesn't really make sense :/
-// Any Attribute
+/**
+ * Represents any kind of attribute.
+ *
+ * A polymorphic type capturing a categorized set of various Attribute types, set by the attribute specific `type` key.
+ *
+ * It provides abstraction for the multitude of attributes available for handling different kinds of data, each of which can have its own options and properties.
+ *
+ * These are typically consumed by modules that need a way to handle any type of attribute in a unified manner.
+ */
 export type AnyAttribute =
   | Attribute.BigInteger
   | Attribute.Boolean
