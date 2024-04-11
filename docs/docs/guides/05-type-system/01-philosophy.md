@@ -76,4 +76,4 @@ The type system should provide a TypeScript experience that is tailored to each 
 
 #### 🏖️ Easy to Use
 
-The type system should prioritize not slowing down developers, both contributors and users. Any complexity should be handled by the type System internals.
+The type system should prioritize not slowing down developers, whether contributors or users. Any complexity should be handled by the type System internals.
