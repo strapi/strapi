@@ -34,7 +34,7 @@ Moreover, the type system can effectively handle high levels of customization, t
 
 Although Strapi users don't often engage directly with the type system, it nonetheless profoundly influences their Strapi experience.
 
-It ensures the provision of type-safe APIs (such as the document service), which greatly reduces runtime errors, offers a simple way of discovering APIs, and makes the system more reliable overall.
+It ensures the provision of type-safe APIs (such as the document service), which greatly reduces runtime errors, offers a simple way of discovering APIs via autocompletion and code hinting, and makes the system more reliable overall.
 
 Moreover, it arms users with ready-made types, which they can use to type-proof their applications or customizations.
 
