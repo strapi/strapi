@@ -623,6 +623,8 @@ class StrapiApp {
                 };
               },
             },
+            // this needs to go before auth/:authType because otherwise it won't match the route
+            ...getBaseEERoutes(),
             {
               path: 'auth/:authType',
               element: <AuthPage />,
@@ -724,7 +726,7 @@ class StrapiApp {
                     </React.Suspense>
                   ),
                 })),
-                ...getBaseEERoutes(),
+
                 {
                   path: '*',
                   element: <NotFoundPage />,
