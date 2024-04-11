@@ -125,7 +125,7 @@ describe('i18n - Content API', () => {
           },
         });
 
-        expect(res.statusCode).toBe(200);
+        expect(res.statusCode).toBe(201);
         expect(res.body.data.locale).toBe(locale);
       }
       const { statusCode, body } = res;
