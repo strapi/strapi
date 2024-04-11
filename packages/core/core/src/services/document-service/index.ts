@@ -32,7 +32,16 @@ export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Se
     const contentType = strapi.contentType(uid);
     const repository = createContentTypeRepository(uid);
 
-    repositories.set(uid, middlewares.wrapObject(repository, { uid, contentType }));
+    repositories.set(
+      uid,
+      middlewares.wrapObject(
+        repository,
+        { uid, contentType },
+        {
+          exclude: ['updateComponents', 'omitComponentData'],
+        }
+      )
+    );
 
     return repository;
   } as Modules.Documents.Service;
