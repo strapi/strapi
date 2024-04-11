@@ -14,7 +14,7 @@ Since its release, Strapi's strength has laid in its **flexibility** and **exten
 
 It can handle a wide array of content and customizations, from content-types to plugins and extensions, most of them are defined dynamically in user applications.
 
-With TypeScript imposing itself as a standard in the JS ecosystem over the years, it became critical to develop a uniform system that streamlines this heavily customized content management's developer experience.
+With TypeScript imposing itself as a standard in the JS ecosystem over the years, it has become critical to develop a uniform system that streamlines this heavily customized content management's developer experience.
 
 This is in this context that a type system becomes an essential tool as it provides a single source of truth for standard types, like schema, attributes, and entities, whether they've been statically or dynamically created.
 
