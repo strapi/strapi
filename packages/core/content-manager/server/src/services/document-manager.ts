@@ -1,40 +1,20 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, sanitize, errors } from '@strapi/utils';
+import { contentTypes, errors, async } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { sumDraftCounts } from './utils/draft';
-import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
 type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
 const { ApplicationError } = errors;
-const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 const omitIdField = omit('id');
-
-const emitEvent = async (uid: UID.ContentType, event: string, document: Document) => {
-  const modelDef = strapi.getModel(uid);
-  const sanitizedDocument = await sanitize.sanitizers.defaultSanitizeOutput(
-    {
-      schema: modelDef,
-      getModel(uid) {
-        return strapi.getModel(uid as UID.Schema);
-      },
-    },
-    document
-  );
-
-  strapi.eventHub.emit(event, {
-    model: modelDef.modelName,
-    entry: sanitizedDocument,
-  });
-};
 
 const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
@@ -197,84 +177,35 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async publishMany(entities: Document[], uid: UID.ContentType) {
-      if (!entities.length) {
-        return null;
-      }
-
-      // Validate entities before publishing, throw if invalid
-      await Promise.all(
-        entities.map((document: Document) => {
-          return strapi.entityValidator.validateEntityCreation(
-            strapi.getModel(uid),
-            document,
-            undefined,
-            // @ts-expect-error - FIXME: entity here is unnecessary
-            document
-          );
-        })
-      );
-
-      // Only publish entities without a published_at date
-      const entitiesToPublish = entities
-        .filter((doc: Document) => !doc[PUBLISHED_AT_ATTRIBUTE])
-        .map((doc: Document) => doc.id);
-
-      const filters = { id: { $in: entitiesToPublish } };
-      const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
       const populate = await buildDeepPopulate(uid);
 
-      // Everything is valid, publish
-      const publishedEntitiesCount = await strapi.db.query(uid).updateMany({
-        where: filters,
-        data,
+      const publishedEntities = await strapi.db.transaction(async () => {
+        return async.map(entities, async ({ documentId }: Document) => {
+          // @ts-expect-error - documents.publish is not accepting populate but it should
+          const publishedEntity = await strapi.documents(uid).publish({ documentId, populate });
+
+          return publishedEntity;
+        });
       });
-      // Get the updated entities since updateMany only returns the count
-      const publishedEntities = await strapi.db.query(uid).findMany({
-        where: filters,
-        populate,
-      });
-      // Emit the publish event for all updated entities
-      await Promise.all(
-        publishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_PUBLISH, doc))
-      );
 
       // Return the number of published entities
-      return publishedEntitiesCount;
+      return { count: publishedEntities.length };
     },
 
-    async unpublishMany(documents: Document[], uid: UID.CollectionType) {
-      if (!documents.length) {
-        return null;
-      }
-
-      // Only unpublish entities with a published_at date
-      const entitiesToUnpublish = documents
-        .filter((doc: Document) => doc[PUBLISHED_AT_ATTRIBUTE])
-        .map((doc: Document) => doc.id);
-
-      const filters = { id: { $in: entitiesToUnpublish } };
-      const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
+    async unpublishMany(entities: Document[], uid: UID.CollectionType) {
       const populate = await buildDeepPopulate(uid);
 
-      // No need to validate, unpublish
-      const unpublishedEntitiesCount = await strapi.db.query(uid).updateMany({
-        where: filters,
-        data,
-      });
+      const unpublishedEntities = await strapi.db.transaction(async () => {
+        return async.map(entities, async ({ documentId }: Document) => {
+          // @ts-expect-error - documents.unpublish is not accepting populate but it should
+          const unpublishedEntity = await strapi.documents(uid).unpublish({ documentId, populate });
 
-      // Get the updated entities since updateMany only returns the count
-      const unpublishedEntities = await strapi.db.query(uid).findMany({
-        where: filters,
-        populate,
+          return unpublishedEntity;
+        });
       });
-
-      // Emit the unpublish event for all updated entities
-      await Promise.all(
-        unpublishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_UNPUBLISH, doc))
-      );
 
       // Return the number of unpublished entities
-      return unpublishedEntitiesCount;
+      return { count: unpublishedEntities.length };
     },
 
     async unpublish(

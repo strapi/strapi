@@ -441,7 +441,6 @@ export default {
       }
     }
 
-    // @ts-expect-error - publish many should not return null
     const { count } = await documentManager.publishMany(entities, model);
     ctx.body = { count };
   },
@@ -479,7 +478,6 @@ export default {
       }
     }
 
-    // @ts-expect-error - unpublish many should not return null
     const { count } = await documentManager.unpublishMany(entities, model);
     ctx.body = { count };
   },
