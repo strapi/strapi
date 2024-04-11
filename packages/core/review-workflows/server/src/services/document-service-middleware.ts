@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Modules } from '@strapi/types';
 
 import { isNil } from 'lodash/fp';
@@ -15,8 +14,9 @@ type Middleware = Modules.Documents.Middleware.Middleware;
  * @returns {Object}
  */
 const getEntityStage = async (uid: any, id: any, params: any) => {
-  const entity = await strapi.documents(uid).findOne(id, {
+  const entity = await strapi.documents(uid).findOne({
     ...params,
+    documentId: id,
     status: 'draft',
     populate: {
       [ENTITY_STAGE_ATTRIBUTE]: {
@@ -34,7 +34,7 @@ const getEntityStage = async (uid: any, id: any, params: any) => {
  * Ensures the entity is assigned to the default workflow stage
  */
 const assignStageOnCreate: Middleware = async (ctx, next) => {
-  if (!['create', 'clone'].includes(ctx.action)) {
+  if (ctx.action !== 'create' && ctx.action !== 'clone') {
     return next();
   }
 
@@ -50,16 +50,11 @@ const assignStageOnCreate: Middleware = async (ctx, next) => {
     return next();
   }
 
-  /**
-   * Doc service args might be formatted differently depending on the action
-   * .create({ data }) => data
-   * .clone(id, { data }) => data
-   */
-  const params: any = ctx.args.length > 1 ? ctx.args[1] : ctx.args[0];
+  const data = ctx.params.data as Record<string, any>;
 
   // Assign the default stage if the entity doesn't have one
-  if (params?.data && isNil(params.data[ENTITY_STAGE_ATTRIBUTE])) {
-    params.data[ENTITY_STAGE_ATTRIBUTE] = { id: workflow.stages[0].id };
+  if (ctx.params?.data && isNil(data[ENTITY_STAGE_ATTRIBUTE])) {
+    data[ENTITY_STAGE_ATTRIBUTE] = { id: workflow.stages[0].id };
   }
 
   return next();
@@ -70,9 +65,8 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
     return next();
   }
 
-  const [documentId, params] = ctx.args;
-  // @ts-expect-error - Typescript doesn't know this should be the params of update
-  const data = params?.data as any;
+  const { documentId } = ctx.params;
+  const data = ctx.params.data as any;
 
   if (isNil(data?.[ENTITY_STAGE_ATTRIBUTE])) {
     delete data?.[ENTITY_STAGE_ATTRIBUTE];
@@ -82,7 +76,7 @@ const handleStageOnUpdate: Middleware = async (ctx, next) => {
   /**
    * Get last stage of the entity
    */
-  const previousStage = await getEntityStage(ctx.contentType.uid, documentId, params);
+  const previousStage = await getEntityStage(ctx.contentType.uid, documentId, ctx.params);
 
   const result = await next();
 
