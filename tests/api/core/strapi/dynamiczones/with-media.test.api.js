@@ -178,7 +178,7 @@ describe('Not required dynamiczone', () => {
 
       const newImgRes = await uploadImg();
 
-      expect(newImgRes.statusCode).toBe(200);
+      expect(newImgRes.statusCode).toBe(201);
       const newMediaId = newImgRes.body[0].id;
       const updateRes = await rq({
         method: 'PUT',
@@ -254,7 +254,7 @@ describe('Not required dynamiczone', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
 
       const getRes = await rq({
         method: 'GET',

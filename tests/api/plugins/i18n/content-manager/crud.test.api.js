@@ -130,7 +130,7 @@ describe('i18n - Content API', () => {
       }
       const { statusCode, body } = res;
 
-      expect(statusCode).toBe(200);
+      expect(statusCode).toBe(201);
       data.categories.push(body.data);
     });
 
