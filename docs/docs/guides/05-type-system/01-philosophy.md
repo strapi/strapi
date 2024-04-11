@@ -46,7 +46,7 @@ The main challenge faced by the type system is being able to maintain a high-qua
 
 #### For Contributors
 
-Contributors expects to create and/or use APIs that handle very generic data structures in the context of Strapi internals, that become context-aware and strongly typed when used by a user withing their application.
+Contributors expect to create and/or use APIs that handle very generic data structures in the context of Strapi internals, which become context-aware and strongly typed when used by a user withing their application.
 
 #### For Users
 
