@@ -24,7 +24,7 @@ On top of this, it offers a wide range of utilities to manipulate those types, a
 
 #### For Contributors
 
-One of its key advantages is the plethora of utilities it provides, which simplifies the manipulation of complex data structures, including content types, documents, and UIDs.
+One of its key advantages is the plethora of utilities it provides, which simplify the manipulation of complex data structures, including content types, documents, and UIDs.
 
 Another significant advantage is the consistency it enforces within the codebase. This is achieved by defining shared types once and reusing them throughout the codebase.
 
