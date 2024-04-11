@@ -603,7 +603,7 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
               // we must coerce the string value back to an object
               const permissions = values.map((value) => ({
                 role: parseInt(value, 10),
-                action: 'plugin::review-workflows.review-workflows.stage.transition',
+                action: 'admin::review-workflows.review-workflows.stage.transition',
               }));
 
               onChange(name, permissions);

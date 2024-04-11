@@ -2,6 +2,8 @@ export const WORKFLOW_MODEL_UID = 'plugin::review-workflows.workflow';
 export const STAGE_MODEL_UID = 'plugin::review-workflows.workflow-stage';
 /**
  * TODO: For V4 compatibility, the old UID was kept, when review workflows was in the admin package
+ *
+ * NOTE!: if you change this string you need to change it here too: strapi/packages/core/review-workflows/admin/src/routes/settings/components/Stages.tsx
  */
 export const STAGE_TRANSITION_UID = 'admin::review-workflows.stage.transition';
 
