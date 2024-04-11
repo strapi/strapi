@@ -10,7 +10,7 @@ tags:
 
 ### Context
 
-Since its release, Strapi's strength has laid in its **flexibility** and **extensibility**.
+Since its release, Strapi's strength has lain in its **flexibility** and **extensibility**.
 
 It can handle a wide array of content and customizations, from content-types to plugins and extensions, most of them are defined dynamically in user applications.
 
