@@ -92,6 +92,7 @@ export default {
     const signedFiles = await async.map(uploadedFiles, getService('file').signFileUrls);
 
     ctx.body = await pm.sanitizeOutput(signedFiles, { action: ACTIONS.read });
+    ctx.status = 201;
   },
 
   // TODO: split into multiple endpoints
