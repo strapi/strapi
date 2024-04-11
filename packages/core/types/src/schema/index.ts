@@ -181,8 +181,7 @@ export type AttributeNamesWithTarget<TSchemaUID extends UID.Schema> = Extract<
 /**
  * Extracts the names of all required attributes from a given schema.
  *
- * @remark `
- RequiredAttributeNames` screens attributes based on the {@link Attribute.Required} property,
+ * @remark `RequiredAttributeNames` screens attributes based on the {@link Attribute.Required} property,
  * determining mandatory attributes from the given schema.
  *
  * @template TSchemaUID - The identifier of the schema.
