@@ -53,7 +53,7 @@ Contributors expects to create and/or use APIs that handle very generic data str
 Users expects to have a TypeScript experience tailored around their own application, with their content-types, components, and plugins being strongly typed and recognized by the Strapi APIs.
 
 :::warning
-Creating such experiences without slowing down developers (both contributors and users) is a huge undertaking and should be considered as a top priority everytime the type system is modified. 
+Creating such experiences without slowing down developers (both contributors and users) is a huge undertaking and should be considered a top priority everytime the type system is modified. 
 :::
 
 ### Key Principles
