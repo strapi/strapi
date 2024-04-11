@@ -42,7 +42,7 @@ Lastly, the type system also provides users with type-manipulation utilities.
 
 ### Challenges
 
-The main challenge faced by the type system is being able to maintain a high-quality TypeScript developer experience for different contexts, each with their singularities.
+The main challenge faced by the type system is being able to maintain a high-quality TypeScript developer experience for different contexts, each with their own nuances.
 
 #### For Contributors
 
