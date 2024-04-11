@@ -229,13 +229,6 @@ export interface ContentTypeSchemaInfo extends SchemaInfo {
 }
 
 /**
- * Schema for a collection type
- */
-export interface CollectionTypeSchema extends ContentTypeSchema {
-  kind: 'collectionType';
-}
-
-/**
  * Schema that represents a collection of content types' entry in the system.
  */
 export interface CollectionTypeSchema extends ContentTypeSchema {
