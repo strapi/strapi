@@ -1,5 +1,9 @@
 export type Middleware = (ctx: any, next: () => Promise<void>) => Promise<void>;
 
+export type Options = {
+  exclude?: string[];
+};
+
 export const createMiddlewareManager = () => {
   const middlewares: Middleware[] = [];
 
@@ -24,14 +28,17 @@ export const createMiddlewareManager = () => {
       return next();
     },
 
-    wrapObject<TSource>(source: TSource, ctxDefaults = {}): TSource {
+    wrapObject<TSource>(source: TSource, ctxDefaults = {}, opts: Options = {}): TSource {
       const facade: TSource = {} as TSource;
+      const { exclude = [] } = opts;
 
       for (const key in source) {
         if (Object.hasOwnProperty.call(source, key)) {
           const prop = source[key];
 
-          if (typeof prop === 'function') {
+          if (exclude.includes(key)) {
+            facade[key] = prop;
+          } else if (typeof prop === 'function') {
             const newMethod = async (params: any) => {
               const ctx = {
                 ...ctxDefaults,

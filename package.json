@@ -137,6 +137,7 @@
     "nx": "18.2.2",
     "plop": "2.7.6",
     "prettier": "3.2.5",
+    "prettier-2": "npm:prettier@^2",
     "qs": "6.11.1",
     "rimraf": "5.0.5",
     "semver": "7.5.4",
