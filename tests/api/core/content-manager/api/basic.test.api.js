@@ -68,7 +68,7 @@ describe('CM API - Basic', () => {
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject(omit('hiddenAttribute', product));
     expect(res.body.data).not.toHaveProperty('hiddenAttribute');
     expect(res.body.data.publishedAt).toBeDefined();
