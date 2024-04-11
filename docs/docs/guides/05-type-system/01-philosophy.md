@@ -64,7 +64,7 @@ Strapi's strength lies in its ability to handle a wide range of content and cust
 
 #### 📏 Uniformity
 
-The goal of the type system is to provide a consistent and smooth TypeScript developer experience for both user's applications and Strapi internals.
+The goal of the type system is to provide a consistent and smooth TypeScript developer experience for both users' applications and Strapi internals.
 
 #### 🧰 Fully-Featured
 
