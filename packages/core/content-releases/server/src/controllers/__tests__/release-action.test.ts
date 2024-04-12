@@ -127,12 +127,10 @@ describe('Release Action controller', () => {
 
       expect(ctx.created).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            data: expect.any(Array), // Ensure data is an array
-            meta: expect.objectContaining({
-              totalEntries: 2,
-              entriesAlreadyInRelease: 0,
-            }),
+          data: expect.any(Array), // Ensure data is an array
+          meta: expect.objectContaining({
+            totalEntries: 2,
+            entriesAlreadyInRelease: 0,
           }),
         })
       );
@@ -169,10 +167,8 @@ describe('Release Action controller', () => {
 
       expect(mockCreateAction).toHaveBeenCalledTimes(1);
       expect(ctx.created).toHaveBeenCalledWith({
-        body: {
-          data: [],
-          meta: { totalEntries: 1, entriesAlreadyInRelease: 1 },
-        },
+        data: [],
+        meta: { totalEntries: 1, entriesAlreadyInRelease: 1 },
       });
     });
   });
