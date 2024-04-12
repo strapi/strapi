@@ -8,6 +8,12 @@ import type {
 } from '../../../shared/contracts/review-workflows';
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 
+type ContentType = Contracts.ContentTypes.ContentType;
+interface ContentTypes {
+  collectionType: ContentType[];
+  singleType: ContentType[];
+}
+
 const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
   endpoints: (builder) => ({
     getStages: builder.query<
@@ -15,11 +21,14 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         stages: NonNullable<GetStages.Response['data']>;
         meta: NonNullable<GetStages.Response['meta']>;
       },
-      GetStages.Params & { slug: string }
+      GetStages.Params & { slug: string; params?: object }
     >({
-      query: ({ model, slug, id }) => ({
-        url: `/admin/content-manager/${slug}/${model}/${id}/stages`,
+      query: ({ model, slug, id, params }) => ({
+        url: `/review-workflows/content-manager/${slug}/${model}/${id}/stages`,
         method: 'GET',
+        config: {
+          params,
+        },
       }),
       transformResponse: (res: GetStages.Response) => {
         return {
@@ -27,39 +36,55 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
           stages: res.data ?? [],
         };
       },
-      providesTags: (_res, _err, arg) => {
-        return [{ type: 'ReviewWorkflowStage' as const, id: arg.id }];
-      },
+      providesTags: ['ReviewWorkflowStages'],
     }),
     updateStage: builder.mutation<
       UpdateStage.Response['data'],
-      UpdateStage.Request['body'] & UpdateStage.Params & { slug: string }
+      UpdateStage.Request['body'] & UpdateStage.Params & { slug: string; params?: object }
     >({
-      query: ({ model, slug, id, ...data }) => ({
-        url: `/admin/content-manager/${slug}/${model}/${id}/stage`,
+      query: ({ model, slug, id, params, ...data }) => ({
+        url: `/review-workflows/content-manager/${slug}/${model}/${id}/stage`,
         method: 'PUT',
         data,
+        config: {
+          params,
+        },
       }),
       transformResponse: (res: UpdateStage.Response) => res.data,
-      invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflowStage' as const, id: arg.id }],
     }),
     updateAssignee: builder.mutation<
       UpdateAssignee.Response['data'],
-      UpdateAssignee.Request['body'] & UpdateAssignee.Params & { slug: string }
+      UpdateAssignee.Request['body'] & UpdateAssignee.Params & { slug: string; params?: object }
     >({
-      query: ({ model, slug, id, ...data }) => ({
-        url: `/admin/content-manager/${slug}/${model}/${id}/assignee`,
+      query: ({ model, slug, id, params, ...data }) => ({
+        url: `/review-workflows/content-manager/${slug}/${model}/${id}/assignee`,
         method: 'PUT',
         data,
+        config: {
+          params,
+        },
       }),
       transformResponse: (res: UpdateAssignee.Response) => res.data,
     }),
-    getContentTypes: builder.query<Contracts.ContentTypes.ContentType[], void>({
+    getContentTypes: builder.query<ContentTypes, void>({
       query: () => ({
         url: `/content-manager/content-types`,
         method: 'GET',
       }),
-      transformResponse: (res: { data: Contracts.ContentTypes.ContentType[] }) => res.data,
+      transformResponse: (res: { data: Contracts.ContentTypes.ContentType[] }) => {
+        return res.data.reduce<ContentTypes>(
+          (acc, curr) => {
+            if (curr.isDisplayed) {
+              acc[curr.kind].push(curr);
+            }
+            return acc;
+          },
+          {
+            collectionType: [],
+            singleType: [],
+          }
+        );
+      },
     }),
   }),
 });
@@ -77,3 +102,4 @@ export {
   useUpdateAssigneeMutation,
   useGetContentTypesQuery,
 };
+export type { ContentTypes, ContentType };

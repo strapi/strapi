@@ -4631,13 +4631,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@npmcli/redact@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@npmcli/redact@npm:1.1.0"
-  checksum: c6c81c2d1463bc9f30d40f983a3dbb3144503030ff455e5a8904ff82ca39b95e46e9830fa4413f17f9a77604cdbb1f2370c53dd0ba4841cf24b79843e1fcf825
-  languageName: node
-  linkType: hard
-
 "@npmcli/run-script@npm:7.0.2":
   version: 7.0.2
   resolution: "@npmcli/run-script@npm:7.0.2"
@@ -6158,7 +6151,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sigstore/bundle@npm:^2.2.0, @sigstore/bundle@npm:^2.3.0":
+"@sigstore/bundle@npm:^2.2.0":
   version: 2.3.0
   resolution: "@sigstore/bundle@npm:2.3.0"
   dependencies:
@@ -6189,14 +6182,14 @@ __metadata:
   linkType: hard
 
 "@sigstore/sign@npm:^2.2.3":
-  version: 2.3.0
-  resolution: "@sigstore/sign@npm:2.3.0"
+  version: 2.2.3
+  resolution: "@sigstore/sign@npm:2.2.3"
   dependencies:
-    "@sigstore/bundle": "npm:^2.3.0"
+    "@sigstore/bundle": "npm:^2.2.0"
     "@sigstore/core": "npm:^1.0.0"
-    "@sigstore/protobuf-specs": "npm:^0.3.1"
+    "@sigstore/protobuf-specs": "npm:^0.3.0"
     make-fetch-happen: "npm:^13.0.0"
-  checksum: 21277ec764b3c382552d3ca4e858c2a6b1c773492d255ce3514352a1023a03e276897e17040d0b658c2411b72c35414e333925ac594f809e708f07d76a7e9d88
+  checksum: 92da5cd20781b02c72cd4cc512dbd03cb7cf55ae46436255910f0d3122db2acbeca544daa108cf092322e5fd0ae4d22b912d7345b425c97ee2f6f97a15c3d009
   languageName: node
   linkType: hard
 
@@ -7867,9 +7860,13 @@ __metadata:
     "@strapi/plugin-content-manager": "npm:5.0.0-beta.3"
     "@strapi/types": "npm:5.0.0-beta.3"
     "@strapi/utils": "npm:5.0.0-beta.3"
+    "@testing-library/react": "npm:14.0.0"
     axios: "npm:1.6.8"
+    fractional-indexing: "npm:3.2.0"
     msw: "npm:1.3.0"
     react: "npm:^18.2.0"
+    react-dnd: "npm:16.0.1"
+    react-dnd-html5-backend: "npm:16.0.1"
     react-dom: "npm:^18.2.0"
     react-helmet: "npm:^6.1.0"
     react-intl: "npm:6.6.2"
@@ -7879,7 +7876,7 @@ __metadata:
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    "@strapi/plugin-content-manager": ^5.0.0
+    "@strapi/plugin-content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -22565,10 +22562,9 @@ __metadata:
   linkType: hard
 
 "npm-registry-fetch@npm:^16.0.0":
-  version: 16.2.0
-  resolution: "npm-registry-fetch@npm:16.2.0"
+  version: 16.1.0
+  resolution: "npm-registry-fetch@npm:16.1.0"
   dependencies:
-    "@npmcli/redact": "npm:^1.1.0"
     make-fetch-happen: "npm:^13.0.0"
     minipass: "npm:^7.0.2"
     minipass-fetch: "npm:^3.0.0"
@@ -22576,7 +22572,7 @@ __metadata:
     minizlib: "npm:^2.1.2"
     npm-package-arg: "npm:^11.0.0"
     proc-log: "npm:^3.0.0"
-  checksum: cad3b7bbbc52e57532300fcd44f7443e978ec7578653479a2e5669a74862df0ea9603fa3c66868ac2da97bb59dddac6cec3d02613ce6e374a92a41c63dd21f16
+  checksum: ba760c9cdacb1219ac5d8fecc26b1c55d502b55d45ab85ad556353b9bc5ba664c226fda54284c06df8c7eecfdcacb1aa065838ea7d1b0189d24c4d3f186309d2
   languageName: node
   linkType: hard
 
