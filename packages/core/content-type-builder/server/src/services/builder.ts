@@ -36,10 +36,9 @@ export const getReservedNames = () => {
       'localizations',
       'meta',
       'locale',
-      'stage',
-      'release',
-      'history',
-      'version',
+      // TODO: remove these in favor of restricting the strapi_ prefix
+      'strapi_stage',
+      'strapi_assignee',
     ],
   };
   // strapi.db.getReservedNames();
