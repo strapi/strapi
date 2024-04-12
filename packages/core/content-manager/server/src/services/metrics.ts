@@ -5,7 +5,7 @@ import type { Configuration } from '../../../shared/contracts/content-types';
 
 const { getRelationalFields } = relations;
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sendDidConfigureListView = async (
     contentType: Struct.ContentTypeSchema,
     configuration: Configuration

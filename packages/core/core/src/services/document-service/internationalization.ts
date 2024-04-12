@@ -21,7 +21,6 @@ const defaultLocale: AsyncTransform = async (contentType, params) => {
   }
 
   if (!params.locale) {
-    // TODO: Load default locale from db in i18n
     return assoc('locale', await getDefaultLocale(), params);
   }
 

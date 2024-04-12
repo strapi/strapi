@@ -165,7 +165,7 @@ describe('Sanitize populated entries', () => {
     test('Wildcard populate is transformed to an exhaustive list of populatable fields', async () => {
       let populate = {};
       strapi.documents.use((ctx, next) => {
-        populate = ctx.args[0]?.populate;
+        populate = ctx.params?.populate;
         return next();
       });
 

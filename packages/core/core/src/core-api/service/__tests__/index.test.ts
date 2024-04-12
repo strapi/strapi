@@ -105,7 +105,8 @@ describe('Default Service', () => {
 
         expect(dbInstance.findOne).toHaveBeenCalledWith();
 
-        expect(documentService.update).toHaveBeenCalledWith(1, {
+        expect(documentService.update).toHaveBeenCalledWith({
+          documentId: 1,
           data: input,
           status: 'published',
         });
@@ -137,7 +138,7 @@ describe('Default Service', () => {
 
         expect(dbInstance.findOne).toHaveBeenCalledWith();
 
-        expect(documentService.delete).toHaveBeenCalledWith(1, { status: 'published' });
+        expect(documentService.delete).toHaveBeenCalledWith({ documentId: 1, status: 'published' });
       });
     });
   });

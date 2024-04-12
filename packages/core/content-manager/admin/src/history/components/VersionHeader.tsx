@@ -1,5 +1,5 @@
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { HeaderLayout, Typography } from '@strapi/design-system';
+import { BaseHeaderLayout, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { ArrowLeft } from '@strapi/icons';
 import { stringify } from 'qs';
@@ -44,7 +44,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   };
 
   return (
-    <HeaderLayout
+    <BaseHeaderLayout
       id={headerId}
       title={formatDate(new Date(version.createdAt), {
         year: 'numeric',
@@ -82,6 +82,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           })}
         </Link>
       }
+      sticky={false}
     />
   );
 };

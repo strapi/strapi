@@ -6,7 +6,7 @@ import { ILink } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: Core.LoadedStrapi, trx?: Knex.Transaction) => {
+export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => {
   const query = () => {
     const { connection } = strapi.db;
 
@@ -224,6 +224,14 @@ export const createLinkQuery = (strapi: Core.LoadedStrapi, trx?: Knex.Transactio
       const attribute = metadata.attributes[left.field];
 
       const payload = {};
+
+      /**
+       * This _should_ only happen for attributes that are added dynamically e.g. review-workflow stages
+       * and a user is importing EE data into a CE project.
+       */
+      if (!attribute) {
+        return;
+      }
 
       if (attribute.type !== 'relation') {
         throw new Error(`Attribute ${left.field} is not a relation`);

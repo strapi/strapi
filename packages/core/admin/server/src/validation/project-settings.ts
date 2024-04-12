@@ -13,8 +13,8 @@ const updateProjectSettings = z
   .strict();
 
 const updateProjectSettingsLogo = z.object({
-  name: z.string().nullish(),
-  type: z.enum(['image/jpeg', 'image/png', 'image/svg+xml']),
+  originalFilename: z.string().nullish(),
+  mimetype: z.enum(['image/jpeg', 'image/png', 'image/svg+xml']),
   size: z.number().max(MAX_IMAGE_FILE_SIZE).nullish(),
 });
 

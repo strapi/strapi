@@ -1,6 +1,9 @@
 import type { Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
+/**
+ * Represents a timestamp Strapi attribute along with its options
+ */
 export type Timestamp = Intersect<
   [
     Attribute.OfType<'timestamp'>,

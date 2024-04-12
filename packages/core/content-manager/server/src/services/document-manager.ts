@@ -8,7 +8,7 @@ import { sumDraftCounts } from './utils/draft';
 import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
 type DocService = Modules.Documents.ServiceInstance;
-type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>;
+type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
 const { ApplicationError } = errors;
@@ -36,10 +36,14 @@ const emitEvent = async (uid: UID.ContentType, event: string, document: Document
   });
 };
 
-const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
-    async findOne(id: string, uid: UID.CollectionType, opts: DocServiceParams<'findOne'>[1] = {}) {
-      return strapi.documents(uid).findOne(id, opts);
+    async findOne(
+      id: string,
+      uid: UID.CollectionType,
+      opts: Omit<DocServiceParams<'findOne'>, 'documentId'> = {}
+    ) {
+      return strapi.documents(uid).findOne({ ...opts, documentId: id });
     },
 
     /**
@@ -72,12 +76,12 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       return strapi.db.query(uid).findMany({ populate: opts.populate, where });
     },
 
-    async findMany(opts: DocServiceParams<'findMany'>[0], uid: UID.CollectionType) {
+    async findMany(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
       const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
       return strapi.documents(uid).findMany(params);
     },
 
-    async findPage(opts: DocServiceParams<'findMany'>[0], uid: UID.CollectionType) {
+    async findPage(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
       // Pagination
       const page = Number(opts?.page) || 1;
       const pageSize = Number(opts?.pageSize) || 10;
@@ -98,7 +102,7 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       };
     },
 
-    async create(uid: UID.CollectionType, opts: DocServiceParams<'create'>[0] = {} as any) {
+    async create(uid: UID.CollectionType, opts: DocServiceParams<'create'> = {} as any) {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, status: 'draft' as const, populate };
 
@@ -108,13 +112,13 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     async update(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: DocServiceParams<'update'>[1] = {} as any
+      opts: Omit<DocServiceParams<'update'>, 'documentId'> = {} as any
     ) {
       const publishData = pipe(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, data: publishData, populate, status: 'draft' };
 
-      return strapi.documents(uid).update(id, params);
+      return strapi.documents(uid).update({ ...params, documentId: id });
     },
 
     async clone(
@@ -133,7 +137,7 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       return strapi
         .documents(uid)
-        .clone(id, params)
+        .clone({ ...params, documentId: id })
         .then((result) => result?.versions.at(0));
     },
 
@@ -155,20 +159,24 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     async delete(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: DocServiceParams<'delete'>[1] = {} as any
+      opts: Omit<DocServiceParams<'delete'>, 'documentId'> = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
 
-      await strapi.documents(uid).delete(id, { ...opts, populate });
+      await strapi.documents(uid).delete({
+        ...opts,
+        documentId: id,
+        populate,
+      });
       return {};
     },
 
     // FIXME: handle relations
-    async deleteMany(opts: DocServiceParams<'findMany'>[0], uid: UID.CollectionType) {
+    async deleteMany(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
       const docs = await strapi.documents(uid).findMany(opts);
 
       for (const doc of docs) {
-        await strapi.documents!(uid).delete(doc.documentId);
+        await strapi.documents!(uid).delete({ documentId: doc.documentId });
       }
 
       return { count: docs.length };
@@ -177,14 +185,14 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     async publish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: DocServiceParams<'publish'>[1] = {} as any
+      opts: Omit<DocServiceParams<'publish'>, 'documentId'> = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = { ...opts, populate };
 
       return strapi
         .documents(uid)
-        .publish(id, params)
+        .publish({ ...params, documentId: id })
         .then((result) => result?.versions.at(0));
     },
 
@@ -272,28 +280,28 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     async unpublish(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: DocServiceParams<'unpublish'>[1] = {} as any
+      opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = { ...opts, populate };
 
       return strapi
         .documents(uid)
-        .unpublish(id, params)
+        .unpublish({ ...params, documentId: id })
         .then((result) => result?.versions.at(0));
     },
 
     async discardDraft(
       id: Modules.Documents.ID,
       uid: UID.CollectionType,
-      opts: DocServiceParams<'discardDraft'>[1] = {} as any
+      opts: Omit<DocServiceParams<'discardDraft'>, 'documentId'> = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = { ...opts, populate };
 
       return strapi
         .documents(uid)
-        .discardDraft(id, params)
+        .discardDraft({ ...params, documentId: id })
         .then((result) => result?.versions.at(0));
     },
 
@@ -303,7 +311,7 @@ const documentManager = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       if (!hasRelations) {
         return 0;
       }
-      const document = await strapi.documents(uid).findOne(id, { populate, locale });
+      const document = await strapi.documents(uid).findOne({ documentId: id, populate, locale });
       if (!document) {
         throw new ApplicationError(
           `Unable to count draft relations, document with id ${id} and locale ${locale} not found`

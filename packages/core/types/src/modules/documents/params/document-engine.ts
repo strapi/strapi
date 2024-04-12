@@ -1,8 +1,7 @@
 import type * as UID from '../../../uid';
 
 import { Pick } from '.';
-
-// TODO: add auth to params
+import { ID } from '..';
 
 /**
  * Document Service specific method params
@@ -16,8 +15,7 @@ export type FindMany<TContentTypeUID extends UID.ContentType> = Pick<
   | 'sort'
   | 'populate'
   | 'status'
-  | 'locale:string'
-  | 'locale:array'
+  | 'locale'
   | 'plugin'
   | 'lookup'
 >;
@@ -40,26 +38,16 @@ export type FindFirst<TContentTypeUID extends UID.ContentType> = Pick<
 export type FindOne<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
   'fields' | 'populate' | 'filters' | 'status' | 'locale:string' | 'sort' | 'lookup'
->;
+> & {
+  documentId: ID;
+};
 
 export type Delete<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
   'fields' | 'populate' | 'filters' | 'status' | 'locale:string' | 'lookup'
->;
-
-export type DeleteMany<TContentTypeUID extends UID.ContentType> = Pick<
-  TContentTypeUID,
-  | 'fields'
-  | 'filters'
-  | '_q'
-  | 'pagination:offset'
-  | 'sort'
-  | 'populate'
-  | 'status'
-  | 'locale:string'
-  | 'plugin'
-  | 'lookup'
->;
+> & {
+  documentId: ID;
+};
 
 export type Create<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
@@ -69,38 +57,34 @@ export type Create<TContentTypeUID extends UID.ContentType> = Pick<
 export type Clone<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
   'data' | 'fields' | 'populate' | 'status' | 'locale:string' | 'lookup'
->;
+> & {
+  documentId: ID;
+};
 
 export type Update<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
   'data:partial' | 'fields' | 'populate' | 'locale:string' | 'lookup'
->;
+> & {
+  documentId: ID;
+};
 
 export type Publish<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'filters' | 'locale:string' | 'locale:array' | 'lookup'
->;
+  'filters' | 'locale' | 'lookup'
+> & {
+  documentId: ID;
+};
 
 export type Unpublish<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'filters' | 'locale:string' | 'locale:array' | 'lookup'
->;
+  'filters' | 'locale' | 'lookup'
+> & {
+  documentId: ID;
+};
 
 export type DiscardDraft<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
   'filters' | 'locale:string' | 'lookup'
->;
-
-export type With<TContentTypeUID extends UID.ContentType> = Pick<
-  TContentTypeUID,
-  | 'filters'
-  | 'fields'
-  | '_q'
-  | 'pagination:offset'
-  | 'sort'
-  | 'populate'
-  | 'status'
-  | 'locale:string'
-  | 'plugin'
-  | 'lookup'
->;
+> & {
+  documentId: ID;
+};

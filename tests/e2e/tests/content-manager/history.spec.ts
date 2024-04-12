@@ -1,7 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { describeOnCondition } from '../../utils/shared';
+import { resetFiles } from '../../utils/file-reset';
+import { waitForRestart } from '../../utils/restart';
 
 const hasFutureFlag = process.env.STRAPI_FEATURES_FUTURE_CONTENT_HISTORY === 'true';
 
@@ -9,8 +11,13 @@ describeOnCondition(hasFutureFlag)('History', () => {
   test.describe('Collection Type', () => {
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin.tar');
+      await resetFiles();
       await page.goto('/admin');
       await login({ page });
+    });
+
+    test.afterAll(async () => {
+      await resetFiles();
     });
 
     test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
@@ -130,11 +137,82 @@ describeOnCondition(hasFutureFlag)('History', () => {
       await expect(currentVersion.getByText('Modified')).toBeVisible();
       await expect(titleInput).toHaveValue('Being from Kansas City, Missouri');
     });
+
+    test('A user should be able to rename (delete + create) a field in the content-type builder and see the changes as "unknown fields" in concerned history versions', async ({
+      page,
+    }) => {
+      const CREATE_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
+      const HISTORY_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+\/history(\?.*)?/;
+      /**
+       * Create an initial entry to also create an initial version
+       */
+      await page.goto('/admin');
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+      await page.waitForURL(CREATE_URL);
+      await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas');
+      await page.getByRole('textbox', { name: 'slug' }).fill('being-from-kansas');
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      /**
+       * Rename field in content-type builder
+       */
+      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+
+      const skipTheTour = await page.getByRole('button', { name: 'Skip the tour' });
+      if (skipTheTour.isVisible()) {
+        skipTheTour.click();
+      }
+
+      await page.getByRole('link', { name: 'Article' }).click();
+      await page.waitForURL(
+        '/admin/plugins/content-type-builder/content-types/api::article.article'
+      );
+      await page.getByRole('button', { name: 'Edit title' }).first().click();
+      await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
+      await page.getByRole('button', { name: 'Finish' }).click();
+      await page.getByRole('button', { name: 'Save' }).click();
+      await waitForRestart(page);
+      await expect(page.getByRole('cell', { name: 'titleRename', exact: true })).toBeVisible();
+
+      /**
+       * Update the existing entry to create another version
+       */
+      await page.goto('/admin');
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Article' }).click();
+      await page.getByRole('gridcell', { name: 'being-from-kansas' }).click();
+      await page.getByRole('textbox', { name: 'titleRename' }).fill('Being from Kansas City');
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      /**
+       * Go to the history page
+       */
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: 'Content History' }).click();
+      await page.waitForURL(HISTORY_URL);
+      const versionCards = await page.getByRole('listitem', { name: 'Version card' });
+      await expect(versionCards).toHaveCount(2);
+
+      const previousVersion = versionCards.nth(1);
+      previousVersion.click();
+
+      // Assert the unknown field is present
+      await expect(page.getByText('Unknown fields')).toBeVisible();
+      await expect(page.getByRole('textbox', { name: 'title' })).toBeVisible();
+      await expect(page.getByRole('textbox', { name: 'title' })).toHaveValue('Being from Kansas');
+      // Assert the new field is present
+      await expect(page.getByText('titleRename')).toBeVisible();
+      await page.getByRole('status').getByText('New field');
+    });
   });
 
   test.describe('Single Type', () => {
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin.tar');
+      await resetFiles();
       await page.goto('/admin');
       await login({ page });
     });
@@ -247,6 +325,72 @@ describeOnCondition(hasFutureFlag)('History', () => {
       // Assert the current version is the most recent published version
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
       await expect(currentVersion.getByText('Modified')).toBeVisible();
+    });
+
+    test('A user should be able to rename (delete + create) a field in the content-type builder and see the changes as "unknown fields" in concerned history versions', async ({
+      page,
+    }) => {
+      const HISTORY_URL =
+        /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
+      /**
+       * Create an initial entry to also create an initial version
+       */
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Homepage' }).click();
+      await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      /**
+       * Rename field in content-type builder
+       */
+      await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+
+      const skipTheTour = await page.getByRole('button', { name: 'Skip the tour' });
+      if (skipTheTour.isVisible()) {
+        skipTheTour.click();
+      }
+
+      await page.getByRole('link', { name: 'Homepage' }).click();
+      await page.waitForURL(
+        '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
+      );
+      await page.getByRole('button', { name: 'Edit title' }).first().click();
+      await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
+      await page.getByRole('button', { name: 'Finish' }).click();
+      await page.getByRole('button', { name: 'Save' }).click();
+      await waitForRestart(page);
+      await expect(page.getByRole('cell', { name: 'titleRename', exact: true })).toBeVisible();
+
+      /**
+       * Update the existing entry to create another version
+       */
+      await page.goto('/admin');
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Homepage' }).click();
+      await page.getByRole('textbox', { name: 'titleRename' }).fill('Welcome to AFC Richmond!');
+      await page.getByRole('button', { name: 'Save' }).click();
+
+      /**
+       * Go to the history page
+       */
+      await page.getByRole('button', { name: /more actions/i }).click();
+      await page.getByRole('menuitem', { name: 'Content History' }).click();
+      await page.waitForURL(HISTORY_URL);
+      const versionCards = await page.getByRole('listitem', { name: 'Version card' });
+      await expect(versionCards).toHaveCount(2);
+
+      const previousVersion = versionCards.nth(1);
+      previousVersion.click();
+
+      // Assert the unknown field is present
+      await expect(page.getByText('Unknown fields')).toBeVisible();
+      await expect(page.getByRole('textbox', { name: 'title' })).toBeVisible();
+      await expect(page.getByRole('textbox', { name: 'title' })).toHaveValue(
+        'Welcome to AFC Richmond'
+      );
+      // Assert the new field is present
+      await expect(page.getByText('titleRename')).toBeVisible();
+      await page.getByRole('status').getByText('New field');
     });
   });
 });

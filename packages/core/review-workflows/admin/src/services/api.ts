@@ -5,7 +5,7 @@ import { axiosBaseQuery, type UnknownApiError } from '../utils/api';
 const reviewWorkflowsApi = createApi({
   reducerPath: 'reviewWorkflowsApi',
   baseQuery: axiosBaseQuery(),
-  tagTypes: ['ReviewWorkflow', 'ReviewWorkflowStage'],
+  tagTypes: ['ReviewWorkflow', 'ReviewWorkflowStages'],
   endpoints: () => ({}),
 });
 
