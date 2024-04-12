@@ -67,7 +67,7 @@
   },
   "devDependencies": {
     "@strapi/admin": "5.0.0-beta.3",
-    "@strapi/pack-up": "5.0.0-beta.3",
+    "@strapi/pack-up": "5.0.0",
     "@strapi/plugin-content-manager": "5.0.0-beta.3",
     "@strapi/types": "5.0.0-beta.3",
     "@strapi/utils": "5.0.0-beta.3",

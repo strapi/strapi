@@ -414,11 +414,11 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
 ************************** */
 
 // components can have nested compos so this must be recursive
-const createComponent = async <TUID extends UID.Component>(
+const createComponent = async <TUID extends UID.Component = UID.Component>(
   uid: TUID,
   data: Modules.EntityService.Params.Data.Input<TUID>
 ) => {
-  const model = strapi.getModel(uid);
+  const model = strapi.getModel(uid) as Schema.Component;
 
   const componentData = await createComponents(uid, data);
   const transform = pipe(
@@ -439,7 +439,7 @@ const updateComponent = async <TUID extends UID.Component>(
   componentToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   data: Modules.EntityService.Params.Data.Input<TUID>
 ) => {
-  const model = strapi.getModel(uid);
+  const model = strapi.getModel(uid) as Schema.Component;
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 

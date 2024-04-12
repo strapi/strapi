@@ -66,7 +66,7 @@
   "devDependencies": {
     "@strapi/admin": "5.0.0-beta.3",
     "@strapi/admin-test-utils": "5.0.0-beta.3",
-    "@strapi/pack-up": "5.0.0-beta.3",
+    "@strapi/pack-up": "5.0.0",
     "@strapi/plugin-content-manager": "5.0.0-beta.3",
     "@strapi/types": "5.0.0-beta.3",
     "@testing-library/react": "14.0.0",
