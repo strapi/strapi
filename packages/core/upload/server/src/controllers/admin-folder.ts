@@ -95,9 +95,7 @@ export default {
     });
 
     ctx.created({
-      body: {
-        data: await permissionsManager.sanitizeOutput(folder),
-      },
+      data: await permissionsManager.sanitizeOutput(folder),
     });
   },
 
