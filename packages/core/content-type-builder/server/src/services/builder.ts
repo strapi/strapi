@@ -16,7 +16,6 @@ export const getReservedNames = () => {
 
       // ID fields
       'id',
-      'documentId',
       'document_id',
 
       // Creator fields
