@@ -115,16 +115,6 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.error.message).toBe('Release with name Test Release already exists');
     });
 
-    test('cannot create a scheduled release without timezone', async () => {
-      const res = await createRelease({
-        name: 'Test Scheduled Release',
-        scheduledAt: new Date('2024-10-10T00:00:00.000Z'),
-      });
-
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toBe('timezone is a required field');
-    });
-
     test('create a scheduled release', async () => {
       const res = await createRelease({
         name: 'Test Scheduled Release',

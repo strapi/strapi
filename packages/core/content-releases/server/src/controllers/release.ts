@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
-import { validateReleaseApi } from './validation/release';
+import { validateRelease } from './validation/release';
 import type {
   CreateRelease,
   UpdateRelease,
@@ -145,7 +145,7 @@ const releaseController = {
     const user: UserInfo = ctx.state.user;
     const releaseArgs: CreateRelease.Request['body'] = ctx.request.body;
 
-    await validateReleaseApi(releaseArgs);
+    await validateRelease(releaseArgs);
 
     const releaseService = getService('release', { strapi });
     const release = await releaseService.create(releaseArgs, { user });
@@ -165,7 +165,7 @@ const releaseController = {
     const releaseArgs: UpdateRelease.Request['body'] = ctx.request.body;
     const id: UpdateRelease.Request['params']['id'] = ctx.params.id;
 
-    await validateReleaseApi(releaseArgs);
+    await validateRelease(releaseArgs);
 
     const releaseService = getService('release', { strapi });
     const release = await releaseService.update(id, releaseArgs, { user });
