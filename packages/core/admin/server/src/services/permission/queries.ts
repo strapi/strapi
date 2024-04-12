@@ -28,7 +28,7 @@ export const deleteByRolesIds = async (rolesIds: Data.ID[]): Promise<void> => {
  * @param ids ids of permissions
  */
 export const deleteByIds = async (ids: Data.ID[]): Promise<void> => {
-  const result: any[] = [];
+  const result: unknown[] = [];
   for (const id of ids) {
     const queryResult = await strapi.db.query('admin::permission').delete({ where: { id } });
     result.push(queryResult);
@@ -41,7 +41,7 @@ export const deleteByIds = async (ids: Data.ID[]): Promise<void> => {
  * @param permissions
  */
 export const createMany = async (permissions: CreatePermissionPayload[]): Promise<Permission[]> => {
-  const createdPermissions: any[] = [];
+  const createdPermissions: CreatePermissionPayload[] = [];
   for (const permission of permissions) {
     const newPerm = await strapi.db.query('admin::permission').create({ data: permission });
     createdPermissions.push(newPerm);
