@@ -116,28 +116,34 @@ describe('CM API - Number of draft relations', () => {
       body: { name: 'Food' },
     });
 
-    const { body: categoryPublished } = await rq({
+    const {
+      body: { data: categoryPublished },
+    } = await rq({
       method: 'POST',
       url: `/content-manager/collection-types/api::category.category/${idToPublish}/actions/publish`,
     });
 
-    categories.published.push(categoryPublished.data);
+    categories.published.push(categoryPublished);
 
-    const { body: categoryDraft1 } = await rq({
+    const {
+      body: { data: categoryDraft1 },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::category.category',
       body: { name: 'Food' },
     });
 
-    categories.draft.push(categoryDraft1.data);
+    categories.draft.push(categoryDraft1);
 
-    const { body: categoryDraft2 } = await rq({
+    const {
+      body: { data: categoryDraft2 },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::category.category',
       body: { name: 'Food' },
     });
 
-    categories.draft.push(categoryDraft2.data);
+    categories.draft.push(categoryDraft2);
 
     // Create a non default locale
     await rq({
@@ -176,7 +182,9 @@ describe('CM API - Number of draft relations', () => {
   test('Return 0 for published relations only', async () => {
     const publishedId = categories.published[0].id;
 
-    const { body: product } = await rq({
+    const {
+      body: { data: product },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::product.product',
       body: {
@@ -200,7 +208,7 @@ describe('CM API - Number of draft relations', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.data.documentId}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(0);
@@ -209,7 +217,9 @@ describe('CM API - Number of draft relations', () => {
   test('Return 8 when there are 8 drafts (1 xToOne & 1 xToMany on ct, compo, comporep, dz)', async () => {
     const draftId = categories.draft[0].id;
 
-    const { body: product } = await rq({
+    const {
+      body: { data: product },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::product.product',
       body: {
@@ -233,7 +243,7 @@ describe('CM API - Number of draft relations', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.data.documentId}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(8);
