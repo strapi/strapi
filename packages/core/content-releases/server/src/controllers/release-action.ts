@@ -27,9 +27,7 @@ const releaseActionController = {
     const releaseAction = await releaseService.createAction(releaseId, releaseActionArgs);
 
     ctx.created({
-      body: {
-        data: releaseAction,
-      },
+      data: releaseAction,
     });
   },
 
@@ -67,12 +65,10 @@ const releaseActionController = {
     const newReleaseActions = releaseActions.filter((action) => action !== null);
 
     ctx.created({
-      body: {
-        data: newReleaseActions,
-        meta: {
-          entriesAlreadyInRelease: releaseActions.length - newReleaseActions.length,
-          totalEntries: releaseActions.length,
-        },
+      data: newReleaseActions,
+      meta: {
+        entriesAlreadyInRelease: releaseActions.length - newReleaseActions.length,
+        totalEntries: releaseActions.length,
       },
     });
   },
