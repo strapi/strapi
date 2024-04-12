@@ -168,21 +168,6 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
           },
         ]
       : []),
-
-    ...(!window.strapi.features.isEnabled(window.strapi.features.REVIEW_WORKFLOWS) &&
-    window.strapi?.flags?.promoteEE
-      ? [
-          {
-            intlLabel: {
-              id: 'Settings.review-workflows.page.title',
-              defaultMessage: 'Review Workflows',
-            },
-            to: '/settings/purchase-review-workflows',
-            id: 'review-workflows-purchase-page',
-            lockIcon: true,
-          },
-        ]
-      : []),
   ],
 
   admin: [
