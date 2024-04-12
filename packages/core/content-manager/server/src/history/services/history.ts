@@ -464,6 +464,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           if (attribute.type === 'media') {
             if (attribute.multiple) {
               const existingAndMissingMedias = await Promise.all(
+                // @ts-expect-error Fix the type definitions so this isn't any
                 relationData.map((media) => {
                   return strapi.db
                     .query('plugin::upload.file')
