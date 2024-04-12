@@ -13,7 +13,7 @@ export const getReservedNames = () => {
     ],
     // attributes are compared with snake_case(name), so only snake_case is needed here and camelCase + UPPER_CASE matches will still be caught
     attributes: [
-      // TODO: these need to come from a centralized place so we don't break things accidentally in the future
+      // TODO: these need to come from a centralized place so we don't break things accidentally in the future and can share them outside the CTB, for example on Strapi bootstrap prior to schema db sync
 
       // ID fields
       'id',
