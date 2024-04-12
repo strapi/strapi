@@ -5,6 +5,9 @@ import type * as UID from '../../../uid';
 
 // TODO: [TS2] Make sure the inference is correct when using extends Relation<infer TRelationKind>
 //             (global search)
+/**
+ * Represents a relation Strapi attribute along with its options
+ */
 export type Relation<
   TRelationKind extends RelationKind.Any = RelationKind.Any,
   TTargetUID extends UID.ContentType = UID.ContentType,

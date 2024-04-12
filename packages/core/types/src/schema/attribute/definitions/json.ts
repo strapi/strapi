@@ -2,6 +2,9 @@ import type { Intersect, JSONValue, JSONPrimitive } from '../../../utils';
 
 import type { Attribute } from '../..';
 
+/**
+ * Represents a JSON Strapi attribute along with its options
+ */
 export type JSON = Intersect<
   [
     Attribute.OfType<'json'>,

@@ -43,10 +43,6 @@ interface SortOption {
   label: string;
 }
 
-interface SettingsProps {
-  hasReviewWorkflows?: boolean;
-}
-
 const Settings = () => {
   const { formatMessage, locale } = useIntl();
   const formatter = useCollator(locale, {
@@ -197,4 +193,4 @@ const SETTINGS_FORM_LAYOUT: FormLayoutInputProps[][] = [
   ],
 ];
 
-export { Settings, type SettingsProps };
+export { Settings };
