@@ -241,7 +241,7 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
         .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
       const map = rows.reduce((map, row) => {
-        map[row[joinColumnName]] = { count: Number(row.count) };
+        map[row[joinColRenameAs]] = { count: Number(row.count) };
         return map;
       }, {} as Record<string, { count: number }>);
 
@@ -270,11 +270,11 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
         on: joinTable.on,
         orderBy: _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy),
       })
-      .addSelect(joinColAlias)
+      .addSelect(joinColSelect)
       .where({ [joinColAlias]: referencedValues })
       .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row>(joinColumnName)(rows);
+    const map = _.groupBy<Row>(joinColRenameAs)(rows);
 
     results.forEach((r) => {
       r[attributeName] = fromTargetRow(map[r[referencedColumnName] as string] || []);

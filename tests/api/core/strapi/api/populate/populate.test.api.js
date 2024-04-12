@@ -134,6 +134,14 @@ describe('Populate', () => {
 
     expect(status).toBe(200);
     expect(body.data).toHaveLength(3);
+
+    expect(body.meta.pagination).toMatchObject({
+      pageCount: 1,
+      page: 1,
+      pageSize: 25,
+      total: 3,
+    });
+
     const shirtA = body.data.find((item) => item.attributes.name === 'Shirt A');
     const shirtB = body.data.find((item) => item.attributes.name === 'Shirt B');
 
@@ -168,6 +176,13 @@ describe('Populate', () => {
 
     expect(status).toBe(200);
     expect(body.data).toHaveLength(3);
+
+    expect(body.meta.pagination).toMatchObject({
+      pageCount: 1,
+      page: 1,
+      pageSize: 25,
+      total: 3,
+    });
 
     const shirtA = body.data.find((item) => item.attributes.name === 'Shirt A');
     const shirtB = body.data.find((item) => item.attributes.name === 'Shirt B');
@@ -207,6 +222,13 @@ describe('Populate', () => {
     expect(status).toBe(200);
     expect(body.data).toHaveLength(3);
 
+    expect(body.meta.pagination).toMatchObject({
+      pageCount: 1,
+      page: 1,
+      pageSize: 25,
+      total: 3,
+    });
+
     const shirtC = body.data.find((item) => item.attributes.name === 'Shirt C');
 
     // TODO: test the morph_to_one side on shirtA
@@ -235,6 +257,13 @@ describe('Populate', () => {
 
     const shirtA = body.data.find((item) => item.attributes.name === 'Shirt A');
     const shirtB = body.data.find((item) => item.attributes.name === 'Shirt B');
+
+    expect(body.meta.pagination).toMatchObject({
+      pageCount: 1,
+      page: 1,
+      pageSize: 25,
+      total: 3,
+    });
 
     // Check that shirtA contains shirtB with shirtId
     // TODO v6: standardize the returned data from morph relationships. morph_to_many returns `[{ ...attributes }]` instead of `data: [{ attributes }]`
