@@ -31,12 +31,12 @@ export const getReservedNames = () => {
 
       // Used for Strapi functionality
       'entry_id',
-      'strapi',
       'status',
       'localizations',
       'meta',
       'locale',
       // TODO: remove these in favor of restricting the strapi_ prefix
+      'strapi',
       'strapi_stage',
       'strapi_assignee',
     ],
