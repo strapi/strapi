@@ -135,7 +135,7 @@ describe('Release Action controller', () => {
         })
       );
       const firstCallArgument = ctx.created.mock.calls[0][0];
-      expect(firstCallArgument.body.data.length).toBe(2);
+      expect(firstCallArgument.data.length).toBe(2);
     });
 
     it('should count already added entries and dont throw an error', async () => {
