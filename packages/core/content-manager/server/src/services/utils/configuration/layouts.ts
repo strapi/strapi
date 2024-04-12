@@ -67,9 +67,9 @@ function syncLayouts(configuration: any, schema: any) {
   // backward compatibility with when relations were on the side of the layout
   // it migrates the displayed relations to the main edit layout
   const elementsToReAppend = [...cleanEditRelations];
-  let cleanEdit = [];
+  let cleanEdit: any[] = [];
   for (const row of edit) {
-    const newRow = [];
+    const newRow: any[] = [];
 
     for (const el of row) {
       if (!hasEditableAttribute(schema, el.name)) continue;

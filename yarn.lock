@@ -8992,6 +8992,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/git-url-parse@npm:9.0.3":
+  version: 9.0.3
+  resolution: "@types/git-url-parse@npm:9.0.3"
+  checksum: ae5389bf4339e0e863d84e92cd8af137ea485ea7141a25998300ae38ba471617af004791f4c6f86431eb5fb0c70ad4dda3558ca9b0a020a3897058e95a91515e
+  languageName: node
+  linkType: hard
+
 "@types/glob@npm:^7.1.1":
   version: 7.2.0
   resolution: "@types/glob@npm:7.2.0"
@@ -9573,6 +9580,16 @@ __metadata:
   version: 2.7.0
   resolution: "@types/prettier@npm:2.7.0"
   checksum: 5451430048c139456f14cc4eab8e1fd4d2dde4e0e10dbd3b49b8befa173f0958bf477575a4848bacfee5d42e46c4494dc9f5933fe8bcadf43b862741a7d049ad
+  languageName: node
+  linkType: hard
+
+"@types/prompts@npm:2.4.9":
+  version: 2.4.9
+  resolution: "@types/prompts@npm:2.4.9"
+  dependencies:
+    "@types/node": "npm:*"
+    kleur: "npm:^3.0.3"
+  checksum: 69b8372f4c790b45fea16a46ff8d1bcc71b14579481776b67bd6263637118a7ecb1f12e1311506c29fadc81bf618dc64f1a91f903cfd5be67a0455a227b3e462
   languageName: node
   linkType: hard
 
@@ -27243,6 +27260,8 @@ __metadata:
     "@swc/core": "npm:1.4.8"
     "@swc/helpers": "npm:0.5.7"
     "@swc/jest": "npm:0.2.36"
+    "@types/git-url-parse": "npm:9.0.3"
+    "@types/prompts": "npm:2.4.9"
     "@types/react": "npm:18.2.66"
     "@types/react-dom": "npm:18.2.22"
     "@types/styled-components": "npm:5.1.34"
