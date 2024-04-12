@@ -9,6 +9,7 @@ import { NavLink, useParams, type To } from 'react-router-dom';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useHistoryContext } from '../pages/History';
 import { useRestoreVersionMutation } from '../services/historyVersion';
+
 interface VersionHeaderProps {
   headerId: string;
 }
@@ -45,7 +46,10 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   };
 
   const handleRestore = async () => {
-    await restoreVersion({ params: { versionId: version.id } });
+    await restoreVersion({
+      params: { versionId: version.id },
+      body: { contentType: version.contentType },
+    });
   };
 
   return (
