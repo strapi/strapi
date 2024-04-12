@@ -37,6 +37,10 @@ export const getReservedNames = () => {
       'localizations',
       'meta',
       'locale',
+      'stage',
+      'release',
+      'history',
+      'version',
     ],
   };
   // strapi.db.getReservedNames();
