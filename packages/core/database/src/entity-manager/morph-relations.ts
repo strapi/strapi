@@ -66,7 +66,7 @@ export const deleteRelatedMorphOneRelationsAfterMorphToManyUpdate = async (
 
   const typeAndFieldIdsGrouped = pipe(groupByType, mapValues(groupByField))(morphOneRows);
 
-  const orWhere = [];
+  const orWhere: object[] = [];
 
   for (const [type, v] of Object.entries(typeAndFieldIdsGrouped)) {
     for (const [field, arr] of Object.entries(v)) {

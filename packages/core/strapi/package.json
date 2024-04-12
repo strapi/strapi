@@ -117,7 +117,7 @@
     "@strapi/generate-new": "5.0.0-beta.3",
     "@strapi/generators": "5.0.0-beta.3",
     "@strapi/logger": "5.0.0-beta.3",
-    "@strapi/pack-up": "5.0.0-beta.3",
+    "@strapi/pack-up": "5.0.0",
     "@strapi/permissions": "5.0.0-beta.3",
     "@strapi/plugin-content-manager": "5.0.0-beta.3",
     "@strapi/plugin-content-type-builder": "5.0.0-beta.3",
@@ -180,7 +180,6 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
     "@types/find-root": "1.1.4",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
