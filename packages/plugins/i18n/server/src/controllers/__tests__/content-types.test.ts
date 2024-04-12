@@ -14,7 +14,18 @@ describe('i18n - Controller - content-types', () => {
       global.strapi = {
         contentType,
         getModel,
-        plugins: { i18n: { services: { 'content-types': ctService } } },
+        plugins: {
+          i18n: { services: { 'content-types': ctService } },
+          'content-manager': {
+            services: {
+              'document-metadata': {
+                getMetadata: () => ({
+                  availableLocales: [{ id: 2, locale: 'it', publishedAt: null }],
+                }),
+              },
+            },
+          },
+        },
         admin: {
           services: { constants: { default: { READ_ACTION: 'read', CREATE_ACTION: 'create' } } },
         },
@@ -42,7 +53,7 @@ describe('i18n - Controller - content-types', () => {
         await controller.getNonLocalizedAttributes(ctx);
       } catch (e: any) {
         expect(e instanceof ApplicationError).toBe(true);
-        expect(e.message).toEqual('model.not.localized');
+        expect(e.message).toEqual('Model api::country.country is not localized');
       }
     });
 

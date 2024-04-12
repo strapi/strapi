@@ -26,6 +26,7 @@ import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-rou
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
+import { RBAC } from '../src/core/apis/rbac';
 import { AppInfoProvider } from '../src/features/AppInfo';
 import { AuthProvider, type Permission } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
@@ -103,52 +104,51 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
       {
         path: '/*',
         element: (
-          <Provider store={store}>
-            <AuthProvider _defaultPermissions={allPermissions}>
-              <QueryClientProvider client={queryClient}>
-                <DndProvider backend={HTML5Backend}>
-                  <LanguageProvider messages={{}}>
-                    <Theme
-                      themes={{
-                        dark: darkTheme,
-                        light: lightTheme,
-                      }}
-                    >
-                      <StrapiAppProvider
-                        components={{}}
-                        customFields={{
-                          customFields: {},
-                          get: jest.fn().mockReturnValue({
-                            name: 'color',
-                            pluginId: 'mycustomfields',
-                            type: 'text',
-                            icon: jest.fn(),
-                            intlLabel: {
-                              id: 'mycustomfields.color.label',
-                              defaultMessage: 'Color',
-                            },
-                            intlDescription: {
-                              id: 'mycustomfields.color.description',
-                              defaultMessage: 'Select any color',
-                            },
-                            components: {
-                              Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
-                            },
-                          }),
-                          getAll: jest.fn(),
-                          register: jest.fn(),
+          <StrapiAppProvider
+            components={{}}
+            rbac={new RBAC()}
+            customFields={{
+              customFields: {},
+              get: jest.fn().mockReturnValue({
+                name: 'color',
+                pluginId: 'mycustomfields',
+                type: 'text',
+                icon: jest.fn(),
+                intlLabel: {
+                  id: 'mycustomfields.color.label',
+                  defaultMessage: 'Color',
+                },
+                intlDescription: {
+                  id: 'mycustomfields.color.description',
+                  defaultMessage: 'Select any color',
+                },
+                components: {
+                  Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
+                },
+              }),
+              getAll: jest.fn(),
+              register: jest.fn(),
+            }}
+            fields={{}}
+            menu={[]}
+            getAdminInjectedComponents={jest.fn()}
+            getPlugin={jest.fn()}
+            plugins={{}}
+            runHookParallel={jest.fn()}
+            runHookWaterfall={jest.fn().mockImplementation((_name, initialValue) => initialValue)}
+            runHookSeries={jest.fn()}
+            settings={{}}
+          >
+            <Provider store={store}>
+              <AuthProvider _defaultPermissions={allPermissions}>
+                <QueryClientProvider client={queryClient}>
+                  <DndProvider backend={HTML5Backend}>
+                    <LanguageProvider messages={{}}>
+                      <Theme
+                        themes={{
+                          dark: darkTheme,
+                          light: lightTheme,
                         }}
-                        fields={{}}
-                        menu={[]}
-                        getAdminInjectedComponents={jest.fn()}
-                        getPlugin={jest.fn()}
-                        plugins={{}}
-                        runHookParallel={jest.fn()}
-                        runHookWaterfall={jest
-                          .fn()
-                          .mockImplementation((_name, initialValue) => initialValue)}
-                        runHookSeries={jest.fn()}
-                        settings={{}}
                       >
                         <NotificationsProvider>
                           <ConfigurationContextProvider
@@ -175,13 +175,13 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                             </AppInfoProvider>
                           </ConfigurationContextProvider>
                         </NotificationsProvider>
-                      </StrapiAppProvider>
-                    </Theme>
-                  </LanguageProvider>
-                </DndProvider>
-              </QueryClientProvider>
-            </AuthProvider>
-          </Provider>
+                      </Theme>
+                    </LanguageProvider>
+                  </DndProvider>
+                </QueryClientProvider>
+              </AuthProvider>
+            </Provider>
+          </StrapiAppProvider>
         ),
       },
     ],

@@ -34,15 +34,35 @@ If you need to clean the test-apps folder because they are not working as expect
 To run only one domain, meaning a top-level directory in e2e/tests such as "admin" or "content-manager", use the `--domains` option.
 
 ```shell
-yarn test:e2e --domains admin
-yarn test:e2e --domain admin
+yarn test:e2e --domains=admin
+npm run test:e2e --domains=admin
 ```
 
 To run a specific file, you can pass arguments and options to playwright using `--` between the test:e2e options and the playwright options, such as:
 
 ```shell
 # to run just the login.spec.ts file in the admin domain
-yarn test:e2e --domains admin -- login.spec.ts
+yarn test:e2e --domains=admin -- login.spec.ts
+npm run test:e2e --domains=admin -- login.spec.ts
+```
+
+Note that you must still include a domain, otherwise playwright will attempt to run every domain filtering by that filename, and any domains that do not contain that filename will fail with "no tests found"
+
+### Running specific browsers
+
+To run only a specific browser (to speed up test development, for example) you can pass `--project` to playwright with the value(s) `chromium`, `firefox`, or `webkit`
+
+```shell
+yarn test:e2e --domains=admin -- login.spec.ts --project=chromium
+npm run test:e2e --domains=admin -- login.spec.ts --project=chromium
+```
+
+To debug your tests with a browser instance and the playwright debugger, you can pass the
+`--debug` option like this:
+
+```shell
+yarn test:e2e --domains admin -- --debug
+yarn test:e2e --domains admin -- login.spec.ts --debug
 ```
 
 ### Concurrency / parallellization
@@ -75,7 +95,7 @@ The test-app you create uses a [template](https://docs.strapi.io/developer-docs/
 
 If you add anything to the template, be sure to add this information to [the docs](/testing/e2e/app-template).
 
-## Running tests with environment variables
+## Running tests with environment variables (needed to run EE tests)
 
 To set specific environment variables for your tests, a `.env` file can be created in the root of the e2e folder. This is useful if you need to run tests with a Strapi license or set future flags.
 
@@ -88,14 +108,6 @@ If you are writing tests for an unstable future feature you will need to add `ap
 Playwright enables reliable end-to-end testing for modern web apps. It's cross browser, cross platform and cross language. At Strapi we use it for Javascript automated testing.
 
 For more information check out their [docs](https://playwright.dev/docs/intro). If you're struggling with their APIs, then check out their specific [API documentation](https://playwright.dev/docs/api/class-playwright).
-
-## Running tests with environment variables
-
-To set specific environment variables for your tests, a `.env` file can be created in the root of the e2e folder. This is useful if you need to run tests with a Strapi license or set future flags.
-
-## Running tests with future flags
-
-If you are writing tests for an unstable future feature you will need to add `app-template/config/features.js`. Currently the app template generation does not take the config folder into consideration. However, the run-e2e-tests script will apply the features config to the generated app. See the documentation for [features.js](https://docs.strapi.io/dev-docs/configurations/features#enabling-a-future-flag)
 
 ## What makes a good end to end test?
 

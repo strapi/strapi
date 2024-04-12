@@ -20,7 +20,7 @@ describe('middlewares', () => {
       const manager = createMiddlewareManager();
       const overwrittenId = 'overwrittenId';
       const middlewareFn = jest.fn(async (ctx: any, next: any) => {
-        ctx.args[0].id = overwrittenId;
+        ctx.params.id = overwrittenId;
         return next();
       });
 

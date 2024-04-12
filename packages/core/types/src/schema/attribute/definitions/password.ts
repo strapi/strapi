@@ -1,6 +1,9 @@
 import type { Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
+/**
+ * Represents a password Strapi attribute along with its options
+ */
 export type Password = Intersect<
   [
     Attribute.OfType<'password'>,

@@ -14,7 +14,6 @@ import {
   DialogFooter,
   DialogProps,
   Flex,
-  ModalBody,
   ModalHeader,
   ModalLayout,
   Typography,
@@ -69,8 +68,7 @@ interface NotificationOptions {
 interface ModalOptions {
   type: 'modal';
   title: string;
-  content: React.ReactNode;
-  footer: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
+  content: React.ComponentType<{ onClose: () => void }>;
   onClose?: () => void;
 }
 
@@ -261,8 +259,7 @@ const BulkActionModal = ({
   isOpen,
   title,
   onClose,
-  footer: Footer,
-  content,
+  content: Content,
   onModalClose,
 }: BulkActionModalProps) => {
   const id = React.useId();
@@ -286,8 +283,7 @@ const BulkActionModal = ({
           {title}
         </Typography>
       </ModalHeader>
-      <ModalBody>{content}</ModalBody>
-      <>{typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}</>
+      <Content onClose={handleClose} />
     </ModalLayout>
   );
 };

@@ -8,7 +8,7 @@ import type { IConfiguration } from '../../../../types';
 /**
  * Create a readable stream that export the Strapi app configuration
  */
-export const createConfigurationStream = (strapi: Core.LoadedStrapi): Readable => {
+export const createConfigurationStream = (strapi: Core.Strapi): Readable => {
   return Readable.from(
     (async function* configurationGenerator(): AsyncGenerator<IConfiguration> {
       // Core Store

@@ -4,11 +4,11 @@ import * as webStream from 'stream/web';
 import { stat, createReadStream, ReadStream } from 'fs-extra';
 import type { Core } from '@strapi/types';
 
-import type { IAsset } from '../../../../types';
+import type { IAsset, IFile } from '../../../../types';
 
 function getFileStream(
   filepath: string,
-  strapi: Core.LoadedStrapi,
+  strapi: Core.Strapi,
   isLocal = false
 ): PassThrough | ReadStream {
   if (isLocal) {
@@ -43,7 +43,7 @@ function getFileStream(
 
 function getFileStats(
   filepath: string,
-  strapi: Core.LoadedStrapi,
+  strapi: Core.Strapi,
   isLocal = false
 ): Promise<{ size: number }> {
   if (isLocal) {
@@ -70,10 +70,32 @@ function getFileStats(
       });
   });
 }
+
+async function signFile(file: IFile) {
+  const { provider } = strapi.plugins.upload;
+  const { provider: providerName } = strapi.config.get('plugin.upload') as { provider: string };
+  const isPrivate = await provider.isPrivate();
+  if (file?.provider === providerName && isPrivate) {
+    const signUrl = async (file: IFile) => {
+      const signedUrl = await provider.getSignedUrl(file);
+      file.url = signedUrl.url;
+    };
+
+    // Sign the original file
+    await signUrl(file);
+    // Sign each file format
+    if (file.formats) {
+      for (const format of Object.keys(file.formats)) {
+        await signUrl(file.formats[format]);
+      }
+    }
+  }
+}
+
 /**
  * Generate and consume assets streams in order to stream each file individually
  */
-export const createAssetsStream = (strapi: Core.LoadedStrapi): Duplex => {
+export const createAssetsStream = (strapi: Core.Strapi): Duplex => {
   const generator: () => AsyncGenerator<IAsset, void> = async function* () {
     const stream: Readable = strapi.db
       .queryBuilder('plugin::upload.file')
@@ -85,6 +107,9 @@ export const createAssetsStream = (strapi: Core.LoadedStrapi): Duplex => {
 
     for await (const file of stream) {
       const isLocalProvider = file.provider === 'local';
+      if (!isLocalProvider) {
+        await signFile(file);
+      }
       const filepath = isLocalProvider ? join(strapi.dirs.static.public, file.url) : file.url;
       const stats = await getFileStats(filepath, strapi, isLocalProvider);
       const stream = getFileStream(filepath, strapi, isLocalProvider);

@@ -45,17 +45,17 @@ import type { UID } from '@strapi/types';
  * AddActionToReleaseModal
  * -----------------------------------------------------------------------------------------------*/
 
-const RELEASE_ACTION_FORM_SCHEMA = yup.object().shape({
+export const RELEASE_ACTION_FORM_SCHEMA = yup.object().shape({
   type: yup.string().oneOf(['publish', 'unpublish']).required(),
   releaseId: yup.string().required(),
 });
 
-interface FormValues {
+export interface FormValues {
   type: CreateReleaseAction.Request['body']['type'];
   releaseId: CreateReleaseAction.Request['params']['releaseId'];
 }
 
-const INITIAL_VALUES = {
+export const INITIAL_VALUES = {
   type: 'publish',
   releaseId: '',
 } satisfies FormValues;
@@ -66,7 +66,7 @@ interface AddActionToReleaseModalProps {
   entryId: GetContentTypeEntryReleases.Request['query']['entryId'];
 }
 
-const NoReleases = () => {
+export const NoReleases = () => {
   const { formatMessage } = useIntl();
   return (
     <EmptyStateLayout
@@ -261,9 +261,9 @@ export const CMReleasesContainer = () => {
     collectionType: string;
   }>();
   const isCreatingEntry = id === 'create';
-  const {
-    allowedActions: { canCreateAction, canMain, canDeleteAction },
-  } = useRBAC(PERMISSIONS);
+  const { allowedActions } = useRBAC(PERMISSIONS);
+
+  const { canCreateAction, canRead: canMain, canDeleteAction } = allowedActions;
 
   const { schema } = unstable_useDocument({
     collectionType: collectionType!,

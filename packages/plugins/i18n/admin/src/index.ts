@@ -11,10 +11,11 @@ import {
 import { Initializer } from './components/Initializer';
 import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
+import { mutateEditViewHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
 import { extendCTBAttributeInitialDataMiddleware } from './middlewares/extendCTBAttributeInitialData';
 import { extendCTBInitialDataMiddleware } from './middlewares/extendCTBInitialData';
-import { localePermissionMiddleware } from './middlewares/localePermission';
+import { localeMiddleware } from './middlewares/rbac-middleware';
 import { pluginId } from './pluginId';
 import { i18nApi } from './services/api';
 import { LOCALIZED_FIELDS } from './utils/fields';
@@ -27,15 +28,12 @@ import type { DocumentActionComponent } from '@strapi/plugin-content-manager/str
 // eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {
-    app.addMiddlewares([
-      extendCTBAttributeInitialDataMiddleware,
-      extendCTBInitialDataMiddleware,
-      localePermissionMiddleware,
-    ]);
+    app.addMiddlewares([extendCTBAttributeInitialDataMiddleware, extendCTBInitialDataMiddleware]);
     app.addMiddlewares([() => i18nApi.middleware]);
     app.addReducers({
       [i18nApi.reducerPath]: i18nApi.reducer,
     });
+    app.addRBACMiddleware([localeMiddleware]);
     app.registerPlugin({
       id: pluginId,
       initializer: Initializer,
@@ -46,6 +44,7 @@ export default {
   bootstrap(app: any) {
     // // Hook that adds a column into the CM's LV table
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
+    app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewHook);
 
     // Add the settings link
     app.addSettingsLink('global', {

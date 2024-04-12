@@ -1,37 +1,24 @@
-import { omit, assoc, curry, merge } from 'lodash/fp';
+import { omit, assoc, merge } from 'lodash/fp';
 
 import { async, contentTypes as contentTypesUtils } from '@strapi/utils';
-import type { UID } from '@strapi/types';
 
 import { wrapInTransaction, type RepositoryFactoryMethod } from './common';
 import * as DP from './draft-and-publish';
 import * as i18n from './internationalization';
-import { transformParamsDocumentId } from './transform/id-transform';
+import * as components from './components';
 
-import {
-  createComponents,
-  deleteComponents,
-  getComponents,
-  omitComponentData,
-  updateComponents,
-} from '../entity-service/components';
-
+import { createEntriesService } from './entries';
 import { pickSelectionParams } from './params';
-import entityValidator from '../entity-validator';
-import { applyTransforms } from '../entity-service/attributes';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
 import { getDeepPopulate } from './utils/populate';
-import { transformData } from './transform/data';
-
-const transformParamsToQuery = curry((uid: UID.Schema, params: any) => {
-  const query = strapi.get('query-params').transform(uid, params);
-
-  return assoc('where', { ...params?.lookup, ...query.where }, query);
-});
+import { transformParamsToQuery } from './transform/query';
+import { transformParamsDocumentId } from './transform/id-transform';
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
+
+  const entries = createEntriesService(uid);
 
   async function findMany(params = {} as any) {
     const query = await async.pipe(
@@ -60,7 +47,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   }
 
   // TODO: do we really want to add filters on the findOne now that we have findFirst ?
-  async function findOne(documentId: string, params = {} as any) {
+  async function findOne(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const query = await async.pipe(
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
@@ -74,15 +63,9 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return strapi.db.query(uid).findOne(query);
   }
 
-  async function deleteEntry(id: number) {
-    const componentsToDelete = await getComponents(uid, { id });
+  async function deleteDocument(opts = {} as any) {
+    const { documentId, ...params } = opts;
 
-    await strapi.db.query(uid).delete({ where: { id } });
-
-    await deleteComponents(uid, componentsToDelete as any, { loadComponents: false });
-  }
-
-  async function deleteFn(documentId: string, params = {} as any) {
     const query = await async.pipe(
       omit('status'),
       i18n.defaultLocale(contentType),
@@ -98,42 +81,14 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const entriesToDelete = await strapi.db.query(uid).findMany(query);
 
     // Delete all matched entries and its components
-    await async.map(entriesToDelete, (entryToDelete: any) => deleteEntry(entryToDelete.id));
+    await async.map(entriesToDelete, (entryToDelete: any) => entries.delete(entryToDelete.id));
 
     return { deletedEntries: entriesToDelete };
   }
 
-  async function createEntry(params = {} as any) {
-    const { data, ...restParams } = await transformParamsDocumentId(uid, params);
+  async function create(opts = {} as any) {
+    const { documentId, ...params } = opts;
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
-
-    // Validation
-    if (!data) {
-      throw new Error('Create requires data attribute');
-    }
-
-    // @ts-expect-error we need type guard to assert that data has the valid type
-    const validData = await entityValidator.validateEntityCreation(contentType, data, {
-      // Note: publishedAt value will always be set when DP is disabled
-      isDraft: !params?.data?.publishedAt,
-      locale: params?.locale,
-    });
-
-    // Component handling
-    const componentData = await createComponents(uid, validData);
-    const contentTypeWithoutComponentData = omitComponentData(contentType, validData);
-    const entryData = applyTransforms(
-      Object.assign(contentTypeWithoutComponentData, componentData) as any,
-      { contentType }
-    );
-
-    const doc = await strapi.db.query(uid).create({ ...query, data: entryData });
-
-    return doc;
-  }
-
-  async function create(params = {} as any) {
     const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       DP.setStatusToDraft(contentType),
@@ -142,16 +97,21 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.localeToData(contentType)
     )(params);
 
-    const doc = await createEntry(queryParams);
+    const doc = await entries.create(queryParams);
 
     if (hasDraftAndPublish && params.status === 'published') {
-      return publish(doc.documentId, params).then((doc) => doc.versions[0]);
+      return publish({
+        ...params,
+        documentId: doc.documentId,
+      }).then((doc) => doc.versions[0]);
     }
 
     return doc;
   }
 
-  async function clone(documentId: string, params = {} as any) {
+  async function clone(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       i18n.defaultLocale(contentType),
@@ -178,14 +138,16 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         assoc('documentId', createDocumentId()),
         // Merge new data into it
         (data) => merge(data, queryParams.data),
-        (data) => createEntry({ ...queryParams, data, status: 'draft' })
+        (data) => entries.create({ ...queryParams, data, status: 'draft' })
       )
     );
 
     return { documentId: clonedEntries.at(0)?.documentId, versions: clonedEntries };
   }
 
-  async function update(documentId: string, params = {} as any) {
+  async function update(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       DP.setStatusToDraft(contentType),
@@ -201,7 +163,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams || {}) as any);
 
     // Validation
-    const model = strapi.contentType(uid);
     // Find if document exists
     const entryToUpdate = await strapi.db
       .query(uid)
@@ -209,27 +170,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     let updatedDraft = null;
     if (entryToUpdate) {
-      const validData = await entityValidator.validateEntityUpdate(
-        model,
-        // @ts-expect-error we need type guard to assert that data has the valid type
-        data,
-        {
-          isDraft: !queryParams?.data?.publishedAt, // Always update the draft version
-          locale: queryParams?.locale,
-        },
-        entryToUpdate
-      );
-
-      // Component handling
-      const componentData = await updateComponents(uid, entryToUpdate, validData as any);
-      const entryData = applyTransforms(
-        Object.assign(omitComponentData(model, validData), componentData as any),
-        { contentType: model }
-      );
-
-      updatedDraft = await strapi.db
-        .query(uid)
-        .update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
+      updatedDraft = await entries.update(entryToUpdate, queryParams);
     }
 
     if (!updatedDraft) {
@@ -238,7 +179,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         .findOne({ where: { documentId } });
 
       if (documentExists) {
-        updatedDraft = await createEntry({
+        updatedDraft = await entries.create({
           ...queryParams,
           data: { ...queryParams.data, documentId },
         });
@@ -246,7 +187,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     }
 
     if (hasDraftAndPublish && updatedDraft && params.status === 'published') {
-      return publish(documentId, params).then((doc) => doc.versions[0]);
+      return publish({
+        ...params,
+        documentId,
+      }).then((doc) => doc.versions[0]);
     }
 
     return updatedDraft;
@@ -264,19 +208,22 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     return strapi.db.query(uid).count(query);
   }
 
-  async function publish(documentId: string, params = {} as any) {
+  async function publish(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    await deleteFn(documentId, {
+    await deleteDocument({
       ...queryParams,
+      documentId,
       lookup: { ...queryParams?.lookup, publishedAt: { $ne: null } },
     });
 
     // Get deep populate
-    const entriesToPublish = await strapi.db?.query(uid).findMany({
+    const draftsToPublish = await strapi.db?.query(uid).findMany({
       where: {
         ...queryParams?.lookup,
         documentId,
@@ -286,51 +233,42 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     });
 
     // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(
-      entriesToPublish,
-      async.pipe(
-        // Updated at value is used to know if draft has been modified
-        // If both versions share the same value, it means the draft has not been modified
-        (draft) => assoc('updatedAt', draft.updatedAt, draft),
-        assoc('publishedAt', new Date()),
-        assoc('documentId', documentId),
-        omit('id'),
-        // Transform relations to target published versions
-        (entry) => {
-          const opts = { uid, locale: entry.locale, status: 'published', allowMissingId: true };
-          return transformData(entry, opts);
-        },
-        // Create the published entry
-        (data) => createEntry({ ...queryParams, data, locale: data.locale, status: 'published' })
-      )
+    const versions = await async.map(draftsToPublish, (draft: unknown) =>
+      entries.publish(draft, queryParams)
     );
 
-    return { versions: publishedEntries };
+    return { versions };
   }
 
-  async function unpublish(documentId: string, params = {} as any) {
+  async function unpublish(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const { deletedEntries } = await deleteFn(documentId, {
+    const { deletedEntries } = await deleteDocument({
       ...params,
+      documentId,
       lookup: { ...queryParams?.lookup, publishedAt: { $ne: null } },
     });
 
     return { versions: deletedEntries };
   }
 
-  async function discardDraft(documentId: string, params = {} as any) {
+  async function discardDraft(opts = {} as any) {
+    const { documentId, ...params } = opts;
+
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    await deleteFn(documentId, {
+    // Delete all drafts that match query
+    await deleteDocument({
       ...queryParams,
-      // Delete all drafts that match query
+      documentId,
       lookup: { ...queryParams?.lookup, publishedAt: null },
     });
 
@@ -345,30 +283,26 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     });
 
     // Transform published entry data and create draft versions
-    const draftEntries = await async.map(
-      entriesToDraft,
-      async.pipe(
-        assoc('publishedAt', null),
-        assoc('documentId', documentId),
-        omit('id'),
-        // Transform relations to target draft versions
-        (entry) => {
-          const opts = { uid, locale: entry.locale, status: 'draft', allowMissingId: true };
-          return transformData(entry, opts);
-        },
-        // Create the draft entry
-        (data) => createEntry({ ...queryParams, locale: data.locale, data, status: 'draft' })
-      )
+    const draftEntries = await async.map(entriesToDraft, (entry: any) =>
+      entries.discardDraft(entry, queryParams)
     );
 
     return { versions: draftEntries };
+  }
+
+  async function updateComponents(entry: any, data: any) {
+    return components.updateComponents(uid, entry, data);
+  }
+
+  function omitComponentData(data: any) {
+    return components.omitComponentData(contentType, data);
   }
 
   return {
     findMany: wrapInTransaction(findMany),
     findFirst: wrapInTransaction(findFirst),
     findOne: wrapInTransaction(findOne),
-    delete: wrapInTransaction(deleteFn),
+    delete: wrapInTransaction(deleteDocument),
     create: wrapInTransaction(create),
     clone: wrapInTransaction(clone),
     update: wrapInTransaction(update),
@@ -376,5 +310,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     publish: hasDraftAndPublish ? wrapInTransaction(publish) : (undefined as any),
     unpublish: hasDraftAndPublish ? wrapInTransaction(unpublish) : (undefined as any),
     discardDraft: hasDraftAndPublish ? wrapInTransaction(discardDraft) : (undefined as any),
+
+    updateComponents,
+    omitComponentData,
   };
 };

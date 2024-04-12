@@ -33,28 +33,27 @@ interface ProvidersProps {
 
 const Providers = ({ children, strapi, store }: ProvidersProps) => {
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <HistoryProvider>
-            <LanguageProvider messages={strapi.configurations.translations}>
-              <Theme themes={strapi.configurations.themes}>
-                <NotificationsProvider>
-                  <StrapiAppProvider
-                    components={strapi.library.components}
-                    customFields={strapi.customFields}
-                    fields={strapi.library.fields}
-                    menu={strapi.menu}
-                    getAdminInjectedComponents={strapi.getAdminInjectedComponents}
-                    getPlugin={strapi.getPlugin}
-                    plugins={strapi.plugins}
-                    runHookParallel={strapi.runHookParallel}
-                    runHookWaterfall={(name, initialValue) => {
-                      return strapi.runHookWaterfall(name, initialValue, store);
-                    }}
-                    runHookSeries={strapi.runHookSeries}
-                    settings={strapi.settings}
-                  >
+    <StrapiAppProvider
+      components={strapi.library.components}
+      customFields={strapi.customFields}
+      fields={strapi.library.fields}
+      menu={strapi.menu}
+      getAdminInjectedComponents={strapi.getAdminInjectedComponents}
+      getPlugin={strapi.getPlugin}
+      plugins={strapi.plugins}
+      rbac={strapi.rbac}
+      runHookParallel={strapi.runHookParallel}
+      runHookWaterfall={(name, initialValue) => strapi.runHookWaterfall(name, initialValue, store)}
+      runHookSeries={strapi.runHookSeries}
+      settings={strapi.settings}
+    >
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <HistoryProvider>
+              <LanguageProvider messages={strapi.configurations.translations}>
+                <Theme themes={strapi.configurations.themes}>
+                  <NotificationsProvider>
                     <TrackingProvider>
                       <GuidedTourProvider>
                         <ConfigurationProvider
@@ -67,14 +66,14 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
                         </ConfigurationProvider>
                       </GuidedTourProvider>
                     </TrackingProvider>
-                  </StrapiAppProvider>
-                </NotificationsProvider>
-              </Theme>
-            </LanguageProvider>
-          </HistoryProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </Provider>
+                  </NotificationsProvider>
+                </Theme>
+              </LanguageProvider>
+            </HistoryProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </Provider>
+    </StrapiAppProvider>
   );
 };
 
