@@ -4,10 +4,10 @@ import { lazy } from 'react';
 import { Routes, Route, PathRouteProps } from 'react-router-dom';
 
 const ProtectedListPage = lazy(() =>
-  import('./pages/settings').then((mod) => ({ default: mod.ProtectedListPage }))
+  import('./routes/settings').then((mod) => ({ default: mod.ProtectedListPage }))
 );
 const ProtectedEditPage = lazy(() =>
-  import('./pages/settings/:id').then((mod) => ({ default: mod.ProtectedEditPage }))
+  import('./routes/settings/:id').then((mod) => ({ default: mod.ProtectedEditPage }))
 );
 
 const routes: PathRouteProps[] = [

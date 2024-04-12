@@ -1,5 +1,7 @@
 import { PLUGIN_ID, FEATURE_ID } from './constants';
+import { Panel } from './routes/content-manager/[model]/[id]/components/Panel';
 import { reviewWorkflowsApi } from './services/api';
+import { addColumnToTableHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
@@ -15,19 +17,30 @@ const admin: Plugin.Config.AdminInput = {
       // @ts-expect-error TS doesn't want you to extend the middleware.
       app.addMiddlewares([() => reviewWorkflowsApi.middleware]);
 
-      // app.addSettingsLink('global', {
-      //   id: PLUGIN_ID,
-      //   to: `review-workflows`,
-      //   intlLabel: {
-      //     id: `${PLUGIN_ID}.plugin.name`,
-      //     defaultMessage: 'Review Workflows',
-      //   },
-      //   permissions: [],
-      //   async Component() {
-      //     const { Router } = await import('./router');
-      //     return { default: Router };
-      //   },
-      // });
+      app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
+
+      const contentManagerPluginApis = app.getPlugin('content-manager').apis;
+
+      if (
+        'addEditViewSidePanel' in contentManagerPluginApis &&
+        typeof contentManagerPluginApis.addEditViewSidePanel === 'function'
+      ) {
+        contentManagerPluginApis.addEditViewSidePanel([Panel]);
+      }
+
+      app.addSettingsLink('global', {
+        id: PLUGIN_ID,
+        to: `review-workflows`,
+        intlLabel: {
+          id: `${PLUGIN_ID}.plugin.name`,
+          defaultMessage: 'Review Workflows',
+        },
+        permissions: [],
+        async Component() {
+          const { Router } = await import('./router');
+          return { default: Router };
+        },
+      });
     } else if (!window.strapi.features.isEnabled(FEATURE_ID) && window.strapi?.flags?.promoteEE) {
       app.addSettingsLink('global', {
         id: PLUGIN_ID,
@@ -38,7 +51,7 @@ const admin: Plugin.Config.AdminInput = {
         },
         permissions: [],
         async Component() {
-          const { PurchaseReviewWorkflows } = await import('./pages/purchase-review-workflows');
+          const { PurchaseReviewWorkflows } = await import('./routes/purchase-review-workflows');
           return { default: PurchaseReviewWorkflows };
         },
         lockIcon: true,

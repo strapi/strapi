@@ -1,3 +1,5 @@
+'use strict';
+
 const {
   file: {
     providers: { createLocalFileDestinationProvider },
@@ -7,7 +9,7 @@ const {
   },
   engine: { createTransferEngine },
 } = require('@strapi/data-transfer');
-const strapiFactory = require('@strapi/strapi');
+const { createStrapi } = require('@strapi/strapi');
 const { ALLOWED_CONTENT_TYPES } = require('../constants');
 
 /**
@@ -16,7 +18,7 @@ const { ALLOWED_CONTENT_TYPES } = require('../constants');
  * root directory of a strapi project e.g. `/examples/kitchensink`. Remember to import
  * the `with-admin` tar file into the project first because the tests rely on the data.
  */
-export const exportData = async () => {
+const exportData = async () => {
   let args = process.argv.slice(2);
 
   if (args.length !== 1) {
@@ -32,7 +34,6 @@ export const exportData = async () => {
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore', // for an export to file, versionStrategy will always be skipped
     schemaStrategy: 'ignore', // for an export to file, schemaStrategy will always be skipped
-    only: ['content', 'files'],
     transforms: {
       links: [
         {
@@ -83,11 +84,14 @@ const createDestinationProvider = (filePath) =>
   });
 
 const createStrapiInstance = async (logLevel = 'error') => {
-  const appContext = await strapiFactory.compile();
-  const app = strapiFactory(appContext);
+  const app = createStrapi();
 
   app.log.level = logLevel;
   const loadedApp = await app.load();
 
   return loadedApp;
+};
+
+module.exports = {
+  exportData,
 };
