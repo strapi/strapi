@@ -1,4 +1,6 @@
 import type { UID } from '@strapi/types';
+import { async } from '@strapi/utils';
+import { assoc, omit } from 'lodash/fp';
 
 import * as components from './components';
 
@@ -6,6 +8,7 @@ import { transformParamsDocumentId } from './transform/id-transform';
 import { transformParamsToQuery } from './transform/query';
 import { pickSelectionParams } from './params';
 import { applyTransforms } from './attributes';
+import { transformData } from './transform/data';
 import entityValidator from '../entity-validator';
 
 const createEntriesService = (uid: UID.ContentType) => {
@@ -29,10 +32,13 @@ const createEntriesService = (uid: UID.ContentType) => {
 
     // Component handling
     const componentData = await components.createComponents(uid, validData);
-    const dataWithComponents = components.assignComponentData(validData, componentData, {
+    const dataWithComponents = components.assignComponentData(
       contentType,
-    });
-    const entryData = applyTransforms(dataWithComponents, { contentType });
+      componentData,
+      validData
+    );
+
+    const entryData = applyTransforms(contentType, dataWithComponents);
 
     const doc = await strapi.db.query(uid).create({ ...query, data: entryData });
 
@@ -62,20 +68,51 @@ const createEntriesService = (uid: UID.ContentType) => {
     );
     // Component handling
     const componentData = await components.updateComponents(uid, entryToUpdate, validData as any);
-    const dataWithComponents = components.assignComponentData(validData, componentData, {
+    const dataWithComponents = components.assignComponentData(
       contentType,
-    });
-    const entryData = applyTransforms(dataWithComponents, { contentType });
+      componentData,
+      validData
+    );
+
+    const entryData = applyTransforms(contentType, dataWithComponents);
 
     return strapi.db
       .query(uid)
       .update({ ...query, where: { id: entryToUpdate.id }, data: entryData });
   }
 
+  async function publishEntry(entry: any, params = {} as any) {
+    return async.pipe(
+      omit('id'),
+      assoc('publishedAt', new Date()),
+      (draft) => {
+        const opts = { uid, locale: draft.locale, status: 'published', allowMissingId: true };
+        return transformData(draft, opts);
+      },
+      // Create the published entry
+      (draft) => createEntry({ ...params, data: draft, locale: draft.locale, status: 'published' })
+    )(entry);
+  }
+
+  async function discardDraftEntry(entry: any, params = {} as any) {
+    return async.pipe(
+      omit('id'),
+      assoc('publishedAt', null),
+      (entry) => {
+        const opts = { uid, locale: entry.locale, status: 'draft', allowMissingId: true };
+        return transformData(entry, opts);
+      },
+      // Create the draft entry
+      (data) => createEntry({ ...params, locale: data.locale, data, status: 'draft' })
+    )(entry);
+  }
+
   return {
     create: createEntry,
     delete: deleteEntry,
     update: updateEntry,
+    publish: publishEntry,
+    discardDraft: discardDraftEntry,
   };
 };
 
