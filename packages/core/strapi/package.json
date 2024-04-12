@@ -178,7 +178,6 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/pack-up": "workspace:*",
     "@strapi/ts-zen": "^0.2.0",
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",

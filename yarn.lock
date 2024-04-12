@@ -7775,7 +7775,7 @@ __metadata:
   dependencies:
     "@juggle/resize-observer": "npm:3.4.0"
     "@reduxjs/toolkit": "npm:1.9.7"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.23.0"
     "@testing-library/jest-dom": "npm:5.16.5"
     eslint-config-custom: "npm:4.23.0"
     jest-styled-components: "npm:7.1.1"
@@ -7942,7 +7942,7 @@ __metadata:
     "@strapi/design-system": "npm:1.16.0"
     "@strapi/helper-plugin": "npm:4.23.0"
     "@strapi/icons": "npm:1.16.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.23.0"
     "@strapi/strapi": "npm:4.23.0"
     "@strapi/types": "workspace:*"
     "@strapi/utils": "npm:4.23.0"
@@ -8149,6 +8149,7 @@ __metadata:
     "@strapi/icons": "npm:1.16.0"
     "@strapi/pack-up": "npm:4.23.0"
     "@strapi/types": "npm:4.23.0"
+    "@strapi/utils": "npm:4.23.0"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
     axios: "npm:1.6.0"
@@ -8206,14 +8207,10 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/pack-up@npm:4.23.0, @strapi/pack-up@workspace:*, @strapi/pack-up@workspace:packages/utils/pack-up":
-  version: 0.0.0-use.local
-  resolution: "@strapi/pack-up@workspace:packages/utils/pack-up"
+"@strapi/pack-up@npm:4.23.0":
+  version: 4.23.0
+  resolution: "@strapi/pack-up@npm:4.23.0"
   dependencies:
-    "@strapi/pack-up": "npm:4.23.0"
-    "@types/git-url-parse": "npm:9.0.1"
-    "@types/ini": "npm:1.3.31"
-    "@types/prompts": "npm:2.4.4"
     "@vitejs/plugin-react-swc": "npm:3.5.0"
     boxen: "npm:5.1.2"
     browserslist-to-esbuild: "npm:1.2.0"
@@ -8222,7 +8219,6 @@ __metadata:
     commander: "npm:8.3.0"
     esbuild: "npm:0.19.11"
     esbuild-register: "npm:3.5.0"
-    eslint-config-custom: "npm:4.23.0"
     get-latest-version: "npm:5.1.0"
     git-url-parse: "npm:13.1.0"
     ini: "npm:4.1.1"
@@ -8232,15 +8228,15 @@ __metadata:
     prettier: "npm:2.8.4"
     prettier-plugin-packagejson: "npm:2.4.5"
     prompts: "npm:2.4.2"
-    rimraf: "npm:3.0.2"
     rxjs: "npm:7.8.1"
     typescript: "npm:5.2.2"
     vite: "npm:5.0.13"
     yup: "npm:0.32.9"
   bin:
-    pack-up: ./bin/pack-up.js
-  languageName: unknown
-  linkType: soft
+    pack-up: bin/pack-up.js
+  checksum: 1440087fdfb23d412ec4dff08b128b7daa62ca2b01e599fdd480d52e3c1bdd820f395a181c945dadcaa127e7f53544e8d61613157e236002d39286e87052f25c
+  languageName: node
+  linkType: hard
 
 "@strapi/permissions@npm:4.23.0, @strapi/permissions@workspace:packages/core/permissions":
   version: 0.0.0-use.local
@@ -8319,7 +8315,7 @@ __metadata:
   resolution: "@strapi/plugin-content-manager@workspace:packages/core/content-manager"
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.23.0"
     "@strapi/types": "npm:4.23.0"
     "@strapi/utils": "npm:4.23.0"
     "@types/jest": "npm:29.5.2"
@@ -8776,7 +8772,7 @@ __metadata:
     "@strapi/generate-new": "npm:4.23.0"
     "@strapi/generators": "npm:4.23.0"
     "@strapi/logger": "npm:4.23.0"
-    "@strapi/pack-up": "workspace:*"
+    "@strapi/pack-up": "npm:4.23.0"
     "@strapi/permissions": "npm:4.23.0"
     "@strapi/plugin-content-manager": "npm:4.23.0"
     "@strapi/plugin-content-type-builder": "npm:4.23.0"
@@ -9705,13 +9701,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/git-url-parse@npm:9.0.1":
-  version: 9.0.1
-  resolution: "@types/git-url-parse@npm:9.0.1"
-  checksum: 9d1678a0aff50b6e77a172965070de34d2e89bc6ccc96c94ea3b2ecf250c602c0daff4b9f4e0eb830e53e81ee273b08f15f728d42ec087f1a95e4f51d57b594a
-  languageName: node
-  linkType: hard
-
 "@types/glob@npm:^7.1.1, @types/glob@npm:^7.1.3":
   version: 7.2.0
   resolution: "@types/glob@npm:7.2.0"
@@ -9794,13 +9783,6 @@ __metadata:
   version: 1.8.2
   resolution: "@types/http-errors@npm:1.8.2"
   checksum: ecc365eea98d7eca650d593e742571acc3003742f0dd0fbbb15b8fce286e0f7421644b4140fb9bf701bbb7f1b744aea3967ebe025f0f0811aa5ab2c3d40fe111
-  languageName: node
-  linkType: hard
-
-"@types/ini@npm:1.3.31":
-  version: 1.3.31
-  resolution: "@types/ini@npm:1.3.31"
-  checksum: aca4fed0cd68f6693fd64e1b7d188a9c8c6f5823b2e3501b0570135555d4184d7d0dfba2c1afb3514c94cb21ece732f4467ea98c827d1b1b98716827ac9de680
   languageName: node
   linkType: hard
 
@@ -10307,16 +10289,6 @@ __metadata:
   version: 1.0.1
   resolution: "@types/pretty-hrtime@npm:1.0.1"
   checksum: a6cdee417eea6f7af914e4fcd13e05822864ce10b5d7646525632e86d69b79123eec55a5d3fff0155ba46b61902775e1644bcb80e1e4dffdac28e7febb089083
-  languageName: node
-  linkType: hard
-
-"@types/prompts@npm:2.4.4":
-  version: 2.4.4
-  resolution: "@types/prompts@npm:2.4.4"
-  dependencies:
-    "@types/node": "npm:*"
-    kleur: "npm:^3.0.3"
-  checksum: fa8d9a6f63f5e7f4a5b9bd4d40527ca4b8c8c6a63bf0864bf72ea85706a9e1b292d73c8c9a3b7423fb80a5d3e7d563d0069d6644384438c1251adbd9efc03a12
   languageName: node
   linkType: hard
 
