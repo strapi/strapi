@@ -29,9 +29,10 @@
     },
     "./strapi-server": {
       "types": "./dist/server/src/index.d.ts",
-      "source": "./server/src/index.js",
-      "require": "./strapi-server.js",
-      "default": "./strapi-server.js"
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
     },
     "./package.json": "./package.json"
   },
@@ -42,13 +43,23 @@
   "scripts": {
     "build": "pack-up build",
     "clean": "run -T rimraf ./dist",
+    "lint": "run -T eslint .",
+    "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
+    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "test:unit": "run -T jest",
+    "test:unit:watch": "run -T jest --watch",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.17.0",
     "@strapi/icons": "1.16.0",
+    "@strapi/utils": "5.0.0-beta.1",
     "axios": "1.6.8",
+    "fractional-indexing": "3.2.0",
+    "react-dnd": "16.0.1",
+    "react-dnd-html5-backend": "16.0.1",
     "react-helmet": "^6.1.0",
     "react-intl": "6.6.2",
     "react-redux": "8.1.3",
@@ -56,10 +67,11 @@
   },
   "devDependencies": {
     "@strapi/admin": "5.0.0-beta.3",
-    "@strapi/pack-up": "5.0.0-beta.3",
+    "@strapi/pack-up": "5.0.0",
     "@strapi/plugin-content-manager": "5.0.0-beta.3",
     "@strapi/types": "5.0.0-beta.3",
     "@strapi/utils": "5.0.0-beta.3",
+    "@testing-library/react": "14.0.0",
     "msw": "1.3.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -68,7 +80,7 @@
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
-    "@strapi/plugin-content-manager": "^5.0.0",
+    "@strapi/plugin-content-manager": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",

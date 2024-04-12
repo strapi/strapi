@@ -236,7 +236,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // create temporary folder to store files for stream manipulation
     const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
-    let uploadedFiles = [];
+    let uploadedFiles: any[] = [];
 
     try {
       const { fileInfo, ...metas } = data;
@@ -293,7 +293,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       _.set(fileData, ['formats', key], file);
     };
 
-    const uploadPromises = [];
+    const uploadPromises: Promise<void>[] = [];
 
     // Upload image
     uploadPromises.push(getService('provider').upload(fileData));

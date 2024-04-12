@@ -298,6 +298,7 @@ const formatEditLayout = (
     options: {
       ...schema?.options,
       ...schema?.pluginOptions,
+      ...data.contentType.options,
     },
   };
 };
@@ -406,6 +407,7 @@ const formatListLayout = (
     options: {
       ...schema?.options,
       ...schema?.pluginOptions,
+      ...data.contentType.options,
     },
   };
 };

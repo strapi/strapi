@@ -478,7 +478,7 @@ const buildRelationsStore = <TUID extends UID.Schema>({
  * mentioned exists
  */
 const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) => {
-  const promises = [];
+  const promises: Promise<void>[] = [];
 
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
