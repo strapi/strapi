@@ -7,7 +7,6 @@ export const getReservedNames = () => {
       'date-time',
       'time',
       'upload',
-      'then', // https://github.com/strapi/strapi/issues/15557
       'rest', // https://github.com/strapi/strapi/issues/13643
       'document',
     ],
