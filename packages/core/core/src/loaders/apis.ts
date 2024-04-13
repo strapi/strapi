@@ -97,16 +97,8 @@ const loadAPI = async (apiName: string, dir: string) => {
     loadContentTypes(apiName, join(dir, 'content-types')),
   ]);
 
-  const [
-    index = {},
-    config = {},
-    routes = [],
-    controllers = {},
-    services = {},
-    policies = {},
-    middlewares = {},
-    contentTypes = {},
-  ] = results.map((result) => result?.result);
+  const [index, config, routes, controllers, services, policies, middlewares, contentTypes] =
+    results.map((result) => result?.result);
 
   return {
     ...(index || {}),
