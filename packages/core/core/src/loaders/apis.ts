@@ -86,19 +86,18 @@ const validateContentTypesUnicity = (apis: APIs) => {
 };
 
 const loadAPI = async (apiName: string, dir: string) => {
-  const results = await Promise.all([
-    loadIndex(dir),
-    loadDir(join(dir, 'config')),
-    loadDir(join(dir, 'routes')),
-    loadDir(join(dir, 'controllers')),
-    loadDir(join(dir, 'services')),
-    loadDir(join(dir, 'policies')),
-    loadDir(join(dir, 'middlewares')),
-    loadContentTypes(apiName, join(dir, 'content-types')),
-  ]);
-
-  const [index, config, routes, controllers, services, policies, middlewares, contentTypes] =
-    results.map((result) => result?.result);
+  const [index, config, routes, controllers, services, policies, middlewares, contentTypes] = (
+    await Promise.all([
+      loadIndex(dir),
+      loadDir(join(dir, 'config')),
+      loadDir(join(dir, 'routes')),
+      loadDir(join(dir, 'controllers')),
+      loadDir(join(dir, 'services')),
+      loadDir(join(dir, 'policies')),
+      loadDir(join(dir, 'middlewares')),
+      loadContentTypes(apiName, join(dir, 'content-types')),
+    ])
+  ).map((result) => result?.result);
 
   return {
     ...(index || {}),
