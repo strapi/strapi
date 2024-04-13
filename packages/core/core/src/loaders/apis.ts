@@ -51,6 +51,7 @@ export default async function loadAPIs(strapi: Core.Strapi) {
     const apiName = normalizeName(apiFD.name);
     const api = await loadAPI(apiName, join(strapi.dirs.dist.api, apiFD.name));
 
+    // @ts-expect-error TODO verify that it's a valid api, not missing bootstrap, register, and destroy
     apis[apiName] = api;
   }
 
@@ -105,7 +106,7 @@ const loadAPI = async (apiName: string, dir: string) => {
     policies = {},
     middlewares = {},
     contentTypes = {},
-  ] = results.map((result) => result?.[0]);
+  ] = results.map((result) => result?.result);
 
   return {
     ...(index || {}),
@@ -141,7 +142,7 @@ const loadContentTypes = async (apiName: string, dir: string) => {
     }
 
     const contentTypeName = normalizeName(fd.name);
-    const [loadedContentType] = (await loadDir(join(dir, fd.name))) || [];
+    const loadedContentType = (await loadDir(join(dir, fd.name)))?.result;
 
     if (isEmpty(loadedContentType) || isEmpty(loadedContentType.schema)) {
       throw new Error(`Could not load content type found at ${dir}`);
@@ -161,7 +162,7 @@ const loadContentTypes = async (apiName: string, dir: string) => {
     contentTypes[normalizeName(contentTypeName)] = contentType;
   }
 
-  return [contentTypes];
+  return { result: contentTypes };
 };
 
 // because this is async and its contents are dynamic, we must return it as an array to avoid a property called `then` being interpreted as a Promise
@@ -180,22 +181,22 @@ const loadDir = async (dir: string) => {
 
     const key = basename(fd.name, extname(fd.name));
 
-    root[normalizeName(key)] = (await loadFile(join(dir, fd.name)))[0];
+    root[normalizeName(key)] = (await loadFile(join(dir, fd.name))).result;
   }
 
-  return [root];
+  return { result: root };
 };
 
 // because this is async and its contents are dynamic, we must return it as an array to avoid a property called `then` being interpreted as a Promise
-const loadFile = async (file: string) => {
+const loadFile = async (file: string): Promise<{ result: unknown }> => {
   const ext = extname(file);
 
   switch (ext) {
     case '.js':
-      return [await importDefault(file)];
+      return { result: await importDefault(file) };
     case '.json':
-      return [await fse.readJSON(file)];
+      return { result: await fse.readJSON(file) };
     default:
-      return [{}];
+      return { result: {} };
   }
 };
