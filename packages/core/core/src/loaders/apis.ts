@@ -85,17 +85,27 @@ const validateContentTypesUnicity = (apis: APIs) => {
 };
 
 const loadAPI = async (apiName: string, dir: string) => {
-  const [index, config, routes, controllers, services, policies, middlewares, contentTypes] =
-    await Promise.all([
-      loadIndex(dir),
-      loadDir(join(dir, 'config')),
-      loadDir(join(dir, 'routes')),
-      loadDir(join(dir, 'controllers')),
-      loadDir(join(dir, 'services')),
-      loadDir(join(dir, 'policies')),
-      loadDir(join(dir, 'middlewares')),
-      loadContentTypes(apiName, join(dir, 'content-types')),
-    ]);
+  const results = await Promise.all([
+    loadIndex(dir),
+    loadDir(join(dir, 'config')),
+    loadDir(join(dir, 'routes')),
+    loadDir(join(dir, 'controllers')),
+    loadDir(join(dir, 'services')),
+    loadDir(join(dir, 'policies')),
+    loadDir(join(dir, 'middlewares')),
+    loadContentTypes(apiName, join(dir, 'content-types')),
+  ]);
+
+  const [
+    index = {},
+    config = {},
+    routes = [],
+    controllers = {},
+    services = {},
+    policies = {},
+    middlewares = {},
+    contentTypes = {},
+  ] = results.map((result) => result?.[0]);
 
   return {
     ...(index || {}),
@@ -115,6 +125,7 @@ const loadIndex = async (dir: string) => {
   }
 };
 
+// because this is async and its contents are dynamic, we must return it as an array to avoid a property called `then` being interpreted as a Promise
 const loadContentTypes = async (apiName: string, dir: string) => {
   if (!(await fse.pathExists(dir))) {
     return;
@@ -130,7 +141,7 @@ const loadContentTypes = async (apiName: string, dir: string) => {
     }
 
     const contentTypeName = normalizeName(fd.name);
-    const loadedContentType = await loadDir(join(dir, fd.name));
+    const [loadedContentType] = (await loadDir(join(dir, fd.name))) || [];
 
     if (isEmpty(loadedContentType) || isEmpty(loadedContentType.schema)) {
       throw new Error(`Could not load content type found at ${dir}`);
@@ -150,9 +161,10 @@ const loadContentTypes = async (apiName: string, dir: string) => {
     contentTypes[normalizeName(contentTypeName)] = contentType;
   }
 
-  return contentTypes;
+  return [contentTypes];
 };
 
+// because this is async and its contents are dynamic, we must return it as an array to avoid a property called `then` being interpreted as a Promise
 const loadDir = async (dir: string) => {
   if (!(await fse.pathExists(dir))) {
     return;
@@ -168,21 +180,22 @@ const loadDir = async (dir: string) => {
 
     const key = basename(fd.name, extname(fd.name));
 
-    root[normalizeName(key)] = await loadFile(join(dir, fd.name));
+    root[normalizeName(key)] = (await loadFile(join(dir, fd.name)))[0];
   }
 
-  return root;
+  return [root];
 };
 
-const loadFile = (file: string) => {
+// because this is async and its contents are dynamic, we must return it as an array to avoid a property called `then` being interpreted as a Promise
+const loadFile = async (file: string) => {
   const ext = extname(file);
 
   switch (ext) {
     case '.js':
-      return importDefault(file);
+      return [await importDefault(file)];
     case '.json':
-      return fse.readJSON(file);
+      return [await fse.readJSON(file)];
     default:
-      return {};
+      return [{}];
   }
 };
