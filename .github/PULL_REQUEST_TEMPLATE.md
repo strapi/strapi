@@ -21,7 +21,7 @@ Describe the issue you are solving.
 
 ### How to test it?
 
-Provide information about the environment and the path to verify the behaviour.
+Provide information about the environment and the path to verify the behavior.
 
 ### Related issue(s)/PR(s)
 
