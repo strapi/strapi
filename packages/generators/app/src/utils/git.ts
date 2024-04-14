@@ -26,6 +26,8 @@ export default async function tryGitInit(rootDir: string) {
     }
 
     await execa('git', ['init'], { stdio: 'ignore', cwd: rootDir });
+    await execa('git', ['add', '-A'], { stdio: 'ignore', cwd: rootDir });
+    await execa('git', ['commit', '-m', '"Initial commit from Create Strapi Project"'], { stdio: 'ignore', cwd: rootDir });
 
     return true;
   } catch (_) {
