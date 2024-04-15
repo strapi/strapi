@@ -63,7 +63,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
       const params: HistoryVersions.GetHistoryVersions.Request['query'] =
         await permissionChecker.sanitizeQuery(ctx.query);
 
-      const { results, pagination } = await getService(strapi, 'history').findPage({
+      const { results, pagination } = await getService(strapi, 'history').findVersionsPage({
         ...params,
         ...getValidPagination({ page: params.page, pageSize: params.pageSize }),
       });
@@ -85,7 +85,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         throw new errors.ForbiddenError();
       }
 
-      const restoredDocument = await getService(strapi, 'history').restore(
+      const restoredDocument = await getService(strapi, 'history').restoreVersion(
         request.params.versionId
       );
 
