@@ -71,8 +71,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
     },
 
     async restoreVersion(ctx) {
-      // @ts-expect-error can't tell koa what I want
-      const request: RestoreHistoryVersion.Request = ctx.request;
+      const request = ctx.request as unknown as RestoreHistoryVersion.Request;
 
       const permissionChecker = getContentManagerService('permission-checker').create({
         userAbility: ctx.state.userAbility,
@@ -87,7 +86,9 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         request.params.versionId
       );
 
-      return { data: { documentId: restoredDocument.documentId } };
+      return {
+        data: { documentId: restoredDocument.documentId },
+      } satisfies RestoreHistoryVersion.Response;
     },
   } satisfies Core.Controller;
 };

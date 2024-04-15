@@ -46,8 +46,10 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
     return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
   };
 
-  const localesService = strapi.plugin('i18n').service('locales');
+  const localesService = strapi.plugin('i18n')?.service('locales');
   const getLocaleDictionary = async () => {
+    if (!localesService) return {};
+
     const locales = (await localesService.find()) || [];
     return locales.reduce(
       (
@@ -161,7 +163,8 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             ? { documentId: result.documentId, locale: context.params?.locale }
             : { documentId: context.params.documentId, locale: context.params?.locale };
 
-        const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
+        const defaultLocale = localesService ? await localesService.getDefaultLocale() : null;
+        const locale = documentContext.locale || defaultLocale;
         const document = await strapi.documents(contentTypeUid).findOne({
           documentId: documentContext.documentId,
           locale,
