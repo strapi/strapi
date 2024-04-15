@@ -248,14 +248,9 @@ const createHelpers = (db: Database) => {
     await schemaBuilder.alterTable(table.name, (tableBuilder) => {
       // Delete indexes / fks / columns
 
-      for (const removedIndex of table.indexes.removed) {
-        debug(`Dropping index ${removedIndex.name} on ${table.name}`);
-        dropIndex(tableBuilder, removedIndex);
-      }
-
-      for (const updateddIndex of table.indexes.updated) {
-        debug(`Dropping updated index ${updateddIndex.name} on ${table.name}`);
-        dropIndex(tableBuilder, updateddIndex.object);
+      for (const removedColumn of table.columns.removed) {
+        debug(`Dropping column ${removedColumn.name} on ${table.name}`);
+        dropColumn(tableBuilder, removedColumn);
       }
 
       for (const removedForeignKey of table.foreignKeys.removed) {
@@ -268,9 +263,14 @@ const createHelpers = (db: Database) => {
         dropForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
-      for (const removedColumn of table.columns.removed) {
-        debug(`Dropping column ${removedColumn.name} on ${table.name}`);
-        dropColumn(tableBuilder, removedColumn);
+      for (const removedIndex of table.indexes.removed) {
+        debug(`Dropping index ${removedIndex.name} on ${table.name}`);
+        dropIndex(tableBuilder, removedIndex);
+      }
+
+      for (const updatedIndex of table.indexes.updated) {
+        debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
+        dropIndex(tableBuilder, updatedIndex.object);
       }
 
       // Update existing columns / foreign keys / indexes
