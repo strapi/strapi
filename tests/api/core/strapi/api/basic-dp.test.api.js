@@ -75,7 +75,7 @@ describe('Core API - Basic', () => {
       },
     });
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(201);
     expect(body.data).toMatchObject({
       id: expect.anything(),
       ...product,
@@ -101,7 +101,7 @@ describe('Core API - Basic', () => {
       },
     });
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(201);
     expect(body.data).toMatchObject({
       documentId: expect.anything(),
       ..._.omit(product, 'publishedAt'),

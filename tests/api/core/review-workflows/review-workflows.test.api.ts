@@ -224,7 +224,7 @@ describeOnCondition(edition === 'EE')('Review workflows', () => {
       });
 
       if (hasRW) {
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(201);
         expect(res.body.data).toMatchObject({
           name: 'createdWorkflow',
           stages: [
