@@ -446,6 +446,14 @@ const createQueryBuilder = (
         case 'select': {
           qb.select(state.select.map((column) => this.aliasColumn(column)));
 
+          // A top-level query (that is, not a populate) needs to be grouped by its id
+          // While populate queries should NOT be grouping because it needs duplicates
+          // Since we can't detect that directly, we make populate queries call a "useless" groupBy
+          // and then if no groupBy exists, we add one
+          if (_.isArray(state.groupBy) && state.groupBy.length === 0) {
+            state.groupBy.push(`${this.alias}.id`);
+          }
+
           if (this.shouldUseDistinct()) {
             qb.distinct();
           }

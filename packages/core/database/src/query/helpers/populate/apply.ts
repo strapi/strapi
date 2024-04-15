@@ -147,6 +147,7 @@ const XtoOne = async (
         orderBy: joinTable.orderBy,
       })
       .addSelect(joinColAlias)
+      .groupBy(`${alias}.id`) // This is a bit of a hack to prevent a the parent query groupBy being applied
       .where({ [joinColAlias]: referencedValues })
       .execute<Row[]>({ mapResults: false });
 
@@ -263,6 +264,7 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
       })
       .addSelect(joinColAlias)
       .where({ [joinColAlias]: referencedValues })
+      .groupBy(`${alias}.id`) // this is a hack to prevent a groupby from being applied from outside in qb
       .execute<Row[]>({ mapResults: false });
 
     const map = _.groupBy<Row>(joinColumnName)(rows);
