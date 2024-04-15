@@ -30,6 +30,11 @@ import { command as initPluginCommand } from './plugin/init';
 import { command as linkWatchPluginCommand } from './plugin/link-watch';
 import { command as watchPluginCommand } from './plugin/watch';
 import { command as verifyPluginCommand } from './plugin/verify';
+
+import { command as loginCommand } from './cloud/login';
+import { command as logoutCommand } from './cloud/logout';
+import { command as deployProjectCommand } from './cloud/deploy-project';
+
 import { StrapiCommand } from '../types';
 
 export const commands: StrapiCommand[] = [
@@ -67,4 +72,10 @@ export const commands: StrapiCommand[] = [
   linkWatchPluginCommand,
   watchPluginCommand,
   verifyPluginCommand,
+  /**
+   * Cloud
+   */
+  loginCommand,
+  logoutCommand,
+  deployProjectCommand,
 ];

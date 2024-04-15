@@ -1,5 +1,6 @@
 import chalk from 'chalk';
 import ora from 'ora';
+import * as cliProgress from 'cli-progress';
 
 export interface LoggerOptions {
   silent?: boolean;
@@ -12,10 +13,15 @@ export interface Logger {
   errors: number;
   debug: (...args: unknown[]) => void;
   info: (...args: unknown[]) => void;
+  success: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
   log: (...args: unknown[]) => void;
   spinner: (text: string) => Pick<ora.Ora, 'succeed' | 'fail' | 'start' | 'text'>;
+  progressBar: (
+    totalSize: number,
+    text: string
+  ) => Pick<cliProgress.SingleBar, 'start' | 'stop' | 'update'>;
 }
 
 const createLogger = (options: LoggerOptions = {}): Logger => {
@@ -62,6 +68,14 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       console.info(chalk.blue(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`), ...args);
     },
 
+    success(...args) {
+      if (silent) {
+        return;
+      }
+
+      console.info(chalk.green(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`), ...args);
+    },
+
     warn(...args) {
       state.warning += 1;
 
@@ -106,6 +120,33 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       return ora(text);
+    },
+
+    progressBar(totalSize: number, text: string) {
+      if (silent) {
+        return {
+          start() {
+            return this;
+          },
+          stop() {
+            return this;
+          },
+          update() {
+            return this;
+          },
+        };
+      }
+
+      const progressBar = new cliProgress.SingleBar({
+        format: `${text ? text + ' |' : ''}${chalk.green('{bar}')}| {percentage}%`,
+        barCompleteChar: '\u2588',
+        barIncompleteChar: '\u2591',
+        hideCursor: true,
+      });
+
+      progressBar.start(totalSize, 0);
+
+      return progressBar;
     },
   };
 };
