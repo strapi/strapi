@@ -1,4 +1,5 @@
 import { Command } from 'commander';
+import { cli as cloudCli } from '@strapi/cloud-cli';
 
 import createAdminUser from './actions/admin/create-user/command';
 import resetAdminUserPassword from './actions/admin/reset-user-password/command';
@@ -63,6 +64,12 @@ const strapiCommands = {
   versionCommand,
   watchAdminCommand,
   /**
+   * Cloud
+   */
+  loginCommand: cloudCli.login.command,
+  logoutCommand: cloudCli.logout.command,
+  deployCommand: cloudCli.deployProject.command,
+  /**
    * Plugins
    */
   buildPluginCommand,
@@ -91,6 +98,10 @@ const buildStrapiCommand = async (argv: string[], command = new Command()) => {
   // Help command
   command.helpOption('-h, --help', 'Display help for command');
   command.addHelpCommand('help [command]', 'Display help for command');
+
+  // Debug and silent options
+  command.option('-d, --debug', 'Output extra debugging');
+  command.option('-s, --silent', 'Output less information');
 
   const keys = Object.keys(strapiCommands) as (keyof typeof strapiCommands)[];
 
