@@ -1,13 +1,11 @@
 {
-  "name": "create-strapi-app",
-  "version": "4.24.5",
-  "description": "Generate a new Strapi application.",
+  "name": "@strapi/cloud-cli",
+  "version": "4.24.4",
+  "description": "Commands to interact with the Strapi Cloud",
   "keywords": [
-    "create-strapi-app",
-    "create",
-    "new",
-    "generate",
-    "strapi"
+    "strapi",
+    "cloud",
+    "cli"
   ],
   "homepage": "https://strapi.io",
   "bugs": {
@@ -30,7 +28,10 @@
       "url": "https://strapi.io"
     }
   ],
-  "main": "",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "source": "./src/index.ts",
+  "types": "./dist/src/index.d.ts",
   "bin": "./bin/index.js",
   "files": [
     "./dist",
@@ -43,16 +44,33 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/generate-new": "4.24.5",
-    "@strapi/cloud-cli": "4.24.5",
-    "chalk": "^4.1.2",
+    "@strapi/utils": "4.24.4",
+    "axios": "1.6.0",
+    "chalk": "4.1.2",
+    "cli-progress": "3.12.0",
     "commander": "8.3.0",
-    "inquirer": "8.2.5"
+    "eventsource": "2.0.2",
+    "fast-safe-stringify": "2.1.1",
+    "fs-extra": "10.0.0",
+    "inquirer": "8.2.5",
+    "jsonwebtoken": "9.0.0",
+    "jwks-rsa": "3.1.0",
+    "lodash": "4.17.21",
+    "minimatch": "9.0.3",
+    "open": "8.4.0",
+    "ora": "5.4.1",
+    "pkg-up": "3.1.0",
+    "tar": "6.1.13",
+    "xdg-app-paths": "8.3.0",
+    "yup": "0.32.9"
   },
   "devDependencies": {
     "@strapi/pack-up": "4.23.0",
-    "eslint-config-custom": "4.24.5",
-    "tsconfig": "4.24.5"
+    "@types/cli-progress": "3.11.5",
+    "@types/eventsource": "1.1.15",
+    "@types/lodash": "^4.14.191",
+    "eslint-config-custom": "4.24.4",
+    "tsconfig": "4.24.4"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
