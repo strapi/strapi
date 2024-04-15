@@ -317,11 +317,12 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
           `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
         );
       }
+
       return sumDraftCounts(document, uid);
     },
 
     async countManyEntriesDraftRelations(
-      ids: number[],
+      documentIds: string[],
       uid: UID.CollectionType,
       locale: string | string[]
     ) {
@@ -339,7 +340,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       const entities = await strapi.db.query(uid).findMany({
         populate,
         where: {
-          id: { $in: ids },
+          documentId: { $in: documentIds },
           ...localeFilter,
         },
       });
