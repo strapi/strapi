@@ -126,7 +126,7 @@ export function useAPIErrorHandler(
   const formatError = React.useCallback(
     (error: FetchError) => {
       // Try to normalize the passed error first. This will fail for e.g. network
-      // errors which are thrown by Axios directly.
+      // errors which are thrown by fetchClient directly.
       try {
         const formattedErr = formatAPIError(error, { intlMessagePrefixCallback, formatMessage });
 

@@ -11,9 +11,7 @@ type SettingsInput = {
 const api = createApi({
   reducerPath: 'plugin::documentation',
   baseQuery: baseQuery({
-    options: {
-      baseURL: '/documentation',
-    },
+    baseURL: '/documentation',
   }),
   tagTypes: ['DocumentInfos'],
   endpoints: (builder) => {

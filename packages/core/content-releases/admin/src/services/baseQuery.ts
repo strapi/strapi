@@ -1,7 +1,7 @@
 import {
   getFetchClient,
   type FetchResponse,
-  type FetchConfig,
+  type FetchOptions,
   type FetchError,
 } from '@strapi/admin/strapi-admin';
 
@@ -9,7 +9,7 @@ export interface QueryArguments<TSend> {
   url: string;
   method: 'PUT' | 'GET' | 'POST' | 'DELETE';
   data?: TSend;
-  config?: FetchConfig;
+  config?: FetchOptions;
 }
 
 const fetchBaseQuery = async <TData = unknown, TSend = unknown>({

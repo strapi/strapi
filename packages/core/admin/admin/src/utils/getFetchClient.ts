@@ -9,23 +9,23 @@ const STORAGE_KEYS = {
 
 type FetchParams = Parameters<typeof fetch>;
 type FetchURL = FetchParams[0];
-export type FetchOptions = FetchParams[1];
 
 export type FetchResponse<TData = unknown> = {
   data: TData;
 };
-type Options = {
+
+export type FetchOptions = {
   params?: any;
-  baseURL?: string;
+  signal?: AbortSignal;
 };
+
 export type FetchConfig = {
-  options?: Options;
-  fetchConfig?: FetchParams[1];
+  baseURL?: string;
 };
 
 type ErrorResponse = {
   data: any;
-  error: ApiError & { status: number };
+  error: ApiError & { status?: number };
 };
 
 export class FetchError extends Error {
@@ -39,7 +39,7 @@ export class FetchError extends Error {
     this.name = 'FetchError';
     this.message = message;
     this.response = response;
-    this.code = response?.error.status;
+    this.code = response?.error?.status;
 
     // Ensure correct stack trace in error object
     if (Error.captureStackTrace) {
@@ -66,18 +66,24 @@ const hasProtocol = (url: string) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(ur
 const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
 
 type FetchClient = {
-  get: <TData = unknown, R = FetchResponse<TData>>(url: string, config?: FetchConfig) => Promise<R>;
+  get: <TData = unknown, R = FetchResponse<TData>>(
+    url: string,
+    config?: FetchOptions
+  ) => Promise<R>;
   put: <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
     url: string,
     data?: TSend,
-    config?: FetchConfig
+    config?: FetchOptions
   ) => Promise<R>;
   post: <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
     url: string,
     data?: TSend,
-    config?: FetchConfig
+    config?: FetchOptions
   ) => Promise<R>;
-  del: <TData = unknown, R = FetchResponse<TData>>(url: string, config?: FetchConfig) => Promise<R>;
+  del: <TData = unknown, R = FetchResponse<TData>>(
+    url: string,
+    config?: FetchOptions
+  ) => Promise<R>;
 };
 
 /**
@@ -101,7 +107,7 @@ type FetchClient = {
  * ```
  */
 const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
-  const { options } = defaultOptions;
+  const baseURL = defaultOptions.baseURL ?? window.strapi.backendURL;
   const headers = new Headers({
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -129,30 +135,19 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     return url;
   };
 
-  const addBaseUrl = (url: FetchURL, clientBaseURL?: string) => {
-    if (clientBaseURL) {
-      return `${clientBaseURL}${url}`;
-    }
-    if (options?.baseURL) {
-      return `${options?.baseURL}${url}`;
-    }
-    const baseURL = window.strapi.backendURL;
+  const addBaseUrl = (url: FetchURL) => {
     return `${baseURL}${url}`;
   };
 
   const fetchClient: FetchClient = {
     get: async <TData = unknown, R = FetchResponse<TData>>(
       url: string,
-      options?: FetchConfig
+      options?: FetchOptions
     ): Promise<R> => {
       const response = await fetch(
-        paramsSerializer(
-          addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
-          options?.options?.params
-        ),
+        paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
-          ...defaultOptions.fetchConfig,
-          ...options?.fetchConfig,
+          ...options,
           method: 'GET',
           headers,
         }
@@ -162,16 +157,12 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     post: async <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
       url: string,
       data?: TSend,
-      options?: FetchConfig
+      options?: FetchOptions
     ): Promise<R> => {
       const response = await fetch(
-        paramsSerializer(
-          addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
-          options?.options?.params
-        ),
+        paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
-          ...defaultOptions?.fetchConfig,
-          ...options?.fetchConfig,
+          ...options,
           method: 'POST',
           headers,
           body: JSON.stringify(data),
@@ -182,16 +173,12 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     put: async <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
       url: string,
       data?: TSend,
-      options?: FetchConfig
+      options?: FetchOptions
     ): Promise<R> => {
       const response = await fetch(
-        paramsSerializer(
-          addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
-          options?.options?.params
-        ),
+        paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
-          ...defaultOptions?.fetchConfig,
-          ...options?.fetchConfig,
+          ...options,
           method: 'PUT',
           headers,
           body: JSON.stringify(data),
@@ -201,16 +188,12 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     },
     del: async <TData = unknown, R = FetchResponse<TData>>(
       url: string,
-      options?: FetchConfig
+      options?: FetchOptions
     ): Promise<R> => {
       const response = await fetch(
-        paramsSerializer(
-          addBaseUrl(normalizeUrl(url), options?.options?.baseURL),
-          options?.options?.params
-        ),
+        paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
-          ...defaultOptions?.fetchConfig,
-          ...options?.fetchConfig,
+          ...options,
           method: 'DELETE',
           headers,
         }

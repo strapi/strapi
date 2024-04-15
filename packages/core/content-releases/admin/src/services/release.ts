@@ -63,9 +63,7 @@ const releaseApi = createApi({
             url: '/content-releases',
             method: 'GET',
             config: {
-              options: {
-                params,
-              },
+              params,
             },
           };
         },
@@ -93,14 +91,12 @@ const releaseApi = createApi({
             url: '/content-releases',
             method: 'GET',
             config: {
-              options: {
-                params: {
-                  page: page || 1,
-                  pageSize: pageSize || 16,
-                  filters: filters || {
-                    releasedAt: {
-                      $notNull: false,
-                    },
+              params: {
+                page: page || 1,
+                pageSize: pageSize || 16,
+                filters: filters || {
+                  releasedAt: {
+                    $notNull: false,
                   },
                 },
               },
@@ -146,9 +142,7 @@ const releaseApi = createApi({
             url: `/content-releases/${releaseId}/actions`,
             method: 'GET',
             config: {
-              options: {
-                params,
-              },
+              params,
             },
           };
         },

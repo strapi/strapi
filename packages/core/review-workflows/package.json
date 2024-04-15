@@ -48,7 +48,6 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.17.0",
     "@strapi/icons": "1.16.0",
-    "axios": "1.6.8",
     "react-helmet": "^6.1.0",
     "react-intl": "6.6.2",
     "react-redux": "8.1.3",

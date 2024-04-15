@@ -4,14 +4,14 @@ import {
   getFetchClient,
   isFetchError,
   type ApiError,
-  type FetchConfig,
+  type FetchOptions,
 } from '@strapi/admin/strapi-admin';
 
 export interface QueryArguments {
   url: string;
   method?: string;
   data?: unknown;
-  config?: FetchConfig;
+  config?: FetchOptions;
 }
 
 export interface UnknownApiError {
@@ -30,31 +30,31 @@ const fetchBaseQuery =
       const { get, post, del, put } = getFetchClient();
 
       if (typeof query === 'string') {
-        const result = await get(query, { fetchConfig: { signal } });
+        const result = await get(query, { signal });
         return { data: result.data };
       } else {
         const { url, method = 'GET', data, config } = query;
 
         if (method === 'POST') {
           const result = await post(url, data, {
-            options: { ...config?.options },
-            fetchConfig: { ...config?.fetchConfig, signal },
+            ...config,
+            signal,
           });
           return { data: result.data };
         }
 
         if (method === 'DELETE') {
           const result = await del(url, {
-            options: { ...config?.options },
-            fetchConfig: { ...config?.fetchConfig, signal },
+            ...config,
+            signal,
           });
           return { data: result.data };
         }
 
         if (method === 'PUT') {
           const result = await put(url, data, {
-            options: { ...config?.options },
-            fetchConfig: { ...config?.fetchConfig, signal },
+            ...config,
+            signal,
           });
           return { data: result.data };
         }
@@ -63,8 +63,8 @@ const fetchBaseQuery =
          * Default is GET.
          */
         const result = await get(url, {
-          options: { ...config?.options },
-          fetchConfig: { ...config?.fetchConfig, signal },
+          ...config,
+          signal,
         });
         return { data: result.data };
       }

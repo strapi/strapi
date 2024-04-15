@@ -20,9 +20,7 @@ const uidApi = contentManagerApi.injectEndpoints({
           method: 'POST',
           data,
           config: {
-            options: {
-              params,
-            },
+            params,
           },
         };
       },
@@ -39,9 +37,7 @@ const uidApi = contentManagerApi.injectEndpoints({
         method: 'POST',
         data,
         config: {
-          options: {
-            params,
-          },
+          params,
         },
       }),
       transformResponse: (response: GenerateUID.Response) => response.data,
@@ -57,9 +53,7 @@ const uidApi = contentManagerApi.injectEndpoints({
         method: 'POST',
         data,
         config: {
-          options: {
-            params,
-          },
+          params,
         },
       }),
     }),
