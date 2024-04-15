@@ -91,7 +91,10 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
     if ('error' in response) {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({ id: 'TODO', defaultMessage: 'Could not restore version.' }),
+        message: formatMessage({
+          id: 'content-manager.history.restore.error.message',
+          defaultMessage: 'Could not restore version.',
+        }),
       });
     }
   };
