@@ -5,6 +5,9 @@ export interface StringProperties {
   regex?: RegExp;
 }
 
+/**
+ * Represents a string Strapi attribute along with its options
+ */
 type StringAttribute = Intersect<
   [
     Attribute.OfType<'string'>,
@@ -28,4 +31,7 @@ export type GetStringValue<T extends Attribute.Attribute> = T extends StringAttr
   ? StringValue
   : never;
 
+/**
+ * Represents a string Strapi attribute along with its options
+ */
 export type String = StringAttribute;

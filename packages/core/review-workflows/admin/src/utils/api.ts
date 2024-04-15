@@ -4,14 +4,14 @@ import {
   getFetchClient,
   isFetchError,
   type ApiError,
-  type FetchConfig,
+  type FetchOptions,
 } from '@strapi/admin/strapi-admin';
 
 export interface QueryArguments {
   url: string;
   method?: string;
   data?: unknown;
-  config?: FetchConfig;
+  config?: FetchOptions;
 }
 
 export interface UnknownApiError {
@@ -30,31 +30,31 @@ const fetchBaseQuery =
       const { get, post, del, put } = getFetchClient();
 
       if (typeof query === 'string') {
-        const result = await get(query, { fetchConfig: { signal } });
+        const result = await get(query, { signal });
         return { data: result.data };
       } else {
         const { url, method = 'GET', data, config } = query;
 
         if (method === 'POST') {
           const result = await post(url, data, {
-            options: { ...config?.options },
-            fetchConfig: { ...config?.fetchConfig, signal },
+            ...config,
+            signal,
           });
           return { data: result.data };
         }
 
         if (method === 'DELETE') {
           const result = await del(url, {
-            options: { ...config?.options },
-            fetchConfig: { ...config?.fetchConfig, signal },
+            ...config,
+            signal,
           });
           return { data: result.data };
         }
 
         if (method === 'PUT') {
           const result = await put(url, data, {
-            options: { ...config?.options },
-            fetchConfig: { ...config?.fetchConfig, signal },
+            ...config,
+            signal,
           });
           return { data: result.data };
         }
@@ -63,8 +63,8 @@ const fetchBaseQuery =
          * Default is GET.
          */
         const result = await get(url, {
-          options: { ...config?.options },
-          fetchConfig: { ...config?.fetchConfig, signal },
+          ...config,
+          signal,
         });
         return { data: result.data };
       }
@@ -118,4 +118,44 @@ const isBaseQueryError = (error: BaseQueryError | SerializedError): error is Bas
   return error.name !== undefined;
 };
 
-export { fetchBaseQuery, isBaseQueryError };
+interface Query {
+  plugins?: Record<string, unknown>;
+  _q?: string;
+  [key: string]: any;
+}
+
+/**
+ * This type extracts the plugin options from the query
+ * and appends them to the root of the query
+ */
+type TransformedQuery<TQuery extends Query> = Omit<TQuery, 'plugins'> & {
+  [key: string]: string;
+};
+
+/**
+ * @description
+ * Creates a valid query params object for get requests
+ * ie. plugins[18n][locale]=en becomes locale=en
+ */
+const buildValidParams = <TQuery extends Query>(query: TQuery): TransformedQuery<TQuery> => {
+  if (!query) return query;
+
+  // Extract pluginOptions from the query, they shouldn't be part of the URL
+  const { plugins: _, ...validQueryParams } = {
+    ...query,
+    ...Object.values(query?.plugins ?? {}).reduce<Record<string, string>>(
+      (acc, current) => Object.assign(acc, current),
+      {}
+    ),
+  };
+
+  if ('_q' in validQueryParams) {
+    // Encode the search query here since the paramsSerializer will not
+    // @ts-expect-error – TODO: fix this type error
+    validQueryParams._q = encodeURIComponent(validQueryParams._q);
+  }
+
+  return validQueryParams;
+};
+
+export { fetchBaseQuery, isBaseQueryError, buildValidParams };

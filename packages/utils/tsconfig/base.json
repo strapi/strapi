@@ -7,6 +7,9 @@
     "esModuleInterop": true,
     "sourceMap": true,
     "resolveJsonModule": true,
-    "noImplicitThis": true
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
   }
 }

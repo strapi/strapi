@@ -5,7 +5,7 @@ import { fetchBaseQuery, type UnknownApiError } from '../utils/api';
 const reviewWorkflowsApi = createApi({
   reducerPath: 'reviewWorkflowsApi',
   baseQuery: fetchBaseQuery(),
-  tagTypes: ['ReviewWorkflow', 'ReviewWorkflowStage'],
+  tagTypes: ['ReviewWorkflow', 'ReviewWorkflowStages'],
   endpoints: () => ({}),
 });
 

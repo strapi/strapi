@@ -40,6 +40,7 @@ export type Configuration = {
   settings: Settings;
   metadatas: Metadatas;
   layouts: Layouts;
+  options?: object;
 };
 
 export interface ContentType extends Struct.ContentTypeSchema {

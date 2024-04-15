@@ -1,8 +1,0 @@
-{
-  "extends": "./tsconfig.json",
-  "compilerOptions": {
-    "noEmit": true
-  },
-  "include": ["examples", "src", "tests", "scripts", "*.config.ts", "*.config.js", ".eslintrc.js"],
-  "exclude": ["node_modules"]
-}

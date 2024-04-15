@@ -10,8 +10,10 @@ import { historyVersion } from './models/history-version';
  * so that we can assume it is enabled in the other files.
  */
 const getFeature = (): Partial<Plugin.LoadedPlugin> => {
-  // TODO: add license check here when it's ready on the license registry
-  if (strapi.features.future.isEnabled('history')) {
+  if (
+    strapi.features.future.isEnabled('history') &&
+    strapi.ee.features.isEnabled('cms-content-history')
+  ) {
     return {
       register({ strapi }) {
         strapi.get('models').add(historyVersion);

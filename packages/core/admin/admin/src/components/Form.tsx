@@ -127,7 +127,14 @@ interface FormProps<TFormValues extends FormValues = FormValues>
     | ((
         props: Pick<
           FormContextValue<TFormValues>,
-          'disabled' | 'errors' | 'isSubmitting' | 'modified' | 'values' | 'resetForm' | 'onChange'
+          | 'disabled'
+          | 'errors'
+          | 'isSubmitting'
+          | 'modified'
+          | 'values'
+          | 'resetForm'
+          | 'onChange'
+          | 'setErrors'
         >
       ) => React.ReactNode);
   method: 'POST' | 'PUT';
@@ -244,7 +251,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
             // We throw any other errors
             if (process.env.NODE_ENV !== 'production') {
               console.warn(
-                `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
+                `Warning: An unhandled error was caught during validation in <Form validationSchema />`,
                 err
               );
             }
@@ -441,6 +448,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
                 disabled,
                 onChange: handleChange,
                 ...state,
+                setErrors,
                 resetForm,
               })
             : props.children}

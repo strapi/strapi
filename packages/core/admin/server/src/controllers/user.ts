@@ -1,6 +1,6 @@
 import type { Context } from 'koa';
 
-import _ = require('lodash');
+import * as _ from 'lodash';
 import { errors } from '@strapi/utils';
 import {
   validateUserCreationInput,
