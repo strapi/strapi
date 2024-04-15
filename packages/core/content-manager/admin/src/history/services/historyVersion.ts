@@ -23,10 +23,11 @@ const historyVersionsApi = contentManagerApi.injectEndpoints({
     }),
     restoreVersion: builder.mutation<RestoreHistoryVersion.Response, RestoreHistoryVersion.Request>(
       {
-        query({ params }) {
+        query({ params, body }) {
           return {
             url: `/content-manager/history-versions/${params.versionId}/restore`,
             method: 'PUT',
+            data: body,
           };
         },
         invalidatesTags: ['HistoryVersion'],

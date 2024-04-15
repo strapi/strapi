@@ -83,6 +83,9 @@ export declare namespace RestoreHistoryVersion {
     params: {
       versionId: Data.ID;
     };
+    body: {
+      contentType: UID.ContentType;
+    };
   }
 
   export type Response =

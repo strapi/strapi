@@ -71,15 +71,24 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
     },
 
     async restoreVersion(ctx) {
-      const versionId: RestoreHistoryVersion.Request['params']['versionId'] = ctx.params.versionId;
+      const request = ctx.request as unknown as RestoreHistoryVersion.Request;
 
-      const restoredDocument = await getService(strapi, 'history').restoreVersion(versionId);
+      const permissionChecker = getContentManagerService('permission-checker').create({
+        userAbility: ctx.state.userAbility,
+        model: request.body.contentType,
+      });
 
-      if (!restoredDocument) {
-        throw new errors.ApplicationError('Failed to restore version');
+      if (permissionChecker.cannot.update()) {
+        throw new errors.ForbiddenError();
       }
 
-      return { data: { documentId: restoredDocument.documentId } };
+      const restoredDocument = await getService(strapi, 'history').restoreVersion(
+        request.params.versionId
+      );
+
+      return {
+        data: { documentId: restoredDocument.documentId },
+      } satisfies RestoreHistoryVersion.Response;
     },
   } satisfies Core.Controller;
 };

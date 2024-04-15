@@ -18,6 +18,7 @@ import { COLLECTION_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
 import { useHistoryContext } from '../pages/History';
 import { useRestoreVersionMutation } from '../services/historyVersion';
+
 interface VersionHeaderProps {
   headerId: string;
 }
@@ -64,7 +65,10 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   };
 
   const handleRestore = async () => {
-    const response = await restoreVersion({ params: { versionId: version.id } });
+    const response = await restoreVersion({
+      params: { versionId: version.id },
+      body: { contentType: version.contentType },
+    });
 
     if ('data' in response) {
       navigate(`/content-manager/${collectionType}/${slug}/${response.data.data?.documentId}`);

@@ -1,5 +1,5 @@
 import type { Core, Modules, UID, Data, Schema, Struct } from '@strapi/types';
-import { contentTypes } from '@strapi/utils';
+import { contentTypes, errors } from '@strapi/utils';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
@@ -46,8 +46,10 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
     return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
   };
 
-  const localesService = strapi.plugin('i18n').service('locales');
+  const localesService = strapi.plugin('i18n')?.service('locales');
   const getLocaleDictionary = async () => {
+    if (!localesService) return {};
+
     const locales = (await localesService.find()) || [];
     return locales.reduce(
       (
@@ -161,7 +163,8 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             ? { documentId: result.documentId, locale: context.params?.locale }
             : { documentId: context.params.documentId, locale: context.params?.locale };
 
-        const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
+        const defaultLocale = localesService ? await localesService.getDefaultLocale() : null;
+        const locale = documentContext.locale || defaultLocale;
         const document = await strapi.documents(contentTypeUid).findOne({
           documentId: documentContext.documentId,
           locale,
@@ -415,7 +418,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         contentTypeSchemaAttributes
       ) as Struct.SchemaAttributes;
       // Set all deleted relation values to null
-      const dataWithoutMissingRelationsPromise = Object.entries(sanitizedSchemaAttributes).reduce(
+      const dataWithoutMissingRelations = await Object.entries(sanitizedSchemaAttributes).reduce(
         async (
           previousRelationAttributesPromise: Promise<Record<string, unknown>>,
           [name, attribute]: [string, Schema.Attribute.AnyAttribute]
@@ -491,13 +494,15 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         Promise.resolve(structuredClone(dataWithoutAddedAttributes))
       );
 
-      // Create a new draft with the version data
-      const dataWithoutMissingRelations = await dataWithoutMissingRelationsPromise;
       const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
       const restoredDocument = await strapi.documents(version.contentType).update({
         documentId: version.relatedDocumentId,
         data,
       });
+
+      if (!restoredDocument) {
+        throw new errors.ApplicationError('Failed to restore version');
+      }
 
       return restoredDocument;
     },
