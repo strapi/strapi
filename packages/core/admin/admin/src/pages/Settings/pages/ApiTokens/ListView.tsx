@@ -1,11 +1,12 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
+import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
+import { LinkButton } from '@strapi/design-system/v2';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
 import { Page } from '../../../../components/PageHelpers';
@@ -146,6 +147,7 @@ export const ListView = () => {
         primaryAction={
           canCreate && (
             <LinkButton
+              forwardedAs={Link}
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="S"
@@ -154,6 +156,7 @@ export const ListView = () => {
                   tokenType: API_TOKEN_TYPE,
                 })
               }
+              // @ts-expect-error We need to accept the props of the component passed in the `as` prop
               to="/settings/api-tokens/create"
             >
               {formatMessage({
@@ -188,8 +191,10 @@ export const ListView = () => {
                 })}
                 action={
                   <LinkButton
+                    forwardedAs={Link}
                     variant="secondary"
                     startIcon={<Plus />}
+                    // @ts-expect-error We need to accept the props of the component passed in the `as` prop
                     to="/settings/api-tokens/create"
                   >
                     {formatMessage({

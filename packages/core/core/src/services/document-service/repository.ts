@@ -11,7 +11,6 @@ import { createEntriesService } from './entries';
 import { pickSelectionParams } from './params';
 import { createDocumentId } from '../../utils/transform-content-types-to-models';
 import { getDeepPopulate } from './utils/populate';
-import { transformData } from './transform/data';
 import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
 
@@ -224,7 +223,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     });
 
     // Get deep populate
-    const entriesToPublish = await strapi.db?.query(uid).findMany({
+    const draftsToPublish = await strapi.db?.query(uid).findMany({
       where: {
         ...queryParams?.lookup,
         documentId,
@@ -234,26 +233,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     });
 
     // Transform draft entry data and create published versions
-    const publishedEntries = await async.map(
-      entriesToPublish,
-      async.pipe(
-        // Updated at value is used to know if draft has been modified
-        // If both versions share the same value, it means the draft has not been modified
-        (draft) => assoc('updatedAt', draft.updatedAt, draft),
-        assoc('publishedAt', new Date()),
-        assoc('documentId', documentId),
-        omit('id'),
-        // Transform relations to target published versions
-        (entry) => {
-          const opts = { uid, locale: entry.locale, status: 'published', allowMissingId: true };
-          return transformData(entry, opts);
-        },
-        // Create the published entry
-        (data) => entries.create({ ...queryParams, data, locale: data.locale, status: 'published' })
-      )
+    const versions = await async.map(draftsToPublish, (draft: unknown) =>
+      entries.publish(draft, queryParams)
     );
 
-    return { versions: publishedEntries };
+    return { versions };
   }
 
   async function unpublish(opts = {} as any) {
@@ -299,20 +283,8 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     });
 
     // Transform published entry data and create draft versions
-    const draftEntries = await async.map(
-      entriesToDraft,
-      async.pipe(
-        assoc('publishedAt', null),
-        assoc('documentId', documentId),
-        omit('id'),
-        // Transform relations to target draft versions
-        (entry) => {
-          const opts = { uid, locale: entry.locale, status: 'draft', allowMissingId: true };
-          return transformData(entry, opts);
-        },
-        // Create the draft entry
-        (data) => entries.create({ ...queryParams, locale: data.locale, data, status: 'draft' })
-      )
+    const draftEntries = await async.map(entriesToDraft, (entry: any) =>
+      entries.discardDraft(entry, queryParams)
     );
 
     return { versions: draftEntries };

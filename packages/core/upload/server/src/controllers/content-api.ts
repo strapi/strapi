@@ -138,6 +138,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       });
 
       ctx.body = await sanitizeOutput(uploadedFiles as any, ctx);
+      ctx.status = 201;
     },
 
     // TODO: split into multiple endpoints

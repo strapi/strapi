@@ -225,6 +225,14 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
 
       const payload = {};
 
+      /**
+       * This _should_ only happen for attributes that are added dynamically e.g. review-workflow stages
+       * and a user is importing EE data into a CE project.
+       */
+      if (!attribute) {
+        return;
+      }
+
       if (attribute.type !== 'relation') {
         throw new Error(`Attribute ${left.field} is not a relation`);
       }

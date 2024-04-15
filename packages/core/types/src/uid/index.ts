@@ -115,7 +115,7 @@ export type CollectionType = Guard.Never<
 /**
  * Single-Type UID based on the public content-type registry
  *
- * If no single type is found, it fallbacks to a generic content-type UID.
+ * If no single type is found, it falls back to a generic content-type UID.
  */
 export type SingleType = Guard.Never<
   Extract<Object.KeysBy<Public.ContentTypeSchemas, Struct.SingleTypeSchema>, ContentType>,

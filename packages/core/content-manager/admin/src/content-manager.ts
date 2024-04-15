@@ -83,7 +83,7 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
    * The defaults are added by Strapi only, if you're providing your own component,
    * you do not need to provide this.
    */
-  type?: 'actions' | 'review-workflows' | 'releases';
+  type?: 'actions' | 'releases';
 }
 
 interface DocumentActionProps extends EditViewContext {}
