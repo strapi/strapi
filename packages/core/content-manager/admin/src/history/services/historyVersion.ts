@@ -30,7 +30,12 @@ const historyVersionsApi = contentManagerApi.injectEndpoints({
             data: body,
           };
         },
-        invalidatesTags: ['HistoryVersion'],
+        invalidatesTags: (_res, _error, { params }) => {
+          return [
+            'HistoryVersion',
+            { type: 'Document', id: `${params.contentType}_${params.documentId}` },
+          ];
+        },
       }
     ),
   }),

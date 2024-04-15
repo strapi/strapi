@@ -66,7 +66,11 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
 
   const handleRestore = async () => {
     const response = await restoreVersion({
-      params: { versionId: version.id },
+      params: {
+        versionId: version.id,
+        documentId: version.relatedDocumentId,
+        contentType: version.contentType,
+      },
       body: { contentType: version.contentType },
     });
 
