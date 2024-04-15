@@ -179,6 +179,13 @@ export interface ContentReleasesFeature {
   };
 }
 
+export interface ContentHistoryFeature {
+  name: 'cms-content-history';
+  options: {
+    retentionDays: number;
+  };
+}
+
 /**
  * TODO: this response needs refactoring because we're mixing the admin seat limit info with
  * regular EE feature info.
@@ -192,7 +199,13 @@ export declare namespace GetLicenseLimitInformation {
     data: {
       currentActiveUserCount: number;
       enforcementUserCount: number;
-      features: (SSOFeature | AuditLogsFeature | ReviewWorkflowsFeature | ContentReleasesFeature)[];
+      features: (
+        | SSOFeature
+        | AuditLogsFeature
+        | ReviewWorkflowsFeature
+        | ContentReleasesFeature
+        | ContentHistoryFeature
+      )[];
       isHostedOnStrapiCloud: boolean;
       licenseLimitStatus: unknown;
       permittedSeats: number;

@@ -47,7 +47,7 @@
     "fs-extra": "10.1.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.3",
+    "@strapi/pack-up": "5.0.0",
     "@strapi/types": "5.0.0-beta.3",
     "@types/jest": "29.5.2",
     "eslint-config-custom": "5.0.0-beta.3",

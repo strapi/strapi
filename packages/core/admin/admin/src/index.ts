@@ -52,7 +52,13 @@ export { useAdminUsers } from './services/users';
 export type { StrapiApp, MenuItem, InjectionZoneComponent } from './StrapiApp';
 export type { Store } from './core/store/configure';
 export type { Plugin, PluginConfig } from './core/apis/Plugin';
-export type { SanitizedAdminUser } from '../../shared/contracts/shared';
+export type {
+  SanitizedAdminUser,
+  AdminUser,
+  SanitizedAdminRole,
+  AdminRole,
+  Entity,
+} from '../../shared/contracts/shared';
 export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
 
 /**

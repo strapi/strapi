@@ -42,7 +42,7 @@ describe('Test type json', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: inputValue,
     });
@@ -63,7 +63,7 @@ describe('Test type json', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: inputValue,
     });

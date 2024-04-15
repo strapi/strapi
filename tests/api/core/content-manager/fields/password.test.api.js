@@ -39,7 +39,7 @@ describe('Test type password', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data.field).toBeUndefined();
   });
 
@@ -52,7 +52,7 @@ describe('Test type password', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data.field).toBeUndefined();
   });
 

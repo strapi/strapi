@@ -240,10 +240,11 @@ class StrapiApp {
       // @ts-expect-error – shh
       link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
-      console.warn(`
-      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed
-        in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-      `);
+      console.warn(
+        `
+      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      `.trim()
+      );
     }
 
     if (link.to.startsWith('/')) {
@@ -312,10 +313,11 @@ class StrapiApp {
       // @ts-expect-error – shh
       link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
-      console.warn(`
-      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed
-        in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-      `);
+      console.warn(
+        `
+      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      `.trim()
+      );
     }
 
     if (link.to.startsWith('/')) {
@@ -414,7 +416,7 @@ class StrapiApp {
 
       if (!darkTheme && !lightTheme) {
         console.warn(
-          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`
+          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`.trim()
         );
         merge(this.configurations.themes.light, customConfig.theme);
       }
