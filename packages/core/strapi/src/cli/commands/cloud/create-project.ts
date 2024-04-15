@@ -69,6 +69,7 @@ const action = async (ctx: CLIContext) => {
     logger.error(
       'We encountered an issue while creating your project. Please try again in a moment. If the problem persists, contact support for assistance.'
     );
+    logger.debug(error);
   }
 };
 

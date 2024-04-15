@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as tar from 'tar';
 import * as path from 'path';
 import { minimatch } from 'minimatch';
-import { logger } from '../services/logs';
 
 const IGNORED_PATTERNS = [
   '**/.git/**',
@@ -78,21 +77,14 @@ const compressFilesToTar = async (
   const ignorePatterns = readGitignore(folderToCompress);
   const filesToCompress = getFiles(folderToCompress, ignorePatterns);
 
-  try {
-    await tar.c(
-      {
-        gzip: true,
-        file: path.resolve(storagePath, filename),
-        cwd: storagePath,
-      },
-      [...filesToCompress.map((file) => path.relative(folderToCompress, file))]
-    );
-    logger.log('📦 Project compressed successfully!');
-  } catch (error) {
-    logger.error(
-      '⚠️ Project compression failed. Try again later or check for large/incompatible files.'
-    );
-  }
+  return tar.c(
+    {
+      gzip: true,
+      file: path.resolve(storagePath, filename),
+      cwd: storagePath,
+    },
+    [...filesToCompress.map((file) => path.relative(folderToCompress, file))]
+  );
 };
 
 export { compressFilesToTar, isIgnoredFile };

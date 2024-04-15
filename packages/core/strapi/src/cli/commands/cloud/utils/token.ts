@@ -23,7 +23,7 @@ export function tokenServiceFactory({ logger }: CLIContext) {
     try {
       fs.writeFileSync(filePath, str);
     } catch (error: Error | unknown) {
-      console.debug(error);
+      logger.debug(error);
       logger.error('There was a problem saving your token. Please try again.');
     }
   }
@@ -109,6 +109,7 @@ export function tokenServiceFactory({ logger }: CLIContext) {
       logger.error(
         'There was an issue removing your login information. Please try logging out again.'
       );
+      logger.debug(error);
     }
   }
 

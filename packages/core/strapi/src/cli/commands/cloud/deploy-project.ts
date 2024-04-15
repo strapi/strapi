@@ -35,6 +35,7 @@ function getPackageJson({ logger }: CLIContext, folderPath: string): Record<stri
     }
     return packageJson;
   } catch (error: Error | unknown) {
+    logger.debug(error);
     if (error instanceof Error && error.message.includes('Unexpected token')) {
       logger.error(
         'The package.json file seems to have invalid formatting. Please check for syntax errors and try again.'
@@ -67,6 +68,7 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
       ctx.logger.error(
         '⚠️ Project compression failed. Try again later or check for large/incompatible files.'
       );
+      ctx.logger.debug(error);
     }
 
     const tarFilePath = path.resolve(storagePath, compressedFilename);
@@ -96,12 +98,14 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
       ctx.logger.success('✨ Upload finished!');
     } catch (error: any) {
       ctx.logger.error('An error occurred while deploying the project. Please try again later.');
+      ctx.logger.debug(error);
     } finally {
       progressBar.stop();
     }
     process.exit(0);
-  } catch (e: any) {
+  } catch (error: any) {
     ctx.logger.error('An error occurred while deploying the project. Please try again later.');
+    ctx.logger.debug(error);
     process.exit(1);
   }
 }

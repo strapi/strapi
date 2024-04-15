@@ -96,6 +96,7 @@ const action = (ctx: CLIContext) => {
             logger.error(
               'There seems to be a problem with your login information. Please try logging in again.'
             );
+            logger.debug(error);
             return;
           } else if (
             error.response?.data.error &&
