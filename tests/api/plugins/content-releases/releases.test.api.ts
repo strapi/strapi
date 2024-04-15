@@ -41,9 +41,23 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       method: 'POST',
       url: '/content-releases/',
       body: {
-        name: 'Test Release',
+        name: `Test Release ${Math.random().toString(36)}`,
         scheduledAt: null,
         ...params,
+      },
+    });
+  };
+
+  const createReleaseAction = async (releaseId, { contentType, entryId, type }) => {
+    return rq({
+      method: 'POST',
+      url: `/content-releases/${releaseId}/actions`,
+      body: {
+        entry: {
+          id: entryId,
+          contentType,
+        },
+        type,
       },
     });
   };
@@ -84,12 +98,14 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     // Create products
     await Promise.all([
       createEntry(productUID, { name: 'Product 1', description: 'Description' }),
-      createEntry(productUID, { name: 'Product 2' }),
+      createEntry(productUID, { name: 'Product 2', description: 'Description' }),
       createEntry(productUID, { name: 'Product 3', description: 'Description' }),
       createEntry(productUID, { name: 'Product 4', description: 'Description' }),
-      createEntry(productUID, { name: 'Product 5', description: 'Description' }),
+      createEntry(productUID, { name: 'Invalid Product' }),
     ]);
+  });
 
+  beforeEach(async () => {
     await deleteAllReleases();
   });
 
@@ -103,33 +119,33 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     test('Create a release', async () => {
       const res = await createRelease();
 
-      data.releases.push(res.body.data);
-
       expect(res.statusCode).toBe(200);
     });
 
     test('cannot create a release with the same name', async () => {
-      const res = await createRelease();
+      const firstCreateRes = await createRelease();
+      expect(firstCreateRes.statusCode).toBe(200);
 
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toBe('Release with name Test Release already exists');
+      const releaseName = firstCreateRes.body.data.name;
+
+      const secondCreateRes = await createRelease({ name: releaseName });
+
+      expect(secondCreateRes.body.error.message).toBe(
+        `Release with name ${releaseName} already exists`
+      );
     });
 
     test('create a scheduled release', async () => {
       const res = await createRelease({
-        name: 'Test Scheduled Release',
         scheduledAt: new Date('2024-10-10T00:00:00.000Z'),
         timezone: 'Europe/Madrid',
       });
-
-      data.releases.push(res.body.data);
 
       expect(res.statusCode).toBe(200);
     });
 
     test('cannot create a scheduled release with date in the past', async () => {
       const res = await createRelease({
-        name: 'Test Scheduled Release',
         scheduledAt: new Date('2022-10-10T00:00:00.000Z'),
         timezone: 'Europe/Madrid',
       });
@@ -139,91 +155,85 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
   });
 
-  // Depends on the previous test
   describe('Create Release Actions', () => {
     test('Create a release action with valid status', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
 
-      const res = await rq({
-        method: 'POST',
-        url: `/content-releases/${release.id}/actions`,
-        body: {
-          entry: {
-            id: 1,
-            contentType: productUID,
-          },
-          type: 'publish',
-        },
+      const release = createReleaseRes.body.data;
+
+      const createActionRes = await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
       });
 
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data.isEntryValid).toBe(true);
+      expect(createActionRes.statusCode).toBe(200);
+      expect(createActionRes.body.data.isEntryValid).toBe(true);
     });
 
     test('Create a release action with invalid status', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
 
-      const res = await rq({
-        method: 'POST',
-        url: `/content-releases/${release.id}/actions`,
-        body: {
-          entry: {
-            id: 2,
-            contentType: productUID,
-          },
-          type: 'unpublish',
-        },
+      const release = createReleaseRes.body.data;
+
+      const createActionRes = await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 5,
+        type: 'publish',
       });
 
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data.isEntryValid).toBe(false);
+      expect(createActionRes.statusCode).toBe(200);
+      expect(createActionRes.body.data.isEntryValid).toBe(false);
     });
 
     test('cannot create an action with invalid contentTypeUid', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
 
-      const res = await rq({
-        method: 'POST',
-        url: `/content-releases/${release.id}/actions`,
-        body: {
-          entry: {
-            id: 1,
-            contentType: 'invalid',
-          },
-          type: 'publish',
-        },
+      const release = createReleaseRes.body.data;
+
+      const createActionRes = await createReleaseAction(release.id, {
+        contentType: 'invalid',
+        entryId: 1,
+        type: 'publish',
       });
 
-      expect(res.statusCode).toBe(404);
-      expect(res.body.error.message).toBe('No content type found for uid invalid');
+      expect(createActionRes.statusCode).toBe(404);
+      expect(createActionRes.body.error.message).toBe('No content type found for uid invalid');
     });
 
     test('throws an error when trying to add an entry that is already in the release', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      const release = createReleaseRes.body.data;
 
-      const res = await rq({
-        method: 'POST',
-        url: `/content-releases/${release.id}/actions`,
-        body: {
-          entry: {
-            id: 1,
-            contentType: productUID,
-          },
-          type: 'publish',
-        },
+      const firstCreateActionRes = await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
+      });
+      expect(firstCreateActionRes.statusCode).toBe(200);
+
+      const secondCreateActionRes = await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
       });
 
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toBe(
-        'Entry with id 1 and contentType api::product.product already exists in release with id 1'
+      expect(secondCreateActionRes.statusCode).toBe(400);
+      expect(secondCreateActionRes.body.error.message).toBe(
+        `Entry with id 1 and contentType api::product.product already exists in release with id ${release.id}`
       );
     });
   });
 
-  // Depends on the previous test
   describe('Create Many Release Actions', () => {
     test('Create many release actions', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
+
+      const release = createReleaseRes.body.data;
 
       const res = await rq({
         method: 'POST',
@@ -252,7 +262,17 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('If entry is already in the release, it should not be added', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
+
+      const release = createReleaseRes.body.data;
+
+      const createActionRes = await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 4,
+        type: 'publish',
+      });
+      expect(createActionRes.statusCode).toBe(200);
 
       const res = await rq({
         method: 'POST',
@@ -281,10 +301,23 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
   });
 
-  // Depends on the previous test
   describe('Find Many Release Actions', () => {
     test('Find many release actions', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
+
+      const release = createReleaseRes.body.data;
+
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
+      });
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 2,
+        type: 'publish',
+      });
 
       const res = await rq({
         method: 'GET',
@@ -292,11 +325,30 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.data.Product.length).toBe(5);
+      expect(res.body.data.Product.length).toBe(2);
     });
 
     test('Group by action type', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
+
+      const release = createReleaseRes.body.data;
+
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
+      });
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 2,
+        type: 'publish',
+      });
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 3,
+        type: 'unpublish',
+      });
 
       const res = await rq({
         method: 'GET',
@@ -304,19 +356,30 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.data.publish.length).toBe(4);
+      expect(res.body.data.publish.length).toBe(2);
       expect(res.body.data.unpublish.length).toBe(1);
     });
   });
 
-  // Depends on the previous test
   describe('Edit Release Action', () => {
     test('Edit a release action', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
+
+      const release = createReleaseRes.body.data;
+
+      const createActionRes = await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
+      });
+
+      expect(createActionRes.statusCode).toBe(200);
+      const releaseAction = createActionRes.body.data;
 
       const changeToUnpublishRes = await rq({
         method: 'PUT',
-        url: `/content-releases/${release.id}/actions/1`,
+        url: `/content-releases/${release.id}/actions/${releaseAction.id}`,
         body: {
           type: 'unpublish',
         },
@@ -327,7 +390,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       const changeToPublishRes = await rq({
         method: 'PUT',
-        url: `/content-releases/${release.id}/actions/1`,
+        url: `/content-releases/${release.id}/actions/${releaseAction.id}`,
         body: {
           type: 'publish',
         },
@@ -338,38 +401,65 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
   });
 
-  // Depends on the previous test
   describe('Delete a Release Action', () => {
     test('Delete a release action', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      const release = createReleaseRes.body.data;
+
+      const createActionRes = await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
+      });
+      const releaseAction = createActionRes.body.data;
 
       const res = await rq({
         method: 'DELETE',
-        url: `/content-releases/${release.id}/actions/2`,
+        url: `/content-releases/${release.id}/actions/${releaseAction.id}`,
       });
 
       expect(res.statusCode).toBe(200);
+
+      const findRes = await rq({
+        method: 'GET',
+        url: `/content-releases/${release.id}/actions`,
+      });
+
+      expect(findRes.statusCode).toBe(200);
     });
 
     test('cannot delete a release action that does not exist', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
+
+      const release = createReleaseRes.body.data;
 
       const res = await rq({
         method: 'DELETE',
-        url: `/content-releases/${release.id}/actions/2`,
+        url: `/content-releases/${release.id}/actions/1`,
       });
 
       expect(res.statusCode).toBe(404);
       expect(res.body.error.message).toBe(
-        'Action with id 2 not found in release with id 1 or it is already published'
+        `Action with id 1 not found in release with id ${release.id} or it is already published`
       );
     });
   });
 
-  // Depends on the previous test
   describe('Find One Release', () => {
     test('Find a release', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
+
+      const release = createReleaseRes.body.data;
+
+      const createActionRes = await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
+      });
+
+      expect(createActionRes.statusCode).toBe(200);
 
       const res = await rq({
         method: 'GET',
@@ -382,7 +472,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('Release status is empty if doesnt have any actions', async () => {
-      const release = data.releases[1];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
+
+      const release = createReleaseRes.body.data;
 
       const res = await rq({
         method: 'GET',
@@ -395,22 +488,20 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('Release status is blocked if at least one action is invalid and then change to ready if removed', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      const release = createReleaseRes.body.data;
 
-      const addEntryRes = await rq({
-        method: 'POST',
-        url: `/content-releases/${release.id}/actions`,
-        body: {
-          entry: {
-            id: 2,
-            contentType: productUID,
-          },
-          type: 'publish',
-        },
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
       });
-      const actionId = addEntryRes.body.data.id;
-
-      expect(addEntryRes.statusCode).toBe(200);
+      const createActionRes = await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 5,
+        type: 'publish',
+      });
+      const releaseAction = createActionRes.body.data;
 
       const findBlockedRes = await rq({
         method: 'GET',
@@ -423,7 +514,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
 
       const removeEntryRes = await rq({
         method: 'DELETE',
-        url: `/content-releases/${release.id}/actions/${actionId}`,
+        url: `/content-releases/${release.id}/actions/${releaseAction.id}`,
       });
 
       expect(removeEntryRes.statusCode).toBe(200);
@@ -439,10 +530,12 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
   });
 
-  // Depends on the previous test
   describe('Edit Release', () => {
     test('Edit a release', async () => {
-      const release = data.releases[0];
+      const createReleaseRes = await createRelease();
+      expect(createReleaseRes.statusCode).toBe(200);
+
+      const release = createReleaseRes.body.data;
 
       const res = await rq({
         method: 'PUT',
@@ -457,26 +550,33 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('cannot change to a name that already exists', async () => {
-      const release = data.releases[0];
-      const release2 = data.releases[1];
+      const createFirstReleaseRes = await createRelease();
+      const createSecondReleaseRes = await createRelease();
 
       const res = await rq({
         method: 'PUT',
-        url: `/content-releases/${release.id}`,
+        url: `/content-releases/${createFirstReleaseRes.body.data.id}`,
         body: {
-          name: release2.name,
+          name: createSecondReleaseRes.body.data.name,
         },
       });
 
       expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toBe(`Release with name ${release2.name} already exists`);
+      expect(res.body.error.message).toBe(
+        `Release with name ${createSecondReleaseRes.body.data.name} already exists`
+      );
     });
   });
 
-  // Depends on the previous test
   describe('Publish Release', () => {
     test('Publish a release', async () => {
-      const release = data.releases[0];
+      const createFirstReleaseRes = await createRelease();
+      const release = createFirstReleaseRes.body.data;
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
+      });
 
       const res = await rq({
         method: 'POST',
@@ -488,33 +588,39 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
 
     test('cannot publish a release that is already published', async () => {
-      const release = data.releases[0];
+      const createFirstReleaseRes = await createRelease();
+      const release = createFirstReleaseRes.body.data;
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
+      });
 
-      const res = await rq({
+      const firstPublishRes = await rq({
         method: 'POST',
         url: `/content-releases/${release.id}/publish`,
       });
 
-      expect(res.statusCode).toBe(400);
-      expect(res.body.error.message).toBe('Release already published');
+      expect(firstPublishRes.statusCode).toBe(200);
+      expect(firstPublishRes.body.data.status).toBe('done');
+
+      const secondPublishRes = await rq({
+        method: 'POST',
+        url: `/content-releases/${release.id}/publish`,
+      });
+
+      expect(secondPublishRes.statusCode).toBe(400);
+      expect(secondPublishRes.body.error.message).toBe('Release already published');
     });
 
     test('cannot publish a release if at least one action is invalid', async () => {
-      const release = data.releases[1];
-
-      const addEntryRes = await rq({
-        method: 'POST',
-        url: `/content-releases/${release.id}/actions`,
-        body: {
-          entry: {
-            id: 2,
-            contentType: productUID,
-          },
-          type: 'publish',
-        },
+      const createFirstReleaseRes = await createRelease();
+      const release = createFirstReleaseRes.body.data;
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 5,
+        type: 'publish',
       });
-
-      expect(addEntryRes.statusCode).toBe(200);
 
       const res = await rq({
         method: 'POST',
@@ -528,17 +634,10 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
   });
 
-  // Depends on the previous test
   describe('Find Many Releases', () => {
     test('Find many not published releases', async () => {
-      const createRes = await createRelease({
-        name: 'Test Release 3',
-        scheduledAt: null,
-      });
-
-      data.releases.push(createRes.body.data);
-
-      expect(createRes.statusCode).toBe(200);
+      await createRelease();
+      await createRelease();
 
       const res = await rq({
         method: 'GET',
@@ -550,44 +649,44 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.body.meta.pendingReleasesCount).toBe(2);
     });
 
-    test('Find many published releases', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/content-releases?filters[releasedAt][$notNull]=true',
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.data.length).toBe(1);
-      expect(res.body.data[0].status).toBe('done');
-    });
-
     test('Find many releases with an entry attached', async () => {
+      const createFirstReleaseRes = await createRelease();
+      const release = createFirstReleaseRes.body.data;
+      await createReleaseAction(release.id, {
+        contentType: productUID,
+        entryId: 1,
+        type: 'publish',
+      });
+
       const res = await rq({
         method: 'GET',
-        url: `/content-releases?contentTypeUid=${productUID}&entryId=2&hasEntryAttached=true`,
+        url: `/content-releases?contentTypeUid=${productUID}&entryId=1&hasEntryAttached=true`,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body.data.length).toBe(1);
-      expect(res.body.data[0].name).toBe('Test Scheduled Release');
+      expect(res.body.data[0].name).toBe(release.name);
     });
 
     test('Find many releases without an entry attached', async () => {
+      const createFirstReleaseRes = await createRelease();
+      const release = createFirstReleaseRes.body.data;
+
       const res = await rq({
         method: 'GET',
-        url: `/content-releases?contentTypeUid=${productUID}&entryId=2&hasEntryAttached=false`,
+        url: `/content-releases?contentTypeUid=${productUID}&entryId=1&hasEntryAttached=false`,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body.data.length).toBe(1);
-      expect(res.body.data[0].name).toBe('Test Release 3');
+      expect(res.body.data[0].name).toBe(release.name);
     });
   });
 
-  // Depends on the previous test
   describe('Delete Release', () => {
     test('Delete a release', async () => {
-      const release = data.releases.pop();
+      const createFirstReleaseRes = await createRelease();
+      const release = createFirstReleaseRes.body.data;
 
       const res = await rq({
         method: 'DELETE',
