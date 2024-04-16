@@ -163,7 +163,6 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
         }
       />
       <ConfirmDialog
-        zIndex={99999}
         isOpen={isConfirmDialogOpen}
         onClose={() => setIsConfirmDialogOpen(false)}
         onConfirm={handleRestore}
