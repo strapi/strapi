@@ -525,8 +525,10 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   } = useRBAC(PERMISSIONS);
   const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
 
-  const { displayedHeaders, hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } =
-    runHookWaterfall('ContentReleases/pages/ReleaseDetails/add-locale-in-releases', {
+  // TODO: Migrated displayedHeader to v5
+  const { hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } = runHookWaterfall(
+    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+    {
       displayedHeaders: {
         label: formatMessage({
           id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
@@ -535,7 +537,8 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         name: 'locale',
       },
       hasI18nEnabled: false,
-    });
+    }
+  );
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -658,7 +661,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     defaultMessage: 'Group by',
   });
   const headers = [
-    ...displayedHeaders,
+    // ...displayedHeaders,
     {
       label: formatMessage({
         id: 'content-releases.page.ReleaseDetails.table.header.label.name',

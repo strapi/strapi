@@ -19,7 +19,8 @@ interface AddLocaleToReleasesHookArgs {
 const addLocaleToReleasesHook = ({ displayedHeaders = [] }: AddLocaleToReleasesHookArgs) => {
   return {
     displayedHeaders: [
-      ...displayedHeaders,
+      // TODO: Fix when migrating to v5
+      // ...displayedHeaders,
       {
         key: '__locale__',
         fieldSchema: { type: 'string' },

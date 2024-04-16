@@ -158,9 +158,7 @@ const releaseController = {
     });
 
     ctx.created({
-      body: {
-        data: await permissionsManager.sanitizeOutput(release),
-      },
+      data: await permissionsManager.sanitizeOutput(release),
     });
   },
 
