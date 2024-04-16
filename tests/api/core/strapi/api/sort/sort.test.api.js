@@ -125,7 +125,7 @@ describe('Sort', () => {
     // await builder.cleanup();
   });
 
-  test('works', async () => {
+  test('targeting an attribute in a relation', async () => {
     const { status, body } = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
       qs: {
         sort: 'categories.id',
