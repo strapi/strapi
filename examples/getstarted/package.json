@@ -27,7 +27,7 @@
     "better-sqlite3": "8.6.0",
     "lodash": "4.17.21",
     "mysql": "2.18.1",
-    "mysql2": "3.6.0",
+    "mysql2": "3.9.4",
     "passport-google-oauth2": "0.2.0",
     "pg": "8.11.1",
     "react": "^18.2.0",
