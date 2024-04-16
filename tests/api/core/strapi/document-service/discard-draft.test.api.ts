@@ -19,35 +19,39 @@ describe('Document Service', () => {
   });
 
   describe('Discard Draft', () => {
+    let documentId: string;
+    beforeAll(async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+      documentId = articleDb.documentId;
+
+      // Publish every draft in every locale
+      await strapi.documents(ARTICLE_UID).publish({ documentId, locale: '*' });
+
+      // Update drafts
+      await Promise.all(
+        ['es', 'nl', 'en'].map((locale) =>
+          strapi.documents(ARTICLE_UID).update({
+            documentId,
+            locale,
+            data: {
+              // @ts-expect-error articles to have titles
+              title: 'Draft Article',
+            },
+          })
+        )
+      );
+    });
+
     it(
       'Discard all locale drafts of a document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
-
-        // Publish every draft in every locale
-        await strapi.documents(ARTICLE_UID).publish({
-          documentId: articleDb.documentId,
-          locale: '*',
-        });
-
-        // Update drafts
-        await Promise.all(
-          ['es', 'nl', 'en'].map((locale) =>
-            strapi.documents(ARTICLE_UID).update({
-              documentId: articleDb.documentId,
-              locale,
-              data: { title: 'Draft Article' },
-            })
-          )
-        );
-
         // Discard drafts
         const result = await strapi
           .documents(ARTICLE_UID)
-          .discardDraft({ documentId: articleDb.documentId, locale: '*' });
+          .discardDraft({ documentId, locale: '*' });
 
         const draftArticlesDb = await findArticlesDb({
-          documentId: articleDb.documentId,
+          documentId,
           publishedAt: { $null: true },
         });
 
@@ -71,31 +75,13 @@ describe('Document Service', () => {
     it(
       'Discard a single locale of a document',
       testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
-
-        // Publish every draft in every locale
-        await strapi
-          .documents(ARTICLE_UID)
-          .publish({ documentId: articleDb.documentId, locale: '*' });
-
-        // Update drafts
-        await Promise.all(
-          ['es', 'nl', 'en'].map((locale) =>
-            strapi.documents(ARTICLE_UID).update({
-              documentId: articleDb.documentId,
-              locale,
-              data: { title: 'Draft Article' },
-            })
-          )
-        );
-
         // Discard english draft
         const result = await strapi
           .documents(ARTICLE_UID)
-          .discardDraft({ documentId: articleDb.documentId, locale: 'en' });
+          .discardDraft({ documentId, locale: 'en' });
 
         const draftArticlesDb = await findArticlesDb({
-          documentId: articleDb.documentId,
+          documentId,
           publishedAt: { $null: true },
         });
 
@@ -112,8 +98,41 @@ describe('Document Service', () => {
         expect(draftArticlesDb.length).toBeGreaterThanOrEqual(3);
         draftArticlesDb.forEach((article) => {
           // The draft title should not have been discarded
-          // @ts-expect-error - FIX: 'StringAttribute' and 'string' have no overlap
           if (['es', 'nl'].includes(article.locale)) {
+            expect(article.title).toBe('Draft Article');
+          }
+        });
+      })
+    );
+
+    it(
+      'Discard multiple locales of a document',
+      testInTransaction(async () => {
+        // Discard 'en' and 'nl' drafts
+        const localesToDiscard = ['en', 'nl'];
+        const result = await strapi
+          .documents(ARTICLE_UID)
+          .discardDraft({ documentId, locale: localesToDiscard });
+
+        const draftArticlesDb = await findArticlesDb({
+          documentId,
+          publishedAt: { $null: true },
+        });
+
+        // 'en' and 'nl' drafts should have been discarded
+        expect(result.versions.length).toBe(2);
+        result.versions.forEach((version) => {
+          expect(localesToDiscard).toContain(version.locale);
+          expect(version.publishedAt).toBeNull();
+          // The draft title should have been discarded
+          expect(version.title).not.toBe('Draft Article');
+        });
+
+        // Rest of locales should not have been discarded
+        expect(draftArticlesDb.length).toBeGreaterThanOrEqual(3);
+        draftArticlesDb.forEach((article) => {
+          // The draft title should not have been discarded
+          if (['es'].includes(article.locale)) {
             expect(article.title).toBe('Draft Article');
           }
         });

@@ -77,14 +77,14 @@ export type Publish<TContentTypeUID extends UID.ContentType> = Pick<
 
 export type Unpublish<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'filters' | 'locale' | 'lookup'
+  'filters' | 'locale:string' | 'lookup'
 > & {
   documentId: ID;
 };
 
 export type DiscardDraft<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'filters' | 'locale:string' | 'lookup'
+  'filters' | 'locale' | 'lookup'
 > & {
   documentId: ID;
 };

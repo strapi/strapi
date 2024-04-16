@@ -21,7 +21,6 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const entries = createEntriesService(uid);
 
   async function findMany(params = {} as any) {
-    // TODO support multiple locales
     const query = await async.pipe(
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
