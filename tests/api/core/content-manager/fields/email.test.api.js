@@ -39,7 +39,7 @@ describe('Test type email', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: 'validemail@test.fr',
     });
@@ -62,7 +62,7 @@ describe('Test type email', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: 'test@email.fr',
     });

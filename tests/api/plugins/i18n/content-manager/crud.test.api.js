@@ -76,7 +76,7 @@ describe('i18n - Content API', () => {
 
       const { statusCode, body } = res;
 
-      expect(statusCode).toBe(200);
+      expect(statusCode).toBe(201);
       expect(body.data).toMatchObject({
         locale: 'en',
         name: 'category in english',
@@ -98,7 +98,7 @@ describe('i18n - Content API', () => {
 
       const { statusCode, body } = res;
 
-      expect(statusCode).toBe(200);
+      expect(statusCode).toBe(201);
       expect(body.data).toMatchObject({
         locale: 'ko',
         name: 'category in korean',
@@ -125,12 +125,12 @@ describe('i18n - Content API', () => {
           },
         });
 
-        expect(res.statusCode).toBe(200);
+        expect(res.statusCode).toBe(201);
         expect(res.body.data.locale).toBe(locale);
       }
       const { statusCode, body } = res;
 
-      expect(statusCode).toBe(200);
+      expect(statusCode).toBe(201);
       data.categories.push(body.data);
     });
 

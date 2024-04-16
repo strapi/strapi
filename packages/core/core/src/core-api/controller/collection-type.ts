@@ -66,6 +66,7 @@ const createCollectionTypeController = ({
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
+      ctx.status = 201;
       return this.transformResponse(sanitizedEntity);
     },
 

@@ -7126,7 +7126,6 @@ __metadata:
     "@testing-library/user-event": "npm:14.4.3"
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15"
     "@types/invariant": "npm:2.2.36"
-    "@types/js-cookie": "npm:3.0.6"
     "@types/jsonwebtoken": "npm:9.0.3"
     "@types/koa-passport": "npm:6.0.1"
     "@types/lodash": "npm:^4.14.191"
@@ -7155,7 +7154,6 @@ __metadata:
     immer: "npm:9.0.21"
     inquirer: "npm:8.2.5"
     invariant: "npm:^2.2.4"
-    js-cookie: "npm:2.2.1"
     jsonwebtoken: "npm:9.0.0"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
@@ -9130,13 +9128,6 @@ __metadata:
     expect: "npm:^29.0.0"
     pretty-format: "npm:^29.0.0"
   checksum: c45d1f2825b31c87b479d6ea0e22d0353c11c547f02c85e504623550527460e4fc572cd566374c4c00fcff2c8a022ef71c4b52545ccb03118b603b3c1e4e884f
-  languageName: node
-  linkType: hard
-
-"@types/js-cookie@npm:3.0.6":
-  version: 3.0.6
-  resolution: "@types/js-cookie@npm:3.0.6"
-  checksum: 272d551687547445cb210213c73e72e0e5d58ad73e2e444a65d688b8ff9425529779ee0cd6492aaa1f070161916d4254ef2b1a76d64179100437f60749d094ef
   languageName: node
   linkType: hard
 
@@ -19964,13 +19955,6 @@ __metadata:
   version: 3.1.1
   resolution: "joycon@npm:3.1.1"
   checksum: 4b36e3479144ec196425f46b3618f8a96ce7e1b658f091a309cd4906215f5b7a402d7df331a3e0a09681381a658d0c5f039cb3cf6907e0a1e17ed847f5d37775
-  languageName: node
-  linkType: hard
-
-"js-cookie@npm:2.2.1":
-  version: 2.2.1
-  resolution: "js-cookie@npm:2.2.1"
-  checksum: 4387f5f5691cb96ca9ff8852c589d3012b53f484fda68630a39e20cabc6c5b740f09225e23233ba56cd9de6ebe300a23d20b2c7315f10c309ad5a89fd8c4990b
   languageName: node
   linkType: hard
 

@@ -232,6 +232,7 @@ export default {
     ]);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
+    ctx.status = 201;
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
