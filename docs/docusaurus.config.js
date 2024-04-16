@@ -49,6 +49,12 @@ const config = {
         watch: process.env.TYPEDOC_WATCH,
       },
     ],
+    [
+      '@cmfcmf/docusaurus-search-local',
+      {
+        indexBlog: false,
+      },
+    ],
   ],
   presets: [
     [

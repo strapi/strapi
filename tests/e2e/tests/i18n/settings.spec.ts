@@ -89,6 +89,7 @@ test.describe('Settings', () => {
       .fill('Magliette');
     await page.getByRole('button', { name: 'There is 1 missing component' }).click();
     await page.getByRole('button', { name: 'Hero image' }).click();
+    await expect(page.getByText('content (2)')).toBeVisible();
     await page.getByRole('button', { name: 'Publish' }).click();
     await findAndClose(page, 'Success:Published');
   });

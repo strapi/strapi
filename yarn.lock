@@ -7121,7 +7121,7 @@ __metadata:
     "@strapi/admin-test-utils": "npm:5.0.0-beta.3"
     "@strapi/data-transfer": "npm:5.0.0-beta.3"
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/permissions": "npm:5.0.0-beta.3"
     "@strapi/provider-audit-logs-local": "npm:5.0.0-beta.3"
@@ -7216,7 +7216,7 @@ __metadata:
     "@strapi/admin": "npm:5.0.0-beta.3"
     "@strapi/admin-test-utils": "npm:5.0.0-beta.3"
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/plugin-content-manager": "npm:5.0.0-beta.3"
     "@strapi/types": "workspace:*"
@@ -7495,6 +7495,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@strapi/icons@npm:1.18.0":
+  version: 1.18.0
+  resolution: "@strapi/icons@npm:1.18.0"
+  peerDependencies:
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+  checksum: b7f27d1293f56e402fdbc12e91a2a775c33dd1ca5bf901f78165136ef911fd44f1b4978919bf8eef1d6c1483afb7e8e6c177df4b54229632404ce8a989fba7f1
+  languageName: node
+  linkType: hard
+
 "@strapi/logger@npm:5.0.0-beta.3, @strapi/logger@workspace:packages/utils/logger":
   version: 0.0.0-use.local
   resolution: "@strapi/logger@workspace:packages/utils/logger"
@@ -7558,7 +7568,7 @@ __metadata:
   resolution: "@strapi/plugin-cloud@workspace:packages/plugins/cloud"
   dependencies:
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/strapi": "npm:5.0.0-beta.3"
     "@types/react": "npm:18.2.66"
     "@types/react-dom": "npm:18.2.22"
@@ -7585,7 +7595,7 @@ __metadata:
   resolution: "@strapi/plugin-color-picker@workspace:packages/plugins/color-picker"
   dependencies:
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/strapi": "npm:5.0.0-beta.3"
     "@testing-library/react": "npm:14.0.0"
     "@testing-library/user-event": "npm:14.4.3"
@@ -7616,7 +7626,7 @@ __metadata:
     "@strapi/admin": "npm:5.0.0-beta.3"
     "@strapi/database": "workspace:*"
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/types": "npm:5.0.0-beta.3"
     "@strapi/utils": "npm:5.0.0-beta.3"
@@ -7679,7 +7689,7 @@ __metadata:
     "@strapi/admin": "npm:5.0.0-beta.3"
     "@strapi/design-system": "npm:1.18.0"
     "@strapi/generators": "npm:5.0.0-beta.3"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/types": "npm:5.0.0-beta.3"
     "@strapi/utils": "npm:5.0.0-beta.3"
@@ -7720,7 +7730,7 @@ __metadata:
     "@strapi/admin": "npm:5.0.0-beta.3"
     "@strapi/admin-test-utils": "npm:5.0.0-beta.3"
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/strapi": "npm:5.0.0-beta.3"
     "@strapi/types": "npm:5.0.0-beta.3"
@@ -7767,7 +7777,7 @@ __metadata:
   dependencies:
     "@strapi/admin": "npm:5.0.0-beta.3"
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/provider-email-sendmail": "npm:5.0.0-beta.3"
     "@strapi/types": "npm:5.0.0-beta.3"
@@ -7806,7 +7816,7 @@ __metadata:
     "@graphql-tools/utils": "npm:^8.13.1"
     "@koa/cors": "npm:5.0.0"
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/strapi": "npm:5.0.0-beta.3"
     "@strapi/types": "npm:5.0.0-beta.3"
     "@strapi/utils": "npm:5.0.0-beta.3"
@@ -7848,7 +7858,7 @@ __metadata:
     "@strapi/admin": "npm:5.0.0-beta.3"
     "@strapi/admin-test-utils": "npm:5.0.0-beta.3"
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/plugin-content-manager": "npm:5.0.0-beta.3"
     "@strapi/types": "npm:5.0.0-beta.3"
@@ -7883,7 +7893,7 @@ __metadata:
   dependencies:
     "@sentry/node": "npm:6.19.7"
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/strapi": "npm:5.0.0-beta.3"
     react: "npm:^18.2.0"
@@ -7905,7 +7915,7 @@ __metadata:
   dependencies:
     "@strapi/admin": "npm:5.0.0-beta.3"
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/provider-upload-local": "npm:5.0.0-beta.3"
     "@strapi/types": "npm:5.0.0-beta.3"
@@ -7958,7 +7968,7 @@ __metadata:
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
     "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.16.0"
+    "@strapi/icons": "npm:1.18.0"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/strapi": "npm:5.0.0-beta.3"
     "@strapi/utils": "npm:5.0.0-beta.3"
@@ -8171,9 +8181,13 @@ __metadata:
     "@strapi/plugin-i18n": "npm:5.0.0-beta.3"
     "@strapi/plugin-upload": "npm:5.0.0-beta.3"
     "@strapi/review-workflows": "npm:5.0.0-beta.3"
+    "@strapi/ts-zen": "npm:^0.2.0"
     "@strapi/types": "npm:5.0.0-beta.3"
     "@strapi/typescript-utils": "npm:5.0.0-beta.3"
     "@strapi/utils": "npm:5.0.0-beta.3"
+    "@types/bcryptjs": "npm:2.4.3"
+    "@types/configstore": "npm:5.0.1"
+    "@types/delegates": "npm:1.0.0"
     "@types/find-root": "npm:1.1.4"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
@@ -14112,10 +14126,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"detect-libc@npm:^2.0.0, detect-libc@npm:^2.0.2":
+"detect-libc@npm:^2.0.0":
   version: 2.0.2
   resolution: "detect-libc@npm:2.0.2"
   checksum: 6118f30c0c425b1e56b9d2609f29bec50d35a6af0b762b6ad127271478f3bbfda7319ce869230cf1a351f2b219f39332cde290858553336d652c77b970f15de8
+  languageName: node
+  linkType: hard
+
+"detect-libc@npm:^2.0.2":
+  version: 2.0.3
+  resolution: "detect-libc@npm:2.0.3"
+  checksum: b4ea018d623e077bd395f168a9e81db77370dde36a5b01d067f2ad7989924a81d31cb547ff764acb2aa25d50bb7fdde0b0a93bec02212b0cb430621623246d39
   languageName: node
   linkType: hard
 

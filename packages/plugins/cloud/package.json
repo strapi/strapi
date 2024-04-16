@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@strapi/design-system": "1.18.0",
-    "@strapi/icons": "1.16.0",
+    "@strapi/icons": "1.18.0",
     "react-intl": "6.6.2"
   },
   "devDependencies": {
