@@ -1,5 +1,5 @@
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { BaseHeaderLayout, Typography } from '@strapi/design-system';
+import { BaseHeaderLayout, Button, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
 import { ArrowLeft } from '@strapi/icons';
 import { stringify } from 'qs';
@@ -8,6 +8,7 @@ import { NavLink, useParams, type To } from 'react-router-dom';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useHistoryContext } from '../pages/History';
+import { useRestoreVersionMutation } from '../services/historyVersion';
 
 interface VersionHeaderProps {
   headerId: string;
@@ -24,6 +25,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
     plugins?: Record<string, unknown>;
   }>();
   const { collectionType } = useParams<{ collectionType: string }>();
+  const [restoreVersion] = useRestoreVersionMutation();
 
   const mainFieldValue = version.data[mainField];
 
@@ -43,6 +45,13 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
     };
   };
 
+  const handleRestore = async () => {
+    await restoreVersion({
+      params: { versionId: version.id },
+      body: { contentType: version.contentType },
+    });
+  };
+
   return (
     <BaseHeaderLayout
       id={headerId}
@@ -54,7 +63,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
         minute: 'numeric',
       })}
       subtitle={
-        <Typography variant="epsilon">
+        <Typography textColor="neutral600" variant="epsilon">
           {formatMessage(
             {
               id: 'content-manager.history.version.subtitle',
@@ -83,6 +92,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
         </Link>
       }
       sticky={false}
+      primaryAction={<Button onClick={handleRestore}>Restore</Button>}
     />
   );
 };
