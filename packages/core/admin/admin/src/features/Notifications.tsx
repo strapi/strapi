@@ -91,7 +91,7 @@ const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
         gap={2}
         top={`${46 / 16}rem`}
         width={`${500 / 16}rem`}
-        zIndex={10}
+        zIndex={999999}
       >
         {notifications.map((notification) => {
           return (

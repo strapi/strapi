@@ -28,16 +28,15 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const navigate = useNavigate();
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
-  const { version, mainField, schema, isCurrentVersion } = useHistoryContext(
+
+  const version = useHistoryContext('VersionHeader', (state) => state.selectedVersion);
+  const mainField = useHistoryContext('VersionHeader', (state) => state.mainField);
+  const schema = useHistoryContext('VersionHeader', (state) => state.schema);
+  const isCurrentVersion = useHistoryContext(
     'VersionHeader',
-    (state) => ({
-      version: state.selectedVersion,
-      mainField: state.mainField,
-      schema: state.schema,
-      isCurrentVersion: state.page === 1 && state.versions.data[0].id === state.selectedVersion.id,
-      versions: state.versions,
-    })
+    (state) => state.page === 1 && state.versions.data[0].id === state.selectedVersion.id
   );
+
   const [{ query }] = useQueryParams<{
     plugins?: Record<string, unknown>;
   }>();
@@ -65,36 +64,43 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   };
 
   const handleRestore = async () => {
-    const response = await restoreVersion({
-      params: { versionId: version.id },
-      body: { contentType: version.contentType },
-    });
-
-    if ('data' in response) {
-      navigate(`/content-manager/${collectionType}/${slug}/${response.data.data?.documentId}`);
-
-      toggleNotification({
-        type: 'success',
-        title: formatMessage({
-          id: 'content-manager.restore.success.title',
-          defaultMessage: 'Version restored.',
-        }),
-        message: formatMessage({
-          id: 'content-manager.restore.success.message',
-          defaultMessage: 'The content of the restored version is not published yet.',
-        }),
+    try {
+      const response = await restoreVersion({
+        params: { versionId: version.id },
+        body: { contentType: version.contentType },
       });
 
-      return;
-    }
+      if ('data' in response) {
+        navigate(`/content-manager/${collectionType}/${slug}/${response.data.data?.documentId}`);
 
-    if ('error' in response) {
+        toggleNotification({
+          type: 'success',
+          title: formatMessage({
+            id: 'content-manager.restore.success.title',
+            defaultMessage: 'Version restored.',
+          }),
+          message: formatMessage({
+            id: 'content-manager.restore.success.message',
+            defaultMessage: 'The content of the restored version is not published yet.',
+          }),
+        });
+
+        return;
+      }
+
+      if ('error' in response) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({
+            id: 'content-manager.history.restore.error.message',
+            defaultMessage: 'Could not restore version.',
+          }),
+        });
+      }
+    } catch (error) {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({
-          id: 'content-manager.history.restore.error.message',
-          defaultMessage: 'Could not restore version.',
-        }),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };
