@@ -12,6 +12,9 @@ export interface MediaProperties<
   multiple?: TMultiple;
 }
 
+/**
+ * Represents a media Strapi attribute along with its options
+ */
 export type Media<
   TKind extends MediaKind | undefined = undefined,
   TMultiple extends Constants.BooleanValue = Constants.False,

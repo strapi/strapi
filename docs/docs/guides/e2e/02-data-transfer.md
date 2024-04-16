@@ -71,11 +71,11 @@ the Strapi application to a desired state prior to testing.
 
 ### Importing in test scenarios
 
-There's an abstraction for importing the data programmatically during tests named `resetDatabaseAndImportDataFromPath` found in `e2e/scripts/dts-import.js`. Typically, you'll want to run this **before** each test:
+There's an abstraction for importing the data programmatically during tests named `resetDatabaseAndImportDataFromPath` found in `e2e/utils/dts-import.js`. Typically, you'll want to run this **before** each test:
 
 ```ts {2,5-8}
 import { test } from '@playwright/test';
-import { resetDatabaseAndImportDataFromPath } from './scripts/dts-import';
+import { resetDatabaseAndImportDataFromPath } from './utils/dts-import';
 
 test.describe('Strapi Application', () => {
   test.beforeEach(async ({ page }) => {

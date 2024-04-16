@@ -1,7 +1,10 @@
 import _ from 'lodash';
-import { has, omit, pipe, assign } from 'lodash/fp';
-import type { Struct, Utils, UID, Schema, Data, Modules } from '@strapi/types';
+import { has, omit, pipe, assign, curry } from 'lodash/fp';
+import type { Utils, UID, Schema, Data, Modules } from '@strapi/types';
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
+
+// type aliases for readability
+type Input<T extends UID.Schema> = Modules.Documents.Params.Data.Input<T>;
 
 type LoadedComponents<TUID extends UID.Schema> = Data.Entity<
   TUID,
@@ -19,37 +22,19 @@ type ComponentBody = {
   [key: string]: ComponentValue | DynamicZoneValue;
 };
 
-function omitComponentData(
-  contentType: Struct.ContentTypeSchema,
-  data: Modules.EntityService.Params.Data.Input<Struct.ContentTypeSchema['uid']>
-): Partial<Modules.EntityService.Params.Data.Input<Struct.ContentTypeSchema['uid']>>;
-function omitComponentData(
-  contentType: Struct.ComponentSchema,
-  data: Modules.EntityService.Params.Data.Input<Struct.ComponentSchema['uid']>
-): Partial<Modules.EntityService.Params.Data.Input<Struct.ComponentSchema['uid']>>;
-function omitComponentData(
-  contentType: Struct.Schema,
-  data: Modules.EntityService.Params.Data.Input<
-    Struct.ContentTypeSchema['uid'] | Struct.ComponentSchema['uid']
-  >
-): Partial<
-  Modules.EntityService.Params.Data.Input<
-    Struct.ContentTypeSchema['uid'] | Struct.ComponentSchema['uid']
-  >
-> {
-  const { attributes } = contentType;
-  const componentAttributes = Object.keys(attributes).filter((attributeName) =>
-    contentTypesUtils.isComponentAttribute(attributes[attributeName])
-  );
+const omitComponentData = curry(
+  (schema: Schema.Schema, data: Input<UID.Schema>): Partial<Input<UID.Schema>> => {
+    const { attributes } = schema;
+    const componentAttributes = Object.keys(attributes).filter((attributeName) =>
+      contentTypesUtils.isComponentAttribute(attributes[attributeName])
+    );
 
-  return omit(componentAttributes, data);
-}
+    return omit(componentAttributes, data);
+  }
+);
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
-const createComponents = async <
-  TUID extends UID.Schema,
-  TData extends Modules.EntityService.Params.Data.Input<TUID>,
->(
+const createComponents = async <TUID extends UID.Schema, TData extends Input<TUID>>(
   uid: TUID,
   data: TData
 ) => {
@@ -80,7 +65,6 @@ const createComponents = async <
           throw new Error('Expected an array to create repeatable component');
         }
 
-        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
         const components: RepeatableComponentValue = await async.map(componentValue, (value: any) =>
           createComponent(componentUID, value)
         );
@@ -97,7 +81,7 @@ const createComponents = async <
       } else {
         const component = await createComponent(
           componentUID,
-          componentValue as Modules.EntityService.Params.Data.Input<UID.Component>
+          componentValue as Input<UID.Component>
         );
 
         componentBody[attributeName] = {
@@ -164,10 +148,7 @@ const getComponents = async <TUID extends UID.Schema>(
   delete old components
   create or update
 */
-const updateComponents = async <
-  TUID extends UID.Schema,
-  TData extends Partial<Modules.EntityService.Params.Data.Input<TUID>>,
->(
+const updateComponents = async <TUID extends UID.Schema, TData extends Partial<Input<TUID>>>(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   data: TData
@@ -356,6 +337,7 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
 
     if (attribute.type === 'component' || attribute.type === 'dynamiczone') {
       let value;
+
       if (loadComponents) {
         value = await strapi.db.query(uid).load(entityToDelete, attributeName);
       } else {
@@ -368,13 +350,10 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
 
       if (attribute.type === 'component') {
         const { component: componentUID } = attribute;
-        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
         await async.map(_.castArray(value), (subValue: any) =>
           deleteComponent(componentUID, subValue)
         );
       } else {
-        // delete dynamic zone components
-        // MySQL/MariaDB can cause deadlocks here if concurrency higher than 1
         await async.map(_.castArray(value), (subValue: any) =>
           deleteComponent(subValue.__component, subValue)
         );
@@ -390,20 +369,15 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
 ************************** */
 
 // components can have nested compos so this must be recursive
-const createComponent = async <TUID extends UID.Component>(
-  uid: TUID,
-  data: Modules.EntityService.Params.Data.Input<TUID>
-) => {
-  const model = strapi.getModel(uid);
+const createComponent = async <TUID extends UID.Component>(uid: TUID, data: Input<TUID>) => {
+  const schema = strapi.getModel(uid);
 
   const componentData = await createComponents(uid, data);
+
   const transform = pipe(
     // Make sure we don't save the component with a pre-defined ID
     omit('id'),
-    // Remove the component data from the original data object ...
-    (payload) => omitComponentData(model, payload),
-    // ... and assign the newly created component instead
-    assign(componentData)
+    assignComponentData(schema, componentData)
   );
 
   return strapi.db.query(uid).create({ data: transform(data) });
@@ -413,9 +387,9 @@ const createComponent = async <TUID extends UID.Component>(
 const updateComponent = async <TUID extends UID.Component>(
   uid: TUID,
   componentToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
-  data: Modules.EntityService.Params.Data.Input<TUID>
+  data: Input<TUID>
 ) => {
-  const model = strapi.getModel(uid);
+  const schema = strapi.getModel(uid);
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
@@ -423,13 +397,13 @@ const updateComponent = async <TUID extends UID.Component>(
     where: {
       id: componentToUpdate.id,
     },
-    data: Object.assign(omitComponentData(model, data), componentData),
+    data: assignComponentData(schema, componentData, data),
   });
 };
 
 const updateOrCreateComponent = <TUID extends UID.Component>(
   componentUID: TUID,
-  value: Modules.EntityService.Params.Data.Input<TUID>
+  value: Input<TUID>
 ) => {
   if (value === null) {
     return null;
@@ -453,17 +427,11 @@ const deleteComponent = async <TUID extends UID.Component>(
   await strapi.db.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
-const assignComponentData = <TUID extends UID.ContentType>(
-  data: Modules.EntityService.Params.Data.Input<TUID>,
-  componentData: ComponentBody,
-  {
-    contentType,
-  }: {
-    contentType: Schema.ContentType<TUID>;
+const assignComponentData = curry(
+  (schema: Schema.Schema, componentData: ComponentBody, data: Input<UID.Schema>) => {
+    return pipe(omitComponentData(schema), assign(componentData))(data);
   }
-) => {
-  return Object.assign(omitComponentData(contentType, data), componentData);
-};
+);
 
 export {
   omitComponentData,

@@ -4,6 +4,7 @@ import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import { HistoryVersions } from '../../../../shared/contracts';
 import { RestoreHistoryVersion } from '../../../../shared/contracts/history-versions';
+import { validateRestoreVersion } from './validation/history-version';
 
 /**
  * Parses pagination params and makes sure they're within valid ranges
@@ -72,6 +73,8 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
 
     async restoreVersion(ctx) {
       const request = ctx.request as unknown as RestoreHistoryVersion.Request;
+
+      await validateRestoreVersion(request.body, 'contentType is required');
 
       const permissionChecker = getContentManagerService('permission-checker').create({
         userAbility: ctx.state.userAbility,

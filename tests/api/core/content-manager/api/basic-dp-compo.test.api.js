@@ -78,7 +78,7 @@ describe('CM API - Basic + compo', () => {
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject(product);
     expect(res.body.data.publishedAt).toBeNull();
     data.productsWithCompoAndDP.push(res.body.data);
@@ -140,7 +140,7 @@ describe('CM API - Basic + compo', () => {
         body: product,
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.data).toMatchObject(product);
       data.productsWithCompoAndDP.push(res.body.data);
     });
@@ -160,7 +160,7 @@ describe('CM API - Basic + compo', () => {
         body: product,
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.data).toMatchObject(product);
       data.productsWithCompoAndDP.push(res.body.data);
     });
@@ -214,7 +214,7 @@ describe('CM API - Basic + compo', () => {
         body: product,
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.data).toMatchObject(product);
       data.productsWithCompoAndDP.push(res.body.data);
     });

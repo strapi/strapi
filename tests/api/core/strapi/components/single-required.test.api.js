@@ -62,7 +62,7 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      expect(statusCode).toBe(200);
+      expect(statusCode).toBe(201);
       expect(body.data.field).toEqual(
         expect.objectContaining({
           id: expect.anything(),
@@ -85,7 +85,7 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      expect(statusCode).toBe(200);
+      expect(statusCode).toBe(201);
       expect(body.data.field).toEqual(
         expect.objectContaining({
           id: expect.anything(),

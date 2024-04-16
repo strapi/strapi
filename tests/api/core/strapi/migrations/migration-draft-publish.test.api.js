@@ -170,7 +170,7 @@ describe('Migration - draft and publish', () => {
           body: dogToCreate,
         });
 
-        expect(res.statusCode).toBe(200);
+        expect(res.statusCode).toBe(201);
         expect(res.body.data).toMatchObject(dogToCreate);
 
         data.dogs.push(res.body);
