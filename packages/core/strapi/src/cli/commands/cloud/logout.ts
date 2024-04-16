@@ -29,7 +29,7 @@ const action = (ctx: CLIContext) => {
  */
 const command: StrapiCommand = ({ ctx }) => {
   return createCommand('cloud:logout')
-    .command('logout')
+    .alias('logout')
     .description('Strapi Cloud Logout')
     .action(runAction('logout', action(ctx)));
 };
