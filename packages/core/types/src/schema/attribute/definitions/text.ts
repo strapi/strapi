@@ -5,6 +5,9 @@ export interface TextProperties {
   regex?: RegExp;
 }
 
+/**
+ * Represents a text Strapi attribute along with its options
+ */
 export type Text = Intersect<
   [
     Attribute.OfType<'text'>,

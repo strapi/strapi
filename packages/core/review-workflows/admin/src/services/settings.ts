@@ -21,7 +21,7 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
         const { id, ...params } = args ?? {};
 
         return {
-          url: `/admin/review-workflows/workflows/${id ?? ''}`,
+          url: `/review-workflows/workflows${id ? `/${id}` : ''}`,
           method: 'GET',
           config: {
             params,
@@ -55,32 +55,38 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
     }),
     createWorkflow: builder.mutation<Create.Response['data'], Create.Request['body']>({
       query: (data) => ({
-        url: '/admin/review-workflows/workflows',
+        url: '/review-workflows/workflows',
         method: 'POST',
         data,
       }),
       transformResponse: (res: Create.Response) => res.data,
-      invalidatesTags: [{ type: 'ReviewWorkflow' as const, id: 'LIST' }],
+      invalidatesTags: [{ type: 'ReviewWorkflow' as const, id: 'LIST' }, 'ReviewWorkflowStages'],
     }),
     updateWorkflow: builder.mutation<
       Update.Response['data'],
       Update.Request['body'] & Update.Params
     >({
       query: ({ id, ...data }) => ({
-        url: `/admin/review-workflows/workflows/${id}`,
+        url: `/review-workflows/workflows/${id}`,
         method: 'PUT',
         data,
       }),
       transformResponse: (res: Update.Response) => res.data,
-      invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflow' as const, id: arg.id }],
+      invalidatesTags: (res, _err, arg) => [
+        { type: 'ReviewWorkflow' as const, id: arg.id },
+        'ReviewWorkflowStages',
+      ],
     }),
     deleteWorkflow: builder.mutation<Delete.Response['data'], Delete.Params>({
       query: ({ id }) => ({
-        url: `/admin/review-workflows/workflows/${id}`,
+        url: `/review-workflows/workflows/${id}`,
         method: 'DELETE',
       }),
       transformResponse: (res: Delete.Response) => res.data,
-      invalidatesTags: (res, _err, arg) => [{ type: 'ReviewWorkflow' as const, id: arg.id }],
+      invalidatesTags: (res, _err, arg) => [
+        { type: 'ReviewWorkflow' as const, id: arg.id },
+        'ReviewWorkflowStages',
+      ],
     }),
   }),
   overrideExisting: false,

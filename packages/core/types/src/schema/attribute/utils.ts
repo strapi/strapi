@@ -36,19 +36,59 @@ export type IsPopulatable<TAttribute extends Attribute.Attribute> = IsOfType<
  */
 export type TypeOf<TAttribute extends Attribute.Attribute> = TAttribute['type'];
 
+/**
+ * Extract the target of an attribute.
+ *
+ * Returns never if the attribute don't have a target.
+ *
+ * Returns {@link UID.Schema} if a valid target is found
+ *
+ * @template TAttribute - The attribute to use
+ *
+ * @remark Targets can only be inferred from relation, component, and media attributes.
+ */
 export type Target<TAttribute extends Attribute.Attribute> =
   | Attribute.RelationTarget<TAttribute>
   | Attribute.ComponentTarget<TAttribute>
   | Attribute.MediaTarget<TAttribute>;
 
+/**
+ * Extract the potential targets of a polymorphic attribute.
+ *
+ * Returns never if the attribute don't have any target.
+ *
+ * Returns {@link UID.Schema} if valid targets are found
+ *
+ * @template TAttribute - The attribute to use
+ *
+ * @remark Morph targets can only be inferred from dynamic-zone attributes.
+ */
 export type MorphTargets<TAttribute extends Attribute.Attribute> =
   Attribute.DynamicZoneTargets<TAttribute>;
 
+/**
+ * Checks whether an attribute has a valid target.
+ *
+ * @template TAttribute - The attribute to check
+ *
+ * @see Target
+ *
+ * @remark Targets can only be inferred from relation, component, and media attributes.
+ */
 export type HasTarget<TAttribute extends Attribute.Attribute> =
   Target<TAttribute> extends infer TTarget
     ? And<IsNotNever<TTarget>, Extends<TTarget, UID.Schema>>
     : Constants.False;
 
+/**
+ * Checks whether an attribute has valid targets.
+ *
+ * @template TAttribute - The attribute to check
+ *
+ * @see MorphTargets
+ *
+ * @remark Targets can only be inferred from dynamic-zone attributes.
+ */
 export type HasMorphTargets<TAttribute extends Attribute.Attribute> =
   MorphTargets<TAttribute> extends infer TMaybeTargets
     ? And<IsNotNever<TMaybeTargets>, Extends<TMaybeTargets, UID.Schema>>
@@ -58,6 +98,7 @@ export type HasMorphTargets<TAttribute extends Attribute.Attribute> =
  * Represents the actual value of a given attribute {@link TAttribute}.
  *
  * @template TAttribute - The attribute to extract the value from.
+ * @template TGuard - The fallback type to use if it's not possible to infer the correct type value.
  */
 export type Value<TAttribute extends Attribute.Attribute, TGuard = unknown> = Guard.Never<
   {
