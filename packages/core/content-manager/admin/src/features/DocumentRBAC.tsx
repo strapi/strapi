@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { useRBAC, useAuth, type Permission, createContext } from '@strapi/admin/strapi-admin';
+import { useRBAC, useAuth, type Permission, createContext, Page } from '@strapi/admin/strapi-admin';
 import { useParams } from 'react-router-dom';
 
 import type { Schema } from '@strapi/types';
@@ -127,6 +127,10 @@ const DocumentRBAC = ({ children, permissions }: DocumentRBACProps) => {
     },
     []
   );
+
+  if (isLoading) {
+    return <Page.Loading />;
+  }
 
   return (
     <DocumentRBACProvider

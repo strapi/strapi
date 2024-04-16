@@ -40,12 +40,14 @@ const App = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { data, isLoading, isError } = useGetInfosQuery();
+  const { data, isLoading: isLoadingInfo, isError } = useGetInfosQuery();
   const [regenerate] = useRegenerateDocMutation();
   const [deleteVersion] = useDeleteVersionMutation();
   const [showConfirmDelete, setShowConfirmDelete] = React.useState<boolean>(false);
   const [versionToDelete, setVersionToDelete] = React.useState<string>();
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions, isLoading: isLoadingRBAC } = useRBAC(PERMISSIONS);
+
+  const isLoading = isLoadingInfo || isLoadingRBAC;
 
   const colCount = 4;
   const rowCount = (data?.docVersions?.length || 0) + 1;
@@ -131,7 +133,7 @@ const App = () => {
           })}
           primaryAction={
             <OpenDocLink
-              disabled={!allowedActions.canOpen || !data?.currentVersion || !data?.prefix}
+              disabled={!allowedActions.canRead || !data?.currentVersion || !data?.prefix}
               href={createDocumentationHref(`${data?.prefix}/v${data?.currentVersion}`)}
               startIcon={<Show />}
             >
@@ -181,7 +183,7 @@ const App = () => {
                         <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
                           <IconButton
                             forwardedAs="a"
-                            disabled={!allowedActions.canOpen}
+                            disabled={!allowedActions.canRead}
                             // @ts-expect-error invalid typing in IconButton
                             href={createDocumentationHref(`${data.prefix}/v${doc.version}`)}
                             noBorder

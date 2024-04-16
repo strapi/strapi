@@ -235,7 +235,7 @@ export declare namespace Unpublish {
       discardDraft?: boolean;
     };
     query: {
-      locale?: string | string[] | null;
+      locale?: string | null;
     };
   }
 

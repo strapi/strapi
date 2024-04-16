@@ -10,12 +10,12 @@ export function assertPluginProject(project: unknown): asserts project is Plugin
   }
 }
 
-export const isAppProject = (project: unknown): project is AppProject => {
+export const isApplicationProject = (project: unknown): project is AppProject => {
   return project instanceof AppProject;
 };
 
 export function assertAppProject(project: unknown): asserts project is AppProject {
-  if (!isAppProject(project)) {
-    throw new Error('Project is not an app');
+  if (!isApplicationProject(project)) {
+    throw new Error('Project is not an application');
   }
 }

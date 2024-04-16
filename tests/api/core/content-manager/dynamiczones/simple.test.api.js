@@ -118,7 +118,7 @@ describe('Not required dynamiczone', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(Array.isArray(res.body.data.field)).toBe(true);
       expect(res.body.data).toMatchObject({
         field: [
@@ -151,7 +151,7 @@ describe('Not required dynamiczone', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(Array.isArray(res.body.data.field)).toBe(true);
       expect(res.body.data.field.length).toBe(0);
     });
@@ -257,7 +257,7 @@ describe('Not required dynamiczone', () => {
     test('Can empty non required dynamic zone', async () => {
       const createRes = await createEntry();
 
-      expect(createRes.statusCode).toBe(200);
+      expect(createRes.statusCode).toBe(201);
       const entryId = createRes.body.data.documentId;
 
       const res = await rq({
@@ -279,7 +279,7 @@ describe('Not required dynamiczone', () => {
     test('Can add items to empty dynamic zone', async () => {
       const createRes = await createEmpty();
 
-      expect(createRes.statusCode).toBe(200);
+      expect(createRes.statusCode).toBe(201);
       const entryId = createRes.body.data.documentId;
 
       const res = await rq({
@@ -315,7 +315,7 @@ describe('Not required dynamiczone', () => {
     test('Can remove items from dynamic zone', async () => {
       const createRes = await createEntry();
 
-      expect(createRes.statusCode).toBe(200);
+      expect(createRes.statusCode).toBe(201);
       const entryId = createRes.body.data.documentId;
 
       const res = await rq({
@@ -359,7 +359,7 @@ describe('Not required dynamiczone', () => {
     test('Respects min items', async () => {
       const createRes = await createEntry();
 
-      expect(createRes.statusCode).toBe(200);
+      expect(createRes.statusCode).toBe(201);
       const entryId = createRes.body.data.documentId;
 
       const res = await rq({
@@ -381,7 +381,7 @@ describe('Not required dynamiczone', () => {
     test('Respects max items', async () => {
       const createRes = await createEntry();
 
-      expect(createRes.statusCode).toBe(200);
+      expect(createRes.statusCode).toBe(201);
       const entryId = createRes.body.data.documentId;
 
       const res = await rq({

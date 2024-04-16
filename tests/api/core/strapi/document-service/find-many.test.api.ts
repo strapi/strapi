@@ -6,7 +6,7 @@ import { findArticlesDb } from './utils';
 
 describe('Document Service', () => {
   let testUtils;
-  let strapi: Core.LoadedStrapi;
+  let strapi: Core.Strapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);

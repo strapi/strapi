@@ -24,7 +24,6 @@ import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
-
 /**
  * @internal
  *
@@ -84,15 +83,17 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     if (CustomInput) {
       // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
       return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
-    } else {
+    }
+
+    return (
       <FormInputRenderer
         {...props}
         hint={hint}
         // @ts-expect-error – this workaround lets us display that the custom field is missing.
         type={props.attribute.customField}
         disabled={fieldIsDisabled}
-      />;
-    }
+      />
+    );
   }
 
   /**
@@ -215,4 +216,4 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
 };
 
 export type { InputRendererProps };
-export { InputRenderer };
+export { InputRenderer, useFieldHint };

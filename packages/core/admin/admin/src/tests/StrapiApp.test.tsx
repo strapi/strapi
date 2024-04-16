@@ -250,10 +250,7 @@ describe('ADMIN | new StrapiApp', () => {
 
       expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
         [
-          "
-              [bar]: [deprecated] addSettingsLink() was called with an async Component from the plugin "bar". This will be removed
-                in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-              ",
+          "[bar]: [deprecated] addSettingsLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.",
         ]
       `);
 
@@ -560,10 +557,7 @@ describe('ADMIN | new StrapiApp', () => {
 
       expect(consoleSpy.mock.calls[0]).toMatchInlineSnapshot(`
         [
-          "
-              [bar]: [deprecated] addMenuLink() was called with an async Component from the plugin "bar". This will be removed
-                in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-              ",
+          "[bar]: [deprecated] addMenuLink() was called with an async Component from the plugin "bar". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.",
         ]
       `);
 

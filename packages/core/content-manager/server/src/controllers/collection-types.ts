@@ -232,6 +232,7 @@ export default {
     ]);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
+    ctx.status = 201;
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
@@ -385,19 +386,30 @@ export default {
         .countRelations()
         .build();
 
-      // TODO If locale is an array map this async?
-      const document = id
-        ? await updateDocument(ctx, { populate })
-        : await createDocument(ctx, { populate });
+      const { locale: requestLocale } = getDocumentLocaleAndStatus(body, {
+        allowMultipleLocales: true,
+      });
+      const localeArray: string[] = Array.isArray(requestLocale) ? requestLocale : [requestLocale];
 
-      if (permissionChecker.cannot.publish(document)) {
-        throw new errors.ForbiddenError();
-      }
+      async.map(localeArray, async (locale: string) => {
+        const localeCtx = {
+          ...ctx,
+          request: {
+            ...ctx.request,
+            body: { ...body, locale },
+          },
+        };
+        const document = id
+          ? await updateDocument(localeCtx, { populate })
+          : await createDocument(localeCtx, { populate });
 
-      // TODO: Publish many locales at once
-      const { locale } = getDocumentLocaleAndStatus(body, { allowMultipleLocales: true });
-      return documentManager.publish(document!.documentId, model, {
-        locale,
+        if (permissionChecker.cannot.publish(document)) {
+          throw new errors.ForbiddenError();
+        }
+      });
+
+      return documentManager.publish(id, model, {
+        locale: requestLocale,
         // TODO: Allow setting creator fields on publish
         // data: setCreatorFields({ user, isEdition: true })({}),
       });
@@ -651,8 +663,8 @@ export default {
 
   async countManyEntriesDraftRelations(ctx: any) {
     const { userAbility } = ctx.state;
-    const ids = ctx.request.query.ids as any;
-    const locale = ctx.request.query.locale;
+    const ids = ctx.request.query.documentIds as string[];
+    const locale = ctx.request.query.locale as string[];
     const { model } = ctx.params;
 
     const documentManager = getService('document-manager');
@@ -662,8 +674,15 @@ export default {
       return ctx.forbidden();
     }
 
-    // @ts-expect-error - ids are not in .find
-    const entities = await documentManager.findMany({ ids, locale }, model);
+    const entities = await documentManager.findMany(
+      {
+        filters: {
+          documentId: ids,
+        },
+        locale,
+      },
+      model
+    );
 
     if (!entities) {
       return ctx.notFound();

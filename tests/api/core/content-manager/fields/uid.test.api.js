@@ -41,7 +41,7 @@ describe('Test type UID', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.data).toMatchObject({
         slug: 'valid-uid',
       });
@@ -76,7 +76,7 @@ describe('Test type UID', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.data).toMatchObject({
         slug: null,
       });
@@ -140,7 +140,7 @@ describe('Test type UID', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.data).toMatchObject({
         slug: value,
       });
@@ -159,7 +159,7 @@ describe('Test type UID', () => {
           slug: value,
         },
       });
-      expect(newLocaleResult.statusCode).toBe(200);
+      expect(newLocaleResult.statusCode).toBe(201);
     });
   });
 
@@ -200,7 +200,7 @@ describe('Test type UID', () => {
         }
       );
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.data).toMatchObject({
         slug: 'valid-uid',
       });

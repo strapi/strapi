@@ -63,7 +63,7 @@ export const SingleSignOnPage = () => {
 
   const {
     isLoading: isLoadingPermissions,
-    allowedActions: { canUpdate, canReadRoles },
+    allowedActions: { canUpdate, canRead: canReadRoles },
   } = useRBAC({
     ...permissions.settings?.sso,
     readRoles: permissions.settings?.roles.read ?? [],
