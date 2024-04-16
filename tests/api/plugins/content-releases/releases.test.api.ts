@@ -695,6 +695,7 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       expect(res.statusCode).toBe(200);
     });
 
+    // @TODO: This test is failing on CI for sqlite with node20 apparently with no reason
     test.skip('cannot delete a release that does not exist', async () => {
       const res = await rq({
         method: 'DELETE',
