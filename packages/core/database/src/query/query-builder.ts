@@ -582,13 +582,13 @@ const createQueryBuilder = (
         if (mapResults && state.type === 'select') {
           results = helpers.fromRow(meta, rows);
           /**
-           * This is covering up an issue in the query itself
+           * This is possibly covering up an issue in the query itself
            * Currently, when we do a query with a join, we use a distinct rather than a groupBy
-           * which results in duplicated data. However, it is difficult to determine which queries
-           * should have the groupBy (top level queries) and which ones should not (populate queries)
+           * which results in duplicated data in certain cases. However, it is difficult to determine
+           * which queries should have the groupBy (top level queries) and which ones should not
+           * (such as populate subqueries)
            */
           if (this.shouldUseDistinct()) {
-            // console.log('GROUPED RESULT');
             results = _.uniqBy('id')(results);
           }
         }
