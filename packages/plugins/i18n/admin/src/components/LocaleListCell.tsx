@@ -60,7 +60,7 @@ const LocaleListCell = ({
         })}
       >
         <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
-          <ActionWrapper alignItems="center" justifyContent="center" height="2rem" width="2rem">
+          <ActionWrapper alignItems="center" justifyContent="center" height="2rem">
             <Typography
               style={{ maxWidth: '252px', cursor: 'pointer' }}
               data-for={elId}
