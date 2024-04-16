@@ -7996,17 +7996,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-<<<<<<< HEAD
-"lunr@npm:^2.3.9":
-  version: 2.3.9
-  resolution: "lunr@npm:2.3.9"
-  checksum: f2f6db34c046f5a767782fe2454e6dd69c75ba3c5cf5c1cb9cacca2313a99c2ba78ff8fa67dac866fb7c4ffd5f22e06684793f5f15ba14bddb598b94513d54bf
-=======
 "lunr-languages@npm:^1.4.0":
   version: 1.14.0
   resolution: "lunr-languages@npm:1.14.0"
   checksum: bb17d7e481efcf262de930b2e0980e0b33790c80a0aec1aeb102f4a32ad4418971efeae2bb1b6841825c1b055fca68dea37aea871524e9d84a451a113076d933
->>>>>>> 6f96608a7c41cfdad1535819b5b9df56f94e7057
+  languageName: node
+  linkType: hard
+
+"lunr@npm:^2.3.9":
+  version: 2.3.9
+  resolution: "lunr@npm:2.3.9"
+  checksum: f2f6db34c046f5a767782fe2454e6dd69c75ba3c5cf5c1cb9cacca2313a99c2ba78ff8fa67dac866fb7c4ffd5f22e06684793f5f15ba14bddb598b94513d54bf
   languageName: node
   linkType: hard
 
