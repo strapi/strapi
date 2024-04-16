@@ -39,7 +39,7 @@ describe('Test type boolean', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: true,
     });
@@ -58,7 +58,7 @@ describe('Test type boolean', () => {
       body: { field: 1 },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: true,
     });
@@ -67,7 +67,7 @@ describe('Test type boolean', () => {
       body: { field: 0 },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: false,
     });

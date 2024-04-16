@@ -73,7 +73,7 @@ describe('CM API - Basic', () => {
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject(product);
     expect(res.body.data.publishedAt).toBeNull();
     data.productsWithDP.push(res.body.data);
@@ -91,7 +91,7 @@ describe('CM API - Basic', () => {
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject(_.omit(product, 'publishedAt'));
     expect(res.body.data.publishedAt).toBeNull();
     data.productsWithDP.push(res.body.data);
@@ -409,7 +409,7 @@ describe('CM API - Basic', () => {
         body: product,
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.data).toMatchObject(product);
       data.productsWithDP.push(res.body.data);
     });
@@ -424,7 +424,7 @@ describe('CM API - Basic', () => {
         body: product,
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.data).toMatchObject({
         ...product,
       });

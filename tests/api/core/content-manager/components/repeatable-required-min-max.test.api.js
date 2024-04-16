@@ -63,7 +63,7 @@ describe('Non repeatable and Not required component', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(Array.isArray(res.body.data.field)).toBe(true);
       expect(res.body.data.field).toEqual(
         expect.arrayContaining([
@@ -89,7 +89,7 @@ describe('Non repeatable and Not required component', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(Array.isArray(res.body.data.field)).toBe(true);
       expect(res.body.data.field).toEqual(
         expect.arrayContaining([
