@@ -70,7 +70,7 @@ describe('Core API - Basic', () => {
 
     const { statusCode, body } = res;
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(201);
     expect(body).toMatchObject({
       data: {
         id: expect.anything(),

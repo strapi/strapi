@@ -79,7 +79,7 @@ describe('CM API - Basic + dz', () => {
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject(product);
     expect(res.body.data.publishedAt).toBe(null);
     data.productsWithDz.push(res.body.data);

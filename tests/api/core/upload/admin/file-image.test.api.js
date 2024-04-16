@@ -46,7 +46,7 @@ describe('Upload', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toEqual(
@@ -74,7 +74,7 @@ describe('Upload', () => {
         },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toEqual(

@@ -84,7 +84,7 @@ describe('Core API - Basic + dz', () => {
       },
     });
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(201);
 
     expect(body.data).toMatchObject({
       documentId: expect.anything(),

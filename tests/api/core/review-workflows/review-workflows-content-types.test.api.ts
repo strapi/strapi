@@ -133,7 +133,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
       test('It should create a workflow and assign a content type', async () => {
         const res = await createWorkflow({ name: 'test-workflow', contentTypes: [productUID] });
 
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(201);
         expect(res.body.data).toMatchObject({
           name: expect.any(String),
           contentTypes: [productUID],
@@ -158,7 +158,7 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
           stages: [{ name: 'Review' }],
         });
 
-        expect(res.status).toBe(200);
+        expect(res.status).toBe(201);
         expect(res.body.data).toMatchObject({ contentTypes: [productUID] });
         workflow2 = res.body.data;
       });

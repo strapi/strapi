@@ -31,7 +31,7 @@ describe('Dimensions are populated when uploading an image', () => {
         formData: { files: fs.createReadStream(path.join(__dirname, `../utils/strapi${ext}`)) },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body[0]).toMatchObject({
         width: 256,
         height: 256,

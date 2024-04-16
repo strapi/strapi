@@ -1,4 +1,4 @@
-import type { Data, Schema, Struct, UID } from '@strapi/types';
+import type { Data, Struct, UID } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
 /**
@@ -68,6 +68,30 @@ export declare namespace GetHistoryVersions {
         data: HistoryVersionDataResponse[];
         meta: {
           pagination: Pagination;
+        };
+        error?: never;
+      }
+    | {
+        data?: never;
+        meta?: never;
+        error: errors.ApplicationError;
+      };
+}
+
+export declare namespace RestoreHistoryVersion {
+  export interface Request {
+    params: {
+      versionId: Data.ID;
+    };
+    body: {
+      contentType: UID.ContentType;
+    };
+  }
+
+  export type Response =
+    | {
+        data: {
+          documentId: HistoryVersionDataResponse['id'];
         };
         error?: never;
       }
