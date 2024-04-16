@@ -122,7 +122,7 @@ describe('Sort', () => {
 
   afterAll(async () => {
     await strapi.destroy();
-    // await builder.cleanup();
+    await builder.cleanup();
   });
 
   test('targeting an attribute in a relation', async () => {
