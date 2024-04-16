@@ -589,7 +589,9 @@ const createQueryBuilder = (
            * (such as populate subqueries)
            */
           if (this.shouldUseDistinct()) {
-            results = _.uniqBy('id')(results);
+            if (results?.length > 0 && 'id' in results[0]) {
+              results = _.uniqBy('id')(results);
+            }
           }
         }
 
