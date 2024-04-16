@@ -2,14 +2,16 @@ import { isNil } from 'lodash/fp';
 
 import { errors } from '@strapi/utils';
 
+interface Options {
+  allowMultipleLocales?: boolean;
+}
+
 /**
  * From a request or query object, validates and returns the locale and status of the document
  */
 export const getDocumentLocaleAndStatus = (
   request: any,
-  opts: {
-    allowMultipleLocales?: boolean;
-  } = { allowMultipleLocales: true }
+  opts: Options = { allowMultipleLocales: true }
 ) => {
   const { allowMultipleLocales } = opts;
   const { locale, status, ...rest } = request || {};
@@ -19,6 +21,7 @@ export const getDocumentLocaleAndStatus = (
     const isLocaleValid =
       typeof locale === 'string' ||
       (allowMultipleLocales &&
+        // Allow multiple locales if the option is set and all locales are strings
         Array.isArray(locale) &&
         locale.every((item) => typeof item === 'string'));
 
