@@ -54,7 +54,7 @@ const config = {
       {
         indexBlog: false,
       },
-    ]
+    ],
   ],
   presets: [
     [
