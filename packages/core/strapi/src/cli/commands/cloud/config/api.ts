@@ -1,4 +1,5 @@
+import { env } from '@strapi/utils';
+
 export const apiConfig = {
-  // FIXME put the production URL here
-  apiBaseUrl: 'http://localhost:4006' as const,
+  apiBaseUrl: env('STRAPI_CLI_CLOUD_API', 'https://cli.cloud.strapi.io'),
 };
