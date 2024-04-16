@@ -11,6 +11,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  useStrapiApp,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -64,7 +65,6 @@ import type {
   ReleaseActionGroupBy,
   ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
-import { useStrapiApp } from '@strapi/admin/strapi-admin';
 import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
@@ -523,14 +523,10 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const {
     allowedActions: { canUpdate },
   } = useRBAC(PERMISSIONS);
-  const runHookWaterfall  = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
+  const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
 
-  const {
-    displayedHeaders,
-    hasI18nEnabled,
-  }: { displayedHeaders: any; hasI18nEnabled: boolean } = runHookWaterfall(
-    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
-    {
+  const { displayedHeaders, hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } =
+    runHookWaterfall('ContentReleases/pages/ReleaseDetails/add-locale-in-releases', {
       displayedHeaders: {
         label: formatMessage({
           id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
@@ -539,8 +535,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         name: 'locale',
       },
       hasI18nEnabled: false,
-    }
-  );
+    });
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';

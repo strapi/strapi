@@ -71,7 +71,10 @@ export interface CMAdminConfiguration
 }
 
 export type NonRelationLayout = Layouts['edit'][number][number] & {
-  fieldSchema: Pick<Exclude<Schema.Attribute.AnyAttribute, { type: 'relation' }>, 'pluginOptions' | 'type'>;
+  fieldSchema: Pick<
+    Exclude<Schema.Attribute.AnyAttribute, { type: 'relation' }>,
+    'pluginOptions' | 'type'
+  >;
   /**
    * why is this trying to beplural? You don't pluralize metadata.
    *

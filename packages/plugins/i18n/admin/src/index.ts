@@ -13,6 +13,7 @@ import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
 import { mutateEditViewHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
+import { addLocaleToReleasesHook } from './contentReleasesHooks/releaseDetailsView';
 import { extendCTBAttributeInitialDataMiddleware } from './middlewares/extendCTBAttributeInitialData';
 import { extendCTBInitialDataMiddleware } from './middlewares/extendCTBInitialData';
 import { localeMiddleware } from './middlewares/rbac-middleware';
@@ -24,7 +25,6 @@ import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
 import type { DocumentActionComponent } from '@strapi/plugin-content-manager/strapi-admin';
-import { addLocaleToReleasesHook } from './contentReleasesHooks/releaseDetailsView';
 
 // eslint-disable-next-line import/no-default-export
 export default {

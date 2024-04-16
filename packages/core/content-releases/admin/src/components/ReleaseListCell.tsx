@@ -144,7 +144,7 @@
 //                 source={buttonRef as React.MutableRefObject<HTMLElement>}
 //                 spacing={16}
 //               >
-//                 <ul>                
+//                 <ul>
 //                   {releases.map(
 //                     // @ts-expect-error fix when migrating to v5
 //                     ({ id, name }) => (

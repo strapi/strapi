@@ -16,7 +16,6 @@ import type { Plugin } from '@strapi/types';
 const admin: Plugin.Config.AdminInput = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register(app: StrapiApp) {
-  
     /**
      * Hook that adds the locale column in the Release Details table
      * @constant
