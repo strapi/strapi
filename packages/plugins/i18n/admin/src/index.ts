@@ -24,6 +24,7 @@ import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
 import type { DocumentActionComponent } from '@strapi/plugin-content-manager/strapi-admin';
+import { addLocaleToReleasesHook } from './contentReleasesHooks/releaseDetailsView';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -45,6 +46,11 @@ export default {
     // // Hook that adds a column into the CM's LV table
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewHook);
+    // Hooks that checks if the locale is present in the release
+    app.registerHook(
+      'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+      addLocaleToReleasesHook
+    );
 
     // Add the settings link
     app.addSettingsLink('global', {
