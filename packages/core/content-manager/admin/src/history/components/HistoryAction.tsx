@@ -19,10 +19,7 @@ const HistoryAction: DocumentActionComponent = ({ model, document }) => {
   const navigate = useNavigate();
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
-  if (
-    !window.strapi.features.isEnabled('cms-content-history') ||
-    !window.strapi.future.isEnabled('history')
-  ) {
+  if (!window.strapi.features.isEnabled('cms-content-history')) {
     return null;
   }
 

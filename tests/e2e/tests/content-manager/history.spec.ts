@@ -1,13 +1,10 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { describeOnCondition } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 import { waitForRestart } from '../../utils/restart';
 
-const hasFutureFlag = process.env.STRAPI_FEATURES_FUTURE_CONTENT_HISTORY === 'true';
-
-describeOnCondition(hasFutureFlag)('History', () => {
+test.describe('History', () => {
   test.describe('Collection Type', () => {
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin.tar');
