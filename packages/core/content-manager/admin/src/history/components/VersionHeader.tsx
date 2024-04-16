@@ -66,7 +66,11 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const handleRestore = async () => {
     try {
       const response = await restoreVersion({
-        params: { versionId: version.id },
+        params: {
+          versionId: version.id,
+          documentId: version.relatedDocumentId,
+          contentType: version.contentType,
+        },
         body: { contentType: version.contentType },
       });
 
@@ -84,8 +88,6 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
             defaultMessage: 'The content of the restored version is not published yet.',
           }),
         });
-
-        return;
       }
 
       if ('error' in response) {
