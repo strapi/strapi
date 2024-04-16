@@ -145,13 +145,14 @@ describe('Document Service', () => {
     );
 
     it(
-      'publish multiple locales',
+      'publish multiple locales of the same document',
       testInTransaction(async () => {
         const articlesDb = await findArticlesDb({ documentId: 'Article1', publishedAt: null });
         const documentId = articlesDb.at(0)!.documentId;
 
-        const result = await strapi.documents(ARTICLE_UID).publish(documentId, {
-          locale: ['en', 'it'], // should only publish the locales provided
+        const result = await strapi.documents(ARTICLE_UID).publish({
+          documentId,
+          locale: ['en', 'it'],
         });
 
         expect(result).not.toBeNull();

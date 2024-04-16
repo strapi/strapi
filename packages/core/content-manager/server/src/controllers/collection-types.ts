@@ -386,19 +386,30 @@ export default {
         .countRelations()
         .build();
 
-      // TODO If locale is an array map this async?
-      const document = id
-        ? await updateDocument(ctx, { populate })
-        : await createDocument(ctx, { populate });
+      const { locale: requestLocale } = getDocumentLocaleAndStatus(body, {
+        allowMultipleLocales: true,
+      });
+      const localeArray: string[] = Array.isArray(requestLocale) ? requestLocale : [requestLocale];
 
-      if (permissionChecker.cannot.publish(document)) {
-        throw new errors.ForbiddenError();
-      }
+      async.map(localeArray, async (locale: string) => {
+        const localeCtx = {
+          ...ctx,
+          request: {
+            ...ctx.request,
+            body: { ...body, locale },
+          },
+        };
+        const document = id
+          ? await updateDocument(localeCtx, { populate })
+          : await createDocument(localeCtx, { populate });
 
-      // TODO: Publish many locales at once
-      const { locale } = getDocumentLocaleAndStatus(body, { allowMultipleLocales: true });
-      return documentManager.publish(document!.documentId, model, {
-        locale,
+        if (permissionChecker.cannot.publish(document)) {
+          throw new errors.ForbiddenError();
+        }
+      });
+
+      return documentManager.publish(id, model, {
+        locale: requestLocale,
         // TODO: Allow setting creator fields on publish
         // data: setCreatorFields({ user, isEdition: true })({}),
       });
