@@ -11,51 +11,33 @@ import * as localSave from './services/strapi-info-save';
 import { compressFilesToTar } from './utils/compress-files';
 import { notificationServiceFactory } from './utils/notification-service';
 import { tokenServiceFactory } from './utils/token';
+import { loadPkg } from '../../utils/pkg';
+
+type PackageJson = {
+  strapi?: {
+    uuid?: string;
+  };
+};
 
 const FILE_SIZE_LIMIT = 100 * 1024 * 1024; // 100MB
 
-function getPackageJson({ logger }: CLIContext, folderPath: string): Record<string, any> | null {
-  const packageJsonPath = path.join(folderPath, 'package.json');
-
-  if (!fs.existsSync(packageJsonPath)) {
-    logger.error(
-      "This project seems to be missing a 'package.json' file. It's required for project configuration."
-    );
-    return null;
-  }
-
-  try {
-    const packageJson = require(packageJsonPath);
-
-    if (!packageJson.strapi || !packageJson.strapi.uuid) {
-      logger.error(
-        'This project appears to be missing a Strapi configuration. Please check your project setup and try again.'
-      );
-      return null;
-    }
-    return packageJson;
-  } catch (error: Error | unknown) {
-    logger.debug(error);
-    if (error instanceof Error && error.message.includes('Unexpected token')) {
-      logger.error(
-        'The package.json file seems to have invalid formatting. Please check for syntax errors and try again.'
-      );
-    } else {
-      logger.error('Unable to proceed: The package.json file does not contain valid JSON data.');
-    }
-  }
-  return null;
-}
-
 async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
   const cloudApi = cloudApiFactory(token);
-  // * Upload project
   try {
     const storagePath = getStoragePath();
     const projectFolder = path.resolve(process.cwd());
-    const packageJson = getPackageJson(ctx, projectFolder);
+    const packageJson: PackageJson = await loadPkg(ctx);
 
     if (!packageJson) {
+      ctx.logger.error(
+        'Unable to deploy the project. Please make sure the package.json file is correctly formatted.'
+      );
+      return;
+    }
+    if (!packageJson.strapi || !packageJson.strapi.uuid) {
+      ctx.logger.error(
+        'The project is not a Strapi project. Please make sure the package.json file is correctly formatted. It should contain a `strapi` object with a `uuid` property.'
+      );
       return;
     }
 
