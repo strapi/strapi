@@ -117,7 +117,7 @@ describe('Sort', () => {
 
     strapi = await createStrapiInstance();
     rq = createContentAPIRequest({ strapi });
-    data = await builder.sanitizedFixtures(strapi);=
+    data = await builder.sanitizedFixtures(strapi);
   });
 
   afterAll(async () => {
@@ -135,7 +135,7 @@ describe('Sort', () => {
 
     expect(status).toBe(200);
     expect(body.data.length).toBe(4);
-=
+
     // TODO: some dbs might not return categories data sorted by id, this should be arrayContaining+objectMatching
     expect(body.data).toMatchObject([
       {
