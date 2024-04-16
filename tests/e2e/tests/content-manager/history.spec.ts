@@ -1,10 +1,13 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { describeOnCondition } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 import { waitForRestart } from '../../utils/restart';
 
-test.describe('History', () => {
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
+describeOnCondition(edition === 'EE')('History', () => {
   test.describe('Collection Type', () => {
     test.beforeEach(async ({ page }) => {
       await resetDatabaseAndImportDataFromPath('with-admin.tar');
