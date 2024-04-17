@@ -123,9 +123,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const responseInterceptor = async <TData = unknown>(
     response: Response
   ): Promise<FetchResponse<TData>> => {
-    console.log('here ====> ', response);
     const result = await response.json();
-    console.log('result ====> ', result);
     if (result.error) {
       throw new FetchError(result.error.message, result);
     }
@@ -154,7 +152,6 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       url: string,
       options?: FetchOptions
     ): Promise<R> => {
-      console.log('here ===> ', window.strapi.backendURL);
       const response = await fetch(
         paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
@@ -170,7 +167,6 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       data?: TSend,
       options?: FetchOptions
     ): Promise<R> => {
-      console.log(url, data, options);
       const response = await fetch(
         paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
