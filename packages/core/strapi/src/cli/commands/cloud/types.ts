@@ -13,6 +13,6 @@ export type CloudCliConfig = {
 
 export type ProjectAnswers = {
   name: string;
-  nodeVersion: '18' | '20';
-  region: 'AMS' | 'NYC';
+  nodeVersion: string;
+  region: string;
 };

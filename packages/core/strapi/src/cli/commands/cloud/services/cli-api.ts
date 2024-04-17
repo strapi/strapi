@@ -6,9 +6,9 @@ import type { CloudCliConfig } from '../types';
 export type ProjectInfos = {
   id: string;
   name: string;
-  nodeVersion: '18' | '20';
-  region: 'AMS' | 'NYC';
-  planPriceId?: string;
+  nodeVersion: string;
+  region: string;
+  plan?: string;
   url?: string;
 };
 export type ProjectInput = Omit<ProjectInfos, 'id'>;
@@ -56,13 +56,13 @@ export function cloudApiFactory(token?: string) {
       name,
       nodeVersion,
       region,
-      planPriceId,
+      plan,
     }: ProjectInput): Promise<AxiosResponse<ProjectInfos>> {
       return axiosCloudAPI.post('/project', {
         projectName: name,
         region,
         nodeVersion,
-        planPriceId,
+        plan,
       });
     },
 
