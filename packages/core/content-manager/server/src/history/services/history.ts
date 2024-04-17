@@ -1,5 +1,5 @@
-import type { Core, Modules, UID, Data, Schema } from '@strapi/types';
-import { contentTypes } from '@strapi/utils';
+import type { Core, Modules, UID, Data, Schema, Struct } from '@strapi/types';
+import { contentTypes, errors } from '@strapi/utils';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
@@ -46,8 +46,10 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
     return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
   };
 
-  const localesService = strapi.plugin('i18n').service('locales');
+  const localesService = strapi.plugin('i18n')?.service('locales');
   const getLocaleDictionary = async () => {
+    if (!localesService) return {};
+
     const locales = (await localesService.find()) || [];
     return locales.reduce(
       (
@@ -161,7 +163,8 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             ? { documentId: result.documentId, locale: context.params?.locale }
             : { documentId: context.params.documentId, locale: context.params?.locale };
 
-        const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
+        const defaultLocale = localesService ? await localesService.getDefaultLocale() : null;
+        const locale = documentContext.locale || defaultLocale;
         const document = await strapi.documents(contentTypeUid).findOne({
           documentId: documentContext.documentId,
           locale,
@@ -394,6 +397,114 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         results: sanitizedResults,
         pagination,
       };
+    },
+
+    async restoreVersion(versionId: Data.ID) {
+      const version = await query.findOne({ where: { id: versionId } });
+      const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
+      const schemaDiff = getSchemaAttributesDiff(version.schema, contentTypeSchemaAttributes);
+
+      // Set all added attribute values to null
+      const dataWithoutAddedAttributes = Object.keys(schemaDiff.added).reduce(
+        (currentData, addedKey) => {
+          currentData[addedKey] = null;
+          return currentData;
+        },
+        // Clone to avoid mutating the original version data
+        structuredClone(version.data)
+      );
+      const sanitizedSchemaAttributes = omit(
+        FIELDS_TO_IGNORE,
+        contentTypeSchemaAttributes
+      ) as Struct.SchemaAttributes;
+      // Set all deleted relation values to null
+      const dataWithoutMissingRelations = await Object.entries(sanitizedSchemaAttributes).reduce(
+        async (
+          previousRelationAttributesPromise: Promise<Record<string, unknown>>,
+          [name, attribute]: [string, Schema.Attribute.AnyAttribute]
+        ) => {
+          const previousRelationAttributes = await previousRelationAttributesPromise;
+
+          const relationData = version.data[name];
+          if (relationData === null) {
+            return previousRelationAttributes;
+          }
+
+          if (
+            attribute.type === 'relation' &&
+            // TODO: handle polymorphic relations
+            attribute.relation !== 'morphToOne' &&
+            attribute.relation !== 'morphToMany'
+          ) {
+            if (Array.isArray(relationData)) {
+              if (relationData.length === 0) return previousRelationAttributes;
+
+              const existingAndMissingRelations = await Promise.all(
+                relationData.map((relation) => {
+                  return strapi.documents(attribute.target).findOne({
+                    documentId: relation.documentId,
+                    locale: relation.locale || undefined,
+                  });
+                })
+              );
+              const existingRelations = existingAndMissingRelations.filter(
+                (relation) => relation !== null
+              ) as Modules.Documents.AnyDocument[];
+
+              previousRelationAttributes[name] = existingRelations;
+            } else {
+              const existingRelation = await strapi.documents(attribute.target).findOne({
+                documentId: relationData.documentId,
+                locale: relationData.locale || undefined,
+              });
+
+              if (!existingRelation) {
+                previousRelationAttributes[name] = null;
+              }
+            }
+          }
+
+          if (attribute.type === 'media') {
+            if (attribute.multiple) {
+              const existingAndMissingMedias = await Promise.all(
+                // @ts-expect-error Fix the type definitions so this isn't any
+                relationData.map((media) => {
+                  return strapi.db
+                    .query('plugin::upload.file')
+                    .findOne({ where: { id: media.id } });
+                })
+              );
+
+              const existingMedias = existingAndMissingMedias.filter((media) => media != null);
+              previousRelationAttributes[name] = existingMedias;
+            } else {
+              const existingMedia = await strapi.db
+                .query('plugin::upload.file')
+                .findOne({ where: { id: version.data[name].id } });
+
+              if (!existingMedia) {
+                previousRelationAttributes[name] = null;
+              }
+            }
+          }
+
+          return previousRelationAttributes;
+        },
+        // Clone to avoid mutating the original version data
+        Promise.resolve(structuredClone(dataWithoutAddedAttributes))
+      );
+
+      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
+      const restoredDocument = await strapi.documents(version.contentType).update({
+        documentId: version.relatedDocumentId,
+        data,
+      });
+
+      if (!restoredDocument) {
+        throw new errors.ApplicationError('Failed to restore version');
+      }
+
+      return restoredDocument;
     },
   };
 };

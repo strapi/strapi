@@ -58,9 +58,9 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.17.0",
+    "@strapi/design-system": "1.18.0",
     "@strapi/generators": "5.0.0-beta.3",
-    "@strapi/icons": "1.16.0",
+    "@strapi/icons": "1.18.0",
     "@strapi/utils": "5.0.0-beta.3",
     "date-fns": "2.30.0",
     "fs-extra": "10.1.0",

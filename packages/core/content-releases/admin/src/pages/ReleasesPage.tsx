@@ -272,7 +272,6 @@ const ReleasesPage = () => {
       });
 
       trackUsage('didCreateRelease');
-
       navigate(response.data.data.id.toString());
     } else if (isFetchError(response.error)) {
       // When the response returns an object with 'error', handle axios error

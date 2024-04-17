@@ -22,6 +22,7 @@ import type {
   UpdateRelease,
   GetRelease,
   PublishRelease,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 
 // NEED TO LOOK AT THE PARAMS HERE
@@ -51,7 +52,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
 const releaseApi = createApi({
   reducerPath: pluginId,
   baseQuery: fetchBaseQuery,
-  tagTypes: ['Release', 'ReleaseAction'],
+  tagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease'],
   endpoints: (build) => {
     return {
       getReleasesForEntry: build.query<
@@ -201,6 +202,7 @@ const releaseApi = createApi({
         invalidatesTags: [
           { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
+          { type: 'EntriesInRelease' },
         ],
       }),
       updateReleaseAction: build.mutation<
@@ -256,6 +258,7 @@ const releaseApi = createApi({
           { type: 'Release', id: 'LIST' },
           { type: 'Release', id: arg.params.releaseId },
           { type: 'ReleaseAction', id: 'LIST' },
+          { type: 'EntriesInRelease' },
         ],
       }),
       publishRelease: build.mutation<PublishRelease.Response, PublishRelease.Request['params']>({
@@ -274,7 +277,25 @@ const releaseApi = createApi({
             method: 'DELETE',
           };
         },
-        invalidatesTags: () => [{ type: 'Release', id: 'LIST' }],
+        invalidatesTags: () => [{ type: 'Release', id: 'LIST' }, { type: 'EntriesInRelease' }],
+      }),
+      getMappedEntriesInReleases: build.query<
+        MapEntriesToReleases.Response['data'],
+        MapEntriesToReleases.Request['query']
+      >({
+        query(params) {
+          return {
+            url: '/content-releases/mapEntriesToReleases',
+            method: 'GET',
+            config: {
+              params,
+            },
+          };
+        },
+        transformResponse(response: MapEntriesToReleases.Response) {
+          return response.data;
+        },
+        providesTags: [{ type: 'EntriesInRelease' }],
       }),
     };
   },
@@ -293,6 +314,7 @@ const {
   usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
+  useGetMappedEntriesInReleasesQuery,
 } = releaseApi;
 
 export {
@@ -308,5 +330,6 @@ export {
   usePublishReleaseMutation,
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
+  useGetMappedEntriesInReleasesQuery,
   releaseApi,
 };
