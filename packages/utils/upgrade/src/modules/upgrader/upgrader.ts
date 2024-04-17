@@ -71,7 +71,7 @@ export class Upgrader implements UpgraderInterface {
     // Extract the <major>.<minor>.<patch> version from the target and assign it to the codemods target
     //
     // This is useful when dealing with alphas, betas or release candidates:
-    // e.g. "5.0.0-beta.3" becomes "5.0.0"
+    // e.g. "5.0.0-beta.951" becomes "5.0.0"
     //
     // For experimental versions (e.g. "0.0.0-experimental.hex"), it is necessary to
     // override the codemods target manually in order to run the appropriate ones.
