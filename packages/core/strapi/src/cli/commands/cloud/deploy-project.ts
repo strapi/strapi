@@ -111,8 +111,9 @@ const action = (ctx: CLIContext) => async () => {
   }
 
   const notificationService = notificationServiceFactory(ctx);
-  notificationService(`${apiConfig.apiBaseUrl}/notifications`, token);
-  return await upload(ctx, project, token);
+  await upload(ctx, project, token);
+  await notificationService(`${apiConfig.apiBaseUrl}/notifications`, token);
+  return;
 };
 
 /**
