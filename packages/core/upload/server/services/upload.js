@@ -163,6 +163,8 @@ module.exports = ({ strapi }) => ({
         tmpWorkingDirectory: file.tmpWorkingDirectory,
       }
     );
+
+    currentFile.filepath = file.path;
     currentFile.getStream = () => fs.createReadStream(file.path);
 
     const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
