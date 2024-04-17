@@ -11,7 +11,7 @@ interface Options {
  */
 export const getDocumentLocaleAndStatus = (
   request: any,
-  opts: Options = { allowMultipleLocales: true }
+  opts: Options = { allowMultipleLocales: false }
 ) => {
   const { allowMultipleLocales } = opts;
   const { locale, status, ...rest } = request || {};

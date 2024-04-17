@@ -386,30 +386,55 @@ export default {
         .countRelations()
         .build();
 
-      const { locale: requestLocale } = getDocumentLocaleAndStatus(body, {
-        allowMultipleLocales: true,
-      });
-      const localeArray: string[] = Array.isArray(requestLocale) ? requestLocale : [requestLocale];
+      const document = id
+        ? await updateDocument(ctx, { populate })
+        : await createDocument(ctx, { populate });
 
-      async.map(localeArray, async (locale: string) => {
-        const localeCtx = {
-          ...ctx,
-          request: {
-            ...ctx.request,
-            body: { ...body, locale },
-          },
-        };
-        const document = id
-          ? await updateDocument(localeCtx, { populate })
-          : await createDocument(localeCtx, { populate });
+      if (permissionChecker.cannot.publish(document)) {
+        throw new errors.ForbiddenError();
+      }
 
-        if (permissionChecker.cannot.publish(document)) {
-          throw new errors.ForbiddenError();
-        }
-      });
+      const { locale } = getDocumentLocaleAndStatus(body);
 
-      return documentManager.publish(id, model, {
-        locale: requestLocale,
+      // TODO: Remove for publish many locales at once
+      // const { locale } = getDocumentLocaleAndStatus(body, {
+      //   allowMultipleLocales: true,
+      // });
+
+      // let document: Modules.Documents.AnyDocument | null = null;
+      // if (body && (!locale || (typeof locale === 'string' && locale !== '*'))) {
+      //   // TODO Only update the document if we are targetting a specific locale and
+      //   // have been provided with a body
+
+      //   document = id
+      //     ? await updateDocument(ctx, { populate })
+      //     : await createDocument(ctx, { populate });
+
+      //   if (permissionChecker.cannot.publish(document)) {
+      //     throw new errors.ForbiddenError();
+      //   }
+      // }
+
+      // const localeArray: string[] = Array.isArray(requestLocale) ? requestLocale : [requestLocale];
+      // async.map(localeArray, async (locale: string) => {
+      //   const localeCtx = {
+      //     ...ctx,
+      //     request: {
+      //       ...ctx.request,
+      //       body: { ...body, locale },
+      //     },
+      //   };
+      //   const document = id
+      //     ? await updateDocument(localeCtx, { populate })
+      //     : await createDocument(localeCtx, { populate });
+
+      //   if (permissionChecker.cannot.publish(document)) {
+      //     throw new errors.ForbiddenError();
+      //   }
+      // });
+
+      return documentManager.publish(document!.documentId, model, {
+        locale,
         // TODO: Allow setting creator fields on publish
         // data: setCreatorFields({ user, isEdition: true })({}),
       });
@@ -423,7 +448,7 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
-    const { ids } = body;
+    const { documentIds, locale } = body;
 
     await validateBulkActionInput(body);
 
@@ -441,8 +466,10 @@ export default {
       .countRelations()
       .build();
 
-    const entityPromises = ids.map((id: any) => documentManager.findOne(id, model, { populate }));
-    const entities = await Promise.all(entityPromises);
+    const entityPromises = documentIds.map((documentId: any) =>
+      documentManager.findLocales(documentId, model, { populate, locale })
+    );
+    const entities = (await Promise.all(entityPromises)).flat();
 
     for (const entity of entities) {
       if (!entity) {

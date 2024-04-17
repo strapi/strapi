@@ -34,7 +34,7 @@ describe('Document Service', () => {
             documentId,
             locale,
             data: {
-              // @ts-expect-error articles to have titles
+              // @ts-expect-error articles do have titles
               title: 'Draft Article',
             },
           })
