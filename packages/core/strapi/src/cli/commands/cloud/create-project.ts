@@ -1,9 +1,10 @@
+import { AxiosError } from 'axios';
 import inquirer from 'inquirer';
-import { cloudApiFactory } from './services/cli-api';
+import { defaults } from 'lodash/fp';
+import { cloudApiFactory, type ProjectInput } from './services/cli-api';
 import { tokenServiceFactory } from './utils/token';
 import type { CLIContext } from '../../types';
 import type { ProjectAnswers } from './types';
-import { AxiosError } from 'axios';
 
 const action = async (ctx: CLIContext) => {
   const { logger } = ctx;
@@ -15,9 +16,14 @@ const action = async (ctx: CLIContext) => {
 
   const cloudApi = cloudApiFactory(token);
   const { data: config } = await cloudApi.config();
-  const projectInputs = await inquirer.prompt<ProjectAnswers>(config.projectQuestions);
+  const { questions, defaults: defaultValues } = config.projectCreation;
+
+  const projectAnswersDefaulted = defaults(defaultValues);
+  const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
+  const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
+
   try {
-    const { data } = await cloudApi.createProject({ plan: 'trial', ...projectInputs });
+    const { data } = await cloudApi.createProject({ plan: 'trial', ...projectInput });
     return data;
   } catch (error: Error | unknown) {
     if (error instanceof AxiosError) {

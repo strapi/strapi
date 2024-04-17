@@ -8,11 +8,15 @@ export type CloudCliConfig = {
   scope: string;
   tokenUrl: string;
   jwksUrl: string;
-  projectQuestions: ReadonlyArray<DistinctQuestion<ProjectAnswers>>;
+  projectCreation: {
+    questions: ReadonlyArray<DistinctQuestion<ProjectAnswers>>;
+    defaults: Partial<ProjectAnswers>;
+  };
 };
 
 export type ProjectAnswers = {
   name: string;
   nodeVersion: string;
   region: string;
+  plan: string;
 };

@@ -3,6 +3,8 @@ import * as fs from 'fs';
 import { apiConfig } from '../config/api';
 import type { CloudCliConfig } from '../types';
 
+export const VERSION = 'v1';
+
 export type ProjectInfos = {
   id: string;
   name: string;
@@ -15,7 +17,7 @@ export type ProjectInput = Omit<ProjectInfos, 'id'>;
 
 export function cloudApiFactory(token?: string) {
   const axiosCloudAPI = axios.create({
-    baseURL: apiConfig.apiBaseUrl,
+    baseURL: `${apiConfig.apiBaseUrl}/${VERSION}`,
     headers: {
       'Content-Type': 'application/json',
     },
