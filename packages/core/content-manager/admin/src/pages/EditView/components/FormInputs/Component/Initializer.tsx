@@ -56,8 +56,8 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
 };
 
 const CircleIcon = styled(PlusCircle)`
-  width: ${24 / 16}rem;
-  height: ${24 / 16}rem;
+  width: 2.4rem;
+  height: 2.4rem;
   > circle {
     fill: ${({ theme }) => theme.colors.primary200};
   }

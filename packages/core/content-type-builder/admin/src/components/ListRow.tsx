@@ -178,7 +178,7 @@ export const ListRow = memo(
             we need to reserve the same space, otherwise the height of the
             row might collapse, leading to bad positioned curve icons
           */
-            <Box height={`${32 / 16}rem`} />
+            <Box height="3.2rem" />
           )}
         </td>
       </BoxWrapper>

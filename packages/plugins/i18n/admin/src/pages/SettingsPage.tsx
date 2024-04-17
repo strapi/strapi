@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Page, useAPIErrorHandler, useNotification, useRBAC } from '@strapi/admin/strapi-admin';
 import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
-import { EmptyDocuments } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { CreateLocale } from '../components/CreateLocale';

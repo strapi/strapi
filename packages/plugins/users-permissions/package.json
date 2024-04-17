@@ -46,8 +46,8 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.18.0",
-    "@strapi/icons": "1.18.0",
+    "@strapi/design-system": "2.0.0-beta.2",
+    "@strapi/icons": "2.0.0-beta.2",
     "@strapi/utils": "5.0.0-beta.5",
     "bcryptjs": "2.4.3",
     "formik": "2.4.5",
