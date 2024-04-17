@@ -28,6 +28,12 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const navigate = useNavigate();
   const { formatMessage, formatDate } = useIntl();
   const { toggleNotification } = useNotification();
+  const [{ query }] = useQueryParams<{
+    plugins?: Record<string, unknown>;
+  }>();
+  const { collectionType, slug } = useParams<{ collectionType: string; slug: UID.ContentType }>();
+  const [restoreVersion, { isLoading }] = useRestoreVersionMutation();
+  const { allowedActions } = useRBAC(PERMISSIONS.map((action) => ({ action, subject: slug })));
 
   const version = useHistoryContext('VersionHeader', (state) => state.selectedVersion);
   const mainField = useHistoryContext('VersionHeader', (state) => state.mainField);
@@ -36,14 +42,6 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
     'VersionHeader',
     (state) => state.page === 1 && state.versions.data[0].id === state.selectedVersion.id
   );
-
-  const [{ query }] = useQueryParams<{
-    plugins?: Record<string, unknown>;
-  }>();
-  const { collectionType, slug } = useParams<{ collectionType: string; slug: UID.ContentType }>();
-  const [restoreVersion, { isLoading }] = useRestoreVersionMutation();
-
-  const { allowedActions } = useRBAC(PERMISSIONS.map((action) => ({ action, subject: slug })));
 
   const mainFieldValue = version.data[mainField];
 
