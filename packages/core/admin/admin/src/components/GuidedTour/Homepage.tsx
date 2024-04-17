@@ -13,12 +13,14 @@ interface GuidedTourHomepageProps {
 }
 
 const GuidedTourHomepage = ({ visibility }: GuidedTourHomepageProps) => {
-  const { guidedTourState, setSkipped } = useGuidedTour();
+  const { guidedTourState, setSkipped, guidedTourVisibility } = useGuidedTour();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
   const layout = visibility === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
   const layoutCopy = JSON.parse(JSON.stringify(layout));
+
+  const triggeredBySA = guidedTourVisibility === 'super-admin' ? true : false;
 
   // Remove the inviteUser step  if we are in the development env
   if (process.env.NODE_ENV === 'development') {
@@ -30,7 +32,7 @@ const GuidedTourHomepage = ({ visibility }: GuidedTourHomepageProps) => {
     title: val.home.title,
     content: (
       <LinkButton
-        onClick={() => trackUsage(val.home.trackingEvent)}
+        onClick={() => trackUsage(val.home.trackingEvent, { triggeredBySA })}
         as={NavLink}
         // @ts-expect-error - types are not inferred correctly through the as prop.
         to={val.home.cta.target}
@@ -48,7 +50,7 @@ const GuidedTourHomepage = ({ visibility }: GuidedTourHomepageProps) => {
 
   const handleSkip = () => {
     setSkipped(true);
-    trackUsage('didSkipGuidedtour');
+    trackUsage('didSkipGuidedtour', { triggeredBySA });
   };
 
   return (

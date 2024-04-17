@@ -43,6 +43,8 @@ const GuidedTourModal = () => {
   const layout = guidedTourVisibility === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
   const layoutCopy = JSON.parse(JSON.stringify(layout));
 
+  const triggeredBySA = guidedTourVisibility === 'super-admin' ? true : false;
+
   // Remove the inviteUser step if we are in the development env
   if (process.env.NODE_ENV === 'development') {
     delete layoutCopy.inviteUser;
@@ -63,7 +65,7 @@ const GuidedTourModal = () => {
     setStepState(currentStep, true);
 
     if (stepData) {
-      trackUsage(stepData.trackingEvent);
+      trackUsage(stepData.trackingEvent, { triggeredBySA });
     }
 
     setCurrentStep(null);
@@ -72,7 +74,7 @@ const GuidedTourModal = () => {
   const handleSkip = () => {
     setSkipped(true);
     setCurrentStep(null);
-    trackUsage('didSkipGuidedtour');
+    trackUsage('didSkipGuidedtour', { triggeredBySA });
   };
 
   return (
@@ -258,7 +260,7 @@ const GuidedTourStepper = ({
  * -----------------------------------------------------------------------------------------------*/
 
 interface GuidedTourContentProps
-  extends Required<Pick<MessageDescriptor, 'defaultMessage' | 'id'>> {}
+  extends Required<Pick<MessageDescriptor, 'defaultMessage' | 'id'>> { }
 
 const GuidedTourContent = ({ id, defaultMessage }: GuidedTourContentProps) => {
   const { formatMessage } = useIntl();

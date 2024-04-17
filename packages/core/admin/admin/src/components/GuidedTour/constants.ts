@@ -32,7 +32,7 @@ const LAYOUT_DATA = {
         },
         type: 'CLOSE',
       },
-      trackingEvent: 'didClickGuidedTourStep2ContentManager',
+      trackingEvent: 'didClickGuidedTourStep1ContentManager',
     },
     success: {
       title: {
@@ -162,7 +162,7 @@ const LAYOUT_DATA = {
         type: 'REDIRECT',
         target: '/',
       },
-      trackingEvent: 'didCreateGuidedTourProfile',
+      trackingEvent: 'didUpdateGuidedTourProfile',
     },
   },
   inviteUser: {
