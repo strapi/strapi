@@ -215,7 +215,7 @@ const ProtectedHistoryPageImpl = () => {
         position="fixed"
         top={0}
         left={0}
-        zIndex={99999}
+        zIndex={2}
         background="neutral0"
       >
         <Page.Error />
@@ -230,7 +230,7 @@ const ProtectedHistoryPageImpl = () => {
       position="fixed"
       top={0}
       left={0}
-      zIndex={99999}
+      zIndex={2}
       background="neutral0"
     >
       <Page.Protect permissions={permissions}>
