@@ -57,7 +57,7 @@ const emitWebhook = async (
   const emitEvent = async () => {
     // There is no need to populate the entry if it has been deleted
     let populatedEntry = entry;
-    if (eventName !== 'entry.delete') {
+    if (eventName !== 'entry.delete' && eventName !== 'entry.unpublish') {
       populatedEntry = await strapi.db.query(uid).findOne({ where: { id: entry.id }, populate });
     }
 
