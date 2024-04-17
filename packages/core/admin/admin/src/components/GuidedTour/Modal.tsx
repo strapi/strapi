@@ -260,7 +260,7 @@ const GuidedTourStepper = ({
  * -----------------------------------------------------------------------------------------------*/
 
 interface GuidedTourContentProps
-  extends Required<Pick<MessageDescriptor, 'defaultMessage' | 'id'>> { }
+  extends Required<Pick<MessageDescriptor, 'defaultMessage' | 'id'>> {}
 
 const GuidedTourContent = ({ id, defaultMessage }: GuidedTourContentProps) => {
   const { formatMessage } = useIntl();

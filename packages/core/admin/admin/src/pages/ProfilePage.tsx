@@ -351,9 +351,9 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
               error={
                 errors.currentPassword
                   ? formatMessage({
-                    id: errors.currentPassword,
-                    defaultMessage: errors.currentPassword,
-                  })
+                      id: errors.currentPassword,
+                      defaultMessage: errors.currentPassword,
+                    })
                   : ''
               }
               onChange={onChange}
@@ -373,13 +373,13 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
                   label={formatMessage(
                     currentPasswordShown
                       ? {
-                        id: 'Auth.form.password.show-password',
-                        defaultMessage: 'Show password',
-                      }
+                          id: 'Auth.form.password.show-password',
+                          defaultMessage: 'Show password',
+                        }
                       : {
-                        id: 'Auth.form.password.hide-password',
-                        defaultMessage: 'Hide password',
-                      }
+                          id: 'Auth.form.password.hide-password',
+                          defaultMessage: 'Hide password',
+                        }
                   )}
                 >
                   {currentPasswordShown ? <Eye /> : <EyeStriked />}
@@ -394,9 +394,9 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
               error={
                 errors.password
                   ? formatMessage({
-                    id: errors.password,
-                    defaultMessage: errors.password,
-                  })
+                      id: errors.password,
+                      defaultMessage: errors.password,
+                    })
                   : ''
               }
               onChange={onChange}
@@ -417,13 +417,13 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
                   label={formatMessage(
                     passwordShown
                       ? {
-                        id: 'Auth.form.password.show-password',
-                        defaultMessage: 'Show password',
-                      }
+                          id: 'Auth.form.password.show-password',
+                          defaultMessage: 'Show password',
+                        }
                       : {
-                        id: 'Auth.form.password.hide-password',
-                        defaultMessage: 'Hide password',
-                      }
+                          id: 'Auth.form.password.hide-password',
+                          defaultMessage: 'Hide password',
+                        }
                   )}
                 >
                   {passwordShown ? <Eye /> : <EyeStriked />}
@@ -436,9 +436,9 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
               error={
                 errors.confirmPassword
                   ? formatMessage({
-                    id: errors.confirmPassword,
-                    defaultMessage: errors.confirmPassword,
-                  })
+                      id: errors.confirmPassword,
+                      defaultMessage: errors.confirmPassword,
+                    })
                   : ''
               }
               onChange={onChange}
@@ -459,13 +459,13 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
                   label={formatMessage(
                     passwordConfirmShown
                       ? {
-                        id: 'Auth.form.password.show-password',
-                        defaultMessage: 'Show password',
-                      }
+                          id: 'Auth.form.password.show-password',
+                          defaultMessage: 'Show password',
+                        }
                       : {
-                        id: 'Auth.form.password.hide-password',
-                        defaultMessage: 'Hide password',
-                      }
+                          id: 'Auth.form.password.hide-password',
+                          defaultMessage: 'Hide password',
+                        }
                   )}
                 >
                   {passwordConfirmShown ? <Eye /> : <EyeStriked />}

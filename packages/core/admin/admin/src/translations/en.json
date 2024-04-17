@@ -442,14 +442,12 @@
   "app.components.GuidedTour.mediaLibrary.success.content": "<p>Awesome you are a pro! What about customizing your experience?</p>",
   "app.components.GuidedTour.mediaLibrary.success.cta.title": "Manage your profile",
   "app.components.GuidedTour.mediaLibrary.success.title": "Step 2: Completed ✅",
-
   "app.components.GuidedTour.profile.create.title": "⚙️ Customize your experience",
   "app.components.GuidedTour.profile.create.content": "<p>Customize your profile by changing the interface mode #darkModeForTheWin.</p>",
   "app.components.GuidedTour.profile.create.cta.title": "Manage your profile",
   "app.components.GuidedTour.profile.success.content": "<p>🎉 Congratulations! You can now invite more users to collaborate with you if you have the permission to add them. Feel free to go back to Light mode, we will not judge your choices...</p>",
   "app.components.GuidedTour.profile.success.cta.title": "Go back to the homepage",
   "app.components.GuidedTour.profile.success.title": "Step 3: Completed ✅",
-
   "app.components.GuidedTour.create-content": "Create content",
   "app.components.GuidedTour.home.CM.title": "⚡️ Create a first Entry",
   "app.components.GuidedTour.home.CTB.cta.title": "Go to the Content type Builder",

@@ -41,7 +41,8 @@ const LAYOUT_DATA = {
       },
       content: {
         id: 'app.components.GuidedTour.CM.success-admin.content',
-        defaultMessage: "<p>Good job! That was easy right? Let's browse the Media Library now.</p><b>🖼️ Upload a Media</b>",
+        defaultMessage:
+          "<p>Good job! That was easy right? Let's browse the Media Library now.</p><b>🖼️ Upload a Media</b>",
       },
       cta: {
         title: {
