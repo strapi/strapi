@@ -13,13 +13,6 @@ exports[`AddStage should render a list of stages 1`] = `
   width: 1px;
 }
 
-.c8 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #8e8ea9;
-}
-
 .c0 {
   margin-left: -250px;
   position: fixed;
@@ -27,15 +20,6 @@ exports[`AddStage should render a list of stages 1`] = `
   top: 2.875rem;
   z-index: 10;
   width: 31.25rem;
-}
-
-.c2 {
-  background: #ffffff;
-  padding-top: 12px;
-  padding-right: 16px;
-  padding-bottom: 12px;
-  padding-left: 16px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
 .c1 {
@@ -51,6 +35,22 @@ exports[`AddStage should render a list of stages 1`] = `
   -ms-flex-direction: column;
   flex-direction: column;
   gap: 8px;
+}
+
+.c8 {
+  font-size: 0.75rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #8e8ea9;
+}
+
+.c2 {
+  background: #ffffff;
+  padding-top: 12px;
+  padding-right: 16px;
+  padding-bottom: 12px;
+  padding-left: 16px;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
 .c4 {

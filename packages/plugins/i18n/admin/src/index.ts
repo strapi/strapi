@@ -17,6 +17,7 @@ import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
 import { mutateEditViewHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
+import { addLocaleToReleasesHook } from './contentReleasesHooks/releaseDetailsView';
 import { extendCTBAttributeInitialDataMiddleware } from './middlewares/extendCTBAttributeInitialData';
 import { extendCTBInitialDataMiddleware } from './middlewares/extendCTBInitialData';
 import { localeMiddleware } from './middlewares/rbac-middleware';
@@ -49,6 +50,11 @@ export default {
     // // Hook that adds a column into the CM's LV table
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewHook);
+    // Hooks that checks if the locale is present in the release
+    app.registerHook(
+      'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+      addLocaleToReleasesHook
+    );
 
     // Add the settings link
     app.addSettingsLink('global', {

@@ -206,7 +206,7 @@ export declare namespace Publish {
   export interface Request {
     body: Partial<Document>;
     query: {
-      locale?: string | string[] | null;
+      locale?: string | null;
     };
   }
 
@@ -304,6 +304,9 @@ export declare namespace BulkPublish {
   export interface Request {
     body: {
       documentIds: Modules.Documents.ID[];
+      // If not provided, the default locale will be used
+      // Otherwise specify the locales to publish of the documents
+      locale?: string | string[] | null;
     };
     query: {};
   }

@@ -82,6 +82,8 @@ export declare namespace RestoreHistoryVersion {
   export interface Request {
     params: {
       versionId: Data.ID;
+      documentId: Data.ID;
+      contentType: UID.ContentType;
     };
     body: {
       contentType: UID.ContentType;
