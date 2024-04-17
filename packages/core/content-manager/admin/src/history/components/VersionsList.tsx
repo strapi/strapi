@@ -88,8 +88,8 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
       borderWidth="1px"
       borderStyle="solid"
       borderColor={isActive ? 'primary600' : 'neutral200'}
-      paddingTop={5}
-      paddingBottom={5}
+      paddingTop={4}
+      paddingBottom={4}
       paddingLeft={5}
       paddingRight={5}
       as={Link}
@@ -106,7 +106,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
             minute: '2-digit',
           })}
         </Typography>
-        <Typography as="p" textColor="neutral600">
+        <Typography as="p" variant="pi" textColor="neutral600">
           {formatMessage(
             {
               id: 'content-manager.history.sidebar.versionDescription',

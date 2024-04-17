@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@strapi/database": "workspace:*",
-    "@strapi/pack-up": "5.0.0-beta.3",
+    "@strapi/pack-up": "5.0.0",
     "@types/fs-extra": "9.0.13",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",

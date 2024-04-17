@@ -21,13 +21,4 @@ export default {
   user,
   metrics,
   'seat-enforcement': seatEnforcement,
-  workflows,
-  stages,
-  'stage-permissions': stagePermissions,
-  assignees,
-  'review-workflows': reviewWorkflows,
-  'review-workflows-validation': reviewWorkflowsValidation,
-  'review-workflows-decorator': reviewWorkflowsDecorator,
-  'review-workflows-metrics': reviewWorkflowsMetrics,
-  'review-workflows-weekly-metrics': reviewWorkflowsWeeklyMetrics,
 };

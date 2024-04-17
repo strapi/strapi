@@ -39,7 +39,7 @@ describe('Test type text', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: 'Some\ntext',
     });

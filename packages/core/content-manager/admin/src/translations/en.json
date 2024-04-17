@@ -265,5 +265,11 @@
   "history.content.missing-relations.title": "{number, plural, =1 {Missing relation} other {{number} missing relations}}",
   "history.content.missing-relations.message": "{number, plural, =1 {It has} other {They have}} been deleted and can't be restored.",
   "history.content.no-relations": "No relations.",
+  "history.restore.confirm.button": "Restore",
+  "history.restore.confirm.title": "Are you sure you want to restore this version?",
+  "history.restore.confirm.message": "{isDraft, select, true {The restored content will override your draft.} other {The restored content won't be published, it will override the draft and be saved as pending changes. You'll be able to publish the changes at anytime.}}",
+  "history.restore.success.title": "Version restored.",
+  "history.restore.success.message": "The content of the restored version is not published yet.",
+  "history.restore.error.message": "Could not restore version.",
   "validation.error": "There are validation errors in your document. Please fix them before saving."
 }

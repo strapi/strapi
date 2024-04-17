@@ -16,4 +16,6 @@ export type Context<TUID extends UID.ContentType = UID.ContentType> = {
 export type Middleware = (
   ctx: Context,
   next: () => ReturnType<ServiceInstance[keyof ServiceInstance]>
-) => ReturnType<ServiceInstance[keyof ServiceInstance]>;
+) => ReturnType<ServiceInstance[keyof ServiceInstance]> extends Promise<infer Return>
+  ? Promise<Return>
+  : Promise<ReturnType<ServiceInstance[keyof ServiceInstance]>>;

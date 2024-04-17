@@ -1,4 +1,4 @@
-export type Middleware = (ctx: any, next: () => Promise<void>) => Promise<void>;
+export type Middleware = (ctx: any, next: () => Promise<void>) => Promise<void> | void;
 
 export type Options = {
   exclude?: string[];
@@ -39,7 +39,7 @@ export const createMiddlewareManager = () => {
           if (exclude.includes(key)) {
             facade[key] = prop;
           } else if (typeof prop === 'function') {
-            const newMethod = async (params: any) => {
+            const newMethod = async (params: any = {}) => {
               const ctx = {
                 ...ctxDefaults,
                 action: key,

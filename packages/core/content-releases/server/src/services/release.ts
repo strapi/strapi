@@ -14,6 +14,7 @@ import type {
   Release,
   DeleteRelease,
   GetContentTypeEntryReleases,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type {
   CreateReleaseAction,
@@ -260,13 +261,23 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async findManyWithContentTypeEntryAttached(
       contentTypeUid: GetContentTypeEntryReleases.Request['query']['contentTypeUid'],
-      entryId: GetContentTypeEntryReleases.Request['query']['entryId']
+      entriesIds:
+        | GetContentTypeEntryReleases.Request['query']['entryId']
+        | MapEntriesToReleases.Request['query']['entriesIds']
     ) {
+      // entriesIds could be an array or a single value
+      let entries = entriesIds;
+      if (!Array.isArray(entriesIds)) {
+        entries = [entriesIds];
+      }
+
       const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
         where: {
           actions: {
             target_type: contentTypeUid,
-            target_id: entryId,
+            target_id: {
+              $in: entries,
+            },
           },
           releasedAt: {
             $null: true,
@@ -277,7 +288,14 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           actions: {
             where: {
               target_type: contentTypeUid,
-              target_id: entryId,
+              target_id: {
+                $in: entries,
+              },
+            },
+            populate: {
+              entry: {
+                select: ['id'],
+              },
             },
           },
         },
@@ -285,14 +303,14 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       return releases.map((release) => {
         if (release.actions?.length) {
-          const [actionForEntry] = release.actions;
+          const actionsForEntry = release.actions;
 
           // Remove the actions key to replace it with an action key
           delete release.actions;
 
           return {
             ...release,
-            action: actionForEntry,
+            actions: actionsForEntry,
           };
         }
 
