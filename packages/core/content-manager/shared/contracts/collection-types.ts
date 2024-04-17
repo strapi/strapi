@@ -304,11 +304,12 @@ export declare namespace BulkPublish {
   export interface Request {
     body: {
       documentIds: Modules.Documents.ID[];
+    };
+    query: {
       // If not provided, the default locale will be used
       // Otherwise specify the locales to publish of the documents
       locale?: string | string[] | null;
     };
-    query: {};
   }
 
   export interface Params {
@@ -316,7 +317,9 @@ export declare namespace BulkPublish {
   }
 
   export interface Response {
-    count: number;
+    data: {
+      count: number;
+    };
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

@@ -448,9 +448,11 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
-    const { documentIds, locale } = body;
+    const { documentIds } = body;
 
     await validateBulkActionInput(body);
+
+    const { locale } = getDocumentLocaleAndStatus(ctx.query, { allowMultipleLocales: true });
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
