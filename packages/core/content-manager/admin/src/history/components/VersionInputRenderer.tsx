@@ -323,7 +323,16 @@ const VersionInputRenderer = ({
     case 'blocks':
       return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'component':
-      return <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <ComponentInput
+          {...props}
+          hint={hint}
+          disabled={fieldIsDisabled}
+          customInputRenderer={(props) => (
+            <VersionInputRenderer {...props} shouldIgnoreRBAC={true} />
+          )}
+        />
+      );
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
