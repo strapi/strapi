@@ -53,9 +53,7 @@ const useFetchClient = () => {
   return React.useMemo(
     () =>
       getFetchClient({
-        fetchConfig: {
-          signal: controller.current!.signal,
-        },
+        signal: controller.current!.signal,
       }),
     []
   );

@@ -17,10 +17,12 @@ export type FetchResponse<TData = unknown> = {
 export type FetchOptions = {
   params?: any;
   signal?: AbortSignal;
+  headers?: Record<string, string>;
 };
 
 export type FetchConfig = {
   baseURL?: string;
+  signal?: AbortSignal;
 };
 
 type ErrorResponse = {
@@ -33,6 +35,7 @@ export class FetchError extends Error {
   public message: string;
   public response?: ErrorResponse;
   public code?: number;
+  public status?: number;
 
   constructor(message: string, response?: ErrorResponse) {
     super(message);
@@ -40,6 +43,7 @@ export class FetchError extends Error {
     this.message = message;
     this.response = response;
     this.code = response?.error?.status;
+    this.status = response?.error?.status;
 
     // Ensure correct stack trace in error object
     if (Error.captureStackTrace) {
@@ -107,7 +111,8 @@ type FetchClient = {
  * ```
  */
 const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
-  const baseURL = defaultOptions.baseURL ?? window.strapi.backendURL;
+  const baseURL = defaultOptions.baseURL;
+  const backendURL = window.strapi.backendURL;
   const headers = new Headers({
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -118,7 +123,9 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const responseInterceptor = async <TData = unknown>(
     response: Response
   ): Promise<FetchResponse<TData>> => {
+    console.log('here ====> ', response);
     const result = await response.json();
+    console.log('result ====> ', result);
     if (result.error) {
       throw new FetchError(result.error.message, result);
     }
@@ -136,33 +143,38 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   };
 
   const addBaseUrl = (url: FetchURL) => {
-    return `${baseURL}${url}`;
+    if (baseURL) {
+      return `${backendURL}${baseURL}${url}`;
+    }
+    return `${backendURL}${url}`;
   };
 
   const fetchClient: FetchClient = {
-    get: async <TData = unknown, R = FetchResponse<TData>>(
+    get: async <TData, R = FetchResponse<TData>>(
       url: string,
       options?: FetchOptions
     ): Promise<R> => {
+      console.log('here ===> ', window.strapi.backendURL);
       const response = await fetch(
         paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
-          ...options,
+          signal: options?.signal ?? defaultOptions.signal,
           method: 'GET',
           headers,
         }
       );
       return responseInterceptor<TData>(response) as Promise<R>;
     },
-    post: async <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
+    post: async <TData, R = FetchResponse<TData>, TSend = unknown>(
       url: string,
       data?: TSend,
       options?: FetchOptions
     ): Promise<R> => {
+      console.log(url, data, options);
       const response = await fetch(
         paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
-          ...options,
+          signal: options?.signal ?? defaultOptions.signal,
           method: 'POST',
           headers,
           body: JSON.stringify(data),
@@ -170,7 +182,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       );
       return responseInterceptor<TData>(response) as Promise<R>;
     },
-    put: async <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
+    put: async <TData, R = FetchResponse<TData>, TSend = unknown>(
       url: string,
       data?: TSend,
       options?: FetchOptions
@@ -178,7 +190,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       const response = await fetch(
         paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
-          ...options,
+          signal: options?.signal ?? defaultOptions.signal,
           method: 'PUT',
           headers,
           body: JSON.stringify(data),
@@ -186,14 +198,14 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       );
       return responseInterceptor<TData>(response) as Promise<R>;
     },
-    del: async <TData = unknown, R = FetchResponse<TData>>(
+    del: async <TData, R = FetchResponse<TData>>(
       url: string,
       options?: FetchOptions
     ): Promise<R> => {
       const response = await fetch(
         paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
         {
-          ...options,
+          signal: options?.signal ?? defaultOptions.signal,
           method: 'DELETE',
           headers,
         }

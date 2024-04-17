@@ -1,62 +1,36 @@
-import { AxiosError, AxiosHeaders } from 'axios';
-
+import { FetchError } from '../getFetchClient';
 import { normalizeAPIError } from '../normalizeAPIError';
 
-import type { ApiError } from '../../hooks/useAPIErrorHandler';
-
-const API_VALIDATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  {
-    data: {
-      error: {
-        name: 'ValidationError',
-        message: 'errors',
-        details: {
-          errors: [
-            {
-              path: ['field', '0', 'name'],
-              message: 'Field contains errors',
-              name: 'ValidationError',
-            },
-
-            {
-              path: ['field'],
-              message: 'Field must be unique',
-              name: 'ValidationError',
-            },
-          ],
+const API_VALIDATION_ERROR_FIXTURE = new FetchError('error message', {
+  data: null,
+  error: {
+    name: 'ValidationError',
+    message: 'errors',
+    details: {
+      errors: [
+        {
+          path: ['field', '0', 'name'],
+          message: 'Field contains errors',
+          name: 'ValidationError',
         },
-      },
+        {
+          path: ['field'],
+          message: 'Field must be unique',
+          name: 'ValidationError',
+        },
+      ],
     },
-    status: 422,
-    statusText: 'Validation',
-    headers: {},
-    config: { headers: new AxiosHeaders() },
-  }
-);
+  },
+});
 
-const API_APPLICATION_ERROR_FIXTURE = new AxiosError<{ error: ApiError }>(
-  undefined,
-  undefined,
-  undefined,
-  undefined,
-  {
-    data: {
-      error: {
-        name: 'ApplicationError',
-        message: 'Application crashed',
-        details: {},
-      },
-    },
-    status: 400,
-    statusText: 'Bad Request',
-    headers: {},
-    config: { headers: new AxiosHeaders() },
-  }
-);
+const API_APPLICATION_ERROR_FIXTURE = new FetchError('error message', {
+  data: null,
+  error: {
+    name: 'ApplicationError',
+    message: 'Application crashed',
+    details: {},
+  },
+});
 
 describe('normalizeAPIError', () => {
   test('Handle ValidationError', () => {

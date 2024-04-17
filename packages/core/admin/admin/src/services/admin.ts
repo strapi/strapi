@@ -43,9 +43,9 @@ const admin = adminApi.injectEndpoints({
       query: () => ({
         url: '/admin/telemetry-properties',
         method: 'GET',
-        config: {
-          validateStatus: (status) => status < 500,
-        },
+        // config: {
+        //   validateStatus: (status) => status < 500,
+        // },
       }),
       transformResponse(res: TelemetryProperties.Response) {
         return res.data;
