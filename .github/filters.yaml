@@ -6,7 +6,8 @@ backend:
   - 'packages/**/strapi-server.js'
   - 'packages/{utils,generators,cli,providers}/**'
   - 'packages/core/*/{lib,bin,ee}/**'
-  - 'api-tests/**'
+  - 'tests/api/**'
+  - 'packages/core/database/**'
 frontend:
   - '.github/actions/yarn-nm-install/*.yml'
   - '.github/workflows/**'

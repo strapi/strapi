@@ -22,7 +22,8 @@ import { useQuery } from 'react-query';
 
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { getTranslation } from '../../../../utils/translations';
-import { InjectionZoneList } from '../InjectionZoneList';
+
+import { Emphasis } from './Actions';
 
 import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import type { AxiosError } from 'axios';
@@ -107,6 +108,7 @@ const ConfirmDialogPublishAll = ({
   }>();
 
   const slug = contentType?.uid ?? '';
+  const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
 
   const {
     data: countDraftRelations = 0,
@@ -172,7 +174,20 @@ const ConfirmDialogPublishAll = ({
               defaultMessage: 'Are you sure you want to publish these entries?',
             })}
           </Typography>
-          <InjectionZoneList area="contentManager.listView.publishModalAdditionalInfos" />
+          {hasI18nEnabled && (
+            <Typography textColor="danger500">
+              {formatMessage(
+                {
+                  id: getTranslation('Settings.list.actions.publishAdditionalInfos'),
+                  defaultMessage:
+                    'This will publish the active locale versions <em>(from Internationalization)</em>',
+                },
+                {
+                  em: Emphasis,
+                }
+              )}
+            </Typography>
+          )}
         </>
       }
       endAction={

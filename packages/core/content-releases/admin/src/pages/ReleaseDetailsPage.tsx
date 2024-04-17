@@ -34,8 +34,10 @@ import {
   useRBAC,
   AnErrorOccurred,
   useTracking,
+  useStrapiApp,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import { Attribute, Schema } from '@strapi/types';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
@@ -67,12 +69,10 @@ import type {
   ReleaseActionGroupBy,
   ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
-import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
-// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
@@ -265,7 +265,12 @@ export const ReleaseDetailsLayout = ({
   };
 
   const handleRefresh = () => {
-    dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
+    dispatch(
+      releaseApi.util.invalidateTags([
+        { type: 'ReleaseAction', id: 'LIST' },
+        { type: 'Release', id: releaseId },
+      ])
+    );
   };
 
   const getCreatedByUser = () => {
@@ -486,6 +491,7 @@ export const ReleaseDetailsLayout = ({
  * ReleaseDetailsBody
  * -----------------------------------------------------------------------------------------------*/
 const GROUP_BY_OPTIONS = ['contentType', 'locale', 'action'] as const;
+const GROUP_BY_OPTIONS_NO_LOCALE = ['contentType', 'action'] as const;
 const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   if (value === 'locale') {
     return {
@@ -507,6 +513,33 @@ const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   };
 };
 
+interface ReleaseHeaderItem {
+  key: string;
+  fieldSchema: { type: Attribute.Kind | 'custom' };
+  metadatas: {
+    label: { id: string; defaultMessage: string };
+    searchable: boolean;
+    sortable: boolean;
+  };
+  name: string;
+}
+
+const DEFAULT_RELEASE_DETAILS_HEADER: ReleaseHeaderItem[] = [
+  {
+    key: '__name__',
+    fieldSchema: { type: 'string' },
+    metadatas: {
+      label: {
+        id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+        defaultMessage: 'name',
+      },
+      searchable: false,
+      sortable: false,
+    },
+    name: 'name',
+  },
+];
+
 const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
@@ -522,6 +555,18 @@ const ReleaseDetailsBody = () => {
   const {
     allowedActions: { canUpdate },
   } = useRBAC(PERMISSIONS);
+  const { runHookWaterfall } = useStrapiApp();
+
+  const {
+    displayedHeaders,
+    hasI18nEnabled,
+  }: { displayedHeaders: ReleaseHeaderItem[]; hasI18nEnabled: boolean } = runHookWaterfall(
+    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+    {
+      displayedHeaders: DEFAULT_RELEASE_DETAILS_HEADER,
+      hasI18nEnabled: false,
+    }
+  );
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -648,6 +693,8 @@ const ReleaseDetailsBody = () => {
     );
   }
 
+  const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
+
   return (
     <ContentLayout>
       <Flex gap={8} direction="column" alignItems="stretch">
@@ -671,7 +718,7 @@ const ReleaseDetailsBody = () => {
             value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
             onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
           >
-            {GROUP_BY_OPTIONS.map((option) => (
+            {options.map((option) => (
               <SingleSelectOption key={option} value={option}>
                 {formatMessage(getGroupByOptionLabel(option))}
               </SingleSelectOption>
@@ -694,22 +741,14 @@ const ReleaseDetailsBody = () => {
             >
               <Table.Content>
                 <Table.Head>
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.name',
-                      defaultMessage: 'name',
-                    })}
-                    name="name"
-                  />
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-                      defaultMessage: 'locale',
-                    })}
-                    name="locale"
-                  />
+                  {displayedHeaders.map(({ key, fieldSchema, metadatas, name }) => (
+                    <Table.HeaderCell
+                      key={key}
+                      fieldSchemaType={fieldSchema.type}
+                      label={formatMessage(metadatas.label)}
+                      name={name}
+                    />
+                  ))}
                   <Table.HeaderCell
                     fieldSchemaType="string"
                     label={formatMessage({
@@ -747,9 +786,12 @@ const ReleaseDetailsBody = () => {
                             contentType.mainFieldValue || entry.id
                           }`}</Typography>
                         </Td>
-                        <Td width="10%">
-                          <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
-                        </Td>
+                        {hasI18nEnabled && (
+                          <Td width="10%">
+                            <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
+                          </Td>
+                        )}
+
                         <Td width="10%">
                           <Typography>{contentType.displayName || ''}</Typography>
                         </Td>
@@ -873,7 +915,7 @@ const ReleaseDetailsPage = () => {
   const scheduledAt =
     releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
   // Just get the date and time to display without considering updated timezone time
-  const date = scheduledAt ? new Date(format(scheduledAt, 'yyyy-MM-dd')) : null;
+  const date = scheduledAt ? format(scheduledAt, 'yyyy-MM-dd') : null;
   const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
@@ -893,6 +935,7 @@ const ReleaseDetailsPage = () => {
           defaultMessage: 'Release updated.',
         }),
       });
+      toggleEditReleaseModal();
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
@@ -906,8 +949,6 @@ const ReleaseDetailsPage = () => {
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
-
-    toggleEditReleaseModal();
   };
 
   const handleDeleteRelease = async () => {
