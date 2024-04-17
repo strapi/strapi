@@ -109,7 +109,7 @@ Let's declare the content-type schema registry.
 
 It should accept:
 - Content-type UIDs as keys
-- Content-type schemas as values.
+- Content-type schemas as values
 
 ```ts title="@strapi/types/public/registries.ts"
 import type { Internal, Struct } from '@strapi/types';
@@ -127,7 +127,7 @@ We use low level types to define our index (`Internal`/`Struct`) to keep it as g
 
 ###### UID.ContentType
 
-To define `UID.ContentType`, we extract every key (`Internal.Registry.Keys`) from the public content-type registry (`Public.ContentTypeSchemas`) that match with the base definition of a content-type UID (`Internal.UID.ContentType`).
+To define `UID.ContentType`, we extract every key (`Internal.Registry.Keys`) from the public content-type registry (`Public.ContentTypeSchemas`) that matches with the base definition of a content-type UID (`Internal.UID.ContentType`).
 
 ```ts title="@strapi/types/uid.ts"
 import type { Internal, Public } from '@strapi/types'
@@ -156,9 +156,9 @@ import type { UID, Public } from '@strapi/types'
 export type ContentType<TUID extends UID.ContentType> = Public.ContentTypeSchemas[TUID];
 ```
 
-##### 3. APIs Design
+##### 3. API Design
 
-To create types for a dynamic API (_aka one that react to its context_), simply use dynamic type definitions such as `UID`, `Data` or `Schema`.
+To create types for a dynamic API (_aka one that reacts to its context_), simply use dynamic type definitions such as `UID`, `Data` or `Schema`.
 
 ```ts title="@strapi/core/document-service.ts"
 import type { Data, UID } from '@strapi/types';
@@ -217,10 +217,10 @@ declare module '@strapi/strapi' {
 }
 ````
 
-This will force every type that depend on the `Public.ContentTypeSchemas` registry to recognize `'api::article.article'` as the only valid UID and `ApiArticleArticle` the only valid schema.
+This will force every type that depends on the `Public.ContentTypeSchemas` registry to recognize `'api::article.article'` as the only valid UID and `ApiArticleArticle` the only valid schema.
 
 :::note
-In the context of a Strapi application, developers are encouraged to use types exported by `@strapi/strapi` and not `@strapi/types`.
+In the context of a Strapi application, developers are strongly encouraged to use types exported by `@strapi/strapi` and not `@strapi/types`.
 
 This is to allow having both an internal (`@strapi/types`) and a public (`@strapi/strapi`) types API.
 :::

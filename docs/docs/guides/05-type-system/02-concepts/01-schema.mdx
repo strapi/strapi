@@ -61,7 +61,7 @@ For example, it's possible to add or remove certain entity-service filters from 
 
 #### Attributes
 
-Strongly typed schema attribute allows the Type System to infer actual entities types based on their properties.
+Strongly typed schema attributes allows the Type System to infer actual entities types based on their properties.
 
 For instance, a string attribute will resolve to a primitive string in an entity, whereas a repeatable component attribute will resolve to an array of objects.
 
@@ -72,7 +72,7 @@ import TabItem from '@theme/TabItem'
 
 <Tabs>
 <TabItem value="public" label="Public" default>
-When designing public APIs (and in most other scenario), it's advised to use the high-level schema types found in the `Schema` namespace.
+When designing public APIs (and in most other scenarios), it's advised to use the high-level schema types found in the `Schema` namespace.
 
 Schema definitions exported from the `Schema` namespace are targeting the dynamic types found in the public schema registries, and will dynamically adapt to the current context while extending the base Schema types.
 
