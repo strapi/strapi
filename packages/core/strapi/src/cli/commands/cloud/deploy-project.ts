@@ -77,12 +77,12 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
         }
       );
       progressBar.update(100);
+      progressBar.stop();
       ctx.logger.success('✨ Upload finished!');
     } catch (error: any) {
+      progressBar.stop();
       ctx.logger.error('An error occurred while deploying the project. Please try again later.');
       ctx.logger.debug(error);
-    } finally {
-      progressBar.stop();
     }
     process.exit(0);
   } catch (error: any) {
@@ -90,6 +90,14 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
     ctx.logger.debug(error);
     process.exit(1);
   }
+}
+
+async function getProject(ctx: CLIContext) {
+  const { project } = localSave.retrieve();
+  if (!project) {
+    return createProjectAction(ctx)();
+  }
+  return project;
 }
 
 const action = (ctx: CLIContext) => async () => {
@@ -100,14 +108,10 @@ const action = (ctx: CLIContext) => async () => {
     return;
   }
 
-  let project: ProjectInfos | null | undefined = localSave.retrieve()?.project;
+  const project = await getProject(ctx);
 
   if (!project) {
-    project = await createProjectAction(ctx);
-
-    if (!project) {
-      return;
-    }
+    return;
   }
 
   const notificationService = notificationServiceFactory(ctx);

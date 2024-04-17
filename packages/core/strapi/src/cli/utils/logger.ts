@@ -138,10 +138,11 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       }
 
       const progressBar = new cliProgress.SingleBar({
-        format: `${text ? text + ' |' : ''}${chalk.green('{bar}')}| {percentage}%`,
+        format: `${text ? `${text} |` : ''}${chalk.green('{bar}')}| {percentage}%`,
         barCompleteChar: '\u2588',
         barIncompleteChar: '\u2591',
         hideCursor: true,
+        forceRedraw: true,
       });
 
       progressBar.start(totalSize, 0);
