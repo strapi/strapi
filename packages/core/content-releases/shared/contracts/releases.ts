@@ -27,7 +27,7 @@ export interface ReleaseDataResponse extends Omit<Release, 'actions'> {
 }
 
 export interface ReleaseForContentTypeEntryDataResponse extends Omit<Release, 'actions'> {
-  action: ReleaseAction;
+  actions: ReleaseAction[];
 }
 
 /**
@@ -69,6 +69,24 @@ export declare namespace GetContentTypeEntryReleases {
   export interface Response {
     data: ReleaseForContentTypeEntryDataResponse[];
     error?: errors.ApplicationError;
+  }
+}
+
+/**
+ * GET /content-releases/mapEntriesToReleases - Map entries to releases
+ */
+export declare namespace MapEntriesToReleases {
+  export interface Request {
+    query: {
+      contentTypeUid: ReleaseAction['contentType'];
+      entriesIds: ReleaseAction['entry']['id'][];
+    };
+  }
+
+  export interface Response {
+    data: {
+      [entryId: ReleaseAction['entry']['id']]: Pick<Release, 'id' | 'name'>[];
+    };
   }
 }
 
