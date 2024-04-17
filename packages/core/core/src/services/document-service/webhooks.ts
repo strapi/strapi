@@ -1,6 +1,6 @@
 import { curry } from 'lodash/fp';
 
-import { UID, Schema, Utils, Core } from '@strapi/types';
+import { UID, Schema, Utils, Core, Modules } from '@strapi/types';
 import { sanitize } from '@strapi/utils';
 
 import { getDeepPopulate } from './utils/populate';
@@ -18,7 +18,7 @@ type WebhookEvent = Utils.Object.Values<typeof ALLOWED_WEBHOOK_EVENTS>;
 
 const sanitizeEntry = async (
   model: Schema.ContentType<any> | Schema.Component<any>,
-  entry: any
+  entry: Modules.Documents.AnyDocument
 ) => {
   return sanitize.sanitizers.defaultSanitizeOutput(
     {
@@ -49,7 +49,7 @@ const registerEntryWebhooks = (strapi: Core.Strapi) => {
 const emitWebhook = async (
   uid: UID.Schema,
   eventName: WebhookEvent,
-  entry: { id: number | string; [key: string]: any }
+  entry: Modules.Documents.AnyDocument
 ) => {
   const populate = getDeepPopulate(uid, {});
   const model = strapi.getModel(uid);
