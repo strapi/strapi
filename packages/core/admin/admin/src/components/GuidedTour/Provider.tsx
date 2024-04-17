@@ -21,7 +21,7 @@ interface GuidedTourProviderProps {
 }
 
 const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
-  const [{ currentStep, guidedTourState, isGuidedTourVisible, isSkipped }, dispatch] =
+  const [{ currentStep, guidedTourState, guidedTourVisibility, isSkipped }, dispatch] =
     React.useReducer(reducer, initialState, initialiseState);
 
   const setCurrentStep = (step: SetCurrentStepAction['step']) => {
@@ -50,6 +50,30 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
   };
 
   const setGuidedTourVisibility = (value: SetGuidedTourVisibilityAction['value']) => {
+    // Update the initial guidedTourState depending on the visibility (executed once)
+    if (!guidedTourVisibility) {
+      const guidedTourState = JSON.parse(JSON.stringify(initialState?.guidedTourState));
+
+      // Remove the inviteUser step if we are in the development env
+      if (process.env.NODE_ENV === 'development') {
+        delete guidedTourState.inviteUser;
+      }
+
+      // Remove non-related steps to specific guided tour (super-admin or admin)
+      if (value === 'admin') {
+        delete guidedTourState.contentTypeBuilder;
+        delete guidedTourState.apiTokens;
+      } else if (value === 'super-admin') {
+        delete guidedTourState.mediaLibrary;
+        delete guidedTourState.profile;
+      }
+
+      dispatch({
+        type: 'SET_GUIDED_TOUR_STATE',
+        value: guidedTourState,
+      });
+    }
+
     dispatch({
       type: 'SET_GUIDED_TOUR_VISIBILITY',
       value,
@@ -71,7 +95,6 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
 
     if (sectionSteps) {
       const guidedTourArray = Object.entries(guidedTourState);
-
       // Find current section position in the guidedTourArray
       // Get only previous sections based on current section position
       const currentSectionIndex = guidedTourArray.findIndex(([key]) => key === sectionName);
@@ -81,7 +104,6 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
       const isSectionToShow = previousSections.every(([, sectionValue]) =>
         Object.values(sectionValue).every(Boolean)
       );
-
       const [firstStep] = Object.keys(sectionSteps) as [GuidedTourStepKey];
       const isFirstStepDone = sectionSteps[firstStep];
 
@@ -109,7 +131,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
       setSkipped={setSkipped}
       setStepState={setStepState}
       startSection={startSection}
-      isGuidedTourVisible={isGuidedTourVisible}
+      guidedTourVisibility={guidedTourVisibility}
       isSkipped={isSkipped}
     >
       {children}
@@ -119,7 +141,7 @@ const GuidedTourProvider = ({ children }: GuidedTourProviderProps) => {
 
 type State = Pick<
   GuidedTourContextValue,
-  'guidedTourState' | 'currentStep' | 'isGuidedTourVisible' | 'isSkipped'
+  'guidedTourState' | 'currentStep' | 'guidedTourVisibility' | 'isSkipped'
 >;
 
 const initialState = {
@@ -137,12 +159,20 @@ const initialState = {
       create: false,
       success: false,
     },
-    transferTokens: {
+    mediaLibrary: {
+      create: false,
+      success: false,
+    },
+    profile: {
+      create: false,
+      success: false,
+    },
+    inviteUser: {
       create: false,
       success: false,
     },
   },
-  isGuidedTourVisible: false,
+  guidedTourVisibility: null,
   isSkipped: false,
 } satisfies State;
 
@@ -157,6 +187,11 @@ interface SetStepStateAction {
   value: boolean;
 }
 
+interface SetGuidedTourStateAction {
+  type: 'SET_GUIDED_TOUR_STATE';
+  value: object;
+}
+
 interface SetSkippedAction {
   type: 'SET_SKIPPED';
   value: boolean;
@@ -164,14 +199,15 @@ interface SetSkippedAction {
 
 interface SetGuidedTourVisibilityAction {
   type: 'SET_GUIDED_TOUR_VISIBILITY';
-  value: boolean;
+  value: string;
 }
 
 type Action =
   | SetCurrentStepAction
   | SetStepStateAction
   | SetSkippedAction
-  | SetGuidedTourVisibilityAction;
+  | SetGuidedTourVisibilityAction
+  | SetGuidedTourStateAction;
 
 const reducer: React.Reducer<State, Action> = (state: State = initialState, action: Action) =>
   produce(state, (draftState) => {
@@ -192,8 +228,12 @@ const reducer: React.Reducer<State, Action> = (state: State = initialState, acti
         draftState.isSkipped = action.value;
         break;
       }
+      case 'SET_GUIDED_TOUR_STATE': {
+        draftState.guidedTourState = action.value;
+        break;
+      }
       case 'SET_GUIDED_TOUR_VISIBILITY': {
-        draftState.isGuidedTourVisible = action.value;
+        draftState.guidedTourVisibility = action.value;
         break;
       }
       default: {

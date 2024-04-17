@@ -28,6 +28,7 @@ import {
   useOverlayBlocker,
   useTracking,
   useAPIErrorHandler,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { Check, Eye, EyeStriked } from '@strapi/icons';
 import { Formik, FormikHelpers } from 'formik';
@@ -74,6 +75,8 @@ const ProfilePage = () => {
   const { notifyStatus } = useNotifyAT();
   const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
   const dispatch = useTypedDispatch();
+  const { startSection, setCurrentStep } = useGuidedTour();
+
   const {
     _unstableFormatValidationErrors: formatValidationErrors,
     _unstableFormatAPIError: formatApiError,
@@ -82,6 +85,10 @@ const ProfilePage = () => {
   useFocusWhenNavigate();
 
   const user = useAuth('ProfilePage', (state) => state.user);
+
+  React.useEffect(() => {
+    startSection('profile');
+  }, [startSection]);
 
   React.useEffect(() => {
     if (user) {
@@ -150,6 +157,8 @@ const ProfilePage = () => {
       dispatch(setAppTheme(currentTheme));
 
       trackUsage('didChangeMode', { newMode: currentTheme });
+
+      setCurrentStep('profile.success');
 
       toggleNotification({
         type: 'success',
@@ -342,9 +351,9 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
               error={
                 errors.currentPassword
                   ? formatMessage({
-                      id: errors.currentPassword,
-                      defaultMessage: errors.currentPassword,
-                    })
+                    id: errors.currentPassword,
+                    defaultMessage: errors.currentPassword,
+                  })
                   : ''
               }
               onChange={onChange}
@@ -364,13 +373,13 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
                   label={formatMessage(
                     currentPasswordShown
                       ? {
-                          id: 'Auth.form.password.show-password',
-                          defaultMessage: 'Show password',
-                        }
+                        id: 'Auth.form.password.show-password',
+                        defaultMessage: 'Show password',
+                      }
                       : {
-                          id: 'Auth.form.password.hide-password',
-                          defaultMessage: 'Hide password',
-                        }
+                        id: 'Auth.form.password.hide-password',
+                        defaultMessage: 'Hide password',
+                      }
                   )}
                 >
                   {currentPasswordShown ? <Eye /> : <EyeStriked />}
@@ -385,9 +394,9 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
               error={
                 errors.password
                   ? formatMessage({
-                      id: errors.password,
-                      defaultMessage: errors.password,
-                    })
+                    id: errors.password,
+                    defaultMessage: errors.password,
+                  })
                   : ''
               }
               onChange={onChange}
@@ -408,13 +417,13 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
                   label={formatMessage(
                     passwordShown
                       ? {
-                          id: 'Auth.form.password.show-password',
-                          defaultMessage: 'Show password',
-                        }
+                        id: 'Auth.form.password.show-password',
+                        defaultMessage: 'Show password',
+                      }
                       : {
-                          id: 'Auth.form.password.hide-password',
-                          defaultMessage: 'Hide password',
-                        }
+                        id: 'Auth.form.password.hide-password',
+                        defaultMessage: 'Hide password',
+                      }
                   )}
                 >
                   {passwordShown ? <Eye /> : <EyeStriked />}
@@ -427,9 +436,9 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
               error={
                 errors.confirmPassword
                   ? formatMessage({
-                      id: errors.confirmPassword,
-                      defaultMessage: errors.confirmPassword,
-                    })
+                    id: errors.confirmPassword,
+                    defaultMessage: errors.confirmPassword,
+                  })
                   : ''
               }
               onChange={onChange}
@@ -450,13 +459,13 @@ const PasswordSection = ({ errors, onChange, values }: PasswordSectionProps) => 
                   label={formatMessage(
                     passwordConfirmShown
                       ? {
-                          id: 'Auth.form.password.show-password',
-                          defaultMessage: 'Show password',
-                        }
+                        id: 'Auth.form.password.show-password',
+                        defaultMessage: 'Show password',
+                      }
                       : {
-                          id: 'Auth.form.password.hide-password',
-                          defaultMessage: 'Hide password',
-                        }
+                        id: 'Auth.form.password.hide-password',
+                        defaultMessage: 'Hide password',
+                      }
                   )}
                 >
                   {passwordConfirmShown ? <Eye /> : <EyeStriked />}

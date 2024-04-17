@@ -20,6 +20,7 @@ import {
   useOverlayBlocker,
   translatedErrors,
   useAPIErrorHandler,
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
 import { Formik, FormikHelpers } from 'formik';
@@ -35,13 +36,14 @@ import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
 interface ModalFormProps {
-  onToggle: () => void;
+  onToggle: (type: string) => void; // Now expects an optional string argument
 }
 
 const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [currentStep, setStep] = React.useState<keyof typeof STEPPER>('create');
   const [registrationToken, setRegistrationToken] = React.useState('');
   const { formatMessage } = useIntl();
+  const { setCurrentStep } = useGuidedTour();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const {
@@ -255,7 +257,11 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                       {formatMessage(buttonSubmitLabel)}
                     </Button>
                   ) : (
-                    <Button type="button" loading={isSubmitting} onClick={onToggle}>
+                    <Button
+                      type="button"
+                      loading={isSubmitting}
+                      onClick={() => onToggle('magic-link')}
+                    >
                       {formatMessage(buttonSubmitLabel)}
                     </Button>
                   )

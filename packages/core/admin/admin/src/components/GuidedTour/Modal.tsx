@@ -17,7 +17,7 @@ import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { LAYOUT_DATA, STATES } from './constants';
+import { LAYOUT_DATA, SUPER_ADMIN_LAYOUT_DATA, STATES } from './constants';
 import { Number, VerticalDivider } from './Ornaments';
 
 /* -------------------------------------------------------------------------------------------------
@@ -30,17 +30,25 @@ const GuidedTourModal = () => {
     guidedTourState,
     setCurrentStep,
     setStepState,
-    isGuidedTourVisible,
+    guidedTourVisibility,
     setSkipped,
   } = useGuidedTour();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  if (!currentStep || !isGuidedTourVisible) {
+  if (!currentStep || !guidedTourVisibility) {
     return null;
   }
 
-  const stepData = get(LAYOUT_DATA, currentStep);
+  const layout = guidedTourVisibility === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
+  const layoutCopy = JSON.parse(JSON.stringify(layout));
+
+  // Remove the inviteUser step if we are in the development env
+  if (process.env.NODE_ENV === 'development') {
+    delete layoutCopy.inviteUser;
+  }
+
+  const stepData = get(layoutCopy, currentStep);
   const sectionKeys = Object.keys(guidedTourState);
   const [sectionName, stepName] = currentStep.split('.') as [
     keyof GuidedTourContextValue['guidedTourState'],
@@ -107,6 +115,7 @@ const GuidedTourModal = () => {
                 sectionIndex={sectionIndex}
                 stepIndex={stepIndex}
                 hasSectionAfter={hasSectionAfter}
+                stepCount={Object.keys(layoutCopy).length}
               >
                 {stepData && 'content' in stepData && <GuidedTourContent {...stepData.content} />}
               </GuidedTourStepper>
@@ -150,6 +159,7 @@ interface GuidedTourStepperProps {
   onCtaClick: () => void;
   sectionIndex: number;
   stepIndex: number;
+  stepCount: number;
   hasSectionAfter: boolean;
 }
 
@@ -160,6 +170,7 @@ const GuidedTourStepper = ({
   onCtaClick,
   sectionIndex,
   stepIndex,
+  stepCount,
   hasSectionAfter,
 }: GuidedTourStepperProps) => {
   const { formatMessage } = useIntl();
@@ -175,9 +186,10 @@ const GuidedTourStepper = ({
           {hasSectionBefore && <VerticalDivider state={STATES.IS_DONE} minHeight={pxToRem(24)} />}
         </Flex>
         <Typography variant="sigma" textColor="primary600">
+          {stepCount}
           {formatMessage({
             id: 'app.components.GuidedTour.title',
-            defaultMessage: '3 steps to get started',
+            defaultMessage: 'steps to get started',
           })}
         </Typography>
       </Flex>

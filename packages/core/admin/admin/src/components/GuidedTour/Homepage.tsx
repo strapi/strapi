@@ -5,15 +5,27 @@ import { ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
-import { LAYOUT_DATA, States, STATES } from './constants';
+import { SUPER_ADMIN_LAYOUT_DATA, LAYOUT_DATA, States, STATES } from './constants';
 import { Number, VerticalDivider } from './Ornaments';
 
-const GuidedTourHomepage = () => {
+interface GuidedTourHomepageProps {
+  visibility: string;
+}
+
+const GuidedTourHomepage = ({ visibility }: GuidedTourHomepageProps) => {
   const { guidedTourState, setSkipped } = useGuidedTour();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
-  const sections = Object.entries(LAYOUT_DATA).map(([key, val]) => ({
+  const layout = visibility === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
+  const layoutCopy = JSON.parse(JSON.stringify(layout));
+
+  // Remove the inviteUser step  if we are in the development env
+  if (process.env.NODE_ENV === 'development') {
+    delete layoutCopy.inviteUser;
+  }
+
+  const sections = Object.entries(layoutCopy).map(([key, val]) => ({
     key: key,
     title: val.home.title,
     content: (
@@ -51,9 +63,10 @@ const GuidedTourHomepage = () => {
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
         <Typography variant="beta" as="h2">
+          {Object.keys(layoutCopy).length}
           {formatMessage({
             id: 'app.components.GuidedTour.title',
-            defaultMessage: '3 steps to get started',
+            defaultMessage: 'steps to get started',
           })}
         </Typography>
         <Box>
