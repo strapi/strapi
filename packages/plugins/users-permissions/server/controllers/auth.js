@@ -218,7 +218,7 @@ module.exports = {
 
         grantConfig[provider].callback = customCallback;
       } catch (e) {
-        strapi.log.warn(e.message);
+        throw new ValidationError('Invalid callback URL provided', { callback: customCallback });
       }
     }
 

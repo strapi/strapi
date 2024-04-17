@@ -20,8 +20,16 @@ module.exports = {
     },
     callback: {
       validate(callback, provider) {
-        const uCallback = new URL(callback);
-        const uProviderCallback = new URL(provider.callback);
+        let uCallback;
+        let uProviderCallback;
+
+        try {
+          uCallback = new URL(callback);
+          uProviderCallback = new URL(provider.callback);
+        } catch {
+          throw new Error('The callback is not a valid URL')
+        }
+
 
         // Make sure the different origin matches
         if(uCallback.origin !== uProviderCallback.origin)  {
