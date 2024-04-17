@@ -127,7 +127,7 @@ We use low level types to define our index (`Internal`/`Struct`) to keep it as g
 
 ###### UID.ContentType
 
-To define `UID.ContentType`, we extract every key (`Internal.Registry.Keys`) from the public content-type registry (`Public.ContentTypeSchemas`) that match with the base definition of a content-type UID (`Internal.UID.ContentType`).
+To define `UID.ContentType`, we extract every key (`Internal.Registry.Keys`) from the public content-type registry (`Public.ContentTypeSchemas`) that matches with the base definition of a content-type UID (`Internal.UID.ContentType`).
 
 ```ts title="@strapi/types/uid.ts"
 import type { Internal, Public } from '@strapi/types'
