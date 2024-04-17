@@ -100,7 +100,7 @@ const action = (ctx: CLIContext) => async () => {
     return;
   }
 
-  let { project } = localSave.retrieve();
+  let project: ProjectInfos | null | undefined = localSave.retrieve()?.project;
 
   if (!project) {
     project = await createProjectAction(ctx);

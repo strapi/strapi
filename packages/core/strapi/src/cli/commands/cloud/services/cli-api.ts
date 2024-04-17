@@ -9,8 +9,6 @@ export type ProjectInfos = {
   nodeVersion: '18' | '20';
   region: 'AMS' | 'NYC';
   planPriceId?: string;
-  deploymentId: string;
-  trackingId: string;
   url?: string;
 };
 export type ProjectInput = Omit<ProjectInfos, 'id'>;
