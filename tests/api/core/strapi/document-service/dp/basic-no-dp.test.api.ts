@@ -1,22 +1,5 @@
 import type { Core, UID } from '@strapi/types';
-import { testInTransaction as wrapInTransaction } from '../../../../utils';
-
-// Wrap "it" with a transaction
-const testInTransaction = (...args: Parameters<jest.It>) => {
-  if (args.length > 1) {
-    return it(
-      args[0], // name
-      wrapInTransaction(args[1]), // fn
-      args[2] // timeout
-    );
-  }
-  return it(...args);
-};
-
-testInTransaction.skip = it.skip as jest.It['skip'];
-testInTransaction.only = it.only as jest.It['only'];
-testInTransaction.todo = it.todo as jest.It['todo'];
-testInTransaction.each = it.each as jest.It['each'];
+import { testInTransaction } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');

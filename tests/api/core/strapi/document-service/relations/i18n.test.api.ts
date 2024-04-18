@@ -10,7 +10,6 @@ import { testInTransaction } from '../../../../utils';
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
-const modelsUtils = require('api-tests/models');
 
 let strapi: Core.Strapi;
 const builder = createTestBuilder();
@@ -146,125 +145,110 @@ describe('Document Service relations', () => {
 
   describe('Non i18n Content Type (Shop) -> i18n Content Type (Product)', () => {
     describe('X to One', () => {
-      it.skip(
-        'Can connect multiple product locales to the same shop',
-        testInTransaction(async () => {
-          const document = await strapi.documents(SHOP_UID).create({
-            // If we can connect multiple locales, should we allow an array of relations to connect on xToOne relations?
+      testInTransaction.skip('Can connect multiple product locales to the same shop', async () => {
+        const document = await strapi.documents(SHOP_UID).create({
+          // If we can connect multiple locales, should we allow an array of relations to connect on xToOne relations?
+          data: {
+            // Can connect same document with different locales, but not other documents
+            products_oo: [
+              // TODO: Prevent connecting other documents if this is an array?
+              { documentId: 'Skate', locale: 'en' },
+              { documentId: 'Skate', locale: 'es' },
+            ],
+            // Can connect same document with different locales, but not other documents
+            products_mo: [
+              { documentId: 'Skate', locale: 'en' },
+              { documentId: 'Skate', locale: 'es' },
+            ],
+          },
+          populate: {
+            products_oo: true,
+            products_mo: true,
+          },
+        });
+
+        expect(document).toMatchObject({
+          name: 'test',
+          // The response of oo is normally an array, how do we prevent this?
+          products_oo: [{ name: 'Skate-En' }, { name: 'Skate-Es' }],
+          products_mo: [{ name: 'Skate-En' }, { name: 'Skate-Es' }],
+        });
+      });
+
+      testInTransaction.skip('Connecting multiple documents should throw an error', async () => {
+        expect(
+          strapi.documents(SHOP_UID).create({
             data: {
-              // Can connect same document with different locales, but not other documents
               products_oo: [
-                // TODO: Prevent connecting other documents if this is an array?
-                { documentId: 'Skate', locale: 'en' },
-                { documentId: 'Skate', locale: 'es' },
-              ],
-              // Can connect same document with different locales, but not other documents
-              products_mo: [
-                { documentId: 'Skate', locale: 'en' },
-                { documentId: 'Skate', locale: 'es' },
-              ],
-            },
-            populate: {
-              products_oo: true,
-              products_mo: true,
-            },
-          });
-
-          expect(document).toMatchObject({
-            name: 'test',
-            // The response of oo is normally an array, how do we prevent this?
-            products_oo: [{ name: 'Skate-En' }, { name: 'Skate-Es' }],
-            products_mo: [{ name: 'Skate-En' }, { name: 'Skate-Es' }],
-          });
-        })
-      );
-
-      it.skip(
-        'Connecting multiple documents should throw an error',
-        testInTransaction(async () => {
-          expect(
-            strapi.documents(SHOP_UID).create({
-              data: {
-                products_oo: [
-                  { documentId: 'Skate', locale: 'en' },
-                  { documentId: 'Candle', locale: 'en' },
-                ],
-              },
-            })
-          ).rejects.toThrowError('Only one document can be connected to a one to one relation');
-        })
-      );
-    });
-
-    describe('X to Many', () => {
-      it(
-        'Can connect to single locale',
-        testInTransaction(async () => {
-          const document = await strapi.documents(SHOP_UID).create({
-            data: {
-              name: 'test',
-              products_mm: [
                 { documentId: 'Skate', locale: 'en' },
                 { documentId: 'Candle', locale: 'en' },
               ],
             },
-            populate: {
-              products_mm: true,
-            },
-          });
+          })
+        ).rejects.toThrowError('Only one document can be connected to a one to one relation');
+      });
+    });
 
-          expect(document).toMatchObject({
+    describe('X to Many', () => {
+      testInTransaction('Can connect to single locale', async () => {
+        const document = await strapi.documents(SHOP_UID).create({
+          data: {
             name: 'test',
-            products_mm: [{ name: 'Skate-En' }, { name: 'Candle-En' }],
-          });
-        })
-      );
+            products_mm: [
+              { documentId: 'Skate', locale: 'en' },
+              { documentId: 'Candle', locale: 'en' },
+            ],
+          },
+          populate: {
+            products_mm: true,
+          },
+        });
 
-      it(
-        'Can connect to multiple locales',
-        testInTransaction(async () => {
-          const document = await strapi.documents(SHOP_UID).create({
-            data: {
-              name: 'test',
-              products_mm: [
-                { documentId: 'Skate', locale: 'en' },
-                { documentId: 'Skate', locale: 'es' },
-              ],
-            },
-            populate: {
-              products_mm: true,
-            },
-          });
+        expect(document).toMatchObject({
+          name: 'test',
+          products_mm: [{ name: 'Skate-En' }, { name: 'Candle-En' }],
+        });
+      });
 
-          expect(document).toMatchObject({
+      testInTransaction('Can connect to multiple locales', async () => {
+        const document = await strapi.documents(SHOP_UID).create({
+          data: {
             name: 'test',
-            products_mm: [{ name: 'Skate-En' }, { name: 'Skate-Es' }],
-          });
-        })
-      );
+            products_mm: [
+              { documentId: 'Skate', locale: 'en' },
+              { documentId: 'Skate', locale: 'es' },
+            ],
+          },
+          populate: {
+            products_mm: true,
+          },
+        });
+
+        expect(document).toMatchObject({
+          name: 'test',
+          products_mm: [{ name: 'Skate-En' }, { name: 'Skate-Es' }],
+        });
+      });
     });
   });
 
   describe('i18n Content Type (Product) -> Non i18n Content Type (Tag)', () => {
-    it(
-      'Can create a document with relations',
-      testInTransaction(async () => {
-        const document = await strapi.documents(PRODUCT_UID).create({
-          data: {
-            name: 'Skate',
-            tag: { documentId: 'Tag1', locale: null },
-          },
-          populate: {
-            tag: true,
-          },
-          locale: 'en',
-        });
-
-        expect(document).toMatchObject({
+    testInTransaction('Can create a document with relations', async () => {
+      const document = await strapi.documents(PRODUCT_UID).create({
+        data: {
           name: 'Skate',
-          tag: { name: 'Tag1' },
-        });
-      })
-    );
+          tag: { documentId: 'Tag1', locale: null },
+        },
+        populate: {
+          tag: true,
+        },
+        locale: 'en',
+      });
+
+      expect(document).toMatchObject({
+        name: 'Skate',
+        tag: { name: 'Tag1' },
+      });
+    });
   });
 });
