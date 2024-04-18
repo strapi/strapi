@@ -29,8 +29,8 @@ module.exports = ({ strapi }) => ({
 
   /**
    * Hashes password fields in the provided values object if they are present.
-   * It checks each key in the values object against the model's attributes. If the attribute type is 'password',
-   * it hashes the corresponding value using the hashPassword function.
+   * It checks each key in the values object against the model's attributes and
+   * hashes it if the attribute type is 'password',
    *
    * @param {object} values - The object containing the fields to be hashed.
    * @return {object} The values object with hashed password fields if they were present.
