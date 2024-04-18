@@ -54,7 +54,7 @@ const localeToData: Transform = (contentType, params) => {
     return params;
   }
 
-  if (params.locale && typeof params.locale === 'string') {
+  if (params.locale && typeof params.locale === 'string' && params.locale !== '*') {
     return assoc(['data', 'locale'], params.locale, params);
   }
 
