@@ -28,17 +28,21 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * Hash password fields in values if present
-   * TODO: Remove this and replace db calls with docservice once it supports targeting entityId
+   * Hashes password fields in the provided values object if they are present.
+   * It checks each key in the values object against the model's attributes. If the attribute type is 'password',
+   * it hashes the corresponding value using the hashPassword function.
    *
-   * @return {object} values with hashed password fields if properties are present
+   * @param {object} values - The object containing the fields to be hashed.
+   * @return {object} The values object with hashed password fields if they were present.
    */
   ensureHashedPasswords(values) {
     const attributes = strapi.getModel(USER_MODEL_UID).attributes;
 
     for (const key in values) {
       if (attributes[key] && attributes[key].type === 'password') {
-        values[key] = this.hashPassword(values[key]);
+        // Check if a custom encryption.rounds has been set on the password attribute
+        const rounds = toNumber(getOr(10, 'encryption.rounds', attributes[key]));
+        values[key] = this.hashPassword(values[key], rounds);
       }
     }
 
@@ -46,23 +50,16 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * Hash a given password using bcrypt.
+   * Hashes a given password using bcrypt.
    *
-   * The number of rounds used for the bcrypt algorithm is either the value set in the password attribute's
-   * encryption.rounds property, or 10 if no custom value has been set.
+   * The number of rounds used for the bcrypt algorithm is either the value provided in the rounds parameter,
+   * or 10 if no custom value has been set.
    *
    * @param {string} password - The password to hash.
+   * @param {number} rounds - The number of rounds to use in the bcrypt algorithm.
    * @return {string} The hashed password.
    */
-  hashPassword(password) {
-    const passwordAttribute = strapi.getModel(USER_MODEL_UID).attributes.password;
-
-    // Check if a custom encryption.rounds has been set on the password attribute
-    const rounds = toNumber(
-      getOr(10, 'encryption.rounds', {
-        passwordAttribute,
-      })
-    );
+  hashPassword(password, rounds) {
     return bcrypt.hashSync(password, rounds);
   },
 
