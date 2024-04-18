@@ -17,6 +17,7 @@ import {
   useDiscardDocumentMutation,
   useLazyGetDocumentQuery,
   usePublishDocumentMutation,
+  usePublishManyDocumentsMutation,
   useUnpublishDocumentMutation,
   useUpdateDocumentMutation,
 } from '../services/documents';
@@ -34,6 +35,7 @@ import type {
   Publish,
   Update,
   Unpublish,
+  BulkPublish,
 } from '../../../shared/contracts/collection-types';
 
 const DEFAULT_UNEXPECTED_ERROR_MSG = {
@@ -41,7 +43,8 @@ const DEFAULT_UNEXPECTED_ERROR_MSG = {
   defaultMessage: 'An error occurred, please try again',
 } satisfies MessageDescriptor;
 
-type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> =
+type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }> =
+  | Pick<TResponse, 'data'>
   | Pick<TResponse, 'data' | 'meta'>
   | { error: BaseQueryError | SerializedError };
 
@@ -111,6 +114,11 @@ type UseDocumentActions = () => {
     },
     document: Partial<Document>
   ) => Promise<OperationResponse<Publish.Response>>;
+  bulkPublish: (args: {
+    model: string;
+    documentIds: string[];
+    params: object;
+  }) => Promise<OperationResponse<BulkPublish.Response>>;
   update: (
     args: {
       collectionType: string;
@@ -293,6 +301,51 @@ const useDocumentActions: UseDocumentActions = () => {
       }
     },
     [trackUsage, publishDocument, toggleNotification, formatMessage, formatAPIError]
+  );
+
+  const [publishManyDocuments] = usePublishManyDocumentsMutation();
+  const bulkPublish: IUseDocumentActs['bulkPublish'] = React.useCallback(
+    async ({ model, documentIds, params }) => {
+      try {
+        // TODO __** tracking events for bulk publish?
+        // trackUsage('willPublishEntry');
+
+        const res = await publishManyDocuments({
+          model,
+          documentIds,
+          params,
+        });
+        if ('error' in res) {
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
+          return { error: res.error };
+        }
+
+        // trackUsage('didPublishEntry');
+
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: getTranslation('success.record.publish'),
+            defaultMessage: 'Published document',
+          }),
+        });
+
+        return res.data;
+      } catch (err) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
+        });
+        throw err;
+      }
+    },
+    [
+      // trackUsage,
+      publishManyDocuments,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+    ]
   );
 
   const [updateDocument] = useUpdateDocumentMutation();
@@ -533,6 +586,7 @@ const useDocumentActions: UseDocumentActions = () => {
     discard,
     getDocument,
     publish,
+    bulkPublish,
     unpublish,
     update,
   } satisfies IUseDocumentActs;

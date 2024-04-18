@@ -10,6 +10,9 @@ import { type MessageDescriptor, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
+import { useGetLocalesQuery } from '../services/locales';
+import { getTranslation } from '../utils/getTranslation';
+
 type status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 
 type Row = {
@@ -61,8 +64,7 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
         <Icon color="success600" as={CheckCircle} />
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
-            // id: 'content-manager.bulk-publish.already-published',
-            id: 'TODO translation',
+            id: 'content-manager.bulk-publish.already-published',
             defaultMessage: 'Already Published',
           })}
         </Typography>
@@ -76,8 +78,7 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
         <Icon color="alternative600" as={Rotate} />
         <Typography>
           {formatMessage({
-            // id: 'app.utils.ready-to-publish',
-            id: 'TODO translation',
+            id: 'app.utils.ready-to-publish-changes',
             defaultMessage: 'Ready to publish changes',
           })}
         </Typography>
@@ -90,8 +91,7 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
       <Icon color="success600" as={CheckCircle} />
       <Typography>
         {formatMessage({
-          // id: 'app.utils.ready-to-publish',
-          id: 'TODO translation',
+          id: 'app.utils.ready-to-publish',
           defaultMessage: 'Ready to publish',
         })}
       </Typography>
@@ -125,23 +125,17 @@ const BulkLocaleActionModal = ({
 }: BulkLocaleActionModalProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
+  const { data: locales = [] } = useGetLocalesQuery();
 
   const [{ query }] = useQueryParams();
 
-  // @ts-expect-error TODO: fix this
+  // @ts-expect-error .plugins is not part of query
   const currentLocale = query?.plugins?.i18n?.locale as string;
 
   const selectedRows: Row[] = useTable(
     'BulkLocaleActionModal',
     (state: { selectedRows: Row[] }) => state.selectedRows
   );
-
-  // Do we need this?
-  // const selectedLocales = selectedRows.map(({ locale }) => locale);
-
-  // const localesToPublish = rows
-  //   .filter(({ locale }) => selectedLocales.includes(locale) && !validationErrors[locale])
-  //   .map(({ locale }) => locale);
 
   const getFormattedCountMessage = () => {
     const alreadyPublishedCount = selectedRows.filter(
@@ -150,6 +144,7 @@ const BulkLocaleActionModal = ({
     const readyToPublishCount = selectedRows.filter(
       ({ status }) => status === 'draft' || status === 'modified'
     ).length;
+    //TODO __**
     // if (publishedCount) {
     //   return formatMessage(
     //     {
@@ -167,7 +162,7 @@ const BulkLocaleActionModal = ({
 
     return formatMessage(
       {
-        id: 'TODO translation id',
+        id: 'content-manager.containers.list.selectedEntriesModal.selectedCount',
         defaultMessage:
           '<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
       },
@@ -204,34 +199,23 @@ const BulkLocaleActionModal = ({
                 <Table.CheckboxCell id={locale} aria-label={`Select ${locale}`} />
                 <Table.Cell>
                   <Typography variant="sigma" textColor="neutral600">
-                    {/* TODO get locale name */}
-                    {locale}
+                    {Array.isArray(locales)
+                      ? locales.find((localeEntry) => localeEntry.code === locale)?.name
+                      : locale}
                   </Typography>
                 </Table.Cell>
                 <Table.Cell>
-                  {/* TODO fix styling */}
-                  <DocumentStatus status={status} />
+                  <Box display="flex">
+                    <DocumentStatus status={status} />
+                  </Box>
                 </Table.Cell>
                 <Table.Cell>
-                  {/* TODO condition for loader */}
-                  {/* {isPublishing && entriesToPublish.includes(row.id) ? ( */}
-                  {false ? null : (
-                    // <Flex gap={2}>
-                    //   <Typography>
-                    //     {formatMessage({
-                    //       id: 'content-manager.success.record.publishing',
-                    //       defaultMessage: 'Publishing...',
-                    //     })}
-                    //   </Typography>
-                    //   <Loader small />
-                    // </Flex>
-                    <EntryValidationText
-                      // TODO validation errors
-                      // validationErrors={validationErrors[row.id]}
-                      validationErrors={undefined}
-                      status={status}
-                    />
-                  )}
+                  <EntryValidationText
+                    // TODO __** reflect validation errors in status
+                    // validationErrors={validationErrors[row.id]}
+                    validationErrors={undefined}
+                    status={status}
+                  />
                 </Table.Cell>
                 {locale !== currentLocale && (
                   <Table.Cell>
@@ -241,11 +225,11 @@ const BulkLocaleActionModal = ({
                       }}
                       label={formatMessage(
                         {
-                          id: 'TODO translation id',
-                          defaultMessage: 'Edit {locale}',
+                          id: getTranslation('Settings.list.actions.edit'),
+                          defaultMessage: 'Edit {name} locale',
                         },
                         {
-                          locale,
+                          name: locale,
                         }
                       )}
                       icon={<Pencil />}
