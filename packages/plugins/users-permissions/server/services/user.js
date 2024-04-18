@@ -28,14 +28,18 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * Hash password in values if present
+   * Hash password fields in values if present
    * TODO: Remove this and replace db calls with docservice once it supports targeting entityId
    *
-   * @return {object} values with a hashed password if property is present
+   * @return {object} values with hashed password fields if properties are present
    */
-  ensureHashedPassword(values) {
-    if ('password' in values) {
-      values.password = this.hashPassword(values.password);
+  ensureHashedPasswords(values) {
+    const attributes = strapi.getModel(USER_MODEL_UID).attributes;
+
+    for (const key in values) {
+      if (attributes[key] && attributes[key].type === 'password') {
+        values[key] = this.hashPassword(values[key]);
+      }
     }
 
     return values;
@@ -68,7 +72,7 @@ module.exports = ({ strapi }) => ({
    */
   async add(values) {
     return strapi.db.query(USER_MODEL_UID).create({
-      data: await this.ensureHashedPassword(values),
+      data: await this.ensureHashedPasswords(values),
       populate: ['role'],
     });
   },
@@ -82,7 +86,7 @@ module.exports = ({ strapi }) => ({
   async edit(userId, params = {}) {
     return strapi.db.query(USER_MODEL_UID).update({
       where: { id: userId },
-      data: await this.ensureHashedPassword(params),
+      data: await this.ensureHashedPasswords(params),
       populate: ['role'],
     });
   },
