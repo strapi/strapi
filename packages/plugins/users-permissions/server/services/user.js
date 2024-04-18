@@ -35,32 +35,18 @@ module.exports = ({ strapi }) => ({
    * @param {object} values - The object containing the fields to be hashed.
    * @return {object} The values object with hashed password fields if they were present.
    */
-  ensureHashedPasswords(values) {
+  async ensureHashedPasswords(values) {
     const attributes = strapi.getModel(USER_MODEL_UID).attributes;
 
     for (const key in values) {
       if (attributes[key] && attributes[key].type === 'password') {
         // Check if a custom encryption.rounds has been set on the password attribute
         const rounds = toNumber(getOr(10, 'encryption.rounds', attributes[key]));
-        values[key] = this.hashPassword(values[key], rounds);
+        values[key] = await bcrypt.hash(values[key], rounds);
       }
     }
 
     return values;
-  },
-
-  /**
-   * Hashes a given password using bcrypt.
-   *
-   * The number of rounds used for the bcrypt algorithm is either the value provided in the rounds parameter,
-   * or 10 if no custom value has been set.
-   *
-   * @param {string} password - The password to hash.
-   * @param {number} rounds - The number of rounds to use in the bcrypt algorithm.
-   * @return {string} The hashed password.
-   */
-  hashPassword(password, rounds) {
-    return bcrypt.hashSync(password, rounds);
   },
 
   /**
