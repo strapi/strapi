@@ -59,7 +59,7 @@ export function normalizeAPIError(
   | NormalizeErrorReturn
   | { name: string; message: string | null; errors: NormalizeErrorReturn[] }
   | null {
-  const error = apiError.response?.error;
+  const error = apiError.response?.data?.error || apiError.response?.error;
 
   if (error) {
     // some errors carry multiple errors (such as ValidationError)

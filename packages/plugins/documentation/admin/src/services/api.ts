@@ -10,20 +10,18 @@ type SettingsInput = {
 
 const api = createApi({
   reducerPath: 'plugin::documentation',
-  baseQuery: baseQuery({
-    baseURL: '/documentation',
-  }),
+  baseQuery: baseQuery(),
   tagTypes: ['DocumentInfos'],
   endpoints: (builder) => {
     return {
       getInfos: builder.query<DocumentInfos, void>({
-        query: () => '/getInfos',
+        query: () => '/documentation/getInfos',
         providesTags: ['DocumentInfos'],
       }),
 
       deleteVersion: builder.mutation<void, { version: string }>({
         query: ({ version }) => ({
-          url: `/deleteDoc/${version}`,
+          url: `/documentation/deleteDoc/${version}`,
           method: 'DELETE',
         }),
         invalidatesTags: ['DocumentInfos'],
@@ -31,7 +29,7 @@ const api = createApi({
 
       updateSettings: builder.mutation<void, { body: SettingsInput }>({
         query: ({ body }) => ({
-          url: `/updateSettings`,
+          url: `/documentation/updateSettings`,
           method: 'PUT',
           data: body,
         }),
@@ -40,7 +38,7 @@ const api = createApi({
 
       regenerateDoc: builder.mutation<void, { version: string }>({
         query: ({ version }) => ({
-          url: `/regenerateDoc`,
+          url: `/documentation/regenerateDoc`,
           method: 'POST',
           data: { version },
         }),

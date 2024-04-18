@@ -5,7 +5,6 @@ import {
   isFetchError,
   type ApiError,
   type FetchOptions,
-  type FetchConfig,
 } from '@strapi/strapi/admin';
 
 export interface QueryArguments {
@@ -25,10 +24,10 @@ export interface UnknownApiError {
 export type BaseQueryError = ApiError | UnknownApiError;
 
 const baseQuery =
-  (config: FetchConfig): BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> =>
+  (): BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> =>
   async (query, { signal }) => {
     try {
-      const { get, post, del, put } = getFetchClient(config);
+      const { get, post, del, put } = getFetchClient();
 
       if (typeof query === 'string') {
         const result = await get(query, { signal });

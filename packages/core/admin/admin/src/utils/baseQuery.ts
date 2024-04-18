@@ -1,13 +1,18 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
-import { getFetchClient, isFetchError, type FetchOptions } from '../utils/getFetchClient';
+import {
+  getFetchClient,
+  isFetchError,
+  type FetchOptions,
+  type Method,
+} from '../utils/getFetchClient';
 
 import type { ApiError } from '../hooks/useAPIErrorHandler';
 
 export interface QueryArguments {
   url: string;
-  method?: string;
+  method?: Method;
   data?: unknown;
   config?: FetchOptions;
 }

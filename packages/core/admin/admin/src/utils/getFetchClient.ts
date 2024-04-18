@@ -1,3 +1,4 @@
+import pipe from 'lodash/fp/pipe';
 import qs from 'qs';
 
 import type { ApiError } from '../hooks/useAPIErrorHandler';
@@ -10,6 +11,8 @@ const STORAGE_KEYS = {
 type FetchParams = Parameters<typeof fetch>;
 type FetchURL = FetchParams[0];
 
+export type Method = 'GET' | 'POST' | 'DELETE' | 'PUT';
+
 export type FetchResponse<TData = unknown> = {
   data: TData;
 };
@@ -21,7 +24,6 @@ export type FetchOptions = {
 };
 
 export type FetchConfig = {
-  baseURL?: string;
   signal?: AbortSignal;
 };
 
@@ -61,33 +63,19 @@ const getToken = () =>
     localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN) ?? '""'
   );
 
-const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
-
-// This regular expression matches a string that starts with either "http://" or "https://" or any other protocol name in lower case letters, followed by "://" and ends with anything else
-const hasProtocol = (url: string) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(url);
-
-// Check if the url has a prepending slash, if not add a slash
-const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
-
 type FetchClient = {
-  get: <TData = unknown, R = FetchResponse<TData>>(
-    url: string,
-    config?: FetchOptions
-  ) => Promise<R>;
-  put: <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
+  get: <TData = any>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
+  put: <TData = any, TSend = any>(
     url: string,
     data?: TSend,
     config?: FetchOptions
-  ) => Promise<R>;
-  post: <TData = unknown, R = FetchResponse<TData>, TSend = unknown>(
+  ) => Promise<FetchResponse<TData>>;
+  post: <TData = any, TSend = any>(
     url: string,
     data?: TSend,
     config?: FetchOptions
-  ) => Promise<R>;
-  del: <TData = unknown, R = FetchResponse<TData>>(
-    url: string,
-    config?: FetchOptions
-  ) => Promise<R>;
+  ) => Promise<FetchResponse<TData>>;
+  del: <TData = any>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
 };
 
 /**
@@ -111,7 +99,6 @@ type FetchClient = {
  * ```
  */
 const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
-  const baseURL = defaultOptions.baseURL;
   const backendURL = window.strapi.backendURL;
   const headers = new Headers({
     Accept: 'application/json',
@@ -119,93 +106,115 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     Authorization: `Bearer ${getToken()}`,
   });
 
+  const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
+
+  // This regular expression matches a string that starts with either "http://" or "https://" or any other protocol name in lower case letters, followed by "://" and ends with anything else
+  const hasProtocol = (url: string) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(url);
+
+  // Check if the url has a prepending slash, if not add a slash
+  const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
+
   // Add a response interceptor to return the response
-  const responseInterceptor = async <TData = unknown>(
-    response: Response
-  ): Promise<FetchResponse<TData>> => {
-    const result = await response.json();
-    if (result.error) {
-      throw new FetchError(result.error.message, result);
+  const responseInterceptor = async <TData>(response: Response): Promise<FetchResponse<TData>> => {
+    try {
+      console.log('response ===> ', response);
+      const result = await response.json();
+      console.log('result ===>', result);
+      if (!response.ok && result.error) {
+        throw new FetchError(result.error.message, { data: result } as any);
+      }
+      if (!response.ok) {
+        throw new FetchError('Unknown Server Error');
+      }
+      return {
+        data: result,
+      };
+    } catch (error) {
+      if (error instanceof SyntaxError && response.ok) {
+        // You can assign a default value to result or handle the error in another way
+        return { data: [], status: response.status };
+      } else {
+        throw error;
+      }
     }
-    return {
-      data: result,
-    };
   };
 
-  const paramsSerializer = <Param = unknown>(url: string, params?: Param) => {
-    if (params) {
-      const serializedParams = qs.stringify(params, { encode: false });
-      return `${url}?${serializedParams}`;
-    }
-    return url;
-  };
+  const paramsSerializer =
+    <Param = unknown>(params?: Param) =>
+    (url: string) => {
+      if (params) {
+        const serializedParams = qs.stringify(params, { encode: false });
+        return `${url}?${serializedParams}`;
+      }
+      return url;
+    };
 
   const addBaseUrl = (url: FetchURL) => {
-    if (baseURL) {
-      return `${backendURL}${baseURL}${url}`;
-    }
     return `${backendURL}${url}`;
   };
 
+  /**
+   * We use the factory method because the options
+   * are unique to the individual request
+   */
+  const makeCreateRequestUrl = (options?: FetchOptions) =>
+    pipe(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
+
   const fetchClient: FetchClient = {
-    get: async <TData, R = FetchResponse<TData>>(
-      url: string,
-      options?: FetchOptions
-    ): Promise<R> => {
-      const response = await fetch(
-        paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
-        {
-          signal: options?.signal ?? defaultOptions.signal,
-          method: 'GET',
-          headers,
-        }
-      );
-      return responseInterceptor<TData>(response) as Promise<R>;
+    get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
+      /**
+       * this applies all our transformations to the URL
+       * - normalizing (making sure it has the correct slash)
+       * - appending our BaseURL which comes from the window.strapi object
+       * - serializing our params with QS
+       */
+      const createRequestUrl = makeCreateRequestUrl(options);
+      const response = await fetch(createRequestUrl(url), {
+        signal: options?.signal ?? defaultOptions.signal,
+        method: 'GET',
+        headers,
+      });
+      return responseInterceptor<TData>(response);
     },
-    post: async <TData, R = FetchResponse<TData>, TSend = unknown>(
+    post: async <TData, TSend = unknown>(
       url: string,
       data?: TSend,
       options?: FetchOptions
-    ): Promise<R> => {
-      const response = await fetch(
-        paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
-        {
-          signal: options?.signal ?? defaultOptions.signal,
-          method: 'POST',
-          headers,
-          body: JSON.stringify(data),
-        }
-      );
-      return responseInterceptor<TData>(response) as Promise<R>;
+    ): Promise<FetchResponse<TData>> => {
+      const createRequestUrl = makeCreateRequestUrl(options);
+      const response = await fetch(createRequestUrl(url), {
+        signal: options?.signal ?? defaultOptions.signal,
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data),
+      });
+      return responseInterceptor<TData>(response);
     },
-    put: async <TData, R = FetchResponse<TData>, TSend = unknown>(
+    put: async <TData, TSend = unknown>(
       url: string,
       data?: TSend,
       options?: FetchOptions
-    ): Promise<R> => {
-      const response = await fetch(
-        paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
-        {
-          signal: options?.signal ?? defaultOptions.signal,
-          method: 'PUT',
-          headers,
-          body: JSON.stringify(data),
-        }
-      );
-      return responseInterceptor<TData>(response) as Promise<R>;
+    ): Promise<FetchResponse<TData>> => {
+      const createRequestUrl = makeCreateRequestUrl(options);
+      const response = await fetch(createRequestUrl(url), {
+        signal: options?.signal ?? defaultOptions.signal,
+        method: 'PUT',
+        headers,
+        body: JSON.stringify(data),
+      });
+
+      return responseInterceptor<TData>(response);
     },
     del: async <TData, R = FetchResponse<TData>>(
       url: string,
       options?: FetchOptions
     ): Promise<R> => {
-      const response = await fetch(
-        paramsSerializer(addBaseUrl(normalizeUrl(url)), options?.params),
-        {
-          signal: options?.signal ?? defaultOptions.signal,
-          method: 'DELETE',
-          headers,
-        }
-      );
+      const createRequestUrl = makeCreateRequestUrl(options);
+      const response = await fetch(createRequestUrl(url), {
+        signal: options?.signal ?? defaultOptions.signal,
+        method: 'DELETE',
+        headers,
+      });
       return responseInterceptor<TData>(response) as Promise<R>;
     },
   };
