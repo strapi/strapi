@@ -27,7 +27,6 @@ const validateUpdateStageOnEntitySchema = yup
   .required();
 
 const validateContentTypes = yup.array().of(
-  // @ts-expect-error yup types
   yup
     .string()
     .test({
@@ -36,7 +35,7 @@ const validateContentTypes = yup.array().of(
       test(uid: any) {
         // Warning; we use the strapi global - to avoid that, it would need to refactor how
         // we generate validation function by using a factory with the strapi instance as parameter.
-        return strapi.getModel(uid);
+        return !!strapi.getModel(uid);
       },
     })
     .test({

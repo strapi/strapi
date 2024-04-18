@@ -36,7 +36,7 @@ const constants = {
 };
 
 const getTimestamps = (model: Model) => {
-  const attributes = [];
+  const attributes: string[] = [];
 
   if (has(CREATED_AT_ATTRIBUTE, model.attributes)) {
     attributes.push(CREATED_AT_ATTRIBUTE);
@@ -50,7 +50,7 @@ const getTimestamps = (model: Model) => {
 };
 
 const getCreatorFields = (model: Model) => {
-  const attributes = [];
+  const attributes: string[] = [];
 
   if (has(CREATED_BY_ATTRIBUTE, model.attributes)) {
     attributes.push(CREATED_BY_ATTRIBUTE);

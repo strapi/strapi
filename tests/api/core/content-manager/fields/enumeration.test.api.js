@@ -43,7 +43,7 @@ describe('Test type enumeration', () => {
       }
     );
 
-    expect(res.statusCode).toBe(200); // should return 201
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: 'one',
     });
@@ -98,7 +98,7 @@ describe('Test type enumeration', () => {
       }
     );
 
-    expect(res.statusCode).toBe(200); // should return 201
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: null,
     });

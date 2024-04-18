@@ -51,11 +51,11 @@
   },
   "dependencies": {
     "@sentry/node": "6.19.7",
-    "@strapi/design-system": "1.17.0",
-    "@strapi/icons": "1.16.0"
+    "@strapi/design-system": "1.18.0",
+    "@strapi/icons": "1.18.0"
   },
   "devDependencies": {
-    "@strapi/pack-up": "5.0.0-beta.3",
+    "@strapi/pack-up": "5.0.0",
     "@strapi/strapi": "5.0.0-beta.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

@@ -48,7 +48,7 @@ describe('Upload', () => {
         formData: { files: fs.createReadStream(path.join(__dirname, '../utils/rec.jpg')) },
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
     });
   });
 

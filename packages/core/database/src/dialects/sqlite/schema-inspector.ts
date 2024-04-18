@@ -155,7 +155,7 @@ export default class SqliteSchemaInspector implements SchemaInspector {
   async getIndexes(tableName: string): Promise<Index[]> {
     const indexes = await this.db.connection.raw<RawIndex[]>(SQL_QUERIES.INDEX_LIST, [tableName]);
 
-    const ret = [];
+    const ret: Index[] = [];
 
     for (const index of indexes.filter((index) => !index.name.startsWith('sqlite_'))) {
       const res = await this.db.connection.raw<RawIndexInfo[]>(SQL_QUERIES.INDEX_INFO, [
