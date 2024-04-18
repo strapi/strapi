@@ -11,6 +11,7 @@ const bcrypt = require('bcryptjs');
 const urlJoin = require('url-join');
 
 const { sanitize } = require('@strapi/utils');
+const { toNumber, getOr } = require('lodash/fp');
 const { getService } = require('../utils');
 
 const USER_MODEL_UID = 'plugin::users-permissions.user';
@@ -27,10 +28,39 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * Promise to search count users
+   * Hash password in values if present
+   * TODO: Remove this and replace db calls with docservice once it supports targeting entityId
    *
-   * @return {Promise}
+   * @return {object} values with a hashed password if property is present
    */
+  ensureHashedPassword(values) {
+    if ('password' in values) {
+      values.password = this.hashPassword(values.password);
+    }
+
+    return values;
+  },
+
+  /**
+   * Hash a given password using bcrypt.
+   *
+   * The number of rounds used for the bcrypt algorithm is either the value set in the password attribute's
+   * encryption.rounds property, or 10 if no custom value has been set.
+   *
+   * @param {string} password - The password to hash.
+   * @return {string} The hashed password.
+   */
+  hashPassword(password) {
+    const passwordAttribute = strapi.getModel(USER_MODEL_UID).attributes.password;
+
+    // Check if a custom encryption.rounds has been set on the password attribute
+    const rounds = toNumber(
+      getOr(10, 'encryption.rounds', {
+        passwordAttribute,
+      })
+    );
+    return bcrypt.hashSync(password, rounds);
+  },
 
   /**
    * Promise to add a/an user.
@@ -38,7 +68,7 @@ module.exports = ({ strapi }) => ({
    */
   async add(values) {
     return strapi.db.query(USER_MODEL_UID).create({
-      data: values,
+      data: await this.ensureHashedPassword(values),
       populate: ['role'],
     });
   },
@@ -52,7 +82,7 @@ module.exports = ({ strapi }) => ({
   async edit(userId, params = {}) {
     return strapi.db.query(USER_MODEL_UID).update({
       where: { id: userId },
-      data: params,
+      data: await this.ensureHashedPassword(params),
       populate: ['role'],
     });
   },
