@@ -81,7 +81,7 @@ describe('Users API', () => {
       },
     });
 
-    expect(bcrypt.compareSync(user.newPassword, userDb.password)).toBe(true);
+    expect(bcrypt.compareSync(user.password, userDb.password)).toBe(true);
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toMatchObject({
