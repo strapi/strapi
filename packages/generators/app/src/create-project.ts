@@ -147,7 +147,8 @@ export default async function createProject(
 
   try {
     if (scope.installDependencies !== false) {
-      const runner = runInstall(scope);
+      const installArguments = await getInstallArguments(scope);
+      const runner = runInstall(scope, installArguments);
 
       runner.stdout?.on('data', logInstall);
       runner.stderr?.on('data', logInstall);
@@ -230,12 +231,31 @@ export default async function createProject(
   console.log();
 }
 
-const installArguments = ['install', '--production', '--no-optional'];
-function runInstall({ rootPath, useYarn }: Scope) {
+async function getInstallArguments({ useYarn, rootPath }: Scope) {
+  const installArguments = ['install', '--production', '--no-optional'];
+
   if (useYarn) {
+    const { stdout } = await execa('yarnpkg', ['--version'], {
+      cwd: rootPath,
+    });
+    const version = stdout.trim();
+
+    if (version.startsWith('1.')) {
+      // Ignore engines for yarn v1.x.x
+      installArguments.push('--ignore-engines');
+    }
+
     // Increase timeout for slow internet connections.
     installArguments.push('--network-timeout 1000000');
 
+    return installArguments;
+  }
+
+  return installArguments;
+}
+
+function runInstall({ rootPath, useYarn }: Scope, installArguments: string[] = []) {
+  if (useYarn) {
     return execa('yarnpkg', installArguments, {
       cwd: rootPath,
       stdin: 'ignore',
