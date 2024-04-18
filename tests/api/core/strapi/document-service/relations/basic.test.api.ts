@@ -119,12 +119,10 @@ describe('Document Service relations', () => {
         await strapi.documents(ARTICLE_UID).publish({ documentId: id });
 
         // Update the draft article
-        await strapi
-          .documents(ARTICLE_UID)
-          .update({
-            documentId: id,
-            data: { title: 'Updated Article with author', categories: [] },
-          });
+        await strapi.documents(ARTICLE_UID).update({
+          documentId: id,
+          data: { title: 'Updated Article with author', categories: [] },
+        });
 
         // Discard the draft
         const newDraftArticles = await strapi

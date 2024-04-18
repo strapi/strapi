@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils/index';
+import { testInTransaction } from '../../../utils';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
 
@@ -28,7 +28,7 @@ describe('Document Service', () => {
       expect(articles).toHaveLength(0);
     });
 
-    testInTransaction('delete a document with a component', async () => {
+    testInTransaction('delete a document with a component', async (trx: any) => {
       const componentData = {
         comp: {
           text: 'comp-1',
@@ -66,10 +66,12 @@ describe('Document Service', () => {
       const comp = await strapi.db
         .getConnection(compTable)
         .where({ id: updatedArticle.comp.id })
+        .transacting(trx)
         .first();
       const dz = await strapi.db
         .getConnection(dzTable)
         .where({ id: updatedArticle.dz.at(0)!.id })
+        .transacting(trx)
         .first();
 
       expect(comp).toBeUndefined();

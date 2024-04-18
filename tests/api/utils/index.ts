@@ -2,9 +2,9 @@
 // Alternatively, we could truncate/insert the tables in afterEach which should be only marginally slower
 // TODO: move to utils
 export const wrapInTransaction = (test) => {
-  return async () => {
-    await strapi.db.transaction(async ({ rollback }) => {
-      await test();
+  return async (...args) => {
+    await strapi.db.transaction(async ({ trx, rollback }) => {
+      await test(trx, ...args);
       await rollback();
     });
   };
