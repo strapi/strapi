@@ -259,8 +259,13 @@ export default {
   isOptimizableImage,
   isResizableImage,
   isImage,
+  breakpointSmallerThan,
+  getBreakpoints,
   getDimensions,
+  getService,
+  generateBreakpoint,
   generateResponsiveFormats,
   generateThumbnail,
   optimize,
+  resizeFileTo,
 };
