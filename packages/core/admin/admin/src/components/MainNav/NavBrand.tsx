@@ -21,7 +21,7 @@ export const NavBrand = () => {
     logos: { menu },
   } = useConfiguration('LeftMenu');
   return (
-    <Box paddingLeft={3} paddingRight={3} paddingTop={3} paddingBottom={3}>
+    <Box padding={3}>
       <BrandIconWrapper>
         <img
           src={menu.custom?.url || menu.default}
