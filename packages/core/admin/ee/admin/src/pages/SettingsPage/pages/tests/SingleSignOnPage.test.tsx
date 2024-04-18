@@ -6,7 +6,7 @@ jest.mock('../../../../../../../admin/src/hooks/useRBAC', () => ({
   useRBAC: () => ({
     isLoading: false,
     allowedActions: {
-      canReadRoles: true,
+      canRead: true,
       canUpdate: true,
     },
   }),
