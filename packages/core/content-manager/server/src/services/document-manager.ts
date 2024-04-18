@@ -1,6 +1,6 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, sanitize, errors } from '@strapi/utils';
+import { contentTypes, sanitize, errors, async } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
@@ -193,44 +193,27 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .publish({ ...params, documentId: id })
-        .then((result) => result?.versions.at(0));
+        .then((result) => result?.versions);
+      // TODO __** check this return format change okay?
     },
 
-    async publishMany(entities: Document[], uid: UID.ContentType) {
-      if (!entities.length) {
-        return null;
-      }
+    async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
+      let publishedEntitiesCount = 0;
+      await async.map(documentIds, async (documentId: string) => {
+        // Publish per documentId
+        const res = await this.publish(documentId, uid, { locale });
+        publishedEntitiesCount += res?.length ?? 0;
 
-      // Validate entities before publishing, throw if invalid
-      await Promise.all(
-        entities.map((document: Document) => {
-          return strapi.entityValidator.validateEntityCreation(
-            strapi.getModel(uid),
-            document,
-            undefined,
-            // @ts-expect-error - FIXME: entity here is unnecessary
-            document
-          );
-        })
-      );
-
-      // Only publish entities without a published_at date
-      const entitiesToPublish = entities
-        .filter((doc: Document) => !doc[PUBLISHED_AT_ATTRIBUTE])
-        .map((doc: Document) => doc.id);
-
-      const filters = { id: { $in: entitiesToPublish } };
-      const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
-      const populate = await buildDeepPopulate(uid);
-
-      // Everything is valid, publish
-      const publishedEntitiesCount = await strapi.db.query(uid).updateMany({
-        where: filters,
-        data,
+        return res;
       });
-      // Get the updated entities since updateMany only returns the count
+
+      const populate = await buildDeepPopulate(uid);
       const publishedEntities = await strapi.db.query(uid).findMany({
-        where: filters,
+        where: {
+          documentId: { $in: documentIds },
+          published_at: { $ne: null },
+          locale: { $in: locale },
+        },
         populate,
       });
       // Emit the publish event for all updated entities
