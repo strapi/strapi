@@ -12,7 +12,7 @@ interface NonRepeatableComponentProps extends Omit<ComponentInputProps, 'require
 const NonRepeatableComponent = ({
   attribute,
   name,
-  customInputRenderer,
+  renderInput = InputRenderer,
 }: NonRepeatableComponentProps) => {
   const {
     edit: { components },
@@ -51,11 +51,7 @@ const NonRepeatableComponent = ({
 
                   return (
                     <GridItem col={size} key={completeFieldName} s={12} xs={12}>
-                      {customInputRenderer ? (
-                        customInputRenderer({ ...field, name: completeFieldName })
-                      ) : (
-                        <InputRenderer {...field} name={completeFieldName} />
-                      )}
+                      {renderInput({ ...field, name: completeFieldName })}
                     </GridItem>
                   );
                 })}

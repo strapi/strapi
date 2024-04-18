@@ -328,9 +328,7 @@ const VersionInputRenderer = ({
           {...props}
           hint={hint}
           disabled={fieldIsDisabled}
-          customInputRenderer={(props) => (
-            <VersionInputRenderer {...props} shouldIgnoreRBAC={true} />
-          )}
+          renderInput={(props) => <VersionInputRenderer {...props} shouldIgnoreRBAC={true} />}
         />
       );
     case 'dynamiczone':
