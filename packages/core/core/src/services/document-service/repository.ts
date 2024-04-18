@@ -124,7 +124,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     )(params);
 
     // Get deep populate
-    const entriesToClone = await strapi.db?.query(uid).findMany({
+    const entriesToClone = await strapi.db.query(uid).findMany({
       where: {
         ...queryParams?.lookup,
         documentId,
@@ -226,7 +226,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     )(params);
 
     const [draftsToPublish, publishedToDelete] = await Promise.all([
-      strapi.db?.query(uid).findMany({
+      strapi.db.query(uid).findMany({
         where: {
           ...queryParams?.lookup,
           documentId,
@@ -235,7 +235,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         // Populate relations, media, compos and dz
         populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
       }),
-      strapi.db?.query(uid).findMany({
+      strapi.db.query(uid).findMany({
         where: {
           ...queryParams?.lookup,
           documentId,
@@ -270,7 +270,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     )(params);
 
     // Delete all published versions
-    const versionsToDelete = await strapi.db?.query(uid).findMany(query);
+    const versionsToDelete = await strapi.db.query(uid).findMany(query);
     await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
     // Trigger webhook
@@ -288,7 +288,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     )(params);
 
     const [versionsToDraft, versionsToDelete] = await Promise.all([
-      strapi.db?.query(uid).findMany({
+      strapi.db.query(uid).findMany({
         where: {
           ...queryParams?.lookup,
           documentId,
@@ -297,7 +297,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         // Populate relations, media, compos and dz
         populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
       }),
-      strapi.db?.query(uid).findMany({
+      strapi.db.query(uid).findMany({
         where: {
           ...queryParams?.lookup,
           documentId,
