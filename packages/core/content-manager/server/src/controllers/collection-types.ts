@@ -396,48 +396,13 @@ export default {
 
       const { locale } = getDocumentLocaleAndStatus(body);
 
-      // TODO: Remove for publish many locales at once
-      // const { locale } = getDocumentLocaleAndStatus(body, {
-      //   allowMultipleLocales: true,
-      // });
-
-      // let document: Modules.Documents.AnyDocument | null = null;
-      // if (body && (!locale || (typeof locale === 'string' && locale !== '*'))) {
-      //   // TODO Only update the document if we are targetting a specific locale and
-      //   // have been provided with a body
-
-      //   document = id
-      //     ? await updateDocument(ctx, { populate })
-      //     : await createDocument(ctx, { populate });
-
-      //   if (permissionChecker.cannot.publish(document)) {
-      //     throw new errors.ForbiddenError();
-      //   }
-      // }
-
-      // const localeArray: string[] = Array.isArray(requestLocale) ? requestLocale : [requestLocale];
-      // async.map(localeArray, async (locale: string) => {
-      //   const localeCtx = {
-      //     ...ctx,
-      //     request: {
-      //       ...ctx.request,
-      //       body: { ...body, locale },
-      //     },
-      //   };
-      //   const document = id
-      //     ? await updateDocument(localeCtx, { populate })
-      //     : await createDocument(localeCtx, { populate });
-
-      //   if (permissionChecker.cannot.publish(document)) {
-      //     throw new errors.ForbiddenError();
-      //   }
-      // });
-
-      return documentManager.publish(document!.documentId, model, {
+      const publishResult = await documentManager.publish(document!.documentId, model, {
         locale,
         // TODO: Allow setting creator fields on publish
         // data: setCreatorFields({ user, isEdition: true })({}),
       });
+
+      return publishResult.at(0);
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
@@ -452,7 +417,7 @@ export default {
 
     await validateBulkActionInput(body);
 
-    const { locale } = getDocumentLocaleAndStatus(ctx.query, { allowMultipleLocales: true });
+    const { locale } = getDocumentLocaleAndStatus(body, { allowMultipleLocales: true });
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -483,8 +448,7 @@ export default {
       }
     }
 
-    // @ts-expect-error - publish many should not return null
-    const { count } = await documentManager.publishMany(entities, model);
+    const count = await documentManager.publishMany(model, documentIds, locale);
     ctx.body = { count };
   },
 

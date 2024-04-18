@@ -211,7 +211,9 @@ export default {
       }
 
       const { locale } = getDocumentLocaleAndStatus(document);
-      return documentManager.publish(document.documentId, model, { locale });
+      const publishResult = await documentManager.publish(document.documentId, model, { locale });
+
+      return publishResult.at(0);
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
