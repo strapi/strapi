@@ -81,7 +81,6 @@ const ListPage = () => {
         });
       }
     }
-    handleToggleModal();
   };
 
   const handleNewRoleClick = () => navigate('new');

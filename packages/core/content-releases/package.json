@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-releases",
-  "version": "5.0.0-beta.3",
+  "version": "5.0.0-beta.4",
   "description": "Strapi plugin for organizing and releasing content",
   "repository": {
     "type": "git",
@@ -58,7 +58,7 @@
     "@strapi/design-system": "1.18.0",
     "@strapi/icons": "1.18.0",
     "@strapi/types": "workspace:*",
-    "@strapi/utils": "5.0.0-beta.3",
+    "@strapi/utils": "5.0.0-beta.4",
     "date-fns": "2.30.0",
     "date-fns-tz": "2.0.1",
     "formik": "2.4.5",
@@ -69,10 +69,10 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.0.0-beta.3",
-    "@strapi/admin-test-utils": "5.0.0-beta.3",
+    "@strapi/admin": "5.0.0-beta.4",
+    "@strapi/admin-test-utils": "5.0.0-beta.4",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/plugin-content-manager": "5.0.0-beta.3",
+    "@strapi/plugin-content-manager": "5.0.0-beta.4",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "@types/koa": "2.13.4",
