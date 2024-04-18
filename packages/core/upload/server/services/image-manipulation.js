@@ -278,13 +278,18 @@ const isImage = async (file) => {
 };
 
 module.exports = () => ({
+  breakpointSmallerThan,
   isSupportedImage,
   isFaultyImage,
   isOptimizableImage,
   isResizableImage,
   isImage,
+  getBreakpoints,
   getDimensions,
+  getService,
+  generateBreakpoint,
   generateResponsiveFormats,
   generateThumbnail,
   optimize,
+  resizeFileTo,
 });
