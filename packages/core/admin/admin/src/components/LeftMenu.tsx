@@ -111,22 +111,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         /**
          * TODO: remove the conditional rendering once the new Main nav is fully implemented
          */
-        <NewNavBrand
-          workplace={formatMessage({
-            id: 'app.components.LeftMenu.navbrand.workplace',
-            defaultMessage: 'Workplace',
-          })}
-          title={menuTitle}
-          icon={
-            <img
-              src={menu.custom?.url || menu.default}
-              alt={formatMessage({
-                id: 'app.components.LeftMenu.logo.alt',
-                defaultMessage: 'Application logo',
-              })}
-            />
-          }
-        />
+        <NewNavBrand />
       ) : (
         <NavBrand
           as={RouterNavLink}

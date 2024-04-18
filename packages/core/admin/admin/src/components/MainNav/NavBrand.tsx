@@ -1,9 +1,10 @@
-import * as React from 'react';
-
 import { Box, VisuallyHidden } from '@strapi/design-system';
+import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-const BrandIconWrapper = styled.div`
+import { useConfiguration } from '../../features/Configuration';
+
+const BrandIconWrapper = styled(Box)`
   svg,
   img {
     border-radius: ${({ theme }) => theme.borderRadius};
@@ -14,20 +15,34 @@ const BrandIconWrapper = styled.div`
   }
 `;
 
-export interface NavBrandProps {
-  icon: React.ReactNode;
-  title: string;
-  workplace: string;
-}
-
-export const NavBrand = ({ workplace, title, icon }: NavBrandProps) => {
+export const NavBrand = () => {
+  const { formatMessage } = useIntl();
+  const {
+    logos: { menu },
+  } = useConfiguration('LeftMenu');
   return (
     <Box paddingLeft={3} paddingRight={3} paddingTop={3} paddingBottom={3}>
       <BrandIconWrapper>
-        {icon}
+        <img
+          src={menu.custom?.url || menu.default}
+          alt={formatMessage({
+            id: 'app.components.LeftMenu.logo.alt',
+            defaultMessage: 'Application logo',
+          })}
+        />
         <VisuallyHidden>
-          <span>{title}</span>
-          <span>{workplace}</span>
+          <span>
+            {formatMessage({
+              id: 'app.components.LeftMenu.navbrand.title',
+              defaultMessage: 'Strapi Dashboard',
+            })}
+          </span>
+          <span>
+            {formatMessage({
+              id: 'app.components.LeftMenu.navbrand.workplace',
+              defaultMessage: 'Workplace',
+            })}
+          </span>
         </VisuallyHidden>
       </BrandIconWrapper>
     </Box>
