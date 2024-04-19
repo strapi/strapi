@@ -1,4 +1,5 @@
 import type { Struct, Modules } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { curry, assoc } from 'lodash/fp';
 
 type Transform = (
@@ -36,7 +37,22 @@ const localeToLookup: Transform = (contentType, params) => {
   }
 
   if (params.locale) {
-    if (typeof params.locale === 'string' && params.locale === '*') {
+    return assoc(['lookup', 'locale'], params.locale, params);
+  }
+
+  return params;
+};
+
+/**
+ * Add locale lookup query to the params
+ */
+const multiLocaleToLookup: Transform = (contentType, params) => {
+  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+    return params;
+  }
+
+  if (params.locale) {
+    if (params.locale === '*') {
       return params;
     }
 
@@ -54,8 +70,15 @@ const localeToData: Transform = (contentType, params) => {
     return params;
   }
 
-  if (params.locale && typeof params.locale === 'string' && params.locale !== '*') {
-    return assoc(['data', 'locale'], params.locale, params);
+  if (params.locale) {
+    const isValidLocale = typeof params.locale === 'string' && params.locale !== '*';
+    if (isValidLocale) {
+      return assoc(['data', 'locale'], params.locale, params);
+    }
+
+    throw new errors.ValidationError(
+      `Invalid locale param ${params.locale} provided. Document locales must be strings.`
+    );
   }
 
   return params;
@@ -63,10 +86,12 @@ const localeToData: Transform = (contentType, params) => {
 
 const defaultLocaleCurry = curry(defaultLocale);
 const localeToLookupCurry = curry(localeToLookup);
+const multiLocaleToLookupCurry = curry(multiLocaleToLookup);
 const localeToDataCurry = curry(localeToData);
 
 export {
   defaultLocaleCurry as defaultLocale,
   localeToLookupCurry as localeToLookup,
   localeToDataCurry as localeToData,
+  multiLocaleToLookupCurry as multiLocaleToLookup,
 };

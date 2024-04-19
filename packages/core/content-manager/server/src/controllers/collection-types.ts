@@ -2,7 +2,7 @@ import { setCreatorFields, async, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
-import { getDocumentLocaleAndStatus } from './utils/dimensions';
+import { getDocumentLocaleAndStatus } from './validation/dimensions';
 
 /**
  * Create a new document.
@@ -29,7 +29,7 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
   const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
-  const { locale, status = 'draft' } = getDocumentLocaleAndStatus(body);
+  const { locale, status = 'draft' } = await getDocumentLocaleAndStatus(body);
 
   return documentManager.create(model, {
     data: sanitizedBody as any,
@@ -72,7 +72,7 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
     .populateFromQuery(permissionQuery)
     .build();
 
-  const { locale } = getDocumentLocaleAndStatus(body);
+  const { locale } = await getDocumentLocaleAndStatus(body);
 
   // Load document version to update
   const [documentVersion, documentExists] = await Promise.all([
@@ -130,7 +130,7 @@ export default {
       .countRelations({ toOne: false, toMany: true })
       .build();
 
-    const { locale, status } = getDocumentLocaleAndStatus(query);
+    const { locale, status } = await getDocumentLocaleAndStatus(query);
 
     const { results: documents, pagination } = await documentManager.findPage(
       { ...permissionQuery, populate, locale, status },
@@ -183,7 +183,7 @@ export default {
       .countRelations()
       .build();
 
-    const { locale, status = 'draft' } = getDocumentLocaleAndStatus(ctx.query);
+    const { locale, status = 'draft' } = await getDocumentLocaleAndStatus(ctx.query);
 
     const version = await documentManager.findOne(id, model, {
       populate,
@@ -277,7 +277,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentLocaleAndStatus(body);
+    const { locale } = await getDocumentLocaleAndStatus(body);
     const document = await documentManager.findOne(id, model, {
       populate,
       locale,
@@ -339,7 +339,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentLocaleAndStatus(ctx.query);
+    const { locale } = await getDocumentLocaleAndStatus(ctx.query);
 
     // Find locales to delete
     const documentLocales = await documentManager.findLocales(id, model, { populate, locale });
@@ -394,7 +394,7 @@ export default {
         throw new errors.ForbiddenError();
       }
 
-      const { locale } = getDocumentLocaleAndStatus(body);
+      const { locale } = await getDocumentLocaleAndStatus(body);
 
       const publishResult = await documentManager.publish(document!.documentId, model, {
         locale,
@@ -417,7 +417,7 @@ export default {
 
     await validateBulkActionInput(body);
 
-    const { locale } = getDocumentLocaleAndStatus(body, { allowMultipleLocales: true });
+    const { locale } = await getDocumentLocaleAndStatus(body, { allowMultipleLocales: true });
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -516,7 +516,7 @@ export default {
       .build();
 
     // TODO allow multiple locales for bulk locale unpublish
-    const { locale } = getDocumentLocaleAndStatus(body);
+    const { locale } = await getDocumentLocaleAndStatus(body);
     const document = await documentManager.findOne(id, model, {
       populate,
       locale,
@@ -566,7 +566,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentLocaleAndStatus(body);
+    const { locale } = await getDocumentLocaleAndStatus(body);
     const document = await documentManager.findOne(id, model, {
       populate,
       locale,
@@ -636,7 +636,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale, status = 'draft' } = getDocumentLocaleAndStatus(ctx.query);
+    const { locale, status = 'draft' } = await getDocumentLocaleAndStatus(ctx.query);
     const entity = await documentManager.findOne(id, model, { populate, locale, status });
 
     if (!entity) {
