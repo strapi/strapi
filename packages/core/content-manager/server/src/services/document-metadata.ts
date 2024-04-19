@@ -88,9 +88,39 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return (
       Object.values(versionsByLocale)
         .map((localeVersions: DocumentVersion[]) => {
-          // There will not be a draft and a version counterpart if the content type does not have draft and publish
-          if (!contentTypes.hasDraftAndPublish(strapi.getModel(uid))) {
-            return pick(AVAILABLE_LOCALES_FIELDS, localeVersions[0]);
+          // There will not be a draft and a version counterpart if the content
+          // type does not have draft and publish
+
+          const model = strapi.getModel(uid);
+
+          // TODO
+          // For displaying the validation errors in the multiple locale modal we need
+          // each available locale to at least contain all the fields that will
+          // require validation
+          // ??
+
+          // Get the additional fields that require validation
+          const additionalFields: string[] = Object.entries(model.attributes).reduce(
+            (acc, [key, value]: [string, any]) => {
+              const requiresValidation =
+                value.required ||
+                value.unique ||
+                Object.prototype.hasOwnProperty.call(value, 'max') ||
+                Object.prototype.hasOwnProperty.call(value, 'min') ||
+                Object.prototype.hasOwnProperty.call(value, 'maxLength') ||
+                Object.prototype.hasOwnProperty.call(value, 'minLength');
+
+              if (requiresValidation) {
+                acc.push(key);
+              }
+              return acc;
+            },
+            [] as string[]
+          );
+          const fieldsToPick = [...AVAILABLE_LOCALES_FIELDS, ...additionalFields];
+
+          if (!contentTypes.hasDraftAndPublish(model)) {
+            return pick(fieldsToPick, localeVersions[0]);
           }
 
           const draftVersion = localeVersions.find((v) => v.publishedAt === null);
@@ -99,7 +129,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           if (!draftVersion) return;
 
           return {
-            ...pick(AVAILABLE_LOCALES_FIELDS, draftVersion),
+            ...pick(fieldsToPick, draftVersion),
             status: this.getStatus(draftVersion, otherVersions as any),
           };
         })
@@ -188,7 +218,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // TODO: Sanitize createdBy
     const versions = await strapi.db.query(uid).findMany({
       where: { documentId: version.documentId },
-      select: ['createdAt', 'updatedAt', 'locale', 'publishedAt', 'documentId'],
       populate: {
         createdBy: {
           select: ['id', 'firstname', 'lastname', 'email'],
