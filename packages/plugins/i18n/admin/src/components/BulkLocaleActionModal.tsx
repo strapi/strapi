@@ -38,11 +38,12 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
 
   if (validationErrors) {
     const validationErrorsMessages = Object.entries(validationErrors)
-      .map(([key, value]) =>
-        formatMessage(
-          { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
-          { field: key }
-        )
+      .map(
+        ([key, value]) =>
+          `${key}: ${formatMessage(
+            // @ts-expect-error TODO __** fix types
+            value.defaultMessage
+          )}`
       )
       .join(' ');
 
@@ -115,7 +116,10 @@ interface BulkLocaleActionModalProps {
     label: string;
     name: string;
   }[];
-  validationErrors?: Record<string, MessageDescriptor>;
+  validationErrors?: Record<
+    Modules.Documents.Params.Locale.StringNotation,
+    Record<string, MessageDescriptor>
+  >;
 }
 
 const BulkLocaleActionModal = ({
@@ -144,21 +148,7 @@ const BulkLocaleActionModal = ({
     const readyToPublishCount = selectedRows.filter(
       ({ status }) => status === 'draft' || status === 'modified'
     ).length;
-    //TODO __**
-    // if (publishedCount) {
-    //   return formatMessage(
-    //     {
-    //       id: getTranslation('containers.ListPage.selectedEntriesModal.publishedCount'),
-    //       defaultMessage:
-    //         '<b>{publishedCount}</b> {publishedCount, plural, =0 {entries} one {entry} other {entries}} published. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
-    //     },
-    //     {
-    //       publishedCount,
-    //       withErrorsCount: selectedEntriesWithErrorsCount,
-    //       b: BoldChunk,
-    //     }
-    //   );
-    // }
+    const withErrorsCount = Object.keys(validationErrors).length;
 
     return formatMessage(
       {
@@ -167,8 +157,7 @@ const BulkLocaleActionModal = ({
           '<b>{alreadyPublishedCount}</b> {alreadyPublishedCount, plural, =0 {entries} one {entry} other {entries}} already published. <b>{readyToPublishCount}</b> {readyToPublishCount, plural, =0 {entries} one {entry} other {entries}} ready to publish. <b>{withErrorsCount}</b> {withErrorsCount, plural, =0 {entries} one {entry} other {entries}} waiting for action.',
       },
       {
-        withErrorsCount: 0,
-        // withErrorsCount: selectedEntriesWithErrorsCount,
+        withErrorsCount,
         readyToPublishCount,
         alreadyPublishedCount,
         b: BoldChunk,
@@ -194,51 +183,50 @@ const BulkLocaleActionModal = ({
             ))}
           </Table.Head>
           <Table.Body>
-            {rows.map(({ locale, status }, index) => (
-              <Table.Row key={index}>
-                <Table.CheckboxCell id={locale} aria-label={`Select ${locale}`} />
-                <Table.Cell>
-                  <Typography variant="sigma" textColor="neutral600">
-                    {Array.isArray(locales)
-                      ? locales.find((localeEntry) => localeEntry.code === locale)?.name
-                      : locale}
-                  </Typography>
-                </Table.Cell>
-                <Table.Cell>
-                  <Box display="flex">
-                    <DocumentStatus status={status} />
-                  </Box>
-                </Table.Cell>
-                <Table.Cell>
-                  <EntryValidationText
-                    // TODO __** reflect validation errors in status
-                    // validationErrors={validationErrors[row.id]}
-                    validationErrors={undefined}
-                    status={status}
-                  />
-                </Table.Cell>
-                {locale !== currentLocale && (
+            {rows.map(({ locale, status }, index) => {
+              const error = validationErrors?.[locale] ?? null;
+
+              return (
+                <Table.Row key={index}>
+                  <Table.CheckboxCell id={locale} aria-label={`Select ${locale}`} />
                   <Table.Cell>
-                    <IconButton
-                      onClick={() => {
-                        navigateToLocale(locale);
-                      }}
-                      label={formatMessage(
-                        {
-                          id: getTranslation('Settings.list.actions.edit'),
-                          defaultMessage: 'Edit {name} locale',
-                        },
-                        {
-                          name: locale,
-                        }
-                      )}
-                      icon={<Pencil />}
-                      borderWidth={0}
-                    />
+                    <Typography variant="sigma" textColor="neutral600">
+                      {Array.isArray(locales)
+                        ? locales.find((localeEntry) => localeEntry.code === locale)?.name
+                        : locale}
+                    </Typography>
                   </Table.Cell>
-                )}
-              </Table.Row>
-            ))}
+                  <Table.Cell>
+                    <Box display="flex">
+                      <DocumentStatus status={status} />
+                    </Box>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <EntryValidationText validationErrors={error} status={status} />
+                  </Table.Cell>
+                  {currentLocale !== locale && (
+                    <Table.Cell>
+                      <IconButton
+                        onClick={() => {
+                          navigateToLocale(locale);
+                        }}
+                        label={formatMessage(
+                          {
+                            id: getTranslation('Settings.list.actions.edit'),
+                            defaultMessage: 'Edit {name} locale',
+                          },
+                          {
+                            name: locale,
+                          }
+                        )}
+                        icon={<Pencil />}
+                        borderWidth={0}
+                      />
+                    </Table.Cell>
+                  )}
+                </Table.Row>
+              );
+            })}
           </Table.Body>
         </Table.Content>
       </Box>

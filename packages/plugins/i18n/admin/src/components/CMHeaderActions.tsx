@@ -16,7 +16,7 @@ import {
   useGetManyDraftRelationCountQuery,
 } from '@strapi/plugin-content-manager/strapi-admin';
 import { Modules } from '@strapi/types';
-import { useIntl } from 'react-intl';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -259,7 +259,11 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
   const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
 
   const { bulkPublish: bulkPublishAction } = useDocumentActions();
-  const { meta: documentMeta, schema } = useDocument({
+  const {
+    meta: documentMeta,
+    schema,
+    validate,
+  } = useDocument({
     model,
     collectionType,
     documentId,
@@ -267,6 +271,31 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       locale: document?.locale,
     },
   });
+
+  // @ts-expect-error __** fix types
+  const allDocuments: Modules.Documents.AnyDocument[] = React.useMemo(() => {
+    return [document, ...(documentMeta?.availableLocales ?? [])];
+  }, [document, documentMeta?.availableLocales]);
+
+  const validationErrors = React.useMemo(() => {
+    const errors: Record<
+      Modules.Documents.Params.Locale.StringNotation,
+      Record<string, MessageDescriptor>
+    > = {};
+
+    if (allDocuments) {
+      allDocuments.map((document) => {
+        const validation = validate(document);
+        if (validation !== null) {
+          errors[document.locale] = validation;
+        }
+
+        return;
+      });
+    }
+
+    return errors;
+  }, [allDocuments, validate]);
 
   const {
     data: draftRelationsCount = 0,
@@ -452,7 +481,9 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
                   (row) =>
                     // Filter out the already published locales as they don't need to be
                     // sent in the request
-                    row.status !== 'published'
+                    row.status !== 'published' &&
+                    // And those that have validation errors
+                    !Object.keys(validationErrors).includes(row.locale)
                 )
                 .map((row) => row.locale)
             );
@@ -463,7 +494,11 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
             id: row.locale,
           }))}
         >
-          <BulkLocaleActionModal headers={headers} rows={rows} />
+          <BulkLocaleActionModal
+            validationErrors={validationErrors}
+            headers={headers}
+            rows={rows}
+          />
         </Table.Root>
       ),
       footer: () => {
