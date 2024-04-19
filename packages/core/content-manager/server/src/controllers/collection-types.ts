@@ -587,7 +587,7 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { query, body } = ctx.request;
-    const { ids } = body;
+    const { documentIds } = body;
 
     await validateBulkActionInput(body);
 
@@ -598,18 +598,32 @@ export default {
       return ctx.forbidden();
     }
 
-    // TODO: fix
     const permissionQuery = await permissionChecker.sanitizedQuery.delete(query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
 
-    const idsWhereClause = { id: { $in: ids } };
-    const params = {
-      ...permissionQuery,
-      filters: {
-        $and: [idsWhereClause].concat(permissionQuery.filters || []),
-      },
-    };
+    const { locale } = getDocumentLocaleAndStatus(body);
 
-    const { count } = await documentManager.deleteMany(params, model);
+    const documentLocales = await documentManager.findLocales(documentIds, model, {
+      populate,
+      locale,
+    });
+
+    if (documentLocales.length === 0) {
+      return ctx.notFound();
+    }
+
+    for (const document of documentLocales) {
+      if (permissionChecker.cannot.delete(document)) {
+        return ctx.forbidden();
+      }
+    }
+
+    // We filter out documentsIds that maybe doesn't exist in a specific locale
+    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
+
+    const { count } = await documentManager.deleteMany(localeDocumentsIds, model, { locale });
 
     ctx.body = { count };
   },

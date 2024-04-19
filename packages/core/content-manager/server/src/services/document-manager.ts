@@ -172,14 +172,16 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     // FIXME: handle relations
-    async deleteMany(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
-      const docs = await strapi.documents(uid).findMany(opts);
+    async deleteMany(
+      documentIds: Modules.Documents.ID[],
+      uid: UID.CollectionType,
+      opts: DocServiceParams<'findMany'>
+    ) {
+      const deletedEntries = await strapi.db.transaction(async () => {
+        return Promise.all(documentIds.map(async (id) => this.delete(id, uid, opts)));
+      });
 
-      for (const doc of docs) {
-        await strapi.documents!(uid).delete({ documentId: doc.documentId });
-      }
-
-      return { count: docs.length };
+      return { count: deletedEntries.length };
     },
 
     async publish(
