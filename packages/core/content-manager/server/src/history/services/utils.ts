@@ -1,42 +1,234 @@
 import { difference, omit } from 'lodash/fp';
-import type { Struct } from '@strapi/types';
+import type { Struct, UID } from '@strapi/types';
+import { Core, Data, Modules, Schema } from '@strapi/types';
+import { contentTypes } from '@strapi/utils';
 import { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import { FIELDS_TO_IGNORE } from '../constants';
+import { HistoryVersions } from '../../../../shared/contracts';
 
-/**
- * @description
- * Get the difference between the version schema and the content type schema
- * @returns the attributes with their original shape
- */
-export const getSchemaAttributesDiff = (
-  versionSchemaAttributes: CreateHistoryVersion['schema'],
-  contentTypeSchemaAttributes: Struct.SchemaAttributes
-) => {
-  // Omit the same fields that were omitted when creating a history version
-  const sanitizedContentTypeSchemaAttributes = omit(FIELDS_TO_IGNORE, contentTypeSchemaAttributes);
+const DEFAULT_RETENTION_DAYS = 90;
 
-  const reduceDifferenceToAttributesObject = (
-    diffKeys: string[],
-    source: CreateHistoryVersion['schema']
+export const createHistoryUtils = ({ strapi }: { strapi: Core.Strapi }) => {
+  /**
+   * @description
+   * Get the difference between the version schema and the content type schema
+   */
+  const getSchemaAttributesDiff = (
+    versionSchemaAttributes: CreateHistoryVersion['schema'],
+    contentTypeSchemaAttributes: Struct.SchemaAttributes
   ) => {
-    return diffKeys.reduce<CreateHistoryVersion['schema']>((previousAttributesObject, diffKey) => {
-      previousAttributesObject[diffKey] = source[diffKey];
+    // Omit the same fields that were omitted when creating a history version
+    const sanitizedContentTypeSchemaAttributes = omit(
+      FIELDS_TO_IGNORE,
+      contentTypeSchemaAttributes
+    );
 
-      return previousAttributesObject;
+    const reduceDifferenceToAttributesObject = (
+      diffKeys: string[],
+      source: CreateHistoryVersion['schema']
+    ) => {
+      return diffKeys.reduce<CreateHistoryVersion['schema']>(
+        (previousAttributesObject, diffKey) => {
+          previousAttributesObject[diffKey] = source[diffKey];
+
+          return previousAttributesObject;
+        },
+        {}
+      );
+    };
+
+    const versionSchemaKeys = Object.keys(versionSchemaAttributes);
+    const contentTypeSchemaAttributesKeys = Object.keys(sanitizedContentTypeSchemaAttributes);
+    // The attribute is new if it's on the content type schema but not on the version schema
+    const uniqueToContentType = difference(contentTypeSchemaAttributesKeys, versionSchemaKeys);
+    const added = reduceDifferenceToAttributesObject(
+      uniqueToContentType,
+      sanitizedContentTypeSchemaAttributes
+    );
+    // The attribute was removed or renamed if it's on the version schema but not on the content type schema
+    const uniqueToVersion = difference(versionSchemaKeys, contentTypeSchemaAttributesKeys);
+    const removed = reduceDifferenceToAttributesObject(uniqueToVersion, versionSchemaAttributes);
+
+    return { added, removed };
+  };
+
+  /**
+   * @description
+   * Gets the value to set for a relation when restoring a document
+   */
+  const getRelationRestoreValue = async (
+    versionRelationData: Data.Entity,
+    attribute: Schema.Attribute.RelationWithTarget
+  ) => {
+    if (Array.isArray(versionRelationData)) {
+      if (versionRelationData.length === 0) return versionRelationData;
+
+      const existingAndMissingRelations = await Promise.all(
+        versionRelationData.map((relation) => {
+          return strapi.documents(attribute.target).findOne({
+            documentId: relation.documentId,
+            locale: relation.locale || undefined,
+          });
+        })
+      );
+      const existingRelations = existingAndMissingRelations.filter(
+        (relation) => relation !== null
+      ) as Modules.Documents.AnyDocument[];
+
+      return existingRelations;
+    }
+    const existingRelationOrNull = await strapi.documents(attribute.target).findOne({
+      documentId: versionRelationData.documentId,
+      locale: versionRelationData.locale || undefined,
+    });
+
+    return existingRelationOrNull;
+  };
+
+  /**
+   * @description
+   * Gets the value to set for a media asset when restoring a document
+   */
+  const getMediaRestoreValue = async (
+    versionRelationData: Data.Entity,
+    attribute: Schema.Attribute.Media<any, boolean>
+  ) => {
+    if (attribute.multiple) {
+      const existingAndMissingMedias = await Promise.all(
+        // @ts-expect-error Fix the type definitions so this isn't any
+        versionRelationData.map((media) => {
+          return strapi.db.query('plugin::upload.file').findOne({ where: { id: media.id } });
+        })
+      );
+
+      const existingMedias = existingAndMissingMedias.filter((media) => media != null);
+      return existingMedias;
+    }
+
+    const existingMediaOrNull = await strapi.db
+      .query('plugin::upload.file')
+      .findOne({ where: { id: versionRelationData.id } });
+
+    return existingMediaOrNull;
+  };
+
+  const localesService = strapi.plugin('i18n')?.service('locales');
+
+  const getDefaultLocale = async () => (localesService ? localesService.getDefaultLocale() : null);
+
+  /**
+   *
+   * @description
+   * Creates a dictionary of all locales available
+   */
+  const getLocaleDictionary = async (): Promise<{
+    [key: string]: { name: string; code: string };
+  }> => {
+    if (!localesService) return {};
+
+    const locales = (await localesService.find()) || [];
+    return locales.reduce(
+      (
+        acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
+        locale: NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>
+      ) => {
+        acc[locale.code] = { name: locale.name, code: locale.code };
+
+        return acc;
+      },
+      {}
+    );
+  };
+
+  /**
+   * 
+   * @description
+   * Gets the number of retention days defined on the license or configured by the user
+   */
+  const getRetentionDays = () => {
+    const featureConfig = strapi.ee.features.get('cms-content-history');
+    const licenseRetentionDays =
+      typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
+    const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
+
+    // Allow users to override the license retention days, but not to increase it
+    if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
+      return userRetentionDays;
+    }
+
+    // User didn't provide retention days value, use the license or fallback to default
+    return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
+  };
+
+  const getVersionStatus = async (
+    contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
+    document: Modules.Documents.AnyDocument | null
+  ) => {
+    const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
+    const meta = await documentMetadataService.getMetadata(contentTypeUid, document);
+
+    return documentMetadataService.getStatus(document, meta.availableStatus);
+  };
+
+  /**
+   * @description
+   * Creates a populate object that looks for all the relations that need
+   * to be saved in history, and populates only the fields needed to later retrieve the content.
+   */
+  const getDeepPopulate = (uid: UID.Schema) => {
+    const model = strapi.getModel(uid);
+    const attributes = Object.entries(model.attributes);
+
+    return attributes.reduce((acc: any, [attributeName, attribute]) => {
+      switch (attribute.type) {
+        case 'relation': {
+          const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
+          if (isVisible) {
+            acc[attributeName] = { fields: ['documentId', 'locale', 'publishedAt'] };
+          }
+          break;
+        }
+
+        case 'media': {
+          acc[attributeName] = { fields: ['id'] };
+          break;
+        }
+
+        case 'component': {
+          const populate = getDeepPopulate(attribute.component);
+          acc[attributeName] = { populate };
+          break;
+        }
+
+        case 'dynamiczone': {
+          // Use fragments to populate the dynamic zone components
+          const populatedComponents = (attribute.components || []).reduce(
+            (acc: any, componentUID: UID.Component) => {
+              acc[componentUID] = { populate: getDeepPopulate(componentUID) };
+              return acc;
+            },
+            {}
+          );
+
+          acc[attributeName] = { on: populatedComponents };
+          break;
+        }
+        default:
+          break;
+      }
+
+      return acc;
     }, {});
   };
 
-  const versionSchemaKeys = Object.keys(versionSchemaAttributes);
-  const contentTypeSchemaAttributesKeys = Object.keys(sanitizedContentTypeSchemaAttributes);
-  // The attribute is new if it's on the content type schema but not on the version schema
-  const uniqueToContentType = difference(contentTypeSchemaAttributesKeys, versionSchemaKeys);
-  const added = reduceDifferenceToAttributesObject(
-    uniqueToContentType,
-    sanitizedContentTypeSchemaAttributes
-  );
-  // The attribute was removed or renamed if it's on the version schema but not on the content type schema
-  const uniqueToVersion = difference(versionSchemaKeys, contentTypeSchemaAttributesKeys);
-  const removed = reduceDifferenceToAttributesObject(uniqueToVersion, versionSchemaAttributes);
-
-  return { added, removed };
+  return {
+    getSchemaAttributesDiff,
+    getRelationRestoreValue,
+    getMediaRestoreValue,
+    getDefaultLocale,
+    getLocaleDictionary,
+    getRetentionDays,
+    getVersionStatus,
+    getDeepPopulate,
+  };
 };

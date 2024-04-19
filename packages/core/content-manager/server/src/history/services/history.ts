@@ -1,5 +1,5 @@
-import type { Core, Modules, UID, Data, Schema, Struct } from '@strapi/types';
-import { contentTypes, errors } from '@strapi/utils';
+import type { Core, Modules, Data, Schema, Struct } from '@strapi/types';
+import { async, errors } from '@strapi/utils';
 import { omit, pick } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
@@ -10,13 +10,11 @@ import {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
-import { getSchemaAttributesDiff } from './utils';
+import { createHistoryUtils } from './utils';
 
 // Needed because the query engine doesn't return any types yet
 type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
   Pick<CreateHistoryVersion, 'locale'>;
-
-const DEFAULT_RETENTION_DAYS = 90;
 
 const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const state: {
@@ -28,104 +26,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const query = strapi.db.query(HISTORY_VERSION_UID);
-
-  const getRetentionDays = (strapi: Core.Strapi) => {
-    const featureConfig = strapi.ee.features.get('cms-content-history');
-
-    const licenseRetentionDays =
-      typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
-
-    const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
-
-    // Allow users to override the license retention days, but not to increase it
-    if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
-      return userRetentionDays;
-    }
-
-    // User didn't provide retention days value, use the license or fallback to default
-    return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
-  };
-
-  const localesService = strapi.plugin('i18n')?.service('locales');
-
-  const getDefaultLocale = async () => (localesService ? localesService.getDefaultLocale() : null);
-
-  const getLocaleDictionary = async () => {
-    if (!localesService) return {};
-
-    const locales = (await localesService.find()) || [];
-    return locales.reduce(
-      (
-        acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
-        locale: NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>
-      ) => {
-        acc[locale.code] = { name: locale.name, code: locale.code };
-
-        return acc;
-      },
-      {}
-    );
-  };
-
-  const getVersionStatus = async (
-    contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
-    document: Modules.Documents.AnyDocument | null
-  ) => {
-    const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
-    const meta = await documentMetadataService.getMetadata(contentTypeUid, document);
-
-    return documentMetadataService.getStatus(document, meta.availableStatus);
-  };
-
-  /**
-   * Creates a populate object that looks for all the relations that need
-   * to be saved in history, and populates only the fields needed to later retrieve the content.
-   */
-  const getDeepPopulate = (uid: UID.Schema) => {
-    const model = strapi.getModel(uid);
-    const attributes = Object.entries(model.attributes);
-
-    return attributes.reduce((acc: any, [attributeName, attribute]) => {
-      switch (attribute.type) {
-        case 'relation': {
-          const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
-          if (isVisible) {
-            acc[attributeName] = { fields: ['documentId', 'locale', 'publishedAt'] };
-          }
-          break;
-        }
-
-        case 'media': {
-          acc[attributeName] = { fields: ['id'] };
-          break;
-        }
-
-        case 'component': {
-          const populate = getDeepPopulate(attribute.component);
-          acc[attributeName] = { populate };
-          break;
-        }
-
-        case 'dynamiczone': {
-          // Use fragments to populate the dynamic zone components
-          const populatedComponents = (attribute.components || []).reduce(
-            (acc: any, componentUID: UID.Component) => {
-              acc[componentUID] = { populate: getDeepPopulate(componentUID) };
-              return acc;
-            },
-            {}
-          );
-
-          acc[attributeName] = { on: populatedComponents };
-          break;
-        }
-        default:
-          break;
-      }
-
-      return acc;
-    }, {});
-  };
+  const historyUtils = createHistoryUtils({ strapi });
 
   return {
     async bootstrap() {
@@ -166,15 +67,15 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             ? { documentId: result.documentId, locale: context.params?.locale }
             : { documentId: context.params.documentId, locale: context.params?.locale };
 
-        const defaultLocale = await getDefaultLocale();
+        const defaultLocale = await historyUtils.getDefaultLocale();
         const locale = documentContext.locale || defaultLocale;
 
         const document = await strapi.documents(contentTypeUid).findOne({
           documentId: documentContext.documentId,
           locale,
-          populate: getDeepPopulate(contentTypeUid),
+          populate: historyUtils.getDeepPopulate(contentTypeUid),
         });
-        const status = await getVersionStatus(contentTypeUid, document);
+        const status = await historyUtils.getVersionStatus(contentTypeUid, document);
 
         /**
          * Store schema of both the fields and the fields of the attributes, as it will let us know
@@ -204,7 +105,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
-              data: omit(FIELDS_TO_IGNORE, document),
+              data: omit(FIELDS_TO_IGNORE, document) as Modules.Documents.AnyDocument,
               schema: omit(FIELDS_TO_IGNORE, attributesSchema),
               componentsSchemas,
               relatedDocumentId: documentContext.documentId,
@@ -217,7 +118,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         return result;
       });
 
-      const retentionDays = getRetentionDays(strapi);
+      const retentionDays = historyUtils.getRetentionDays();
       // Schedule a job to delete expired history versions every day at midnight
       state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
         const retentionDaysInMilliseconds = retentionDays * 24 * 60 * 60 * 1000;
@@ -255,7 +156,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       results: HistoryVersions.HistoryVersionDataResponse[];
       pagination: HistoryVersions.Pagination;
     }> {
-      const locale = params.locale || (await getDefaultLocale());
+      const locale = params.locale || (await historyUtils.getDefaultLocale());
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
           ...params,
@@ -269,7 +170,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           populate: ['createdBy'],
           orderBy: [{ createdAt: 'desc' }],
         }),
-        getLocaleDictionary(),
+        historyUtils.getLocaleDictionary(),
       ]);
 
       type EntryToPopulate =
@@ -330,7 +231,10 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                     ...relatedEntry,
                     ...(isNormalRelation
                       ? {
-                          status: await getVersionStatus(attributeSchema.target, relatedEntry),
+                          status: await historyUtils.getVersionStatus(
+                            attributeSchema.target,
+                            relatedEntry
+                          ),
                         }
                       : {}),
                   });
@@ -385,7 +289,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             ...result,
             data: await populateEntryRelations(result),
             meta: {
-              unknownAttributes: getSchemaAttributesDiff(
+              unknownAttributes: historyUtils.getSchemaAttributesDiff(
                 result.schema,
                 strapi.getModel(params.contentType).attributes
               ),
@@ -407,7 +311,10 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
       const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
-      const schemaDiff = getSchemaAttributesDiff(version.schema, contentTypeSchemaAttributes);
+      const schemaDiff = historyUtils.getSchemaAttributesDiff(
+        version.schema,
+        contentTypeSchemaAttributes
+      );
 
       // Set all added attribute values to null
       const dataWithoutAddedAttributes = Object.keys(schemaDiff.added).reduce(
@@ -422,16 +329,16 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         FIELDS_TO_IGNORE,
         contentTypeSchemaAttributes
       ) as Struct.SchemaAttributes;
+
       // Set all deleted relation values to null
-      const dataWithoutMissingRelations = await Object.entries(sanitizedSchemaAttributes).reduce(
+      const reducer = async.reduce(Object.entries(sanitizedSchemaAttributes));
+      const dataWithoutMissingRelations = await reducer(
         async (
-          previousRelationAttributesPromise: Promise<Record<string, unknown>>,
+          previousRelationAttributes: Record<string, unknown>,
           [name, attribute]: [string, Schema.Attribute.AnyAttribute]
         ) => {
-          const previousRelationAttributes = await previousRelationAttributesPromise;
-
-          const relationData = version.data[name];
-          if (relationData === null) {
+          const versionRelationData = version.data[name];
+          if (!versionRelationData) {
             return previousRelationAttributes;
           }
 
@@ -441,62 +348,19 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             attribute.relation !== 'morphToOne' &&
             attribute.relation !== 'morphToMany'
           ) {
-            if (Array.isArray(relationData)) {
-              if (relationData.length === 0) return previousRelationAttributes;
-
-              const existingAndMissingRelations = await Promise.all(
-                relationData.map((relation) => {
-                  return strapi.documents(attribute.target).findOne({
-                    documentId: relation.documentId,
-                    locale: relation.locale || undefined,
-                  });
-                })
-              );
-              const existingRelations = existingAndMissingRelations.filter(
-                (relation) => relation !== null
-              ) as Modules.Documents.AnyDocument[];
-
-              previousRelationAttributes[name] = existingRelations;
-            } else {
-              const existingRelation = await strapi.documents(attribute.target).findOne({
-                documentId: relationData.documentId,
-                locale: relationData.locale || undefined,
-              });
-
-              if (!existingRelation) {
-                previousRelationAttributes[name] = null;
-              }
-            }
+            const data = await historyUtils.getRelationRestoreValue(versionRelationData, attribute);
+            previousRelationAttributes[name] = data;
           }
 
           if (attribute.type === 'media') {
-            if (attribute.multiple) {
-              const existingAndMissingMedias = await Promise.all(
-                // @ts-expect-error Fix the type definitions so this isn't any
-                relationData.map((media) => {
-                  return strapi.db
-                    .query('plugin::upload.file')
-                    .findOne({ where: { id: media.id } });
-                })
-              );
-
-              const existingMedias = existingAndMissingMedias.filter((media) => media != null);
-              previousRelationAttributes[name] = existingMedias;
-            } else {
-              const existingMedia = await strapi.db
-                .query('plugin::upload.file')
-                .findOne({ where: { id: version.data[name].id } });
-
-              if (!existingMedia) {
-                previousRelationAttributes[name] = null;
-              }
-            }
+            const data = await historyUtils.getMediaRestoreValue(versionRelationData, attribute);
+            previousRelationAttributes[name] = data;
           }
 
           return previousRelationAttributes;
         },
         // Clone to avoid mutating the original version data
-        Promise.resolve(structuredClone(dataWithoutAddedAttributes))
+        structuredClone(dataWithoutAddedAttributes)
       );
 
       const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);

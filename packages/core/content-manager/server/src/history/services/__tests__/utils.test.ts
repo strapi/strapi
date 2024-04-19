@@ -1,7 +1,16 @@
-import { getSchemaAttributesDiff } from '../utils';
+import { createHistoryUtils } from '../utils';
 
-describe('history-version service utils', () => {
+const baseStrapiMock = {
+  plugin: jest.fn(() => {}),
+};
+
+describe('History utils', () => {
   describe('getSchemaAttributesDiff', () => {
+    const { getSchemaAttributesDiff } = createHistoryUtils({
+      // @ts-expect-error ignore
+      strapi: baseStrapiMock,
+    });
+
     it('should return a diff', () => {
       const versionSchema = {
         title: {
