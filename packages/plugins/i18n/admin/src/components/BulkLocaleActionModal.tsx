@@ -142,13 +142,16 @@ const BulkLocaleActionModal = ({
   );
 
   const getFormattedCountMessage = () => {
+    const localesWithErrors = Object.keys(validationErrors);
+
     const alreadyPublishedCount = selectedRows.filter(
       ({ status }) => status === 'published'
     ).length;
     const readyToPublishCount = selectedRows.filter(
-      ({ status }) => status === 'draft' || status === 'modified'
+      ({ status, locale }) =>
+        (status === 'draft' || status === 'modified') && !localesWithErrors.includes(locale)
     ).length;
-    const withErrorsCount = Object.keys(validationErrors).length;
+    const withErrorsCount = localesWithErrors.length;
 
     return formatMessage(
       {
