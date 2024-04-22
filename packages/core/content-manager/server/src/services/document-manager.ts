@@ -138,7 +138,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .clone({ ...params, documentId: id })
-        .then((result) => result?.versions.at(0));
+        .then((result) => result?.entries.at(0));
     },
 
     /**
@@ -193,7 +193,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .publish({ ...params, documentId: id })
-        .then((result) => result?.versions.at(0));
+        .then((result) => result?.entries.at(0));
     },
 
     async publishMany(entities: Document[], uid: UID.ContentType) {
@@ -288,7 +288,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .unpublish({ ...params, documentId: id })
-        .then((result) => result?.versions.at(0));
+        .then((result) => result?.entries.at(0));
     },
 
     async discardDraft(
@@ -302,7 +302,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .discardDraft({ ...params, documentId: id })
-        .then((result) => result?.versions.at(0));
+        .then((result) => result?.entries.at(0));
     },
 
     async countDraftRelations(id: string, uid: UID.ContentType, locale: string) {
