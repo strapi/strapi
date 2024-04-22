@@ -16,7 +16,7 @@ export interface CreateHistoryVersion {
   componentsSchemas: Record<`${string}.${string}`, Struct.SchemaAttributes>;
 }
 
-interface Locale {
+export interface Locale {
   name: string;
   code: string;
 }
