@@ -9,7 +9,11 @@ import type { ComponentInputProps } from './Input';
 
 interface NonRepeatableComponentProps extends Omit<ComponentInputProps, 'required' | 'label'> {}
 
-const NonRepeatableComponent = ({ attribute, name }: NonRepeatableComponentProps) => {
+const NonRepeatableComponent = ({
+  attribute,
+  name,
+  renderInput = InputRenderer,
+}: NonRepeatableComponentProps) => {
   const {
     edit: { components },
   } = useDocLayout();
@@ -47,7 +51,7 @@ const NonRepeatableComponent = ({ attribute, name }: NonRepeatableComponentProps
 
                   return (
                     <GridItem col={size} key={completeFieldName} s={12} xs={12}>
-                      <InputRenderer {...field} name={completeFieldName} />
+                      {renderInput({ ...field, name: completeFieldName })}
                     </GridItem>
                   );
                 })}

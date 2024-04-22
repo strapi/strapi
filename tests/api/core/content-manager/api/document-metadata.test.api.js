@@ -8,7 +8,6 @@ const { testInTransaction } = require('../../../utils');
 const builder = createTestBuilder();
 let strapi;
 let formatDocument;
-let rq;
 
 const PRODUCT_UID = 'api::product.product';
 
@@ -67,50 +66,44 @@ describe('CM API - Document metadata', () => {
     await builder.cleanup();
   });
 
-  it(
-    'Returns empty metadata when there is only a draft',
-    testInTransaction(async () => {
-      await createProduct('product', 'en', 'draft');
+  testInTransaction('Returns empty metadata when there is only a draft', async () => {
+    await createProduct('product', 'en', 'draft');
 
-      const product = await getProduct('product');
-      const { data, meta } = await formatDocument(PRODUCT_UID, product, {});
+    const product = await getProduct('product');
+    const { data, meta } = await formatDocument(PRODUCT_UID, product, {});
 
-      expect(data.status).toBe('draft');
-      expect(meta.availableLocales).toEqual([]);
-      expect(meta.availableStatus).toEqual([]);
-    })
-  );
+    expect(data.status).toBe('draft');
+    expect(meta.availableLocales).toEqual([]);
+    expect(meta.availableStatus).toEqual([]);
+  });
 
-  it(
-    'Returns availableStatus when draft has a published version',
-    testInTransaction(async () => {
-      await createProduct('product', 'en', 'draft');
-      await createProduct('product', 'en', 'published');
+  testInTransaction('Returns availableStatus when draft has a published version', async () => {
+    await createProduct('product', 'en', 'draft');
+    await createProduct('product', 'en', 'published');
 
-      const draftProduct = await getProduct('product', 'en', 'draft');
+    const draftProduct = await getProduct('product', 'en', 'draft');
 
-      const { data, meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
+    const { data, meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
 
-      expect(data.status).toBe('published');
-      expect(meta.availableLocales).toEqual([]);
-      expect(meta.availableStatus).toMatchObject([
-        {
-          locale: 'en',
-          publishedAt: expect.any(String),
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-          createdBy: expect.any(Object),
-          updatedBy: expect.any(Object),
-          // TODO
-          // status: 'published',
-        },
-      ]);
-    })
-  );
+    expect(data.status).toBe('published');
+    expect(meta.availableLocales).toEqual([]);
+    expect(meta.availableStatus).toMatchObject([
+      {
+        locale: 'en',
+        publishedAt: expect.any(String),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+        createdBy: expect.any(Object),
+        updatedBy: expect.any(Object),
+        // TODO
+        // status: 'published',
+      },
+    ]);
+  });
 
-  it(
+  testInTransaction(
     'Returns availableStatus when published version has a draft version',
-    testInTransaction(async () => {
+    async () => {
       await createProduct('product', 'en', 'draft');
       await createProduct('product', 'en', 'published');
 
@@ -131,35 +124,32 @@ describe('CM API - Document metadata', () => {
           // status: 'published',
         },
       ]);
-    })
+    }
   );
 
-  it(
-    'Returns available locales when there are multiple locales',
-    testInTransaction(async () => {
-      await createProduct('product', 'en', 'draft');
-      await createProduct('product', 'fr', 'draft');
+  testInTransaction('Returns available locales when there are multiple locales', async () => {
+    await createProduct('product', 'en', 'draft');
+    await createProduct('product', 'fr', 'draft');
 
-      const draftProduct = await getProduct('product', 'en', 'draft');
+    const draftProduct = await getProduct('product', 'en', 'draft');
 
-      const { data, meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
+    const { meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
 
-      expect(meta.availableLocales).toMatchObject([
-        {
-          locale: 'fr',
-          status: 'draft',
-          createdAt: expect.any(String),
-          updatedAt: expect.any(String),
-        },
-      ]);
-      expect(meta.availableStatus).toEqual([]);
-    })
-  );
+    expect(meta.availableLocales).toMatchObject([
+      {
+        locale: 'fr',
+        status: 'draft',
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+    ]);
+    expect(meta.availableStatus).toEqual([]);
+  });
 
-  //TODO:  Modified status
-  it(
+  // TODO:  Modified status
+  testInTransaction(
     'Returns modified status when draft is different from published version',
-    testInTransaction(async () => {
+    async () => {
       // Published versions should have different dates
       await createProduct('product', 'en', 'draft');
       await createProduct('product', 'en', 'published', { updatedAt: '2024-02-11' });
@@ -182,6 +172,6 @@ describe('CM API - Document metadata', () => {
 
       expect(dataPublished.status).toBe('modified');
       expect(metaPublished.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
-    })
+    }
   );
 });

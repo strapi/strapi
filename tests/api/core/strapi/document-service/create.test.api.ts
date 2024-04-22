@@ -19,47 +19,26 @@ describe('Document Service', () => {
   });
 
   describe('Creates', () => {
-    it(
-      'can create a document',
-      testInTransaction(async () => {
-        const article = await strapi.documents(ARTICLE_UID).create({
-          data: { title: 'Article' },
-        });
+    testInTransaction('can create a document', async () => {
+      const article = await strapi.documents(ARTICLE_UID).create({
+        data: { title: 'Article' },
+      });
 
-        // verify that the returned document was updated
-        expect(article).toMatchObject({
-          title: 'Article',
-          locale: 'en', // default locale
-          publishedAt: null, // should be a draft
-        });
+      // verify that the returned document was updated
+      expect(article).toMatchObject({
+        title: 'Article',
+        locale: 'en', // default locale
+        publishedAt: null, // should be a draft
+      });
 
-        const articles = await findArticlesDb({ documentId: article.documentId });
-        // Only one article should have been created
-        expect(articles).toHaveLength(1);
-      })
-    );
+      const articles = await findArticlesDb({ documentId: article.documentId });
+      // Only one article should have been created
+      expect(articles).toHaveLength(1);
+    });
 
-    it(
-      'can create document with components',
-      testInTransaction(async () => {
-        const article = await strapi.documents(ARTICLE_UID).create({
-          data: {
-            title: 'Article',
-            comp: {
-              text: 'comp-1',
-            },
-            dz: [
-              {
-                __component: 'article.dz-comp',
-                name: 'dz-comp-1',
-              },
-            ],
-          },
-          populate: ['comp', 'dz'],
-        });
-
-        // verify that the returned document was updated
-        expect(article).toMatchObject({
+    testInTransaction('can create document with components', async () => {
+      const article = await strapi.documents(ARTICLE_UID).create({
+        data: {
           title: 'Article',
           comp: {
             text: 'comp-1',
@@ -70,70 +49,65 @@ describe('Document Service', () => {
               name: 'dz-comp-1',
             },
           ],
-        });
-      })
-    );
+        },
+        populate: ['comp', 'dz'],
+      });
 
-    it(
-      'can create an article in dutch',
-      testInTransaction(async () => {
-        const article = await strapi.documents(ARTICLE_UID).create({
-          locale: 'nl',
-          data: { title: 'Article' },
-        });
+      // verify that the returned document was updated
+      expect(article).toMatchObject({
+        title: 'Article',
+        comp: {
+          text: 'comp-1',
+        },
+        dz: [
+          {
+            __component: 'article.dz-comp',
+            name: 'dz-comp-1',
+          },
+        ],
+      });
+    });
 
-        // verify that the returned document was updated
-        expect(article).toMatchObject({
-          title: 'Article',
-          locale: 'nl', // selected locale
-          publishedAt: null, // should be a draft
-        });
-      })
-    );
+    testInTransaction('can create an article in dutch', async () => {
+      const article = await strapi.documents(ARTICLE_UID).create({
+        locale: 'nl',
+        data: { title: 'Article' },
+      });
 
-    // TODO
-    it.skip(
-      'can not directly create a published document',
-      testInTransaction(async () => {
-        const articlePromise = strapi.documents(ARTICLE_UID).create({
-          locale: 'nl',
-          status: 'published',
-          data: { title: 'Article' },
-        });
-      })
-    );
+      // verify that the returned document was updated
+      expect(article).toMatchObject({
+        title: 'Article',
+        locale: 'nl', // selected locale
+        publishedAt: null, // should be a draft
+      });
+    });
 
-    // TODO: Make publishedAt not editable
-    it(
-      'publishedAt attribute is ignored when creating document',
-      testInTransaction(async () => {
-        const article = await strapi.documents(ARTICLE_UID).create({
-          data: { title: 'Article', publishedAt: new Date() },
-        });
+    testInTransaction.todo('can not directly create a published document');
 
-        // verify that the returned document was updated
-        expect(article).toMatchObject({
-          title: 'Article',
-          publishedAt: null, // should be a draft
-        });
-      })
-    );
+    testInTransaction('publishedAt attribute is ignored when creating document', async () => {
+      const article = await strapi.documents(ARTICLE_UID).create({
+        data: { title: 'Article', publishedAt: new Date() },
+      });
 
-    it(
-      'ignores locale parameter on non-localized content type',
-      testInTransaction(async () => {
-        const author = await strapi.documents(AUTHOR_UID).create({
-          // Should be ignored on non-localized content types
-          locale: 'nl',
-          data: { name: 'Author' },
-        });
+      // verify that the returned document was updated
+      expect(article).toMatchObject({
+        title: 'Article',
+        publishedAt: null, // should be a draft
+      });
+    });
 
-        // verify that the returned document was updated
-        expect(author).toMatchObject({
-          name: 'Author',
-          locale: null, // should be null, as it is not a localized content type
-        });
-      })
-    );
+    testInTransaction('ignores locale parameter on non-localized content type', async () => {
+      const author = await strapi.documents(AUTHOR_UID).create({
+        // Should be ignored on non-localized content types
+        locale: 'nl',
+        data: { name: 'Author' },
+      });
+
+      // verify that the returned document was updated
+      expect(author).toMatchObject({
+        name: 'Author',
+        locale: null, // should be null, as it is not a localized content type
+      });
+    });
   });
 });

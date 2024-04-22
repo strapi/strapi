@@ -1,7 +1,7 @@
 import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils/index';
+import { testInTransaction } from '../../../utils';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findArticlesDb } from './utils';
 
@@ -19,21 +19,16 @@ describe('Document Service', () => {
   });
 
   describe('Delete', () => {
-    it(
-      'delete an entire document',
-      testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
-        await strapi
-          .documents(ARTICLE_UID)
-          .delete({ documentId: articleDb.documentId, locale: '*' });
+    testInTransaction('delete an entire document', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+      await strapi.documents(ARTICLE_UID).delete({ documentId: articleDb.documentId, locale: '*' });
 
-        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+      const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
-        expect(articles).toHaveLength(0);
-      })
-    );
+      expect(articles).toHaveLength(0);
+    });
 
-    it('delete a document with a component', async () => {
+    testInTransaction('delete a document with a component', async (trx: any) => {
       const componentData = {
         comp: {
           text: 'comp-1',
@@ -71,48 +66,44 @@ describe('Document Service', () => {
       const comp = await strapi.db
         .getConnection(compTable)
         .where({ id: updatedArticle.comp.id })
+        .transacting(trx)
         .first();
       const dz = await strapi.db
         .getConnection(dzTable)
         .where({ id: updatedArticle.dz.at(0)!.id })
+        .transacting(trx)
         .first();
 
       expect(comp).toBeUndefined();
       expect(dz).toBeUndefined();
     });
 
-    it(
-      'delete a document locale',
-      testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
-        await strapi.documents(ARTICLE_UID).delete({
-          documentId: articleDb.documentId,
-          locale: 'nl',
-        });
+    testInTransaction('delete a document locale', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
+      await strapi.documents(ARTICLE_UID).delete({
+        documentId: articleDb.documentId,
+        locale: 'nl',
+      });
 
-        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+      const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
-        expect(articles.length).toBeGreaterThan(0);
-        // Should not have dutch locale
-        articles.forEach((article) => {
-          expect(article.locale).not.toBe('nl');
-        });
-      })
-    );
+      expect(articles.length).toBeGreaterThan(0);
+      // Should not have dutch locale
+      articles.forEach((article) => {
+        expect(article.locale).not.toBe('nl');
+      });
+    });
 
-    it(
-      'status is ignored when deleting a document',
-      testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
-        await strapi.documents(ARTICLE_UID).delete({
-          documentId: articleDb.documentId,
-          status: 'published',
-        });
+    testInTransaction('status is ignored when deleting a document', async () => {
+      const articleDb = await findArticleDb({ title: 'Article2-Draft-EN' });
+      await strapi.documents(ARTICLE_UID).delete({
+        documentId: articleDb.documentId,
+        status: 'published',
+      });
 
-        const articles = await findArticlesDb({ documentId: articleDb.documentId });
+      const articles = await findArticlesDb({ documentId: articleDb.documentId });
 
-        expect(articles.length).toBe(0);
-      })
-    );
+      expect(articles.length).toBe(0);
+    });
   });
 });
