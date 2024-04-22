@@ -84,11 +84,6 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     // Retrieve the attribute definition associated to the key from the schema
     const attribute = schema.attributes[key] as AnyAttribute | undefined;
 
-    // If the attribute doesn't exist within the schema, ignore it
-    // if (isNil(attribute)) {
-    //   continue;
-    // }
-
     const newPath = { ...path };
 
     newPath.raw = isNil(path.raw) ? key : `${path.raw}.${key}`;
