@@ -50,7 +50,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
      * Find multiple (or all) locales for a document
      */
     async findLocales(
-      id: string | undefined,
+      id: string | string[] | undefined,
       uid: UID.CollectionType,
       opts: {
         populate?: Modules.Documents.Params.Pick<any, 'populate'>;
