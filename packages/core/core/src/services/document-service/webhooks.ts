@@ -38,6 +38,15 @@ const registerEntryWebhooks = (strapi: Core.Strapi) => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
     strapi.get('webhookStore').addAllowedEvent(key, value);
   });
+
+  // TODO: V6 Remove the legacy events
+  Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
+    if (value.startsWith('document.')) {
+      const legacyKey = key.replace('DOCUMENT_', 'ENTRY_');
+      const legacyValue = value.replace('document.', 'entry.');
+      strapi.get('webhookStore').addAllowedEvent(legacyKey, legacyValue);
+    }
+  });
 };
 
 /**
