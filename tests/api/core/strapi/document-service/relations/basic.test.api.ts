@@ -22,27 +22,24 @@ describe('Document Service relations', () => {
   });
 
   describe('Create', () => {
-    it(
-      'Can create a document with relations',
-      testInTransaction(async () => {
-        const article = await strapi.documents(ARTICLE_UID).create({
-          data: {
-            title: 'Article with author',
-            // Connect document id
-            categories: ['Cat1'],
-          },
-          populate: { categories: true },
-        });
+    testInTransaction('Can create a document with relations', async () => {
+      const article = await strapi.documents(ARTICLE_UID).create({
+        data: {
+          title: 'Article with author',
+          // Connect document id
+          categories: ['Cat1'],
+        },
+        populate: { categories: true },
+      });
 
-        // TODO: Category id should be the document id
-        expect(article.categories[0].documentId).toBe('Cat1');
-      })
-    );
+      // TODO: Category id should be the document id
+      expect(article.categories[0].documentId).toBe('Cat1');
+    });
   });
 
   // TODO
   describe.skip('Update', () => {
-    it('Can update a document with relations', async () => {
+    testInTransaction('Can update a document with relations', async () => {
       const article = await strapi.documents(ARTICLE_UID).update({
         documentId: 'Article1',
         locale: 'en',
@@ -60,9 +57,9 @@ describe('Document Service relations', () => {
   });
 
   describe('Publish', () => {
-    it(
+    testInTransaction(
       'Publishing filters relations that do not have a published targeted document',
-      testInTransaction(async () => {
+      async () => {
         const article = await strapi.documents(ARTICLE_UID).create({
           data: { title: 'Article with author', categories: ['Cat1'] },
           populate: { categories: true },
@@ -77,12 +74,12 @@ describe('Document Service relations', () => {
         expect(publishedArticles.versions.length).toBe(1);
         // Cat1 does not have a published document
         expect(publishedArticle.categories.length).toBe(0);
-      })
+      }
     );
 
-    it(
+    testInTransaction(
       'Publishing connects relation to the published targeted documents',
-      testInTransaction(async () => {
+      async () => {
         const article = await strapi.documents(ARTICLE_UID).create({
           data: { title: 'Article with author', categories: ['Cat1'] },
           populate: { categories: true },
@@ -102,38 +99,42 @@ describe('Document Service relations', () => {
         // Cat1 has a published document
         expect(publishedArticle.categories.length).toBe(1);
         expect(publishedArticle.categories[0].documentId).toBe('Cat1');
-      })
+      }
     );
   });
 
   describe('Discard', () => {
-    it('Discarding draft brings back relations from the published version', async () => {
-      // Create article in draft with a relation
-      const draftArticle = await strapi.documents(ARTICLE_UID).create({
-        data: { title: 'Article with author', categories: ['Cat1'] },
-      });
+    testInTransaction(
+      'Discarding draft brings back relations from the published version',
+      async () => {
+        // Create article in draft with a relation
+        const draftArticle = await strapi.documents(ARTICLE_UID).create({
+          data: { title: 'Article with author', categories: ['Cat1'] },
+        });
 
-      const id = draftArticle.documentId;
+        const id = draftArticle.documentId;
 
-      // Publish documents
-      await strapi.documents(CATEGORY_UID).publish({ documentId: 'Cat1' });
-      await strapi.documents(ARTICLE_UID).publish({ documentId: id });
+        // Publish documents
+        await strapi.documents(CATEGORY_UID).publish({ documentId: 'Cat1' });
+        await strapi.documents(ARTICLE_UID).publish({ documentId: id });
 
-      // Update the draft article
-      await strapi
-        .documents(ARTICLE_UID)
-        .update({ documentId: id, data: { title: 'Updated Article with author', categories: [] } });
+        // Update the draft article
+        await strapi.documents(ARTICLE_UID).update({
+          documentId: id,
+          data: { title: 'Updated Article with author', categories: [] },
+        });
 
-      // Discard the draft
-      const newDraftArticles = await strapi
-        .documents(ARTICLE_UID)
-        .discardDraft({ documentId: id, populate: ['categories'] });
+        // Discard the draft
+        const newDraftArticles = await strapi
+          .documents(ARTICLE_UID)
+          .discardDraft({ documentId: id, populate: ['categories'] });
 
-      // Validate the draft is discarded
-      const newDraftArticle = newDraftArticles.versions[0];
+        // Validate the draft is discarded
+        const newDraftArticle = newDraftArticles.versions[0];
 
-      expect(newDraftArticle.title).toBe('Article with author');
-      expect(newDraftArticle.categories.length).toBe(1);
-    });
+        expect(newDraftArticle.title).toBe('Article with author');
+        expect(newDraftArticle.categories.length).toBe(1);
+      }
+    );
   });
 });
