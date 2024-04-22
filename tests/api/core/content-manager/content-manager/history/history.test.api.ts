@@ -422,15 +422,13 @@ describeOnCondition(edition === 'EE')('History API', () => {
         .documents(collectionTypeUid)
         .findOne({ documentId: collectionTypeDocumentId, locale: 'fr' });
 
-      const res = await rq({
+      await rq({
         method: 'PUT',
         url: `/content-manager/history-versions/4/restore`,
         body: {
           contentType: collectionTypeUid,
         },
       });
-
-      console.log('res', res);
 
       const restoredDocument = await strapi
         .documents(collectionTypeUid)
