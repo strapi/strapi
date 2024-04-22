@@ -966,7 +966,7 @@ describe('Core API - Validate', () => {
           [{ dz: { on: { 'default.component-a': true } } }, 'default.component-a', 2],
           [{ dz: { on: { 'default.component-b': true } } }, 'default.component-b', 1],
         ])(
-          'Populates a dynamic-use using populate fragments (%s)',
+          'Populates a dynamic-zone using populate fragments (%s)',
           async (populate, componentUID, expectedLength) => {
             const res = await rq.get('/api/documents', { qs: { populate } });
 

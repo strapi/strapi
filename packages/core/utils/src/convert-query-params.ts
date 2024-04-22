@@ -343,6 +343,15 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     const { attributes } = schema;
 
     return Object.entries(populate).reduce((acc, [key, subPopulate]) => {
+      if (_.isString(subPopulate)) {
+        try {
+          const subPopulateAsBoolean = parseType({ type: 'boolean', value: subPopulate });
+          return { ...acc, [key]: subPopulateAsBoolean };
+        } catch {
+          // ignore
+        }
+      }
+
       if (_.isBoolean(subPopulate)) {
         return { ...acc, [key]: subPopulate };
       }
@@ -357,42 +366,29 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       const isAllowedAttributeForFragmentPopulate =
         isDynamicZoneAttribute(attribute) || isMorphToRelationalAttribute(attribute);
 
-      if (isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined(subPopulate)) {
-        return {
-          ...acc,
-          [key]: {
-            on: Object.entries(subPopulate.on).reduce(
-              (acc, [type, typeSubPopulate]) => ({
-                ...acc,
-                [type]: convertNestedPopulate(typeSubPopulate, getModel(type)),
-              }),
-              {}
-            ),
-          },
-        };
-      }
-
-      // TODO: This is a query's populate fallback for DynamicZone and is kept for legacy purpose.
-      //       Removing it could break existing user queries but it should be removed in V5.
-      if (isDynamicZoneAttribute(attribute)) {
-        const populates = attribute.components
-          .map((uid) => getModel(uid))
-          .map((schema) => convertNestedPopulate(subPopulate, schema))
-          .map((populate) => (populate === true ? {} : populate)) // cast boolean to empty object to avoid merging issues
-          .filter((populate) => populate !== false);
-
-        if (isEmpty(populates)) {
-          return acc;
+      if (isAllowedAttributeForFragmentPopulate) {
+        if (hasFragmentPopulateDefined(subPopulate)) {
+          return {
+            ...acc,
+            [key]: {
+              on: Object.entries(subPopulate.on).reduce(
+                (acc, [type, typeSubPopulate]) => ({
+                  ...acc,
+                  [type]: convertNestedPopulate(typeSubPopulate, getModel(type)),
+                }),
+                {}
+              ),
+            },
+          };
         }
 
-        return {
-          ...acc,
-          [key]: mergeAll(populates),
-        };
+        throw new Error(
+          `Invalid nested populate. Expected a fragment ("on") but found ${JSON.stringify(subPopulate)}`
+        );
       }
 
-      if (isMorphToRelationalAttribute(attribute)) {
-        return { ...acc, [key]: convertNestedPopulate(subPopulate, undefined) };
+      if (!isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined(subPopulate)) {
+        throw new Error(`Using fragments is not permitted to populate "${key}" in "${schema.uid}"`);
       }
 
       // NOTE: Retrieve the target schema UID.
