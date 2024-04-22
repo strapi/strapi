@@ -68,7 +68,15 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         ...getValidPagination({ page: params.page, pageSize: params.pageSize }),
       });
 
-      return { data: results, meta: { pagination } };
+      return {
+        data: await Promise.all(
+          results.map(async (result) => ({
+            ...result,
+            data: await permissionChecker.sanitizeOutput(result.data),
+          }))
+        ),
+        meta: { pagination },
+      };
     },
 
     async restoreVersion(ctx) {
