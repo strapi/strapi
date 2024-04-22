@@ -219,8 +219,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
     ]);
   });
 
-  afterAll(() => {
-    // TODO: cleanup
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
   });
 
   describe('Find many history versions', () => {
