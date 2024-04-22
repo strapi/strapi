@@ -124,7 +124,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     )(params);
 
     // Get deep populate
-    const entriesToClone = await strapi.db?.query(uid).findMany({
+    const entriesToClone = await strapi.db.query(uid).findMany({
       where: {
         ...queryParams?.lookup,
         documentId,
@@ -225,27 +225,35 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    await deleteDocument({
-      ...queryParams,
-      documentId,
-      lookup: { ...queryParams?.lookup, publishedAt: { $ne: null } },
-    });
+    const [draftsToPublish, publishedToDelete] = await Promise.all([
+      strapi.db.query(uid).findMany({
+        where: {
+          ...queryParams?.lookup,
+          documentId,
+          publishedAt: null, // Ignore lookup
+        },
+        // Populate relations, media, compos and dz
+        populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
+      }),
+      strapi.db.query(uid).findMany({
+        where: {
+          ...queryParams?.lookup,
+          documentId,
+          publishedAt: { $ne: null },
+        },
+        select: ['id'],
+      }),
+    ]);
 
-    // Get deep populate
-    const draftsToPublish = await strapi.db?.query(uid).findMany({
-      where: {
-        ...queryParams?.lookup,
-        documentId,
-        publishedAt: null,
-      },
-      populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
-    });
+    // Delete all published versions
+    await async.map(publishedToDelete, (entry: any) => entries.delete(entry.id));
 
     // Transform draft entry data and create published versions
     const versions = await async.map(draftsToPublish, (draft: unknown) =>
       entries.publish(draft, queryParams)
     );
 
+    // Trigger webhook
     versions.forEach(emitWebhook(uid, 'entry.publish'));
 
     return { versions };
@@ -254,20 +262,21 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   async function unpublish(opts = {} as any) {
     const { documentId, ...params } = opts;
 
-    const queryParams = await async.pipe(
+    const query = await async.pipe(
       i18n.defaultLocale(contentType),
-      i18n.multiLocaleToLookup(contentType)
+      i18n.multiLocaleToLookup(contentType),
+      transformParamsToQuery(uid),
+      (query) => assoc('where', { ...query.where, documentId, publishedAt: { $ne: null } }, query)
     )(params);
 
-    const { deletedEntries } = await deleteDocument({
-      ...params,
-      documentId,
-      lookup: { ...queryParams?.lookup, publishedAt: { $ne: null } },
-    });
+    // Delete all published versions
+    const versionsToDelete = await strapi.db.query(uid).findMany(query);
+    await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
-    deletedEntries.forEach(emitWebhook(uid, 'entry.unpublish'));
+    // Trigger webhook
+    versionsToDelete.forEach(emitWebhook(uid, 'entry.unpublish'));
 
-    return { versions: deletedEntries };
+    return { versions: versionsToDelete };
   }
 
   async function discardDraft(opts = {} as any) {
@@ -278,28 +287,35 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    // Delete all drafts that match query
-    await deleteDocument({
-      ...queryParams,
-      documentId,
-      lookup: { ...queryParams?.lookup, publishedAt: null },
-    });
+    const [versionsToDraft, versionsToDelete] = await Promise.all([
+      strapi.db.query(uid).findMany({
+        where: {
+          ...queryParams?.lookup,
+          documentId,
+          publishedAt: { $ne: null },
+        },
+        // Populate relations, media, compos and dz
+        populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
+      }),
+      strapi.db.query(uid).findMany({
+        where: {
+          ...queryParams?.lookup,
+          documentId,
+          publishedAt: null,
+        },
+        select: ['id'],
+      }),
+    ]);
 
-    // Get deep populate of published versions
-    const entriesToDraft = await strapi.db?.query(uid).findMany({
-      where: {
-        ...queryParams?.lookup,
-        documentId,
-        publishedAt: { $ne: null },
-      },
-      populate: getDeepPopulate(uid, { relationalFields: ['documentId', 'locale'] }),
-    });
+    // Delete all drafts
+    await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
     // Transform published entry data and create draft versions
-    const draftEntries = await async.map(entriesToDraft, (entry: any) =>
+    const draftEntries = await async.map(versionsToDraft, (entry: any) =>
       entries.discardDraft(entry, queryParams)
     );
 
+    // Trigger webhook
     draftEntries.forEach(emitWebhook(uid, 'entry.draft-discard'));
 
     return { versions: draftEntries };
