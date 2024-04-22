@@ -11,7 +11,7 @@ import {
   NavSections,
   NavUser,
 } from '@strapi/design-system/v2';
-import { Exit, Write, Lock } from '@strapi/icons';
+import { Exit, Write, Lock, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -24,6 +24,7 @@ import { usePersistentState } from '../hooks/usePersistentState';
 import { getDisplayName } from '../utils/users';
 
 import { NavBrand as NewNavBrand } from './MainNav/NavBrand';
+import { NavLink as NewNavLink } from './MainNav/NavLink';
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -135,6 +136,11 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
       <Divider />
 
       <NavSections>
+        {condensed && (
+          <NewNavLink to="/" icon={House} onClick={() => handleClickOnLink('/')}>
+            {formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
+          </NewNavLink>
+        )}
         <NavLink
           as={RouterNavLink}
           // @ts-expect-error the props from the passed as prop are not inferred // joined together
