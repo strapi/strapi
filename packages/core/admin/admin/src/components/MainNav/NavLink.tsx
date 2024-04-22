@@ -6,8 +6,7 @@ import styled from 'styled-components';
 
 export interface NavLinkProps extends LinkProps {
   children: React.ReactNode;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon?: string | React.ComponentType<any>;
+  icon?: React.ElementType<React.SVGProps<SVGSVGElement>>;
   badgeAriaLabel?: string;
   badgeContent?: string | number;
 }
