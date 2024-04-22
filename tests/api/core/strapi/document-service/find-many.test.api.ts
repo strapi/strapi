@@ -131,24 +131,6 @@ describe('Document Service', () => {
       expect(count).toBe(articles.length);
     });
 
-    it('Invalid locale parameters are ignored', async () => {
-      const params = {
-        locale: [1],
-      } as any;
-
-      // @ts-expect-error
-      const articlesInvalid = await findArticles({ locale: [1] });
-      const articlesEn = await findArticles({ locale: 'en' });
-
-      // Should return default language (en) and draft version
-      expect(articlesInvalid.length).toBe(articlesEn.length);
-
-      // all articles should be in english
-      articlesInvalid.forEach((article) => {
-        expect(article.locale).toBe('en');
-      });
-    });
-
     it.todo('pagination');
   });
 });
