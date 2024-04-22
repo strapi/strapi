@@ -255,7 +255,6 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       results: HistoryVersions.HistoryVersionDataResponse[];
       pagination: HistoryVersions.Pagination;
     }> {
-      
       const locale = params.locale || (await getDefaultLocale());
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
