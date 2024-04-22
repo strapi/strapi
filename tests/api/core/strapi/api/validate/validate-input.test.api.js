@@ -1,8 +1,5 @@
 'use strict';
 
-// TODO: add tests for components, media, dynamic zone and relations (for each param)
-// TODO: add tests for populate
-
 const { values } = require('lodash/fp');
 
 const { createTestBuilder } = require('api-tests/builder');
