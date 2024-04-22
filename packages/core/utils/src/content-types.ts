@@ -141,8 +141,8 @@ const isPrivateAttribute = (model: Model, attributeName: string) => {
   return getStoredPrivateAttributes(model).includes(attributeName);
 };
 
-const isScalarAttribute = (attribute: Attribute) => {
-  return !['media', 'component', 'relation', 'dynamiczone'].includes(attribute?.type);
+const isScalarAttribute = (attribute?: Attribute) => {
+  return attribute && !['media', 'component', 'relation', 'dynamiczone'].includes(attribute.type);
 };
 const isMediaAttribute = (attribute: Attribute) => attribute?.type === 'media';
 const isRelationalAttribute = (attribute: Attribute): attribute is RelationalAttribute =>
@@ -153,10 +153,12 @@ const isComponentAttribute = (
 ): attribute is ComponentAttribute | DynamicZoneAttribute =>
   ['component', 'dynamiczone'].includes(attribute?.type);
 
-const isDynamicZoneAttribute = (attribute: Attribute): attribute is DynamicZoneAttribute =>
-  attribute?.type === 'dynamiczone';
-const isMorphToRelationalAttribute = (attribute: Attribute) => {
-  return isRelationalAttribute(attribute) && attribute?.relation?.startsWith?.('morphTo');
+const isDynamicZoneAttribute = (attribute?: Attribute): attribute is DynamicZoneAttribute =>
+  !!attribute && attribute.type === 'dynamiczone';
+const isMorphToRelationalAttribute = (attribute?: Attribute) => {
+  return (
+    attribute && isRelationalAttribute(attribute) && attribute.relation?.startsWith?.('morphTo')
+  );
 };
 
 const getComponentAttributes = (schema: Model) => {

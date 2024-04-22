@@ -59,6 +59,7 @@ function createController({
       return strapi.contentAPI.validate.query(ctx.query, contentType, { auth });
     },
 
+    // TODO: should this just accept ctx and pull body.data from it?
     async validateInput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 

@@ -38,6 +38,7 @@ export interface Validators {
 const createAPIValidators = (opts: APIOptions) => {
   const { getModel } = opts || {};
 
+  // TODO: instead of using throwInvalidParam add a throwInvalidData to use different wording
   const validateInput: ValidateFunc = async (data: unknown, schema: Model, { auth } = {}) => {
     if (!schema) {
       throw new Error('Missing schema in validateInput');
@@ -61,9 +62,12 @@ const createAPIValidators = (opts: APIOptions) => {
             throwInvalidParam({ key: DOC_ID_ATTRIBUTE });
           }
         }
+        return data;
       },
       // non-writable attributes
       traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema, getModel }),
+      // unrecognized attributes
+      traverseEntity(visitors.throwUnrecognizedFields, { schema, getModel }),
     ];
 
     if (auth) {

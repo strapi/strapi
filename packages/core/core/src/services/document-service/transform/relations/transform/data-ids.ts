@@ -67,6 +67,10 @@ const getRelationIds = curry(
 const transformDataIdsVisitor = (idMap: IdMap, data: Record<string, any>, source: Options) => {
   return traverseEntityRelations(
     async ({ key, value, attribute }, { set }) => {
+      if (!attribute) {
+        return;
+      }
+
       // Find relational attributes, and return the document ids
       const targetUid = attribute.target!;
       const getIds = getRelationIds(idMap, targetUid, source);

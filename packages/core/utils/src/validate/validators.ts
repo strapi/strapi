@@ -112,7 +112,7 @@ const defaultValidateFields = curry((ctx: Context, fields: unknown) => {
     // Only allow scalar attributes
     traverseQueryFields(({ key, attribute, path }) => {
       // ID is not an attribute per se, so we need to make
-      // an extra check to ensure we're not removing it
+      // an extra check to ensure we're not throwing because of it
       if ([ID_ATTRIBUTE, DOC_ID_ATTRIBUTE].includes(key)) {
         return;
       }

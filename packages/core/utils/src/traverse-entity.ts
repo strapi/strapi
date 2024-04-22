@@ -10,7 +10,7 @@ export interface VisitorOptions {
   schema: Model;
   key: string;
   value: Data[keyof Data];
-  attribute: AnyAttribute;
+  attribute?: AnyAttribute;
   path: Path;
   getModel(uid: string): Model;
 }
@@ -82,12 +82,12 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
     // Retrieve the attribute definition associated to the key from the schema
-    const attribute = schema.attributes[key];
+    const attribute = schema.attributes[key] as AnyAttribute | undefined;
 
     // If the attribute doesn't exist within the schema, ignore it
-    if (isNil(attribute)) {
-      continue;
-    }
+    // if (isNil(attribute)) {
+    //   continue;
+    // }
 
     const newPath = { ...path };
 
@@ -113,8 +113,8 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     // Extract the value for the current key (after calling the visitor)
     const value = copy[key];
 
-    // Ignore Nil values
-    if (isNil(value)) {
+    // Ignore Nil values or attributes
+    if (isNil(value) || isNil(attribute)) {
       continue;
     }
 
