@@ -117,7 +117,7 @@ const loadIndex = async (dir: string) => {
   }
 };
 
-// because this is async and its contents are dynamic, we must return it as an array to avoid a property called `then` being interpreted as a Promise
+// because this is async and its contents are dynamic, we must return it within an object to avoid a property called `then` being interpreted as a Promise
 const loadContentTypes = async (apiName: string, dir: string) => {
   if (!(await fse.pathExists(dir))) {
     return;
@@ -156,7 +156,7 @@ const loadContentTypes = async (apiName: string, dir: string) => {
   return { result: contentTypes };
 };
 
-// because this is async and its contents are dynamic, we must return it as an array to avoid a property called `then` being interpreted as a Promise
+// because this is async and its contents are dynamic, we must return it within an object to avoid a property called `then` being interpreted as a Promise
 const loadDir = async (dir: string) => {
   if (!(await fse.pathExists(dir))) {
     return;
@@ -184,7 +184,7 @@ const loadFile = async (file: string): Promise<{ result: unknown }> => {
 
   switch (ext) {
     case '.js':
-      return { result: await importDefault(file) };
+      return { result: importDefault(file) };
     case '.json':
       return { result: await fse.readJSON(file) };
     default:
