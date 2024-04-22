@@ -155,8 +155,8 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                             showReleaseNotification={false}
                             showTutorials={false}
                             logos={{
-                              auth: { default: '' },
-                              menu: { default: '' },
+                              auth: { default: 'default' },
+                              menu: { default: 'default' },
                             }}
                             updateProjectSettings={jest.fn()}
                           >
