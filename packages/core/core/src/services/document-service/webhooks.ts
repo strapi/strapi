@@ -6,12 +6,12 @@ import { sanitize } from '@strapi/utils';
 import { getDeepPopulate } from './utils/populate';
 
 const ALLOWED_WEBHOOK_EVENTS = {
-  DOCUMENT_CREATE: 'document.create',
-  DOCUMENT_UPDATE: 'document.update',
-  DOCUMENT_DELETE: 'document.delete',
-  DOCUMENT_PUBLISH: 'document.publish',
-  DOCUMENT_UNPUBLISH: 'document.unpublish',
-  DOCUMENT_DRAFT_DISCARD: 'document.draft-discard',
+  ENTRY_CREATE: 'entry.create',
+  ENTRY_UPDATE: 'entry.update',
+  ENTRY_DELETE: 'entry.delete',
+  ENTRY_PUBLISH: 'entry.publish',
+  ENTRY_UNPUBLISH: 'entry.unpublish',
+  ENTRY_DRAFT_DISCARD: 'entry.draft-discard',
 };
 
 type WebhookEvent = Utils.Object.Values<typeof ALLOWED_WEBHOOK_EVENTS>;
@@ -38,15 +38,6 @@ const registerEntryWebhooks = (strapi: Core.Strapi) => {
   Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
     strapi.get('webhookStore').addAllowedEvent(key, value);
   });
-
-  // TODO: V6 Remove the legacy events
-  Object.entries(ALLOWED_WEBHOOK_EVENTS).forEach(([key, value]) => {
-    if (value.startsWith('document.')) {
-      const legacyKey = key.replace('DOCUMENT_', 'ENTRY_');
-      const legacyValue = value.replace('document.', 'entry.');
-      strapi.get('webhookStore').addAllowedEvent(legacyKey, legacyValue);
-    }
-  });
 };
 
 /**
@@ -66,7 +57,7 @@ const emitWebhook = async (
   const emitEvent = async () => {
     // There is no need to populate the entry if it has been deleted
     let populatedEntry = entry;
-    if (eventName !== 'document.delete' && eventName !== 'document.unpublish') {
+    if (eventName !== 'entry.delete' && eventName !== 'entry.unpublish') {
       populatedEntry = await strapi.db.query(uid).findOne({ where: { id: entry.id }, populate });
     }
 
@@ -77,16 +68,6 @@ const emitWebhook = async (
       uid: model.uid,
       entry: sanitizedEntry,
     });
-
-    // TODO: V6 Do not emit the 'entry.XXX' events
-    if (eventName.startsWith('document.')) {
-      // Also emit the legacy event "entry.XXX" for backward compatibility
-      await strapi.eventHub.emit(eventName.replace('document.', 'entry.'), {
-        model: model.modelName,
-        uid: model.uid,
-        entry: sanitizedEntry,
-      });
-    }
   };
 
   /**

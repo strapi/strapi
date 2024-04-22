@@ -84,7 +84,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     // Delete all matched entries and its components
     await async.map(entriesToDelete, (entryToDelete: any) => entries.delete(entryToDelete.id));
 
-    entriesToDelete.forEach(emitWebhook(uid, 'document.delete'));
+    entriesToDelete.forEach(emitWebhook(uid, 'entry.delete'));
 
     return { deletedEntries: entriesToDelete };
   }
@@ -102,7 +102,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     const doc = await entries.create(queryParams);
 
-    emitWebhook(uid, 'document.create', doc);
+    emitWebhook(uid, 'entry.create', doc);
 
     if (hasDraftAndPublish && params.status === 'published') {
       return publish({
@@ -147,7 +147,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       )
     );
 
-    clonedEntries.forEach(emitWebhook(uid, 'document.create'));
+    clonedEntries.forEach(emitWebhook(uid, 'entry.create'));
 
     return { documentId: clonedEntries.at(0)?.documentId, versions: clonedEntries };
   }
@@ -178,7 +178,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     let updatedDraft = null;
     if (entryToUpdate) {
       updatedDraft = await entries.update(entryToUpdate, queryParams);
-      emitWebhook(uid, 'document.update', updatedDraft);
+      emitWebhook(uid, 'entry.update', updatedDraft);
     }
 
     if (!updatedDraft) {
@@ -191,7 +191,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
           ...queryParams,
           data: { ...queryParams.data, documentId },
         });
-        emitWebhook(uid, 'document.create', updatedDraft);
+        emitWebhook(uid, 'entry.create', updatedDraft);
       }
     }
 
@@ -254,7 +254,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     );
 
     // Trigger webhook
-    versions.forEach(emitWebhook(uid, 'document.publish'));
+    versions.forEach(emitWebhook(uid, 'entry.publish'));
 
     return { versions };
   }
@@ -274,7 +274,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
     // Trigger webhook
-    versionsToDelete.forEach(emitWebhook(uid, 'document.unpublish'));
+    versionsToDelete.forEach(emitWebhook(uid, 'entry.unpublish'));
 
     return { versions: versionsToDelete };
   }
@@ -316,7 +316,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     );
 
     // Trigger webhook
-    draftEntries.forEach(emitWebhook(uid, 'document.draft-discard'));
+    draftEntries.forEach(emitWebhook(uid, 'entry.draft-discard'));
 
     return { versions: draftEntries };
   }
