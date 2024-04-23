@@ -137,9 +137,18 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
       <NavSections>
         {condensed && (
-          <NewNavLink to="/" icon={House} onClick={() => handleClickOnLink('/')}>
-            {formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
-          </NewNavLink>
+          <NewNavLink.Link to="/">
+            <NewNavLink.Tooltip
+              label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
+            >
+              <>
+                <NewNavLink.Icon>
+                  <Icon as={House} color="neutral500" />
+                </NewNavLink.Icon>
+                <NewNavLink.Badge label="ee only">5</NewNavLink.Badge>
+              </>
+            </NewNavLink.Tooltip>
+          </NewNavLink.Link>
         )}
         <NavLink
           as={RouterNavLink}

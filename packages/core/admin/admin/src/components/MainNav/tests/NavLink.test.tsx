@@ -1,25 +1,39 @@
-import { render, screen } from '@tests/utils';
+import { Icon } from '@strapi/design-system';
+import { House, Lock } from '@strapi/icons';
+import { screen, render as renderRTL } from '@tests/utils';
 
 import { NavLink } from '../NavLink';
 
 describe('NavLink', () => {
+  const Component = () => (
+    <NavLink.Link to="/test-link">
+      <NavLink.Tooltip label="test-tooltip">
+        <>
+          <NavLink.Icon>
+            <Icon as={House} data-testid="nav-link-icon" />
+          </NavLink.Icon>
+          <NavLink.Badge label="badge label">
+            <Icon data-testid="nav-link-badge" as={Lock} />
+          </NavLink.Badge>
+        </>
+      </NavLink.Tooltip>
+    </NavLink.Link>
+  );
+
+  const render = () => renderRTL(<Component />);
+
   it('shows the NavLink with link to destination', async () => {
-    render(
-      <NavLink to="/content-manager" badgeContent="5">
-        test link
-      </NavLink>
-    );
+    render();
     const link = screen.getByRole('link');
     expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute('href', '/content-manager');
+    expect(link).toHaveAttribute('href', '/test-link');
+  });
+  it('shows the home icon in the link', async () => {
+    render();
+    expect(screen.getByTestId('nav-link-icon')).toBeInTheDocument();
   });
   it('shows the badge next to the link', async () => {
-    render(
-      <NavLink to="/content-manager" badgeContent="5">
-        test link
-      </NavLink>
-    );
-    const badge = screen.getByText('5');
-    expect(badge).toBeInTheDocument();
+    render();
+    expect(screen.getByTestId('nav-link-badge')).toBeInTheDocument();
   });
 });
