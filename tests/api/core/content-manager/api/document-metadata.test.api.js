@@ -11,6 +11,24 @@ let formatDocument;
 
 const PRODUCT_UID = 'api::product.product';
 
+const featuresCompo = {
+  displayName: 'features',
+  attributes: {
+    name: {
+      type: 'string',
+      required: true,
+    },
+    description: {
+      type: 'text',
+      minLength: 4,
+      maxLength: 30,
+    },
+    slogan: {
+      type: 'string',
+    },
+  },
+};
+
 const product = {
   attributes: {
     name: {
@@ -25,21 +43,22 @@ const product = {
       type: 'string',
       maxLength: 10,
     },
+    price: {
+      type: 'integer',
+      max: 10,
+    },
+    features: {
+      required: true,
+      type: 'component',
+      repeatable: false,
+      component: 'default.features',
+    },
+    // TODO - Add other fields with validation requirements
     shopName: {
       // This field has no validation requirements so should be expluded from
       // available locales
       type: 'string',
     },
-    price: {
-      type: 'integer',
-      max: 10,
-    },
-    // TODO include other fields that require validation
-    // compo: {
-    //   type: 'component',
-    //   repeatable: false,
-    //   component: 'basic.features',
-    // },
   },
   pluginOptions: {
     i18n: {
@@ -72,7 +91,7 @@ const getProduct = async (name, locale, status) => {
 
 describe('CM API - Document metadata', () => {
   beforeAll(async () => {
-    await builder.addContentType(product).build();
+    await builder.addComponent(featuresCompo).addContentType(product).build();
 
     strapi = await createStrapiInstance();
     formatDocument = (...props) =>
@@ -183,10 +202,21 @@ describe('CM API - Document metadata', () => {
           expectation: expect.any(Number),
           getDefaultValue: () => 1,
         },
+        features: {
+          expectation: expect.any(Object),
+          getDefaultValue: (locale) => ({
+            name: `Feature 1 ${locale}`,
+            description: 'Description 1',
+            slogan: 'Slogan 1',
+          }),
+        },
         createdAt: {
           expectation: expect.any(String),
         },
         updatedAt: {
+          expectation: expect.any(String),
+        },
+        name: {
           expectation: expect.any(String),
         },
       };
@@ -250,7 +280,7 @@ describe('CM API - Document metadata', () => {
     }
   );
 
-  // TODO:  Modified status
+  // TODO: Modified status
   testInTransaction(
     'Returns modified status when draft is different from published version',
     async () => {
