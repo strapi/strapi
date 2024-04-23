@@ -745,6 +745,8 @@ describe('Core API - Validate', () => {
       'locale',
       'name',
       'name_non_searchable',
+      'name_hidden',
+      'name_non_writable',
       'misc',
       'createdAt',
       'updatedAt',
