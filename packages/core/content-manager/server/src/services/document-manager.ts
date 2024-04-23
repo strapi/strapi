@@ -196,85 +196,30 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         .then((result) => result?.versions.at(0));
     },
 
-    async publishMany(entities: Document[], uid: UID.ContentType) {
-      if (!entities.length) {
-        return null;
-      }
-
-      // Validate entities before publishing, throw if invalid
-      await Promise.all(
-        entities.map((document: Document) => {
-          return strapi.entityValidator.validateEntityCreation(
-            strapi.getModel(uid),
-            document,
-            undefined,
-            // @ts-expect-error - FIXME: entity here is unnecessary
-            document
-          );
-        })
-      );
-
-      // Only publish entities without a published_at date
-      const entitiesToPublish = entities
-        .filter((doc: Document) => !doc[PUBLISHED_AT_ATTRIBUTE])
-        .map((doc: Document) => doc.id);
-
-      const filters = { id: { $in: entitiesToPublish } };
-      const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
-      const populate = await buildDeepPopulate(uid);
-
-      // Everything is valid, publish
-      const publishedEntitiesCount = await strapi.db.query(uid).updateMany({
-        where: filters,
-        data,
+    async publishMany(
+      documentIds: Modules.Documents.ID[],
+      uid: UID.ContentType,
+      opts: Omit<DocServiceParams<'publish'>, 'documentId'> = {} as any
+    ) {
+      const publishedEntries = await strapi.db.transaction(async () => {
+        return Promise.all(documentIds.map((id) => this.publish(id, uid, opts)));
       });
-      // Get the updated entities since updateMany only returns the count
-      const publishedEntities = await strapi.db.query(uid).findMany({
-        where: filters,
-        populate,
-      });
-      // Emit the publish event for all updated entities
-      await Promise.all(
-        publishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_PUBLISH, doc))
-      );
 
       // Return the number of published entities
-      return publishedEntitiesCount;
+      return { count: publishedEntries.length };
     },
 
-    async unpublishMany(documents: Document[], uid: UID.CollectionType) {
-      if (!documents.length) {
-        return null;
-      }
-
-      // Only unpublish entities with a published_at date
-      const entitiesToUnpublish = documents
-        .filter((doc: Document) => doc[PUBLISHED_AT_ATTRIBUTE])
-        .map((doc: Document) => doc.id);
-
-      const filters = { id: { $in: entitiesToUnpublish } };
-      const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
-      const populate = await buildDeepPopulate(uid);
-
-      // No need to validate, unpublish
-      const unpublishedEntitiesCount = await strapi.db.query(uid).updateMany({
-        where: filters,
-        data,
+    async unpublishMany(
+      documentIds: Modules.Documents.ID[],
+      uid: UID.CollectionType,
+      opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
+    ) {
+      const unpublishedEntries = await strapi.db.transaction(async () => {
+        return Promise.all(documentIds.map((id) => this.unpublish(id, uid, opts)));
       });
-
-      // Get the updated entities since updateMany only returns the count
-      const unpublishedEntities = await strapi.db.query(uid).findMany({
-        where: filters,
-        populate,
-      });
-
-      // Emit the unpublish event for all updated entities
-      await Promise.all(
-        unpublishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_UNPUBLISH, doc))
-      );
 
       // Return the number of unpublished entities
-      return unpublishedEntitiesCount;
+      return { count: unpublishedEntries.length };
     },
 
     async unpublish(
