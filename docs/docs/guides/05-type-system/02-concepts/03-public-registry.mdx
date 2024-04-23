@@ -283,24 +283,24 @@ declare module '@strapi/strapi' {
 
 When coupling everything together, the end result is a TypeScript developer experience automatically adjusted to the current context.
 
+<!-- prettier-ignore-start -->
+
 <Tabs>
-  <TabItem value="app" label="User Application">
-  ```ts title="my-app/src/index.ts"
-  export default () => ({
-    bootstrap() {
-      strapi.findOne('ap');
-      //                ^ TypeScript will autocomplete with "api::article.article"
+<TabItem value="app" label="User Application">
+```ts title="my-app/src/index.ts"
+export default () => ({
+  bootstrap() {
+    strapi.findOne('ap');
+    //                ^ TypeScript will autocomplete with "api::article.article"
 
-      strapi.findOne('ad');
-      //                ^ TypeScript will autocomplete with "admin::user"
+    strapi.findOne('ad');
+    //                ^ TypeScript will autocomplete with "admin::user"
 
-      strapi.findOne('api::blog.blog');
-      //                ^ Error, TypeScript will complain
-    }
-
+    strapi.findOne('api::blog.blog');
+    //                ^ Error, TypeScript will complain
+  }
 })
-
-````
+```
 </TabItem>
 <TabItem value="strapi" label="Strapi Codebase">
 ```ts title="@strapi/strapi/document-service.ts"
@@ -318,7 +318,8 @@ findOne('plugin::bar.bar');
 
 findOne('baz');
 //           ^ Error, does not correspond to any content-type UID format
-````
-
-  </TabItem>
+```
+</TabItem>
 </Tabs>
+
+<!-- prettier-ignore-end -->
