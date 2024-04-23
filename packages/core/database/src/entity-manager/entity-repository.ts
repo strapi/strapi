@@ -1,4 +1,4 @@
-import { isString } from 'lodash/fp';
+import { isString, isNil } from 'lodash/fp';
 import type { Database } from '..';
 import type { Repository, Params } from './types';
 
@@ -20,6 +20,17 @@ type ParamsWithLimits = Omit<Params, 'page' | 'pageSize'> & {
 const withOffsetLimit = (
   params: Params
 ): [ParamsWithLimits, { page: number; pageSize: number }] => {
+  // If params already include limit and offset, return them as is
+  if (!isNil(params.limit) && !isNil(params.offset)) {
+    return [
+      params as ParamsWithLimits,
+      {
+        page: Math.floor(params.offset / params.limit) + 1,
+        pageSize: params.limit,
+      },
+    ];
+  }
+
   const { page, pageSize, ...rest } = withDefaultPagination(params);
 
   const offset = Math.max(page - 1, 0) * pageSize;
