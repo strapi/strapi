@@ -11,7 +11,7 @@ import {
 } from '../traverse';
 import { throwPassword, throwPrivate, throwDynamicZones, throwMorphToRelations } from './visitors';
 import { isOperator } from '../operators';
-import { throwInvalidParam } from './utils';
+import { throwInvalidKey } from './utils';
 import type { Model, Data } from '../types';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
@@ -47,7 +47,7 @@ const defaultValidateFilters = curry((ctx: Context, filters: unknown) => {
       const isAttribute = !!attribute;
 
       if (!isAttribute && !isOperator(key)) {
-        throwInvalidParam({ key, path: path.attribute });
+        throwInvalidKey({ key, path: path.attribute });
       }
     }, ctx),
     // dynamic zones from filters
@@ -77,7 +77,7 @@ const defaultValidateSort = curry((ctx: Context, sort: unknown) => {
       }
 
       if (!attribute) {
-        throwInvalidParam({ key, path: path.attribute });
+        throwInvalidKey({ key, path: path.attribute });
       }
     }, ctx),
     // dynamic zones from sort
@@ -97,7 +97,7 @@ const defaultValidateSort = curry((ctx: Context, sort: unknown) => {
       }
 
       if (!isScalarAttribute(attribute) && isEmpty(value)) {
-        throwInvalidParam({ key, path: path.attribute });
+        throwInvalidKey({ key, path: path.attribute });
       }
     }, ctx)
   )(sort);
@@ -118,7 +118,7 @@ const defaultValidateFields = curry((ctx: Context, fields: unknown) => {
       }
 
       if (isNil(attribute) || !isScalarAttribute(attribute)) {
-        throwInvalidParam({ key, path: path.attribute });
+        throwInvalidKey({ key, path: path.attribute });
       }
     }, ctx),
     // private fields

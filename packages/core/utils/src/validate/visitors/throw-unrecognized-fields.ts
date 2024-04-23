@@ -4,7 +4,7 @@ import {
   isRelationalAttribute,
 } from '../../content-types';
 import type { Visitor } from '../../traverse/factory';
-import { throwInvalidParam } from '../utils';
+import { throwInvalidKey } from '../utils';
 
 // TODO replace with imported constants
 const CONSTANT_FIELDS = ['id', 'document_id'];
@@ -24,7 +24,7 @@ const throwUnrecognizedFields: Visitor = ({ key, attribute, path, schema }) => {
       return;
     }
 
-    return throwInvalidParam({ key, path: attribute });
+    return throwInvalidKey({ key, path: attribute });
   }
 
   const closestAttribute = schema.attributes[path.attribute];
@@ -51,7 +51,7 @@ const throwUnrecognizedFields: Visitor = ({ key, attribute, path, schema }) => {
   }
 
   // if we couldn't find any reason for it to be here, throw
-  throwInvalidParam({ key, path: attribute });
+  throwInvalidKey({ key, path: attribute });
 };
 
 export default throwUnrecognizedFields;

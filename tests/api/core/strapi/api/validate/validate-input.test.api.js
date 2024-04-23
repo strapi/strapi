@@ -128,7 +128,9 @@ describe('Core API - Validate', () => {
         expect(res.status).toBe(400);
         expect(res.error.message).toMatch(new RegExp(`Cannot ${method.toUpperCase()}`, 'i'));
         const err = JSON.parse(res.text).error;
-        expect(err.message).toMatch(new RegExp(`invalid parameter ${attribute}`, 'i'));
+        expect(err.message).toMatch(new RegExp(`invalid key ${attribute}`, 'i'));
+        expect(err.details.key).toMatch(attribute);
+        expect(err.details.source).toMatch('body');
       });
     });
   });
