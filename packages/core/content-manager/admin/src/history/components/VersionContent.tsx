@@ -73,10 +73,9 @@ type UnknownField = EditFieldLayout & { shouldIgnoreRBAC: boolean };
 const VersionContent = () => {
   const { formatMessage } = useIntl();
   const { fieldSizes } = useTypedSelector((state) => state['content-manager'].app);
-  const { version, layout } = useHistoryContext('VersionContent', (state) => ({
-    version: state.selectedVersion,
-    layout: state.layout,
-  }));
+  const version = useHistoryContext('VersionContent', (state) => state.selectedVersion);
+  const layout = useHistoryContext('VersionContent', (state) => state.layout);
+  const _configuration = useHistoryContext('VersionContent', (state) => state.configuration);
 
   const removedAttributes = version.meta.unknownAttributes.removed;
   const removedAttributesAsFields = Object.entries(removedAttributes).map(
