@@ -21,7 +21,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const query = strapi.db.query(HISTORY_VERSION_UID);
   const historyService = getService(strapi, 'history');
-  const historyUtils = createServiceUtils({ strapi });
+  const serviceUtils = createServiceUtils({ strapi });
 
   return {
     async bootstrap() {
@@ -62,15 +62,15 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
             ? { documentId: result.documentId, locale: context.params?.locale }
             : { documentId: context.params.documentId, locale: context.params?.locale };
 
-        const defaultLocale = await historyUtils.getDefaultLocale();
+        const defaultLocale = await serviceUtils.getDefaultLocale();
         const locale = documentContext.locale || defaultLocale;
 
         const document = await strapi.documents(contentTypeUid).findOne({
           documentId: documentContext.documentId,
           locale,
-          populate: historyUtils.getDeepPopulate(contentTypeUid),
+          populate: serviceUtils.getDeepPopulate(contentTypeUid),
         });
-        const status = await historyUtils.getVersionStatus(contentTypeUid, document);
+        const status = await serviceUtils.getVersionStatus(contentTypeUid, document);
 
         /**
          * Store schema of both the fields and the fields of the attributes, as it will let us know
@@ -113,7 +113,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         return result;
       });
 
-      const retentionDays = historyUtils.getRetentionDays();
+      const retentionDays = serviceUtils.getRetentionDays();
       // Schedule a job to delete expired history versions every day at midnight
       state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
         const retentionDaysInMilliseconds = retentionDays * 24 * 60 * 60 * 1000;
