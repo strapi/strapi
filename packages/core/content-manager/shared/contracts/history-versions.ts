@@ -16,7 +16,7 @@ export interface CreateHistoryVersion {
   componentsSchemas: Record<`${string}.${string}`, Struct.SchemaAttributes>;
 }
 
-interface Locale {
+export interface Locale {
   name: string;
   code: string;
 }
@@ -82,7 +82,6 @@ export declare namespace RestoreHistoryVersion {
   export interface Request {
     params: {
       versionId: Data.ID;
-      documentId: Data.ID;
       contentType: UID.ContentType;
     };
     body: {
