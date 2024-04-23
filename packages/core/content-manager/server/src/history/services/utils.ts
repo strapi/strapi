@@ -8,7 +8,7 @@ import { HistoryVersions } from '../../../../shared/contracts';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
-export const createHistoryUtils = ({ strapi }: { strapi: Core.Strapi }) => {
+export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * @description
    * Get the difference between the version schema and the content type schema
@@ -55,6 +55,8 @@ export const createHistoryUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * @description
    * Gets the value to set for a relation when restoring a document
+   * @returns
+   * The relation if it exists or null
    */
   const getRelationRestoreValue = async (
     versionRelationData: Data.Entity,
@@ -71,23 +73,23 @@ export const createHistoryUtils = ({ strapi }: { strapi: Core.Strapi }) => {
           });
         })
       );
-      const existingRelations = existingAndMissingRelations.filter(
+
+      return existingAndMissingRelations.filter(
         (relation) => relation !== null
       ) as Modules.Documents.AnyDocument[];
-
-      return existingRelations;
     }
-    const existingRelationOrNull = await strapi.documents(attribute.target).findOne({
+
+    return strapi.documents(attribute.target).findOne({
       documentId: versionRelationData.documentId,
       locale: versionRelationData.locale || undefined,
     });
-
-    return existingRelationOrNull;
   };
 
   /**
    * @description
    * Gets the value to set for a media asset when restoring a document
+   * @returns
+   * The media asset if it exists or null
    */
   const getMediaRestoreValue = async (
     versionRelationData: Data.Entity,
@@ -101,15 +103,12 @@ export const createHistoryUtils = ({ strapi }: { strapi: Core.Strapi }) => {
         })
       );
 
-      const existingMedias = existingAndMissingMedias.filter((media) => media != null);
-      return existingMedias;
+      return existingAndMissingMedias.filter((media) => media != null);
     }
 
-    const existingMediaOrNull = await strapi.db
+    return strapi.db
       .query('plugin::upload.file')
       .findOne({ where: { id: versionRelationData.id } });
-
-    return existingMediaOrNull;
   };
 
   const localesService = strapi.plugin('i18n')?.service('locales');
@@ -141,7 +140,7 @@ export const createHistoryUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   /**
-   * 
+   *
    * @description
    * Gets the number of retention days defined on the license or configured by the user
    */

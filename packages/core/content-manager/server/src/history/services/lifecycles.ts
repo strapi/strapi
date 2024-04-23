@@ -8,7 +8,7 @@ import { getService } from '../utils';
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 
 import { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
-import { createHistoryUtils } from './utils';
+import { createServiceUtils } from './utils';
 
 const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
   const state: {
@@ -21,7 +21,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
   const query = strapi.db.query(HISTORY_VERSION_UID);
   const historyService = getService(strapi, 'history');
-  const historyUtils = createHistoryUtils({ strapi });
+  const historyUtils = createServiceUtils({ strapi });
 
   return {
     async bootstrap() {

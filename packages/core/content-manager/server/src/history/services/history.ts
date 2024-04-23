@@ -8,7 +8,7 @@ import {
   CreateHistoryVersion,
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
-import { createHistoryUtils } from './utils';
+import { createServiceUtils } from './utils';
 
 // Needed because the query engine doesn't return any types yet
 type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
@@ -16,7 +16,7 @@ type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
 
 const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = strapi.db.query(HISTORY_VERSION_UID);
-  const historyUtils = createHistoryUtils({ strapi });
+  const historyUtils = createServiceUtils({ strapi });
 
   return {
     async createVersion(historyVersionData: HistoryVersions.CreateHistoryVersion) {

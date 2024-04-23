@@ -1,4 +1,4 @@
-import { createHistoryUtils } from '../utils';
+import { createServiceUtils } from '../utils';
 
 const baseStrapiMock = {
   plugin: jest.fn(() => {}),
@@ -6,7 +6,7 @@ const baseStrapiMock = {
 
 describe('History utils', () => {
   describe('getSchemaAttributesDiff', () => {
-    const { getSchemaAttributesDiff } = createHistoryUtils({
+    const { getSchemaAttributesDiff } = createServiceUtils({
       // @ts-expect-error ignore
       strapi: baseStrapiMock,
     });
