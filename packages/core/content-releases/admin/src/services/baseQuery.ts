@@ -1,9 +1,4 @@
-import {
-  getFetchClient,
-  type FetchResponse,
-  type FetchOptions,
-  type FetchError,
-} from '@strapi/admin/strapi-admin';
+import { getFetchClient, type FetchOptions, type FetchError } from '@strapi/admin/strapi-admin';
 
 export interface QueryArguments<TSend> {
   url: string;
@@ -22,26 +17,28 @@ const fetchBaseQuery = async <TData = unknown, TSend = unknown>({
     const { get, post, del, put } = getFetchClient();
 
     if (method === 'POST') {
-      const result = await post<TData, FetchResponse<TData>, TSend>(url, data, config);
+      const result = await post<TData, TSend>(url, data, config);
       return { data: result.data };
     }
 
     if (method === 'DELETE') {
-      const result = await del<TData, FetchResponse<TData>>(url, config);
+      const result = await del<TData>(url, config);
       return { data: result.data };
     }
 
     if (method === 'PUT') {
-      const result = await put<TData, FetchResponse<TData>, TSend>(url, data, config);
+      const result = await put<TData>(url, data, config);
       return { data: result.data };
     }
 
     /**
      * Default is GET.
      */
-    const result = await get<TData, FetchResponse<TData>>(url, config);
+    const result = await get<TData>(url, config);
+    console.log('baseQuery', result);
     return { data: result.data };
   } catch (error) {
+    console.log('did we arrive here for some reason ?');
     const err = error as FetchError;
     /**
      * Handle error of type FetchError

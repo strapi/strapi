@@ -100,11 +100,11 @@ type FetchClient = {
  */
 const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const backendURL = window.strapi.backendURL;
-  const headers = new Headers({
+  const defaultHeader = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${getToken()}`,
-  });
+  };
 
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
 
@@ -117,21 +117,18 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   // Add a response interceptor to return the response
   const responseInterceptor = async <TData>(response: Response): Promise<FetchResponse<TData>> => {
     try {
-      console.log('response ===> ', response);
       const result = await response.json();
-      console.log('result ===>', result);
+
       if (!response.ok && result.error) {
         throw new FetchError(result.error.message, { data: result } as any);
       }
       if (!response.ok) {
         throw new FetchError('Unknown Server Error');
       }
-      return {
-        data: result,
-      };
+      return { data: result };
     } catch (error) {
       if (error instanceof SyntaxError && response.ok) {
-        // You can assign a default value to result or handle the error in another way
+        // Making sure that a SyntaxError doesn't throw if it's successful
         return { data: [], status: response.status };
       } else {
         throw error;
@@ -162,6 +159,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
   const fetchClient: FetchClient = {
     get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
+      const headers = new Headers({
+        ...defaultHeader,
+        ...options?.headers,
+      });
       /**
        * this applies all our transformations to the URL
        * - normalizing (making sure it has the correct slash)
@@ -181,12 +182,18 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       data?: TSend,
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
+      const headers = new Headers({
+        ...defaultHeader,
+        ...options?.headers,
+      });
       const createRequestUrl = makeCreateRequestUrl(options);
       const response = await fetch(createRequestUrl(url), {
         signal: options?.signal ?? defaultOptions.signal,
         method: 'POST',
         headers,
-        body: JSON.stringify(data),
+        body: options?.headers?.['Content-Type'].includes('multipart/form-data')
+          ? data
+          : JSON.stringify(data),
       });
       return responseInterceptor<TData>(response);
     },
@@ -195,12 +202,19 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       data?: TSend,
       options?: FetchOptions
     ): Promise<FetchResponse<TData>> => {
+      const headers = new Headers({
+        ...defaultHeader,
+        ...options?.headers,
+      });
+
       const createRequestUrl = makeCreateRequestUrl(options);
       const response = await fetch(createRequestUrl(url), {
         signal: options?.signal ?? defaultOptions.signal,
         method: 'PUT',
         headers,
-        body: JSON.stringify(data),
+        body: options?.headers?.['Content-Type'].includes('multipart/form-data')
+          ? data
+          : JSON.stringify(data),
       });
 
       return responseInterceptor<TData>(response);
@@ -209,6 +223,11 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       url: string,
       options?: FetchOptions
     ): Promise<R> => {
+      const headers = new Headers({
+        ...defaultHeader,
+        ...options?.headers,
+      });
+
       const createRequestUrl = makeCreateRequestUrl(options);
       const response = await fetch(createRequestUrl(url), {
         signal: options?.signal ?? defaultOptions.signal,
