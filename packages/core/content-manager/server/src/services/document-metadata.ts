@@ -1,9 +1,10 @@
 import { groupBy, pick } from 'lodash/fp';
 
-import { contentTypes } from '@strapi/utils';
+import { async, contentTypes, traverseEntity } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
+import { getDeepPopulate } from './utils/populate';
 
 export interface DocumentVersion {
   id: string;
@@ -23,7 +24,15 @@ const AVAILABLE_STATUS_FIELDS = [
   'updatedBy',
   'status',
 ];
-const AVAILABLE_LOCALES_FIELDS = ['id', 'locale', 'updatedAt', 'createdAt', 'status'];
+const AVAILABLE_LOCALES_FIELDS = [
+  'id',
+  'locale',
+  'updatedAt',
+  'createdAt',
+  'status',
+  'publishedAt',
+  'documentId',
+];
 
 const CONTENT_MANAGER_STATUS = {
   PUBLISHED: 'published',
@@ -73,7 +82,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
-  getAvailableLocales(
+  async getAvailableLocales(
     uid: UID.ContentType,
     version: DocumentVersion,
     allVersions: DocumentVersion[]
@@ -85,54 +94,63 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     delete versionsByLocale[version.locale];
 
     // For each locale, get the ones with the same status
+    // There will not be a draft and a version counterpart if the content
+    // type does not have draft and publish
+    const mappingResult = await async.map(
+      Object.values(versionsByLocale),
+      async (localeVersions: DocumentVersion[]) => {
+        const model = strapi.getModel(uid);
+
+        const mappedLocaleVersions: DocumentVersion[] = await async.map(
+          localeVersions,
+          async (localeVersion: DocumentVersion) =>
+            traverseEntity(
+              ({ key, attribute }, { remove }) => {
+                if (AVAILABLE_LOCALES_FIELDS.includes(key)) {
+                  // Keep the value if it is a field to pick
+                  return;
+                }
+
+                const requiresValidation =
+                  attribute.required ||
+                  attribute.unique ||
+                  Object.prototype.hasOwnProperty.call(attribute, 'max') ||
+                  Object.prototype.hasOwnProperty.call(attribute, 'min') ||
+                  Object.prototype.hasOwnProperty.call(attribute, 'maxLength') ||
+                  Object.prototype.hasOwnProperty.call(attribute, 'minLength');
+
+                if (requiresValidation) {
+                  // Keep the value if it requires any kind of validation
+                  return;
+                }
+
+                // Otherwise remove this key from the data
+                remove(key);
+              },
+              { schema: model, getModel: strapi.getModel.bind(strapi) },
+              // @ts-expect-error fix types
+              localeVersion
+            )
+        );
+
+        if (!contentTypes.hasDraftAndPublish(model)) {
+          return mappedLocaleVersions[0];
+        }
+
+        const draftVersion = mappedLocaleVersions.find((v) => v.publishedAt === null);
+        const otherVersions = mappedLocaleVersions.filter((v) => v.id !== draftVersion?.id);
+
+        if (!draftVersion) return;
+
+        return {
+          ...draftVersion,
+          status: this.getStatus(draftVersion, otherVersions as any),
+        };
+      }
+    );
+
     return (
-      Object.values(versionsByLocale)
-        .map((localeVersions: DocumentVersion[]) => {
-          // There will not be a draft and a version counterpart if the content
-          // type does not have draft and publish
-
-          const model = strapi.getModel(uid);
-
-          // TODO
-          // For displaying the validation errors in the multiple locale modal we need
-          // each available locale to at least contain all the fields that will
-          // require validation
-          // ??
-
-          // Get the additional fields that require validation
-          const additionalFields: string[] = Object.entries(model.attributes).reduce(
-            (acc, [key, value]: [string, any]) => {
-              const requiresValidation =
-                value.required ||
-                value.unique ||
-                Object.prototype.hasOwnProperty.call(value, 'max') ||
-                Object.prototype.hasOwnProperty.call(value, 'min') ||
-                Object.prototype.hasOwnProperty.call(value, 'maxLength') ||
-                Object.prototype.hasOwnProperty.call(value, 'minLength');
-
-              if (requiresValidation) {
-                acc.push(key);
-              }
-              return acc;
-            },
-            [] as string[]
-          );
-          const fieldsToPick = [...AVAILABLE_LOCALES_FIELDS, ...additionalFields];
-
-          if (!contentTypes.hasDraftAndPublish(model)) {
-            return pick(fieldsToPick, localeVersions[0]);
-          }
-
-          const draftVersion = localeVersions.find((v) => v.publishedAt === null);
-          const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
-
-          if (!draftVersion) return;
-
-          return {
-            ...pick(fieldsToPick, draftVersion),
-            status: this.getStatus(draftVersion, otherVersions as any),
-          };
-        })
+      mappingResult
         // Filter just in case there is a document with no drafts
         .filter(Boolean)
     );
@@ -216,9 +234,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   ) {
     // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if i18n is disabled
     // TODO: Sanitize createdBy
+
     const versions = await strapi.db.query(uid).findMany({
       where: { documentId: version.documentId },
       populate: {
+        ...getDeepPopulate(uid),
         createdBy: {
           select: ['id', 'firstname', 'lastname', 'email'],
         },
@@ -229,7 +249,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     });
 
     const availableLocalesResult = availableLocales
-      ? this.getAvailableLocales(uid, version, versions)
+      ? await this.getAvailableLocales(uid, version, versions)
       : [];
 
     const availableStatusResult = availableStatus

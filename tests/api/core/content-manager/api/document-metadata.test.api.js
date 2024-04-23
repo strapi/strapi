@@ -109,7 +109,10 @@ describe('CM API - Document metadata', () => {
 
       const draftProduct = await getProduct('product', 'en', 'published');
 
-      const { data, meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
+      const {
+        // data,
+        meta,
+      } = await formatDocument(PRODUCT_UID, draftProduct, {});
 
       expect(meta.availableLocales).toEqual([]);
       expect(meta.availableStatus).toMatchObject([
@@ -145,6 +148,8 @@ describe('CM API - Document metadata', () => {
     ]);
     expect(meta.availableStatus).toEqual([]);
   });
+
+  test.todo('Return available locales, including fields and nested fields that require validation');
 
   // TODO:  Modified status
   testInTransaction(
