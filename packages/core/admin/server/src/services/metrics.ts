@@ -34,7 +34,7 @@ const startCron = (strapi: Strapi) => {
   });
 };
 
-export {
+export default {
   sendDidInviteUser,
   sendDidUpdateRolePermissions,
   sendDidChangeInterfaceLanguage,
