@@ -12,6 +12,7 @@ import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useGetContentTypeConfigurationQuery } from '../../services/contentTypes';
+import { useGetInitialDataQuery } from '../../services/init';
 import { buildValidParams } from '../../utils/api';
 import { VersionContent } from '../components/VersionContent';
 import { VersionHeader } from '../components/VersionHeader';

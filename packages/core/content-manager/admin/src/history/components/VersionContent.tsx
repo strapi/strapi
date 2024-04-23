@@ -70,13 +70,42 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
  * -----------------------------------------------------------------------------------------------*/
 
 type UnknownField = EditFieldLayout & { shouldIgnoreRBAC: boolean };
+
 const VersionContent = () => {
   const { formatMessage } = useIntl();
   const { fieldSizes } = useTypedSelector((state) => state['content-manager'].app);
   const version = useHistoryContext('VersionContent', (state) => state.selectedVersion);
   const layout = useHistoryContext('VersionContent', (state) => state.layout);
-  const _configuration = useHistoryContext('VersionContent', (state) => state.configuration);
+  const configuration = useHistoryContext('VersionContent', (state) => state.configuration);
+  const schema = useHistoryContext('VersionContent', (state) => state.schema);
 
+  const createLayoutFromFields = <T extends EditFieldLayout | UnknownField>(fields: T[]) => {
+    return (
+      fields
+        .reduce<Array<T[]>>((rows, field) => {
+          if (field.type === 'dynamiczone') {
+            // Dynamic zones take up all the columns in a row
+            rows.push([field]);
+
+            return rows;
+          }
+
+          if (!rows[rows.length - 1]) {
+            // Create a new row if there isn't one available
+            rows.push([]);
+          }
+
+          // Push fields to the current row, they wrap and handle their own column size
+          rows[rows.length - 1].push(field);
+
+          return rows;
+        }, [])
+        // Map the rows to panels
+        .map((row) => [row])
+    );
+  };
+
+  // Build a layout for the unknown fields section
   const removedAttributes = version.meta.unknownAttributes.removed;
   const removedAttributesAsFields = Object.entries(removedAttributes).map(
     ([attributeName, attribute]) => {
@@ -94,34 +123,45 @@ const VersionContent = () => {
       return field;
     }
   );
-  const unknownFieldsLayout = removedAttributesAsFields
-    .reduce<Array<UnknownField[]>>((rows, field) => {
-      if (field.type === 'dynamiczone') {
-        // Dynamic zones take up all the columns in a row
-        rows.push([field]);
+  const unknownFieldsLayout = createLayoutFromFields(removedAttributesAsFields);
 
-        return rows;
-      }
+  /**
+   * Build a layout for the fields that are were deleted from the edit view layout
+   * via the configure the view page. This layout will be merged with the main one.
+   * Those fields would be restored if the user restores the history version, which is why it's
+   * important to show them, even if they're not in the normal layout.
+   */
+  const fieldsInLayout = layout.flatMap((panel) =>
+    panel.flatMap((row) => row.flatMap((field) => field.name))
+  );
+  const remainingFields = Object.entries(configuration.contentType.metadatas).reduce<
+    EditFieldLayout[]
+  >((currentRemainingFields, [name, field]) => {
+    // Make sure we do not fields that are not visible, e.g. "id"
+    if (!fieldsInLayout.includes(name) && field.edit.visible === true) {
+      const attribute = schema.attributes[name];
+      // @ts-expect-error not sure why attribute causes type error
+      currentRemainingFields.push({
+        attribute,
+        type: attribute.type,
+        visible: true,
+        disabled: true,
+        label: field.edit.label || name,
+        name: name,
+        size: fieldSizes[attribute.type].default ?? 12,
+      });
+    }
 
-      if (!rows[rows.length - 1]) {
-        // Create a new row if there isn't one available
-        rows.push([]);
-      }
-
-      // Push fields to the current row, they wrap and handle their own column size
-      rows[rows.length - 1].push(field);
-
-      return rows;
-    }, [])
-    // Map the rows to panels
-    .map((row) => [row]);
+    return currentRemainingFields;
+  }, []);
+  const remainingFieldsLayout = createLayoutFromFields(remainingFields);
 
   return (
     <ContentLayout>
       <Box paddingBottom={8}>
         <Form disabled={true} method="PUT" initialValues={version.data}>
           <Flex direction="column" alignItems="stretch" gap={6} position="relative">
-            {layout.map((panel, index) => {
+            {[...layout, ...remainingFieldsLayout].map((panel, index) => {
               return <FormPanel key={index} panel={panel} />;
             })}
           </Flex>
