@@ -13,7 +13,7 @@ import { createDocumentId } from '../../utils/transform-content-types-to-models'
 import { getDeepPopulate } from './utils/populate';
 import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
-import { emitWebhook } from './webhooks';
+import { emitEvent } from './events';
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
@@ -84,7 +84,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     // Delete all matched entries and its components
     await async.map(entriesToDelete, (entryToDelete: any) => entries.delete(entryToDelete.id));
 
-    entriesToDelete.forEach(emitWebhook(uid, 'entry.delete'));
+    entriesToDelete.forEach(emitEvent(uid, 'entry.delete'));
 
     return { deletedEntries: entriesToDelete };
   }
@@ -102,7 +102,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     const doc = await entries.create(queryParams);
 
-    emitWebhook(uid, 'entry.create', doc);
+    emitEvent(uid, 'entry.create', doc);
 
     if (hasDraftAndPublish && params.status === 'published') {
       return publish({
@@ -147,7 +147,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       )
     );
 
-    clonedEntries.forEach(emitWebhook(uid, 'entry.create'));
+    clonedEntries.forEach(emitEvent(uid, 'entry.create'));
 
     return { documentId: clonedEntries.at(0)?.documentId, versions: clonedEntries };
   }
@@ -178,7 +178,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     let updatedDraft = null;
     if (entryToUpdate) {
       updatedDraft = await entries.update(entryToUpdate, queryParams);
-      emitWebhook(uid, 'entry.update', updatedDraft);
+      emitEvent(uid, 'entry.update', updatedDraft);
     }
 
     if (!updatedDraft) {
@@ -191,7 +191,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
           ...queryParams,
           data: { ...queryParams.data, documentId },
         });
-        emitWebhook(uid, 'entry.create', updatedDraft);
+        emitEvent(uid, 'entry.create', updatedDraft);
       }
     }
 
@@ -253,8 +253,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       entries.publish(draft, queryParams)
     );
 
-    // Trigger webhook
-    versions.forEach(emitWebhook(uid, 'entry.publish'));
+    versions.forEach(emitEvent(uid, 'entry.publish'));
 
     return { versions };
   }
@@ -273,8 +272,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const versionsToDelete = await strapi.db.query(uid).findMany(query);
     await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
-    // Trigger webhook
-    versionsToDelete.forEach(emitWebhook(uid, 'entry.unpublish'));
+    versionsToDelete.forEach(emitEvent(uid, 'entry.unpublish'));
 
     return { versions: versionsToDelete };
   }
@@ -315,8 +313,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       entries.discardDraft(entry, queryParams)
     );
 
-    // Trigger webhook
-    draftEntries.forEach(emitWebhook(uid, 'entry.draft-discard'));
+    draftEntries.forEach(emitEvent(uid, 'entry.draft-discard'));
 
     return { versions: draftEntries };
   }

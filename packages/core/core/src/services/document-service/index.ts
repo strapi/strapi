@@ -3,7 +3,6 @@ import type { Core, Modules, UID } from '@strapi/types';
 import { createMiddlewareManager, databaseErrorsMiddleware } from './middlewares';
 import { createContentTypeRepository } from './repository';
 import { transformData } from './transform/data';
-import { registerEntryWebhooks } from './webhooks';
 
 /**
  * Repository to :
@@ -22,9 +21,6 @@ import { registerEntryWebhooks } from './webhooks';
 export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Service => {
   // Cache the repositories (one per content type)
   const repositories = new Map<string, Modules.Documents.ServiceInstance>();
-
-  // Register the document service webhooks
-  registerEntryWebhooks(strapi);
 
   // Manager to handle document service middlewares
   const middlewares = createMiddlewareManager();
