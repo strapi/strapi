@@ -64,8 +64,6 @@ const addLocaleToDocument = async (documentId, locale, name) => {
     },
   });
 
-  console.log(res.body);
-
   return res.body.data;
 };
 
