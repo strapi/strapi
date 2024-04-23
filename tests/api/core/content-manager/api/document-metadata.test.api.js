@@ -17,6 +17,29 @@ const product = {
       type: 'string',
       required: true,
     },
+    // The schema contains different types of fields that require validation
+    // This is to ensure that when we request metadata for these documents
+    // that the available locales contain data for any fields that require
+    // validation. In order ti enable error states in bulk action UI modals
+    category: {
+      type: 'string',
+      maxLength: 10,
+    },
+    shopName: {
+      // This field has no validation requirements so should be expluded from
+      // available locales
+      type: 'string',
+    },
+    price: {
+      type: 'integer',
+      max: 10,
+    },
+    // TODO include other fields that require validation
+    // compo: {
+    //   type: 'component',
+    //   repeatable: false,
+    //   component: 'basic.features',
+    // },
   },
   pluginOptions: {
     i18n: {
@@ -109,10 +132,7 @@ describe('CM API - Document metadata', () => {
 
       const draftProduct = await getProduct('product', 'en', 'published');
 
-      const {
-        // data,
-        meta,
-      } = await formatDocument(PRODUCT_UID, draftProduct, {});
+      const { meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
 
       expect(meta.availableLocales).toEqual([]);
       expect(meta.availableStatus).toMatchObject([
@@ -149,7 +169,86 @@ describe('CM API - Document metadata', () => {
     expect(meta.availableStatus).toEqual([]);
   });
 
-  test.todo('Return available locales, including fields and nested fields that require validation');
+  testInTransaction(
+    'Return available locales, including any fields that require validation',
+    async () => {
+      const documentId = 'product-available-locale-test';
+
+      const wantedKeys = {
+        category: {
+          expectation: expect.any(String),
+          getDefaultValue: (locale) => `Cat-1-${locale}`,
+        },
+        price: {
+          expectation: expect.any(Number),
+          getDefaultValue: () => 1,
+        },
+        createdAt: {
+          expectation: expect.any(String),
+        },
+        updatedAt: {
+          expectation: expect.any(String),
+        },
+      };
+
+      const unWantedKeys = {
+        // These fields have no validation requirements
+        // We will check that they are not included in the available locales response
+        shopName: {
+          expectation: expect.any(String),
+          getDefaultValue: (locale) => `BuyMyStuff-${locale}`,
+        },
+      };
+
+      const getExtraContent = (locale) => {
+        return {
+          ...Object.entries({ ...wantedKeys, ...unWantedKeys }).reduce(
+            (acc, [key, { getDefaultValue }]) => {
+              if (getDefaultValue === undefined) {
+                // If there is no default value function, do not include the key
+                return acc;
+              }
+
+              return { ...acc, [key]: getDefaultValue(locale) };
+            },
+            {}
+          ),
+        };
+      };
+
+      // Create products with different locales with content for every kind of
+      // field that requires validation
+      await createProduct(documentId, 'en', 'draft', getExtraContent('en'));
+      await createProduct(documentId, 'fr', 'draft', getExtraContent('fr'));
+
+      const draftProduct = await getProduct(documentId, 'en', 'draft');
+      const { meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
+
+      expect(meta.availableLocales).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining(
+            Object.keys(wantedKeys).reduce(
+              (acc, key) => ({ ...acc, [key]: wantedKeys[key].expectation }),
+              {}
+            )
+          ),
+        ])
+      );
+
+      expect(meta.availableLocales).toEqual(
+        expect.arrayContaining([
+          expect.not.objectContaining(
+            Object.keys(unWantedKeys).reduce(
+              (acc, key) => ({ ...acc, [key]: unWantedKeys[key].expectation }),
+              {}
+            )
+          ),
+        ])
+      );
+
+      expect(meta.availableStatus).toEqual([]);
+    }
+  );
 
   // TODO:  Modified status
   testInTransaction(
