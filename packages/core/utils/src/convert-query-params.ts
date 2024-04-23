@@ -247,7 +247,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     return limitAsANumber;
   };
 
-  const convertPaginationToOffsetLimit = (
+  const convertPageQueryToOffsetLimit = (
     page: unknown,
     pageSize?: unknown
   ): {
@@ -479,7 +479,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     validatePaginationParams(page, pageSize, start, limit);
 
     if (!isNil(page) || !isNil(pageSize)) {
-      const { offset, limit } = convertPaginationToOffsetLimit(page, pageSize);
+      const { offset, limit } = convertPageQueryToOffsetLimit(page, pageSize);
       query.offset = offset;
       query.limit = limit;
     }
@@ -668,7 +668,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     validatePaginationParams(page, pageSize, start, limit);
 
     if (!isNil(page) || !isNil(pageSize)) {
-      const { offset, limit } = convertPaginationToOffsetLimit(page, pageSize);
+      const { offset, limit } = convertPageQueryToOffsetLimit(page, pageSize);
       query.offset = offset;
       query.limit = limit;
     }
