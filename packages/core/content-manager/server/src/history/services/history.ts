@@ -47,6 +47,9 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   };
 
   const localesService = strapi.plugin('i18n')?.service('locales');
+
+  const getDefaultLocale = async () => (localesService ? localesService.getDefaultLocale() : null);
+
   const getLocaleDictionary = async () => {
     if (!localesService) return {};
 
@@ -163,8 +166,9 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             ? { documentId: result.documentId, locale: context.params?.locale }
             : { documentId: context.params.documentId, locale: context.params?.locale };
 
-        const defaultLocale = localesService ? await localesService.getDefaultLocale() : null;
+        const defaultLocale = await getDefaultLocale();
         const locale = documentContext.locale || defaultLocale;
+
         const document = await strapi.documents(contentTypeUid).findOne({
           documentId: documentContext.documentId,
           locale,
@@ -251,6 +255,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       results: HistoryVersions.HistoryVersionDataResponse[];
       pagination: HistoryVersions.Pagination;
     }> {
+      const locale = params.locale || (await getDefaultLocale());
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
           ...params,
@@ -258,7 +263,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             $and: [
               { contentType: params.contentType },
               ...(params.documentId ? [{ relatedDocumentId: params.documentId }] : []),
-              ...(params.locale ? [{ locale: params.locale }] : []),
+              ...(locale ? [{ locale }] : []),
             ],
           },
           populate: ['createdBy'],
@@ -497,6 +502,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
       const restoredDocument = await strapi.documents(version.contentType).update({
         documentId: version.relatedDocumentId,
+        locale: version.locale,
         data,
       });
 

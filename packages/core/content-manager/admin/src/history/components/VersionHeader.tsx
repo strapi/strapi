@@ -45,18 +45,18 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
 
   const mainFieldValue = version.data[mainField];
 
-  const getBackLink = (): To => {
+  const getNextNavigation = (): To => {
     const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
     if (collectionType === COLLECTION_TYPES) {
       return {
-        pathname: `../${collectionType}/${version.contentType}/${version.relatedDocumentId}`,
+        pathname: `/content-manager/${collectionType}/${version.contentType}/${version.relatedDocumentId}`,
         search: pluginsQueryParams,
       };
     }
 
     return {
-      pathname: `../${collectionType}/${version.contentType}`,
+      pathname: `/content-manager/${collectionType}/${version.contentType}`,
       search: pluginsQueryParams,
     };
   };
@@ -64,16 +64,17 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   const handleRestore = async () => {
     try {
       const response = await restoreVersion({
+        documentId: version.relatedDocumentId,
+        collectionType,
         params: {
           versionId: version.id,
-          documentId: version.relatedDocumentId,
           contentType: version.contentType,
         },
         body: { contentType: version.contentType },
       });
 
       if ('data' in response) {
-        navigate(`/content-manager/${collectionType}/${slug}/${response.data.data?.documentId}`);
+        navigate(getNextNavigation());
 
         toggleNotification({
           type: 'success',
@@ -137,7 +138,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
             startIcon={<ArrowLeft />}
             as={NavLink}
             // @ts-expect-error - types are not inferred correctly through the as prop.
-            to={getBackLink()}
+            to={getNextNavigation()}
           >
             {formatMessage({
               id: 'global.back',
