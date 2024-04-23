@@ -2,33 +2,35 @@ import { FetchError } from '../getFetchClient';
 import { normalizeAPIError } from '../normalizeAPIError';
 
 const API_VALIDATION_ERROR_FIXTURE = new FetchError('error message', {
-  data: null,
-  error: {
-    name: 'ValidationError',
-    message: 'errors',
-    details: {
-      errors: [
-        {
-          path: ['field', '0', 'name'],
-          message: 'Field contains errors',
-          name: 'ValidationError',
-        },
-        {
-          path: ['field'],
-          message: 'Field must be unique',
-          name: 'ValidationError',
-        },
-      ],
+  data: {
+    error: {
+      name: 'ValidationError',
+      message: 'errors',
+      details: {
+        errors: [
+          {
+            path: ['field', '0', 'name'],
+            message: 'Field contains errors',
+            name: 'ValidationError',
+          },
+          {
+            path: ['field'],
+            message: 'Field must be unique',
+            name: 'ValidationError',
+          },
+        ],
+      },
     },
   },
 });
 
 const API_APPLICATION_ERROR_FIXTURE = new FetchError('error message', {
-  data: null,
-  error: {
-    name: 'ApplicationError',
-    message: 'Application crashed',
-    details: {},
+  data: {
+    error: {
+      name: 'ApplicationError',
+      message: 'Application crashed',
+      details: {},
+    },
   },
 });
 

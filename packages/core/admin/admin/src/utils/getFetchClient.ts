@@ -30,8 +30,10 @@ export type FetchConfig = {
 };
 
 type ErrorResponse = {
-  data: any;
-  error: ApiError & { status?: number };
+  data: {
+    data?: any;
+    error: ApiError & { status?: number };
+  };
 };
 
 export class FetchError extends Error {
@@ -46,8 +48,8 @@ export class FetchError extends Error {
     this.name = 'FetchError';
     this.message = message;
     this.response = response;
-    this.code = response?.error?.status;
-    this.status = response?.error?.status;
+    this.code = response?.data?.error?.status;
+    this.status = response?.data?.error?.status;
 
     // Ensure correct stack trace in error object
     if (Error.captureStackTrace) {
@@ -125,7 +127,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       const result = await response.json();
 
       if (!response.ok && result.error) {
-        throw new FetchError(result.error.message, { data: result } as any);
+        throw new FetchError(result.error.message, { data: result });
       }
       if (!response.ok) {
         throw new FetchError('Unknown Server Error');

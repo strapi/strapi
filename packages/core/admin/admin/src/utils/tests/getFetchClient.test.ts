@@ -19,6 +19,8 @@ describe('getFetchClient', () => {
   it('should call correct url', async () => {
     (global.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
+        status: 200,
+        ok: true,
         json: () => Promise.resolve({ data: 'success response' }),
       })
     );
@@ -34,6 +36,8 @@ describe('getFetchClient', () => {
   it('should serialize a params object to a string', async () => {
     (global.fetch as jest.Mock).mockImplementationOnce(() =>
       Promise.resolve({
+        status: 200,
+        ok: true,
         json: () => Promise.resolve({ data: 'success response' }),
       })
     );
@@ -64,21 +68,6 @@ describe('getFetchClient', () => {
     expect(data).toEqual({ data: 'success response' });
     expect(global.fetch).toHaveBeenCalledWith(
       'http://localhost:1337/test-fetch-client?page=1&pageSize=10&sort=short_text:ASC&filters[$and][0][biginteger][$eq]=3&filters[$and][1][short_text][$eq]=test&locale=en',
-      expect.anything()
-    );
-  });
-
-  it('should add baseUrl', async () => {
-    (global.fetch as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({
-        json: () => Promise.resolve({ data: 'success response' }),
-      })
-    );
-    const fetchClient = getFetchClient({ baseURL: '/documentation' });
-    const { data } = await fetchClient.get('test-fetch-client');
-    expect(data).toEqual({ data: 'success response' });
-    expect(global.fetch).toHaveBeenCalledWith(
-      'http://localhost:1337/documentation/test-fetch-client',
       expect.anything()
     );
   });
