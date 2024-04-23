@@ -167,7 +167,12 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             : { documentId: context.params.documentId, locale: context.params?.locale };
 
         const defaultLocale = await getDefaultLocale();
-        const locale = documentContext.locale || defaultLocale;
+
+        // TODO
+        let locale = defaultLocale;
+        if (documentContext.locale && !Array.isArray(documentContext.locale)) {
+          locale = documentContext.locale;
+        }
 
         const document = await strapi.documents(contentTypeUid).findOne({
           documentId: documentContext.documentId,
