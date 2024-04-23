@@ -51,7 +51,6 @@ const validDocInput = {
   name: 'string attr',
 };
 
-// TODO: test updates as well as creates
 describe('Core API - Validate', () => {
   beforeAll(async () => {
     await init();
