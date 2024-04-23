@@ -1,3 +1,4 @@
+import axios from 'axios';
 import pipe from 'lodash/fp/pipe';
 import qs from 'qs';
 
@@ -21,6 +22,7 @@ export type FetchOptions = {
   params?: any;
   signal?: AbortSignal;
   headers?: Record<string, string>;
+  onUploadProgress?: (progressEvent: any) => void;
 };
 
 export type FetchConfig = {
@@ -106,6 +108,9 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     Authorization: `Bearer ${getToken()}`,
   };
 
+  const isFormDataRequest = (headers: Headers) =>
+    headers.has('Content-Type') && headers.get('Content-Type') === 'multipart/form-data';
+
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
 
   // This regular expression matches a string that starts with either "http://" or "https://" or any other protocol name in lower case letters, followed by "://" and ends with anything else
@@ -186,14 +191,26 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         ...defaultHeader,
         ...options?.headers,
       });
+
       const createRequestUrl = makeCreateRequestUrl(options);
+
+      // Todo: remove this and replace it with a native implementation
+      if (isFormDataRequest(headers)) {
+        return axios.post(createRequestUrl(url), data, {
+          headers: {
+            ...defaultHeader,
+            ...options?.headers,
+          },
+          signal: options?.signal ?? defaultOptions.signal,
+          onUploadProgress: options?.onUploadProgress,
+        });
+      }
+
       const response = await fetch(createRequestUrl(url), {
         signal: options?.signal ?? defaultOptions.signal,
         method: 'POST',
         headers,
-        body: options?.headers?.['Content-Type'].includes('multipart/form-data')
-          ? data
-          : JSON.stringify(data),
+        body: JSON.stringify(data),
       });
       return responseInterceptor<TData>(response);
     },
@@ -208,13 +225,24 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       });
 
       const createRequestUrl = makeCreateRequestUrl(options);
+
+      // Todo: remove this and replace it with a native implementation
+      if (isFormDataRequest(headers)) {
+        return axios.post(createRequestUrl(url), data, {
+          headers: {
+            ...defaultHeader,
+            ...options?.headers,
+          },
+          signal: options?.signal ?? defaultOptions.signal,
+          onUploadProgress: options?.onUploadProgress,
+        });
+      }
+
       const response = await fetch(createRequestUrl(url), {
         signal: options?.signal ?? defaultOptions.signal,
         method: 'PUT',
         headers,
-        body: options?.headers?.['Content-Type'].includes('multipart/form-data')
-          ? data
-          : JSON.stringify(data),
+        body: JSON.stringify(data),
       });
 
       return responseInterceptor<TData>(response);

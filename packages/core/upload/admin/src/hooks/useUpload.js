@@ -1,16 +1,13 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { useFetchClient } from '@strapi/admin/strapi-admin';
-import axios from 'axios';
-import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getTrad } from '../utils';
 
 const endpoint = `/${pluginId}`;
 
-const uploadAsset = (asset, folderId, cancelToken, onProgress, post) => {
+const uploadAsset = (asset, folderId, signal, onProgress, post) => {
   const { rawFile, caption, name, alternativeText } = asset;
   const formData = new FormData();
 
@@ -30,7 +27,7 @@ const uploadAsset = (asset, folderId, cancelToken, onProgress, post) => {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
-    cancelToken: cancelToken.token,
+    signal,
     onUploadProgress({ total, loaded }) {
       onProgress((loaded / total) * 100);
     },
@@ -39,14 +36,14 @@ const uploadAsset = (asset, folderId, cancelToken, onProgress, post) => {
 
 export const useUpload = () => {
   const [progress, setProgress] = useState(0);
-  const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
-  const tokenRef = useRef(axios.CancelToken.source());
+  const abortController = new AbortController();
+  const signal = abortController.signal;
   const { post } = useFetchClient();
 
   const mutation = useMutation(
     ({ asset, folderId }) => {
-      return uploadAsset(asset, folderId, tokenRef.current, setProgress, post);
+      return uploadAsset(asset, folderId, signal, setProgress, post);
     },
     {
       onSuccess() {
@@ -58,10 +55,7 @@ export const useUpload = () => {
 
   const upload = (asset, folderId) => mutation.mutateAsync({ asset, folderId });
 
-  const cancel = () =>
-    tokenRef.current.cancel(
-      formatMessage({ id: getTrad('modal.upload.cancelled'), defaultMessage: '' })
-    );
+  const cancel = () => abortController.abort();
 
   return {
     upload,
