@@ -37,7 +37,15 @@ const localeToLookup: Transform = (contentType, params) => {
   }
 
   if (params.locale) {
-    return assoc(['lookup', 'locale'], params.locale, params);
+    const isValidLocale = typeof params.locale === 'string';
+
+    if (isValidLocale) {
+      return assoc(['lookup', 'locale'], params.locale, params);
+    }
+
+    throw new errors.ValidationError(
+      `Invalid locale param ${params.locale} provided. Document locales must be strings.`
+    );
   }
 
   return params;
