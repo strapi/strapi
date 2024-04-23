@@ -1,7 +1,7 @@
 import type { UID } from '@strapi/types';
 import { setCreatorFields, async, errors } from '@strapi/utils';
 
-import { getDocumentLocaleAndStatus } from './utils/dimensions';
+import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { getService } from '../utils';
 
 const buildPopulateFromQuery = async (query: any, model: any) => {
@@ -38,7 +38,7 @@ const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => 
 
   const sanitizedQuery = await permissionChecker.sanitizedQuery.update(query);
 
-  const { locale } = getDocumentLocaleAndStatus(body);
+  const { locale } = await getDocumentLocaleAndStatus(body);
 
   // Load document version to update
   const [documentVersion, otherDocumentVersion] = await Promise.all([
@@ -100,7 +100,7 @@ export default {
     }
 
     const permissionQuery = await permissionChecker.sanitizedQuery.read(query);
-    const { locale, status } = getDocumentLocaleAndStatus(query);
+    const { locale, status } = await getDocumentLocaleAndStatus(query);
 
     const version = await findDocument(permissionQuery, model, { locale, status });
 
@@ -161,7 +161,7 @@ export default {
     const sanitizedQuery = await permissionChecker.sanitizedQuery.delete(query);
     const populate = await buildPopulateFromQuery(sanitizedQuery, model);
 
-    const { locale } = getDocumentLocaleAndStatus(query);
+    const { locale } = await getDocumentLocaleAndStatus(query);
     const documentLocales = await documentManager.findLocales(undefined, model, {
       populate,
       locale,
@@ -210,7 +210,7 @@ export default {
         throw new errors.ForbiddenError();
       }
 
-      const { locale } = getDocumentLocaleAndStatus(document);
+      const { locale } = await getDocumentLocaleAndStatus(document);
       const publishResult = await documentManager.publish(document.documentId, model, { locale });
 
       return publishResult.at(0);
@@ -241,7 +241,7 @@ export default {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.unpublish(query);
-    const { locale } = getDocumentLocaleAndStatus(body);
+    const { locale } = await getDocumentLocaleAndStatus(body);
 
     const document = await findDocument(sanitizedQuery, model, { locale });
 
@@ -284,7 +284,7 @@ export default {
     }
 
     const sanitizedQuery = await permissionChecker.sanitizedQuery.discard(query);
-    const { locale } = getDocumentLocaleAndStatus(body);
+    const { locale } = await getDocumentLocaleAndStatus(body);
 
     const document = await findDocument(sanitizedQuery, model, { locale, status: 'published' });
 
@@ -311,7 +311,7 @@ export default {
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
-    const { locale } = getDocumentLocaleAndStatus(query);
+    const { locale } = await getDocumentLocaleAndStatus(query);
 
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();

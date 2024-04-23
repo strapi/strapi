@@ -69,7 +69,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const query = await async.pipe(
       omit('status'),
       i18n.defaultLocale(contentType),
-      i18n.localeToLookup(contentType),
+      i18n.multiLocaleToLookup(contentType),
       transformParamsToQuery(uid),
       (query) => assoc('where', { ...query.where, documentId }, query)
     )(params);
@@ -115,7 +115,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const queryParams = await async.pipe(
       DP.filterDataPublishedAt,
       i18n.defaultLocale(contentType),
-      i18n.localeToLookup(contentType)
+      i18n.multiLocaleToLookup(contentType)
     )(params);
 
     // Get deep populate
@@ -213,7 +213,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
-      i18n.localeToLookup(contentType)
+      i18n.multiLocaleToLookup(contentType)
     )(params);
 
     await deleteDocument({
@@ -245,7 +245,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
-      i18n.localeToLookup(contentType)
+      i18n.multiLocaleToLookup(contentType)
     )(params);
 
     const { deletedEntries } = await deleteDocument({
@@ -262,7 +262,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     const queryParams = await async.pipe(
       i18n.defaultLocale(contentType),
-      i18n.localeToLookup(contentType)
+      i18n.multiLocaleToLookup(contentType)
     )(params);
 
     // Delete all drafts that match query

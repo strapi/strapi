@@ -198,31 +198,34 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
-      let publishedEntitiesCount = 0;
-      await async.map(documentIds, async (documentId: string) => {
-        // Publish per documentId
-        const res = await this.publish(documentId, uid, { locale });
-        publishedEntitiesCount += res?.length ?? 0;
+      return strapi.db.transaction(async () => {
+        let publishedEntitiesCount = 0;
+        await async.map(documentIds, async (documentId: string) => {
+          const res = await this.publish(documentId, uid, { locale });
+          publishedEntitiesCount += res?.length ?? 0;
 
-        return res;
+          return res;
+        });
+
+        const populate = await buildDeepPopulate(uid);
+        const publishedEntities = await strapi.db.query(uid).findMany({
+          where: {
+            documentId: { $in: documentIds },
+            published_at: { $ne: null },
+            locale: { $in: locale },
+          },
+          populate,
+        });
+        // Emit the publish event for all updated entities
+        await Promise.all(
+          publishedEntities!.map((doc: Document) => {
+            return emitEvent(uid, ENTRY_PUBLISH, doc);
+          })
+        );
+
+        // Return the number of published entities
+        return publishedEntitiesCount;
       });
-
-      const populate = await buildDeepPopulate(uid);
-      const publishedEntities = await strapi.db.query(uid).findMany({
-        where: {
-          documentId: { $in: documentIds },
-          published_at: { $ne: null },
-          locale: { $in: locale },
-        },
-        populate,
-      });
-      // Emit the publish event for all updated entities
-      await Promise.all(
-        publishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_PUBLISH, doc))
-      );
-
-      // Return the number of published entities
-      return publishedEntitiesCount;
     },
 
     async unpublishMany(documents: Document[], uid: UID.CollectionType) {
