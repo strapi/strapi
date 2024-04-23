@@ -44,12 +44,12 @@ const HomePageCE = () => {
   const { formatMessage } = useIntl();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();
-  const { guidedTourState, guidedTourVisibility, isSkipped } = useGuidedTour();
+  const { guidedTourState, isGuidedTourVisible, isSkipped, userRole } = useGuidedTour();
   const showGuidedTour =
     !Object.values(guidedTourState).every((section) =>
       Object.values(section).every((step) => step)
     ) &&
-    guidedTourVisibility &&
+    isGuidedTourVisible &&
     !isSkipped;
 
   const { push } = useHistory();
@@ -137,11 +137,7 @@ const HomePageCE = () => {
           </Grid>
           <Grid gap={6}>
             <GridItem col={8} s={12}>
-              {showGuidedTour ? (
-                <GuidedTourHomepage visibility={guidedTourVisibility} />
-              ) : (
-                <ContentBlocks />
-              )}
+              {showGuidedTour ? <GuidedTourHomepage userRole={userRole} /> : <ContentBlocks />}
             </GridItem>
             <GridItem col={4} s={12}>
               <SocialLinks />

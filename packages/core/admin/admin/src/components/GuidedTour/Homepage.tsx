@@ -1,33 +1,46 @@
 import { Box, Button, Flex, Typography } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { GuidedTourContextValue, pxToRem, useGuidedTour, useTracking } from '@strapi/helper-plugin';
+import {
+  GuidedTourContextValue,
+  pxToRem,
+  useGuidedTour,
+  useTracking,
+  useAppInfo,
+} from '@strapi/helper-plugin';
 import { ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
-import { SUPER_ADMIN_LAYOUT_DATA, LAYOUT_DATA, States, STATES } from './constants';
+import {
+  SUPER_ADMIN_LAYOUT_DATA,
+  LAYOUT_DATA,
+  States,
+  STATES,
+  LayoutData,
+  SuperAdminLayoutData,
+} from './constants';
 import { Number, VerticalDivider } from './Ornaments';
 
 interface GuidedTourHomepageProps {
-  visibility: string;
+  userRole: string;
 }
 
-const GuidedTourHomepage = ({ visibility }: GuidedTourHomepageProps) => {
-  const { guidedTourState, setSkipped, guidedTourVisibility } = useGuidedTour();
+const GuidedTourHomepage = ({ userRole }: GuidedTourHomepageProps) => {
+  const { guidedTourState, setSkipped } = useGuidedTour();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const appInfo = useAppInfo();
 
-  const layout = visibility === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
-  const layoutCopy = JSON.parse(JSON.stringify(layout));
-
-  const triggeredBySA = guidedTourVisibility === 'super-admin' ? true : false;
+  const layout: SuperAdminLayoutData | LayoutData =
+    userRole === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
+  const triggeredBySA = userRole === 'super-admin' ? true : false;
 
   // Remove the inviteUser step  if we are in the development env
-  if (process.env.NODE_ENV === 'development') {
-    delete layoutCopy.inviteUser;
+  if (appInfo?.currentEnvironment === 'development') {
+    delete layout.inviteUser;
   }
 
-  const sections = Object.entries(layoutCopy).map(([key, val]) => ({
+  const sections = Object.entries(layout).map(([key, val]) => ({
     key: key,
     title: val.home.title,
     content: (
@@ -65,11 +78,13 @@ const GuidedTourHomepage = ({ visibility }: GuidedTourHomepageProps) => {
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
         <Typography variant="beta" as="h2">
-          {Object.keys(layoutCopy).length}
-          {formatMessage({
-            id: 'app.components.GuidedTour.title',
-            defaultMessage: 'steps to get started',
-          })}
+          {formatMessage(
+            {
+              id: 'app.components.GuidedTour.title',
+              defaultMessage: '{count} steps to get started',
+            },
+            { count: Object.keys(layout).length }
+          )}
         </Typography>
         <Box>
           {sections.map((section, index) => {

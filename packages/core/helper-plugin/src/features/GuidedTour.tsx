@@ -39,11 +39,16 @@ interface GuidedTourContextValue {
       create: boolean;
       success: boolean;
     };
+    transferTokens: {
+      create: boolean;
+      success: boolean;
+    };
   };
-  guidedTourVisibility: string | null;
+  userRole: string;
+  isGuidedTourVisible: boolean;
   isSkipped: boolean;
   setCurrentStep: (step: Step | null) => void | null;
-  setGuidedTourVisibility: (isVisible: string) => void;
+  setGuidedTourVisibility: (isVisible: boolean, userRole: string) => void;
   setSkipped: (isSkipped: boolean) => void;
   setStepState: (step: Step, state: boolean) => void;
   startSection: (section: SectionKey) => void;
@@ -76,8 +81,13 @@ const GuidedTourContext = React.createContext<GuidedTourContextValue>({
       create: false,
       success: false,
     },
+    transferTokens: {
+      create: false,
+      success: false,
+    },
   },
-  guidedTourVisibility: null,
+  userRole: 'super-admin',
+  isGuidedTourVisible: false,
   isSkipped: true,
   setCurrentStep: () => null,
   setGuidedTourVisibility: () => null,
@@ -98,7 +108,8 @@ const GuidedTourProvider = ({
   children,
   currentStep = null,
   guidedTourState,
-  guidedTourVisibility = null,
+  isGuidedTourVisible = false,
+  userRole = 'super-admin',
   isSkipped,
   setCurrentStep,
   setGuidedTourVisibility,
@@ -110,7 +121,8 @@ const GuidedTourProvider = ({
     () => ({
       currentStep,
       guidedTourState,
-      guidedTourVisibility,
+      userRole,
+      isGuidedTourVisible,
       isSkipped,
       setCurrentStep,
       setGuidedTourVisibility,
@@ -121,7 +133,8 @@ const GuidedTourProvider = ({
     [
       currentStep,
       guidedTourState,
-      guidedTourVisibility,
+      userRole,
+      isGuidedTourVisible,
       isSkipped,
       setCurrentStep,
       setGuidedTourVisibility,

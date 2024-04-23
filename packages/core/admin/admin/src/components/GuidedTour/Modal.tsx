@@ -10,14 +10,26 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import { GuidedTourContextValue, pxToRem, useGuidedTour, useTracking } from '@strapi/helper-plugin';
+import {
+  GuidedTourContextValue,
+  pxToRem,
+  useGuidedTour,
+  useTracking,
+  useAppInfo,
+} from '@strapi/helper-plugin';
 import { ArrowRight, Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { LAYOUT_DATA, SUPER_ADMIN_LAYOUT_DATA, STATES } from './constants';
+import {
+  LAYOUT_DATA,
+  SUPER_ADMIN_LAYOUT_DATA,
+  STATES,
+  LayoutData,
+  SuperAdminLayoutData,
+} from './constants';
 import { Number, VerticalDivider } from './Ornaments';
 
 /* -------------------------------------------------------------------------------------------------
@@ -25,32 +37,26 @@ import { Number, VerticalDivider } from './Ornaments';
  * -----------------------------------------------------------------------------------------------*/
 
 const GuidedTourModal = () => {
-  const {
-    currentStep,
-    guidedTourState,
-    setCurrentStep,
-    setStepState,
-    guidedTourVisibility,
-    setSkipped,
-  } = useGuidedTour();
+  const { currentStep, guidedTourState, setCurrentStep, setStepState, userRole, setSkipped } =
+    useGuidedTour();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const appInfo = useAppInfo();
 
-  if (!currentStep || !guidedTourVisibility) {
+  if (!currentStep || !userRole) {
     return null;
   }
 
-  const layout = guidedTourVisibility === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
-  const layoutCopy = JSON.parse(JSON.stringify(layout));
+  const layout: SuperAdminLayoutData | LayoutData =
+    userRole === 'super-admin' ? SUPER_ADMIN_LAYOUT_DATA : LAYOUT_DATA;
+  const triggeredBySA = userRole === 'super-admin' ? true : false;
 
-  const triggeredBySA = guidedTourVisibility === 'super-admin' ? true : false;
-
-  // Remove the inviteUser step if we are in the development env
-  if (process.env.NODE_ENV === 'development') {
-    delete layoutCopy.inviteUser;
+  // Remove the inviteUser step  if we are in the development env
+  if (appInfo?.currentEnvironment === 'development') {
+    delete layout.inviteUser;
   }
 
-  const stepData = get(layoutCopy, currentStep);
+  const stepData = get(layout, currentStep);
   const sectionKeys = Object.keys(guidedTourState);
   const [sectionName, stepName] = currentStep.split('.') as [
     keyof GuidedTourContextValue['guidedTourState'],
@@ -260,7 +266,7 @@ const GuidedTourStepper = ({
  * -----------------------------------------------------------------------------------------------*/
 
 interface GuidedTourContentProps
-  extends Required<Pick<MessageDescriptor, 'defaultMessage' | 'id'>> {}
+  extends Required<Pick<MessageDescriptor, 'defaultMessage' | 'id'>> { }
 
 const GuidedTourContent = ({ id, defaultMessage }: GuidedTourContentProps) => {
   const { formatMessage } = useIntl();

@@ -213,7 +213,7 @@ const LAYOUT_DATA = {
       trackingEvent: 'didGenerateGuidedTourUsers',
     },
   },
-} as const;
+};
 
 const SUPER_ADMIN_LAYOUT_DATA = {
   contentTypeBuilder: {
@@ -429,7 +429,7 @@ const SUPER_ADMIN_LAYOUT_DATA = {
       trackingEvent: 'didGenerateGuidedTourUsers',
     },
   },
-} as const;
+};
 
 const STATES = {
   IS_DONE: 'IS_DONE',
@@ -437,8 +437,20 @@ const STATES = {
   IS_NOT_DONE: 'IS_NOT_DONE',
 } as const;
 
-type LayoutData = typeof LAYOUT_DATA;
-type SuperAdminLayoutData = typeof SUPER_ADMIN_LAYOUT_DATA;
+interface LayoutData {
+  contentManager: object;
+  mediaLibrary: object;
+  profile: object;
+  inviteUser?: object;
+}
+
+interface SuperAdminLayoutData {
+  contentTypeBuilder: object;
+  contentManager: object;
+  apiTokens: object;
+  inviteUser?: object;
+}
+
 type States = keyof typeof STATES;
 
 export { SUPER_ADMIN_LAYOUT_DATA, LAYOUT_DATA, STATES };
