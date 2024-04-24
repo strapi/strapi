@@ -91,7 +91,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
 
     if ('error' in response) {
       if (isFetchError(response.error)) {
-        // Handle axios error
+        // Handle fetch error
         toggleNotification({
           type: 'danger',
           message: formatAPIError(response.error),

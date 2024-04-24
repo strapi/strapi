@@ -23,6 +23,7 @@ export type FetchOptions = {
   signal?: AbortSignal;
   headers?: Record<string, string>;
   onUploadProgress?: (progressEvent: any) => void;
+  validateStatus?: ((status: number) => boolean) | null;
 };
 
 export type FetchConfig = {
@@ -122,16 +123,26 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
 
   // Add a response interceptor to return the response
-  const responseInterceptor = async <TData>(response: Response): Promise<FetchResponse<TData>> => {
+  const responseInterceptor = async <TData>(
+    response: Response,
+    validateStatus?: FetchOptions['validateStatus']
+  ): Promise<FetchResponse<TData>> => {
     try {
       const result = await response.json();
 
-      if (!response.ok && result.error) {
+      /**
+       * validateStatus allows us to customize when a response should throw an error
+       * In native Fetch API, a response is considered "not ok"
+       * when the status code falls in the 200 to 299 (inclusive) range
+       */
+      if (!response.ok && result.error && !validateStatus?.(response.status)) {
         throw new FetchError(result.error.message, { data: result });
       }
-      if (!response.ok) {
+
+      if (!response.ok && !validateStatus?.(response.status)) {
         throw new FetchError('Unknown Server Error');
       }
+
       return { data: result };
     } catch (error) {
       if (error instanceof SyntaxError && response.ok) {
@@ -182,7 +193,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         method: 'GET',
         headers,
       });
-      return responseInterceptor<TData>(response);
+      return responseInterceptor<TData>(response, options?.validateStatus);
     },
     post: async <TData, TSend = unknown>(
       url: string,
@@ -205,6 +216,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
           },
           signal: options?.signal ?? defaultOptions.signal,
           onUploadProgress: options?.onUploadProgress,
+          validateStatus: options?.validateStatus,
         });
       }
 
@@ -214,7 +226,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         headers,
         body: JSON.stringify(data),
       });
-      return responseInterceptor<TData>(response);
+      return responseInterceptor<TData>(response, options?.validateStatus);
     },
     put: async <TData, TSend = unknown>(
       url: string,
@@ -237,6 +249,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
           },
           signal: options?.signal ?? defaultOptions.signal,
           onUploadProgress: options?.onUploadProgress,
+          validateStatus: options?.validateStatus,
         });
       }
 
@@ -247,12 +260,9 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         body: JSON.stringify(data),
       });
 
-      return responseInterceptor<TData>(response);
+      return responseInterceptor<TData>(response, options?.validateStatus);
     },
-    del: async <TData, R = FetchResponse<TData>>(
-      url: string,
-      options?: FetchOptions
-    ): Promise<R> => {
+    del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
       const headers = new Headers({
         ...defaultHeader,
         ...options?.headers,
@@ -264,7 +274,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         method: 'DELETE',
         headers,
       });
-      return responseInterceptor<TData>(response) as Promise<R>;
+      return responseInterceptor<TData>(response, options?.validateStatus);
     },
   };
 

@@ -60,7 +60,7 @@ describe('useAPIErrorHandler', () => {
     expect(message).toBe('Field contains errors\nField must be unique');
   });
 
-  test('formats AxiosErrors', async () => {
+  test('formats FetchErrors', async () => {
     const { result } = renderHook(() => useAPIErrorHandler());
 
     const fetchError = new FetchError(

@@ -122,7 +122,7 @@ const ReleaseAction: BulkActionComponent = ({ documentIds, model }) => {
 
     if ('error' in response) {
       if (isFetchError(response.error)) {
-        // Handle axios error
+        // Handle fetch error
         toggleNotification({
           type: 'warning',
           message: formatAPIError(response.error),
