@@ -155,7 +155,7 @@ export default ({ action, ability, model }: any) => {
       traverseEntity(omitHiddenFields, ctx),
       // Remove not allowed fields (RBAC)
       traverseEntity(removeDisallowedFields(permittedFields), ctx),
-      // Remove roles from createdBy & updateBy fields
+      // Remove roles from createdBy & updatedBy fields
       omitCreatorRoles
     );
   };
