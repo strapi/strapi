@@ -9,8 +9,6 @@ import {
   Accordion,
   AccordionContent as DSAccordionContent,
   AccordionToggle,
-  Grid,
-  GridItem,
   IconButton,
   Typography,
   KeyboardNavigable,
@@ -30,7 +28,6 @@ import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
-import { InputRenderer } from '../../InputRenderer';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
@@ -49,7 +46,7 @@ const RepeatableComponent = ({
   disabled,
   name,
   mainField,
-  renderInput,
+  renderLayout,
 }: RepeatableComponentProps) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
@@ -227,7 +224,7 @@ const RepeatableComponent = ({
                   index={index}
                   isOpen={collapseToOpen === key}
                   mainField={mainField}
-                  renderInput={renderInput}
+                  renderLayout={renderLayout}
                   onMoveItem={handleMoveComponentField}
                   onClickToggle={handleToggle(key)}
                   onDeleteComponent={() => {
@@ -379,7 +376,7 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
-    Pick<RepeatableComponentProps, 'mainField' | 'renderInput'> {
+    Pick<RepeatableComponentProps, 'mainField' | 'renderLayout'> {
   attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
@@ -400,10 +397,10 @@ const Component = ({
     name: 'id',
     type: 'integer',
   },
+  renderLayout,
   onClickToggle,
   onDeleteComponent,
   toggleCollapses,
-  renderInput = InputRenderer,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
@@ -500,27 +497,7 @@ const Component = ({
               padding={6}
               gap={6}
             >
-              {layout.map((row, index) => {
-                return (
-                  <Grid gap={4} key={index}>
-                    {row.map(({ size, ...field }) => {
-                      /**
-                       * Layouts are built from schemas so they don't understand the complete
-                       * schema tree, for components we append the parent name to the field name
-                       * because this is the structure for the data & permissions also understand
-                       * the nesting involved.
-                       */
-                      const completeFieldName = `${name}.${field.name}`;
-
-                      return (
-                        <GridItem col={size} key={completeFieldName} s={12} xs={12}>
-                          {renderInput({ ...field, name: completeFieldName })}
-                        </GridItem>
-                      );
-                    })}
-                  </Grid>
-                );
-              })}
+              {renderLayout({ layout, name })}
             </Flex>
           </DSAccordionContent>
         </Accordion>

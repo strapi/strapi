@@ -10,9 +10,9 @@ import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
-import { InputRendererProps } from '../../InputRenderer';
 
 import { Initializer } from './Initializer';
+import { ComponentLayout, type ComponentLayoutProps } from './Layout';
 import { NonRepeatableComponent } from './NonRepeatable';
 import { RepeatableComponent } from './Repeatable';
 
@@ -20,7 +20,7 @@ interface ComponentInputProps
   extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {
   labelAction?: React.ReactNode;
-  renderInput?: (props: InputRendererProps) => React.ReactNode;
+  renderLayout: (props: ComponentLayoutProps) => React.ReactNode;
 }
 
 const ComponentInput = ({
@@ -30,6 +30,7 @@ const ComponentInput = ({
   attribute,
   disabled,
   labelAction,
+  renderLayout = ComponentLayout,
   ...props
 }: ComponentInputProps) => {
   const { formatMessage } = useIntl();
@@ -94,11 +95,18 @@ const ComponentInput = ({
             attribute={attribute}
             name={name}
             disabled={disabled}
+            renderLayout={renderLayout}
             {...props}
           />
         ) : null}
         {attribute.repeatable && (
-          <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props} />
+          <RepeatableComponent
+            attribute={attribute}
+            name={name}
+            disabled={disabled}
+            renderLayout={renderLayout}
+            {...props}
+          />
         )}
       </Flex>
     </Box>

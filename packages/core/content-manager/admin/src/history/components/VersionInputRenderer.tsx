@@ -19,6 +19,7 @@ import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { BlocksInput } from '../../pages/EditView/components/FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from '../../pages/EditView/components/FormInputs/Component/Input';
+import { ComponentLayout } from '../../pages/EditView/components/FormInputs/Component/Layout';
 import {
   DynamicZone,
   useDynamicZone,
@@ -328,7 +329,13 @@ const VersionInputRenderer = ({
           {...props}
           hint={hint}
           disabled={fieldIsDisabled}
-          renderInput={(props) => <VersionInputRenderer {...props} shouldIgnoreRBAC={true} />}
+          renderLayout={(props) => (
+            <ComponentLayout
+              {...props}
+              // TODO: modify layout to show remaining fields
+              renderInput={(props) => <VersionInputRenderer {...props} shouldIgnoreRBAC={true} />}
+            />
+          )}
         />
       );
     case 'dynamiczone':
