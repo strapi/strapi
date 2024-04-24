@@ -19,11 +19,12 @@ describe('useAPIErrorHandler', () => {
 
     const message = result.current.formatAPIError(
       new FetchError('Error occured', {
-        data: null,
-        error: {
-          name: 'ApplicationError',
-          message: 'Field contains errors',
-          details: {},
+        data: {
+          error: {
+            name: 'ApplicationError',
+            message: 'Field contains errors',
+            details: {},
+          },
         },
       })
     );
@@ -36,22 +37,23 @@ describe('useAPIErrorHandler', () => {
 
     const message = result.current.formatAPIError(
       new FetchError('Fetch Error Occured', {
-        data: null,
-        error: {
-          name: 'ValidationError',
-          message: '',
-          details: {
-            errors: [
-              {
-                path: ['field', '0', 'name'],
-                message: 'Field contains errors',
-              },
+        data: {
+          error: {
+            name: 'ValidationError',
+            message: '',
+            details: {
+              errors: [
+                {
+                  path: ['field', '0', 'name'],
+                  message: 'Field contains errors',
+                },
 
-              {
-                path: ['field'],
-                message: 'Field must be unique',
-              },
-            ],
+                {
+                  path: ['field'],
+                  message: 'Field must be unique',
+                },
+              ],
+            },
           },
         },
       })

@@ -21,7 +21,7 @@ export interface UnknownApiError {
   status?: number;
 }
 
-export type BaseQueryError = ApiError | UnknownApiError;
+export type BaseQueryError = ApiError | UnknownApiError | SerializedError;
 
 const fetchBaseQuery =
   (): BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> =>
@@ -95,8 +95,8 @@ const fetchBaseQuery =
             error: {
               name: 'UnknownError',
               message: 'There was an unknown error response from the API',
-              details: err.response?.data,
-              status: err.response?.error.status,
+              details: err.response,
+              status: err.status,
             } as UnknownApiError,
           };
         }
@@ -114,7 +114,7 @@ const fetchBaseQuery =
     }
   };
 
-const isBaseQueryError = (error: BaseQueryError | SerializedError): error is BaseQueryError => {
+const isBaseQueryError = (error: BaseQueryError): error is ApiError | UnknownApiError => {
   return error.name !== undefined;
 };
 

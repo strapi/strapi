@@ -35,10 +35,9 @@ const fetchBaseQuery = async <TData = unknown, TSend = unknown>({
      * Default is GET.
      */
     const result = await get<TData>(url, config);
-    console.log('baseQuery', result);
+
     return { data: result.data };
   } catch (error) {
-    console.log('did we arrive here for some reason ?');
     const err = error as FetchError;
     /**
      * Handle error of type FetchError
@@ -51,7 +50,7 @@ const fetchBaseQuery = async <TData = unknown, TSend = unknown>({
      */
     return {
       error: {
-        status: err.response?.error.status,
+        status: err.status,
         code: err.code,
         response: {
           data: err.response?.data,
