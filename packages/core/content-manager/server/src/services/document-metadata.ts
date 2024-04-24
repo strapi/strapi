@@ -239,6 +239,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       where: { documentId: version.documentId },
       populate: {
         ...getDeepPopulate(uid),
+        // Creator fields are selected in this way to avoid exposing sensitive data
         createdBy: {
           select: ['id', 'firstname', 'lastname', 'email'],
         },
