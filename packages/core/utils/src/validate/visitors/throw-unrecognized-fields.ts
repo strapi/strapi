@@ -3,17 +3,20 @@ import {
   isMorphToRelationalAttribute,
   isRelationalAttribute,
   constants,
+  isComponentSchema,
+  isMediaAttribute,
 } from '../../content-types';
-import type { Visitor } from '../../traverse/factory';
+import type { Visitor } from '../../traverse-entity';
 import { throwInvalidKey } from '../utils';
 
 // TODO these should all be centralized somewhere instead of maintaining a list
-const CONSTANT_FIELDS = [constants.DOC_ID_ATTRIBUTE, constants.DOC_ID_ATTRIBUTE];
+const ID_FIELDS = [constants.DOC_ID_ATTRIBUTE, constants.DOC_ID_ATTRIBUTE];
+const ALLOWED_ROOT_LEVEL_FIELDS = [...ID_FIELDS];
 const MORPH_TO_ALLOWED_FIELDS = ['__type'];
 const DYNAMIC_ZONE_ALLOWED_FIELDS = ['__component'];
 const RELATION_REORDERING_FIELDS = ['connect', 'disconnect', 'set', 'options'];
 
-const throwUnrecognizedFields: Visitor = ({ key, attribute, path, schema }) => {
+const throwUnrecognizedFields: Visitor = ({ key, attribute, path, schema, parent }) => {
   // We only look at properties that are not attributes
   if (attribute) {
     return;
@@ -21,33 +24,36 @@ const throwUnrecognizedFields: Visitor = ({ key, attribute, path, schema }) => {
 
   // At root level (path.attribute === null), only accept allowed fields
   if (path.attribute === null) {
-    if (CONSTANT_FIELDS.includes(key)) {
+    if (ALLOWED_ROOT_LEVEL_FIELDS.includes(key)) {
       return;
     }
 
     return throwInvalidKey({ key, path: attribute });
   }
 
-  const closestAttribute = schema.attributes[path.attribute];
-
   // allow special morphTo keys
-  if (isMorphToRelationalAttribute(closestAttribute) && MORPH_TO_ALLOWED_FIELDS.includes(key)) {
+  if (isMorphToRelationalAttribute(parent?.attribute) && MORPH_TO_ALLOWED_FIELDS.includes(key)) {
     return;
   }
 
   // allow special dz keys
-  if (isDynamicZoneAttribute(closestAttribute) && DYNAMIC_ZONE_ALLOWED_FIELDS.includes(key)) {
+  if (
+    isComponentSchema(schema) &&
+    isDynamicZoneAttribute(parent?.attribute) &&
+    DYNAMIC_ZONE_ALLOWED_FIELDS.includes(key)
+  ) {
     return;
   }
 
   // allow special relation reordering keys
   // TODO: Only toMany or all?
-  if (isRelationalAttribute(closestAttribute) && RELATION_REORDERING_FIELDS.includes(key)) {
+  if (isRelationalAttribute(parent?.attribute) && RELATION_REORDERING_FIELDS.includes(key)) {
     return;
   }
 
-  // allow id fields (since we're not at the root level)
-  if (isRelationalAttribute(closestAttribute) && !CONSTANT_FIELDS.includes(key)) {
+  // allow id fields where it is needed for setting a relational id rather than trying to create with a given id
+  const canUseID = isRelationalAttribute(parent?.attribute) || isMediaAttribute(parent?.attribute);
+  if (canUseID && !ID_FIELDS.includes(key)) {
     return;
   }
 

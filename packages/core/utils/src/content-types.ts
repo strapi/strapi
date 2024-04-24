@@ -117,6 +117,24 @@ const hasDraftAndPublish = (model: Model) =>
 const isDraft = <T extends object>(data: T, model: Model) =>
   hasDraftAndPublish(model) && _.get(data, PUBLISHED_AT_ATTRIBUTE) === null;
 
+const isSchema = (data: unknown): data is Model => {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'modelType' in data &&
+    typeof data.modelType === 'string' &&
+    ['component', 'contentType'].includes(data.modelType)
+  );
+};
+
+const isComponentSchema = (data: unknown): data is Model & { modelType: 'component' } => {
+  return isSchema(data) && data.modelType === 'component';
+};
+
+const isContentTypeSchema = (data: unknown): data is Model & { modelType: 'contentType' } => {
+  return isSchema(data) && data.modelType === 'contentType';
+};
+
 const isSingleType = ({ kind = COLLECTION_TYPE }) => kind === SINGLE_TYPE;
 const isCollectionType = ({ kind = COLLECTION_TYPE }) => kind === COLLECTION_TYPE;
 const isKind = (kind: Kind) => (model: Model) => model.kind === kind;
@@ -144,8 +162,8 @@ const isPrivateAttribute = (model: Model, attributeName: string) => {
 const isScalarAttribute = (attribute?: Attribute) => {
   return attribute && !['media', 'component', 'relation', 'dynamiczone'].includes(attribute.type);
 };
-const isMediaAttribute = (attribute: Attribute) => attribute?.type === 'media';
-const isRelationalAttribute = (attribute: Attribute): attribute is RelationalAttribute =>
+const isMediaAttribute = (attribute?: Attribute) => attribute?.type === 'media';
+const isRelationalAttribute = (attribute?: Attribute): attribute is RelationalAttribute =>
   attribute?.type === 'relation';
 
 const isComponentAttribute = (
@@ -157,7 +175,7 @@ const isDynamicZoneAttribute = (attribute?: Attribute): attribute is DynamicZone
   !!attribute && attribute.type === 'dynamiczone';
 const isMorphToRelationalAttribute = (attribute?: Attribute) => {
   return (
-    attribute && isRelationalAttribute(attribute) && attribute.relation?.startsWith?.('morphTo')
+    !!attribute && isRelationalAttribute(attribute) && attribute.relation?.startsWith?.('morphTo')
   );
 };
 
@@ -215,6 +233,9 @@ const getContentTypeRoutePrefix = (contentType: WithRequired<Model, 'info'>) => 
 };
 
 export {
+  isSchema,
+  isContentTypeSchema,
+  isComponentSchema,
   isScalarAttribute,
   isMediaAttribute,
   isRelationalAttribute,
