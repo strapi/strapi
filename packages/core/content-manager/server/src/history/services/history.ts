@@ -16,7 +16,7 @@ type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
 
 const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = strapi.db.query(HISTORY_VERSION_UID);
-  const historyUtils = createServiceUtils({ strapi });
+  const serviceUtils = createServiceUtils({ strapi });
 
   return {
     async createVersion(historyVersionData: HistoryVersions.CreateHistoryVersion) {
@@ -33,7 +33,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       results: HistoryVersions.HistoryVersionDataResponse[];
       pagination: HistoryVersions.Pagination;
     }> {
-      const locale = params.locale || (await historyUtils.getDefaultLocale());
+      const locale = params.locale || (await serviceUtils.getDefaultLocale());
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
           ...params,
@@ -47,7 +47,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           populate: ['createdBy'],
           orderBy: [{ createdAt: 'desc' }],
         }),
-        historyUtils.getLocaleDictionary(),
+        serviceUtils.getLocaleDictionary(),
       ]);
 
       type EntryToPopulate =
@@ -108,7 +108,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                     ...relatedEntry,
                     ...(isNormalRelation
                       ? {
-                          status: await historyUtils.getVersionStatus(
+                          status: await serviceUtils.getVersionStatus(
                             attributeSchema.target,
                             relatedEntry
                           ),
@@ -166,7 +166,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             ...result,
             data: await populateEntryRelations(result),
             meta: {
-              unknownAttributes: historyUtils.getSchemaAttributesDiff(
+              unknownAttributes: serviceUtils.getSchemaAttributesDiff(
                 result.schema,
                 strapi.getModel(params.contentType).attributes
               ),
@@ -188,7 +188,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
     async restoreVersion(versionId: Data.ID) {
       const version = await query.findOne({ where: { id: versionId } });
       const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
-      const schemaDiff = historyUtils.getSchemaAttributesDiff(
+      const schemaDiff = serviceUtils.getSchemaAttributesDiff(
         version.schema,
         contentTypeSchemaAttributes
       );
@@ -225,12 +225,12 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             attribute.relation !== 'morphToOne' &&
             attribute.relation !== 'morphToMany'
           ) {
-            const data = await historyUtils.getRelationRestoreValue(versionRelationData, attribute);
+            const data = await serviceUtils.getRelationRestoreValue(versionRelationData, attribute);
             previousRelationAttributes[name] = data;
           }
 
           if (attribute.type === 'media') {
-            const data = await historyUtils.getMediaRestoreValue(versionRelationData, attribute);
+            const data = await serviceUtils.getMediaRestoreValue(versionRelationData, attribute);
             previousRelationAttributes[name] = data;
           }
 
