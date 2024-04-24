@@ -77,7 +77,6 @@ const HistoryPage = () => {
       settings: { displayName, mainField },
     },
   } = useDocumentLayout(slug!);
-  // TODO: try using skip to avoid double request
   const { data: configuration, isLoading: isLoadingConfiguration } =
     useGetContentTypeConfigurationQuery(slug!);
 

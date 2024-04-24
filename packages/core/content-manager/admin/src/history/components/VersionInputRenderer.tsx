@@ -16,6 +16,7 @@ import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
+import { useTypedSelector } from '../../modules/hooks';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { BlocksInput } from '../../pages/EditView/components/FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from '../../pages/EditView/components/FormInputs/Component/Input';
@@ -30,6 +31,8 @@ import { Wysiwyg } from '../../pages/EditView/components/FormInputs/Wysiwyg/Fiel
 import { useFieldHint } from '../../pages/EditView/components/InputRenderer';
 import { getRelationLabel } from '../../utils/relations';
 import { useHistoryContext } from '../pages/History';
+
+import { getRemaingFieldsLayout } from './VersionContent';
 
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
 import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
@@ -204,10 +207,11 @@ const VersionInputRenderer = ({
   ...props
 }: VersionInputRendererProps) => {
   const { formatMessage } = useIntl();
-  const { version } = useHistoryContext('VersionContent', (state) => ({
-    version: state.selectedVersion,
-  }));
-  const { id } = useDoc();
+  const version = useHistoryContext('VersionContent', (state) => state.selectedVersion);
+  const configuration = useHistoryContext('VersionContent', (state) => state.configuration);
+  const fieldSizes = useTypedSelector((state) => state['content-manager'].app.fieldSizes);
+
+  const { id, components } = useDoc();
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
@@ -329,13 +333,25 @@ const VersionInputRenderer = ({
           {...props}
           hint={hint}
           disabled={fieldIsDisabled}
-          renderLayout={(props) => (
-            <ComponentLayout
-              {...props}
-              // TODO: modify layout to show remaining fields
-              renderInput={(props) => <VersionInputRenderer {...props} shouldIgnoreRBAC={true} />}
-            />
-          )}
+          renderLayout={(layoutProps) => {
+            // Components can only have one panel, so only save the first layout item
+            const [remainingFieldsLayout] = getRemaingFieldsLayout({
+              layout: [layoutProps.layout],
+              metadatas: configuration.components[props.attribute.component].metadatas,
+              fieldSizes,
+              schemaAttributes: components[props.attribute.component].attributes,
+            });
+
+            return (
+              <ComponentLayout
+                {...layoutProps}
+                layout={[...layoutProps.layout, ...remainingFieldsLayout]}
+                renderInput={(inputProps) => (
+                  <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />
+                )}
+              />
+            );
+          }}
         />
       );
     case 'dynamiczone':
