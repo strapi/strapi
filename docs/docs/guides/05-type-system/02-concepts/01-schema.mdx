@@ -67,8 +67,8 @@ For instance, a string attribute will resolve to a primitive string in an entity
 
 ### Usage
 
-import Tabs from '@theme/Tabs'
-import TabItem from '@theme/TabItem'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 <Tabs>
 <TabItem value="public" label="Public" default>
@@ -89,22 +89,23 @@ declare const component: Schema.Component;
 
 declare function processAnySchema(schema: Schema.Schema): void;
 
-processAnySchema(schema);   // ✅
+processAnySchema(schema); // ✅
 processAnySchema(contentType); // ✅
 processAnySchema(component); // ✅
 
 declare function processContentTypeSchema(schema: Schema.ContentType): void;
 
-processContentTypeSchema(schema);   // ✅
+processContentTypeSchema(schema); // ✅
 processContentTypeSchema(contentType); // ✅
 processContentTypeSchema(component); // ❌ Error, a component schema is not assignable to a content-type schema
 
 declare function processComponentSchema(schema: Schema.Component): void;
 
-processComponentSchema(schema);   // ✅
+processComponentSchema(schema); // ✅
 processComponentSchema(contentType); // ❌ Error, a content-type schema is not assignable to a component schema
 processComponentSchema(component); // ✅
 ```
+
 </TabItem>
 <TabItem value="internal" label="Internal">
 Schema definitions exported from the `Struct` namespace defines the low level type representation of Strapi schemas.
@@ -112,6 +113,7 @@ Schema definitions exported from the `Struct` namespace defines the low level ty
 :::caution
 Those types can be useful when you want to validate other types against the base ones, but realistically, the public Schema types should almost always be preferred.
 :::
+
 ```typescript
 import type { Struct } from '@strapi/strapi';
 
@@ -121,21 +123,22 @@ declare const component: Struct.ComponentSchema;
 
 declare function processAnySchema(schema: Struct.Schema): void;
 
-processAnySchema(schema);   // ✅
+processAnySchema(schema); // ✅
 processAnySchema(contentType); // ✅
 processAnySchema(component); // ✅
 
 declare function processContentTypeSchema(schema: Struct.ContentTypeSchema): void;
 
-processContentTypeSchema(schema);   // ✅
+processContentTypeSchema(schema); // ✅
 processContentTypeSchema(contentType); // ✅
 processContentTypeSchema(component); // ❌ Error, a component schema is not assignable to a content-type schema
 
 declare function processComponentSchema(schema: Struct.ComponentSchema): void;
 
-processComponentSchema(schema);   // ✅
+processComponentSchema(schema); // ✅
 processComponentSchema(contentType); // ❌ Error, a content-type schema is not assignable to a component schema
 processComponentSchema(component); // ✅
 ```
+
 </TabItem>
 </Tabs>
