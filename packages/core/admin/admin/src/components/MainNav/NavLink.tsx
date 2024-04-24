@@ -47,7 +47,7 @@ const LinkImpl = ({ children, ...props }: LinkProps) => {
 const TooltipImpl = ({ children, label, position = 'right' }: NavLink.TooltipProps) => {
   return (
     <Tooltip position={position} label={label}>
-      {children}
+      <Flex justifyContent="center">{children}</Flex>
     </Tooltip>
   );
 };
@@ -64,6 +64,7 @@ const IconImpl = ({ children }: { children: React.ReactNode }) => {
       paddingRight={`${12 / 16}rem`}
       justifyContent="center"
       aria-hidden
+      as="span"
     >
       {children}
     </Flex>
@@ -116,7 +117,7 @@ namespace NavLink {
 
   export interface TooltipProps {
     position?: 'top' | 'bottom' | 'left' | 'right';
-    label: string;
+    label?: string;
     children: React.ReactNode;
   }
 }

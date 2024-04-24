@@ -137,16 +137,13 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
       <NavSections>
         {condensed && (
-          <NewNavLink.Link to="/">
+          <NewNavLink.Link to="/" onClick={() => handleClickOnLink('/')}>
             <NewNavLink.Tooltip
               label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
             >
-              <>
-                <NewNavLink.Icon>
-                  <Icon as={House} color="neutral500" />
-                </NewNavLink.Icon>
-                <NewNavLink.Badge label="ee only">5</NewNavLink.Badge>
-              </>
+              <NewNavLink.Icon>
+                <Icon as={House} color="neutral500" />
+              </NewNavLink.Icon>
             </NewNavLink.Tooltip>
           </NewNavLink.Link>
         )}
