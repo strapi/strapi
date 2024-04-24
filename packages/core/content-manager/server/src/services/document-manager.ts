@@ -1,40 +1,20 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, sanitize, errors } from '@strapi/utils';
+import { contentTypes, errors } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { sumDraftCounts } from './utils/draft';
-import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
 type DocService = Modules.Documents.ServiceInstance;
 type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
 const { ApplicationError } = errors;
-const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 const omitIdField = omit('id');
-
-const emitEvent = async (uid: UID.ContentType, event: string, document: Document) => {
-  const modelDef = strapi.getModel(uid);
-  const sanitizedDocument = await sanitize.sanitizers.defaultSanitizeOutput(
-    {
-      schema: modelDef,
-      getModel(uid) {
-        return strapi.getModel(uid as UID.Schema);
-      },
-    },
-    document
-  );
-
-  strapi.eventHub.emit(event, {
-    model: modelDef.modelName,
-    entry: sanitizedDocument,
-  });
-};
 
 const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
