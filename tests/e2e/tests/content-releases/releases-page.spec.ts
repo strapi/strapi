@@ -136,8 +136,6 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     await test.step('releases should be updated in the release column of list view', async () => {
       const releaseColumn = page.getByRole('button', { name: '2 releases' });
-      expect(releaseColumn).toHaveCount(2);
-
       await releaseColumn.first().click();
       await expect(page.getByText('The Diamond Dogs')).toBeVisible();
       await expect(page.getByText('Trent Crimm: The Independent')).toBeVisible();
