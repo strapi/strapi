@@ -12,7 +12,7 @@ const Component = () => {
 
   React.useEffect(() => {
     setDataCalls((s) => s + 1);
-    get('/use-fetch-client-test').then(({ data }) => setData(data as any));
+    get('/use-fetch-client-test').then(({ data }) => setData(data));
   }, [get]);
 
   if (data === null) {
