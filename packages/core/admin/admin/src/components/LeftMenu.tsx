@@ -142,7 +142,12 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
               label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
             >
               <NewNavLink.Icon>
-                <Icon as={House} color="neutral500" />
+                <Icon
+                  width={`${16 / 16}rem`}
+                  height={`${16 / 16}rem`}
+                  as={House}
+                  color="neutral500"
+                />
               </NewNavLink.Icon>
             </NewNavLink.Tooltip>
           </NewNavLink.Link>

@@ -56,12 +56,17 @@ const TooltipImpl = ({ children, label, position = 'right' }: NavLink.TooltipPro
  * Icon
  * -----------------------------------------------------------------------------------------------*/
 const IconImpl = ({ children }: { children: React.ReactNode }) => {
+  if (!children) {
+    return null;
+  }
   return (
     <Flex
       paddingTop={`${8 / 16}rem`}
       paddingBottom={`${8 / 16}rem`}
       paddingLeft={`${12 / 16}rem`}
       paddingRight={`${12 / 16}rem`}
+      height={`${34 / 16}rem`}
+      width={`${52 / 16}rem`}
       justifyContent="center"
       aria-hidden
       as="span"
@@ -86,8 +91,8 @@ const BadgeImpl = ({ children, label }: NavLink.BadgeProps) => {
   return (
     <CustomBadge
       position="absolute"
-      top="-12px"
-      right="-4px"
+      top={`-${12 / 16}rem`}
+      right={`-${4 / 16}rem`}
       aria-label={label}
       background="primary600"
       textColor="neutral0"
