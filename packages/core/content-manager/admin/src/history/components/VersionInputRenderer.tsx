@@ -59,8 +59,20 @@ const LinkEllipsis = styled(Link)`
 
 const CustomRelationInput = (props: RelationsFieldProps) => {
   const { formatMessage } = useIntl();
-  const field = useField<{ results: RelationResult[]; meta: { missingCount: number } }>(props.name);
-  const { results, meta } = field.value!;
+  const field = useField<
+    { results: RelationResult[]; meta: { missingCount: number } } | RelationResult[]
+  >(props.name);
+
+  const fieldValue = field.value!;
+
+  const res = Array.isArray(fieldValue)
+    ? {
+        results: fieldValue.filter((item) => item !== null && Object.keys(item).length > 0),
+        meta: { missingCount: 0 },
+      }
+    : fieldValue;
+
+  const { results, meta } = res;
 
   return (
     <Box>
@@ -68,7 +80,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       {results.length > 0 && (
         <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
           {results.map((relationData) => {
-            // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+            // @ts-expect-error - targetModel does exist on the attribute. But it's not typed.
             const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
             const label = getRelationLabel(relationData, props.mainField);
 

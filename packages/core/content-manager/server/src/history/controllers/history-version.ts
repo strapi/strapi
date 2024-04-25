@@ -1,4 +1,4 @@
-import { errors } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
@@ -68,13 +68,28 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         ...getValidPagination({ page: params.page, pageSize: params.pageSize }),
       });
 
+      const sanitizedResults = await async.map(results, async (version: any) => {
+        console.log({
+          ...version.data,
+          locale: version.locale.code,
+        });
+        console.log('sanitized', {
+          data: await permissionChecker.sanitizeOutput({
+            ...version.data,
+            locale: version.locale.code,
+          }),
+        });
+        return {
+          ...version,
+          data: await permissionChecker.sanitizeOutput({
+            ...version.data,
+            locale: version.locale.code,
+          }),
+        };
+      });
+
       return {
-        data: await Promise.all(
-          results.map(async (result) => ({
-            ...result,
-            data: await permissionChecker.sanitizeOutput(result.data),
-          }))
-        ),
+        data: sanitizedResults,
         meta: { pagination },
       };
     },

@@ -354,9 +354,38 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       ): Promise<CreateHistoryVersion['data']> => {
         const entryWithRelations = await Object.entries(entry.schema).reduce(
           async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
+            /**
+             * Don't build the relations response object for relations to admin users,
+             * because it breaks the pickAllowedAdminUserFields sanitization, as it looks for the
+             */
+            if (
+              attributeSchema.type === 'relation' &&
+              attributeSchema.relation !== 'morphToOne' &&
+              attributeSchema.relation !== 'morphToMany' &&
+              attributeSchema.target === 'admin::user'
+            ) {
+              const attributeValue = entry.data[attributeKey];
+              const attributeValues = Array.isArray(attributeValue)
+                ? attributeValue
+                : [attributeValue];
+
+              return {
+                ...(await currentDataWithRelations),
+                [attributeKey]: await Promise.all(
+                  attributeValues.map((userToPopulate) => {
+                    console.log('userToPopulate', userToPopulate);
+                    return strapi
+                      .query('admin::user')
+                      .findOne({ where: { id: userToPopulate.id } });
+                  })
+                ),
+              };
+            }
+
             // TODO: handle relations that are inside components
             if (['relation', 'media'].includes(attributeSchema.type)) {
               const attributeValue = entry.data[attributeKey];
+
               const relationResponse = await buildRelationReponse(
                 (Array.isArray(attributeValue)
                   ? attributeValue
