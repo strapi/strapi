@@ -1,11 +1,9 @@
-import { curry } from 'lodash/fp';
-
-import { UID, Schema, Utils, Modules } from '@strapi/types';
+import { UID, Utils, Modules, Core } from '@strapi/types';
 import { sanitize } from '@strapi/utils';
 
 import { getDeepPopulate } from './utils/populate';
 
-const ALLOWED_EVENTS = {
+const EVENTS = {
   ENTRY_CREATE: 'entry.create',
   ENTRY_UPDATE: 'entry.update',
   ENTRY_DELETE: 'entry.delete',
@@ -14,45 +12,32 @@ const ALLOWED_EVENTS = {
   ENTRY_DRAFT_DISCARD: 'entry.draft-discard',
 };
 
-type EventName = Utils.Object.Values<typeof ALLOWED_EVENTS>;
-
-const sanitizeEntry = async (
-  model: Schema.ContentType<any> | Schema.Component<any>,
-  entry: Modules.Documents.AnyDocument
-) => {
-  return sanitize.sanitizers.defaultSanitizeOutput(
-    {
-      schema: model,
-      getModel(uid) {
-        return strapi.getModel(uid as UID.Schema);
-      },
-    },
-    entry
-  );
-};
+type EventName = Utils.Object.Values<typeof EVENTS>;
 
 /**
- * Triggers an event.
+ * Manager to trigger entry related events
  *
  * It will populate the entry if it is not a delete event.
  * So the event payload will contain the full entry.
  */
-const emitEntryEvent = async (
-  uid: UID.Schema,
-  eventName: EventName,
-  entry: Modules.Documents.AnyDocument
-) => {
+const createEventManager = (strapi: Core.Strapi, uid: UID.Schema) => {
   const populate = getDeepPopulate(uid, {});
   const model = strapi.getModel(uid);
 
-  const emitEvent = async () => {
+  const emitEvent = async (eventName: EventName, entry: Modules.Documents.AnyDocument) => {
     // There is no need to populate the entry if it has been deleted
     let populatedEntry = entry;
-    if (eventName !== 'entry.delete' && eventName !== 'entry.unpublish') {
+    if (![EVENTS.ENTRY_DELETE, EVENTS.ENTRY_UNPUBLISH].includes(eventName)) {
       populatedEntry = await strapi.db.query(uid).findOne({ where: { id: entry.id }, populate });
     }
 
-    const sanitizedEntry = await sanitizeEntry(model, populatedEntry);
+    const sanitizedEntry = await sanitize.sanitizers.defaultSanitizeOutput(
+      {
+        schema: model,
+        getModel: (uid) => strapi.getModel(uid as UID.Schema),
+      },
+      populatedEntry
+    );
 
     await strapi.eventHub.emit(eventName, {
       model: model.modelName,
@@ -61,13 +46,17 @@ const emitEntryEvent = async (
     });
   };
 
-  /**
-   * strapi.db.query might reuse the transaction used in the doc service request,
-   * so this is executed after that transaction is committed.
-   */
-  strapi.db.transaction(async ({ onCommit }) => onCommit(emitEvent));
+  return {
+    /**
+     * strapi.db.query might reuse the transaction used in the doc service request,
+     * so this is executed after that transaction is committed.
+     */
+    emitEvent(eventName: EventName, entry: Modules.Documents.AnyDocument) {
+      strapi.db.transaction(({ onCommit }) => {
+        onCommit(() => emitEvent(eventName, entry));
+      });
+    },
+  };
 };
 
-const curriedEmitEvent = curry(emitEntryEvent);
-
-export { curriedEmitEvent as emitEvent };
+export { createEventManager };

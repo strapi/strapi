@@ -1,4 +1,4 @@
-import { omit, assoc, merge } from 'lodash/fp';
+import { omit, assoc, merge, curry } from 'lodash/fp';
 
 import { async, contentTypes as contentTypesUtils } from '@strapi/utils';
 
@@ -13,13 +13,16 @@ import { createDocumentId } from '../../utils/transform-content-types-to-models'
 import { getDeepPopulate } from './utils/populate';
 import { transformParamsToQuery } from './transform/query';
 import { transformParamsDocumentId } from './transform/id-transform';
-import { emitEvent } from './events';
+import { createEventManager } from './events';
 
 export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
   const contentType = strapi.contentType(uid);
   const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(contentType);
 
   const entries = createEntriesService(uid);
+
+  const eventManager = createEventManager(strapi, uid);
+  const emitEvent = curry(eventManager.emitEvent);
 
   async function findMany(params = {} as any) {
     const query = await async.pipe(
@@ -84,7 +87,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     // Delete all matched entries and its components
     await async.map(entriesToDelete, (entryToDelete: any) => entries.delete(entryToDelete.id));
 
-    entriesToDelete.forEach(emitEvent(uid, 'entry.delete'));
+    entriesToDelete.forEach(emitEvent('entry.delete'));
 
     return { deletedEntries: entriesToDelete };
   }
@@ -102,7 +105,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     const doc = await entries.create(queryParams);
 
-    emitEvent(uid, 'entry.create', doc);
+    emitEvent('entry.create', doc);
 
     if (hasDraftAndPublish && params.status === 'published') {
       return publish({
@@ -147,7 +150,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       )
     );
 
-    clonedEntries.forEach(emitEvent(uid, 'entry.create'));
+    clonedEntries.forEach(emitEvent('entry.create'));
 
     return { documentId: clonedEntries.at(0)?.documentId, versions: clonedEntries };
   }
@@ -178,7 +181,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     let updatedDraft = null;
     if (entryToUpdate) {
       updatedDraft = await entries.update(entryToUpdate, queryParams);
-      emitEvent(uid, 'entry.update', updatedDraft);
+      emitEvent('entry.update', updatedDraft);
     }
 
     if (!updatedDraft) {
@@ -191,7 +194,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
           ...queryParams,
           data: { ...queryParams.data, documentId },
         });
-        emitEvent(uid, 'entry.create', updatedDraft);
+        emitEvent('entry.create', updatedDraft);
       }
     }
 
@@ -253,7 +256,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       entries.publish(draft, queryParams)
     );
 
-    versions.forEach(emitEvent(uid, 'entry.publish'));
+    versions.forEach(emitEvent('entry.publish'));
 
     return { versions };
   }
@@ -272,7 +275,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const versionsToDelete = await strapi.db.query(uid).findMany(query);
     await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
-    versionsToDelete.forEach(emitEvent(uid, 'entry.unpublish'));
+    versionsToDelete.forEach(emitEvent('entry.unpublish'));
 
     return { versions: versionsToDelete };
   }
@@ -313,7 +316,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       entries.discardDraft(entry, queryParams)
     );
 
-    draftEntries.forEach(emitEvent(uid, 'entry.draft-discard'));
+    draftEntries.forEach(emitEvent('entry.draft-discard'));
 
     return { versions: draftEntries };
   }
