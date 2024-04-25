@@ -107,7 +107,7 @@ describe('Release controller', () => {
       };
 
       // @ts-expect-error partial context
-      expect(() => releaseController.create(ctx)).rejects.toThrow('Required field');
+      expect(() => releaseController.create(ctx)).rejects.toThrow('This value is required.');
     });
   });
 
@@ -129,7 +129,7 @@ describe('Release controller', () => {
       };
 
       // @ts-expect-error partial context
-      expect(() => releaseController.update(ctx)).rejects.toThrow('Required field');
+      expect(() => releaseController.update(ctx)).rejects.toThrow('This value is required.');
     });
 
     it('throws an error given unknown request arguments', () => {
