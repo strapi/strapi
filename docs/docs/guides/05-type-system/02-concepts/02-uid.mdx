@@ -14,7 +14,6 @@ On this page, **a resource** is considered as **anything that can be identified 
 This includes (but is not limited to) controllers, schema, services, policies, middlewares, etc...
 :::
 
-
 In the Type System, UIDs play a crucial role in referencing various resources (such as schema and entities) by attaching a unique identifier.
 
 To put it simply, a UID is a unique (string) literal key used to identify, locate, or access a particular resource within the system.
@@ -26,6 +25,7 @@ This makes it the perfect tool to index type registries or to use as a type para
 ### Format
 
 A UID is composed of 3 different parts:
+
 1. A namespace ([link](#1-namespaces))
 2. A separator ([link](#2-separators))
 3. A name ([link](#3-names))
@@ -46,7 +46,7 @@ Scoped namespaces are defined by a base name, followed by a separator (`::`) and
 In Strapi there are two of them:
 
 | Name   |    Definition     | Description                                          |
-|--------|:-----------------:|------------------------------------------------------|
+| ------ | :---------------: | ---------------------------------------------------- |
 | API    |  `api::<scope>`   | Represent a resource present in the `<scope>` API    |
 | Plugin | `plugin::<scope>` | Represent a resource present in the `<scope>` plugin |
 
@@ -57,7 +57,7 @@ These namespaces are used as a simple prefix and define the origin of a resource
 Strapi uses three of them to create UIDs
 
 | Name   | Definition | Description                                                                   |
-|--------|:----------:|-------------------------------------------------------------------------------|
+| ------ | :--------: | ----------------------------------------------------------------------------- |
 | Strapi |  `strapi`  | Represent a resource present in the core of strapi                            |
 | Admin  |  `admin`   | Represent a resource present in Strapi admin                                  |
 | Global |  `global`  | Rarely used (_e.g. policies or middlewares_), it represents a global resource |
@@ -90,7 +90,7 @@ ContentType and Component are referring to both the related schema and entity.
 :::
 
 |                          |    ContentType     |     Component      |     Middleware     |       Policy       |     Controller     |      Service       |
-|--------------------------|:------------------:|:------------------:|:------------------:|:------------------:|:------------------:|:------------------:|
+| ------------------------ | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: |
 | `api::<scope>.<name>`    | :white_check_mark: |        :x:         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | `plugin::<scope>.<name>` | :white_check_mark: |        :x:         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
 | `<category>.<name>`      |        :x:         | :white_check_mark: |        :x:         |        :x:         |        :x:         |        :x:         |
@@ -141,6 +141,7 @@ fetch('api::article.article');
 fetch('admin::user');
 // ^ this should return a Data.Entity<'admin::user'>
 ```
+
 To do that, we'll need the function to be able to provide us with the current `uid` type based on usage.
 
 ```typescript
@@ -171,14 +172,15 @@ Let's add the possibility to select which fields we want to return for our entit
 ```typescript
 import type { UID, Data, Schema } from '@strapi/types';
 
-declare function fetch<
-  T extends UID.ContentType,
-  F extends Schema.AttributeNames<T>
->(uid: T, fields: F[]): Data.ContentType<T>;
+declare function fetch<T extends UID.ContentType, F extends Schema.AttributeNames<T>>(
+  uid: T,
+  fields: F[]
+): Data.ContentType<T>;
 ```
 
 :::tip
 You may have noticed that we're using the inferred UID type (`T`) to reference both:
+
 - An entity (`Data.Entity<T>`)
 - A schema (`Schema.AttributeNames<T>`)
 

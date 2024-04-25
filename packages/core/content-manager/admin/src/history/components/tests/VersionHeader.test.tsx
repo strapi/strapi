@@ -80,7 +80,7 @@ describe('VersionHeader', () => {
       const backLink = screen.getByRole('link', { name: 'Back' });
       expect(backLink).toHaveAttribute(
         'href',
-        '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr'
+        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr'
       );
     });
 
@@ -111,7 +111,7 @@ describe('VersionHeader', () => {
       const backLink = screen.getByRole('link', { name: 'Back' });
       expect(backLink).toHaveAttribute(
         'href',
-        '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr?plugins[i18n][locale]=en'
+        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr?plugins[i18n][locale]=en'
       );
     });
 
@@ -158,7 +158,10 @@ describe('VersionHeader', () => {
       expect(await screen.findByText('Test Title (homepage)')).toBeInTheDocument();
 
       const backLink = screen.getByRole('link', { name: 'Back' });
-      expect(backLink).toHaveAttribute('href', '/single-types/api::homepage.homepage');
+      expect(backLink).toHaveAttribute(
+        'href',
+        '/content-manager/single-types/api::homepage.homepage'
+      );
     });
 
     it('should display the correct title and subtitle for a localized entry', async () => {
@@ -185,7 +188,7 @@ describe('VersionHeader', () => {
       const backLink = screen.getByRole('link', { name: 'Back' });
       expect(backLink).toHaveAttribute(
         'href',
-        '/single-types/api::homepage.homepage?plugins[i18n][locale]=en'
+        '/content-manager/single-types/api::homepage.homepage?plugins[i18n][locale]=en'
       );
     });
   });

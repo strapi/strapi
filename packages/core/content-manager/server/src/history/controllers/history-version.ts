@@ -37,13 +37,13 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
   return {
     async findMany(ctx) {
       const contentTypeUid = ctx.query.contentType as UID.ContentType;
-      const isSingleType = strapi.getModel(contentTypeUid).kind === 'singleType';
+      const isSingleType = strapi.getModel(contentTypeUid)?.kind === 'singleType';
 
       if (isSingleType && !contentTypeUid) {
         throw new errors.ForbiddenError('contentType is required');
       }
 
-      if (!contentTypeUid && !ctx.query.documentId) {
+      if (!isSingleType && (!contentTypeUid || !ctx.query.documentId)) {
         throw new errors.ForbiddenError('contentType and documentId are required');
       }
 
@@ -68,7 +68,15 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         ...getValidPagination({ page: params.page, pageSize: params.pageSize }),
       });
 
-      return { data: results, meta: { pagination } };
+      return {
+        data: await Promise.all(
+          results.map(async (result) => ({
+            ...result,
+            data: await permissionChecker.sanitizeOutput(result.data),
+          }))
+        ),
+        meta: { pagination },
+      };
     },
 
     async restoreVersion(ctx) {
