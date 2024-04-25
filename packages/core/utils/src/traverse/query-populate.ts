@@ -221,25 +221,7 @@ const populate = traverseFactory()
       }
 
       if (isObject(value)) {
-        const { components } = attribute;
-
         const newValue = {};
-
-        // Handle legacy DZ params
-        let newProperties: unknown = omit('on', value);
-
-        for (const componentUID of components) {
-          const componentSchema = getModel(componentUID);
-
-          const properties = await recurse(
-            visitor,
-            { schema: componentSchema, path, getModel },
-            value
-          );
-          newProperties = merge(newProperties, properties);
-        }
-
-        Object.assign(newValue, newProperties);
 
         // Handle new morph fragment syntax
         if ('on' in value && value.on) {
