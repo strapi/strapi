@@ -9,8 +9,8 @@ tags:
 toc_max_heading_level: 5
 ---
 
-import Tabs from '@theme/Tabs'
-import TabItem from '@theme/TabItem'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
 
 ### Context
 
@@ -108,6 +108,7 @@ Creating a new registry is as simple as exporting an indexed interface from the 
 Let's declare the content-type schema registry.
 
 It should accept:
+
 - Content-type UIDs as keys
 - Content-type schemas as values
 
@@ -130,7 +131,7 @@ We use low level types to define our index (`Internal`/`Struct`) to keep it as g
 To define `UID.ContentType`, we extract every key (`Internal.Registry.Keys`) from the public content-type registry (`Public.ContentTypeSchemas`) that matches with the base definition of a content-type UID (`Internal.UID.ContentType`).
 
 ```ts title="@strapi/types/uid.ts"
-import type { Internal, Public } from '@strapi/types'
+import type { Internal, Public } from '@strapi/types';
 
 export type ContentType = Internal.Registry.Keys<
   Public.ContentTypeSchemas,
@@ -151,7 +152,7 @@ Since `UID.ContentType` (`TUID`) is [dynamically built based on actual keys](#ui
 :::
 
 ```ts title="@strapi/types/schema.ts"
-import type { UID, Public } from '@strapi/types'
+import type { UID, Public } from '@strapi/types';
 
 export type ContentType<TUID extends UID.ContentType> = Public.ContentTypeSchemas[TUID];
 ```
@@ -172,6 +173,7 @@ Remember to use dynamic type definitions (`UID`, `Data`, `Schema`) and not stati
 
 :::info[Reminder]
 Registries are **indexed**, which means that:
+
 - **When augmented** (_e.g. in users' applications_), they'll return **strongly typed values** that correspond to the defined types.
 - **When empty** (_e.g. in Strapi codebase_), they'll return **generic low level types** based on their index definition.
 
@@ -183,6 +185,7 @@ Registries are **indexed**, which means that:
     const uid: UID.ContentType;
     // ^ 'api::article.article' | 'admin::user'
     ```
+
   </TabItem>
   <TabItem value="empty" label="Empty">
     ```ts
@@ -191,6 +194,7 @@ Registries are **indexed**, which means that:
     const uid: UID.ContentType;
     // ^ `admin::${string}` | `api::${string}.${string}` | `plugin::${string}.${string}` | `strapi::${string}`
     ```
+
   </TabItem>
 </Tabs>
 :::
@@ -215,7 +219,7 @@ declare module '@strapi/strapi' {
     }
   }
 }
-````
+```
 
 This will force every type that depends on the `Public.ContentTypeSchemas` registry to recognize `'api::article.article'` as the only valid UID and `ApiArticleArticle` the only valid schema.
 
@@ -235,18 +239,20 @@ The process will generate type definitions based on the user application state (
   <TabItem value="manual" label="Manual Run">
     Generate the types once.
 
-  ```shell title="my-app/"
-  yarn strapi ts:generate-types
-  ```
+```shell title="my-app/"
+yarn strapi ts:generate-types
+```
+
   </TabItem>
   <TabItem value="dev" label="During Development">
     Start the application in dev mode, and generate types on every server restart.
 
     Useful when working with the content-type builder.
 
-  ```shell title="my-app/"
-  yarn develop
-  ```
+```shell title="my-app/"
+yarn develop
+```
+
   </TabItem>
 </Tabs>
 
@@ -277,40 +283,43 @@ declare module '@strapi/strapi' {
 
 When coupling everything together, the end result is a TypeScript developer experience automatically adjusted to the current context.
 
+<!-- prettier-ignore-start -->
 
 <Tabs>
-  <TabItem value="app" label="User Application">
-  ```ts title="my-app/src/index.ts"
-  export default () => ({
-    bootstrap() {
-      strapi.findOne('ap');
-      //                ^ TypeScript will autocomplete with "api::article.article"
+<TabItem value="app" label="User Application">
+```ts title="my-app/src/index.ts"
+export default () => ({
+  bootstrap() {
+    strapi.findOne('ap');
+    //                ^ TypeScript will autocomplete with "api::article.article"
 
-      strapi.findOne('ad');
-      //                ^ TypeScript will autocomplete with "admin::user"
+    strapi.findOne('ad');
+    //                ^ TypeScript will autocomplete with "admin::user"
 
-      strapi.findOne('api::blog.blog');
-      //                ^ Error, TypeScript will complain
-    }
-  })
-  ```
-  </TabItem>
-  <TabItem value="strapi" label="Strapi Codebase">
-  ```ts title="@strapi/strapi/document-service.ts"
-  import type { UID } from '@strapi/types';
-
-  export const findOne<TUID extends UID.ContentType>(uid: TUID) {
-    // ...
+    strapi.findOne('api::blog.blog');
+    //                ^ Error, TypeScript will complain
   }
+})
+```
+</TabItem>
+<TabItem value="strapi" label="Strapi Codebase">
+```ts title="@strapi/strapi/document-service.ts"
+import type { UID } from '@strapi/types';
 
-  findOne('admin::foo');
-  //           ^ Valid, matches 'admin::${string}'
+export const findOne<TUID extends UID.ContentType>(uid: TUID) {
+  // ...
+}
 
-  findOne('plugin::bar.bar');
-  //           ^ Valid, matches 'plugin::${string}.${string}'
+findOne('admin::foo');
+//           ^ Valid, matches 'admin::${string}'
 
-  findOne('baz');
-  //           ^ Error, does not correspond to any content-type UID format
-  ```
-  </TabItem>
+findOne('plugin::bar.bar');
+//           ^ Valid, matches 'plugin::${string}.${string}'
+
+findOne('baz');
+//           ^ Error, does not correspond to any content-type UID format
+```
+</TabItem>
 </Tabs>
+
+<!-- prettier-ignore-end -->

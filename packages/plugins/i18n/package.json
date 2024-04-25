@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-i18n",
-  "version": "5.0.0-beta.4",
+  "version": "5.0.0-beta.5",
   "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
   "repository": {
     "type": "git",
@@ -55,7 +55,7 @@
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "1.18.0",
     "@strapi/icons": "1.18.0",
-    "@strapi/utils": "5.0.0-beta.4",
+    "@strapi/utils": "5.0.0-beta.5",
     "axios": "1.6.8",
     "lodash": "4.17.21",
     "qs": "6.11.1",
@@ -64,11 +64,11 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.0.0-beta.4",
-    "@strapi/admin-test-utils": "5.0.0-beta.4",
+    "@strapi/admin": "5.0.0-beta.5",
+    "@strapi/admin-test-utils": "5.0.0-beta.5",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/plugin-content-manager": "5.0.0-beta.4",
-    "@strapi/types": "5.0.0-beta.4",
+    "@strapi/plugin-content-manager": "5.0.0-beta.5",
+    "@strapi/types": "5.0.0-beta.5",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
     "msw": "1.3.0",
