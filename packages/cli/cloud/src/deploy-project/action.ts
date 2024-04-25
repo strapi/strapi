@@ -8,9 +8,9 @@ import createProjectAction from '../create-project/action';
 import type { CLIContext, ProjectInfos } from '../types';
 import { getTmpStoragePath } from '../config/local';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
-import { notificationServiceFactory } from '../utils/notification-service';
+import { notificationServiceFactory } from '../services/notification';
 import { loadPkg } from '../utils/pkg';
-import { buildLogsServiceFactory } from '../utils/build-logs-service';
+import { buildLogsServiceFactory } from '../services/build-logs';
 
 const FILE_SIZE_LIMIT = 100 * 1024 * 1024; // 100MB
 
