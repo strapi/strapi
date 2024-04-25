@@ -31,6 +31,7 @@ import { createDefaultForm } from '../../../utils/forms';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
+import { ComponentLayout } from './Layout';
 
 import type { ComponentInputProps } from './Input';
 import type { Schema } from '@strapi/types';
@@ -46,7 +47,7 @@ const RepeatableComponent = ({
   disabled,
   name,
   mainField,
-  renderLayout,
+  children,
 }: RepeatableComponentProps) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
@@ -224,7 +225,6 @@ const RepeatableComponent = ({
                   index={index}
                   isOpen={collapseToOpen === key}
                   mainField={mainField}
-                  renderLayout={renderLayout}
                   onMoveItem={handleMoveComponentField}
                   onClickToggle={handleToggle(key)}
                   onDeleteComponent={() => {
@@ -235,7 +235,9 @@ const RepeatableComponent = ({
                   onCancel={handleCancel}
                   onDropItem={handleDropItem}
                   onGrabItem={handleGrabItem}
-                />
+                >
+                  {children}
+                </Component>
               </ComponentProvider>
             );
           })}
@@ -376,7 +378,7 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
-    Pick<RepeatableComponentProps, 'mainField' | 'renderLayout'> {
+    Pick<RepeatableComponentProps, 'mainField' | 'children'> {
   attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
@@ -397,18 +399,13 @@ const Component = ({
     name: 'id',
     type: 'integer',
   },
-  renderLayout,
   onClickToggle,
   onDeleteComponent,
   toggleCollapses,
+  children,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
-  const {
-    edit: { components },
-  } = useDocLayout();
-
-  const { layout } = components[attribute.component];
 
   const displayValue = useForm('RepeatableComponent', (state) => {
     return getIn(state.values, [...name.split('.'), mainField.name]);
@@ -497,7 +494,7 @@ const Component = ({
               padding={6}
               gap={6}
             >
-              {renderLayout({ layout, name })}
+              {children}
             </Flex>
           </DSAccordionContent>
         </Accordion>

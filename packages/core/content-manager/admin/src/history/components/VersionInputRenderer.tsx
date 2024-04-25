@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
+import { useDocLayout, type EditFieldLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useTypedSelector } from '../../modules/hooks';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
@@ -34,7 +35,6 @@ import { useHistoryContext } from '../pages/History';
 
 import { getRemaingFieldsLayout } from './VersionContent';
 
-import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
 import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
 import type { RelationResult } from '../../services/relations';
 import type { Schema } from '@strapi/types';
@@ -223,6 +223,11 @@ const VersionInputRenderer = ({
 
   const editableFields = id ? canUpdateFields : canCreateFields;
   const readableFields = id ? canReadFields : canCreateFields;
+
+  const {
+    edit: { components: compos },
+  } = useDocLayout();
+
   /**
    * Component fields are always readable and editable,
    * however the fields within them may not be.
@@ -328,31 +333,25 @@ const VersionInputRenderer = ({
     case 'blocks':
       return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'component':
-      return (
-        <ComponentInput
-          {...props}
-          hint={hint}
-          disabled={fieldIsDisabled}
-          renderLayout={(layoutProps) => {
-            // Components can only have one panel, so only save the first layout item
-            const [remainingFieldsLayout] = getRemaingFieldsLayout({
-              layout: [layoutProps.layout],
-              metadatas: configuration.components[props.attribute.component].metadatas,
-              fieldSizes,
-              schemaAttributes: components[props.attribute.component].attributes,
-            });
+      const { layout } = compos[props.attribute.component];
 
-            return (
-              <ComponentLayout
-                {...layoutProps}
-                layout={[...layoutProps.layout, ...remainingFieldsLayout]}
-                renderInput={(inputProps) => (
-                  <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />
-                )}
-              />
-            );
-          }}
-        />
+      const [remainingFieldsLayout] = getRemaingFieldsLayout({
+        layout: [layout],
+        metadatas: configuration.components[props.attribute.component].metadatas,
+        fieldSizes,
+        schemaAttributes: components[props.attribute.component].attributes,
+      });
+
+      return (
+        <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled}>
+          <ComponentLayout
+            name={props.name}
+            layout={layout}
+            renderInput={(inputProps) => (
+              <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />
+            )}
+          />
+        </ComponentInput>
       );
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
