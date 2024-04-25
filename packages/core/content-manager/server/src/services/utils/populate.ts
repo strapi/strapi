@@ -3,7 +3,7 @@ import strapiUtils from '@strapi/utils';
 import { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 
-const { isVisibleAttribute } = strapiUtils.contentTypes;
+const { isVisibleAttribute, isScalarAttribute } = strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
@@ -210,12 +210,7 @@ const getValidatableFieldsPopulate = (
       return populateAcc;
     }
 
-    const isScalarAttribute =
-      !isMedia(attribute) &&
-      !isRelation(attribute) &&
-      !isComponent(attribute) &&
-      !isDynamicZone(attribute);
-    if (isScalarAttribute) {
+    if (isScalarAttribute(attribute)) {
       return merge(populateAcc, {
         [attributeName]: true,
       });

@@ -215,6 +215,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return CONTENT_MANAGER_STATUS.MODIFIED;
   },
 
+  // TODO is it necessary to return metadata on every page of the CM
+  // We could refactor this so the locales are only loaded when they're
+  // needed. e.g. in the bulk locale action modal.
   async getMetadata(
     uid: UID.ContentType,
     version: DocumentVersion,

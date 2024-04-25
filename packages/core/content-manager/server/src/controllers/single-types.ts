@@ -3,6 +3,7 @@ import { setCreatorFields, async, errors } from '@strapi/utils';
 
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { getService } from '../utils';
+import { formatDocumentWithMetadata } from './utils/metadata';
 
 const buildPopulateFromQuery = async (query: any, model: any) => {
   return getService('populate-builder')(model)
@@ -93,7 +94,6 @@ export default {
     const { query = {} } = ctx.request;
 
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
-    const documentMetadata = getService('document-metadata');
 
     if (permissionChecker.cannot.read()) {
       return ctx.forbidden();
@@ -117,11 +117,12 @@ export default {
       }
 
       // If the requested locale doesn't exist, return an empty response
-      const { meta } = await documentMetadata.formatDocumentWithMetadata(
+      const { meta } = await formatDocumentWithMetadata(
+        permissionChecker,
         model,
+        // @ts-expect-error - fix types
         { id: document.documentId, locale, publishedAt: null },
-        { availableLocales: true, availableStatus: false },
-        userAbility
+        { availableLocales: true, availableStatus: false }
       );
       ctx.body = { data: {}, meta };
       return;
@@ -132,29 +133,18 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(
-      model,
-      sanitizedDocument,
-      {},
-      userAbility
-    );
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
   async createOrUpdate(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const document = await createOrUpdateDocument(ctx);
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(
-      model,
-      sanitizedDocument,
-      {},
-      userAbility
-    );
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
   async delete(ctx: any) {
@@ -201,7 +191,6 @@ export default {
     const { query = {} } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -228,12 +217,7 @@ export default {
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(
-      model,
-      sanitizedDocument,
-      {},
-      userAbility
-    );
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
   async unpublish(ctx: any) {
@@ -245,7 +229,6 @@ export default {
     } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -281,7 +264,7 @@ export default {
       ctx.body = await async.pipe(
         (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
-        (document) => documentMetadata.formatDocumentWithMetadata(model, document, {}, userAbility)
+        (document) => formatDocumentWithMetadata(permissionChecker, model, document)
       )(document);
     });
   },
@@ -292,7 +275,6 @@ export default {
     const { body, query = {} } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.discard()) {
@@ -316,7 +298,7 @@ export default {
     ctx.body = await async.pipe(
       (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
-      (document) => documentMetadata.formatDocumentWithMetadata(model, document, {}, userAbility)
+      (document) => formatDocumentWithMetadata(permissionChecker, model, document)
     )(document);
   },
 

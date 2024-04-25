@@ -1,16 +1,9 @@
-import { UID } from '@strapi/types';
-import { setCreatorFields, async, errors, sanitize } from '@strapi/utils';
+import { setCreatorFields, async, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
-
-import type {
-  AvailableLocaleDocument,
-  AvailableStatusDocument,
-} from '../../../shared/contracts/collection-types';
-
-import { DocumentVersion, GetMetadataOptions } from '../services/document-metadata';
+import { formatDocumentWithMetadata } from './utils/metadata';
 
 /**
  * Create a new document.
@@ -114,54 +107,6 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
     populate: opts?.populate,
     locale,
   });
-};
-
-/**
- * Format a document with metadata. Making sure the metadata response is
- * correctly sanitized for the current user
- */
-const formatDocumentWithMetadata = async (
-  permissionChecker: any,
-  uid: UID.ContentType,
-  document: DocumentVersion,
-  opts: GetMetadataOptions = {}
-) => {
-  const documentMetadata = getService('document-metadata');
-
-  const serviceOutput = await documentMetadata.formatDocumentWithMetadata(uid, document, opts);
-
-  let {
-    meta: { availableLocales, availableStatus },
-  } = serviceOutput;
-
-  // Always sanitize passwords
-  const defaultSanitizer = sanitize.sanitizers.sanitizePasswords({
-    schema: strapi.getModel(uid),
-    getModel(uid: string) {
-      return strapi.getModel(uid as UID.Schema);
-    },
-  });
-  const metadataSanitizer = permissionChecker.sanitizeOutput;
-
-  availableLocales = await async.map(
-    availableLocales,
-    async (localeDocument: AvailableLocaleDocument) =>
-      async.pipe(defaultSanitizer, metadataSanitizer)(localeDocument)
-  );
-
-  availableStatus = await async.map(
-    availableStatus,
-    async (statusDocument: AvailableStatusDocument) =>
-      async.pipe(defaultSanitizer, metadataSanitizer)(statusDocument)
-  );
-
-  return {
-    ...serviceOutput,
-    meta: {
-      availableLocales,
-      availableStatus,
-    },
-  };
 };
 
 export default {
