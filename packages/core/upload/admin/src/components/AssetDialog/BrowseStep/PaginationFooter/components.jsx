@@ -33,7 +33,7 @@ const PageLinkWrapper = styled(LinkWrapper)`
 `;
 
 const ActionLinkWrapper = styled(LinkWrapper)`
-  font-size: 0.7rem;
+  font-size: 1.1rem;
   svg path {
     fill: ${(p) => (p['aria-disabled'] ? p.theme.colors.neutral300 : p.theme.colors.neutral600)};
   }

@@ -47,6 +47,8 @@
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
+    "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
     "test:unit": "run -T jest --verbose",
     "test:unit:watch": "run -T jest --watch",
     "watch": "strapi plugin:watch"
@@ -54,8 +56,8 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/admin": "5.0.0-beta.5",
-    "@strapi/design-system": "1.18.0",
-    "@strapi/icons": "1.18.0",
+    "@strapi/design-system": "2.0.0-beta.2",
+    "@strapi/icons": "2.0.0-beta.2",
     "@strapi/utils": "5.0.0-beta.5",
     "axios": "1.6.8",
     "bcryptjs": "2.4.3",

@@ -229,10 +229,6 @@ class StrapiApp {
       link.Component && typeof link.Component === 'function',
       `[${link.intlLabel.defaultMessage}]: link.Component must be a function returning a Promise that returns a default component. Please use: \`Component: () => import(path)\` instead.`
     );
-    invariant(
-      link.icon && typeof link.icon === 'function',
-      `[${link.intlLabel.defaultMessage}]: link.Icon should be a valid React Component`
-    );
 
     if (
       link.Component &&

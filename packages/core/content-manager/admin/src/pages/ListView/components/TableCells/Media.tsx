@@ -71,8 +71,8 @@ const FileWrapper = ({ children }: { children: React.ReactNode }) => {
 };
 
 const FileTypography = styled(Typography)`
-  font-size: 0.6rem;
-  line-height: 0.6rem;
+  font-size: 0.9rem;
+  line-height: 0.9rem;
 `;
 
 /* -------------------------------------------------------------------------------------------------

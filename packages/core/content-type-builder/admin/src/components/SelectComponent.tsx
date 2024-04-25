@@ -1,4 +1,4 @@
-import { Option, Select } from '@strapi/design-system';
+import { SingleSelectOption, SingleSelect } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useDataManager } from '../hooks/useDataManager';
@@ -88,7 +88,7 @@ export const SelectComponent = ({
   }
 
   return (
-    <Select
+    <SingleSelect
       disabled={isCreatingComponentWhileAddingAField || !isCreating}
       error={errorMessage}
       label={label}
@@ -101,11 +101,11 @@ export const SelectComponent = ({
     >
       {options.map((option) => {
         return (
-          <Option key={option.uid} value={option.uid}>
+          <SingleSelectOption key={option.uid} value={option.uid}>
             {`${option.categoryName} - ${option.label}`}
-          </Option>
+          </SingleSelectOption>
         );
       })}
-    </Select>
+    </SingleSelect>
   );
 };

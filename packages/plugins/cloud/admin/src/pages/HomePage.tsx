@@ -5,7 +5,7 @@
  */
 
 import { Box, GridLayout, Flex, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import { Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -23,7 +23,7 @@ const LogoContainer = styled(Box)`
   right: 0;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
@@ -33,7 +33,7 @@ const RightSideCloudContainer = styled(Box)`
   right: 0;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
@@ -43,7 +43,7 @@ const LeftSideCloudContainer = styled(Box)`
   left: 220px;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 

@@ -1,6 +1,5 @@
-import { Flex, GridItem, Icon, Tooltip, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { ExclamationMarkCircle, ExternalLink } from '@strapi/icons';
+import { Flex, GridItem, Tooltip, Typography, Link } from '@strapi/design-system';
+import { ExternalLink, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
@@ -82,12 +81,7 @@ export const AdminSeatInfoEE = () => {
               defaultMessage: 'At limit: add seats to invite more users',
             })}
           >
-            <Icon
-              width={`${14 / 16}rem`}
-              height={`${14 / 16}rem`}
-              color="danger500"
-              as={ExclamationMarkCircle}
-            />
+            <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
           </Tooltip>
         )}
       </Flex>

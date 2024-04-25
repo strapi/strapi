@@ -10,8 +10,9 @@ import {
   ModalHeader,
   ModalLayout,
   Typography,
+  Breadcrumbs,
+  Crumb,
 } from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { useIntl } from 'react-intl';
 
 import { useNotification } from '../../../../../../../../admin/src/features/Notifications';

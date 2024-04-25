@@ -63,7 +63,7 @@ const EditorLayout = ({
                 </BoxWithBorder>
                 <Flex alignItems="start" direction="column" flex={1} height="100%" width="100%">
                   <Flex
-                    height={`${48 / 16}rem`}
+                    height="4.8rem"
                     background="neutral100"
                     justifyContent="flex-end"
                     shrink={0}
@@ -125,8 +125,8 @@ const ExpandButton = styled(BaseButton)`
 
     path {
       fill: ${({ theme }) => theme.colors.neutral700};
-      width: ${12 / 16}rem;
-      height: ${12 / 16}rem;
+      width: 1.2rem;
+      height: 1.2rem;
     }
   }
 `;
