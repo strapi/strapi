@@ -3,7 +3,8 @@ import strapiUtils from '@strapi/utils';
 import { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 
-const { isVisibleAttribute, isScalarAttribute } = strapiUtils.contentTypes;
+const { isVisibleAttribute, isScalarAttribute, getDoesAttributeRequireValidation } =
+  strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
@@ -196,17 +197,8 @@ const getValidatableFieldsPopulate = (
   const model = strapi.getModel(uid);
 
   return Object.entries(model.attributes).reduce((populateAcc, [attributeName, attribute]) => {
-    // TODO confirm all kinds of validation required?
-    const requiresValidation =
-      attribute.required ||
-      // @ts-expect-error - improve types
-      attribute.unique ||
-      Object.prototype.hasOwnProperty.call(attribute, 'max') ||
-      Object.prototype.hasOwnProperty.call(attribute, 'min') ||
-      Object.prototype.hasOwnProperty.call(attribute, 'maxLength') ||
-      Object.prototype.hasOwnProperty.call(attribute, 'minLength');
-
-    if (!requiresValidation) {
+    if (!getDoesAttributeRequireValidation(attribute)) {
+      // If the attribute does not require validation, skip it
       return populateAcc;
     }
 
