@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
+    "@types/http-errors": "2.0.4",
     "@types/koa": "2.13.4",
     "@types/node": "18.19.24",
     "eslint-config-custom": "5.0.0-beta.5",

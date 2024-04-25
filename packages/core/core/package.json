@@ -111,6 +111,7 @@
     "@types/bcryptjs": "2.4.3",
     "@types/configstore": "5.0.1",
     "@types/delegates": "1.0.0",
+    "@types/http-errors": "2.0.4",
     "@types/jest": "29.5.2",
     "@types/koa": "2.13.4",
     "@types/koa-compress": "4.0.3",

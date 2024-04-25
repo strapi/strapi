@@ -7276,6 +7276,7 @@ __metadata:
     "@types/bcryptjs": "npm:2.4.3"
     "@types/configstore": "npm:5.0.1"
     "@types/delegates": "npm:1.0.0"
+    "@types/http-errors": "npm:2.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"
     "@types/koa-compress": "npm:4.0.3"
@@ -8176,10 +8177,6 @@ __metadata:
     "@strapi/types": "npm:5.0.0-beta.5"
     "@strapi/typescript-utils": "npm:5.0.0-beta.5"
     "@strapi/utils": "npm:5.0.0-beta.5"
-    "@types/bcryptjs": "npm:2.4.3"
-    "@types/configstore": "npm:5.0.1"
-    "@types/delegates": "npm:1.0.0"
-    "@types/find-root": "npm:1.1.4"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
     "@types/node": "npm:18.19.24"
@@ -8203,22 +8200,17 @@ __metadata:
     esbuild-register: "npm:3.5.0"
     eslint-config-custom: "npm:5.0.0-beta.5"
     execa: "npm:5.1.1"
-    find-root: "npm:1.1.0"
     fork-ts-checker-webpack-plugin: "npm:8.0.0"
     fs-extra: "npm:11.2.0"
     get-latest-version: "npm:5.1.0"
     git-url-parse: "npm:14.0.0"
-    glob: "npm:10.3.10"
     html-webpack-plugin: "npm:5.6.0"
-    http-errors: "npm:2.0.0"
-    https-proxy-agent: "npm:5.0.1"
     inquirer: "npm:8.2.5"
     lodash: "npm:4.17.21"
     mini-css-extract-plugin: "npm:2.7.7"
     nodemon: "npm:3.0.2"
     ora: "npm:5.4.1"
     outdent: "npm:0.8.0"
-    package-json: "npm:7.0.0"
     pkg-up: "npm:3.1.0"
     prettier: "npm:3.2.5"
     react: "npm:^18.2.0"
@@ -8367,6 +8359,7 @@ __metadata:
   dependencies:
     "@sindresorhus/slugify": "npm:1.1.0"
     "@strapi/pack-up": "npm:5.0.0"
+    "@types/http-errors": "npm:2.0.4"
     "@types/koa": "npm:2.13.4"
     "@types/node": "npm:18.19.24"
     date-fns: "npm:2.30.0"
@@ -8970,13 +8963,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/find-root@npm:1.1.4":
-  version: 1.1.4
-  resolution: "@types/find-root@npm:1.1.4"
-  checksum: e438c62b3ef3b706d058764797ec5227479ed4be98e9fec5456fb3b9a2096ccd3e35a84c94e2018278e22c651f12ae6ff4d6d7006b09fa5132da3612e2118076
-  languageName: node
-  linkType: hard
-
 "@types/fined@npm:*":
   version: 1.1.3
   resolution: "@types/fined@npm:1.1.3"
@@ -9073,6 +9059,13 @@ __metadata:
   version: 1.8.2
   resolution: "@types/http-errors@npm:1.8.2"
   checksum: ecc365eea98d7eca650d593e742571acc3003742f0dd0fbbb15b8fce286e0f7421644b4140fb9bf701bbb7f1b744aea3967ebe025f0f0811aa5ab2c3d40fe111
+  languageName: node
+  linkType: hard
+
+"@types/http-errors@npm:2.0.4":
+  version: 2.0.4
+  resolution: "@types/http-errors@npm:2.0.4"
+  checksum: 1f3d7c3b32c7524811a45690881736b3ef741bf9849ae03d32ad1ab7062608454b150a4e7f1351f83d26a418b2d65af9bdc06198f1c079d75578282884c4e8e3
   languageName: node
   linkType: hard
 
@@ -16369,7 +16362,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"find-root@npm:1.1.0, find-root@npm:^1.1.0":
+"find-root@npm:^1.1.0":
   version: 1.1.0
   resolution: "find-root@npm:1.1.0"
   checksum: caa799c976a14925ba7f31ca1a226fe73d3aa270f4f1b623fcfeb1c6e263111db4beb807d8acd31bd4d48d44c343b93688a9288dfbccca27463c36a0301b0bb9
@@ -18100,7 +18093,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"https-proxy-agent@npm:5.0.1, https-proxy-agent@npm:^5.0.0, https-proxy-agent@npm:^5.0.1":
+"https-proxy-agent@npm:^5.0.0, https-proxy-agent@npm:^5.0.1":
   version: 5.0.1
   resolution: "https-proxy-agent@npm:5.0.1"
   dependencies:
