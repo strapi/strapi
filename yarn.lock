@@ -7180,7 +7180,7 @@ __metadata:
     fast-deep-equal: "npm:3.1.3"
     formik: "npm:2.4.5"
     fractional-indexing: "npm:3.2.0"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     highlight.js: "npm:^10.4.1"
     immer: "npm:9.0.21"
     inquirer: "npm:8.2.5"
@@ -7311,19 +7311,19 @@ __metadata:
     bcryptjs: "npm:2.4.3"
     boxen: "npm:5.1.2"
     chalk: "npm:4.1.2"
-    ci-info: "npm:3.8.0"
+    ci-info: "npm:4.0.0"
     cli-table3: "npm:0.6.2"
     commander: "npm:8.3.0"
     configstore: "npm:5.0.1"
     copyfiles: "npm:2.4.1"
     debug: "npm:4.3.4"
     delegates: "npm:1.0.0"
-    dotenv: "npm:14.2.0"
+    dotenv: "npm:16.4.5"
     eslint-config-custom: "npm:5.0.0-beta.5"
     execa: "npm:5.1.1"
-    fs-extra: "npm:10.0.0"
+    fs-extra: "npm:11.2.0"
     glob: "npm:10.3.10"
-    http-errors: "npm:1.8.1"
+    http-errors: "npm:2.0.0"
     inquirer: "npm:8.2.5"
     is-docker: "npm:2.2.1"
     koa: "npm:2.15.2"
@@ -7362,7 +7362,7 @@ __metadata:
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/types": "npm:5.0.0-beta.5"
     "@strapi/utils": "npm:5.0.0-beta.5"
-    "@types/fs-extra": "npm:9.0.13"
+    "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"
     "@types/lodash": "npm:^4.14.191"
@@ -7376,7 +7376,7 @@ __metadata:
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.2"
     commander: "npm:8.3.0"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     inquirer: "npm:8.2.5"
     knex: "npm:3.0.1"
     koa: "npm:2.15.2"
@@ -7404,7 +7404,7 @@ __metadata:
     date-fns: "npm:2.30.0"
     debug: "npm:4.3.4"
     eslint-config-custom: "npm:5.0.0-beta.5"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     knex: "npm:3.0.1"
     lodash: "npm:4.17.21"
     semver: "npm:7.5.4"
@@ -7477,7 +7477,7 @@ __metadata:
     chalk: "npm:^4.1.2"
     copyfiles: "npm:2.4.1"
     execa: "npm:5.1.1"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     inquirer: "npm:8.2.5"
     lodash: "npm:4.17.21"
     node-machine-id: "npm:^1.1.10"
@@ -7498,7 +7498,7 @@ __metadata:
     chalk: "npm:4.1.2"
     copyfiles: "npm:2.4.1"
     eslint-config-custom: "npm:5.0.0-beta.5"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     node-plop: "npm:0.26.3"
     plop: "npm:2.7.6"
     pluralize: "npm:8.0.0"
@@ -7709,7 +7709,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.4.3"
     "@types/pluralize": "npm:0.0.30"
     date-fns: "npm:2.30.0"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     immer: "npm:9.0.21"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
@@ -7756,7 +7756,7 @@ __metadata:
     bcryptjs: "npm:2.4.3"
     cheerio: "npm:^1.0.0-rc.12"
     formik: "npm:2.4.5"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     immer: "npm:9.0.21"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
@@ -7939,12 +7939,12 @@ __metadata:
     "@types/koa-range": "npm:0.3.5"
     "@types/koa-static": "npm:4.0.2"
     axios: "npm:1.6.8"
-    byte-size: "npm:7.0.1"
+    byte-size: "npm:8.1.1"
     cropperjs: "npm:1.6.1"
     date-fns: "npm:2.30.0"
     formidable: "npm:3.5.1"
     formik: "npm:2.4.5"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     immer: "npm:9.0.21"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
@@ -8130,7 +8130,7 @@ __metadata:
     "@strapi/utils": "npm:5.0.0-beta.5"
     "@types/jest": "npm:29.5.2"
     eslint-config-custom: "npm:5.0.0-beta.5"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     memfs: "npm:4.6.0"
     tsconfig: "npm:5.0.0-beta.5"
   languageName: unknown
@@ -8218,7 +8218,7 @@ __metadata:
     concurrently: "npm:8.2.2"
     copyfiles: "npm:2.4.1"
     css-loader: "npm:^6.10.0"
-    dotenv: "npm:14.2.0"
+    dotenv: "npm:16.4.5"
     esbuild: "npm:0.19.11"
     esbuild-loader: "npm:^2.21.0"
     esbuild-register: "npm:3.5.0"
@@ -8226,12 +8226,12 @@ __metadata:
     execa: "npm:5.1.1"
     find-root: "npm:1.1.0"
     fork-ts-checker-webpack-plugin: "npm:8.0.0"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     get-latest-version: "npm:5.1.0"
-    git-url-parse: "npm:13.1.1"
+    git-url-parse: "npm:14.0.0"
     glob: "npm:10.3.10"
     html-webpack-plugin: "npm:5.6.0"
-    http-errors: "npm:1.8.1"
+    http-errors: "npm:2.0.0"
     https-proxy-agent: "npm:5.0.1"
     inquirer: "npm:8.2.5"
     lodash: "npm:4.17.21"
@@ -8315,7 +8315,7 @@ __metadata:
   dependencies:
     chalk: "npm:4.1.2"
     cli-table3: "npm:0.6.2"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     lodash: "npm:4.17.21"
     prettier: "npm:3.2.5"
     typescript: "npm:5.3.2"
@@ -8367,7 +8367,7 @@ __metadata:
     commander: "npm:8.3.0"
     esbuild-register: "npm:3.5.0"
     eslint-config-custom: "workspace:*"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     glob: "npm:10.3.10"
     jscodeshift: "npm:0.15.1"
     lodash: "npm:4.17.21"
@@ -8393,7 +8393,7 @@ __metadata:
     date-fns: "npm:2.30.0"
     eslint-config-custom: "npm:5.0.0-beta.5"
     execa: "npm:5.1.1"
-    http-errors: "npm:1.8.1"
+    http-errors: "npm:2.0.0"
     koa: "npm:2.15.2"
     koa-body: "npm:6.0.1"
     lodash: "npm:4.17.21"
@@ -9014,12 +9014,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/fs-extra@npm:9.0.13":
-  version: 9.0.13
-  resolution: "@types/fs-extra@npm:9.0.13"
+"@types/fs-extra@npm:11.0.4":
+  version: 11.0.4
+  resolution: "@types/fs-extra@npm:11.0.4"
   dependencies:
+    "@types/jsonfile": "npm:*"
     "@types/node": "npm:*"
-  checksum: ac545e377248039c596ef27d9f277b813507ebdd95d05f32fe7e9c67eb1ed567dafb4ba59f5fdcb6601dd7fd396ff9ba24f8c122e89cef096cdc17987c50a7fa
+  checksum: acc4c1eb0cde7b1f23f3fe6eb080a14832d8fa9dc1761aa444c5e2f0f6b6fa657ed46ebae32fb580a6700fc921b6165ce8ac3e3ba030c3dd15f10ad4dd4cae98
   languageName: node
   linkType: hard
 
@@ -9217,6 +9218,15 @@ __metadata:
   version: 0.0.29
   resolution: "@types/json5@npm:0.0.29"
   checksum: 4e5aed58cabb2bbf6f725da13421aa50a49abb6bc17bfab6c31b8774b073fa7b50d557c61f961a09a85f6056151190f8ac95f13f5b48136ba5841f7d4484ec56
+  languageName: node
+  linkType: hard
+
+"@types/jsonfile@npm:*":
+  version: 6.1.4
+  resolution: "@types/jsonfile@npm:6.1.4"
+  dependencies:
+    "@types/node": "npm:*"
+  checksum: 309fda20eb5f1cf68f2df28931afdf189c5e7e6bec64ac783ce737bb98908d57f6f58757ad5da9be37b815645a6f914e2d4f3ac66c574b8fe1ba6616284d0e97
   languageName: node
   linkType: hard
 
@@ -10983,7 +10993,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "api-tests@workspace:packages/utils/api-tests"
   dependencies:
-    dotenv: "npm:14.2.0"
+    dotenv: "npm:16.4.5"
     lodash: "npm:4.17.21"
     qs: "npm:6.11.1"
     supertest: "npm:6.3.3"
@@ -12034,13 +12044,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"byte-size@npm:7.0.1":
-  version: 7.0.1
-  resolution: "byte-size@npm:7.0.1"
-  checksum: 823afd08712cb58da94a37307c4a2e695c8db3fde6e24a3a4267552f526d57c976daaf4f027a724f89e395a8673f4af4be1e5bb5bb30ba00dadfde58909158cf
-  languageName: node
-  linkType: hard
-
 "byte-size@npm:8.1.1":
   version: 8.1.1
   resolution: "byte-size@npm:8.1.1"
@@ -12507,7 +12510,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ci-info@npm:3.8.0, ci-info@npm:^3.2.0, ci-info@npm:^3.6.1":
+"ci-info@npm:4.0.0":
+  version: 4.0.0
+  resolution: "ci-info@npm:4.0.0"
+  checksum: c983bb7ff1b06648f4a47432201abbd58291147d8ab5043dbb5c03e1a0e3fb2347f40d29b66a3044f28ffeb5dade01ac35aa6bd4e7464a44d9a49a3d7532415a
+  languageName: node
+  linkType: hard
+
+"ci-info@npm:^3.2.0, ci-info@npm:^3.6.1":
   version: 3.8.0
   resolution: "ci-info@npm:3.8.0"
   checksum: b00e9313c1f7042ca8b1297c157c920d6d69f0fbad7b867910235676df228c4b4f4df33d06cacae37f9efba7a160b0a167c6be85492b419ef71d85660e60606b
@@ -13462,11 +13472,11 @@ __metadata:
     "@strapi/generate-new": "npm:5.0.0-beta.5"
     "@strapi/pack-up": "npm:5.0.0"
     chalk: "npm:4.1.2"
-    ci-info: "npm:3.8.0"
+    ci-info: "npm:4.0.0"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:5.0.0-beta.5"
     execa: "npm:5.1.1"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     inquirer: "npm:8.2.5"
     ora: "npm:5.4.1"
     tsconfig: "npm:5.0.0-beta.5"
@@ -14372,10 +14382,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:14.2.0":
-  version: 14.2.0
-  resolution: "dotenv@npm:14.2.0"
-  checksum: 28ab4b299bdd4280a61d943bf103565f131f798fc1e1c4d7c1557e14ecec1ad7efdd3a9618edd9fa6c1caba22fea4541e48dea2ff0a7bae48c6c2ed85563039c
+"dotenv@npm:16.4.5":
+  version: 16.4.5
+  resolution: "dotenv@npm:16.4.5"
+  checksum: 55a3134601115194ae0f924e54473459ed0d9fc340ae610b676e248cca45aa7c680d86365318ea964e6da4e2ea80c4514c1adab5adb43d6867fb57ff068f95c8
   languageName: node
   linkType: hard
 
@@ -16706,18 +16716,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fs-extra@npm:10.0.0":
-  version: 10.0.0
-  resolution: "fs-extra@npm:10.0.0"
+"fs-extra@npm:11.2.0, fs-extra@npm:^11.1.1":
+  version: 11.2.0
+  resolution: "fs-extra@npm:11.2.0"
   dependencies:
     graceful-fs: "npm:^4.2.0"
     jsonfile: "npm:^6.0.1"
     universalify: "npm:^2.0.0"
-  checksum: c333973ece06655bf9a4566c65e648d64d7ab3a36e52011b05263e8f4664d2cc85cf9d98ddd4672857105561d759ef63828cf49428c78470a788a3751094a1a4
+  checksum: 0579bf6726a4cd054d4aa308f10b483f52478bb16284f32cf60b4ce0542063d551fca1a08a2af365e35db21a3fa5a06cf2a6ed614004b4368982bc754cb816b3
   languageName: node
   linkType: hard
 
-"fs-extra@npm:10.1.0, fs-extra@npm:^10.0.0":
+"fs-extra@npm:^10.0.0":
   version: 10.1.0
   resolution: "fs-extra@npm:10.1.0"
   dependencies:
@@ -16736,17 +16746,6 @@ __metadata:
     jsonfile: "npm:^6.0.1"
     universalify: "npm:^2.0.0"
   checksum: b3f4a411e221f3300cfed7f2c1fa3ea0538cc1688c4276ce38fc404e270526002c5a01a18f64f8dee5e2745f7c2e9ba188cb130240796da67a2a142b133b4b25
-  languageName: node
-  linkType: hard
-
-"fs-extra@npm:^11.1.1":
-  version: 11.2.0
-  resolution: "fs-extra@npm:11.2.0"
-  dependencies:
-    graceful-fs: "npm:^4.2.0"
-    jsonfile: "npm:^6.0.1"
-    universalify: "npm:^2.0.0"
-  checksum: 0579bf6726a4cd054d4aa308f10b483f52478bb16284f32cf60b4ce0542063d551fca1a08a2af365e35db21a3fa5a06cf2a6ed614004b4368982bc754cb816b3
   languageName: node
   linkType: hard
 
@@ -17219,6 +17218,15 @@ __metadata:
   dependencies:
     git-up: "npm:^7.0.0"
   checksum: 407f6579f3aa5e4040e215b45c1cfa7f08bd52a298a50310fc3debdd99e9d049d9f05e582b5475218116f312526691e1c3cc368e0d23f97c49735f210e381475
+  languageName: node
+  linkType: hard
+
+"git-url-parse@npm:14.0.0":
+  version: 14.0.0
+  resolution: "git-url-parse@npm:14.0.0"
+  dependencies:
+    git-up: "npm:^7.0.0"
+  checksum: c19430947895676c59ce472d534c88e5d2d9f443e6b6e4deaa8ad9ad921ded6c27a996b219503775c37fbb90f4a3c02a5f106f14b61286386f9e5098dff7d634
   languageName: node
   linkType: hard
 
@@ -18017,19 +18025,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"http-errors@npm:1.8.1, http-errors@npm:^1.6.3, http-errors@npm:^1.7.3, http-errors@npm:^1.8.1, http-errors@npm:~1.8.0":
-  version: 1.8.1
-  resolution: "http-errors@npm:1.8.1"
-  dependencies:
-    depd: "npm:~1.1.2"
-    inherits: "npm:2.0.4"
-    setprototypeof: "npm:1.2.0"
-    statuses: "npm:>= 1.5.0 < 2"
-    toidentifier: "npm:1.0.1"
-  checksum: 76fc491bd8df2251e21978e080d5dae20d9736cfb29bb72b5b76ec1bcebb1c14f0f58a3a128dd89288934379d2173cfb0421c571d54103e93dd65ef6243d64d8
-  languageName: node
-  linkType: hard
-
 "http-errors@npm:2.0.0, http-errors@npm:^2.0.0":
   version: 2.0.0
   resolution: "http-errors@npm:2.0.0"
@@ -18040,6 +18035,19 @@ __metadata:
     statuses: "npm:2.0.1"
     toidentifier: "npm:1.0.1"
   checksum: 0e7f76ee8ff8a33e58a3281a469815b893c41357378f408be8f6d4aa7d1efafb0da064625518e7078381b6a92325949b119dc38fcb30bdbc4e3a35f78c44c439
+  languageName: node
+  linkType: hard
+
+"http-errors@npm:^1.6.3, http-errors@npm:^1.7.3, http-errors@npm:^1.8.1, http-errors@npm:~1.8.0":
+  version: 1.8.1
+  resolution: "http-errors@npm:1.8.1"
+  dependencies:
+    depd: "npm:~1.1.2"
+    inherits: "npm:2.0.4"
+    setprototypeof: "npm:1.2.0"
+    statuses: "npm:>= 1.5.0 < 2"
+    toidentifier: "npm:1.0.1"
+  checksum: 76fc491bd8df2251e21978e080d5dae20d9736cfb29bb72b5b76ec1bcebb1c14f0f58a3a128dd89288934379d2173cfb0421c571d54103e93dd65ef6243d64d8
   languageName: node
   linkType: hard
 
@@ -27262,7 +27270,7 @@ __metadata:
     coffee: "npm:5.5.1"
     core-js: "npm:3.36.0"
     cross-env: "npm:7.0.3"
-    dotenv: "npm:14.2.0"
+    dotenv: "npm:16.4.5"
     eslint: "npm:8.50.0"
     eslint-config-airbnb: "npm:^19.0.4"
     eslint-config-airbnb-base: "npm:^15.0.0"
@@ -27281,7 +27289,7 @@ __metadata:
     eslint-plugin-testing-library: "npm:6.0.2"
     execa: "npm:5.1.1"
     find-up: "npm:5.0.0"
-    fs-extra: "npm:10.1.0"
+    fs-extra: "npm:11.2.0"
     get-port: "npm:5.1.1"
     glob: "npm:10.3.10"
     husky: "npm:8.0.3"
