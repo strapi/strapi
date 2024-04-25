@@ -155,7 +155,7 @@ const EntryValidationText = ({ action, schema, components, entry }: EntryValidat
     );
   }
 
-  if (action == 'publish') {
+  if (action === 'publish') {
     return (
       <Flex gap={2}>
         <Icon color="success600" as={CheckCircle} />
