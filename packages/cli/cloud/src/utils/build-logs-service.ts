@@ -30,7 +30,7 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
               'We were unable to connect to the server to get build logs at this time. This could be due to a temporary issue.'
             );
             es.close();
-            reject('Connection timed out');
+            reject(new Error('Connection timed out'));
           }, CONN_TIMEOUT);
         };
 
@@ -50,14 +50,14 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
           logger.log(data.msg);
         });
 
-        es.onerror = async (error) => {
+        es.onerror = async () => {
           retries += 1;
           if (retries > MAX_RETRIES) {
             logger.log('We were unable to connect to the server to get build logs at this time.');
             es.close();
-            reject('Max retries reached');
+            reject(new Error('Max retries reached'));
           }
-          console.log('Connection lost. Retrying...');
+          logger.log('Connection lost. Retrying...');
         };
       };
 

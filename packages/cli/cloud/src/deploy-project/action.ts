@@ -38,7 +38,7 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
 
     ctx.logger.log('📦 Compressing project...');
     // hash packageJson.name to avoid conflicts
-    const hashname = crypto.createHash('md5').update(packageJson.name).digest('hex');
+    const hashname = crypto.createHash('sha512').update(packageJson.name).digest('hex');
     const compressedFilename = `${hashname}.tar.gz`;
     try {
       ctx.logger.debug(
@@ -144,9 +144,14 @@ export default async (ctx: CLIContext) => {
 
   const buildId = await upload(ctx, project, token);
 
-  await Promise.all([
-    notificationService(`${apiConfig.apiBaseUrl}/notifications`, token),
-    buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token),
-  ]);
-  return;
+  try {
+    await Promise.all([
+      notificationService(`${apiConfig.apiBaseUrl}/notifications`, token),
+      buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token),
+    ]);
+  } catch (e: Error | unknown) {
+    if (e instanceof Error) {
+      ctx.logger.error(e.message);
+    }
+  }
 };

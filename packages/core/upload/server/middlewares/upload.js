@@ -16,7 +16,7 @@ module.exports = ({ strapi }) => {
       return;
     }
 
-    strapi.server.app.onerror(err);
+    strapi.server.app.onerror();
   });
 
   const localServerConfig = strapi.config.get('plugin.upload.providerOptions.localServer', {});
