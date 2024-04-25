@@ -15,31 +15,7 @@ type Step = `${SectionKey}.${StepKey}`;
 interface GuidedTourContextValue {
   currentStep: Step | null;
   guidedTourState: {
-    contentTypeBuilder: {
-      create: boolean;
-      success: boolean;
-    };
-    contentManager: {
-      create: boolean;
-      success: boolean;
-    };
-    apiTokens: {
-      create: boolean;
-      success: boolean;
-    };
-    mediaLibrary: {
-      create: boolean;
-      success: boolean;
-    };
-    profile: {
-      create: boolean;
-      success: boolean;
-    };
-    inviteUser: {
-      create: boolean;
-      success: boolean;
-    };
-    transferTokens: {
+    [key: string]: {
       create: boolean;
       success: boolean;
     };

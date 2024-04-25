@@ -92,7 +92,7 @@ const ListPageCE = () => {
     defaultMessage: 'Users',
   });
 
-  const handleToggle = (step: string) => {
+  const handleToggle = (step: unknown) => {
     if (step === 'magic-link') {
       setCurrentStep('inviteUser.success');
     }

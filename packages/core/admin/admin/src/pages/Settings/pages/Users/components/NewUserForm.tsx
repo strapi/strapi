@@ -20,7 +20,6 @@ import {
   useOverlayBlocker,
   translatedErrors,
   useAPIErrorHandler,
-  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { Entity } from '@strapi/types';
 import { Formik, FormikHelpers } from 'formik';
@@ -36,14 +35,13 @@ import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
 interface ModalFormProps {
-  onToggle: (type?: string) => void;
+  onToggle: (type?: unknown) => void;
 }
 
 const ModalForm = ({ onToggle }: ModalFormProps) => {
   const [currentStep, setStep] = React.useState<keyof typeof STEPPER>('create');
   const [registrationToken, setRegistrationToken] = React.useState('');
   const { formatMessage } = useIntl();
-  const { setCurrentStep } = useGuidedTour();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const {

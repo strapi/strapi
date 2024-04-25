@@ -31,7 +31,6 @@ export const UploadAssetDialog = ({
 
   const { setCurrentStep } = useGuidedTour();
 
-
   const handleAddToPendingAssets = (nextAssets) => {
     validateAssetsTypes(nextAssets, () => {
       setAssets((prevAssets) => prevAssets.concat(nextAssets));
@@ -61,7 +60,7 @@ export const UploadAssetDialog = ({
       onClose();
     }
 
-    setCurrentStep("mediaLibrary.success")
+    setCurrentStep('mediaLibrary.success');
   };
 
   const handleAssetEditValidation = (nextAsset) => {

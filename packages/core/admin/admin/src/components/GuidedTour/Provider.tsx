@@ -202,7 +202,12 @@ interface SetStepStateAction {
 
 interface SetGuidedTourStateAction {
   type: 'SET_GUIDED_TOUR_STATE';
-  value: object;
+  value: {
+    [key: string]: {
+      create: boolean;
+      success: boolean;
+    };
+  };
 }
 
 interface SetSkippedAction {

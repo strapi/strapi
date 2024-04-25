@@ -56,7 +56,7 @@ const GuidedTourModal = () => {
     delete layout.inviteUser;
   }
 
-  const stepData = get(layout, currentStep);
+  const stepData: StepData | undefined = get(layout, currentStep);
   const sectionKeys = Object.keys(guidedTourState);
   const [sectionName, stepName] = currentStep.split('.') as [
     keyof GuidedTourContextValue['guidedTourState'],
@@ -123,7 +123,7 @@ const GuidedTourModal = () => {
                 sectionIndex={sectionIndex}
                 stepIndex={stepIndex}
                 hasSectionAfter={hasSectionAfter}
-                stepCount={Object.keys(layoutCopy).length}
+                stepCount={Object.keys(layout).length}
               >
                 {stepData && 'content' in stepData && <GuidedTourContent {...stepData.content} />}
               </GuidedTourStepper>
@@ -152,6 +152,13 @@ const ModalWrapper = styled(Flex)`
   /* this is theme.colors.neutral800 with opacity */
   background: ${({ theme }) => `${theme.colors.neutral800}1F`};
 `;
+
+interface StepData {
+  trackingEvent?: string;
+  title?: GuidedTourStepperProps['title'];
+  cta?: GuidedTourStepperProps['cta'];
+  content?: GuidedTourContentProps;
+}
 
 /* -------------------------------------------------------------------------------------------------
  * GuidedTourStepper
@@ -266,7 +273,7 @@ const GuidedTourStepper = ({
  * -----------------------------------------------------------------------------------------------*/
 
 interface GuidedTourContentProps
-  extends Required<Pick<MessageDescriptor, 'defaultMessage' | 'id'>> { }
+  extends Required<Pick<MessageDescriptor, 'defaultMessage' | 'id'>> {}
 
 const GuidedTourContent = ({ id, defaultMessage }: GuidedTourContentProps) => {
   const { formatMessage } = useIntl();

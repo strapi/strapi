@@ -24,7 +24,7 @@ import {
   useQueryParams,
   useSelectionState,
   useTracking,
-  useGuidedTour
+  useGuidedTour,
 } from '@strapi/helper-plugin';
 import { Cog, Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
@@ -168,8 +168,6 @@ export const MediaLibrary = () => {
     setShowEditFolderDialog((prev) => !prev);
   };
 
-  
-
   const handleBulkSelect = (event, elements) => {
     if (event.target.checked) {
       trackUsage('didSelectAllMediaLibraryElements');
@@ -221,7 +219,6 @@ export const MediaLibrary = () => {
 
   useFocusWhenNavigate();
 
-  
   return (
     <Layout>
       <Main aria-busy={isLoading}>
