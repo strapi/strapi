@@ -67,7 +67,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
 
   const res = Array.isArray(fieldValue)
     ? {
-        results: fieldValue.filter((item) => item !== null && Object.keys(item).length > 0),
+        results: fieldValue,
         meta: { missingCount: 0 },
       }
     : fieldValue;

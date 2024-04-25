@@ -371,14 +371,19 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
               return {
                 ...(await currentDataWithRelations),
-                [attributeKey]: await Promise.all(
-                  attributeValues.map((userToPopulate) => {
-                    console.log('userToPopulate', userToPopulate);
-                    return strapi
-                      .query('admin::user')
-                      .findOne({ where: { id: userToPopulate.id } });
-                  })
-                ),
+                [attributeKey]: (
+                  await Promise.all(
+                    attributeValues.map((userToPopulate) => {
+                      if (userToPopulate == null) {
+                        return null;
+                      }
+
+                      return strapi
+                        .query('admin::user')
+                        .findOne({ where: { id: userToPopulate.id } });
+                    })
+                  )
+                ).filter((user) => user != null),
               };
             }
 

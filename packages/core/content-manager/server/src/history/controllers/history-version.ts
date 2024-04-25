@@ -69,16 +69,6 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
       });
 
       const sanitizedResults = await async.map(results, async (version: any) => {
-        console.log({
-          ...version.data,
-          locale: version.locale.code,
-        });
-        console.log('sanitized', {
-          data: await permissionChecker.sanitizeOutput({
-            ...version.data,
-            locale: version.locale.code,
-          }),
-        });
         return {
           ...version,
           data: await permissionChecker.sanitizeOutput({
