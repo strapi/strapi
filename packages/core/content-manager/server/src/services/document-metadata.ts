@@ -1,14 +1,10 @@
 import { groupBy, pick } from 'lodash/fp';
 
-import { async, contentTypes, traverseEntity, sanitize } from '@strapi/utils';
+import { async, contentTypes, traverseEntity } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 
 import { getService } from '../utils';
-import type {
-  AvailableLocaleDocument,
-  AvailableStatusDocument,
-  DocumentMetadata,
-} from '../../../shared/contracts/collection-types';
+import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
 export interface DocumentVersion {
   id: string;
@@ -242,6 +238,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const versions = await strapi.db.query(uid).findMany({
       where: { documentId: version.documentId },
       populate: {
+        // TODO __** only populate fields that need validation
+        // Build specific populate builder for this
         ...deepPopulate,
         // Creator fields are selected in this way to avoid exposing sensitive data
         createdBy: {
@@ -275,8 +273,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async formatDocumentWithMetadata(
     uid: UID.ContentType,
     document: DocumentVersion,
-    opts: GetMetadataOptions = {},
-    userAbility?: any
+    opts: GetMetadataOptions = {}
   ) {
     if (!document) {
       return document;
@@ -290,42 +287,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     const meta = await this.getMetadata(uid, document, opts);
-    let { availableLocales, availableStatus } = meta;
-
-    // Always sanitize passwords
-    const defaultSanitizer = sanitize.sanitizers.sanitizePasswords({
-      schema: strapi.getModel(uid),
-      getModel(uid: string) {
-        return strapi.getModel(uid as UID.Schema);
-      },
-    });
-
-    availableLocales = await async.map(
-      availableLocales,
-      (localeDocument: AvailableLocaleDocument) => defaultSanitizer(localeDocument)
-    );
-
-    availableStatus = await async.map(availableStatus, (statusDocument: AvailableStatusDocument) =>
-      defaultSanitizer(statusDocument)
-    );
-
-    if (userAbility) {
-      // If we have a userAbility we sanitize the metadata further to remove fields the user does not have access to
-      const metadataSanitizer = getService('permission-checker').create({
-        userAbility,
-        model: uid,
-      }).sanitizeOutput;
-
-      availableLocales = await async.map(
-        availableLocales,
-        (localeDocument: AvailableLocaleDocument) => metadataSanitizer(localeDocument)
-      );
-
-      availableStatus = await async.map(
-        availableStatus,
-        (statusDocument: AvailableStatusDocument) => metadataSanitizer(statusDocument)
-      );
-    }
 
     return {
       data: {
@@ -335,10 +296,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           ? this.getStatus(document, meta.availableStatus as any)
           : undefined,
       },
-      meta: {
-        availableLocales,
-        availableStatus,
-      },
+      meta,
     };
   },
 });
