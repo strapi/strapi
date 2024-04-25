@@ -1,8 +1,16 @@
-import { setCreatorFields, async, errors } from '@strapi/utils';
+import { UID } from '@strapi/types';
+import { setCreatorFields, async, errors, sanitize } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
+
+import type {
+  AvailableLocaleDocument,
+  AvailableStatusDocument,
+} from '../../../shared/contracts/collection-types';
+
+import { DocumentVersion, GetMetadataOptions } from '../services/document-metadata';
 
 /**
  * Create a new document.
@@ -108,6 +116,54 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
   });
 };
 
+/**
+ * Format a document with metadata. Making sure the metadata response is
+ * correctly sanitized for the current user
+ */
+const formatDocumentWithMetadata = async (
+  permissionChecker: any,
+  uid: UID.ContentType,
+  document: DocumentVersion,
+  opts: GetMetadataOptions = {}
+) => {
+  const documentMetadata = getService('document-metadata');
+
+  const serviceOutput = await documentMetadata.formatDocumentWithMetadata(uid, document, opts);
+
+  let {
+    meta: { availableLocales, availableStatus },
+  } = serviceOutput;
+
+  // Always sanitize passwords
+  const defaultSanitizer = sanitize.sanitizers.sanitizePasswords({
+    schema: strapi.getModel(uid),
+    getModel(uid: string) {
+      return strapi.getModel(uid as UID.Schema);
+    },
+  });
+  const metadataSanitizer = permissionChecker.sanitizeOutput;
+
+  availableLocales = await async.map(
+    availableLocales,
+    async (localeDocument: AvailableLocaleDocument) =>
+      async.pipe(defaultSanitizer, metadataSanitizer)(localeDocument)
+  );
+
+  availableStatus = await async.map(
+    availableStatus,
+    async (statusDocument: AvailableStatusDocument) =>
+      async.pipe(defaultSanitizer, metadataSanitizer)(statusDocument)
+  );
+
+  return {
+    ...serviceOutput,
+    meta: {
+      availableLocales,
+      availableStatus,
+    },
+  };
+};
+
 export default {
   async find(ctx: any) {
     const { userAbility } = ctx.state;
@@ -169,7 +225,6 @@ export default {
     const { model, id } = ctx.params;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -199,12 +254,14 @@ export default {
       }
 
       // If the requested locale doesn't exist, return an empty response
-      const { meta } = await documentMetadata.formatDocumentWithMetadata(
+      const { meta } = await formatDocumentWithMetadata(
+        permissionChecker,
         model,
+        // @ts-expect-error TODO: fix
         { id, locale, publishedAt: null },
-        { availableLocales: true, availableStatus: false },
-        userAbility
+        { availableLocales: true, availableStatus: false }
       );
+
       ctx.body = { data: {}, meta };
 
       return;
@@ -217,19 +274,13 @@ export default {
 
     // TODO: Count populated relations by permissions
     const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(
-      model,
-      sanitizedDocument,
-      {},
-      userAbility
-    );
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
   async create(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const [totalEntries, document] = await Promise.all([
@@ -239,16 +290,11 @@ export default {
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
     ctx.status = 201;
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(
-      model,
-      sanitizedDocument,
-      {
-        // Empty metadata as it's not relevant for a new document
-        availableLocales: false,
-        availableStatus: false,
-      },
-      userAbility
-    );
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
+      // Empty metadata as it's not relevant for a new document
+      availableLocales: false,
+      availableStatus: false,
+    });
 
     if (totalEntries === 0) {
       strapi.telemetry.send('didCreateFirstContentTypeEntry', {
@@ -261,18 +307,12 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const updatedVersion = await updateDocument(ctx);
 
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(
-      model,
-      sanitizedVersion,
-      {},
-      userAbility
-    );
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion);
   },
 
   async clone(ctx: any) {
@@ -281,7 +321,6 @@ export default {
     const { body } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.create()) {
@@ -313,16 +352,11 @@ export default {
     const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(
-      model,
-      sanitizedDocument,
-      {
-        // Empty metadata as it's not relevant for a new document
-        availableLocales: false,
-        availableStatus: false,
-      },
-      userAbility
-    );
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
+      // Empty metadata as it's not relevant for a new document
+      availableLocales: false,
+      availableStatus: false,
+    });
   },
 
   async autoClone(ctx: any) {
@@ -391,7 +425,6 @@ export default {
     const { body } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -427,12 +460,7 @@ export default {
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(
-      model,
-      sanitizedDocument,
-      {},
-      userAbility
-    );
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
   async bulkPublish(ctx: any) {
@@ -524,7 +552,6 @@ export default {
     } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -569,7 +596,7 @@ export default {
       ctx.body = await async.pipe(
         (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
-        (document) => documentMetadata.formatDocumentWithMetadata(model, document, {}, userAbility)
+        (document) => formatDocumentWithMetadata(permissionChecker, model, document)
       )(document);
     });
   },
@@ -580,7 +607,6 @@ export default {
     const { body } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.discard()) {
@@ -611,7 +637,7 @@ export default {
     ctx.body = await async.pipe(
       (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
-      (document) => documentMetadata.formatDocumentWithMetadata(model, document, {}, userAbility)
+      (document) => formatDocumentWithMetadata(permissionChecker, model, document)
     )(document);
   },
 

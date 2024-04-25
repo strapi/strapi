@@ -174,6 +174,72 @@ const getDeepPopulate = (
 };
 
 /**
+ * Deeply populate a model based on UID. Only populating fields that require validation.
+ * @param uid - Unique identifier of the model
+ * @param options - Options to apply while populating
+ * @param level - Current level of nested call
+ */
+const getValidatableFieldsPopulate = (
+  uid: UID.Schema,
+  {
+    initialPopulate = {} as any,
+    countMany = false,
+    countOne = false,
+    maxLevel = Infinity,
+  }: PopulateOptions = {},
+  level = 1
+) => {
+  if (level > maxLevel) {
+    return {};
+  }
+
+  const model = strapi.getModel(uid);
+
+  return Object.entries(model.attributes).reduce((populateAcc, [attributeName, attribute]) => {
+    // TODO confirm all kinds of validation required?
+    const requiresValidation =
+      attribute.required ||
+      // @ts-expect-error - improve types
+      attribute.unique ||
+      Object.prototype.hasOwnProperty.call(attribute, 'max') ||
+      Object.prototype.hasOwnProperty.call(attribute, 'min') ||
+      Object.prototype.hasOwnProperty.call(attribute, 'maxLength') ||
+      Object.prototype.hasOwnProperty.call(attribute, 'minLength');
+
+    if (!requiresValidation) {
+      return populateAcc;
+    }
+
+    const isScalarAttribute =
+      !isMedia(attribute) &&
+      !isRelation(attribute) &&
+      !isComponent(attribute) &&
+      !isDynamicZone(attribute);
+    if (isScalarAttribute) {
+      return merge(populateAcc, {
+        [attributeName]: true,
+      });
+    }
+
+    return merge(
+      populateAcc,
+      getPopulateFor(
+        attributeName,
+        model,
+        {
+          // @ts-expect-error - improve types
+          initialPopulate: initialPopulate?.[attributeName],
+          countMany,
+          countOne,
+          maxLevel,
+        },
+        level
+      )
+    );
+  }, {});
+};
+
+/**
  * getDeepPopulateDraftCount works recursively on the attributes of a model
  * creating a populated object to count all the unpublished relations within the model
  * These relations can be direct to this content type or contained within components/dynamic zones
@@ -274,4 +340,10 @@ const buildDeepPopulate = (uid: UID.CollectionType) => {
   return getService('populate-builder')(uid).populateDeep(Infinity).countRelations().build();
 };
 
-export { getDeepPopulate, getDeepPopulateDraftCount, getQueryPopulate, buildDeepPopulate };
+export {
+  getDeepPopulate,
+  getDeepPopulateDraftCount,
+  getQueryPopulate,
+  buildDeepPopulate,
+  getValidatableFieldsPopulate,
+};

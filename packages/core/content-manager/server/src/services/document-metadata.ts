@@ -3,8 +3,8 @@ import { groupBy, pick } from 'lodash/fp';
 import { async, contentTypes, traverseEntity } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
 
-import { getService } from '../utils';
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
+import { getValidatableFieldsPopulate } from './utils/populate';
 
 export interface DocumentVersion {
   id: string;
@@ -85,7 +85,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   async getAvailableLocales(
     uid: UID.ContentType,
     version: DocumentVersion,
-    allVersions: DocumentVersion[]
+    allVersions: DocumentVersion[],
+    validatableFields: string[] = []
   ) {
     // Group all versions by locale
     const versionsByLocale = groupBy('locale', allVersions);
@@ -105,22 +106,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
           localeVersions,
           async (localeVersion: DocumentVersion) =>
             traverseEntity(
-              ({ key, attribute }, { remove }) => {
-                if (AVAILABLE_LOCALES_FIELDS.includes(key)) {
+              ({ key }, { remove }) => {
+                if ([...AVAILABLE_LOCALES_FIELDS, ...validatableFields].includes(key)) {
                   // Keep the value if it is a field to pick
-                  return;
-                }
-
-                const requiresValidation =
-                  attribute.required ||
-                  attribute.unique ||
-                  Object.prototype.hasOwnProperty.call(attribute, 'max') ||
-                  Object.prototype.hasOwnProperty.call(attribute, 'min') ||
-                  Object.prototype.hasOwnProperty.call(attribute, 'maxLength') ||
-                  Object.prototype.hasOwnProperty.call(attribute, 'minLength');
-
-                if (requiresValidation) {
-                  // Keep the value if it requires any kind of validation
                   return;
                 }
 
@@ -232,15 +220,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     version: DocumentVersion,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
-    // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if i18n is disabled
-
-    const deepPopulate = await getService('populate-builder')(uid).populateDeep().build();
+    // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
+    // i18n is disabled
+    const populate = getValidatableFieldsPopulate(uid);
     const versions = await strapi.db.query(uid).findMany({
       where: { documentId: version.documentId },
       populate: {
-        // TODO __** only populate fields that need validation
-        // Build specific populate builder for this
-        ...deepPopulate,
+        // Populate only fields that require validation for bulk locale actions
+        ...populate,
         // Creator fields are selected in this way to avoid exposing sensitive data
         createdBy: {
           select: ['id', 'firstname', 'lastname', 'email'],
@@ -252,7 +239,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     });
 
     const availableLocalesResult = availableLocales
-      ? await this.getAvailableLocales(uid, version, versions)
+      ? await this.getAvailableLocales(uid, version, versions, Object.keys(populate))
       : [];
 
     const availableStatusResult = availableStatus
