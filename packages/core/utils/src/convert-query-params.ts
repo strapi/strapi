@@ -247,15 +247,8 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     return limitAsANumber;
   };
 
-  const convertPageQueryToOffsetLimit = (
-    page: unknown,
-    pageSize?: unknown
-  ): {
-    offset: number;
-    limit: number;
-  } => {
-    const pageVal = toNumber(page) ?? 1;
-    const pageSizeVal = toNumber(pageSize) ?? 10;
+  const convertPageQueryParams = (page: unknown): number => {
+    const pageVal = toNumber(page);
 
     if (!isInteger(pageVal) || pageVal <= 0) {
       throw new PaginationError(
@@ -263,16 +256,19 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       );
     }
 
+    return pageVal;
+  };
+
+  const convertPageSizeQueryParams = (pageSize: unknown, page: unknown): number => {
+    const pageSizeVal = toNumber(pageSize);
+
     if (!isInteger(pageSizeVal) || pageSizeVal <= 0) {
       throw new PaginationError(
         `Invalid 'pageSize' parameter. Expected an integer > 0, received: ${page}`
       );
     }
 
-    const offset = Math.max(pageVal - 1, 0) * pageSizeVal;
-    const limit = pageSizeVal;
-
-    return { offset, limit };
+    return pageSizeVal;
   };
 
   const validatePaginationParams = (
@@ -478,10 +474,12 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page) || !isNil(pageSize)) {
-      const { offset, limit } = convertPageQueryToOffsetLimit(page, pageSize);
-      query.offset = offset;
-      query.limit = limit;
+    if (!isNil(page)) {
+      query.page = convertPageQueryParams(page);
+    }
+
+    if (!isNil(pageSize)) {
+      query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
     if (!isNil(start)) {
@@ -667,10 +665,12 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     validatePaginationParams(page, pageSize, start, limit);
 
-    if (!isNil(page) || !isNil(pageSize)) {
-      const { offset, limit } = convertPageQueryToOffsetLimit(page, pageSize);
-      query.offset = offset;
-      query.limit = limit;
+    if (!isNil(page)) {
+      query.page = convertPageQueryParams(page);
+    }
+
+    if (!isNil(pageSize)) {
+      query.pageSize = convertPageSizeQueryParams(pageSize, page);
     }
 
     if (!isNil(start)) {
