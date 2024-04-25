@@ -36,7 +36,7 @@ import { MagicLinkCE } from './MagicLinkCE';
 import { SelectRoles } from './SelectRoles';
 
 interface ModalFormProps {
-  onToggle: (type?: string) => void; // Now expects an optional string argument
+  onToggle: (type?: string) => void;
 }
 
 const ModalForm = ({ onToggle }: ModalFormProps) => {
