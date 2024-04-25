@@ -202,7 +202,8 @@ export default {
       const { meta } = await documentMetadata.formatDocumentWithMetadata(
         model,
         { id, locale, publishedAt: null },
-        { availableLocales: true, availableStatus: false }
+        { availableLocales: true, availableStatus: false },
+        userAbility
       );
       ctx.body = { data: {}, meta };
 
@@ -216,7 +217,12 @@ export default {
 
     // TODO: Count populated relations by permissions
     const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(
+      model,
+      sanitizedDocument,
+      {},
+      userAbility
+    );
   },
 
   async create(ctx: any) {
@@ -233,11 +239,16 @@ export default {
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
     ctx.status = 201;
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
-      // Empty metadata as it's not relevant for a new document
-      availableLocales: false,
-      availableStatus: false,
-    });
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(
+      model,
+      sanitizedDocument,
+      {
+        // Empty metadata as it's not relevant for a new document
+        availableLocales: false,
+        availableStatus: false,
+      },
+      userAbility
+    );
 
     if (totalEntries === 0) {
       strapi.telemetry.send('didCreateFirstContentTypeEntry', {
@@ -256,7 +267,12 @@ export default {
     const updatedVersion = await updateDocument(ctx);
 
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedVersion);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(
+      model,
+      sanitizedVersion,
+      {},
+      userAbility
+    );
   },
 
   async clone(ctx: any) {
@@ -297,11 +313,16 @@ export default {
     const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
-      // Empty metadata as it's not relevant for a new document
-      availableLocales: false,
-      availableStatus: false,
-    });
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(
+      model,
+      sanitizedDocument,
+      {
+        // Empty metadata as it's not relevant for a new document
+        availableLocales: false,
+        availableStatus: false,
+      },
+      userAbility
+    );
   },
 
   async autoClone(ctx: any) {
@@ -406,7 +427,12 @@ export default {
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(
+      model,
+      sanitizedDocument,
+      {},
+      userAbility
+    );
   },
 
   async bulkPublish(ctx: any) {
@@ -543,7 +569,7 @@ export default {
       ctx.body = await async.pipe(
         (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
-        (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+        (document) => documentMetadata.formatDocumentWithMetadata(model, document, {}, userAbility)
       )(document);
     });
   },
@@ -585,7 +611,7 @@ export default {
     ctx.body = await async.pipe(
       (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
-      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+      (document) => documentMetadata.formatDocumentWithMetadata(model, document, {}, userAbility)
     )(document);
   },
 

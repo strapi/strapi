@@ -120,7 +120,8 @@ export default {
       const { meta } = await documentMetadata.formatDocumentWithMetadata(
         model,
         { id: document.documentId, locale, publishedAt: null },
-        { availableLocales: true, availableStatus: false }
+        { availableLocales: true, availableStatus: false },
+        userAbility
       );
       ctx.body = { data: {}, meta };
       return;
@@ -131,7 +132,12 @@ export default {
     }
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(
+      model,
+      sanitizedDocument,
+      {},
+      userAbility
+    );
   },
 
   async createOrUpdate(ctx: any) {
@@ -143,7 +149,12 @@ export default {
 
     const document = await createOrUpdateDocument(ctx);
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(
+      model,
+      sanitizedDocument,
+      {},
+      userAbility
+    );
   },
 
   async delete(ctx: any) {
@@ -217,7 +228,12 @@ export default {
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    ctx.body = await documentMetadata.formatDocumentWithMetadata(
+      model,
+      sanitizedDocument,
+      {},
+      userAbility
+    );
   },
 
   async unpublish(ctx: any) {
@@ -265,7 +281,7 @@ export default {
       ctx.body = await async.pipe(
         (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
-        (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+        (document) => documentMetadata.formatDocumentWithMetadata(model, document, {}, userAbility)
       )(document);
     });
   },
@@ -300,7 +316,7 @@ export default {
     ctx.body = await async.pipe(
       (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
-      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+      (document) => documentMetadata.formatDocumentWithMetadata(model, document, {}, userAbility)
     )(document);
   },
 
