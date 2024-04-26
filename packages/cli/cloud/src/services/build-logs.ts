@@ -3,7 +3,7 @@ import { CLIContext } from '../types';
 
 const buildLogsServiceFactory = ({ logger }: CLIContext) => {
   return async (url: string, token: string) => {
-    const CONN_TIMEOUT = 20000; // 2 mins
+    const CONN_TIMEOUT = 120000; // 2 mins
     const MAX_RETRIES = 5;
 
     return new Promise((resolve, reject) => {
@@ -11,6 +11,8 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
       let retries = 0;
 
       const connect = (url: string) => {
+        const spinner = logger.spinner('Connecting to server to get build logs');
+        spinner.start();
         const es = new EventSource(`${url}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -45,6 +47,9 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
         });
 
         es.addEventListener('log', (event) => {
+          if (spinner.isSpinning) {
+            spinner.succeed();
+          }
           resetTimeout();
           const data = JSON.parse(event.data);
           logger.log(data.msg);
@@ -53,11 +58,10 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
         es.onerror = async () => {
           retries += 1;
           if (retries > MAX_RETRIES) {
-            logger.log('We were unable to connect to the server to get build logs at this time.');
+            spinner.fail('We were unable to connect to the server to get build logs at this time.');
             es.close();
             reject(new Error('Max retries reached'));
           }
-          logger.log('Connection lost. Retrying...');
         };
       };
 

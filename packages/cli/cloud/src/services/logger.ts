@@ -17,7 +17,7 @@ export interface Logger {
   warn: (...args: unknown[]) => void;
   error: (...args: unknown[]) => void;
   log: (...args: unknown[]) => void;
-  spinner: (text: string) => Pick<ora.Ora, 'succeed' | 'fail' | 'start' | 'text'>;
+  spinner: (text: string) => Pick<ora.Ora, 'succeed' | 'fail' | 'start' | 'text' | 'isSpinning'>;
   progressBar: (
     totalSize: number,
     text: string
@@ -119,6 +119,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
             return this;
           },
           text: '',
+          isSpinning: false,
         };
       }
 
