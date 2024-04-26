@@ -81,6 +81,7 @@
     "@strapi/types": "5.0.0-beta.5",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
+    "@types/fs-extra": "11.0.4",
     "@types/koa": "2.13.4",
     "@types/koa-session": "6.4.1",
     "@types/swagger-ui-dist": "3.30.4",

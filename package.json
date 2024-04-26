@@ -91,6 +91,7 @@
     "@swc/core": "1.4.8",
     "@swc/helpers": "0.5.7",
     "@swc/jest": "0.2.36",
+    "@types/fs-extra": "11.0.4",
     "@types/git-url-parse": "9.0.3",
     "@types/prompts": "2.4.9",
     "@types/react": "18.2.66",

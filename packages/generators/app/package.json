@@ -57,6 +57,7 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
+    "@types/fs-extra": "11.0.4",
     "copyfiles": "2.4.1"
   },
   "engines": {
