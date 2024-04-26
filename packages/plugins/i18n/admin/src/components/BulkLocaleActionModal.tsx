@@ -12,13 +12,9 @@ import styled from 'styled-components';
 
 import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
+import { LocaleStatus } from './CMHeaderActions';
 
 type status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
-
-type Row = {
-  locale: string;
-  status: status;
-};
 
 /* -------------------------------------------------------------------------------------------------
  * EntryValidationText
@@ -33,18 +29,23 @@ interface EntryValidationTextProps {
   validationErrors?: Record<string, MessageDescriptor>;
 }
 
+const isMessageDescriptor = (obj: any): obj is MessageDescriptor =>
+  obj && (typeof obj?.id === 'string' || typeof obj?.defaultMessage === 'string');
+
 const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
 
   if (validationErrors) {
     const validationErrorsMessages = Object.entries(validationErrors)
-      .map(
-        ([key, value]) =>
-          `${key}: ${formatMessage(
-            // @ts-expect-error TODO __** fix types
-            value.defaultMessage
-          )}`
-      )
+      .map(([key, value]) => {
+        if (isMessageDescriptor(value?.defaultMessage)) {
+          return `${key}: ${formatMessage(value.defaultMessage)}`;
+        } else if (isMessageDescriptor(value)) {
+          return `${key}: ${formatMessage(value)}`;
+        }
+
+        return `${key}: ${value}`;
+      })
       .join(' ');
 
     return (
@@ -111,7 +112,7 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
  * -----------------------------------------------------------------------------------------------*/
 
 interface BulkLocaleActionModalProps {
-  rows: Row[];
+  rows: LocaleStatus[];
   headers: {
     label: string;
     name: string;
@@ -136,21 +137,29 @@ const BulkLocaleActionModal = ({
   // @ts-expect-error .plugins is not part of query
   const currentLocale = query?.plugins?.i18n?.locale as string;
 
-  const selectedRows: Row[] = useTable(
+  const selectedRows: LocaleStatus[] = useTable(
     'BulkLocaleActionModal',
-    (state: { selectedRows: Row[] }) => state.selectedRows
+    (state: { selectedRows: LocaleStatus[] }) => state.selectedRows
   );
 
   const getFormattedCountMessage = () => {
+    const currentStatusByLocale = rows.reduce((acc: Record<string, string>, { locale, status }) => {
+      acc[locale] = status;
+      return acc;
+    }, {});
     const localesWithErrors = Object.keys(validationErrors);
 
     const alreadyPublishedCount = selectedRows.filter(
-      ({ status }) => status === 'published'
+      ({ locale }) => currentStatusByLocale[locale] === 'published'
     ).length;
+
     const readyToPublishCount = selectedRows.filter(
-      ({ status, locale }) =>
-        (status === 'draft' || status === 'modified') && !localesWithErrors.includes(locale)
+      ({ locale }) =>
+        (currentStatusByLocale[locale] === 'draft' ||
+          currentStatusByLocale[locale] === 'modified') &&
+        !localesWithErrors.includes(locale)
     ).length;
+
     const withErrorsCount = localesWithErrors.length;
 
     return formatMessage(

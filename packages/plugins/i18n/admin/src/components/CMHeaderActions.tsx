@@ -239,7 +239,7 @@ const DeleteLocaleAction: DocumentActionComponent = ({
  * BulkPublishAction
  * -----------------------------------------------------------------------------------------------*/
 
-type LocaleStatus = {
+export type LocaleStatus = {
   locale: string;
   status: Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 };
@@ -272,7 +272,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     },
   });
 
-  // @ts-expect-error __** fix types
+  // @ts-expect-error fix types
   const allDocuments: Modules.Documents.AnyDocument[] = React.useMemo(() => {
     return [document, ...(documentMeta?.availableLocales ?? [])];
   }, [document, documentMeta?.availableLocales]);
@@ -341,8 +341,8 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
 
   // This document action can be enabled given that draft and publish and i18n are
   // enabled and we can publish the current locale.
-  // In the modal that follows, the user will be able to see which locales are available for publication.
-
+  // In the modal that follows, the user will be able to see which locales are
+  // available for publication.
   const rows: LocaleStatus[] = availableLocales.map((doc) => {
     const { locale, status } = doc;
 
@@ -478,14 +478,14 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
             setSelectedLocales(
               selectedRows
                 .filter(
-                  (row) =>
+                  (selectedRow) =>
                     // Filter out the already published locales as they don't need to be
                     // sent in the request
-                    row.status !== 'published' &&
+                    selectedRow.status !== 'published' &&
                     // And those that have validation errors
-                    !Object.keys(validationErrors).includes(row.locale)
+                    !Object.keys(validationErrors).includes(selectedRow.locale)
                 )
-                .map((row) => row.locale)
+                .map((selectedRow) => selectedRow.locale)
             );
           }}
           headers={headers}
