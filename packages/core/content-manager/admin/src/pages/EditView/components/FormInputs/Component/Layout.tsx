@@ -3,15 +3,15 @@ import * as React from 'react';
 import { Grid, GridItem } from '@strapi/design-system';
 
 import { type EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
-import { InputRenderer, type InputRendererProps } from '../../InputRenderer';
+import { type InputRendererProps } from '../../InputRenderer';
 
 interface ComponentLayoutProps {
   layout: EditFieldLayout[][];
   name: string;
-  renderInput?: (props: InputRendererProps) => React.ReactNode;
+  children: (props: InputRendererProps) => React.ReactNode;
 }
 
-const ComponentLayout = ({ layout, name, renderInput = InputRenderer }: ComponentLayoutProps) => {
+const ComponentLayout = ({ layout, name, children }: ComponentLayoutProps) => {
   return (
     <>
       {layout.map((row, index) => {
@@ -28,7 +28,7 @@ const ComponentLayout = ({ layout, name, renderInput = InputRenderer }: Componen
 
               return (
                 <GridItem col={size} key={completeFieldName} s={12} xs={12}>
-                  {renderInput({ ...field, name: completeFieldName })}
+                  {children({ ...field, name: completeFieldName })}
                 </GridItem>
               );
             })}

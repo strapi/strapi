@@ -121,10 +121,9 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     case 'component':
       return (
         <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled}>
-          <ComponentLayout
-            name={props.name}
-            layout={components[props.attribute.component].layout}
-          />
+          <ComponentLayout name={props.name} layout={components[props.attribute.component].layout}>
+            {(inputProps) => <InputRenderer {...inputProps} />}
+          </ComponentLayout>
         </ComponentInput>
       );
     case 'dynamiczone':
