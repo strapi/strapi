@@ -18,13 +18,13 @@ const Number = ({ children, state, ...props }: NumberProps) => {
       background="primary600"
       padding={2}
       borderRadius="50%"
-      width={`${30 / 16}rem`}
-      height={`${30 / 16}rem`}
+      width={`3rem`}
+      height={`3rem`}
       justifyContent="center"
       {...props}
     >
       {state === STATES.IS_DONE ? (
-        <Check aria-hidden width={`${16 / 16}rem`} color="neutral0" />
+        <Check aria-hidden width={`1.6rem`} color="neutral0" />
       ) : (
         <Typography fontWeight="semiBold" textColor="neutral0">
           {children}
@@ -38,8 +38,8 @@ const Number = ({ children, state, ...props }: NumberProps) => {
       borderStyle="solid"
       padding={2}
       borderRadius="50%"
-      width={`${30 / 16}rem`}
-      height={`${30 / 16}rem`}
+      width={`3rem`}
+      height={`3rem`}
       justifyContent="center"
       {...props}
     >
@@ -60,11 +60,11 @@ interface VerticalDividerProps extends BoxProps {
 
 const VerticalDivider = ({ state, ...props }: VerticalDividerProps) => (
   <Box
-    width={`${2 / 16}rem`}
+    width={`0.2rem`}
     height="100%"
     background={state === STATES.IS_NOT_DONE ? 'neutral300' : 'primary500'}
     hasRadius
-    minHeight={state === STATES.IS_ACTIVE ? `${85 / 16}rem` : `${65 / 16}rem`}
+    minHeight={state === STATES.IS_ACTIVE ? `8.5rem` : `6.5rem`}
     {...props}
   />
 );

@@ -1,32 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderCard has all required ids set when rendering a start action 1`] = `
-.c19 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c13 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
-}
-
 .c0 {
   position: relative;
 }
 
 .c2 {
   background: #ffffff;
-  padding: 12px;
+  padding-block: 12px;
+  padding-inline: 12px;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
@@ -43,10 +25,10 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 .c6 {
   background: #eaf5ff;
   color: #66b7f1;
-  padding-top: 8px;
-  padding-right: 12px;
-  padding-bottom: 8px;
-  padding-left: 12px;
+  padding-block-start: 8px;
+  padding-inline-end: 12px;
+  padding-block-end: 8px;
+  padding-inline-start: 12px;
   border-radius: 4px;
 }
 
@@ -57,7 +39,8 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c11 {
-  padding: 4px;
+  padding-block: 4px;
+  padding-inline: 4px;
   max-width: 100%;
 }
 
@@ -94,18 +77,23 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   flex-direction: column;
 }
 
-.c16 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c13 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c17 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c5 {
@@ -176,16 +164,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   background-color: #8e8ea9;
 }
 
-.c17 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c17 > * + * {
-  margin-left: 8px;
-}
-
-.c18 {
+.c16 {
   position: absolute;
   top: 12px;
 }
@@ -258,15 +237,14 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       >
         <svg
           class="c7"
-          fill="none"
-          height="1.5rem"
-          viewBox="0 0 24 24"
-          width="1.5rem"
+          fill="currentColor"
+          height="2.4rem"
+          viewBox="0 0 32 32"
+          width="2.4rem"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
-            fill="#212134"
+            d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
           />
         </svg>
       </div>
@@ -294,13 +272,13 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
         class="c14"
       >
         <div
-          class="c15 c16 c17 c18"
+          class="c15 c3 c16"
         />
       </div>
     </div>
   </div>
   <div
-    class="c19"
+    class="c17"
   >
     <p
       aria-live="polite"
@@ -325,32 +303,14 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 `;
 
 exports[`FolderCard renders and matches the snapshot 1`] = `
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c11 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
-}
-
 .c0 {
   position: relative;
 }
 
 .c2 {
   background: #ffffff;
-  padding: 12px;
+  padding-block: 12px;
+  padding-inline: 12px;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
@@ -362,10 +322,10 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 .c4 {
   background: #eaf5ff;
   color: #66b7f1;
-  padding-top: 8px;
-  padding-right: 12px;
-  padding-bottom: 8px;
-  padding-left: 12px;
+  padding-block-start: 8px;
+  padding-inline-end: 12px;
+  padding-block-end: 8px;
+  padding-inline-start: 12px;
   border-radius: 4px;
 }
 
@@ -376,7 +336,8 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 }
 
 .c9 {
-  padding: 4px;
+  padding-block: 4px;
+  padding-inline: 4px;
   max-width: 100%;
 }
 
@@ -413,30 +374,26 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   flex-direction: column;
 }
 
+.c11 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: #32324d;
+}
+
+.c15 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c14 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c15 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c15 > * + * {
-  margin-left: 8px;
-}
-
-.c16 {
   position: absolute;
   top: 12px;
 }
@@ -496,15 +453,14 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       >
         <svg
           class="c5"
-          fill="none"
-          height="1.5rem"
-          viewBox="0 0 24 24"
-          width="1.5rem"
+          fill="currentColor"
+          height="2.4rem"
+          viewBox="0 0 32 32"
+          width="2.4rem"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
-            fill="#212134"
+            d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
           />
         </svg>
       </div>
@@ -532,13 +488,13 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
         class="c12"
       >
         <div
-          class="c13 c14 c15 c16"
+          class="c13 c3 c14"
         />
       </div>
     </div>
   </div>
   <div
-    class="c17"
+    class="c15"
   >
     <p
       aria-live="polite"

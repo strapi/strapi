@@ -1,11 +1,10 @@
-import { Icon } from '@strapi/design-system';
 import {
   SubNav,
   SubNavHeader,
   SubNavLink,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/v2';
+} from '@strapi/design-system';
 import { Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
@@ -19,7 +18,7 @@ import { SettingsMenu } from '../../../hooks/useSettingsMenu';
  * to do this hack to work a lock at the end. It's a bit hacky.
  */
 
-const CustomIcon = styled(Icon)`
+const CustomIcon = styled(Lock)`
   right: 15px;
   position: absolute;
 `;
@@ -77,9 +76,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                   key={link.id}
                 >
                   {formatMessage(link.intlLabel)}
-                  {link?.lockIcon && (
-                    <CustomIcon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
-                  )}
+                  {link?.lockIcon && <CustomIcon width="1.5rem" height="1.5rem" />}
                 </SubNavLink>
               );
             })}

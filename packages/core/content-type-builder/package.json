@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-type-builder",
-  "version": "5.0.0-beta.4",
+  "version": "5.0.0-beta.5",
   "description": "Strapi plugin to create content type",
   "repository": {
     "type": "git",
@@ -58,12 +58,12 @@
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "1.18.0",
-    "@strapi/generators": "5.0.0-beta.4",
-    "@strapi/icons": "1.18.0",
-    "@strapi/utils": "5.0.0-beta.4",
+    "@strapi/design-system": "2.0.0-beta.2",
+    "@strapi/generators": "5.0.0-beta.5",
+    "@strapi/icons": "2.0.0-beta.2",
+    "@strapi/utils": "5.0.0-beta.5",
     "date-fns": "2.30.0",
-    "fs-extra": "10.1.0",
+    "fs-extra": "11.2.0",
     "immer": "9.0.21",
     "lodash": "4.17.21",
     "pluralize": "8.0.0",
@@ -73,11 +73,12 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.0.0-beta.4",
+    "@strapi/admin": "5.0.0-beta.5",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "5.0.0-beta.4",
+    "@strapi/types": "5.0.0-beta.5",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
+    "@types/fs-extra": "11.0.4",
     "@types/pluralize": "0.0.30",
     "koa": "2.15.2",
     "koa-body": "6.0.1",

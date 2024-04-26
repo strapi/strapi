@@ -1,7 +1,11 @@
 import * as React from 'react';
 
-import { Box, Divider, Flex, FocusTrap, Icon, Typography } from '@strapi/design-system';
 import {
+  Box,
+  Divider,
+  Flex,
+  FocusTrap,
+  Typography,
   MainNav,
   NavBrand,
   NavCondense,
@@ -10,8 +14,8 @@ import {
   NavSection,
   NavSections,
   NavUser,
-} from '@strapi/design-system/v2';
-import { Exit, Write, Lock } from '@strapi/icons';
+} from '@strapi/design-system';
+import { SignOut, Feather, Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -26,7 +30,7 @@ import { getDisplayName } from '../utils/users';
 import { NavBrand as NewNavBrand } from './MainNav/NavBrand';
 
 const LinkUserWrapper = styled(Box)`
-  width: ${150 / 16}rem;
+  width: 15rem;
   position: absolute;
   bottom: ${({ theme }) => theme.spaces[9]};
   left: ${({ theme }) => theme.spaces[5]};
@@ -47,9 +51,7 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
   }
 
   svg {
-    path {
-      fill: ${({ theme }) => theme.colors.danger600};
-    }
+    fill: ${({ theme }) => theme.colors.danger600};
   }
 `;
 
@@ -139,7 +141,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
           as={RouterNavLink}
           // @ts-expect-error the props from the passed as prop are not inferred // joined together
           to="/content-manager"
-          icon={<Write />}
+          icon={<Feather />}
           onClick={() => handleClickOnLink('/content-manager')}
         >
           {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
@@ -167,9 +169,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     onClick={() => handleClickOnLink(link.to)}
                     // @ts-expect-error: badgeContent in the DS accept only strings
                     badgeContent={
-                      link?.lockIcon ? (
-                        <Icon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
-                      ) : undefined
+                      link?.lockIcon ? <Lock width="1.5rem" height="1.5rem" /> : undefined
                     }
                   >
                     {formatMessage(link.intlLabel)}
@@ -246,7 +246,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                       defaultMessage: 'Logout',
                     })}
                   </Typography>
-                  <Exit />
+                  <SignOut />
                 </LinkUser>
               </Flex>
             </FocusTrap>

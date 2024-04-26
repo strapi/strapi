@@ -41,7 +41,7 @@ import { ReplaceMediaButton } from './ReplaceMediaButton';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + ${80 / 16}rem)`};
+  min-height: ${() => `calc(60vh + 8rem)`};
 `;
 
 const fileInfoSchema = yup.object({

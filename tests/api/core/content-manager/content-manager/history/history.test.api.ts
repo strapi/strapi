@@ -149,7 +149,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
     await localeService.create({ code: 'fr', name: 'French' });
 
     // Create a collection type to create an initial history version
-    const collectionType = await createEntry({
+    const collectionTypeEntry = await createEntry({
       uid: collectionTypeUid,
       data: {
         name: 'Product 1',
@@ -157,16 +157,17 @@ describeOnCondition(edition === 'EE')('History API', () => {
     });
 
     // Update the single type to create an initial history version
-    const singleType = await updateEntry({
+    const singleTypeEntry = await updateEntry({
       uid: singleTypeUid,
       data: {
         title: 'Welcome',
       },
       isCollectionType: false,
     });
+
     // Set the documentIds to test
-    collectionTypeDocumentId = collectionType.data.documentId;
-    singleTypeDocumentId = singleType.data.documentId;
+    collectionTypeDocumentId = collectionTypeEntry.data.documentId;
+    singleTypeDocumentId = singleTypeEntry.data.documentId;
 
     // Update to create history versions for entries in different locales
     await Promise.all([
@@ -177,7 +178,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
           description: 'Hello',
         },
       }),
-      updateEntry({
+      await updateEntry({
         documentId: collectionTypeDocumentId,
         uid: collectionTypeUid,
         locale: 'fr',
@@ -356,10 +357,35 @@ describeOnCondition(edition === 'EE')('History API', () => {
   });
 
   describe('Restore a history version', () => {
+    let englishVersionIdToRestore;
+    let frenchVersionIdToRestore;
+
+    beforeAll(async () => {
+      // Set the entry ids to restore
+      englishVersionIdToRestore = (
+        await strapi.db.query('plugin::content-manager.history-version').findOne({
+          where: {
+            contentType: collectionTypeUid,
+            relatedDocumentId: collectionTypeDocumentId,
+            locale: 'en',
+          },
+        })
+      ).id;
+      frenchVersionIdToRestore = (
+        await strapi.db.query('plugin::content-manager.history-version').findOne({
+          where: {
+            contentType: collectionTypeUid,
+            relatedDocumentId: collectionTypeDocumentId,
+            locale: 'fr',
+          },
+        })
+      ).id;
+    });
+
     test('Throws with invalid body', async () => {
       const res = await rq({
         method: 'PUT',
-        url: `/content-manager/history-versions/1/restore`,
+        url: `/content-manager/history-versions/${englishVersionIdToRestore}/restore`,
         body: {},
       });
 
@@ -380,7 +406,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       ]);
       const res = await restrictedRq({
         method: 'PUT',
-        url: `/content-manager/history-versions/1/restore`,
+        url: `/content-manager/history-versions/${englishVersionIdToRestore}/restore`,
         body: {
           contentType: collectionTypeUid,
         },
@@ -404,7 +430,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
       await rq({
         method: 'PUT',
-        url: `/content-manager/history-versions/1/restore`,
+        url: `/content-manager/history-versions/${englishVersionIdToRestore}/restore`,
         body: {
           contentType: collectionTypeUid,
         },
@@ -425,7 +451,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
       await rq({
         method: 'PUT',
-        url: `/content-manager/history-versions/4/restore`,
+        url: `/content-manager/history-versions/${frenchVersionIdToRestore}/restore`,
         body: {
           contentType: collectionTypeUid,
         },

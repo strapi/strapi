@@ -23,8 +23,9 @@ const addCustomMethods = (app: Koa) => {
     .filter((code) => code >= 400 && code < 600)
     .forEach((code) => {
       const name = statuses(code);
+
       const camelCasedName = camelCase(name);
-      app.response[camelCasedName] = function responseCode(message, details = {}) {
+      app.response[camelCasedName] = function responseCode(message = name, details = {}) {
         const httpError = createError(code, message, { details });
         const { status, body } = formatHttpError(httpError);
         this.status = status;

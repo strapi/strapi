@@ -117,19 +117,18 @@ const migrateDocumentIdsWithLocalizations = async (db: Database, knex: Knex, met
 
 // Migrate document ids for tables that don't have localizations
 const migrationDocumentIds = async (db: Database, knex: Knex, meta: Meta) => {
-  let run = true;
+  let updatedRows: number;
 
   do {
-    const updatedRows = await knex(meta.tableName)
+    updatedRows = await knex(meta.tableName)
       .update({ document_id: createId() })
-      .whereIn('id', (builder) => {
-        return builder.whereNull('document_id').select('id').limit(1);
-      });
-
-    if (updatedRows <= 0) {
-      run = false;
-    }
-  } while (run);
+      .whereIn(
+        'id',
+        knex(meta.tableName)
+          .select('id')
+          .from(knex(meta.tableName).select('id').whereNull('document_id').limit(1).as('sub_query'))
+      );
+  } while (updatedRows > 0);
 };
 
 const createDocumentIdColumn = async (knex: Knex, tableName: string) => {

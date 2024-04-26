@@ -85,10 +85,10 @@ const HeadersInput = () => {
                           paddingTop={textInputError ? 0 : 5}
                         >
                           <StyledIconButton
-                            borderRadius={30 / 16}
-                            width={20 / 16}
-                            height={20 / 16}
-                            padding={3 / 16}
+                            borderRadius="3rem"
+                            width="2rem"
+                            height="2rem"
+                            padding="0.4rem"
                             alignItems="center"
                             justifyContent="center"
                             disabled={values.headers.length === 1}
@@ -133,7 +133,7 @@ const HeadersInput = () => {
 
 const StyledIconButton = styled(IconButton)`
   svg {
-    width: 0.5rem;
+    width: 0.8rem;
     rect {
       fill: ${(props) => props.theme.colors.primary600};
     }

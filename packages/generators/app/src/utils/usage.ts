@@ -24,7 +24,7 @@ export async function captureException(error: Error) {
 
 async function captureError(message: string) {
   try {
-    sentry.captureMessage(message, sentry.Severity.Error);
+    sentry.captureMessage(message, 'error');
     await sentry.flush();
   } catch (err) {
     /** ignore errors */
@@ -41,7 +41,7 @@ export function captureStderr(name: string, error: unknown) {
         sentry.addBreadcrumb({
           category: 'stderr',
           message: line,
-          level: sentry.Severity.Error,
+          level: 'error',
         });
       });
   }

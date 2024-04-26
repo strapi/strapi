@@ -14,7 +14,7 @@ import {
   Typography,
   useComposedRefs,
 } from '@strapi/design-system';
-import { CarretDown } from '@strapi/icons';
+import { CaretDown } from '@strapi/icons';
 import { useField, type InputProps } from '@strapi/strapi/admin';
 import { HexColorPicker } from 'react-colorful';
 import { useIntl } from 'react-intl';
@@ -131,7 +131,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                 {color}
               </Typography>
             </Flex>
-            <CarretDown aria-hidden />
+            <CaretDown aria-hidden />
           </ColorPickerToggle>
           {showColorPicker && (
             <ColorPickerPopover

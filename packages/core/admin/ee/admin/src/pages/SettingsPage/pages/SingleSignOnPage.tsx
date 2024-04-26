@@ -8,8 +8,8 @@ import {
   Layout,
   MultiSelect,
   MultiSelectOption,
-  Option,
-  Select,
+  SingleSelectOption,
+  SingleSelect,
   ToggleInput,
   Typography,
 } from '@strapi/design-system';
@@ -205,7 +205,7 @@ export const SingleSignOnPage = () => {
                         />
                       </GridItem>
                       <GridItem col={6} s={12}>
-                        <Select
+                        <SingleSelect
                           disabled={!canUpdate}
                           hint={formatMessage({
                             id: 'Settings.sso.form.defaultRole.description',
@@ -235,11 +235,11 @@ export const SingleSignOnPage = () => {
                           value={values.defaultRole}
                         >
                           {roles.map(({ id, name }) => (
-                            <Option key={id} value={id.toString()}>
+                            <SingleSelectOption key={id} value={id.toString()}>
                               {name}
-                            </Option>
+                            </SingleSelectOption>
                           ))}
-                        </Select>
+                        </SingleSelect>
                       </GridItem>
                       <GridItem col={6} s={12}>
                         <MultiSelect
