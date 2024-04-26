@@ -109,8 +109,8 @@ describe('Document Service', () => {
       });
 
       // 'en' and 'nl' drafts should have been discarded
-      expect(result.versions.length).toBe(2);
-      result.versions.forEach((version) => {
+      expect(result.entries.length).toBe(2);
+      result.entries.forEach((version) => {
         expect(localesToDiscard).toContain(version.locale);
         expect(version.publishedAt).toBeNull();
         // The draft title should have been discarded

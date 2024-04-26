@@ -193,7 +193,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .publish({ ...params, documentId: id })
-        .then((result) => result?.versions);
+        .then((result) => result?.entries);
     },
 
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
