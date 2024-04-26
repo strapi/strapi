@@ -80,16 +80,16 @@ describe('Webhooks | ListPage', () => {
   });
 
   it('should delete a single webhook', async () => {
-    const { getByText, getByRole, findByText, getAllByRole, user } = render(<ListPage />);
-    await waitFor(() => {
-      getByText('http:://strapi.io');
-    });
+    const { findByText, user, findByRole, findAllByRole } = render(<ListPage />);
 
-    const deleteButtons = getAllByRole('button', { name: /delete webhook/i });
+    await findByText('http:://strapi.io');
+
+    const deleteButtons = await findAllByRole('button', { name: /delete webhook/i });
     await user.click(deleteButtons[0]);
 
+    const popup = await findByText('Are you sure?');
     await waitFor(async () => {
-      expect(await findByText('Are you sure?')).toBeInTheDocument();
+      expect(popup).toBeInTheDocument();
     });
 
     server.use(
@@ -102,10 +102,11 @@ describe('Webhooks | ListPage', () => {
       })
     );
 
-    await user.click(getByRole('button', { name: /confirm/i }));
-
+    const confirmButton = await findByRole('button', { name: /confirm/i });
+    await user.click(confirmButton);
+    const link = await findByText('http://me.io');
     await waitFor(async () => {
-      expect(await findByText('http://me.io')).toBeInTheDocument();
+      expect(link).toBeInTheDocument();
     });
   });
 

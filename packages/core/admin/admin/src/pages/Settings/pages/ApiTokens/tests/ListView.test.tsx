@@ -43,8 +43,9 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     });
 
-    const { queryByTestId } = render(<ListView />);
+    const { queryByTestId, findByText } = render(<ListView />);
 
+    await findByText('API Tokens');
     await waitFor(() => expect(queryByTestId('create-api-token-button')).not.toBeInTheDocument());
   });
 
