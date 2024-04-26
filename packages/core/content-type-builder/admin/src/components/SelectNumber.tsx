@@ -1,5 +1,4 @@
-// TODO: change option and select with non deprecated alternative
-import { Option, Select } from '@strapi/design-system';
+import { SingleSelectOption, SingleSelect } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 type SelectNumberProps = {
@@ -91,7 +90,7 @@ export const SelectNumber = ({
   };
 
   return (
-    <Select
+    <SingleSelect
       error={errorMessage}
       label={label}
       id={name}
@@ -101,12 +100,12 @@ export const SelectNumber = ({
     >
       {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
         return (
-          <Option key={key} value={value} disabled={disabled} hidden={hidden}>
+          <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
             {formatMessage(intlLabel)}
-          </Option>
+          </SingleSelectOption>
         );
       })}
-    </Select>
+    </SingleSelect>
   );
 };
 

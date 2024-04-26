@@ -4,7 +4,6 @@ import {
   Box,
   ContentLayout,
   Flex,
-  Icon,
   Layout,
   Searchbar,
   Tab,
@@ -13,7 +12,8 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import { ExternalLink, GlassesSquare } from '@strapi/icons';
+import { ExternalLink } from '@strapi/icons';
+import { GlassesSquare } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { ContentBox } from '../../components/ContentBox';
@@ -291,7 +291,12 @@ const MarketplacePage = () => {
                 icon={<GlassesSquare />}
                 iconBackground="alternative100"
                 endAction={
-                  <Icon as={ExternalLink} color="neutral600" width={3} height={3} marginLeft={2} />
+                  <ExternalLink
+                    fill="neutral600"
+                    width="1.2rem"
+                    height="1.2rem"
+                    style={{ marginLeft: '0.8rem' }}
+                  />
                 }
               />
             </a>

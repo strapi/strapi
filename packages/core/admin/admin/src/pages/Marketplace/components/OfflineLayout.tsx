@@ -15,7 +15,7 @@ const OfflineLayout = () => {
           direction="column"
           alignItems="center"
           justifyContent="center"
-          paddingTop={`${120 / 16}rem`}
+          paddingTop={`12rem`}
         >
           <Box paddingBottom={2}>
             <Typography textColor="neutral700" variant="alpha">

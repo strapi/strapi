@@ -1,5 +1,4 @@
-// TODO: change option and select with non deprecated alternative
-import { Option, Select } from '@strapi/design-system';
+import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { PrimitiveType, useIntl } from 'react-intl';
 
 type SelectDateTypeProps = {
@@ -64,7 +63,7 @@ export const SelectDateType = ({
   };
 
   return (
-    <Select
+    <SingleSelect
       error={errorMessage}
       label={label}
       id={name}
@@ -74,14 +73,14 @@ export const SelectDateType = ({
     >
       {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
         return (
-          <Option key={key} value={value} disabled={disabled} hidden={hidden}>
+          <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
             {formatMessage(
               { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
               intlLabel.values
             )}
-          </Option>
+          </SingleSelectOption>
         );
       })}
-    </Select>
+    </SingleSelect>
   );
 };

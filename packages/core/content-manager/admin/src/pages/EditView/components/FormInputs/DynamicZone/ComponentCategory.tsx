@@ -63,7 +63,7 @@ const ComponentCategory = ({
                 justifyContent="center"
                 onClick={onAddComponent(uid)}
                 hasRadius
-                height={`${84 / 16}rem`}
+                height="8.4rem"
                 shrink={0}
                 borderColor="neutral200"
               >
@@ -85,7 +85,7 @@ const ComponentCategory = ({
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, ${140 / 16}rem);
+  grid-template-columns: repeat(auto-fit, 14rem);
   grid-gap: ${({ theme }) => theme.spaces[1]};
 `;
 

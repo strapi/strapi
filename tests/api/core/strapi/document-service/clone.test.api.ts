@@ -105,8 +105,8 @@ describe('Document Service', () => {
       });
 
       // Cloned articles should have the components
-      expect(clonedArticle.versions.length).toBe(1);
-      expect(clonedArticle.versions[0]).toMatchObject({
+      expect(clonedArticle.entries.length).toBe(1);
+      expect(clonedArticle.entries[0]).toMatchObject({
         ...componentData,
         publishedAt: null,
       });
@@ -125,7 +125,7 @@ describe('Document Service', () => {
 
       expect(resultPromise).toMatchObject({
         documentId: undefined,
-        versions: [],
+        entries: [],
       });
     });
   });

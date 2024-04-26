@@ -1,6 +1,6 @@
 import { forwardRef, useState } from 'react';
 
-import { Icon, TextInput, useComposedRefs } from '@strapi/design-system';
+import { TextInput, useComposedRefs } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -39,11 +39,7 @@ export const PasswordInput = forwardRef<any, StringProps>((props, ref) => {
           }}
           type="button"
         >
-          {showPassword ? (
-            <Icon as={Eye} color="neutral500" />
-          ) : (
-            <Icon as={EyeStriked} color="neutral500" />
-          )}
+          {showPassword ? <Eye fill="neutral500" /> : <EyeStriked fill="neutral500" />}
         </button>
       }
       id={props.name}

@@ -96,11 +96,11 @@ const SSOProviderButton = ({ provider }: SSOProviderButtonProps) => {
 };
 
 const SSOButton = styled.a`
-  width: ${136 / 16}rem;
+  width: 13.6rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: ${48 / 16}rem;
+  height: 4.8rem;
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
   border-radius: ${({ theme }) => theme.borderRadius};
   text-decoration: inherit;

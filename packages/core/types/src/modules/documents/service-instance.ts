@@ -24,7 +24,7 @@ export type ServiceResults<TContentTypeUID extends UID.ContentType = UID.Content
   findMany: Result.FindMany<TContentTypeUID, Params.FindMany<TContentTypeUID>>;
   findFirst: Result.FindFirst<TContentTypeUID, Params.FindFirst<TContentTypeUID>>;
   findOne: Result.FindOne<TContentTypeUID, Params.FindOne<TContentTypeUID>>;
-  delete: Result.Delete;
+  delete: Result.Delete<TContentTypeUID, Params.Delete<TContentTypeUID>>;
   create: Result.Create<TContentTypeUID, Params.Create<TContentTypeUID>>;
   clone: Result.Clone<TContentTypeUID, Params.Clone<TContentTypeUID>>;
   update: Result.Update<TContentTypeUID, Params.Update<TContentTypeUID>>;

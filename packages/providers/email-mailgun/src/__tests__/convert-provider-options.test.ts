@@ -1,49 +1,7 @@
 import formData from 'form-data';
 import Mailgun from 'mailgun.js';
-import Options from 'mailgun.js/interfaces/Options';
-import provider from '../index';
 
 describe('@strapi/provider-email-mailgun', () => {
-  describe('.convertProviderOptions()', () => {
-    it('returns an empty object', () => {
-      expect(provider.convertProviderOptions({})).toEqual({});
-    });
-
-    it('returns the correct key', () => {
-      expect(
-        provider.convertProviderOptions({
-          apiKey: 'foo',
-        })
-      ).toEqual({
-        key: 'foo',
-      });
-    });
-
-    it('passes through unknown options', () => {
-      expect(
-        provider.convertProviderOptions({
-          username: 'foo',
-        })
-      ).toEqual({
-        username: 'foo',
-      });
-    });
-
-    it('correctly merges options objects with defaults', () => {
-      const defaults = {
-        username: 'api',
-      };
-      const providerOptions = {
-        key: 'foo',
-        username: 'bar',
-        domain: 'baz.example.com',
-      };
-      expect({ ...defaults, ...provider.convertProviderOptions(providerOptions) }).toEqual(
-        providerOptions
-      );
-    });
-  });
-
   describe('Mailgun', () => {
     it('successfully creates a new Mailgun client', () => {
       const defaults = {
@@ -58,8 +16,9 @@ describe('@strapi/provider-email-mailgun', () => {
       const mailgun = new Mailgun(formData);
       const mg = mailgun.client({
         ...defaults,
-        ...provider.convertProviderOptions(providerOptions),
-      } as Options);
+        ...providerOptions,
+      });
+
       expect(mg).toMatchObject({
         messages: {
           request: {
@@ -75,15 +34,20 @@ describe('@strapi/provider-email-mailgun', () => {
     it('fails to create a new Mailgun client due to missing key', () => {
       const defaults = {
         username: 'api',
-      } as Options;
+      };
 
       const providerOptions = {
         username: 'bar',
         domain: 'baz.example.com',
       };
+
       const mailgun = new Mailgun(formData);
       expect(() => {
-        mailgun.client({ ...defaults, ...provider.convertProviderOptions(providerOptions) });
+        // @ts-expect-error - Testing invalid input
+        mailgun.client({
+          ...defaults,
+          ...providerOptions,
+        });
       }).toThrowError('Parameter "key" is required');
     });
   });

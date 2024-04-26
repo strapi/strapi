@@ -16,8 +16,8 @@ import {
   Link,
   More,
   NumberList,
-  Picture as Image,
-  Quote,
+  Image,
+  Quotes,
   StrikeThrough,
   Underline,
 } from '@strapi/icons';
@@ -77,7 +77,7 @@ const WysiwygNav = ({
         padding={2}
         background="neutral100"
         justifyContent="space-between"
-        borderRadius={`${4 / 16}rem ${4 / 16}rem 0 0`}
+        borderRadius={`0.4rem 0.4rem 0 0`}
       >
         <StyledFlex>
           <SingleSelect disabled placeholder={selectPlaceholder} size="S" label={selectPlaceholder}>
@@ -115,7 +115,7 @@ const WysiwygNav = ({
       padding={2}
       background="neutral100"
       justifyContent="space-between"
-      borderRadius={`${4 / 16}rem ${4 / 16}rem 0 0`}
+      borderRadius={`0.4rem 0.4rem 0 0`}
     >
       <StyledFlex>
         <SingleSelect
@@ -210,7 +210,7 @@ const WysiwygNav = ({
                   onClick={() => onActionClick('Quote', editorRef, handleTogglePopover)}
                   label="Quote"
                   name="Quote"
-                  icon={<Quote />}
+                  icon={<Quotes />}
                 />
               </IconButtonGroup>
             </Flex>

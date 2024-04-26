@@ -22,7 +22,7 @@ const IconWrapper = styled(Box)<{ isSelected: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius};
   z-index: 1;
   svg {
-    width: 1.5rem;
+    width: 2.4rem;
     height: 100%;
     path {
       fill: ${({ theme, isSelected }) => theme.colors[isSelected ? 'primary700' : 'neutral500']};

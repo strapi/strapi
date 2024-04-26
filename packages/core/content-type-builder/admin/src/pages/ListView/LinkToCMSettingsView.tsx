@@ -2,7 +2,7 @@ import { memo } from 'react';
 
 import { type Permission, useRBAC } from '@strapi/admin/strapi-admin';
 import { Button } from '@strapi/design-system';
-import { Layer } from '@strapi/icons';
+import { ListPlus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
@@ -86,7 +86,7 @@ export const LinkToCMSettingsView = memo(
 
     return (
       <Button
-        startIcon={<Layer />}
+        startIcon={<ListPlus />}
         variant="tertiary"
         onClick={handleClick}
         disabled={isTemporary || disabled}
