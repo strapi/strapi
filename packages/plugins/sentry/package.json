@@ -50,7 +50,7 @@
     "watch": "strapi plugin:watch"
   },
   "dependencies": {
-    "@sentry/node": "6.19.7",
+    "@sentry/node": "7.112.2",
     "@strapi/design-system": "2.0.0-beta.2",
     "@strapi/icons": "2.0.0-beta.2"
   },
