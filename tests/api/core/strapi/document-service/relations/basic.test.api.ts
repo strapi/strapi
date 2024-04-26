@@ -69,9 +69,9 @@ describe('Document Service relations', () => {
           documentId: article.documentId,
           populate: { categories: true },
         });
-        const publishedArticle = publishedArticles.versions[0];
+        const publishedArticle = publishedArticles.entries[0];
 
-        expect(publishedArticles.versions.length).toBe(1);
+        expect(publishedArticles.entries.length).toBe(1);
         // Cat1 does not have a published document
         expect(publishedArticle.categories.length).toBe(0);
       }
@@ -93,9 +93,9 @@ describe('Document Service relations', () => {
           locale: article.locale,
           populate: { categories: true },
         });
-        const publishedArticle = publishedArticles.versions[0];
+        const publishedArticle = publishedArticles.entries[0];
 
-        expect(publishedArticles.versions.length).toBe(1);
+        expect(publishedArticles.entries.length).toBe(1);
         // Cat1 has a published document
         expect(publishedArticle.categories.length).toBe(1);
         expect(publishedArticle.categories[0].documentId).toBe('Cat1');
@@ -130,7 +130,7 @@ describe('Document Service relations', () => {
           .discardDraft({ documentId: id, populate: ['categories'] });
 
         // Validate the draft is discarded
-        const newDraftArticle = newDraftArticles.versions[0];
+        const newDraftArticle = newDraftArticles.entries[0];
 
         expect(newDraftArticle.title).toBe('Article with author');
         expect(newDraftArticle.categories.length).toBe(1);

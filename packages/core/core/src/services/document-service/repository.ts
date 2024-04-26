@@ -83,7 +83,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     // Delete all matched entries and its components
     await async.map(entriesToDelete, (entryToDelete: any) => entries.delete(entryToDelete.id));
 
-    return { deletedEntries: entriesToDelete };
+    return { documentId, entries: entriesToDelete };
   }
 
   async function create(opts = {} as any) {
@@ -103,7 +103,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       return publish({
         ...params,
         documentId: doc.documentId,
-      }).then((doc) => doc.versions[0]);
+      }).then((doc) => doc.entries[0]);
     }
 
     return doc;
@@ -142,7 +142,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       )
     );
 
-    return { documentId: clonedEntries.at(0)?.documentId, versions: clonedEntries };
+    return { documentId: clonedEntries.at(0)?.documentId, entries: clonedEntries };
   }
 
   async function update(opts = {} as any) {
@@ -190,7 +190,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       return publish({
         ...params,
         documentId,
-      }).then((doc) => doc.versions[0]);
+      }).then((doc) => doc.entries[0]);
     }
 
     return updatedDraft;
@@ -233,11 +233,11 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     });
 
     // Transform draft entry data and create published versions
-    const versions = await async.map(draftsToPublish, (draft: unknown) =>
+    const publishedEntries = await async.map(draftsToPublish, (draft: unknown) =>
       entries.publish(draft, queryParams)
     );
 
-    return { versions };
+    return { documentId, entries: publishedEntries };
   }
 
   async function unpublish(opts = {} as any) {
@@ -248,13 +248,13 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       i18n.multiLocaleToLookup(contentType)
     )(params);
 
-    const { deletedEntries } = await deleteDocument({
+    const { entries } = await deleteDocument({
       ...params,
       documentId,
       lookup: { ...queryParams?.lookup, publishedAt: { $ne: null } },
     });
 
-    return { versions: deletedEntries };
+    return { documentId, entries };
   }
 
   async function discardDraft(opts = {} as any) {
@@ -287,7 +287,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       entries.discardDraft(entry, queryParams)
     );
 
-    return { versions: draftEntries };
+    return { documentId, entries: draftEntries };
   }
 
   async function updateComponents(entry: any, data: any) {
