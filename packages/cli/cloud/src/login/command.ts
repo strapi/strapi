@@ -10,6 +10,7 @@ const command: StrapiCloudCommand = ({ command, ctx }) => {
     .command('cloud:login')
     .alias('login')
     .description('Strapi Cloud Login')
+    .addHelpText('after', '\nAfter running this command, you will be prompted to enter your authentication information.')
     .action(() => runAction('login', action)(ctx));
 };
 
