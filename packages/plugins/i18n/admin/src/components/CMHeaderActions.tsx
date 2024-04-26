@@ -6,9 +6,8 @@ import {
   Table,
   useAPIErrorHandler,
 } from '@strapi/admin/strapi-admin';
-import { Flex, Icon, Status, Typography, Button } from '@strapi/design-system';
-import { WarningCircle, Layer, Trash } from '@strapi/icons';
-
+import { Flex, Status, Typography, Button } from '@strapi/design-system';
+import { WarningCircle, ListPlus, Trash } from '@strapi/icons';
 import {
   type HeaderActionComponent,
   type DocumentActionComponent,
@@ -445,7 +444,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         }),
         content: (
           <Flex direction="column" alignItems="center" gap={2}>
-            <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+            <WarningCircle width="24px" height="24px" fill="danger600" />
             <Typography textAlign="center">
               {formatMessage({
                 id: 'content-manager.actions.discard.dialog.body',
@@ -464,7 +463,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       id: getTranslation('CMEditViewBulkLocale.publish-title'),
       defaultMessage: 'Publish Multiple Locales',
     }),
-    icon: <Layer />,
+    icon: <ListPlus />,
     position: ['panel'],
     variant: 'secondary',
     dialog: {

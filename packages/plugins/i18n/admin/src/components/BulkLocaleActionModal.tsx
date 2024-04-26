@@ -1,8 +1,8 @@
 import * as React from 'react';
 
 import { Table, useTable, useQueryParams } from '@strapi/admin/strapi-admin';
-import { Box, Typography, IconButton, Flex, Icon, Tooltip } from '@strapi/design-system';
-import { Pencil, CheckCircle, CrossCircle, Rotate } from '@strapi/icons';
+import { Box, Typography, IconButton, Flex, Tooltip } from '@strapi/design-system';
+import { Pencil, CheckCircle, CrossCircle, ArrowsCounterClockwise } from '@strapi/icons';
 import { DocumentStatus } from '@strapi/plugin-content-manager/strapi-admin';
 import { Modules } from '@strapi/types';
 import { stringify } from 'qs';
@@ -49,7 +49,7 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
 
     return (
       <Flex gap={2}>
-        <Icon color="danger600" as={CrossCircle} />
+        <CrossCircle fill="danger600" />
         <Tooltip description={validationErrorsMessages}>
           <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
             {validationErrorsMessages}
@@ -62,7 +62,7 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
   if (status === 'published') {
     return (
       <Flex gap={2}>
-        <Icon color="success600" as={CheckCircle} />
+        <CheckCircle fill="success600" />
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
             id: 'content-manager.bulk-publish.already-published',
@@ -76,7 +76,7 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
   if (status === 'modified') {
     return (
       <Flex gap={2}>
-        <Icon color="alternative600" as={Rotate} />
+        <ArrowsCounterClockwise fill="alternative600" />
         <Typography>
           {formatMessage({
             id: 'app.utils.ready-to-publish-changes',
@@ -89,7 +89,7 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
 
   return (
     <Flex gap={2}>
-      <Icon color="success600" as={CheckCircle} />
+      <CheckCircle fill="success600" />
       <Typography>
         {formatMessage({
           id: 'app.utils.ready-to-publish',
