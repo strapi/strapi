@@ -1,6 +1,6 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, sanitize, errors, async } from '@strapi/utils';
+import { contentTypes, sanitize, errors } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
@@ -12,7 +12,7 @@ type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
 const { ApplicationError } = errors;
-const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
+const { ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
@@ -193,36 +193,16 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .publish({ ...params, documentId: id })
-        .then((result) => result?.versions);
+        .then((result) => result?.entries);
     },
 
     async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
       return strapi.db.transaction(async () => {
-        let publishedEntitiesCount = 0;
-        await async.map(documentIds, async (documentId: string) => {
-          const res = await this.publish(documentId, uid, { locale });
-          publishedEntitiesCount += res?.length ?? 0;
-
-          return res;
-        });
-
-        const populate = await buildDeepPopulate(uid);
-        const publishedEntities = await strapi.db.query(uid).findMany({
-          where: {
-            documentId: { $in: documentIds },
-            published_at: { $ne: null },
-            locale: { $in: locale },
-          },
-          populate,
-        });
-        // Emit the publish event for all updated entities
-        await Promise.all(
-          publishedEntities!.map((doc: Document) => {
-            return emitEvent(uid, ENTRY_PUBLISH, doc);
-          })
+        const results = await Promise.all(
+          documentIds.map((documentId) => this.publish(documentId, uid, { locale }))
         );
 
-        // Return the number of published entities
+        const publishedEntitiesCount = results.filter(Boolean).length;
         return publishedEntitiesCount;
       });
     },
