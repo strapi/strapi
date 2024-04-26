@@ -76,7 +76,7 @@ const CustomBadge = styled(Badge)`
   border-radius: ${({ theme }) => theme.spaces[10]};
 `;
 
-const BadgeImpl = ({ children, label }: NavLink.BadgeProps) => {
+const BadgeImpl = ({ children, label, ...props }: NavLink.BadgeProps) => {
   if (!children) {
     return null;
   }
@@ -86,8 +86,7 @@ const BadgeImpl = ({ children, label }: NavLink.BadgeProps) => {
       top={`-${12 / 16}rem`}
       right={`-${4 / 16}rem`}
       aria-label={label}
-      background="primary600"
-      textColor="neutral0"
+      {...props}
     >
       {children}
     </CustomBadge>

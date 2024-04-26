@@ -1,4 +1,3 @@
-import { Icon } from '@strapi/design-system';
 import { House, Lock } from '@strapi/icons';
 import { screen, render as renderRTL } from '@tests/utils';
 
@@ -10,10 +9,10 @@ describe('NavLink', () => {
       <NavLink.Tooltip label="test-tooltip">
         <>
           <NavLink.Icon>
-            <Icon as={House} data-testid="nav-link-icon" />
+            <House data-testid="nav-link-icon" />
           </NavLink.Icon>
           <NavLink.Badge label="badge label">
-            <Icon data-testid="nav-link-badge" as={Lock} />
+            <Lock data-testid="nav-link-badge" />
           </NavLink.Badge>
         </>
       </NavLink.Tooltip>
