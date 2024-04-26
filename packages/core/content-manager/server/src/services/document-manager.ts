@@ -245,22 +245,26 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return sumDraftCounts(document, uid);
     },
 
-    async countManyEntriesDraftRelations(ids: number[], uid: UID.CollectionType, locale: string) {
+    async countManyEntriesDraftRelations(
+      documentIds: Modules.Documents.ID[],
+      uid: UID.CollectionType,
+      locale: string
+    ) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
         return 0;
       }
 
-      const entities = await strapi.db.query(uid).findMany({
+      const documents = await strapi.documents(uid).findMany({
         populate,
-        where: {
-          id: { $in: ids },
-          ...(locale ? { locale } : {}),
+        filters: {
+          documentId: documentIds,
         },
+        locale,
       });
 
-      const totalNumberDraftRelations: number = entities!.reduce(
+      const totalNumberDraftRelations: number = documents!.reduce(
         (count: number, entity: Document) => sumDraftCounts(entity, uid) + count,
         0
       );

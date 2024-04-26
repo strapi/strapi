@@ -651,8 +651,7 @@ export default {
 
   async countManyEntriesDraftRelations(ctx: any) {
     const { userAbility } = ctx.state;
-    const ids = ctx.request.query.ids as any;
-    const locale = ctx.request.query.locale;
+    const { documentIds, locale } = ctx.request.query;
     const { model } = ctx.params;
 
     const documentManager = getService('document-manager');
@@ -662,21 +661,21 @@ export default {
       return ctx.forbidden();
     }
 
-    const entities = await documentManager.findMany(
+    const documents = await documentManager.findMany(
       {
         filters: {
-          id: ids,
+          documentId: { $in: documentIds },
         },
         locale,
       },
       model
     );
 
-    if (!entities) {
+    if (!documents) {
       return ctx.notFound();
     }
 
-    const number = await documentManager.countManyEntriesDraftRelations(ids, model, locale);
+    const number = await documentManager.countManyEntriesDraftRelations(documentIds, model, locale);
 
     return {
       data: number,
