@@ -6,7 +6,6 @@ import type { CloudCliConfig } from '../types';
 export const VERSION = 'v1';
 
 export type ProjectInfos = {
-  id: string;
   name: string;
   nodeVersion: string;
   region: string;
@@ -19,7 +18,7 @@ export interface CloudApiService {
   deploy(
     deployInput: {
       filePath: string;
-      project: { id: string };
+      project: { name: string };
     },
     {
       onUploadProgress,
@@ -55,7 +54,7 @@ export function cloudApiFactory(token?: string): CloudApiService {
   return {
     deploy({ filePath, project }, { onUploadProgress }) {
       return axiosCloudAPI.post(
-        `/deploy/${project.id}`,
+        `/deploy/${project.name}`,
         { file: fs.createReadStream(filePath) },
         {
           headers: {
