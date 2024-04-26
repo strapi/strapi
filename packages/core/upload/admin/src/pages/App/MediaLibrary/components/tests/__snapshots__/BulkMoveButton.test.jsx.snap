@@ -1,30 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BulkMoveButton renders 1`] = `
-.c6 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c5 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .c0 {
   background: #4945ff;
-  padding: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
+  padding-block: 8px;
+  padding-inline: 8px;
+  padding-inline-end: 16px;
+  padding-inline-start: 16px;
   border-radius: 4px;
   border-color: #4945ff;
   border: 1px solid #4945ff;
@@ -46,19 +28,28 @@ exports[`BulkMoveButton renders 1`] = `
   gap: 8px;
 }
 
+.c5 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c6 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c2 {
   position: relative;
   outline: none;
-}
-
-.c2 > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c2 > svg > g,
-.c2 > svg path {
-  fill: #ffffff;
 }
 
 .c2[aria-disabled='true'] {
@@ -96,14 +87,13 @@ exports[`BulkMoveButton renders 1`] = `
 }
 
 .c3 {
-  height: 2rem;
+  height: 3.2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
 .c3 svg {
-  height: 0.75rem;
-  width: auto;
+  height: 1.2rem;
 }
 
 .c3[aria-disabled='true'] {
@@ -172,15 +162,14 @@ exports[`BulkMoveButton renders 1`] = `
       class=""
     >
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="1.6rem"
+        viewBox="0 0 32 32"
+        width="1.6rem"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
-          fill="#212134"
+          d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
         />
       </svg>
     </div>

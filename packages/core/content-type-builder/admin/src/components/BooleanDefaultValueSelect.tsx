@@ -1,4 +1,4 @@
-import { Option, Select } from '@strapi/design-system';
+import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { IntlLabel } from '../types';
@@ -53,7 +53,7 @@ export const BooleanDefaultValueSelect = ({
   };
 
   return (
-    <Select
+    <SingleSelect
       label={label}
       id={name}
       name={name}
@@ -62,12 +62,12 @@ export const BooleanDefaultValueSelect = ({
     >
       {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
         return (
-          <Option key={key} value={value} disabled={disabled} hidden={hidden}>
+          <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
             {/* No need to translate the options */}
             {intlLabel.defaultMessage}
-          </Option>
+          </SingleSelectOption>
         );
       })}
-    </Select>
+    </SingleSelect>
   );
 };

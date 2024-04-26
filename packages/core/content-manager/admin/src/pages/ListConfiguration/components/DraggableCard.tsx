@@ -112,7 +112,7 @@ const DraggableCard = ({
               )}
               type="button"
             >
-              <Pencil />
+              <Pencil width="1.2rem" height="1.2rem" />
             </ActionButton>
             <ActionButton
               onClick={onRemoveField}
@@ -126,7 +126,7 @@ const DraggableCard = ({
               )}
               type="button"
             >
-              <Cross />
+              <Cross width="1.2rem" height="1.2rem" />
             </ActionButton>
           </Flex>
         </FieldContainer>
@@ -146,6 +146,11 @@ const ActionButton = styled.button`
   display: flex;
   align-items: center;
   height: ${({ theme }) => theme.spaces[7]};
+  color: ${({ theme }) => theme.colors.neutral600};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.neutral700};
+  }
 
   &:last-child {
     padding: 0 ${({ theme }) => theme.spaces[3]};
@@ -156,25 +161,11 @@ const DragButton = styled(ActionButton)`
   padding: 0 ${({ theme }) => theme.spaces[3]};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
   cursor: all-scroll;
-
-  svg {
-    width: ${12 / 16}rem;
-    height: ${12 / 16}rem;
-  }
 `;
 
 const FieldContainer = styled(Flex)`
-  max-height: ${32 / 16}rem;
+  max-height: 3.2rem;
   cursor: pointer;
-
-  svg {
-    width: ${10 / 16}rem;
-    height: ${10 / 16}rem;
-
-    path {
-      fill: ${({ theme }) => theme.colors.neutral600};
-    }
-  }
 `;
 
 const FieldWrapper = styled(Box)`
