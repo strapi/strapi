@@ -330,9 +330,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
           id="main-content"
           tabindex="-1"
         >
-          <div
-            style="height: 0px;"
-          >
+          <div>
             <div
               class="c3"
               data-strapi-header="true"
