@@ -80,6 +80,7 @@
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
+    "@types/fs-extra": "11.0.4",
     "@types/koa": "2.13.4",
     "@types/koa-range": "0.3.5",
     "@types/koa-static": "4.0.2",
