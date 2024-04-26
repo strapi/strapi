@@ -1,4 +1,4 @@
-import { Write } from '@strapi/icons';
+import { Feather } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
@@ -20,7 +20,7 @@ export default {
 
     app.addMenuLink({
       to: PLUGIN_ID,
-      icon: Write,
+      icon: Feather,
       intlLabel: {
         id: `content-manager.plugin.name`,
         defaultMessage: 'Content Manager',

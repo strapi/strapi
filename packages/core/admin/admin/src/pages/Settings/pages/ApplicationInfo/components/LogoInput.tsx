@@ -22,7 +22,6 @@ import {
   FieldError,
   FieldInput,
   Flex,
-  Icon,
   IconButton,
   ModalFooter,
   ModalHeader,
@@ -36,7 +35,7 @@ import {
   TextInputProps,
   Typography,
 } from '@strapi/design-system';
-import { PicturePlus, Plus, Refresh } from '@strapi/icons';
+import { PlusCircle, Plus, ArrowClockwise } from '@strapi/icons';
 import axios, { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -127,7 +126,7 @@ const LogoInput = ({
                   id: 'Settings.application.customization.carousel.reset-action',
                   defaultMessage: 'Reset logo',
                 })}
-                icon={<Refresh />}
+                icon={<ArrowClockwise />}
               />
             )}
           </CarouselActions>
@@ -372,13 +371,7 @@ const ComputerForm = () => {
                 onDragEnter={handleDragEnter}
                 onDragLeave={handleDragLeave}
               >
-                <Icon
-                  color="primary600"
-                  width={`${60 / 16}rem`}
-                  height={`${60 / 16}rem`}
-                  as={PicturePlus}
-                  aria-hidden
-                />
+                <PlusCircle fill="primary600" width="6rem" height="6rem" aria-hidden />
                 <Box paddingTop={3} paddingBottom={5}>
                   <Typography variant="delta" as="label" htmlFor={id}>
                     {formatMessage({
@@ -493,7 +486,7 @@ const PendingLogoDialog = ({ onChangeLogo }: PendingLogoDialogProps) => {
             })}
           </Button>
         </Flex>
-        <Box maxWidth={`${180 / 16}rem`}>
+        <Box maxWidth={`18rem`}>
           {localImage?.url ? <ImageCardAsset asset={localImage} /> : null}
         </Box>
       </Box>

@@ -21,9 +21,10 @@ import {
   Tr,
   Typography,
   VisuallyHidden,
+  LinkButton,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
+import { Pencil, Plus, Trash } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 

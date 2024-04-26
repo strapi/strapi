@@ -4,16 +4,16 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import styled from 'styled-components';
 
 const IconBox = styled(Box)`
-  height: ${24 / 16}rem;
-  width: ${24 / 16}rem;
+  height: 2.4rem;
+  width: 2.4rem;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
 
   svg {
-    height: ${10 / 16}rem;
-    width: ${10 / 16}rem;
+    height: 1rem;
+    width: 1rem;
   }
 
   svg path {
@@ -27,7 +27,7 @@ const ButtonBox = styled(Box)`
   width: 100%;
   border: none;
   position: relative;
-  left: -0.25rem;
+  left: -0.4rem;
 `;
 
 interface NestedTFooterProps {

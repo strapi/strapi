@@ -1,7 +1,7 @@
 // import * as React from 'react';
 
 // import { Box, Flex, Popover, Typography } from '@strapi/design-system';
-// import { Link } from '@strapi/design-system/v2';
+// import { Link } from '@strapi/design-system';
 // import { Modules, UID } from '@strapi/types';
 // import { useIntl } from 'react-intl';
 // import styled from 'styled-components';
@@ -41,7 +41,7 @@
 
 // const ActionWrapper = styled(Flex)`
 //   svg {
-//     height: ${4 / 16}rem;
+//     height: 0.4rem;
 //   }
 // `;
 
@@ -122,7 +122,7 @@
 //   return (
 //     <Flex onClick={(e) => e.stopPropagation()}>
 //       <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
-//         <ActionWrapper height="2rem" width="2rem">
+//         <ActionWrapper height="3.2rem" width="3.2rem">
 //           <Typography style={{ maxWidth: '252px', cursor: 'pointer' }} textColor="neutral800">
 //             {releases.length > 0
 //               ? formatMessage(
