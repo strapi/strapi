@@ -16,7 +16,7 @@ import {
   ModalHeader,
   ModalLayout,
 } from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
+import { Breadcrumbs, Crumb } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

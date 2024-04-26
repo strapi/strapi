@@ -6,7 +6,6 @@ import {
   FieldInput,
   FieldLabel,
   Flex,
-  Icon,
   IconButton,
   inputFocusStyle,
   Searchbar,
@@ -43,6 +42,8 @@ interface IconPickProps {
 }
 
 const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickProps) => {
+  const Icon = COMPONENT_ICONS[iconKey];
+
   return (
     <Field name={name} required={false}>
       <FieldLabel htmlFor={iconKey} id={`${iconKey}-label`}>
@@ -65,7 +66,7 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickPr
           hasRadius
           background={isSelected ? 'primary200' : undefined}
         >
-          <Icon as={COMPONENT_ICONS[iconKey]} color={isSelected ? 'primary600' : 'neutral300'} />
+          <Icon fill={isSelected ? 'primary600' : 'neutral300'} />
         </Flex>
       </FieldLabel>
     </Field>

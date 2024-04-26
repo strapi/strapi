@@ -11,6 +11,7 @@ import type {
   DeleteRelease,
   GetContentTypeEntryReleases,
   GetReleases,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -106,6 +107,42 @@ const releaseController = {
     ctx.body = { data };
   },
 
+  async mapEntriesToReleases(ctx: Koa.Context) {
+    const { contentTypeUid, entriesIds } = ctx.query;
+
+    if (!contentTypeUid || !entriesIds) {
+      throw new errors.ValidationError('Missing required query parameters');
+    }
+
+    const releaseService = getService('release', { strapi });
+
+    const releasesWithActions = await releaseService.findManyWithContentTypeEntryAttached(
+      contentTypeUid,
+      entriesIds
+    );
+
+    const mappedEntriesInReleases = releasesWithActions.reduce(
+      // TODO: Fix for v5 removed mappedEntriedToRelease
+      (acc: MapEntriesToReleases.Response['data'], release: Release) => {
+        release.actions.forEach((action) => {
+          if (!acc[action.entry.id]) {
+            acc[action.entry.id] = [{ id: release.id, name: release.name }];
+          } else {
+            acc[action.entry.id].push({ id: release.id, name: release.name });
+          }
+        });
+
+        return acc;
+      },
+      // TODO: Fix for v5 removed mappedEntriedToRelease
+      {} as MapEntriesToReleases.Response['data']
+    );
+
+    ctx.body = {
+      data: mappedEntriesInReleases,
+    };
+  },
+
   async create(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
     const releaseArgs = ctx.request.body as CreateRelease.Request['body'];
@@ -121,9 +158,7 @@ const releaseController = {
     });
 
     ctx.created({
-      body: {
-        data: await permissionsManager.sanitizeOutput(release),
-      },
+      data: await permissionsManager.sanitizeOutput(release),
     });
   },
 

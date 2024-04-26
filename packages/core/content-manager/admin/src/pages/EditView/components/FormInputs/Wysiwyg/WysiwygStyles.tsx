@@ -8,15 +8,15 @@ export const CustomIconButton = styled(IconButton)`
   outline-offset: -2px !important;
 
   svg {
-    width: ${18 / 16}rem;
-    height: ${18 / 16}rem;
+    width: 1.8rem;
+    height: 1.8rem;
   }
 `;
 
 export const CustomLinkIconButton = styled(CustomIconButton)`
   svg {
-    width: ${8 / 16}rem;
-    height: ${8 / 16}rem;
+    width: 0.8rem;
+    height: 0.8rem;
   }
 `;
 
@@ -29,8 +29,8 @@ export const MoreButton = styled(IconButton)`
   padding: ${({ theme }) => theme.spaces[2]};
 
   svg {
-    width: ${18 / 16}rem;
-    height: ${18 / 16}rem;
+    width: 1.8rem;
+    height: 1.8rem;
   }
 `;
 
@@ -50,8 +50,8 @@ export const ExpandButton = styled(BaseButton)`
     margin-left: ${({ theme }) => `${theme.spaces[2]}`};
     path {
       fill: ${({ theme }) => theme.colors.neutral700};
-      width: ${12 / 16}rem;
-      height: ${12 / 16}rem;
+      width: 1.2rem;
+      height: 1.2rem;
     }
   }
 `;

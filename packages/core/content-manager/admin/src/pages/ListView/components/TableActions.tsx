@@ -7,7 +7,7 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import { Button, Flex } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton } from '@strapi/design-system';
 import { Duplicate, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';

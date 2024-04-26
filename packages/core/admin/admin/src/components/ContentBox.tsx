@@ -44,8 +44,8 @@ const IconWrapper = styled(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};
 
   svg {
-    width: ${32 / 16}rem;
-    height: ${32 / 16}rem;
+    width: 3.2rem;
+    height: 3.2rem;
   }
 `;
 

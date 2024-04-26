@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-import { Flex, Icon, Typography } from '@strapi/design-system';
-import { PicturePlus } from '@strapi/icons';
+import { Flex, Typography } from '@strapi/design-system';
+import { PlusCircle as PicturePlus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -71,15 +71,14 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      gap={3}
       style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
     >
-      <Icon
-        as={PicturePlus}
+      <PicturePlus
         aria-hidden
-        width="30px"
-        height="24px"
-        color={disabled ? 'neutral400' : 'primary600'}
-        marginBottom={3}
+        width="3.2rem"
+        height="3.2rem"
+        fill={disabled ? 'neutral400' : 'primary600'}
       />
       <TextAlignTypography
         variant="pi"

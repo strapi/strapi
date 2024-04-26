@@ -116,8 +116,8 @@ const EditorDivider = styled(Divider)`
 
 const ExpandIconButton = styled(IconButton)`
   position: absolute;
-  bottom: ${12 / 16}rem;
-  right: ${12 / 16}rem;
+  bottom: 1.2rem;
+  right: 1.2rem;
 `;
 
 /**

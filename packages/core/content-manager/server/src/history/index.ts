@@ -6,14 +6,11 @@ import { getService } from './utils';
 import { historyVersion } from './models/history-version';
 
 /**
- * Check once if the feature is enabled (both license info & feature flag) before loading it,
+ * Check once if the feature is enabled before loading it,
  * so that we can assume it is enabled in the other files.
  */
 const getFeature = (): Partial<Plugin.LoadedPlugin> => {
-  if (
-    strapi.features.future.isEnabled('history') &&
-    strapi.ee.features.isEnabled('cms-content-history')
-  ) {
+  if (strapi.ee.features.isEnabled('cms-content-history')) {
     return {
       register({ strapi }) {
         strapi.get('models').add(historyVersion);
