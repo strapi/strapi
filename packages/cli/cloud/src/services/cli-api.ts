@@ -14,6 +14,11 @@ export type ProjectInfos = {
 };
 export type ProjectInput = Omit<ProjectInfos, 'id'>;
 
+export type DeployResponse = {
+  build_id: string;
+  image: string;
+};
+
 export interface CloudApiService {
   deploy(
     deployInput: {
@@ -25,7 +30,7 @@ export interface CloudApiService {
     }: {
       onUploadProgress: (progressEvent: { loaded: number; total?: number }) => void;
     }
-  ): Promise<AxiosResponse>;
+  ): Promise<AxiosResponse<DeployResponse>>;
 
   createProject(projectInput: ProjectInput): Promise<{
     data: ProjectInfos;

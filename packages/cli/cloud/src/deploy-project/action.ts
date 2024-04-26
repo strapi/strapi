@@ -70,7 +70,7 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
     const progressBar = ctx.logger.progressBar(100, 'Upload Progress');
 
     try {
-      const { data } = (await cloudApi.deploy(
+      const { data } = await cloudApi.deploy(
         { filePath: tarFilePath, project },
         {
           onUploadProgress(progressEvent) {
@@ -79,12 +79,12 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
             progressBar.update(percentage);
           },
         }
-      )) as { data: { buildId: string } };
+      );
 
       progressBar.update(100);
       progressBar.stop();
       ctx.logger.success('✨ Upload finished!');
-      return data.buildId;
+      return data.build_id;
     } catch (error: any) {
       progressBar.stop();
       if (error instanceof AxiosError && error.response?.data) {
