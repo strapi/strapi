@@ -21,17 +21,19 @@ const IGNORED_PATTERNS = [
 const getFiles = (
   dirPath: string,
   ignorePatterns: string[] = [],
-  arrayOfFiles: string[] = []
+  arrayOfFiles: string[] = [],
+  subfolder: string = '',
 ): string[] => {
-  const entries = fs.readdirSync(dirPath);
+  const entries = fs.readdirSync(path.join(dirPath, subfolder));
   entries.forEach((entry) => {
-    const entryPath = path.resolve(dirPath, entry);
-    const isIgnored = isIgnoredFile(dirPath, entry, ignorePatterns);
+    const entryPathFromRoot = path.join(subfolder, entry);
+    const entryPath = path.relative(dirPath, entryPathFromRoot);
+    const isIgnored = isIgnoredFile(dirPath, entryPathFromRoot, ignorePatterns);
     if (isIgnored) {
       return;
     }
     if (fs.statSync(entryPath).isDirectory()) {
-      getFiles(entryPath, ignorePatterns, arrayOfFiles);
+      getFiles(dirPath, ignorePatterns, arrayOfFiles, entryPathFromRoot);
     } else {
       arrayOfFiles.push(entryPath);
     }
@@ -78,7 +80,6 @@ const compressFilesToTar = async (
     {
       gzip: true,
       file: path.resolve(storagePath, filename),
-      cwd: storagePath,
     },
     filesToCompress
   );
