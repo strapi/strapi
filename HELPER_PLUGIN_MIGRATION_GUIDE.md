@@ -204,7 +204,7 @@ This was aliasing the design-system and using the `as` prop with `react-router-d
 import { Link } from '@strapi/helper-plugin';
 
 // After
-import { Link } from '@strapi/design-system/v2';
+import { Link } from '@strapi/design-system';
 import { NavLink } from 'react-router-dom';
 
 const MyLink = () => {
@@ -225,7 +225,7 @@ This was aliasing the design-system and using the `as` prop with `react-router-d
 import { LinkButton } from '@strapi/helper-plugin';
 
 // After
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton } from '@strapi/design-system';
 import { NavLink } from 'react-router-dom';
 
 const MyLink = () => {

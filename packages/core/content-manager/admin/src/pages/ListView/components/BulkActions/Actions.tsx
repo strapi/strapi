@@ -18,7 +18,7 @@ import {
   ModalLayout,
   Typography,
 } from '@strapi/design-system';
-import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
+import { Check, WarningCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useDoc } from '../../../../hooks/useDocument';
@@ -217,7 +217,7 @@ const BulkActionConfirmDialog = ({
 
   return (
     <Dialog isOpen={isOpen} title={title} onClose={handleClose}>
-      <DialogBody icon={<ExclamationMarkCircle />}>{content}</DialogBody>
+      <DialogBody icon={<WarningCircle />}>{content}</DialogBody>
       <DialogFooter
         startAction={
           <Button onClick={handleClose} variant="tertiary">

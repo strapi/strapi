@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 
 import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
-import { CarretDown } from '@strapi/icons';
+import { CaretDown } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 import styled, { DefaultTheme, css } from 'styled-components';
@@ -331,9 +331,9 @@ const Wrapper = styled(Flex)<{ isCollapsable?: boolean; isActive?: boolean }>`
   ${({ isActive, theme }) => isActive && activeStyle(theme)};
 `;
 
-const CarretIcon = styled(CarretDown)<{ $isActive: boolean }>`
+const CarretIcon = styled(CaretDown)<{ $isActive: boolean }>`
   display: none;
-  width: ${10 / 16}rem;
+  width: 1rem;
   transform: rotate(${({ $isActive }) => ($isActive ? '180' : '0')}deg);
   margin-left: ${({ theme }) => theme.spaces[2]};
 `;
@@ -385,7 +385,7 @@ const SubActionRow = ({
   }, [rowToOpen, childrenForm]);
 
   return (
-    <Box paddingLeft={`2rem`}>
+    <Box paddingLeft={`3.2rem`}>
       <TopTimeline />
       {childrenForm.map(({ label, value, required, children: subChildrenForm }, index) => {
         const isVisible = index + 1 < childrenForm.length;
@@ -574,7 +574,7 @@ const RowStyle = styled(Flex)<{ level: number; isCollapsable?: boolean; isActive
 const TopTimeline = styled.div`
   padding-top: ${({ theme }) => theme.spaces[2]};
   margin-top: ${({ theme }) => theme.spaces[2]};
-  width: ${4 / 16}rem;
+  width: 0.4rem;
   background-color: ${({ theme }) => theme.colors.primary200};
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
@@ -585,8 +585,8 @@ const StyledBox = styled(Box)`
 
   &:before {
     content: '';
-    width: ${4 / 16}rem;
-    height: ${12 / 16}rem;
+    width: 0.4rem;
+    height: 1.2rem;
     background: ${({ theme }) => theme.colors.primary200};
     display: block;
   }
