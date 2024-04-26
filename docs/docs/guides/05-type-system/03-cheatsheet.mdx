@@ -8,9 +8,9 @@ tags:
 toc_max_heading_level: 3
 ---
 
-import Tabs from '@theme/Tabs'
-import TabItem from '@theme/TabItem'
-import Admonition from '@theme/Admonition'
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+import Admonition from '@theme/Admonition';
 
 ### Common Use Cases
 
@@ -39,9 +39,7 @@ Infer the UID type based on usage and allow passing it to other generic types.
 ```typescript
 import type { Schema, UID } from '@strapi/types';
 
-function getSchema<TSchemaUID extends UID.Schema>(
-  uid: TSchemaUID
-): Schema.Schema<TSchemaUID> {}
+function getSchema<TSchemaUID extends UID.Schema>(uid: TSchemaUID): Schema.Schema<TSchemaUID> {}
 ```
 
 </TabItem>
@@ -62,7 +60,6 @@ function getSchema(uid: UID.Schema): Schema.Schema {}
 </TabItem>
 
 </Tabs>
-
 
 ---
 
@@ -123,7 +120,7 @@ import type { Schema } from '@strapi/types';
 
 function assertIsContentTypeSchema(schema: Schema.Schema): asserts schema is Schema.ContentType {
   if (schema.modelType !== 'contentType') {
-    throw new Error('schema is not a content-type')
+    throw new Error('schema is not a content-type');
   }
 }
 ```
@@ -167,6 +164,7 @@ import type { Data } from '@strapi/types';
     ```typescript
     type PartialArticle = Data.Entity<'api::article.article', 'title' | 'description' | 'author'>;
     ```
+
   </TabItem>
   <TabItem value="contenttype" label="Data.ContentType">
     #### Represent any content-type entity
@@ -206,6 +204,7 @@ import type { Data } from '@strapi/types';
     ```typescript
     type PartialMetadata = Data.Component<'seo.metadata', 'description' | 'tags'>;
     ```
+
   </TabItem>
 </Tabs>
 
@@ -246,6 +245,7 @@ declare const contentTypeUID: UID.ContentType;
 ```
 
 #### Check if a given UID is a ContentType UID
+
 ```typescript
 type IsContentType = UID.IsContentType<'api::article.article'>;
 ```
