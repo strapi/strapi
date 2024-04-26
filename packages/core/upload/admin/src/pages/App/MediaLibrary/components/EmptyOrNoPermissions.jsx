@@ -1,7 +1,8 @@
 import React from 'react';
 
 import { Button } from '@strapi/design-system';
-import { EmptyPermissions, Plus } from '@strapi/icons';
+import { Plus } from '@strapi/icons';
+import { EmptyPermissions } from '@strapi/icons/symbols';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -42,7 +43,7 @@ export const EmptyOrNoPermissions = ({ canCreate, isFiltering, canRead, onAction
 
   return (
     <EmptyAssets
-      icon={!canRead ? EmptyPermissions : null}
+      icon={!canRead ? EmptyPermissions : undefined}
       action={
         canCreate &&
         !isFiltering && (

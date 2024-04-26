@@ -1,0 +1,190 @@
+---
+title: UID
+tags:
+  - typescript
+  - type system
+  - type
+  - concepts
+toc_max_heading_level: 4
+---
+
+:::note
+On this page, **a resource** is considered as **anything that can be identified by a UID**.
+
+This includes (but is not limited to) controllers, schema, services, policies, middlewares, etc...
+:::
+
+In the Type System, UIDs play a crucial role in referencing various resources (such as schema and entities) by attaching a unique identifier.
+
+To put it simply, a UID is a unique (string) literal key used to identify, locate, or access a particular resource within the system.
+
+:::tip
+This makes it the perfect tool to index type registries or to use as a type parameter for resource-centric types.
+:::
+
+### Format
+
+A UID is composed of 3 different parts:
+
+1. A namespace ([link](#1-namespaces))
+2. A separator ([link](#2-separators))
+3. A name ([link](#3-names))
+
+#### 1. Namespaces
+
+There are two main families of namespaces:
+
+- Scoped (_aka parametrized_)
+- Non-scoped (_aka constants_)
+
+A third kind exists for component UIDs and is defined only by a dynamic category: `<category>`.
+
+##### Scoped
+
+Scoped namespaces are defined by a base name, followed by a separator (`::`) and any string.
+
+In Strapi there are two of them:
+
+| Name   |    Definition     | Description                                          |
+| ------ | :---------------: | ---------------------------------------------------- |
+| API    |  `api::<scope>`   | Represent a resource present in the `<scope>` API    |
+| Plugin | `plugin::<scope>` | Represent a resource present in the `<scope>` plugin |
+
+##### Non-Scoped
+
+These namespaces are used as a simple prefix and define the origin of a resource.
+
+Strapi uses three of them to create UIDs
+
+| Name   | Definition | Description                                                                   |
+| ------ | :--------: | ----------------------------------------------------------------------------- |
+| Strapi |  `strapi`  | Represent a resource present in the core of strapi                            |
+| Admin  |  `admin`   | Represent a resource present in Strapi admin                                  |
+| Global |  `global`  | Rarely used (_e.g. policies or middlewares_), it represents a global resource |
+
+#### 2. Separators
+
+There are only two kind of separators:
+
+- `.` for scoped namespaces (`api::<scope>`, `plugin::<scope>`) and components (`<category>`)
+- `::` for others (`admin`, `strapi`, `global`)
+
+#### 3. Names
+
+UID names can be any alphanumeric string.
+
+:::caution
+A UID is unique for the kind of resource it's attached to, but **different resource can share the same UID**.
+
+For instance, it's completely possible to have both a `service` and a `schema` identified by `api::article.article`.
+
+Since **TypeScript is a structural type system**, it means that **different UIDs resolving to the same literal type can match each other**, thus making it possible to send a service UID to a method expecting a schema UID (if they share the same format).
+:::
+
+### Compatibility Table
+
+The following table shows, for each kind of UID, what resource they can be associated with.
+
+:::note
+ContentType and Component are referring to both the related schema and entity.
+:::
+
+|                          |    ContentType     |     Component      |     Middleware     |       Policy       |     Controller     |      Service       |
+| ------------------------ | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: |
+| `api::<scope>.<name>`    | :white_check_mark: |        :x:         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `plugin::<scope>.<name>` | :white_check_mark: |        :x:         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `<category>.<name>`      |        :x:         | :white_check_mark: |        :x:         |        :x:         |        :x:         |        :x:         |
+| `strapi::<name>`         | :white_check_mark: |        :x:         | :white_check_mark: | :white_check_mark: |        :x:         |        :x:         |
+| `admin::<name>`          | :white_check_mark: |        :x:         | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| `global::<name>`         |        :x:         |        :x:         | :white_check_mark: | :white_check_mark: |        :x:         |        :x:         |
+
+### Usage
+
+When referencing resource by their UID you'll need to use the `UID` namespace exported from `@strapi/types`.
+
+```typescript
+import type { UID } from '@strapi/types';
+```
+
+This namespace contains shortcuts to dynamic UID types built from the public registries so that they always adapt to the current context.
+
+:::danger
+The `UID` namespace is designed to be the main interface used by developers.
+
+Do not use the `Internal.UID` namespace unless you know what you're doing (low level extends clause, isolated internal code, etc...).
+:::
+
+#### Basic Example
+
+A common usage is to declare a function that takes a UID as a parameter.
+
+For our example, let's imagine we want to fetch an entity based on the provided resource UID.
+
+```typescript
+import type { UID, Data } from '@strapi/types';
+
+declare function fetch(uid: UID.ContentType): Data.ContentType;
+```
+
+:::tip
+To find an exhaustive list of available UID types, take a look at the [related API reference](http://foo)
+:::
+
+#### Parameter Type Inference
+
+Now let's say we want to adapt the return type of our function, so that it matches the given UID.
+
+```typescript
+fetch('api::article.article');
+// ^ this should return a Data.Entity<'api::article.article'>
+
+fetch('admin::user');
+// ^ this should return a Data.Entity<'admin::user'>
+```
+
+To do that, we'll need the function to be able to provide us with the current `uid` type based on usage.
+
+```typescript
+import type { UID, Data } from '@strapi/types';
+
+declare function fetch<T extends UID.ContentType>(uid: T): Data.ContentType<T>;
+```
+
+So what's changed here?
+
+1. We've forced the `uid` type to be inferred upon usage and stored in a type variable called `T`.
+2. We've then re-used `T` to parametrize the `Data.ContentType` type.
+
+`fetch` will now always return the correct entity depending on which `UID` is sent.
+
+:::caution
+When writing actual code, avoid using `T` as a type variable, and always use meaningful names that will help other developers understand what the variable represents.
+
+For instance, in our example we could use `TContentTypeUID` instead of just `T`.
+:::
+
+#### Going Further
+
+It's completely possible to reference `T` in other generic parameters.
+
+Let's add the possibility to select which fields we want to return for our entity.
+
+```typescript
+import type { UID, Data, Schema } from '@strapi/types';
+
+declare function fetch<T extends UID.ContentType, F extends Schema.AttributeNames<T>>(
+  uid: T,
+  fields: F[]
+): Data.ContentType<T>;
+```
+
+:::tip
+You may have noticed that we're using the inferred UID type (`T`) to reference both:
+
+- An entity (`Data.Entity<T>`)
+- A schema (`Schema.AttributeNames<T>`)
+
+This is because they share the same format and can be used interchangeably.
+
+For more information, take a look at the [format](#format) and [compatibility table](#compatibility-table) sections.
+:::

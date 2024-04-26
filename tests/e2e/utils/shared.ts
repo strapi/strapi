@@ -38,7 +38,7 @@ export const findAndClose = async (
 
   // Find the 'Close' button that is a sibling of the element containing the specified text.
   const closeBtn = await page.locator(
-    `:has-text("${text}")[role="${role}"] ~ button[aria-label="${closeLabel}"]`
+    `:has-text("${text}")[role="${role}"] ~ button:has-text("${closeLabel}")`
   );
 
   // Click the 'Close' button.

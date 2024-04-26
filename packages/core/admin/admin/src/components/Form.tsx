@@ -6,12 +6,11 @@ import {
   DialogBody,
   DialogFooter,
   Flex,
-  Icon,
   Typography,
   useCallbackRef,
   useComposedRefs,
 } from '@strapi/design-system';
-import { ExclamationMarkCircle } from '@strapi/icons';
+import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
 import isEqual from 'lodash/isEqual';
@@ -738,7 +737,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
       >
         <DialogBody>
           <Flex direction="column" gap={2}>
-            <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+            <WarningCircle width="24px" height="24px" fill="danger600" />
             <Typography as="p" variant="omega" textAlign="center">
               {formatMessage({
                 id: 'global.prompt.unsaved',

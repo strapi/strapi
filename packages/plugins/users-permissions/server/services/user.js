@@ -11,6 +11,7 @@ const bcrypt = require('bcryptjs');
 const urlJoin = require('url-join');
 
 const { sanitize } = require('@strapi/utils');
+const { toNumber, getOr } = require('lodash/fp');
 const { getService } = require('../utils');
 
 const USER_MODEL_UID = 'plugin::users-permissions.user';
@@ -27,10 +28,26 @@ module.exports = ({ strapi }) => ({
   },
 
   /**
-   * Promise to search count users
+   * Hashes password fields in the provided values object if they are present.
+   * It checks each key in the values object against the model's attributes and
+   * hashes it if the attribute type is 'password',
    *
-   * @return {Promise}
+   * @param {object} values - The object containing the fields to be hashed.
+   * @return {object} The values object with hashed password fields if they were present.
    */
+  async ensureHashedPasswords(values) {
+    const attributes = strapi.getModel(USER_MODEL_UID).attributes;
+
+    for (const key in values) {
+      if (attributes[key] && attributes[key].type === 'password') {
+        // Check if a custom encryption.rounds has been set on the password attribute
+        const rounds = toNumber(getOr(10, 'encryption.rounds', attributes[key]));
+        values[key] = await bcrypt.hash(values[key], rounds);
+      }
+    }
+
+    return values;
+  },
 
   /**
    * Promise to add a/an user.
@@ -38,7 +55,7 @@ module.exports = ({ strapi }) => ({
    */
   async add(values) {
     return strapi.db.query(USER_MODEL_UID).create({
-      data: values,
+      data: await this.ensureHashedPasswords(values),
       populate: ['role'],
     });
   },
@@ -52,7 +69,7 @@ module.exports = ({ strapi }) => ({
   async edit(userId, params = {}) {
     return strapi.db.query(USER_MODEL_UID).update({
       where: { id: userId },
-      data: params,
+      data: await this.ensureHashedPasswords(params),
       populate: ['role'],
     });
   },

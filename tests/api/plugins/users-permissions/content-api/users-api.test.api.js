@@ -2,6 +2,7 @@
 
 // Test a simple default API with no relations
 
+const bcrypt = require('bcryptjs');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createContentAPIRequest } = require('api-tests/request');
 
@@ -72,6 +73,15 @@ describe('Users API', () => {
       url: '/users',
       body: user,
     });
+
+    // check that password was hashed
+    const userDb = await strapi.db.query('plugin::users-permissions.user').findOne({
+      where: {
+        email: user.email,
+      },
+    });
+
+    expect(bcrypt.compareSync(user.password, userDb.password)).toBe(true);
 
     expect(res.statusCode).toBe(201);
     expect(res.body).toMatchObject({

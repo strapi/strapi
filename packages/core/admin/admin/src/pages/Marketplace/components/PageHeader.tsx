@@ -1,5 +1,5 @@
 import { HeaderLayout } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton } from '@strapi/design-system';
 import { Upload } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 

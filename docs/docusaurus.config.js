@@ -17,6 +17,7 @@ const config = {
   organizationName: 'strapi',
   projectName: 'strapi',
   trailingSlash: false,
+  themes: ['@docusaurus/theme-mermaid'],
 
   // Even if you don't use internalization, you can use this field to set useful
   // metadata like html lang. For example, if your site is Chinese, you may want
@@ -24,6 +25,9 @@ const config = {
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
+  },
+  markdown: {
+    mermaid: true,
   },
   plugins: [
     () => ({

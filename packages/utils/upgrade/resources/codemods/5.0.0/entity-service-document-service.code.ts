@@ -142,12 +142,39 @@ const objectParam_10 = [...objectParam_10_2];
 
 strapi.entityService.findOne(...[...objectParam_10]);
 
+Case: find, create, update, delete with entityId as first argument
+
+strapi.entityService.findMany(uid, {
+  fields: ["id", "name", "description"],
+  populate: ["author", "comments"],
+  publicationState: "preview",
+});
+
+strapi.entityService.create(uid, {
+  data: {
+    name: "John Doe",
+    age: 30,
+  },
+});
+
+strapi.entityService.update(uid, entityId, {
+  data: {
+    name: "John Doe",
+    age: 30,
+  },
+});
+
+strapi.entityService.delete(uid, entityId);
+strapi.entityService.findOne(uid, entityId);
+
 */
 
-const movedFunctions = ['findOne', 'find', 'count', 'create', 'update', 'delete'];
+const movedFunctions = ['findOne', 'findMany', 'count', 'create', 'update', 'delete'];
+
+const functionsWithEntityId = ['findOne', 'update', 'delete'];
 
 const transformDeclaration = (path: ASTPath<any>, name: any, j: JSCodeshift) => {
-  const declaration = findClosesDeclaration(path, name, j);
+  const declaration = findClosestDeclaration(path, name, j);
 
   if (!declaration) {
     return;
@@ -222,7 +249,7 @@ const transformObjectParam = (path: ASTPath<any>, expression: ObjectExpression, 
             break;
           }
           case j.Identifier.check(prop.value): {
-            const declaration = findClosesDeclaration(path, prop.value.name, j);
+            const declaration = findClosestDeclaration(path, prop.value.name, j);
 
             if (!declaration) {
               return;
@@ -253,7 +280,7 @@ const transformObjectParam = (path: ASTPath<any>, expression: ObjectExpression, 
   });
 };
 
-const findClosesDeclaration = (path: ASTPath<any>, name: string, j) => {
+const findClosestDeclaration = (path: ASTPath<any>, name: string, j) => {
   // find Identifier declaration
   const scope = path.scope.lookup(name);
 
@@ -318,7 +345,7 @@ const transform: Transform = (file, api) => {
                 case j.Identifier.check(arg.argument): {
                   const identifier = arg.argument;
 
-                  const declaration = findClosesDeclaration(path, identifier.name, j);
+                  const declaration = findClosestDeclaration(path, identifier.name, j);
 
                   if (!declaration) {
                     return arg;
@@ -350,6 +377,42 @@ const transform: Transform = (file, api) => {
       const resolvedArgs = resolveArgs(args);
 
       const [docUID, ...rest] = resolvedArgs;
+
+      // function with entityId as first argument
+      if (
+        j.Identifier.check(path.value.callee.property) &&
+        functionsWithEntityId.includes(path.value.callee.property.name)
+      ) {
+        rest.splice(0, 1);
+
+        // in case no extra params are passed in the function e.g delete(uid, entityId)
+        if (rest.length === 0) {
+          rest.push(
+            j.objectExpression.from({
+              properties: [],
+            })
+          );
+        }
+
+        const params = rest[0];
+
+        const placeholder = j.objectProperty(j.identifier('documentId'), j.literal('__TODO__'));
+
+        // add documentId to params with a placeholder
+        if (j.ObjectExpression.check(params)) {
+          params.properties.unshift(placeholder);
+        } else if (j.Identifier.check(params)) {
+          const declaration = findClosestDeclaration(path, params.name, j);
+
+          if (!declaration) {
+            return;
+          }
+
+          if (j.ObjectExpression.check(declaration.init)) {
+            declaration.init.properties.unshift(placeholder);
+          }
+        }
+      }
 
       path.value.arguments.forEach((arg) => {
         transformElement(path, arg, j);
