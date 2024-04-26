@@ -168,17 +168,14 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const defaultLocale = await getDefaultLocale();
 
-        let locale = defaultLocale;
-        if (documentContext.locale) {
-          if (Array.isArray(documentContext.locale)) {
-            // TODO calls picked from the middleware could contain an array of
-            // locales. This is incompatible with our call to findOne below.
+        if (Array.isArray(documentContext?.locale)) {
+          // TODO calls picked from the middleware could contain an array of
+          // locales. This is incompatible with our call to findOne below.
 
-            return next();
-          }
-
-          locale = documentContext.locale;
+          return next();
         }
+
+        const locale = documentContext.locale || defaultLocale;
 
         const document = await strapi.documents(contentTypeUid).findOne({
           documentId: documentContext.documentId,
