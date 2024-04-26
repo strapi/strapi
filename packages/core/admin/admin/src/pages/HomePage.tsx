@@ -1,21 +1,30 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Layout, Main, Typography } from '@strapi/design-system';
-import { Link, LinkButton } from '@strapi/design-system/v2';
 import {
-  ArrowRight,
+  Box,
+  Button,
+  Flex,
+  Grid,
+  GridItem,
+  Layout,
+  Main,
+  Typography,
+  Link,
+  LinkButton,
+} from '@strapi/design-system';
+import { ArrowRight, ExternalLink } from '@strapi/icons';
+import {
   CodeSquare,
   Discord,
   Discourse,
-  ExternalLink,
   FeatherSquare,
-  Github,
+  GitHub,
   InformationSquare,
   PlaySquare,
   Reddit,
   Strapi,
-  Twitter,
-} from '@strapi/icons';
+  X as Twitter,
+} from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -146,7 +155,7 @@ const LogoContainer = styled(Box)`
   right: 0;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
@@ -182,8 +191,8 @@ const ContentBlocks = () => {
         >
           <CloudCustomWrapper hasRadius padding={3}>
             <CloudIconWrapper
-              width="2rem"
-              height="2rem"
+              width="3.2rem"
+              height="3.2rem"
               justifyContent="center"
               hasRadius
               alignItems="center"
@@ -392,6 +401,10 @@ const StyledReddit = styled(Reddit)`
   > path:first-child {
     fill: #ff4500;
   }
+
+  > path:nth-child(2) {
+    fill: #fff;
+  }
 `;
 const StyledStrapi = styled(Strapi)`
   > path:first-child {
@@ -406,8 +419,12 @@ const StyledStrapi = styled(Strapi)`
 `;
 
 const StyledTwitter = styled(Twitter)`
-  path {
-    fill: #1da1f2 !important;
+  path:first-child {
+    fill: #fff;
+  }
+
+  path:nth-child(2) {
+    fill: #000 !important;
   }
 `;
 
@@ -456,7 +473,7 @@ const SOCIAL_LINKS = [
   {
     name: { id: 'app.components.HomePage.community.links.github', defaultMessage: 'Github' },
     link: 'https://github.com/strapi/strapi/',
-    icon: <Github fill="#7289DA" />,
+    icon: <GitHub fill="#7289DA" />,
     alt: 'github',
   },
   {

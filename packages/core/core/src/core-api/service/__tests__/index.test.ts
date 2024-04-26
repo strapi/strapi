@@ -114,7 +114,7 @@ describe('Default Service', () => {
 
       test('Delete data when entity is found', async () => {
         const documentService = {
-          delete: jest.fn(() => Promise.resolve({ documentId: 1 })),
+          delete: jest.fn(() => Promise.resolve({ documentId: 1, entries: [{}] })),
         };
 
         const dbInstance = {

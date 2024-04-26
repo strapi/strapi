@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
+import { Flex, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
@@ -26,7 +26,7 @@ const ToolbarWrapper = styled(Flex)`
 const Separator = styled(Toolbar.Separator)`
   background: ${({ theme }) => theme.colors.neutral150};
   width: 1px;
-  height: ${24 / 16}rem;
+  height: 2.4rem;
 `;
 
 const FlexButton = styled(Flex)`
@@ -90,7 +90,7 @@ function useConversionModal() {
 }
 
 interface ToolbarButtonProps {
-  icon: React.ComponentType;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   name: string;
   label: MessageDescriptor;
   isActive: boolean;
@@ -99,7 +99,7 @@ interface ToolbarButtonProps {
 }
 
 const ToolbarButton = ({
-  icon,
+  icon: Icon,
   name,
   label,
   isActive,
@@ -136,7 +136,7 @@ const ToolbarButton = ({
           height={7}
           hasRadius
         >
-          <Icon width={3} height={3} as={icon} color={disabled ? 'neutral300' : enabledColor} />
+          <Icon width="1.2rem" height="1.2rem" fill={disabled ? 'neutral300' : enabledColor} />
         </FlexButton>
       </Toolbar.ToggleItem>
     </Tooltip>
@@ -270,11 +270,13 @@ const BlocksDropdown = () => {
     }
   }, [editor.selection, editor, blocks, blockSelected]);
 
+  const Icon = blocks[blockSelected].icon;
+
   return (
     <>
       <SelectWrapper>
         <SingleSelect
-          startIcon={<Icon as={blocks[blockSelected].icon} />}
+          startIcon={<Icon />}
           onChange={handleSelect}
           placeholder={formatMessage(blocks[blockSelected].label)}
           value={blockSelected}
@@ -303,19 +305,19 @@ const BlocksDropdown = () => {
 
 interface BlockOptionProps {
   value: string;
-  icon: React.ComponentType;
+  icon: React.ComponentType<React.SVGProps<SVGElement>>;
   label: MessageDescriptor;
   blockSelected: string;
 }
 
-const BlockOption = ({ value, icon, label, blockSelected }: BlockOptionProps) => {
+const BlockOption = ({ value, icon: Icon, label, blockSelected }: BlockOptionProps) => {
   const { formatMessage } = useIntl();
 
   const isSelected = value === blockSelected;
 
   return (
     <SingleSelectOption
-      startIcon={<Icon as={icon} color={isSelected ? 'primary600' : 'neutral600'} />}
+      startIcon={<Icon fill={isSelected ? 'primary600' : 'neutral600'} />}
       value={value}
     >
       {formatMessage(label)}

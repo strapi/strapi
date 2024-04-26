@@ -1,5 +1,5 @@
-import { Box, Flex, Grid, GridItem, GridLayout, Icon, Typography } from '@strapi/design-system';
-import { EmptyDocuments } from '@strapi/icons';
+import { Box, Flex, Grid, GridItem, GridLayout, Typography } from '@strapi/design-system';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -59,7 +59,7 @@ const NpmPackagesGrid = ({
         </GridLayout>
         <Box position="absolute" top={11} width="100%">
           <Flex alignItems="center" justifyContent="center" direction="column">
-            <Icon as={EmptyDocuments} color={undefined} width="160px" height="88px" />
+            <EmptyDocuments width="160px" height="88px" />
             <Box paddingTop={6}>
               <Typography variant="delta" as="p" textColor="neutral600">
                 {emptySearchMessage}
