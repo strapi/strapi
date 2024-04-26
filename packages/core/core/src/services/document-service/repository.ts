@@ -85,13 +85,13 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
     const entriesToDelete = await strapi.db.query(uid).findMany(query);
 
     // Delete all matched entries and its components
-    const entries = await async.map(entriesToDelete, (entryToDelete: any) =>
+    const deletedEntries = await async.map(entriesToDelete, (entryToDelete: any) =>
       entries.delete(entryToDelete.id)
     );
 
     entriesToDelete.forEach(emitEvent('entry.delete'));
 
-    return { documentId, entries };
+    return { documentId, entries: deletedEntries };
   }
 
   async function create(opts = {} as any) {
@@ -274,10 +274,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     // Delete all published versions
     const versionsToDelete = await strapi.db.query(uid).findMany(query);
-    const entries = await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
+    const unpublishedEntries = await async.map(versionsToDelete, (entry: any) =>
+      entries.delete(entry.id)
+    );
 
     versionsToDelete.forEach(emitEvent('entry.unpublish'));
-    return { documentId, entries };
+    return { documentId, entries: unpublishedEntries };
   }
 
   async function discardDraft(opts = {} as any) {
