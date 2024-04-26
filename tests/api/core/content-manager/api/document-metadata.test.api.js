@@ -38,7 +38,7 @@ const product = {
     // The schema contains different types of fields that require validation
     // This is to ensure that when we request metadata for these documents
     // that the available locales contain data for any fields that require
-    // validation. In order ti enable error states in bulk action UI modals
+    // validation. In order to enable error states in bulk action UI modals
     category: {
       type: 'string',
       maxLength: 10,
@@ -55,7 +55,7 @@ const product = {
     },
     // TODO - Add other fields with validation requirements
     shopName: {
-      // This field has no validation requirements so should be expluded from
+      // This field has no validation requirements so should be excluded from
       // available locales
       type: 'string',
     },

@@ -15,7 +15,6 @@ const createEntriesService = (uid: UID.ContentType) => {
   const contentType = strapi.contentType(uid);
 
   async function createEntry(params = {} as any) {
-    // TODO fails here
     const { data, ...restParams } = await transformParamsDocumentId(uid, params);
 
     const query = transformParamsToQuery(uid, pickSelectionParams(restParams) as any); // select / populate
