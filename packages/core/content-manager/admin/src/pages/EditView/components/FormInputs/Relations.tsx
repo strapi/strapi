@@ -13,16 +13,15 @@ import {
   Combobox,
   ComboboxOption,
   Flex,
-  Icon,
   IconButton,
   TextButton,
   Tooltip,
   Typography,
   VisuallyHidden,
   useComposedRefs,
+  Link,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { Cross, Drag, Refresh } from '@strapi/icons';
+import { Cross, Drag, ArrowClockwise } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -266,7 +265,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
               disabled={isFetchingMoreRelations}
               onClick={handleLoadMore}
               loading={isFetchingMoreRelations}
-              startIcon={<Refresh />}
+              startIcon={<ArrowClockwise />}
               // prevent the label from line-wrapping
               shrink={0}
             >
@@ -963,7 +962,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                 defaultMessage: 'Remove',
               })}
             >
-              <Icon width="12px" as={Cross} />
+              <Cross width="12px" />
             </DisconnectButton>
           </Box>
         </Flex>

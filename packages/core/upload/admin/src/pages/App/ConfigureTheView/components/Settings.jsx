@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Grid, GridItem, Option, Select } from '@strapi/design-system';
+import { Box, Grid, GridItem, SingleSelectOption, SingleSelect } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -22,7 +22,7 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
     >
       <Grid gap={4}>
         <GridItem s={12} col={6}>
-          <Select
+          <SingleSelect
             label={formatMessage({
               id: getTrad('config.entries.title'),
               defaultMessage: 'Entries per page',
@@ -36,14 +36,14 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
             value={pageSize}
           >
             {pageSizes.map((pageSize) => (
-              <Option key={pageSize} value={pageSize}>
+              <SingleSelectOption key={pageSize} value={pageSize}>
                 {pageSize}
-              </Option>
+              </SingleSelectOption>
             ))}
-          </Select>
+          </SingleSelect>
         </GridItem>
         <GridItem s={12} col={6}>
-          <Select
+          <SingleSelect
             label={formatMessage({
               id: getTrad('config.sort.title'),
               defaultMessage: 'Default sort order',
@@ -59,15 +59,15 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
             data-testid="sort-select"
           >
             {sortOptions.map((filter) => (
-              <Option
+              <SingleSelectOption
                 data-testid={`sort-option-${filter.value}`}
                 key={filter.key}
                 value={filter.value}
               >
                 {formatMessage({ id: getTrad(filter.key), defaultMessage: `${filter.value}` })}
-              </Option>
+              </SingleSelectOption>
             ))}
-          </Select>
+          </SingleSelect>
         </GridItem>
       </Grid>
     </Box>

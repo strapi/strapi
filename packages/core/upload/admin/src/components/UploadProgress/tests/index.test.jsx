@@ -51,11 +51,6 @@ describe('<UploadProgress />', () => {
     } = renderCompo();
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c9 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-      }
-
       .c0 {
         background: #eaeaef;
       }
@@ -114,6 +109,11 @@ describe('<UploadProgress />', () => {
         -ms-flex-direction: row;
         flex-direction: row;
         gap: 8px;
+      }
+
+      .c9 {
+        font-size: 1.2rem;
+        line-height: 1.33;
       }
 
       .c6:before {
@@ -184,15 +184,14 @@ describe('<UploadProgress />', () => {
               </span>
               <svg
                 aria-hidden="true"
-                fill="none"
-                height="1rem"
-                viewBox="0 0 24 24"
-                width="1rem"
+                fill="currentColor"
+                height="1.6rem"
+                viewBox="0 0 32 32"
+                width="1.6rem"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                  fill="#212134"
+                  d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
                 />
               </svg>
             </div>
@@ -241,15 +240,14 @@ describe('<UploadProgress />', () => {
       >
         <svg
           aria-label="Something went wrong"
-          fill="none"
-          height="1rem"
-          viewBox="0 0 24 24"
-          width="1rem"
+          fill="currentColor"
+          height="1.6rem"
+          viewBox="0 0 32 32"
+          width="1.6rem"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-            fill="#212134"
+            d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
           />
         </svg>
       </div>

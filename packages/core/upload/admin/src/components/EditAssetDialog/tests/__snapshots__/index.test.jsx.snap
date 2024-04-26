@@ -1,71 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
-.c2 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c14 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c6 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.c33 {
-  font-weight: 600;
-  font-size: 0.6875rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c34 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #4a4a6a;
-}
-
-.c35 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c39 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
 .c0 {
-  margin-left: -250px;
+  margin-inline-start: -250px;
   position: fixed;
   left: 50%;
-  top: 2.875rem;
+  top: 4.6rem;
   z-index: 10;
-  width: 31.25rem;
+  width: 50rem;
 }
 
 .c7 {
-  padding-right: 40px;
-  padding-left: 40px;
+  padding-inline-end: 40px;
+  padding-inline-start: 40px;
   position: fixed;
   z-index: 4;
 }
@@ -74,20 +21,21 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
-  width: 51.875rem;
+  width: 83rem;
 }
 
 .c11 {
   background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 20px;
-  padding-bottom: 16px;
-  padding-left: 20px;
+  padding-block-start: 16px;
+  padding-inline-end: 20px;
+  padding-block-end: 16px;
+  padding-inline-start: 20px;
 }
 
 .c15 {
   background: #ffffff;
-  padding: 8px;
+  padding-block: 8px;
+  padding-inline: 8px;
   border-radius: 4px;
   border-color: #dcdce4;
   border: 1px solid #dcdce4;
@@ -95,7 +43,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c18 {
-  padding: 32px;
+  padding-block: 32px;
+  padding-inline: 32px;
 }
 
 .c22 {
@@ -106,40 +55,42 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c24 {
-  padding-right: 12px;
-  padding-left: 12px;
+  padding-inline-end: 12px;
+  padding-inline-start: 12px;
 }
 
 .c3 {
   background: #212134;
-  padding: 8px;
+  padding-block: 8px;
+  padding-inline: 8px;
   border-radius: 4px;
   position: absolute;
 }
 
 .c29 {
-  padding-right: 8px;
-  padding-left: 8px;
+  padding-inline-end: 8px;
+  padding-inline-start: 8px;
 }
 
 .c31 {
   background: #f6f6f9;
-  padding-top: 16px;
-  padding-right: 24px;
-  padding-bottom: 16px;
-  padding-left: 24px;
+  padding-block-start: 16px;
+  padding-inline-end: 24px;
+  padding-block-end: 16px;
+  padding-inline-start: 24px;
   border-radius: 4px;
 }
 
 .c40 {
-  padding-right: 12px;
+  padding-inline-end: 12px;
 }
 
 .c45 {
   background: #4945ff;
-  padding: 8px;
-  padding-right: 16px;
-  padding-left: 16px;
+  padding-block: 8px;
+  padding-inline: 8px;
+  padding-inline-end: 16px;
+  padding-inline-start: 16px;
   border-radius: 4px;
   border-color: #4945ff;
   border: 1px solid #4945ff;
@@ -275,19 +226,62 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   gap: 8px;
 }
 
+.c14 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c6 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.c33 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  color: #666687;
+}
+
+.c34 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #4a4a6a;
+}
+
+.c35 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c39 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c2 {
+  border: 0;
+  -webkit-clip: rect(0 0 0 0);
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
 .c16 {
   position: relative;
   outline: none;
-}
-
-.c16 > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c16 > svg > g,
-.c16 > svg path {
-  fill: #ffffff;
 }
 
 .c16[aria-disabled='true'] {
@@ -325,14 +319,13 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c46 {
-  height: 2rem;
+  height: 3.2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
 }
 
 .c46 svg {
-  height: 0.75rem;
-  width: auto;
+  height: 1.2rem;
 }
 
 .c46[aria-disabled='true'] {
@@ -381,14 +374,13 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c47 {
-  height: 2rem;
+  height: 3.2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
 .c47 svg {
-  height: 0.75rem;
-  width: auto;
+  height: 1.2rem;
 }
 
 .c47[aria-disabled='true'] {
@@ -447,12 +439,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c48 {
-  height: 2rem;
+  height: 3.2rem;
 }
 
 .c48 svg {
-  height: 0.75rem;
-  width: auto;
+  height: 1.2rem;
 }
 
 .c48[aria-disabled='true'] {
@@ -517,13 +508,13 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 .c38 {
   border: none;
   border-radius: 4px;
-  padding-bottom: 0.65625rem;
+  padding-bottom: 1rem;
   padding-left: 16px;
   padding-right: 16px;
-  padding-top: 0.65625rem;
+  padding-top: 1rem;
   color: #32324d;
   font-weight: 400;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   display: block;
   width: 100%;
   background: inherit;
@@ -588,24 +579,18 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c17 {
   border-color: #dcdce4;
-  height: 2rem;
-  width: 2rem;
+  height: 3.2rem;
+  width: 3.2rem;
+  color: #8e8ea9;
 }
 
-.c17 svg g,
-.c17 svg path {
-  fill: #8e8ea9;
+.c17:hover,
+.c17:focus {
+  color: #666687;
 }
 
-.c17:hover svg g,
-.c17:focus svg g,
-.c17:hover svg path,
-.c17:focus svg path {
-  fill: #666687;
-}
-
-.c17[aria-disabled='true'] svg path {
-  fill: #666687;
+.c17[aria-disabled='true'] {
+  color: #666687;
 }
 
 .c9 {
@@ -636,8 +621,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c41 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
+  height: 1.1rem;
+  width: 1.1rem;
 }
 
 .c41 svg path {
@@ -654,7 +639,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c42 svg {
-  width: 0.5625rem;
+  width: 0.9rem;
 }
 
 .c23 {
@@ -668,29 +653,29 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c28 svg {
-  font-size: 3rem;
-  height: 16.5rem;
+  font-size: 4.8rem;
+  height: 26.4rem;
 }
 
 .c28 img,
 .c28 video {
   margin: 0;
   padding: 0;
-  max-height: 16.5rem;
+  max-height: 26.4rem;
   max-width: 100%;
 }
 
 .c26 {
-  height: 3.25rem;
+  height: 5.2rem;
 }
 
-@media (max-width:68.75rem) {
+@media (max-width:1100px) {
   .c21 {
     grid-column: span;
   }
 }
 
-@media (max-width:34.375rem) {
+@media (max-width:550px) {
   .c21 {
     grid-column: span 12;
   }
@@ -824,16 +809,15 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                   </span>
                   <svg
                     aria-hidden="true"
-                    fill="none"
+                    fill="currentColor"
                     focusable="false"
-                    height="1rem"
-                    viewBox="0 0 24 24"
-                    width="1rem"
+                    height="1.6rem"
+                    viewBox="0 0 32 32"
+                    width="1.6rem"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
-                      d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-                      fill="#212134"
+                      d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
                     />
                   </svg>
                 </button>
@@ -872,16 +856,15 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             </span>
                             <svg
                               aria-hidden="true"
-                              fill="none"
+                              fill="currentColor"
                               focusable="false"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
+                              height="1.6rem"
+                              viewBox="0 0 32 32"
+                              width="1.6rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M3.236 6.149a.2.2 0 0 0-.197.233L6 24h12l2.96-17.618a.2.2 0 0 0-.196-.233H3.236ZM21.8 1.983c.11 0 .2.09.2.2v1.584a.2.2 0 0 1-.2.2H2.2a.2.2 0 0 1-.2-.2V2.183c0-.11.09-.2.2-.2h5.511c.9 0 1.631-1.09 1.631-1.983h5.316c0 .894.73 1.983 1.631 1.983H21.8Z"
-                                fill="#32324D"
+                                d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
                               />
                             </svg>
                           </button>
@@ -901,18 +884,15 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             </span>
                             <svg
                               aria-hidden="true"
-                              fill="none"
+                              fill="currentColor"
                               focusable="false"
-                              height="1rem"
-                              viewBox="0 0 24 25"
-                              width="1rem"
+                              height="1.6rem"
+                              viewBox="0 0 32 32"
+                              width="1.6rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                clip-rule="evenodd"
-                                d="M13.571 5.85H10.43v8.47H2.487a.2.2 0 0 0-.14.343l9.512 9.401a.2.2 0 0 0 .282 0l9.513-9.401a.2.2 0 0 0-.14-.342H13.57V5.85ZM2.2 3.027a.2.2 0 0 1-.2-.2V.402c0-.11.09-.2.2-.2h19.6c.11 0 .2.09.2.2v2.423a.2.2 0 0 1-.2.2H2.2Z"
-                                fill="#212134"
-                                fill-rule="evenodd"
+                                d="M28.5 19v7a2.5 2.5 0 0 1-2.5 2.5H6A2.5 2.5 0 0 1 3.5 26v-7a1.5 1.5 0 0 1 3 0v6.5h19V19a1.5 1.5 0 1 1 3 0m-13.561 1.061a1.5 1.5 0 0 0 2.125 0l5-5a1.502 1.502 0 1 0-2.125-2.125L17.5 15.375V5a1.5 1.5 0 1 0-3 0v10.375l-2.439-2.436a1.502 1.502 0 1 0-2.125 2.125z"
                               />
                             </svg>
                           </button>
@@ -932,20 +912,15 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             </span>
                             <svg
                               aria-hidden="true"
-                              fill="none"
+                              fill="currentColor"
                               focusable="false"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
+                              height="1.6rem"
+                              viewBox="0 0 32 32"
+                              width="1.6rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M21.415 1.344a6.137 6.137 0 0 0-8.525.838L11.095 4.33a1.53 1.53 0 1 0 2.35 1.963l1.794-2.148a3.054 3.054 0 0 1 4.365-.324 3.117 3.117 0 0 1 .255 4.301l-3.73 4.467-.035.038a3.048 3.048 0 0 1-4.53.078 1.531 1.531 0 0 0-2.241 2.086 6.114 6.114 0 0 0 9.159-.245l3.721-4.454a6.289 6.289 0 0 0 1.418-4.62 6.01 6.01 0 0 0-2.206-4.128Z"
-                                fill="#212134"
-                              />
-                              <path
-                                d="m10.399 17.884-1.604 1.92a3.118 3.118 0 0 1-4.278.513 3.052 3.052 0 0 1-.457-4.353l3.795-4.542.028-.031a3.042 3.042 0 0 1 4.584-.022 1.529 1.529 0 0 0 1.794.37c.197-.094.37-.228.51-.395l.018-.022a1.51 1.51 0 0 0-.025-1.977 6.11 6.11 0 0 0-9.27.126l-3.784 4.53a6.137 6.137 0 0 0 .692 8.539 6.01 6.01 0 0 0 4.454 1.437 6.289 6.289 0 0 0 4.294-2.217l1.598-1.913a1.53 1.53 0 0 0-2.35-1.963Z"
-                                fill="#212134"
+                                d="M17.046 23.441a1.5 1.5 0 0 1 0 2.125l-.742.743a7.502 7.502 0 1 1-10.61-10.61l3.015-3.014A7.5 7.5 0 0 1 19 12.375a1.506 1.506 0 0 1-2 2.25 4.5 4.5 0 0 0-6.171.184l-3.013 3.01a4.5 4.5 0 0 0 6.365 6.365l.743-.743a1.5 1.5 0 0 1 2.122 0m9.26-17.75a7.51 7.51 0 0 0-10.61 0l-.742.743a1.503 1.503 0 1 0 2.125 2.125l.742-.743a4.5 4.5 0 0 1 6.365 6.365l-3.014 3.015a4.5 4.5 0 0 1-6.172.179 1.506 1.506 0 1 0-2 2.25 7.5 7.5 0 0 0 10.288-.304l3.014-3.014a7.51 7.51 0 0 0 .004-10.613z"
                               />
                             </svg>
                           </button>
@@ -965,16 +940,15 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             </span>
                             <svg
                               aria-hidden="true"
-                              fill="none"
+                              fill="currentColor"
                               focusable="false"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
+                              height="1.6rem"
+                              viewBox="0 0 32 32"
+                              width="1.6rem"
                               xmlns="http://www.w3.org/2000/svg"
                             >
                               <path
-                                d="M20.571 21.429h-3.428V24h3.428v-2.571ZM20.571 17.143V3.429H7.714v3.428h9.429v10.286H6.857V0H3.43v3.429H0v3.428h3.429v13.714H24v-3.428h-3.429Z"
-                                fill="#212134"
+                                d="M30.5 24a1.5 1.5 0 0 1-1.5 1.5h-3.5V29a1.5 1.5 0 1 1-3 0v-3.5H8A1.5 1.5 0 0 1 6.5 24V9.5H3a1.5 1.5 0 0 1 0-3h3.5V3a1.5 1.5 0 0 1 3 0v19.5H29a1.5 1.5 0 0 1 1.5 1.5M13 9.5h9.5V19a1.5 1.5 0 1 0 3 0V8A1.5 1.5 0 0 0 24 6.5H13a1.5 1.5 0 0 0 0 3"
                               />
                             </svg>
                           </button>
@@ -1220,7 +1194,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                             role="log"
                           />
                           <div
-                            class=" css-1ioi85f-control"
+                            class=" css-oe0cnm-control"
                           >
                             <div
                               class=" css-onz4xi-ValueContainer"
@@ -1253,17 +1227,14 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                                 class="c40 c41 c42"
                               >
                                 <svg
-                                  fill="none"
-                                  height="1rem"
-                                  viewBox="0 0 14 8"
-                                  width="1rem"
+                                  fill="currentColor"
+                                  height="1.6rem"
+                                  viewBox="0 0 32 32"
+                                  width="1.6rem"
                                   xmlns="http://www.w3.org/2000/svg"
                                 >
                                   <path
-                                    clip-rule="evenodd"
-                                    d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-                                    fill="#32324D"
-                                    fill-rule="evenodd"
+                                    d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
                                   />
                                 </svg>
                               </div>

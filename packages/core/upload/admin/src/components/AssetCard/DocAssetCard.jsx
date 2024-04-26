@@ -9,7 +9,7 @@ import { AssetCardBase } from './AssetCardBase';
 
 const IconWrapper = styled.span`
   svg {
-    font-size: 3rem;
+    font-size: 4.8rem;
   }
 `;
 
@@ -21,11 +21,7 @@ const CardAsset = styled(Flex)`
 export const DocAssetCard = ({ name, extension, size, ...restProps }) => {
   return (
     <AssetCardBase name={name} extension={extension} {...restProps} variant="Doc">
-      <CardAsset
-        width="100%"
-        height={size === 'S' ? `${88 / 16}rem` : `${164 / 16}rem`}
-        justifyContent="center"
-      >
+      <CardAsset width="100%" height={size === 'S' ? `8.8rem` : `16.4rem`} justifyContent="center">
         <IconWrapper>
           {extension === 'pdf' ? <FilePdf aria-label={name} /> : <File aria-label={name} />}
         </IconWrapper>

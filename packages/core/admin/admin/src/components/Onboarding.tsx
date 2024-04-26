@@ -5,7 +5,6 @@ import {
   Button,
   Divider,
   Flex,
-  Icon,
   PopoverPrimitives,
   Portal,
   Typography,
@@ -39,6 +38,8 @@ const Onboarding = () => {
     },
   ];
 
+  const Icon = isOpen ? Cross : Question;
+
   return (
     <Box as="aside" position="fixed" bottom={2} right={2}>
       <HelperButton
@@ -56,7 +57,7 @@ const Onboarding = () => {
         onClick={handlePopoverVisibility}
         ref={triggerRef}
       >
-        <Icon as={isOpen ? Cross : Question} color="buttonNeutral0" />
+        <Icon fill="buttonNeutral0" />
       </HelperButton>
 
       {isOpen && (
@@ -123,7 +124,7 @@ const Onboarding = () => {
                     width={6}
                     height={6}
                   >
-                    <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
+                    <Play fill="buttonNeutral0" width="1.2rem" height="1.2rem" />
                   </IconWrapper>
                 </Box>
                 <Flex direction="column" alignItems="start" paddingLeft={4}>
@@ -143,9 +144,9 @@ const Onboarding = () => {
               paddingTop={2}
               paddingBottom={5}
             >
-              {docLinks.map(({ label, href, icon }) => (
+              {docLinks.map(({ label, href, icon: Icon }) => (
                 <Flex gap={3} key={href}>
-                  <Icon as={icon} color="primary600" />
+                  <Icon fill="primary600" />
                   <TextLink
                     as="a"
                     href={href}

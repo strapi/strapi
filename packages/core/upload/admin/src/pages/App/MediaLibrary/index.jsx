@@ -20,7 +20,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Cog, Grid, List, Pencil } from '@strapi/icons';
+import { Cog, GridFour as Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
@@ -54,7 +54,7 @@ import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 
 const BoxWithHeight = styled(Box)`
-  height: ${32 / 16}rem;
+  height: 3.2rem;
   display: flex;
   align-items: center;
 `;

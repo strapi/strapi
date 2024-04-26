@@ -1,17 +1,10 @@
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { History } from '@strapi/icons';
+import { ClockCounterClockwise } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 
 import type { DocumentActionComponent } from '../../content-manager';
-
-const StyledHistory = styled(History)`
-  path {
-    fill: currentColor;
-  }
-`;
 
 const HistoryAction: DocumentActionComponent = ({ model, document }) => {
   const { formatMessage } = useIntl();
@@ -24,7 +17,7 @@ const HistoryAction: DocumentActionComponent = ({ model, document }) => {
   }
 
   return {
-    icon: <StyledHistory />,
+    icon: <ClockCounterClockwise />,
     label: formatMessage({
       id: 'content-manager.history.document-action',
       defaultMessage: 'Content History',

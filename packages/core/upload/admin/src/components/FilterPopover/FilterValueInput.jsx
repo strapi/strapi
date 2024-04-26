@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { DateTimePicker, Option, Select } from '@strapi/design-system';
+import { DateTimePicker, SingleSelectOption, SingleSelect } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -27,15 +27,15 @@ const FilterValueInput = ({ label, onChange, options, type, value }) => {
   }
 
   return (
-    <Select aria-label={label} onChange={onChange} value={value}>
+    <SingleSelect aria-label={label} onChange={onChange} value={value}>
       {options.map((option) => {
         return (
-          <Option key={option.value} value={option.value}>
+          <SingleSelectOption key={option.value} value={option.value}>
             {option.label}
-          </Option>
+          </SingleSelectOption>
         );
       })}
-    </Select>
+    </SingleSelect>
   );
 };
 

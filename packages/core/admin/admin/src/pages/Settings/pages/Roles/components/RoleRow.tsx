@@ -36,12 +36,12 @@ const RoleRow = ({
       // @ts-expect-error – the prop uses `HTMLButtonElement` but we just specify `HTMLElement`
       onClick={canUpdate ? editObject.onClick : undefined}
     >
-      <Td maxWidth={`${130 / 16}rem`}>
+      <Td maxWidth={`13rem`}>
         <Typography ellipsis textColor="neutral800">
           {name}
         </Typography>
       </Td>
-      <Td maxWidth={`${250 / 16}rem`}>
+      <Td maxWidth={`25rem`}>
         <Typography ellipsis textColor="neutral800">
           {description}
         </Typography>

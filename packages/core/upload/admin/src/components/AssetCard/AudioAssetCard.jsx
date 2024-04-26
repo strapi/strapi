@@ -12,7 +12,7 @@ const AudioPreviewWrapper = styled(Box)`
   audio {
     display: block;
     max-width: 100%;
-    max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
+    max-height: ${({ size }) => (size === 'M' ? 16.4 : 8.8)}rem;
   }
 `;
 

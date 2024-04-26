@@ -12,7 +12,7 @@ import {
   DialogProps,
   DialogFooterProps,
 } from '@strapi/design-system';
-import { ExclamationMarkCircle } from '@strapi/icons';
+import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 /* -------------------------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ interface ConfirmDialogProps
  */
 const ConfirmDialog = ({
   children,
-  icon = <ExclamationMarkCircle />,
+  icon = <WarningCircle />,
   onClose,
   onConfirm,
   variant = 'danger',
