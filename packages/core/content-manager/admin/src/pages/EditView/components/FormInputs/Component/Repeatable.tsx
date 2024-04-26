@@ -22,7 +22,6 @@ import styled from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
@@ -39,15 +38,14 @@ import type { Schema } from '@strapi/types';
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
 
-type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'> &
-  Required<Pick<ComponentInputProps, 'renderLayout'>>;
+type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
 
 const RepeatableComponent = ({
   attribute,
   disabled,
   name,
   mainField,
-  renderLayout,
+  children,
 }: RepeatableComponentProps) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
@@ -225,7 +223,6 @@ const RepeatableComponent = ({
                   index={index}
                   isOpen={collapseToOpen === key}
                   mainField={mainField}
-                  renderLayout={renderLayout}
                   onMoveItem={handleMoveComponentField}
                   onClickToggle={handleToggle(key)}
                   onDeleteComponent={() => {
@@ -236,7 +233,9 @@ const RepeatableComponent = ({
                   onCancel={handleCancel}
                   onDropItem={handleDropItem}
                   onGrabItem={handleGrabItem}
-                />
+                >
+                  {children}
+                </Component>
               </ComponentProvider>
             );
           })}
@@ -377,7 +376,7 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
-    Pick<RepeatableComponentProps, 'mainField' | 'renderLayout'> {
+    Pick<RepeatableComponentProps, 'mainField' | 'children'> {
   attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
@@ -389,7 +388,6 @@ interface ComponentProps
 }
 
 const Component = ({
-  attribute,
   disabled,
   index,
   isOpen,
@@ -398,18 +396,13 @@ const Component = ({
     name: 'id',
     type: 'integer',
   },
-  renderLayout,
+  children,
   onClickToggle,
   onDeleteComponent,
   toggleCollapses,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
-  const {
-    edit: { components },
-  } = useDocLayout();
-
-  const { layout } = components[attribute.component];
 
   const displayValue = useForm('RepeatableComponent', (state) => {
     return getIn(state.values, [...name.split('.'), mainField.name]);
@@ -498,7 +491,7 @@ const Component = ({
               padding={6}
               gap={6}
             >
-              {renderLayout({ layout, name })}
+              {children}
             </Flex>
           </DSAccordionContent>
         </Accordion>

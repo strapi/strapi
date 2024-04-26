@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
+import { useDocLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
 import { useTypedSelector } from '../../modules/hooks';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
@@ -236,6 +237,9 @@ const VersionInputRenderer = ({
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+  const {
+    edit: { components: componentsLayout },
+  } = useDocLayout();
 
   if (!visible) {
     return null;
@@ -328,31 +332,25 @@ const VersionInputRenderer = ({
     case 'blocks':
       return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'component':
-      return (
-        <ComponentInput
-          {...props}
-          hint={hint}
-          disabled={fieldIsDisabled}
-          renderLayout={(layoutProps) => {
-            // Components can only have one panel, so only save the first layout item
-            const [remainingFieldsLayout] = getRemaingFieldsLayout({
-              layout: [layoutProps.layout],
-              metadatas: configuration.components[props.attribute.component].metadatas,
-              fieldSizes,
-              schemaAttributes: components[props.attribute.component].attributes,
-            });
+      const { layout } = componentsLayout[props.attribute.component];
+      // Components can only have one panel, so only save the first layout item
+      const [remainingFieldsLayout] = getRemaingFieldsLayout({
+        layout: [layout],
+        metadatas: configuration.components[props.attribute.component].metadatas,
+        fieldSizes,
+        schemaAttributes: components[props.attribute.component].attributes,
+      });
 
-            return (
-              <ComponentLayout
-                {...layoutProps}
-                layout={[...layoutProps.layout, ...remainingFieldsLayout]}
-                renderInput={(inputProps) => (
-                  <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />
-                )}
-              />
-            );
-          }}
-        />
+      return (
+        <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled}>
+          <ComponentLayout
+            name={props.name}
+            layout={[...layout, ...remainingFieldsLayout]}
+            renderInput={(inputProps) => (
+              <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />
+            )}
+          />
+        </ComponentInput>
       );
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;

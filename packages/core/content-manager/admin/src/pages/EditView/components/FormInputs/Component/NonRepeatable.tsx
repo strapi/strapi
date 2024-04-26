@@ -6,10 +6,9 @@ import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import type { ComponentInputProps } from './Input';
 
-type NonRepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'> &
-  Required<Pick<ComponentInputProps, 'renderLayout'>>;
+type NonRepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
 
-const NonRepeatableComponent = ({ attribute, name, renderLayout }: NonRepeatableComponentProps) => {
+const NonRepeatableComponent = ({ attribute, name, children }: NonRepeatableComponentProps) => {
   const {
     edit: { components },
   } = useDocLayout();
@@ -33,7 +32,7 @@ const NonRepeatableComponent = ({ attribute, name, renderLayout }: NonRepeatable
         borderColor={isNested ? 'neutral200' : undefined}
       >
         <Flex direction="column" alignItems="stretch" gap={6}>
-          {renderLayout({ layout, name })}
+          {children}
         </Flex>
       </Box>
     </ComponentProvider>

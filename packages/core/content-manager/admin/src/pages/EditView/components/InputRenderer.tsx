@@ -9,10 +9,12 @@ import { useIntl } from 'react-intl';
 
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
+import { useDocLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
+import { ComponentLayout } from './FormInputs/Component/Layout';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from './FormInputs/NotAllowed';
 import { RelationsInput } from './FormInputs/Relations';
@@ -58,6 +60,9 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+  const {
+    edit: { components },
+  } = useDocLayout();
 
   if (!visible) {
     return null;
@@ -114,7 +119,14 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     case 'blocks':
       return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'component':
-      return <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled}>
+          <ComponentLayout
+            name={props.name}
+            layout={components[props.attribute.component].layout}
+          />
+        </ComponentInput>
+      );
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
