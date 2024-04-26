@@ -5,6 +5,7 @@ import {
   constants,
   isComponentSchema,
   isMediaAttribute,
+  hasRelationReordering,
 } from '../../content-types';
 import type { Visitor } from '../../traverse-entity';
 import { throwInvalidKey } from '../utils';
@@ -45,9 +46,8 @@ const throwUnrecognizedFields: Visitor = ({ key, attribute, path, schema, parent
     return;
   }
 
-  // allow special relation reordering keys
-  // TODO: Only toMany or all?
-  if (isRelationalAttribute(parent?.attribute) && RELATION_REORDERING_FIELDS.includes(key)) {
+  // allow special relation reordering keys in manyToX and XtoMany relations
+  if (hasRelationReordering(parent?.attribute) && RELATION_REORDERING_FIELDS.includes(key)) {
     return;
   }
 
