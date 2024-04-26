@@ -4,7 +4,7 @@ interface Options {
   allowMultipleLocales?: boolean;
 }
 
-const singleLocaleSchema = yup.string();
+const singleLocaleSchema = yup.string().nullable();
 
 const multipleLocaleSchema = yup.lazy((value) =>
   Array.isArray(value) ? yup.array().of(singleLocaleSchema.required()) : singleLocaleSchema

@@ -3,6 +3,7 @@ import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
+import { formatDocumentWithMetadata } from './utils/metadata';
 
 /**
  * Create a new document.
@@ -169,7 +170,6 @@ export default {
     const { model, id } = ctx.params;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -199,11 +199,14 @@ export default {
       }
 
       // If the requested locale doesn't exist, return an empty response
-      const { meta } = await documentMetadata.formatDocumentWithMetadata(
+      const { meta } = await formatDocumentWithMetadata(
+        permissionChecker,
         model,
+        // @ts-expect-error TODO: fix
         { id, locale, publishedAt: null },
         { availableLocales: true, availableStatus: false }
       );
+
       ctx.body = { data: {}, meta };
 
       return;
@@ -216,14 +219,13 @@ export default {
 
     // TODO: Count populated relations by permissions
     const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
   async create(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const [totalEntries, document] = await Promise.all([
@@ -233,7 +235,7 @@ export default {
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
     ctx.status = 201;
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
       availableStatus: false,
@@ -250,13 +252,12 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const updatedVersion = await updateDocument(ctx);
 
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedVersion);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion);
   },
 
   async clone(ctx: any) {
@@ -265,7 +266,6 @@ export default {
     const { body } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.create()) {
@@ -297,7 +297,7 @@ export default {
     const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
       availableStatus: false,
@@ -370,7 +370,6 @@ export default {
     const { body } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -406,7 +405,7 @@ export default {
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
   async bulkPublish(ctx: any) {
@@ -498,7 +497,6 @@ export default {
     } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -543,7 +541,7 @@ export default {
       ctx.body = await async.pipe(
         (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
-        (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+        (document) => formatDocumentWithMetadata(permissionChecker, model, document)
       )(document);
     });
   },
@@ -554,7 +552,6 @@ export default {
     const { body } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.discard()) {
@@ -585,7 +582,7 @@ export default {
     ctx.body = await async.pipe(
       (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
-      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+      (document) => formatDocumentWithMetadata(permissionChecker, model, document)
     )(document);
   },
 
