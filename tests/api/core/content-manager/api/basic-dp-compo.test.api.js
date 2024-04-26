@@ -247,7 +247,7 @@ describe('CM API - Basic + compo', () => {
     });
 
     // TODO: Implement bulk publish
-    test.skip('Can bulk publish product with compo - required', async () => {
+    test('Can bulk publish product with compo - required', async () => {
       const product = {
         name: 'Product 1',
         description: 'Product description',
@@ -266,7 +266,7 @@ describe('CM API - Basic + compo', () => {
         method: 'POST',
         url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/actions/bulkPublish`,
         body: {
-          ids: [res.body.documentId],
+          documentIds: [res.body.data.documentId],
         },
       });
 

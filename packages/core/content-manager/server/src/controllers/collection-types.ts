@@ -411,7 +411,7 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
-    const { ids } = body;
+    const { documentIds } = body;
 
     await validateBulkActionInput(body);
 
@@ -422,28 +422,27 @@ export default {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
-    const populate = await getService('populate-builder')(model)
-      .populateFromQuery(permissionQuery)
-      .populateDeep(Infinity)
-      .countRelations()
-      .build();
+    const { locale } = getDocumentLocaleAndStatus(body);
 
-    const entityPromises = ids.map((id: any) => documentManager.findOne(id, model, { populate }));
-    const entities = await Promise.all(entityPromises);
+    const documentLocales = await documentManager.findLocales(documentIds, model, {
+      locale,
+    });
 
-    for (const entity of entities) {
-      if (!entity) {
-        return ctx.notFound();
-      }
+    if (documentLocales.length === 0) {
+      return ctx.notFound();
+    }
 
-      if (permissionChecker.cannot.publish(entity)) {
+    for (const document of documentLocales) {
+      if (permissionChecker.cannot.publish(document)) {
         return ctx.forbidden();
       }
     }
 
-    // @ts-expect-error - publish many should not return null
-    const { count } = await documentManager.publishMany(entities, model);
+    const localeDocumentsIds = documentLocales
+      .filter((document) => !document.publishedAt)
+      .map((document) => document.documentId);
+
+    const { count } = await documentManager.publishMany(localeDocumentsIds, model, { locale });
     ctx.body = { count };
   },
 
@@ -451,7 +450,7 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
-    const { ids } = body;
+    const { documentIds } = body;
 
     await validateBulkActionInput(body);
 
@@ -462,26 +461,28 @@ export default {
       return ctx.forbidden();
     }
 
-    const permissionQuery = await permissionChecker.sanitizedQuery.publish(ctx.query);
-    const populate = await getService('populate-builder')(model)
-      .populateFromQuery(permissionQuery)
-      .build();
+    const { locale } = getDocumentLocaleAndStatus(body);
 
-    const entityPromises = ids.map((id: any) => documentManager.findOne(id, model, { populate }));
-    const entities = await Promise.all(entityPromises);
+    const documentLocales = await documentManager.findLocales(documentIds, model, {
+      locale,
+    });
 
-    for (const entity of entities) {
-      if (!entity) {
-        return ctx.notFound();
-      }
+    if (documentLocales.length === 0) {
+      return ctx.notFound();
+    }
 
-      if (permissionChecker.cannot.publish(entity)) {
+    for (const document of documentLocales) {
+      if (permissionChecker.cannot.unpublish(document)) {
         return ctx.forbidden();
       }
     }
 
-    // @ts-expect-error - unpublish many should not return null
-    const { count } = await documentManager.unpublishMany(entities, model);
+    const localeDocumentsIds = documentLocales
+      .filter((document) => !!document.publishedAt)
+      .map((document) => document.documentId);
+
+    const { count } = await documentManager.unpublishMany(localeDocumentsIds, model, { locale });
+
     ctx.body = { count };
   },
 
@@ -587,7 +588,7 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { query, body } = ctx.request;
-    const { ids } = body;
+    const { documentIds } = body;
 
     await validateBulkActionInput(body);
 
@@ -598,18 +599,32 @@ export default {
       return ctx.forbidden();
     }
 
-    // TODO: fix
     const permissionQuery = await permissionChecker.sanitizedQuery.delete(query);
+    const populate = await getService('populate-builder')(model)
+      .populateFromQuery(permissionQuery)
+      .build();
 
-    const idsWhereClause = { id: { $in: ids } };
-    const params = {
-      ...permissionQuery,
-      filters: {
-        $and: [idsWhereClause].concat(permissionQuery.filters || []),
-      },
-    };
+    const { locale } = getDocumentLocaleAndStatus(body);
 
-    const { count } = await documentManager.deleteMany(params, model);
+    const documentLocales = await documentManager.findLocales(documentIds, model, {
+      populate,
+      locale,
+    });
+
+    if (documentLocales.length === 0) {
+      return ctx.notFound();
+    }
+
+    for (const document of documentLocales) {
+      if (permissionChecker.cannot.delete(document)) {
+        return ctx.forbidden();
+      }
+    }
+
+    // We filter out documentsIds that maybe doesn't exist in a specific locale
+    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
+
+    const { count } = await documentManager.deleteMany(localeDocumentsIds, model, { locale });
 
     ctx.body = { count };
   },
