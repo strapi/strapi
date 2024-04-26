@@ -1,5 +1,6 @@
 import { async, errors } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
+import { pick } from 'lodash/fp';
 import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import { HistoryVersions } from '../../../../shared/contracts';
@@ -60,12 +61,13 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         return ctx.forbidden();
       }
 
-      const params: HistoryVersions.GetHistoryVersions.Request['query'] =
+      const query: HistoryVersions.GetHistoryVersions.Request['query'] =
         await permissionChecker.sanitizeQuery(ctx.query);
 
       const { results, pagination } = await getService(strapi, 'history').findVersionsPage({
-        ...params,
-        ...getValidPagination({ page: params.page, pageSize: params.pageSize }),
+        query,
+        state: { userAbility: ctx.state.userAbility },
+        ...getValidPagination({ page: query.page, pageSize: query.pageSize }),
       });
 
       const sanitizedResults = await async.map(results, async (version: any) => {
@@ -75,6 +77,9 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
             ...version.data,
             locale: version.locale.code,
           }),
+          createdBy: version.createdBy
+            ? pick(['id', 'firstname', 'lastname', 'username', 'email'], version.createdBy)
+            : undefined,
         };
       });
 

@@ -1,6 +1,6 @@
 import type { Core, Modules, UID, Data, Schema, Struct } from '@strapi/types';
 import { contentTypes, errors } from '@strapi/utils';
-import { omit, pick } from 'lodash/fp';
+import { omit } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
 
@@ -11,6 +11,7 @@ import {
   HistoryVersionDataResponse,
 } from '../../../../shared/contracts/history-versions';
 import { getSchemaAttributesDiff } from './utils';
+import { getService as getContentManagerService } from '../../utils';
 
 // Needed because the query engine doesn't return any types yet
 type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
@@ -251,18 +252,18 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
-    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']): Promise<{
+    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request): Promise<{
       results: HistoryVersions.HistoryVersionDataResponse[];
       pagination: HistoryVersions.Pagination;
     }> {
-      const locale = params.locale || (await getDefaultLocale());
+      const locale = params.query.locale || (await getDefaultLocale());
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
-          ...params,
+          ...params.query,
           where: {
             $and: [
-              { contentType: params.contentType },
-              ...(params.documentId ? [{ relatedDocumentId: params.documentId }] : []),
+              { contentType: params.query.contentType },
+              ...(params.query.documentId ? [{ relatedDocumentId: params.query.documentId }] : []),
               ...(locale ? [{ locale }] : []),
             ],
           },
@@ -314,9 +315,18 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                 let relatedEntry;
                 if (isNormalRelation) {
                   if ('documentId' in entry) {
-                    relatedEntry = await strapi
+                    const relation = await strapi
                       .documents(attributeSchema.target)
                       .findOne({ documentId: entry.documentId, locale: entry.locale || undefined });
+
+                    const permissionChecker = getContentManagerService('permission-checker').create(
+                      {
+                        userAbility: params.state.userAbility,
+                        model: attributeSchema.target,
+                      }
+                    );
+
+                    relatedEntry = await permissionChecker.sanitizeOutput(relation);
                   }
                   // For media assets, only the id is available, double check that we have it
                 } else if ('id' in entry) {
@@ -354,53 +364,59 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
       ): Promise<CreateHistoryVersion['data']> => {
         const entryWithRelations = await Object.entries(entry.schema).reduce(
           async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
-            /**
-             * Don't build the relations response object for relations to admin users,
-             * because it breaks the pickAllowedAdminUserFields sanitization, as it looks for the
-             */
-            if (
-              attributeSchema.type === 'relation' &&
-              attributeSchema.relation !== 'morphToOne' &&
-              attributeSchema.relation !== 'morphToMany' &&
-              attributeSchema.target === 'admin::user'
-            ) {
-              const attributeValue = entry.data[attributeKey];
-              const attributeValues = Array.isArray(attributeValue)
-                ? attributeValue
-                : [attributeValue];
+            const attributeValue = entry.data[attributeKey];
+            const attributeValues = Array.isArray(attributeValue)
+              ? attributeValue
+              : ([attributeValue] as EntryToPopulate[]);
 
-              return {
-                ...(await currentDataWithRelations),
-                [attributeKey]: (
-                  await Promise.all(
-                    attributeValues.map((userToPopulate) => {
-                      if (userToPopulate == null) {
-                        return null;
-                      }
-
-                      return strapi
-                        .query('admin::user')
-                        .findOne({ where: { id: userToPopulate.id } });
-                    })
-                  )
-                ).filter((user) => user != null),
-              };
-            }
-
-            // TODO: handle relations that are inside components
-            if (['relation', 'media'].includes(attributeSchema.type)) {
-              const attributeValue = entry.data[attributeKey];
-
-              const relationResponse = await buildRelationReponse(
-                (Array.isArray(attributeValue)
-                  ? attributeValue
-                  : [attributeValue]) as EntryToPopulate[],
-                attributeSchema
-              );
+            if (attributeSchema.type === 'media') {
+              const relationResponse = await buildRelationReponse(attributeValues, attributeSchema);
 
               return {
                 ...(await currentDataWithRelations),
                 [attributeKey]: relationResponse,
+              };
+            }
+
+            // TODO: handle relations that are inside components
+            if (
+              attributeSchema.type === 'relation' &&
+              attributeSchema.relation !== 'morphToOne' &&
+              attributeSchema.relation !== 'morphToMany'
+            ) {
+              /**
+               * Don't build the relations response object for relations to admin users,
+               * because pickAllowedAdminUserFields sanitizati
+               */
+              if (attributeSchema.target === 'admin::user') {
+                const sanitizedAdminUser = await Promise.all(
+                  attributeValues.map(async (userToPopulate) => {
+                    const user = await strapi
+                      .query('admin::user')
+                      .findOne({ where: { id: userToPopulate.id } });
+
+                    const permissionChecker = getContentManagerService('permission-checker').create(
+                      {
+                        userAbility: params.state.userAbility,
+                        model: 'admin::user',
+                      }
+                    );
+
+                    const sanitizedUser = await permissionChecker.sanitizeOutput(user);
+
+                    return sanitizedUser;
+                  })
+                );
+
+                return {
+                  ...(await currentDataWithRelations),
+                  [attributeKey]: sanitizedAdminUser,
+                };
+              }
+
+              return {
+                ...(await currentDataWithRelations),
+                [attributeKey]: await buildRelationReponse(attributeValues, attributeSchema),
               };
             }
 
@@ -413,7 +429,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         return entryWithRelations;
       };
 
-      const sanitizedResults = await Promise.all(
+      const formattedResults = await Promise.all(
         (results as HistoryVersionQueryResult[]).map(async (result) => {
           return {
             ...result,
@@ -421,19 +437,16 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             meta: {
               unknownAttributes: getSchemaAttributesDiff(
                 result.schema,
-                strapi.getModel(params.contentType).attributes
+                strapi.getModel(params.query.contentType).attributes
               ),
             },
             locale: result.locale ? localeDictionary[result.locale] : null,
-            createdBy: result.createdBy
-              ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
-              : undefined,
           };
         })
       );
 
       return {
-        results: sanitizedResults,
+        results: formattedResults,
         pagination,
       };
     },
