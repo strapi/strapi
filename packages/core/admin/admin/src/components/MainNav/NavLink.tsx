@@ -47,7 +47,9 @@ const LinkImpl = ({ children, ...props }: LinkProps) => {
 const TooltipImpl = ({ children, label, position = 'right' }: NavLink.TooltipProps) => {
   return (
     <Tooltip position={position} label={label}>
-      <Flex justifyContent="center">{children}</Flex>
+      <Flex justifyContent="center" width={7} height={7}>
+        {children}
+      </Flex>
     </Tooltip>
   );
 };
@@ -60,17 +62,7 @@ const IconImpl = ({ children }: { children: React.ReactNode }) => {
     return null;
   }
   return (
-    <Flex
-      paddingTop={`${8 / 16}rem`}
-      paddingBottom={`${8 / 16}rem`}
-      paddingLeft={`${12 / 16}rem`}
-      paddingRight={`${12 / 16}rem`}
-      height={`${34 / 16}rem`}
-      width={`${52 / 16}rem`}
-      justifyContent="center"
-      aria-hidden
-      as="span"
-    >
+    <Flex justifyContent="center" aria-hidden as="span" width={5} height={5}>
       {children}
     </Flex>
   );
