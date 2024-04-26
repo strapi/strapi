@@ -82,7 +82,7 @@ module.exports = async () => {
       subCategory: 'options',
     },
   ];
-  await strapi.admin.services.permission.actionProvider.registerMany(actions);
+  await strapi.service('admin::permission').actionProvider.registerMany(actions);
 };
 ```
 
@@ -136,7 +136,7 @@ module.exports = async () => {
       handler: (user) => ({ 'createdBy.id': user.id }),
     },
   ];
-  await strapi.admin.services.permission.conditionProvider.registerMany(conditions);
+  await strapi.service('admin::permission').conditionProvider.registerMany(conditions);
 };
 ```
 

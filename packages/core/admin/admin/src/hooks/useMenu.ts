@@ -4,7 +4,7 @@ import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 import { useSelector } from 'react-redux';
 
-import { useAuth, type Permission } from '../features/Auth';
+import { useAuth, type Permission, AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 
@@ -103,14 +103,14 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
 const getGeneralLinks = async (
   generalSectionRawLinks: MenuItem[],
   shouldUpdateStrapi: boolean = false,
-  checkUserHasPermissions: (permissions: Permission[]) => Promise<boolean>
+  checkUserHasPermissions: AuthContextValue['checkUserHasPermissions']
 ) => {
   const generalSectionLinksPermissions = await Promise.all(
     generalSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
   const authorizedGeneralSectionLinks = generalSectionRawLinks.filter(
-    (_, index) => generalSectionLinksPermissions[index]
+    (_, index) => generalSectionLinksPermissions[index].length > 0
   );
 
   const settingsLinkIndex = authorizedGeneralSectionLinks.findIndex(
@@ -130,14 +130,14 @@ const getGeneralLinks = async (
 
 const getPluginSectionLinks = async (
   pluginsSectionRawLinks: MenuItem[],
-  checkUserHasPermissions: (permissions: Permission[]) => Promise<boolean>
+  checkUserHasPermissions: AuthContextValue['checkUserHasPermissions']
 ) => {
   const pluginSectionLinksPermissions = await Promise.all(
     pluginsSectionRawLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
   );
 
   const authorizedPluginSectionLinks = pluginsSectionRawLinks.filter(
-    (_, index) => pluginSectionLinksPermissions[index]
+    (_, index) => pluginSectionLinksPermissions[index].length > 0
   );
 
   return authorizedPluginSectionLinks;

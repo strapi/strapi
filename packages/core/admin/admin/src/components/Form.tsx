@@ -127,7 +127,14 @@ interface FormProps<TFormValues extends FormValues = FormValues>
     | ((
         props: Pick<
           FormContextValue<TFormValues>,
-          'disabled' | 'errors' | 'isSubmitting' | 'modified' | 'values' | 'resetForm' | 'onChange'
+          | 'disabled'
+          | 'errors'
+          | 'isSubmitting'
+          | 'modified'
+          | 'values'
+          | 'resetForm'
+          | 'onChange'
+          | 'setErrors'
         >
       ) => React.ReactNode);
   method: 'POST' | 'PUT';
@@ -244,7 +251,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
             // We throw any other errors
             if (process.env.NODE_ENV !== 'production') {
               console.warn(
-                `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
+                `Warning: An unhandled error was caught during validation in <Form validationSchema />`,
                 err
               );
             }
@@ -441,6 +448,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
                 disabled,
                 onChange: handleChange,
                 ...state,
+                setErrors,
                 resetForm,
               })
             : props.children}
@@ -687,20 +695,38 @@ const isErrorMessageDescriptor = (object?: string | object): object is Translati
   );
 };
 
+/**
+ * Props for the Blocker component.
+ * @param onProceed Function to be called when the user confirms the action that triggered the blocker.
+ * @param onCancel Function to be called when the user cancels the action that triggered the blocker.
+ */
+interface BlockerProps {
+  onProceed?: () => void;
+  onCancel?: () => void;
+}
 /* -------------------------------------------------------------------------------------------------
  * Blocker
  * -----------------------------------------------------------------------------------------------*/
-const Blocker = () => {
+const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) => {
   const { formatMessage } = useIntl();
   const modified = useForm('Blocker', (state) => state.modified);
   const isSubmitting = useForm('Blocker', (state) => state.isSubmitting);
 
-  const blocker = useBlocker(
-    ({ currentLocation, nextLocation }) =>
-      !isSubmitting && modified && currentLocation.pathname !== nextLocation.pathname
-  );
+  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+    return (
+      !isSubmitting &&
+      modified &&
+      (currentLocation.pathname !== nextLocation.pathname ||
+        currentLocation.search !== nextLocation.search)
+    );
+  });
 
   if (blocker.state === 'blocked') {
+    const handleCancel = () => {
+      onCancel();
+      blocker.reset();
+    };
+
     return (
       <Dialog
         isOpen
@@ -708,7 +734,7 @@ const Blocker = () => {
           id: 'app.components.ConfirmDialog.title',
           defaultMessage: 'Confirmation',
         })}
-        onClose={() => blocker.reset()}
+        onClose={handleCancel}
       >
         <DialogBody>
           <Flex direction="column" gap={2}>
@@ -723,7 +749,7 @@ const Blocker = () => {
         </DialogBody>
         <DialogFooter
           startAction={
-            <Button onClick={() => blocker.reset()} variant="tertiary">
+            <Button onClick={handleCancel} variant="tertiary">
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
@@ -731,7 +757,13 @@ const Blocker = () => {
             </Button>
           }
           endAction={
-            <Button onClick={() => blocker.proceed()} variant="danger">
+            <Button
+              onClick={() => {
+                onProceed();
+                blocker.proceed();
+              }}
+              variant="danger"
+            >
               {formatMessage({
                 id: 'app.components.Button.confirm',
                 defaultMessage: 'Confirm',

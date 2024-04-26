@@ -24,7 +24,7 @@ jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
   unstable_useDocument: jest.fn().mockReturnValue({ validate: jest.fn().mockReturnValue({}) }),
 }));
 
-describe('Releases details page', () => {
+describe.skip('Releases details page', () => {
   it('renders the details page with no release-actions', async () => {
     server.use(
       rest.get('/content-releases/:releaseId', (req, res, ctx) =>

@@ -8,6 +8,9 @@ export interface DynamicZoneProperties<TComponentsUID extends UID.Component[]> {
   components: TComponentsUID;
 }
 
+/**
+ * Represents a dynamic-zone Strapi attribute along with its options
+ */
 export type DynamicZone<TComponentsUID extends UID.Component[] = UID.Component[]> = Intersect<
   [
     Attribute.OfType<'dynamiczone'>,

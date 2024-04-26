@@ -7,7 +7,7 @@ import { createLinkQuery } from '../../queries/link';
 /**
  * Create a Readable which will stream all the links from a Strapi instance
  */
-export const createLinksStream = (strapi: Core.LoadedStrapi): Readable => {
+export const createLinksStream = (strapi: Core.Strapi): Readable => {
   const uids = [...Object.keys(strapi.contentTypes), ...Object.keys(strapi.components)] as string[];
 
   // Async generator stream that returns every link from a Strapi instance

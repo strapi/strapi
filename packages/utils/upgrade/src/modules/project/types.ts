@@ -5,6 +5,8 @@ import type { Report } from '../report';
 
 export type FileExtension = `.${string}`;
 
+export type ProjectType = 'plugin' | 'application';
+
 export interface RunCodemodsOptions {
   dry?: boolean;
   onCodemodStartRunning?(codemod: Codemod.Codemod, index: number): Promise<void> | void;

@@ -22,6 +22,7 @@ const DEFAULT_FEATURES = {
     { name: 'audit-logs', options: { retentionDays: null } },
     { name: 'review-workflows' },
     { name: 'cms-content-releases' },
+    { name: 'cms-content-history', options: { retentionDays: 99999 } },
   ],
 };
 

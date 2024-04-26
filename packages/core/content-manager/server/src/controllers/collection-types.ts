@@ -232,6 +232,7 @@ export default {
     ]);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
+    ctx.status = 201;
     ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
@@ -660,8 +661,15 @@ export default {
       return ctx.forbidden();
     }
 
-    // @ts-expect-error - ids are not in .find
-    const entities = await documentManager.findMany({ ids, locale }, model);
+    const entities = await documentManager.findMany(
+      {
+        filters: {
+          id: ids,
+        },
+        locale,
+      },
+      model
+    );
 
     if (!entities) {
       return ctx.notFound();

@@ -23,6 +23,8 @@ import { Menu } from '../hooks/useMenu';
 import { usePersistentState } from '../hooks/usePersistentState';
 import { getDisplayName } from '../utils/users';
 
+import { NavBrand as NewNavBrand } from './MainNav/NavBrand';
+
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
   position: absolute;
@@ -105,23 +107,30 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
   return (
     <MainNav condensed={condensed}>
-      <NavBrand
-        as={RouterNavLink}
-        workplace={formatMessage({
-          id: 'app.components.LeftMenu.navbrand.workplace',
-          defaultMessage: 'Workplace',
-        })}
-        title={menuTitle}
-        icon={
-          <img
-            src={menu.custom?.url || menu.default}
-            alt={formatMessage({
-              id: 'app.components.LeftMenu.logo.alt',
-              defaultMessage: 'Application logo',
-            })}
-          />
-        }
-      />
+      {condensed ? (
+        /**
+         * TODO: remove the conditional rendering once the new Main nav is fully implemented
+         */
+        <NewNavBrand />
+      ) : (
+        <NavBrand
+          as={RouterNavLink}
+          workplace={formatMessage({
+            id: 'app.components.LeftMenu.navbrand.workplace',
+            defaultMessage: 'Workplace',
+          })}
+          title={menuTitle}
+          icon={
+            <img
+              src={menu.custom?.url || menu.default}
+              alt={formatMessage({
+                id: 'app.components.LeftMenu.logo.alt',
+                defaultMessage: 'Application logo',
+              })}
+            />
+          }
+        />
+      )}
 
       <Divider />
 

@@ -25,7 +25,9 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
     throw new NotFoundError();
   }
 
-  const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
+  const pm = strapi
+    .service('admin::permission')
+    .createPermissionsManager({ ability, action, model });
 
   if (pm.ability.cannot(pm.action, pm.toSubject(doc))) {
     throw new ForbiddenError();
@@ -47,7 +49,7 @@ module.exports = {
 
     const { email, username } = body;
 
-    const pm = strapi.admin.services.permission.createPermissionsManager({
+    const pm = strapi.service('admin::permission').createPermissionsManager({
       ability: userAbility,
       action: ACTIONS.create,
       model: userModel,

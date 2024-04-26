@@ -10,7 +10,7 @@ export default {
   async findOne(ctx: Context) {
     const { id } = ctx.params;
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });
@@ -48,7 +48,7 @@ export default {
   },
 
   async find(ctx: Context) {
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });
@@ -89,14 +89,14 @@ export default {
 
     const folder = await folderService.create(body, { user });
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });
 
-    ctx.body = {
+    ctx.created({
       data: await permissionsManager.sanitizeOutput(folder),
-    };
+    });
   },
 
   async update(ctx: Context) {
@@ -104,7 +104,7 @@ export default {
     const { user } = ctx.state;
     const { body } = ctx.request;
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });

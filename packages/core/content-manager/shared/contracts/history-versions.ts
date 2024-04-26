@@ -1,4 +1,4 @@
-import type { Data, UID } from '@strapi/types';
+import type { Data, Struct, UID } from '@strapi/types';
 import { type errors } from '@strapi/utils';
 
 /**
@@ -12,10 +12,11 @@ export interface CreateHistoryVersion {
   locale: string | null;
   status: 'draft' | 'published' | 'modified' | null;
   data: Record<string, unknown>;
-  schema: Record<string, unknown>;
+  schema: Struct.SchemaAttributes;
+  componentsSchemas: Record<`${string}.${string}`, Struct.SchemaAttributes>;
 }
 
-interface Locale {
+export interface Locale {
   name: string;
   code: string;
 }
@@ -31,10 +32,10 @@ export interface HistoryVersionDataResponse extends Omit<CreateHistoryVersion, '
     email: string;
   };
   locale: Locale | null;
-  meta?: {
-    unknownAttributes?: {
-      added: Record<string, unknown>;
-      removed: Record<string, unknown>;
+  meta: {
+    unknownAttributes: {
+      added: Struct.SchemaAttributes;
+      removed: Struct.SchemaAttributes;
     };
   };
 }
@@ -67,6 +68,31 @@ export declare namespace GetHistoryVersions {
         data: HistoryVersionDataResponse[];
         meta: {
           pagination: Pagination;
+        };
+        error?: never;
+      }
+    | {
+        data?: never;
+        meta?: never;
+        error: errors.ApplicationError;
+      };
+}
+
+export declare namespace RestoreHistoryVersion {
+  export interface Request {
+    params: {
+      versionId: Data.ID;
+      contentType: UID.ContentType;
+    };
+    body: {
+      contentType: UID.ContentType;
+    };
+  }
+
+  export type Response =
+    | {
+        data: {
+          documentId: HistoryVersionDataResponse['id'];
         };
         error?: never;
       }
