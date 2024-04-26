@@ -166,7 +166,7 @@ const isMediaAttribute = (attribute?: Attribute) => attribute?.type === 'media';
 const isRelationalAttribute = (attribute?: Attribute): attribute is RelationalAttribute =>
   attribute?.type === 'relation';
 
-const HAS_RELATION_REORDERING = ['manyToMany', 'manyToOne'];
+const HAS_RELATION_REORDERING = ['manyToMany', 'manyToOne', 'oneToMany'];
 const hasRelationReordering = (attribute?: Attribute) =>
   isRelationalAttribute(attribute) && HAS_RELATION_REORDERING.includes(attribute.relation);
 
