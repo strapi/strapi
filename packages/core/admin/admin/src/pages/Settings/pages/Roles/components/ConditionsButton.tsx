@@ -42,7 +42,7 @@ const ButtonContainer = styled(Box)<ButtonContainerProps>`
       left: -10px;
       width: 6px;
       height: 6px;
-      border-radius: ${20 / 16}rem;;
+      border-radius: 2rem;
       background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
     }
   `}

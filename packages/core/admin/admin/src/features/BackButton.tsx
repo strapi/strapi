@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Link, LinkProps } from '@strapi/design-system/v2';
+import { Link, LinkProps } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';

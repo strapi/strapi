@@ -4,7 +4,7 @@
  *
  */
 import { Box, Flex, ModalHeader, Typography } from '@strapi/design-system';
-import { Breadcrumbs, Crumb, Link } from '@strapi/design-system/v2';
+import { Breadcrumbs, Crumb, Link } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';

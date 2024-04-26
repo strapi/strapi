@@ -22,7 +22,7 @@ import { getTrad } from '../../utils';
 import { UploadProgress } from '../UploadProgress';
 
 const UploadProgressWrapper = styled.div`
-  height: ${88 / 16}rem;
+  height: 8.8rem;
   width: 100%;
 `;
 

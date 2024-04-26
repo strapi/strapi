@@ -8,7 +8,7 @@ import {
   PageLink,
   Pagination as PaginationImpl,
   PreviousLink,
-} from '@strapi/design-system/v2';
+} from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';

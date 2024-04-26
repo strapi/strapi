@@ -130,7 +130,7 @@ const EditorStylesContainer = styled.div<{ disabled?: boolean; isExpandMode?: bo
 
   .CodeMirror {
     /* Set height, width, borders, and global font properties here */
-    font-size: ${14 / 16}rem;
+    font-size: 1.4rem;
     height: ${({ isExpandMode }) =>
       isExpandMode
         ? '100%'
