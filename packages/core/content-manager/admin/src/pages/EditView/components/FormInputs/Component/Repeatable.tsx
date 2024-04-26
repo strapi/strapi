@@ -39,7 +39,8 @@ import type { Schema } from '@strapi/types';
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
 
-interface RepeatableComponentProps extends Omit<ComponentInputProps, 'label' | 'required'> {}
+type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'> &
+  Required<Pick<ComponentInputProps, 'renderLayout'>>;
 
 const RepeatableComponent = ({
   attribute,

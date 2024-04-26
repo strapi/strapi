@@ -6,7 +6,8 @@ import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import type { ComponentInputProps } from './Input';
 
-interface NonRepeatableComponentProps extends Omit<ComponentInputProps, 'required' | 'label'> {}
+type NonRepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'> &
+  Required<Pick<ComponentInputProps, 'renderLayout'>>;
 
 const NonRepeatableComponent = ({ attribute, name, renderLayout }: NonRepeatableComponentProps) => {
   const {
