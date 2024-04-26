@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
+import { Cog, PuzzlePiece, ShoppingCart } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 import { useSelector } from 'react-redux';
 
-import { useAuth, type Permission, AuthContextValue } from '../features/Auth';
+import { useAuth, AuthContextValue } from '../features/Auth';
 import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
 import { selectAdminPermissions } from '../selectors';
 
@@ -27,7 +27,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
       {
-        icon: Puzzle,
+        icon: PuzzlePiece,
         intlLabel: {
           id: 'global.plugins',
           defaultMessage: 'Plugins',

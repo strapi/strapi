@@ -53,8 +53,8 @@ describe('Document Service', () => {
       });
 
       // All locales should have been discarded
-      expect(result.versions.length).toBe(3);
-      result.versions.forEach((version) => {
+      expect(result.entries.length).toBe(3);
+      result.entries.forEach((version) => {
         expect(version.publishedAt).toBeNull();
         // The draft title should have been discarded
         expect(version.title).not.toBe('Draft Article');
@@ -78,8 +78,8 @@ describe('Document Service', () => {
       });
 
       // Only english locale should have been discarded
-      expect(result.versions.length).toBe(1);
-      result.versions.forEach((version) => {
+      expect(result.entries.length).toBe(1);
+      result.entries.forEach((version) => {
         expect(version.locale).toBe('en');
         expect(version.publishedAt).toBeNull();
         // The draft title should have been discarded
@@ -109,8 +109,8 @@ describe('Document Service', () => {
       });
 
       // 'en' and 'nl' drafts should have been discarded
-      expect(result.versions.length).toBe(2);
-      result.versions.forEach((version) => {
+      expect(result.entries.length).toBe(2);
+      result.entries.forEach((version) => {
         expect(localesToDiscard).toContain(version.locale);
         expect(version.publishedAt).toBeNull();
         // The draft title should have been discarded

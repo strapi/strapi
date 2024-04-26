@@ -6,7 +6,14 @@
 
 import React, { useState } from 'react';
 
-import { Box, Button, Flex, Option, Popover, Select } from '@strapi/design-system';
+import {
+  Box,
+  Button,
+  Flex,
+  SingleSelectOption,
+  Popover,
+  SingleSelect,
+} from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -193,7 +200,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
       <form onSubmit={handleSubmit}>
         <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
           <Box>
-            <Select
+            <SingleSelect
               aria-label={formatMessage({
                 id: 'app.utils.select-field',
                 defaultMessage: 'Select field',
@@ -205,15 +212,15 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
             >
               {displayedFilters.map((filter) => {
                 return (
-                  <Option key={filter.name} value={filter.name}>
+                  <SingleSelectOption key={filter.name} value={filter.name}>
                     {filter.metadatas.label}
-                  </Option>
+                  </SingleSelectOption>
                 );
               })}
-            </Select>
+            </SingleSelect>
           </Box>
           <Box>
-            <Select
+            <SingleSelect
               aria-label={formatMessage({
                 id: 'app.utils.select-filter',
                 defaultMessage: 'Select filter',
@@ -225,12 +232,12 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
             >
               {getFilterList(appliedFilter).map((option) => {
                 return (
-                  <Option key={option.value} value={option.value}>
+                  <SingleSelectOption key={option.value} value={option.value}>
                     {formatMessage(option.intlLabel)}
-                  </Option>
+                  </SingleSelectOption>
                 );
               })}
-            </Select>
+            </SingleSelect>
           </Box>
           <Box>
             <FilterValueInput

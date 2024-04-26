@@ -10,7 +10,6 @@ import {
   Checkbox,
   DatePicker,
   DateTimePicker,
-  Icon,
   JSONInput,
   NumberInput,
   SingleSelect,
@@ -232,8 +231,8 @@ const GenericInput = ({
                 : json;
             onChange({ target: { name, value } }, false);
           }}
-          minHeight={`${252 / 16}rem`}
-          maxHeight={`${504 / 16}rem`}
+          minHeight="25.2rem"
+          maxHeight="50.4rem"
         />
       );
     }
@@ -427,11 +426,7 @@ const GenericInput = ({
               }}
               type="button"
             >
-              {showPassword ? (
-                <Icon as={Eye} color="neutral500" />
-              ) : (
-                <Icon as={EyeStriked} color="neutral500" />
-              )}
+              {showPassword ? <Eye fill="neutral500" /> : <EyeStriked fill="neutral500" />}
             </button>
           }
           label={label}

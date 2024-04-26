@@ -46,10 +46,12 @@ export class SingleTypeService extends CoreService implements Core.CoreAPI.Servi
     const documentId = await this.getDocumentId();
     if (!documentId) return { deletedEntries: 0 };
 
-    return strapi.documents(uid).delete({
+    const { entries } = await strapi.documents(uid).delete({
       ...this.getFetchParams(params),
       documentId,
     });
+
+    return { deletedEntries: entries.length };
   }
 }
 

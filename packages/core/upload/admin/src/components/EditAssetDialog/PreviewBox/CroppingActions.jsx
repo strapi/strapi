@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Flex, FocusTrap, IconButton, VisuallyHidden } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system/v2';
+import { Menu } from '@strapi/design-system';
 import { Check, Cross } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

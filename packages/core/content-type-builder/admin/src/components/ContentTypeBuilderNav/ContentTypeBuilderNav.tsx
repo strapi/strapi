@@ -1,14 +1,15 @@
 import { Fragment } from 'react';
 
-import { Box, Icon, TextButton } from '@strapi/design-system';
 import {
+  Box,
+  TextButton,
   SubNav,
   SubNavHeader,
   SubNavLink,
   SubNavLinkSection,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/v2';
+} from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -88,7 +89,7 @@ export const ContentTypeBuilderNav = () => {
               <Box paddingLeft={7}>
                 <TextButton
                   onClick={section.customLink.onClick}
-                  startIcon={<Icon as={Plus} width={`${8 / 16}rem`} height={`${8 / 16}rem`} />}
+                  startIcon={<Plus width="0.8rem" height="0.8rem" />}
                   marginTop={2}
                 >
                   {formatMessage({
