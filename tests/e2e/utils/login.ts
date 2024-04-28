@@ -2,13 +2,17 @@ import type { Page } from '@playwright/test';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, URL_ROOT } from '../constants';
 
 /**
- * Log in to an e2e test app
+ * Clear cookoies, refresh, and log in to an e2e test app, landing on the admin home page
  * it is often flaky, resulting in an infinite spinning loader, so it will attempt several retries before failing
  */
 // TODO: solve why this is so flaky
 export const login = async ({ page, rememberMe = false }: { page: Page; rememberMe?: boolean }) => {
   const maxRetries = 5;
   for (let i = 0; i < maxRetries; i++) {
+    // sometimes it gets stuck on the login screen with an invalid session and can't log in
+    await page.context().clearCookies();
+    await page.reload({ waitUntil: 'networkidle' });
+
     // go to the root page which should be the logged in
     await page.goto(URL_ROOT, { waitUntil: 'networkidle' });
 
