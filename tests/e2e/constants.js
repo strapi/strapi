@@ -1,3 +1,5 @@
+'use strict';
+
 const { CUSTOM_TRANSFER_TOKEN_ACCESS_KEY } = require('./app-template/template/src/constants');
 
 // NOTE: anything included here needs to be included in all test datasets exports
@@ -41,9 +43,14 @@ const ALLOWED_CONTENT_TYPES = [
 const ADMIN_EMAIL_ADDRESS = 'test@testing.com';
 const ADMIN_PASSWORD = 'Testing123!';
 
+const TITLE_LOGIN = 'Strapi Admin';
+const TITLE_HOME = 'Homepage | Strapi';
+
 module.exports = {
   ADMIN_EMAIL_ADDRESS,
   ADMIN_PASSWORD,
   ALLOWED_CONTENT_TYPES,
   CUSTOM_TRANSFER_TOKEN_ACCESS_KEY,
+  TITLE_LOGIN,
+  TITLE_HOME,
 };

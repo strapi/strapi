@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../constants';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME } from '../constants';
 
 /**
  * Log in to an e2e test app
@@ -10,6 +10,7 @@ export const login = async ({ page, rememberMe = false }: { page: Page; remember
   const maxRetries = 5;
   for (let i = 0; i < maxRetries; i++) {
     try {
+      // TODO: nav to login page and check title
       await page.getByLabel('Email').fill(ADMIN_EMAIL_ADDRESS);
       await page
         .getByLabel('Password*', {
@@ -22,7 +23,7 @@ export const login = async ({ page, rememberMe = false }: { page: Page; remember
       }
       await page.getByRole('button', { name: 'Login' }).click();
       await page.waitForTimeout(2000);
-      if ((await page.title()) !== 'Homepage | Strapi') {
+      if ((await page.title()) !== TITLE_HOME) {
         throw new Error('Login failed to load homepage');
       }
       break; // If the page loads successfully, break the loop
@@ -35,7 +36,7 @@ export const login = async ({ page, rememberMe = false }: { page: Page; remember
       await page.reload();
 
       // if it actually did log in, proceed instead of trying again
-      if ((await page.title()) === 'Homepage | Strapi') {
+      if ((await page.title()) === TITLE_HOME) {
         break;
       }
     }
