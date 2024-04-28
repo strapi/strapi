@@ -22,7 +22,7 @@ export const login = async ({ page, rememberMe = false }: { page: Page; remember
       }
       await page.getByRole('button', { name: 'Login' }).click();
       await page.waitForTimeout(5000);
-      if ((await page.title()) !== 'Homepage | Strapi') {
+      if ((await page.title()) !== 'Homepage') {
         throw new Error('Login failed to load homepage');
       }
       break; // If the page loads successfully, break the loop
@@ -35,7 +35,7 @@ export const login = async ({ page, rememberMe = false }: { page: Page; remember
       await page.reload();
 
       // if it actually did log in, proceed instead of trying again
-      if ((await page.title()) === 'Homepage | Strapi') {
+      if ((await page.title()) === 'Homepage') {
         break;
       }
     }
