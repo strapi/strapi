@@ -5,7 +5,6 @@ import { login } from '../../utils/login';
 test.describe('List view', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
     await login({ page });
   });
 

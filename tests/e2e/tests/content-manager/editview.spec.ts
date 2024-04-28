@@ -6,7 +6,6 @@ import { findAndClose } from '../../utils/shared';
 test.describe('Edit View', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
     await login({ page });
   });
 

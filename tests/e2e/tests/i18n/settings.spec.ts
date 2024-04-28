@@ -8,7 +8,6 @@ test.describe('Settings', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await prunePermissions(page);
-    await page.goto('/admin');
     await login({ page });
   });
 

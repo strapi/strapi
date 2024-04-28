@@ -15,12 +15,12 @@ export const navToHeader = async (page: Page, navItems: string[], headerText: st
     // BUT if we don't match exact it conflicts with "Advanceed Settings"
     // As a workaround, we implement our own startsWith with page.locator
     const item = page.locator(`role=link[name^="${navItem}"]`);
-    await expect(item).toBeVisible();
+    await item.waitFor({ state: 'visible' });
     await Promise.all([item.click(), page.waitForLoadState('networkidle')]);
   }
 
   const header = page.getByRole('heading', { name: headerText, exact: true });
-  await expect(header).toBeVisible();
+  await header.waitFor({ state: 'visible' });
   return header;
 };
 

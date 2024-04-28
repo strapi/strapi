@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { navToHeader } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
@@ -22,9 +22,12 @@ const createAPIToken = async (page, tokenName, duration, type) => {
 };
 
 test.describe('API Tokens', () => {
-  test.beforeEach(async ({ page }) => {
+  let page: Page;
+
+  // For some reason, logging in after each token is extremely flaky, so we'll just do it once
+  test.beforeAll(async ({ browser }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
+    page = await browser.newPage();
     await login({ page });
   });
 
@@ -37,16 +40,17 @@ test.describe('API Tokens', () => {
     ['unlimited token', 'Unlimited', 'Full access'],
   ];
   for (const [name, duration, type] of testCases) {
-    test(`A user should be able to create a ${name}`, async ({ page }) => {
+    test(`A user should be able to create a ${name}`, async ({}) => {
       await createAPIToken(page, name, duration, type);
     });
   }
 
-  test('Created tokens list page should be correct', async ({ page }) => {
+  test('Created tokens list page should be correct', async ({}) => {
     await createAPIToken(page, 'my test token', 'unlimited', 'Full access');
     await navToHeader(page, ['Settings', 'API Tokens'], 'API Tokens');
 
     const row = page.getByRole('gridcell', { name: 'my test token', exact: true });
     await expect(row).toBeVisible();
+    // await expect(row.getByText(/\d+ (second|minute)s? ago/)).toBeVisible();
   });
 });
