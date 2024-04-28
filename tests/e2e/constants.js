@@ -46,6 +46,8 @@ const ADMIN_PASSWORD = 'Testing123!';
 const TITLE_LOGIN = 'Strapi Admin';
 const TITLE_HOME = 'Homepage | Strapi';
 
+const URL_ROOT = '/';
+
 module.exports = {
   ADMIN_EMAIL_ADDRESS,
   ADMIN_PASSWORD,
@@ -53,4 +55,5 @@ module.exports = {
   CUSTOM_TRANSFER_TOKEN_ACCESS_KEY,
   TITLE_LOGIN,
   TITLE_HOME,
+  URL_ROOT,
 };
