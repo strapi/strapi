@@ -10,10 +10,10 @@ export const login = async ({ page, rememberMe = false }: { page: Page; remember
   const maxRetries = 5;
   for (let i = 0; i < maxRetries; i++) {
     // go to the root page which should be the logged in
-    await page.goto(URL_ROOT);
+    await page.goto(URL_ROOT, { waitUntil: 'networkidle' });
 
     // ...unless we already logged in, and are redirected to the home page now
-    if (i > 0 && (await page.title()) === TITLE_HOME) {
+    if ((await page.title()) === TITLE_HOME) {
       break; // If the page loads successfully, break the loop
     }
 

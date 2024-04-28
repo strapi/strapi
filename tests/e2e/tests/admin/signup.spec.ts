@@ -28,7 +28,7 @@ test.describe('Sign Up', () => {
     await resetDatabaseAndImportDataFromPath('without-admin.tar', (cts) =>
       cts.filter((ct) => ct !== 'plugin::i18n.locale')
     );
-    await page.goto('/admin');
+    await page.goto('/admin', { waitUntil: 'networkidle' });
     await fillValidSignUpForm({ page });
   });
 
@@ -96,7 +96,10 @@ test.describe('Sign Up', () => {
   test('a user should be able to signup when the strapi instance starts fresh', async ({
     page,
   }) => {
-    await page.getByRole('button', { name: "Let's start" }).click();
+    await Promise.all([
+      page.waitForLoadState('networkidle'),
+      page.getByRole('button', { name: "Let's start" }).click(),
+    ]);
 
     await expect(page).toHaveTitle(TITLE_HOME);
   });
