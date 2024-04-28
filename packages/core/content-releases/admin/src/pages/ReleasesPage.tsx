@@ -30,9 +30,10 @@ import {
   TabPanels,
   Tabs,
   Typography,
+  Link,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { EmptyDocuments, Plus } from '@strapi/icons';
+import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -113,7 +114,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
             target: sectionTitle,
           }
         )}
-        icon={<EmptyDocuments width="10rem" />}
+        icon={<EmptyDocuments width="16rem" />}
       />
     );
   }

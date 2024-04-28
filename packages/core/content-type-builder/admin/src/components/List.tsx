@@ -14,7 +14,8 @@ import {
   Tr,
   Typography,
 } from '@strapi/design-system';
-import { EmptyDocuments, Plus } from '@strapi/icons';
+import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { useDataManager } from '../hooks/useDataManager';
@@ -93,7 +94,7 @@ export const List = ({
                   defaultMessage: 'Create your first Collection-Type',
                 })}
                 hasRadius
-                icon={<EmptyDocuments width="10rem" />}
+                icon={<EmptyDocuments width="16rem" />}
               />
             </Td>
           </Tr>
@@ -148,7 +149,7 @@ export const List = ({
                       }
                 )}
                 hasRadius
-                icon={<EmptyDocuments width="10rem" />}
+                icon={<EmptyDocuments width="16rem" />}
               />
             </Td>
           </Tr>

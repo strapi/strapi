@@ -1,6 +1,6 @@
 {
   "name": "@strapi/review-workflows",
-  "version": "5.0.0-beta.4",
+  "version": "5.0.0-beta.5",
   "description": "Review workflows for your content",
   "repository": {
     "type": "git",
@@ -53,8 +53,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "1.18.0",
-    "@strapi/icons": "1.16.0",
+    "@strapi/design-system": "2.0.0-beta.2",
+    "@strapi/icons": "2.0.0-beta.2",
     "@strapi/utils": "5.0.0-beta.1",
     "fractional-indexing": "3.2.0",
     "react-dnd": "16.0.1",
@@ -65,11 +65,11 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.0.0-beta.4",
+    "@strapi/admin": "5.0.0-beta.5",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/plugin-content-manager": "5.0.0-beta.4",
-    "@strapi/types": "5.0.0-beta.4",
-    "@strapi/utils": "5.0.0-beta.4",
+    "@strapi/plugin-content-manager": "5.0.0-beta.5",
+    "@strapi/types": "5.0.0-beta.5",
+    "@strapi/utils": "5.0.0-beta.5",
     "@testing-library/react": "14.0.0",
     "msw": "1.3.0",
     "react": "^18.2.0",

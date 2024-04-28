@@ -19,7 +19,7 @@ const StageColumn = (props: StageColumnProps) => {
   const { themeColorName } = getStageColorByHex(color) ?? {};
 
   return (
-    <Flex alignItems="center" gap={2} maxWidth={`${300 / 16}rem`}>
+    <Flex alignItems="center" gap={2} maxWidth="30rem">
       <Box
         height={2}
         background={color}

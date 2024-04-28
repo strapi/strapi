@@ -16,7 +16,7 @@ const CardDragPreview = ({ label, isSibling = false }: CardDragPreviewProps) => 
       hasRadius
       justifyContent="space-between"
       isSibling={isSibling}
-      max-height={`${32 / 16}rem`}
+      max-height={`3.2rem`}
       maxWidth="min-content"
     >
       <Flex gap={3}>
@@ -58,8 +58,8 @@ const DragButton = styled(ActionBox)`
   border-right: 1px solid ${({ theme }) => theme.colors.primary200};
 
   svg {
-    width: ${12 / 16}rem;
-    height: ${12 / 16}rem;
+    width: 1.2rem;
+    height: 1.2rem;
   }
 `;
 
@@ -68,8 +68,8 @@ const FieldContainer = styled(Flex)<{ isSibling: boolean }>`
     ${({ theme, isSibling }) => (isSibling ? theme.colors.neutral150 : theme.colors.primary200)};
 
   svg {
-    width: ${10 / 16}rem;
-    height: ${10 / 16}rem;
+    width: 1rem;
+    height: 1rem;
 
     path {
       fill: ${({ theme, isSibling }) => (isSibling ? undefined : theme.colors.primary600)};
@@ -78,7 +78,7 @@ const FieldContainer = styled(Flex)<{ isSibling: boolean }>`
 `;
 
 const TypographyMaxWidth = styled(Typography)`
-  max-width: ${72 / 16}rem;
+  max-width: 7.2rem;
 `;
 
 export { CardDragPreview };

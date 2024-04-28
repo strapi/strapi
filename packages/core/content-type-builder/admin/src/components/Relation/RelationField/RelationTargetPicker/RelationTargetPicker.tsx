@@ -1,4 +1,4 @@
-import { Menu } from '@strapi/design-system/v2';
+import { Menu } from '@strapi/design-system';
 import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
@@ -76,7 +76,7 @@ export const RelationTargetPicker = ({
  */
 const MenuTrigger = styled(Menu.Trigger)`
   svg {
-    width: ${6 / 16}rem;
-    height: ${4 / 16}rem;
+    width: 0.6rem;
+    height: 0.4rem;
   }
 `;

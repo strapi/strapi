@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Breadcrumbs as BaseBreadcrumbs, Crumb, CrumbLink } from '@strapi/design-system/v2';
+import { Breadcrumbs as BaseBreadcrumbs, Crumb, CrumbLink } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';

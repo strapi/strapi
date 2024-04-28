@@ -75,7 +75,7 @@ export interface Attribute<TKind extends Kind = Kind> {
  *
  * @example
  * ```typescript
- * import type { Schema } from '@strapi/utils';
+ * import type { Schema } from '@strapi/types';
  *
  * // An attribute of type 'boolean'
  * type BooleanAttribute = Schema.Attribute.OfType<'boolean'>;

@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { EmptyDocuments, Plus } from '@strapi/icons';
+import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
@@ -212,7 +212,7 @@ const ListView = () => {
                     })}
                   </LinkButton>
                 }
-                icon={<EmptyDocuments width="10rem" />}
+                icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({
                   id: 'Settings.transferTokens.addFirstToken',
                   defaultMessage: 'Add your first Transfer Token',
@@ -221,7 +221,7 @@ const ListView = () => {
             ) : null}
             {!canCreate && transferTokens.length === 0 ? (
               <EmptyStateLayout
-                icon={<EmptyDocuments width="10rem" />}
+                icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({
                   id: 'Settings.transferTokens.emptyStateLayout',
                   defaultMessage: 'You don’t have any content yet...',

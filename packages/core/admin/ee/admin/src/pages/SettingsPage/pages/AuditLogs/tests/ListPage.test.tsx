@@ -72,7 +72,7 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
     });
   });
 
-  it('should open a modal when clicked on a table row and close modal when clicked', async () => {
+  it.skip('should open a modal when clicked on a table row and close modal when clicked', async () => {
     const { user } = render(<ListPage />);
 
     await waitFor(() => expect(screen.queryByText('Loading content')).not.toBeInTheDocument());

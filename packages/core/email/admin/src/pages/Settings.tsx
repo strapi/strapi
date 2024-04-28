@@ -9,12 +9,12 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
-  Option,
-  Select,
+  SingleSelectOption,
+  SingleSelect,
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { Envelop } from '@strapi/icons';
+import { Mail } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
 import styled from 'styled-components';
@@ -229,7 +229,7 @@ const SettingsPage = () => {
                     </GridItem>
 
                     <GridItem col={6} s={12}>
-                      <Select
+                      <SingleSelect
                         name="email-provider"
                         label={formatMessage({
                           id: 'email.Settings.email.plugin.label.provider',
@@ -238,8 +238,10 @@ const SettingsPage = () => {
                         disabled
                         value={data.provider}
                       >
-                        <Option value={data.provider}>{data.provider}</Option>
-                      </Select>
+                        <SingleSelectOption value={data.provider}>
+                          {data.provider}
+                        </SingleSelectOption>
+                      </SingleSelect>
                     </GridItem>
                   </Grid>
                 </Flex>
@@ -293,7 +295,7 @@ const SettingsPage = () => {
                       loading={mutation.isLoading}
                       disabled={!isTestAddressValid}
                       type="submit"
-                      startIcon={<Envelop />}
+                      startIcon={<Mail />}
                     >
                       {formatMessage({
                         id: 'email.Settings.email.plugin.button.test-email',

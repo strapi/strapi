@@ -36,13 +36,6 @@ describe('<Input />', () => {
     } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
       .c0 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
@@ -76,6 +69,13 @@ describe('<Input />', () => {
         justify-content: space-between;
       }
 
+      .c1 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c2 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -90,13 +90,13 @@ describe('<Input />', () => {
       .c5 {
         border: none;
         border-radius: 4px;
-        padding-bottom: 0.65625rem;
+        padding-bottom: 1rem;
         padding-left: 16px;
         padding-right: 16px;
-        padding-top: 0.65625rem;
+        padding-top: 1rem;
         color: #32324d;
         font-weight: 400;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
         display: block;
         width: 100%;
         background: inherit;
