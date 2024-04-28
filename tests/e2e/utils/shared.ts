@@ -16,7 +16,7 @@ export const navToHeader = async (page: Page, navItems: string[], headerText: st
     // As a workaround, we implement our own startsWith with page.locator
     const item = page.locator(`role=link[name^="${navItem}"]`);
     await expect(item).toBeVisible();
-    await item.click();
+    await Promise.all([item.click(), page.waitForLoadState('networkidle')]);
   }
 
   const header = page.getByRole('heading', { name: headerText, exact: true });
