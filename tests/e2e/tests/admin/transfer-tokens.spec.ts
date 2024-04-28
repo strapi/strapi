@@ -60,9 +60,13 @@ test.describe('Transfer Tokens', () => {
 
     await navToHeader(page, ['Settings', 'Transfer Tokens'], 'Transfer Tokens');
 
-    const row = page.getByRole('gridcell', { name: 'my test token', exact: true });
-    await expect(row).toBeVisible();
-    // await expect(row.getByText(/\d+ (second|minute)s? ago/)).toBeVisible();
+    const nameCell = page.getByRole('gridcell', { name: 'my test token', exact: true });
+    await expect(nameCell).toBeVisible();
+
+    // Locate the parent of nameCell and then search within it for the timestamp
+    const parentRow = nameCell.locator('xpath=..');
+    await expect(parentRow).toContainText(/\d+ (second|minute)s? ago/);
+
     // TODO: expand on this test, it could check edit and delete icons
   });
 });
