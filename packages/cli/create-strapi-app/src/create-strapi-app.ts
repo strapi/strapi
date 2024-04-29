@@ -45,11 +45,12 @@ command
   })
   .parse(process.argv);
 
-function generateApp(projectName: string, options: Partial<NewOptions>) {
+async function generateApp(projectName: string, options: Partial<NewOptions>) {
   if (!projectName) {
     console.error('Please specify the <directory> of your project when using --quickstart');
     process.exit(1);
   }
+  await handleCloudProject(projectName);
 
   return generateNewApp(projectName, options).then(() => {
     if (process.platform === 'win32') {
@@ -107,6 +108,5 @@ async function initProject(projectName: string, programArgs: Program) {
     ...options,
   };
 
-  await handleCloudProject(directory);
   await generateApp(directory, generateStrapiAppOptions);
 }

@@ -80,9 +80,12 @@ export async function handleCloudProject(projectName: string): Promise<void> {
       } catch (e) {
         /* empty */
       }
-      logger.error(
-        'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.'
-      );
+      const defaultErrorMessage = 'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.';
+      if (projectCreationSpinner.isSpinning) {
+        projectCreationSpinner.fail(defaultErrorMessage);
+      } else {
+        logger.error(defaultErrorMessage);
+      }
     }
   }
 }
