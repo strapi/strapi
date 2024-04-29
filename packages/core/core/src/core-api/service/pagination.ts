@@ -1,5 +1,6 @@
-import { has, toNumber, isUndefined } from 'lodash/fp';
-import { errors } from '@strapi/utils';
+import { has, toNumber } from 'lodash/fp';
+
+import { errors, pagination } from '@strapi/utils';
 
 interface BasePaginationParams {
   withCount?: boolean | 't' | '1' | 'true' | 'f' | '0' | 'false' | 0 | 1;
@@ -35,15 +36,6 @@ const getLimitConfigDefaults = () => ({
   maxLimit: toNumber(strapi.config.get('api.rest.maxLimit')) || null,
 });
 
-/**
- * Should maxLimit be used as the limit or not
- */
-const shouldApplyMaxLimit = (
-  limit: number,
-  maxLimit: number | null,
-  { isPagedPagination = false } = {}
-) => (!isPagedPagination && limit === -1) || (maxLimit !== null && limit > maxLimit);
-
 const shouldCount = (params: { pagination?: PaginationParams }) => {
   if (has('pagination.withCount', params)) {
     const withCount = params.pagination?.withCount;
@@ -72,69 +64,19 @@ const shouldCount = (params: { pagination?: PaginationParams }) => {
   return Boolean(strapi.config.get('api.rest.withCount', true));
 };
 
-const isOffsetPagination = (pagination?: PaginationParams): pagination is OffsetPagination =>
-  has('start', pagination) || has('limit', pagination);
-
-const isPagedPagination = (pagination?: PaginationParams): pagination is PagedPagination =>
-  has('page', pagination) || has('pageSize', pagination);
-
 const getPaginationInfo = (params: { pagination?: PaginationParams }): PaginationInfo => {
   const { defaultLimit, maxLimit } = getLimitConfigDefaults();
 
-  const { pagination } = params;
+  const { start, limit } = pagination.withDefaultPagination(params.pagination || {}, {
+    defaults: { offset: { limit: defaultLimit }, page: { pageSize: defaultLimit } },
+    maxLimit: maxLimit || -1,
+  });
 
-  const isPaged = isPagedPagination(pagination);
-  const isOffset = isOffsetPagination(pagination);
-
-  if (isOffset && isPaged) {
-    throw new errors.ValidationError(
-      'Invalid pagination parameters. Expected either start/limit or page/pageSize'
-    );
-  }
-
-  if (!isOffset && !isPaged) {
-    return {
-      page: 1,
-      pageSize: defaultLimit,
-    };
-  }
-
-  if (isPagedPagination(pagination)) {
-    const pageSize = isUndefined(pagination.pageSize)
-      ? defaultLimit
-      : Math.max(1, toNumber(pagination.pageSize));
-
-    return {
-      page: Math.max(1, toNumber(pagination.page || 1)),
-      pageSize:
-        typeof maxLimit === 'number' &&
-        shouldApplyMaxLimit(pageSize, maxLimit, { isPagedPagination: true })
-          ? maxLimit
-          : Math.max(1, pageSize),
-    };
-  }
-
-  const limit = isUndefined(pagination.limit) ? defaultLimit : toNumber(pagination.limit);
-
-  return {
-    start: Math.max(0, toNumber(pagination.start || 0)),
-    limit: shouldApplyMaxLimit(limit, maxLimit) ? maxLimit || -1 : Math.max(1, limit),
-  };
+  return { start, limit };
 };
 
 const transformPaginationResponse = (paginationInfo: PaginationInfo, count: number) => {
-  if ('page' in paginationInfo) {
-    return {
-      ...paginationInfo,
-      pageCount: Math.ceil(count / paginationInfo.pageSize),
-      total: count,
-    };
-  }
-
-  return {
-    ...paginationInfo,
-    total: count,
-  };
+  return pagination.transformPaginationInfo(paginationInfo, count);
 };
 
 export { getPaginationInfo, transformPaginationResponse, shouldCount };

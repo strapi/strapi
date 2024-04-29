@@ -13,6 +13,13 @@ export interface Pagination {
   limit: number;
 }
 
+export interface PatinationInformation {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+}
+
 const STRAPI_DEFAULTS = {
   offset: {
     start: 0,
@@ -53,8 +60,8 @@ const withNoLimit = (pagination: Pagination, maxLimit = -1) => ({
   limit: pagination.limit === -1 ? maxLimit : pagination.limit,
 });
 
-const withDefaultPagination = (
-  args: Partial<PaginationArgs>,
+const withDefaultPagination = <T extends Partial<PaginationArgs>>(
+  args: T,
   { defaults = {}, maxLimit = -1 } = {}
 ) => {
   const defaultValues = merge(STRAPI_DEFAULTS, defaults);
@@ -112,4 +119,48 @@ const withDefaultPagination = (
   return replacePaginationAttributes(args);
 };
 
-export { withDefaultPagination };
+/**
+ * Transform pagination information into a consistent format.
+ *
+ * Used across the app apis, such as Content API and Content Manager API
+ */
+const transformPaginationInfo = (
+  paginationInfo: Partial<PaginationArgs>,
+  total: number
+): PatinationInformation => {
+  if (paginationInfo.page) {
+    const page = paginationInfo.page;
+    const pageSize = paginationInfo.pageSize ?? total;
+
+    return {
+      page,
+      pageSize,
+      pageCount: pageSize > 0 ? Math.ceil(total / pageSize) : 0,
+      total,
+    };
+  }
+
+  if (paginationInfo.start) {
+    const start = paginationInfo.start;
+    const limit = paginationInfo.limit ?? total;
+
+    // Start limit to page page size
+    return {
+      page: Math.floor(start / limit) + 1,
+      pageSize: limit,
+      pageCount: limit > 0 ? Math.ceil(total / limit) : 0,
+      total,
+    };
+  }
+
+  // Default pagination
+  return {
+    ...paginationInfo,
+    page: 1,
+    pageSize: 10,
+    pageCount: 1,
+    total,
+  };
+};
+
+export { withDefaultPagination, transformPaginationInfo };

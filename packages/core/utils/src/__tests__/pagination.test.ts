@@ -1,4 +1,4 @@
-import { withDefaultPagination } from '../pagination';
+import { withDefaultPagination, transformPaginationInfo } from '../pagination';
 
 const defaultLimit = 20;
 const defaults = {
@@ -238,6 +238,56 @@ describe('Pagination util', () => {
           limit: 1,
         });
       });
+    });
+  });
+});
+
+describe('Pagination info util', () => {
+  test('Transforms page and pageSize to pagination info', () => {
+    const total = 100;
+    const paginationInfo = transformPaginationInfo({ page: 2, pageSize: 10 }, total);
+
+    expect(paginationInfo).toEqual({
+      page: 2,
+      pageSize: 10,
+      pageCount: 10,
+      total,
+    });
+  });
+
+  test('Transforms page to pagination info', () => {
+    const total = 100;
+    const paginationInfo = transformPaginationInfo({ page: 2 }, total);
+
+    expect(paginationInfo).toEqual({
+      page: 2,
+      pageSize: total, // Applies total as pageSize
+      pageCount: 1,
+      total,
+    });
+  });
+
+  test('Transforms start and limit to pagination info', () => {
+    const total = 100;
+    const paginationInfo = transformPaginationInfo({ start: 10, limit: 10 }, total);
+
+    expect(paginationInfo).toEqual({
+      page: 2,
+      pageSize: 10,
+      pageCount: 10,
+      total,
+    });
+  });
+
+  test('Transforms start to pagination info', () => {
+    const total = 100;
+    const paginationInfo = transformPaginationInfo({ start: 10 }, total);
+
+    expect(paginationInfo).toEqual({
+      page: 1,
+      pageSize: total, // Applies total as pageSize
+      pageCount: 1,
+      total,
     });
   });
 });
