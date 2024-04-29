@@ -99,12 +99,15 @@ const documentApi = contentManagerApi.injectEndpoints({
     }),
     deleteManyDocuments: builder.mutation<
       BulkDelete.Response,
-      BulkDelete.Params & BulkDelete.Request['body']
+      BulkDelete.Params & BulkDelete.Request['body'] & { params?: Find.Request['query'] }
     >({
-      query: ({ model, ...body }) => ({
+      query: ({ model, params, ...body }) => ({
         url: `/content-manager/collection-types/${model}/actions/bulkDelete`,
         method: 'POST',
         data: body,
+        config: {
+          params,
+        },
       }),
       invalidatesTags: (_res, _error, { model, documentIds }) =>
         documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),

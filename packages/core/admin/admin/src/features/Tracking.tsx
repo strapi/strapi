@@ -98,6 +98,7 @@ interface EventWithoutProperties {
     | 'didAccessAuthenticatedAdministration'
     | 'didAddComponentToDynamicZone'
     | 'didBulkDeleteEntries'
+    | 'didNotBulkDeleteEntries'
     | 'didChangeDisplayedFields'
     | 'didCheckDraftRelations'
     | 'didClickGuidedTourHomepageApiTokens'

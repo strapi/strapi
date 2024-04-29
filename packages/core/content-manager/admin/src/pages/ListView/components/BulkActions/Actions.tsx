@@ -10,6 +10,7 @@ import {
   useAPIErrorHandler,
   useTable,
   useRBAC,
+  useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -22,6 +23,7 @@ import {
   ModalHeader,
   ModalLayout,
   Typography,
+  Radio,
 } from '@strapi/design-system';
 import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
 import { AxiosError, AxiosResponse } from 'axios';
@@ -29,7 +31,9 @@ import { useIntl } from 'react-intl';
 import { useQueryClient, useMutation } from 'react-query';
 
 import { Contracts } from '../../../../../../shared';
+import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
 import { useDoc } from '../../../../hooks/useDocument';
+import { useDocumentActions } from '../../../../hooks/useDocumentActions';
 import { getTranslation } from '../../../../utils/translations';
 
 import { PublishAction } from './PublishAction';
@@ -90,7 +94,7 @@ const BulkActionsRenderer = () => {
 
   const { model, collectionType } = useDoc();
   const { selectedRows } = useTable('BulkActionsRenderer', (state) => state);
-  const documentIds = selectedRows.map((entry) => entry.id.toString());
+  const documentIds = selectedRows.map((entry) => entry.documentId);
 
   return (
     <Flex gap={2}>
@@ -303,42 +307,39 @@ const BulkActionModal = ({
  * DefaultBulkActions
  * -----------------------------------------------------------------------------------------------*/
 
-const DeleteAction: BulkActionComponent = ({ documentIds, model: slug }) => {
+const BULK_DELETE_OPTIONS = {
+  SELECTED_LOCALE: 'selected_Locale',
+  ALL_LOCALES: 'all_Locales',
+};
+
+const DeleteAction: BulkActionComponent = ({ documentIds, model }) => {
   const { formatMessage } = useIntl();
-  const { post } = useFetchClient();
-  const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler(getTranslation);
   const { selectRow } = useTable('deleteAction', (state) => state);
-  const { schema } = useDoc();
-
-  const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
-  const queryClient = useQueryClient();
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
+  const currentLocale = query.plugins?.i18n?.locale || 'en';
+  // const { data: locales = [] } = useGetLocalesQuery(); TODO: check if can import this query to get locale name
   const { trackUsage } = useTracking();
-  const contentPermissions = getContentPermissions(slug);
-  const {
-    allowedActions: { canDelete: hasDeletePermission },
-  } = useRBAC(contentPermissions);
+  const hasDeletePermission = useDocumentRBAC('deleteAction', (state) => state.canDelete);
+  const { deleteMany: bulkdeleteAction } = useDocumentActions();
+  const [isDeleteAllLocale, setIsDeleteAllLocale] = React.useState(false);
 
-  const handleConfirmDeleteAllData = async () => {
-    try {
-      await post<
-        Contracts.CollectionTypes.BulkDelete.Response,
-        AxiosResponse<Contracts.CollectionTypes.BulkDelete.Response>,
-        Contracts.CollectionTypes.BulkDelete.Request['body']
-      >(`/content-manager/collection-types/${slug}/actions/bulkDelete`, {
-        documentIds,
-      });
-
-      queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
+  const handleConfirmBulkDelete = async () => {
+    const data = await bulkdeleteAction({
+      documentIds,
+      model,
+      params: {
+        locale: isDeleteAllLocale ? '*' : currentLocale,
+      },
+    });
+    if (!('error' in data)) {
       selectRow([]);
       trackUsage('didBulkDeleteEntries');
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(err),
-        });
-      }
+    }
+  };
+
+  const handleChange: React.FormEventHandler<HTMLDivElement> = (e) => {
+    if ('value' in e.target) {
+      setIsDeleteAllLocale(e.target.value === BULK_DELETE_OPTIONS.ALL_LOCALES);
     }
   };
 
@@ -359,28 +360,39 @@ const DeleteAction: BulkActionComponent = ({ documentIds, model: slug }) => {
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
               id: 'popUpWarning.bodyMessage.contentType.delete.all',
-              defaultMessage: 'Are you sure you want to delete these entries?',
+              defaultMessage: 'What do you want to delete?',
             })}
           </Typography>
-          {hasI18nEnabled && (
-            <Box textAlign="center" padding={3}>
-              <Typography textColor="danger500">
+          <Box textAlign="center" padding={3}>
+            <Flex onChange={handleChange} direction="column" alignItems="flex-start" gap={3}>
+              <Radio
+                checked={!isDeleteAllLocale}
+                value={BULK_DELETE_OPTIONS.SELECTED_LOCALE}
+                name="bulk-delete-options"
+              >
                 {formatMessage(
                   {
-                    id: getTranslation('Settings.list.actions.deleteAdditionalInfos'),
-                    defaultMessage:
-                      'This will delete the active locale versions <em>(from Internationalization)</em>',
+                    id: 'popUpWarning.bodyMessage.contentType.delete.selectedLocale',
+                    defaultMessage: 'Delete entries ({locale})',
                   },
-                  {
-                    em: Emphasis,
-                  }
+                  { locale: currentLocale } //TODO: get locale name from locale code
                 )}
-              </Typography>
-            </Box>
-          )}
+              </Radio>
+              <Radio
+                checked={isDeleteAllLocale}
+                value={BULK_DELETE_OPTIONS.ALL_LOCALES}
+                name="bulk-delete-options"
+              >
+                {formatMessage({
+                  id: 'popUpWarning.bodyMessage.contentType.delete.allLocales',
+                  defaultMessage: 'Delete entries (all locales)',
+                })}
+              </Radio>
+            </Flex>
+          </Box>
         </Flex>
       ),
-      onConfirm: handleConfirmDeleteAllData,
+      onConfirm: handleConfirmBulkDelete,
     },
   };
 };

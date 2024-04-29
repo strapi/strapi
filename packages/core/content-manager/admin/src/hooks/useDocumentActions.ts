@@ -14,6 +14,7 @@ import {
   useCloneDocumentMutation,
   useCreateDocumentMutation,
   useDeleteDocumentMutation,
+  useDeleteManyDocumentsMutation,
   useDiscardDocumentMutation,
   useLazyGetDocumentQuery,
   usePublishDocumentMutation,
@@ -29,6 +30,7 @@ import type {
   Clone,
   Create,
   Delete,
+  BulkDelete,
   Discard,
   FindOne,
   Publish,
@@ -41,9 +43,10 @@ const DEFAULT_UNEXPECTED_ERROR_MSG = {
   defaultMessage: 'An error occurred, please try again',
 } satisfies MessageDescriptor;
 
-type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> =
+type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }> =
   | Pick<TResponse, 'data' | 'meta'>
-  | { error: BaseQueryError | SerializedError };
+  | { error: BaseQueryError | SerializedError }
+  | Pick<TResponse, 'data'>;
 
 type UseDocumentActions = () => {
   /**
@@ -90,6 +93,11 @@ type UseDocumentActions = () => {
       { name: 'willDeleteEntry' | 'didDeleteEntry' | 'didNotDeleteEntry' }
     >['properties']
   ) => Promise<OperationResponse<Delete.Response>>;
+  deleteMany: (args: {
+    model: string;
+    documentIds: string[];
+    params?: object;
+  }) => Promise<OperationResponse<BulkDelete.Response>>;
   discard: (args: {
     collectionType: string;
     model: string;
@@ -211,6 +219,53 @@ const useDocumentActions: UseDocumentActions = () => {
       }
     },
     [trackUsage, deleteDocument, toggleNotification, formatMessage, formatAPIError]
+  );
+
+  const [deleteManyDocuments] = useDeleteManyDocumentsMutation();
+
+  const deleteMany: IUseDocumentActs['deleteMany'] = React.useCallback(
+    async ({ model, documentIds, params }) => {
+      try {
+        trackUsage('willBulkDeleteEntries');
+
+        const res = await deleteManyDocuments({
+          model,
+          documentIds,
+          params,
+        });
+
+        if ('error' in res) {
+          toggleNotification({
+            type: 'danger',
+            message: formatAPIError(res.error),
+          });
+
+          return { error: res.error };
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: getTranslation('success.records.delete'),
+            defaultMessage: 'Successfully deleted.',
+          }),
+        });
+
+        trackUsage('didBulkDeleteEntries');
+
+        return res.data;
+      } catch (err) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
+        });
+
+        trackUsage('didNotBulkDeleteEntries');
+
+        throw err;
+      }
+    },
+    [trackUsage, deleteManyDocuments, toggleNotification, formatMessage, formatAPIError]
   );
 
   const [discardDocument] = useDiscardDocumentMutation();
@@ -530,6 +585,7 @@ const useDocumentActions: UseDocumentActions = () => {
     clone,
     create,
     delete: _delete,
+    deleteMany,
     discard,
     getDocument,
     publish,
