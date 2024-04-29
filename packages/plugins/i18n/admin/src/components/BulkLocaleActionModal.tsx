@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Table, useTable, useQueryParams } from '@strapi/admin/strapi-admin';
+import { Table, useTable } from '@strapi/admin/strapi-admin';
 import { Box, Typography, IconButton, Flex, Tooltip } from '@strapi/design-system';
 import { Pencil, CheckCircle, CrossCircle, ArrowsCounterClockwise } from '@strapi/icons';
 import { DocumentStatus } from '@strapi/plugin-content-manager/strapi-admin';
@@ -12,6 +12,7 @@ import styled from 'styled-components';
 
 import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
+
 import { LocaleStatus } from './CMHeaderActions';
 
 type status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
@@ -29,8 +30,18 @@ interface EntryValidationTextProps {
   validationErrors?: Record<string, MessageDescriptor>;
 }
 
-const isMessageDescriptor = (obj: any): obj is MessageDescriptor =>
-  obj && (typeof obj?.id === 'string' || typeof obj?.defaultMessage === 'string');
+const isMessageDescriptor = (obj: unknown): obj is MessageDescriptor => {
+  const possibleMessageDescriptor = obj as {
+    id?: unknown;
+    defaultMessage?: unknown;
+  };
+
+  return (
+    typeof obj === 'object' &&
+    (typeof possibleMessageDescriptor.id === 'string' ||
+      typeof possibleMessageDescriptor.defaultMessage === 'string')
+  );
+};
 
 const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
@@ -117,6 +128,7 @@ interface BulkLocaleActionModalProps {
     label: string;
     name: string;
   }[];
+  onClose: () => void;
   validationErrors?: Record<
     Modules.Documents.Params.Locale.StringNotation,
     Record<string, MessageDescriptor>
@@ -126,16 +138,12 @@ interface BulkLocaleActionModalProps {
 const BulkLocaleActionModal = ({
   headers,
   rows,
+  onClose,
   validationErrors = {},
 }: BulkLocaleActionModalProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const { data: locales = [] } = useGetLocalesQuery();
-
-  const [{ query }] = useQueryParams();
-
-  // @ts-expect-error .plugins is not part of query
-  const currentLocale = query?.plugins?.i18n?.locale as string;
 
   const selectedRows: LocaleStatus[] = useTable(
     'BulkLocaleActionModal',
@@ -181,6 +189,7 @@ const BulkLocaleActionModal = ({
     navigate({
       search: stringify({ plugins: { i18n: { locale } } }),
     });
+    onClose();
   };
 
   return (
@@ -216,26 +225,24 @@ const BulkLocaleActionModal = ({
                   <Table.Cell>
                     <EntryValidationText validationErrors={error} status={status} />
                   </Table.Cell>
-                  {currentLocale !== locale && (
-                    <Table.Cell>
-                      <IconButton
-                        onClick={() => {
-                          navigateToLocale(locale);
-                        }}
-                        label={formatMessage(
-                          {
-                            id: getTranslation('Settings.list.actions.edit'),
-                            defaultMessage: 'Edit {name} locale',
-                          },
-                          {
-                            name: locale,
-                          }
-                        )}
-                        icon={<Pencil />}
-                        borderWidth={0}
-                      />
-                    </Table.Cell>
-                  )}
+                  <Table.Cell>
+                    <IconButton
+                      onClick={() => {
+                        navigateToLocale(locale);
+                      }}
+                      label={formatMessage(
+                        {
+                          id: getTranslation('Settings.list.actions.edit'),
+                          defaultMessage: 'Edit {name} locale',
+                        },
+                        {
+                          name: locale,
+                        }
+                      )}
+                      icon={<Pencil />}
+                      borderWidth={0}
+                    />
+                  </Table.Cell>
                 </Table.Row>
               );
             })}

@@ -472,7 +472,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         id: getTranslation('CMEditViewBulkLocale.publish-title'),
         defaultMessage: 'Publish Multiple Locales',
       }),
-      content: (
+      content: ({ onClose }) => (
         <Table.Root
           onSelectedRowsChange={(selectedRows) => {
             setSelectedLocales(
@@ -498,6 +498,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
             validationErrors={validationErrors}
             headers={headers}
             rows={rows}
+            onClose={onClose}
           />
         </Table.Root>
       ),
