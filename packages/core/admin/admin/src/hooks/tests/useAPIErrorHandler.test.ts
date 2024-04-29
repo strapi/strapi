@@ -65,13 +65,10 @@ describe('useAPIErrorHandler', () => {
   test('formats FetchErrors', async () => {
     const { result } = renderHook(() => useAPIErrorHandler());
 
-    const fetchError = new FetchError(
-      'Error message',
+    const fetchError = new FetchError('Error message', {
       // @ts-expect-error – we're testing that it can handle fetch errors
-      {
-        data: { message: 'Error message' },
-      }
-    );
+      data: { message: 'Error message' },
+    });
 
     const message = result.current.formatAPIError(fetchError);
 

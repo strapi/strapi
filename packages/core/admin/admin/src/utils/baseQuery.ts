@@ -91,7 +91,7 @@ const fetchBaseQuery =
               name: 'UnknownError',
               message: err.message,
               details: err.response,
-              status: err.response?.error.status,
+              status: err.status,
             } as UnknownApiError,
           };
         }

@@ -13,8 +13,9 @@ type FetchURL = FetchParams[0];
 
 export type Method = 'GET' | 'POST' | 'DELETE' | 'PUT';
 
-export type FetchResponse<TData = unknown> = {
+export type FetchResponse<TData = any> = {
   data: TData;
+  status?: number;
 };
 
 export type FetchOptions = {
@@ -119,7 +120,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
 
   // Add a response interceptor to return the response
-  const responseInterceptor = async <TData>(
+  const responseInterceptor = async <TData = any>(
     response: Response,
     validateStatus?: FetchOptions['validateStatus']
   ): Promise<FetchResponse<TData>> => {
@@ -143,7 +144,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     } catch (error) {
       if (error instanceof SyntaxError && response.ok) {
         // Making sure that a SyntaxError doesn't throw if it's successful
-        return { data: [], status: response.status };
+        return { data: [], status: response.status } as FetchResponse<any>;
       } else {
         throw error;
       }
@@ -191,7 +192,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       });
       return responseInterceptor<TData>(response, options?.validateStatus);
     },
-    post: async <TData, TSend = unknown>(
+    post: async <TData, TSend = any>(
       url: string,
       data?: TSend,
       options?: FetchOptions
@@ -211,11 +212,11 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         signal: options?.signal ?? defaultOptions.signal,
         method: 'POST',
         headers,
-        body: isFormDataRequest(data) ? data : JSON.stringify(data),
+        body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
       });
       return responseInterceptor<TData>(response, options?.validateStatus);
     },
-    put: async <TData, TSend = unknown>(
+    put: async <TData, TSend = any>(
       url: string,
       data?: TSend,
       options?: FetchOptions
@@ -235,7 +236,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         signal: options?.signal ?? defaultOptions.signal,
         method: 'PUT',
         headers,
-        body: isFormDataRequest(data) ? data : JSON.stringify(data),
+        body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
       });
 
       return responseInterceptor<TData>(response, options?.validateStatus);
