@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, URL_ROOT } from '../constants';
 
+const REMEMBER_ME_LABEL = 'Remember me';
+
 /**
  * Clear cookies, go to admin, and log in to an e2e test app, landing on the Strapi dashboard
  */
@@ -19,7 +21,7 @@ export const login = async ({ page, rememberMe = false }: { page: Page; remember
     .fill(ADMIN_PASSWORD);
 
   if (rememberMe) {
-    await page.getByLabel('Remember me').click();
+    await page.getByLabel(REMEMBER_ME_LABEL).click();
   }
 
   await page.getByRole('button', { name: 'Login' }).click();
