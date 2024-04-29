@@ -1,4 +1,3 @@
-import axios from 'axios';
 import pipe from 'lodash/fp/pipe';
 import qs from 'qs';
 
@@ -22,7 +21,6 @@ export type FetchOptions = {
   params?: any;
   signal?: AbortSignal;
   headers?: Record<string, string>;
-  onUploadProgress?: (progressEvent: any) => void;
   validateStatus?: ((status: number) => boolean) | null;
 };
 
@@ -111,9 +109,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     Authorization: `Bearer ${getToken()}`,
   };
 
-  const isFormDataRequest = (headers: Headers) =>
-    headers.has('Content-Type') && headers.get('Content-Type') === 'multipart/form-data';
-
+  const isFormDataRequest = (body: any) => body instanceof FormData;
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
 
   // This regular expression matches a string that starts with either "http://" or "https://" or any other protocol name in lower case letters, followed by "://" and ends with anything else
@@ -207,24 +203,15 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
       const createRequestUrl = makeCreateRequestUrl(options);
 
-      // Todo: remove this and replace it with a native implementation
-      if (isFormDataRequest(headers)) {
-        return axios.post(createRequestUrl(url), data, {
-          headers: {
-            ...defaultHeader,
-            ...options?.headers,
-          },
-          signal: options?.signal ?? defaultOptions.signal,
-          onUploadProgress: options?.onUploadProgress,
-          validateStatus: options?.validateStatus,
-        });
+      if (isFormDataRequest(data)) {
+        headers.delete('Content-Type');
       }
 
       const response = await fetch(createRequestUrl(url), {
         signal: options?.signal ?? defaultOptions.signal,
         method: 'POST',
         headers,
-        body: JSON.stringify(data),
+        body: isFormDataRequest(data) ? data : JSON.stringify(data),
       });
       return responseInterceptor<TData>(response, options?.validateStatus);
     },
@@ -240,24 +227,15 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
       const createRequestUrl = makeCreateRequestUrl(options);
 
-      // Todo: remove this and replace it with a native implementation
-      if (isFormDataRequest(headers)) {
-        return axios.post(createRequestUrl(url), data, {
-          headers: {
-            ...defaultHeader,
-            ...options?.headers,
-          },
-          signal: options?.signal ?? defaultOptions.signal,
-          onUploadProgress: options?.onUploadProgress,
-          validateStatus: options?.validateStatus,
-        });
+      if (isFormDataRequest(data)) {
+        headers.delete('Content-Type');
       }
 
       const response = await fetch(createRequestUrl(url), {
         signal: options?.signal ?? defaultOptions.signal,
         method: 'PUT',
         headers,
-        body: JSON.stringify(data),
+        body: isFormDataRequest(data) ? data : JSON.stringify(data),
       });
 
       return responseInterceptor<TData>(response, options?.validateStatus);

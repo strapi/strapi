@@ -25,7 +25,6 @@ import type {
   MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 
-// NEED TO LOOK AT THE PARAMS HERE
 export interface GetReleasesQueryParams {
   page?: number;
   pageSize?: number;
