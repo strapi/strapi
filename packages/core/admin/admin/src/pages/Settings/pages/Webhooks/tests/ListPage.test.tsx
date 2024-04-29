@@ -79,7 +79,7 @@ describe('Webhooks | ListPage', () => {
     });
   });
 
-  it.only('should delete a single webhook', async () => {
+  it('should delete a single webhook', async () => {
     const { findByText, user, findByRole, findAllByRole, queryByText } = render(<ListPage />);
 
     await findByText('http:://strapi.io');

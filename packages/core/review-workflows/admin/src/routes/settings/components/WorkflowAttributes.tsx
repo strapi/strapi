@@ -76,6 +76,7 @@ const ContentTypesSelector = ({ disabled }: ContentTypesSelectorProps) => {
       label: contentType.info.displayName,
       value: contentType.uid,
     }));
+
   const singleTypes = (contentTypes?.singleType ?? []).map((contentType) => ({
     label: contentType.info.displayName,
     value: contentType.uid,
