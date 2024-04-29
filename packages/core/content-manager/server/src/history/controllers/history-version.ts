@@ -77,10 +77,7 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         async (version: HistoryVersions.HistoryVersionDataResponse & { locale: string }) => {
           return {
             ...version,
-            data: await permissionChecker.sanitizeOutput({
-              ...version.data,
-              locale: version.locale.code,
-            }),
+            data: await permissionChecker.sanitizeOutput(version.data),
             createdBy: version.createdBy
               ? pick(['id', 'firstname', 'lastname', 'username', 'email'], version.createdBy)
               : undefined,
