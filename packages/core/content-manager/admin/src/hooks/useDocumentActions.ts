@@ -19,6 +19,7 @@ import {
   useLazyGetDocumentQuery,
   usePublishDocumentMutation,
   useUnpublishDocumentMutation,
+  useUnpublishManyDocumentsMutation,
   useUpdateDocumentMutation,
 } from '../services/documents';
 import { BaseQueryError } from '../utils/api';
@@ -36,6 +37,7 @@ import type {
   Publish,
   Update,
   Unpublish,
+  BulkUnpublish,
 } from '../../../shared/contracts/collection-types';
 
 const DEFAULT_UNEXPECTED_ERROR_MSG = {
@@ -141,6 +143,14 @@ type UseDocumentActions = () => {
     },
     discardDraft?: boolean
   ) => Promise<OperationResponse<Unpublish.Response>>;
+  unpublishMany: (
+    args: {
+      model: string;
+      documentIds: string[];
+      params?: object;
+    },
+    discardDraft?: boolean
+  ) => Promise<OperationResponse<BulkUnpublish.Response>>;
 };
 
 type IUseDocumentActs = ReturnType<UseDocumentActions>;
@@ -441,6 +451,48 @@ const useDocumentActions: UseDocumentActions = () => {
     [trackUsage, unpublishDocument, toggleNotification, formatMessage, formatAPIError]
   );
 
+  const [unpublishManyDocuments] = useUnpublishManyDocumentsMutation();
+  const unpublishMany: IUseDocumentActs['unpublishMany'] = React.useCallback(
+    async ({ model, documentIds }) => {
+      try {
+        trackUsage('willBulkUnpublishEntries');
+
+        const res = await unpublishManyDocuments({
+          model,
+          documentIds,
+        });
+
+        if ('error' in res) {
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
+
+          return { error: res.error };
+        }
+
+        trackUsage('didBulkUnpublishEntries');
+
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: getTranslation('success.records.unpublish'),
+            defaultMessage: 'Successfully unpublished.',
+          }),
+        });
+
+        return res.data;
+      } catch (err) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
+        });
+
+        trackUsage('didNotBulkUnpublishEntries');
+
+        throw err;
+      }
+    },
+    [trackUsage, unpublishManyDocuments, toggleNotification, formatMessage, formatAPIError]
+  );
+
   const [createDocument] = useCreateDocumentMutation();
   const create: IUseDocumentActs['create'] = React.useCallback(
     async ({ model, params }, data, trackerProperty) => {
@@ -590,6 +642,7 @@ const useDocumentActions: UseDocumentActions = () => {
     getDocument,
     publish,
     unpublish,
+    unpublishMany,
     update,
   } satisfies IUseDocumentActs;
 };

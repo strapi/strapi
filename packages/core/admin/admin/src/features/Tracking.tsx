@@ -133,6 +133,8 @@ interface EventWithoutProperties {
     | 'didPluginLearnMore'
     | 'didPublishEntry'
     | 'didUnpublishEntry'
+    | 'didBulkUnpublishEntries'
+    | 'didNotBulkUnpublishEntries'
     | 'didSaveComponent'
     | 'didSaveContentType'
     | 'didSearch'

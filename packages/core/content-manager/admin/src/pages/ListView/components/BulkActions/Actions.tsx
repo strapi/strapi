@@ -318,7 +318,6 @@ const DeleteAction: BulkActionComponent = ({ documentIds, model }) => {
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const currentLocale = query.plugins?.i18n?.locale || 'en';
   // const { data: locales = [] } = useGetLocalesQuery(); TODO: check if can import this query to get locale name
-  const { trackUsage } = useTracking();
   const hasDeletePermission = useDocumentRBAC('deleteAction', (state) => state.canDelete);
   const { deleteMany: bulkdeleteAction } = useDocumentActions();
   const [isDeleteAllLocale, setIsDeleteAllLocale] = React.useState(false);
@@ -333,7 +332,6 @@ const DeleteAction: BulkActionComponent = ({ documentIds, model }) => {
     });
     if (!('error' in data)) {
       selectRow([]);
-      trackUsage('didBulkDeleteEntries');
     }
   };
 
@@ -397,59 +395,19 @@ const DeleteAction: BulkActionComponent = ({ documentIds, model }) => {
   };
 };
 
-const UnpublishAction: BulkActionComponent = ({ documentIds, model: slug }) => {
+const UnpublishAction: BulkActionComponent = ({ documentIds, model }) => {
   const { formatMessage } = useIntl();
-  const { post } = useFetchClient();
-  const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler(getTranslation);
-  const { selectRow, selectedRows } = useTable('unpublishAction', (state) => state);
   const { schema } = useDoc();
+  const { selectRow, selectedRows } = useTable('unpublishAction', (state) => state);
+  const hasPublishPermission = useDocumentRBAC('unpublishAction', (state) => state.canPublish);
   const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
-  const contentPermissions = getContentPermissions(slug);
-  const {
-    allowedActions: { canPublish: hasPublishPermission },
-  } = useRBAC(contentPermissions);
+  const { unpublishMany: bulkUnpublishAction } = useDocumentActions();
 
-  const queryClient = useQueryClient();
-
-  const bulkUnpublishMutation = useMutation<
-    Contracts.CollectionTypes.BulkUnpublish.Response,
-    AxiosError<Required<Pick<Contracts.CollectionTypes.BulkUnpublish.Response, 'error'>>>,
-    Contracts.CollectionTypes.BulkUnpublish.Request['body']
-  >(
-    async (body) => {
-      const { data } = await post<
-        Contracts.CollectionTypes.BulkUnpublish.Response,
-        AxiosResponse<Contracts.CollectionTypes.BulkUnpublish.Response>,
-        Contracts.CollectionTypes.BulkUnpublish.Request['body']
-      >(`/content-manager/collection-types/${slug}/actions/bulkUnpublish`, body);
-
-      return data;
-    },
-    {
-      onSuccess() {
-        toggleNotification({
-          type: 'success',
-          message: formatMessage({
-            id: 'content-manager.success.record.unpublish',
-            defaultMessage: 'Unpublished',
-          }),
-        });
-
-        queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
-        selectRow([]);
-      },
-      onError(error) {
-        toggleNotification({
-          type: 'warning',
-          message: formatAPIError(error),
-        });
-      },
+  const handleConfirmBulkUnpublish = async () => {
+    const data = await bulkUnpublishAction({ documentIds, model });
+    if (!('error' in data)) {
+      selectRow([]);
     }
-  );
-
-  const handleConfirmUnpublishAllData = async () => {
-    await bulkUnpublishMutation.mutateAsync({ documentIds });
   };
 
   const showUnpublishButton =
@@ -497,7 +455,7 @@ const UnpublishAction: BulkActionComponent = ({ documentIds, model: slug }) => {
         id: 'app.utils.unpublish',
         defaultMessage: 'Unpublish',
       }),
-      onConfirm: handleConfirmUnpublishAllData,
+      onConfirm: handleConfirmBulkUnpublish,
     },
   };
 };
