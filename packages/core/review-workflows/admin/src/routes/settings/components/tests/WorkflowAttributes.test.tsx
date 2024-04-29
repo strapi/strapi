@@ -113,6 +113,8 @@ describe('WorkflowAttributes', () => {
 
     const { getByRole, queryByRole, user } = setup();
 
+    await screen.findByText(/workflow name/i);
+
     const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
 
     await user.click(contentTypesSelect);

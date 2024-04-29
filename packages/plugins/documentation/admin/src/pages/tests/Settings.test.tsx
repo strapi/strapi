@@ -84,6 +84,10 @@ describe('SettingsPage', () => {
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
+    await findByText('Loading content.');
+
     await findByText('Successfully updated settings');
+
+    await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
   });
 });

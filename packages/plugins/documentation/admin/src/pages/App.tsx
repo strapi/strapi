@@ -30,7 +30,7 @@ import styled from 'styled-components';
 
 import { PERMISSIONS } from '../constants';
 import {
-  useGetInfosQuery,
+  useGetInfoQuery,
   useRegenerateDocMutation,
   useDeleteVersionMutation,
 } from '../services/api';
@@ -40,7 +40,7 @@ const App = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { data, isLoading: isLoadingInfo, isError } = useGetInfosQuery();
+  const { data, isLoading: isLoadingInfo, isError } = useGetInfoQuery();
   const [regenerate] = useRegenerateDocMutation();
   const [deleteVersion] = useDeleteVersionMutation();
   const [showConfirmDelete, setShowConfirmDelete] = React.useState<boolean>(false);
