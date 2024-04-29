@@ -61,7 +61,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     const extension = extensionService.generate({ typeRegistry: registry });
 
     // Add the extension's resolvers to the final schema
-    const schemaWithResolvers = addResolversToSchema(schema, extension.resolvers);
+    const schemaWithResolvers = addResolversToSchema({
+      schema,
+      resolvers: extension.resolvers,
+    });
 
     // Create a configuration object for the artifacts generation
     const outputs: Nexus.core.SchemaConfig['outputs'] = {
