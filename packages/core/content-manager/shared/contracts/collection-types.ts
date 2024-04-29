@@ -9,11 +9,14 @@ type SortQuery = Modules.Documents.Params.Sort.StringNotation<UID.Schema> & stri
 type Document = Modules.Documents.Document<any>;
 type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
 type BY_FIELDS = 'createdBy' | 'updatedBy' | 'publishedBy';
+
+export type AvailableLocaleDocument = Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>;
+export type AvailableStatusDocument = Pick<Document, 'id' | BY_FIELDS | AT_FIELDS>;
 export type DocumentMetadata = {
   // All status of the returned locale
-  availableStatus: Pick<Document, 'id' | BY_FIELDS | AT_FIELDS>[];
+  availableStatus: AvailableStatusDocument[];
   // Available locales within the same status of the returned document
-  availableLocales: Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>[];
+  availableLocales: AvailableLocaleDocument[];
 };
 
 /**
