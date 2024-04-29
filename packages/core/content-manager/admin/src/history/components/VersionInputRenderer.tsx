@@ -63,16 +63,22 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
     { results: RelationResult[]; meta: { missingCount: number } } | RelationResult[]
   >(props.name);
 
+  // Assert that we aways have a field.value
   const fieldValue = field.value!;
-
-  const res = Array.isArray(fieldValue)
+  /**
+   * TODO:
+   *
+   * Ideally the server would return the correct shape, however, for admin user relations
+   * it sanitizes everyything out when it finds and object for the relation value.
+   */
+  const formattedFieldValue = Array.isArray(fieldValue)
     ? {
         results: fieldValue,
         meta: { missingCount: 0 },
       }
     : fieldValue;
 
-  const { results, meta } = res;
+  const { results, meta } = formattedFieldValue;
 
   return (
     <Box>
