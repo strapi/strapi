@@ -1,7 +1,6 @@
 import { useField } from '@strapi/admin/strapi-admin';
 import { Box, Flex } from '@strapi/design-system';
 
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import type { ComponentInputProps } from './Input';
@@ -9,14 +8,8 @@ import type { ComponentInputProps } from './Input';
 type NonRepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
 
 const NonRepeatableComponent = ({ attribute, name, children }: NonRepeatableComponentProps) => {
-  const {
-    edit: { components },
-  } = useDocLayout();
-
   const { value } = useField(name);
   const level = useComponent('NonRepeatableComponent', (state) => state.level);
-
-  const { layout } = components[attribute.component];
 
   const isNested = level > 0;
 
@@ -32,7 +25,7 @@ const NonRepeatableComponent = ({ attribute, name, children }: NonRepeatableComp
         borderColor={isNested ? 'neutral200' : undefined}
       >
         <Flex direction="column" alignItems="stretch" gap={6}>
-          {children}
+          {children(name)}
         </Flex>
       </Box>
     </ComponentProvider>

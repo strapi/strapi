@@ -207,6 +207,7 @@ const RepeatableComponent = ({
       <AccordionGroup error={error}>
         <AccordionContent aria-describedby={ariaDescriptionId}>
           {value.map(({ __temp_key__: key, id }, index) => {
+            const nameWithIndex = `${name}.${index}`;
             return (
               <ComponentProvider
                 key={key}
@@ -218,7 +219,7 @@ const RepeatableComponent = ({
               >
                 <Component
                   disabled={disabled}
-                  name={`${name}.${index}`}
+                  name={nameWithIndex}
                   attribute={attribute}
                   index={index}
                   isOpen={collapseToOpen === key}
@@ -234,7 +235,7 @@ const RepeatableComponent = ({
                   onDropItem={handleDropItem}
                   onGrabItem={handleGrabItem}
                 >
-                  {children}
+                  {children(nameWithIndex)}
                 </Component>
               </ComponentProvider>
             );
@@ -376,7 +377,7 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
-    Pick<RepeatableComponentProps, 'mainField' | 'children'> {
+    Pick<RepeatableComponentProps, 'mainField'> {
   attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
@@ -385,6 +386,7 @@ interface ComponentProps
   onClickToggle: () => void;
   onDeleteComponent?: React.MouseEventHandler<HTMLButtonElement>;
   toggleCollapses: () => void;
+  children: React.ReactNode;
 }
 
 const Component = ({

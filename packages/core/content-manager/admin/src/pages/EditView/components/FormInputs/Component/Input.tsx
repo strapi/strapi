@@ -19,7 +19,7 @@ interface ComponentInputProps
   extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {
   labelAction?: React.ReactNode;
-  children: React.ReactNode;
+  children: (name: string) => React.ReactNode;
 }
 
 const ComponentInput = ({
