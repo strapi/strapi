@@ -431,6 +431,38 @@ const SUPER_ADMIN_LAYOUT_DATA = {
   },
 };
 
+type TrackingEvents =
+  | 'didClickGuidedTourHomepageContentManager'
+  | 'didClickGuidedTourStep1ContentManager'
+  | 'didCreateGuidedTourEntry'
+  | 'didClickGuidedTourHomepageMediaLibrary'
+  | 'didClickGuidedTourStep2MediaLibrary'
+  | 'didCreateGuidedTourMedia'
+  | 'didClickGuidedTourHomepageProfile'
+  | 'didClickGuidedTourStep3Profile'
+  | 'didUpdateGuidedTourProfile'
+  | 'didClickGuidedTourHomepageUsers'
+  | 'didClickGuidedTourStep4Users'
+  | 'didGenerateGuidedTourUsers'
+  | 'didClickGuidedTourHomepageContentTypeBuilder'
+  | 'didClickGuidedTourStep1CollectionType'
+  | 'didCreateGuidedTourCollectionType'
+  | 'didClickGuidedTourHomepageApiTokens'
+  | 'didClickGuidedTourStep3ApiTokens'
+  | 'didGenerateGuidedTourApiTokens'
+  | 'didClickGuidedTourHomepageUsers'
+  | 'didClickGuidedTourStep4Users'
+  | 'didGenerateGuidedTourUsers'
+  | 'didClickGuidedTourHomepageContentManager'
+  | 'didClickGuidedTourStep2ContentManager'
+  | 'didCreateGuidedTourEntry'
+  | 'didClickGuidedTourHomepageApiTokens'
+  | 'didClickGuidedTourStep3ApiTokens'
+  | 'didGenerateGuidedTourApiTokens'
+  | 'didClickGuidedTourHomepageUsers'
+  | 'didClickGuidedTourStep4Users'
+  | 'didGenerateGuidedTourUsers';
+
 const STATES = {
   IS_DONE: 'IS_DONE',
   IS_ACTIVE: 'IS_ACTIVE',
@@ -454,4 +486,4 @@ interface SuperAdminLayoutData {
 type States = keyof typeof STATES;
 
 export { SUPER_ADMIN_LAYOUT_DATA, LAYOUT_DATA, STATES };
-export type { SuperAdminLayoutData, LayoutData, States };
+export type { SuperAdminLayoutData, LayoutData, States, TrackingEvents };

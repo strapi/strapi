@@ -10,13 +10,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { LinkButton } from '@strapi/design-system/v2';
-import {
-  GuidedTourContextValue,
-  pxToRem,
-  useGuidedTour,
-  useTracking,
-  useAppInfo,
-} from '@strapi/helper-plugin';
+import { pxToRem, useGuidedTour, useTracking, useAppInfo } from '@strapi/helper-plugin';
 import { ArrowRight, Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -29,6 +23,7 @@ import {
   STATES,
   LayoutData,
   SuperAdminLayoutData,
+  TrackingEvents,
 } from './constants';
 import { Number, VerticalDivider } from './Ornaments';
 
@@ -56,12 +51,9 @@ const GuidedTourModal = () => {
     delete layout.inviteUser;
   }
 
-  const stepData: StepData | undefined = get(layout, currentStep);
+  const stepData = get(layout, currentStep) as StepData | undefined;
   const sectionKeys = Object.keys(guidedTourState);
-  const [sectionName, stepName] = currentStep.split('.') as [
-    keyof GuidedTourContextValue['guidedTourState'],
-    string
-  ];
+  const [sectionName, stepName] = currentStep.split('.');
   const sectionIndex = sectionKeys.indexOf(sectionName);
   const stepIndex = Object.keys(guidedTourState[sectionName]).indexOf(stepName);
   const hasSectionAfter = sectionIndex < sectionKeys.length - 1;
@@ -70,7 +62,7 @@ const GuidedTourModal = () => {
   const handleCtaClick = () => {
     setStepState(currentStep, true);
 
-    if (stepData) {
+    if (stepData && stepData.trackingEvent) {
       trackUsage(stepData.trackingEvent, { triggeredBySA });
     }
 
@@ -125,7 +117,7 @@ const GuidedTourModal = () => {
                 hasSectionAfter={hasSectionAfter}
                 stepCount={Object.keys(layout).length}
               >
-                {stepData && 'content' in stepData && <GuidedTourContent {...stepData.content} />}
+                {stepData?.content ? <GuidedTourContent {...stepData.content} /> : null}
               </GuidedTourStepper>
             </Box>
             {!(!hasStepAfter && !hasSectionAfter) && (
@@ -154,7 +146,7 @@ const ModalWrapper = styled(Flex)`
 `;
 
 interface StepData {
-  trackingEvent?: string;
+  trackingEvent?: TrackingEvents;
   title?: GuidedTourStepperProps['title'];
   cta?: GuidedTourStepperProps['cta'];
   content?: GuidedTourContentProps;
