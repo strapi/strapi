@@ -10,7 +10,7 @@ import { type MessageDescriptor, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useGetLocalesQuery } from '../services/locales';
+import { Locale } from '../../../shared/contracts/locales';
 import { getTranslation } from '../utils/getTranslation';
 
 import { LocaleStatus } from './CMHeaderActions';
@@ -38,8 +38,8 @@ const isMessageDescriptor = (obj: unknown): obj is MessageDescriptor => {
 
   return (
     typeof obj === 'object' &&
-    (typeof possibleMessageDescriptor.id === 'string' ||
-      typeof possibleMessageDescriptor.defaultMessage === 'string')
+    typeof possibleMessageDescriptor.id === 'string' &&
+    typeof possibleMessageDescriptor.defaultMessage === 'string'
   );
 };
 
@@ -129,6 +129,7 @@ interface BulkLocaleActionModalProps {
     name: string;
   }[];
   onClose: () => void;
+  localesMetadata: Locale[];
   validationErrors?: Record<
     Modules.Documents.Params.Locale.StringNotation,
     Record<string, MessageDescriptor>
@@ -138,12 +139,12 @@ interface BulkLocaleActionModalProps {
 const BulkLocaleActionModal = ({
   headers,
   rows,
+  localesMetadata,
   onClose,
   validationErrors = {},
 }: BulkLocaleActionModalProps) => {
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
-  const { data: locales = [] } = useGetLocalesQuery();
 
   const selectedRows: LocaleStatus[] = useTable(
     'BulkLocaleActionModal',
@@ -212,8 +213,8 @@ const BulkLocaleActionModal = ({
                   <Table.CheckboxCell id={locale} aria-label={`Select ${locale}`} />
                   <Table.Cell>
                     <Typography variant="sigma" textColor="neutral600">
-                      {Array.isArray(locales)
-                        ? locales.find((localeEntry) => localeEntry.code === locale)?.name
+                      {Array.isArray(localesMetadata)
+                        ? localesMetadata.find((localeEntry) => localeEntry.code === locale)?.name
                         : locale}
                     </Typography>
                   </Table.Cell>

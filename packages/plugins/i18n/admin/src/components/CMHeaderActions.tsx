@@ -27,6 +27,7 @@ import { capitalize } from '../utils/strings';
 
 import { BulkLocaleActionModal } from './BulkLocaleActionModal';
 
+import type { Locale } from '../../../shared/contracts/locales';
 import type { I18nBaseQuery } from '../types';
 
 /* -------------------------------------------------------------------------------------------------
@@ -272,6 +273,8 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     },
   });
 
+  const { data: localesMetadata = [] } = useGetLocalesQuery();
+
   // @ts-expect-error fix types
   const allDocuments: Modules.Documents.AnyDocument[] = React.useMemo(() => {
     return [document, ...(documentMeta?.availableLocales ?? [])];
@@ -322,6 +325,23 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
   }, [isDraftRelationsError, toggleNotification, formatAPIError]);
 
   const availableLocales = documentMeta?.availableLocales ?? [];
+
+  const onSelectedRowsChange = React.useCallback(
+    (selectedRows: LocaleStatus[]) => {
+      const newSelectedLocales = selectedRows
+        .filter(
+          (selectedRow) =>
+            selectedRow.status !== 'published' &&
+            !Object.keys(validationErrors).includes(selectedRow.locale)
+        )
+        .map((selectedRow) => selectedRow.locale);
+
+      if (JSON.stringify(newSelectedLocales) !== JSON.stringify(selectedLocales)) {
+        setSelectedLocales(newSelectedLocales);
+      }
+    },
+    [selectedLocales, validationErrors]
+  );
 
   if (!schema?.options?.draftAndPublish ?? false) {
     return null;
@@ -472,36 +492,26 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         id: getTranslation('CMEditViewBulkLocale.publish-title'),
         defaultMessage: 'Publish Multiple Locales',
       }),
-      content: ({ onClose }) => (
-        <Table.Root
-          onSelectedRowsChange={(selectedRows) => {
-            setSelectedLocales(
-              selectedRows
-                .filter(
-                  (selectedRow) =>
-                    // Filter out the already published locales as they don't need to be
-                    // sent in the request
-                    selectedRow.status !== 'published' &&
-                    // And those that have validation errors
-                    !Object.keys(validationErrors).includes(selectedRow.locale)
-                )
-                .map((selectedRow) => selectedRow.locale)
-            );
-          }}
-          headers={headers}
-          rows={rows.map((row) => ({
-            ...row,
-            id: row.locale,
-          }))}
-        >
-          <BulkLocaleActionModal
-            validationErrors={validationErrors}
+      content: ({ onClose }) => {
+        return (
+          <Table.Root
+            onSelectedRowsChange={onSelectedRowsChange}
             headers={headers}
-            rows={rows}
-            onClose={onClose}
-          />
-        </Table.Root>
-      ),
+            rows={rows.map((row) => ({
+              ...row,
+              id: row.locale,
+            }))}
+          >
+            <BulkLocaleActionModal
+              validationErrors={validationErrors}
+              headers={headers}
+              rows={rows}
+              onClose={onClose}
+              localesMetadata={localesMetadata as Locale[]}
+            />
+          </Table.Root>
+        );
+      },
       footer: () => {
         return (
           <Flex justifyContent="flex-end">
