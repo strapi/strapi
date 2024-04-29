@@ -79,7 +79,6 @@
     "@babel/core": "^7.20.12",
     "@babel/eslint-parser": "^7.19.1",
     "@babel/preset-react": "7.18.6",
-    "@playwright/test": "1.38.1",
     "@strapi/admin-test-utils": "workspace:*",
     "@strapi/eslint-config": "0.2.0",
     "@swc/cli": "0.1.62",
@@ -146,5 +145,8 @@
     "node": ">=18.0.0 <=20.x.x",
     "npm": ">=6.0.0"
   },
-  "isStrapiMonorepo": true
+  "isStrapiMonorepo": true,
+  "dependencies": {
+    "@playwright/test": "1.43.1"
+  }
 }

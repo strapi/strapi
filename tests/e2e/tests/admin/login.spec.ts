@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { toggleRateLimiting } from '../../utils/rate-limit';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, TITLE_LOGIN } from '../../constants';
 import { login } from '../../utils/login';
 
 test.describe('Login', () => {
@@ -14,26 +14,33 @@ test.describe('Login', () => {
     test('A user should be able to log in with or without making their authentication persistent', async ({
       page,
       context,
+      browser,
     }) => {
       // Test without making user authentication persistent
       await login({ page });
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle(TITLE_HOME);
 
+      // Close the page and open a new one
       await page.close();
-
-      page = await context.newPage();
-      await page.goto('/admin');
-      await expect(page).toHaveTitle('Strapi Admin');
+      const nonPersistentPage = await context.newPage();
+      await Promise.all([
+        nonPersistentPage.waitForLoadState('networkidle'),
+        nonPersistentPage.goto('/admin'),
+      ]);
+      await expect(nonPersistentPage).toHaveTitle(TITLE_LOGIN);
 
       // Test with making user authentication persistent
-      await login({ page, rememberMe: true });
-      await expect(page).toHaveTitle('Homepage');
+      await login({ page: nonPersistentPage, rememberMe: true });
+      await expect(nonPersistentPage).toHaveTitle(TITLE_HOME);
 
-      await page.close();
-
-      page = await context.newPage();
-      await page.goto('/admin');
-      await expect(page).toHaveTitle('Homepage');
+      // Close the page and open a new one
+      await nonPersistentPage.close();
+      const persistentPage = await context.newPage();
+      await Promise.all([
+        persistentPage.waitForLoadState('networkidle'),
+        persistentPage.goto('/admin'),
+      ]);
+      await expect(persistentPage).toHaveTitle(TITLE_HOME);
     });
   });
 

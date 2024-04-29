@@ -30,7 +30,6 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
 describeOnCondition(edition === 'EE')('Release page', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
     await login({ page });
 
     await page.getByRole('link', { name: 'Releases' }).click();

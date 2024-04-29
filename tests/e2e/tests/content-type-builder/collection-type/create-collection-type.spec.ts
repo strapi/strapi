@@ -8,7 +8,6 @@ test.describe('Create collection type', () => {
   test.beforeEach(async ({ page }) => {
     await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
     await login({ page });
 
     await page.getByRole('link', { name: 'Content-Type Builder' }).click();

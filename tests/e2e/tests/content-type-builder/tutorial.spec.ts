@@ -5,7 +5,6 @@ import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 test.describe('Tutorial', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.goto('/admin');
     await login({ page });
   });
 

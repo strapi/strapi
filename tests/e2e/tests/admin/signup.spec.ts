@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME } from '../../constants';
 
 /**
  * Fill in the sign up form with valid values
@@ -26,7 +26,7 @@ export const fillValidSignUpForm = async ({ page }) => {
 test.describe('Sign Up', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('without-admin.tar');
-    await page.goto('/admin');
+    await page.goto('/admin', { waitUntil: 'networkidle' });
     await fillValidSignUpForm({ page });
   });
 
@@ -94,8 +94,11 @@ test.describe('Sign Up', () => {
   test('a user should be able to signup when the strapi instance starts fresh', async ({
     page,
   }) => {
-    await page.getByRole('button', { name: "Let's start" }).click();
+    await Promise.all([
+      page.waitForLoadState('networkidle'),
+      page.getByRole('button', { name: "Let's start" }).click(),
+    ]);
 
-    await expect(page).toHaveTitle('Homepage');
+    await expect(page).toHaveTitle(TITLE_HOME);
   });
 });
