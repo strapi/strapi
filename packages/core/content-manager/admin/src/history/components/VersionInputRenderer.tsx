@@ -342,12 +342,13 @@ const VersionInputRenderer = ({
       });
 
       return (
-        <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled}>
-          {(name) => (
-            <ComponentLayout name={name} layout={[...layout, ...remainingFieldsLayout]}>
-              {(inputProps) => <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />}
-            </ComponentLayout>
-          )}
+        <ComponentInput
+          {...props}
+          layout={[...layout, ...remainingFieldsLayout]}
+          hint={hint}
+          disabled={fieldIsDisabled}
+        >
+          {(inputProps) => <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />}
         </ComponentInput>
       );
     case 'dynamiczone':

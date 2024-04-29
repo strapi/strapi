@@ -10,6 +10,7 @@ import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
+import { type InputRendererProps } from '../../InputRenderer';
 
 import { Initializer } from './Initializer';
 import { NonRepeatableComponent } from './NonRepeatable';
@@ -19,7 +20,8 @@ interface ComponentInputProps
   extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {
   labelAction?: React.ReactNode;
-  children: (name: string) => React.ReactNode;
+  children: (name: InputRendererProps) => React.ReactNode;
+  layout: EditFieldLayout[][];
 }
 
 const ComponentInput = ({

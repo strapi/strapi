@@ -30,6 +30,7 @@ import { createDefaultForm } from '../../../utils/forms';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
+import { ComponentLayout } from './Layout';
 
 import type { ComponentInputProps } from './Input';
 import type { Schema } from '@strapi/types';
@@ -46,6 +47,7 @@ const RepeatableComponent = ({
   name,
   mainField,
   children,
+  layout,
 }: RepeatableComponentProps) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
@@ -236,7 +238,9 @@ const RepeatableComponent = ({
                   onDropItem={handleDropItem}
                   onGrabItem={handleGrabItem}
                 >
-                  {children(nameWithIndex)}
+                  <ComponentLayout layout={layout} name={nameWithIndex}>
+                    {(inputProps) => children(inputProps)}
+                  </ComponentLayout>
                 </Component>
               </ComponentProvider>
             );
