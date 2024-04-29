@@ -98,11 +98,29 @@ const createYupSchema = (
               return {
                 ...acc,
                 [name]: transformSchema(
-                  yup.array().of(
-                    yup.object().shape({
-                      id: yup.string().required(),
-                    })
-                  )
+                  yup.lazy((value) => {
+                    if (!value) {
+                      return yup.mixed().nullable(true);
+                    } else if (Array.isArray(value)) {
+                      return yup.array().of(
+                        yup.object().shape({
+                          id: yup.string().required(),
+                        })
+                      );
+                    } else if (typeof value === 'object' && value !== null) {
+                      return yup.object().shape({
+                        count: yup.number().required(),
+                      });
+                    } else {
+                      return yup
+                        .mixed()
+                        .test(
+                          'type-error',
+                          'Value must be either an array of objects with {id} or an object with {count}',
+                          () => false
+                        );
+                    }
+                  })
                 ),
               };
             default:
@@ -199,7 +217,7 @@ const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
     });
   }
 
-  return schema.nullable();
+  return schema?.nullable ? schema.nullable() : schema;
 };
 
 const addMinLengthValidation: ValidationFn =

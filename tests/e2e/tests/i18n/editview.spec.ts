@@ -306,7 +306,6 @@ test.describe('Edit view', () => {
       .getByLabel('Select all entries')
       .click();
 
-    // TODO __** this is failing because of validation errors in the modal. it expects authors to be set
     await expect(page.getByText('2 entries Ready to publish')).toBeVisible();
     await page
       .getByLabel('Publish Multiple Locales')

@@ -246,21 +246,24 @@ export type LocaleStatus = {
 };
 
 const BulkLocalePublishAction: DocumentActionComponent = ({
-  document,
+  document: baseDocument,
   documentId,
   model,
   collectionType,
 }) => {
+  const baseLocale = baseDocument?.locale ?? null;
+
   const { formatMessage } = useIntl();
   const { hasI18n, canPublish } = useI18n();
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const [selectedLocales, setSelectedLocales] = React.useState<string[]>([]);
+  const [selectedRows, setSelectedRows] = React.useState<any[]>([]);
   const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
 
   const { bulkPublish: bulkPublishAction } = useDocumentActions();
   const {
+    document,
     meta: documentMeta,
     schema,
     validate,
@@ -269,147 +272,11 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     collectionType,
     documentId,
     params: {
-      locale: document?.locale,
+      locale: baseLocale,
     },
   });
 
   const { data: localesMetadata = [] } = useGetLocalesQuery();
-
-  // @ts-expect-error fix types
-  const allDocuments: Modules.Documents.AnyDocument[] = React.useMemo(() => {
-    return [document, ...(documentMeta?.availableLocales ?? [])];
-  }, [document, documentMeta?.availableLocales]);
-
-  const validationErrors = React.useMemo(() => {
-    const errors: Record<
-      Modules.Documents.Params.Locale.StringNotation,
-      Record<string, MessageDescriptor>
-    > = {};
-
-    if (allDocuments) {
-      allDocuments.map((document) => {
-        const validation = validate(document);
-        if (validation !== null) {
-          errors[document.locale] = validation;
-        }
-
-        return;
-      });
-    }
-
-    return errors;
-  }, [allDocuments, validate]);
-
-  const {
-    data: draftRelationsCount = 0,
-    isLoading: isDraftRelationsLoading,
-    error: isDraftRelationsError,
-  } = useGetManyDraftRelationCountQuery(
-    {
-      model,
-      documentIds: [documentId!],
-      locale: selectedLocales,
-    },
-    {
-      skip: !documentId || selectedLocales.length === 0,
-    }
-  );
-
-  React.useEffect(() => {
-    if (isDraftRelationsError) {
-      toggleNotification({
-        type: 'danger',
-        message: formatAPIError(isDraftRelationsError),
-      });
-    }
-  }, [isDraftRelationsError, toggleNotification, formatAPIError]);
-
-  const availableLocales = documentMeta?.availableLocales ?? [];
-
-  const onSelectedRowsChange = React.useCallback(
-    (selectedRows: LocaleStatus[]) => {
-      const newSelectedLocales = selectedRows
-        .filter(
-          (selectedRow) =>
-            selectedRow.status !== 'published' &&
-            !Object.keys(validationErrors).includes(selectedRow.locale)
-        )
-        .map((selectedRow) => selectedRow.locale);
-
-      if (JSON.stringify(newSelectedLocales) !== JSON.stringify(selectedLocales)) {
-        setSelectedLocales(newSelectedLocales);
-      }
-    },
-    [selectedLocales, validationErrors]
-  );
-
-  if (!schema?.options?.draftAndPublish ?? false) {
-    return null;
-  }
-
-  if (!hasI18n) {
-    return null;
-  }
-
-  if (!documentId) {
-    return null;
-  }
-
-  if (!canPublish) {
-    return null;
-  }
-
-  // This document action can be enabled given that draft and publish and i18n are
-  // enabled and we can publish the current locale.
-  // In the modal that follows, the user will be able to see which locales are
-  // available for publication.
-  const rows: LocaleStatus[] = availableLocales.map((doc) => {
-    const { locale, status } = doc;
-
-    return { locale, status };
-  });
-  rows.unshift({
-    locale: document?.locale ?? '',
-    status: document?.status ?? 'draft',
-  });
-
-  const publish = async () => {
-    try {
-      const bulkPublishRes = await bulkPublishAction({
-        model,
-        documentIds: [documentId],
-        params: {
-          locale: selectedLocales,
-        },
-      });
-
-      if ('error' in bulkPublishRes) {
-        toggleNotification({
-          type: 'danger',
-          message: formatAPIError(bulkPublishRes.error),
-        });
-        return;
-      }
-
-      setSelectedLocales([]);
-    } catch (error) {
-      toggleNotification({
-        type: 'danger',
-        message: formatMessage({
-          id: 'notification.error',
-          defaultMessage: 'An error occurred',
-        }),
-      });
-    }
-  };
-
-  const handleAction = async () => {
-    if (draftRelationsCount > 0) {
-      setIsConfirmationOpen(true);
-    } else {
-      await publish();
-    }
-  };
 
   const headers = [
     {
@@ -434,6 +301,133 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       name: 'publication-status',
     },
   ];
+
+  const [rows, validationErrors] = React.useMemo(() => {
+    if (!document || !documentMeta?.availableLocales) {
+      return [[], {}];
+    }
+
+    const rowsFromMeta: LocaleStatus[] = documentMeta?.availableLocales.map((doc) => {
+      const { locale, status } = doc;
+
+      return { locale, status };
+    });
+    rowsFromMeta.unshift({
+      locale: document?.locale ?? '',
+      status: document?.status ?? 'draft',
+    });
+
+    const allDocuments = [document, ...(documentMeta?.availableLocales ?? [])];
+
+    const errors: Record<
+      Modules.Documents.Params.Locale.StringNotation,
+      Record<string, MessageDescriptor>
+    > = {};
+
+    allDocuments.map((document) => {
+      if (!document) {
+        return document;
+      }
+
+      const validation = validate(document as Modules.Documents.AnyDocument);
+      if (validation !== null) {
+        errors[document.locale] = validation;
+      }
+
+      return document;
+    });
+
+    return [rowsFromMeta, errors];
+  }, [document, documentMeta?.availableLocales, validate]);
+
+  const localesToPublish = selectedRows
+    .filter(
+      (selectedRow) =>
+        selectedRow.status !== 'published' &&
+        !Object.keys(validationErrors || {}).includes(selectedRow.locale)
+    )
+    .map((selectedRow) => selectedRow.locale);
+
+  const {
+    data: draftRelationsCount = 0,
+    isLoading: isDraftRelationsLoading,
+    error: isDraftRelationsError,
+  } = useGetManyDraftRelationCountQuery(
+    {
+      model,
+      documentIds: [documentId!],
+      locale: localesToPublish,
+    },
+    {
+      skip: !documentId || localesToPublish.length === 0,
+    }
+  );
+
+  React.useEffect(() => {
+    if (isDraftRelationsError) {
+      toggleNotification({
+        type: 'danger',
+        message: formatAPIError(isDraftRelationsError),
+      });
+    }
+  }, [isDraftRelationsError, toggleNotification, formatAPIError]);
+
+  if (!schema?.options?.draftAndPublish ?? false) {
+    return null;
+  }
+
+  if (!hasI18n) {
+    return null;
+  }
+
+  if (!documentId) {
+    return null;
+  }
+
+  if (!canPublish) {
+    return null;
+  }
+
+  // This document action can be enabled given that draft and publish and i18n are
+  // enabled and we can publish the current locale.
+  // In the modal that follows, the user will be able to see which locales are
+  // available for publication.
+
+  const publish = async () => {
+    try {
+      const bulkPublishRes = await bulkPublishAction({
+        model,
+        documentIds: [documentId],
+        params: {
+          locale: localesToPublish,
+        },
+      });
+
+      if ('error' in bulkPublishRes) {
+        toggleNotification({
+          type: 'danger',
+          message: formatAPIError(bulkPublishRes.error),
+        });
+        return;
+      }
+    } catch (error) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        }),
+      });
+    }
+  };
+
+  const handleAction = async () => {
+    if (draftRelationsCount > 0) {
+      setIsConfirmationOpen(true);
+    } else {
+      await publish();
+    }
+  };
 
   const isUnpublish = document?.status === 'published';
   if (isUnpublish) {
@@ -495,12 +489,13 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       content: ({ onClose }) => {
         return (
           <Table.Root
-            onSelectedRowsChange={onSelectedRowsChange}
             headers={headers}
             rows={rows.map((row) => ({
               ...row,
               id: row.locale,
             }))}
+            selectedRows={selectedRows}
+            onSelectedRowsChange={(tableSelectedRows) => setSelectedRows(tableSelectedRows)}
           >
             <BulkLocaleActionModal
               validationErrors={validationErrors}
@@ -512,23 +507,21 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
           </Table.Root>
         );
       },
-      footer: () => {
-        return (
-          <Flex justifyContent="flex-end">
-            <Button
-              loading={isDraftRelationsLoading}
-              disabled={selectedLocales.length === 0}
-              variant="default"
-              onClick={handleAction}
-            >
-              {formatMessage({
-                id: 'app.utils.publish',
-                defaultMessage: 'Publish',
-              })}
-            </Button>
-          </Flex>
-        );
-      },
+      footer: () => (
+        <Flex justifyContent="flex-end">
+          <Button
+            loading={isDraftRelationsLoading}
+            disabled={localesToPublish.length === 0}
+            variant="default"
+            onClick={handleAction}
+          >
+            {formatMessage({
+              id: 'app.utils.publish',
+              defaultMessage: 'Publish',
+            })}
+          </Button>
+        </Flex>
+      ),
     },
   };
 };
