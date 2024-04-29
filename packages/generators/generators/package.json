@@ -50,13 +50,14 @@
     "@strapi/utils": "5.0.0-beta.5",
     "chalk": "4.1.2",
     "copyfiles": "2.4.1",
-    "fs-extra": "10.1.0",
+    "fs-extra": "11.2.0",
     "node-plop": "0.26.3",
     "plop": "2.7.6",
     "pluralize": "8.0.0"
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
+    "@types/fs-extra": "11.0.4",
     "eslint-config-custom": "5.0.0-beta.5",
     "tsconfig": "5.0.0-beta.5"
   },
