@@ -81,7 +81,7 @@ export function cloudApiFactory(token?: string): CloudApiService {
       return {
         data: {
           id: response.data.id,
-          name: response.data.displayName,
+          name: response.data.name,
           nodeVersion: response.data.nodeVersion,
           region: response.data.region,
         },

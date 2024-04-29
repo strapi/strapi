@@ -35,14 +35,21 @@ export async function handleCloudProject(projectName: string): Promise<void> {
       cwd: process.cwd(),
     };
     const tokenService = cloudServices.tokenServiceFactory(cliContext);
+    const projectCreationSpinner = logger.spinner('Creating project on Strapi Cloud');
 
     try {
       await cloudCli.login.action(cliContext);
+      logger.debug('Retrieving token');
       const token = await tokenService.retrieveToken();
 
       const cloudApiService = cloudServices.cloudApiFactory(token);
+
+      logger.debug('Retrieving config');
       const { data: config } = await cloudApiService.config();
+      logger.debug('config', config);
       const defaultProjectValues = config.projectCreation?.defaults || {};
+      logger.debug('default project values', defaultProjectValues);
+      projectCreationSpinner.start();
       const { data: project } = await cloudApiService.createProject({
         nodeVersion: process.versions?.node?.slice(1, 3) || '20',
         region: 'NYC',
@@ -50,7 +57,9 @@ export async function handleCloudProject(projectName: string): Promise<void> {
         ...defaultProjectValues,
         name: projectName,
       });
+      projectCreationSpinner.succeed('Project created on Strapi Cloud');
       const projectPath = resolve(projectName);
+      logger.debug(project, projectPath);
       cloudServices.local.save({ project }, { directoryPath: projectPath });
     } catch (e: Error | CloudError | unknown) {
       logger.debug(e);
@@ -61,7 +70,11 @@ export async function handleCloudProject(projectName: string): Promise<void> {
             typeof e.response.data === 'string'
               ? e.response.data
               : 'We are sorry, but we are not able to create a Strapi Cloud project for you at the moment.';
-          logger.warn(message);
+          if (projectCreationSpinner.isSpinning) {
+            projectCreationSpinner.fail(message);
+          } else {
+            logger.warn(message);
+          }
           return;
         }
       } catch (e) {
