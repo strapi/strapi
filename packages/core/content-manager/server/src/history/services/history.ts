@@ -205,7 +205,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
           onCommit(() => {
             this.createVersion({
               contentType: contentTypeUid,
-              data: omit(FIELDS_TO_IGNORE, document),
+              data: omit(FIELDS_TO_IGNORE, document) as Modules.Documents.AnyDocument,
               schema: omit(FIELDS_TO_IGNORE, attributesSchema),
               componentsSchemas,
               relatedDocumentId: documentContext.documentId,
@@ -273,22 +273,18 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         getLocaleDictionary(),
       ]);
 
-      type EntryToPopulate =
-        | {
-            documentId: string;
-            locale: string | null;
-          }
-        | { id: Data.ID }
-        | null;
-
       /**
        * Get an object with two keys:
        * - results: an array with the current values of the relations
        * - meta: an object with the count of missing relations
        */
+      // TODO: Move outside this function to utils
       const buildRelationReponse = async (
-        values: EntryToPopulate[],
-        attributeSchema: Schema.Attribute.AnyAttribute
+        values: {
+          documentId: string;
+          locale: string | null;
+        }[],
+        attributeSchema: Schema.Attribute.RelationWithTarget
       ): Promise<{ results: any[]; meta: { missingCount: number } }> => {
         return (
           values
@@ -303,47 +299,65 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                   return currentRelationData;
                 }
 
-                const isNormalRelation =
-                  attributeSchema.type === 'relation' &&
-                  attributeSchema.relation !== 'morphToOne' &&
-                  attributeSchema.relation !== 'morphToMany';
+                const relatedEntry = await strapi
+                  .documents(attributeSchema.target)
+                  .findOne({ documentId: entry.documentId, locale: entry.locale || undefined });
 
-                /**
-                 * Adapt the query depending on if the attribute is a media
-                 * or a normal relation. The extra checks are only for type narrowing
-                 */
-                let relatedEntry;
-                if (isNormalRelation) {
-                  if ('documentId' in entry) {
-                    const relation = await strapi
-                      .documents(attributeSchema.target)
-                      .findOne({ documentId: entry.documentId, locale: entry.locale || undefined });
+                const permissionChecker = getContentManagerService('permission-checker').create({
+                  userAbility: params.state.userAbility,
+                  model: attributeSchema.target,
+                });
 
-                    const permissionChecker = getContentManagerService('permission-checker').create(
-                      {
-                        userAbility: params.state.userAbility,
-                        model: attributeSchema.target,
-                      }
-                    );
+                const sanitizedEntry = await permissionChecker.sanitizeOutput(relatedEntry);
 
-                    relatedEntry = await permissionChecker.sanitizeOutput(relation);
-                  }
-                  // For media assets, only the id is available, double check that we have it
-                } else if ('id' in entry) {
-                  relatedEntry = await strapi.db
-                    .query('plugin::upload.file')
-                    .findOne({ where: { id: entry.id } });
+                if (sanitizedEntry) {
+                  currentRelationData.results.push({
+                    ...sanitizedEntry,
+                    status: await getVersionStatus(attributeSchema.target, sanitizedEntry),
+                  });
+                } else {
+                  // The related content has been deleted
+                  currentRelationData.meta.missingCount += 1;
                 }
 
+                return currentRelationData;
+              },
+              Promise.resolve({
+                results: [] as any[],
+                meta: { missingCount: 0 },
+              })
+            )
+        );
+      };
+
+      /**
+       * Get an object with two keys:
+       * - results: an array with the current values of the relations
+       * - meta: an object with the count of missing relations
+       */
+      // TODO: Move outside this function to utils
+      const buildMediaResponse = async (
+        values: { id: Data.ID }[]
+      ): Promise<{ results: any[]; meta: { missingCount: number } }> => {
+        return (
+          values
+            // Until we implement proper pagination, limit relations to an arbitrary amount
+            .slice(0, 25)
+            .reduce(
+              async (currentRelationDataPromise, entry) => {
+                const currentRelationData = await currentRelationDataPromise;
+
+                // Entry can be null if it's a toOne relation
+                if (!entry) {
+                  return currentRelationData;
+                }
+
+                const relatedEntry = await strapi.db
+                  .query('plugin::upload.file')
+                  .findOne({ where: { id: entry.id } });
+
                 if (relatedEntry) {
-                  currentRelationData.results.push({
-                    ...relatedEntry,
-                    ...(isNormalRelation
-                      ? {
-                          status: await getVersionStatus(attributeSchema.target, relatedEntry),
-                        }
-                      : {}),
-                  });
+                  currentRelationData.results.push(relatedEntry);
                 } else {
                   // The related content has been deleted
                   currentRelationData.meta.missingCount += 1;
@@ -367,14 +381,12 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             const attributeValue = entry.data[attributeKey];
             const attributeValues = Array.isArray(attributeValue)
               ? attributeValue
-              : ([attributeValue] as EntryToPopulate[]);
+              : [attributeValue];
 
             if (attributeSchema.type === 'media') {
-              const relationResponse = await buildRelationReponse(attributeValues, attributeSchema);
-
               return {
                 ...(await currentDataWithRelations),
-                [attributeKey]: relationResponse,
+                [attributeKey]: await buildMediaResponse(attributeValues),
               };
             }
 
@@ -391,6 +403,10 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
               if (attributeSchema.target === 'admin::user') {
                 const sanitizedAdminUser = await Promise.all(
                   attributeValues.map(async (userToPopulate) => {
+                    if (userToPopulate == null) {
+                      return null;
+                    }
+
                     const user = await strapi
                       .query('admin::user')
                       .findOne({ where: { id: userToPopulate.id } });
@@ -401,7 +417,6 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                         model: 'admin::user',
                       }
                     );
-
                     const sanitizedUser = await permissionChecker.sanitizeOutput(user);
 
                     return sanitizedUser;
@@ -410,6 +425,13 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
                 return {
                   ...(await currentDataWithRelations),
+                  /**
+                   * TODO:
+                   *
+                   * Ideally we would return the same "{results: [], meta: {}}" shape, however,
+                   * when sanitizing the data as a whole in the controller before sending to the client,
+                   * the data for admin relation user is completely sanitized if we return an object here as opposed to an array.
+                   */
                   [attributeKey]: sanitizedAdminUser,
                 };
               }
