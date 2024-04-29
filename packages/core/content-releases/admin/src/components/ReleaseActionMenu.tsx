@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { useAPIErrorHandler, useNotification, useAuth, useRBAC, isFetchError } from '@strapi/admin/strapi-admin';
+import {
+  useAPIErrorHandler,
+  useNotification,
+  useAuth,
+  useRBAC,
+  isFetchError,
+} from '@strapi/admin/strapi-admin';
 import { Flex, IconButton, Typography, Menu, Link } from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';

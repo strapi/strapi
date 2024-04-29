@@ -76,11 +76,14 @@ describe('Edit Locale', () => {
     );
 
     const { user } = render(<EditLocale {...LOCALE} />);
-    await user.click(screen.getByRole('button', { name: 'Edit English locale' }));
+    await user.click(await screen.findByRole('button', { name: 'Edit English locale' }));
 
-    await user.type(screen.getByRole('textbox', { name: 'Locale display name *' }), 'Afrikaans');
+    await user.type(
+      await screen.findByRole('textbox', { name: 'Locale display name *' }),
+      'Afrikaans'
+    );
 
-    fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Save' }));
 
     expect(await screen.findByText('Could not update locale')).toBeInTheDocument();
   });

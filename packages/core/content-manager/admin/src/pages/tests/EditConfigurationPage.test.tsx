@@ -110,7 +110,7 @@ describe('EditConfigurationPage', () => {
       expect(queryByRole('button', { name: 'Delete json' })).not.toBeInTheDocument();
     });
     await waitFor(() => {
-      expect(queryByRole('button', { name: 'Edit json' })).not.toBeInTheDocument();;
+      expect(queryByRole('button', { name: 'Edit json' })).not.toBeInTheDocument();
     });
 
     fireEvent.click(await findByRole('button', { name: 'Save' }));
