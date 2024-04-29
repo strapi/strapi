@@ -27,7 +27,8 @@ import {
   TableProps,
   RawTdProps,
 } from '@strapi/design-system';
-import { CarretDown, EmptyDocuments } from '@strapi/icons';
+import { CaretDown } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -224,7 +225,7 @@ interface SortIconProps {
   isUp: boolean;
 }
 
-const SortIcon = styled(CarretDown)<SortIconProps>`
+const SortIcon = styled(CaretDown)<SortIconProps>`
   transform: ${({ isUp }) => `rotate(${isUp ? '180' : '0'}deg)`};
 `;
 
@@ -330,7 +331,7 @@ const Empty = (props: Table.EmptyProps) => {
               defaultMessage: 'No content found',
             })}
             hasRadius
-            icon={<EmptyDocuments width="10rem" />}
+            icon={<EmptyDocuments width="16rem" />}
             {...props}
           />
         </Td>

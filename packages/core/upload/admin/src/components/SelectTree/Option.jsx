@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Flex, Icon, Typography } from '@strapi/design-system';
+import { Flex, Typography } from '@strapi/design-system';
 import { ChevronDown, ChevronUp } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -9,8 +9,8 @@ import styled from 'styled-components';
 
 const ToggleButton = styled(Flex)`
   align-self: flex-end;
-  height: ${22 / 16}rem;
-  width: ${28 / 16}rem;
+  height: 2.2rem;
+  width: 2.8rem;
 
   &:hover,
   &:focus {
@@ -23,6 +23,8 @@ const Option = ({ children, data, selectProps, ...props }) => {
   const { depth, value, children: options } = data;
   const { maxDisplayDepth, openValues, onOptionToggle } = selectProps;
   const isOpen = openValues.includes(value);
+
+  const Icon = isOpen ? ChevronUp : ChevronDown;
 
   return (
     <components.Option {...props}>
@@ -51,11 +53,7 @@ const Option = ({ children, data, selectProps, ...props }) => {
               onOptionToggle(value);
             }}
           >
-            <Icon
-              width={`${14 / 16}rem`}
-              color="neutral500"
-              as={isOpen ? ChevronUp : ChevronDown}
-            />
+            <Icon width="1.4rem" fill="neutral500" />
           </ToggleButton>
         )}
       </Flex>

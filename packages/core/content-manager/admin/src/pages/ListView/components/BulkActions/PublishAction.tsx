@@ -16,7 +16,6 @@ import {
   ModalFooter,
   IconButton,
   Flex,
-  Icon,
   Tooltip,
   Loader,
 } from '@strapi/design-system';
@@ -73,7 +72,7 @@ const EntryValidationText = ({
 
     return (
       <Flex gap={2}>
-        <Icon color="danger600" as={CrossCircle} />
+        <CrossCircle fill="danger600" />
         <Tooltip description={validationErrorsMessages}>
           <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
             {validationErrorsMessages}
@@ -86,7 +85,7 @@ const EntryValidationText = ({
   if (isPublished) {
     return (
       <Flex gap={2}>
-        <Icon color="success600" as={CheckCircle} />
+        <CheckCircle fill="success600" />
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
             id: 'content-manager.bulk-publish.already-published',
@@ -99,7 +98,7 @@ const EntryValidationText = ({
 
   return (
     <Flex gap={2}>
-      <Icon color="success600" as={CheckCircle} />
+      <CheckCircle fill="success600" />
       <Typography>
         {formatMessage({
           id: 'app.utils.ready-to-publish',

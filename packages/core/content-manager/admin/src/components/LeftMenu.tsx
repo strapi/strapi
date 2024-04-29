@@ -8,7 +8,7 @@ import {
   SubNavLink,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/v2';
+} from '@strapi/design-system';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';

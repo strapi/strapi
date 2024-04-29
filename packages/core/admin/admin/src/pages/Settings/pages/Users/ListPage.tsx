@@ -289,7 +289,7 @@ const TABLE_HEADERS: Array<
             color="neutral800"
             variant={isActive ? 'success' : 'danger'}
           >
-            {isActive ? 'Active' : 'Inactive'}
+            <Typography>{isActive ? 'Active' : 'Inactive'}</Typography>
           </Status>
         </Flex>
       );

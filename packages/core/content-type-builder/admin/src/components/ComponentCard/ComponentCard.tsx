@@ -20,11 +20,11 @@ const CloseButton = styled(Box)`
   position: absolute;
   display: none;
   top: 5px;
-  right: ${8 / 16}rem;
+  right: 0.8rem;
 
   svg {
-    width: ${10 / 16}rem;
-    height: ${10 / 16}rem;
+    width: 1rem;
+    height: 1rem;
 
     path {
       fill: ${({ theme }) => theme.colors.primary600};
@@ -33,8 +33,8 @@ const CloseButton = styled(Box)`
 `;
 
 const ComponentBox = styled(Flex)`
-  width: ${140 / 16}rem;
-  height: ${80 / 16}rem;
+  width: 14rem;
+  height: 8rem;
   position: relative;
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   background: ${({ theme }) => theme.colors.neutral100};

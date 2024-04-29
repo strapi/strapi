@@ -2,14 +2,11 @@ import * as React from 'react';
 
 import {
   useTracking,
-  useFetchClient,
   useStrapiApp,
   useNotification,
   NotificationConfig,
   DescriptionComponentRenderer,
-  useAPIErrorHandler,
   useTable,
-  useRBAC,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
@@ -25,12 +22,9 @@ import {
   Typography,
   Radio,
 } from '@strapi/design-system';
-import { Check, ExclamationMarkCircle, Trash } from '@strapi/icons';
-import { AxiosError, AxiosResponse } from 'axios';
+import { Check, WarningCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useQueryClient, useMutation } from 'react-query';
 
-import { Contracts } from '../../../../../../shared';
 import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useDocumentActions } from '../../../../hooks/useDocumentActions';
@@ -232,7 +226,7 @@ const BulkActionConfirmDialog = ({
 
   return (
     <Dialog isOpen={isOpen} title={title} onClose={handleClose}>
-      <DialogBody icon={<ExclamationMarkCircle />}>{content}</DialogBody>
+      <DialogBody icon={<WarningCircle />}>{content}</DialogBody>
       <DialogFooter
         startAction={
           <Button onClick={handleClose} variant="tertiary">

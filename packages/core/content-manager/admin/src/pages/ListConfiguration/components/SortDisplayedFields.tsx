@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useForm } from '@strapi/admin/strapi-admin';
 import { Box, Flex, VisuallyHidden, Typography } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system/v2';
+import { Menu } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
