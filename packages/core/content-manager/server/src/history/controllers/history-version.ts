@@ -65,9 +65,11 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         await permissionChecker.sanitizeQuery(ctx.query);
 
       const { results, pagination } = await getService(strapi, 'history').findVersionsPage({
-        query,
+        query: {
+          ...query,
+          ...getValidPagination({ page: query.page, pageSize: query.pageSize }),
+        },
         state: { userAbility: ctx.state.userAbility },
-        ...getValidPagination({ page: query.page, pageSize: query.pageSize }),
       });
 
       const sanitizedResults = await async.map(
