@@ -35,6 +35,10 @@ test.describe('Transfer Tokens', () => {
     await login({ page });
   });
 
+  test.afterAll(async ({ browser }) => {
+    page.close();
+  });
+
   // Test token creation
   const testCases = [
     ['30-day push token', '30 days', 'Push'],

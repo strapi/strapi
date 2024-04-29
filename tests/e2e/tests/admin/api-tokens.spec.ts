@@ -31,6 +31,10 @@ test.describe('API Tokens', () => {
     await login({ page });
   });
 
+  test.afterAll(async ({ browser }) => {
+    page.close();
+  });
+
   // Test token creation
   const testCases = [
     ['30-day Read-only token', '30 days', 'Read-only'],

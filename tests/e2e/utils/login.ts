@@ -28,7 +28,7 @@ export const login = async ({ page, rememberMe = false }: { page: Page; remember
   await waitForTitle(page, TITLE_HOME, 5000);
 };
 
-async function waitForTitle(page: Page, title: string, timeout = 5000) {
+export const waitForTitle = async (page: Page, title: string, timeout = 5000) => {
   for (let i = 0; i < timeout / 100; i++) {
     if ((await page.title()) === title) {
       return;
@@ -36,4 +36,4 @@ async function waitForTitle(page: Page, title: string, timeout = 5000) {
     await page.waitForTimeout(100);
   }
   throw new Error(`Title did not change to ${title} after ${timeout}ms`);
-}
+};

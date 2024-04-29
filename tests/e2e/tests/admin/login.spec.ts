@@ -23,7 +23,10 @@ test.describe('Login', () => {
       // Close the page and open a new one
       await page.close();
       const nonPersistentPage = await context.newPage();
-      await nonPersistentPage.goto('/admin');
+      await Promise.all([
+        nonPersistentPage.waitForLoadState('networkidle'),
+        nonPersistentPage.goto('/admin'),
+      ]);
       await expect(nonPersistentPage).toHaveTitle(TITLE_LOGIN);
 
       // Test with making user authentication persistent
@@ -33,7 +36,10 @@ test.describe('Login', () => {
       // Close the page and open a new one
       await nonPersistentPage.close();
       const persistentPage = await context.newPage();
-      await persistentPage.goto('/admin');
+      await Promise.all([
+        persistentPage.waitForLoadState('networkidle'),
+        persistentPage.goto('/admin'),
+      ]);
       await expect(persistentPage).toHaveTitle(TITLE_HOME);
     });
   });
