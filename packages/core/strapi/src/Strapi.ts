@@ -591,7 +591,7 @@ class Strapi implements StrapiI {
       contentTypes: this.contentTypes,
     });
 
-    await this.db.schema.sync();
+    // await this.db.schema.sync();
 
     if (this.EE) {
       await ee.checkLicense({ strapi: this });
