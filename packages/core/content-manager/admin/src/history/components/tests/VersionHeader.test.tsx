@@ -55,6 +55,8 @@ describe('VersionHeader', () => {
       componentsSchemas: {},
       locale: null,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'Test Title',
       },
       meta: {
@@ -138,6 +140,8 @@ describe('VersionHeader', () => {
       componentsSchemas: {},
       locale: null,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'Test Title',
       },
       meta: {
