@@ -231,8 +231,8 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
 interface SelectedEntriesModalContentProps
   extends Pick<SelectedEntriesTableContentProps, 'validationErrors'> {
   refetchModalData: UseQueryResult['refetch'];
-  setEntriesToFetch: React.Dispatch<React.SetStateAction<Document['id'][]>>;
-  setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Document['id'][]>>;
+  setEntriesToFetch: React.Dispatch<React.SetStateAction<Data.ID[]>>;
+  setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Data.ID[]>>;
   toggleModal: ConfirmDialogPublishAllProps['onToggleDialog'];
 }
 

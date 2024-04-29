@@ -143,14 +143,11 @@ type UseDocumentActions = () => {
     },
     discardDraft?: boolean
   ) => Promise<OperationResponse<Unpublish.Response>>;
-  unpublishMany: (
-    args: {
-      model: string;
-      documentIds: string[];
-      params?: object;
-    },
-    discardDraft?: boolean
-  ) => Promise<OperationResponse<BulkUnpublish.Response>>;
+  unpublishMany: (args: {
+    model: string;
+    documentIds: string[];
+    params?: object;
+  }) => Promise<OperationResponse<BulkUnpublish.Response>>;
 };
 
 type IUseDocumentActs = ReturnType<UseDocumentActions>;
