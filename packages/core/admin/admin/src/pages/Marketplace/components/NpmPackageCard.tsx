@@ -1,6 +1,6 @@
-import { Box, Flex, Icon, Tooltip, Typography, Divider, Button } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { CheckCircle, ExternalLink, Download, Github, Star, Check, Duplicate } from '@strapi/icons';
+import { Box, Flex, Tooltip, Typography, Divider, Button, LinkButton } from '@strapi/design-system';
+import { CheckCircle, ExternalLink, Download, Star, Check, Duplicate } from '@strapi/icons';
+import { GitHub } from '@strapi/icons/symbols';
 import pluralize from 'pluralize';
 import { useIntl } from 'react-intl';
 import * as semver from 'semver';
@@ -89,7 +89,10 @@ const NpmPackageCard = ({
         </Flex>
         <Box paddingTop={4}>
           <Typography as="h3" variant="delta">
-            <Flex alignItems="center">
+            <Flex
+              alignItems="center"
+              gap={attributes.validated && !attributes.madeByStrapi ? 2 : 1}
+            >
               {attributes.name}
               {attributes.validated && !attributes.madeByStrapi && (
                 <Tooltip
@@ -98,23 +101,18 @@ const NpmPackageCard = ({
                     defaultMessage: 'Plugin verified by Strapi',
                   })}
                 >
-                  <Flex>
-                    <Icon as={CheckCircle} marginLeft={2} color="success600" />
-                  </Flex>
+                  <CheckCircle fill="success600" />
                 </Tooltip>
               )}
               {attributes.madeByStrapi && (
                 <Tooltip description={madeByStrapiMessage}>
-                  <Flex>
-                    <Box
-                      as="img"
-                      src={StrapiLogo}
-                      alt={madeByStrapiMessage}
-                      marginLeft={1}
-                      width={6}
-                      height="auto"
-                    />
-                  </Flex>
+                  <Box
+                    as="img"
+                    src={StrapiLogo}
+                    alt={madeByStrapiMessage}
+                    width={6}
+                    height="auto"
+                  />
                 </Tooltip>
               )}
             </Flex>
@@ -200,15 +198,15 @@ const InstallPluginButton = ({
   // Already installed
   if (isInstalled) {
     return (
-      <Box paddingLeft={4}>
-        <Icon as={Check} marginRight={2} width={12} height={12} color="success600" />
+      <Flex gap={2} paddingLeft={4}>
+        <Check width="1.2rem" height="1.2rem" color="success600" />
         <Typography variant="omega" textColor="success600" fontWeight="bold">
           {formatMessage({
             id: 'admin.pages.MarketPlacePage.plugin.installed',
             defaultMessage: 'Installed',
           })}
         </Typography>
-      </Box>
+      </Flex>
     );
   }
 
@@ -320,14 +318,8 @@ const PackageStats = ({ githubStars = 0, npmDownloads = 0, npmPackageType }: Pac
     <Flex gap={1}>
       {!!githubStars && (
         <>
-          <Icon as={Github} height={`${12 / 16}rem`} width={`${12 / 16}rem`} aria-hidden />
-          <Icon
-            as={Star}
-            height={`${12 / 16}rem`}
-            width={`${12 / 16}rem`}
-            color="warning500"
-            aria-hidden
-          />
+          <GitHub height="1.2rem" width="1.2rem" aria-hidden />
+          <Star height="1.2rem" width="1.2rem" fill="warning500" aria-hidden />
           <p
             aria-label={formatMessage(
               {
@@ -347,7 +339,7 @@ const PackageStats = ({ githubStars = 0, npmDownloads = 0, npmPackageType }: Pac
           <VerticalDivider unsetMargin={false} />
         </>
       )}
-      <Icon as={Download} height={`${12 / 16}rem`} width={`${12 / 16}rem`} aria-hidden />
+      <Download height="1.2rem" width="1.2rem" aria-hidden />
       <p
         aria-label={formatMessage(
           {
@@ -369,7 +361,7 @@ const PackageStats = ({ githubStars = 0, npmDownloads = 0, npmPackageType }: Pac
 };
 
 const VerticalDivider = styled(Divider)`
-  width: ${12 / 16}rem;
+  width: 1.2rem;
   transform: rotate(90deg);
 `;
 

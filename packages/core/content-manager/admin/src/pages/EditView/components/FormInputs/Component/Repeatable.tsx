@@ -49,6 +49,7 @@ const RepeatableComponent = ({
   disabled,
   name,
   mainField,
+  renderInput,
 }: RepeatableComponentProps) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
@@ -226,6 +227,7 @@ const RepeatableComponent = ({
                   index={index}
                   isOpen={collapseToOpen === key}
                   mainField={mainField}
+                  renderInput={renderInput}
                   onMoveItem={handleMoveComponentField}
                   onClickToggle={handleToggle(key)}
                   onDeleteComponent={() => {
@@ -377,7 +379,7 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
-    Pick<RepeatableComponentProps, 'mainField'> {
+    Pick<RepeatableComponentProps, 'mainField' | 'renderInput'> {
   attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
@@ -401,6 +403,7 @@ const Component = ({
   onClickToggle,
   onDeleteComponent,
   toggleCollapses,
+  renderInput = InputRenderer,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
@@ -511,7 +514,7 @@ const Component = ({
 
                       return (
                         <GridItem col={size} key={completeFieldName} s={12} xs={12}>
-                          <InputRenderer {...field} name={completeFieldName} />
+                          {renderInput({ ...field, name: completeFieldName })}
                         </GridItem>
                       );
                     })}

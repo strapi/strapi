@@ -11,7 +11,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Grid, List, Pencil, Plus } from '@strapi/icons';
+import { GridFour as Grid, List, Pencil, Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -131,7 +131,7 @@ export const BrowseStep = ({
                     background="neutral0"
                     hasRadius
                     borderColor="neutral200"
-                    height={`${32 / 16}rem`}
+                    height="3.2rem"
                   >
                     <BaseCheckbox
                       aria-label={formatMessage({

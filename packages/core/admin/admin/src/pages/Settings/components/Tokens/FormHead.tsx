@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Button, Flex, HeaderLayout } from '@strapi/design-system';
-import { Check, Refresh } from '@strapi/icons';
+import { Check, ArrowClockwise } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
@@ -64,7 +64,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
   return (
     <>
       <Button
-        startIcon={<Refresh />}
+        startIcon={<ArrowClockwise />}
         type="button"
         size="S"
         variant="tertiary"
@@ -86,7 +86,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
         })}
         endAction={
           <Button
-            startIcon={<Refresh />}
+            startIcon={<ArrowClockwise />}
             loading={isLoadingConfirmation}
             onClick={handleConfirmRegeneration}
           >

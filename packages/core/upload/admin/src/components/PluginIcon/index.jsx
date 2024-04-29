@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { Landscape } from '@strapi/icons';
+import { Images as Landscape } from '@strapi/icons';
 
 const PluginIcon = () => <Landscape />;
 

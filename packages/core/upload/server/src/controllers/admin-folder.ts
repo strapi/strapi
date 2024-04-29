@@ -94,9 +94,9 @@ export default {
       model: FOLDER_MODEL_UID,
     });
 
-    ctx.body = {
+    ctx.created({
       data: await permissionsManager.sanitizeOutput(folder),
-    };
+    });
   },
 
   async update(ctx: Context) {

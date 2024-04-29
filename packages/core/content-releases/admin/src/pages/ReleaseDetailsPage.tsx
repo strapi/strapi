@@ -11,6 +11,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  useStrapiApp,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -25,12 +26,13 @@ import {
   Badge,
   SingleSelect,
   SingleSelectOption,
-  Icon,
   Tooltip,
   EmptyStateLayout,
+  LinkButton,
+  Menu,
 } from '@strapi/design-system';
-import { LinkButton, Menu } from '@strapi/design-system/v2';
-import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
+import { CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
@@ -145,7 +147,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
 
     return (
       <Flex gap={2}>
-        <Icon color="danger600" as={CrossCircle} />
+        <CrossCircle fill="danger600" />
         <Tooltip description={validationErrorsMessages}>
           <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
             {validationErrorsMessages}
@@ -158,7 +160,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
   if (action == 'publish') {
     return (
       <Flex gap={2}>
-        <Icon color="success600" as={CheckCircle} />
+        <CheckCircle fill="success600" />
         {entry.publishedAt ? (
           <Typography textColor="success600" fontWeight="bold">
             {formatMessage({
@@ -180,7 +182,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
 
   return (
     <Flex gap={2}>
-      <Icon color="success600" as={CheckCircle} />
+      <CheckCircle fill="success600" />
       {!entry.publishedAt ? (
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
@@ -387,7 +389,7 @@ const ReleaseDetailsLayout = ({
                   TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
                   Refactor this once fixed in the DS
                 */}
-                <Menu.Content top={1} popoverPlacement="bottom-end">
+                <Menu.Content top={1} popoverPlacement="bottom-end" maxHeight={undefined}>
                   <Flex
                     alignItems="center"
                     justifyContent="center"
@@ -482,6 +484,7 @@ const ReleaseDetailsLayout = ({
  * ReleaseDetailsBody
  * -----------------------------------------------------------------------------------------------*/
 const GROUP_BY_OPTIONS = ['contentType', 'locale', 'action'] as const;
+const GROUP_BY_OPTIONS_NO_LOCALE = ['contentType', 'action'] as const;
 const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   if (value === 'locale') {
     return {
@@ -521,6 +524,22 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const {
     allowedActions: { canUpdate },
   } = useRBAC(PERMISSIONS);
+  const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
+
+  // TODO: Migrated displayedHeader to v5
+  const { hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } = runHookWaterfall(
+    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+    {
+      displayedHeaders: {
+        label: formatMessage({
+          id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+          defaultMessage: 'locale',
+        }),
+        name: 'locale',
+      },
+      hasI18nEnabled: false,
+    }
+  );
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -627,7 +646,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               })}
             </LinkButton>
           }
-          icon={<EmptyDocuments width="10rem" />}
+          icon={<EmptyDocuments width="16rem" />}
           content={formatMessage({
             id: 'content-releases.pages.Details.tab.emptyEntries',
             defaultMessage:
@@ -643,19 +662,13 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     defaultMessage: 'Group by',
   });
   const headers = [
+    // ...displayedHeaders,
     {
       label: formatMessage({
         id: 'content-releases.page.ReleaseDetails.table.header.label.name',
         defaultMessage: 'name',
       }),
       name: 'name',
-    },
-    {
-      label: formatMessage({
-        id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-        defaultMessage: 'locale',
-      }),
-      name: 'locale',
     },
     {
       label: formatMessage({
@@ -683,6 +696,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         ]
       : []),
   ];
+  const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
 
   return (
     <ContentLayout>
@@ -705,7 +719,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
             onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
           >
-            {GROUP_BY_OPTIONS.map((option) => (
+            {options.map((option) => (
               <SingleSelectOption key={option} value={option}>
                 {formatMessage(getGroupByOptionLabel(option))}
               </SingleSelectOption>
@@ -741,9 +755,12 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                             contentType.mainFieldValue || entry.id
                           }`}</Typography>
                         </Td>
-                        <Td width="10%">
-                          <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
-                        </Td>
+                        {hasI18nEnabled && (
+                          <Td width="10%">
+                            <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
+                          </Td>
+                        )}
+
                         <Td width="10%">
                           <Typography>{contentType.displayName || ''}</Typography>
                         </Td>

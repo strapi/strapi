@@ -59,9 +59,9 @@ export default {
       })
       .then(formatWorkflowToAdmin);
 
-    ctx.body = {
+    ctx.created({
       data: await sanitizeOutput(createdWorkflow),
-    };
+    });
   },
 
   /**

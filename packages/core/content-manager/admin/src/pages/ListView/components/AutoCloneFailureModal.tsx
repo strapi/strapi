@@ -1,4 +1,4 @@
-import { Box, Flex, Icon, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -59,13 +59,11 @@ const AutoCloneFailureModalBody = ({ prohibitedFields }: AutoCloneFailureModalBo
                 <Typography fontWeight="semiBold" as="li" key={index}>
                   {pathSegment}
                   {index !== fieldPath.length - 1 && (
-                    <Icon
-                      as={ChevronRight}
-                      color="neutral500"
-                      height={2}
-                      width={2}
-                      marginLeft={2}
-                      marginRight={2}
+                    <ChevronRight
+                      fill="neutral500"
+                      height="0.8rem"
+                      width="0.8rem"
+                      style={{ margin: '0 0.8rem' }}
                     />
                   )}
                 </Typography>
