@@ -264,21 +264,24 @@ const createHelpers = (db: Database) => {
         dropColumn(tableBuilder, removedColumn);
       }
 
-      // dropForeignKey also removes the index, so don't drop twice
-      const droppedForeignKeyNames = [
-        ...table.foreignKeys.removed.map((fk) => fk.name),
-        ...table.foreignKeys.updated.map((fk) => fk.name),
-      ];
+      // for mysql only, dropForeignKey also removes the index, so don't drop it twice
+      const isMySQL = db.config.connection.client === 'mysql';
+      const ignoreForeignKeyNames = isMySQL
+        ? [
+            ...table.foreignKeys.removed.map((fk) => fk.name),
+            ...table.foreignKeys.updated.map((fk) => fk.name),
+          ]
+        : [];
 
       for (const removedIndex of table.indexes.removed) {
-        if (!droppedForeignKeyNames.includes(removedIndex.name)) {
+        if (!ignoreForeignKeyNames.includes(removedIndex.name)) {
           debug(`Dropping index ${removedIndex.name} on ${table.name}`);
           dropIndex(tableBuilder, removedIndex);
         }
       }
 
       for (const updatedIndex of table.indexes.updated) {
-        if (!droppedForeignKeyNames.includes(updatedIndex.name)) {
+        if (!ignoreForeignKeyNames.includes(updatedIndex.name)) {
           debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
           dropIndex(tableBuilder, updatedIndex.object);
         }
