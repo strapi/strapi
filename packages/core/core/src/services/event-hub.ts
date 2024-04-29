@@ -92,7 +92,10 @@ export default function createEventHub(): EventHub {
     },
 
     removeAllListeners() {
-      return eventHub.destroy();
+      const destroy = eventHub.destroy();
+      // Re-add the default subscriber
+      subscribers.push(defaultSubscriber);
+      return destroy;
     },
 
     addListener(eventName, listener) {
