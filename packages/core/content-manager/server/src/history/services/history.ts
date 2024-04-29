@@ -351,12 +351,19 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                   return currentRelationData;
                 }
 
+                const permissionChecker = getContentManagerService('permission-checker').create({
+                  userAbility: params.state.userAbility,
+                  model: 'plugin::upload.file',
+                });
+
                 const relatedEntry = await strapi.db
                   .query('plugin::upload.file')
                   .findOne({ where: { id: entry.id } });
 
-                if (relatedEntry) {
-                  currentRelationData.results.push(relatedEntry);
+                const sanitizedEntry = await permissionChecker.sanitizeOutput(relatedEntry);
+
+                if (sanitizedEntry) {
+                  currentRelationData.results.push(sanitizedEntry);
                 } else {
                   // The related content has been deleted
                   currentRelationData.meta.missingCount += 1;
@@ -400,7 +407,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                * because pickAllowedAdminUserFields will sanitize the data in the controller.
                */
               if (attributeSchema.target === 'admin::user') {
-                const sanitizedAdminUsers = await Promise.all(
+                const adminUsers = await Promise.all(
                   attributeValues.map(async (userToPopulate) => {
                     if (userToPopulate == null) {
                       return null;
@@ -419,7 +426,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                    * when sanitizing the data as a whole in the controller before sending to the client,
                    * the data for admin relation user is completely sanitized if we return an object here as opposed to an array.
                    */
-                  [attributeKey]: sanitizedAdminUsers,
+                  [attributeKey]: adminUsers,
                 };
               }
 
