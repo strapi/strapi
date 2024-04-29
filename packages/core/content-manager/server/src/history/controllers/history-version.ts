@@ -70,18 +70,21 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         ...getValidPagination({ page: query.page, pageSize: query.pageSize }),
       });
 
-      const sanitizedResults = await async.map(results, async (version: any) => {
-        return {
-          ...version,
-          data: await permissionChecker.sanitizeOutput({
-            ...version.data,
-            locale: version.locale.code,
-          }),
-          createdBy: version.createdBy
-            ? pick(['id', 'firstname', 'lastname', 'username', 'email'], version.createdBy)
-            : undefined,
-        };
-      });
+      const sanitizedResults = await async.map(
+        results,
+        async (version: HistoryVersions.HistoryVersionDataResponse & { locale: string }) => {
+          return {
+            ...version,
+            data: await permissionChecker.sanitizeOutput({
+              ...version.data,
+              locale: version.locale.code,
+            }),
+            createdBy: version.createdBy
+              ? pick(['id', 'firstname', 'lastname', 'username', 'email'], version.createdBy)
+              : undefined,
+          };
+        }
+      );
 
       return {
         data: sanitizedResults,
