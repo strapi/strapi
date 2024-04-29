@@ -37,11 +37,7 @@ import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { CreateLocale } from '../../../shared/contracts/locales';
-import {
-  useCreateLocaleMutation,
-  useGetDefaultLocalesQuery,
-  useGetLocalesQuery,
-} from '../services/locales';
+import { useCreateLocaleMutation, useGetDefaultLocalesQuery } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';
 
@@ -258,8 +254,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { data: defaultLocales = [], error } = useGetDefaultLocalesQuery();
-  const { data: locales = [] } = useGetLocalesQuery();
+  const { data: defaultLocales, error } = useGetDefaultLocalesQuery();
 
   React.useEffect(() => {
     if (error) {
@@ -270,7 +265,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
     }
   }, [error, formatAPIError, toggleNotification]);
 
-  if (!Array.isArray(defaultLocales) || !Array.isArray(locales)) {
+  if (!Array.isArray(defaultLocales)) {
     return null;
   }
 

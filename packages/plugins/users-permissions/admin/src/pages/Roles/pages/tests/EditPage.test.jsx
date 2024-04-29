@@ -127,6 +127,11 @@ describe('Roles – EditPage', () => {
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(getByText('Role edited')).toBeInTheDocument());
+
+    /**
+     * @note the permissions are refetched, because we're mocking calls no real update will be made.
+     */
+    await waitFor(() => expect(getByRole('checkbox', { name: 'create' })).not.toBeChecked());
   });
 
   it('will update the Advanced Settings panel when you click on the cog icon of a specific permission', async () => {
