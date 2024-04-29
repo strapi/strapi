@@ -306,14 +306,14 @@ test.describe('Edit view', () => {
       .getByLabel('Select all entries')
       .click();
 
-    await expect(page.getByText('2 entries Ready to publish')).toBeVisible();
+    await expect(page.getByText('2 entries ready to publish')).toBeVisible();
     await page
       .getByLabel('Publish Multiple Locales')
       .getByRole('button', { name: 'Publish' })
       .click();
 
     // Assert that all locales are now published
-    await expect(page.locator('text=Already Published')).toHaveCount(2);
+    await expect(page.getByText('2 entries already published')).toBeVisible();
   });
 
   // TODO
