@@ -398,9 +398,14 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
             ) {
               /**
                * Don't build the relations response object for relations to admin users,
-               * because pickAllowedAdminUserFields sanitizati
+               * because pickAllowedAdminUserFields will sanitize the data in the controller.
                */
               if (attributeSchema.target === 'admin::user') {
+                const permissionChecker = getContentManagerService('permission-checker').create({
+                  userAbility: params.state.userAbility,
+                  model: 'admin::user',
+                });
+
                 const sanitizedAdminUser = await Promise.all(
                   attributeValues.map(async (userToPopulate) => {
                     if (userToPopulate == null) {
@@ -411,12 +416,6 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                       .query('admin::user')
                       .findOne({ where: { id: userToPopulate.id } });
 
-                    const permissionChecker = getContentManagerService('permission-checker').create(
-                      {
-                        userAbility: params.state.userAbility,
-                        model: 'admin::user',
-                      }
-                    );
                     const sanitizedUser = await permissionChecker.sanitizeOutput(user);
 
                     return sanitizedUser;
@@ -426,8 +425,6 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                 return {
                   ...(await currentDataWithRelations),
                   /**
-                   * TODO:
-                   *
                    * Ideally we would return the same "{results: [], meta: {}}" shape, however,
                    * when sanitizing the data as a whole in the controller before sending to the client,
                    * the data for admin relation user is completely sanitized if we return an object here as opposed to an array.
