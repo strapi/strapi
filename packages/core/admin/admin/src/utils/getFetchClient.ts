@@ -110,7 +110,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
     Authorization: `Bearer ${getToken()}`,
   };
 
-  const isFormDataRequest = (body: any) => body instanceof FormData;
+  const isFormDataRequest = (body: unknown) => body instanceof FormData;
   const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
 
   // This regular expression matches a string that starts with either "http://" or "https://" or any other protocol name in lower case letters, followed by "://" and ends with anything else
@@ -204,6 +204,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
       const createRequestUrl = makeCreateRequestUrl(options);
 
+      /**
+       * we have to remove the Content-Type value if it was a formData request
+       * the browser will automatically set the header value
+       */
       if (isFormDataRequest(data)) {
         headers.delete('Content-Type');
       }
@@ -228,6 +232,10 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
 
       const createRequestUrl = makeCreateRequestUrl(options);
 
+      /**
+       * we have to remove the Content-Type value if it was a formData request
+       * the browser will automatically set the header value
+       */
       if (isFormDataRequest(data)) {
         headers.delete('Content-Type');
       }
