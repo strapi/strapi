@@ -107,16 +107,15 @@ const createYupSchema = (
                           id: yup.string().required(),
                         })
                       );
-                    } else if (typeof value === 'object' && value !== null) {
-                      return yup.object().shape({
-                        count: yup.number().required(),
-                      });
+                    } else if (typeof value === 'object') {
+                      // TODO assert keys such as connect, disconnect, count etc
+                      return yup.object();
                     } else {
                       return yup
                         .mixed()
                         .test(
                           'type-error',
-                          'Value must be either an array of objects with {id} or an object with {count}',
+                          'Value must be either an array of objects with {id} or an object',
                           () => false
                         );
                     }
