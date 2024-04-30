@@ -13,6 +13,8 @@ import {
   Typography,
   KeyboardNavigable,
   useComposedRefs,
+  GridItem,
+  Grid,
 } from '@strapi/design-system';
 import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -30,7 +32,6 @@ import { createDefaultForm } from '../../../utils/forms';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
-import { ComponentLayout } from './Layout';
 
 import type { ComponentInputProps } from './Input';
 import type { Schema } from '@strapi/types';
@@ -237,9 +238,27 @@ const RepeatableComponent = ({
                   onDropItem={handleDropItem}
                   onGrabItem={handleGrabItem}
                 >
-                  <ComponentLayout layout={layout} name={nameWithIndex}>
-                    {(inputProps) => children(inputProps)}
-                  </ComponentLayout>
+                  {layout.map((row, index) => {
+                    return (
+                      <Grid gap={4} key={index}>
+                        {row.map(({ size, ...field }) => {
+                          /**
+                           * Layouts are built from schemas so they don't understand the complete
+                           * schema tree, for components we append the parent name to the field name
+                           * because this is the structure for the data & permissions also understand
+                           * the nesting involved.
+                           */
+                          const completeFieldName = `${nameWithIndex}.${field.name}`;
+
+                          return (
+                            <GridItem col={size} key={completeFieldName} s={12} xs={12}>
+                              {children({ ...field, name: completeFieldName })}
+                            </GridItem>
+                          );
+                        })}
+                      </Grid>
+                    );
+                  })}
                 </Component>
               </ComponentProvider>
             );

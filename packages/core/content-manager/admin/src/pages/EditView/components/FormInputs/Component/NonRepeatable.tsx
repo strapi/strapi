@@ -1,10 +1,7 @@
 import { useField } from '@strapi/admin/strapi-admin';
-import { Box, Flex } from '@strapi/design-system';
+import { Box, Flex, Grid, GridItem } from '@strapi/design-system';
 
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { ComponentProvider, useComponent } from '../ComponentContext';
-
-import { ComponentLayout } from './Layout';
 
 import type { ComponentInputProps } from './Input';
 
@@ -32,9 +29,27 @@ const NonRepeatableComponent = ({
         borderColor={isNested ? 'neutral200' : undefined}
       >
         <Flex direction="column" alignItems="stretch" gap={6}>
-          <ComponentLayout layout={layout} name={name}>
-            {(inputProps) => children(inputProps)}
-          </ComponentLayout>
+          {layout.map((row, index) => {
+            return (
+              <Grid gap={4} key={index}>
+                {row.map(({ size, ...field }) => {
+                  /**
+                   * Layouts are built from schemas so they don't understand the complete
+                   * schema tree, for components we append the parent name to the field name
+                   * because this is the structure for the data & permissions also understand
+                   * the nesting involved.
+                   */
+                  const completeFieldName = `${name}.${field.name}`;
+
+                  return (
+                    <GridItem col={size} key={completeFieldName} s={12} xs={12}>
+                      {children({ ...field, name: completeFieldName })}
+                    </GridItem>
+                  );
+                })}
+              </Grid>
+            );
+          })}
         </Flex>
       </Box>
     </ComponentProvider>
