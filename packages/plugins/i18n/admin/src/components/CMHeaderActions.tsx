@@ -253,6 +253,14 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
 }) => {
   const baseLocale = baseDocument?.locale ?? null;
 
+  const [
+    {
+      query: { status },
+    },
+  ] = useQueryParams<{ status: 'draft' | 'published' }>({
+    status: 'draft',
+  });
+  const isPublishedTab = status === 'published';
   const { formatMessage } = useIntl();
   const { hasI18n, canPublish } = useI18n();
   const { toggleNotification } = useNotification();
@@ -475,6 +483,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       defaultMessage: 'Publish Multiple Locales',
     }),
     icon: <ListPlus />,
+    disabled: isPublishedTab,
     position: ['panel'],
     variant: 'secondary',
     dialog: {
