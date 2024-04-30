@@ -153,7 +153,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Create an initial entry to also create an initial version
        */
-      await page.getByRole('link', { name: 'Content Manager' }).click()
+      await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
       await page.waitForURL(CREATE_URL);
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas');
