@@ -128,7 +128,7 @@ const transformPaginationInfo = (
   paginationInfo: Partial<PaginationArgs>,
   total: number
 ): PatinationInformation => {
-  if (paginationInfo.page) {
+  if (!isNil(paginationInfo.page)) {
     const page = paginationInfo.page;
     const pageSize = paginationInfo.pageSize ?? total;
 
@@ -140,7 +140,7 @@ const transformPaginationInfo = (
     };
   }
 
-  if (paginationInfo.start) {
+  if (!isNil(paginationInfo.start)) {
     const start = paginationInfo.start;
     const limit = paginationInfo.limit ?? total;
 

@@ -129,7 +129,5 @@ describe('Document Service', () => {
       const count = await strapi.documents('api::article.article').count(params);
       expect(count).toBe(articles.length);
     });
-
-    it.todo('pagination');
   });
 });
