@@ -63,7 +63,7 @@ interface ListViewContext {
   /**
    * TODO: add comment
    */
-  documentIds: string[];
+  documents: Document[];
   /**
    * The current content-type's model.
    */

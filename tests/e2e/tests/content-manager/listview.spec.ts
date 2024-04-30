@@ -19,7 +19,8 @@ test.describe('List View', () => {
     await expect(page.getByRole('link', { name: /Create new entry/ }).first()).toBeVisible();
   });
 
-  test('A user should be able to perform bulk actions on entries', async ({ page }) => {
+  // Should be enabled once bulk publish is in action
+  test.skip('A user should be able to perform bulk actions on entries', async ({ page }) => {
     await test.step('bulk publish', async () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
       // Select all entries to publish

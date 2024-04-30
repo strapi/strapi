@@ -20,7 +20,6 @@ import {
   ModalHeader,
   ModalLayout,
   Typography,
-  Radio,
 } from '@strapi/design-system';
 import { Check, WarningCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -88,7 +87,6 @@ const BulkActionsRenderer = () => {
 
   const { model, collectionType } = useDoc();
   const { selectedRows } = useTable('BulkActionsRenderer', (state) => state);
-  const documentIds = selectedRows.map((entry) => entry.documentId);
 
   return (
     <Flex gap={2}>
@@ -96,7 +94,7 @@ const BulkActionsRenderer = () => {
         props={{
           model,
           collectionType,
-          documentIds,
+          documents: selectedRows,
         }}
         descriptions={(
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
@@ -301,37 +299,27 @@ const BulkActionModal = ({
  * DefaultBulkActions
  * -----------------------------------------------------------------------------------------------*/
 
-const BULK_DELETE_OPTIONS = {
-  SELECTED_LOCALE: 'selected_Locale',
-  ALL_LOCALES: 'all_Locales',
-};
-
-const DeleteAction: BulkActionComponent = ({ documentIds, model }) => {
+const DeleteAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
+  const { schema: contentType } = useDoc();
   const { selectRow } = useTable('deleteAction', (state) => state);
+  const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const currentLocale = query.plugins?.i18n?.locale || 'en';
-  // const { data: locales = [] } = useGetLocalesQuery(); TODO: check if can import this query to get locale name
   const hasDeletePermission = useDocumentRBAC('deleteAction', (state) => state.canDelete);
-  const { deleteMany: bulkdeleteAction } = useDocumentActions();
-  const [isDeleteAllLocale, setIsDeleteAllLocale] = React.useState(false);
+  const { deleteMany: bulkDeleteAction } = useDocumentActions();
+  const documentIds = documents.map(({ documentId }) => documentId);
 
   const handleConfirmBulkDelete = async () => {
-    const data = await bulkdeleteAction({
+    const data = await bulkDeleteAction({
       documentIds,
       model,
       params: {
-        locale: isDeleteAllLocale ? '*' : currentLocale,
+        locale: currentLocale,
       },
     });
     if (!('error' in data)) {
       selectRow([]);
-    }
-  };
-
-  const handleChange: React.FormEventHandler<HTMLDivElement> = (e) => {
-    if ('value' in e.target) {
-      setIsDeleteAllLocale(e.target.value === BULK_DELETE_OPTIONS.ALL_LOCALES);
     }
   };
 
@@ -352,36 +340,25 @@ const DeleteAction: BulkActionComponent = ({ documentIds, model }) => {
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
               id: 'popUpWarning.bodyMessage.contentType.delete.all',
-              defaultMessage: 'What do you want to delete?',
+              defaultMessage: 'Are you sure you want to delete these entries?',
             })}
           </Typography>
-          <Box textAlign="center" padding={3}>
-            <Flex onChange={handleChange} direction="column" alignItems="flex-start" gap={3}>
-              <Radio
-                checked={!isDeleteAllLocale}
-                value={BULK_DELETE_OPTIONS.SELECTED_LOCALE}
-                name="bulk-delete-options"
-              >
+          {hasI18nEnabled && (
+            <Box textAlign="center" padding={3}>
+              <Typography textColor="danger500">
                 {formatMessage(
                   {
-                    id: 'popUpWarning.bodyMessage.contentType.delete.selectedLocale',
-                    defaultMessage: 'Delete entries ({locale})',
+                    id: getTranslation('Settings.list.actions.deleteAdditionalInfos'),
+                    defaultMessage:
+                      'This will delete the active locale versions <em>(from Internationalization)</em>',
                   },
-                  { locale: currentLocale } //TODO: get locale name from locale code
+                  {
+                    em: Emphasis,
+                  }
                 )}
-              </Radio>
-              <Radio
-                checked={isDeleteAllLocale}
-                value={BULK_DELETE_OPTIONS.ALL_LOCALES}
-                name="bulk-delete-options"
-              >
-                {formatMessage({
-                  id: 'popUpWarning.bodyMessage.contentType.delete.allLocales',
-                  defaultMessage: 'Delete entries (all locales)',
-                })}
-              </Radio>
-            </Flex>
-          </Box>
+              </Typography>
+            </Box>
+          )}
         </Flex>
       ),
       onConfirm: handleConfirmBulkDelete,
@@ -389,13 +366,14 @@ const DeleteAction: BulkActionComponent = ({ documentIds, model }) => {
   };
 };
 
-const UnpublishAction: BulkActionComponent = ({ documentIds, model }) => {
+const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
   const { schema } = useDoc();
   const { selectRow, selectedRows } = useTable('unpublishAction', (state) => state);
   const hasPublishPermission = useDocumentRBAC('unpublishAction', (state) => state.canPublish);
   const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
   const { unpublishMany: bulkUnpublishAction } = useDocumentActions();
+  const documentIds = documents.map(({ documentId }) => documentId);
 
   const handleConfirmBulkUnpublish = async () => {
     const data = await bulkUnpublishAction({ documentIds, model });
@@ -452,33 +430,6 @@ const UnpublishAction: BulkActionComponent = ({ documentIds, model }) => {
       onConfirm: handleConfirmBulkUnpublish,
     },
   };
-};
-
-export const getContentPermissions = (subject: string) => {
-  const permissions = {
-    delete: [
-      {
-        action: 'plugin::content-manager.explorer.delete',
-        subject,
-        id: '',
-        actionParameters: {},
-        properties: {},
-        conditions: [],
-      },
-    ],
-    publish: [
-      {
-        action: 'plugin::content-manager.explorer.publish',
-        subject,
-        id: '',
-        actionParameters: {},
-        properties: {},
-        conditions: [],
-      },
-    ],
-  };
-
-  return permissions;
 };
 
 const Emphasis = (chunks: React.ReactNode) => (

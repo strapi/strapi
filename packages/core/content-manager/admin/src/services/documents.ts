@@ -109,8 +109,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_res, _error, { model, documentIds }) =>
-        documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
+      invalidatesTags: (_res, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
     }),
     discardDocument: builder.mutation<
       Discard.Response,
