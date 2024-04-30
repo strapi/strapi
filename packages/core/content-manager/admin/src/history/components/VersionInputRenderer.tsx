@@ -59,8 +59,38 @@ const LinkEllipsis = styled(Link)`
 
 const CustomRelationInput = (props: RelationsFieldProps) => {
   const { formatMessage } = useIntl();
-  const field = useField<{ results: RelationResult[]; meta: { missingCount: number } }>(props.name);
-  const { results, meta } = field.value!;
+  const field = useField<
+    { results: RelationResult[]; meta: { missingCount: number } } | RelationResult[]
+  >(props.name);
+
+  /**
+   * Ideally the server would return the correct shape, however, for admin user relations
+   * it sanitizes everything out when it finds an object for the relation value.
+   */
+  const formattedFieldValue = Array.isArray(field.value)
+    ? {
+        results: field.value,
+        meta: { missingCount: 0 },
+      }
+    : field.value;
+
+  if (!formattedFieldValue || formattedFieldValue.results.length === 0) {
+    return (
+      <>
+        <FieldLabel>{props.label}</FieldLabel>
+        <Box marginTop={1}>
+          <StyledAlert variant="default">
+            {formatMessage({
+              id: 'content-manager.history.content.no-relations',
+              defaultMessage: 'No relations.',
+            })}
+          </StyledAlert>
+        </Box>
+      </>
+    );
+  }
+
+  const { results, meta } = formattedFieldValue;
 
   return (
     <Box>
@@ -68,7 +98,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       {results.length > 0 && (
         <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
           {results.map((relationData) => {
-            // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+            // @ts-expect-error - targetModel does exist on the attribute. But it's not typed.
             const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
             const label = getRelationLabel(relationData, props.mainField);
 
