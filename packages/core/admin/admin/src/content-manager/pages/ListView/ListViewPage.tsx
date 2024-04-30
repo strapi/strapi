@@ -649,7 +649,6 @@ const ListViewPage = ({
       <ContentLayout>
         {canRead ? (
           <Flex gap={4} direction="column" alignItems="stretch">
-            adasdasd
             <HelperPluginTable.Root rows={data} isLoading={isLoading} colCount={colCount}>
               <HelperPluginTable.ActionBar>
                 <BulkActionsRenderer />
