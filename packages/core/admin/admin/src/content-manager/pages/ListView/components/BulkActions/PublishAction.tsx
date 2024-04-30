@@ -19,7 +19,6 @@ import {
   Table as HelperPluginTable,
   getYupInnerErrors,
   useFetchClient,
-  useQueryParams,
   useNotification,
   TranslationMessage,
   useAPIErrorHandler,
@@ -29,7 +28,7 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { Entity } from '@strapi/types';
 import { AxiosError, AxiosResponse } from 'axios';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { UseQueryResult, useMutation, useQuery, useQueryClient } from 'react-query';
+import { useMutation, useQueryClient } from 'react-query';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
@@ -40,7 +39,7 @@ import { createYupSchema } from '../../../../utils/validation';
 import { useAllowedActions } from '../../hooks/useAllowedActions';
 import { Table } from '../Table';
 
-import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
+import { ConfirmDialogPublishAll } from './ConfirmBulkActionDialog';
 
 import type { BulkActionComponent } from '../../../../../core/apis/content-manager';
 
@@ -227,12 +226,9 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
  * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-interface SelectedEntriesModalContentProps
-  extends Pick<SelectedEntriesTableContentProps, 'validationErrors'> {
-  refetchModalData: UseQueryResult['refetch'];
-  setEntriesToFetch: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
+interface SelectedEntriesModalContentProps {
   setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
-  toggleModal: ConfirmDialogPublishAllProps['onToggleDialog'];
+  onClose: () => void;
 }
 
 interface TableRow {
@@ -241,12 +237,10 @@ interface TableRow {
 }
 
 const SelectedEntriesModalContent = ({
-  toggleModal,
-  refetchModalData,
-  setEntriesToFetch,
   setSelectedListViewEntries,
-  validationErrors = {},
+  onClose,
 }: SelectedEntriesModalContentProps) => {
+  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
   const { selectedEntries, rows, onSelectRow, isLoading, isFetching } = useTableContext<TableRow>();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
@@ -254,13 +248,44 @@ const SelectedEntriesModalContent = ({
   const [publishedCount, setPublishedCount] = React.useState(0);
   const { formatAPIError } = useAPIErrorHandler();
 
+  const { contentType, components } = useTypedSelector(
+    (state) => state['content-manager_listView']
+  );
+
+  const validationErrors = React.useMemo(() => {
+    if (rows.length === 0 || !contentType) return {};
+
+    const schema = createYupSchema(
+      contentType,
+      { components },
+      { isDraft: false, isJSONTestDisabled: true }
+    );
+    const validationErrors: Record<Entity.ID, Record<string, TranslationMessage>> = rows.reduce(
+      (acc: any, entry) => {
+        try {
+          schema.validateSync(entry, { abortEarly: false });
+          return acc;
+        } catch (e) {
+          if (e instanceof ValidationError) {
+            return {
+              ...acc,
+              [entry.id]: getYupInnerErrors(e),
+            };
+          }
+        }
+      },
+      {} as Record<Entity.ID, Record<string, TranslationMessage>>
+    );
+
+    return validationErrors;
+  }, [components, contentType, rows]);
+
   const entriesToPublish = rows
     .filter(({ id }) => selectedEntries.includes(id) && !validationErrors[id])
     .map(({ id }) => id);
 
   const { post } = useFetchClient();
   const toggleNotification = useNotification();
-  const { contentType } = useTypedSelector((state) => state['content-manager_listView']);
 
   const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
     ({ id }) => selectedEntries.includes(id) && validationErrors[id]
@@ -280,6 +305,8 @@ const SelectedEntriesModalContent = ({
       post(`/content-manager/collection-types/${contentType!.uid}/actions/bulkPublish`, data),
     {
       onSuccess() {
+        refetchList();
+
         const update = rowsToDisplay.filter((row) => {
           if (entriesToPublish.includes(row.id)) {
             // Deselect the entries that have been published from the modal table
@@ -292,14 +319,8 @@ const SelectedEntriesModalContent = ({
 
         setRowsToDisplay(update);
         const publishedIds = update.map(({ id }) => id);
-        // Set the parent's entries to fetch when clicking refresh
-        setEntriesToFetch(publishedIds);
         // Deselect the entries that were published in the list view
         setSelectedListViewEntries(publishedIds);
-
-        if (update.length === 0) {
-          toggleModal();
-        }
 
         toggleNotification({
           type: 'success',
@@ -354,6 +375,10 @@ const SelectedEntriesModalContent = ({
     );
   };
 
+  const refetchList = () => {
+    queryClient.invalidateQueries(['content-manager', 'collection-types', contentType?.uid]);
+  };
+
   React.useEffect(() => {
     // When the api responds with data
     if (rows.length > 0) {
@@ -377,7 +402,7 @@ const SelectedEntriesModalContent = ({
       </ModalBody>
       <ModalFooter
         startActions={
-          <Button onClick={toggleModal} variant="tertiary">
+          <Button onClick={onClose} variant="tertiary">
             {formatMessage({
               id: 'app.components.Button.cancel',
               defaultMessage: 'Cancel',
@@ -386,7 +411,7 @@ const SelectedEntriesModalContent = ({
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={() => refetchModalData()} variant="tertiary" loading={isFetching}>
+            <Button onClick={refetchList} variant="tertiary" loading={isFetching}>
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
@@ -419,105 +444,12 @@ const SelectedEntriesModalContent = ({
 
 const PublishAction: BulkActionComponent = ({ model: slug }) => {
   const { formatMessage } = useIntl();
-  const queryClient = useQueryClient();
-  const { selectedEntries } = useTableContext();
-  const {
-    data: list,
-    contentType,
-    components,
-  } = useTypedSelector((state) => state['content-manager_listView']);
-  const selectedEntriesObjects = list.filter((entry) => selectedEntries.includes(entry.id));
+  const { selectedEntries, setSelectedEntries, rows } = useTableContext();
+  const selectedEntriesObjects = rows.filter((entry) => selectedEntries.includes(entry.id));
   const hasPublishPermission = useAllowedActions(slug).canPublish;
   const showPublishButton =
+    // @ts-expect-error - rows has the complete object, not only ID, type is wrong
     hasPublishPermission && selectedEntriesObjects.some((entry) => !entry.publishedAt);
-  const {
-    selectedEntries: selectedListViewEntries,
-    setSelectedEntries: setSelectedListViewEntries,
-  } = useTableContext();
-  // The child table will update this value based on the entries that were published
-  const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
-  // We want to keep the selected entries order same as the list view
-  const [
-    {
-      query: { sort, plugins },
-    },
-  ] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
-
-  const queryParams = {
-    page: 1,
-    pageSize: entriesToFetch.length,
-    sort,
-    filters: {
-      id: {
-        $in: entriesToFetch,
-      },
-    },
-    locale: plugins?.i18n?.locale,
-  };
-
-  const { get } = useFetchClient();
-
-  const {
-    data = [],
-    isLoading,
-    isFetching,
-    refetch,
-  } = useQuery(
-    ['entries', contentType?.uid, queryParams],
-    async () => {
-      const { data } = await get<Contracts.CollectionTypes.Find.Response>(
-        `content-manager/collection-types/${contentType!.uid}`,
-        {
-          params: queryParams,
-        }
-      );
-
-      return data.results;
-    },
-    {
-      enabled: contentType !== null,
-    }
-  );
-
-  const { rows, validationErrors } = React.useMemo(() => {
-    if (data.length > 0 && contentType) {
-      const schema = createYupSchema(
-        contentType,
-        { components },
-        { isDraft: false, isJSONTestDisabled: true }
-      );
-      const validationErrors: Record<Entity.ID, Record<string, TranslationMessage>> = {};
-      const rows = data.map((entry) => {
-        try {
-          schema.validateSync(entry, { abortEarly: false });
-
-          return entry;
-        } catch (e) {
-          if (e instanceof ValidationError) {
-            validationErrors[entry.id] = getYupInnerErrors(e);
-          }
-
-          return entry;
-        }
-      });
-
-      return { rows, validationErrors };
-    }
-
-    return {
-      rows: [],
-      validationErrors: {},
-    };
-  }, [components, contentType, data]);
-
-  const refetchList = () => {
-    queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
-  };
-
-  // If all the entries are published, we want to refetch the list view
-  if (rows.length === 0) {
-    refetchList();
-  }
 
   if (!showPublishButton) return null;
 
@@ -534,27 +466,16 @@ const PublishAction: BulkActionComponent = ({ model: slug }) => {
       content: ({ onClose }) => {
         return (
           <HelperPluginTable.Root
-            rows={rows}
-            defaultSelectedEntries={selectedListViewEntries}
+            rows={selectedEntriesObjects}
+            defaultSelectedEntries={selectedEntries}
             colCount={4}
-            isLoading={isLoading}
-            isFetching={isFetching}
           >
             <SelectedEntriesModalContent
-              setSelectedListViewEntries={setSelectedListViewEntries}
-              setEntriesToFetch={setEntriesToFetch}
-              toggleModal={() => {
-                onClose();
-                refetchList();
-              }}
-              refetchModalData={refetch}
-              validationErrors={validationErrors}
+              setSelectedListViewEntries={setSelectedEntries}
+              onClose={onClose}
             />
           </HelperPluginTable.Root>
         );
-      },
-      onClose: () => {
-        refetchList();
       },
     },
   };
