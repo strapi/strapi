@@ -187,6 +187,7 @@ const ListViewPage = ({
   useFocusWhenNavigate();
 
   const params = React.useMemo(() => buildValidGetParams(query), [query]);
+
   const pluginsQueryParams = stringify({ plugins: query.plugins }, { encode: false });
 
   const displayedAttributeFilters = allowedAttributes.map((name) => {
@@ -570,6 +571,9 @@ const ListViewPage = ({
     return null;
   }
 
+  // eslint-disable-next-line no-console
+  console.log('list view page');
+
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout
@@ -604,13 +608,15 @@ const ListViewPage = ({
         }
       />
       {!canRead && (
-        <ActionLayout endActions={<InjectionZone area="contentManager.listView.actions" />} />
+        <ActionLayout
+          endActions={<InjectionZone area="contentManager.listView.actions" key={params.locale} />}
+        />
       )}
       {canRead && (
         <ActionLayout
           endActions={
             <>
-              <InjectionZone area="contentManager.listView.actions" />
+              <InjectionZone area="contentManager.listView.actions" key={params.locale} />
               <ViewSettingsMenu slug={slug} />
             </>
           }
@@ -643,6 +649,7 @@ const ListViewPage = ({
       <ContentLayout>
         {canRead ? (
           <Flex gap={4} direction="column" alignItems="stretch">
+            adasdasd
             <HelperPluginTable.Root rows={data} isLoading={isLoading} colCount={colCount}>
               <HelperPluginTable.ActionBar>
                 <BulkActionsRenderer />
