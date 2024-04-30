@@ -111,7 +111,7 @@ test.describe('List View', () => {
       await deleteButton.click();
 
       // Wait for the selected entries modal to appear
-      await page.waitForSelector('text=What do you want to delete?');
+      await page.waitForSelector('text=Are you sure you want to delete these entries?');
       const confirmDeleteButton = page
         .getByLabel('Confirmation')
         .getByRole('button', { name: 'Confirm' });
