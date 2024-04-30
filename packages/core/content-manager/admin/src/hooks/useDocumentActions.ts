@@ -256,10 +256,11 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: formatMessage({
+          title: formatMessage({
             id: getTranslation('success.records.delete'),
             defaultMessage: 'Successfully deleted.',
           }),
+          message: '',
         });
 
         trackUsage('didBulkDeleteEntries');
@@ -473,10 +474,11 @@ const useDocumentActions: UseDocumentActions = () => {
 
         toggleNotification({
           type: 'success',
-          message: formatMessage({
+          title: formatMessage({
             id: getTranslation('success.records.unpublish'),
             defaultMessage: 'Successfully unpublished.',
           }),
+          message: '',
         });
 
         return res.data;
