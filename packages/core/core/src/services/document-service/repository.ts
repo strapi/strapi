@@ -274,12 +274,10 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
 
     // Delete all published versions
     const versionsToDelete = await strapi.db.query(uid).findMany(query);
-    const unpublishedEntries = await async.map(versionsToDelete, (entry: any) =>
-      entries.delete(entry.id)
-    );
+    await async.map(versionsToDelete, (entry: any) => entries.delete(entry.id));
 
     versionsToDelete.forEach(emitEvent('entry.unpublish'));
-    return { documentId, entries: unpublishedEntries };
+    return { documentId, entries: versionsToDelete };
   }
 
   async function discardDraft(opts = {} as any) {
