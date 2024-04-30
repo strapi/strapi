@@ -373,7 +373,7 @@ const VersionInputRenderer = ({
       return (
         <ComponentInput
           {...props}
-          layout={[...layout, ...remainingFieldsLayout]}
+          layout={[...layout, ...(remainingFieldsLayout || [])]}
           hint={hint}
           disabled={fieldIsDisabled}
         >
