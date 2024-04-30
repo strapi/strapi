@@ -15,7 +15,7 @@ import { getTranslation } from '../utils/getTranslation';
 
 import { LocaleStatus } from './CMHeaderActions';
 
-type status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
+type Status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 
 /* -------------------------------------------------------------------------------------------------
  * EntryValidationText
@@ -26,20 +26,18 @@ const TypographyMaxWidth = styled(Typography)`
 `;
 
 interface EntryValidationTextProps {
-  status: status;
+  status: Status;
   validationErrors?: Record<string, MessageDescriptor>;
 }
 
 const isMessageDescriptor = (obj: unknown): obj is MessageDescriptor => {
-  const possibleMessageDescriptor = obj as {
-    id?: unknown;
-    defaultMessage?: unknown;
-  };
-
   return (
+    obj !== null &&
     typeof obj === 'object' &&
-    typeof possibleMessageDescriptor.id === 'string' &&
-    typeof possibleMessageDescriptor.defaultMessage === 'string'
+    'id' in obj &&
+    typeof obj.id === 'string' &&
+    'defaultMessage' in obj &&
+    typeof obj.defaultMessage === 'string'
   );
 };
 
@@ -146,13 +144,13 @@ const BulkLocaleActionModal = ({
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
 
-  const selectedRows: LocaleStatus[] = useTable(
+  const selectedRows: LocaleStatus[] = useTable<LocaleStatus[]>(
     'BulkLocaleActionModal',
-    (state: { selectedRows: LocaleStatus[] }) => state.selectedRows
+    (state) => state.selectedRows
   );
 
   const getFormattedCountMessage = () => {
-    const currentStatusByLocale = rows.reduce((acc: Record<string, string>, { locale, status }) => {
+    const currentStatusByLocale = rows.reduce<Record<string, string>>((acc, { locale, status }) => {
       acc[locale] = status;
       return acc;
     }, {});

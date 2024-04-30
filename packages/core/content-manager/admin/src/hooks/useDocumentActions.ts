@@ -114,7 +114,7 @@ type UseDocumentActions = () => {
     },
     document: Partial<Document>
   ) => Promise<OperationResponse<Publish.Response>>;
-  bulkPublish: (args: {
+  publishMany: (args: {
     model: string;
     documentIds: string[];
     params: object;
@@ -304,7 +304,7 @@ const useDocumentActions: UseDocumentActions = () => {
   );
 
   const [publishManyDocuments] = usePublishManyDocumentsMutation();
-  const bulkPublish: IUseDocumentActs['bulkPublish'] = React.useCallback(
+  const publishMany: IUseDocumentActs['publishMany'] = React.useCallback(
     async ({ model, documentIds, params }) => {
       try {
         // TODO Confirm tracking events for bulk publish?
@@ -583,7 +583,7 @@ const useDocumentActions: UseDocumentActions = () => {
     discard,
     getDocument,
     publish,
-    bulkPublish,
+    publishMany,
     unpublish,
     update,
   } satisfies IUseDocumentActs;

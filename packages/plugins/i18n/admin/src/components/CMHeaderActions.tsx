@@ -269,7 +269,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
   const [selectedRows, setSelectedRows] = React.useState<any[]>([]);
   const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
 
-  const { bulkPublish: bulkPublishAction } = useDocumentActions();
+  const { publishMany: publishManyAction } = useDocumentActions();
   const {
     document,
     meta: documentMeta,
@@ -392,15 +392,12 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     return null;
   }
 
-  if (!canPublish) {
-    return null;
-  }
   // This document action can be enabled given that draft and publish and i18n are
   // enabled and we can publish the current locale.
 
   const publish = async () => {
     try {
-      const bulkPublishRes = await bulkPublishAction({
+      const bulkPublishRes = await publishManyAction({
         model,
         documentIds: [documentId],
         params: {
@@ -483,7 +480,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       defaultMessage: 'Publish Multiple Locales',
     }),
     icon: <ListPlus />,
-    disabled: isPublishedTab,
+    disabled: isPublishedTab || !canPublish,
     position: ['panel'],
     variant: 'secondary',
     dialog: {
