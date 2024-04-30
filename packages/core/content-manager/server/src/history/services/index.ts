@@ -4,5 +4,5 @@ import { createLifecyclesService } from './lifecycles';
 
 export const services = {
   history: createHistoryService,
-  lifecycles: createLifecyclesService
+  lifecycles: createLifecyclesService,
 } satisfies Plugin.LoadedPlugin['services'];

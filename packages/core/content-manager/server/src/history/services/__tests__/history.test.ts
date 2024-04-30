@@ -138,7 +138,6 @@ describe('history-version service', () => {
       status: 'draft' as const,
     };
 
-    // @ts-expect-error - ignore
     await historyService.createVersion(historyVersionData);
     expect(createMock).toHaveBeenCalledWith({
       data: {
@@ -172,7 +171,6 @@ describe('history-version service', () => {
 
     mockGetRequestContext.mockReturnValueOnce(null as any);
 
-    // @ts-expect-error - ignore
     await historyService.createVersion(historyVersionData);
     expect(createMock).toHaveBeenCalledWith({
       data: {
