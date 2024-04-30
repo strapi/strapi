@@ -9,6 +9,7 @@ export {
   useGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,
 } from './services/documents';
+export { buildValidParams } from './utils/api';
 
 export { useDocument as unstable_useDocument } from './hooks/useDocument';
 export { useDocumentActions as unstable_useDocumentActions } from './hooks/useDocumentActions';

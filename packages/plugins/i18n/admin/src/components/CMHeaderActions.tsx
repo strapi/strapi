@@ -14,6 +14,7 @@ import {
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
   useGetManyDraftRelationCountQuery,
+  buildValidParams,
 } from '@strapi/plugin-content-manager/strapi-admin';
 import { Modules } from '@strapi/types';
 import { useIntl, type MessageDescriptor } from 'react-intl';
@@ -253,14 +254,11 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
 }) => {
   const baseLocale = baseDocument?.locale ?? null;
 
-  const [
-    {
-      query: { status },
-    },
-  ] = useQueryParams<{ status: 'draft' | 'published' }>({
-    status: 'draft',
-  });
-  const isPublishedTab = status === 'published';
+  const [{ query }] = useQueryParams<{ status: 'draft' | 'published' }>();
+
+  const params = React.useMemo(() => buildValidParams(query), [query]);
+  const isPublishedTab = query.status === 'published';
+
   const { formatMessage } = useIntl();
   const { hasI18n, canPublish } = useI18n();
   const { toggleNotification } = useNotification();
@@ -401,6 +399,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         model,
         documentIds: [documentId],
         params: {
+          ...params,
           locale: localesToPublish,
         },
       });
