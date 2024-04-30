@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
 
 /**

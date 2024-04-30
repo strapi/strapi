@@ -7,6 +7,7 @@ backend:
   - 'packages/{utils,generators,cli,providers}/**'
   - 'packages/core/*/{lib,bin,ee}/**'
   - 'tests/api/**'
+  - 'packages/core/database/**'
 frontend:
   - '.github/actions/yarn-nm-install/*.yml'
   - '.github/workflows/**'

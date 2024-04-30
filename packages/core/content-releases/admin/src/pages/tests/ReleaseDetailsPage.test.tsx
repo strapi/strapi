@@ -16,6 +16,39 @@ jest.mock('@strapi/helper-plugin', () => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canDelete: true },
   })),
+  useStrapiApp: jest.fn(() => ({
+    runHookWaterfall: jest.fn().mockReturnValue({
+      displayedHeaders: [
+        {
+          key: '__name__',
+          fieldSchema: { type: 'string' },
+          metadatas: {
+            label: {
+              id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+              defaultMessage: 'name',
+            },
+            searchable: false,
+            sortable: false,
+          },
+          name: 'name',
+        },
+        {
+          key: '__locale__',
+          fieldSchema: { type: 'string' },
+          metadatas: {
+            label: {
+              id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+              defaultMessage: 'locale',
+            },
+            searchable: false,
+            sortable: false,
+          },
+          name: 'locale',
+        },
+      ],
+      hasI18nEnabled: true,
+    }),
+  })),
 }));
 
 /**
