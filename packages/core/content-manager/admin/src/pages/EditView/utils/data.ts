@@ -10,7 +10,9 @@ import type { Schema, UID } from '@strapi/types';
  * traverseData
  * -----------------------------------------------------------------------------------------------*/
 
+// Make only attributes required since it's the only one Content History has
 type PartialSchema = Partial<Schema.Schema> & Pick<Schema.Schema, 'attributes'>;
+
 type Predicate = <TAttribute extends Schema.Attribute.AnyAttribute>(
   attribute: TAttribute,
   value: Schema.Attribute.Value<TAttribute>
