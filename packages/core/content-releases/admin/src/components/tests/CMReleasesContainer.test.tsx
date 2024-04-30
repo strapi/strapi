@@ -105,7 +105,7 @@ describe('CMReleasesContainer', () => {
     expect(submitButtom).toBeEnabled();
   });
 
-  it.skip('should list releases', async () => {
+  it('should list releases', async () => {
     // Mock the response from the server
     server.use(
       rest.get('/content-releases', (req, res, ctx) => {
