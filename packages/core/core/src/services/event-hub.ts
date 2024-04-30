@@ -11,6 +11,7 @@ export interface EventHub {
   destroy(): EventHub;
   removeListener(eventName: string, listener: Listener): void;
   removeAllListeners(): EventHub;
+  removeAllSubscribers(): EventHub;
   addListener(eventName: string, listener: Listener): () => void;
 }
 
@@ -82,8 +83,8 @@ export default function createEventHub(): EventHub {
     },
 
     destroy() {
-      listeners.clear();
-      subscribers.length = 0;
+      this.removeAllListeners();
+      this.removeAllSubscribers();
       return this;
     },
 
@@ -92,10 +93,15 @@ export default function createEventHub(): EventHub {
     },
 
     removeAllListeners() {
-      const destroy = eventHub.destroy();
+      listeners.clear();
+      return this;
+    },
+
+    removeAllSubscribers() {
+      subscribers.length = 0;
       // Re-add the default subscriber
       subscribers.push(defaultSubscriber);
-      return destroy;
+      return this;
     },
 
     addListener(eventName, listener) {
