@@ -305,11 +305,11 @@ const CheckboxWrapper = styled.div<{ hasConditions?: boolean; disabled?: boolean
     &:before {
       content: '';
       position: absolute;
-      top: ${-4 / 16}rem;
-      left: ${-8 / 16}rem;
-      width: ${6 / 16}rem;
-      height: ${6 / 16}rem;
-      border-radius: ${20 / 16}rem;
+      top: -0.4rem;
+      left: -0.8rem;
+      width: 0.6rem;
+      height: 0.6rem;
+      border-radius: 2rem;
       background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
     }
   `}

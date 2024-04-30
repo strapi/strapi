@@ -1,5 +1,5 @@
 import { Flex, Typography } from '@strapi/design-system';
-import { CarretDown } from '@strapi/icons';
+import { CaretDown } from '@strapi/icons';
 import styled from 'styled-components';
 
 interface StageDragPreviewType {
@@ -17,7 +17,7 @@ const StageDragPreview = ({ name }: StageDragPreviewType) => {
       hasRadius
       padding={3}
       shadow="tableShadow"
-      width={`${300 / 16}rem`}
+      width="30rem"
     >
       <Toggle
         alignItems="center"
@@ -27,7 +27,7 @@ const StageDragPreview = ({ name }: StageDragPreviewType) => {
         justifyContent="center"
         width={6}
       >
-        <CarretDown width={`${8 / 16}rem`} />
+        <CaretDown width="0.8rem" />
       </Toggle>
 
       <Typography fontWeight="bold">{name}</Typography>

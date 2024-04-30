@@ -313,7 +313,7 @@ const UsersRoleNumber = styled.div`
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
   color: ${({ theme }) => theme.colors.primary600};
   border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${12 / 16}rem;
+  font-size: 1.2rem;
   font-weight: bold;
 `;
 

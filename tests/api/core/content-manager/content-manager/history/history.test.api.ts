@@ -266,6 +266,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       },
       isCollectionType: false,
     });
+
     // Set the documentIds to test
     collectionTypeDocumentId = collectionTypeEntry.data.documentId;
     singleTypeDocumentId = singleTypeEntry.data.documentId;
@@ -279,7 +280,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
           description: 'Hello',
         },
       }),
-      updateEntry({
+      await updateEntry({
         documentId: collectionTypeDocumentId,
         uid: collectionTypeUid,
         locale: 'fr',
@@ -458,10 +459,35 @@ describeOnCondition(edition === 'EE')('History API', () => {
   });
 
   describe('Restore a history version', () => {
+    let englishVersionIdToRestore;
+    let frenchVersionIdToRestore;
+
+    beforeAll(async () => {
+      // Set the entry ids to restore
+      englishVersionIdToRestore = (
+        await strapi.db.query('plugin::content-manager.history-version').findOne({
+          where: {
+            contentType: collectionTypeUid,
+            relatedDocumentId: collectionTypeDocumentId,
+            locale: 'en',
+          },
+        })
+      ).id;
+      frenchVersionIdToRestore = (
+        await strapi.db.query('plugin::content-manager.history-version').findOne({
+          where: {
+            contentType: collectionTypeUid,
+            relatedDocumentId: collectionTypeDocumentId,
+            locale: 'fr',
+          },
+        })
+      ).id;
+    });
+
     test('Throws with invalid body', async () => {
       const res = await rq({
         method: 'PUT',
-        url: `/content-manager/history-versions/1/restore`,
+        url: `/content-manager/history-versions/${englishVersionIdToRestore}/restore`,
         body: {},
       });
 
@@ -482,7 +508,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       ]);
       const res = await restrictedRq({
         method: 'PUT',
-        url: `/content-manager/history-versions/4/restore`,
+        url: `/content-manager/history-versions/${englishVersionIdToRestore}/restore`,
         body: {
           contentType: collectionTypeUid,
         },
@@ -506,8 +532,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
       await rq({
         method: 'PUT',
-        // The 4th history version created was the first collectionType english version
-        url: `/content-manager/history-versions/4/restore`,
+        url: `/content-manager/history-versions/${englishVersionIdToRestore}/restore`,
         body: {
           contentType: collectionTypeUid,
         },
@@ -528,8 +553,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
       await rq({
         method: 'PUT',
-        // The 7th history version created was the first collectionType french version
-        url: `/content-manager/history-versions/7/restore`,
+        url: `/content-manager/history-versions/${frenchVersionIdToRestore}/restore`,
         body: {
           contentType: collectionTypeUid,
         },

@@ -146,8 +146,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
 
 const HeaderContainer = styled(Flex)`
   svg {
-    width: ${32 / 16}rem;
-    height: ${24 / 16}rem;
+    width: 3.2rem;
     margin-right: ${({ theme }) => theme.spaces[3]};
   }
 `;

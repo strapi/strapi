@@ -27,8 +27,7 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
     rootDir: outDir ?? undefined,
     logger: {
       silent,
-      // TODO V5: verbose is deprecated and should be removed
-      debug: debug || verbose,
+      debug,
     },
     artifacts: { contentTypes: true, components: true },
   });
@@ -42,7 +41,6 @@ const action = async ({ debug, silent, verbose, outDir }: CmdOptions) => {
 const command: StrapiCommand = () => {
   return createCommand('ts:generate-types')
     .description(`Generate TypeScript typings for your schemas`)
-    .option('--verbose', `[DEPRECATED] The verbose option has been replaced by debug`, false)
     .option('-d, --debug', `Run the generation with debug messages`, false)
     .option('-s, --silent', `Run the generation silently, without any output`, false)
     .option(

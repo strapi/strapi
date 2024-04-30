@@ -74,10 +74,12 @@ export class CollectionTypeService
   async delete(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).delete({
+    const { entries } = await strapi.documents(uid).delete({
       ...this.getFetchParams(params),
       documentId,
     });
+
+    return { deletedEntries: entries.length };
   }
 }
 

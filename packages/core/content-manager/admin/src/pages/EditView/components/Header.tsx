@@ -8,8 +8,8 @@ import {
   useStrapiApp,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { Flex, Icon, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
-import { Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
+import { Flex, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
+import { Cog, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -298,13 +298,17 @@ const Information = ({ activeTab }: InformationProps) => {
       borderColor="neutral150"
       direction="column"
       marginTop={2}
-      marginLeft="-4px"
-      marginRight="-4px"
       as="dl"
       padding={5}
       gap={3}
       alignItems="flex-start"
-      width="100%"
+      /**
+       * The menu content has a padding of 4px, but we want our divider (the border top applied) to
+       * be flush with the menu content. So we need to adjust the margin & width to account for the padding.
+       */
+      marginLeft="-0.4rem"
+      marginRight="-0.4rem"
+      width="calc(100% + 8px)"
     >
       {information.map((info) => (
         <Flex gap={1} direction="column" alignItems="flex-start" key={info.label}>
@@ -445,7 +449,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
       }),
       content: (
         <Flex direction="column" gap={2}>
-          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+          <WarningCircle width="24px" height="24px" fill="danger600" />
           <Typography as="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.delete.dialog.body',

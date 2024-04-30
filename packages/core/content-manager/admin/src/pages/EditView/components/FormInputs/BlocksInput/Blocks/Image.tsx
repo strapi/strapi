@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
 import { Box, Flex } from '@strapi/design-system';
-import { Picture } from '@strapi/icons';
+import { Image as Picture } from '@strapi/icons';
 import { type Element, Transforms, Editor } from 'slate';
 import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
 import styled, { css } from 'styled-components';

@@ -7,8 +7,8 @@ import {
   useRBAC,
 } from '@strapi/admin/strapi-admin';
 import { BaseHeaderLayout, Button, Typography, Flex } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { ArrowLeft, ExclamationMarkCircle } from '@strapi/icons';
+import { Link } from '@strapi/design-system';
+import { ArrowLeft, WarningCircle } from '@strapi/icons';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -165,7 +165,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
         isOpen={isConfirmDialogOpen}
         onClose={() => setIsConfirmDialogOpen(false)}
         onConfirm={handleRestore}
-        icon={<ExclamationMarkCircle />}
+        icon={<WarningCircle />}
         endAction={
           <Button variant="secondary" onClick={handleRestore} loading={isLoading}>
             {formatMessage({
