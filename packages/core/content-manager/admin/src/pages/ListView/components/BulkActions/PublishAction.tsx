@@ -6,7 +6,6 @@ import {
   useNotification,
   Table,
   useTable,
-  useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
   Box,
@@ -21,12 +20,12 @@ import {
 } from '@strapi/design-system';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { UseQueryResult, useQueryClient } from 'react-query';
+import { useQueryClient } from 'react-query';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
 
-import { useDoc } from '../../../../hooks/useDocument';
+import { Document, useDoc } from '../../../../hooks/useDocument';
 import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import {
   useGetAllDocumentsQuery,
@@ -34,8 +33,8 @@ import {
 } from '../../../../services/documents';
 import { getTranslation } from '../../../../utils/translations';
 import { getInnerErrors, createYupSchema } from '../../../../utils/validation';
+// import { useAllowedActions } from '../../hooks/useAllowedActions';
 
-import { getContentPermissions } from './Actions';
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
 import type { BulkActionComponent } from '../../../../content-manager';
@@ -230,10 +229,13 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
 
 interface SelectedEntriesModalContentProps
   extends Pick<SelectedEntriesTableContentProps, 'validationErrors'> {
-  refetchModalData: UseQueryResult['refetch'];
-  setEntriesToFetch: React.Dispatch<React.SetStateAction<Data.ID[]>>;
-  setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Data.ID[]>>;
-  toggleModal: ConfirmDialogPublishAllProps['onToggleDialog'];
+  isDialogOpen: boolean;
+  setIsDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchList: () => void;
+  setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Document['id'][]>>;
+  setEntriesToFetch: React.Dispatch<React.SetStateAction<Document['id'][]>>;
+  validationErrors: Record<string, EntryValidationTextProps['validationErrors']>;
+  setIsPublishModalBtnDisabled: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 interface TableRow {
@@ -242,10 +244,9 @@ interface TableRow {
 }
 
 const SelectedEntriesModalContent = ({
-  toggleModal,
-  refetchModalData,
-  setEntriesToFetch,
-  setSelectedListViewEntries,
+  // refetchList,
+  // setEntriesToFetch,
+  // setSelectedListViewEntries,
   validationErrors = {},
 }: SelectedEntriesModalContentProps) => {
   const { formatMessage } = useIntl();
@@ -258,7 +259,7 @@ const SelectedEntriesModalContent = ({
   const [rowsToDisplay, setRowsToDisplay] = React.useState<Array<TableRow>>([]);
   const [publishedCount, setPublishedCount] = React.useState(0);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+
   const entriesToPublish = rows
     .filter(({ id }) => selectedEntries.includes(id) && !validationErrors[id])
     .map(({ id }) => id);
@@ -275,11 +276,11 @@ const SelectedEntriesModalContent = ({
   const selectedEntriesWithNoErrorsCount =
     selectedEntries.length - selectedEntriesWithErrorsCount - selectedEntriesPublished;
 
-  const toggleDialog = () => setIsDialogOpen((prev) => !prev);
+  // const toggleDialog = () => setIsDialogOpen((prev) => !prev);
 
   const [publishManyDocuments, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
   const handleConfirmBulkPublish = async () => {
-    toggleDialog();
+    // toggleDialog();
 
     try {
       // @ts-expect-error – TODO: this still expects Entity.ID instead of Document.ID
@@ -305,15 +306,15 @@ const SelectedEntriesModalContent = ({
       });
 
       setRowsToDisplay(update);
-      const publishedIds = update.map(({ id }) => id);
+      // const publishedIds = update.map(({ id }) => id);
       // Set the parent's entries to fetch when clicking refresh
-      setEntriesToFetch(publishedIds);
+      // setEntriesToFetch(publishedIds);
       // Deselect the entries that were published in the list view
-      setSelectedListViewEntries(publishedIds);
+      // setSelectedListViewEntries(publishedIds);
 
-      if (update.length === 0) {
-        toggleModal();
-      }
+      // if (update.length === 0) {
+      //   toggleModal();
+      // }
 
       toggleNotification({
         type: 'success',
@@ -376,48 +377,18 @@ const SelectedEntriesModalContent = ({
 
   return (
     <>
-      <ModalBody>
-        <Typography>{getFormattedCountMessage()}</Typography>
-        <Box marginTop={5}>
-          <SelectedEntriesTableContent
-            isPublishing={isSubmittingForm}
-            rowsToDisplay={rowsToDisplay}
-            entriesToPublish={entriesToPublish}
-            validationErrors={validationErrors}
-          />
-        </Box>
-      </ModalBody>
-      <ModalFooter
-        startActions={
-          <Button onClick={toggleModal} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
-        }
-        endActions={
-          <Flex gap={2}>
-            <Button onClick={() => refetchModalData()} variant="tertiary">
-              {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
-            </Button>
-            <Button
-              // onClick={toggleDialog}
-              disabled={
-                selectedEntries.length === 0 ||
-                selectedEntries.length === selectedEntriesWithErrorsCount ||
-                isLoading
-              }
-              loading={isSubmittingForm}
-            >
-              {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
-            </Button>
-          </Flex>
-        }
-      />
+      <Typography>{getFormattedCountMessage()}</Typography>
+      <Box marginTop={5}>
+        <SelectedEntriesTableContent
+          // isPublishing={bulkPublishMutation.isLoading}
+          rowsToDisplay={rowsToDisplay}
+          entriesToPublish={entriesToPublish}
+          validationErrors={validationErrors}
+        />
+      </Box>
       {/* <ConfirmDialogPublishAll
-        isOpen={isDialogOpen}
-        onToggleDialog={toggleDialog}
+        // isOpen={isDialogOpen}
+        // onToggleDialog={toggleDialog}
         isConfirmButtonLoading={isSubmittingForm}
         onConfirm={handleConfirmBulkPublish}
       /> */}
@@ -430,126 +401,162 @@ const SelectedEntriesModalContent = ({
  * -----------------------------------------------------------------------------------------------*/
 
 const PublishAction: BulkActionComponent = () => {
-  const { formatMessage } = useIntl();
-  const queryClient = useQueryClient();
-  const { selectedRows: selectedListViewEntries, selectRow: setSelectedListViewEntries } = useTable(
-    'SelectedEntriesModal',
-    (state) => state
-  );
-  const { model, schema, components, isLoading: isLoadingDoc } = useDoc();
-  const contentPermissions = getContentPermissions(model);
-  const {
-    allowedActions: { canPublish: hasPublishPermission },
-  } = useRBAC(contentPermissions);
+  /**
+   * TODO: fix this in V5 with the rest of bulk actions
+   */
+  return null;
 
-  const showPublishButton =
-    hasPublishPermission && selectedListViewEntries.some((entry) => entry.status !== 'published');
+  // const { formatMessage } = useIntl();
 
-  // The child table will update this value based on the entries that were published
-  const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
-  // We want to keep the selected entries order same as the list view
-  const [
-    {
-      query: { sort, plugins },
-    },
-  ] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
+  // const { selectedRows: selectedListViewEntries, selectRow: setSelectedListViewEntries } = useTable(
+  //   'SelectedEntriesModal',
+  //   (state) => state
+  // );
 
-  const { data, isLoading, isFetching, refetch } = useGetAllDocumentsQuery(
-    {
-      model,
-      params: {
-        page: '1',
-        pageSize: entriesToFetch.length.toString(),
-        sort,
-        filters: {
-          id: {
-            $in: entriesToFetch,
-          },
-        },
-        locale: plugins?.i18n?.locale,
-      },
-    },
-    {
-      selectFromResult: ({ data, ...restRes }) => ({ data: data?.results ?? [], ...restRes }),
-    }
-  );
+  // const { model, schema, components, isLoading: isLoadingDoc } = useDoc();
+  // // const selectedEntriesObjects = list.filter((entry) => selectedEntries.includes(entry.id));
+  // // const hasPublishPermission = useAllowedActions(slug).canPublish;
+  // const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  // const queryClient = useQueryClient();
+  // // const showPublishButton =
+  // //   hasPublishPermission && selectedEntriesObjects.some((entry) => !entry.publishedAt);
+  // const [isPublishModalBtnDisabled, setIsPublishModalBtnDisabled] = React.useState(true);
 
-  const { rows, validationErrors } = React.useMemo(() => {
-    if (data.length > 0 && schema) {
-      const validate = createYupSchema(schema.attributes, components);
-      const validationErrors: Record<Data.ID, Record<string, MessageDescriptor>> = {};
-      const rows = data.map((entry) => {
-        try {
-          validate.validateSync(entry, { abortEarly: false });
+  // // The child table will update this value based on the entries that were published
+  // const [entriesToFetch, setEntriesToFetch] = React.useState(selectedListViewEntries);
+  // // We want to keep the selected entries order same as the list view
+  // const [
+  //   {
+  //     query: { sort, plugins },
+  //   },
+  // ] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
 
-          return entry;
-        } catch (e) {
-          if (e instanceof ValidationError) {
-            validationErrors[entry.id] = getInnerErrors(e);
-          }
+  // const { data, isLoading, isFetching } = useGetAllDocumentsQuery(
+  //   {
+  //     model,
+  //     params: {
+  //       page: '1',
+  //       pageSize: entriesToFetch.length.toString(),
+  //       sort,
+  //       filters: {
+  //         id: {
+  //           $in: entriesToFetch,
+  //         },
+  //       },
+  //       locale: plugins?.i18n?.locale,
+  //     },
+  //   },
+  //   {
+  //     selectFromResult: ({ data, ...restRes }) => ({ data: data?.results ?? [], ...restRes }),
+  //   }
+  // );
 
-          return entry;
-        }
-      });
+  // const { rows, validationErrors } = React.useMemo(() => {
+  //   if (data.length > 0 && schema) {
+  //     const validate = createYupSchema(schema.attributes, components);
+  //     const validationErrors: Record<Data.ID, Record<string, MessageDescriptor>> = {};
+  //     const rows = data.map((entry) => {
+  //       try {
+  //         validate.validateSync(entry, { abortEarly: false });
 
-      return { rows, validationErrors };
-    }
+  //         return entry;
+  //       } catch (e) {
+  //         if (e instanceof ValidationError) {
+  //           validationErrors[entry.id] = getInnerErrors(e);
+  //         }
 
-    return {
-      rows: [],
-      validationErrors: {},
-    };
-  }, [components, data, schema]);
+  //         return entry;
+  //       }
+  //     });
 
-  const refetchList = () => {
-    queryClient.invalidateQueries(['content-manager', 'collection-types', model]);
-  };
+  //     return { rows, validationErrors };
+  //   }
 
-  // If all the entries are published, we want to refetch the list view
-  if (rows.length === 0) {
-    refetchList();
-  }
+  //   return {
+  //     rows: [],
+  //     validationErrors: {},
+  //   };
+  // }, [components, data, schema]);
 
-  if (!showPublishButton) return null;
+  // const refetchList = () => {
+  //   // queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
+  // };
 
-  return {
-    actionType: 'publish',
-    variant: 'tertiary',
-    label: formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' }),
-    dialog: {
-      type: 'modal',
-      title: formatMessage({
-        id: getTranslation('containers.ListPage.selectedEntriesModal.title'),
-        defaultMessage: 'Publish entries',
-      }),
-      content: ({ onClose }) => {
-        // @ts-check-ignore TODO:fix this
-        return (
-          <Table.Root
-            rows={rows}
-            defaultSelectedRows={selectedListViewEntries}
-            headers={TABLE_HEADERS}
-            isLoading={isLoading || isLoadingDoc || isFetching}
-          >
-            <SelectedEntriesModalContent
-              setSelectedListViewEntries={setSelectedListViewEntries}
-              setEntriesToFetch={setEntriesToFetch}
-              toggleModal={() => {
-                onClose();
-                refetchList();
-              }}
-              // @ts-expect-error TODO: fix this
-              refetchModalData={refetch}
-              validationErrors={validationErrors}
-            />
-          </Table.Root>
-        );
-      },
-      onClose: () => {
-        refetchList();
-      },
-    },
-  };
+  // // If all the entries are published, we want to refetch the list view
+  // if (rows.length === 0) {
+  //   refetchList();
+  // }
+
+  // // if (!showPublishButton) return null;
+
+  // return {
+  //   actionType: 'publish',
+  //   variant: 'tertiary',
+  //   label: formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' }),
+  //   dialog: {
+  //     type: 'modal',
+  //     title: formatMessage({
+  //       id: getTranslation('containers.ListPage.selectedEntriesModal.title'),
+  //       defaultMessage: 'Publish entries',
+  //     }),
+  //     content: (
+  //       <Table.Root
+  //         rows={rows}
+  //         defaultSelectedRows={selectedListViewEntries}
+  //         headers={TABLE_HEADERS}
+  //         isLoading={isLoading || isLoadingDoc || isFetching}
+  //       >
+  //         <SelectedEntriesModalContent
+  //           isDialogOpen={isDialogOpen}
+  //           setIsDialogOpen={setIsDialogOpen}
+  //           refetchList={refetchList}
+  //           setSelectedListViewEntries={setSelectedListViewEntries}
+  //           setEntriesToFetch={setEntriesToFetch}
+  //           validationErrors={validationErrors}
+  //           setIsPublishModalBtnDisabled={setIsPublishModalBtnDisabled}
+  //         />
+  //       </Table.Root>
+  //     ),
+  //     footer: ({ onClose }) => {
+  //       return (
+  //         <ModalFooter
+  //           startActions={
+  //             <Button
+  //               onClick={() => {
+  //                 onClose();
+  //                 refetchList();
+  //               }}
+  //               variant="tertiary"
+  //             >
+  //               {formatMessage({
+  //                 id: 'app.components.Button.cancel',
+  //                 defaultMessage: 'Cancel',
+  //               })}
+  //             </Button>
+  //           }
+  //           endActions={
+  //             <Flex gap={2}>
+  //               <Button /* onClick={() => refetchModalData()} */ variant="tertiary">
+  //                 {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
+  //               </Button>
+  //               <Button
+  //                 onClick={() => setIsDialogOpen((prev) => !prev)}
+  //                 disabled={isPublishModalBtnDisabled}
+  //                 // TODO: in V5 when bulk actions are refactored, we should use the isLoading prop
+  //                 // loading={bulkPublishMutation.isLoading}
+  //               >
+  //                 {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+  //               </Button>
+  //             </Flex>
+  //           }
+  //         />
+  //       );
+  //     },
+  //     onClose: () => {
+  //       refetchList();
+  //     },
+  //   },
+  // };
 };
 
 export { PublishAction, SelectedEntriesModalContent };
