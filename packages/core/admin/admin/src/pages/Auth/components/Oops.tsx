@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box, Flex, Main, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import { Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 

@@ -15,52 +15,46 @@ describe('Document Service', () => {
   });
 
   describe('Unpublish', () => {
-    it(
-      'unpublish all locales of a document',
-      testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+    testInTransaction('unpublish all locales of a document', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        // Publish first all locales
-        await strapi
-          .documents(ARTICLE_UID)
-          .publish({ documentId: articleDb.documentId, locale: '*' });
-        // Unpublish all locales
-        await strapi
-          .documents(ARTICLE_UID)
-          .unpublish({ documentId: articleDb.documentId, locale: '*' });
+      // Publish first all locales
+      await strapi
+        .documents(ARTICLE_UID)
+        .publish({ documentId: articleDb.documentId, locale: '*' });
+      // Unpublish all locales
+      await strapi
+        .documents(ARTICLE_UID)
+        .unpublish({ documentId: articleDb.documentId, locale: '*' });
 
-        const publishedArticles = await findPublishedArticlesDb(articleDb.documentId);
+      const publishedArticles = await findPublishedArticlesDb(articleDb.documentId);
 
-        // All locales should have been unpublished
-        expect(publishedArticles.length).toBe(0);
-      })
-    );
+      // All locales should have been unpublished
+      expect(publishedArticles.length).toBe(0);
+    });
 
-    it(
-      'unpublish single locale of document',
-      testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+    testInTransaction('unpublish single locale of document', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        // Publish first all locales
-        await strapi
-          .documents(ARTICLE_UID)
-          .publish({ documentId: articleDb.documentId, locale: '*' });
-        const publishedArticlesBefore = await findPublishedArticlesDb(articleDb.documentId);
+      // Publish first all locales
+      await strapi
+        .documents(ARTICLE_UID)
+        .publish({ documentId: articleDb.documentId, locale: '*' });
+      const publishedArticlesBefore = await findPublishedArticlesDb(articleDb.documentId);
 
-        await strapi
-          .documents(ARTICLE_UID)
-          .unpublish({ documentId: articleDb.documentId, locale: 'en' });
+      await strapi
+        .documents(ARTICLE_UID)
+        .unpublish({ documentId: articleDb.documentId, locale: 'en' });
 
-        const publishedArticlesAfter = await findPublishedArticlesDb(articleDb.documentId);
+      const publishedArticlesAfter = await findPublishedArticlesDb(articleDb.documentId);
 
-        // Sanity check to validate there are multiple locales
-        expect(publishedArticlesBefore.length).toBeGreaterThan(1);
-        // Only the english locale should have been unpublished
-        expect(publishedArticlesAfter.length).toBe(publishedArticlesBefore.length - 1);
-        publishedArticlesAfter.forEach((article) => {
-          expect(article.locale).not.toBe('en');
-        });
-      })
-    );
+      // Sanity check to validate there are multiple locales
+      expect(publishedArticlesBefore.length).toBeGreaterThan(1);
+      // Only the english locale should have been unpublished
+      expect(publishedArticlesAfter.length).toBe(publishedArticlesBefore.length - 1);
+      publishedArticlesAfter.forEach((article) => {
+        expect(article.locale).not.toBe('en');
+      });
+    });
   });
 });

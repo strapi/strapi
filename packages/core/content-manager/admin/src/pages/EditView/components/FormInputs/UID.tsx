@@ -10,7 +10,7 @@ import {
   useFocusInputField,
 } from '@strapi/admin/strapi-admin';
 import { FieldAction, Flex, TextInput, Typography, useComposedRefs } from '@strapi/design-system';
-import { CheckCircle, ExclamationMarkCircle, Loader, Refresh } from '@strapi/icons';
+import { CheckCircle, WarningCircle, Loader, ArrowClockwise } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled, { keyframes } from 'styled-components';
 
@@ -193,7 +193,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>((props, ref) => {
               right={6}
               width="100px"
             >
-              {availability?.isAvailable ? <CheckCircle /> : <ExclamationMarkCircle />}
+              {availability?.isAvailable ? <CheckCircle /> : <WarningCircle />}
 
               <Typography
                 textColor={availability.isAvailable ? 'success600' : 'danger600'}
@@ -241,7 +241,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>((props, ref) => {
                     <Loader />
                   </LoadingWrapper>
                 ) : (
-                  <Refresh />
+                  <ArrowClockwise />
                 )}
               </FieldActionWrapper>
             </>
@@ -261,8 +261,8 @@ const UIDInput = React.forwardRef<any, UIDInputProps>((props, ref) => {
 
 const FieldActionWrapper = styled(FieldAction)`
   svg {
-    height: 1rem;
-    width: 1rem;
+    height: 1.6rem;
+    width: 1.6rem;
     path {
       fill: ${({ theme }) => theme.colors.neutral400};
     }
@@ -281,8 +281,8 @@ const FieldActionWrapper = styled(FieldAction)`
 
 const TextValidation = styled(Flex)<{ available?: boolean }>`
   svg {
-    height: ${12 / 16}rem;
-    width: ${12 / 16}rem;
+    height: 1.2rem;
+    width: 1.2rem;
 
     path {
       fill: ${({ theme, available }) =>

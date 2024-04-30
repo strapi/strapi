@@ -41,12 +41,6 @@ const productModel = {
       target: 'api::category.category',
       targetAttribute: 'oneproduct',
     },
-    categories: {
-      type: 'relation',
-      relation: 'oneToMany',
-      target: 'api::category.category',
-      targetAttribute: 'product',
-    },
     compo: {
       component: 'default.compo',
       type: 'component',
@@ -67,6 +61,7 @@ const categoryModel = {
   displayName: 'Category',
   singularName: 'category',
   pluralName: 'categories',
+  draftAndPublish: true,
   pluginOptions: {
     i18n: {
       localized: true,
@@ -98,8 +93,7 @@ const compoModel = {
   },
 };
 
-// TODO: Fix relations
-describe.skip('CM API - Basic', () => {
+describe('CM API - Number of draft relations', () => {
   const locale = 'fr';
 
   beforeAll(async () => {
@@ -113,21 +107,27 @@ describe.skip('CM API - Basic', () => {
     rq = await createAuthRequest({ strapi });
 
     const {
-      body: { id: idToPublish },
+      body: {
+        data: { documentId: idToPublish },
+      },
     } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::category.category',
       body: { name: 'Food' },
     });
 
-    const { body: categoryPublished } = await rq({
+    const {
+      body: { data: categoryPublished },
+    } = await rq({
       method: 'POST',
       url: `/content-manager/collection-types/api::category.category/${idToPublish}/actions/publish`,
     });
 
     categories.published.push(categoryPublished);
 
-    const { body: categoryDraft1 } = await rq({
+    const {
+      body: { data: categoryDraft1 },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::category.category',
       body: { name: 'Food' },
@@ -135,7 +135,9 @@ describe.skip('CM API - Basic', () => {
 
     categories.draft.push(categoryDraft1);
 
-    const { body: categoryDraft2 } = await rq({
+    const {
+      body: { data: categoryDraft2 },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::category.category',
       body: { name: 'Food' },
@@ -161,7 +163,9 @@ describe.skip('CM API - Basic', () => {
   });
 
   test('Return 0 when no relations are set', async () => {
-    const { body: product } = await rq({
+    const {
+      body: { data: product },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::product.product',
       body: { name: 'Pizza' },
@@ -176,9 +180,11 @@ describe.skip('CM API - Basic', () => {
   });
 
   test('Return 0 for published relations only', async () => {
-    const publishedId = categories.published[0].entryId;
+    const publishedId = categories.published[0].id;
 
-    const { body: product } = await rq({
+    const {
+      body: { data: product },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::product.product',
       body: {
@@ -209,9 +215,11 @@ describe.skip('CM API - Basic', () => {
   });
 
   test('Return 8 when there are 8 drafts (1 xToOne & 1 xToMany on ct, compo, comporep, dz)', async () => {
-    const draftId = categories.draft[0].entryId;
+    const draftId = categories.draft[0].id;
 
-    const { body: product } = await rq({
+    const {
+      body: { data: product },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::product.product',
       body: {
@@ -242,26 +250,25 @@ describe.skip('CM API - Basic', () => {
   });
 
   test('Return 8 when there are 8 drafts (1 xToOne & 1/2 xToMany on ct, compo, comporep, dz)', async () => {
-    const publishedId = categories.published[0].entryId;
-    const draftId = categories.draft[0].entryId;
+    const publishedId = categories.published[0].id;
+    const draftId = categories.draft[0].id;
 
-    const { body: product } = await rq({
+    const {
+      body: { data: product },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::product.product',
       body: {
         name: 'Pizza',
         onecategory: draftId,
-        categories: [publishedId],
         categories: [draftId, publishedId],
         compo: {
           onecategory: draftId,
-          categories: [publishedId],
           categories: [draftId, publishedId],
         },
         comporep: [
           {
             onecategory: draftId,
-            categories: [publishedId],
             categories: [draftId, publishedId],
           },
         ],
@@ -269,7 +276,6 @@ describe.skip('CM API - Basic', () => {
           {
             onecategory: draftId,
             __component: 'default.compo',
-            categories: [publishedId],
             categories: [draftId, publishedId],
           },
         ],
@@ -285,27 +291,26 @@ describe.skip('CM API - Basic', () => {
   });
 
   test('Return 12 when there are 12 drafts (1 xToOne & 2 xToMany on ct, compo, comporep, dz)', async () => {
-    const publishedId = categories.published[0].entryId;
-    const draft1Id = categories.draft[0].entryId;
-    const draft2Id = categories.draft[1].entryId;
+    const publishedId = categories.published[0].id;
+    const draft1Id = categories.draft[0].id;
+    const draft2Id = categories.draft[1].id;
 
-    const { body: product } = await rq({
+    const {
+      body: { data: product },
+    } = await rq({
       method: 'POST',
       url: '/content-manager/collection-types/api::product.product',
       body: {
         name: 'Pizza',
-        onecategory: categories.draft[0].entryId,
-        categories: [publishedId],
-        categories: [draft1Id, draft2Id],
+        onecategory: draft1Id,
+        categories: [draft1Id, draft2Id, publishedId],
         compo: {
           onecategory: draft1Id,
-          categories: [publishedId],
           categories: [draft1Id, draft2Id],
         },
         comporep: [
           {
             onecategory: draft1Id,
-            categories: [publishedId],
             categories: [draft1Id, draft2Id],
           },
         ],
@@ -313,7 +318,6 @@ describe.skip('CM API - Basic', () => {
           {
             onecategory: draft1Id,
             __component: 'default.compo',
-            categories: [publishedId],
             categories: [draft1Id, draft2Id],
           },
         ],
@@ -333,54 +337,61 @@ describe.skip('CM API - Basic', () => {
 
     // Create categories in a non default locale
     const {
-      body: { id: idToPublish },
+      body: {
+        data: { documentId: idToPublish },
+      },
     } = await rq({
       method: 'POST',
       url: `/content-manager/collection-types/api::category.category?${localeQuery}`,
       body: { name: 'Nourriture' },
     });
 
-    const { body: categoryPublished } = await rq({
+    const {
+      body: { data: categoryPublished },
+    } = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::category.category/${idToPublish}/actions/publish?${localeQuery}`,
+      url: `/content-manager/collection-types/api::category.category/${idToPublish}/actions/publish`,
+      qs: { locale },
     });
 
-    const { body: categoryDraft } = await rq({
+    const {
+      body: { data: categoryDraft },
+    } = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::category.category?${localeQuery}`,
+      url: `/content-manager/collection-types/api::category.category`,
       body: { name: 'Nourriture' },
+      qs: { locale },
     });
 
-    const publishedId = categoryPublished.entryId;
-    const draftId = categoryDraft.entryId;
+    const publishedId = categoryPublished.id;
+    const draftId = categoryDraft.id;
 
     // Create a product in a non default locale
-    const { body: localisedProduct } = await rq({
+    const {
+      body: { data: localisedProduct },
+    } = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product.product?${localeQuery}`,
+      url: `/content-manager/collection-types/api::product.product`,
+      qs: { locale },
       body: {
         name: 'PizzaFR',
         onecategory: draftId,
-        categories: [publishedId],
-        categories: [draftId],
+        categories: [draftId, publishedId],
         compo: {
           onecategory: draftId,
-          categories: [publishedId],
-          categories: [draftId],
+          categories: [draftId, publishedId],
         },
         comporep: [
           {
             onecategory: draftId,
-            categories: [publishedId],
-            categories: [draftId],
+            categories: [draftId, publishedId],
           },
         ],
         dz: [
           {
             onecategory: draftId,
             __component: 'default.compo',
-            categories: [publishedId],
-            categories: [draftId],
+            categories: [draftId, publishedId],
           },
         ],
       },
@@ -389,7 +400,8 @@ describe.skip('CM API - Basic', () => {
     // Ensure we can count the number of draft relations when the entry is in a non default locale
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${localisedProduct.documentId}/actions/countDraftRelations?locale=${locale}`,
+      url: `/content-manager/collection-types/api::product.product/${localisedProduct.documentId}/actions/countDraftRelations`,
+      qs: { locale },
     });
 
     expect(body.data).toBe(8);

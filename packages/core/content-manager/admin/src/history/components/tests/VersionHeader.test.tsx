@@ -55,6 +55,8 @@ describe('VersionHeader', () => {
       componentsSchemas: {},
       locale: null,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'Test Title',
       },
       meta: {
@@ -65,7 +67,7 @@ describe('VersionHeader', () => {
       },
     };
 
-    it('should display the correct title and subtitle for a non-localized entry', () => {
+    it('should display the correct title and subtitle for a non-localized entry', async () => {
       render(
         {
           selectedVersion,
@@ -74,17 +76,17 @@ describe('VersionHeader', () => {
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
-      expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
-      expect(screen.getByText('Test Title (kitchensink)')).toBeInTheDocument();
+      expect(await screen.findByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
+      expect(await screen.findByText('Test Title (kitchensink)')).toBeInTheDocument();
 
       const backLink = screen.getByRole('link', { name: 'Back' });
       expect(backLink).toHaveAttribute(
         'href',
-        '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr'
+        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr'
       );
     });
 
-    it('should display the correct title and subtitle for a localized entry', () => {
+    it('should display the correct title and subtitle for a localized entry', async () => {
       render(
         {
           selectedVersion: {
@@ -103,24 +105,26 @@ describe('VersionHeader', () => {
         }
       );
 
-      expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
-      expect(screen.getByText('Test Title (kitchensink), in English (en)')).toBeInTheDocument();
+      expect(await screen.findByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
+      expect(
+        await screen.findByText('Test Title (kitchensink), in English (en)')
+      ).toBeInTheDocument();
 
       const backLink = screen.getByRole('link', { name: 'Back' });
       expect(backLink).toHaveAttribute(
         'href',
-        '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr?plugins[i18n][locale]=en'
+        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr?plugins[i18n][locale]=en'
       );
     });
 
-    it('should display the correct subtitle without an entry title (mainField)', () => {
+    it('should display the correct subtitle without an entry title (mainField)', async () => {
       render(
-        { selectedVersion, mainField: 'id' },
+        { selectedVersion, mainField: 'plop' },
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
-      expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
-      expect(screen.getByText('(kitchensink)')).toBeInTheDocument();
+      expect(await screen.findByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
+      expect(await screen.findByText('(kitchensink)')).toBeInTheDocument();
     });
   });
 
@@ -136,6 +140,8 @@ describe('VersionHeader', () => {
       componentsSchemas: {},
       locale: null,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'Test Title',
       },
       meta: {
@@ -146,20 +152,23 @@ describe('VersionHeader', () => {
       },
     };
 
-    it('should display the correct title and subtitle for a non-localized entry', () => {
+    it('should display the correct title and subtitle for a non-localized entry', async () => {
       render(
         { selectedVersion, mainField: 'title' },
         '/single-types/api::homepage.homepage/history'
       );
 
-      expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
-      expect(screen.getByText('Test Title (homepage)')).toBeInTheDocument();
+      expect(await screen.findByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
+      expect(await screen.findByText('Test Title (homepage)')).toBeInTheDocument();
 
       const backLink = screen.getByRole('link', { name: 'Back' });
-      expect(backLink).toHaveAttribute('href', '/single-types/api::homepage.homepage');
+      expect(backLink).toHaveAttribute(
+        'href',
+        '/content-manager/single-types/api::homepage.homepage'
+      );
     });
 
-    it('should display the correct title and subtitle for a localized entry', () => {
+    it('should display the correct title and subtitle for a localized entry', async () => {
       render(
         {
           selectedVersion: {
@@ -177,13 +186,13 @@ describe('VersionHeader', () => {
         }
       );
 
-      expect(screen.getByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
-      expect(screen.getByText('Test Title (homepage), in English (en)')).toBeInTheDocument();
+      expect(await screen.findByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
+      expect(await screen.findByText('Test Title (homepage), in English (en)')).toBeInTheDocument();
 
       const backLink = screen.getByRole('link', { name: 'Back' });
       expect(backLink).toHaveAttribute(
         'href',
-        '/single-types/api::homepage.homepage?plugins[i18n][locale]=en'
+        '/content-manager/single-types/api::homepage.homepage?plugins[i18n][locale]=en'
       );
     });
   });

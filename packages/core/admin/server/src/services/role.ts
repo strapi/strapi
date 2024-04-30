@@ -201,7 +201,7 @@ const deleteByIds = async (ids = [] as Data.ID[]): Promise<AdminRole[]> => {
 
   await getService('permission').deleteByRolesIds(ids);
 
-  const deletedRoles = [];
+  const deletedRoles: AdminRole[] = [];
   for (const id of ids) {
     const deletedRole = await strapi.db.query('admin::role').delete({ where: { id } });
 

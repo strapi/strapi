@@ -9,7 +9,7 @@ import {
   Flex,
   Typography,
 } from '@strapi/design-system';
-import { ExclamationMarkCircle } from '@strapi/icons';
+import { WarningCircle } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -90,7 +90,7 @@ const CheckboxConfirmation = ({
       </Checkbox>
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
-          <DialogBody icon={<ExclamationMarkCircle />}>
+          <DialogBody icon={<WarningCircle />}>
             <Flex direction="column" alignItems="stretch" gap={2}>
               <Flex justifyContent="center">
                 <TextAlignTypography id="confirm-description">

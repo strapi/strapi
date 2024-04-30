@@ -12,7 +12,7 @@ import {
   ModalLayout,
   Typography,
 } from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
+import { Breadcrumbs, Crumb } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
