@@ -56,7 +56,7 @@ describe('CMReleasesContainer', () => {
     );
   });
 
-  it.skip('should render the container', async () => {
+  it('should render the container', async () => {
     render();
 
     const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
