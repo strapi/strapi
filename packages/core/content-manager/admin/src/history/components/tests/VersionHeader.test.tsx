@@ -55,6 +55,8 @@ describe('VersionHeader', () => {
       componentsSchemas: {},
       locale: null,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'Test Title',
       },
       meta: {
@@ -117,7 +119,7 @@ describe('VersionHeader', () => {
 
     it('should display the correct subtitle without an entry title (mainField)', async () => {
       render(
-        { selectedVersion, mainField: 'id' },
+        { selectedVersion, mainField: 'plop' },
         '/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr/history'
       );
 
@@ -138,6 +140,8 @@ describe('VersionHeader', () => {
       componentsSchemas: {},
       locale: null,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'Test Title',
       },
       meta: {
