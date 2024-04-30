@@ -246,6 +246,8 @@ describe('history-version service', () => {
     const historyVersionData = {
       contentType: 'api::article.article' as UID.ContentType,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'My article',
       },
       locale: 'en',
@@ -275,6 +277,8 @@ describe('history-version service', () => {
     const historyVersionData = {
       contentType: 'api::article.article' as UID.ContentType,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'My article',
       },
       locale: 'en',
