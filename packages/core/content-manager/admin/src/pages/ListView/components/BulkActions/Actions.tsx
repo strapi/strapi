@@ -311,14 +311,14 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
   const documentIds = documents.map(({ documentId }) => documentId);
 
   const handleConfirmBulkDelete = async () => {
-    const data = await bulkDeleteAction({
+    const res = await bulkDeleteAction({
       documentIds,
       model,
       params: {
         locale: currentLocale,
       },
     });
-    if (!('error' in data)) {
+    if (!('error' in res)) {
       selectRow([]);
     }
   };

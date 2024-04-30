@@ -50,6 +50,10 @@ type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }>
   | { error: BaseQueryError | SerializedError }
   | Pick<TResponse, 'data'>;
 
+type BulkOperationResponse<TResponse extends { data: any; error?: any }> =
+  | Pick<TResponse, 'data'>
+  | { error: BaseQueryError | SerializedError };
+
 type UseDocumentActions = () => {
   /**
    * @description Attempts to clone a document based on the provided sourceId.
@@ -99,7 +103,7 @@ type UseDocumentActions = () => {
     model: string;
     documentIds: string[];
     params?: object;
-  }) => Promise<OperationResponse<BulkDelete.Response>>;
+  }) => Promise<BulkOperationResponse<BulkDelete.Response>>;
   discard: (args: {
     collectionType: string;
     model: string;
@@ -147,7 +151,7 @@ type UseDocumentActions = () => {
     model: string;
     documentIds: string[];
     params?: object;
-  }) => Promise<OperationResponse<BulkUnpublish.Response>>;
+  }) => Promise<BulkOperationResponse<BulkUnpublish.Response>>;
 };
 
 type IUseDocumentActs = ReturnType<UseDocumentActions>;
