@@ -64,11 +64,8 @@ describe('CMReleasesContainer', () => {
       expect(informationBox).toBeInTheDocument();
     });
 
-    // const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
-    // expect(informationBox).toBeInTheDocument();
-
-    // const addToReleaseButton = await screen.findByRole('button', { name: 'Add to release' });
-    // expect(addToReleaseButton).toBeInTheDocument();
+    const addToReleaseButton = await screen.findByRole('button', { name: 'Add to release' });
+    expect(addToReleaseButton).toBeInTheDocument();
   });
 
   it('should open and close the add to release modal', async () => {
