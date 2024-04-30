@@ -28,6 +28,14 @@ const relationModel = {
         },
       },
     },
+    password: {
+      type: 'password',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
   },
 };
 
@@ -84,6 +92,14 @@ const collectionTypeModel = {
     images: {
       type: 'media',
       multiple: true,
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    password: {
+      type: 'password',
       pluginOptions: {
         i18n: {
           localized: true,
@@ -455,6 +471,21 @@ describeOnCondition(edition === 'EE')('History API', () => {
         pageCount: 2,
         total: 2,
       });
+    });
+
+    test('Finds many versions with sensitive data', async () => {
+      const collectionType = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=1&pageSize=1`,
+      });
+
+      expect(collectionType.body.data).toHaveLength(1);
+      expect(Object.keys(collectionType.body.data[0].data).includes('password')).toBe(false);
+      expect(
+        Object.keys(collectionType.body.data[0].data.tags_one_to_one.results[0]).includes(
+          'password'
+        )
+      ).toBe(false);
     });
   });
 

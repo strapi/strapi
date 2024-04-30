@@ -51,112 +51,6 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         serviceUtils.getLocaleDictionary(),
       ]);
 
-      /**
-       * Get an object with two keys:
-       * - results: an array with the current values of the relations
-       * - meta: an object with the count of missing relations
-       */
-      // TODO: Move outside this function to utils
-      const buildRelationReponse = async (
-        values: {
-          documentId: string;
-          locale: string | null;
-        }[],
-        attributeSchema: Schema.Attribute.RelationWithTarget
-      ): Promise<{ results: any[]; meta: { missingCount: number } }> => {
-        return (
-          values
-            // Until we implement proper pagination, limit relations to an arbitrary amount
-            .slice(0, 25)
-            .reduce(
-              async (currentRelationDataPromise, entry) => {
-                const currentRelationData = await currentRelationDataPromise;
-
-                // Entry can be null if it's a toOne relation
-                if (!entry) {
-                  return currentRelationData;
-                }
-
-                const relatedEntry = await strapi
-                  .documents(attributeSchema.target)
-                  .findOne({ documentId: entry.documentId, locale: entry.locale || undefined });
-
-                const permissionChecker = getContentManagerService('permission-checker').create({
-                  userAbility: params.state.userAbility,
-                  model: attributeSchema.target,
-                });
-                const sanitizedEntry = await permissionChecker.sanitizeOutput(relatedEntry);
-
-                if (sanitizedEntry) {
-                  currentRelationData.results.push({
-                    ...sanitizedEntry,
-                    status: await serviceUtils.getVersionStatus(attributeSchema.target, sanitizedEntry),
-                  });
-                } else {
-                  // The related content has been deleted
-                  currentRelationData.meta.missingCount += 1;
-                }
-
-                return currentRelationData;
-              },
-              Promise.resolve({
-                results: [] as any[],
-                meta: { missingCount: 0 },
-              })
-            )
-        );
-      };
-
-      /**
-       * Get an object with two keys:
-       * - results: an array with the current values of the relations
-       * - meta: an object with the count of missing relations
-       */
-      // TODO: Move outside this function to utils
-      const buildMediaResponse = async (
-        values: { id: Data.ID }[]
-      ): Promise<{ results: any[]; meta: { missingCount: number } }> => {
-        return (
-          values
-            // Until we implement proper pagination, limit relations to an arbitrary amount
-            .slice(0, 25)
-            .reduce(
-              async (currentRelationDataPromise, entry) => {
-                const currentRelationData = await currentRelationDataPromise;
-
-                // Entry can be null if it's a toOne relation
-                if (!entry) {
-                  return currentRelationData;
-                }
-
-                const permissionChecker = getContentManagerService('permission-checker').create({
-                  userAbility: params.state.userAbility,
-                  model: 'plugin::upload.file',
-                });
-
-                const relatedEntry = await strapi.db
-                  .query('plugin::upload.file')
-                  .findOne({ where: { id: entry.id } });
-
-                const sanitizedEntry = await permissionChecker.sanitizeOutput(relatedEntry);
-
-                if (sanitizedEntry) {
-                  currentRelationData.results.push(sanitizedEntry);
-                } else {
-                  // The related content has been deleted
-                  currentRelationData.meta.missingCount += 1;
-                }
-
-                return currentRelationData;
-              },
-              Promise.resolve({
-                results: [] as any[],
-                meta: { missingCount: 0 },
-              })
-            )
-        );
-      };
-
       const populateEntryRelations = async (
         entry: HistoryVersionQueryResult
       ): Promise<CreateHistoryVersion['data']> => {
@@ -168,9 +62,22 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
               : [attributeValue];
 
             if (attributeSchema.type === 'media') {
+              const permissionChecker = getContentManagerService('permission-checker').create({
+                userAbility: params.state.userAbility,
+                model: 'plugin::upload.file',
+              });
+
+              const response = await serviceUtils.buildMediaResponse(attributeValues);
+              const sanitizedResults = await Promise.all(
+                response.results.map((media) => permissionChecker.sanitizeOutput(media))
+              );
+
               return {
                 ...(await currentDataWithRelations),
-                [attributeKey]: await buildMediaResponse(attributeValues),
+                [attributeKey]: {
+                  results: sanitizedResults,
+                  meta: response.meta,
+                },
               };
             }
 
@@ -186,7 +93,7 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
                */
               if (attributeSchema.target === 'admin::user') {
                 const adminUsers = await Promise.all(
-                  attributeValues.map(async (userToPopulate) => {
+                  attributeValues.map((userToPopulate) => {
                     if (userToPopulate == null) {
                       return null;
                     }
@@ -199,18 +106,29 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
                 return {
                   ...(await currentDataWithRelations),
-                  /**
-                   * Ideally we would return the same "{results: [], meta: {}}" shape, however,
-                   * when sanitizing the data as a whole in the controller before sending to the client,
-                   * the data for admin relation user is completely sanitized if we return an object here as opposed to an array.
-                   */
                   [attributeKey]: adminUsers,
                 };
               }
 
+              const permissionChecker = getContentManagerService('permission-checker').create({
+                userAbility: params.state.userAbility,
+                model: attributeSchema.target,
+              });
+
+              const response = await serviceUtils.buildRelationReponse(
+                attributeValues,
+                attributeSchema
+              );
+              const sanitizedResults = await Promise.all(
+                response.results.map((media) => permissionChecker.sanitizeOutput(media))
+              );
+
               return {
                 ...(await currentDataWithRelations),
-                [attributeKey]: await buildRelationReponse(attributeValues, attributeSchema),
+                [attributeKey]: {
+                  results: sanitizedResults,
+                  meta: response.meta,
+                },
               };
             }
 

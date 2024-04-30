@@ -8,6 +8,11 @@ import { HistoryVersions } from '../../../../shared/contracts';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
+type RelationResponse = {
+  results: any[];
+  meta: { missingCount: number };
+};
+
 export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
   /**
    * @description
@@ -220,6 +225,93 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     }, {});
   };
 
+  /**
+   * @description
+   * Builds a response object for relations containing the related data and a count of missing relations
+   */
+  const buildMediaResponse = async (values: { id: Data.ID }[]): Promise<RelationResponse> => {
+    return (
+      values
+        // Until we implement proper pagination, limit relations to an arbitrary amount
+        .slice(0, 25)
+        .reduce(
+          async (currentRelationDataPromise, entry) => {
+            const currentRelationData = await currentRelationDataPromise;
+
+            // Entry can be null if it's a toOne relation
+            if (!entry) {
+              return currentRelationData;
+            }
+
+            const relatedEntry = await strapi.db
+              .query('plugin::upload.file')
+              .findOne({ where: { id: entry.id } });
+
+            if (relatedEntry) {
+              currentRelationData.results.push(relatedEntry);
+            } else {
+              // The related content has been deleted
+              currentRelationData.meta.missingCount += 1;
+            }
+
+            return currentRelationData;
+          },
+          Promise.resolve<RelationResponse>({
+            results: [],
+            meta: { missingCount: 0 },
+          })
+        )
+    );
+  };
+
+  /**
+   * @description
+   * Builds a response object for media containing the media assets data and a count of missing media assets
+   */
+  const buildRelationReponse = async (
+    values: {
+      documentId: string;
+      locale: string | null;
+    }[],
+    attributeSchema: Schema.Attribute.RelationWithTarget
+  ): Promise<RelationResponse> => {
+    return (
+      values
+        // Until we implement proper pagination, limit relations to an arbitrary amount
+        .slice(0, 25)
+        .reduce(
+          async (currentRelationDataPromise, entry) => {
+            const currentRelationData = await currentRelationDataPromise;
+
+            // Entry can be null if it's a toOne relation
+            if (!entry) {
+              return currentRelationData;
+            }
+
+            const relatedEntry = await strapi
+              .documents(attributeSchema.target)
+              .findOne({ documentId: entry.documentId, locale: entry.locale || undefined });
+
+            if (relatedEntry) {
+              currentRelationData.results.push({
+                ...relatedEntry,
+                status: await getVersionStatus(attributeSchema.target, relatedEntry),
+              });
+            } else {
+              // The related content has been deleted
+              currentRelationData.meta.missingCount += 1;
+            }
+
+            return currentRelationData;
+          },
+          Promise.resolve<RelationResponse>({
+            results: [],
+            meta: { missingCount: 0 },
+          })
+        )
+    );
+  };
+
   return {
     getSchemaAttributesDiff,
     getRelationRestoreValue,
@@ -229,5 +321,7 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     getRetentionDays,
     getVersionStatus,
     getDeepPopulate,
+    buildMediaResponse,
+    buildRelationReponse,
   };
 };
