@@ -324,7 +324,7 @@ const SelectedEntriesModalContent = ({
         }),
       });
 
-      // TODO fix this in V5
+      // TODO fix for V5
       setPublishedCount(res.data.data.count);
     } catch {
       toggleNotification({

@@ -307,8 +307,7 @@ const useDocumentActions: UseDocumentActions = () => {
   const bulkPublish: IUseDocumentActs['bulkPublish'] = React.useCallback(
     async ({ model, documentIds, params }) => {
       try {
-        // TODO __** tracking events for bulk publish?
-        // trackUsage('willPublishEntry');
+        // TODO Confirm tracking events for bulk publish?
 
         const res = await publishManyDocuments({
           model,
@@ -319,8 +318,6 @@ const useDocumentActions: UseDocumentActions = () => {
           toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
           return { error: res.error };
         }
-
-        // trackUsage('didPublishEntry');
 
         toggleNotification({
           type: 'success',

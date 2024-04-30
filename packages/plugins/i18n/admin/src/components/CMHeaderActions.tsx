@@ -387,11 +387,8 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
   if (!canPublish) {
     return null;
   }
-
   // This document action can be enabled given that draft and publish and i18n are
   // enabled and we can publish the current locale.
-  // In the modal that follows, the user will be able to see which locales are
-  // available for publication.
 
   const publish = async () => {
     try {

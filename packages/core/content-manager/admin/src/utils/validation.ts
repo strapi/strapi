@@ -108,14 +108,14 @@ const createYupSchema = (
                         })
                       );
                     } else if (typeof value === 'object') {
-                      // TODO assert keys such as connect, disconnect, count etc
+                      // TODO assert for specific keys such as connect, disconnect, count?
                       return yup.object();
                     } else {
                       return yup
                         .mixed()
                         .test(
                           'type-error',
-                          'Value must be either an array of objects with {id} or an object',
+                          'Relation values must be either null, an array of objects with {id} or an object.',
                           () => false
                         );
                     }
