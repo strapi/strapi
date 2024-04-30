@@ -10,15 +10,23 @@ import {
   GridItem,
   Typography,
 } from '@strapi/design-system';
+import { Schema } from '@strapi/types';
+import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
 
+import { useDoc } from '../../hooks/useDocument';
 import { useTypedSelector } from '../../modules/hooks';
+import {
+  prepareTempKeys,
+  removeFieldsThatDontExistOnSchema,
+} from '../../pages/EditView/utils/data';
 import { HistoryContextValue, useHistoryContext } from '../pages/History';
 
 import { VersionInputRenderer } from './VersionInputRenderer';
 
 import type { Metadatas } from '../../../../shared/contracts/content-types';
 import type { GetInitData } from '../../../../shared/contracts/init';
+import type { ComponentsDictionary, Document } from '../../hooks/useDocument';
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
 
 const createLayoutFromFields = <T extends EditFieldLayout | UnknownField>(fields: T[]) => {
@@ -186,10 +194,31 @@ const VersionContent = () => {
     fieldSizes,
   });
 
+  const { components } = useDoc();
+
+  /**
+   * Transform the data before passing it to the form so that each field
+   * has a uniquely generated key
+   */
+  const transformedData = React.useMemo(() => {
+    const transform =
+      (schemaAttributes: Schema.Attributes, components: ComponentsDictionary = {}) =>
+      (document: Omit<Document, 'id'>) => {
+        const schema = { attributes: schemaAttributes };
+        const transformations = pipe(
+          removeFieldsThatDontExistOnSchema(schema),
+          prepareTempKeys(schema, components)
+        );
+        return transformations(document);
+      };
+
+    return transform(version.schema, components)(version.data);
+  }, [components, version.data, version.schema]);
+
   return (
     <ContentLayout>
       <Box paddingBottom={8}>
-        <Form disabled={true} method="PUT" initialValues={version.data}>
+        <Form disabled={true} method="PUT" initialValues={transformedData}>
           <Flex direction="column" alignItems="stretch" gap={6} position="relative">
             {[...layout, ...remainingFieldsLayout].map((panel, index) => {
               return <FormPanel key={index} panel={panel} />;

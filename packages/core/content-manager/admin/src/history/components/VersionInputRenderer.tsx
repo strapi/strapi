@@ -21,7 +21,6 @@ import { useTypedSelector } from '../../modules/hooks';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { BlocksInput } from '../../pages/EditView/components/FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from '../../pages/EditView/components/FormInputs/Component/Input';
-import { ComponentLayout } from '../../pages/EditView/components/FormInputs/Component/Layout';
 import {
   DynamicZone,
   useDynamicZone,

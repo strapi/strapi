@@ -14,7 +14,6 @@ import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from './FormInputs/Component/Input';
-import { ComponentLayout } from './FormInputs/Component/Layout';
 import { DynamicZone, useDynamicZone } from './FormInputs/DynamicZone/Field';
 import { NotAllowedInput } from './FormInputs/NotAllowed';
 import { RelationsInput } from './FormInputs/Relations';

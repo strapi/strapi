@@ -210,7 +210,6 @@ const RepeatableComponent = ({
         <AccordionContent aria-describedby={ariaDescriptionId}>
           {value.map(({ __temp_key__: key, id }, index) => {
             const nameWithIndex = `${name}.${index}`;
-            const safeKey = key ?? nameWithIndex;
             return (
               <ComponentProvider
                 key={key}
@@ -225,10 +224,10 @@ const RepeatableComponent = ({
                   name={nameWithIndex}
                   attribute={attribute}
                   index={index}
-                  isOpen={collapseToOpen === safeKey}
+                  isOpen={collapseToOpen === key}
                   mainField={mainField}
                   onMoveItem={handleMoveComponentField}
-                  onClickToggle={handleToggle(safeKey)}
+                  onClickToggle={handleToggle(key)}
                   onDeleteComponent={() => {
                     removeFieldRow(name, index);
                     toggleCollapses();
