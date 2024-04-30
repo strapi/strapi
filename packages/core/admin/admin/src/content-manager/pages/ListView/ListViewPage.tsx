@@ -571,6 +571,9 @@ const ListViewPage = ({
     return null;
   }
 
+  // eslint-disable-next-line no-console
+  console.log('list view page');
+
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout
@@ -646,6 +649,7 @@ const ListViewPage = ({
       <ContentLayout>
         {canRead ? (
           <Flex gap={4} direction="column" alignItems="stretch">
+            adasdasd
             <HelperPluginTable.Root rows={data} isLoading={isLoading} colCount={colCount}>
               <HelperPluginTable.ActionBar>
                 <BulkActionsRenderer />
