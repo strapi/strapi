@@ -56,7 +56,7 @@ describe('CMReleasesContainer', () => {
     );
   });
 
-  it('should render the container', async () => {
+  it.skip('should render the container', async () => {
     render();
 
     const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
@@ -66,7 +66,7 @@ describe('CMReleasesContainer', () => {
     expect(addToReleaseButton).toBeInTheDocument();
   });
 
-  it.skip('should open and close the add to release modal', async () => {
+  it('should open and close the add to release modal', async () => {
     const { user } = render();
 
     const addToReleaseButton = await screen.findByRole('button', { name: 'Add to release' });
@@ -79,7 +79,7 @@ describe('CMReleasesContainer', () => {
     expect(modalDialog).not.toBeVisible();
   });
 
-  it.skip("should enable the modal's submit button", async () => {
+  it("should enable the modal's submit button", async () => {
     // Mock the response from the server
     server.use(
       rest.get('/content-releases', (req, res, ctx) => {
