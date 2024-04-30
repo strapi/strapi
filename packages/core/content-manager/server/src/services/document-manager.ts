@@ -202,7 +202,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
           documentIds.map((documentId) => this.publish(documentId, uid, { locale }))
         );
 
-        const publishedEntitiesCount = results.filter(Boolean).length;
+        const publishedEntitiesCount = results.flat().filter(Boolean).length;
         return publishedEntitiesCount;
       });
     },
