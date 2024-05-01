@@ -19,6 +19,7 @@ import {
   Table as HelperPluginTable,
   getYupInnerErrors,
   useFetchClient,
+  useQueryParams,
   useNotification,
   TranslationMessage,
   useAPIErrorHandler,
@@ -28,7 +29,7 @@ import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
 import { Entity } from '@strapi/types';
 import { AxiosError, AxiosResponse } from 'axios';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { useMutation, useQueryClient } from 'react-query';
+import { UseQueryResult, useMutation, useQuery, useQueryClient } from 'react-query';
 import { Link, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { ValidationError } from 'yup';
@@ -39,7 +40,7 @@ import { createYupSchema } from '../../../../utils/validation';
 import { useAllowedActions } from '../../hooks/useAllowedActions';
 import { Table } from '../Table';
 
-import { ConfirmDialogPublishAll } from './ConfirmBulkActionDialog';
+import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
 import type { BulkActionComponent } from '../../../../../core/apis/content-manager';
 
@@ -117,14 +118,14 @@ const EntryValidationText = ({
 
 interface SelectedEntriesTableContentProps {
   isPublishing?: boolean;
-  rowsToDisplay?: TableRow[];
+  rows?: TableRow[];
   entriesToPublish?: Entity.ID[];
   validationErrors: Record<string, EntryValidationTextProps['validationErrors']>;
 }
 
 const SelectedEntriesTableContent = ({
   isPublishing,
-  rowsToDisplay = [],
+  rows = [],
   entriesToPublish = [],
   validationErrors = {},
 }: SelectedEntriesTableContentProps) => {
@@ -151,7 +152,7 @@ const SelectedEntriesTableContent = ({
       </HelperPluginTable.Head>
       <HelperPluginTable.LoadingBody />
       <HelperPluginTable.Body>
-        {rowsToDisplay.map((row, index) => (
+        {rows.map((row, index) => (
           <Tr key={row.id}>
             <Td>
               <Table.CheckboxDataCell rowId={row.id} index={index} />
@@ -226,9 +227,11 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
  * SelectedEntriesModalContent
  * -----------------------------------------------------------------------------------------------*/
 
-interface SelectedEntriesModalContentProps {
-  setSelectedListViewEntries: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
-  onClose: () => void;
+interface SelectedEntriesModalContentProps
+  extends Pick<SelectedEntriesTableContentProps, 'validationErrors'> {
+  refetchModalData: UseQueryResult['refetch'];
+  onSuccessfulPublish: (ids: Entity.ID[]) => void;
+  toggleModal: ConfirmDialogPublishAllProps['onToggleDialog'];
 }
 
 interface TableRow {
@@ -237,60 +240,32 @@ interface TableRow {
 }
 
 const SelectedEntriesModalContent = ({
-  setSelectedListViewEntries,
-  onClose,
+  toggleModal,
+  refetchModalData,
+  onSuccessfulPublish,
+  validationErrors = {},
 }: SelectedEntriesModalContentProps) => {
-  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
-  const { selectedEntries, rows, onSelectRow, isLoading, isFetching } = useTableContext<TableRow>();
+  const { selectedEntries, rows, isLoading, isFetching } = useTableContext<TableRow>();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [rowsToDisplay, setRowsToDisplay] = React.useState<Array<TableRow>>([]);
   const [publishedCount, setPublishedCount] = React.useState(0);
   const { formatAPIError } = useAPIErrorHandler();
 
-  const { contentType, components } = useTypedSelector(
-    (state) => state['content-manager_listView']
-  );
-
-  const validationErrors = React.useMemo(() => {
-    if (rows.length === 0 || !contentType) return {};
-
-    const schema = createYupSchema(
-      contentType,
-      { components },
-      { isDraft: false, isJSONTestDisabled: true }
-    );
-    const validationErrors: Record<Entity.ID, Record<string, TranslationMessage>> = rows.reduce(
-      (acc: any, entry) => {
-        try {
-          schema.validateSync(entry, { abortEarly: false });
-          return acc;
-        } catch (e) {
-          if (e instanceof ValidationError) {
-            return {
-              ...acc,
-              [entry.id]: getYupInnerErrors(e),
-            };
-          }
-        }
-      },
-      {} as Record<Entity.ID, Record<string, TranslationMessage>>
-    );
-
-    return validationErrors;
-  }, [components, contentType, rows]);
-
-  const entriesToPublish = rows
-    .filter(({ id }) => selectedEntries.includes(id) && !validationErrors[id])
-    .map(({ id }) => id);
+  const entriesToPublish = rows.reduce<Entity.ID[]>((acc, { id }) => {
+    if (selectedEntries.includes(id) && !validationErrors[id]) {
+      acc.push(id);
+    }
+    return acc;
+  }, []);
 
   const { post } = useFetchClient();
   const toggleNotification = useNotification();
+  const { contentType } = useTypedSelector((state) => state['content-manager_listView']);
 
-  const selectedEntriesWithErrorsCount = rowsToDisplay.filter(
+  const selectedEntriesWithErrorsCount = rows.filter(
     ({ id }) => selectedEntries.includes(id) && validationErrors[id]
   ).length;
-  const selectedEntriesPublished = rowsToDisplay.filter(
+  const selectedEntriesPublished = rows.filter(
     ({ id, publishedAt }) => selectedEntries.includes(id) && publishedAt
   ).length;
   const selectedEntriesWithNoErrorsCount =
@@ -304,23 +279,8 @@ const SelectedEntriesModalContent = ({
     (data) =>
       post(`/content-manager/collection-types/${contentType!.uid}/actions/bulkPublish`, data),
     {
-      onSuccess() {
-        refetchList();
-
-        const update = rowsToDisplay.filter((row) => {
-          if (entriesToPublish.includes(row.id)) {
-            // Deselect the entries that have been published from the modal table
-            onSelectRow({ name: row.id, value: false });
-          }
-
-          // Remove the entries that have been published from the table
-          return !entriesToPublish.includes(row.id);
-        });
-
-        setRowsToDisplay(update);
-        const publishedIds = update.map(({ id }) => id);
-        // Deselect the entries that were published in the list view
-        setSelectedListViewEntries(publishedIds);
+      onSuccess(_res, { ids }) {
+        onSuccessfulPublish(ids);
 
         toggleNotification({
           type: 'success',
@@ -375,18 +335,6 @@ const SelectedEntriesModalContent = ({
     );
   };
 
-  const refetchList = () => {
-    queryClient.invalidateQueries(['content-manager', 'collection-types', contentType?.uid]);
-  };
-
-  React.useEffect(() => {
-    // When the api responds with data
-    if (rows.length > 0) {
-      // Update the rows to display
-      setRowsToDisplay(rows);
-    }
-  }, [rows]);
-
   return (
     <>
       <ModalBody>
@@ -394,7 +342,7 @@ const SelectedEntriesModalContent = ({
         <Box marginTop={5}>
           <SelectedEntriesTableContent
             isPublishing={bulkPublishMutation.isLoading}
-            rowsToDisplay={rowsToDisplay}
+            rows={rows}
             entriesToPublish={entriesToPublish}
             validationErrors={validationErrors}
           />
@@ -402,7 +350,7 @@ const SelectedEntriesModalContent = ({
       </ModalBody>
       <ModalFooter
         startActions={
-          <Button onClick={onClose} variant="tertiary">
+          <Button onClick={toggleModal} variant="tertiary">
             {formatMessage({
               id: 'app.components.Button.cancel',
               defaultMessage: 'Cancel',
@@ -411,15 +359,13 @@ const SelectedEntriesModalContent = ({
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={refetchList} variant="tertiary" loading={isFetching}>
+            <Button onClick={() => refetchModalData()} variant="tertiary" loading={isFetching}>
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
               onClick={toggleDialog}
               disabled={
-                selectedEntries.length === 0 ||
-                selectedEntries.length === selectedEntriesWithErrorsCount ||
-                isLoading
+                selectedEntries.length === 0 || selectedEntriesWithErrorsCount > 0 || isLoading
               }
               loading={bulkPublishMutation.isLoading}
             >
@@ -442,14 +388,103 @@ const SelectedEntriesModalContent = ({
  * PublishAction
  * -----------------------------------------------------------------------------------------------*/
 
-const PublishAction: BulkActionComponent = ({ model: slug }) => {
+const PublishAction: BulkActionComponent = ({ model: slug, ids }) => {
   const { formatMessage } = useIntl();
-  const { selectedEntries, setSelectedEntries, rows } = useTableContext();
-  const selectedEntriesObjects = rows.filter((entry) => selectedEntries.includes(entry.id));
+  const queryClient = useQueryClient();
+  const {
+    data: list,
+    contentType,
+    components,
+  } = useTypedSelector((state) => state['content-manager_listView']);
+  const selectedEntries = list.filter((entry) => ids.includes(entry.id));
   const hasPublishPermission = useAllowedActions(slug).canPublish;
   const showPublishButton =
-    // @ts-expect-error - rows has the complete object, not only ID, type is wrong
-    hasPublishPermission && selectedEntriesObjects.some((entry) => !entry.publishedAt);
+    hasPublishPermission && selectedEntries.some((entry) => !entry.publishedAt);
+  const { setSelectedEntries: setListViewTableSelectedRows } = useTableContext();
+  // We want to keep the selected entries order same as the list view
+  const [
+    {
+      query: { sort, plugins },
+    },
+  ] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
+
+  const queryParams = {
+    page: 1,
+    pageSize: ids.length,
+    sort,
+    filters: {
+      id: {
+        $in: ids,
+      },
+    },
+    locale: plugins?.i18n?.locale,
+  };
+
+  const { get } = useFetchClient();
+
+  const {
+    data = [],
+    isLoading,
+    isFetching,
+    refetch,
+  } = useQuery(
+    ['bulk-actions', contentType?.uid, queryParams],
+    async () => {
+      const { data } = await get<Contracts.CollectionTypes.Find.Response>(
+        `content-manager/collection-types/${contentType!.uid}`,
+        {
+          params: queryParams,
+        }
+      );
+
+      return data.results;
+    },
+    {
+      enabled: contentType !== null,
+    }
+  );
+
+  const { rows, validationErrors } = React.useMemo(() => {
+    if (data.length > 0 && contentType) {
+      const schema = createYupSchema(
+        contentType,
+        { components },
+        { isDraft: false, isJSONTestDisabled: true }
+      );
+      const validationErrors: Record<Entity.ID, Record<string, TranslationMessage>> = {};
+      const rows = data.map((entry) => {
+        try {
+          schema.validateSync(entry, { abortEarly: false });
+
+          return entry;
+        } catch (e) {
+          if (e instanceof ValidationError) {
+            validationErrors[entry.id] = getYupInnerErrors(e);
+          }
+
+          return entry;
+        }
+      });
+
+      return { rows, validationErrors };
+    }
+
+    return {
+      rows: [],
+      validationErrors: {},
+    };
+  }, [components, contentType, data]);
+
+  const refetchList = () => {
+    queryClient.invalidateQueries(['content-manager', 'collection-types', slug]);
+  };
+
+  const onSuccessfulPublish = (ids: Entity.ID[]) => {
+    // Deselect the entries that were published in the list view
+    setListViewTableSelectedRows((allIds) => allIds.filter((id) => !ids.includes(id)));
+
+    refetchList();
+  };
 
   if (!showPublishButton) return null;
 
@@ -466,16 +501,26 @@ const PublishAction: BulkActionComponent = ({ model: slug }) => {
       content: ({ onClose }) => {
         return (
           <HelperPluginTable.Root
-            rows={selectedEntriesObjects}
-            defaultSelectedEntries={selectedEntries}
+            rows={rows}
+            defaultSelectedEntries={ids}
             colCount={4}
+            isLoading={isLoading}
+            isFetching={isFetching}
           >
             <SelectedEntriesModalContent
-              setSelectedListViewEntries={setSelectedEntries}
-              onClose={onClose}
+              onSuccessfulPublish={onSuccessfulPublish}
+              toggleModal={() => {
+                onClose();
+                refetchList();
+              }}
+              refetchModalData={refetch}
+              validationErrors={validationErrors}
             />
           </HelperPluginTable.Root>
         );
+      },
+      onClose: () => {
+        refetchList();
       },
     },
   };
