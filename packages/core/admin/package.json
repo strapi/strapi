@@ -129,7 +129,7 @@
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "1.0.0",
     "mini-css-extract-plugin": "2.7.7",
-    "node-schedule": "2.1.0",
+    "node-schedule": "2.1.1",
     "ora": "5.4.1",
     "outdent": "0.8.0",
     "p-map": "4.0.0",
