@@ -1,4 +1,11 @@
-import { SingleSelectOption, SingleSelect, Typography } from '@strapi/design-system';
+import {
+  SingleSelectOption,
+  SingleSelect,
+  Typography,
+  Field,
+  FieldLabel,
+  FieldError,
+} from '@strapi/design-system';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { getDateOfExpiration } from '../../pages/ApiTokens/EditView/utils/getDateOfExpiration';
@@ -26,13 +33,7 @@ export const LifeSpanInput = ({
 
   return (
     <>
-      <SingleSelect
-        name="lifespan"
-        label={formatMessage({
-          id: 'Settings.tokens.form.duration',
-          defaultMessage: 'Token duration',
-        })}
-        value={value}
+      <Field
         error={
           error
             ? formatMessage(
@@ -42,39 +43,51 @@ export const LifeSpanInput = ({
               )
             : undefined
         }
-        onChange={(value) => {
-          // @ts-expect-error – DS v2 won't support number types for select
-          onChange({ target: { name: 'lifespan', value } });
-        }}
+        name="lifespan"
         required
-        disabled={!isCreating}
-        placeholder="Select"
       >
-        <SingleSelectOption value="604800000">
+        <FieldLabel>
           {formatMessage({
-            id: 'Settings.tokens.duration.7-days',
-            defaultMessage: '7 days',
+            id: 'Settings.tokens.form.duration',
+            defaultMessage: 'Token duration',
           })}
-        </SingleSelectOption>
-        <SingleSelectOption value="2592000000">
-          {formatMessage({
-            id: 'Settings.tokens.duration.30-days',
-            defaultMessage: '30 days',
-          })}
-        </SingleSelectOption>
-        <SingleSelectOption value="7776000000">
-          {formatMessage({
-            id: 'Settings.tokens.duration.90-days',
-            defaultMessage: '90 days',
-          })}
-        </SingleSelectOption>
-        <SingleSelectOption value="0">
-          {formatMessage({
-            id: 'Settings.tokens.duration.unlimited',
-            defaultMessage: 'Unlimited',
-          })}
-        </SingleSelectOption>
-      </SingleSelect>
+        </FieldLabel>
+        <SingleSelect
+          value={value}
+          onChange={(value) => {
+            // @ts-expect-error – DS v2 won't support number types for select
+            onChange({ target: { name: 'lifespan', value } });
+          }}
+          disabled={!isCreating}
+          placeholder="Select"
+        >
+          <SingleSelectOption value="604800000">
+            {formatMessage({
+              id: 'Settings.tokens.duration.7-days',
+              defaultMessage: '7 days',
+            })}
+          </SingleSelectOption>
+          <SingleSelectOption value="2592000000">
+            {formatMessage({
+              id: 'Settings.tokens.duration.30-days',
+              defaultMessage: '30 days',
+            })}
+          </SingleSelectOption>
+          <SingleSelectOption value="7776000000">
+            {formatMessage({
+              id: 'Settings.tokens.duration.90-days',
+              defaultMessage: '90 days',
+            })}
+          </SingleSelectOption>
+          <SingleSelectOption value="0">
+            {formatMessage({
+              id: 'Settings.tokens.duration.unlimited',
+              defaultMessage: 'Unlimited',
+            })}
+          </SingleSelectOption>
+        </SingleSelect>
+        <FieldError />
+      </Field>
       <Typography variant="pi" textColor="neutral600">
         {!isCreating &&
           `${formatMessage({

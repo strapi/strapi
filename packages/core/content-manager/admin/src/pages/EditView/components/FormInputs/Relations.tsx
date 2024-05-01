@@ -921,7 +921,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
           <FlexWrapper gap={1}>
             {canDrag ? (
               <IconButton
-                forwardedAs="div"
+                tag="div"
                 role="button"
                 tabIndex={0}
                 aria-label={formatMessage({
@@ -939,7 +939,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                 <Tooltip description={label}>
                   {href ? (
-                    <LinkEllipsis forwardedAs={NavLink} to={href}>
+                    <LinkEllipsis tag={NavLink} to={href}>
                       {label}
                     </LinkEllipsis>
                   ) : (

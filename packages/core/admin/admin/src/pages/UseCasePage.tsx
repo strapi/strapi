@@ -10,6 +10,8 @@ import {
   TextButton,
   TextInput,
   Typography,
+  Field,
+  FieldLabel,
 } from '@strapi/design-system';
 import { parse } from 'qs';
 import { useIntl } from 'react-intl';
@@ -132,32 +134,28 @@ const UseCasePage = () => {
               </Box>
             </Flex>
             <Flex direction="column" alignItems="stretch" gap={6}>
-              <SingleSelect
-                id="usecase"
-                data-testid="usecase"
-                label={formatMessage({
-                  id: 'Usecase.input.work-type',
-                  defaultMessage: 'What type of work do you do?',
-                })}
-                // onClear={() => setRole(null)}
-                // clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-                onChange={(value) => setRole(value)}
-                value={role}
-              >
-                {options.map(({ intlLabel, value }) => (
-                  <SingleSelectOption key={value} value={value}>
-                    {formatMessage(intlLabel)}
-                  </SingleSelectOption>
-                ))}
-              </SingleSelect>
+              <Field name="usecase">
+                <FieldLabel>
+                  {formatMessage({
+                    id: 'Usecase.input.work-type',
+                    defaultMessage: 'What type of work do you do?',
+                  })}
+                </FieldLabel>
+                <SingleSelect onChange={(value) => setRole(value)} value={role}>
+                  {options.map(({ intlLabel, value }) => (
+                    <SingleSelectOption key={value} value={value}>
+                      {formatMessage(intlLabel)}
+                    </SingleSelectOption>
+                  ))}
+                </SingleSelect>
+              </Field>
               {isOther && (
-                <TextInput
-                  name="other"
-                  label={formatMessage({ id: 'Usecase.other', defaultMessage: 'Other' })}
-                  value={otherRole}
-                  onChange={(e) => setOtherRole(e.target.value)}
-                  data-testid="other"
-                />
+                <Field name="other">
+                  <FieldLabel>
+                    {formatMessage({ id: 'Usecase.other', defaultMessage: 'Other' })}
+                  </FieldLabel>
+                  <TextInput value={otherRole} onChange={(e) => setOtherRole(e.target.value)} />
+                </Field>
               )}
               <Button type="submit" size="L" fullWidth disabled={!role}>
                 {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}

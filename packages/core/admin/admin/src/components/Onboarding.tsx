@@ -108,9 +108,9 @@ const Onboarding = () => {
                 paddingRight={11}
               >
                 <Box paddingRight={5}>
-                  <Typography textColor="neutral200" variant="alpha">
+                  <Number textColor="neutral200" variant="alpha">
                     {index + 1}
-                  </Typography>
+                  </Number>
                 </Box>
                 <Box position="relative">
                   <Preview src={onboardingPreview} alt="" />
@@ -128,7 +128,7 @@ const Onboarding = () => {
                   </IconWrapper>
                 </Box>
                 <Flex direction="column" alignItems="start" paddingLeft={4}>
-                  <Typography fontWeight="bold">{formatMessage(label)}</Typography>
+                  <Label fontWeight="bold">{formatMessage(label)}</Label>
                   <VisuallyHidden>:</VisuallyHidden>
                   <Typography textColor="neutral600" variant="pi">
                     {duration}
@@ -179,6 +179,10 @@ const IconWrapper = styled(Flex)`
   transform: translate(-50%, -50%);
 `;
 
+const Number = styled(Typography)``;
+
+const Label = styled(Typography)``;
+
 const VideoLinkWrapper = styled(Flex)`
   text-decoration: none;
 
@@ -190,12 +194,12 @@ const VideoLinkWrapper = styled(Flex)`
     background: ${({ theme }) => theme.colors.primary100};
 
     /* Hover style for the number displayed */
-    ${Typography}:first-child {
+    ${Number} {
       color: ${({ theme }) => theme.colors.primary500};
     }
 
     /* Hover style for the label */
-    ${Typography}:nth-child(1) {
+    ${Label} {
       color: ${({ theme }) => theme.colors.primary600};
     }
   }

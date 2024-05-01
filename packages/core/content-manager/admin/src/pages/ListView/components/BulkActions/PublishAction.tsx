@@ -185,7 +185,7 @@ const SelectedEntriesTableContent = ({
             </Table.Cell>
             <Table.Cell>
               <IconButton
-                forwardedAs={Link}
+                tag={Link}
                 // @ts-expect-error – DS does not correctly infer props from the as prop.
                 to={{
                   pathname: `${pathname}/${row.id}`,

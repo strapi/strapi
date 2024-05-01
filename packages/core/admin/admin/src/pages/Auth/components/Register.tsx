@@ -473,7 +473,6 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         {match?.params.authType === 'register' && (
           <Box paddingTop={4}>
             <Flex justifyContent="center">
-              {/* @ts-expect-error – error with inferring the props from the as component */}
               <Link tag={NavLink} to="/auth/login">
                 {formatMessage({
                   id: 'Auth.link.signin.account',

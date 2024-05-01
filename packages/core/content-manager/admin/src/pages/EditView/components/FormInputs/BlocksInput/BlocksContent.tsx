@@ -223,7 +223,7 @@ const DragAndDropElement = ({
           dragVisibility={dragVisibility}
         >
           <DragIconButton
-            forwardedAs="div"
+            tag="div"
             role="button"
             tabIndex={0}
             aria-label={formatMessage({
@@ -258,7 +258,7 @@ const CloneDragItem = ({ children, dragHandleTopMargin }: CloneDragItemProps) =>
   return (
     <DragItem gap={2} paddingLeft={2} alignItems="start" dragVisibility="visible">
       <DragIconButton
-        forwardedAs="div"
+        tag="div"
         role="button"
         aria-label={formatMessage({
           id: getTranslation('components.DragHandle-label'),

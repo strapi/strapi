@@ -1,28 +1,37 @@
 import { forwardRef } from 'react';
 
-import { TextInput, useComposedRefs } from '@strapi/design-system';
+import {
+  TextInput,
+  useComposedRefs,
+  Field,
+  FieldLabel,
+  FieldHint,
+  FieldError,
+} from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { type InputProps, useField } from '../Form';
 
-/**
- * TODO: fix the ref type when the design system is fixed.
- */
-export const StringInput = forwardRef<any, InputProps>(({ ...props }, ref) => {
-  const field = useField(props.name);
-  const fieldRef = useFocusInputField(props.name);
+export const StringInput = forwardRef<HTMLInputElement, InputProps>(
+  ({ name, required, label, hint, labelAction, ...props }, ref) => {
+    const field = useField(name);
+    const fieldRef = useFocusInputField<HTMLInputElement>(name);
 
-  const composedRefs = useComposedRefs(ref, fieldRef);
+    const composedRefs = useComposedRefs(ref, fieldRef);
 
-  return (
-    // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-    <TextInput
-      ref={composedRefs}
-      error={field.error}
-      defaultValue={field.initialValue}
-      onChange={field.onChange}
-      value={field.value ?? ''}
-      {...props}
-    />
-  );
-});
+    return (
+      <Field error={field.error} name={name} hint={hint} required={required}>
+        <FieldLabel action={labelAction}>{label}</FieldLabel>
+        <TextInput
+          ref={composedRefs}
+          defaultValue={field.initialValue}
+          onChange={field.onChange}
+          value={field.value ?? ''}
+          {...props}
+        />
+        <FieldHint />
+        <FieldError />
+      </Field>
+    );
+  }
+);

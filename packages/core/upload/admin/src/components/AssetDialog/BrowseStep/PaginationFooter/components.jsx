@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { buttonFocusStyle, Typography, VisuallyHidden } from '@strapi/design-system';
+import { Typography, VisuallyHidden } from '@strapi/design-system';
 import { ChevronLeft, ChevronRight } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
@@ -18,7 +18,7 @@ const LinkWrapper = styled.button`
   text-decoration: none;
   display: flex;
 
-  ${buttonFocusStyle}
+  // TODO: re-add focus style
 `;
 
 LinkWrapper.defaultProps = { type: 'button' };

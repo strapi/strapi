@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { TextInput, ToggleInput } from '@strapi/design-system';
+import { TextInput, Toggle } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -41,7 +41,7 @@ const Input = ({
 
   if (type === 'bool') {
     return (
-      <ToggleInput
+      <Toggle
         aria-label={name}
         checked={value}
         disabled={disabled}

@@ -264,7 +264,7 @@ export const MediaLibrary = () => {
               {canConfigureView ? (
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    forwardedAs={ReactRouterLink}
+                    tag={ReactRouterLink}
                     to={{
                       pathname: `${pathname}/configuration`,
                       search: stringify(query, { encode: false }),

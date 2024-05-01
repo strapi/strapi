@@ -62,7 +62,7 @@ const NpmPackagesFilters = ({
         </ButtonToggle>
         {isVisible && (
           <Popover source={buttonRef} onDismiss={handleToggle} padding={3} spacing={4}>
-            <FiltersFlex direction="column" alignItems="stretch" gap={1}>
+            <Flex direction="column" alignItems="stretch" gap={1}>
               <FilterSelect
                 message={formatMessage({
                   id: 'admin.pages.MarketPlacePage.filters.collections',
@@ -111,7 +111,7 @@ const NpmPackagesFilters = ({
                   }
                 />
               )}
-            </FiltersFlex>
+            </Flex>
           </Popover>
         )}
       </Box>
@@ -138,20 +138,6 @@ const ButtonToggle = styled(Button)`
   height: ${({ theme }) => theme.sizes.input.S};
 `;
 
-const FiltersFlex = styled(Flex)`
-  /* Hide the label, every input needs a label. */
-  label {
-    border: 0;
-    clip: rect(0 0 0 0);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    width: 1px;
-  }
-`;
-
 /* -------------------------------------------------------------------------------------------------
  * FilterSelect
  * -----------------------------------------------------------------------------------------------*/
@@ -175,7 +161,7 @@ const FilterSelect = ({
   return (
     <MultiSelect
       data-testid={`${message}-button`}
-      label={message}
+      aria-label={message}
       placeholder={message}
       size="M"
       onChange={onChange}

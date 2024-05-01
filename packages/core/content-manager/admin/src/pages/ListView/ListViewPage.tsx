@@ -348,7 +348,7 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
   return (
     <Button
       variant={variant}
-      forwardedAs={ReactRouterLink}
+      tag={ReactRouterLink}
       onClick={() => {
         trackUsage('willCreateEntry', { status: 'draft' });
       }}

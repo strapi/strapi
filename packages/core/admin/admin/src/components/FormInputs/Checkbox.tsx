@@ -1,28 +1,34 @@
 import { forwardRef } from 'react';
 
-import { Checkbox, useComposedRefs } from '@strapi/design-system';
+import { Checkbox, useComposedRefs, Field, FieldHint, FieldError } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const CheckboxInput = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
-  const field = useField<boolean>(props.name);
-  const fieldRef = useFocusInputField(props.name);
+const CheckboxInput = forwardRef<HTMLInputElement, InputProps>(
+  ({ name, required, label, hint, ...props }, ref) => {
+    const field = useField<boolean>(name);
+    const fieldRef = useFocusInputField<HTMLInputElement>(name);
 
-  const composedRefs = useComposedRefs<HTMLInputElement | null>(ref, fieldRef);
+    const composedRefs = useComposedRefs(ref, fieldRef);
 
-  return (
-    <Checkbox
-      onValueChange={(checked) => field.onChange(props.name, checked)}
-      ref={composedRefs}
-      value={field.value}
-      {...props}
-    >
-      {props.label || props['aria-label']}
-    </Checkbox>
-  );
-});
+    return (
+      <Field error={field.error} name={name} hint={hint} required={required}>
+        <Checkbox
+          onValueChange={(checked) => field.onChange(name, checked)}
+          ref={composedRefs}
+          value={field.value}
+          {...props}
+        >
+          {label || props['aria-label']}
+        </Checkbox>
+        <FieldHint />
+        <FieldError />
+      </Field>
+    );
+  }
+);
 
 export { CheckboxInput };

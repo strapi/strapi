@@ -72,7 +72,6 @@ const Providers = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            {/* @ts-expect-error – error with inferring the props from the as component */}
             <Link tag={NavLink} to="/auth/forgot-password">
               <Typography variant="pi">
                 {formatMessage({ id: 'Auth.link.forgot-password' })}

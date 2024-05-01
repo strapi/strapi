@@ -319,7 +319,7 @@ const Stage = ({
                     <DragIconButton
                       background="transparent"
                       // @ts-expect-error – `forwardedAs` can be a string.
-                      forwardedAs="div"
+                      tag="div"
                       hasRadius
                       role="button"
                       noBorder

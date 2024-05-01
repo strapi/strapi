@@ -120,7 +120,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
               >
                 <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                   <Tooltip description={label}>
-                    <LinkEllipsis forwardedAs={NavLink} to={href}>
+                    <LinkEllipsis tag={NavLink} to={href}>
                       {label}
                     </LinkEllipsis>
                   </Tooltip>

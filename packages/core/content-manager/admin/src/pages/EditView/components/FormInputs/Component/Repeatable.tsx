@@ -488,7 +488,7 @@ const Component = ({
                   <IconButton
                     className="drag-handle"
                     ref={composedAccordionRefs}
-                    forwardedAs="div"
+                    tag="div"
                     role="button"
                     borderWidth={0}
                     tabIndex={0}

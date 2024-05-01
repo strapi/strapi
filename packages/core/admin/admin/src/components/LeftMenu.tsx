@@ -123,6 +123,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             defaultMessage: 'Workplace',
           })}
           title={menuTitle}
+          to="/"
           icon={
             <img
               src={menu.custom?.url || menu.default}
@@ -151,7 +152,6 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         )}
         <NavLink
           tag={RouterNavLink}
-          // @ts-expect-error the props from the passed as prop are not inferred // joined together
           to="/content-manager"
           icon={<Feather />}
           onClick={() => handleClickOnLink('/content-manager')}
@@ -210,7 +210,6 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                       ? link.notificationsCount.toString()
                       : undefined
                   }
-                  // @ts-expect-error the props from the passed as prop are not inferred // joined together
                   to={link.to}
                   key={link.to}
                   icon={<LinkIcon />}

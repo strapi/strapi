@@ -17,7 +17,7 @@ import {
   Textarea,
   TextInput,
   TimePicker,
-  ToggleInput,
+  Toggle,
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
@@ -238,7 +238,7 @@ const GenericInput = ({
     }
     case 'bool': {
       return (
-        <ToggleInput
+        <Toggle
           checked={defaultValue === null ? null : defaultValue || false}
           disabled={disabled}
           hint={hint}

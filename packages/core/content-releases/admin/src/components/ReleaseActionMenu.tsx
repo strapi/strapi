@@ -164,7 +164,7 @@ const ReleaseActionEntryLinkItem = ({
 
   return (
     <StyledMenuItem
-      forwardedAs={NavLink}
+      tag={NavLink}
       isLink
       to={{
         pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
@@ -195,7 +195,7 @@ const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <StyledMenuItem forwardedAs={NavLink} isLink to={`/plugins/content-releases/${releaseId}`}>
+    <StyledMenuItem tag={NavLink} isLink to={`/plugins/content-releases/${releaseId}`}>
       <Flex gap={2}>
         <Pencil width="1.6rem" height="1.6rem" />
         <Typography variant="omega">

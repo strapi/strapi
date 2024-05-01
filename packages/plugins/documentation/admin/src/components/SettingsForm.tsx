@@ -9,7 +9,7 @@ import {
   GridItem,
   HeaderLayout,
   TextInput,
-  ToggleInput,
+  Toggle,
   Typography,
   FieldAction,
 } from '@strapi/design-system';
@@ -115,7 +115,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                   </Typography>
                   <Grid gap={4}>
                     <GridItem col={6} s={12}>
-                      <ToggleInput
+                      <Toggle
                         name="restrictedAccess"
                         label={formatMessage({
                           id: getTrad('pages.SettingsPage.toggle.label'),

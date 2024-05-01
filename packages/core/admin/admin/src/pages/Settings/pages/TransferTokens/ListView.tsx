@@ -160,7 +160,7 @@ const ListView = () => {
         primaryAction={
           canCreate ? (
             <LinkButton
-              forwardedAs={Link}
+              tag={Link}
               data-testid="create-transfer-token-button"
               startIcon={<Plus />}
               size="S"
@@ -169,7 +169,6 @@ const ListView = () => {
                   tokenType: TRANSFER_TOKEN_TYPE,
                 })
               }
-              // @ts-expect-error We need to accept the props of the component passed in the `as` prop
               to="/settings/transfer-tokens/create"
             >
               {formatMessage({
@@ -199,10 +198,9 @@ const ListView = () => {
               <EmptyStateLayout
                 action={
                   <LinkButton
-                    forwardedAs={Link}
+                    tag={Link}
                     variant="secondary"
                     startIcon={<Plus />}
-                    // @ts-expect-error We need to accept the props of the component passed in the `as` prop
                     to="/settings/transfer-tokens/create"
                   >
                     {formatMessage({

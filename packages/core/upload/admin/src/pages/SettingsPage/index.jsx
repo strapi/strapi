@@ -10,7 +10,7 @@ import {
   GridItem,
   HeaderLayout,
   Layout,
-  ToggleInput,
+  Toggle,
   Typography,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
@@ -141,7 +141,7 @@ export const SettingsPage = () => {
                   </Flex>
                   <Grid gap={6}>
                     <GridItem col={6} s={12}>
-                      <ToggleInput
+                      <Toggle
                         aria-label="responsiveDimensions"
                         checked={modifiedData.responsiveDimensions}
                         hint={formatMessage({
@@ -170,7 +170,7 @@ export const SettingsPage = () => {
                       />
                     </GridItem>
                     <GridItem col={6} s={12}>
-                      <ToggleInput
+                      <Toggle
                         aria-label="sizeOptimization"
                         checked={modifiedData.sizeOptimization}
                         hint={formatMessage({
@@ -199,7 +199,7 @@ export const SettingsPage = () => {
                       />
                     </GridItem>
                     <GridItem col={6} s={12}>
-                      <ToggleInput
+                      <Toggle
                         aria-label="autoOrientation"
                         checked={modifiedData.autoOrientation}
                         hint={formatMessage({

@@ -271,11 +271,7 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
 
   return (
     <PaginationImpl activePage={activePage} pageCount={pageCount}>
-      <PreviousLink
-        tag={Link}
-        // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
-        to={{ search: stringify({ ...query, page: activePage - 1 }) }}
-      >
+      <PreviousLink tag={Link} to={{ search: stringify({ ...query, page: activePage - 1 }) }}>
         {formatMessage({
           id: 'components.pagination.go-to-previous',
           defaultMessage: 'Go to previous page',
@@ -289,7 +285,6 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
               active={item === activePage}
               key={item}
               number={item}
-              // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
               to={{ search: stringify({ ...query, page: item }) }}
             >
               {formatMessage(
@@ -303,11 +298,7 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
         return <Dots key={item} />;
       })}
 
-      <NextLink
-        tag={Link}
-        // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
-        to={{ search: stringify({ ...query, page: activePage + 1 }) }}
-      >
+      <NextLink tag={Link} to={{ search: stringify({ ...query, page: activePage + 1 }) }}>
         {formatMessage({
           id: 'components.pagination.go-to-next',
           defaultMessage: 'Go to next page',

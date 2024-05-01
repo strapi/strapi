@@ -22,7 +22,6 @@ const GuidedTourHomepage = () => {
       <LinkButton
         onClick={() => trackUsage(val.home.trackingEvent)}
         tag={NavLink}
-        // @ts-expect-error - types are not inferred correctly through the as prop.
         to={val.home.cta.target}
         endIcon={<ArrowRight />}
       >

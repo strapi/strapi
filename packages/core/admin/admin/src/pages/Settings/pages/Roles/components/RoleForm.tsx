@@ -1,6 +1,9 @@
 import {
   Box,
   Button,
+  Field,
+  FieldError,
+  FieldLabel,
   Flex,
   Grid,
   GridItem,
@@ -63,34 +66,35 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
         </Flex>
         <Grid gap={4}>
           <GridItem col={6}>
-            <TextInput
-              disabled={disabled}
-              name="name"
-              error={errors.name && formatMessage({ id: errors.name })}
-              label={formatMessage({
-                id: 'global.name',
-                defaultMessage: 'Name',
-              })}
-              onChange={onChange}
-              onBlur={onBlur}
-              required
-              value={values.name || ''}
-            />
+            <Field name="name" error={errors.name && formatMessage({ id: errors.name })} required>
+              <FieldLabel>
+                {formatMessage({
+                  id: 'global.name',
+                  defaultMessage: 'Name',
+                })}
+              </FieldLabel>
+              <TextInput
+                disabled={disabled}
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values.name || ''}
+              />
+              <FieldError />
+            </Field>
           </GridItem>
           <GridItem col={6}>
-            <Textarea
-              disabled={disabled}
-              label={formatMessage({
-                id: 'global.description',
-                defaultMessage: 'Description',
-              })}
-              id="description"
-              error={errors.name && formatMessage({ id: errors.name })}
-              onChange={onChange}
-              onBlur={onBlur}
-            >
-              {values.description || ''}
-            </Textarea>
+            <Field name="description" error={errors.name && formatMessage({ id: errors.name })}>
+              <FieldLabel>
+                {formatMessage({
+                  id: 'global.description',
+                  defaultMessage: 'Description',
+                })}
+              </FieldLabel>
+              <Textarea disabled={disabled} onChange={onChange} onBlur={onBlur}>
+                {values.description || ''}
+              </Textarea>
+              <FieldError />
+            </Field>
           </GridItem>
         </Grid>
       </Flex>

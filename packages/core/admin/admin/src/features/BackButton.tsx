@@ -212,8 +212,7 @@ const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(({ disab
     <Link
       ref={ref}
       tag={NavLink}
-      // @ts-expect-error – the DS does not infer the props from the `as` prop to the component.
-      to={history.at(-1)}
+      to={history.at(-1) ?? ''}
       onClick={handleClick}
       disabled={disabled || !canGoBack}
       aria-disabled={disabled || !canGoBack}

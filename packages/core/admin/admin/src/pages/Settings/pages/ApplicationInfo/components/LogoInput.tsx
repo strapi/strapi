@@ -21,6 +21,7 @@ import {
   Field,
   FieldError,
   FieldInput,
+  FieldLabel,
   Flex,
   IconButton,
   ModalFooter,
@@ -277,16 +278,16 @@ const URLForm = () => {
   return (
     <form onSubmit={handleSubmit}>
       <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
-        <TextInput
-          label={formatMessage({
-            id: 'Settings.application.customization.modal.upload.from-url.input-label',
-            defaultMessage: 'URL',
-          })}
-          error={error}
-          onChange={handleChange}
-          value={logoUrl}
-          name="logo-url"
-        />
+        <Field error={error} name="logo-url">
+          <FieldLabel>
+            {formatMessage({
+              id: 'Settings.application.customization.modal.upload.from-url.input-label',
+              defaultMessage: 'URL',
+            })}
+          </FieldLabel>
+          <TextInput onChange={handleChange} value={logoUrl} />
+          <FieldError />
+        </Field>
       </Box>
       <ModalFooter
         startActions={

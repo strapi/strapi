@@ -1,6 +1,13 @@
 import { forwardRef, memo } from 'react';
 
-import { TextInput, useComposedRefs } from '@strapi/design-system';
+import {
+  TextInput,
+  useComposedRefs,
+  Field,
+  FieldLabel,
+  FieldHint,
+  FieldError,
+} from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
@@ -68,28 +75,30 @@ const InputRenderer = memo(
   })
 );
 
-const NotSupportedField = forwardRef<any, InputProps>((props, ref) => {
-  const { error } = useField(props.name);
-  const fieldRef = useFocusInputField(props.name);
+const NotSupportedField = forwardRef<any, InputProps>(
+  ({ label, hint, name, required, type, labelAction }, ref) => {
+    const { error } = useField(name);
+    const fieldRef = useFocusInputField(name);
 
-  const composedRefs = useComposedRefs(ref, fieldRef);
+    const composedRefs = useComposedRefs(ref, fieldRef);
 
-  return (
-    <TextInput
-      ref={composedRefs}
-      disabled
-      error={error}
-      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-      label={props.label}
-      id={props.name}
-      hint={props.hint}
-      name={props.name}
-      placeholder={`Unsupported field type: ${props.type}`}
-      required={props.required}
-      type="text"
-      value=""
-    />
-  );
-});
+    return (
+      <Field error={error} name={name} hint={hint} required={required}>
+        <FieldLabel action={labelAction}>{label}</FieldLabel>
+        <TextInput
+          ref={composedRefs}
+          disabled
+          error={error}
+          placeholder={`Unsupported field type: ${type}`}
+          required={required}
+          type="text"
+          value=""
+        />
+        <FieldHint />
+        <FieldError />
+      </Field>
+    );
+  }
+);
 
 export { InputRenderer };

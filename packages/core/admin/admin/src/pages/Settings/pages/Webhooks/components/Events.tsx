@@ -37,6 +37,7 @@ const EventsRoot = ({ children }: EventsRootProps) => {
   return (
     <Flex direction="column" alignItems="stretch" gap={1}>
       <FieldLabel aria-hidden>{label}</FieldLabel>
+      {/* @ts-expect-error – TODO: add colCount & rowCount */}
       <StyledTable aria-label={label}>{children}</StyledTable>
     </Flex>
   );

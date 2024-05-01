@@ -43,7 +43,7 @@ const SSOProviders = ({ providers, displayAllProviders }: SSOProvidersProps) => 
               id: 'global.see-more',
             })}
           >
-            <SSOButton tag={Link} to="/auth/providers">
+            <SSOButton as={Link} to="/auth/providers">
               <span aria-hidden>•••</span>
             </SSOButton>
           </Tooltip>

@@ -147,7 +147,7 @@ export const ListView = () => {
         primaryAction={
           canCreate && (
             <LinkButton
-              forwardedAs={Link}
+              tag={Link}
               data-testid="create-api-token-button"
               startIcon={<Plus />}
               size="S"
@@ -156,7 +156,6 @@ export const ListView = () => {
                   tokenType: API_TOKEN_TYPE,
                 })
               }
-              // @ts-expect-error We need to accept the props of the component passed in the `as` prop
               to="/settings/api-tokens/create"
             >
               {formatMessage({
@@ -191,10 +190,9 @@ export const ListView = () => {
                 })}
                 action={
                   <LinkButton
-                    forwardedAs={Link}
+                    tag={Link}
                     variant="secondary"
                     startIcon={<Plus />}
-                    // @ts-expect-error We need to accept the props of the component passed in the `as` prop
                     to="/settings/api-tokens/create"
                   >
                     {formatMessage({

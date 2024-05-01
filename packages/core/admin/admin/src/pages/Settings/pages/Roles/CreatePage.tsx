@@ -4,6 +4,9 @@ import {
   Box,
   Button,
   ContentLayout,
+  Field,
+  FieldError,
+  FieldLabel,
   Flex,
   Grid,
   GridItem,
@@ -261,30 +264,34 @@ const CreatePage = () => {
                       </Flex>
                       <Grid gap={4}>
                         <GridItem col={6}>
-                          <TextInput
+                          <Field
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
-                            label={formatMessage({
-                              id: 'global.name',
-                              defaultMessage: 'Name',
-                            })}
-                            onChange={handleChange}
                             required
-                            value={values.name}
-                          />
+                          >
+                            <FieldLabel>
+                              {formatMessage({
+                                id: 'global.name',
+                                defaultMessage: 'Name',
+                              })}
+                            </FieldLabel>
+                            <TextInput onChange={handleChange} value={values.name} />
+                            <FieldError />
+                          </Field>
                         </GridItem>
                         <GridItem col={6}>
-                          <Textarea
-                            label={formatMessage({
-                              id: 'global.description',
-                              defaultMessage: 'Description',
-                            })}
-                            id="description"
+                          <Field
+                            name="description"
                             error={errors.description && formatMessage({ id: errors.description })}
-                            onChange={handleChange}
                           >
-                            {values.description}
-                          </Textarea>
+                            <FieldLabel>
+                              {formatMessage({
+                                id: 'global.description',
+                                defaultMessage: 'Description',
+                              })}
+                            </FieldLabel>
+                            <Textarea onChange={handleChange}>{values.description}</Textarea>
+                          </Field>
                         </GridItem>
                       </Grid>
                     </Flex>

@@ -187,8 +187,7 @@ const ListPageCE = () => {
                       <Flex justifyContent="end">
                         {canRead ? (
                           <IconButton
-                            forwardedAs={NavLink}
-                            // @ts-expect-error – This is an issue in the DS with the as prop not adding the inferred props to the component.
+                            tag={NavLink}
                             to={user.id.toString()}
                             label={formatMessage(
                               { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },

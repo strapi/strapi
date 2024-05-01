@@ -9,9 +9,13 @@ import {
   TextButton,
   TextInput,
   ComboboxOption,
-  CreatableCombobox,
+  Combobox,
   ComboboxProps,
   IconButton,
+  FieldProps,
+  Field as DSField,
+  FieldError as DSFieldError,
+  FieldLabel as DSFieldLabel,
 } from '@strapi/design-system';
 import { Minus, Plus } from '@strapi/icons';
 import { Field, FieldArray, FieldInputProps, useFormikContext } from 'formik';
@@ -144,11 +148,18 @@ const StyledIconButton = styled(IconButton)`
  * HeaderCombobox
  * -----------------------------------------------------------------------------------------------*/
 
-interface HeaderComboboxProps
-  extends FieldInputProps<string>,
-    Required<Pick<ComboboxProps, 'label' | 'error'>> {}
+interface HeaderComboboxProps extends FieldInputProps<string>, Required<Pick<FieldProps, 'error'>> {
+  label: string;
+}
 
-const HeaderCombobox = ({ name, onChange, value, ...restProps }: HeaderComboboxProps) => {
+const HeaderCombobox = ({
+  name,
+  onChange,
+  value,
+  error,
+  label,
+  ...restProps
+}: HeaderComboboxProps) => {
   const {
     values: { headers },
   } = useFormikContext<FormikContext>();
@@ -173,20 +184,25 @@ const HeaderCombobox = ({ name, onChange, value, ...restProps }: HeaderComboboxP
   };
 
   return (
-    <CreatableCombobox
-      {...restProps}
-      onClear={() => handleChange('')}
-      onChange={handleChange}
-      onCreateOption={handleCreateOption}
-      placeholder=""
-      value={value}
-    >
-      {options.map((key) => (
-        <ComboboxOption value={key} key={key}>
-          {key}
-        </ComboboxOption>
-      ))}
-    </CreatableCombobox>
+    <DSField>
+      <DSFieldLabel>{label}</DSFieldLabel>
+      <Combobox
+        {...restProps}
+        onClear={() => handleChange('')}
+        onChange={handleChange}
+        onCreateOption={handleCreateOption}
+        placeholder=""
+        creatable
+        value={value}
+      >
+        {options.map((key) => (
+          <ComboboxOption value={key} key={key}>
+            {key}
+          </ComboboxOption>
+        ))}
+      </Combobox>
+      <DSFieldError />
+    </DSField>
   );
 };
 

@@ -1,4 +1,4 @@
-import { TextInput, TextInputProps } from '@strapi/design-system';
+import { Field, FieldError, FieldLabel, TextInput, TextInputProps } from '@strapi/design-system';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { isErrorMessageMessageDescriptor } from '../../utils/forms';
@@ -12,7 +12,7 @@ export const TokenName = ({ error, value, onChange, canEditInputs }: TokenNamePr
   const { formatMessage } = useIntl();
 
   return (
-    <TextInput
+    <Field
       name="name"
       error={
         error
@@ -21,14 +21,16 @@ export const TokenName = ({ error, value, onChange, canEditInputs }: TokenNamePr
             )
           : undefined
       }
-      label={formatMessage({
-        id: 'Settings.tokens.form.name',
-        defaultMessage: 'Name',
-      })}
-      onChange={onChange}
-      value={value}
-      disabled={!canEditInputs}
       required
-    />
+    >
+      <FieldLabel>
+        {formatMessage({
+          id: 'Settings.tokens.form.name',
+          defaultMessage: 'Name',
+        })}
+      </FieldLabel>
+      <TextInput onChange={onChange} value={value} disabled={!canEditInputs} />
+      <FieldError />
+    </Field>
   );
 };

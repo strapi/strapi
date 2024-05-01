@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import { ComboboxOption, CreatableCombobox } from '@strapi/design-system';
+import { ComboboxOption, Combobox } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useDataManager } from '../hooks/useDataManager';
@@ -41,7 +41,7 @@ export const SelectCategory = ({
   };
 
   return (
-    <CreatableCombobox
+    <Combobox
       error={errorMessage}
       id={name}
       label={label}
@@ -49,12 +49,13 @@ export const SelectCategory = ({
       onChange={handleChange}
       onCreateOption={handleCreateOption}
       value={value}
+      creatable
     >
       {categories.map((category) => (
         <ComboboxOption key={category} value={category}>
           {category}
         </ComboboxOption>
       ))}
-    </CreatableCombobox>
+    </Combobox>
   );
 };

@@ -420,14 +420,14 @@ const SubActionRow = ({
                     {...(isArrayType && {
                       onClick: () => handleClickToggleSubLevel(value),
                       'aria-expanded': isActive,
-                      onKeyDown: ({ key }) =>
+                      onKeyDown: ({ key }: React.KeyboardEvent<HTMLButtonElement>) =>
                         (key === 'Enter' || key === ' ') && handleClickToggleSubLevel(value),
                       tabIndex: 0,
                       role: 'button',
                     })}
                     title={label}
                   >
-                    <Typography ellipsis>{capitalise(label)}</Typography>
+                    <RowLabel ellipsis>{capitalise(label)}</RowLabel>
                     {required && <RequiredSign />}
                     <CarretIcon $isActive={isActive} />
                   </CollapseLabel>
@@ -571,6 +571,8 @@ const RowStyle = styled(Flex)<{ level: number; isCollapsable?: boolean; isActive
   ${({ isActive, theme }) => isActive && activeStyle(theme)};
 `;
 
+const RowLabel = styled(Typography)``;
+
 const TopTimeline = styled.div`
   padding-top: ${({ theme }) => theme.spaces[2]};
   margin-top: ${({ theme }) => theme.spaces[2]};
@@ -655,7 +657,7 @@ const Header = ({ headers = [], label }: HeaderProps) => {
  * @internal
  */
 const activeStyle = (theme: DefaultTheme) => css`
-  ${Typography} {
+  ${RowLabel} {
     color: ${theme.colors.primary600};
     font-weight: ${theme.fontWeights.bold};
   }

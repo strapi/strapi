@@ -265,7 +265,6 @@ const ActionRow = ({
         </Typography>
       </Flex>
       <Box style={{ maxWidth: 430, width: '100%' }}>
-        {/* @ts-expect-error – fix this label issue */}
         <MultiSelectNested
           id={name}
           customizeContent={(values = []) => `${values.length} currently selected`}

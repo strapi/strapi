@@ -182,7 +182,7 @@ const App = () => {
                       <Td>
                         <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
                           <IconButton
-                            forwardedAs="a"
+                            tag="a"
                             disabled={!allowedActions.canRead}
                             // @ts-expect-error invalid typing in IconButton
                             href={createDocumentationHref(`${data.prefix}/v${doc.version}`)}

@@ -45,7 +45,6 @@ const ForgotPasswordSuccess = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            {/* @ts-expect-error – error with inferring the props from the as component */}
             <Link tag={NavLink} to="/auth/login">
               {formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}
             </Link>

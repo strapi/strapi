@@ -60,7 +60,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   };
 
   return (
-    <SubNav ariaLabel={label}>
+    <SubNav aria-label={label}>
       <SubNavHeader label={label} />
       <SubNavSections>
         {sections.map((section) => (
@@ -70,7 +70,6 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                 <SubNavLink
                   tag={NavLink}
                   withBullet={link.hasNotification}
-                  // @ts-expect-error – this is an issue with the DS where as props are not inferred
                   to={link.to}
                   onClick={handleClickOnLink(link.to)}
                   key={link.id}
