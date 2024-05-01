@@ -344,14 +344,35 @@ const extractValuesFromYupError = (
   };
 };
 
+const isMessageDescriptor = (obj: unknown): obj is MessageDescriptor => {
+  return (
+    obj !== null &&
+    typeof obj === 'object' &&
+    'id' in obj &&
+    typeof obj.id === 'string' &&
+    'defaultMessage' in obj &&
+    typeof obj.defaultMessage === 'string'
+  );
+};
+
 const getInnerErrors = (error: yup.ValidationError) =>
   (error?.inner || []).reduce<Record<string, TranslationMessage>>((acc, currentError) => {
     if (currentError.path) {
-      acc[currentError.path.split('[').join('.').split(']').join('')] = {
-        id: currentError.message,
-        defaultMessage: currentError.message,
-        values: extractValuesFromYupError(currentError?.type, currentError?.params),
-      };
+      const key = currentError.path.split('[').join('.').split(']').join('');
+      const message = currentError.message;
+
+      if (isMessageDescriptor(message)) {
+        acc[key] = {
+          ...(message as MessageDescriptor),
+          values: extractValuesFromYupError(currentError?.type, currentError?.params),
+        };
+      } else {
+        acc[key] = {
+          id: message,
+          defaultMessage: message,
+          values: extractValuesFromYupError(currentError?.type, currentError?.params),
+        };
+      }
     }
 
     return acc;

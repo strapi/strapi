@@ -30,31 +30,12 @@ interface EntryValidationTextProps {
   validationErrors?: Record<string, MessageDescriptor>;
 }
 
-const isMessageDescriptor = (obj: unknown): obj is MessageDescriptor => {
-  return (
-    obj !== null &&
-    typeof obj === 'object' &&
-    'id' in obj &&
-    typeof obj.id === 'string' &&
-    'defaultMessage' in obj &&
-    typeof obj.defaultMessage === 'string'
-  );
-};
-
 const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
 
   if (validationErrors) {
     const validationErrorsMessages = Object.entries(validationErrors)
-      .map(([key, value]) => {
-        if (isMessageDescriptor(value?.defaultMessage)) {
-          return `${key}: ${formatMessage(value.defaultMessage)}`;
-        } else if (isMessageDescriptor(value)) {
-          return `${key}: ${formatMessage(value)}`;
-        }
-
-        return `${key}: ${value}`;
-      })
+      .map(([key, value]) => `${key}: ${formatMessage(value)}`)
       .join(' ');
 
     return (
