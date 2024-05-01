@@ -17,7 +17,7 @@ type Task =
   | TaskFn
   | {
       task: TaskFn;
-      options: Spec
+      options: Spec;
     };
 
 interface Tasks {

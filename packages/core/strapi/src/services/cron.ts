@@ -14,7 +14,7 @@ type Task =
   | TaskFn
   | {
       task: TaskFn;
-      options: Spec
+      options: Spec;
     };
 
 interface Tasks {
@@ -31,7 +31,7 @@ const createCronService = () => {
         const taskValue = tasks[taskExpression];
 
         let fn: TaskFn;
-        let options: Spec
+        let options: Spec;
         let taskName: string | null;
         if (isFunction(taskValue)) {
           // don't use task name if key is the rule
