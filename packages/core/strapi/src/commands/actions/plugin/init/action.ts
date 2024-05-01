@@ -373,7 +373,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                     '@types/react': '*',
                     '@types/react-dom': '*',
                     '@types/react-router-dom': '5.3.3',
-                    '@types/styled-components': '5.1.26',
+                    '@types/styled-components': '5.1.32',
                   };
 
                   const { adminTsconfigFiles } = await import('./files/typescript');

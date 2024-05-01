@@ -33,7 +33,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useTracking,
-  RelativeTime,
+  RelativeTime as BaseRelativeTime,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -63,8 +63,11 @@ const LinkCard = styled(Link)`
   display: block;
 `;
 
-const CapitalizeRelativeTime = styled(RelativeTime)`
-  text-transform: capitalize;
+const RelativeTime = styled(BaseRelativeTime)`
+  display: inline-block;
+  &::first-letter {
+    text-transform: uppercase;
+  }
 `;
 
 const getBadgeProps = (status: Release['status']) => {
@@ -96,7 +99,6 @@ const getBadgeProps = (status: Release['status']) => {
 
 const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: ReleasesGridProps) => {
   const { formatMessage } = useIntl();
-  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
 
   if (isError) {
     return <AnErrorOccurred />;
@@ -121,7 +123,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
 
   return (
     <Grid gap={4}>
-      {releases.map(({ id, name, actions, scheduledAt, status }) => (
+      {releases.map(({ id, name, scheduledAt, status }) => (
         <GridItem col={3} s={6} xs={12} key={id}>
           <LinkCard href={`content-releases/${id}`} isExternal={false}>
             <Flex
@@ -141,24 +143,13 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
                   {name}
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">
-                  {IsSchedulingEnabled ? (
-                    scheduledAt ? (
-                      <CapitalizeRelativeTime timestamp={new Date(scheduledAt)} />
-                    ) : (
-                      formatMessage({
-                        id: 'content-releases.pages.Releases.not-scheduled',
-                        defaultMessage: 'Not scheduled',
-                      })
-                    )
+                  {scheduledAt ? (
+                    <RelativeTime timestamp={new Date(scheduledAt)} />
                   ) : (
-                    formatMessage(
-                      {
-                        id: 'content-releases.page.Releases.release-item.entries',
-                        defaultMessage:
-                          '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-                      },
-                      { number: actions.meta.count }
-                    )
+                    formatMessage({
+                      id: 'content-releases.pages.Releases.not-scheduled',
+                      defaultMessage: 'Not scheduled',
+                    })
                   )}
                 </Typography>
               </Flex>
@@ -191,8 +182,7 @@ const INITIAL_FORM_VALUES = {
   name: '',
   date: null,
   time: '',
-  // Remove future flag check after Scheduling Beta release and replace with true as creating new release should include scheduling by default
-  isScheduled: window.strapi.future.isEnabled('contentReleasesScheduling'),
+  isScheduled: true,
   scheduledAt: null,
   timezone: null,
 } satisfies FormValues;

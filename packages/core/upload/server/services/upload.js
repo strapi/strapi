@@ -61,6 +61,31 @@ const createAndAssignTmpWorkingDirectoryToFiles = async (files) => {
   return tmpWorkingDirectory;
 };
 
+function filenameReservedRegex() {
+  // eslint-disable-next-line no-control-regex
+  return /[<>:"/\\|?*\u0000-\u001F]/g;
+}
+
+function windowsReservedNameRegex() {
+  return /^(con|prn|aux|nul|com\d|lpt\d)$/i;
+}
+
+/**
+ * Copied from https://github.com/sindresorhus/valid-filename package
+ */
+function isValidFilename(string) {
+  if (!string || string.length > 255) {
+    return false;
+  }
+  if (filenameReservedRegex().test(string) || windowsReservedNameRegex().test(string)) {
+    return false;
+  }
+  if (string === '.' || string === '..') {
+    return false;
+  }
+  return true;
+}
+
 module.exports = ({ strapi }) => ({
   async emitEvent(event, data) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
@@ -72,12 +97,22 @@ module.exports = ({ strapi }) => ({
   async formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const fileService = getService('file');
 
+    if (!isValidFilename(filename)) {
+      throw new ApplicationError('File name contains invalid characters');
+    }
+
     let ext = path.extname(filename);
     if (!ext) {
       ext = `.${extension(type)}`;
     }
+
     const usedName = (fileInfo.name || filename).normalize();
     const basename = path.basename(usedName, ext);
+
+    // Prevent null characters in file name
+    if (!isValidFilename(usedName)) {
+      throw new ApplicationError('File name contains invalid characters');
+    }
 
     const entity = {
       name: usedName,
@@ -128,6 +163,8 @@ module.exports = ({ strapi }) => ({
         tmpWorkingDirectory: file.tmpWorkingDirectory,
       }
     );
+
+    currentFile.filepath = file.path;
     currentFile.getStream = () => fs.createReadStream(file.path);
 
     const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
@@ -214,29 +251,34 @@ module.exports = ({ strapi }) => ({
       _.set(fileData, ['formats', key], file);
     };
 
-    const uploadPromises = [];
+    /**
+     * Create an array of callbacks that will be executed in parallel.
+     *
+     * NOTE: Eagerly calling the promises and calling Promise.all at the end
+     *       resulted in some issues with streams and unhandled promises.
+     */
+    const uploadCallbacks = [];
 
     // Upload image
-    uploadPromises.push(getService('provider').upload(fileData));
+    uploadCallbacks.push(() => getService('provider').upload(fileData));
 
     // Generate & Upload thumbnail and responsive formats
     if (await isResizableImage(fileData)) {
       const thumbnailFile = await generateThumbnail(fileData);
       if (thumbnailFile) {
-        uploadPromises.push(uploadThumbnail(thumbnailFile));
+        uploadCallbacks.push(() => uploadThumbnail(thumbnailFile));
       }
-
       const formats = await generateResponsiveFormats(fileData);
       if (Array.isArray(formats) && formats.length > 0) {
         for (const format of formats) {
           // eslint-disable-next-line no-continue
           if (!format) continue;
-          uploadPromises.push(uploadResponsiveFormat(format));
+          uploadCallbacks.push(() => uploadResponsiveFormat(format));
         }
       }
     }
     // Wait for all uploads to finish
-    await Promise.all(uploadPromises);
+    await Promise.all(uploadCallbacks.map((fn) => fn()));
   },
 
   /**

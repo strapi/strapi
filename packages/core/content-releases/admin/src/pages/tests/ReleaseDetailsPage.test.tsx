@@ -1,3 +1,5 @@
+import { ReactNode } from 'react';
+
 import { useRBAC } from '@strapi/helper-plugin';
 import { within } from '@testing-library/react';
 import { render, server, screen } from '@tests/utils';
@@ -9,11 +11,43 @@ import { mockReleaseDetailsPageData } from './mockReleaseDetailsPageData';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
-  // eslint-disable-next-line
-  CheckPermissions: ({ children }: { children: JSX.Element }) => <div>{children}</div>,
+  CheckPermissions: jest.fn(({ children }: { children: ReactNode }) => children),
   useRBAC: jest.fn(() => ({
     isLoading: false,
     allowedActions: { canUpdate: true, canDelete: true },
+  })),
+  useStrapiApp: jest.fn(() => ({
+    runHookWaterfall: jest.fn().mockReturnValue({
+      displayedHeaders: [
+        {
+          key: '__name__',
+          fieldSchema: { type: 'string' },
+          metadatas: {
+            label: {
+              id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+              defaultMessage: 'name',
+            },
+            searchable: false,
+            sortable: false,
+          },
+          name: 'name',
+        },
+        {
+          key: '__locale__',
+          fieldSchema: { type: 'string' },
+          metadatas: {
+            label: {
+              id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+              defaultMessage: 'locale',
+            },
+            searchable: false,
+            sortable: false,
+          },
+          name: 'locale',
+        },
+      ],
+      hasI18nEnabled: true,
+    }),
   })),
 }));
 

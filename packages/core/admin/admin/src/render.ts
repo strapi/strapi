@@ -3,6 +3,7 @@ import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
+import { createAbsoluteUrl } from './utils/urls';
 
 import type { FeaturesService } from '@strapi/types';
 
@@ -27,7 +28,7 @@ const renderAdmin = async (
      *
      * To ensure that the backendURL is always set, we use the window.location.origin as a fallback.
      */
-    backendURL: process.env.STRAPI_ADMIN_BACKEND_URL || window.location.origin,
+    backendURL: createAbsoluteUrl(process.env.STRAPI_ADMIN_BACKEND_URL),
     isEE: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
     future: {
