@@ -162,7 +162,6 @@ const ListView = () => {
             <LinkButton
               role="button"
               forwardedAs={Link}
-              data-testid="create-transfer-token-button"
               startIcon={<Plus />}
               size="S"
               onClick={() =>
