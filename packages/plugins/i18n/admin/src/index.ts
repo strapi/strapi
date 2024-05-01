@@ -79,10 +79,9 @@ export default {
     });
 
     contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
-      // TODO add to the right place in the list
-      // actions.splice(indexOfPublishAction, 0, BulkPublishAction);
-      actions.push(BulkLocalePublishAction);
-
+      // When enabled the bulk locale publish action should be the first action
+      // in 'More Document Actions' and therefore the third action in the array
+      actions.splice(2, 0, BulkLocalePublishAction);
       return actions;
     });
 
