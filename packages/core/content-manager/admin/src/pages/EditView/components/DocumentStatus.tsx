@@ -22,7 +22,7 @@ const DocumentStatus = ({ status = 'draft', ...restProps }: DocumentStatusProps)
 
   return (
     <Status {...restProps} showBullet={false} size={'S'} variant={statusVariant}>
-      <Typography as="span" variant="omega" fontWeight="bold">
+      <Typography tag="span" variant="omega" fontWeight="bold">
         {capitalise(status)}
       </Typography>
     </Status>

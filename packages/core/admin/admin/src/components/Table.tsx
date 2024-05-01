@@ -30,7 +30,7 @@ import {
 import { CaretDown } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useControllableState } from '../hooks/useControllableState';
 import { useQueryParams } from '../hooks/useQueryParams';
@@ -210,7 +210,7 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
       <Tooltip label={sortable ? sortLabel : label}>
         <Typography
           textColor="neutral600"
-          as={!isSorted && sortable ? 'button' : 'span'}
+          tag={!isSorted && sortable ? 'button' : 'span'}
           onClick={handleClickSort}
           variant="sigma"
         >

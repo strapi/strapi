@@ -1,6 +1,6 @@
 import { Box, SingleSelectOption, SingleSelect } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const SORT_TYPES = {
   'name:asc': {

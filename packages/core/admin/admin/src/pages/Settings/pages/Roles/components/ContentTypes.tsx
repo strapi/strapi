@@ -1,5 +1,5 @@
 import { Box } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ContentPermission } from '../../../../../../../shared/contracts/permissions';
 

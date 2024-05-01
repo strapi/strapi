@@ -237,7 +237,7 @@ const PasswordSection = () => {
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.change-password',
             defaultMessage: 'Change password',
@@ -315,7 +315,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <Typography variant="delta" as="h2">
+          <Typography variant="delta" tag="h2">
             {formatMessage({
               id: 'Settings.profile.form.section.experience.title',
               defaultMessage: 'Experience',
@@ -331,7 +331,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
               {
                 here: (
                   <Box
-                    as="a"
+                    tag="a"
                     color="primary600"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -440,7 +440,7 @@ const UserInfoSection = () => {
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.profile',
             defaultMessage: 'Profile',

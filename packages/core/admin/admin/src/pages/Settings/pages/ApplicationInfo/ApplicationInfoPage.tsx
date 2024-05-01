@@ -154,22 +154,22 @@ const ApplicationInfoPage = () => {
                 paddingRight={7}
                 paddingLeft={7}
               >
-                <Typography variant="delta" as="h3">
+                <Typography variant="delta" tag="h3">
                   {formatMessage({
                     id: 'global.details',
                     defaultMessage: 'Details',
                   })}
                 </Typography>
 
-                <Grid gap={5} as="dl">
+                <Grid gap={5} tag="dl">
                   <GridItem col={6} s={12}>
-                    <Typography variant="sigma" textColor="neutral600" as="dt">
+                    <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.strapiVersion',
                         defaultMessage: 'strapi version',
                       })}
                     </Typography>
-                    <Flex gap={3} direction="column" alignItems="start" as="dd">
+                    <Flex gap={3} direction="column" alignItems="start" tag="dd">
                       <Typography>v{strapiVersion}</Typography>
                       {shouldUpdateStrapi && (
                         <Link
@@ -185,13 +185,13 @@ const ApplicationInfoPage = () => {
                     </Flex>
                   </GridItem>
                   <GridItem col={6} s={12}>
-                    <Typography variant="sigma" textColor="neutral600" as="dt">
+                    <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.edition-title',
                         defaultMessage: 'current plan',
                       })}
                     </Typography>
-                    <Flex gap={3} direction="column" alignItems="start" as="dd">
+                    <Flex gap={3} direction="column" alignItems="start" tag="dd">
                       <Typography>
                         {formatMessage(
                           {
@@ -212,13 +212,13 @@ const ApplicationInfoPage = () => {
                   </GridItem>
 
                   <GridItem col={6} s={12}>
-                    <Typography variant="sigma" textColor="neutral600" as="dt">
+                    <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.node-version',
                         defaultMessage: 'node version',
                       })}
                     </Typography>
-                    <Typography as="dd">{nodeVersion}</Typography>
+                    <Typography tag="dd">{nodeVersion}</Typography>
                   </GridItem>
                   <AdminSeatInfo />
                 </Grid>
@@ -233,7 +233,7 @@ const ApplicationInfoPage = () => {
                   paddingRight={7}
                   paddingLeft={7}
                 >
-                  <Typography variant="delta" as="h3">
+                  <Typography variant="delta" tag="h3">
                     {formatMessage({
                       id: 'Settings.application.customization',
                       defaultMessage: 'Customization',

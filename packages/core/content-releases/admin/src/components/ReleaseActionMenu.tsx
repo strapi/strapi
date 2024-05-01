@@ -6,7 +6,7 @@ import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
 import { Link as NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
 import { Release } from '../../../shared/contracts/releases';
@@ -229,11 +229,11 @@ const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
       <Menu.Root>
         {/* 
           TODO Fix in the DS
-          - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
+          - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
           - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
          */}
         <Menu.Trigger
-          as={hasTriggerBorder ? StyledIconButton : IconButton}
+          tag={hasTriggerBorder ? StyledIconButton : IconButton}
           paddingLeft={2}
           paddingRight={2}
           aria-label={formatMessage({

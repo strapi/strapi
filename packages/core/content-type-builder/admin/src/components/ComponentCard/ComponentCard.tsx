@@ -1,7 +1,7 @@
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import get from 'lodash/get';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../../hooks/useDataManager';
 
@@ -114,7 +114,7 @@ export const ComponentCard = ({
       </Box>
 
       {isInDevelopmentMode && (
-        <CloseButton as="button" onClick={onClose}>
+        <CloseButton tag="button" onClick={onClose}>
           <Cross />
         </CloseButton>
       )}

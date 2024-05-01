@@ -11,7 +11,7 @@ export const EditFolderModalHeader = ({ isEditing }) => {
 
   return (
     <ModalHeader>
-      <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+      <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
         {formatMessage(
           isEditing
             ? {

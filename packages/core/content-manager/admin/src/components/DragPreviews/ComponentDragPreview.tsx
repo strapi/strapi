@@ -1,6 +1,6 @@
 import { Flex, IconButton, Typography } from '@strapi/design-system';
 import { CaretDown, Drag, Trash } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface ComponentDragPreviewProps {
   displayedValue: string;

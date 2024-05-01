@@ -11,7 +11,7 @@ import {
 } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTranslation } from '../utils/getTranslation';
 

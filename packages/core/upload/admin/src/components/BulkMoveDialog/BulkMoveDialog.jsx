@@ -87,7 +87,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
         {({ values, errors, setFieldValue }) => (
           <Form noValidate>
             <ModalHeader>
-              <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+              <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
                 {formatMessage({
                   id: getTrad('modal.folder.move.title'),
                   defaultMessage: 'Move elements to',
@@ -122,7 +122,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
                     {errors.destination && (
                       <Typography
                         variant="pi"
-                        as="p"
+                        tag="p"
                         id="folder-destination-error"
                         textColor="danger600"
                       >

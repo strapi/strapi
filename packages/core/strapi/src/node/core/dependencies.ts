@@ -15,7 +15,7 @@ const PEER_DEPS = {
   react: '^18.0.0',
   'react-dom': '^18.0.0',
   'react-router-dom': '^6.0.0',
-  'styled-components': '^5.2.1',
+  'styled-components': '^6.0.0',
 };
 
 interface CheckRequiredDependenciesResult {

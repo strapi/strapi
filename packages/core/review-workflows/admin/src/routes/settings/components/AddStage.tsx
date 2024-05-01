@@ -1,11 +1,11 @@
 import { Box, ButtonProps, Flex, Typography } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 export const AddStage = ({ children, ...props }: ButtonProps) => {
   return (
     <StyledButton
-      as="button"
+      tag="button"
       background="neutral0"
       border="neutral150"
       paddingBottom={3}
@@ -17,7 +17,7 @@ export const AddStage = ({ children, ...props }: ButtonProps) => {
     >
       {/* @ts-expect-error – textColor can accept css properties in the next DS release */}
       <Typography variant="pi" fontWeight="bold" textColor="inherit">
-        <Flex as="span" gap={2}>
+        <Flex tag="span" gap={2}>
           <PlusCircle width="2.4rem" height="2.4rem" aria-hidden />
           {children}
         </Flex>

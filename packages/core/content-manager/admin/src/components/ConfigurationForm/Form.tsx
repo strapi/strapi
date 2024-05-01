@@ -105,7 +105,7 @@ const ConfigurationForm = ({
               paddingLeft={7}
               paddingRight={7}
             >
-              <Typography variant="delta" as="h2">
+              <Typography variant="delta" tag="h2">
                 {formatMessage({
                   id: getTranslation('containers.SettingPage.settings'),
                   defaultMessage: 'Settings',
@@ -153,7 +153,7 @@ const ConfigurationForm = ({
                   <Divider />
                 </GridItem>
                 <GridItem col={12} s={12}>
-                  <Typography variant="delta" as="h3">
+                  <Typography variant="delta" tag="h3">
                     {formatMessage({
                       id: getTranslation('containers.SettingPage.view'),
                       defaultMessage: 'View',

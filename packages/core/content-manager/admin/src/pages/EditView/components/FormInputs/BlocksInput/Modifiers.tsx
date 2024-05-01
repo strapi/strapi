@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
 import { type MessageDescriptor } from 'react-intl';
 import { Editor, Text, Transforms } from 'slate';
-import styled, { css } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 const stylesToInherit = css`
   font-size: inherit;

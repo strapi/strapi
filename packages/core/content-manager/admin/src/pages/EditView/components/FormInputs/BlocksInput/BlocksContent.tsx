@@ -5,7 +5,7 @@ import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
-import styled, { CSSProperties, css } from 'styled-components';
+import { styled, CSSProperties, css } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop';

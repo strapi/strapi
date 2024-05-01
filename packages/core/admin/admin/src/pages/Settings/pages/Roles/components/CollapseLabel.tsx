@@ -1,5 +1,5 @@
 import { Flex } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const CollapseLabel = styled(Flex)<{ isCollapsable: boolean }>`
   padding-right: ${({ theme }) => theme.spaces[2]};

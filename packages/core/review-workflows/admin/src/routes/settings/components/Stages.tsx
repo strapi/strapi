@@ -32,7 +32,7 @@ import {
 import { Duplicate, Drag, More, EyeStriked } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { Stage as IStage, StagePermission } from '../../../../../shared/contracts/review-workflows';
 import { useGetRolesQuery } from '../../../services/admin';
@@ -80,11 +80,11 @@ const Stages = ({ canDelete = true, canUpdate = true, isCreating = false }: Stag
           gap={6}
           zIndex={2}
           position="relative"
-          as="ol"
+          tag="ol"
         >
           {stages.map((stage, index) => {
             return (
-              <Box key={stage.__temp_key__} as="li">
+              <Box key={stage.__temp_key__} tag="li">
                 <Stage
                   index={index}
                   canDelete={stages.length > 1 && canDelete}
@@ -282,7 +282,7 @@ const Stage = ({
                   <Menu.Root>
                     <ContextMenuTrigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
                       <More aria-hidden focusable={false} />
-                      <VisuallyHidden as="span">
+                      <VisuallyHidden tag="span">
                         {formatMessage({
                           id: '[tbdb].components.DynamicZone.more-actions',
                           defaultMessage: 'More actions',
@@ -487,7 +487,7 @@ const ColorSelector = ({ disabled, label, name, required }: ColorSelectorProps) 
       value={value?.toUpperCase()}
       startIcon={
         <Flex
-          as="span"
+          tag="span"
           height={2}
           background={value}
           // @ts-expect-error - transparent doesn't exist in theme.colors
@@ -507,7 +507,7 @@ const ColorSelector = ({ disabled, label, name, required }: ColorSelectorProps) 
             key={value}
             startIcon={
               <Flex
-                as="span"
+                tag="span"
                 height={2}
                 background={color}
                 // @ts-expect-error - transparent doesn't exist in theme.colors

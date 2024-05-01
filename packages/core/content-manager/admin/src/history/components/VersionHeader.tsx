@@ -135,7 +135,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
         navigationAction={
           <Link
             startIcon={<ArrowLeft />}
-            as={NavLink}
+            tag={NavLink}
             // @ts-expect-error - types are not inferred correctly through the as prop.
             to={getNextNavigation()}
           >

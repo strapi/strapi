@@ -60,7 +60,7 @@ const ConfigureTheView = ({ config }) => {
         <form onSubmit={handleSubmit}>
           <HeaderLayout
             navigationAction={
-              <Link as={NavLink} startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
+              <Link tag={NavLink} startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
                 {formatMessage({ id: getTrad('config.back'), defaultMessage: 'Back' })}
               </Link>
             }

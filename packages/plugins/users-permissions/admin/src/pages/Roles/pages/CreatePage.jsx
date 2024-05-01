@@ -119,7 +119,7 @@ export const CreatePage = () => {
                 shadow="filterShadow"
               >
                 <Flex direction="column" alignItems="stretch">
-                  <Typography variant="delta" as="h2">
+                  <Typography variant="delta" tag="h2">
                     {formatMessage({
                       id: getTrad('EditPage.form.roles'),
                       defaultMessage: 'Role details',

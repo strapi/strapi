@@ -14,7 +14,7 @@ import {
 import { parse } from 'qs';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PrivateRoute } from '../components/PrivateRoute';
 import { Logo } from '../components/UnauthenticatedLogo';
@@ -123,7 +123,7 @@ const UseCasePage = () => {
             <Flex direction="column" paddingBottom={7}>
               <Logo />
               <Box paddingTop={6} paddingBottom={1} width={`25rem`}>
-                <TypographyCenter variant="alpha" as="h1" id="usecase-title">
+                <TypographyCenter variant="alpha" tag="h1" id="usecase-title">
                   {formatMessage({
                     id: 'Usecase.title',
                     defaultMessage: 'Tell us a bit more about yourself',

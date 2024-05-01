@@ -17,7 +17,7 @@ import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { Page } from '../../../../components/PageHelpers';

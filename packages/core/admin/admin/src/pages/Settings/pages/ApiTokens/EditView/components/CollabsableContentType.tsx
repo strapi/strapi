@@ -14,7 +14,7 @@ import {
 import { Cog } from '@strapi/icons';
 import capitalize from 'lodash/capitalize';
 import { useIntl } from 'react-intl';
-import styled, { css } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 import { ContentApiPermission } from '../../../../../../../../shared/contracts/content-api/permissions';
 import { useApiTokenPermissions } from '../apiTokenPermissions';

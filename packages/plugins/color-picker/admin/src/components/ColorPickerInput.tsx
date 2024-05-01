@@ -18,7 +18,7 @@ import { CaretDown } from '@strapi/icons';
 import { useField, type InputProps } from '@strapi/strapi/admin';
 import { HexColorPicker } from 'react-colorful';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../utils/getTrad';
 
@@ -144,7 +144,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                 <ColorPicker color={color} onChange={(hexValue) => onChange(name, hexValue)} />
                 <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
                   <Box paddingRight={2}>
-                    <Typography variant="omega" as="label" textColor="neutral600">
+                    <Typography variant="omega" tag="label" textColor="neutral600">
                       {formatMessage({
                         id: getTrad('color-picker.input.format'),
                         defaultMessage: 'HEX',

@@ -233,7 +233,7 @@ const EditPage = () => {
                     paddingRight={7}
                   >
                     <Flex direction="column" alignItems="stretch" gap={4}>
-                      <Typography variant="delta" as="h2">
+                      <Typography variant="delta" tag="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
                           defaultMessage: 'Details',
@@ -271,7 +271,7 @@ const EditPage = () => {
                     paddingRight={7}
                   >
                     <Flex direction="column" alignItems="stretch" gap={4}>
-                      <Typography variant="delta" as="h2">
+                      <Typography variant="delta" tag="h2">
                         {formatMessage({
                           id: 'global.roles',
                           defaultMessage: "User's role",

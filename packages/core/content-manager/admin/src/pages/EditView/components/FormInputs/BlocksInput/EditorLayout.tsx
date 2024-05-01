@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Flex, FocusTrap, Portal, IconButton, InputWrapper } from '@strapi/design-system';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTranslation } from '../../../../../utils/translations';
 

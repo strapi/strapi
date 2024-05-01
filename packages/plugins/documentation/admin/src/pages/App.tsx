@@ -26,7 +26,7 @@ import {
   useNotification,
 } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PERMISSIONS } from '../constants';
 import {

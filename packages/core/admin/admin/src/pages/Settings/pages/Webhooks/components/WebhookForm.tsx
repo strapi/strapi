@@ -156,7 +156,7 @@ const WebhookForm = ({
                 <Grid gap={6}>
                   <GridItem col={6}>
                     <Field
-                      as={TextInput}
+                      tag={TextInput}
                       name="name"
                       error={formik.errors.name}
                       label={formatMessage({
@@ -168,7 +168,7 @@ const WebhookForm = ({
                   </GridItem>
                   <GridItem col={12}>
                     <Field
-                      as={TextInput}
+                      tag={TextInput}
                       name="url"
                       error={formik.errors.url}
                       label={formatMessage({

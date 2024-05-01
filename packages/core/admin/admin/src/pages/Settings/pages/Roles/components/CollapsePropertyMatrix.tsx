@@ -4,7 +4,7 @@ import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
-import styled, { DefaultTheme, css } from 'styled-components';
+import { styled, DefaultTheme, css } from 'styled-components';
 
 import { Action, SubjectProperty } from '../../../../../../../shared/contracts/permissions';
 import { capitalise } from '../../../../../utils/strings';

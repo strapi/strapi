@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Box, Flex, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { setLocale } from '../reducer';
@@ -66,7 +66,7 @@ interface UnauthenticatedLayoutProps {
 export const UnauthenticatedLayout = ({ children }: UnauthenticatedLayoutProps) => {
   return (
     <div>
-      <Flex as="header" justifyContent="flex-end">
+      <Flex tag="header" justifyContent="flex-end">
         <Box paddingTop={6} paddingRight={8}>
           <LocaleToggle />
         </Box>

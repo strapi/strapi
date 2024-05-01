@@ -234,7 +234,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                     {errors.parent && (
                       <Typography
                         variant="pi"
-                        as="p"
+                        tag="p"
                         id="folder-parent-error"
                         textColor="danger600"
                       >

@@ -173,7 +173,7 @@ const ListPage = () => {
             canCreate &&
             !isLoading && (
               <LinkButton
-                as={NavLink}
+                tag={NavLink}
                 startIcon={<Plus />}
                 variant="default"
                 // @ts-expect-error – this is an issue with the DS where as props are not inferred
@@ -387,7 +387,7 @@ const ListPage = () => {
               action={
                 canCreate ? (
                   // @ts-expect-error – this is an issue with the DS where as props are not inferred
-                  <LinkButton variant="secondary" startIcon={<Plus />} as={NavLink} to="create">
+                  <LinkButton variant="secondary" startIcon={<Plus />} tag={NavLink} to="create">
                     {formatMessage({
                       id: 'Settings.webhooks.list.button.add',
                       defaultMessage: 'Create new webhook',

@@ -8,7 +8,7 @@ import {
   Flex,
   type FieldProps,
 } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface FieldWrapperProps extends FieldProps {
   actionType: 'publish' | 'unpublish';

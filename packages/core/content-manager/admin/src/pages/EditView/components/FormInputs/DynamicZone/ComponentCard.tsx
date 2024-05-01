@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Flex, Typography } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ComponentIcon, ComponentIconProps } from '../../../../../components/ComponentIcon';
 
@@ -13,7 +13,7 @@ interface ComponentCardProps extends Pick<ComponentIconProps, 'icon'> {
 const ComponentCard = ({ children, onClick, icon }: ComponentCardProps) => {
   return (
     <ComponentBox
-      as="button"
+      tag="button"
       type="button"
       onClick={onClick}
       hasRadius

@@ -1,5 +1,5 @@
 import { Flex, FlexProps, Typography } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface ContentBoxProps {
   title?: string;

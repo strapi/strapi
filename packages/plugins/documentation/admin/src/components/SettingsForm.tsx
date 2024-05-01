@@ -18,7 +18,7 @@ import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
 import { translatedErrors, useRBAC } from '@strapi/strapi/admin';
 import { Form, Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { PERMISSIONS } from '../constants';
@@ -107,7 +107,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                 paddingRight={7}
               >
                 <Flex direction="column" alignItems="stretch" gap={4}>
-                  <Typography variant="delta" as="h2">
+                  <Typography variant="delta" tag="h2">
                     {formatMessage({
                       id: 'global.settings',
                       defaultMessage: 'Settings',

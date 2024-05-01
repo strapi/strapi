@@ -4,7 +4,7 @@ import { unstable_useDocument as useDocument } from '@strapi/content-manager/str
 import { Box, Flex, Popover, Typography, useCollator } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { Locale } from '../../../shared/contracts/locales';
 import { useGetLocalesQuery } from '../services/locales';
@@ -94,7 +94,7 @@ const LocaleListCell = ({
         >
           <ul>
             {localesForDocument.map((name) => (
-              <Box key={name} padding={3} as="li">
+              <Box key={name} padding={3} tag="li">
                 <Typography>{name}</Typography>
               </Box>
             ))}

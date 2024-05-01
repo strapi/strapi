@@ -1,6 +1,6 @@
 import { Box, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useConfiguration } from '../../features/Configuration';
 

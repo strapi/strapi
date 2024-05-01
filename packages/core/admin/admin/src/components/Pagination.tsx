@@ -167,7 +167,7 @@ const PageSize = ({ options = ['10', '20', '50', '100'] }: Pagination.PageSizePr
           </SingleSelectOption>
         ))}
       </SingleSelect>
-      <Typography textColor="neutral600" as="span">
+      <Typography textColor="neutral600" tag="span">
         {formatMessage({
           id: 'components.PageFooter.select',
           defaultMessage: 'Entries per page',
@@ -272,7 +272,7 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
   return (
     <PaginationImpl activePage={activePage} pageCount={pageCount}>
       <PreviousLink
-        as={Link}
+        tag={Link}
         // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
         to={{ search: stringify({ ...query, page: activePage - 1 }) }}
       >
@@ -285,7 +285,7 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
         if (typeof item === 'number') {
           return (
             <PageLink
-              as={Link}
+              tag={Link}
               active={item === activePage}
               key={item}
               number={item}
@@ -304,7 +304,7 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
       })}
 
       <NextLink
-        as={Link}
+        tag={Link}
         // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
         to={{ search: stringify({ ...query, page: activePage + 1 }) }}
       >

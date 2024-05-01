@@ -1,6 +1,6 @@
 import { Tooltip, Typography } from '@strapi/design-system';
 import isEmpty from 'lodash/isEmpty';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { CellValue } from './CellValue';
 import { SingleComponent, RepeatableComponent } from './Components';

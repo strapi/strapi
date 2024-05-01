@@ -164,7 +164,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
         onSubmit={handleSubmit}
       >
         <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" as="h2" id={titleId}>
+          <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={titleId}>
             {formatMessage({
               id: getTranslation('Settings.list.actions.add'),
               defaultMessage: 'Add new locale',
@@ -180,7 +180,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
             variant="simple"
           >
             <Flex justifyContent="space-between">
-              <Typography as="h2" variant="beta">
+              <Typography tag="h2" variant="beta">
                 {formatMessage({
                   id: getTranslation('Settings.locales.modal.title'),
                   defaultMessage: 'Configuration',

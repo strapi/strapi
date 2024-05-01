@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 import { BulletList, NumberList } from '@strapi/icons';
 import { type Text, Editor, Node, Transforms, Path } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
-import styled, { type CSSProperties, css } from 'styled-components';
+import { styled, type CSSProperties, css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
@@ -356,7 +356,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
   },
   'list-item': {
     renderElement: (props) => (
-      <Typography as="li" {...props.attributes}>
+      <Typography tag="li" {...props.attributes}>
         {props.children}
       </Typography>
     ),

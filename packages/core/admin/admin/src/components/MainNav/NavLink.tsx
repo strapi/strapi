@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Tooltip, Flex, Badge } from '@strapi/design-system';
 import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * Link
@@ -62,7 +62,7 @@ const IconImpl = ({ children }: { children: React.ReactNode }) => {
     return null;
   }
   return (
-    <Flex justifyContent="center" aria-hidden as="span" width={5} height={5}>
+    <Flex justifyContent="center" aria-hidden tag="span" width={5} height={5}>
       {children}
     </Flex>
   );

@@ -12,7 +12,7 @@ import {
 } from '@strapi/design-system';
 import { Cross, Filter } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import type { Categories, Collections, FilterTypes } from '../hooks/useMarketplaceData';
 import type { NpmPackageType, MarketplacePageQuery } from '../MarketplacePage';

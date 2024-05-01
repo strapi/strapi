@@ -10,7 +10,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
 
@@ -57,7 +57,7 @@ const ComponentCategory = ({
             {components.map(({ uid, displayName, icon }) => (
               <ComponentBox
                 key={uid}
-                as="button"
+                tag="button"
                 type="button"
                 background="neutral100"
                 justifyContent="center"

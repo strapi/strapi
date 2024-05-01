@@ -4,7 +4,7 @@ import { EmptyDocuments } from '@strapi/icons/symbols';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../../utils';
 
@@ -43,14 +43,14 @@ export const EmptyAttributes = () => {
           <EmptyDocuments width="160px" height="88px" />
           <Box paddingTop={6} paddingBottom={4}>
             <Box textAlign="center">
-              <Typography variant="delta" as="p" textColor="neutral600">
+              <Typography variant="delta" tag="p" textColor="neutral600">
                 {formatMessage({
                   id: getTrad('modalForm.empty.heading'),
                   defaultMessage: 'Nothing in here yet.',
                 })}
               </Typography>
               <Box paddingTop={4}>
-                <Typography variant="delta" as="p" textColor="neutral600">
+                <Typography variant="delta" tag="p" textColor="neutral600">
                   {formatMessage({
                     id: getTrad('modalForm.empty.sub-heading'),
                     defaultMessage:

@@ -17,7 +17,7 @@ import {
 import { Mail } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { PERMISSIONS } from '../constants';
@@ -163,7 +163,7 @@ const SettingsPage = () => {
               >
                 <Flex direction="column" alignItems="stretch" gap={4}>
                   <Flex direction="column" alignItems="stretch" gap={1}>
-                    <Typography variant="delta" as="h2">
+                    <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: 'email.Settings.email.plugin.title.config',
                         defaultMessage: 'Configuration',
@@ -259,7 +259,7 @@ const SettingsPage = () => {
                 paddingLeft={7}
                 paddingRight={7}
               >
-                <Typography variant="delta" as="h2">
+                <Typography variant="delta" tag="h2">
                   {formatMessage({
                     id: 'email.Settings.email.plugin.title.test',
                     defaultMessage: 'Test email delivery',

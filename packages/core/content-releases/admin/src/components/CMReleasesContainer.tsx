@@ -83,7 +83,7 @@ export const NoReleases = () => {
           to={{
             pathname: '/plugins/content-releases',
           }}
-          as={ReactRouterLink}
+          tag={ReactRouterLink}
           variant="secondary"
         >
           {formatMessage({
@@ -321,7 +321,7 @@ export const CMReleasesContainer = () => {
 
   return (
     <Box
-      as="aside"
+      tag="aside"
       aria-label={formatMessage({
         id: 'content-releases.plugin.name',
         defaultMessage: 'Releases',

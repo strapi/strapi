@@ -9,7 +9,7 @@ import {
   useCollator,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useGetContentTypesQuery } from '../../../services/content-manager';
 import { useReviewWorkflows } from '../hooks/useReviewWorkflows';
@@ -162,7 +162,7 @@ const ContentTypesSelector = ({ disabled }: ContentTypesSelectorProps) => {
                           label: child.label,
                           name: assignedWorkflowName,
                           em: (...children) => (
-                            <Typography as="em" fontWeight="bold">
+                            <Typography tag="em" fontWeight="bold">
                               {children}
                             </Typography>
                           ),

@@ -161,7 +161,7 @@ const AdvancedSettingsPage = () => {
                   paddingRight={7}
                 >
                   <Flex direction="column" alignItems="stretch" gap={4}>
-                    <Typography variant="delta" as="h2">
+                    <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: 'global.settings',
                         defaultMessage: 'Settings',

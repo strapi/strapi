@@ -4,7 +4,7 @@ import { Box, Flex, Typography } from '@strapi/design-system';
 import map from 'lodash/map';
 import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';
-import styled, { DefaultTheme } from 'styled-components';
+import { styled, DefaultTheme } from 'styled-components';
 
 type HttpVerb = 'POST' | 'GET' | 'PUT' | 'DELETE';
 
@@ -83,7 +83,7 @@ export const BoundRoute = ({
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
-      <Typography variant="delta" as="h3">
+      <Typography variant="delta" tag="h3">
         {formatMessage({
           id: 'Settings.apiTokens.createPage.BoundRoute.title',
           defaultMessage: 'Bound route to',

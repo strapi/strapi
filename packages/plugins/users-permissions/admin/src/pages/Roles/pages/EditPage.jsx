@@ -136,7 +136,7 @@ export const EditPage = () => {
                 shadow="filterShadow"
               >
                 <Flex direction="column" alignItems="stretch" gap={4}>
-                  <Typography variant="delta" as="h2">
+                  <Typography variant="delta" tag="h2">
                     {formatMessage({
                       id: getTrad('EditPage.form.roles'),
                       defaultMessage: 'Role details',

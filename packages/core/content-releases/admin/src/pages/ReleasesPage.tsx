@@ -35,7 +35,7 @@ import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { GetReleases, type Release } from '../../../shared/contracts/releases';
 import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
@@ -137,7 +137,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               gap={4}
             >
               <Flex direction="column" alignItems="start" gap={1}>
-                <Typography as="h3" variant="delta" fontWeight="bold">
+                <Typography tag="h3" variant="delta" fontWeight="bold">
                   {name}
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">

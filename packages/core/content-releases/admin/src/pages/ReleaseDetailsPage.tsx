@@ -38,7 +38,7 @@ import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
@@ -370,11 +370,11 @@ const ReleaseDetailsLayout = ({
               <Menu.Root>
                 {/*
                   TODO Fix in the DS
-                  - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
+                  - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
                   - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
                 */}
                 <Menu.Trigger
-                  as={IconButton}
+                  tag={IconButton}
                   paddingLeft={2}
                   paddingRight={2}
                   aria-label={formatMessage({
@@ -632,7 +632,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         <EmptyStateLayout
           action={
             <LinkButton
-              as={ReactRouterLink}
+              tag={ReactRouterLink}
               // @ts-expect-error - types are not inferred correctly through the as prop.
               to={{
                 pathname: '/content-manager',

@@ -13,7 +13,7 @@ import {
 import { useIntl } from 'react-intl';
 import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
@@ -116,7 +116,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
         </StyledBaseLink>
         {popoverOpen && (
           <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
-            <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
+            <Flex tag="form" onSubmit={handleSave} direction="column" gap={4}>
               <Field width="368px">
                 <Flex direction="column" gap={1} alignItems="stretch">
                   <FieldLabel>

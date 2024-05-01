@@ -4,7 +4,7 @@ import { Box, Flex, Typography, useComposedRefs } from '@strapi/design-system';
 import { Cross, Drag, Pencil } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
 import { ItemTypes } from '../../../constants/dragAndDrop';
@@ -82,7 +82,7 @@ const DraggableCard = ({
         >
           <Flex gap={3}>
             <DragButton
-              as="span"
+              tag="span"
               aria-label={formatMessage(
                 {
                   id: getTranslation('components.DraggableCard.move.field'),

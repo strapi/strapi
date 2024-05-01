@@ -3,7 +3,7 @@ import * as React from 'react';
 import { BaseButton, Box, Flex, FocusTrap, Portal, Typography } from '@strapi/design-system';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PreviewWysiwyg } from './PreviewWysiwyg';
 

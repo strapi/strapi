@@ -2,7 +2,7 @@ import { Alert, Button, Flex, Main, Typography, Link } from '@strapi/design-syst
 import { Duplicate, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useRouteError } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useClipboard } from '../hooks/useClipboard';
 

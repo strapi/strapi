@@ -21,7 +21,7 @@ const GuidedTourHomepage = () => {
     content: (
       <LinkButton
         onClick={() => trackUsage(val.home.trackingEvent)}
-        as={NavLink}
+        tag={NavLink}
         // @ts-expect-error - types are not inferred correctly through the as prop.
         to={val.home.cta.target}
         endIcon={<ArrowRight />}
@@ -52,7 +52,7 @@ const GuidedTourHomepage = () => {
       background="neutral0"
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
-        <Typography variant="beta" as="h2">
+        <Typography variant="beta" tag="h2">
           {formatMessage({
             id: 'app.components.GuidedTour.title',
             defaultMessage: '3 steps to get started',
@@ -67,7 +67,7 @@ const GuidedTourHomepage = () => {
                   <Box minWidth={`3rem`} marginRight={5}>
                     <Number state={state}>{index + 1}</Number>
                   </Box>
-                  <Typography variant="delta" as="h3">
+                  <Typography variant="delta" tag="h3">
                     {formatMessage(section.title)}
                   </Typography>
                 </Flex>

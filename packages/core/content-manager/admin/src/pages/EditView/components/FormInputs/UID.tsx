@@ -12,7 +12,7 @@ import {
 import { FieldAction, Flex, TextInput, Typography, useComposedRefs } from '@strapi/design-system';
 import { CheckCircle, WarningCircle, Loader, ArrowClockwise } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled, { keyframes } from 'styled-components';
+import { styled, keyframes } from 'styled-components';
 
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { useDoc } from '../../../../hooks/useDocument';

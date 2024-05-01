@@ -10,7 +10,7 @@ import {
   HeadingTwo,
 } from '@strapi/icons';
 import { Editor } from 'slate';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';

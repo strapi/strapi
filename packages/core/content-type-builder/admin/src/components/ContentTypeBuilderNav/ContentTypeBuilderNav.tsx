@@ -61,7 +61,7 @@ export const ContentTypeBuilderNav = () => {
                     <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
                       {link.links.map((subLink: any) => (
                         <SubNavLink
-                          as={NavLink}
+                          tag={NavLink}
                           // @ts-expect-error verify if "to" is needed
                           to={subLink.to}
                           active={subLink.active}
@@ -79,7 +79,7 @@ export const ContentTypeBuilderNav = () => {
 
                 return (
                   // @ts-expect-error verify if "to" is needed
-                  <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
+                  <SubNavLink tag={NavLink} to={link.to} active={link.active} key={link.name}>
                     {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
                   </SubNavLink>
                 );

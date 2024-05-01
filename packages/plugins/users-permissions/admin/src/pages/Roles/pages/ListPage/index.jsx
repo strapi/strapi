@@ -177,7 +177,7 @@ export const RolesListPage = () => {
             canCreate ? (
               <LinkButton
                 to="new"
-                as={NavLink}
+                tag={NavLink}
                 onClick={() => trackUsage('willCreateRole')}
                 startIcon={<Plus />}
                 size="S"

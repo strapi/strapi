@@ -18,7 +18,7 @@ import {
 import { SignOut, Feather, Lock, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
@@ -117,7 +117,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         <NewNavBrand />
       ) : (
         <NavBrand
-          as={RouterNavLink}
+          tag={RouterNavLink}
           workplace={formatMessage({
             id: 'app.components.LeftMenu.navbrand.workplace',
             defaultMessage: 'Workplace',
@@ -150,7 +150,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
           </NewNavLink.Link>
         )}
         <NavLink
-          as={RouterNavLink}
+          tag={RouterNavLink}
           // @ts-expect-error the props from the passed as prop are not inferred // joined together
           to="/content-manager"
           icon={<Feather />}
@@ -175,7 +175,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
               return (
                 <NavLinkWrapper key={link.to}>
                   <NavLink
-                    as={RouterNavLink}
+                    tag={RouterNavLink}
                     to={link.to}
                     icon={<LinkIcon />}
                     onClick={() => handleClickOnLink(link.to)}
@@ -204,7 +204,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
               return (
                 <NavLink
-                  as={RouterNavLink}
+                  tag={RouterNavLink}
                   badgeContent={
                     link.notificationsCount && link.notificationsCount > 0
                       ? link.notificationsCount.toString()

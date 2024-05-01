@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Avatar, AvatarGroup, Flex, Tooltip, Typography } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/urls';
 
@@ -52,7 +52,7 @@ const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSi
 const FileWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <Flex
-      as="span"
+      tag="span"
       position="relative"
       borderRadius="50%"
       width="26px"

@@ -173,7 +173,7 @@ export const SingleSignOnPage = () => {
                     shadow="filterShadow"
                     hasRadius
                   >
-                    <Typography variant="delta" as="h2">
+                    <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: 'global.settings',
                         defaultMessage: 'Settings',

@@ -6,7 +6,7 @@ import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import {
   type BlocksStore,
@@ -128,7 +128,7 @@ const ToolbarButton = ({
         asChild
       >
         <FlexButton
-          as="button"
+          tag="button"
           background={isActive ? 'primary100' : ''}
           alignItems="center"
           justifyContent="center"

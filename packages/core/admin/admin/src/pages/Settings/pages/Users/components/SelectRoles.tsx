@@ -1,7 +1,7 @@
 import { MultiSelect, MultiSelectOption } from '@strapi/design-system';
 import { Loader as LoadingIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled, { keyframes } from 'styled-components';
+import { styled, keyframes } from 'styled-components';
 
 import { useField } from '../../../../../components/Form';
 import { useAdminRoles } from '../../../../../hooks/useAdminRoles';

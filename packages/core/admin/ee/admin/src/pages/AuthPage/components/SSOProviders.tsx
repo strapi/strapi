@@ -1,7 +1,7 @@
 import { Flex, Grid, GridItem, Tooltip, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { GetProviders } from '../../../../../../shared/contracts/providers';
 
@@ -43,7 +43,7 @@ const SSOProviders = ({ providers, displayAllProviders }: SSOProvidersProps) => 
               id: 'global.see-more',
             })}
           >
-            <SSOButton as={Link} to="/auth/providers">
+            <SSOButton tag={Link} to="/auth/providers">
               <span aria-hidden>•••</span>
             </SSOButton>
           </Tooltip>

@@ -6,7 +6,7 @@ import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
-import styled, { DefaultTheme } from 'styled-components';
+import { styled, DefaultTheme } from 'styled-components';
 
 import { Action, Subject } from '../../../../../../../shared/contracts/permissions';
 import {
@@ -196,7 +196,7 @@ const Collapse = ({
                   <Cell key={actionId} justifyContent="center" alignItems="center">
                     {hasConditions && (
                       <Box
-                        as="span"
+                        tag="span"
                         position="absolute"
                         top="-6px"
                         left="37px"
@@ -236,7 +236,7 @@ const Collapse = ({
                 <Cell key={actionId} justifyContent="center" alignItems="center">
                   {hasConditions && (
                     <Box
-                      as="span"
+                      tag="span"
                       position="absolute"
                       top="-6px"
                       left="37px"

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import CodeMirror, { EditorFromTextArea } from 'codemirror5';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PreviewWysiwyg } from './PreviewWysiwyg';
 import { newlineAndIndentContinueMarkdownList } from './utils/continueList';

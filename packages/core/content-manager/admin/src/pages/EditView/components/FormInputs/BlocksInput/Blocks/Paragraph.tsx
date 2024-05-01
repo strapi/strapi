@@ -11,7 +11,7 @@ import { type Block } from '../utils/types';
 const paragraphBlocks: Pick<BlocksStore, 'paragraph'> = {
   paragraph: {
     renderElement: (props) => (
-      <Typography as="p" variant="omega" {...props.attributes}>
+      <Typography tag="p" variant="omega" {...props.attributes}>
         {props.children}
       </Typography>
     ),

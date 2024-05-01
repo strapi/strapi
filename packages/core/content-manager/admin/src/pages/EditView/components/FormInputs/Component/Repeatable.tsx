@@ -20,7 +20,7 @@ import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
@@ -526,7 +526,7 @@ const Component = ({
 };
 
 const Preview = () => {
-  return <StyledSpan as="span" padding={6} background="primary100" />;
+  return <StyledSpan tag="span" padding={6} background="primary100" />;
 };
 
 const StyledSpan = styled(Box)`

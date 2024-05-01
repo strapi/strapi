@@ -12,7 +12,7 @@ import {
 } from '@strapi/design-system';
 import { Cross, Message, Play, Question, Book, PaperPlane } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import onboardingPreview from '../assets/images/onboarding-preview.png';
 import { useAppInfo } from '../features/AppInfo';
@@ -41,7 +41,7 @@ const Onboarding = () => {
   const Icon = isOpen ? Cross : Question;
 
   return (
-    <Box as="aside" position="fixed" bottom={2} right={2}>
+    <Box tag="aside" position="fixed" bottom={2} right={2}>
       <HelperButton
         aria-label={formatMessage(
           isOpen
@@ -83,7 +83,7 @@ const Onboarding = () => {
                 })}
               </TypographyLineHeight>
               <TextLink
-                as="a"
+                tag="a"
                 href={WATCH_MORE.href}
                 target="_blank"
                 rel="noreferrer noopener"
@@ -96,7 +96,7 @@ const Onboarding = () => {
             <Divider />
             {VIDEO_LINKS.map(({ href, duration, label }, index) => (
               <VideoLinkWrapper
-                as="a"
+                tag="a"
                 href={href}
                 target="_blank"
                 rel="noreferrer noopener"
@@ -148,7 +148,7 @@ const Onboarding = () => {
                 <Flex gap={3} key={href}>
                   <Icon fill="primary600" />
                   <TextLink
-                    as="a"
+                    tag="a"
                     href={href}
                     target="_blank"
                     rel="noreferrer noopener"

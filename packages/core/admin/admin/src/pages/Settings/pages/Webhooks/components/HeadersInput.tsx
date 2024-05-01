@@ -16,7 +16,7 @@ import {
 import { Minus, Plus } from '@strapi/icons';
 import { Field, FieldArray, FieldInputProps, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * HeadersInput
@@ -55,7 +55,7 @@ const HeadersInput = () => {
                   <React.Fragment key={`${index}.${header.key}`}>
                     <GridItem col={6}>
                       <Field
-                        as={HeaderCombobox}
+                        tag={HeaderCombobox}
                         name={`headers.${index}.key`}
                         aria-label={`row ${index + 1} key`}
                         label={formatMessage({
@@ -69,7 +69,7 @@ const HeadersInput = () => {
                       <Flex alignItems="flex-end">
                         <Box style={{ flex: 1 }}>
                           <Field
-                            as={TextInput}
+                            tag={TextInput}
                             name={`headers.${index}.value`}
                             aria-label={`row ${index + 1} value`}
                             label={formatMessage({

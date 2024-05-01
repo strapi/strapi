@@ -15,7 +15,7 @@ import {
 } from '@strapi/design-system';
 import { Search, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../../utils';
 
@@ -117,7 +117,7 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
   return (
     <>
       <Flex justifyContent="space-between" paddingBottom={2}>
-        <Typography variant="pi" fontWeight="bold" textColor="neutral800" as="label">
+        <Typography variant="pi" fontWeight="bold" textColor="neutral800" tag="label">
           {formatMessage(intlLabel)}
         </Typography>
         <Flex gap={1}>

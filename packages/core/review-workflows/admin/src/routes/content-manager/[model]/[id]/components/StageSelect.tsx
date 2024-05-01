@@ -189,7 +189,7 @@ export const StageSelect = () => {
             startIcon={
               activeWorkflowStage && (
                 <Flex
-                  as="span"
+                  tag="span"
                   height={2}
                   background={activeWorkflowStage?.color}
                   borderColor={themeColorName === 'neutral0' ? 'neutral150' : undefined}
@@ -203,7 +203,7 @@ export const StageSelect = () => {
             // @ts-expect-error – `customizeContent` is not correctly typed in the DS.
             customizeContent={() => {
               return (
-                <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
+                <Flex tag="span" justifyContent="space-between" alignItems="center" width="100%">
                   <Typography textColor="neutral800" ellipsis>
                     {activeWorkflowStage?.name ?? ''}
                   </Typography>

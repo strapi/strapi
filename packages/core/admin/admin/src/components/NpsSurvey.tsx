@@ -16,7 +16,7 @@ import {
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import styled, { useTheme } from 'styled-components';
+import { styled, useTheme } from 'styled-components';
 import * as yup from 'yup';
 
 import { useAppInfo } from '../features/AppInfo';
@@ -279,10 +279,10 @@ const NpsSurvey = () => {
                   })}
                 </Typography>
               ) : (
-                <Box as="fieldset" width="100%">
+                <Box tag="fieldset" width="100%">
                   <Flex justifyContent="space-between" width="100%">
                     <Box marginLeft="auto" marginRight="auto">
-                      <Typography fontWeight="semiBold" as="legend">
+                      <Typography fontWeight="semiBold" tag="legend">
                         {formatMessage({
                           id: 'app.components.NpsSurvey.banner-title',
                           defaultMessage:

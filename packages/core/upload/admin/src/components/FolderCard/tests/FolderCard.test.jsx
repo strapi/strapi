@@ -24,7 +24,7 @@ const ComponentFixture = ({ to, ...props }) => {
           to={to}
           {...props}
         >
-          <FolderCardBody as="h2">
+          <FolderCardBody tag="h2">
             <FolderCardBodyAction onClick={() => {}} to={to}>
               <Flex direction="column" alignItems="flex-start">
                 <Typography variant="omega" fontWeight="semiBold">

@@ -61,7 +61,7 @@ const ComponentInput = ({
             htmlFor={name}
             variant="pi"
             fontWeight="bold"
-            as="label"
+            tag="label"
           >
             {label}
             {attribute.repeatable && (

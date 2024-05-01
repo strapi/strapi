@@ -14,7 +14,7 @@ import { ArrowRight, Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useTracking } from '../../features/Tracking';
 
@@ -48,7 +48,7 @@ const GuidedTourModal = () => {
   const sectionKeys = Object.keys(guidedTourState);
   const [sectionName, stepName] = currentStep.split('.') as [
     keyof GuidedTourContextValue['guidedTourState'],
-    string,
+    string
   ];
   const sectionIndex = sectionKeys.indexOf(sectionName);
   const stepIndex = Object.keys(guidedTourState[sectionName]).indexOf(stepName);
@@ -196,7 +196,7 @@ const GuidedTourStepper = ({
           </Number>
         </Flex>
         {title && (
-          <Typography variant="alpha" fontWeight="bold" textColor="neutral800" as="h3" id="title">
+          <Typography variant="alpha" fontWeight="bold" textColor="neutral800" tag="h3" id="title">
             {formatMessage(title)}
           </Typography>
         )}
@@ -219,7 +219,7 @@ const GuidedTourStepper = ({
           {cta &&
             (cta.target ? (
               <LinkButton
-                as={NavLink}
+                tag={NavLink}
                 endIcon={<ArrowRight />}
                 onClick={onCtaClick}
                 // @ts-expect-error - types are not inferred correctly through the as prop.
@@ -274,7 +274,7 @@ const GuidedTourContent = ({ id, defaultMessage }: GuidedTourContentProps) => {
 
 const DocumentationLink = (children: React.ReactNode) => (
   <Typography
-    as="a"
+    tag="a"
     textColor="primary600"
     target="_blank"
     rel="noopener noreferrer"

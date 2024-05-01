@@ -3,7 +3,7 @@ import React from 'react';
 import { buttonFocusStyle, Typography, VisuallyHidden } from '@strapi/design-system';
 import { ChevronLeft, ChevronRight } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { usePagination } from './PaginationContext';
 
@@ -106,7 +106,7 @@ export const PageLink = ({ number, children, ...props }) => {
 
 export const Dots = ({ children, ...props }) => (
   <li>
-    <DotsWrapper {...props} as="div">
+    <DotsWrapper {...props} tag="div">
       <VisuallyHidden>{children}</VisuallyHidden>
       <PaginationText aria-hidden small>
         …

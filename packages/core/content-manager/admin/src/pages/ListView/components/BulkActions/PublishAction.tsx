@@ -22,7 +22,7 @@ import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { useQueryClient } from 'react-query';
 import { Link, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { Document, useDoc } from '../../../../hooks/useDocument';

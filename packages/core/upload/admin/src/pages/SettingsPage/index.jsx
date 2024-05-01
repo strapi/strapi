@@ -132,7 +132,7 @@ export const SettingsPage = () => {
               <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                 <Flex direction="column" alignItems="stretch" gap={4}>
                   <Flex>
-                    <Typography variant="delta" as="h2">
+                    <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: getTrad('settings.blockTitle'),
                         defaultMessage: 'Asset management',

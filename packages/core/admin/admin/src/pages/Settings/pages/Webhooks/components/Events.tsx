@@ -16,7 +16,7 @@ import {
 } from '@strapi/design-system';
 import { useFormikContext, FieldInputProps } from 'formik';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * EventsRoot

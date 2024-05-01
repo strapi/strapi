@@ -8,7 +8,7 @@ import {
 import { Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
@@ -68,7 +68,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
             {section.links.map((link) => {
               return (
                 <SubNavLink
-                  as={NavLink}
+                  tag={NavLink}
                   withBullet={link.hasNotification}
                   // @ts-expect-error – this is an issue with the DS where as props are not inferred
                   to={link.to}

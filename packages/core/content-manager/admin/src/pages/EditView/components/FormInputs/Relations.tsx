@@ -28,7 +28,7 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
@@ -898,7 +898,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   return (
     <Box
       style={style}
-      as="li"
+      tag="li"
       ref={dropRef}
       aria-describedby={ariaDescribedBy}
       cursor={canDrag ? 'all-scroll' : 'default'}

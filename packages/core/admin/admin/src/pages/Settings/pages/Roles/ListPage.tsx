@@ -149,7 +149,7 @@ const ListPage = () => {
           id: 'Settings.roles.list.description',
           defaultMessage: 'List of roles',
         })}
-        as="h2"
+        tag="h2"
       />
       {canRead && (
         <ActionLayout

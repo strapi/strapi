@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { BaseButton, Flex, Typography } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface AddComponentButtonProps {
   children: React.ReactNode;
@@ -31,7 +31,7 @@ const AddComponentButton = ({
       paddingRight={4}
       style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
     >
-      <Flex as="span" gap={2}>
+      <Flex tag="span" gap={2}>
         <StyledAddIcon aria-hidden $isOpen={isOpen} $hasError={hasError && !isOpen} />
         <Typography
           variant="pi"

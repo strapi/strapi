@@ -38,7 +38,7 @@ import {
 import { PlusCircle, Plus, ArrowClockwise } from '@strapi/icons';
 import axios, { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ConfigurationContextValue } from '../../../../../features/Configuration';
 import { ACCEPTED_FORMAT, DIMENSION, SIZE } from '../utils/constants';
@@ -141,7 +141,7 @@ const LogoInput = ({
           <Box
             maxHeight="40%"
             maxWidth="40%"
-            as="img"
+            tag="img"
             src={customLogo?.url || defaultLogo}
             alt={formatMessage({
               id: 'Settings.application.customization.carousel.title',
@@ -153,7 +153,7 @@ const LogoInput = ({
       {currentStep ? (
         <ModalLayout labelledBy="modal" onClose={handleClose}>
           <ModalHeader>
-            <Typography fontWeight="bold" as="h2" id="modal">
+            <Typography fontWeight="bold" tag="h2" id="modal">
               {formatMessage(
                 currentStep === 'upload'
                   ? {
@@ -373,7 +373,7 @@ const ComputerForm = () => {
               >
                 <PlusCircle fill="primary600" width="6rem" height="6rem" aria-hidden />
                 <Box paddingTop={3} paddingBottom={5}>
-                  <Typography variant="delta" as="label" htmlFor={id}>
+                  <Typography variant="delta" tag="label" htmlFor={id}>
                     {formatMessage({
                       id: 'Settings.application.customization.modal.upload.drag-drop',
                       defaultMessage: 'Drag and Drop here or',
