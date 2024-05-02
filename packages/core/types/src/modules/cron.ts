@@ -1,7 +1,4 @@
-import type {
-  Job,
-  Spec
-} from 'node-schedule';
+import type { Job, Spec } from 'node-schedule';
 
 import type { Strapi } from '..';
 
