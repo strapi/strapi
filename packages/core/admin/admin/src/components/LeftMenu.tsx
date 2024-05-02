@@ -55,7 +55,7 @@ const NavListWrapper = styled(Flex)`
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
-  const navUserRef = React.useRef<HTMLButtonElement>(null!);
+  const navUserRef = React.useRef<HTMLDivElement>(null!);
   const [userLinksVisible, setUserLinksVisible] = React.useState(false);
   const user = useAuth('AuthenticatedApp', (state) => state.user);
   const { formatMessage } = useIntl();
@@ -76,10 +76,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     e.preventDefault();
     if (
       !e.currentTarget.contains(e.relatedTarget) &&
-      /**
-       * TODO: can we replace this by just using the navUserRef?
-       */
-      e.relatedTarget?.parentElement?.id !== 'main-nav-user-button'
+      e.relatedTarget?.parentElement?.id !== navUserRef.current.id
     ) {
       setUserLinksVisible(false);
     }

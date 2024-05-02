@@ -12,8 +12,8 @@ export interface NavUserProps extends ButtonProps {
 export const NavUser = React.forwardRef<HTMLButtonElement, NavUserProps>(
   ({ children, initials, ...props }, ref) => {
     return (
-      <Flex paddingTop={3} paddingBottom={3} justifyContent="center" {...props}>
-        <Flex as="button" justifyContent="center" ref={ref}>
+      <Flex paddingTop={3} paddingBottom={3} ref={ref} justifyContent="center" {...props}>
+        <Flex as="button" justifyContent="center">
           <Initials>{initials}</Initials>
           <VisuallyHidden>
             <span>{children}</span>
