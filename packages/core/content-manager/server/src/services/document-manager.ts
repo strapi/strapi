@@ -93,7 +93,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
       return {
         results: documents,
-        pagination: pagination.transformPaginationInfo(params, total),
+        pagination: pagination.transformPagedPaginationInfo(params, total),
       };
     },
 

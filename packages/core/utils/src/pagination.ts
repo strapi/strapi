@@ -13,10 +13,16 @@ export interface Pagination {
   limit: number;
 }
 
-export interface PatinationInformation {
+export interface PagePatinationInformation {
   page: number;
   pageSize: number;
   pageCount: number;
+  total: number;
+}
+
+export interface OffsetPaginationInformation {
+  start: number;
+  limit: number;
   total: number;
 }
 
@@ -120,14 +126,18 @@ const withDefaultPagination = <T extends Partial<PaginationArgs>>(
 };
 
 /**
- * Transform pagination information into a consistent format.
- *
- * Used across the app apis, such as Content API and Content Manager API
+ * Transform pagination information into a paginated response:
+ * {
+ *    page: number,
+ *    pageSize: number,
+ *    pageCount: number,
+ *    total: number
+ * }
  */
-const transformPaginationInfo = (
+const transformPagedPaginationInfo = (
   paginationInfo: Partial<PaginationArgs>,
   total: number
-): PatinationInformation => {
+): PagePatinationInformation => {
   if (!isNil(paginationInfo.page)) {
     const page = paginationInfo.page;
     const pageSize = paginationInfo.pageSize ?? total;
@@ -163,4 +173,40 @@ const transformPaginationInfo = (
   };
 };
 
-export { withDefaultPagination, transformPaginationInfo };
+/**
+ * Transform pagination information into a offset response:
+ * {
+ *    start: number,
+ *    limit: number,
+ *    total: number
+ * }
+ */
+const transformOffsetPaginationInfo = (
+  paginationInfo: Partial<PaginationArgs>,
+  total: number
+): OffsetPaginationInformation => {
+  if (!isNil(paginationInfo.page)) {
+    const start = paginationInfo.page - 1;
+    const limit = paginationInfo.pageSize ?? total;
+
+    return { start, limit, total };
+  }
+
+  if (!isNil(paginationInfo.start)) {
+    const start = paginationInfo.start;
+    const limit = paginationInfo.limit ?? total;
+
+    // Start limit to page page size
+    return { start, limit, total };
+  }
+
+  // Default pagination
+  return {
+    ...paginationInfo,
+    start: 0,
+    limit: 10,
+    total,
+  };
+};
+
+export { withDefaultPagination, transformPagedPaginationInfo, transformOffsetPaginationInfo };
