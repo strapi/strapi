@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { useCollator, useFilter } from '@strapi/design-system';
 import {
+  useCollator,
+  useFilter,
   SubNav,
   SubNavHeader,
   SubNavLink,
