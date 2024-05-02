@@ -255,10 +255,10 @@ describe('Find Relations', () => {
 
     // Publish Skate and Chair
     const [publishedSkate, publishedChair] = await Promise.all([
-      strapi.documents(productUid).publish(productMapping.skate.documentId),
-      strapi.documents(productUid).publish(productMapping.chair.documentId),
+      strapi.documents(productUid).publish({ documentId: productMapping.skate.documentId }),
+      strapi.documents(productUid).publish({ documentId: productMapping.chair.documentId }),
     ]);
-    data[productUid].published.push(publishedSkate.versions[0], publishedChair.versions[0]);
+    data[productUid].published.push(publishedSkate.entries[0], publishedChair.entries[0]);
 
     const stan = await strapi.documents(employeeUid).create({ data: { name: 'Stan' } });
     data[employeeUid].draft.push(stan);
@@ -311,20 +311,21 @@ describe('Find Relations', () => {
 
     // Publish both shops
     const [publishedShop, publishedEmptyShop] = await Promise.all([
-      strapi.documents(shopUid).publish(draftShop.documentId, {
+      strapi.documents(shopUid).publish({
+        documentId: draftShop.documentId,
         populate: Object.keys(allRelations),
       }),
-      strapi.documents(shopUid).publish(draftEmptyShop.documentId),
+      strapi.documents(shopUid).publish({ documentId: draftEmptyShop.documentId }),
     ]);
-    data[shopUid].published.push(publishedShop.versions[0], publishedEmptyShop.versions[0]);
+    data[shopUid].published.push(publishedShop.entries[0], publishedEmptyShop.entries[0]);
 
     // We now omit non relational fields before storing the shop relations
     ['id', 'updatedAt', 'publishedAt', 'locale', 'createdAt', 'name'].forEach(
-      (key) => delete publishedShop.versions[0][key]
+      (key) => delete publishedShop.entries[0][key]
     );
     data.shopRelations = {
       draft: draftRelations,
-      published: publishedShop.versions[0],
+      published: publishedShop.entries[0],
     };
 
     // Define the ids of the shops we will use for testing

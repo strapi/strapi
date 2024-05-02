@@ -21,6 +21,7 @@ import { Theme } from './components/Theme';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
 import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
+import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
@@ -156,6 +157,7 @@ class StrapiApp {
   /**
    * APIs
    */
+  rbac = new RBAC();
   library: Library = {
     components: {},
     fields: {},
@@ -227,10 +229,6 @@ class StrapiApp {
       link.Component && typeof link.Component === 'function',
       `[${link.intlLabel.defaultMessage}]: link.Component must be a function returning a Promise that returns a default component. Please use: \`Component: () => import(path)\` instead.`
     );
-    invariant(
-      link.icon && typeof link.icon === 'function',
-      `[${link.intlLabel.defaultMessage}]: link.Icon should be a valid React Component`
-    );
 
     if (
       link.Component &&
@@ -238,10 +236,11 @@ class StrapiApp {
       // @ts-expect-error – shh
       link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
-      console.warn(`
-      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed
-        in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-      `);
+      console.warn(
+        `
+      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      `.trim()
+      );
     }
 
     if (link.to.startsWith('/')) {
@@ -270,6 +269,14 @@ class StrapiApp {
     middlewares.forEach((middleware) => {
       this.middlewares.push(middleware);
     });
+  };
+
+  addRBACMiddleware = (m: RBACMiddleware | RBACMiddleware[]) => {
+    if (Array.isArray(m)) {
+      this.rbac.use(m);
+    } else {
+      this.rbac.use(m);
+    }
   };
 
   addReducers = (reducers: ReducersMapObject) => {
@@ -302,10 +309,11 @@ class StrapiApp {
       // @ts-expect-error – shh
       link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
-      console.warn(`
-      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed
-        in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-      `);
+      console.warn(
+        `
+      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      `.trim()
+      );
     }
 
     if (link.to.startsWith('/')) {
@@ -404,7 +412,7 @@ class StrapiApp {
 
       if (!darkTheme && !lightTheme) {
         console.warn(
-          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`
+          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`.trim()
         );
         merge(this.configurations.themes.light, customConfig.theme);
       }
@@ -623,6 +631,8 @@ class StrapiApp {
                 };
               },
             },
+            // this needs to go before auth/:authType because otherwise it won't match the route
+            ...getBaseEERoutes(),
             {
               path: 'auth/:authType',
               element: <AuthPage />,
@@ -724,7 +734,7 @@ class StrapiApp {
                     </React.Suspense>
                   ),
                 })),
-                ...getBaseEERoutes(),
+
                 {
                   path: '*',
                   element: <NotFoundPage />,

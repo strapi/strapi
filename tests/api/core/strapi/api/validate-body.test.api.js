@@ -56,7 +56,7 @@ describe('Validate Body', () => {
 
       const response = await rq.post('/products', { body: createPayload });
 
-      expect(response.statusCode).toBe(200);
+      expect(response.statusCode).toBe(201);
 
       const { documentId, ...attributes } = response.body.data;
 

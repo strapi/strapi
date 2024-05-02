@@ -1,24 +1,20 @@
 import { useField } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Grid, GridItem } from '@strapi/design-system';
 
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
-import { InputRenderer } from '../../InputRenderer';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import type { ComponentInputProps } from './Input';
 
-interface NonRepeatableComponentProps extends Omit<ComponentInputProps, 'required' | 'label'> {}
+type NonRepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
 
-const NonRepeatableComponent = ({ attribute, name }: NonRepeatableComponentProps) => {
-  const {
-    edit: { components },
-  } = useDocLayout();
-
+const NonRepeatableComponent = ({
+  attribute,
+  name,
+  children,
+  layout,
+}: NonRepeatableComponentProps) => {
   const { value } = useField(name);
   const level = useComponent('NonRepeatableComponent', (state) => state.level);
-
-  const { layout } = components[attribute.component];
-
   const isNested = level > 0;
 
   return (
@@ -47,7 +43,7 @@ const NonRepeatableComponent = ({ attribute, name }: NonRepeatableComponentProps
 
                   return (
                     <GridItem col={size} key={completeFieldName} s={12} xs={12}>
-                      <InputRenderer {...field} name={completeFieldName} />
+                      {children({ ...field, name: completeFieldName })}
                     </GridItem>
                   );
                 })}

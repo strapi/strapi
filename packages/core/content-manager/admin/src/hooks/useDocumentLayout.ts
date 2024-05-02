@@ -143,9 +143,14 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { isLoading: isLoadingSchemas, schemas } = useContentTypeSchema();
 
-  const { data, isLoading: isLoadingConfigs, error } = useGetContentTypeConfigurationQuery(model);
+  const {
+    data,
+    isLoading: isLoadingConfigs,
+    error,
+    isFetching: isFetchingConfigs,
+  } = useGetContentTypeConfigurationQuery(model);
 
-  const isLoading = isLoadingSchemas || isLoadingConfigs;
+  const isLoading = isLoadingSchemas || isFetchingConfigs || isLoadingConfigs;
 
   React.useEffect(() => {
     if (error) {
@@ -158,7 +163,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
 
   const editLayout = React.useMemo(
     () =>
-      data
+      data && !isLoading
         ? formatEditLayout(data, { schemas, schema, components })
         : ({
             layout: [],
@@ -167,11 +172,11 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
             options: {},
             settings: DEFAULT_SETTINGS,
           } as EditLayout),
-    [data, schema, components, schemas]
+    [data, isLoading, schemas, schema, components]
   );
 
   const listLayout = React.useMemo(() => {
-    return data
+    return data && !isLoading
       ? formatListLayout(data, { schemas, schema, components })
       : ({
           layout: [],
@@ -179,7 +184,7 @@ const useDocumentLayout: UseDocumentLayout = (model) => {
           options: {},
           settings: DEFAULT_SETTINGS,
         } as ListLayout);
-  }, [data, schema, schemas, components]);
+  }, [data, isLoading, schemas, schema, components]);
 
   const { layout: edit } = React.useMemo(
     () =>
@@ -219,7 +224,7 @@ type LayoutData = FindContentTypeConfiguration.Response['data'];
 /**
  * @internal
  * @description takes the configuration data, the schema & the components used in the schema and formats the edit view
- * vesions of the schema & components. This is then used to redner the edit view of the content-type.
+ * versions of the schema & components. This is then used to render the edit view of the content-type.
  */
 const formatEditLayout = (
   data: LayoutData,
@@ -293,6 +298,7 @@ const formatEditLayout = (
     options: {
       ...schema?.options,
       ...schema?.pluginOptions,
+      ...data.contentType.options,
     },
   };
 };
@@ -401,6 +407,7 @@ const formatListLayout = (
     options: {
       ...schema?.options,
       ...schema?.pluginOptions,
+      ...data.contentType.options,
     },
   };
 };

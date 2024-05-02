@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
+import { findAndClose } from '../../utils/shared';
 
 type Field = {
   name: string;
@@ -22,32 +23,17 @@ test.describe('Uniqueness', () => {
   });
 
   const FIELDS_TO_TEST = [
-    { name: 'uniqueString', value: 'unique' },
-    { name: 'uniqueNumber', value: '10' },
-    { name: 'uniqueEmail', value: 'test@testing.com' },
+    { name: 'uniqueString', value: 'unique', newValue: 'unique-1' },
+    { name: 'uniqueNumber', value: '10', newValue: '20' },
+    { name: 'uniqueEmail', value: 'test@testing.com', newValue: 'editor@testing.com' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
-    { name: 'UID', value: 'unique' },
+    { name: 'UID', value: 'unique', newValue: 'unique-1' },
   ] as const satisfies Array<Field>;
 
   const clickSave = async (page) => {
     await page.getByRole('button', { name: 'Save' }).isEnabled();
     await page.getByRole('tab', { name: 'Draft' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
-  };
-
-  // When we need to adjust the value of a field to test uniqueness
-  // Either take the new value provided in the field object or generate a random
-  // new one based on the type of the field
-  const getNewValue = (field: (typeof FIELDS_TO_TEST)[number]) => {
-    if ('newValue' in field) {
-      return field.newValue;
-    }
-
-    if (isNaN(Number(field.value))) {
-      return String.fromCharCode(Math.floor(Math.random() * 26) + 97) + field.value.substring(1);
-    }
-
-    return `${Number(field.value) + 10}`;
   };
 
   const CREATE_URL =
@@ -74,8 +60,7 @@ test.describe('Uniqueness', () => {
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
-      const successLocator = page.getByText('Saved document');
-      await expect(page.getByText('Saved document')).toBeVisible();
+      await findAndClose(page, 'Saved document');
 
       await page.getByRole('link', { name: 'Unique' }).click();
       await page.waitForURL(LIST_URL);
@@ -91,20 +76,15 @@ test.describe('Uniqueness', () => {
 
       await clickSave(page);
       await expect(page.getByText('Warning:This attribute must be unique')).toBeVisible();
-      // Wait for previous success notifications to be removed
-      await expect(successLocator).toHaveCount(0);
       /**
        * Modify the value and try again, this should save successfully
        * Either take the new value provided in the field object or generate a random new one
        */
-      // TODO: find a better way to generate random values for all field types
-      const newValue = getNewValue(field);
-
       await page
         .getByRole(fieldRole, {
           name: field.name,
         })
-        .fill(newValue);
+        .fill(field.newValue);
 
       await clickSave(page);
       await expect(page.getByText('Saved document')).toBeVisible();

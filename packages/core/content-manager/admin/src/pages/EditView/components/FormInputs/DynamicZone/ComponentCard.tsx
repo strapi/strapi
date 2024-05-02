@@ -22,7 +22,7 @@ const ComponentCard = ({ children, onClick, icon }: ComponentCardProps) => {
       justifyContent="center"
       alignItems="center"
       shrink={0}
-      height={`${84 / 16}rem`}
+      height="8.4rem"
     >
       <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
         <ComponentIcon icon={icon} />

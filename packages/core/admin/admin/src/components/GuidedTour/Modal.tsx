@@ -9,7 +9,7 @@ import {
   Portal,
   Typography,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton } from '@strapi/design-system';
 import { ArrowRight, Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -79,7 +79,7 @@ const GuidedTourModal = () => {
             direction="column"
             alignItems="stretch"
             background="neutral0"
-            width={`${660 / 16}rem`}
+            width={`66rem`}
             shadow="popupShadow"
             hasRadius
             padding={4}
@@ -175,10 +175,8 @@ const GuidedTourStepper = ({
   return (
     <>
       <Flex alignItems="stretch">
-        <Flex marginRight={8} justifyContent="center" minWidth={`${30 / 16}rem`}>
-          {hasSectionBefore && (
-            <VerticalDivider state={STATES.IS_DONE} minHeight={`${24 / 16}rem`} />
-          )}
+        <Flex marginRight={8} justifyContent="center" minWidth={`3rem`}>
+          {hasSectionBefore && <VerticalDivider state={STATES.IS_DONE} minHeight={`2.4rem`} />}
         </Flex>
         <Typography variant="sigma" textColor="primary600">
           {formatMessage({
@@ -188,7 +186,7 @@ const GuidedTourStepper = ({
         </Typography>
       </Flex>
       <Flex>
-        <Flex marginRight={8} minWidth={`${30 / 16}rem`}>
+        <Flex marginRight={8} minWidth={`3rem`}>
           <Number
             state={hasStepsBefore ? STATES.IS_DONE : STATES.IS_ACTIVE}
             paddingTop={3}
@@ -204,7 +202,7 @@ const GuidedTourStepper = ({
         )}
       </Flex>
       <Flex alignItems="stretch">
-        <Flex marginRight={8} direction="column" justifyContent="center" minWidth={`${30 / 16}rem`}>
+        <Flex marginRight={8} direction="column" justifyContent="center" minWidth={`3rem`}>
           {hasSectionAfter && (
             <>
               <VerticalDivider state={STATES.IS_DONE} />
@@ -238,8 +236,8 @@ const GuidedTourStepper = ({
       </Flex>
       {hasStepsBefore && hasSectionAfter && (
         <Box paddingTop={3}>
-          <Flex marginRight={8} justifyContent="center" width={`${30 / 16}rem`}>
-            <VerticalDivider state={STATES.IS_DONE} minHeight={`${24 / 16}rem`} />
+          <Flex marginRight={8} justifyContent="center" width={`3rem`}>
+            <VerticalDivider state={STATES.IS_DONE} minHeight={`2.4rem`} />
           </Flex>
         </Box>
       )}

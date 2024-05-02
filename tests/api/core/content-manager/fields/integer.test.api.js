@@ -39,7 +39,7 @@ describe('Test type integer', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: 123456,
     });
@@ -53,7 +53,7 @@ describe('Test type integer', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body.data).toMatchObject({
       field: 123456,
     });

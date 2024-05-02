@@ -6,12 +6,11 @@ import {
   DialogBody,
   DialogFooter,
   Flex,
-  Icon,
   Typography,
   useCallbackRef,
   useComposedRefs,
 } from '@strapi/design-system';
-import { ExclamationMarkCircle } from '@strapi/icons';
+import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
 import isEqual from 'lodash/isEqual';
@@ -127,7 +126,14 @@ interface FormProps<TFormValues extends FormValues = FormValues>
     | ((
         props: Pick<
           FormContextValue<TFormValues>,
-          'disabled' | 'errors' | 'isSubmitting' | 'modified' | 'values' | 'resetForm' | 'onChange'
+          | 'disabled'
+          | 'errors'
+          | 'isSubmitting'
+          | 'modified'
+          | 'values'
+          | 'resetForm'
+          | 'onChange'
+          | 'setErrors'
         >
       ) => React.ReactNode);
   method: 'POST' | 'PUT';
@@ -244,7 +250,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
             // We throw any other errors
             if (process.env.NODE_ENV !== 'production') {
               console.warn(
-                `Warning: An unhandled error was caught during validation in <Formik validationSchema />`,
+                `Warning: An unhandled error was caught during validation in <Form validationSchema />`,
                 err
               );
             }
@@ -441,6 +447,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
                 disabled,
                 onChange: handleChange,
                 ...state,
+                setErrors,
                 resetForm,
               })
             : props.children}
@@ -730,7 +737,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
       >
         <DialogBody>
           <Flex direction="column" gap={2}>
-            <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+            <WarningCircle width="24px" height="24px" fill="danger600" />
             <Typography as="p" variant="omega" textAlign="center">
               {formatMessage({
                 id: 'global.prompt.unsaved',

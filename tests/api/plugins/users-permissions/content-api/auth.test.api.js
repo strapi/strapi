@@ -1,5 +1,7 @@
 'use strict';
 
+const bcrypt = require('bcryptjs');
+
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createRequest } = require('api-tests/request');
 const { createAuthenticatedUser } = require('../utils');
@@ -20,7 +22,7 @@ const internals = {
 
 const data = {};
 
-describe.skip('Auth API', () => {
+describe('Auth API', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance({ bypassAuth: false });
 
@@ -111,6 +113,15 @@ describe.skip('Auth API', () => {
         },
       });
 
+      // check that password was hashed
+      const user = await strapi.db.query('plugin::users-permissions.user').findOne({
+        where: {
+          email: internals.user.email.toLowerCase(),
+        },
+      });
+      expect(bcrypt.compareSync(internals.newPassword, user.password)).toBe(true);
+
+      // check results
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
         jwt: expect.any(String),

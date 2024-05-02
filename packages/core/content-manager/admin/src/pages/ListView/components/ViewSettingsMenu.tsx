@@ -9,9 +9,9 @@ import {
   TextButton,
   Typography,
   useCollator,
+  LinkButton,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { Cog, Layer } from '@strapi/icons';
+import { Cog, ListPlus } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -33,10 +33,8 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
   const [{ query }] = useQueryParams<{ plugins?: Record<string, unknown> }>();
   const { formatMessage } = useIntl();
   const {
-    allowedActions: { canViewConfiguration },
-  } = useRBAC({
-    viewConfiguration: permissions,
-  });
+    allowedActions: { canConfigureView },
+  } = useRBAC(permissions);
 
   const handleToggle = () => {
     setIsVisible((prev) => !prev);
@@ -62,10 +60,10 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
           padding={3}
         >
           <Flex alignItems="stretch" direction="column" gap={3}>
-            {canViewConfiguration ? (
+            {canConfigureView ? (
               <LinkButton
                 size="S"
-                startIcon={<Layer />}
+                startIcon={<ListPlus />}
                 variant="secondary"
                 as={NavLink}
                 // @ts-expect-error – inference from the as prop does not work in the DS.

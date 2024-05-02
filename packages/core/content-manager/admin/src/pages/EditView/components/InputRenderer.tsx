@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
+import { useDocLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
@@ -24,7 +25,6 @@ import type { Schema } from '@strapi/types';
 import type { DistributiveOmit } from 'react-redux';
 
 type InputRendererProps = DistributiveOmit<EditFieldLayout, 'size'>;
-
 /**
  * @internal
  *
@@ -59,6 +59,9 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+  const {
+    edit: { components },
+  } = useDocLayout();
 
   if (!visible) {
     return null;
@@ -84,15 +87,17 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     if (CustomInput) {
       // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
       return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
-    } else {
+    }
+
+    return (
       <FormInputRenderer
         {...props}
         hint={hint}
         // @ts-expect-error – this workaround lets us display that the custom field is missing.
         type={props.attribute.customField}
         disabled={fieldIsDisabled}
-      />;
-    }
+      />
+    );
   }
 
   /**
@@ -113,7 +118,16 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     case 'blocks':
       return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'component':
-      return <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <ComponentInput
+          {...props}
+          hint={hint}
+          layout={components[props.attribute.component].layout}
+          disabled={fieldIsDisabled}
+        >
+          {(inputProps) => <InputRenderer {...inputProps} />}
+        </ComponentInput>
+      );
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
@@ -215,4 +229,4 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
 };
 
 export type { InputRendererProps };
-export { InputRenderer };
+export { InputRenderer, useFieldHint };

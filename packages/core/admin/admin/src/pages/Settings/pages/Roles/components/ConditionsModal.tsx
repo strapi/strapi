@@ -13,7 +13,7 @@ import {
   MultiSelectNestedProps,
   Typography,
 } from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
+import { Breadcrumbs, Crumb } from '@strapi/design-system';
 import { produce } from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';

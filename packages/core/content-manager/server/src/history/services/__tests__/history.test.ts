@@ -137,11 +137,9 @@ describe('history-version service', () => {
       contentType: {
         uid: 'api::article.article',
       },
-      args: [
-        {
-          locale: 'fr',
-        },
-      ],
+      params: {
+        locale: 'fr',
+      },
     };
 
     const next = jest.fn((context) => ({ ...context, documentId: 'document-id' }));
@@ -154,7 +152,8 @@ describe('history-version service', () => {
     expect(next).toHaveBeenCalled();
 
     // Ensure we're only storing the data we need in the database
-    expect(mockFindOne).toHaveBeenLastCalledWith('document-id', {
+    expect(mockFindOne).toHaveBeenLastCalledWith({
+      documentId: 'document-id',
       locale: 'fr',
       populate: {
         component: {
@@ -247,6 +246,8 @@ describe('history-version service', () => {
     const historyVersionData = {
       contentType: 'api::article.article' as UID.ContentType,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'My article',
       },
       locale: 'en',
@@ -276,6 +277,8 @@ describe('history-version service', () => {
     const historyVersionData = {
       contentType: 'api::article.article' as UID.ContentType,
       data: {
+        documentId: '1234',
+        id: 1,
         title: 'My article',
       },
       locale: 'en',

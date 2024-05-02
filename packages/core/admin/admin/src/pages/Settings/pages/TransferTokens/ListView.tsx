@@ -1,11 +1,12 @@
 import * as React from 'react';
 
 import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
-import { EmptyDocuments, Plus } from '@strapi/icons';
+import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -159,6 +160,7 @@ const ListView = () => {
         primaryAction={
           canCreate ? (
             <LinkButton
+              forwardedAs={Link}
               data-testid="create-transfer-token-button"
               startIcon={<Plus />}
               size="S"
@@ -167,6 +169,7 @@ const ListView = () => {
                   tokenType: TRANSFER_TOKEN_TYPE,
                 })
               }
+              // @ts-expect-error We need to accept the props of the component passed in the `as` prop
               to="/settings/transfer-tokens/create"
             >
               {formatMessage({
@@ -196,8 +199,10 @@ const ListView = () => {
               <EmptyStateLayout
                 action={
                   <LinkButton
+                    forwardedAs={Link}
                     variant="secondary"
                     startIcon={<Plus />}
+                    // @ts-expect-error We need to accept the props of the component passed in the `as` prop
                     to="/settings/transfer-tokens/create"
                   >
                     {formatMessage({
@@ -206,7 +211,7 @@ const ListView = () => {
                     })}
                   </LinkButton>
                 }
-                icon={<EmptyDocuments width="10rem" />}
+                icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({
                   id: 'Settings.transferTokens.addFirstToken',
                   defaultMessage: 'Add your first Transfer Token',
@@ -215,7 +220,7 @@ const ListView = () => {
             ) : null}
             {!canCreate && transferTokens.length === 0 ? (
               <EmptyStateLayout
-                icon={<EmptyDocuments width="10rem" />}
+                icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({
                   id: 'Settings.transferTokens.emptyStateLayout',
                   defaultMessage: 'You don’t have any content yet...',

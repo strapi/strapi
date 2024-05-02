@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { screen, within } from '@testing-library/react';
 import { render as renderRTL, server, waitFor } from '@tests/utils';
 import { rest } from 'msw';
@@ -21,13 +23,16 @@ const render = (
 ) =>
   renderRTL(<CMReleasesContainer />, {
     renderOptions: {
-      wrapper: ({ children }) => (
+      wrapper: ({ children }: { children: React.ReactNode }) => (
         <Routes>
           <Route path="/content-manager/:collectionType/:slug/:id" element={children} />
         </Routes>
       ),
     },
     initialEntries,
+    userEventOptions: {
+      skipHover: true,
+    },
   });
 
 describe('CMReleasesContainer', () => {
@@ -80,7 +85,7 @@ describe('CMReleasesContainer', () => {
       rest.get('/content-releases', (req, res, ctx) => {
         return res(
           ctx.json({
-            data: [{ name: 'release1', id: '1', action: { type: 'publish' } }],
+            data: [{ name: 'release1', id: '1', actions: [{ type: 'publish' }] }],
           })
         );
       })
@@ -107,8 +112,8 @@ describe('CMReleasesContainer', () => {
         return res(
           ctx.json({
             data: [
-              { name: 'release1', id: '1', action: { type: 'publish' } },
-              { name: 'release2', id: '2', action: { type: 'unpublish' } },
+              { name: 'release1', id: '1', actions: [{ type: 'publish' }] },
+              { name: 'release2', id: '2', actions: [{ type: 'unpublish' }] },
             ],
           })
         );
@@ -125,7 +130,7 @@ describe('CMReleasesContainer', () => {
   });
 
   /**
-   * TODO: this needs re-implmenting without the act warning appearing.
+   * TODO: this needs re-implementing without the act warning appearing.
    */
   it.skip('should show the scheduled date for a release', async () => {
     // Mock the response from the server
@@ -137,7 +142,7 @@ describe('CMReleasesContainer', () => {
               {
                 name: 'release1',
                 id: '1',
-                action: { type: 'publish' },
+                actions: [{ type: 'publish' }],
                 scheduledAt: '2024-01-01T10:00:00.000Z',
                 timezone: 'Europe/Paris',
               },

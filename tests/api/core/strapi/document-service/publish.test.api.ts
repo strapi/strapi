@@ -19,46 +19,43 @@ describe('Document Service', () => {
   });
 
   describe('Publish', () => {
-    it(
-      'publish an entire document',
-      testInTransaction(async () => {
-        const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+    testInTransaction('publish an entire document', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-        const result = await strapi
-          .documents(ARTICLE_UID)
-          .publish(articleDb.documentId, { locale: '*' });
+      const result = await strapi
+        .documents(ARTICLE_UID)
+        .publish({ documentId: articleDb.documentId, locale: '*' });
 
-        expect(result).not.toBeNull();
+      expect(result).not.toBeNull();
 
-        const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
-          findArticlesDb({
-            documentId: articleDb.documentId,
-            publishedAt: { $null: true },
-          }),
-          findArticlesDb({
-            documentId: articleDb.documentId,
-            publishedAt: { $notNull: true },
-          }),
-        ]);
+      const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
+        findArticlesDb({
+          documentId: articleDb.documentId,
+          publishedAt: { $null: true },
+        }),
+        findArticlesDb({
+          documentId: articleDb.documentId,
+          publishedAt: { $notNull: true },
+        }),
+      ]);
 
-        // All locales should have been published
-        expect(draftArticlesDb.length).toBeGreaterThanOrEqual(3);
-        expect(publishedArticlesDb.length).toBe(draftArticlesDb.length);
-        publishedArticlesDb.forEach((article) => {
-          expect(article.publishedAt).not.toBeNull();
-        });
-      })
-    );
+      // All locales should have been published
+      expect(draftArticlesDb.length).toBeGreaterThanOrEqual(3);
+      expect(publishedArticlesDb.length).toBe(draftArticlesDb.length);
+      publishedArticlesDb.forEach((article) => {
+        expect(article.publishedAt).not.toBeNull();
+      });
+    });
 
-    it(
+    testInTransaction(
       'publish an already published document should discard the original document',
-      testInTransaction(async () => {
+      async () => {
         const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
         // Publish twice should not create two new published versions,
         // the second published version should replace the first one
-        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
-        await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+        await strapi.documents(ARTICLE_UID).publish({ documentId: articleDb.documentId });
+        await strapi.documents(ARTICLE_UID).publish({ documentId: articleDb.documentId });
 
         const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
           findArticlesDb({
@@ -79,13 +76,15 @@ describe('Document Service', () => {
         publishedArticlesDb.forEach((article) => {
           expect(article.publishedAt).not.toBeNull();
         });
-      })
+      }
     );
 
-    it('should publish default locale if no locale is provided', async () => {
+    testInTransaction('should publish default locale if no locale is provided', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-      const result = await strapi.documents(ARTICLE_UID).publish(articleDb.documentId);
+      const result = await strapi
+        .documents(ARTICLE_UID)
+        .publish({ documentId: articleDb.documentId });
 
       expect(result).not.toBeNull();
 
@@ -108,37 +107,35 @@ describe('Document Service', () => {
       });
     });
 
-    it(
-      'publish one locale',
-      testInTransaction(async () => {
-        const articlesDb = await findArticlesDb({ documentId: 'Article1', publishedAt: null });
-        const documentId = articlesDb.at(0)!.documentId;
+    testInTransaction('publish one locale', async () => {
+      const articlesDb = await findArticlesDb({ documentId: 'Article1', publishedAt: null });
+      const documentId = articlesDb.at(0)!.documentId;
 
-        const result = await strapi.documents(ARTICLE_UID).publish(documentId, {
-          locale: 'en', // should only publish the english locale
-        });
+      const result = await strapi.documents(ARTICLE_UID).publish({
+        documentId,
+        locale: 'en', // should only publish the english locale
+      });
 
-        expect(result).not.toBeNull();
+      expect(result).not.toBeNull();
 
-        const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
-          findArticlesDb({
-            documentId,
-            publishedAt: { $null: true },
-          }),
-          findArticlesDb({
-            documentId,
-            publishedAt: { $notNull: true },
-          }),
-        ]);
+      const [draftArticlesDb, publishedArticlesDb] = await Promise.all([
+        findArticlesDb({
+          documentId,
+          publishedAt: { $null: true },
+        }),
+        findArticlesDb({
+          documentId,
+          publishedAt: { $notNull: true },
+        }),
+      ]);
 
-        // Original drafts should still be there
-        expect(draftArticlesDb.length).toBe(articlesDb.length);
+      // Original drafts should still be there
+      expect(draftArticlesDb.length).toBe(articlesDb.length);
 
-        // All locales should have been published
-        // Only the english locale should have been published
-        expect(publishedArticlesDb.length).toBe(1);
-        expect(publishedArticlesDb[0].locale).toBe('en');
-      })
-    );
+      // All locales should have been published
+      // Only the english locale should have been published
+      expect(publishedArticlesDb.length).toBe(1);
+      expect(publishedArticlesDb[0].locale).toBe('en');
+    });
   });
 });

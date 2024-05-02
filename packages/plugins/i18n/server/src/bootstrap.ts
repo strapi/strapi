@@ -15,7 +15,6 @@ const registerModelsHooks = () => {
   });
 
   strapi.documents.use(async (context, next) => {
-    // @ts-expect-error ContentType is not typed correctly on the context
     const schema: Schema.ContentType = context.contentType;
 
     if (!['create', 'update', 'discardDraft', 'publish'].includes(context.action)) {
@@ -38,8 +37,8 @@ const registerModelsHooks = () => {
     // Use the id and populate built from non localized fields to get the full
     // result
     let resultID;
-    if (Array.isArray(result?.versions)) {
-      resultID = result.versions[0].id;
+    if (Array.isArray(result?.entries)) {
+      resultID = result.entries[0].id;
     } else if (result?.id) {
       resultID = result.id;
     } else {

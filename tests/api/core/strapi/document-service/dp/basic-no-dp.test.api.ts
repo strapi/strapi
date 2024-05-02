@@ -1,22 +1,5 @@
 import type { Core, UID } from '@strapi/types';
-import { testInTransaction as wrapInTransaction } from '../../../../utils';
-
-// Wrap "it" with a transaction
-const testInTransaction = (...args: Parameters<jest.It>) => {
-  if (args.length > 1) {
-    return it(
-      args[0], // name
-      wrapInTransaction(args[1]), // fn
-      args[2] // timeout
-    );
-  }
-  return it(...args);
-};
-
-testInTransaction.skip = it.skip as jest.It['skip'];
-testInTransaction.only = it.only as jest.It['only'];
-testInTransaction.todo = it.todo as jest.It['todo'];
-testInTransaction.each = it.each as jest.It['each'];
+import { testInTransaction } from '../../../../utils';
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
@@ -83,7 +66,8 @@ describe('Document Service relations', () => {
     // Update a shop and check publishedAt value is a date
     const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
-    const updatedShop = await shopDocuments.update(shop.documentId, {
+    const updatedShop = await shopDocuments.update({
+      documentId: shop.documentId,
       data: { name: 'Shop2' },
     });
 
@@ -96,7 +80,7 @@ describe('Document Service relations', () => {
     // Delete a shop and check there are no other references in db
     const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
-    await shopDocuments.delete(shop.documentId);
+    await shopDocuments.delete({ documentId: shop.documentId });
 
     // Shop should be deleted
     const databaseShops = await shopsDB.findMany({ where: { documentId: shop.documentId } });
@@ -107,7 +91,7 @@ describe('Document Service relations', () => {
     // Find a shop and check publishedAt value is a date
     const shop = await shopDocuments.create({ data: { name: 'Shop1' } });
 
-    const foundShop = await shopDocuments.findOne(shop.documentId);
+    const foundShop = await shopDocuments.findOne({ documentId: shop.documentId });
 
     // Published version should be found
     expect(foundShop.name).toBe('Shop1');

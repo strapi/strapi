@@ -12,6 +12,9 @@ export interface ComponentProperties<
   repeatable?: TRepeatable;
 }
 
+/**
+ * Represents a component Strapi attribute along with its options
+ */
 export type Component<
   TComponentUID extends UID.Component = UID.Component,
   TRepeatable extends Constants.BooleanValue = Constants.False,

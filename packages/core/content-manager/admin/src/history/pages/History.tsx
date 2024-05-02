@@ -1,23 +1,27 @@
 import * as React from 'react';
 
-import { useQueryParams, Page, createContext } from '@strapi/admin/strapi-admin';
+import { useQueryParams, Page, createContext, useRBAC } from '@strapi/admin/strapi-admin';
 import { Box, Flex, FocusTrap, Main, Portal } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Navigate, useParams } from 'react-router-dom';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
+import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
-import { useSyncRbac } from '../../hooks/useSyncRbac';
+import { useGetContentTypeConfigurationQuery } from '../../services/contentTypes';
 import { buildValidParams } from '../../utils/api';
 import { VersionContent } from '../components/VersionContent';
 import { VersionHeader } from '../components/VersionHeader';
 import { VersionsList } from '../components/VersionsList';
 import { useGetHistoryVersionsQuery } from '../services/historyVersion';
 
-import type { ContentType } from '../../../../shared/contracts/content-types';
+import type {
+  ContentType,
+  FindContentTypeConfiguration,
+} from '../../../../shared/contracts/content-types';
 import type {
   HistoryVersionDataResponse,
   GetHistoryVersions,
@@ -32,6 +36,7 @@ interface HistoryContextValue {
   contentType: UID.ContentType;
   id?: string; // null for single types
   layout: EditLayout['layout'];
+  configuration: FindContentTypeConfiguration.Response['data'];
   selectedVersion: HistoryVersionDataResponse;
   // Errors are handled outside of the provider, so we exclude errors from the response type
   versions: Extract<GetHistoryVersions.Response, { data: Array<HistoryVersionDataResponse> }>;
@@ -71,6 +76,8 @@ const HistoryPage = () => {
       settings: { displayName, mainField },
     },
   } = useDocumentLayout(slug!);
+  const { data: configuration, isLoading: isLoadingConfiguration } =
+    useGetContentTypeConfigurationQuery(slug!);
 
   // Parse state from query params
   const [{ query }] = useQueryParams<{
@@ -114,7 +121,13 @@ const HistoryPage = () => {
     return <Navigate to="/content-manager" />;
   }
 
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isFetching || isStaleRequest) {
+  if (
+    isLoadingDocument ||
+    isLoadingLayout ||
+    versionsResponse.isFetching ||
+    isStaleRequest ||
+    isLoadingConfiguration
+  ) {
     return <Page.Loading />;
   }
 
@@ -141,6 +154,7 @@ const HistoryPage = () => {
     !layout ||
     !schema ||
     !selectedVersion ||
+    !configuration ||
     // This should not happen as it's covered by versionsResponse.isError, but we need it for TS
     versionsResponse.data.error
   ) {
@@ -165,13 +179,21 @@ const HistoryPage = () => {
         id={documentId}
         schema={schema}
         layout={layout}
+        configuration={configuration}
         selectedVersion={selectedVersion}
         versions={versionsResponse.data}
         page={page}
         mainField={mainField}
       >
         <Flex direction="row" alignItems="flex-start">
-          <Main grow={1} height="100vh" overflow="auto" labelledBy={headerId}>
+          <Main
+            grow={1}
+            height="100vh"
+            background="neutral100"
+            paddingBottom={6}
+            overflow="auto"
+            labelledBy={headerId}
+          >
             <VersionHeader headerId={headerId} />
             <VersionContent />
           </Main>
@@ -190,14 +212,17 @@ const ProtectedHistoryPageImpl = () => {
   const { slug } = useParams<{
     slug: string;
   }>();
-  const [{ query }] = useQueryParams();
-  const { permissions = [], isLoading, isError } = useSyncRbac(slug ?? '', query, 'History');
+  const {
+    permissions = [],
+    isLoading,
+    error,
+  } = useRBAC(PERMISSIONS.map((action) => ({ action, subject: slug })));
 
   if (isLoading) {
     return <Page.Loading />;
   }
 
-  if ((!isLoading && isError) || !slug) {
+  if (error || !slug) {
     return (
       <Box
         height="100vh"
@@ -205,7 +230,7 @@ const ProtectedHistoryPageImpl = () => {
         position="fixed"
         top={0}
         left={0}
-        zIndex={99999}
+        zIndex={2}
         background="neutral0"
       >
         <Page.Error />
@@ -220,7 +245,7 @@ const ProtectedHistoryPageImpl = () => {
       position="fixed"
       top={0}
       left={0}
-      zIndex={99999}
+      zIndex={2}
       background="neutral0"
     >
       <Page.Protect permissions={permissions}>

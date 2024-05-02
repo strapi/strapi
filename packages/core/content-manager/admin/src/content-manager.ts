@@ -1,10 +1,4 @@
 /* eslint-disable check-file/filename-naming-convention */
-/**
- * This file can be removed when the content-manager is moved back to it's own plugin,
- * we would just add the APIs that plugin and continue to alias their methods on the
- * main StrapiApp class.
- */
-
 import { INJECTION_ZONES } from './components/InjectionZone';
 import { PLUGIN_ID } from './constants/plugin';
 import { HistoryAction } from './history/components/HistoryAction';
@@ -83,7 +77,7 @@ interface PanelComponent extends DescriptionComponent<PanelComponentProps, Panel
    * The defaults are added by Strapi only, if you're providing your own component,
    * you do not need to provide this.
    */
-  type?: 'actions' | 'review-workflows' | 'releases';
+  type?: 'actions' | 'releases';
 }
 
 interface DocumentActionProps extends EditViewContext {}
