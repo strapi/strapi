@@ -97,30 +97,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     // For each locale, get the ones with the same status
     // There will not be a draft and a version counterpart if the content
     // type does not have draft and publish
-
+    const model = strapi.getModel(uid);
     const keysToKeep = [...AVAILABLE_LOCALES_FIELDS, ...validatableFields];
+
+    const traversalFunction = async (localeVersion: DocumentVersion) =>
+      traverseEntity(
+        ({ key }, { remove }) => {
+          if (keysToKeep.includes(key)) {
+            // Keep the value if it is a field to pick
+            return;
+          }
+
+          // Otherwise remove this key from the data
+          remove(key);
+        },
+        { schema: model, getModel: strapi.getModel.bind(strapi) },
+        // @ts-expect-error fix types DocumentVersion incompatible with Data
+        localeVersion
+      );
+
     const mappingResult = await async.map(
       Object.values(versionsByLocale),
       async (localeVersions: DocumentVersion[]) => {
-        const model = strapi.getModel(uid);
-
         const mappedLocaleVersions: DocumentVersion[] = await async.map(
           localeVersions,
-          async (localeVersion: DocumentVersion) =>
-            traverseEntity(
-              ({ key }, { remove }) => {
-                if (keysToKeep.includes(key)) {
-                  // Keep the value if it is a field to pick
-                  return;
-                }
-
-                // Otherwise remove this key from the data
-                remove(key);
-              },
-              { schema: model, getModel: strapi.getModel.bind(strapi) },
-              // @ts-expect-error fix types DocumentVersion incompatible with Data
-              localeVersion
-            )
+          traversalFunction
         );
 
         if (!contentTypes.hasDraftAndPublish(model)) {

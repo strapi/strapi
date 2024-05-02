@@ -27,4 +27,25 @@ describe('getDocumentDimensions', () => {
   test('neither status or locale are required', () => {
     expect(getDocumentLocaleAndStatus({})).resolves.toEqual({});
   });
+
+  test('status = modifed is invalid', () => {
+    expect(getDocumentLocaleAndStatus({ status: 'modified' })).rejects.toThrow();
+  });
+
+  test('valid status only', () => {
+    expect(getDocumentLocaleAndStatus({ status: 'draft' })).resolves.toEqual({
+      status: 'draft',
+    });
+  });
+
+  test('valid locale only', () => {
+    expect(getDocumentLocaleAndStatus({ locale: 'en' })).resolves.toEqual({ locale: 'en' });
+  });
+
+  test('valid status and locale', () => {
+    expect(getDocumentLocaleAndStatus({ locale: 'en', status: 'published' })).resolves.toEqual({
+      locale: 'en',
+      status: 'published',
+    });
+  });
 });

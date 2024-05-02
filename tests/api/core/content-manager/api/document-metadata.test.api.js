@@ -236,59 +236,6 @@ describe('CM API - Document metadata', () => {
   );
 
   test('Return available locales, including any fields that require validation', async () => {
-    const wantedKeys = {
-      category: {
-        expectation: expect.any(String),
-        getDefaultValue: (locale) => `Cat-1-${locale}`,
-      },
-      price: {
-        expectation: expect.any(Number),
-        getDefaultValue: () => 1,
-      },
-      features: {
-        expectation: expect.any(Object),
-        getDefaultValue: (locale) => ({
-          name: `Feature 1 ${locale}`,
-          description: 'Description 1',
-          slogan: 'Slogan 1',
-        }),
-      },
-      createdAt: {
-        expectation: expect.any(String),
-      },
-      updatedAt: {
-        expectation: expect.any(String),
-      },
-      name: {
-        expectation: expect.any(String),
-      },
-    };
-
-    const unWantedKeys = {
-      // These fields have no validation requirements
-      // We will check that they are not included in the available locales response
-      shopName: {
-        expectation: expect.any(String),
-        getDefaultValue: (locale) => `BuyMyStuff-${locale}`,
-      },
-    };
-
-    const getExtraContent = (locale) => {
-      return {
-        ...Object.entries({ ...wantedKeys, ...unWantedKeys }).reduce(
-          (acc, [key, { getDefaultValue }]) => {
-            if (getDefaultValue === undefined) {
-              // If there is no default value function, do not include the key
-              return acc;
-            }
-
-            return { ...acc, [key]: getDefaultValue(locale) };
-          },
-          {}
-        ),
-      };
-    };
-
     // Create products with different locales with content for every kind of
     // field that requires validation
     const defaultLocaleProduct = await rq({
@@ -296,7 +243,13 @@ describe('CM API - Document metadata', () => {
       url: `/content-manager/collection-types/${PRODUCT_UID}`,
       body: {
         name: `prod-en-draft`,
-        ...getExtraContent('en'),
+        category: 'Cat-1-en',
+        price: 1,
+        features: {
+          name: 'Feature 1 en',
+          description: 'Description 1',
+          slogan: 'Slogan 1',
+        },
       },
     });
     const documentId = defaultLocaleProduct.body.data.documentId;
@@ -306,7 +259,13 @@ describe('CM API - Document metadata', () => {
       url: `/content-manager/collection-types/${PRODUCT_UID}/${documentId}`,
       body: {
         name: `prod-${extraLocaleCode}-draft`,
-        ...getExtraContent(extraLocaleCode),
+        category: `Cat-1-${extraLocaleCode}`,
+        price: 1,
+        features: {
+          name: `Feature 1 ${extraLocaleCode}`,
+          description: 'Description 1',
+          slogan: 'Slogan 1',
+        },
       },
       qs: { locale: extraLocaleCode },
     });
@@ -314,27 +273,31 @@ describe('CM API - Document metadata', () => {
     const draftProduct = await getProduct(documentId, 'en', 'draft');
     const { meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
 
+    const expectedLocaleData = {
+      documentId: expect.any(String),
+      id: expect.any(Number),
+      locale: extraLocaleCode,
+      name: 'prod-fr-draft',
+      category: 'Cat-1-fr',
+      price: 1,
+      features: {
+        id: expect.any(Number),
+        name: 'Feature 1 fr',
+      },
+      status: 'draft',
+      publishedAt: null,
+      createdAt: expect.any(String),
+      updatedAt: expect.any(String),
+    };
     expect(meta.availableLocales).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining(
-          Object.keys(wantedKeys).reduce(
-            (acc, key) => ({ ...acc, [key]: wantedKeys[key].expectation }),
-            {}
-          )
-        ),
-      ])
+      expect.arrayContaining([expect.objectContaining(expectedLocaleData)])
     );
 
-    expect(meta.availableLocales).toEqual(
-      expect.arrayContaining([
-        expect.not.objectContaining(
-          Object.keys(unWantedKeys).reduce(
-            (acc, key) => ({ ...acc, [key]: unWantedKeys[key].expectation }),
-            {}
-          )
-        ),
-      ])
-    );
+    // Ensure no unwanted keys are present
+    const unwantedKeys = ['shopName'];
+    unwantedKeys.forEach((key) => {
+      expect(meta.availableLocales[0]).not.toHaveProperty(key);
+    });
 
     expect(meta.availableStatus).toEqual([]);
   });
@@ -367,7 +330,15 @@ describe('CM API - Document metadata', () => {
     expect(data.status).toBe('published');
 
     expect(meta.availableStatus.length).toEqual(1);
-    expect(meta.availableStatus[0].createdBy?.password).toBeUndefined();
-    expect(meta.availableStatus[0].undatedBy?.password).toBeUndefined();
+    expect(meta.availableStatus[0]).toEqual(
+      expect.not.objectContaining({
+        createdBy: expect.objectContaining({
+          password: expect.anything(),
+        }),
+        updatedBy: expect.objectContaining({
+          password: expect.anything(),
+        }),
+      })
+    );
   });
 });
