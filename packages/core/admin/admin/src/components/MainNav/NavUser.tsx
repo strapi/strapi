@@ -9,7 +9,7 @@ export interface NavUserProps extends ButtonProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
-export const NavUser = React.forwardRef<HTMLButtonElement, NavUserProps>(
+export const NavUser = React.forwardRef<HTMLDivElement, NavUserProps>(
   ({ children, initials, ...props }, ref) => {
     return (
       <Flex paddingTop={3} paddingBottom={3} ref={ref} justifyContent="center" {...props}>
