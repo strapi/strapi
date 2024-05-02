@@ -30,9 +30,6 @@ import {
   MenuItem,
   IconButtonComponent,
   Field,
-  FieldLabel,
-  FieldError,
-  FieldHint,
 } from '@strapi/design-system';
 import { Duplicate, Drag, More, EyeStriked } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -476,54 +473,54 @@ const ColorSelector = ({ disabled, label, name, required }: ColorSelectorProps) 
   const { themeColorName } = getStageColorByHex(value) ?? {};
 
   return (
-    <SingleSelect
-      disabled={disabled}
-      error={error}
-      required={required}
-      // @ts-expect-error – ReactNode is fine for the `label` prop.
-      label={label}
-      onChange={(v) => {
-        onChange(name, v.toString());
-      }}
-      value={value?.toUpperCase()}
-      startIcon={
-        <Flex
-          tag="span"
-          height={2}
-          background={value}
-          // @ts-expect-error - transparent doesn't exist in theme.colors
-          borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
-          hasRadius
-          shrink={0}
-          width={2}
-        />
-      }
-    >
-      {colorOptions.map(({ value, label, color }) => {
-        const { themeColorName } = getStageColorByHex(color) || {};
+    <Field.Root error={error} name={name} required={required}>
+      <Field.Label>{label}</Field.Label>
+      <SingleSelect
+        disabled={disabled}
+        onChange={(v) => {
+          onChange(name, v.toString());
+        }}
+        value={value?.toUpperCase()}
+        startIcon={
+          <Flex
+            tag="span"
+            height={2}
+            background={value}
+            // @ts-expect-error - transparent doesn't exist in theme.colors
+            borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+            hasRadius
+            shrink={0}
+            width={2}
+          />
+        }
+      >
+        {colorOptions.map(({ value, label, color }) => {
+          const { themeColorName } = getStageColorByHex(color) || {};
 
-        return (
-          <SingleSelectOption
-            value={value}
-            key={value}
-            startIcon={
-              <Flex
-                tag="span"
-                height={2}
-                background={color}
-                // @ts-expect-error - transparent doesn't exist in theme.colors
-                borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
-                hasRadius
-                shrink={0}
-                width={2}
-              />
-            }
-          >
-            {label}
-          </SingleSelectOption>
-        );
-      })}
-    </SingleSelect>
+          return (
+            <SingleSelectOption
+              value={value}
+              key={value}
+              startIcon={
+                <Flex
+                  tag="span"
+                  height={2}
+                  background={color}
+                  // @ts-expect-error - transparent doesn't exist in theme.colors
+                  borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+                  hasRadius
+                  shrink={0}
+                  width={2}
+                />
+              }
+            >
+              {label}
+            </SingleSelectOption>
+          );
+        })}
+      </SingleSelect>
+      <Field.Error />
+    </Field.Root>
   );
 };
 
@@ -564,7 +561,7 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
 
   if (!isLoading && filteredRoles.length === 0) {
     return (
-      <Field
+      <Field.Root
         name={name}
         hint={formatMessage({
           id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
@@ -572,12 +569,12 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
         })}
         required={required}
       >
-        <FieldLabel>
+        <Field.Label>
           {formatMessage({
             id: 'Settings.review-workflows.stage.permissions.label',
             defaultMessage: 'Roles that can change this stage',
           })}
-        </FieldLabel>
+        </Field.Label>
         <TextInput
           disabled
           placeholder={formatMessage({
@@ -588,8 +585,8 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
           type="text"
           value=""
         />
-        <FieldHint />
-      </Field>
+        <Field.Hint />
+      </Field.Root>
     );
   }
 
@@ -597,13 +594,13 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
     <>
       <Flex alignItems="flex-end" gap={3}>
         <PermissionWrapper grow={1}>
-          <Field error={error} name={name} required>
-            <FieldLabel>
+          <Field.Root error={error} name={name} required>
+            <Field.Label>
               {formatMessage({
                 id: 'Settings.review-workflows.stage.permissions.label',
                 defaultMessage: 'Roles that can change this stage',
               })}
-            </FieldLabel>
+            </Field.Label>
             <MultiSelect
               disabled={disabled}
               onChange={(values) => {
@@ -638,8 +635,8 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
                 })}
               </MultiSelectGroup>
             </MultiSelect>
-            <FieldError />
-          </Field>
+            <Field.Error />
+          </Field.Root>
         </PermissionWrapper>
 
         <IconButton

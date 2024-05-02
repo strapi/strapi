@@ -1,7 +1,6 @@
 import { InputRenderer, useField, useForm } from '@strapi/admin/strapi-admin';
 import {
   Field,
-  FieldLabel,
   Grid,
   GridItem,
   MultiSelect,
@@ -84,13 +83,13 @@ const ContentTypesSelector = ({ disabled }: ContentTypesSelectorProps) => {
   }));
 
   return (
-    <Field error={error} name={'contentTypes'}>
-      <FieldLabel>
+    <Field.Root error={error} name={'contentTypes'}>
+      <Field.Label>
         {formatMessage({
           id: 'Settings.review-workflows.workflow.contentTypes.label',
           defaultMessage: 'Associated to',
         })}
-      </FieldLabel>
+      </Field.Label>
       <MultiSelect
         customizeContent={(value) =>
           formatMessage(
@@ -185,7 +184,7 @@ const ContentTypesSelector = ({ disabled }: ContentTypesSelectorProps) => {
           );
         })}
       </MultiSelect>
-    </Field>
+    </Field.Root>
   );
 };
 

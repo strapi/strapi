@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { TextInput, Toggle, Field, FieldHint, FieldLabel, FieldError } from '@strapi/design-system';
+import { TextInput, Toggle, Field } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -41,8 +41,8 @@ const Input = ({
 
   if (type === 'bool') {
     return (
-      <Field hint={hint} name={name}>
-        <FieldLabel>{label}</FieldLabel>
+      <Field.Root hint={hint} name={name}>
+        <Field.Label>{label}</Field.Label>
         <Toggle
           aria-label={name}
           checked={value}
@@ -59,8 +59,8 @@ const Input = ({
             onChange({ target: { name, value: e.target.checked } });
           }}
         />
-        <FieldHint />
-      </Field>
+        <Field.Hint />
+      </Field.Root>
     );
   }
 
@@ -74,8 +74,8 @@ const Input = ({
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   return (
-    <Field error={errorMessage} name={name}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field.Root error={errorMessage} name={name}>
+      <Field.Label>{label}</Field.Label>
       <TextInput
         disabled={disabled}
         onChange={onChange}
@@ -83,8 +83,8 @@ const Input = ({
         type={type}
         value={inputValue}
       />
-      <FieldError />
-    </Field>
+      <Field.Error />
+    </Field.Root>
   );
 };
 

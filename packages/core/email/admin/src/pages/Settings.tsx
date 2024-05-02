@@ -14,7 +14,6 @@ import {
   TextInput,
   Typography,
   Field,
-  FieldLabel,
 } from '@strapi/design-system';
 import { Mail } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -199,13 +198,13 @@ const SettingsPage = () => {
 
                   <Grid gap={5}>
                     <GridItem col={6} s={12}>
-                      <Field name="shipper-email">
-                        <FieldLabel>
+                      <Field.Root name="shipper-email">
+                        <Field.Label>
                           {formatMessage({
                             id: 'email.Settings.email.plugin.label.defaultFrom',
                             defaultMessage: 'Default sender email',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <TextInput
                           placeholder={formatMessage({
                             id: 'email.Settings.email.plugin.placeholder.defaultFrom',
@@ -214,17 +213,17 @@ const SettingsPage = () => {
                           disabled
                           value={data.settings.defaultFrom}
                         />
-                      </Field>
+                      </Field.Root>
                     </GridItem>
 
                     <GridItem col={6} s={12}>
-                      <Field name="response-email">
-                        <FieldLabel>
+                      <Field.Root name="response-email">
+                        <Field.Label>
                           {formatMessage({
                             id: 'email.Settings.email.plugin.label.defaultReplyTo',
                             defaultMessage: 'Default response email',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <TextInput
                           placeholder={formatMessage({
                             id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
@@ -233,23 +232,23 @@ const SettingsPage = () => {
                           disabled
                           value={data.settings.defaultReplyTo}
                         />
-                      </Field>
+                      </Field.Root>
                     </GridItem>
 
                     <GridItem col={6} s={12}>
-                      <Field name="email-provider">
-                        <FieldLabel>
+                      <Field.Root name="email-provider">
+                        <Field.Label>
                           {formatMessage({
                             id: 'email.Settings.email.plugin.label.provider',
                             defaultMessage: 'Email provider',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <SingleSelect disabled value={data.provider}>
                           <SingleSelectOption value={data.provider}>
                             {data.provider}
                           </SingleSelectOption>
                         </SingleSelect>
-                      </Field>
+                      </Field.Root>
                     </GridItem>
                   </Grid>
                 </Flex>
@@ -276,7 +275,7 @@ const SettingsPage = () => {
 
                 <Grid gap={5}>
                   <GridItem col={6} s={12}>
-                    <Field
+                    <Field.Root
                       name="test-address"
                       error={
                         formErrors.email?.id &&
@@ -286,12 +285,12 @@ const SettingsPage = () => {
                         })
                       }
                     >
-                      <FieldLabel>
+                      <Field.Label>
                         {formatMessage({
                           id: 'email.Settings.email.plugin.label.testAddress',
                           defaultMessage: 'Recipient email',
                         })}
-                      </FieldLabel>
+                      </Field.Label>
                       <TextInput
                         onChange={handleChange}
                         value={testAddress}
@@ -300,7 +299,7 @@ const SettingsPage = () => {
                           defaultMessage: 'ex: developer@example.com',
                         })}
                       />
-                    </Field>
+                    </Field.Root>
                   </GridItem>
                   <GridItem col={7} s={12}>
                     <Button

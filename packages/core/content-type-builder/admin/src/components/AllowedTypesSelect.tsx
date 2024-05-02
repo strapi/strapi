@@ -1,4 +1,4 @@
-import { Field, FieldLabel, MultiSelectNested } from '@strapi/design-system';
+import { Field, MultiSelectNested } from '@strapi/design-system';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 
@@ -47,10 +47,9 @@ export const AllowedTypesSelect = ({
     : name;
 
   return (
-    <Field>
-      <FieldLabel>{label}</FieldLabel>
+    <Field.Root name={name}>
+      <Field.Label>{label}</Field.Label>
       <MultiSelectNested
-        id="select1"
         customizeContent={() => displayedValue}
         onChange={(values: any[]) => {
           if (values.length > 0) {
@@ -62,6 +61,6 @@ export const AllowedTypesSelect = ({
         options={options}
         value={value || []}
       />
-    </Field>
+    </Field.Root>
   );
 };

@@ -7,7 +7,7 @@
 import { useState } from 'react';
 
 import { ConfirmDialog } from '@strapi/admin/strapi-admin';
-import { Checkbox, Field, FieldHint } from '@strapi/design-system';
+import { Checkbox, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils';
@@ -75,12 +75,12 @@ export const DraftAndPublishToggle = ({
 
   return (
     <>
-      <Field hint={hint} name={name}>
+      <Field.Root hint={hint} name={name}>
         <Checkbox checked={value} disabled={disabled} onChange={handleChange}>
           {label}
         </Checkbox>
-        <FieldHint />
-      </Field>
+        <Field.Hint />
+      </Field.Root>
 
       <ConfirmDialog isOpen={showWarning} onClose={handleToggle} onConfirm={handleConfirm}>
         {formatMessage({

@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Button,
-  FieldLabel,
+  Field,
   Flex,
   Grid,
   GridItem,
@@ -209,12 +209,12 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
 
                 <GridItem xs={12} col={6}>
                   <Flex direction="column" alignItems="stretch" gap={1}>
-                    <FieldLabel htmlFor="folder-parent">
+                    <Field.Label htmlFor="folder-parent">
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
                       })}
-                    </FieldLabel>
+                    </Field.Label>
 
                     <SelectTree
                       options={folderStructure}

@@ -7,7 +7,7 @@ import {
   useField,
   Form,
 } from '@strapi/admin/strapi-admin';
-import { Alert, Box, FieldLabel, Flex, Link, Tooltip } from '@strapi/design-system';
+import { Alert, Box, Field, Flex, Link, Tooltip } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -81,7 +81,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
   if (!formattedFieldValue || formattedFieldValue.results.length === 0) {
     return (
       <>
-        <FieldLabel>{props.label}</FieldLabel>
+        <Field.Label>{props.label}</Field.Label>
         <Box marginTop={1}>
           {/* @ts-expect-error – we dont need closeLabel */}
           <StyledAlert variant="default">
@@ -99,7 +99,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
 
   return (
     <Box>
-      <FieldLabel>{props.label}</FieldLabel>
+      <Field.Label>{props.label}</Field.Label>
       {results.length > 0 && (
         <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
           {results.map((relationData) => {
@@ -295,7 +295,7 @@ const VersionInputRenderer = ({
   if (Object.keys(addedAttributes).includes(props.name)) {
     return (
       <Flex direction="column" alignItems="flex-start" gap={1}>
-        <FieldLabel>{props.label}</FieldLabel>
+        <Field.Label>{props.label}</Field.Label>
         <StyledAlert
           width="100%"
           closeLabel="Close"

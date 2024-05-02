@@ -1,4 +1,4 @@
-import { Field, FieldLabel, SingleSelect, SingleSelectOption } from '@strapi/design-system';
+import { Field, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { IntlLabel } from '../types';
@@ -53,8 +53,8 @@ export const BooleanDefaultValueSelect = ({
   };
 
   return (
-    <Field name={name}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field.Root name={name}>
+      <Field.Label>{label}</Field.Label>
       <SingleSelect onChange={handleChange} value={(value === null ? '' : value).toString()}>
         {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
           return (
@@ -65,6 +65,6 @@ export const BooleanDefaultValueSelect = ({
           );
         })}
       </SingleSelect>
-    </Field>
+    </Field.Root>
   );
 };

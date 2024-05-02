@@ -1,17 +1,9 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Flex,
-  FocusTrap,
-  Portal,
-  IconButton,
-  InputWrapper,
-  FlexComponent,
-} from '@strapi/design-system';
+import { Box, Flex, FocusTrap, Portal, IconButton, FlexComponent } from '@strapi/design-system';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
+import { css, styled } from 'styled-components';
 
 import { getTranslation } from '../../../../../utils/translations';
 
@@ -115,5 +107,32 @@ const EditorLayout = ({
     </InputWrapper>
   );
 };
+
+const InputWrapper = styled<FlexComponent>(Flex)<{ $disabled?: boolean; $hasError?: boolean }>`
+  border: 1px solid
+    ${({ theme, $hasError }) => ($hasError ? theme.colors.danger600 : theme.colors.neutral200)};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  background: ${({ theme }) => theme.colors.neutral0};
+
+  ${({ theme, $hasError = false }) => css`
+    outline: none;
+    box-shadow: 0;
+    transition-property: border-color, box-shadow, fill;
+    transition-duration: 0.2s;
+
+    &:focus-within {
+      border: 1px solid ${$hasError ? theme.colors.danger600 : theme.colors.primary600};
+      box-shadow: ${$hasError ? theme.colors.danger600 : theme.colors.primary600} 0px 0px 0px 2px;
+    }
+  `}
+
+  ${({ theme, $disabled }) =>
+    $disabled
+      ? css`
+          color: ${theme.colors.neutral600};
+          background: ${theme.colors.neutral150};
+        `
+      : undefined}
+`;
 
 export { EditorLayout };

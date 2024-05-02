@@ -100,7 +100,7 @@ const AssigneeSelect = () => {
   };
 
   return (
-    <Field name={ASSIGNEE_ATTRIBUTE_NAME} id={ASSIGNEE_ATTRIBUTE_NAME}>
+    <Field.Root name={ASSIGNEE_ATTRIBUTE_NAME} id={ASSIGNEE_ATTRIBUTE_NAME}>
       <Flex direction="column" gap={2} alignItems="stretch">
         <Combobox
           clearLabel={formatMessage({
@@ -147,7 +147,7 @@ const AssigneeSelect = () => {
           })}
         </Combobox>
       </Flex>
-    </Field>
+    </Field.Root>
   );
 };
 

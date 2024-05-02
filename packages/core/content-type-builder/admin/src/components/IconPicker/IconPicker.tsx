@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Field,
-  FieldInput,
-  FieldLabel,
   Flex,
   IconButton,
   inputFocusStyle,
@@ -45,13 +43,11 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickPr
   const Icon = COMPONENT_ICONS[iconKey];
 
   return (
-    <Field name={name} required={false}>
-      <FieldLabel htmlFor={iconKey} id={`${iconKey}-label`}>
+    <Field.Root name={name} required={false}>
+      <Field.Label>
         <VisuallyHidden>
-          <FieldInput
+          <Field.Input
             type="radio"
-            id={iconKey}
-            name={name}
             checked={isSelected}
             onChange={onChange}
             value={iconKey}
@@ -68,8 +64,8 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickPr
         >
           <Icon fill={isSelected ? 'primary600' : 'neutral300'} />
         </Flex>
-      </FieldLabel>
-    </Field>
+      </Field.Label>
+    </Field.Root>
   );
 };
 

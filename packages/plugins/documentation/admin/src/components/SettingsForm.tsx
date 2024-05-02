@@ -11,11 +11,7 @@ import {
   TextInput,
   Toggle,
   Typography,
-  FieldAction,
   Field,
-  FieldLabel,
-  FieldError,
-  FieldHint,
 } from '@strapi/design-system';
 // Strapi Icons
 import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
@@ -36,7 +32,7 @@ const schema = yup.object().shape({
   }),
 });
 
-const FieldActionWrapper = styled(FieldAction)`
+const FieldActionWrapper = styled(Field.Action)`
   svg {
     height: 1.6rem;
     width: 1.6rem;
@@ -119,19 +115,19 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                   </Typography>
                   <Grid gap={4}>
                     <GridItem col={6} s={12}>
-                      <Field
+                      <Field.Root
                         name="restrictedAccess"
                         hint={formatMessage({
                           id: getTrad('pages.SettingsPage.toggle.hint'),
                           defaultMessage: 'Make the documentation endpoint private',
                         })}
                       >
-                        <FieldLabel>
+                        <Field.Label>
                           {formatMessage({
                             id: getTrad('pages.SettingsPage.toggle.label'),
                             defaultMessage: 'Restricted Access',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <Toggle
                           checked={values.restrictedAccess}
                           onChange={() => {
@@ -146,12 +142,12 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                           onLabel="On"
                           offLabel="Off"
                         />
-                        <FieldHint />
-                      </Field>
+                        <Field.Hint />
+                      </Field.Root>
                     </GridItem>
                     {values.restrictedAccess && (
                       <GridItem col={6} s={12}>
-                        <Field
+                        <Field.Root
                           name="password"
                           error={
                             errors.password
@@ -162,12 +158,12 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                               : undefined
                           }
                         >
-                          <FieldLabel>
+                          <Field.Label>
                             {formatMessage({
                               id: 'global.password',
                               defaultMessage: 'Password',
                             })}
-                          </FieldLabel>
+                          </Field.Label>
                           <TextInput
                             placeholder="**********"
                             type={passwordShown ? 'text' : 'password'}
@@ -195,8 +191,8 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                               </FieldActionWrapper>
                             }
                           />
-                          <FieldError />
-                        </Field>
+                          <Field.Error />
+                        </Field.Root>
                       </GridItem>
                     )}
                   </Grid>

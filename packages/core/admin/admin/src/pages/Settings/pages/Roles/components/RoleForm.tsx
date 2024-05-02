@@ -2,8 +2,6 @@ import {
   Box,
   Button,
   Field,
-  FieldError,
-  FieldLabel,
   Flex,
   Grid,
   GridItem,
@@ -66,35 +64,42 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
         </Flex>
         <Grid gap={4}>
           <GridItem col={6}>
-            <Field name="name" error={errors.name && formatMessage({ id: errors.name })} required>
-              <FieldLabel>
+            <Field.Root
+              name="name"
+              error={errors.name && formatMessage({ id: errors.name })}
+              required
+            >
+              <Field.Label>
                 {formatMessage({
                   id: 'global.name',
                   defaultMessage: 'Name',
                 })}
-              </FieldLabel>
+              </Field.Label>
               <TextInput
                 disabled={disabled}
                 onChange={onChange}
                 onBlur={onBlur}
                 value={values.name || ''}
               />
-              <FieldError />
-            </Field>
+              <Field.Error />
+            </Field.Root>
           </GridItem>
           <GridItem col={6}>
-            <Field name="description" error={errors.name && formatMessage({ id: errors.name })}>
-              <FieldLabel>
+            <Field.Root
+              name="description"
+              error={errors.name && formatMessage({ id: errors.name })}
+            >
+              <Field.Label>
                 {formatMessage({
                   id: 'global.description',
                   defaultMessage: 'Description',
                 })}
-              </FieldLabel>
+              </Field.Label>
               <Textarea disabled={disabled} onChange={onChange} onBlur={onBlur}>
                 {values.description || ''}
               </Textarea>
-              <FieldError />
-            </Field>
+              <Field.Error />
+            </Field.Root>
           </GridItem>
         </Grid>
       </Flex>

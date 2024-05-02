@@ -1,10 +1,4 @@
-import {
-  SingleSelectOption,
-  SingleSelect,
-  Field,
-  FieldLabel,
-  FieldError,
-} from '@strapi/design-system';
+import { SingleSelectOption, SingleSelect, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useDataManager } from '../hooks/useDataManager';
@@ -94,8 +88,8 @@ export const SelectComponent = ({
   }
 
   return (
-    <Field error={errorMessage} name={name}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field.Root error={errorMessage} name={name}>
+      <Field.Label>{label}</Field.Label>
       <SingleSelect
         disabled={isCreatingComponentWhileAddingAField || !isCreating}
         onChange={(value: any) => {
@@ -111,7 +105,7 @@ export const SelectComponent = ({
           );
         })}
       </SingleSelect>
-      <FieldError />
-    </Field>
+      <Field.Error />
+    </Field.Root>
   );
 };

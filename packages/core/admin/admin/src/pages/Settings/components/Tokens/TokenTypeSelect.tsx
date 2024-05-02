@@ -1,11 +1,4 @@
-import {
-  SingleSelectOption,
-  SingleSelect,
-  SingleSelectProps,
-  Field,
-  FieldLabel,
-  FieldError,
-} from '@strapi/design-system';
+import { SingleSelectOption, SingleSelect, SingleSelectProps, Field } from '@strapi/design-system';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { isErrorMessageMessageDescriptor } from '../../utils/forms';
@@ -33,7 +26,7 @@ export const TokenTypeSelect = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Field
+    <Field.Root
       error={
         error
           ? formatMessage(
@@ -44,12 +37,12 @@ export const TokenTypeSelect = ({
       name={name}
       required
     >
-      <FieldLabel>
+      <Field.Label>
         {formatMessage({
           id: label.id,
           defaultMessage: label.defaultMessage,
         })}
-      </FieldLabel>
+      </Field.Label>
       <SingleSelect
         value={value}
         onChange={onChange}
@@ -63,7 +56,7 @@ export const TokenTypeSelect = ({
             </SingleSelectOption>
           ))}
       </SingleSelect>
-      <FieldError />
-    </Field>
+      <Field.Error />
+    </Field.Root>
   );
 };

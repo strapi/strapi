@@ -12,8 +12,6 @@ import {
   GridItem,
   Grid,
   Field,
-  FieldError,
-  FieldLabel,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import {
@@ -148,7 +146,7 @@ export const EditPage = () => {
 
                   <Grid gap={4}>
                     <GridItem col={6}>
-                      <Field
+                      <Field.Root
                         name="name"
                         error={
                           errors?.name
@@ -160,18 +158,18 @@ export const EditPage = () => {
                         }
                         required
                       >
-                        <FieldLabel>
+                        <Field.Label>
                           {formatMessage({
                             id: 'global.name',
                             defaultMessage: 'Name',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <TextInput value={values.name || ''} onChange={handleChange} />
-                        <FieldError />
-                      </Field>
+                        <Field.Error />
+                      </Field.Root>
                     </GridItem>
                     <GridItem col={6}>
-                      <Field
+                      <Field.Root
                         name="description"
                         error={
                           errors?.description
@@ -183,15 +181,15 @@ export const EditPage = () => {
                         }
                         required
                       >
-                        <FieldLabel>
+                        <Field.Label>
                           {formatMessage({
                             id: 'global.description',
                             defaultMessage: 'Description',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <Textarea value={values.description || ''} onChange={handleChange} />
-                        <FieldError />
-                      </Field>
+                        <Field.Error />
+                      </Field.Root>
                     </GridItem>
                   </Grid>
                 </Flex>

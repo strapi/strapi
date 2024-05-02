@@ -1,10 +1,4 @@
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-  SingleSelect,
-  SingleSelectOption,
-} from '@strapi/design-system';
+import { Field, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { PrimitiveType, useIntl } from 'react-intl';
 
 type SelectDateTypeProps = {
@@ -69,8 +63,8 @@ export const SelectDateType = ({
   };
 
   return (
-    <Field error={errorMessage} name={name}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field.Root error={errorMessage} name={name}>
+      <Field.Label>{label}</Field.Label>
       <SingleSelect onChange={handleChange} value={value || ''}>
         {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
           return (
@@ -83,7 +77,7 @@ export const SelectDateType = ({
           );
         })}
       </SingleSelect>
-      <FieldError />
-    </Field>
+      <Field.Error />
+    </Field.Root>
   );
 };

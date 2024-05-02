@@ -3,7 +3,6 @@ import * as React from 'react';
 import {
   BaseCheckbox,
   Checkbox,
-  FieldLabel,
   Flex,
   RawTable as Table,
   RawTbody as Tbody,
@@ -13,6 +12,7 @@ import {
   RawTr as Tr,
   Typography,
   VisuallyHidden,
+  Field,
 } from '@strapi/design-system';
 import { useFormikContext, FieldInputProps } from 'formik';
 import { MessageDescriptor, useIntl } from 'react-intl';
@@ -36,7 +36,7 @@ const EventsRoot = ({ children }: EventsRootProps) => {
 
   return (
     <Flex direction="column" alignItems="stretch" gap={1}>
-      <FieldLabel aria-hidden>{label}</FieldLabel>
+      <Field.Label aria-hidden>{label}</Field.Label>
       {/* @ts-expect-error – TODO: add colCount & rowCount */}
       <StyledTable aria-label={label}>{children}</StyledTable>
     </Flex>

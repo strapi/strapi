@@ -2,9 +2,9 @@ import React from 'react';
 
 import {
   Button,
-  FieldLabel,
   Flex,
   Grid,
+  Field,
   GridItem,
   Loader,
   ModalBody,
@@ -99,12 +99,12 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
               <Grid gap={4}>
                 <GridItem xs={12} col={12}>
                   <Flex direction="column" alignItems="stretch" gap={1}>
-                    <FieldLabel htmlFor="folder-destination">
+                    <Field.Label htmlFor="folder-destination">
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
                       })}
-                    </FieldLabel>
+                    </Field.Label>
 
                     <SelectTree
                       options={folderStructure}

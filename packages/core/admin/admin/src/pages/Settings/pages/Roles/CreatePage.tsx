@@ -5,8 +5,6 @@ import {
   Button,
   ContentLayout,
   Field,
-  FieldError,
-  FieldLabel,
   Flex,
   Grid,
   GridItem,
@@ -264,34 +262,34 @@ const CreatePage = () => {
                       </Flex>
                       <Grid gap={4}>
                         <GridItem col={6}>
-                          <Field
+                          <Field.Root
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
                             required
                           >
-                            <FieldLabel>
+                            <Field.Label>
                               {formatMessage({
                                 id: 'global.name',
                                 defaultMessage: 'Name',
                               })}
-                            </FieldLabel>
+                            </Field.Label>
                             <TextInput onChange={handleChange} value={values.name} />
-                            <FieldError />
-                          </Field>
+                            <Field.Error />
+                          </Field.Root>
                         </GridItem>
                         <GridItem col={6}>
-                          <Field
+                          <Field.Root
                             name="description"
                             error={errors.description && formatMessage({ id: errors.description })}
                           >
-                            <FieldLabel>
+                            <Field.Label>
                               {formatMessage({
                                 id: 'global.description',
                                 defaultMessage: 'Description',
                               })}
-                            </FieldLabel>
+                            </Field.Label>
                             <Textarea onChange={handleChange}>{values.description}</Textarea>
-                          </Field>
+                          </Field.Root>
                         </GridItem>
                       </Grid>
                     </Flex>

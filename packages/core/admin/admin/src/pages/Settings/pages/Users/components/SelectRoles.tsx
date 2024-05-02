@@ -1,11 +1,4 @@
-import {
-  Field,
-  FieldError,
-  FieldHint,
-  FieldLabel,
-  MultiSelect,
-  MultiSelectOption,
-} from '@strapi/design-system';
+import { Field, MultiSelect, MultiSelectOption } from '@strapi/design-system';
 import { Loader as LoadingIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled, keyframes } from 'styled-components';
@@ -24,7 +17,7 @@ const SelectRoles = ({ disabled }: SelectRolesProps) => {
   const { value = [], onChange, error } = useField<string[]>('roles');
 
   return (
-    <Field
+    <Field.Root
       error={error}
       hint={formatMessage({
         id: 'app.components.Users.ModalCreateBody.block-title.roles.description',
@@ -33,12 +26,12 @@ const SelectRoles = ({ disabled }: SelectRolesProps) => {
       name="roles"
       required
     >
-      <FieldLabel>
+      <Field.Label>
         {formatMessage({
           id: 'app.components.Users.ModalCreateBody.block-title.roles',
           defaultMessage: "User's roles",
         })}
-      </FieldLabel>
+      </Field.Label>
       <MultiSelect
         disabled={disabled}
         onChange={(v) => {
@@ -63,9 +56,9 @@ const SelectRoles = ({ disabled }: SelectRolesProps) => {
           );
         })}
       </MultiSelect>
-      <FieldError />
-      <FieldHint />
-    </Field>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
   );
 };
 

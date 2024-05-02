@@ -12,8 +12,6 @@ import {
   TextInput,
   Typography,
   Field,
-  FieldLabel,
-  FieldError,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { Page, useTracking, useNotification, useFetchClient } from '@strapi/strapi/admin';
@@ -131,7 +129,7 @@ export const CreatePage = () => {
 
                   <Grid gap={4}>
                     <GridItem col={6}>
-                      <Field
+                      <Field.Root
                         name="name"
                         error={
                           errors?.name
@@ -140,18 +138,18 @@ export const CreatePage = () => {
                         }
                         required
                       >
-                        <FieldLabel>
+                        <Field.Label>
                           {formatMessage({
                             id: 'global.name',
                             defaultMessage: 'Name',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <TextInput value={values.name || ''} onChange={handleChange} />
-                        <FieldError />
-                      </Field>
+                        <Field.Error />
+                      </Field.Root>
                     </GridItem>
                     <GridItem col={6}>
-                      <Field
+                      <Field.Root
                         name="description"
                         error={
                           errors?.description
@@ -163,15 +161,15 @@ export const CreatePage = () => {
                         }
                         required
                       >
-                        <FieldLabel>
+                        <Field.Label>
                           {formatMessage({
                             id: 'global.description',
                             defaultMessage: 'Description',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <Textarea value={values.description || ''} onChange={handleChange} />
-                        <FieldError />
-                      </Field>
+                        <Field.Error />
+                      </Field.Root>
                     </GridItem>
                   </Grid>
                 </Flex>

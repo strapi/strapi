@@ -11,12 +11,10 @@ import {
   TextInput,
   Typography,
   Field,
-  FieldLabel,
 } from '@strapi/design-system';
 import { parse } from 'qs';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { styled } from 'styled-components';
 
 import { PrivateRoute } from '../components/PrivateRoute';
 import { Logo } from '../components/UnauthenticatedLogo';
@@ -130,13 +128,13 @@ const UseCasePage = () => {
               </Box>
             </Flex>
             <Flex direction="column" alignItems="stretch" gap={6}>
-              <Field name="usecase">
-                <FieldLabel>
+              <Field.Root name="usecase">
+                <Field.Label>
                   {formatMessage({
                     id: 'Usecase.input.work-type',
                     defaultMessage: 'What type of work do you do?',
                   })}
-                </FieldLabel>
+                </Field.Label>
                 <SingleSelect onChange={(value) => setRole(value)} value={role}>
                   {options.map(({ intlLabel, value }) => (
                     <SingleSelectOption key={value} value={value}>
@@ -144,14 +142,14 @@ const UseCasePage = () => {
                     </SingleSelectOption>
                   ))}
                 </SingleSelect>
-              </Field>
+              </Field.Root>
               {isOther && (
-                <Field name="other">
-                  <FieldLabel>
+                <Field.Root name="other">
+                  <Field.Label>
                     {formatMessage({ id: 'Usecase.other', defaultMessage: 'Other' })}
-                  </FieldLabel>
+                  </Field.Label>
                   <TextInput value={otherRole} onChange={(e) => setOtherRole(e.target.value)} />
-                </Field>
+                </Field.Root>
               )}
               <Button type="submit" size="L" fullWidth disabled={!role}>
                 {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}

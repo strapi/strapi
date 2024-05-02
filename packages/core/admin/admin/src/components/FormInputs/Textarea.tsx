@@ -1,13 +1,6 @@
 import { forwardRef } from 'react';
 
-import {
-  Textarea,
-  useComposedRefs,
-  Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
-} from '@strapi/design-system';
+import { Textarea, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
@@ -22,8 +15,8 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field error={field.error} name={name} hint={hint} required={required}>
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root error={field.error} name={name} hint={hint} required={required}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <Textarea
           ref={composedRefs}
           defaultValue={field.initialValue}
@@ -31,9 +24,9 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
           value={field.value ?? ''}
           {...props}
         />
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

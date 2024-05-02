@@ -11,7 +11,6 @@ import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Box,
   Button,
-  FieldLabel,
   Flex,
   ModalBody,
   ModalHeader,
@@ -22,11 +21,12 @@ import {
   ModalFooter,
   EmptyStateLayout,
   LinkButton,
+  Field,
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { isAxiosError } from 'axios';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useParams } from 'react-router-dom';
 import * as yup from 'yup';
@@ -183,13 +183,13 @@ const AddActionToReleaseModal = ({
                 <ModalBody>
                   <Flex direction="column" alignItems="stretch" gap={2}>
                     <Box paddingBottom={6}>
-                      <Field required>
-                        <FieldLabel>
+                      <Field.Root required>
+                        <Field.Label>
                           {formatMessage({
                             id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
                             defaultMessage: 'Select a release',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <SingleSelect
                           placeholder={formatMessage({
                             id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
@@ -204,14 +204,14 @@ const AddActionToReleaseModal = ({
                             </SingleSelectOption>
                           ))}
                         </SingleSelect>
-                      </Field>
+                      </Field.Root>
                     </Box>
-                    <FieldLabel>
+                    <Field.Label>
                       {formatMessage({
                         id: 'content-releases.content-manager-edit-view.add-to-release.action-type-label',
                         defaultMessage: 'What do you want to do with this entry?',
                       })}
-                    </FieldLabel>
+                    </Field.Label>
                     <ReleaseActionOptions
                       selected={values.type}
                       handleChange={(e) => setFieldValue('type', e.target.value)}

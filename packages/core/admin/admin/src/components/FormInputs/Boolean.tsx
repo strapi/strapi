@@ -1,13 +1,6 @@
 import { forwardRef } from 'react';
 
-import {
-  Toggle,
-  useComposedRefs,
-  Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
-} from '@strapi/design-system';
+import { Toggle, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
@@ -24,12 +17,11 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field error={field.error} name={name} hint={hint} required={required} maxWidth="320px">
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root error={field.error} name={name} hint={hint} required={required} maxWidth="320px">
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <Toggle
           ref={composedRefs}
           checked={field.value === null ? null : field.value || false}
-          error={field.error}
           offLabel={formatMessage({
             id: 'app.components.ToggleCheckbox.off-label',
             defaultMessage: 'False',
@@ -41,9 +33,9 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
           onChange={field.onChange}
           {...props}
         />
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

@@ -1,13 +1,6 @@
 import { forwardRef } from 'react';
 
-import {
-  TimePicker,
-  useComposedRefs,
-  Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
-} from '@strapi/design-system';
+import { TimePicker, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
@@ -24,8 +17,8 @@ const TimeInput = forwardRef<HTMLInputElement, InputProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field error={field.error} name={name} hint={hint} required={required}>
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root error={field.error} name={name} hint={hint} required={required}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <TimePicker
           ref={composedRefs}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -36,9 +29,9 @@ const TimeInput = forwardRef<HTMLInputElement, InputProps>(
           value={field.value ?? ''}
           {...props}
         />
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

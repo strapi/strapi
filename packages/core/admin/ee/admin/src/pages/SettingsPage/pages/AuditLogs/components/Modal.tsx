@@ -13,7 +13,6 @@ import {
   Breadcrumbs,
   Crumb,
   Field,
-  FieldLabel,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -144,15 +143,15 @@ const ActionBody = ({ isLoading, data, formattedDate }: ActionBodyProps) => {
           actionName={user?.id.toString() || '-'}
         />
       </Grid>
-      <Field>
-        <FieldLabel>
+      <Field.Root>
+        <Field.Label>
           {formatMessage({
             id: 'Settings.permissions.auditLogs.payload',
             defaultMessage: 'Payload',
           })}
-        </FieldLabel>
+        </Field.Label>
         <JSONInput value={JSON.stringify(payload, null, 2)} disabled />
-      </Field>
+      </Field.Root>
     </>
   );
 };

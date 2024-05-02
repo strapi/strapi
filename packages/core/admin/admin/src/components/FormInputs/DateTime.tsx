@@ -1,13 +1,6 @@
 import { forwardRef } from 'react';
 
-import {
-  DateTimePicker,
-  useComposedRefs,
-  Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
-} from '@strapi/design-system';
+import { DateTimePicker, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
@@ -25,8 +18,8 @@ const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
     const value = typeof field.value === 'string' ? new Date(field.value) : field.value;
 
     return (
-      <Field error={field.error} name={name} hint={hint} required={required}>
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root error={field.error} name={name} hint={hint} required={required}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <DateTimePicker
           ref={composedRefs}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
@@ -37,9 +30,9 @@ const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
           value={value}
           {...props}
         />
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

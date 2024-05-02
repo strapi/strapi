@@ -4,9 +4,6 @@ import {
   JSONInput as JSONInputImpl,
   useComposedRefs,
   Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
   JSONInputRef,
 } from '@strapi/design-system';
 
@@ -23,8 +20,8 @@ export const JsonInput = forwardRef<JSONInputRef, InputProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field error={field.error} name={name} hint={hint} required={required}>
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root error={field.error} name={name} hint={hint} required={required}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <JSONInputImpl
           ref={composedRefs}
           value={field.value}
@@ -37,9 +34,9 @@ export const JsonInput = forwardRef<JSONInputRef, InputProps>(
           maxHeight={`50.4rem`}
           {...props}
         />
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

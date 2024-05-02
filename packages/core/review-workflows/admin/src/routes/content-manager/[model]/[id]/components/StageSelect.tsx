@@ -7,8 +7,6 @@ import {
   SingleSelect,
   SingleSelectOption,
   Field,
-  FieldError,
-  FieldHint,
   Flex,
   Loader,
   Typography,
@@ -158,7 +156,7 @@ export const StageSelect = () => {
 
   return (
     <>
-      <Field
+      <Field.Root
         hint={
           !isLoading &&
           stages.length === 0 &&
@@ -238,10 +236,10 @@ export const StageSelect = () => {
               );
             })}
           </SingleSelect>
-          <FieldHint />
-          <FieldError />
+          <Field.Hint />
+          <Field.Error />
         </Flex>
-      </Field>
+      </Field.Root>
 
       <LimitsModal.Root
         isOpen={showLimitModal === 'workflow'}

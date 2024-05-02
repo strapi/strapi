@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 
-import { Field, FieldError, FieldHint, FieldLabel, TextInput } from '@strapi/design-system';
+import { Field, TextInput } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { nameToSlug } from '../utils/nameToSlug';
@@ -48,11 +48,11 @@ export const SingularName = ({
   const label = formatMessage(intlLabel);
 
   return (
-    <Field error={errorMessage} hint={hint} name={name}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field.Root error={errorMessage} hint={hint} name={name}>
+      <Field.Label>{label}</Field.Label>
       <TextInput onChange={onChange} value={value || ''} />
-      <FieldError />
-      <FieldHint />
-    </Field>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
   );
 };

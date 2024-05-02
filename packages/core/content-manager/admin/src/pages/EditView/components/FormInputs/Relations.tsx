@@ -21,9 +21,6 @@ import {
   useComposedRefs,
   Link,
   Field,
-  FieldLabel,
-  FieldError,
-  FieldHint,
   FlexComponent,
   BoxComponent,
 } from '@strapi/design-system';
@@ -496,8 +493,8 @@ const RelationsInput = ({
   }, [field.value]);
 
   return (
-    <Field error={field.error} hint={hint} name={name} required={required}>
-      <FieldLabel action={labelAction}>{label}</FieldLabel>
+    <Field.Root error={field.error} hint={hint} name={name} required={required}>
+      <Field.Label action={labelAction}>{label}</Field.Label>
       <Combobox
         ref={fieldRef}
         name={name}
@@ -548,9 +545,9 @@ const RelationsInput = ({
           );
         })}
       </Combobox>
-      <FieldError />
-      <FieldHint />
-    </Field>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
   );
 };
 

@@ -7,8 +7,6 @@ import {
   SingleSelectOption,
   SingleSelect,
   Field,
-  FieldHint,
-  FieldLabel,
 } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -31,19 +29,19 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
     >
       <Grid gap={4}>
         <GridItem s={12} col={6}>
-          <Field
+          <Field.Root
             hint={formatMessage({
               id: getTrad('config.entries.note'),
               defaultMessage: 'Number of assets displayed by default in the Media Library',
             })}
             name="pageSize"
           >
-            <FieldLabel>
+            <Field.Label>
               {formatMessage({
                 id: getTrad('config.entries.title'),
                 defaultMessage: 'Entries per page',
               })}
-            </FieldLabel>
+            </Field.Label>
             <SingleSelect
               onChange={(value) => onChange({ target: { name: 'pageSize', value } })}
               value={pageSize}
@@ -54,23 +52,23 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
                 </SingleSelectOption>
               ))}
             </SingleSelect>
-            <FieldHint />
-          </Field>
+            <Field.Hint />
+          </Field.Root>
         </GridItem>
         <GridItem s={12} col={6}>
-          <Field
+          <Field.Root
             hint={formatMessage({
               id: getTrad('config.note'),
               defaultMessage: 'Note: You can override this value in the media library.',
             })}
             name="sort"
           >
-            <FieldLabel>
+            <Field.Label>
               {formatMessage({
                 id: getTrad('config.sort.title'),
                 defaultMessage: 'Default sort order',
               })}
-            </FieldLabel>
+            </Field.Label>
             <SingleSelect
               onChange={(value) => onChange({ target: { name: 'sort', value } })}
               value={sort}
@@ -87,8 +85,8 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
                 </SingleSelectOption>
               ))}
             </SingleSelect>
-            <FieldHint />
-          </Field>
+            <Field.Hint />
+          </Field.Root>
         </GridItem>
       </Grid>
     </Box>

@@ -1,11 +1,4 @@
-import {
-  SingleSelectOption,
-  SingleSelect,
-  Typography,
-  Field,
-  FieldLabel,
-  FieldError,
-} from '@strapi/design-system';
+import { SingleSelectOption, SingleSelect, Typography, Field } from '@strapi/design-system';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { getDateOfExpiration } from '../../pages/ApiTokens/EditView/utils/getDateOfExpiration';
@@ -33,7 +26,7 @@ export const LifeSpanInput = ({
 
   return (
     <>
-      <Field
+      <Field.Root
         error={
           error
             ? formatMessage(
@@ -46,12 +39,12 @@ export const LifeSpanInput = ({
         name="lifespan"
         required
       >
-        <FieldLabel>
+        <Field.Label>
           {formatMessage({
             id: 'Settings.tokens.form.duration',
             defaultMessage: 'Token duration',
           })}
-        </FieldLabel>
+        </Field.Label>
         <SingleSelect
           value={value}
           onChange={(value) => {
@@ -86,8 +79,8 @@ export const LifeSpanInput = ({
             })}
           </SingleSelectOption>
         </SingleSelect>
-        <FieldError />
-      </Field>
+        <Field.Error />
+      </Field.Root>
       <Typography variant="pi" textColor="neutral600">
         {!isCreating &&
           `${formatMessage({

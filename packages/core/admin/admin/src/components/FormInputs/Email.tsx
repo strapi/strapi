@@ -1,13 +1,6 @@
 import { forwardRef } from 'react';
 
-import {
-  TextInput,
-  useComposedRefs,
-  Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
-} from '@strapi/design-system';
+import { TextInput, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
@@ -22,8 +15,8 @@ export const EmailInput = forwardRef<HTMLInputElement, StringProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field error={field.error} name={name} hint={hint} required={required}>
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root error={field.error} name={name} hint={hint} required={required}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <TextInput
           ref={composedRefs}
           autoComplete="email"
@@ -33,9 +26,9 @@ export const EmailInput = forwardRef<HTMLInputElement, StringProps>(
           {...props}
           type="email"
         />
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

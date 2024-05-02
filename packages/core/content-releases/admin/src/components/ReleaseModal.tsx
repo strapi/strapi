@@ -16,8 +16,6 @@ import {
   Combobox,
   ComboboxOption,
   Field,
-  FieldLabel,
-  FieldError,
 } from '@strapi/design-system';
 import { formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
@@ -112,16 +110,16 @@ export const ReleaseModal = ({
           <Form>
             <ModalBody>
               <Flex direction="column" alignItems="stretch" gap={6}>
-                <Field name="name" error={errors.name} required>
-                  <FieldLabel>
+                <Field.Root name="name" error={errors.name} required>
+                  <Field.Label>
                     {formatMessage({
                       id: 'content-releases.modal.form.input.label.release-name',
                       defaultMessage: 'Name',
                     })}
-                  </FieldLabel>
+                  </Field.Label>
                   <TextInput value={values.name} onChange={handleChange} />
-                  <FieldError />
-                </Field>
+                  <Field.Error />
+                </Field.Root>
                 <Box width="max-content">
                   <Checkbox
                     name="isScheduled"
@@ -156,13 +154,13 @@ export const ReleaseModal = ({
                   <>
                     <Flex gap={4} alignItems="start">
                       <Box width="100%">
-                        <Field name="date" error={errors.date} required>
-                          <FieldLabel>
+                        <Field.Root name="date" error={errors.date} required>
+                          <Field.Label>
                             {formatMessage({
                               id: 'content-releases.modal.form.input.label.date',
                               defaultMessage: 'Date',
                             })}
-                          </FieldLabel>
+                          </Field.Label>
                           <DatePicker
                             onChange={(date) => {
                               const isoFormatDate = date
@@ -180,17 +178,17 @@ export const ReleaseModal = ({
                             selectedDate={values.date || undefined}
                             minDate={utcToZonedTime(new Date(), values.timezone.split('&')[1])}
                           />
-                          <FieldError />
-                        </Field>
+                          <Field.Error />
+                        </Field.Root>
                       </Box>
                       <Box width="100%">
-                        <Field name="time" error={errors.time} required>
-                          <FieldLabel>
+                        <Field.Root name="time" error={errors.time} required>
+                          <Field.Label>
                             {formatMessage({
                               id: 'content-releases.modal.form.input.label.time',
                               defaultMessage: 'Time',
                             })}
-                          </FieldLabel>
+                          </Field.Label>
                           <TimePicker
                             onChange={(time) => {
                               setFieldValue('time', time);
@@ -204,8 +202,8 @@ export const ReleaseModal = ({
                             }}
                             value={values.time || undefined}
                           />
-                          <FieldError />
-                        </Field>
+                          <Field.Error />
+                        </Field.Root>
                       </Box>
                     </Flex>
                     <TimezoneComponent timezoneOptions={timezoneList} />
@@ -284,13 +282,13 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
   }, [setFieldValue, values.date, values.timezone]);
 
   return (
-    <Field name="timezone" error={errors.timezone} required>
-      <FieldLabel>
+    <Field.Root name="timezone" error={errors.timezone} required>
+      <Field.Label>
         {formatMessage({
           id: 'content-releases.modal.form.input.label.timezone',
           defaultMessage: 'Timezone',
         })}
-      </FieldLabel>
+      </Field.Label>
       <Combobox
         autocomplete={{ type: 'list', filter: 'contains' }}
         value={values.timezone || undefined}
@@ -311,7 +309,7 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
           </ComboboxOption>
         ))}
       </Combobox>
-      <FieldError />
-    </Field>
+      <Field.Error />
+    </Field.Root>
   );
 };

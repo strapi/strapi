@@ -1,13 +1,6 @@
 import { forwardRef, memo } from 'react';
 
-import {
-  TextInput,
-  useComposedRefs,
-  Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
-} from '@strapi/design-system';
+import { TextInput, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
@@ -83,20 +76,19 @@ const NotSupportedField = forwardRef<any, InputProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field error={error} name={name} hint={hint} required={required}>
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root error={error} name={name} hint={hint} required={required}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <TextInput
           ref={composedRefs}
           disabled
-          error={error}
           placeholder={`Unsupported field type: ${type}`}
           required={required}
           type="text"
           value=""
         />
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

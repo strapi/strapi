@@ -11,9 +11,6 @@ import {
   DatePicker,
   DateTimePicker,
   Field,
-  FieldError,
-  FieldHint,
-  FieldLabel,
   JSONInput,
   NumberInput,
   SingleSelect,
@@ -446,12 +443,12 @@ const GenericInput = ({
   };
 
   return (
-    <Field error={errorMessage} name={name} hint={hint} required={required}>
-      <FieldLabel action={labelAction}>{label}</FieldLabel>
+    <Field.Root error={errorMessage} name={name} hint={hint} required={required}>
+      <Field.Label action={labelAction}>{label}</Field.Label>
       {getComponent()}
-      <FieldError />
-      <FieldHint />
-    </Field>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
   );
 };
 

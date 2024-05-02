@@ -17,9 +17,6 @@ import {
   ButtonProps,
   Divider,
   Field,
-  FieldError,
-  FieldHint,
-  FieldLabel,
   Flex,
   Grid,
   GridItem,
@@ -418,8 +415,8 @@ const EnumerationInput = ({
   };
 
   return (
-    <Field error={error} hint={hint} name={name} required={required}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field.Root error={error} hint={hint} name={name} required={required}>
+      <Field.Label>{label}</Field.Label>
       <SingleSelect
         disabled={disabled}
         // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
@@ -433,9 +430,9 @@ const EnumerationInput = ({
           </SingleSelectOption>
         ))}
       </SingleSelect>
-      <FieldError />
-      <FieldHint />
-    </Field>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
   );
 };
 

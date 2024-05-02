@@ -9,8 +9,6 @@ import {
   Textarea,
   Portal,
   Field,
-  FieldLabel,
-  FieldInput,
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
@@ -24,7 +22,7 @@ import { useAuth } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
 import { usePersistentState } from '../hooks/usePersistentState';
 
-const FieldWrapper = styled(Field)`
+const FieldWrapper = styled(Field.Root)`
   height: 3.2rem;
   width: 3.2rem;
 
@@ -310,6 +308,7 @@ const NpsSurvey = () => {
                       return (
                         <FieldWrapper
                           key={number}
+                          name="npsSurveyRating"
                           className={values.npsSurveyRating === number ? 'selected' : undefined} // "selected" class added when child radio button is checked
                           hasRadius
                           background="primary100"
@@ -318,12 +317,10 @@ const NpsSurvey = () => {
                           position="relative"
                           cursor="pointer"
                         >
-                          <FieldLabel htmlFor={`nps-survey-rating-${number}-input`}>
+                          <Field.Label>
                             <VisuallyHidden>
-                              <FieldInput
+                              <Field.Input
                                 type="radio"
-                                id={`nps-survey-rating-${number}-input`}
-                                name="npsSurveyRating"
                                 checked={values.npsSurveyRating === number}
                                 onChange={(e) =>
                                   setFieldValue('npsSurveyRating', parseInt(e.target.value, 10))
@@ -332,7 +329,7 @@ const NpsSurvey = () => {
                               />
                             </VisuallyHidden>
                             {number}
-                          </FieldLabel>
+                          </Field.Label>
                         </FieldWrapper>
                       );
                     })}
@@ -346,12 +343,12 @@ const NpsSurvey = () => {
                   {values.npsSurveyRating !== null && (
                     <Flex direction="column">
                       <Box marginTop={2}>
-                        <FieldLabel htmlFor="npsSurveyFeedback" fontWeight="semiBold" fontSize={2}>
+                        <Field.Label fontWeight="semiBold" fontSize={2}>
                           {formatMessage({
                             id: 'app.components.NpsSurvey.feedback-question',
                             defaultMessage: 'Do you have any suggestion for improvements?',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                       </Box>
                       <Box width="62%" marginTop={3} marginBottom={4}>
                         <Textarea

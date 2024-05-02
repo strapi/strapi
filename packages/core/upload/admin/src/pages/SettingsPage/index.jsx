@@ -13,8 +13,6 @@ import {
   Toggle,
   Typography,
   Field,
-  FieldLabel,
-  FieldHint,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
@@ -143,7 +141,7 @@ export const SettingsPage = () => {
                   </Flex>
                   <Grid gap={6}>
                     <GridItem col={6} s={12}>
-                      <Field
+                      <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.responsiveDimensions.description'),
                           defaultMessage:
@@ -151,12 +149,12 @@ export const SettingsPage = () => {
                         })}
                         name="responsiveDimensions"
                       >
-                        <FieldLabel>
+                        <Field.Label>
                           {formatMessage({
                             id: getTrad('settings.form.responsiveDimensions.label'),
                             defaultMessage: 'Responsive friendly upload',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <Toggle
                           checked={modifiedData.responsiveDimensions}
                           offLabel={formatMessage({
@@ -173,11 +171,11 @@ export const SettingsPage = () => {
                             });
                           }}
                         />
-                        <FieldHint />
-                      </Field>
+                        <Field.Hint />
+                      </Field.Root>
                     </GridItem>
                     <GridItem col={6} s={12}>
-                      <Field
+                      <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.sizeOptimization.description'),
                           defaultMessage:
@@ -185,12 +183,12 @@ export const SettingsPage = () => {
                         })}
                         name="sizeOptimization"
                       >
-                        <FieldLabel>
+                        <Field.Label>
                           {formatMessage({
                             id: getTrad('settings.form.sizeOptimization.label'),
                             defaultMessage: 'Size optimization',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <Toggle
                           checked={modifiedData.sizeOptimization}
                           offLabel={formatMessage({
@@ -207,11 +205,11 @@ export const SettingsPage = () => {
                             });
                           }}
                         />
-                        <FieldHint />
-                      </Field>
+                        <Field.Hint />
+                      </Field.Root>
                     </GridItem>
                     <GridItem col={6} s={12}>
-                      <Field
+                      <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.autoOrientation.description'),
                           defaultMessage:
@@ -219,12 +217,12 @@ export const SettingsPage = () => {
                         })}
                         name="autoOrientation"
                       >
-                        <FieldLabel>
+                        <Field.Label>
                           {formatMessage({
                             id: getTrad('settings.form.autoOrientation.label'),
                             defaultMessage: 'Auto orientation',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                         <Toggle
                           checked={modifiedData.autoOrientation}
                           offLabel={formatMessage({
@@ -241,8 +239,8 @@ export const SettingsPage = () => {
                             });
                           }}
                         />
-                        <FieldHint />
-                      </Field>
+                        <Field.Hint />
+                      </Field.Root>
                     </GridItem>
                   </Grid>
                 </Flex>

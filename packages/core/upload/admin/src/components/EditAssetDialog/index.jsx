@@ -9,7 +9,7 @@ import React, { useRef, useState } from 'react';
 import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Button,
-  FieldLabel,
+  Field,
   Flex,
   Grid,
   GridItem,
@@ -283,12 +283,12 @@ export const EditAssetDialog = ({
                     />
 
                     <Flex direction="column" alignItems="stretch" gap={1}>
-                      <FieldLabel htmlFor="asset-folder">
+                      <Field.Label htmlFor="asset-folder">
                         {formatMessage({
                           id: getTrad('form.input.label.file-location'),
                           defaultMessage: 'Location',
                         })}
-                      </FieldLabel>
+                      </Field.Label>
 
                       <SelectTree
                         name="parent"

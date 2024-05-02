@@ -1,14 +1,6 @@
 import { forwardRef } from 'react';
 
-import {
-  SingleSelect,
-  SingleSelectOption,
-  useComposedRefs,
-  Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
-} from '@strapi/design-system';
+import { SingleSelect, SingleSelectOption, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
@@ -23,11 +15,10 @@ export const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field error={field.error} name={name} hint={hint} required={required}>
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root error={field.error} name={name} hint={hint} required={required}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <SingleSelect
           ref={composedRefs}
-          error={field.error}
           onChange={(value) => {
             field.onChange(name, value);
           }}
@@ -42,9 +33,9 @@ export const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
             );
           })}
         </SingleSelect>
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

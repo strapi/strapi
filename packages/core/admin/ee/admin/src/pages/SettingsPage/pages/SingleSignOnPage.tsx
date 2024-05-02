@@ -10,9 +10,6 @@ import {
   MultiSelectOption,
   Typography,
   Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -281,8 +278,8 @@ const MultiSelectInput = ({ hint, label, name, options, ...props }: MultiSelectI
   const field = useField(name);
 
   return (
-    <Field name={name} hint={hint} error={field.error}>
-      <FieldLabel>{label}</FieldLabel>
+    <Field.Root name={name} hint={hint} error={field.error}>
+      <Field.Label>{label}</Field.Label>
       <MultiSelect
         onChange={(value) => field.onChange('ssoLockedRoles', value)}
         onClear={() => field.onChange('ssoLockedRoles', [])}
@@ -296,9 +293,9 @@ const MultiSelectInput = ({ hint, label, name, options, ...props }: MultiSelectI
           </MultiSelectOption>
         ))}
       </MultiSelect>
-      <FieldHint />
-      <FieldError />
-    </Field>
+      <Field.Hint />
+      <Field.Error />
+    </Field.Root>
   );
 };
 

@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import {
   Box,
-  FieldLabel,
   Flex,
   Grid,
   GridItem,
@@ -12,10 +11,7 @@ import {
   Combobox,
   ComboboxProps,
   IconButton,
-  FieldProps,
   Field as DSField,
-  FieldError as DSFieldError,
-  FieldLabel as DSFieldLabel,
 } from '@strapi/design-system';
 import { Minus, Plus } from '@strapi/icons';
 import { Field, FieldArray, FieldInputProps, useFormikContext } from 'formik';
@@ -36,12 +32,12 @@ const HeadersInput = () => {
 
   return (
     <Flex direction="column" alignItems="stretch" gap={1}>
-      <FieldLabel>
+      <DSField.Label>
         {formatMessage({
           id: 'Settings.webhooks.form.headers',
           defaultMessage: 'Headers',
         })}
-      </FieldLabel>
+      </DSField.Label>
       <Box padding={8} background="neutral100" hasRadius>
         <FieldArray
           validateOnChange={false}
@@ -148,7 +144,9 @@ const StyledIconButton = styled(IconButton)`
  * HeaderCombobox
  * -----------------------------------------------------------------------------------------------*/
 
-interface HeaderComboboxProps extends FieldInputProps<string>, Required<Pick<FieldProps, 'error'>> {
+interface HeaderComboboxProps
+  extends FieldInputProps<string>,
+    Required<Pick<DSField.Props, 'error'>> {
   label: string;
 }
 
@@ -184,8 +182,8 @@ const HeaderCombobox = ({
   };
 
   return (
-    <DSField>
-      <DSFieldLabel>{label}</DSFieldLabel>
+    <DSField.Root name={name} error={error}>
+      <DSField.Label>{label}</DSField.Label>
       <Combobox
         {...restProps}
         onClear={() => handleChange('')}
@@ -201,8 +199,8 @@ const HeaderCombobox = ({
           </ComboboxOption>
         ))}
       </Combobox>
-      <DSFieldError />
-    </DSField>
+      <DSField.Error />
+    </DSField.Root>
   );
 };
 

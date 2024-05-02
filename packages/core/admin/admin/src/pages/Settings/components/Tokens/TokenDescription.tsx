@@ -1,4 +1,4 @@
-import { Field, FieldError, FieldLabel, Textarea, TextareaProps } from '@strapi/design-system';
+import { Field, Textarea, TextareaProps } from '@strapi/design-system';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { isErrorMessageMessageDescriptor } from '../../utils/forms';
@@ -17,7 +17,7 @@ export const TokenDescription = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Field
+    <Field.Root
       name="description"
       error={
         error
@@ -32,16 +32,16 @@ export const TokenDescription = ({
           : undefined
       }
     >
-      <FieldLabel>
+      <Field.Label>
         {formatMessage({
           id: 'Settings.tokens.form.description',
           defaultMessage: 'Description',
         })}
-      </FieldLabel>
+      </Field.Label>
       <Textarea onChange={onChange} disabled={!canEditInputs}>
         {value}
       </Textarea>
-      <FieldError />
-    </Field>
+      <Field.Error />
+    </Field.Root>
   );
 };

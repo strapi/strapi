@@ -1,13 +1,6 @@
 import { forwardRef } from 'react';
 
-import {
-  NumberInput,
-  useComposedRefs,
-  Field,
-  FieldLabel,
-  FieldHint,
-  FieldError,
-} from '@strapi/design-system';
+import { NumberInput, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
@@ -22,8 +15,8 @@ const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field error={field.error} name={name} hint={hint} required={required}>
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root error={field.error} name={name} hint={hint} required={required}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <NumberInput
           ref={composedRefs}
           defaultValue={field.initialValue}
@@ -34,9 +27,9 @@ const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
           value={field.value}
           {...props}
         />
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

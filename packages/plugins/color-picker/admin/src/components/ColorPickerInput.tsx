@@ -4,10 +4,6 @@ import {
   BaseButton,
   Box,
   Field,
-  FieldError,
-  FieldHint,
-  FieldInput,
-  FieldLabel,
   Flex,
   FocusTrap,
   Popover,
@@ -98,16 +94,9 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
     const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
 
     return (
-      <Field
-        name={name}
-        id={name}
-        // GenericInput calls formatMessage and returns a string for the error
-        error={error}
-        hint={hint}
-        required={required}
-      >
+      <Field.Root name={name} id={name} error={error} hint={hint} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <FieldLabel action={labelAction}>{label}</FieldLabel>
+          <Field.Label action={labelAction}>{label}</Field.Label>
           <ColorPickerToggle
             ref={composedRefs}
             aria-label={formatMessage({
@@ -151,12 +140,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                       })}
                     </Typography>
                   </Box>
-                  <FieldInput
-                    id="color-picker-value"
-                    aria-label={formatMessage({
-                      id: getTrad('color-picker.input.aria-label'),
-                      defaultMessage: 'Color picker input',
-                    })}
+                  <Field.Input
                     style={{ textTransform: 'uppercase' }}
                     value={value}
                     placeholder="#000000"
@@ -166,10 +150,10 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
               </FocusTrap>
             </ColorPickerPopover>
           )}
-          <FieldHint />
-          <FieldError />
+          <Field.Hint />
+          <Field.Error />
         </Flex>
-      </Field>
+      </Field.Root>
     );
   }
 );

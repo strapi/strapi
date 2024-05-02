@@ -1,6 +1,6 @@
 import { forwardRef } from 'react';
 
-import { Checkbox, useComposedRefs, Field, FieldHint, FieldError } from '@strapi/design-system';
+import { Checkbox, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { useField } from '../Form';
@@ -15,7 +15,7 @@ const CheckboxInput = forwardRef<HTMLInputElement, InputProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field error={field.error} name={name} hint={hint} required={required}>
+      <Field.Root error={field.error} name={name} hint={hint} required={required}>
         <Checkbox
           onValueChange={(checked) => field.onChange(name, checked)}
           ref={composedRefs}
@@ -24,9 +24,9 @@ const CheckboxInput = forwardRef<HTMLInputElement, InputProps>(
         >
           {label || props['aria-label']}
         </Checkbox>
-        <FieldHint />
-        <FieldError />
-      </Field>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
     );
   }
 );

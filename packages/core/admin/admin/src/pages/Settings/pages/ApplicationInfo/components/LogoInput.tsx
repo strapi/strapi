@@ -19,9 +19,6 @@ import {
   CarouselSlide,
   Divider,
   Field,
-  FieldError,
-  FieldInput,
-  FieldLabel,
   Flex,
   IconButton,
   ModalFooter,
@@ -278,16 +275,16 @@ const URLForm = () => {
   return (
     <form onSubmit={handleSubmit}>
       <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
-        <Field error={error} name="logo-url">
-          <FieldLabel>
+        <Field.Root error={error} name="logo-url">
+          <Field.Label>
             {formatMessage({
               id: 'Settings.application.customization.modal.upload.from-url.input-label',
               defaultMessage: 'URL',
             })}
-          </FieldLabel>
+          </Field.Label>
           <TextInput onChange={handleChange} value={logoUrl} />
-          <FieldError />
-        </Field>
+          <Field.Error />
+        </Field.Root>
       </Box>
       <ModalFooter
         startActions={
@@ -356,7 +353,7 @@ const ComputerForm = () => {
     <>
       <form>
         <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
-          <Field name={id} error={fileError}>
+          <Field.Root name={id} error={fileError}>
             <Flex direction="column" alignItems="stretch" gap={2}>
               <Flex
                 paddingTop={9}
@@ -409,9 +406,9 @@ const ComputerForm = () => {
                   </Typography>
                 </Box>
               </Flex>
-              <FieldError />
+              <Field.Error />
             </Flex>
-          </Field>
+          </Field.Root>
         </Box>
       </form>
       <ModalFooter
@@ -428,7 +425,7 @@ const ComputerForm = () => {
   );
 };
 
-const FileInput = styled(FieldInput)`
+const FileInput = styled(Field.Input)`
   opacity: 0;
   position: absolute;
   top: 0;

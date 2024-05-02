@@ -11,10 +11,6 @@ import {
 } from '@strapi/admin/strapi-admin';
 import {
   Field,
-  FieldAction,
-  FieldError,
-  FieldHint,
-  FieldLabel,
   Flex,
   FlexComponent,
   TextInput,
@@ -186,8 +182,8 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
-      <Field hint={hint} name={name} error={field.error} required={required}>
-        <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Field.Root hint={hint} name={name} error={field.error} required={required}>
+        <Field.Label action={labelAction}>{label}</Field.Label>
         <TextInput
           ref={composedRefs}
           disabled={props.disabled}
@@ -264,9 +260,9 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
           value={field.value ?? ''}
           {...props}
         />
-        <FieldError />
-        <FieldHint />
-      </Field>
+        <Field.Error />
+        <Field.Hint />
+      </Field.Root>
     );
   }
 );
@@ -275,7 +271,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
  * FieldActionWrapper
  * -----------------------------------------------------------------------------------------------*/
 
-const FieldActionWrapper = styled(FieldAction)`
+const FieldActionWrapper = styled(Field.Action)`
   svg {
     height: 1.6rem;
     width: 1.6rem;

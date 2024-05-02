@@ -9,7 +9,6 @@ import {
 import {
   Box,
   Button,
-  FieldLabel,
   Flex,
   SingleSelect,
   SingleSelectOption,
@@ -173,13 +172,13 @@ const ReleaseAction: BulkActionComponent = ({ documentIds, model }) => {
                   <ModalBody>
                     <Flex direction="column" alignItems="stretch" gap={2}>
                       <Box paddingBottom={6}>
-                        <Field required>
-                          <FieldLabel>
+                        <Field.Root required>
+                          <Field.Label>
                             {formatMessage({
                               id: 'content-releases.content-manager-list-view.add-to-release.select-label',
                               defaultMessage: 'Select a release',
                             })}
-                          </FieldLabel>
+                          </Field.Label>
                           <SingleSelect
                             placeholder={formatMessage({
                               id: 'content-releases.content-manager-list-view.add-to-release.select-placeholder',
@@ -194,14 +193,14 @@ const ReleaseAction: BulkActionComponent = ({ documentIds, model }) => {
                               </SingleSelectOption>
                             ))}
                           </SingleSelect>
-                        </Field>
+                        </Field.Root>
                       </Box>
-                      <FieldLabel>
+                      <Field.Label>
                         {formatMessage({
                           id: 'content-releases.content-manager-list-view.add-to-release.action-type-label',
                           defaultMessage: 'What do you want to do with these entries?',
                         })}
-                      </FieldLabel>
+                      </Field.Label>
                       <ReleaseActionOptions
                         selected={values.type}
                         handleChange={(e) => setFieldValue('type', e.target.value)}
