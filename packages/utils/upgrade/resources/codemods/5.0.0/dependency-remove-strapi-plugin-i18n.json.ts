@@ -2,11 +2,11 @@ import path from 'node:path';
 
 import type { modules } from '../../../dist';
 
-const STRAPI_I18N_DEP_NAME = '@strapi/plugin-i18n';
+const STRAPI_I18N_DEP_NAME = '@strapi/i18n';
 const STRAPI_I18N_DEP_PATH = `dependencies.${STRAPI_I18N_DEP_NAME}`;
 
 /**
- * Specifically targets the root package.json and removes the @strapi/plugin-i18n dependency.
+ * Specifically targets the root package.json and removes the @strapi/i18n dependency.
  *
  * Why? The i18n plugin is now a hard dependency of @strapi/strapi and isn't needed in the package.json anymore.
  */

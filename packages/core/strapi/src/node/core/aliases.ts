@@ -19,7 +19,7 @@ const devAliases: Record<string, string> = {
   '@strapi/plugin-color-picker/strapi-admin': './packages/plugins/color-picker/admin/src',
   '@strapi/plugin-documentation/strapi-admin': './packages/plugins/documentation/admin/src',
   '@strapi/plugin-graphql/strapi-admin': './packages/plugins/graphql/admin/src',
-  '@strapi/plugin-i18n/strapi-admin': './packages/plugins/i18n/admin/src',
+  '@strapi/i18n/strapi-admin': './packages/plugins/i18n/admin/src',
   '@strapi/plugin-sentry/strapi-admin': './packages/plugins/sentry/admin/src',
   '@strapi/plugin-users-permissions/strapi-admin': './packages/plugins/users-permissions/admin/src',
   '@strapi/review-workflows/strapi-admin': './packages/core/review-workflows/admin/src',
