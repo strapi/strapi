@@ -283,7 +283,6 @@ export const CMReleasesContainer = () => {
       }
     : skipToken;
   // Get all 'pending' releases that have the entry attached
-  // @ts-expect-error – we'll fix this when we fix content-releases for v5
   const response = useGetReleasesForEntryQuery(fetchParams);
   const releases = response.data?.data;
 
@@ -440,7 +439,6 @@ export const CMReleasesContainer = () => {
         <AddActionToReleaseModal
           handleClose={toggleModal}
           contentTypeUid={contentTypeUid}
-          // @ts-expect-error – we'll fix this when we fix content-releases for v5
           entryId={id}
         />
       )}

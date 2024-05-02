@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useAPIErrorHandler, useNotification, useAuth, useRBAC } from '@strapi/admin/strapi-admin';
-import { Flex, IconButton, Typography, Menu, Link } from '@strapi/design-system';
+import { Flex, IconButton, Typography, Menu } from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
@@ -227,7 +227,7 @@ const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release
     allowedActions.canDeleteAction || allowedActions.canUpdate ? (
       <Menu.Root>
-        {/* 
+        {/*
           TODO Fix in the DS
           - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
           - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
