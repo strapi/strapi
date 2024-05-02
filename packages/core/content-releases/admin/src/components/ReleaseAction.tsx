@@ -15,6 +15,7 @@ import {
   SingleSelectOption,
   ModalBody,
   ModalFooter,
+  Field,
 } from '@strapi/design-system';
 import { UID } from '@strapi/types';
 import { isAxiosError } from 'axios';
@@ -172,25 +173,28 @@ const ReleaseAction: BulkActionComponent = ({ documentIds, model }) => {
                   <ModalBody>
                     <Flex direction="column" alignItems="stretch" gap={2}>
                       <Box paddingBottom={6}>
-                        <SingleSelect
-                          required
-                          label={formatMessage({
-                            id: 'content-releases.content-manager-list-view.add-to-release.select-label',
-                            defaultMessage: 'Select a release',
-                          })}
-                          placeholder={formatMessage({
-                            id: 'content-releases.content-manager-list-view.add-to-release.select-placeholder',
-                            defaultMessage: 'Select',
-                          })}
-                          onChange={(value) => setFieldValue('releaseId', value)}
-                          value={values.releaseId}
-                        >
-                          {releases?.map((release) => (
-                            <SingleSelectOption key={release.id} value={release.id}>
-                              {release.name}
-                            </SingleSelectOption>
-                          ))}
-                        </SingleSelect>
+                        <Field required>
+                          <FieldLabel>
+                            {formatMessage({
+                              id: 'content-releases.content-manager-list-view.add-to-release.select-label',
+                              defaultMessage: 'Select a release',
+                            })}
+                          </FieldLabel>
+                          <SingleSelect
+                            placeholder={formatMessage({
+                              id: 'content-releases.content-manager-list-view.add-to-release.select-placeholder',
+                              defaultMessage: 'Select',
+                            })}
+                            onChange={(value) => setFieldValue('releaseId', value)}
+                            value={values.releaseId}
+                          >
+                            {releases?.map((release) => (
+                              <SingleSelectOption key={release.id} value={release.id}>
+                                {release.name}
+                              </SingleSelectOption>
+                            ))}
+                          </SingleSelect>
+                        </Field>
                       </Box>
                       <FieldLabel>
                         {formatMessage({

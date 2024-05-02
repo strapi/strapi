@@ -374,6 +374,7 @@ const ReleaseDetailsLayout = ({
                   - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
                 */}
                 <Menu.Trigger
+                  // @ts-expect-error See above
                   tag={IconButton}
                   paddingLeft={2}
                   paddingRight={2}
@@ -381,7 +382,6 @@ const ReleaseDetailsLayout = ({
                     id: 'content-releases.header.actions.open-release-actions',
                     defaultMessage: 'Release edit and delete menu',
                   })}
-                  // @ts-expect-error See above
                   icon={<More />}
                   variant="tertiary"
                 />
@@ -633,7 +633,6 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           action={
             <LinkButton
               tag={ReactRouterLink}
-              // @ts-expect-error - types are not inferred correctly through the as prop.
               to={{
                 pathname: '/content-manager',
               }}

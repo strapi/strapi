@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useAPIErrorHandler, useNotification, useAuth, useRBAC } from '@strapi/admin/strapi-admin';
-import { Flex, IconButton, Typography, Menu, Link } from '@strapi/design-system';
+import { Flex, IconButton, Typography, Menu } from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
@@ -164,6 +164,7 @@ const ReleaseActionEntryLinkItem = ({
 
   return (
     <StyledMenuItem
+      /* @ts-expect-error inference isn't working in DS */
       tag={NavLink}
       isLink
       to={{
@@ -195,6 +196,7 @@ const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
   const { formatMessage } = useIntl();
 
   return (
+    /* @ts-expect-error inference isn't working in DS */
     <StyledMenuItem tag={NavLink} isLink to={`/plugins/content-releases/${releaseId}`}>
       <Flex gap={2}>
         <Pencil width="1.6rem" height="1.6rem" />
@@ -233,6 +235,7 @@ const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
           - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
          */}
         <Menu.Trigger
+          // @ts-expect-error See above
           tag={hasTriggerBorder ? StyledIconButton : IconButton}
           paddingLeft={2}
           paddingRight={2}
@@ -240,7 +243,6 @@ const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
             id: 'content-releases.content-manager-edit-view.release-action-menu',
             defaultMessage: 'Release action options',
           })}
-          // @ts-expect-error See above
           icon={<More />}
         />
         {/*
