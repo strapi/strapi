@@ -262,6 +262,7 @@ export const CMReleasesContainer = () => {
     collectionType: string;
   }>();
   const isCreatingEntry = id === 'create';
+  const entryId = parseInt(id!, 10);
   const { allowedActions } = useRBAC(PERMISSIONS);
 
   const { canCreateAction, canRead: canMain, canDeleteAction } = allowedActions;
@@ -278,7 +279,7 @@ export const CMReleasesContainer = () => {
   const fetchParams = canFetch
     ? {
         contentTypeUid: contentTypeUid,
-        entryId: id,
+        entryId,
         hasEntryAttached: true,
       }
     : skipToken;
@@ -439,7 +440,7 @@ export const CMReleasesContainer = () => {
         <AddActionToReleaseModal
           handleClose={toggleModal}
           contentTypeUid={contentTypeUid}
-          entryId={id}
+          entryId={entryId}
         />
       )}
     </Box>
