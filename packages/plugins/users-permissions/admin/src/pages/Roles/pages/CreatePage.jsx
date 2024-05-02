@@ -11,6 +11,9 @@ import {
   Textarea,
   TextInput,
   Typography,
+  Field,
+  FieldLabel,
+  FieldError,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { Page, useTracking, useNotification, useFetchClient } from '@strapi/strapi/admin';
@@ -128,31 +131,28 @@ export const CreatePage = () => {
 
                   <Grid gap={4}>
                     <GridItem col={6}>
-                      <TextInput
+                      <Field
                         name="name"
-                        value={values.name || ''}
-                        onChange={handleChange}
-                        label={formatMessage({
-                          id: 'global.name',
-                          defaultMessage: 'Name',
-                        })}
                         error={
                           errors?.name
                             ? formatMessage({ id: errors.name, defaultMessage: 'Name is required' })
                             : false
                         }
                         required
-                      />
+                      >
+                        <FieldLabel>
+                          {formatMessage({
+                            id: 'global.name',
+                            defaultMessage: 'Name',
+                          })}
+                        </FieldLabel>
+                        <TextInput value={values.name || ''} onChange={handleChange} />
+                        <FieldError />
+                      </Field>
                     </GridItem>
                     <GridItem col={6}>
-                      <Textarea
-                        id="description"
-                        value={values.description || ''}
-                        onChange={handleChange}
-                        label={formatMessage({
-                          id: 'global.description',
-                          defaultMessage: 'Description',
-                        })}
+                      <Field
+                        name="description"
                         error={
                           errors?.description
                             ? formatMessage({
@@ -162,7 +162,16 @@ export const CreatePage = () => {
                             : false
                         }
                         required
-                      />
+                      >
+                        <FieldLabel>
+                          {formatMessage({
+                            id: 'global.description',
+                            defaultMessage: 'Description',
+                          })}
+                        </FieldLabel>
+                        <Textarea value={values.description || ''} onChange={handleChange} />
+                        <FieldError />
+                      </Field>
                     </GridItem>
                   </Grid>
                 </Flex>

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { TextInput, Toggle } from '@strapi/design-system';
+import { TextInput, Toggle, Field, FieldHint, FieldLabel, FieldError } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -41,25 +41,26 @@ const Input = ({
 
   if (type === 'bool') {
     return (
-      <Toggle
-        aria-label={name}
-        checked={value}
-        disabled={disabled}
-        hint={hint}
-        label={label}
-        name={name}
-        offLabel={formatMessage({
-          id: 'app.components.ToggleCheckbox.off-label',
-          defaultMessage: 'Off',
-        })}
-        onLabel={formatMessage({
-          id: 'app.components.ToggleCheckbox.on-label',
-          defaultMessage: 'On',
-        })}
-        onChange={(e) => {
-          onChange({ target: { name, value: e.target.checked } });
-        }}
-      />
+      <Field hint={hint} name={name}>
+        <FieldLabel>{label}</FieldLabel>
+        <Toggle
+          aria-label={name}
+          checked={value}
+          disabled={disabled}
+          offLabel={formatMessage({
+            id: 'app.components.ToggleCheckbox.off-label',
+            defaultMessage: 'Off',
+          })}
+          onLabel={formatMessage({
+            id: 'app.components.ToggleCheckbox.on-label',
+            defaultMessage: 'On',
+          })}
+          onChange={(e) => {
+            onChange({ target: { name, value: e.target.checked } });
+          }}
+        />
+        <FieldHint />
+      </Field>
     );
   }
 
@@ -73,17 +74,17 @@ const Input = ({
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   return (
-    <TextInput
-      aria-label={name}
-      disabled={disabled}
-      error={errorMessage}
-      label={label}
-      name={name}
-      onChange={onChange}
-      placeholder={formattedPlaceholder}
-      type={type}
-      value={inputValue}
-    />
+    <Field error={errorMessage} name={name}>
+      <FieldLabel>{label}</FieldLabel>
+      <TextInput
+        disabled={disabled}
+        onChange={onChange}
+        placeholder={formattedPlaceholder}
+        type={type}
+        value={inputValue}
+      />
+      <FieldError />
+    </Field>
   );
 };
 

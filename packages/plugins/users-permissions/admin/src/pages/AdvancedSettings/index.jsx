@@ -21,7 +21,6 @@ import {
   useFetchClient,
   useRBAC,
 } from '@strapi/strapi/admin';
-
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
