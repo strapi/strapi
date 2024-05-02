@@ -72,7 +72,7 @@ export default function createEventHub(): EventHub {
     },
 
     off(eventName, listener) {
-      listeners.get(eventName).splice(listeners.get(eventName).indexOf(listener), 1);
+      listeners.get(eventName)?.splice(listeners.get(eventName).indexOf(listener), 1);
     },
 
     once(eventName, listener) {
