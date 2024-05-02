@@ -47,8 +47,7 @@ const DEFAULT_UNEXPECTED_ERROR_MSG = {
 
 type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }> =
   | Pick<TResponse, 'data' | 'meta'>
-  | { error: BaseQueryError | SerializedError }
-  | Pick<TResponse, 'data'>;
+  | { error: BaseQueryError | SerializedError };
 
 type BulkOperationResponse<TResponse extends { data: any; error?: any }> =
   | Pick<TResponse, 'data'>
@@ -455,13 +454,14 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [unpublishManyDocuments] = useUnpublishManyDocumentsMutation();
   const unpublishMany: IUseDocumentActs['unpublishMany'] = React.useCallback(
-    async ({ model, documentIds }) => {
+    async ({ model, documentIds, params }) => {
       try {
         trackUsage('willBulkUnpublishEntries');
 
         const res = await unpublishManyDocuments({
           model,
           documentIds,
+          params,
         });
 
         if ('error' in res) {

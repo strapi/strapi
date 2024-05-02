@@ -61,7 +61,7 @@ interface ListViewContext {
    */
   collectionType: string;
   /**
-   * TODO: add comment
+   * These are currently selected entries.
    */
   documents: Document[];
   /**

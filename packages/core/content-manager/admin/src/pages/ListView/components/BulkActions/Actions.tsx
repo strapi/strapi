@@ -27,9 +27,8 @@ import { useIntl } from 'react-intl';
 import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
 import { useDoc } from '../../../../hooks/useDocument';
 import { useDocumentActions } from '../../../../hooks/useDocumentActions';
+import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
-
-import { PublishAction } from './PublishAction';
 
 import type { BulkActionComponent, ContentManagerPlugin } from '../../../../content-manager';
 
@@ -305,7 +304,7 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
   const { selectRow } = useTable('deleteAction', (state) => state);
   const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
-  const currentLocale = query.plugins?.i18n?.locale || 'en';
+  const params = React.useMemo(() => buildValidParams(query), [query]);
   const hasDeletePermission = useDocumentRBAC('deleteAction', (state) => state.canDelete);
   const { deleteMany: bulkDeleteAction } = useDocumentActions();
   const documentIds = documents.map(({ documentId }) => documentId);
@@ -314,9 +313,7 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
     const res = await bulkDeleteAction({
       documentIds,
       model,
-      params: {
-        locale: currentLocale,
-      },
+      params,
     });
     if (!('error' in res)) {
       selectRow([]);
@@ -374,9 +371,11 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
   const { unpublishMany: bulkUnpublishAction } = useDocumentActions();
   const documentIds = documents.map(({ documentId }) => documentId);
+  const [{ query }] = useQueryParams();
+  const params = React.useMemo(() => buildValidParams(query), [query]);
 
   const handleConfirmBulkUnpublish = async () => {
-    const data = await bulkUnpublishAction({ documentIds, model });
+    const data = await bulkUnpublishAction({ documentIds, model, params });
     if (!('error' in data)) {
       selectRow([]);
     }
