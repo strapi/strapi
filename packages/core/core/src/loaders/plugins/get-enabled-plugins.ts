@@ -31,7 +31,7 @@ interface PluginDeclaration {
  */
 const INTERNAL_PLUGINS = [
   '@strapi/content-manager',
-  '@strapi/plugin-content-type-builder',
+  '@strapi/content-type-builder',
   '@strapi/email',
   '@strapi/upload',
   '@strapi/plugin-i18n',
