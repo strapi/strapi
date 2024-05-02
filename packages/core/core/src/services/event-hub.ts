@@ -99,8 +99,6 @@ export default function createEventHub(): EventHub {
 
     removeAllSubscribers() {
       subscribers.length = 0;
-      // Re-add the default subscriber
-      subscribers.push(defaultSubscriber);
       return this;
     },
 
