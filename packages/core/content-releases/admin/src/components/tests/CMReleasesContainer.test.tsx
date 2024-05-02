@@ -50,7 +50,7 @@ describe('CMReleasesContainer', () => {
 
   it('should not render the container when creating an entry', async () => {
     render(['/content-manager/collection-types/api::article.article/create']);
-    await screen.findByRole('log');
+    await screen.findByRole('alert');
     await waitFor(() =>
       expect(screen.queryByRole('complementary', { name: 'Releases' })).not.toBeInTheDocument()
     );

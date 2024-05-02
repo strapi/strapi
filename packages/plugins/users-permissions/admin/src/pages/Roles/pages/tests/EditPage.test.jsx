@@ -97,19 +97,20 @@ describe('Roles – EditPage', () => {
   });
 
   it("can update a role's name and description", async () => {
-    const { getByRole, user, getByText } = render();
+    const { getByRole, user, getByText, findByRole, findByText } = render();
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
     await user.type(getByRole('textbox', { name: 'Name *' }), 'test');
     await user.type(getByRole('textbox', { name: 'Description *' }), 'testing');
 
+    const button = await findByRole('button', { name: 'Save' });
     /**
      * @note user.click will not trigger the form.
      */
-    fireEvent.click(getByRole('button', { name: 'Save' }));
-
-    await waitFor(() => expect(getByText('Role edited')).toBeInTheDocument());
+    fireEvent.click(button);
+    await findByText('Role edited');
+    await findByText('Authenticated');
   });
 
   it("can update a role's permissions", async () => {

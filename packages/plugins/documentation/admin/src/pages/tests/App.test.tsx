@@ -85,7 +85,7 @@ describe('App', () => {
       });
     });
 
-    it.only('should regenerate the documentation', async () => {
+    it('should regenerate the documentation', async () => {
       const { getByRole, queryByText, user, getByText, findByText } = renderApp();
 
       await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
