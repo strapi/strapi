@@ -438,7 +438,7 @@ const Emphasis = (chunks: React.ReactNode) => (
   </Typography>
 );
 
-const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [UnpublishAction, DeleteAction];
+const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [PublishAction, UnpublishAction, DeleteAction];
 
 export { DEFAULT_BULK_ACTIONS, BulkActionsRenderer, Emphasis };
 export type { BulkActionDescription };

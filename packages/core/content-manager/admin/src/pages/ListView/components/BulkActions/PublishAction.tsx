@@ -511,7 +511,6 @@ const ModalContent = ({ onClose, selectedDocuments }: ModalContentProps) => {
   }, [components, data, schema]);
 
   const refetchList = () => {
-    // TODO: fix invalidating the list cache doesnt refresh the list view
     contentManagerApi.util.invalidateTags([{ type: 'Document', id: `${model}_LIST` }]);
   };
 
@@ -532,7 +531,6 @@ const ModalContent = ({ onClose, selectedDocuments }: ModalContentProps) => {
         setEntriesToFetch={setEntriesToFetch}
         toggleModal={() => {
           onClose();
-          refetch();
           refetchList();
         }}
         refetchModalData={refetch}
