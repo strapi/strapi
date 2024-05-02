@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { useNotification, useAPIErrorHandler, useQueryParams } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   SingleSelect,
   SingleSelectOption,
@@ -12,7 +13,6 @@ import {
   Loader,
   Typography,
 } from '@strapi/design-system';
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';

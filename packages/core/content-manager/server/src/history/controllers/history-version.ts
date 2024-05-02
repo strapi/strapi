@@ -1,5 +1,6 @@
-import { errors } from '@strapi/utils';
+import { async, errors } from '@strapi/utils';
 import type { Core, UID } from '@strapi/types';
+import { pick } from 'lodash/fp';
 import { getService as getContentManagerService } from '../../utils';
 import { getService } from '../utils';
 import { HistoryVersions } from '../../../../shared/contracts';
@@ -60,21 +61,32 @@ const createHistoryVersionController = ({ strapi }: { strapi: Core.Strapi }) => 
         return ctx.forbidden();
       }
 
-      const params: HistoryVersions.GetHistoryVersions.Request['query'] =
+      const query: HistoryVersions.GetHistoryVersions.Request['query'] =
         await permissionChecker.sanitizeQuery(ctx.query);
 
       const { results, pagination } = await getService(strapi, 'history').findVersionsPage({
-        ...params,
-        ...getValidPagination({ page: params.page, pageSize: params.pageSize }),
+        query: {
+          ...query,
+          ...getValidPagination({ page: query.page, pageSize: query.pageSize }),
+        },
+        state: { userAbility: ctx.state.userAbility },
       });
 
+      const sanitizedResults = await async.map(
+        results,
+        async (version: HistoryVersions.HistoryVersionDataResponse & { locale: string }) => {
+          return {
+            ...version,
+            data: await permissionChecker.sanitizeOutput(version.data),
+            createdBy: version.createdBy
+              ? pick(['id', 'firstname', 'lastname', 'username', 'email'], version.createdBy)
+              : undefined,
+          };
+        }
+      );
+
       return {
-        data: await Promise.all(
-          results.map(async (result) => ({
-            ...result,
-            data: await permissionChecker.sanitizeOutput(result.data),
-          }))
-        ),
+        data: sanitizedResults,
         meta: { pagination },
       };
     },

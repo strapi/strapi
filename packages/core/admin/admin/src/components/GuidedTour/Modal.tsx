@@ -8,8 +8,8 @@ import {
   IconButton,
   Portal,
   Typography,
+  LinkButton,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system';
 import { ArrowRight, Cross } from '@strapi/icons';
 import get from 'lodash/get';
 import { MessageDescriptor, useIntl } from 'react-intl';
