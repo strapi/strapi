@@ -128,7 +128,7 @@ export default async (ctx: CLIContext) => {
       }
     }
     spinner.succeed('Authentication successful!');
-    logger.log('You are now logged in to Strapi Cloud.');
+    logger.log('You are now logged into Strapi Cloud.');
   };
 
   await authenticate();
