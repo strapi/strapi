@@ -12,7 +12,6 @@ const dtoFields = [
   'options',
   'pluginOptions',
   'attributes',
-  'pluginOptions',
 ];
 
 export default () => ({
