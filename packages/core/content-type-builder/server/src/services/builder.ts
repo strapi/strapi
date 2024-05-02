@@ -7,8 +7,8 @@ export const getReservedNames = () => {
       'date-time',
       'time',
       'upload',
-      'then', // https://github.com/strapi/strapi/issues/15557
       'document',
+      'then', // no longer an issue but still restricting for being a javascript keyword
     ],
     // attributes are compared with snake_case(name), so only snake_case is needed here and camelCase + UPPER_CASE matches will still be caught
     attributes: [
