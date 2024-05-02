@@ -15,8 +15,7 @@ export const AddStage = ({ children, ...props }: ButtonProps) => {
       shadow="filterShadow"
       {...props}
     >
-      {/* @ts-expect-error – textColor can accept css properties in the next DS release */}
-      <Typography variant="pi" fontWeight="bold" textColor="inherit">
+      <Typography variant="pi" fontWeight="bold">
         <Flex tag="span" gap={2}>
           <PlusCircle width="2.4rem" height="2.4rem" aria-hidden />
           {children}

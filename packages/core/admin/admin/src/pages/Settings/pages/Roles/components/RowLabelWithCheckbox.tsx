@@ -69,7 +69,7 @@ const RowLabelWithCheckbox = ({
         {...(isCollapsable && {
           onClick,
           'aria-expanded': isActive,
-          onKeyDown: ({ key }: React.KeyboardEvent<HTMLButtonElement>) =>
+          onKeyDown: ({ key }: React.KeyboardEvent<HTMLDivElement>) =>
             (key === 'Enter' || key === ' ') && onClick(),
           tabIndex: 0,
           role: 'button',

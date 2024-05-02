@@ -138,7 +138,6 @@ export const ReviewWorkflowsListView = () => {
               startIcon={<Plus />}
               size="S"
               tag={NavLink}
-              // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
               to="create"
               onClick={handleCreateClick}
             >
@@ -215,7 +214,6 @@ export const ReviewWorkflowsListView = () => {
                     <Flex alignItems="center" justifyContent="end">
                       {canRead || canUpdate ? (
                         <ActionLink
-                          // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
                           to={`${workflow.id}`}
                           aria-label={formatMessage(
                             {

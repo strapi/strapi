@@ -184,7 +184,6 @@ const App = () => {
                           <IconButton
                             tag="a"
                             disabled={!allowedActions.canRead}
-                            // @ts-expect-error invalid typing in IconButton
                             href={createDocumentationHref(`${data.prefix}/v${doc.version}`)}
                             noBorder
                             icon={<Show />}

@@ -12,6 +12,10 @@ import {
   Toggle,
   Typography,
   FieldAction,
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldHint,
 } from '@strapi/design-system';
 // Strapi Icons
 import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
@@ -115,42 +119,40 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                   </Typography>
                   <Grid gap={4}>
                     <GridItem col={6} s={12}>
-                      <Toggle
+                      <Field
                         name="restrictedAccess"
-                        label={formatMessage({
-                          id: getTrad('pages.SettingsPage.toggle.label'),
-                          defaultMessage: 'Restricted Access',
-                        })}
                         hint={formatMessage({
                           id: getTrad('pages.SettingsPage.toggle.hint'),
                           defaultMessage: 'Make the documentation endpoint private',
                         })}
-                        checked={values.restrictedAccess}
-                        onChange={() => {
-                          if (values.restrictedAccess === true) {
-                            setFieldValue('password', '', false);
-                            setFieldTouched('password', false, false);
-                            setFieldError('password', undefined);
-                          }
+                      >
+                        <FieldLabel>
+                          {formatMessage({
+                            id: getTrad('pages.SettingsPage.toggle.label'),
+                            defaultMessage: 'Restricted Access',
+                          })}
+                        </FieldLabel>
+                        <Toggle
+                          checked={values.restrictedAccess}
+                          onChange={() => {
+                            if (values.restrictedAccess === true) {
+                              setFieldValue('password', '', false);
+                              setFieldTouched('password', false, false);
+                              setFieldError('password', undefined);
+                            }
 
-                          setFieldValue('restrictedAccess', !values.restrictedAccess, false);
-                        }}
-                        onLabel="On"
-                        offLabel="Off"
-                      />
+                            setFieldValue('restrictedAccess', !values.restrictedAccess, false);
+                          }}
+                          onLabel="On"
+                          offLabel="Off"
+                        />
+                        <FieldHint />
+                      </Field>
                     </GridItem>
                     {values.restrictedAccess && (
                       <GridItem col={6} s={12}>
-                        <TextInput
-                          label={formatMessage({
-                            id: 'global.password',
-                            defaultMessage: 'Password',
-                          })}
+                        <Field
                           name="password"
-                          placeholder="**********"
-                          type={passwordShown ? 'text' : 'password'}
-                          value={values.password}
-                          onChange={handleChange}
                           error={
                             errors.password
                               ? formatMessage({
@@ -159,28 +161,42 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                                 })
                               : undefined
                           }
-                          endAction={
-                            <FieldActionWrapper
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setPasswordShown((prev) => !prev);
-                              }}
-                              label={formatMessage(
-                                passwordShown
-                                  ? {
-                                      id: 'Auth.form.password.show-password',
-                                      defaultMessage: 'Show password',
-                                    }
-                                  : {
-                                      id: 'Auth.form.password.hide-password',
-                                      defaultMessage: 'Hide password',
-                                    }
-                              )}
-                            >
-                              {passwordShown ? <Show /> : <Hide />}
-                            </FieldActionWrapper>
-                          }
-                        />
+                        >
+                          <FieldLabel>
+                            {formatMessage({
+                              id: 'global.password',
+                              defaultMessage: 'Password',
+                            })}
+                          </FieldLabel>
+                          <TextInput
+                            placeholder="**********"
+                            type={passwordShown ? 'text' : 'password'}
+                            value={values.password}
+                            onChange={handleChange}
+                            endAction={
+                              <FieldActionWrapper
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPasswordShown((prev) => !prev);
+                                }}
+                                label={formatMessage(
+                                  passwordShown
+                                    ? {
+                                        id: 'Auth.form.password.show-password',
+                                        defaultMessage: 'Show password',
+                                      }
+                                    : {
+                                        id: 'Auth.form.password.hide-password',
+                                        defaultMessage: 'Hide password',
+                                      }
+                                )}
+                              >
+                                {passwordShown ? <Show /> : <Hide />}
+                              </FieldActionWrapper>
+                            }
+                          />
+                          <FieldError />
+                        </Field>
                       </GridItem>
                     )}
                   </Grid>

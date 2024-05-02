@@ -13,6 +13,8 @@ import {
   SingleSelect,
   TextInput,
   Typography,
+  Field,
+  FieldLabel,
 } from '@strapi/design-system';
 import { Mail } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -197,51 +199,57 @@ const SettingsPage = () => {
 
                   <Grid gap={5}>
                     <GridItem col={6} s={12}>
-                      <TextInput
-                        name="shipper-email"
-                        label={formatMessage({
-                          id: 'email.Settings.email.plugin.label.defaultFrom',
-                          defaultMessage: 'Default sender email',
-                        })}
-                        placeholder={formatMessage({
-                          id: 'email.Settings.email.plugin.placeholder.defaultFrom',
-                          defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
-                        })}
-                        disabled
-                        value={data.settings.defaultFrom}
-                      />
+                      <Field name="shipper-email">
+                        <FieldLabel>
+                          {formatMessage({
+                            id: 'email.Settings.email.plugin.label.defaultFrom',
+                            defaultMessage: 'Default sender email',
+                          })}
+                        </FieldLabel>
+                        <TextInput
+                          placeholder={formatMessage({
+                            id: 'email.Settings.email.plugin.placeholder.defaultFrom',
+                            defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
+                          })}
+                          disabled
+                          value={data.settings.defaultFrom}
+                        />
+                      </Field>
                     </GridItem>
 
                     <GridItem col={6} s={12}>
-                      <TextInput
-                        name="response-email"
-                        label={formatMessage({
-                          id: 'email.Settings.email.plugin.label.defaultReplyTo',
-                          defaultMessage: 'Default response email',
-                        })}
-                        placeholder={formatMessage({
-                          id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
-                          defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
-                        })}
-                        disabled
-                        value={data.settings.defaultReplyTo}
-                      />
+                      <Field name="response-email">
+                        <FieldLabel>
+                          {formatMessage({
+                            id: 'email.Settings.email.plugin.label.defaultReplyTo',
+                            defaultMessage: 'Default response email',
+                          })}
+                        </FieldLabel>
+                        <TextInput
+                          placeholder={formatMessage({
+                            id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
+                            defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
+                          })}
+                          disabled
+                          value={data.settings.defaultReplyTo}
+                        />
+                      </Field>
                     </GridItem>
 
                     <GridItem col={6} s={12}>
-                      <SingleSelect
-                        name="email-provider"
-                        label={formatMessage({
-                          id: 'email.Settings.email.plugin.label.provider',
-                          defaultMessage: 'Email provider',
-                        })}
-                        disabled
-                        value={data.provider}
-                      >
-                        <SingleSelectOption value={data.provider}>
-                          {data.provider}
-                        </SingleSelectOption>
-                      </SingleSelect>
+                      <Field name="email-provider">
+                        <FieldLabel>
+                          {formatMessage({
+                            id: 'email.Settings.email.plugin.label.provider',
+                            defaultMessage: 'Email provider',
+                          })}
+                        </FieldLabel>
+                        <SingleSelect disabled value={data.provider}>
+                          <SingleSelectOption value={data.provider}>
+                            {data.provider}
+                          </SingleSelectOption>
+                        </SingleSelect>
+                      </Field>
                     </GridItem>
                   </Grid>
                 </Flex>
@@ -268,15 +276,8 @@ const SettingsPage = () => {
 
                 <Grid gap={5}>
                   <GridItem col={6} s={12}>
-                    <TextInput
-                      id="test-address-input"
+                    <Field
                       name="test-address"
-                      onChange={handleChange}
-                      label={formatMessage({
-                        id: 'email.Settings.email.plugin.label.testAddress',
-                        defaultMessage: 'Recipient email',
-                      })}
-                      value={testAddress}
                       error={
                         formErrors.email?.id &&
                         formatMessage({
@@ -284,11 +285,22 @@ const SettingsPage = () => {
                           defaultMessage: 'This is not a valid email',
                         })
                       }
-                      placeholder={formatMessage({
-                        id: 'email.Settings.email.plugin.placeholder.testAddress',
-                        defaultMessage: 'ex: developer@example.com',
-                      })}
-                    />
+                    >
+                      <FieldLabel>
+                        {formatMessage({
+                          id: 'email.Settings.email.plugin.label.testAddress',
+                          defaultMessage: 'Recipient email',
+                        })}
+                      </FieldLabel>
+                      <TextInput
+                        onChange={handleChange}
+                        value={testAddress}
+                        placeholder={formatMessage({
+                          id: 'email.Settings.email.plugin.placeholder.testAddress',
+                          defaultMessage: 'ex: developer@example.com',
+                        })}
+                      />
+                    </Field>
                   </GridItem>
                   <GridItem col={7} s={12}>
                     <Button

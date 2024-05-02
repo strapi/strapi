@@ -6,6 +6,8 @@ import {
   Dialog,
   DialogBody,
   DialogFooter,
+  Field,
+  FieldHint,
   Flex,
   Typography,
 } from '@strapi/design-system';
@@ -78,16 +80,12 @@ const CheckboxConfirmation = ({
 
   return (
     <>
-      <Checkbox
-        hint={hint}
-        id={name}
-        name={name}
-        onValueChange={handleChange}
-        value={value}
-        type="checkbox"
-      >
-        {label}
-      </Checkbox>
+      <Field hint={hint} name={name}>
+        <Checkbox onValueChange={handleChange} value={value} type="checkbox">
+          {label}
+        </Checkbox>
+        <FieldHint />
+      </Field>
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<WarningCircle />}>

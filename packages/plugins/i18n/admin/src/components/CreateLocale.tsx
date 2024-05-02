@@ -16,6 +16,10 @@ import {
   Button,
   ButtonProps,
   Divider,
+  Field,
+  FieldError,
+  FieldHint,
+  FieldLabel,
   Flex,
   Grid,
   GridItem,
@@ -414,25 +418,24 @@ const EnumerationInput = ({
   };
 
   return (
-    <SingleSelect
-      disabled={disabled}
-      error={error}
-      hint={hint}
-      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-      label={label}
-      name={name}
-      // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
-      onChange={handleChange}
-      placeholder={placeholder}
-      required={required}
-      value={value}
-    >
-      {options.map((option) => (
-        <SingleSelectOption value={option.value} key={option.value}>
-          {option.label}
-        </SingleSelectOption>
-      ))}
-    </SingleSelect>
+    <Field error={error} hint={hint} name={name} required={required}>
+      <FieldLabel>{label}</FieldLabel>
+      <SingleSelect
+        disabled={disabled}
+        // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
+        onChange={handleChange}
+        placeholder={placeholder}
+        value={value}
+      >
+        {options.map((option) => (
+          <SingleSelectOption value={option.value} key={option.value}>
+            {option.label}
+          </SingleSelectOption>
+        ))}
+      </SingleSelect>
+      <FieldError />
+      <FieldHint />
+    </Field>
   );
 };
 

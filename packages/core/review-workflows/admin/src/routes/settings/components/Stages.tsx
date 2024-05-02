@@ -28,6 +28,11 @@ import {
   useComposedRefs,
   Menu,
   MenuItem,
+  IconButtonComponent,
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldHint,
 } from '@strapi/design-system';
 import { Duplicate, Drag, More, EyeStriked } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -243,7 +248,7 @@ const Stage = ({
   };
 
   return (
-    <Box ref={(ref) => composedRef(ref!)}>
+    <Box ref={composedRef}>
       {liveText && <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>}
 
       {isDragging ? (
@@ -318,7 +323,6 @@ const Stage = ({
                   {canUpdate && (
                     <DragIconButton
                       background="transparent"
-                      // @ts-expect-error – `forwardedAs` can be a string.
                       tag="div"
                       hasRadius
                       role="button"
@@ -410,10 +414,7 @@ const ContextMenuTrigger = styled(Menu.Trigger)`
   }
 `;
 
-// As soon as either `as` or `forwardedAs` is set, the component
-// resets some styles and e.g. the `hasBorder` prop no longer works,
-// which is why this bit of CSS has been added manually ¯\_(ツ)_/¯
-const DragIconButton = styled(IconButton)`
+const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton)`
   align-items: center;
   border-radius: ${({ theme }) => theme.borderRadius};
   display: flex;
@@ -563,26 +564,32 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
 
   if (!isLoading && filteredRoles.length === 0) {
     return (
-      <TextInput
-        disabled
+      <Field
         name={name}
         hint={formatMessage({
           id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
           defaultMessage: 'You don’t have the permission to see roles',
         })}
-        label={formatMessage({
-          id: 'Settings.review-workflows.stage.permissions.label',
-          defaultMessage: 'Roles that can change this stage',
-        })}
-        placeholder={formatMessage({
-          id: 'components.NotAllowedInput.text',
-          defaultMessage: 'No permissions to see this field',
-        })}
         required={required}
-        startAction={<StyledIcon />}
-        type="text"
-        value=""
-      />
+      >
+        <FieldLabel>
+          {formatMessage({
+            id: 'Settings.review-workflows.stage.permissions.label',
+            defaultMessage: 'Roles that can change this stage',
+          })}
+        </FieldLabel>
+        <TextInput
+          disabled
+          placeholder={formatMessage({
+            id: 'components.NotAllowedInput.text',
+            defaultMessage: 'No permissions to see this field',
+          })}
+          startAction={<StyledIcon />}
+          type="text"
+          value=""
+        />
+        <FieldHint />
+      </Field>
     );
   }
 
@@ -590,47 +597,49 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
     <>
       <Flex alignItems="flex-end" gap={3}>
         <PermissionWrapper grow={1}>
-          <MultiSelect
-            disabled={disabled}
-            error={error}
-            id={name}
-            label={formatMessage({
-              id: 'Settings.review-workflows.stage.permissions.label',
-              defaultMessage: 'Roles that can change this stage',
-            })}
-            onChange={(values) => {
-              // Because the select components expects strings for values, but
-              // the yup schema validates we are sending full permission objects to the API,
-              // we must coerce the string value back to an object
-              const permissions = values.map((value) => ({
-                role: parseInt(value, 10),
-                action: 'admin::review-workflows.stage.transition',
-              }));
+          <Field error={error} name={name} required>
+            <FieldLabel>
+              {formatMessage({
+                id: 'Settings.review-workflows.stage.permissions.label',
+                defaultMessage: 'Roles that can change this stage',
+              })}
+            </FieldLabel>
+            <MultiSelect
+              disabled={disabled}
+              onChange={(values) => {
+                // Because the select components expects strings for values, but
+                // the yup schema validates we are sending full permission objects to the API,
+                // we must coerce the string value back to an object
+                const permissions = values.map((value) => ({
+                  role: parseInt(value, 10),
+                  action: 'admin::review-workflows.stage.transition',
+                }));
 
-              onChange(name, permissions);
-            }}
-            placeholder={placeholder}
-            required
-            // The Select component expects strings for values
-            value={value.map((permission) => `${permission.role}`)}
-            withTags
-          >
-            <MultiSelectGroup
-              label={formatMessage({
-                id: 'Settings.review-workflows.stage.permissions.allRoles.label',
-                defaultMessage: 'All roles',
-              })}
-              values={filteredRoles.map((r) => `${r.id}`)}
+                onChange(name, permissions);
+              }}
+              placeholder={placeholder}
+              // The Select component expects strings for values
+              value={value.map((permission) => `${permission.role}`)}
+              withTags
             >
-              {filteredRoles.map((role) => {
-                return (
-                  <NestedOption key={role.id} value={`${role.id}`}>
-                    {role.name}
-                  </NestedOption>
-                );
-              })}
-            </MultiSelectGroup>
-          </MultiSelect>
+              <MultiSelectGroup
+                label={formatMessage({
+                  id: 'Settings.review-workflows.stage.permissions.allRoles.label',
+                  defaultMessage: 'All roles',
+                })}
+                values={filteredRoles.map((r) => `${r.id}`)}
+              >
+                {filteredRoles.map((role) => {
+                  return (
+                    <NestedOption key={role.id} value={`${role.id}`}>
+                      {role.name}
+                    </NestedOption>
+                  );
+                })}
+              </MultiSelectGroup>
+            </MultiSelect>
+            <FieldError />
+          </Field>
         </PermissionWrapper>
 
         <IconButton
