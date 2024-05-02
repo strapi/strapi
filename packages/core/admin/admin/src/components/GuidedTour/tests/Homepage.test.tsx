@@ -35,7 +35,7 @@ const App = (
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={{}} textComponent="span">
         <Router history={history}>
-          <GuidedTourHomepage />
+          <GuidedTourHomepage userRole={'super-admin'} />
         </Router>
       </IntlProvider>
     </ThemeProvider>

@@ -29,7 +29,7 @@ describe('<GuidedTourModal />', () => {
   it('should match the snapshot with contentTypeBuilder.create layout', async () => {
     render(<GuidedTourModal />);
 
-    expect(screen.getByText('🧠 Create a first Collection type')).toBeInTheDocument();
+    expect(screen.getByText('🧠 Create a first Collection Type')).toBeInTheDocument();
 
     expect(document.body).toMatchInlineSnapshot(`
       .c2 {

@@ -26,7 +26,7 @@ describe('GuidedTour', () => {
       const { setGuidedTourVisibility, isGuidedTourVisible } = useGuidedTour();
 
       React.useEffect(() => {
-        setGuidedTourVisibility(true);
+        setGuidedTourVisibility(true, 'super-admin');
       }, [setGuidedTourVisibility]);
 
       return <div>{isGuidedTourVisible && <p>hello guided tour</p>}</div>;
@@ -46,7 +46,7 @@ describe('GuidedTour', () => {
       const { setGuidedTourVisibility, isGuidedTourVisible } = useGuidedTour();
 
       React.useEffect(() => {
-        setGuidedTourVisibility(false);
+        setGuidedTourVisibility(false, 'super-admin');
       }, [setGuidedTourVisibility]);
 
       return <div>{isGuidedTourVisible && <p>hello guided tour</p>}</div>;
@@ -126,7 +126,6 @@ describe('GuidedTour', () => {
       const { startSection, currentStep } = useGuidedTour();
 
       React.useEffect(() => {
-        // @ts-expect-error – testing it doesn't do something we don't want it too.
         startSection('failTest');
       }, [startSection]);
 
