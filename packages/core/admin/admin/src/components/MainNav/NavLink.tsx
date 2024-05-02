@@ -39,11 +39,7 @@ const MainNavLinkWrapper = styled(RouterLink)`
 `;
 
 const LinkImpl = ({ children, ...props }: LinkProps) => {
-  return (
-    <Flex as="li">
-      <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>
-    </Flex>
-  );
+  return <MainNavLinkWrapper {...props}>{children}</MainNavLinkWrapper>;
 };
 
 /* -------------------------------------------------------------------------------------------------
