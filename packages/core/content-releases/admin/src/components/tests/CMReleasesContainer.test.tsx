@@ -108,7 +108,7 @@ describe('CMReleasesContainer', () => {
       rest.get('/content-releases', (req, res, ctx) => {
         return res(
           ctx.json({
-            data: [{ name: 'release1', id: '1', action: { type: 'publish' } }],
+            data: [{ name: 'release1', id: '1', actions: [{ type: 'publish' }] }],
           })
         );
       })
@@ -135,8 +135,8 @@ describe('CMReleasesContainer', () => {
         return res(
           ctx.json({
             data: [
-              { name: 'release1', id: '1', action: { type: 'publish' } },
-              { name: 'release2', id: '2', action: { type: 'unpublish' } },
+              { name: 'release1', id: '1', actions: [{ type: 'publish' }] },
+              { name: 'release2', id: '2', actions: [{ type: 'unpublish' }] },
             ],
           })
         );
@@ -162,7 +162,7 @@ describe('CMReleasesContainer', () => {
               {
                 name: 'release1',
                 id: '1',
-                action: { type: 'publish' },
+                actions: [{ type: 'publish' }],
                 scheduledAt: '2024-01-01T10:00:00.000Z',
                 timezone: 'Europe/Paris',
               },

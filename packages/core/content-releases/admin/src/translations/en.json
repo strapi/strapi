@@ -24,6 +24,7 @@
   "content-manager-list-view.add-to-release.notification.success.title": "Successfully added to release.",
   "content-manager-list-view.add-to-release.notification.success.message": "{entriesAlreadyInRelease} out of {totalEntries} entries were already in the release.",
   "content-manager.notification.entry-error": "Failed to get entry data",
+  "content-manager.list-view.releases-number": "{number} {number, plural, one {release} other {releases}}",
   "plugin.name": "Releases",
   "pages.Releases.title": "Releases",
   "pages.Releases.header-subtitle": "Create and manage content updates",
