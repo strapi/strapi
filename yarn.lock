@@ -7920,6 +7920,7 @@ __metadata:
     sift: "npm:16.0.1"
     slate: "npm:0.94.1"
     slate-history: "npm:0.93.0"
+    slate-hyperscript: "npm:0.100.0"
     slate-react: "npm:0.98.3"
     style-loader: "npm:3.3.4"
     styled-components: "npm:5.3.3"
@@ -13181,17 +13182,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caniuse-lite@npm:^1.0.30001541":
-  version: 1.0.30001542
-  resolution: "caniuse-lite@npm:1.0.30001542"
-  checksum: 07b14b8341d7bf0ea386a5fa5b5edbee41d81dfc072d3d11db22dd1d7a929358f522b16fdf3cbd154c8a5cae84662578cf5c9e490e7d7606ee7d156ccf07c9fa
-  languageName: node
-  linkType: hard
-
-"caniuse-lite@npm:^1.0.30001565":
-  version: 1.0.30001576
-  resolution: "caniuse-lite@npm:1.0.30001576"
-  checksum: 51632942733593f310e581bd91c9558b8d75fbf67160a39f8036d2976cd7df9183e96d4c9d9e6f18e0205950b940d9c761bcfb7810962d7899f8a1179fde6e3f
+"caniuse-lite@npm:^1.0.30001541, caniuse-lite@npm:^1.0.30001565":
+  version: 1.0.30001615
+  resolution: "caniuse-lite@npm:1.0.30001615"
+  checksum: 3dfb48e9b8fbf4d550cf204075b170ef4a5bcbc7faf9e14b03dc7456ac1aec2da1405d4fca808bc72b47a2ca0818d6d138aa62769548472440ff605ad1313719
   languageName: node
   linkType: hard
 

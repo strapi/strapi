@@ -1,6 +1,6 @@
 import { Transforms } from 'slate';
-import { jsx } from 'slate-hyperscript';
 import { type Editor } from 'slate';
+import { jsx } from 'slate-hyperscript';
 
 const ELEMENT_TAGS = {
   A: (el: HTMLAnchorElement) => ({ type: 'link', url: el.getAttribute('href') }),
