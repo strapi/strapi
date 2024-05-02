@@ -401,7 +401,11 @@ export default {
         // data: setCreatorFields({ user, isEdition: true })({}),
       });
 
-      return publishResult.at(0);
+      if (!publishResult || publishResult.length === 0) {
+        throw new errors.NotFoundError('Document not found or already published.');
+      }
+
+      return publishResult[0];
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);

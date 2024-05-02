@@ -32,23 +32,23 @@ const defaultLocale: AsyncTransform = async (contentType, params) => {
  * Add locale lookup query to the params
  */
 const localeToLookup: Transform = (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (
+    !params.locale ||
+    !strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)
+  ) {
     return params;
   }
 
-  if (params.locale) {
-    const isValidLocale = typeof params.locale === 'string';
-
-    if (isValidLocale) {
-      return assoc(['lookup', 'locale'], params.locale, params);
-    }
-
+  if (typeof params.locale !== 'string') {
+    // localeToLookup accepts locales of '*'. This is because the document
+    // service functions that use this transform work with the '*' locale
+    // to return all locales.
     throw new errors.ValidationError(
-      `Invalid locale param ${params.locale} provided. Document locales must be strings.`
+      `Invalid locale param ${String(params.locale)} provided. Document locales must be strings.`
     );
   }
 
-  return params;
+  return assoc(['lookup', 'locale'], params.locale, params);
 };
 
 /**

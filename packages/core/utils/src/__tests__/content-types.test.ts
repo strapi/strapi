@@ -133,6 +133,13 @@ describe('Content types utils', () => {
     test('true for fields with a min length', () => {
       expect(getDoesAttributeRequireValidation({ type: 'string', minLength: 10 })).toEqual(true);
     });
+    test('false for non-required fields', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', required: false })).toEqual(false);
+    });
+
+    test('false for non-unique fields', () => {
+      expect(getDoesAttributeRequireValidation({ type: 'string', unique: false })).toEqual(false);
+    });
   });
 
   describe('getPrivateAttributes', () => {

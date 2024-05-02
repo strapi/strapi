@@ -28,8 +28,6 @@ export const formatDocumentWithMetadata = async (
     meta: { availableLocales, availableStatus },
   } = serviceOutput;
 
-  // Always sanitize passwords
-
   const metadataSanitizer = permissionChecker.sanitizeOutput;
 
   availableLocales = await async.map(
