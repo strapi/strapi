@@ -43,6 +43,10 @@ const DEFAULT_UNEXPECTED_ERROR_MSG = {
   defaultMessage: 'An error occurred, please try again',
 } satisfies MessageDescriptor;
 
+type BulkOperationResponse<TResponse extends { data: any; error?: any }> =
+  | Pick<TResponse, 'data'>
+  | { error: BaseQueryError | SerializedError };
+
 type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }> =
   | Pick<TResponse, 'data'>
   | Pick<TResponse, 'data' | 'meta'>
@@ -117,8 +121,8 @@ type UseDocumentActions = () => {
   publishMany: (args: {
     model: string;
     documentIds: string[];
-    params: object;
-  }) => Promise<OperationResponse<BulkPublish.Response>>;
+    params?: object;
+  }) => Promise<BulkOperationResponse<BulkPublish.Response>>;
   update: (
     args: {
       collectionType: string;

@@ -1,9 +1,11 @@
-import { translatedErrors } from '@strapi/admin/strapi-admin';
+import { translatedErrors, FormErrors } from '@strapi/admin/strapi-admin';
 import pipe from 'lodash/fp/pipe';
-import { MessageDescriptor, PrimitiveType } from 'react-intl';
+import { type MessageDescriptor } from 'react-intl';
 import * as yup from 'yup';
 
 import { DOCUMENT_META_FIELDS } from '../constants/attributes';
+
+import { getIn, setIn } from './objects';
 
 import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
 import type { Schema as SchemaUtils } from '@strapi/types';
@@ -102,13 +104,17 @@ const createYupSchema = (
                     if (!value) {
                       return yup.mixed().nullable(true);
                     } else if (Array.isArray(value)) {
+                      // If a relation value is an array, we expect
+                      // an array of objects with {id} properties, representing the related entities.
                       return yup.array().of(
                         yup.object().shape({
                           id: yup.string().required(),
                         })
                       );
                     } else if (typeof value === 'object') {
-                      // TODO assert for specific keys such as connect, disconnect, count?
+                      // A realtion value can also be an object. Some API
+                      // repsonses return the number of entities in the relation
+                      // as { count: x }
                       return yup.object();
                     } else {
                       return yup
@@ -327,55 +333,37 @@ const addRegexValidation: ValidationFn =
  * getInnerErrors
  * -----------------------------------------------------------------------------------------------*/
 
-interface TranslationMessage extends MessageDescriptor {
-  values?: Record<string, PrimitiveType>;
-}
-
-const extractValuesFromYupError = (
-  errorType?: string | undefined,
-  errorParams?: Record<string, any> | undefined
-) => {
-  if (!errorType || !errorParams) {
-    return {};
-  }
-
-  return {
-    [errorType]: errorParams[errorType],
-  };
-};
-
-const isMessageDescriptor = (obj: unknown): obj is MessageDescriptor => {
+const isErrorMessageDescriptor = (object?: string | object): object is MessageDescriptor => {
   return (
-    obj !== null &&
-    typeof obj === 'object' &&
-    'id' in obj &&
-    typeof obj.id === 'string' &&
-    'defaultMessage' in obj &&
-    typeof obj.defaultMessage === 'string'
+    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
   );
 };
 
-const getInnerErrors = (error: yup.ValidationError) =>
-  (error?.inner || []).reduce<Record<string, TranslationMessage>>((acc, currentError) => {
-    if (currentError.path) {
-      const key = currentError.path.split('[').join('.').split(']').join('');
-      const message = currentError.message;
+const getInnerErrors = (error: yup.ValidationError): FormErrors => {
+  let errors: FormErrors = {};
 
-      if (isMessageDescriptor(message)) {
-        acc[key] = {
-          ...(message as MessageDescriptor),
-          values: extractValuesFromYupError(currentError?.type, currentError?.params),
-        };
-      } else {
-        acc[key] = {
-          id: message,
-          defaultMessage: message,
-          values: extractValuesFromYupError(currentError?.type, currentError?.params),
-        };
-      }
+  if (error.inner) {
+    if (error.inner.length === 0 && error.path) {
+      errors = setIn(errors, error.path, error.message);
+      return errors;
     }
 
-    return acc;
-  }, {});
+    error.inner.forEach((innerError) => {
+      if (innerError.path && !getIn(errors, innerError.path)) {
+        const message = isErrorMessageDescriptor(innerError.message)
+          ? innerError.message
+          : {
+              id: innerError.message,
+              defaultMessage: innerError.message,
+              values: innerError.params,
+            };
+
+        errors = setIn(errors, innerError.path, message);
+      }
+    });
+  }
+
+  return errors;
+};
 
 export { createYupSchema, getInnerErrors };

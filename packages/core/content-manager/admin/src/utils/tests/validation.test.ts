@@ -105,11 +105,20 @@ describe('validation', () => {
       } satisfies ValidationError;
 
       expect(getInnerErrors(dynamicZoneErrors)).toMatchObject({
-        'dynamicZone.0.number': {
-          id: 'components.Input.error.validation.max',
-          defaultMessage: 'components.Input.error.validation.max',
-          values: { max: 5 },
-        },
+        dynamicZone: [
+          {
+            number: {
+              defaultMessage: 'components.Input.error.validation.max',
+              id: 'components.Input.error.validation.max',
+              values: {
+                max: 5,
+                originalValue: 6,
+                path: 'dynamicZone[0].number',
+                value: 6,
+              },
+            },
+          },
+        ],
       });
     });
   });

@@ -4,7 +4,6 @@
  * but should still export the same things.
  */
 
-export * from './pages/EditView/components/DocumentStatus';
 export {
   useGetDraftRelationCountQuery,
   useGetManyDraftRelationCountQuery,

@@ -474,7 +474,7 @@ const isErrorYupValidationError = (err: any): err is Yup.ValidationError =>
  * reducer
  * -----------------------------------------------------------------------------------------------*/
 
-type FormErrors<TFormValues extends FormValues = FormValues> = {
+export type FormErrors<TFormValues extends FormValues = FormValues> = {
   // is it a repeatable component or dynamic zone?
   [Key in keyof TFormValues]?: TFormValues[Key] extends any[]
     ? TFormValues[Key][number] extends object

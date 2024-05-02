@@ -1,9 +1,8 @@
 import * as React from 'react';
 
 import { Table, useTable } from '@strapi/admin/strapi-admin';
-import { Box, Typography, IconButton, Flex, Tooltip } from '@strapi/design-system';
+import { Box, Typography, IconButton, Flex, Tooltip, Status } from '@strapi/design-system';
 import { Pencil, CheckCircle, CrossCircle, ArrowsCounterClockwise } from '@strapi/icons';
-import { DocumentStatus } from '@strapi/plugin-content-manager/strapi-admin';
 import { Modules } from '@strapi/types';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
@@ -12,6 +11,7 @@ import styled from 'styled-components';
 
 import { Locale } from '../../../shared/contracts/locales';
 import { getTranslation } from '../utils/getTranslation';
+import { capitalize } from '../utils/strings';
 
 import { LocaleStatus } from './CMHeaderActions';
 
@@ -187,6 +187,9 @@ const BulkLocaleActionModal = ({
             {rows.map(({ locale, status }, index) => {
               const error = validationErrors?.[locale] ?? null;
 
+              const statusVariant =
+                status === 'draft' ? 'primary' : status === 'published' ? 'success' : 'alternative';
+
               return (
                 <Table.Row key={index}>
                   <Table.CheckboxCell id={locale} aria-label={`Select ${locale}`} />
@@ -199,7 +202,20 @@ const BulkLocaleActionModal = ({
                   </Table.Cell>
                   <Table.Cell>
                     <Box display="flex">
-                      <DocumentStatus status={status} />
+                      <Status
+                        display="flex"
+                        paddingLeft="6px"
+                        paddingRight="6px"
+                        paddingTop="2px"
+                        paddingBottom="2px"
+                        showBullet={false}
+                        size={'S'}
+                        variant={statusVariant}
+                      >
+                        <Typography as="span" variant="pi" fontWeight="bold">
+                          {capitalize(status)}
+                        </Typography>
+                      </Status>
                     </Box>
                   </Table.Cell>
                   <Table.Cell>

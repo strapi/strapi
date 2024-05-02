@@ -97,7 +97,11 @@ describe('useDocument', () => {
           "defaultMessage": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
           "id": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
           "values": {
-            "typeError": undefined,
+            "label": undefined,
+            "originalValue": 12,
+            "path": "postal_code",
+            "type": "string",
+            "value": 12,
           },
         },
       }
