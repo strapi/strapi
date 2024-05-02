@@ -62,7 +62,6 @@ export const EmptyAttributes = () => {
           </Box>
           <LinkButton
             tag={Link}
-            // @ts-expect-error We need to accept the props of the component passed in the `as` prop
             to={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
             variant="secondary"
             startIcon={<Plus />}

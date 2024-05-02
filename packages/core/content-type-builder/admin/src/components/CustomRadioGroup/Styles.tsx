@@ -58,9 +58,7 @@ const Wrapper = styled(Flex)`
 
   .container input:checked ~ div {
     background: ${({ theme }) => theme.colors.primary100};
-    ${Typography} {
-      color: ${({ theme }) => theme.colors.primary600};
-    }
+    color: ${({ theme }) => theme.colors.primary600};
     border: 1px solid ${({ theme }) => theme.colors.primary200};
     .checkmark {
       border: solid 1px ${({ theme }) => theme.colors.primary600};

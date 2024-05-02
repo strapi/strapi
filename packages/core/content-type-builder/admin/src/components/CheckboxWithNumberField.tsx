@@ -1,6 +1,14 @@
 import { useState } from 'react';
 
-import { Box, Checkbox, Flex, NumberInput, TextInput } from '@strapi/design-system';
+import {
+  Box,
+  Checkbox,
+  Field,
+  FieldError,
+  Flex,
+  NumberInput,
+  TextInput,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { IntlLabel } from '../types';
@@ -55,28 +63,27 @@ export const CheckboxWithNumberField = ({
       {showInput && (
         <Box paddingLeft={6} style={{ maxWidth: '200px' }}>
           {type === 'text' ? (
-            <TextInput
-              label=""
-              aria-label={label}
-              disabled={disabled}
-              error={errorMessage}
-              id={name}
-              name={name}
-              onChange={onChange}
-              value={value === null ? '' : value}
-            />
+            <Field error={errorMessage} name={name}>
+              <TextInput
+                aria-label={label}
+                disabled={disabled}
+                onChange={onChange}
+                value={value === null ? '' : value}
+              />
+              <FieldError />
+            </Field>
           ) : (
-            <NumberInput
-              aria-label={label}
-              disabled={disabled}
-              error={errorMessage}
-              id={name}
-              name={name}
-              onValueChange={(value: any) => {
-                onChange({ target: { name, value, type } });
-              }}
-              value={value || 0}
-            />
+            <Field error={errorMessage} name={name}>
+              <NumberInput
+                aria-label={label}
+                disabled={disabled}
+                onValueChange={(value: any) => {
+                  onChange({ target: { name, value, type } });
+                }}
+                value={value || 0}
+              />
+              <FieldError />
+            </Field>
           )}
         </Box>
       )}

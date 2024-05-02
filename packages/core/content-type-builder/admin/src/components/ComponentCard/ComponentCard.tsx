@@ -46,13 +46,10 @@ const ComponentBox = styled(Flex)`
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.primary200};
     background: ${({ theme }) => theme.colors.primary100};
+    color: ${({ theme }) => theme.colors.primary600};
 
     ${CloseButton} {
       display: block;
-    }
-
-    ${Typography} {
-      color: ${({ theme }) => theme.colors.primary600};
     }
 
     /* > ComponentIcon */

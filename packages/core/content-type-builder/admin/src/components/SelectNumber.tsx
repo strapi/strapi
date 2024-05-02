@@ -1,4 +1,11 @@
-import { SingleSelectOption, SingleSelect } from '@strapi/design-system';
+import {
+  SingleSelectOption,
+  SingleSelect,
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldHint,
+} from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 type SelectNumberProps = {
@@ -90,22 +97,19 @@ export const SelectNumber = ({
   };
 
   return (
-    <SingleSelect
-      error={errorMessage}
-      label={label}
-      id={name}
-      name={name}
-      onChange={handleChange}
-      value={value || ''}
-    >
-      {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
-        return (
-          <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
-            {formatMessage(intlLabel)}
-          </SingleSelectOption>
-        );
-      })}
-    </SingleSelect>
+    <Field error={errorMessage} name={name}>
+      <FieldLabel>{label}</FieldLabel>
+      <SingleSelect onChange={handleChange} value={value || ''}>
+        {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
+          return (
+            <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
+              {formatMessage(intlLabel)}
+            </SingleSelectOption>
+          );
+        })}
+      </SingleSelect>
+      <FieldError />
+    </Field>
   );
 };
 

@@ -1,6 +1,6 @@
 import { ReactNode, ChangeEvent } from 'react';
 
-import { Textarea } from '@strapi/design-system';
+import { Field, FieldError, FieldHint, FieldLabel, Textarea } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import type { IntlLabel } from '../types';
@@ -53,19 +53,18 @@ export const TextareaEnum = ({
   };
 
   return (
-    <Textarea
-      disabled={disabled}
-      error={errorMessage}
-      label={label}
-      labelAction={labelAction}
-      id={name}
-      hint={hint}
-      name={name}
-      onChange={handleChange}
-      placeholder={formattedPlaceholder}
-      value={inputValue}
-    >
-      {inputValue}
-    </Textarea>
+    <Field error={errorMessage} hint={hint} name={name}>
+      <FieldLabel action={labelAction}>{label}</FieldLabel>
+      <Textarea
+        disabled={disabled}
+        onChange={handleChange}
+        placeholder={formattedPlaceholder}
+        value={inputValue}
+      >
+        {inputValue}
+      </Textarea>
+      <FieldError />
+      <FieldHint />
+    </Field>
   );
 };

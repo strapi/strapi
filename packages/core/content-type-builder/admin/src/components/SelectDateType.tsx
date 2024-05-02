@@ -1,4 +1,10 @@
-import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
+import {
+  Field,
+  FieldError,
+  FieldLabel,
+  SingleSelect,
+  SingleSelectOption,
+} from '@strapi/design-system';
 import { PrimitiveType, useIntl } from 'react-intl';
 
 type SelectDateTypeProps = {
@@ -63,24 +69,21 @@ export const SelectDateType = ({
   };
 
   return (
-    <SingleSelect
-      error={errorMessage}
-      label={label}
-      id={name}
-      name={name}
-      onChange={handleChange}
-      value={value || ''}
-    >
-      {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
-        return (
-          <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
-            {formatMessage(
-              { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
-              intlLabel.values
-            )}
-          </SingleSelectOption>
-        );
-      })}
-    </SingleSelect>
+    <Field error={errorMessage} name={name}>
+      <FieldLabel>{label}</FieldLabel>
+      <SingleSelect onChange={handleChange} value={value || ''}>
+        {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
+          return (
+            <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
+              {formatMessage(
+                { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
+                intlLabel.values
+              )}
+            </SingleSelectOption>
+          );
+        })}
+      </SingleSelect>
+      <FieldError />
+    </Field>
   );
 };
