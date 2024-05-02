@@ -1,5 +1,5 @@
 {
-  "name": "@strapi/plugin-content-manager",
+  "name": "@strapi/content-manager",
   "version": "5.0.0-beta.5",
   "description": "A powerful UI to easily manage your data.",
   "repository": {

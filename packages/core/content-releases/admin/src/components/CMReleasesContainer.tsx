@@ -8,6 +8,7 @@ import {
   useRBAC,
   isFetchError,
 } from '@strapi/admin/strapi-admin';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Box,
   Button,
@@ -25,7 +26,6 @@ import {
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useParams } from 'react-router-dom';

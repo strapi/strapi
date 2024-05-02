@@ -1,5 +1,5 @@
 {
-  "name": "@strapi/plugin-upload",
+  "name": "@strapi/upload",
   "version": "5.0.0-beta.5",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",

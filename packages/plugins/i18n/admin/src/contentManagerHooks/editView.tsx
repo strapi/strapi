@@ -8,7 +8,7 @@ import styled from 'styled-components';
 
 import { getTranslation } from '../utils/getTranslation';
 
-import type { EditFieldLayout, EditLayout } from '@strapi/plugin-content-manager/strapi-admin';
+import type { EditFieldLayout, EditLayout } from '@strapi/content-manager/strapi-admin';
 
 interface MutateEditViewArgs {
   layout: EditLayout;

@@ -29,7 +29,7 @@ import { type FormValues, INITIAL_VALUES, RELEASE_ACTION_FORM_SCHEMA } from './C
 import { NoReleases } from './CMReleasesContainer';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
-import type { BulkActionComponent } from '@strapi/plugin-content-manager/strapi-admin';
+import type { BulkActionComponent } from '@strapi/content-manager/strapi-admin';
 
 const getContentPermissions = (subject: string) => {
   const permissions = {
