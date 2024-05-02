@@ -2,15 +2,17 @@ import { isArray, isString, isUndefined, constant } from 'lodash/fp';
 import { objectType } from 'nexus';
 import { contentTypes } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-
 import type { Context } from '../types';
+import { blocks } from 'nexus';
+import { CacheHint, CacheScope } from 'apollo-server-types';
 
-export type TypeBuildersOptions = {
-  builder: any;
+export type TypeBuildersOptions<TypeName extends string = string> = {
+  builder: Omit<blocks.OutputDefinitionBlock<TypeName>, 'nonNull' | 'nullable'>;
   attributeName: string;
   attribute: any;
   contentType: any;
   context: Context;
+  cacheHint: CacheHint;
 };
 
 export default (context: Context) => {
@@ -26,13 +28,20 @@ export default (context: Context) => {
    * type and a GraphQL type (the map is defined in `strapiTypeToGraphQLScalar`)
    */
   const addScalarAttribute = (options: TypeBuildersOptions) => {
-    const { builder, attributeName, attribute } = options;
+    const { builder, attributeName, attribute, cacheHint } = options;
 
     const { mappers } = getGraphQLService('utils');
 
     const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
-    builder.field(attributeName, { type: gqlType });
+    builder.field(attributeName, {
+      type: gqlType,
+      // TODO: Probably we don't need to cache scalar values
+      resolve: (parent, _args, _context, info) => {
+        info.cacheControl.setCacheHint(cacheHint);
+        return parent[attributeName];
+      },
+    });
   };
 
   /**
@@ -42,7 +51,7 @@ export default (context: Context) => {
    * name and using it as the attribute's type
    */
   const addComponentAttribute = (options: TypeBuildersOptions) => {
-    const { builder, attributeName, contentType, attribute } = options;
+    const { builder, attributeName, contentType, attribute, cacheHint } = options;
 
     let localBuilder = builder;
 
@@ -62,6 +71,7 @@ export default (context: Context) => {
       contentTypeUID: contentType.uid,
       attributeName,
       strapi,
+      cacheHint,
     });
 
     const args = getContentTypeArgs(targetComponent, { multiple: !!attribute.repeatable });
@@ -76,7 +86,7 @@ export default (context: Context) => {
    * type name and using it as the attribute's type
    */
   const addDynamicZoneAttribute = (options: TypeBuildersOptions) => {
-    const { builder, attributeName, contentType } = options;
+    const { builder, attributeName, contentType, cacheHint } = options;
 
     const { naming } = getGraphQLService('utils');
     const { ERROR_CODES } = getGraphQLService('constants');
@@ -97,6 +107,7 @@ export default (context: Context) => {
         buildDynamicZoneResolver({
           contentTypeUID: contentType.uid,
           attributeName,
+          cacheHint,
         });
 
     builder.list.field(attributeName, { type, resolve });
@@ -109,13 +120,20 @@ export default (context: Context) => {
    * name and using it as the attribute's type
    */
   const addEnumAttribute = (options: TypeBuildersOptions) => {
-    const { builder, attributeName, contentType } = options;
+    const { builder, attributeName, contentType, cacheHint } = options;
 
     const { naming } = getGraphQLService('utils');
 
     const type = naming.getEnumName(contentType, attributeName);
 
-    builder.field(attributeName, { type });
+    builder.field(attributeName, {
+      type,
+      // TODO: Probably we don't need to cache enum values
+      resolve: (parent, _args, _context, info) => {
+        info.cacheControl.setCacheHint(cacheHint);
+        return parent[attributeName];
+      },
+    });
   };
 
   /**
@@ -128,7 +146,7 @@ export default (context: Context) => {
     const extension = getGraphQLService('extension');
 
     const { builder } = options;
-    const { attributeName, attribute, contentType } = options;
+    const { attributeName, attribute, contentType, cacheHint } = options;
     const fileUID = 'plugin::upload.file';
 
     if (extension.shadowCRUD(fileUID).isDisabled()) {
@@ -141,6 +159,7 @@ export default (context: Context) => {
       contentTypeUID: contentType.uid,
       attributeName,
       strapi,
+      cacheHint,
     });
 
     const args = attribute.multiple ? getContentTypeArgs(fileContentType) : undefined;
@@ -160,7 +179,7 @@ export default (context: Context) => {
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
 
     let { builder } = options;
-    const { attributeName, attribute, contentType } = options;
+    const { attributeName, attribute, contentType, cacheHint } = options;
 
     const { target } = attribute;
     const isToManyRelation = attribute.relation.endsWith('Many');
@@ -175,6 +194,7 @@ export default (context: Context) => {
       contentTypeUID: contentType.uid,
       attributeName,
       strapi,
+      cacheHint,
     });
 
     // If there is no specific target specified, then use the GenericMorph type
@@ -203,7 +223,7 @@ export default (context: Context) => {
     const extension = getGraphQLService('extension');
 
     const { builder } = options;
-    const { attributeName, attribute, contentType } = options;
+    const { attributeName, attribute, contentType, cacheHint } = options;
 
     if (extension.shadowCRUD(attribute.target).isDisabled()) {
       return;
@@ -215,6 +235,7 @@ export default (context: Context) => {
       contentTypeUID: contentType.uid,
       attributeName,
       strapi,
+      cacheHint,
     });
 
     const targetContentType = strapi.getModel(attribute.target);
@@ -268,7 +289,7 @@ export default (context: Context) => {
       const name = (modelType === 'component' ? getComponentName : getTypeName).call(
         null,
         contentType
-      );
+      ) as string;
 
       return objectType({
         name,
@@ -301,13 +322,20 @@ export default (context: Context) => {
             .forEach((attributeName) => {
               const attribute = attributes[attributeName];
 
+              const pluginOptions = (attribute.pluginOptions ?? {}) as {
+                // TODO: The value is not coming from the schema attribute pluginOptions
+                graphql?: { cacheHint?: CacheHint };
+              };
+
+              // If CacheHint is 0/Public, Cache-Control header is not added at all
+              const cacheHint = pluginOptions.graphql?.cacheHint ?? {
+                maxAge: 60,
+                scope: CacheScope.Public,
+              };
+
               // We create a copy of the builder (t) to apply custom
               // rules only on the current attribute (eg: nonNull, list, ...)
-              let builder: any = t;
-
-              if (attribute.required) {
-                builder = builder.nonNull;
-              }
+              const builder = attribute.required ? t.nonNull : t;
 
               const options: TypeBuildersOptions = {
                 builder,
@@ -315,6 +343,7 @@ export default (context: Context) => {
                 attribute,
                 contentType,
                 context,
+                cacheHint,
               };
 
               // Enums

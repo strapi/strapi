@@ -3,6 +3,7 @@ import { ApolloServer } from 'apollo-server-koa';
 import {
   ApolloServerPluginLandingPageDisabled,
   ApolloServerPluginLandingPageGraphQLPlayground,
+  ApolloServerPluginCacheControl,
 } from 'apollo-server-core';
 import depthLimit from 'graphql-depth-limit';
 import { graphqlUploadKoa } from 'graphql-upload';
@@ -74,6 +75,8 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
     bodyParserConfig: true,
 
     plugins: [
+      // TODO: Remove this. Will be added by user in config if they want to enable cache
+      ApolloServerPluginCacheControl({ defaultMaxAge: 90 }),
       process.env.NODE_ENV === 'production' && !config('playgroundAlways')
         ? ApolloServerPluginLandingPageDisabled()
         : ApolloServerPluginLandingPageGraphQLPlayground(),

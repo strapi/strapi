@@ -1,19 +1,25 @@
+import type { CacheHint } from 'apollo-server-types';
 import { sanitize, validate } from '@strapi/utils';
 import type { Attribute, UID } from '@strapi/types';
 
 import type { Context } from '../../types';
+import { FieldResolver } from 'nexus';
 
 export default ({ strapi }: Context) => ({
   buildComponentResolver({
     contentTypeUID,
     attributeName,
+    cacheHint,
   }: {
     contentTypeUID: UID.ContentType;
     attributeName: string;
-  }) {
+    cacheHint: CacheHint;
+  }): FieldResolver<string, string> {
     const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
 
-    return async (parent: any, args: any, ctx: any) => {
+    return async (parent: any, args: any, ctx: any, info) => {
+      info.cacheControl.setCacheHint(cacheHint);
+
       const contentType = strapi.getModel(contentTypeUID);
 
       const { component: componentName } = contentType.attributes[

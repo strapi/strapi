@@ -22,6 +22,12 @@
       "pluginOptions": {
         "i18n": {
           "localized": true
+        },
+        "graphql": {
+          "cacheHint": {
+            "maxAge": 10,
+            "scope": "PUBLIC"
+          }
         }
       }
     }

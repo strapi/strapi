@@ -1,8 +1,10 @@
+import type { CacheHint } from 'apollo-server-types';
 import { get } from 'lodash/fp';
 import { sanitize, validate, pipeAsync, errors } from '@strapi/utils';
 import type { UID } from '@strapi/types';
 
 import type { Context } from '../../types';
+import { FieldResolver } from 'nexus';
 
 const { ApplicationError } = errors;
 
@@ -17,10 +19,12 @@ export default ({ strapi }: Context) => {
     buildAssociationResolver({
       contentTypeUID,
       attributeName,
+      cacheHint,
     }: {
       contentTypeUID: UID.ContentType;
       attributeName: string;
-    }) {
+      cacheHint: CacheHint;
+    }): FieldResolver<string, string> {
       const contentType = strapi.getModel(contentTypeUID);
       const attribute: any = contentType.attributes[attributeName];
 
@@ -38,7 +42,9 @@ export default ({ strapi }: Context) => {
 
       const targetContentType = strapi.getModel(targetUID);
 
-      return async (parent: any, args: any = {}, context: any = {}) => {
+      return async (parent: any, args: any = {}, context: any = {}, resolveInfo) => {
+        resolveInfo.cacheControl.setCacheHint(cacheHint);
+
         const { auth } = context.state;
 
         const transformedArgs = transformArgs(args, {
