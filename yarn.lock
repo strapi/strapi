@@ -8009,6 +8009,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
   dependencies:
+    "@strapi/database": "workspace:*"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/types": "npm:5.0.0-beta.5"
     "@strapi/utils": "npm:5.0.0-beta.5"

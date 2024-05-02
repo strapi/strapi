@@ -1,5 +1,5 @@
 import type { Core } from '@strapi/types';
-import auditLogContentType from './content-types/audit-log';
+import { auditLog } from './models/audit-logs';
 
 interface Event {
   action: string;
@@ -14,15 +14,7 @@ interface Log extends Omit<Event, 'userId'> {
 
 export default {
   async register({ strapi }: { strapi: Core.Strapi }) {
-    const contentTypes = strapi.get('content-types');
-    if (!contentTypes.keys().includes('admin::audit-log')) {
-      const { schema } = auditLogContentType;
-      Object.assign(schema, {
-        plugin: 'admin',
-        globalId: `admin-${schema.info.singularName}`,
-      });
-      strapi.get('content-types').add('admin::', { 'audit-log': auditLogContentType });
-    }
+    strapi.get('models').add(auditLog);
 
     // Return the provider object
     return {
