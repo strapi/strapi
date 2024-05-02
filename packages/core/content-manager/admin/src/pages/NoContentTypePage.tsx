@@ -1,5 +1,5 @@
-import { Page } from '@strapi/admin/strapi-admin';
-import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
+import { Page, Layouts } from '@strapi/admin/strapi-admin';
+import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
@@ -12,13 +12,13 @@ const NoContentType = () => {
 
   return (
     <Page.Main>
-      <HeaderLayout
+      <Layouts.Header
         title={formatMessage({
           id: getTranslation('header.name'),
           defaultMessage: 'Content',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <EmptyStateLayout
           action={
             <LinkButton
@@ -43,7 +43,7 @@ const NoContentType = () => {
           icon={<EmptyDocuments width="16rem" />}
           shadow="tableShadow"
         />
-      </ContentLayout>
+      </Layouts.Content>
     </Page.Main>
   );
 };

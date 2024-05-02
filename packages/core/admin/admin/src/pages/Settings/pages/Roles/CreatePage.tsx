@@ -3,11 +3,9 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  ContentLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
   Main,
   Textarea,
   TextInput,
@@ -20,6 +18,7 @@ import { useNavigate, useMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import * as yup from 'yup';
 
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
@@ -191,7 +190,7 @@ const CreatePage = () => {
         {({ values, errors, handleReset, handleChange, isSubmitting }) => (
           <Form>
             <>
-              <HeaderLayout
+              <Layouts.Header
                 primaryAction={
                   <Flex gap={2}>
                     <Button
@@ -225,7 +224,7 @@ const CreatePage = () => {
                 })}
                 navigationAction={<BackButton />}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                     <Flex direction="column" alignItems="stretch" gap={4}>
@@ -298,7 +297,7 @@ const CreatePage = () => {
                     />
                   </Box>
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </>
           </Form>
         )}

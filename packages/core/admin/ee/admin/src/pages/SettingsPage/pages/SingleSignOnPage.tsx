@@ -1,11 +1,8 @@
 import {
   Button,
-  ContentLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
-  Layout,
   MultiSelect,
   MultiSelectOption,
   SingleSelectOption,
@@ -18,6 +15,7 @@ import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
+import { Layouts } from '../../../../../../admin/src/components/Layouts/Layout';
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useNotification } from '../../../../../../admin/src/features/Notifications';
@@ -111,7 +109,7 @@ export const SingleSignOnPage = () => {
   const isLoadingData = isLoadingRoles || isLoadingPermissions || isLoadingProviderOptions;
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -136,7 +134,7 @@ export const SingleSignOnPage = () => {
         >
           {({ handleChange, isSubmitting, values, setFieldValue, dirty, errors }) => (
             <Form>
-              <HeaderLayout
+              <Layouts.Header
                 primaryAction={
                   <Button
                     disabled={!dirty}
@@ -160,7 +158,7 @@ export const SingleSignOnPage = () => {
                   defaultMessage: 'Configure the settings for the Single Sign-On feature.',
                 })}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 {isSubmitting || isLoadingData ? (
                   <Page.Loading />
                 ) : (
@@ -288,12 +286,12 @@ export const SingleSignOnPage = () => {
                     </Grid>
                   </Flex>
                 )}
-              </ContentLayout>
+              </Layouts.Content>
             </Form>
           )}
         </Formik>
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

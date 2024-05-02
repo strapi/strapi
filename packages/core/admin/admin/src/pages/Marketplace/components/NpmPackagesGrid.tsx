@@ -1,8 +1,9 @@
-import { Box, Flex, Grid, GridItem, GridLayout, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
+import { Layouts } from '../../../components/Layouts/Layout';
 import { Page } from '../../../components/PageHelpers';
 import { AppInfoContextValue } from '../../../features/AppInfo';
 
@@ -50,13 +51,13 @@ const NpmPackagesGrid = ({
   if (npmPackages.length === 0) {
     return (
       <Box position="relative">
-        <GridLayout>
+        <Layouts.Grid size="M">
           {Array(12)
             .fill(null)
             .map((_, idx) => (
               <EmptyPluginCard key={idx} height="234px" hasRadius />
             ))}
-        </GridLayout>
+        </Layouts.Grid>
         <Box position="absolute" top={11} width="100%">
           <Flex alignItems="center" justifyContent="center" direction="column">
             <EmptyDocuments width="160px" height="88px" />

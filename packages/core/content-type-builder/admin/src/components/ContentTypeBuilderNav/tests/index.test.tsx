@@ -1,5 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
-import { Layout, lightTheme, ThemeProvider } from '@strapi/design-system';
+import { Layouts } from '@strapi/admin/strapi-admin';
+import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
@@ -23,9 +24,9 @@ const makeApp = () => {
     <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
       <ThemeProvider theme={lightTheme}>
         <MemoryRouter>
-          <Layout sideNav={<ContentTypeBuilderNav />}>
+          <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
             <div />
-          </Layout>
+          </Layouts.Root>
         </MemoryRouter>
       </ThemeProvider>
     </IntlProvider>

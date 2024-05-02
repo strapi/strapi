@@ -66,3 +66,9 @@ export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
  */
 export { translatedErrors } from './utils/translatedErrors';
 export { getFetchClient } from './utils/getFetchClient';
+
+/**
+ * Components
+ */
+
+export { Layouts, type LayoutProps } from './components/Layouts/Layout';
