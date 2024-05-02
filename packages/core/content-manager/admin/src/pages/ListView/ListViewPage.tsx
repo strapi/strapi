@@ -354,7 +354,6 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
       }}
       startIcon={<Plus />}
       style={{ textDecoration: 'none' }}
-      // @ts-expect-error – DS inference does not work with as or forwardedAs
       to={{
         pathname: 'create',
         search: stringify({ plugins: query.plugins }),

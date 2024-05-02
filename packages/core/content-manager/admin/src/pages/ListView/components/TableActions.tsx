@@ -209,7 +209,6 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
             </Button>
             <LinkButton
               tag={NavLink}
-              // @ts-expect-error – the DS LinkButton can't infer props from the `as` prop component
               to={{
                 pathname: `clone/${documentId}`,
               }}

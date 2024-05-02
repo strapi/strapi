@@ -1,4 +1,4 @@
-import { Box, SingleSelectOption, SingleSelect } from '@strapi/design-system';
+import { Box, SingleSelectOption, SingleSelect, BoxComponent } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
@@ -81,7 +81,7 @@ const SortSelect = ({ sortQuery, handleSelectChange }: SortSelectProps) => {
   );
 };
 
-const SelectWrapper = styled(Box)`
+const SelectWrapper = styled<BoxComponent>(Box)`
   font-weight: ${({ theme }) => theme.fontWeights.semiBold};
 
   span {

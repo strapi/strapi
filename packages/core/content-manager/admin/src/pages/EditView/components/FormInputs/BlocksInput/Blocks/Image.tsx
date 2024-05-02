@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
-import { Box, Flex } from '@strapi/design-system';
+import { Box, Flex, FlexComponent } from '@strapi/design-system';
 import { Image as Picture } from '@strapi/icons';
 import { type Element, Transforms, Editor } from 'slate';
 import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
@@ -17,7 +17,7 @@ interface ImageWrapperProps extends React.ComponentProps<typeof Box> {
   isFocused: boolean;
 }
 
-const ImageWrapper = styled(Flex)<ImageWrapperProps>`
+const ImageWrapper = styled<FlexComponent>(Flex)<ImageWrapperProps>`
   transition-property: box-shadow;
   transition-duration: 0.2s;
   ${(props) =>

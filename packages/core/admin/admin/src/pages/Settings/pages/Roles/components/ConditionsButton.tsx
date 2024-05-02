@@ -1,4 +1,4 @@
-import { Box, Button, ButtonProps } from '@strapi/design-system';
+import { Box, BoxComponent, Button, ButtonProps } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -31,7 +31,7 @@ interface ButtonContainerProps extends Pick<ConditionsButtonProps, 'hasCondition
   disabled?: boolean;
 }
 
-const ButtonContainer = styled(Box)<ButtonContainerProps>`
+const ButtonContainer = styled<BoxComponent>(Box)<ButtonContainerProps>`
   ${({ hasConditions, disabled, theme }) =>
     hasConditions &&
     `

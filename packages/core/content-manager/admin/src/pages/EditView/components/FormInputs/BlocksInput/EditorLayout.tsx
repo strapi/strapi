@@ -1,6 +1,14 @@
 import * as React from 'react';
 
-import { Box, Flex, FocusTrap, Portal, IconButton, InputWrapper } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  FocusTrap,
+  Portal,
+  IconButton,
+  InputWrapper,
+  FlexComponent,
+} from '@strapi/design-system';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -15,7 +23,7 @@ const CollapseIconButton = styled(IconButton)`
   right: 1.2rem;
 `;
 
-const ExpandWrapper = styled(Flex)`
+const ExpandWrapper = styled<FlexComponent>(Flex)`
   // Background with 20% opacity
   background: ${({ theme }) => `${theme.colors.neutral800}1F`};
 `;
@@ -97,8 +105,8 @@ const EditorLayout = ({
       direction="column"
       alignItems="flex-start"
       height="512px"
-      disabled={disabled}
-      hasError={Boolean(error)}
+      $disabled={disabled}
+      $hasError={Boolean(error)}
       style={{ overflow: 'hidden' }}
       aria-describedby={ariaDescriptionId}
       position="relative"

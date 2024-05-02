@@ -1,4 +1,13 @@
-import { Box, Flex, Tooltip, Typography, Divider, Button, LinkButton } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Tooltip,
+  Typography,
+  Divider,
+  Button,
+  LinkButton,
+  TypographyComponent,
+} from '@strapi/design-system';
 import { CheckCircle, ExternalLink, Download, Star, Check, Duplicate } from '@strapi/icons';
 import { GitHub } from '@strapi/icons/symbols';
 import pluralize from 'pluralize';
@@ -16,7 +25,7 @@ import type { Plugin, Provider } from '../hooks/useMarketplaceData';
 import type { NpmPackageType } from '../MarketplacePage';
 
 // Custom component to have an ellipsis after the 2nd line
-const EllipsisText = styled(Typography)`
+const EllipsisText = styled<TypographyComponent<'p'>>(Typography)`
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;

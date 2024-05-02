@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Flex, Typography } from '@strapi/design-system';
+import { Flex, FlexComponent, Typography, TypographyComponent } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { ComponentIcon, ComponentIconProps } from '../../../../../components/ComponentIcon';
@@ -27,21 +27,23 @@ const ComponentCard = ({ children, onClick, icon }: ComponentCardProps) => {
       <Flex direction="column" gap={1} alignItems="center" justifyContent="center">
         <ComponentIcon icon={icon} />
 
-        <Typography variant="pi" fontWeight="bold" textColor="neutral600">
+        <ComponentName variant="pi" fontWeight="bold" textColor="neutral600">
           {children}
-        </Typography>
+        </ComponentName>
       </Flex>
     </ComponentBox>
   );
 };
 
-const ComponentBox = styled(Flex)`
+const ComponentName = styled<TypographyComponent>(Typography)``;
+
+const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
   &:focus,
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.primary200};
     background: ${({ theme }) => theme.colors.primary100};
 
-    ${Typography} {
+    ${ComponentName} {
       color: ${({ theme }) => theme.colors.primary600};
     }
 

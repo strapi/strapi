@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { BaseCheckbox, Box, Flex } from '@strapi/design-system';
+import { BaseCheckbox, Box, BoxComponent, Flex, FlexComponent } from '@strapi/design-system';
 import { ChevronDown, ChevronUp } from '@strapi/icons';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -377,7 +377,7 @@ const activeRowStyle = (theme: DefaultTheme, isActive?: boolean): string => `
   }
 `;
 
-const Wrapper = styled(Flex)`
+const Wrapper = styled<FlexComponent>(Flex)`
   border: 1px solid transparent;
 `;
 
@@ -394,12 +394,12 @@ const BoxWrapper = styled.div<{ isActive: boolean }>`
   }
 `;
 
-const Cell = styled(Flex)`
+const Cell = styled<FlexComponent>(Flex)`
   width: ${cellWidth};
   position: relative;
 `;
 
-const Chevron = styled(Box)`
+const Chevron = styled<BoxComponent>(Box)`
   display: none;
   svg {
     width: 11px;

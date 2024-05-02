@@ -79,8 +79,13 @@ const WysiwygNav = ({
         justifyContent="space-between"
         borderRadius={`0.4rem 0.4rem 0 0`}
       >
-        <StyledFlex>
-          <SingleSelect disabled placeholder={selectPlaceholder} size="S" label={selectPlaceholder}>
+        <Flex>
+          <SingleSelect
+            disabled
+            placeholder={selectPlaceholder}
+            size="S"
+            aria-label={selectPlaceholder}
+          >
             <SingleSelectOption value="h1">h1</SingleSelectOption>
             <SingleSelectOption value="h2">h2</SingleSelectOption>
             <SingleSelectOption value="h3">h3</SingleSelectOption>
@@ -96,7 +101,7 @@ const WysiwygNav = ({
           </MainButtons>
 
           <MoreButton disabled label="More" icon={<More />} />
-        </StyledFlex>
+        </Flex>
 
         {!isExpandMode && (
           <Button onClick={onTogglePreviewMode} variant="tertiary">
@@ -117,10 +122,10 @@ const WysiwygNav = ({
       justifyContent="space-between"
       borderRadius={`0.4rem 0.4rem 0 0`}
     >
-      <StyledFlex>
+      <Flex>
         <SingleSelect
           placeholder={selectPlaceholder}
-          label={selectPlaceholder}
+          aria-label={selectPlaceholder}
           size="S"
           // @ts-expect-error – DS v2 will only allow strings.
           onChange={(value) => onActionClick(value, editorRef)}
@@ -216,7 +221,7 @@ const WysiwygNav = ({
             </Flex>
           </Popover>
         )}
-      </StyledFlex>
+      </Flex>
 
       {onTogglePreviewMode && (
         <Button onClick={onTogglePreviewMode} variant="tertiary">
@@ -232,17 +237,3 @@ const WysiwygNav = ({
 
 export { WysiwygNav };
 export type { WysiwygNavProps };
-
-const StyledFlex = styled(Flex)`
-  /* Hide the label, every input needs a label. */
-  label {
-    border: 0;
-    clip: rect(0 0 0 0);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    width: 1px;
-  }
-`;

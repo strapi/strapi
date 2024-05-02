@@ -69,10 +69,6 @@ export const options = [
   },
 ];
 
-const TypographyCenter = styled(Typography)`
-  text-align: center;
-`;
-
 const UseCasePage = () => {
   const { toggleNotification } = useNotification();
   const location = useLocation();
@@ -125,12 +121,12 @@ const UseCasePage = () => {
             <Flex direction="column" paddingBottom={7}>
               <Logo />
               <Box paddingTop={6} paddingBottom={1} width={`25rem`}>
-                <TypographyCenter variant="alpha" tag="h1" id="usecase-title">
+                <Typography textAlign="center" variant="alpha" tag="h1" id="usecase-title">
                   {formatMessage({
                     id: 'Usecase.title',
                     defaultMessage: 'Tell us a bit more about yourself',
                   })}
-                </TypographyCenter>
+                </Typography>
               </Box>
             </Flex>
             <Flex direction="column" alignItems="stretch" gap={6}>

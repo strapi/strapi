@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { Avatar, AvatarGroup, Flex, Tooltip, Typography } from '@strapi/design-system';
+import {
+  Avatar,
+  AvatarGroup,
+  Flex,
+  Tooltip,
+  Typography,
+  TypographyComponent,
+} from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/urls';
@@ -70,7 +77,7 @@ const FileWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const FileTypography = styled(Typography)`
+const FileTypography = styled<TypographyComponent>(Typography)`
   font-size: 0.9rem;
   line-height: 0.9rem;
 `;

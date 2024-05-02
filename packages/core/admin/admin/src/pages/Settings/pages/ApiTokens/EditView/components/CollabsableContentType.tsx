@@ -5,6 +5,7 @@ import {
   AccordionContent,
   AccordionToggle,
   Box,
+  BoxComponent,
   Checkbox,
   Flex,
   Grid,
@@ -26,7 +27,7 @@ const activeCheckboxWrapperStyles = css`
   }
 `;
 
-const CheckboxWrapper = styled(Box)<{ isActive: boolean }>`
+const CheckboxWrapper = styled<BoxComponent>(Box)<{ isActive: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;

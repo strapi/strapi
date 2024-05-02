@@ -14,6 +14,7 @@ import {
   NavSection,
   NavSections,
   NavUser,
+  BoxComponent,
 } from '@strapi/design-system';
 import { SignOut, Feather, Lock, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -30,7 +31,7 @@ import { getDisplayName } from '../utils/users';
 import { NavBrand as NewNavBrand } from './MainNav/NavBrand';
 import { NavLink as NewNavLink } from './MainNav/NavLink';
 
-const LinkUserWrapper = styled(Box)`
+const LinkUserWrapper = styled<BoxComponent>(Box)`
   width: 15rem;
   position: absolute;
   bottom: ${({ theme }) => theme.spaces[9]};
@@ -56,7 +57,7 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
   }
 `;
 
-const NavLinkWrapper = styled(Box)`
+const NavLinkWrapper = styled<BoxComponent>(Box)`
   div:nth-child(2) {
     /* remove badge background color */
     background: transparent;

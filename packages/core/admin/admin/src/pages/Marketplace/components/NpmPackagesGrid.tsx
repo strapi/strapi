@@ -1,4 +1,12 @@
-import { Box, Flex, Grid, GridItem, GridLayout, Typography } from '@strapi/design-system';
+import {
+  Box,
+  BoxComponent,
+  Flex,
+  Grid,
+  GridItem,
+  GridLayout,
+  Typography,
+} from '@strapi/design-system';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -89,7 +97,7 @@ const NpmPackagesGrid = ({
   );
 };
 
-const EmptyPluginCard = styled(Box)`
+const EmptyPluginCard = styled<BoxComponent>(Box)`
   background: ${({ theme }) =>
     `linear-gradient(180deg, rgba(234, 234, 239, 0) 0%, ${theme.colors.neutral150} 100%)`};
   opacity: 0.33;

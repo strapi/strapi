@@ -1,4 +1,12 @@
-import { Alert, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
+import {
+  Alert,
+  Button,
+  Flex,
+  Main,
+  Typography,
+  Link,
+  TypographyComponent,
+} from '@strapi/design-system';
 import { Duplicate, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useRouteError } from 'react-router-dom';
@@ -98,7 +106,7 @@ const StyledAlert = styled(Alert)`
   }
 `;
 
-const ErrorType = styled(Typography)`
+const ErrorType = styled<TypographyComponent>(Typography)`
   word-break: break-all;
   color: ${({ theme }) => theme.colors.danger600};
 `;

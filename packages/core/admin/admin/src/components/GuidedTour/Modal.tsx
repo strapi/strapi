@@ -4,6 +4,7 @@ import {
   Box,
   Button,
   Flex,
+  FlexComponent,
   FocusTrap,
   IconButton,
   Portal,
@@ -132,7 +133,7 @@ const GuidedTourModal = () => {
   );
 };
 
-const ModalWrapper = styled(Flex)`
+const ModalWrapper = styled<FlexComponent>(Flex)`
   position: fixed;
   z-index: 4;
   inset: 0;

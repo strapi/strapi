@@ -5,9 +5,11 @@ import {
   Button,
   Divider,
   Flex,
+  FlexComponent,
   PopoverPrimitives,
   Portal,
   Typography,
+  TypographyComponent,
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Cross, Message, Play, Question, Book, PaperPlane } from '@strapi/icons';
@@ -175,15 +177,15 @@ const HelperButton = styled(Button)`
   height: 100%;
 `;
 
-const IconWrapper = styled(Flex)`
+const IconWrapper = styled<FlexComponent>(Flex)`
   transform: translate(-50%, -50%);
 `;
 
-const Number = styled(Typography)``;
+const Number = styled<TypographyComponent>(Typography)``;
 
-const Label = styled(Typography)``;
+const Label = styled<TypographyComponent>(Typography)``;
 
-const VideoLinkWrapper = styled(Flex)`
+const VideoLinkWrapper = styled<FlexComponent<'a'>>(Flex)`
   text-decoration: none;
 
   :focus-visible {
@@ -213,13 +215,14 @@ const Preview = styled.img`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
-const TypographyLineHeight = styled(Typography)`
+const TypographyLineHeight = styled<TypographyComponent>(Typography)`
   /* line height of label and watch more to 1 so they can be better aligned visually */
   line-height: 1;
 `;
 
-const TextLink = styled(TypographyLineHeight)`
+const TextLink = styled<TypographyComponent<'a'>>(Typography)`
   text-decoration: none;
+  line-height: 1;
 
   :hover {
     text-decoration: underline;

@@ -4,6 +4,7 @@ import { Form, useField, InputRenderer, useNotification } from '@strapi/admin/st
 import {
   Button,
   Flex,
+  FlexComponent,
   Grid,
   GridItem,
   ModalBody,
@@ -144,7 +145,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   );
 };
 
-const HeaderContainer = styled(Flex)`
+const HeaderContainer = styled<FlexComponent>(Flex)`
   svg {
     width: 3.2rem;
     margin-right: ${({ theme }) => theme.spaces[3]};

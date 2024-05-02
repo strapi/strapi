@@ -1,4 +1,10 @@
-import { Flex, FlexProps, Typography } from '@strapi/design-system';
+import {
+  Flex,
+  FlexComponent,
+  FlexProps,
+  Typography,
+  TypographyComponent,
+} from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 interface ContentBoxProps {
@@ -40,7 +46,7 @@ const ContentBox = ({
   );
 };
 
-const IconWrapper = styled(Flex)`
+const IconWrapper = styled<FlexComponent>(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};
 
   svg {
@@ -49,7 +55,7 @@ const IconWrapper = styled(Flex)`
   }
 `;
 
-const TypographyWordBreak = styled(Typography)`
+const TypographyWordBreak = styled<TypographyComponent>(Typography)`
   word-break: break-all;
 `;
 

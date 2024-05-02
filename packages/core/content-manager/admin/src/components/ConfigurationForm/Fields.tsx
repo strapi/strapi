@@ -7,6 +7,7 @@ import {
   Grid,
   GridItem,
   IconButton,
+  IconButtonComponent,
   Typography,
   useComposedRefs,
   Link,
@@ -456,7 +457,6 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                 onClick={(e) => e.stopPropagation()}
                 startIcon={<Cog />}
                 tag={NavLink}
-                // @ts-expect-error – DS does not infer props from the `as` prop
                 to={`../components/${attribute.component}/configurations/edit`}
               >
                 {formatMessage({
@@ -500,7 +500,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
   );
 };
 
-const DragButton = styled(IconButton)`
+const DragButton = styled<IconButtonComponent<'span'>>(IconButton)`
   height: unset;
   align-self: stretch;
   display: flex;

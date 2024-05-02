@@ -1,6 +1,14 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, useComposedRefs } from '@strapi/design-system';
+import {
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  IconButton,
+  IconButtonComponent,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms } from 'slate';
@@ -32,13 +40,13 @@ const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
   }
 `;
 
-const Wrapper = styled(Box)<{ isOverDropTarget: boolean }>`
+const Wrapper = styled<BoxComponent>(Box)<{ isOverDropTarget: boolean }>`
   position: ${({ isOverDropTarget }) => isOverDropTarget && 'relative'};
 `;
 
 type DragDirection = (typeof DIRECTIONS)[keyof typeof DIRECTIONS];
 
-const DropPlaceholder = styled(Box)<{
+const DropPlaceholder = styled<BoxComponent>(Box)<{
   dragDirection: DragDirection | null;
   placeholderMargin: 1 | 2;
 }>`
@@ -52,7 +60,7 @@ const DropPlaceholder = styled(Box)<{
   `}
 `;
 
-const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
+const DragItem = styled<FlexComponent>(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
   // Style each block rendered using renderElement()
   & > [data-slate-node='element'] {
     width: 100%;
@@ -69,7 +77,9 @@ const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
   }
 `;
 
-const DragIconButton = styled(IconButton)<{ dragHandleTopMargin?: CSSProperties['marginTop'] }>`
+const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton)<{
+  dragHandleTopMargin?: CSSProperties['marginTop'];
+}>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -178,7 +188,7 @@ const DragAndDropElement = ({
   }, [editor.selection]);
 
   return (
-    <Wrapper ref={(ref) => composedBoxRefs(ref!)} isOverDropTarget={isOverDropTarget}>
+    <Wrapper ref={composedBoxRefs} isOverDropTarget={isOverDropTarget}>
       {isOverDropTarget && (
         <DropPlaceholder
           borderStyle="solid"

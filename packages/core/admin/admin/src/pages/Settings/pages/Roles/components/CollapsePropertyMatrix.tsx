@@ -1,6 +1,14 @@
 import React, { useMemo } from 'react';
 
-import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
+import {
+  BaseCheckbox,
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  Typography,
+  TypographyComponent,
+} from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
@@ -313,7 +321,7 @@ const getRowLabelCheckboxState = (
   return getCheckboxState(data);
 };
 
-const Wrapper = styled(Flex)<{ isCollapsable?: boolean; isActive?: boolean }>`
+const Wrapper = styled<FlexComponent>(Flex)<{ isCollapsable?: boolean; isActive?: boolean }>`
   height: ${rowHeight};
   flex: 1;
 
@@ -420,7 +428,7 @@ const SubActionRow = ({
                     {...(isArrayType && {
                       onClick: () => handleClickToggleSubLevel(value),
                       'aria-expanded': isActive,
-                      onKeyDown: ({ key }: React.KeyboardEvent<HTMLButtonElement>) =>
+                      onKeyDown: ({ key }: React.KeyboardEvent<HTMLDivElement>) =>
                         (key === 'Enter' || key === ' ') && handleClickToggleSubLevel(value),
                       tabIndex: 0,
                       role: 'button',
@@ -548,12 +556,16 @@ const SubActionRow = ({
   );
 };
 
-const LeftBorderTimeline = styled(Box)<{ isVisible?: boolean }>`
+const LeftBorderTimeline = styled<BoxComponent>(Box)<{ isVisible?: boolean }>`
   border-left: ${({ isVisible, theme }) =>
     isVisible ? `4px solid ${theme.colors.primary200}` : '4px solid transparent'};
 `;
 
-const RowStyle = styled(Flex)<{ level: number; isCollapsable?: boolean; isActive?: boolean }>`
+const RowStyle = styled<FlexComponent>(Flex)<{
+  level: number;
+  isCollapsable?: boolean;
+  isActive?: boolean;
+}>`
   padding-left: ${({ theme }) => theme.spaces[4]};
   width: ${({ level }) => 145 - level * 36}px;
 
@@ -571,7 +583,7 @@ const RowStyle = styled(Flex)<{ level: number; isCollapsable?: boolean; isActive
   ${({ isActive, theme }) => isActive && activeStyle(theme)};
 `;
 
-const RowLabel = styled(Typography)``;
+const RowLabel = styled<TypographyComponent>(Typography)``;
 
 const TopTimeline = styled.div`
   padding-top: ${({ theme }) => theme.spaces[2]};
@@ -582,7 +594,7 @@ const TopTimeline = styled.div`
   border-top-right-radius: 2px;
 `;
 
-const StyledBox = styled(Box)`
+const StyledBox = styled<BoxComponent>(Box)`
   transform: translate(-4px, -12px);
 
   &:before {

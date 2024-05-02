@@ -10,6 +10,7 @@ import {
   Typography,
   useCollator,
   LinkButton,
+  FlexComponent,
 } from '@strapi/design-system';
 import { Cog, ListPlus } from '@strapi/icons';
 import { stringify } from 'qs';
@@ -66,7 +67,6 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
                 startIcon={<ListPlus />}
                 variant="secondary"
                 tag={NavLink}
-                // @ts-expect-error – inference from the as prop does not work in the DS.
                 to={{
                   pathname: 'configurations/list',
                   search: query.plugins
@@ -179,7 +179,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
   );
 };
 
-const ChackboxWrapper = styled(Flex)`
+const ChackboxWrapper = styled<FlexComponent<'label'>>(Flex)`
   :hover {
     background-color: ${(props) => props.theme.colors.primary100};
   }

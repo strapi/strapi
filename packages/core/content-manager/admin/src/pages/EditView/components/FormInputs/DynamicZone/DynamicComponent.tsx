@@ -14,6 +14,8 @@ import {
   useComposedRefs,
   Menu,
   MenuItem,
+  FlexComponent,
+  BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -219,7 +221,6 @@ const DynamicComponent = ({
       <Flex justifyContent="center">
         <Rectangle background="neutral200" />
       </Flex>
-      {/* @ts-expect-error – Fix this ref issue */}
       <StyledBox ref={composedBoxRefs} hasRadius>
         {isDragging ? (
           <Preview />
@@ -258,7 +259,7 @@ const DynamicComponent = ({
   );
 };
 
-const ActionsFlex = styled(Flex)`
+const ActionsFlex = styled<FlexComponent>(Flex)`
   /* 
     we need to remove the background from the button but we can't 
     wrap the element in styled because it breaks the forwardedAs which
@@ -280,17 +281,17 @@ const IconButtonCustom = styled(IconButton)<{ expanded?: boolean }>`
 
 // TODO: Delete once https://github.com/strapi/design-system/pull/858
 // is merged and released.
-const StyledBox = styled(Box)`
+const StyledBox = styled<BoxComponent>(Box)`
   > div:first-child {
     box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   }
 `;
 
-const AccordionContentRadius = styled(Box)`
+const AccordionContentRadius = styled<BoxComponent>(Box)`
   border-radius: 0 0 ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[1]};
 `;
 
-const Rectangle = styled(Box)`
+const Rectangle = styled<BoxComponent>(Box)`
   width: ${({ theme }) => theme.spaces[2]};
   height: ${({ theme }) => theme.spaces[4]};
 `;
@@ -303,7 +304,7 @@ const Preview = styled.span`
   padding: ${({ theme }) => theme.spaces[6]};
 `;
 
-const ComponentContainer = styled(Box)`
+const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
   list-style: none;
   padding: 0;
   margin: 0;

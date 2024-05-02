@@ -46,24 +46,20 @@ const CellContent = ({ content, mainField, attribute, rowId, name }: CellContent
     case 'string':
       return (
         <Tooltip description={content}>
-          <TypographyMaxWidth ellipsis textColor="neutral800">
+          <Typography maxWidth="30rem" ellipsis textColor="neutral800">
             <CellValue type={attribute.type} value={content} />
-          </TypographyMaxWidth>
+          </Typography>
         </Tooltip>
       );
 
     default:
       return (
-        <TypographyMaxWidth ellipsis textColor="neutral800">
+        <Typography maxWidth="30rem" ellipsis textColor="neutral800">
           <CellValue type={attribute.type} value={content} />
-        </TypographyMaxWidth>
+        </Typography>
       );
   }
 };
-
-const TypographyMaxWidth = styled(Typography)`
-  max-width: 300px;
-`;
 
 const hasContent = (
   content: CellContentProps['content'],

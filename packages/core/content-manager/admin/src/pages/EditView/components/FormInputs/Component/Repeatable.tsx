@@ -15,6 +15,8 @@ import {
   useComposedRefs,
   GridItem,
   Grid,
+  FlexComponent,
+  BoxComponent,
 } from '@strapi/design-system';
 import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -295,7 +297,7 @@ const TextButtonCustom = styled(TextButton)`
  * Accordion
  * -----------------------------------------------------------------------------------------------*/
 
-const AccordionFooter = styled(Box)`
+const AccordionFooter = styled<BoxComponent>(Box)`
   overflow: hidden;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
@@ -303,7 +305,7 @@ const AccordionFooter = styled(Box)`
   border-radius: 0 0 ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius};
 `;
 
-const AccordionContent = styled(Box)`
+const AccordionContent = styled<BoxComponent>(Box)`
   border-bottom: none;
 
   /* add the borders and make sure the top is transparent to avoid jumping with the hover effect  */
@@ -377,7 +379,7 @@ const CustomIconButton = styled(IconButton)<{ expanded?: boolean }>`
   }
 `;
 
-const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
+const ActionsFlex = styled<FlexComponent>(Flex)<{ expanded?: boolean }>`
   & .drag-handle {
     background: unset;
 
@@ -466,7 +468,7 @@ const Component = ({
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
 
   return (
-    <Box ref={(ref) => composedBoxRefs(ref!)}>
+    <Box ref={composedBoxRefs}>
       {isDragging ? (
         <Preview />
       ) : (
@@ -529,7 +531,7 @@ const Preview = () => {
   return <StyledSpan tag="span" padding={6} background="primary100" />;
 };
 
-const StyledSpan = styled(Box)`
+const StyledSpan = styled<BoxComponent<'span'>>(Box)`
   display: block;
   outline: 1px dashed ${({ theme }) => theme.colors.primary500};
   outline-offset: -1px;

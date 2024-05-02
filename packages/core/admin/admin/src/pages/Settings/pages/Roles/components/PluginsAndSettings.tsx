@@ -5,6 +5,7 @@ import {
   AccordionContent,
   AccordionToggle,
   Box,
+  BoxComponent,
   Checkbox,
   Flex,
   Grid,
@@ -291,7 +292,7 @@ const SubCategory = ({
   );
 };
 
-const Border = styled(Box)`
+const Border = styled<BoxComponent>(Box)`
   align-self: center;
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;

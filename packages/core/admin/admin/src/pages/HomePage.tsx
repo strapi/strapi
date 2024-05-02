@@ -11,6 +11,9 @@ import {
   Typography,
   Link,
   LinkButton,
+  TypographyComponent,
+  BoxComponent,
+  FlexComponent,
 } from '@strapi/design-system';
 import { ArrowRight, ExternalLink } from '@strapi/icons';
 import {
@@ -149,7 +152,7 @@ const HomePageCE = () => {
   );
 };
 
-const LogoContainer = styled(Box)`
+const LogoContainer = styled<BoxComponent>(Box)`
   position: absolute;
   top: 0;
   right: 0;
@@ -159,7 +162,7 @@ const LogoContainer = styled(Box)`
   }
 `;
 
-const WordWrap = styled(Typography)`
+const WordWrap = styled<TypographyComponent>(Typography)`
   word-break: break-word;
 `;
 
@@ -309,11 +312,11 @@ const BlockLink = styled.a`
   text-decoration: none;
 `;
 
-const CloudCustomWrapper = styled(Box)`
+const CloudCustomWrapper = styled<BoxComponent>(Box)`
   background-image: url(${cloudIconBackgroundImage});
 `;
 
-const CloudIconWrapper = styled(Flex)`
+const CloudIconWrapper = styled<FlexComponent>(Flex)`
   background: rgba(255, 255, 255, 0.3);
 `;
 

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Flex, Typography } from '@strapi/design-system';
+import { Box, BoxComponent, Flex, Typography } from '@strapi/design-system';
 import map from 'lodash/map';
 import tail from 'lodash/tail';
 import { useIntl } from 'react-intl';
@@ -54,7 +54,7 @@ const getMethodColor = (verb: HttpVerb): MethodColor => {
   }
 };
 
-const MethodBox = styled(Box)`
+const MethodBox = styled<BoxComponent>(Box)`
   margin: -1px;
   border-radius: ${({ theme }) => theme.spaces[1]} 0 0 ${({ theme }) => theme.spaces[1]};
 `;
