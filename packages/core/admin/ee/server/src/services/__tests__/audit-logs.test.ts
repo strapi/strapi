@@ -196,9 +196,9 @@ describe('Audit logs service', () => {
               user: {
                 id: 1,
               },
-              auth: {
-                strategy: {
-                  name: 'admin',
+              route: {
+                info: {
+                  type: 'admin',
                 },
               },
             },
@@ -298,9 +298,9 @@ describe('Audit logs service', () => {
         get() {
           return {
             state: {
-              auth: {
-                strategy: {
-                  name: 'content-api',
+              route: {
+                info: {
+                  type: 'not-admin',
                 },
               },
             },

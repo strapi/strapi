@@ -62,7 +62,9 @@ const getEventMap = (defaultEvents: any) => {
 };
 
 const getRetentionDays = (strapi: Core.Strapi) => {
-  const licenseRetentionDays = strapi.ee.features.get('audit-logs')?.options.retentionDays;
+  const featureConfig = strapi.ee.features.get('audit-logs');
+  const licenseRetentionDays =
+    typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
   const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
 
   // For enterprise plans, use 90 days by default, but allow users to override it
@@ -90,9 +92,8 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     const requestState = strapi.requestContext.get()?.state;
 
     // Ignore events with auth strategies different from admin
-    const isUsingAdminAuth = requestState?.auth?.strategy.name === 'admin';
+    const isUsingAdminAuth = requestState?.route.info.type === 'admin';
     const user = requestState?.user;
-
     if (!isUsingAdminAuth || !user) {
       return null;
     }
