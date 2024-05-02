@@ -16,7 +16,7 @@ const devAliases: Record<string, string> = {
   '@strapi/plugin-content-type-builder/strapi-admin':
     './packages/core/content-type-builder/admin/src',
   '@strapi/plugin-email/strapi-admin': './packages/core/email/admin/src',
-  '@strapi/plugin-upload/strapi-admin': './packages/core/upload/admin/src',
+  '@strapi/upload/strapi-admin': './packages/core/upload/admin/src',
   '@strapi/plugin-color-picker/strapi-admin': './packages/plugins/color-picker/admin/src',
   '@strapi/plugin-documentation/strapi-admin': './packages/plugins/documentation/admin/src',
   '@strapi/plugin-graphql/strapi-admin': './packages/plugins/graphql/admin/src',

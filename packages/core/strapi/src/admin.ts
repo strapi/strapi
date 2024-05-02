@@ -3,7 +3,7 @@ import contentTypeBuilder from '@strapi/plugin-content-type-builder/strapi-admin
 import contentManager from '@strapi/content-manager/strapi-admin';
 import email from '@strapi/plugin-email/strapi-admin';
 // @ts-expect-error – No types, yet.
-import upload from '@strapi/plugin-upload/strapi-admin';
+import upload from '@strapi/upload/strapi-admin';
 import i18n from '@strapi/plugin-i18n/strapi-admin';
 import contentReleases from '@strapi/content-releases/strapi-admin';
 import reviewWorkflows from '@strapi/review-workflows/strapi-admin';

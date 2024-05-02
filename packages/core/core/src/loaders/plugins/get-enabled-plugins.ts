@@ -33,7 +33,7 @@ const INTERNAL_PLUGINS = [
   '@strapi/content-manager',
   '@strapi/plugin-content-type-builder',
   '@strapi/plugin-email',
-  '@strapi/plugin-upload',
+  '@strapi/upload',
   '@strapi/plugin-i18n',
   '@strapi/content-releases',
   '@strapi/review-workflows',
