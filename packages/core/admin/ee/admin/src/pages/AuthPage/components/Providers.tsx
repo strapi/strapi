@@ -1,5 +1,4 @@
-import { Box, Button, Divider, Flex, Loader, Main, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Box, Button, Divider, Flex, Loader, Main, Typography, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
