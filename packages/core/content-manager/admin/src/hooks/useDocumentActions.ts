@@ -45,7 +45,7 @@ const DEFAULT_UNEXPECTED_ERROR_MSG = {
   defaultMessage: 'An error occurred, please try again',
 } satisfies MessageDescriptor;
 
-type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }> =
+type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> =
   | Pick<TResponse, 'data' | 'meta'>
   | { error: BaseQueryError | SerializedError };
 
