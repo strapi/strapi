@@ -6,8 +6,7 @@ const { createStrapiInstance } = require('api-tests/strapi');
 const { createRequest, createAuthRequest } = require('api-tests/request');
 const { createUtils } = require('api-tests/utils');
 
-// TODO: V5 fix RBAC
-describe.skip('Admin Permissions - Conditions', () => {
+describe('Admin Permissions - Conditions', () => {
   let strapi;
   let utils;
   const builder = createTestBuilder();
@@ -138,17 +137,17 @@ describe.skip('Admin Permissions - Conditions', () => {
       body: localTestData.entry,
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     localTestData.entry = res.body.data;
   });
 
   test('User A can read its entry', async () => {
-    const { id } = localTestData.entry;
+    const { documentId } = localTestData.entry;
     const modelName = getModelName();
     const rq = getUserRequest(0);
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}`,
+      url: `/content-manager/collection-types/api::${modelName}.${modelName}/${documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -156,12 +155,12 @@ describe.skip('Admin Permissions - Conditions', () => {
   });
 
   test('User B can read the entry created by user A', async () => {
-    const { id } = localTestData.entry;
+    const { documentId } = localTestData.entry;
     const modelName = getModelName();
     const rq = getUserRequest(1);
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}`,
+      url: `/content-manager/collection-types/api::${modelName}.${modelName}/${documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -169,28 +168,26 @@ describe.skip('Admin Permissions - Conditions', () => {
   });
 
   test('User B cannot delete the entry created by user A', async () => {
-    const { id } = localTestData.entry;
+    const { documentId } = localTestData.entry;
     const modelName = getModelName();
     const rq = getUserRequest(1);
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}`,
+      url: `/content-manager/collection-types/api::${modelName}.${modelName}/${documentId}`,
     });
 
     expect(res.statusCode).toBe(403);
   });
 
   test('User A can delete its entry', async () => {
-    const { id } = localTestData.entry;
+    const { documentId } = localTestData.entry;
     const modelName = getModelName();
     const rq = getUserRequest(0);
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}`,
+      url: `/content-manager/collection-types/api::${modelName}.${modelName}/${documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
-    // Fix V5: Decide if we want to return the deleted entry or not
-    // expect(res.body.data).toMatchObject(localTestData.entry);
   });
 });
