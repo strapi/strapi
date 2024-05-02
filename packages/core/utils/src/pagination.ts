@@ -186,8 +186,8 @@ const transformOffsetPaginationInfo = (
   total: number
 ): OffsetPaginationInformation => {
   if (!isNil(paginationInfo.page)) {
-    const start = paginationInfo.page - 1;
     const limit = paginationInfo.pageSize ?? total;
+    const start = (paginationInfo.page - 1) * limit;
 
     return { start, limit, total };
   }
