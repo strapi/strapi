@@ -1,3 +1,4 @@
+export default `
 ############################
 # OS X
 ############################
@@ -129,3 +130,4 @@ exports
 dist
 build
 .strapi-updater.json
+`;

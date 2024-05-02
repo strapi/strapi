@@ -1,24 +1,36 @@
 import { execSync } from 'child_process';
 import execa from 'execa';
-import logger from './logger';
-import type { Options } from '../types';
 
-// TODO: Refactor run install, use the methods available in @strapi/utils instead
-export function runInstall(path: string, { useYarn }: Options = {}) {
-  return execa(useYarn ? 'yarn' : 'npm', ['install'], {
+import logger from './logger';
+import type { PackageManager } from '../types';
+
+const installArguments = ['install'];
+
+const installArgumentsMap = {
+  npm: ['--legacy-peer-deps'],
+  yarn: ['--network-timeout 1000000'],
+  pnpm: [],
+};
+
+export function runInstall(path: string, packageManager: PackageManager) {
+  const options: execa.Options = {
     cwd: path,
-    stdin: 'ignore',
-  });
-}
-export function runApp(rootPath: string, { useYarn }: Options = {}) {
-  if (useYarn) {
-    return execa('yarn', ['develop'], {
-      stdio: 'inherit',
-      cwd: rootPath,
-    });
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      NODE_ENV: 'development',
+    },
+  };
+
+  if (packageManager in installArgumentsMap) {
+    installArguments.push(...(installArgumentsMap[packageManager] ?? []));
   }
 
-  return execa('npm', ['run', 'develop'], {
+  return execa(packageManager, installArguments, options);
+}
+
+export function runApp(rootPath: string, packageManager: PackageManager) {
+  return execa(packageManager, ['run', 'develop'], {
     stdio: 'inherit',
     cwd: rootPath,
   });

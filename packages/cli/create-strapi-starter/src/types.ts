@@ -1,17 +1,16 @@
-export interface Options {
-  useYarn?: boolean;
-}
+import type { Options as GenerateNewAppOptions } from '@strapi/generate-new';
 
 export interface PackageInfo {
   name: string;
   version: string;
 }
 
-export interface Program {
+export interface Options {
   useNpm?: boolean;
-  debug?: boolean;
+  usePnpm?: boolean;
+  useYarn?: boolean;
   quickstart?: boolean;
-  dbclient?: string;
+  dbclient?: 'mysql' | 'postgres' | 'sqlite';
   dbhost?: string;
   dbport?: string;
   dbname?: string;
@@ -19,6 +18,27 @@ export interface Program {
   dbpassword?: string;
   dbssl?: string;
   dbfile?: string;
-  dbforce?: boolean;
-  template?: string;
+  typescript?: boolean;
+  javascript?: boolean;
 }
+
+export type DBClient = 'mysql' | 'postgres' | 'sqlite';
+
+export type DBConfig = {
+  client: DBClient;
+  connection: {
+    host?: string;
+    port?: string;
+    database?: string;
+    username?: string;
+    password?: string;
+    filename?: string;
+    ssl?: boolean;
+  };
+};
+
+export type StarterOptions = GenerateNewAppOptions & {
+  starter: string;
+};
+
+export type PackageManager = GenerateNewAppOptions['packageManager'];

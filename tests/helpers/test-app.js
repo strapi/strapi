@@ -21,15 +21,16 @@ const cleanTestApp = async (appPath) => {
  * @param {database} options.database - Arguments to create the testApp with the provided database params
  */
 const generateTestApp = async ({ appPath, database, template, link = false }) => {
+  const pkg = require(path.resolve(__dirname, '../../packages/core/strapi/package.json'));
+
   const scope = {
     database,
     rootPath: path.resolve(appPath),
     name: path.basename(appPath),
     // disable quickstart run app after creation
-    runQuickstartApp: false,
+    runApp: false,
     // use package version as strapiVersion (all packages have the same version);
-    strapiVersion: require(path.resolve(__dirname, '../../packages/core/strapi/package.json'))
-      .version,
+    strapiVersion: pkg.version,
     debug: false,
     quick: false,
     uuid: undefined,
@@ -37,14 +38,14 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
     // use yarn if available and --use-npm isn't true
     useYarn: true,
     installDependencies: false,
-    strapiDependencies: [
-      '@strapi/strapi',
-      '@strapi/plugin-users-permissions',
-      '@strapi/plugin-graphql',
-      '@strapi/plugin-documentation',
-      '@strapi/plugin-cloud',
-    ],
-    additionalsDependencies: {
+    devDependencies: {
+      '@strapi/strapi': pkg.version,
+      '@strapi/plugin-users-permissions': pkg.version,
+      '@strapi/plugin-graphql': pkg.version,
+      '@strapi/plugin-documentation': pkg.version,
+      '@strapi/plugin-cloud': pkg.version,
+    },
+    dependencies: {
       react: '18.2.0',
       'react-dom': '18.2.0',
       'react-router-dom': '^6.0.0',

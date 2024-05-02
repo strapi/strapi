@@ -1,38 +1,34 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import commander, { CommanderError } from 'commander';
+import commander from 'commander';
 
 import buildStarter from './utils/build-starter';
-import promptUser from './utils/prompt-user';
-import type { Program } from './types';
-
-interface ProjectArgs {
-  projectName: string;
-  starter: string;
-}
+import * as prompts from './prompts';
+import * as database from './database';
+import type { Options, StarterOptions } from './types';
+import { detectPackageManager } from './package-manager';
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
-const program = new commander.Command(packageJson.name);
+const command = new commander.Command(packageJson.name);
 
-const incompatibleQuickstartOptions: Array<keyof Program> = [
-  'dbclient',
-  'dbhost',
-  'dbport',
-  'dbname',
-  'dbusername',
-  'dbpassword',
-  'dbssl',
-  'dbfile',
-];
-
-program
+command
   .version(packageJson.version)
   .arguments('[directory], [starter]')
-  .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
-  .option('--debug', 'Display database connection error')
-  .option('--quickstart', 'Quickstart app creation')
+  .usage('[directory] [starter] [options]')
+  .option('--quick, --quickstart', 'Quickstart app creation')
+
+  // setup options
+  .option('--ts, --typescript', 'Initialize the project with TypeScript (default)')
+  .option('--js, --javascript', 'Initialize the project with Javascript')
+
+  // Package manager options
+  .option('--use-npm', 'Use npm as the project package manager')
+  .option('--use-yarn', 'Use yarn as the project package manager')
+  .option('--use-pnpm', 'Use pnpm as the project package manager')
+
+  // Database options
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')
@@ -41,71 +37,88 @@ program
   .option('--dbpassword <dbpassword>', 'Database password')
   .option('--dbssl <dbssl>', 'Database SSL')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
-  .option('--dbforce', 'Overwrite database content if any')
   .description(
     'Create a fullstack monorepo application using the strapi backend template specified in the provided starter'
   )
-  .action((directory, starter, programArgs) => {
-    const projectArgs: ProjectArgs = { projectName: directory, starter };
+  .action((directory, starter, options) => {
+    createStrapiStarter(directory, starter, options);
+  })
+  .parse(process.argv);
 
-    initProject(projectArgs, programArgs);
-  });
+async function createStrapiStarter(
+  directory: string | undefined,
+  starter: string | undefined,
+  options: Options
+) {
+  validateOptions(options);
 
-function generateApp(projectArgs: ProjectArgs, programArgs: Program) {
-  if (!projectArgs.projectName || !projectArgs.starter) {
+  if (options.quickstart && (!directory || !starter)) {
     console.error(
       'Please specify the <directory> and <starter> of your project when using --quickstart'
     );
-    // eslint-disable-next-line no-process-exit
+
     process.exit(1);
   }
 
-  return buildStarter(projectArgs, programArgs);
+  const appDirectory = directory || (await prompts.directory());
+  const appStarter = starter || (await prompts.starter());
+
+  const appOptions = {
+    directory: appDirectory,
+    starter: appStarter,
+    useTypescript: true,
+    packageManager: 'npm',
+    isQuickstart: options.quickstart,
+  } as StarterOptions;
+
+  if (options.javascript === true) {
+    appOptions.useTypescript = false;
+  } else if (options.typescript === true) {
+    appOptions.useTypescript = true;
+  } else {
+    appOptions.useTypescript = options.quickstart ? true : await prompts.typescript();
+  }
+
+  if (options.useNpm === true) {
+    appOptions.packageManager = 'npm';
+  } else if (options.usePnpm === true) {
+    appOptions.packageManager = 'pnpm';
+  } else if (options.useYarn === true) {
+    appOptions.packageManager = 'yarn';
+  } else {
+    appOptions.packageManager = detectPackageManager();
+  }
+
+  if (options.quickstart === true) {
+    appOptions.runApp = true;
+  }
+
+  appOptions.database = await database.getDatabaseInfos(options);
+
+  return buildStarter(appOptions)
+    .then(() => {
+      if (process.platform === 'win32') {
+        process.exit(0);
+      }
+    })
+    .catch((error) => {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    });
 }
 
-async function initProject(projectArgs: ProjectArgs, programArgs: Program) {
-  const hasIncompatibleQuickstartOptions = incompatibleQuickstartOptions.some(
-    (opt) => programArgs[opt]
-  );
+async function validateOptions(options: Options) {
+  if (options.javascript === true && options.typescript === true) {
+    console.error('You cannot use both --typescript (--ts) and --javascript (--js) flags together');
+    process.exit(1);
+  }
 
-  if (programArgs.quickstart && hasIncompatibleQuickstartOptions) {
+  if ([options.useNpm, options.usePnpm, options.useYarn].filter(Boolean).length > 1) {
     console.error(
-      `The quickstart option is incompatible with the following options: ${incompatibleQuickstartOptions.join(
-        ', '
-      )}`
+      'You cannot specify multiple package managers at the same time (--use-npm, --use-pnpm, --use-yarn)'
     );
     process.exit(1);
   }
 
-  if (hasIncompatibleQuickstartOptions) {
-    programArgs.quickstart = false; // Will disable the quickstart question because != 'undefined'
-  }
-
-  const { projectName, starter } = projectArgs;
-
-  if (programArgs.quickstart) {
-    return generateApp(projectArgs, programArgs);
-  }
-
-  const prompt = await promptUser(projectName, starter, programArgs);
-
-  const promptProjectArgs = {
-    projectName: prompt.directory || projectName,
-    starter: prompt.starter || starter,
-  };
-
-  return generateApp(promptProjectArgs, {
-    ...programArgs,
-    quickstart: prompt.quick || programArgs.quickstart,
-  });
-}
-
-try {
-  program.parse(process.argv);
-} catch (err) {
-  if (err instanceof CommanderError) {
-    if (err.exitCode && err.exitCode !== 0) {
-      program.outputHelp();
-    }
-  }
+  database.validateOptions(options);
 }
