@@ -11,13 +11,17 @@ import { PERMISSIONS } from '../../constants/plugin';
 import { DocumentRBAC } from '../../features/DocumentRBAC';
 import { useDocument } from '../../hooks/useDocument';
 import { type EditLayout, useDocumentLayout } from '../../hooks/useDocumentLayout';
+import { useGetContentTypeConfigurationQuery } from '../../services/contentTypes';
 import { buildValidParams } from '../../utils/api';
 import { VersionContent } from '../components/VersionContent';
 import { VersionHeader } from '../components/VersionHeader';
 import { VersionsList } from '../components/VersionsList';
 import { useGetHistoryVersionsQuery } from '../services/historyVersion';
 
-import type { ContentType } from '../../../../shared/contracts/content-types';
+import type {
+  ContentType,
+  FindContentTypeConfiguration,
+} from '../../../../shared/contracts/content-types';
 import type {
   HistoryVersionDataResponse,
   GetHistoryVersions,
@@ -32,6 +36,7 @@ interface HistoryContextValue {
   contentType: UID.ContentType;
   id?: string; // null for single types
   layout: EditLayout['layout'];
+  configuration: FindContentTypeConfiguration.Response['data'];
   selectedVersion: HistoryVersionDataResponse;
   // Errors are handled outside of the provider, so we exclude errors from the response type
   versions: Extract<GetHistoryVersions.Response, { data: Array<HistoryVersionDataResponse> }>;
@@ -71,6 +76,8 @@ const HistoryPage = () => {
       settings: { displayName, mainField },
     },
   } = useDocumentLayout(slug!);
+  const { data: configuration, isLoading: isLoadingConfiguration } =
+    useGetContentTypeConfigurationQuery(slug!);
 
   // Parse state from query params
   const [{ query }] = useQueryParams<{
@@ -114,7 +121,13 @@ const HistoryPage = () => {
     return <Navigate to="/content-manager" />;
   }
 
-  if (isLoadingDocument || isLoadingLayout || versionsResponse.isFetching || isStaleRequest) {
+  if (
+    isLoadingDocument ||
+    isLoadingLayout ||
+    versionsResponse.isFetching ||
+    isStaleRequest ||
+    isLoadingConfiguration
+  ) {
     return <Page.Loading />;
   }
 
@@ -141,6 +154,7 @@ const HistoryPage = () => {
     !layout ||
     !schema ||
     !selectedVersion ||
+    !configuration ||
     // This should not happen as it's covered by versionsResponse.isError, but we need it for TS
     versionsResponse.data.error
   ) {
@@ -165,6 +179,7 @@ const HistoryPage = () => {
         id={documentId}
         schema={schema}
         layout={layout}
+        configuration={configuration}
         selectedVersion={selectedVersion}
         versions={versionsResponse.data}
         page={page}
