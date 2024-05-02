@@ -1,6 +1,6 @@
 import { RenderAdminArgs, renderAdmin } from '@strapi/admin/strapi-admin';
 import contentTypeBuilder from '@strapi/plugin-content-type-builder/strapi-admin';
-import contentManager from '@strapi/plugin-content-manager/strapi-admin';
+import contentManager from '@strapi/content-manager/strapi-admin';
 import email from '@strapi/plugin-email/strapi-admin';
 // @ts-expect-error – No types, yet.
 import upload from '@strapi/plugin-upload/strapi-admin';

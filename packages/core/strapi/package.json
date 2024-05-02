@@ -110,6 +110,7 @@
   "dependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@strapi/admin": "5.0.0-beta.5",
+    "@strapi/content-manager": "5.0.0-beta.5",
     "@strapi/content-releases": "5.0.0-beta.5",
     "@strapi/core": "5.0.0-beta.5",
     "@strapi/data-transfer": "5.0.0-beta.5",
@@ -119,7 +120,6 @@
     "@strapi/logger": "5.0.0-beta.5",
     "@strapi/pack-up": "5.0.0",
     "@strapi/permissions": "5.0.0-beta.5",
-    "@strapi/plugin-content-manager": "5.0.0-beta.5",
     "@strapi/plugin-content-type-builder": "5.0.0-beta.5",
     "@strapi/plugin-email": "5.0.0-beta.5",
     "@strapi/plugin-i18n": "5.0.0-beta.5",

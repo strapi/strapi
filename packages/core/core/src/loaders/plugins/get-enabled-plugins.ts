@@ -30,7 +30,7 @@ interface PluginDeclaration {
  * otherwise known as "core features"
  */
 const INTERNAL_PLUGINS = [
-  '@strapi/plugin-content-manager',
+  '@strapi/content-manager',
   '@strapi/plugin-content-type-builder',
   '@strapi/plugin-email',
   '@strapi/plugin-upload',

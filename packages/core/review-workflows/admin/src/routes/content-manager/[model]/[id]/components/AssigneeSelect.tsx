@@ -7,8 +7,8 @@ import {
   useAdminUsers,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import { Combobox, ComboboxOption, Field, Flex } from '@strapi/design-system';
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
