@@ -589,7 +589,7 @@ describe('<GuidedTourModal />', () => {
                       class="c16 c21"
                       id="title"
                     >
-                      🧠 Create a first Collection type
+                      🧠 Create a first Collection Type
                     </h3>
                   </div>
                   <div
