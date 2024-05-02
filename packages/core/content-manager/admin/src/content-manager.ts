@@ -61,7 +61,7 @@ interface ListViewContext {
    */
   collectionType: string;
   /**
-   * These are currently selected entries.
+   * The current selected documents in the table
    */
   documents: Document[];
   /**
