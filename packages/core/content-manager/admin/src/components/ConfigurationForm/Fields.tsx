@@ -9,8 +9,9 @@ import {
   IconButton,
   Typography,
   useComposedRefs,
+  Link,
+  Menu,
 } from '@strapi/design-system';
-import { Link, Menu } from '@strapi/design-system';
 import { Cog, Cross, Drag, Pencil, Plus } from '@strapi/icons';
 import { generateNKeysBetween as generateNKeysBetweenImpl } from 'fractional-indexing';
 import { getEmptyImage } from 'react-dnd-html5-backend';

@@ -7,8 +7,8 @@ import { Route, Routes } from 'react-router-dom';
 
 import { CMReleasesContainer } from '../CMReleasesContainer';
 
-jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
-  ...jest.requireActual('@strapi/plugin-content-manager/strapi-admin'),
+jest.mock('@strapi/content-manager/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/content-manager/strapi-admin'),
   unstable_useDocument: jest.fn().mockReturnValue({
     schema: {
       options: {

@@ -7212,6 +7212,70 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@strapi/content-manager@npm:5.0.0-beta.5, @strapi/content-manager@workspace:packages/core/content-manager":
+  version: 0.0.0-use.local
+  resolution: "@strapi/content-manager@workspace:packages/core/content-manager"
+  dependencies:
+    "@radix-ui/react-toolbar": "npm:1.0.4"
+    "@reduxjs/toolkit": "npm:1.9.7"
+    "@sindresorhus/slugify": "npm:1.1.0"
+    "@strapi/admin": "npm:5.0.0-beta.5"
+    "@strapi/database": "workspace:*"
+    "@strapi/design-system": "npm:2.0.0-beta.2"
+    "@strapi/icons": "npm:2.0.0-beta.2"
+    "@strapi/pack-up": "npm:5.0.0"
+    "@strapi/types": "npm:5.0.0-beta.5"
+    "@strapi/utils": "npm:5.0.0-beta.5"
+    "@testing-library/react": "npm:14.0.0"
+    "@types/jest": "npm:29.5.2"
+    "@types/lodash": "npm:^4.14.191"
+    axios: "npm:1.6.8"
+    codemirror5: "npm:codemirror@^5.65.11"
+    date-fns: "npm:2.30.0"
+    fractional-indexing: "npm:3.2.0"
+    highlight.js: "npm:^10.4.1"
+    immer: "npm:9.0.21"
+    koa: "npm:2.15.2"
+    koa-body: "npm:6.0.1"
+    lodash: "npm:4.17.21"
+    markdown-it: "npm:^12.3.2"
+    markdown-it-abbr: "npm:^1.0.4"
+    markdown-it-container: "npm:^3.0.0"
+    markdown-it-deflist: "npm:^2.1.0"
+    markdown-it-emoji: "npm:^2.0.0"
+    markdown-it-footnote: "npm:^3.0.3"
+    markdown-it-ins: "npm:^3.0.1"
+    markdown-it-mark: "npm:^3.0.1"
+    markdown-it-sub: "npm:^1.0.0"
+    markdown-it-sup: "npm:1.0.0"
+    msw: "npm:1.3.0"
+    node-schedule: "npm:2.1.0"
+    qs: "npm:6.11.1"
+    react: "npm:^18.2.0"
+    react-dnd: "npm:16.0.1"
+    react-dnd-html5-backend: "npm:16.0.1"
+    react-dom: "npm:^18.2.0"
+    react-helmet: "npm:^6.1.0"
+    react-intl: "npm:6.6.2"
+    react-query: "npm:3.39.3"
+    react-redux: "npm:8.1.3"
+    react-router-dom: "npm:6.22.3"
+    react-window: "npm:1.8.10"
+    sanitize-html: "npm:2.11.0"
+    slate: "npm:0.94.1"
+    slate-history: "npm:0.93.0"
+    slate-react: "npm:0.98.3"
+    styled-components: "npm:5.3.11"
+    yup: "npm:0.32.9"
+  peerDependencies:
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^6.0.0
+    styled-components: ^5.2.1
+  languageName: unknown
+  linkType: soft
+
 "@strapi/content-releases@npm:5.0.0-beta.5, @strapi/content-releases@workspace:packages/core/content-releases":
   version: 0.0.0-use.local
   resolution: "@strapi/content-releases@workspace:packages/core/content-releases"
@@ -7219,10 +7283,10 @@ __metadata:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.0.0-beta.5"
     "@strapi/admin-test-utils": "npm:5.0.0-beta.5"
+    "@strapi/content-manager": "npm:5.0.0-beta.5"
     "@strapi/design-system": "npm:2.0.0-beta.2"
     "@strapi/icons": "npm:2.0.0-beta.2"
     "@strapi/pack-up": "npm:5.0.0"
-    "@strapi/plugin-content-manager": "npm:5.0.0-beta.5"
     "@strapi/types": "workspace:*"
     "@strapi/utils": "npm:5.0.0-beta.5"
     "@testing-library/react": "npm:14.0.0"
@@ -7248,11 +7312,53 @@ __metadata:
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    "@strapi/plugin-content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
     styled-components: 5.3.3
+  languageName: unknown
+  linkType: soft
+
+"@strapi/content-type-builder@npm:5.0.0-beta.5, @strapi/content-type-builder@workspace:packages/core/content-type-builder":
+  version: 0.0.0-use.local
+  resolution: "@strapi/content-type-builder@workspace:packages/core/content-type-builder"
+  dependencies:
+    "@reduxjs/toolkit": "npm:1.9.7"
+    "@sindresorhus/slugify": "npm:1.1.0"
+    "@strapi/admin": "npm:5.0.0-beta.5"
+    "@strapi/design-system": "npm:2.0.0-beta.2"
+    "@strapi/generators": "npm:5.0.0-beta.5"
+    "@strapi/icons": "npm:2.0.0-beta.2"
+    "@strapi/pack-up": "npm:5.0.0"
+    "@strapi/types": "npm:5.0.0-beta.5"
+    "@strapi/utils": "npm:5.0.0-beta.5"
+    "@testing-library/react": "npm:14.0.0"
+    "@testing-library/user-event": "npm:14.4.3"
+    "@types/fs-extra": "npm:11.0.4"
+    "@types/pluralize": "npm:0.0.30"
+    date-fns: "npm:2.30.0"
+    fs-extra: "npm:11.2.0"
+    immer: "npm:9.0.21"
+    koa: "npm:2.15.2"
+    koa-body: "npm:6.0.1"
+    lodash: "npm:4.17.21"
+    pluralize: "npm:8.0.0"
+    qs: "npm:6.11.1"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-intl: "npm:6.6.2"
+    react-query: "npm:3.39.3"
+    react-redux: "npm:8.1.3"
+    react-router-dom: "npm:6.22.3"
+    styled-components: "npm:5.3.11"
+    yup: "npm:0.32.9"
+  peerDependencies:
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^6.0.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -7420,6 +7526,41 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@strapi/email@npm:5.0.0-beta.5, @strapi/email@workspace:packages/core/email":
+  version: 0.0.0-use.local
+  resolution: "@strapi/email@workspace:packages/core/email"
+  dependencies:
+    "@strapi/admin": "npm:5.0.0-beta.5"
+    "@strapi/design-system": "npm:2.0.0-beta.2"
+    "@strapi/icons": "npm:2.0.0-beta.2"
+    "@strapi/pack-up": "npm:5.0.0"
+    "@strapi/provider-email-sendmail": "npm:5.0.0-beta.5"
+    "@strapi/types": "npm:5.0.0-beta.5"
+    "@strapi/utils": "npm:5.0.0-beta.5"
+    "@testing-library/react": "npm:14.0.0"
+    "@types/koa": "npm:2.13.4"
+    "@types/lodash": "npm:^4.14.191"
+    koa: "npm:2.15.2"
+    koa-body: "npm:6.0.1"
+    lodash: "npm:4.17.21"
+    msw: "npm:1.3.0"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-intl: "npm:6.6.2"
+    react-query: "npm:3.39.3"
+    react-router-dom: "npm:6.22.3"
+    styled-components: "npm:5.3.11"
+    yup: "npm:0.32.9"
+  peerDependencies:
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    koa: 2.13.4
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^6.0.0
+    styled-components: ^5.2.1
+  languageName: unknown
+  linkType: soft
+
 "@strapi/eslint-config@npm:0.2.0":
   version: 0.2.0
   resolution: "@strapi/eslint-config@npm:0.2.0"
@@ -7488,6 +7629,43 @@ __metadata:
     plop: "npm:2.7.6"
     pluralize: "npm:8.0.0"
     tsconfig: "npm:5.0.0-beta.5"
+  languageName: unknown
+  linkType: soft
+
+"@strapi/i18n@npm:5.0.0-beta.5, @strapi/i18n@workspace:packages/plugins/i18n":
+  version: 0.0.0-use.local
+  resolution: "@strapi/i18n@workspace:packages/plugins/i18n"
+  dependencies:
+    "@reduxjs/toolkit": "npm:1.9.7"
+    "@strapi/admin": "npm:5.0.0-beta.5"
+    "@strapi/admin-test-utils": "npm:5.0.0-beta.5"
+    "@strapi/content-manager": "npm:5.0.0-beta.5"
+    "@strapi/design-system": "npm:2.0.0-beta.2"
+    "@strapi/icons": "npm:2.0.0-beta.2"
+    "@strapi/pack-up": "npm:5.0.0"
+    "@strapi/types": "npm:5.0.0-beta.5"
+    "@strapi/utils": "npm:5.0.0-beta.5"
+    "@testing-library/react": "npm:14.0.0"
+    "@testing-library/user-event": "npm:14.4.3"
+    axios: "npm:1.6.8"
+    lodash: "npm:4.17.21"
+    msw: "npm:1.3.0"
+    qs: "npm:6.11.1"
+    react: "npm:^18.2.0"
+    react-dom: "npm:^18.2.0"
+    react-intl: "npm:6.6.2"
+    react-query: "npm:3.39.3"
+    react-redux: "npm:8.1.3"
+    react-router-dom: "npm:6.22.3"
+    styled-components: "npm:5.3.11"
+    yup: "npm:0.32.9"
+  peerDependencies:
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^6.0.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 
@@ -7613,112 +7791,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-content-manager@npm:5.0.0-beta.5, @strapi/plugin-content-manager@workspace:packages/core/content-manager":
-  version: 0.0.0-use.local
-  resolution: "@strapi/plugin-content-manager@workspace:packages/core/content-manager"
-  dependencies:
-    "@radix-ui/react-toolbar": "npm:1.0.4"
-    "@reduxjs/toolkit": "npm:1.9.7"
-    "@sindresorhus/slugify": "npm:1.1.0"
-    "@strapi/admin": "npm:5.0.0-beta.5"
-    "@strapi/database": "workspace:*"
-    "@strapi/design-system": "npm:2.0.0-beta.2"
-    "@strapi/icons": "npm:2.0.0-beta.2"
-    "@strapi/pack-up": "npm:5.0.0"
-    "@strapi/types": "npm:5.0.0-beta.5"
-    "@strapi/utils": "npm:5.0.0-beta.5"
-    "@testing-library/react": "npm:14.0.0"
-    "@types/jest": "npm:29.5.2"
-    "@types/lodash": "npm:^4.14.191"
-    axios: "npm:1.6.8"
-    codemirror5: "npm:codemirror@^5.65.11"
-    date-fns: "npm:2.30.0"
-    fractional-indexing: "npm:3.2.0"
-    highlight.js: "npm:^10.4.1"
-    immer: "npm:9.0.21"
-    koa: "npm:2.15.2"
-    koa-body: "npm:6.0.1"
-    lodash: "npm:4.17.21"
-    markdown-it: "npm:^12.3.2"
-    markdown-it-abbr: "npm:^1.0.4"
-    markdown-it-container: "npm:^3.0.0"
-    markdown-it-deflist: "npm:^2.1.0"
-    markdown-it-emoji: "npm:^2.0.0"
-    markdown-it-footnote: "npm:^3.0.3"
-    markdown-it-ins: "npm:^3.0.1"
-    markdown-it-mark: "npm:^3.0.1"
-    markdown-it-sub: "npm:^1.0.0"
-    markdown-it-sup: "npm:1.0.0"
-    msw: "npm:1.3.0"
-    node-schedule: "npm:2.1.0"
-    qs: "npm:6.11.1"
-    react: "npm:^18.2.0"
-    react-dnd: "npm:16.0.1"
-    react-dnd-html5-backend: "npm:16.0.1"
-    react-dom: "npm:^18.2.0"
-    react-helmet: "npm:^6.1.0"
-    react-intl: "npm:6.6.2"
-    react-query: "npm:3.39.3"
-    react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
-    react-window: "npm:1.8.10"
-    sanitize-html: "npm:2.11.0"
-    slate: "npm:0.94.1"
-    slate-history: "npm:0.93.0"
-    slate-react: "npm:0.98.3"
-    styled-components: "npm:5.3.11"
-    yup: "npm:0.32.9"
-  peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
-    styled-components: ^5.2.1
-  languageName: unknown
-  linkType: soft
-
-"@strapi/plugin-content-type-builder@npm:5.0.0-beta.5, @strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder":
-  version: 0.0.0-use.local
-  resolution: "@strapi/plugin-content-type-builder@workspace:packages/core/content-type-builder"
-  dependencies:
-    "@reduxjs/toolkit": "npm:1.9.7"
-    "@sindresorhus/slugify": "npm:1.1.0"
-    "@strapi/admin": "npm:5.0.0-beta.5"
-    "@strapi/design-system": "npm:2.0.0-beta.2"
-    "@strapi/generators": "npm:5.0.0-beta.5"
-    "@strapi/icons": "npm:2.0.0-beta.2"
-    "@strapi/pack-up": "npm:5.0.0"
-    "@strapi/types": "npm:5.0.0-beta.5"
-    "@strapi/utils": "npm:5.0.0-beta.5"
-    "@testing-library/react": "npm:14.0.0"
-    "@testing-library/user-event": "npm:14.4.3"
-    "@types/fs-extra": "npm:11.0.4"
-    "@types/pluralize": "npm:0.0.30"
-    date-fns: "npm:2.30.0"
-    fs-extra: "npm:11.2.0"
-    immer: "npm:9.0.21"
-    koa: "npm:2.15.2"
-    koa-body: "npm:6.0.1"
-    lodash: "npm:4.17.21"
-    pluralize: "npm:8.0.0"
-    qs: "npm:6.11.1"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
-    react-intl: "npm:6.6.2"
-    react-query: "npm:3.39.3"
-    react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
-    styled-components: "npm:5.3.11"
-    yup: "npm:0.32.9"
-  peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
-    styled-components: ^5.2.1
-  languageName: unknown
-  linkType: soft
-
 "@strapi/plugin-documentation@npm:5.0.0-beta.5, @strapi/plugin-documentation@workspace:packages/plugins/documentation":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-documentation@workspace:packages/plugins/documentation"
@@ -7770,41 +7842,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-email@npm:5.0.0-beta.5, @strapi/plugin-email@workspace:packages/core/email":
-  version: 0.0.0-use.local
-  resolution: "@strapi/plugin-email@workspace:packages/core/email"
-  dependencies:
-    "@strapi/admin": "npm:5.0.0-beta.5"
-    "@strapi/design-system": "npm:2.0.0-beta.2"
-    "@strapi/icons": "npm:2.0.0-beta.2"
-    "@strapi/pack-up": "npm:5.0.0"
-    "@strapi/provider-email-sendmail": "npm:5.0.0-beta.5"
-    "@strapi/types": "npm:5.0.0-beta.5"
-    "@strapi/utils": "npm:5.0.0-beta.5"
-    "@testing-library/react": "npm:14.0.0"
-    "@types/koa": "npm:2.13.4"
-    "@types/lodash": "npm:^4.14.191"
-    koa: "npm:2.15.2"
-    koa-body: "npm:6.0.1"
-    lodash: "npm:4.17.21"
-    msw: "npm:1.3.0"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
-    react-intl: "npm:6.6.2"
-    react-query: "npm:3.39.3"
-    react-router-dom: "npm:6.22.3"
-    styled-components: "npm:5.3.11"
-    yup: "npm:0.32.9"
-  peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    koa: 2.13.4
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
-    styled-components: ^5.2.1
-  languageName: unknown
-  linkType: soft
-
 "@strapi/plugin-graphql@npm:5.0.0-beta.5, @strapi/plugin-graphql@workspace:packages/plugins/graphql":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-graphql@workspace:packages/plugins/graphql"
@@ -7849,43 +7886,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-i18n@npm:5.0.0-beta.5, @strapi/plugin-i18n@workspace:packages/plugins/i18n":
-  version: 0.0.0-use.local
-  resolution: "@strapi/plugin-i18n@workspace:packages/plugins/i18n"
-  dependencies:
-    "@reduxjs/toolkit": "npm:1.9.7"
-    "@strapi/admin": "npm:5.0.0-beta.5"
-    "@strapi/admin-test-utils": "npm:5.0.0-beta.5"
-    "@strapi/design-system": "npm:2.0.0-beta.2"
-    "@strapi/icons": "npm:2.0.0-beta.2"
-    "@strapi/pack-up": "npm:5.0.0"
-    "@strapi/plugin-content-manager": "npm:5.0.0-beta.5"
-    "@strapi/types": "npm:5.0.0-beta.5"
-    "@strapi/utils": "npm:5.0.0-beta.5"
-    "@testing-library/react": "npm:14.0.0"
-    "@testing-library/user-event": "npm:14.4.3"
-    axios: "npm:1.6.8"
-    lodash: "npm:4.17.21"
-    msw: "npm:1.3.0"
-    qs: "npm:6.11.1"
-    react: "npm:^18.2.0"
-    react-dom: "npm:^18.2.0"
-    react-intl: "npm:6.6.2"
-    react-query: "npm:3.39.3"
-    react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
-    styled-components: "npm:5.3.11"
-    yup: "npm:0.32.9"
-  peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    "@strapi/plugin-content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
-    styled-components: ^5.2.1
-  languageName: unknown
-  linkType: soft
-
 "@strapi/plugin-sentry@npm:5.0.0-beta.5, @strapi/plugin-sentry@workspace:packages/plugins/sentry":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-sentry@workspace:packages/plugins/sentry"
@@ -7901,61 +7901,6 @@ __metadata:
     styled-components: "npm:5.3.11"
   peerDependencies:
     "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
-    styled-components: ^5.2.1
-  languageName: unknown
-  linkType: soft
-
-"@strapi/plugin-upload@npm:5.0.0-beta.5, @strapi/plugin-upload@workspace:packages/core/upload":
-  version: 0.0.0-use.local
-  resolution: "@strapi/plugin-upload@workspace:packages/core/upload"
-  dependencies:
-    "@strapi/admin": "npm:5.0.0-beta.5"
-    "@strapi/design-system": "npm:2.0.0-beta.2"
-    "@strapi/icons": "npm:2.0.0-beta.2"
-    "@strapi/pack-up": "npm:5.0.0"
-    "@strapi/provider-upload-local": "npm:5.0.0-beta.5"
-    "@strapi/types": "npm:5.0.0-beta.5"
-    "@strapi/utils": "npm:5.0.0-beta.5"
-    "@testing-library/dom": "npm:9.2.0"
-    "@testing-library/react": "npm:14.0.0"
-    "@testing-library/user-event": "npm:14.4.3"
-    "@types/fs-extra": "npm:11.0.4"
-    "@types/koa": "npm:2.13.4"
-    "@types/koa-range": "npm:0.3.5"
-    "@types/koa-static": "npm:4.0.2"
-    axios: "npm:1.6.8"
-    byte-size: "npm:8.1.1"
-    cropperjs: "npm:1.6.1"
-    date-fns: "npm:2.30.0"
-    formidable: "npm:3.5.1"
-    formik: "npm:2.4.5"
-    fs-extra: "npm:11.2.0"
-    immer: "npm:9.0.21"
-    koa: "npm:2.15.2"
-    koa-body: "npm:6.0.1"
-    koa-range: "npm:0.3.0"
-    koa-static: "npm:5.0.0"
-    lodash: "npm:4.17.21"
-    mime-types: "npm:2.1.35"
-    msw: "npm:1.3.0"
-    prop-types: "npm:^15.8.1"
-    qs: "npm:6.11.1"
-    react: "npm:^18.2.0"
-    react-dnd: "npm:16.0.1"
-    react-dom: "npm:^18.2.0"
-    react-intl: "npm:6.6.2"
-    react-query: "npm:3.39.3"
-    react-redux: "npm:8.1.3"
-    react-router-dom: "npm:6.22.3"
-    react-select: "npm:5.8.0"
-    sharp: "npm:0.32.6"
-    styled-components: "npm:5.3.11"
-    yup: "npm:0.32.9"
-  peerDependencies:
-    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -8131,10 +8076,10 @@ __metadata:
   dependencies:
     "@reduxjs/toolkit": "npm:1.9.7"
     "@strapi/admin": "npm:5.0.0-beta.5"
+    "@strapi/content-manager": "npm:5.0.0-beta.5"
     "@strapi/design-system": "npm:2.0.0-beta.2"
     "@strapi/icons": "npm:2.0.0-beta.2"
     "@strapi/pack-up": "npm:5.0.0"
-    "@strapi/plugin-content-manager": "npm:5.0.0-beta.5"
     "@strapi/types": "npm:5.0.0-beta.5"
     "@strapi/utils": "npm:5.0.0-beta.5"
     "@testing-library/react": "npm:14.0.0"
@@ -8153,7 +8098,7 @@ __metadata:
     yup: "npm:0.32.9"
   peerDependencies:
     "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    "@strapi/plugin-content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    "@strapi/content-manager": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^6.0.0
@@ -8167,24 +8112,24 @@ __metadata:
   dependencies:
     "@pmmmwh/react-refresh-webpack-plugin": "npm:0.5.11"
     "@strapi/admin": "npm:5.0.0-beta.5"
+    "@strapi/content-manager": "npm:5.0.0-beta.5"
     "@strapi/content-releases": "npm:5.0.0-beta.5"
+    "@strapi/content-type-builder": "npm:5.0.0-beta.5"
     "@strapi/core": "npm:5.0.0-beta.5"
     "@strapi/data-transfer": "npm:5.0.0-beta.5"
     "@strapi/database": "npm:5.0.0-beta.5"
+    "@strapi/email": "npm:5.0.0-beta.5"
     "@strapi/generate-new": "npm:5.0.0-beta.5"
     "@strapi/generators": "npm:5.0.0-beta.5"
+    "@strapi/i18n": "npm:5.0.0-beta.5"
     "@strapi/logger": "npm:5.0.0-beta.5"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/permissions": "npm:5.0.0-beta.5"
-    "@strapi/plugin-content-manager": "npm:5.0.0-beta.5"
-    "@strapi/plugin-content-type-builder": "npm:5.0.0-beta.5"
-    "@strapi/plugin-email": "npm:5.0.0-beta.5"
-    "@strapi/plugin-i18n": "npm:5.0.0-beta.5"
-    "@strapi/plugin-upload": "npm:5.0.0-beta.5"
     "@strapi/review-workflows": "npm:5.0.0-beta.5"
     "@strapi/ts-zen": "npm:^0.2.0"
     "@strapi/types": "npm:5.0.0-beta.5"
     "@strapi/typescript-utils": "npm:5.0.0-beta.5"
+    "@strapi/upload": "npm:5.0.0-beta.5"
     "@strapi/utils": "npm:5.0.0-beta.5"
     "@types/fs-extra": "npm:11.0.4"
     "@types/jest": "npm:29.5.2"
@@ -8362,6 +8307,61 @@ __metadata:
     simple-git: "npm:3.21.0"
   bin:
     upgrade: ./bin/upgrade.js
+  languageName: unknown
+  linkType: soft
+
+"@strapi/upload@npm:5.0.0-beta.5, @strapi/upload@workspace:packages/core/upload":
+  version: 0.0.0-use.local
+  resolution: "@strapi/upload@workspace:packages/core/upload"
+  dependencies:
+    "@strapi/admin": "npm:5.0.0-beta.5"
+    "@strapi/design-system": "npm:2.0.0-beta.2"
+    "@strapi/icons": "npm:2.0.0-beta.2"
+    "@strapi/pack-up": "npm:5.0.0"
+    "@strapi/provider-upload-local": "npm:5.0.0-beta.5"
+    "@strapi/types": "npm:5.0.0-beta.5"
+    "@strapi/utils": "npm:5.0.0-beta.5"
+    "@testing-library/dom": "npm:9.2.0"
+    "@testing-library/react": "npm:14.0.0"
+    "@testing-library/user-event": "npm:14.4.3"
+    "@types/fs-extra": "npm:11.0.4"
+    "@types/koa": "npm:2.13.4"
+    "@types/koa-range": "npm:0.3.5"
+    "@types/koa-static": "npm:4.0.2"
+    axios: "npm:1.6.8"
+    byte-size: "npm:8.1.1"
+    cropperjs: "npm:1.6.1"
+    date-fns: "npm:2.30.0"
+    formidable: "npm:3.5.1"
+    formik: "npm:2.4.5"
+    fs-extra: "npm:11.2.0"
+    immer: "npm:9.0.21"
+    koa: "npm:2.15.2"
+    koa-body: "npm:6.0.1"
+    koa-range: "npm:0.3.0"
+    koa-static: "npm:5.0.0"
+    lodash: "npm:4.17.21"
+    mime-types: "npm:2.1.35"
+    msw: "npm:1.3.0"
+    prop-types: "npm:^15.8.1"
+    qs: "npm:6.11.1"
+    react: "npm:^18.2.0"
+    react-dnd: "npm:16.0.1"
+    react-dom: "npm:^18.2.0"
+    react-intl: "npm:6.6.2"
+    react-query: "npm:3.39.3"
+    react-redux: "npm:8.1.3"
+    react-router-dom: "npm:6.22.3"
+    react-select: "npm:5.8.0"
+    sharp: "npm:0.32.6"
+    styled-components: "npm:5.3.11"
+    yup: "npm:0.32.9"
+  peerDependencies:
+    "@strapi/admin": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
+    react: ^17.0.0 || ^18.0.0
+    react-dom: ^17.0.0 || ^18.0.0
+    react-router-dom: ^6.0.0
+    styled-components: ^5.2.1
   languageName: unknown
   linkType: soft
 

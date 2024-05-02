@@ -1,11 +1,11 @@
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { AssigneeSelect } from '../AssigneeSelect';
 
-jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
+jest.mock('@strapi/content-manager/strapi-admin', () => ({
   unstable_useDocument: jest.fn().mockReturnValue({
     document: {
       documentId: '12345',
