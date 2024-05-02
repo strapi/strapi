@@ -23,14 +23,13 @@ const uploadAsset = (asset, folderId, signal, onProgress, post) => {
     })
   );
 
+  /**
+   * onProgress is not possible using native fetch
+   * need to look into an alternative to make it work
+   * perhaps using xhr like Axios does
+   */
   return post(endpoint, formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
     signal,
-    onUploadProgress({ total, loaded }) {
-      onProgress((loaded / total) * 100);
-    },
   }).then((res) => res.data);
 };
 

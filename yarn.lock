@@ -7922,7 +7922,6 @@ __metadata:
     "@types/koa": "npm:2.13.4"
     "@types/koa-range": "npm:0.3.5"
     "@types/koa-static": "npm:4.0.2"
-    axios: "npm:1.6.8"
     byte-size: "npm:8.1.1"
     cropperjs: "npm:1.6.1"
     date-fns: "npm:2.30.0"
