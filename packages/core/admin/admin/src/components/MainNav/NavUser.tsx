@@ -64,23 +64,27 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
           <VisuallyHidden as="span">{children}</VisuallyHidden>
         </MenuTrigger>
         <MenuContent popoverPlacement="top" zIndex={3} width="15rem">
-          <LinkUser to="/me">
-            <Typography>
-              {formatMessage({
-                id: 'global.profile',
-                defaultMessage: 'Profile',
-              })}
-            </Typography>
-          </LinkUser>
-          <LinkUser onClick={logout} to="/auth/login">
-            <Typography textColor="danger600">
-              {formatMessage({
-                id: 'app.components.LeftMenu.logout',
-                defaultMessage: 'Logout',
-              })}
-            </Typography>
-            <SignOut />
-          </LinkUser>
+          <Menu.Item>
+            <LinkUser to="/me">
+              <Typography>
+                {formatMessage({
+                  id: 'global.profile',
+                  defaultMessage: 'Profile',
+                })}
+              </Typography>
+            </LinkUser>
+          </Menu.Item>
+          <Menu.Item>
+            <LinkUser onClick={logout} to="/auth/login">
+              <Typography textColor="danger600">
+                {formatMessage({
+                  id: 'app.components.LeftMenu.logout',
+                  defaultMessage: 'Logout',
+                })}
+              </Typography>
+              <SignOut />
+            </LinkUser>
+          </Menu.Item>
         </MenuContent>
       </Menu.Root>
     </Flex>
