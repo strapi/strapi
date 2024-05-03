@@ -53,7 +53,7 @@ const admin: Plugin.Config.AdminInput = {
 
       // app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
       //   // We want to add this action to just before the delete action all the time
-      //   const deleteActionIndex = actions.findIndex((action) => action.name === 'DeleteAction');
+      //   const deleteActionIndex = actions.findIndex((action) => action.type === 'delete');
 
       //   actions.splice(deleteActionIndex, 0, ReleaseAction);
       //   return actions;
