@@ -301,7 +301,7 @@ const BulkActionModal = ({
 const DeleteAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
   const { schema: contentType } = useDoc();
-  const { selectRow } = useTable('deleteAction', (state) => state);
+  const selectRow = useTable('DeleteAction', (state) => state.selectRow);
   const hasI18nEnabled = Boolean(contentType?.pluginOptions?.i18n);
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -366,7 +366,7 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
 const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
   const { schema } = useDoc();
-  const { selectRow, selectedRows } = useTable('unpublishAction', (state) => state);
+  const selectRow = useTable('UnpublishAction', (state) => state.selectRow);
   const hasPublishPermission = useDocumentRBAC('unpublishAction', (state) => state.canPublish);
   const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
   const { unpublishMany: bulkUnpublishAction } = useDocumentActions();
@@ -382,7 +382,7 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   };
 
   const showUnpublishButton =
-    hasPublishPermission && selectedRows.some((entry) => entry.status === 'published');
+    hasPublishPermission && documents.some((entry) => entry.status === 'published');
 
   if (!showUnpublishButton) return null;
 
