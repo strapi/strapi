@@ -2,7 +2,11 @@ import get from 'lodash/get';
 import * as yup from 'yup';
 
 import { CheckboxConfirmation } from './components/CheckboxConfirmation';
-import { DeleteLocaleAction, LocalePickerAction } from './components/CMHeaderActions';
+import {
+  BulkLocalePublishAction,
+  DeleteLocaleAction,
+  LocalePickerAction,
+} from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
   PublishModalAdditionalInfo,
@@ -71,6 +75,13 @@ export default {
     contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
       actions.splice(indexOfDeleteAction, 0, DeleteLocaleAction);
+      return actions;
+    });
+
+    contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
+      // When enabled the bulk locale publish action should be the first action
+      // in 'More Document Actions' and therefore the third action in the array
+      actions.splice(2, 0, BulkLocalePublishAction);
       return actions;
     });
 

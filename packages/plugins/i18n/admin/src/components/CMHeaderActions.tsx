@@ -1,23 +1,34 @@
 import * as React from 'react';
 
-import { useNotification, useQueryParams } from '@strapi/admin/strapi-admin';
+import {
+  useNotification,
+  useQueryParams,
+  Table,
+  useAPIErrorHandler,
+} from '@strapi/admin/strapi-admin';
 import {
   type HeaderActionComponent,
+  type DocumentActionComponent,
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
-  type DocumentActionComponent,
+  buildValidParams,
 } from '@strapi/content-manager/strapi-admin';
-import { Flex, Status, Typography } from '@strapi/design-system';
-import { Trash, WarningCircle } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import { Flex, Status, Typography, Button } from '@strapi/design-system';
+import { WarningCircle, ListPlus, Trash } from '@strapi/icons';
+import { Modules } from '@strapi/types';
+import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useI18n } from '../hooks/useI18n';
 import { useGetLocalesQuery } from '../services/locales';
+import { useGetManyDraftRelationCountQuery } from '../services/relations';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 
+import { BulkLocaleActionModal } from './BulkLocaleActionModal';
+
+import type { Locale } from '../../../shared/contracts/locales';
 import type { I18nBaseQuery } from '../types';
 
 /* -------------------------------------------------------------------------------------------------
@@ -226,6 +237,297 @@ const DeleteLocaleAction: DocumentActionComponent = ({
   };
 };
 
+/* -------------------------------------------------------------------------------------------------
+ * BulkPublishAction
+ * -----------------------------------------------------------------------------------------------*/
+
+export type LocaleStatus = {
+  locale: string;
+  status: Modules.Documents.Params.PublicationStatus.Kind | 'modified';
+};
+
+const BulkLocalePublishAction: DocumentActionComponent = ({
+  document: baseDocument,
+  documentId,
+  model,
+  collectionType,
+}) => {
+  const baseLocale = baseDocument?.locale ?? null;
+
+  const [{ query }] = useQueryParams<{ status: 'draft' | 'published' }>();
+
+  const params = React.useMemo(() => buildValidParams(query), [query]);
+  const isPublishedTab = query.status === 'published';
+
+  const { formatMessage } = useIntl();
+  const { hasI18n, canPublish } = useI18n();
+  const { toggleNotification } = useNotification();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+
+  const [selectedRows, setSelectedRows] = React.useState<any[]>([]);
+  const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
+
+  const { publishMany: publishManyAction } = useDocumentActions();
+  const {
+    document,
+    meta: documentMeta,
+    schema,
+    validate,
+  } = useDocument({
+    model,
+    collectionType,
+    documentId,
+    params: {
+      locale: baseLocale,
+    },
+  });
+
+  const { data: localesMetadata = [] } = useGetLocalesQuery();
+
+  const headers = [
+    {
+      label: formatMessage({
+        id: 'global.name',
+        defaultMessage: 'Name',
+      }),
+      name: 'name',
+    },
+    {
+      label: formatMessage({
+        id: getTranslation('CMEditViewBulkLocale.status'),
+        defaultMessage: 'Status',
+      }),
+      name: 'status',
+    },
+    {
+      label: formatMessage({
+        id: getTranslation('CMEditViewBulkLocale.publication-status'),
+        defaultMessage: 'Publication Status',
+      }),
+      name: 'publication-status',
+    },
+  ];
+
+  const [rows, validationErrors] = React.useMemo(() => {
+    if (!document || !documentMeta?.availableLocales) {
+      return [[], {}];
+    }
+
+    const rowsFromMeta: LocaleStatus[] = documentMeta?.availableLocales.map((doc) => {
+      const { locale, status } = doc;
+
+      return { locale, status };
+    });
+    rowsFromMeta.unshift({
+      locale: document?.locale ?? '',
+      status: document?.status ?? 'draft',
+    });
+
+    const allDocuments = [document, ...(documentMeta?.availableLocales ?? [])];
+
+    const errors: Record<
+      Modules.Documents.Params.Locale.StringNotation,
+      Record<string, MessageDescriptor>
+    > = {};
+
+    allDocuments.map((document) => {
+      if (!document) {
+        return document;
+      }
+
+      const validation = validate(document as Modules.Documents.AnyDocument);
+      if (validation !== null) {
+        errors[document.locale] = validation;
+      }
+
+      return document;
+    });
+
+    return [rowsFromMeta, errors];
+  }, [document, documentMeta?.availableLocales, validate]);
+
+  const localesToPublish = selectedRows
+    .filter(
+      (selectedRow) =>
+        selectedRow.status !== 'published' &&
+        !Object.keys(validationErrors || {}).includes(selectedRow.locale)
+    )
+    .map((selectedRow) => selectedRow.locale);
+
+  const {
+    data: draftRelationsCount = 0,
+    isLoading: isDraftRelationsLoading,
+    error: isDraftRelationsError,
+  } = useGetManyDraftRelationCountQuery(
+    {
+      model,
+      documentIds: [documentId!],
+      locale: localesToPublish,
+    },
+    {
+      skip: !documentId || localesToPublish.length === 0,
+    }
+  );
+
+  React.useEffect(() => {
+    if (isDraftRelationsError) {
+      toggleNotification({
+        type: 'danger',
+        message: formatAPIError(isDraftRelationsError),
+      });
+    }
+  }, [isDraftRelationsError, toggleNotification, formatAPIError]);
+
+  if (!schema?.options?.draftAndPublish ?? false) {
+    return null;
+  }
+
+  if (!hasI18n) {
+    return null;
+  }
+
+  if (!documentId) {
+    return null;
+  }
+
+  // This document action can be enabled given that draft and publish and i18n are
+  // enabled and we can publish the current locale.
+
+  const publish = async () => {
+    try {
+      const bulkPublishRes = await publishManyAction({
+        model,
+        documentIds: [documentId],
+        params: {
+          ...params,
+          locale: localesToPublish,
+        },
+      });
+
+      if ('error' in bulkPublishRes) {
+        toggleNotification({
+          type: 'danger',
+          message: formatAPIError(bulkPublishRes.error),
+        });
+        return;
+      }
+    } catch (error) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        }),
+      });
+    }
+  };
+
+  const handleAction = async () => {
+    if (draftRelationsCount > 0) {
+      setIsConfirmationOpen(true);
+    } else {
+      await publish();
+    }
+  };
+
+  const isUnpublish = document?.status === 'published';
+  if (isUnpublish) {
+    // TODO: For now we still proceed so we have the bulk locale publish action in all cases
+    console.warn(['I18N'], 'Bulk locale unpublish modal not implemented');
+  }
+
+  if (isConfirmationOpen) {
+    return {
+      label: formatMessage({
+        id: 'app.components.ConfirmDialog.title',
+        defaultMessage: 'Confirmation',
+      }),
+      variant: 'danger',
+      dialog: {
+        onCancel: () => {
+          setIsConfirmationOpen(false);
+        },
+        onConfirm: async () => {
+          await publish();
+
+          setIsConfirmationOpen(false);
+        },
+        type: 'dialog',
+        title: formatMessage({
+          id: getTranslation('actions.publish.dialog.title'),
+          defaultMessage: 'Confirmation',
+        }),
+        content: (
+          <Flex direction="column" alignItems="center" gap={2}>
+            <WarningCircle width="24px" height="24px" fill="danger600" />
+            <Typography textAlign="center">
+              {formatMessage({
+                id: 'content-manager.actions.discard.dialog.body',
+                defaultMessage:
+                  'Are you sure you want to discard the changes? This action is irreversible.',
+              })}
+            </Typography>
+          </Flex>
+        ),
+      },
+    };
+  }
+
+  return {
+    label: formatMessage({
+      id: getTranslation('CMEditViewBulkLocale.publish-title'),
+      defaultMessage: 'Publish Multiple Locales',
+    }),
+    icon: <ListPlus />,
+    disabled: isPublishedTab || !canPublish,
+    position: ['panel'],
+    variant: 'secondary',
+    dialog: {
+      type: 'modal',
+      title: formatMessage({
+        id: getTranslation('CMEditViewBulkLocale.publish-title'),
+        defaultMessage: 'Publish Multiple Locales',
+      }),
+      content: ({ onClose }) => {
+        return (
+          <Table.Root
+            headers={headers}
+            rows={rows.map((row) => ({
+              ...row,
+              id: row.locale,
+            }))}
+            selectedRows={selectedRows}
+            onSelectedRowsChange={(tableSelectedRows) => setSelectedRows(tableSelectedRows)}
+          >
+            <BulkLocaleActionModal
+              validationErrors={validationErrors}
+              headers={headers}
+              rows={rows}
+              onClose={onClose}
+              localesMetadata={localesMetadata as Locale[]}
+            />
+          </Table.Root>
+        );
+      },
+      footer: () => (
+        <Flex justifyContent="flex-end">
+          <Button
+            loading={isDraftRelationsLoading}
+            disabled={localesToPublish.length === 0}
+            variant="default"
+            onClick={handleAction}
+          >
+            {formatMessage({
+              id: 'app.utils.publish',
+              defaultMessage: 'Publish',
+            })}
+          </Button>
+        </Flex>
+      ),
+    },
+  };
+};
+
 /**
  * Because the icon system is completely broken, we have to do
  * this to remove the fill from the cog.
@@ -236,4 +538,4 @@ const StyledTrash = styled(Trash)`
   }
 `;
 
-export { DeleteLocaleAction, LocalePickerAction };
+export { BulkLocalePublishAction, DeleteLocaleAction, LocalePickerAction };

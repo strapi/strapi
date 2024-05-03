@@ -7,6 +7,7 @@
 import * as React from 'react';
 
 import { useNotification, useAPIErrorHandler, useQueryParams } from '@strapi/admin/strapi-admin';
+import { Modules } from '@strapi/types';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
@@ -117,7 +118,9 @@ const useDocument: UseDocument = (args, opts) => {
   }, [schema, components]);
 
   const validate = React.useCallback(
-    (document: Document) => {
+    (
+      document: Modules.Documents.AnyDocument
+    ): Record<string, MessageDescriptor & { values?: Record<string, PrimitiveType> }> | null => {
       if (!validationSchema) {
         throw new Error(
           'There is no validation schema generated, this is likely due to the schema not being loaded yet.'
@@ -126,11 +129,16 @@ const useDocument: UseDocument = (args, opts) => {
 
       try {
         validationSchema.validateSync(document, { abortEarly: false, strict: true });
-
         return null;
       } catch (error) {
         if (error instanceof ValidationError) {
-          return getInnerErrors(error);
+          const formattedErrors = getInnerErrors(error);
+          // Ensure that formattedErrors is of the correct type
+          // You may need to transform formattedErrors to match the expected type
+          return formattedErrors as unknown as Record<
+            string,
+            MessageDescriptor & { values?: Record<string, PrimitiveType> }
+          >;
         }
 
         throw error;
