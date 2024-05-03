@@ -1,13 +1,20 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
+
+import { omit } from 'lodash/fp';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb } from './utils';
 
+let strapi: Core.Strapi;
+
+const updateArticle = async (params: Modules.Documents.ServiceParams['update']) => {
+  return strapi.documents(ARTICLE_UID).update({ ...params });
+};
+
 describe('Document Service', () => {
   let testUtils;
-  let strapi: Core.Strapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
@@ -19,33 +26,11 @@ describe('Document Service', () => {
   });
 
   describe('Update', () => {
-    testInTransaction('update a document with defaults', async () => {
+    testInTransaction('Can update a draft', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
-      const newName = 'Updated Document';
 
-      const article = await strapi
-        .documents(ARTICLE_UID)
-        .update({ documentId: articleDb.documentId, data: { title: newName } });
-
-      // verify that the returned document was updated
-      expect(article).toMatchObject({
-        ...articleDb,
-        title: newName,
-        updatedAt: article.updatedAt,
-      });
-
-      // verify it was updated in the database
-      const updatedArticleDb = await findArticleDb({ title: newName });
-      expect(updatedArticleDb).toMatchObject({
-        ...articleDb,
-        title: newName,
-        updatedAt: article.updatedAt,
-      });
-    });
-
-    testInTransaction('update document component', async () => {
-      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
-      const dataToUpdate = {
+      const data = {
+        title: 'Updated Document',
         comp: {
           text: 'comp-1',
         },
@@ -55,48 +40,37 @@ describe('Document Service', () => {
             name: 'dz-comp-1',
           },
         ],
-      } as const;
+      };
 
-      const article = await strapi.documents(ARTICLE_UID).update({
+      const article = await updateArticle({
         documentId: articleDb.documentId,
-        data: {
-          comp: dataToUpdate.comp,
-          dz: [...dataToUpdate.dz],
-        },
-        populate: ['comp', 'dz'],
+        data,
+        populate: '*',
       });
 
       // verify that the returned document was updated
       expect(article).toMatchObject({
-        ...articleDb,
-        ...dataToUpdate,
-        updatedAt: article.updatedAt,
+        ...omit('updatedAt', articleDb),
+        ...data,
       });
     });
 
-    testInTransaction('update a document locale', async () => {
+    testInTransaction('Can update a draft article in dutch', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-NL' });
-      const newName = 'updated document';
+
+      const data = { title: 'updated document' };
 
       // Update an existing locale of a document
-      const article = await strapi
-        .documents(ARTICLE_UID)
-        .update({ documentId: articleDb.documentId, locale: 'nl', data: { title: newName } });
+      const article = await updateArticle({
+        documentId: articleDb.documentId,
+        locale: 'nl',
+        data,
+      });
 
       // verify that the returned document was updated
       expect(article).toMatchObject({
-        ...articleDb,
-        title: newName,
-        updatedAt: article.updatedAt,
-      });
-
-      // verify it was updated in the database
-      const updatedArticleDb = await findArticleDb({ title: newName });
-      expect(updatedArticleDb).toMatchObject({
-        documentId: articleDb.documentId,
-        locale: 'nl',
-        title: newName,
-        updatedAt: article.updatedAt,
+        ...omit('updatedAt', articleDb),
+        ...data,
       });
 
       // verity others locales are not updated
@@ -104,23 +78,23 @@ describe('Document Service', () => {
       expect(enLocale).toBeDefined();
     });
 
-    testInTransaction('create a new localization for an existing document', async () => {
+    testInTransaction('Create a new locale for an existing document', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
       const newName = 'updated document';
 
       // Create a new article in spanish
-      const article = await strapi.documents(ARTICLE_UID).update({
+      const data = { title: newName };
+      const article = await updateArticle({
         documentId: articleDb.documentId,
         locale: 'es',
-        data: { title: newName, password: '123456' },
+        data,
       });
 
       // verify that the returned document was updated
       expect(article).toMatchObject({
         documentId: articleDb.documentId,
         locale: 'es',
-        title: newName,
-        updatedAt: article.updatedAt,
+        ...data,
       });
 
       // verify it was updated in the database
@@ -132,11 +106,23 @@ describe('Document Service', () => {
       expect(enLocale).toBeDefined();
     });
 
-    // TODO
-    it.todo('can update and publish');
+    testInTransaction('Can update a draft and publish it', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
-    testInTransaction('document to update does not exist', async () => {
-      const article = await strapi.documents(ARTICLE_UID).update({
+      const article = await updateArticle({
+        documentId: articleDb.documentId,
+        data: { title: 'Updated Document' },
+        status: 'published',
+      });
+
+      expect(article).toMatchObject({
+        title: 'Updated Document',
+        publishedAt: expect.any(String),
+      });
+    });
+
+    testInTransaction('Returns null if document to update does not exist', async () => {
+      const article = await updateArticle({
         documentId: 'does-not-exist',
         data: { title: 'updated document' },
       });

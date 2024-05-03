@@ -1,12 +1,17 @@
-import type { Core } from '@strapi/types';
+import type { Core, Modules } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import resources from './resources/index';
-import { findArticlesDb } from './utils';
+import { ARTICLE_UID, findArticlesDb } from './utils';
+
+let strapi: Core.Strapi;
+
+const findArticles = async (params: Modules.Documents.ServiceParams['findMany']) => {
+  return strapi.documents(ARTICLE_UID).findMany({ ...params });
+};
 
 describe('Document Service', () => {
   let testUtils;
-  let strapi: Core.Strapi;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
@@ -18,20 +23,19 @@ describe('Document Service', () => {
   });
 
   describe('FindMany and Count', () => {
-    it('find many documents should only return drafts by default', async () => {
-      const params = { populate: '*' } as const;
-      const articles = await strapi.documents('api::article.article').findMany(params);
+    it('Find many documents should only return drafts by default', async () => {
+      const articles = await findArticles({ populate: '*' });
 
       articles.forEach((article) => {
         expect(article.publishedAt).toBe(null);
       });
 
       // expect count to be the same as findMany
-      const count = await strapi.documents('api::article.article').count(params);
+      const count = await strapi.documents(ARTICLE_UID).count({});
       expect(count).toBe(articles.length);
     });
 
-    it('find documents by name returns default locale and draft version', async () => {
+    it('Find documents by name returns default locale and draft version', async () => {
       const params = {
         filters: { title: 'Article1-Draft-EN' },
         populate: '*',
@@ -39,18 +43,18 @@ describe('Document Service', () => {
 
       const articlesDb = await findArticlesDb(params.filters);
 
-      const articles = await strapi.documents('api::article.article').findMany(params);
+      const articles = await findArticles(params);
 
       // Should return default language (en) and draft version
       expect(articles.length).toBe(1);
       expect(articles).toMatchObject(articlesDb);
 
       // expect count to be the same as findMany
-      const count = await strapi.documents('api::article.article').count(params);
+      const count = await strapi.documents(ARTICLE_UID).count(params);
       expect(count).toBe(articles.length);
     });
 
-    it('find documents by name and locale', async () => {
+    it('Find documents by name and locale', async () => {
       const params = {
         locale: 'nl',
         filters: { title: 'Article1-Draft-NL' },
@@ -58,26 +62,23 @@ describe('Document Service', () => {
       } as const;
 
       // There should not be a nl article called Article1-Draft-EN
-      const articles = await strapi.documents('api::article.article').findMany(params);
+      const articles = await findArticles(params);
 
       // Should return dutch locale and draft version
       expect(articles.length).toBe(1);
 
       // expect count to be the same as findMany
-      const count = await strapi.documents('api::article.article').count(params);
+      const count = await strapi.documents(ARTICLE_UID).count(params);
       expect(count).toBe(articles.length);
     });
 
-    it('find dutch documents', async () => {
+    it('Find dutch documents', async () => {
       const params = {
         locale: 'nl',
         status: 'draft', // 'published' | 'draft'
       } as const;
 
-      // TODO: compare this with results from findMany
-      const articlesDb = await findArticlesDb({ title: 'Article1-Draft-EN' });
-
-      const articles = await strapi.documents('api::article.article').findMany(params);
+      const articles = await findArticles(params);
 
       // Should return default language (en) and draft version
       expect(articles.length).toBeGreaterThan(0);
@@ -88,16 +89,16 @@ describe('Document Service', () => {
       });
 
       // expect count to be the same as findMany
-      const count = await strapi.documents('api::article.article').count(params);
+      const count = await strapi.documents(ARTICLE_UID).count(params);
       expect(count).toBe(articles.length);
     });
 
-    it('find published documents', async () => {
+    it('Find published documents', async () => {
       const params = {
         status: 'published',
       } as const;
 
-      const articles = await strapi.documents('api::article.article').findMany(params);
+      const articles = await findArticles(params);
 
       // Should return default language (en) and draft version
       expect(articles.length).toBeGreaterThan(0);
@@ -107,16 +108,16 @@ describe('Document Service', () => {
       });
 
       // expect count to be the same as findMany
-      const count = await strapi.documents('api::article.article').count(params);
+      const count = await strapi.documents(ARTICLE_UID).count(params);
       expect(count).toBe(articles.length);
     });
 
-    it('find draft documents', async () => {
+    it('Find draft documents', async () => {
       const params = {
         status: 'draft',
       } as const;
 
-      const articles = await strapi.documents('api::article.article').findMany(params);
+      const articles = await findArticles(params);
 
       // Should return default language (en) and draft version
       expect(articles.length).toBeGreaterThan(0);
@@ -126,7 +127,7 @@ describe('Document Service', () => {
       });
 
       // expect count to be the same as findMany
-      const count = await strapi.documents('api::article.article').count(params);
+      const count = await strapi.documents(ARTICLE_UID).count(params);
       expect(count).toBe(articles.length);
     });
 
