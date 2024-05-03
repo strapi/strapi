@@ -35,6 +35,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       opts: {
         populate?: Modules.Documents.Params.Pick<any, 'populate'>;
         locale?: string | string[] | '*';
+        isPublished?: boolean;
       }
     ) {
       // Will look for a specific locale by default
@@ -51,6 +52,11 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       } else if (opts.locale && opts.locale !== '*') {
         // Look for a specific locale, ignore if looking for all locales
         where.locale = opts.locale;
+      }
+
+      // Published is passed, so we filter on it, otherwise we don't filter
+      if (typeof opts.isPublished === 'boolean') {
+        where.publishedAt = { $null: opts.isPublished };
       }
 
       return strapi.db.query(uid).findMany({ populate: opts.populate, where });
@@ -184,7 +190,14 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       opts: Omit<DocServiceParams<'publish'>, 'documentId'> = {} as any
     ) {
       const publishedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(documentIds.map((id) => this.publish(id, uid, opts)));
+        return Promise.all(
+          documentIds.map((id) =>
+            strapi
+              .documents(uid)
+              .publish({ ...opts, documentId: id })
+              .then((result) => result?.entries.at(0))
+          )
+        );
       });
 
       // Return the number of published entities
@@ -197,7 +210,14 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
     ) {
       const unpublishedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(documentIds.map((id) => this.unpublish(id, uid, opts)));
+        return Promise.all(
+          documentIds.map((id) =>
+            strapi
+              .documents(uid)
+              .unpublish({ ...opts, documentId: id })
+              .then((result) => result?.entries.at(0))
+          )
+        );
       });
 
       // Return the number of unpublished entities

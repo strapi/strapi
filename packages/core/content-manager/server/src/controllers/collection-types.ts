@@ -424,8 +424,9 @@ export default {
 
     const { locale } = getDocumentLocaleAndStatus(body);
 
-    const documentLocales = await documentManager.findLocales(documentIds, model, {
+    const documentLocales = await documentManager.findLocales(documentIds[0], model, {
       locale,
+      isPublished: true,
     });
 
     if (documentLocales.length === 0) {
@@ -438,9 +439,7 @@ export default {
       }
     }
 
-    const localeDocumentsIds = documentLocales
-      .filter((document) => !document.publishedAt)
-      .map((document) => document.documentId);
+    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
 
     const { count } = await documentManager.publishMany(localeDocumentsIds, model, { locale });
     ctx.body = { count };
@@ -465,6 +464,7 @@ export default {
 
     const documentLocales = await documentManager.findLocales(documentIds, model, {
       locale,
+      isPublished: true,
     });
 
     if (documentLocales.length === 0) {
@@ -477,9 +477,7 @@ export default {
       }
     }
 
-    const localeDocumentsIds = documentLocales
-      .filter((document) => !!document.publishedAt)
-      .map((document) => document.documentId);
+    const localeDocumentsIds = documentLocales.map((document) => document.documentId);
 
     const { count } = await documentManager.unpublishMany(localeDocumentsIds, model, { locale });
 
