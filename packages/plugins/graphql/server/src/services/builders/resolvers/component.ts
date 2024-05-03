@@ -13,12 +13,14 @@ export default ({ strapi }: Context) => ({
   }: {
     contentTypeUID: UID.ContentType;
     attributeName: string;
-    cacheHint: CacheHint;
+    cacheHint?: CacheHint;
   }): FieldResolver<string, string> {
     const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
 
     return async (parent: any, args: any, ctx: any, info) => {
-      info.cacheControl.setCacheHint(cacheHint);
+      if (cacheHint) {
+        info.cacheControl.setCacheHint(cacheHint);
+      }
 
       const contentType = strapi.getModel(contentTypeUID);
 

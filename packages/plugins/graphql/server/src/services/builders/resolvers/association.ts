@@ -23,7 +23,7 @@ export default ({ strapi }: Context) => {
     }: {
       contentTypeUID: UID.ContentType;
       attributeName: string;
-      cacheHint: CacheHint;
+      cacheHint?: CacheHint;
     }): FieldResolver<string, string> {
       const contentType = strapi.getModel(contentTypeUID);
       const attribute: any = contentType.attributes[attributeName];
@@ -43,7 +43,9 @@ export default ({ strapi }: Context) => {
       const targetContentType = strapi.getModel(targetUID);
 
       return async (parent: any, args: any = {}, context: any = {}, resolveInfo) => {
-        resolveInfo.cacheControl.setCacheHint(cacheHint);
+        if (cacheHint) {
+          resolveInfo.cacheControl.setCacheHint(cacheHint);
+        }
 
         const { auth } = context.state;
 

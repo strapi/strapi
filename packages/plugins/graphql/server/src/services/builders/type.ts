@@ -12,7 +12,7 @@ export type TypeBuildersOptions<TypeName extends string = string> = {
   attribute: any;
   contentType: any;
   context: Context;
-  cacheHint: CacheHint;
+  cacheHint?: CacheHint;
 };
 
 export default (context: Context) => {
@@ -36,9 +36,11 @@ export default (context: Context) => {
 
     builder.field(attributeName, {
       type: gqlType,
-      // TODO: Probably we don't need to cache scalar values
       resolve: (parent, _args, _context, info) => {
-        info.cacheControl.setCacheHint(cacheHint);
+        if (cacheHint) {
+          info.cacheControl.setCacheHint(cacheHint);
+        }
+
         return parent[attributeName];
       },
     });
@@ -128,9 +130,11 @@ export default (context: Context) => {
 
     builder.field(attributeName, {
       type,
-      // TODO: Probably we don't need to cache enum values
       resolve: (parent, _args, _context, info) => {
-        info.cacheControl.setCacheHint(cacheHint);
+        if (cacheHint) {
+          info.cacheControl.setCacheHint(cacheHint);
+        }
+
         return parent[attributeName];
       },
     });
@@ -322,15 +326,10 @@ export default (context: Context) => {
             .forEach((attributeName) => {
               const attribute = attributes[attributeName];
 
-              const pluginOptions = (attribute.pluginOptions ?? {}) as {
-                graphql?: { cacheHint?: CacheHint };
-              };
-
               // If CacheHint is 0/Public, Cache-Control header is not added at all
-              const cacheHint = pluginOptions.graphql?.cacheHint ?? {
-                maxAge: 0,
-                scope: CacheScope.Public,
-              };
+              const cacheHint = (attribute.pluginOptions as any)?.graphql?.cacheHint as
+                | CacheHint
+                | undefined;
 
               // We create a copy of the builder (t) to apply custom
               // rules only on the current attribute (eg: nonNull, list, ...)
