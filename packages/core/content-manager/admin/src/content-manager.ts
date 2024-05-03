@@ -106,7 +106,7 @@ interface BulkActionComponentProps extends ListViewContext {}
 
 interface BulkActionComponent
   extends DescriptionComponent<BulkActionComponentProps, BulkActionDescription> {
-  actionType?: 'delete' | 'publish' | 'unpublish';
+  type?: 'delete' | 'publish' | 'unpublish';
 }
 
 /* -------------------------------------------------------------------------------------------------
