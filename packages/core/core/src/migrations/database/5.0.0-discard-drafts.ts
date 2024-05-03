@@ -50,9 +50,11 @@ async function* getBatchToDiscard({
 }
 
 /**
- * This migration makes use of the document service.
- * This one assumes the `locale` column exists. In v4, that was not the case
- * for content types with i18n disabled, so we need to create it for those cases.
+ * This migration makes use of the document service,
+ * which assumes the `locale` column always exists.
+ * In v4, that was not the case, for content types with i18n disabled.
+ *
+ * This function creates the `locale` column if it doesn't exist.
  */
 const createLocaleColumn = async (db: Knex, tableName: string) => {
   await db.schema.alterTable(tableName, (table) => {
