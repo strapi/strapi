@@ -201,10 +201,28 @@ module.exports = {
     }
 
     // Ability to pass OAuth callback dynamically
-    grantConfig[provider].callback =
-      _.get(ctx, 'query.callback') ||
-      _.get(ctx, 'session.grant.dynamic.callback') ||
-      grantConfig[provider].callback;
+    const queryCustomCallback = _.get(ctx, 'query.callback');
+    const dynamicSessionCallback = _.get(ctx, 'session.grant.dynamic.callback');
+
+    const customCallback = queryCustomCallback ?? dynamicSessionCallback;
+
+    // The custom callback is validated to make sure it's not redirecting to an unwanted actor.
+    if (customCallback !== undefined) {
+      try {
+        // We're extracting the callback validator from the plugin config since it can be user-customized
+        const { validate: validateCallback } = strapi
+          .plugin('users-permissions')
+          .config('callback');
+
+        await validateCallback(customCallback, grantConfig[provider]);
+
+        grantConfig[provider].callback = customCallback;
+      } catch (e) {
+        throw new ValidationError('Invalid callback URL provided', { callback: customCallback });
+      }
+    }
+
+    // Build a valid redirect URI for the current provider
     grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
 
     return grant(grantConfig)(ctx, next);
