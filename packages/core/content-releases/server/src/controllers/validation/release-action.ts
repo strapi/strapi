@@ -4,8 +4,9 @@ const RELEASE_ACTION_SCHEMA = yup.object().shape({
   entry: yup
     .object()
     .shape({
-      id: yup.strapiID().required(),
+      documentId: yup.strapiID().required(),
       contentType: yup.string().required(),
+      locale: yup.string(),
     })
     .required(),
   type: yup.string().oneOf(['publish', 'unpublish']).required(),

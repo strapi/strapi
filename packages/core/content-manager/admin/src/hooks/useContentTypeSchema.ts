@@ -43,8 +43,8 @@ const useContentTypeSchema = (model?: string) => {
         const components = extractContentTypeComponents(contentType?.attributes, componentsByKey);
 
         return {
-          isLoading: res.isLoading,
-          isFetching: res.isFetching,
+          isLoading: res.isLoading || res.isUninitialized,
+          isFetching: res.isFetching || res.isUninitialized,
           error: res.error,
           components: Object.keys(components).length === 0 ? undefined : components,
           contentType,

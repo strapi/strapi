@@ -1,33 +1,21 @@
-import { RELEASE_MODEL_UID } from '../../constants';
+import type { Model } from '@strapi/database';
 
-export default {
-  collectionName: 'strapi_release_actions',
-  info: {
-    singularName: 'release-action',
-    pluralName: 'release-actions',
-    displayName: 'Release Action',
-  },
-  options: {
-    draftAndPublish: false,
-  },
-  pluginOptions: {
-    'content-manager': {
-      visible: false,
-    },
-    'content-type-builder': {
-      visible: false,
-    },
-  },
+import { RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from '../constants';
+
+const releaseAction: Model = {
+  uid: RELEASE_ACTION_MODEL_UID,
+  tableName: 'strapi_release_actions',
+  singularName: 'release-action',
   attributes: {
     type: {
       type: 'enumeration',
       enum: ['publish', 'unpublish'],
       required: true,
     },
+    // @ts-expect-error - morphColumn is expected
     entry: {
       type: 'relation',
       relation: 'morphToOne',
-      configurable: false,
     },
     contentType: {
       type: 'string',
@@ -36,6 +24,7 @@ export default {
     locale: {
       type: 'string',
     },
+    // @ts-expect-error - joinTable is expected
     release: {
       type: 'relation',
       relation: 'manyToOne',
@@ -47,3 +36,5 @@ export default {
     },
   },
 };
+
+export { releaseAction };

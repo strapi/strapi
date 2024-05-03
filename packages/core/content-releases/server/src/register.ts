@@ -10,8 +10,13 @@ import {
   disableContentTypeLocalized,
   enableContentTypeLocalized,
 } from './migrations';
+import { release, releaseAction } from './models';
 
 export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
+  // Always add the models to avoid losing data when feature is disabled
+  strapi.get('models').add(release);
+  strapi.get('models').add(releaseAction);
+
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
     await strapi.service('admin::permission').actionProvider.registerMany(ACTIONS);
 

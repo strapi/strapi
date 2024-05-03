@@ -9,17 +9,16 @@ import type {
   GetRelease,
   Release,
   DeleteRelease,
-  GetContentTypeEntryReleases,
   GetReleases,
   MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
-import { getService } from '../utils';
+import { getService, getEntryId } from '../utils';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
 const releaseController = {
-  async findMany(ctx: Koa.Context) {
+  async findByDocumentAttached(ctx: Koa.Context) {
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: RELEASE_MODEL_UID,
@@ -29,48 +28,108 @@ const releaseController = {
 
     const releaseService = getService('release', { strapi });
 
-    // Handle requests for releases filtered by content type entry
-    const isFindManyForContentTypeEntry = Boolean(ctx.query?.contentTypeUid && ctx.query?.entryId);
-    if (isFindManyForContentTypeEntry) {
-      const query: GetContentTypeEntryReleases.Request['query'] =
-        await permissionsManager.sanitizeQuery(ctx.query);
+    const query = await permissionsManager.sanitizeQuery(ctx.query);
+    const { contentTypeUid, documentId, hasEntryAttached, locale } = query;
+    const entryId = await getEntryId({ contentTypeUid, documentId, locale }, { strapi });
 
-      const contentTypeUid = query.contentTypeUid;
-      const entryId = query.entryId;
-      // Parse the string value or fallback to a default
-      const hasEntryAttached: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] =
-        typeof query.hasEntryAttached === 'string' ? JSON.parse(query.hasEntryAttached) : false;
+    if (!entryId) {
+      throw new errors.NotFoundError('Entry not found');
+    }
 
-      const data = hasEntryAttached
-        ? await releaseService.findManyWithContentTypeEntryAttached(contentTypeUid, entryId)
-        : await releaseService.findManyWithoutContentTypeEntryAttached(contentTypeUid, entryId);
+    const isEntryAttachedBoolean =
+      typeof hasEntryAttached === 'string' ? JSON.parse(hasEntryAttached) : false;
 
-      ctx.body = { data };
-    } else {
-      const query: GetReleases.Request['query'] = await permissionsManager.sanitizeQuery(ctx.query);
-      const { results, pagination } = await releaseService.findPage(query);
-
-      const data = results.map((release: ReleaseWithPopulatedActions) => {
-        const { actions, ...releaseData } = release;
-
-        return {
-          ...releaseData,
+    if (isEntryAttachedBoolean) {
+      const releases = await releaseService.findMany({
+        where: {
           actions: {
-            meta: {
-              count: actions.count,
+            target_type: contentTypeUid,
+            target_id: entryId,
+          },
+          releasedAt: {
+            $null: true,
+          },
+        },
+        populate: {
+          actions: {
+            fields: ['type'],
+            where: {
+              target_type: contentTypeUid,
+              target_id: entryId,
             },
           },
-        };
-      });
-
-      const pendingReleasesCount = await strapi.db.query(RELEASE_MODEL_UID).count({
-        where: {
-          releasedAt: null,
         },
       });
 
-      ctx.body = { data, meta: { pagination, pendingReleasesCount } };
+      ctx.body = { data: releases };
+    } else {
+      const relatedReleases = await releaseService.findMany({
+        where: {
+          releasedAt: {
+            $null: true,
+          },
+          actions: {
+            target_type: contentTypeUid,
+            target_id: entryId,
+          },
+        },
+      });
+
+      const releases = await releaseService.findMany({
+        where: {
+          $or: [
+            {
+              id: {
+                $notIn: relatedReleases.map((release: any) => release.id),
+              },
+            },
+            {
+              actions: null,
+            },
+          ],
+          releasedAt: {
+            $null: true,
+          },
+        },
+      });
+
+      ctx.body = { data: releases };
     }
+  },
+
+  async findPage(ctx: Koa.Context) {
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: RELEASE_MODEL_UID,
+    });
+
+    await permissionsManager.validateQuery(ctx.query);
+
+    const releaseService = getService('release', { strapi });
+
+    const query: GetReleases.Request['query'] = await permissionsManager.sanitizeQuery(ctx.query);
+    const { results, pagination } = await releaseService.findPage(query);
+
+    const data = results.map((release: ReleaseWithPopulatedActions) => {
+      const { actions, ...releaseData } = release;
+
+      return {
+        ...releaseData,
+        actions: {
+          meta: {
+            count: actions.count,
+          },
+        },
+      };
+    });
+
+    const pendingReleasesCount = await strapi.db.query(RELEASE_MODEL_UID).count({
+      where: {
+        releasedAt: null,
+      },
+    });
+
+    ctx.body = { data, meta: { pagination, pendingReleasesCount } };
   },
 
   async findOne(ctx: Koa.Context) {

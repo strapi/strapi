@@ -123,17 +123,19 @@ interface EntryValidationTextProps {
 
 const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validate } = unstable_useDocument(
+
+  const { validate, isLoading } = unstable_useDocument(
     {
       collectionType: schema?.kind ?? '',
       model: schema?.uid ?? '',
     },
     {
-      skip: !schema,
+      skip: true,
     }
   );
 
-  const errors = validate(entry) ?? {};
+  // Validate needs to make a init query, so we need to wait for it to be ready
+  const errors = !isLoading ? validate(entry) ?? {} : {};
 
   if (Object.keys(errors).length > 0) {
     const validationErrorsMessages = Object.entries(errors)

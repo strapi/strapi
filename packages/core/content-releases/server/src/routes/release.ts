@@ -18,6 +18,22 @@ export default {
       },
     },
     {
+      method: 'GET',
+      path: '/getByDocumentAttached',
+      handler: 'release.findByDocumentAttached',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.read'],
+            },
+          },
+        ],
+      },
+    },
+    {
       method: 'POST',
       path: '/',
       handler: 'release.create',
@@ -36,7 +52,7 @@ export default {
     {
       method: 'GET',
       path: '/',
-      handler: 'release.findMany',
+      handler: 'release.findPage',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

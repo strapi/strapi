@@ -1,5 +1,5 @@
 import { errors } from '@strapi/utils';
-import { Core } from '@strapi/types';
+import { Core, UID } from '@strapi/types';
 import type { Release, CreateRelease, UpdateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
@@ -24,7 +24,7 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
       where: {
         id: releaseId,
       },
-      populate: { actions: { populate: { entry: { select: ['id'] } } } },
+      populate: { actions: { populate: { entry: { select: ['documentId', 'locale'] } } } },
     })) as Release | null;
 
     if (!release) {
@@ -33,20 +33,21 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
 
     const isEntryInRelease = release.actions.some(
       (action) =>
-        Number(action.entry.id) === Number(releaseActionArgs.entry.id) &&
-        action.contentType === releaseActionArgs.entry.contentType
+        Number(action.entry.documentId) === Number(releaseActionArgs.entry.documentId) &&
+        action.contentType === releaseActionArgs.entry.contentType &&
+        action.locale === releaseActionArgs.entry.locale
     );
 
     if (isEntryInRelease) {
       throw new AlreadyOnReleaseError(
-        `Entry with id ${releaseActionArgs.entry.id} and contentType ${releaseActionArgs.entry.contentType} already exists in release with id ${releaseId}`
+        `Entry with documentId ${releaseActionArgs.entry.documentId} ${releaseActionArgs.entry.locale ? `(${releaseActionArgs.entry.locale})` : ''} and contentType ${releaseActionArgs.entry.contentType} already exists in release with id ${releaseId}`
       );
     }
   },
   validateEntryContentType(
     contentTypeUid: CreateReleaseAction.Request['body']['entry']['contentType']
   ) {
-    const contentType = strapi.contentType(contentTypeUid);
+    const contentType = strapi.contentType(contentTypeUid as UID.ContentType);
 
     if (!contentType) {
       throw new errors.NotFoundError(`No content type found for uid ${contentTypeUid}`);
