@@ -83,42 +83,38 @@ describe('Event Hub', () => {
   });
 
   it('removes all subscribers on destroy()', async () => {
-    const { subscribe, on, emit, destroy } = createEventHub();
+    const eventHub = createEventHub();
 
     const fn = jest.fn();
     const fn2 = jest.fn();
-    subscribe(fn);
-    on('my-event', fn2);
+    eventHub.subscribe(fn);
+    eventHub.on('my-event', fn2);
 
-    await emit('my-event');
+    await eventHub.emit('my-event');
     expect(fn).toHaveBeenCalled();
     expect(fn2).toHaveBeenCalled();
 
-    destroy();
+    eventHub.destroy();
 
     // Subscribers are removed
-    await emit('my-event');
+    await eventHub.emit('my-event');
     expect(fn).toHaveBeenCalledTimes(1);
     expect(fn2).toHaveBeenCalledTimes(1);
   });
 
-  it('removes all subscribers on removeAllListeners()', async () => {
-    const { subscribe, on, emit, removeAllListeners } = createEventHub();
+  it('removes all subscribers on removeAllSubscribers()', async () => {
+    const eventHub = createEventHub();
 
     const fn = jest.fn();
-    const fn2 = jest.fn();
-    subscribe(fn);
-    on('my-event', fn2);
+    eventHub.subscribe(fn);
 
-    await emit('my-event');
+    await eventHub.emit('my-event');
     expect(fn).toHaveBeenCalled();
-    expect(fn2).toHaveBeenCalled();
 
-    removeAllListeners();
+    eventHub.removeAllSubscribers();
 
     // Subscribers are removed
-    await emit('my-event');
+    await eventHub.emit('my-event');
     expect(fn).toHaveBeenCalledTimes(1);
-    expect(fn2).toHaveBeenCalledTimes(1);
   });
 });
