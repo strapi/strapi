@@ -501,15 +501,16 @@ describe('i18n', () => {
 
             // If we have connected a relation, we should expect the count to
             // equal the number of relations we have connected
-            Array.isArray(res.body.data[key])
-              ? res.body.data[key]
-              : [res.body.data[key]].forEach((item, index) => {
-                  expect(item[connectRelationAt].count).toEqual(
-                    Array.isArray(updatedValue)
-                      ? updatedValue[index][connectRelationAt].connect.length
-                      : updatedValue[connectRelationAt].connect.length
-                  );
-                });
+            const fieldData = res.body.data[key];
+            if (Array.isArray(fieldData)) {
+              fieldData.forEach((item, index) => {
+                expect(item[connectRelationAt].count).toEqual(
+                  Array.isArray(updatedValue)
+                    ? updatedValue[index][connectRelationAt].connect.length
+                    : updatedValue[connectRelationAt].connect.length
+                );
+              });
+            }
 
             for (const locale of allLocaleCodes) {
               const localeRes = await strapi.db.query('api::category.category').findOne({
