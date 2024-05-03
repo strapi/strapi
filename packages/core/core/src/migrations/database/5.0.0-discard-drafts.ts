@@ -1,4 +1,6 @@
 /* eslint-disable no-continue */
+import { isNil } from 'lodash/fp';
+
 import type { UID } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { async, contentTypes } from '@strapi/utils';
@@ -47,6 +49,17 @@ async function* getBatchToDiscard({
   }
 }
 
+/**
+ * This migrations makes use of the document service.
+ * This one assumes the `locale` column exists. In v4, that was not the case
+ * for content types with i18n disabled, so we need to create it for those cases.
+ */
+const createLocaleColumn = async (db: Knex, tableName: string) => {
+  await db.schema.alterTable(tableName, (table) => {
+    table.string('locale');
+  });
+};
+
 const migrateUp = async (trx: Knex, db: Database) => {
   for (const meta of db.metadata.values()) {
     const hasTable = await trx.schema.hasTable(meta.tableName);
@@ -60,6 +73,11 @@ const migrateUp = async (trx: Knex, db: Database) => {
     const hasDP = contentTypes.hasDraftAndPublish(model);
     if (!hasDP) {
       continue;
+    }
+
+    // Create locale column if it doesn't exist
+    if (isNil(meta.attributes.locale)) {
+      await createLocaleColumn(trx, meta.tableName);
     }
 
     const discardDraft = async (entry: DocumentVersion) =>
