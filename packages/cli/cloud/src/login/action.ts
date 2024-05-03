@@ -1,14 +1,29 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
-
 import type { CloudCliConfig, CLIContext } from '../types';
 
 const openModule = import('open');
-const cloudApiService = cloudApiFactory();
+
 
 export default async (ctx: CLIContext) => {
   const { logger } = ctx;
   const tokenService = tokenServiceFactory(ctx);
+  const existingToken = await tokenService.retrieveToken();
+  const cloudApiService = cloudApiFactory(existingToken || undefined);
+
+  if (existingToken) {
+    const isTokenValid = await tokenService.isTokenValid(existingToken);
+    if (isTokenValid) {
+      const userInfo = await cloudApiService.getUserInfo();
+      const { email } = userInfo.data.data;
+      if (email) {
+        logger.log(`You are already logged into your account (${email}).`);
+      } else {
+        logger.log("You are already logged in.");
+      }
+      return;
+    }
+  }
 
   let cliConfig: CloudCliConfig;
   try {
@@ -68,6 +83,7 @@ export default async (ctx: CLIContext) => {
     const spinner = logger.spinner('Waiting for authentication');
     spinner.start();
     const spinnerFail = () => spinner.fail('Authentication failed!');
+
     while (!isAuthenticated) {
       try {
         const tokenResponse = await axios.post(cliConfig.tokenUrl, tokenPayload);
