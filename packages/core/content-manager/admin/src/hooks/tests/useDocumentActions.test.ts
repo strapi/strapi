@@ -18,6 +18,7 @@ describe('useDocumentActions', () => {
       deleteMany: expect.any(Function),
       getDocument: expect.any(Function),
       publish: expect.any(Function),
+      publishMany: expect.any(Function),
       update: expect.any(Function),
       unpublish: expect.any(Function),
       unpublishMany: expect.any(Function),
