@@ -248,16 +248,7 @@ const createHelpers = (db: Database) => {
     await schemaBuilder.alterTable(table.name, (tableBuilder) => {
       // Delete indexes / fks / columns
 
-      for (const removedIndex of table.indexes.removed) {
-        debug(`Dropping index ${removedIndex.name} on ${table.name}`);
-        dropIndex(tableBuilder, removedIndex);
-      }
-
-      for (const updateddIndex of table.indexes.updated) {
-        debug(`Dropping updated index ${updateddIndex.name} on ${table.name}`);
-        dropIndex(tableBuilder, updateddIndex.object);
-      }
-
+      // Drop foreign keys first to avoid foreign key errors in the following steps
       for (const removedForeignKey of table.foreignKeys.removed) {
         debug(`Dropping foreign key ${removedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, removedForeignKey);
@@ -271,6 +262,29 @@ const createHelpers = (db: Database) => {
       for (const removedColumn of table.columns.removed) {
         debug(`Dropping column ${removedColumn.name} on ${table.name}`);
         dropColumn(tableBuilder, removedColumn);
+      }
+
+      // for mysql only, dropForeignKey also removes the index, so don't drop it twice
+      const isMySQL = db.config.connection.client === 'mysql';
+      const ignoreForeignKeyNames = isMySQL
+        ? [
+            ...table.foreignKeys.removed.map((fk) => fk.name),
+            ...table.foreignKeys.updated.map((fk) => fk.name),
+          ]
+        : [];
+
+      for (const removedIndex of table.indexes.removed) {
+        if (!ignoreForeignKeyNames.includes(removedIndex.name)) {
+          debug(`Dropping index ${removedIndex.name} on ${table.name}`);
+          dropIndex(tableBuilder, removedIndex);
+        }
+      }
+
+      for (const updatedIndex of table.indexes.updated) {
+        if (!ignoreForeignKeyNames.includes(updatedIndex.name)) {
+          debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
+          dropIndex(tableBuilder, updatedIndex.object);
+        }
       }
 
       // Update existing columns / foreign keys / indexes

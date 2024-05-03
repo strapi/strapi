@@ -9,7 +9,7 @@ import { releaseApi } from './services/release';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
-import type { BulkActionComponent } from '@strapi/plugin-content-manager/strapi-admin';
+import type { BulkActionComponent } from '@strapi/content-manager/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 // eslint-disable-next-line import/no-default-export

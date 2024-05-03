@@ -7,6 +7,7 @@ import {
   useQueryParams,
   useRBAC,
 } from '@strapi/admin/strapi-admin';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Box,
   Button,
@@ -24,7 +25,6 @@ import {
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -262,6 +262,7 @@ export const CMReleasesContainer = () => {
     collectionType: string;
   }>();
   const isCreatingEntry = id === 'create';
+  const entryId = parseInt(id!, 10);
   const { allowedActions } = useRBAC(PERMISSIONS);
 
   const { canCreateAction, canRead: canMain, canDeleteAction } = allowedActions;
@@ -278,12 +279,11 @@ export const CMReleasesContainer = () => {
   const fetchParams = canFetch
     ? {
         contentTypeUid: contentTypeUid,
-        entryId: id,
+        entryId,
         hasEntryAttached: true,
       }
     : skipToken;
   // Get all 'pending' releases that have the entry attached
-  // @ts-expect-error – we'll fix this when we fix content-releases for v5
   const response = useGetReleasesForEntryQuery(fetchParams);
   const releases = response.data?.data;
 
@@ -440,8 +440,7 @@ export const CMReleasesContainer = () => {
         <AddActionToReleaseModal
           handleClose={toggleModal}
           contentTypeUid={contentTypeUid}
-          // @ts-expect-error – we'll fix this when we fix content-releases for v5
-          entryId={id}
+          entryId={entryId}
         />
       )}
     </Box>

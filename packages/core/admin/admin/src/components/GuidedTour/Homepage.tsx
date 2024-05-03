@@ -1,5 +1,4 @@
-import { Box, Button, Flex, Typography } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system';
+import { Box, Button, Flex, Typography, LinkButton } from '@strapi/design-system';
 import { ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';

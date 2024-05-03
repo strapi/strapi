@@ -5,7 +5,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { StageSelect } from '../StageSelect';
 
-jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
+jest.mock('@strapi/content-manager/strapi-admin', () => ({
   unstable_useDocument: jest.fn().mockReturnValue({
     document: {
       documentId: '12345',

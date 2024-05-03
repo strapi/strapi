@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
+import { useDocLayout } from '../../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../../hooks/useLazyComponents';
 
 import { BlocksInput } from './FormInputs/BlocksInput/BlocksInput';
@@ -58,6 +59,9 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+  const {
+    edit: { components },
+  } = useDocLayout();
 
   if (!visible) {
     return null;
@@ -114,7 +118,16 @@ const InputRenderer = ({ visible, hint: providedHint, ...props }: InputRendererP
     case 'blocks':
       return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'component':
-      return <ComponentInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <ComponentInput
+          {...props}
+          hint={hint}
+          layout={components[props.attribute.component].layout}
+          disabled={fieldIsDisabled}
+        >
+          {(inputProps) => <InputRenderer {...inputProps} />}
+        </ComponentInput>
+      );
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
     case 'relation':
