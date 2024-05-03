@@ -3811,18 +3811,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/merge@npm:8.3.1":
-  version: 8.3.1
-  resolution: "@graphql-tools/merge@npm:8.3.1"
-  dependencies:
-    "@graphql-tools/utils": "npm:8.9.0"
-    tslib: "npm:^2.4.0"
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 9354a68aa1b851ee72d2d727a3a264279f1e5ed95100f6c6e7e0a2ad7449943d2ebe6fce43b4873a15e5c3e9df52ea9d23ff51ffc1f73c417c4ccf368f8486ab
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/merge@npm:^8.4.1":
   version: 8.4.2
   resolution: "@graphql-tools/merge@npm:8.4.2"
@@ -3861,20 +3849,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/schema@npm:8.5.1":
-  version: 8.5.1
-  resolution: "@graphql-tools/schema@npm:8.5.1"
-  dependencies:
-    "@graphql-tools/merge": "npm:8.3.1"
-    "@graphql-tools/utils": "npm:8.9.0"
-    tslib: "npm:^2.4.0"
-    value-or-promise: "npm:1.0.11"
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: 98f57502cc67ee48157bcf6f26c334e27b0673ec6f5a35c1a5bc1901772063c8bfdca435f81664ab1a41f9274b43dc78aa12791feee83546640d0a034b38c836
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/schema@npm:^9.0.0":
   version: 9.0.19
   resolution: "@graphql-tools/schema@npm:9.0.19"
@@ -3889,17 +3863,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@graphql-tools/utils@npm:8.9.0":
-  version: 8.9.0
-  resolution: "@graphql-tools/utils@npm:8.9.0"
-  dependencies:
-    tslib: "npm:^2.4.0"
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: de5930b33664c53f0d22781bb16b4e029afaad165539faf80bd520adfad969c024891db672a2ff96195d8d1185bac66b284ebde67938e554d04c0798453da002
-  languageName: node
-  linkType: hard
-
 "@graphql-tools/utils@npm:^10.0.13, @graphql-tools/utils@npm:^10.1.3":
   version: 10.1.3
   resolution: "@graphql-tools/utils@npm:10.1.3"
@@ -3911,17 +3874,6 @@ __metadata:
   peerDependencies:
     graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
   checksum: 97b4329b54126060e128b56656b46df4ddceb63e8e0bc342d7c7294b5d97c741ba32cb72f82c331f76e4fa0bb2a5b4406d8806d0f2abf00bf3ef6d86c79bb2fb
-  languageName: node
-  linkType: hard
-
-"@graphql-tools/utils@npm:^8.13.1":
-  version: 8.13.1
-  resolution: "@graphql-tools/utils@npm:8.13.1"
-  dependencies:
-    tslib: "npm:^2.4.0"
-  peerDependencies:
-    graphql: ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
-  checksum: b3679e43f6cbde26924dc6eabc5b45fe1481aac5793487284750167749c2b46f5e44ab0344f8264f8cfa657901348d8cf566c54c3c9eca2c403cb69039edf766
   languageName: node
   linkType: hard
 
@@ -8194,25 +8146,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/plugin-color-picker@npm:5.0.0-beta.5":
-  version: 5.0.0-beta.5
-  resolution: "@strapi/plugin-color-picker@npm:5.0.0-beta.5"
-  dependencies:
-    "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.18.0"
-    react-colorful: "npm:5.6.1"
-    react-intl: "npm:6.6.2"
-  peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
-    styled-components: ^5.2.1
-  checksum: ad648f8196bf658e653271d47e226b7d8fbaba2e8aab043bf16703fa401c6c2932de8ebbbd3fd665a01eb19fa9f399beb2a836710569c5a2aea893b3b1b75d4d
-  languageName: node
-  linkType: hard
-
-"@strapi/plugin-color-picker@workspace:packages/plugins/color-picker":
+"@strapi/plugin-color-picker@npm:5.0.0-beta.6, @strapi/plugin-color-picker@workspace:packages/plugins/color-picker":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-color-picker@workspace:packages/plugins/color-picker"
   dependencies:
@@ -8320,39 +8254,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/plugin-documentation@npm:5.0.0-beta.5":
-  version: 5.0.0-beta.5
-  resolution: "@strapi/plugin-documentation@npm:5.0.0-beta.5"
-  dependencies:
-    "@reduxjs/toolkit": "npm:1.9.7"
-    "@strapi/admin": "npm:5.0.0-beta.5"
-    "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.18.0"
-    "@strapi/utils": "npm:5.0.0-beta.5"
-    axios: "npm:1.6.8"
-    bcryptjs: "npm:2.4.3"
-    cheerio: "npm:^1.0.0-rc.12"
-    formik: "npm:2.4.5"
-    fs-extra: "npm:10.1.0"
-    immer: "npm:9.0.21"
-    koa-static: "npm:^5.0.0"
-    lodash: "npm:4.17.21"
-    path-to-regexp: "npm:6.2.1"
-    react-intl: "npm:6.6.2"
-    swagger-ui-dist: "npm:4.19.0"
-    yaml: "npm:1.10.2"
-    yup: "npm:0.32.9"
-  peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
-    styled-components: ^5.2.1
-  checksum: 046767376ef8eac8f6ce74d9537428510cca9aa35e82d2de84f4bf230ff1c2f235cc022fa1780a700c4a8e96e9e8528f55e53678e89e36755a0f111760f2326c
-  languageName: node
-  linkType: hard
-
-"@strapi/plugin-documentation@workspace:packages/plugins/documentation":
+"@strapi/plugin-documentation@npm:5.0.0-beta.6, @strapi/plugin-documentation@workspace:packages/plugins/documentation":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-documentation@workspace:packages/plugins/documentation"
   dependencies:
@@ -8426,38 +8328,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/plugin-graphql@npm:5.0.0-beta.5":
-  version: 5.0.0-beta.5
-  resolution: "@strapi/plugin-graphql@npm:5.0.0-beta.5"
-  dependencies:
-    "@apollo/server": "npm:4.10.0"
-    "@as-integrations/koa": "npm:1.1.1"
-    "@graphql-tools/schema": "npm:8.5.1"
-    "@graphql-tools/utils": "npm:^8.13.1"
-    "@koa/cors": "npm:5.0.0"
-    "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.18.0"
-    "@strapi/utils": "npm:5.0.0-beta.5"
-    graphql: "npm:^16.8.1"
-    graphql-depth-limit: "npm:^1.1.0"
-    graphql-playground-middleware-koa: "npm:^1.6.21"
-    graphql-scalars: "npm:1.22.2"
-    koa-bodyparser: "npm:4.4.1"
-    koa-compose: "npm:^4.1.0"
-    lodash: "npm:4.17.21"
-    nexus: "npm:1.3.0"
-    pluralize: "npm:8.0.0"
-  peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
-    styled-components: ^5.2.1
-  checksum: 6338c5a310a947ab91052ac643601f1cfcdb0162a37b288e4b3836e16322555492c33520d9d02da6b763f75a15beff678bb3fff01cd37b9865a6174321b04c30
-  languageName: node
-  linkType: hard
-
-"@strapi/plugin-graphql@workspace:packages/plugins/graphql":
+"@strapi/plugin-graphql@npm:5.0.0-beta.6, @strapi/plugin-graphql@workspace:packages/plugins/graphql":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-graphql@workspace:packages/plugins/graphql"
   dependencies:
@@ -8526,24 +8397,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/plugin-sentry@npm:5.0.0-beta.5":
-  version: 5.0.0-beta.5
-  resolution: "@strapi/plugin-sentry@npm:5.0.0-beta.5"
-  dependencies:
-    "@sentry/node": "npm:6.19.7"
-    "@strapi/design-system": "npm:1.18.0"
-    "@strapi/icons": "npm:1.18.0"
-  peerDependencies:
-    "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
-    react: ^17.0.0 || ^18.0.0
-    react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: ^6.0.0
-    styled-components: ^5.2.1
-  checksum: fd6d87f9b7b7504193ef18334f3168187e1eec88313e608f744466e74b1eaca082217559a79e14e6d9bd784713c14d5d2668ad9ca50da0214e726c25a3b25874
-  languageName: node
-  linkType: hard
-
-"@strapi/plugin-sentry@workspace:packages/plugins/sentry":
+"@strapi/plugin-sentry@npm:5.0.0-beta.6, @strapi/plugin-sentry@workspace:packages/plugins/sentry":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-sentry@workspace:packages/plugins/sentry"
   dependencies:
@@ -8636,7 +8490,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions":
+"@strapi/plugin-users-permissions@npm:5.0.0-beta.6, @strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions":
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-users-permissions@workspace:packages/plugins/users-permissions"
   dependencies:
@@ -8722,7 +8576,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun":
+"@strapi/provider-email-mailgun@npm:5.0.0-beta.6, @strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-email-mailgun@workspace:packages/providers/email-mailgun"
   dependencies:
@@ -8796,7 +8650,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3":
+"@strapi/provider-upload-aws-s3@npm:5.0.0-beta.6, @strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-aws-s3@workspace:packages/providers/upload-aws-s3"
   dependencies:
@@ -8823,7 +8677,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary":
+"@strapi/provider-upload-cloudinary@npm:5.0.0-beta.6, @strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary":
   version: 0.0.0-use.local
   resolution: "@strapi/provider-upload-cloudinary@workspace:packages/providers/upload-cloudinary"
   dependencies:
@@ -8900,7 +8754,7 @@ __metadata:
     "@strapi/icons": "npm:2.0.0-beta.2"
     "@strapi/pack-up": "npm:5.0.0"
     "@strapi/types": "npm:5.0.0-beta.6"
-    "@strapi/utils": "npm:5.0.0-beta.5"
+    "@strapi/utils": "npm:5.0.0-beta.6"
     "@testing-library/react": "npm:14.0.0"
     axios: "npm:1.6.8"
     fractional-indexing: "npm:3.2.0"
@@ -18154,15 +18008,15 @@ __metadata:
   resolution: "getstarted@workspace:examples/getstarted"
   dependencies:
     "@strapi/icons": "npm:2.0.0-beta.2"
-    "@strapi/plugin-color-picker": "npm:5.0.0-beta.5"
-    "@strapi/plugin-documentation": "npm:5.0.0-beta.5"
-    "@strapi/plugin-graphql": "npm:5.0.0-beta.5"
-    "@strapi/plugin-sentry": "npm:5.0.0-beta.5"
-    "@strapi/plugin-users-permissions": "npm:5.0.0-beta.5"
-    "@strapi/provider-email-mailgun": "npm:5.0.0-beta.5"
-    "@strapi/provider-upload-aws-s3": "npm:5.0.0-beta.5"
-    "@strapi/provider-upload-cloudinary": "npm:5.0.0-beta.5"
-    "@strapi/strapi": "npm:5.0.0-beta.5"
+    "@strapi/plugin-color-picker": "npm:5.0.0-beta.6"
+    "@strapi/plugin-documentation": "npm:5.0.0-beta.6"
+    "@strapi/plugin-graphql": "npm:5.0.0-beta.6"
+    "@strapi/plugin-sentry": "npm:5.0.0-beta.6"
+    "@strapi/plugin-users-permissions": "npm:5.0.0-beta.6"
+    "@strapi/provider-email-mailgun": "npm:5.0.0-beta.6"
+    "@strapi/provider-upload-aws-s3": "npm:5.0.0-beta.6"
+    "@strapi/provider-upload-cloudinary": "npm:5.0.0-beta.6"
+    "@strapi/strapi": "npm:5.0.0-beta.6"
     better-sqlite3: "npm:9.4.3"
     lodash: "npm:4.17.21"
     mysql2: "npm:3.6.2"
@@ -30379,13 +30233,6 @@ __metadata:
   version: 13.11.0
   resolution: "validator@npm:13.11.0"
   checksum: 4bf094641eb71729c06a42d669840e7189597ba655a8264adabac9bf03f95cd6fde5fbc894b0a13ee861bd4a852f56d2afdc9391aeaeb3fc0f9633a974140e12
-  languageName: node
-  linkType: hard
-
-"value-or-promise@npm:1.0.11":
-  version: 1.0.11
-  resolution: "value-or-promise@npm:1.0.11"
-  checksum: 9bd1cf82be5b59ec4a7ee9fa17ca7b3f16165c3ea33ebabe514f7a20e4f88dd11f912900f0279760618eb7fbd5e3bb2a4cf4b351b5fd8e8da69aa2719725e54a
   languageName: node
   linkType: hard
 
