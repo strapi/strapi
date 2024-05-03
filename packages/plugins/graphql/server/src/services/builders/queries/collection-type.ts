@@ -2,6 +2,7 @@ import { extendType } from 'nexus';
 import type * as Nexus from 'nexus';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../../types';
+import type { CacheHint } from 'apollo-server-types';
 
 export default ({ strapi }: Context) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -76,9 +77,11 @@ export default ({ strapi }: Context) => {
 
       async resolve(parent, args, ctx, info) {
         // TODO: pluginOptions.graphql not recognised
-        if ((contentType.pluginOptions as any)?.graphql?.cacheHint?.findOne) {
-          info.cacheControl.setCacheHint((contentType.pluginOptions as any).graphql.cacheHint.findOne);
-        }
+        const cacheHint = (contentType.pluginOptions as any)?.graphql?.cacheHint?.findOne as
+          | CacheHint
+          | undefined;
+
+        if (cacheHint) info.cacheControl.setCacheHint(cacheHint);
 
         const transformedArgs = transformArgs(args, { contentType });
 
@@ -113,9 +116,11 @@ export default ({ strapi }: Context) => {
 
       async resolve(parent, args, ctx, info) {
         // TODO: pluginOptions.graphql not recognised
-        if ((contentType.pluginOptions as any)?.graphql?.cacheHint?.find) {
-          info.cacheControl.setCacheHint((contentType.pluginOptions as any).graphql.cacheHint.find);
-        }
+        const cacheHint = (contentType.pluginOptions as any)?.graphql?.cacheHint?.find as
+          | CacheHint
+          | undefined;
+
+        if (cacheHint) info.cacheControl.setCacheHint(cacheHint);
 
         const transformedArgs = transformArgs(args, { contentType, usePagination: true });
 

@@ -18,9 +18,7 @@ export default ({ strapi }: Context) => ({
     const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
 
     return async (parent: any, args: any, ctx: any, info) => {
-      if (cacheHint) {
-        info.cacheControl.setCacheHint(cacheHint);
-      }
+      if (cacheHint) info.cacheControl.setCacheHint(cacheHint);
 
       const contentType = strapi.getModel(contentTypeUID);
 

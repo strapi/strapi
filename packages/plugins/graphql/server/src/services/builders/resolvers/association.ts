@@ -43,9 +43,7 @@ export default ({ strapi }: Context) => {
       const targetContentType = strapi.getModel(targetUID);
 
       return async (parent: any, args: any = {}, context: any = {}, resolveInfo) => {
-        if (cacheHint) {
-          resolveInfo.cacheControl.setCacheHint(cacheHint);
-        }
+        if (cacheHint) resolveInfo.cacheControl.setCacheHint(cacheHint);
 
         const { auth } = context.state;
 

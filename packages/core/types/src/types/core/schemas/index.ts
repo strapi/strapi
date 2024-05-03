@@ -102,7 +102,7 @@ export interface PluginOptions {
     cacheHint?: {
       find?: CacheHint;
       findOne?: CacheHint;
-    }
+    };
   };
 }
 

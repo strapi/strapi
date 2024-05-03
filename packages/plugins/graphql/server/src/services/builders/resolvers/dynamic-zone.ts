@@ -15,10 +15,7 @@ export default ({ strapi }: Context) => ({
     cacheHint?: CacheHint;
   }): FieldResolver<string, string> {
     return async (parent, _args, _context, info) => {
-      if (cacheHint) {
-        info.cacheControl.setCacheHint(cacheHint);
-      }
-
+      if (cacheHint) info.cacheControl.setCacheHint(cacheHint);
       return strapi.entityService!.load(contentTypeUID, parent, attributeName);
     };
   },

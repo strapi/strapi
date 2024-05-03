@@ -37,10 +37,7 @@ export default (context: Context) => {
     builder.field(attributeName, {
       type: gqlType,
       resolve: (parent, _args, _context, info) => {
-        if (cacheHint) {
-          info.cacheControl.setCacheHint(cacheHint);
-        }
-
+        if (cacheHint) info.cacheControl.setCacheHint(cacheHint);
         return parent[attributeName];
       },
     });
@@ -131,10 +128,7 @@ export default (context: Context) => {
     builder.field(attributeName, {
       type,
       resolve: (parent, _args, _context, info) => {
-        if (cacheHint) {
-          info.cacheControl.setCacheHint(cacheHint);
-        }
-
+        if (cacheHint) info.cacheControl.setCacheHint(cacheHint);
         return parent[attributeName];
       },
     });
