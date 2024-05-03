@@ -36,7 +36,6 @@ const ELEMENT_TAGS = {
   PRE: () => ({ type: 'code' }),
 };
 
-// COMPAT: `B` is omitted here because Google Docs uses `<b>` in weird ways.
 const TEXT_TAGS = {
   CODE: () => ({ code: true }),
   DEL: () => ({ strikethrough: true }),
@@ -49,33 +48,33 @@ const TEXT_TAGS = {
 };
 
 function getSpan(el: HTMLElement) {
+  const attrs = [];
   if (el.style.fontWeight === '700') {
-    return { bold: true };
+    attrs.push({ bold: true });
   }
   if (el.style.fontStyle === 'italic') {
-    return { italic: true };
+    attrs.push({ italic: true });
   }
+  if (el.style.textDecoration === 'underline') {
+    attrs.push({ underline: true });
+  }
+  return attrs.reduce((acc, attr) => ({ ...acc, ...attr }), {});
 }
-function isGoogleDoc(el: HTMLElement) {
-  return el.nodeName === 'B' && el.style.fontWeight === 'normal';
+
+function checkIfGoogleDoc(el: HTMLElement) {
+  return el.nodeName === 'B' && el.id?.startsWith('docs-internal-guid-');
 }
 
 const deserialize = (
-  el: ChildNode
+  el: ChildNode,
+  parentNodeName?: string
 ): string | null | Descendant | (string | null | { text: string } | Descendant | Node)[] => {
-  console.log('------------------------------------------------');
-  console.log('------------------------------------------------');
-  console.log('------------------------------------------------');
-  console.log('el', el);
-  console.log('el.nodeType', el.nodeType);
-  console.log('el.nodeName', el.nodeName);
-
   if (el.nodeType === 3) {
     return el.textContent;
   } else if (el.nodeType !== 1) {
     return null;
   } else if (el.nodeName === 'BR') {
-    return '\n';
+    return jsx('element', {}, [{ text: '' }]);
   }
 
   const { nodeName } = el;
@@ -84,7 +83,9 @@ const deserialize = (
   if (nodeName === 'PRE' && el.childNodes[0] && el.childNodes[0].nodeName === 'CODE') {
     parent = el.childNodes[0];
   }
-  let children = Array.from(parent.childNodes).map(deserialize).flat();
+  let children = Array.from(parent.childNodes)
+    .map((childNode) => deserialize(childNode, el.nodeName as TElementTag))
+    .flat();
 
   if (children.length === 0) {
     children = [{ text: '' }];
@@ -93,22 +94,26 @@ const deserialize = (
   if (nodeName === 'BODY') {
     return jsx('fragment', {}, children);
   }
-  if (isGoogleDoc(el as HTMLElement)) {
+
+  // Google Docs adds a <p> tag in a <li> tag, that must be omitted
+  if (nodeName === 'P' && parentNodeName && ELEMENT_TAGS[parentNodeName as TElementTag]) {
     return jsx('fragment', {}, children);
   }
 
+  // Google Docs wraps the content in a <b> tag with an id starting with 'docs-internal-guid-'
+  if (checkIfGoogleDoc(el as HTMLElement)) {
+    return jsx('fragment', {}, children);
+  }
+
+  // Google Docs expresses bold/italic/underlined text with a <span> tag
   if (nodeName === 'SPAN') {
-    console.log('SPAN');
     const attrs = getSpan(el as HTMLElement);
-    console.log('attrs', attrs);
-    console.log('children', children);
     if (attrs) {
       return children.map((child) => jsx('text', attrs, child));
     }
   }
 
   if (ELEMENT_TAGS[nodeName as TElementTag]) {
-    console.log('ELEMENT TAGS');
     const attrs = ELEMENT_TAGS[nodeName as TElementTag](el as HTMLElement);
     if (children) {
       return jsx('element', attrs, children);
@@ -116,7 +121,6 @@ const deserialize = (
   }
 
   if (TEXT_TAGS[nodeName as TTextTag]) {
-    console.log('TEXT TAGS');
     const attrs = TEXT_TAGS[nodeName as TTextTag]();
     return children.map((child) => jsx('text', attrs, child));
   }
@@ -137,7 +141,6 @@ export function withHtml(editor: Editor) {
     if (html) {
       const parsed = new DOMParser().parseFromString(html, 'text/html');
       const fragment = deserialize(parsed.body);
-      console.log('fragment', fragment);
       Transforms.insertFragment(editor, fragment as Node[]);
       return;
     }
