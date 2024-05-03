@@ -138,14 +138,12 @@ HeaderLayout.displayName = 'HeaderLayout';
  * useElementOnScreen: hook that returns a ref to an element and a boolean indicating if the element is in the viewport.
  */
 const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
-  // eslint-disable-next-line
   options?: IntersectionObserverInit
 ): [containerRef: React.RefObject<TElement>, isVisible: boolean] => {
   const containerRef = React.useRef<TElement>(null);
 
   const [isVisible, setIsVisible] = React.useState<boolean>(true);
 
-  // eslint-disable-next-line
   const callback: IntersectionObserverCallback = ([entry]) => {
     setIsVisible(entry.isIntersecting);
   };
@@ -173,7 +171,6 @@ const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
  */
 const useResizeObserver = (
   sources: React.RefObject<HTMLElement> | React.RefObject<HTMLElement>[],
-  // eslint-disable-next-line
   onResize: ResizeObserverCallback
 ) => {
   const handleResize = useCallbackRef(onResize);
