@@ -315,7 +315,11 @@ test.describe('Edit view', () => {
       .click();
 
     // Assert that all locales are now published
-    await expect(page.getByText('2 entries already published')).toBeVisible();
+    await expect(page.getByRole('gridcell', { name: 'Already Published' })).toHaveCount(2);
+
+    await expect(
+      page.getByLabel('Publish Multiple Locales').getByRole('button', { name: 'Publish' })
+    ).toBeDisabled();
   });
 
   interface ValidationType {

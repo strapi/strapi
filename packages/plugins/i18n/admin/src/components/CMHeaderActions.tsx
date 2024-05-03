@@ -411,6 +411,8 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         });
         return;
       }
+
+      setSelectedRows([]);
     } catch (error) {
       toggleNotification({
         type: 'danger',
