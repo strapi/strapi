@@ -3,7 +3,7 @@ import type {} from 'koa-body';
 import authentication from './authentication';
 import role from './role';
 import user from './user';
-import auditLogs from './audit-logs';
+import auditLogs from '../audit-logs/controllers/audit-logs';
 import admin from './admin';
 
 export default {

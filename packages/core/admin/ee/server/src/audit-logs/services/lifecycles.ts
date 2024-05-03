@@ -1,6 +1,17 @@
 import type { Core } from '@strapi/types';
-import localProvider from '@strapi/provider-audit-logs-local';
+import { auditLog } from '../models/audit-log';
 import { scheduleJob } from 'node-schedule';
+
+interface Event {
+  action: string;
+  date: Date;
+  userId: string | number;
+  payload: Record<string, unknown>;
+}
+
+interface Log extends Omit<Event, 'userId'> {
+  user: string | number;
+}
 
 const DEFAULT_RETENTION_DAYS = 90;
 
@@ -35,22 +46,6 @@ const defaultEvents = [
   'permission.delete',
 ];
 
-const getSanitizedUser = (user: any) => {
-  let displayName = user.email;
-
-  if (user.username) {
-    displayName = user.username;
-  } else if (user.firstname && user.lastname) {
-    displayName = `${user.firstname} ${user.lastname}`;
-  }
-
-  return {
-    id: user.id,
-    email: user.email,
-    displayName,
-  };
-};
-
 const getEventMap = (defaultEvents: any) => {
   const getDefaultPayload = (...args: any) => args[0];
 
@@ -81,9 +76,14 @@ const getRetentionDays = (strapi: Core.Strapi) => {
   return licenseRetentionDays;
 };
 
-const createAuditLogsService = (strapi: Core.Strapi) => {
+/**
+ * @description
+ * Manages the the lifecycle of audit logs. Accessible via strapi.get('audit-logs-lifecycles')
+ */
+const createAuditLogsLifecycle = (strapi: Core.Strapi) => {
   // Manage internal service state privately
   const state = {} as any;
+  const auditLogsService = strapi.get('audit-logs');
 
   // NOTE: providers should be able to replace getEventMap to add or remove events
   const eventMap = getEventMap(defaultEvents);
@@ -119,17 +119,17 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     };
   };
 
-  async function handleEvent(name: string, ...args: any) {
+  const handleEvent = async (name: string, ...args: any) => {
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
       // This stores the event when after the transaction is committed,
       // so it's not stored if the transaction is rolled back
       await strapi.db.transaction(({ onCommit }) => {
-        onCommit(() => state.provider.saveEvent(processedEvent));
+        onCommit(() => auditLogsService.saveEvent(processedEvent));
       });
     }
-  }
+  };
 
   return {
     async register() {
@@ -162,7 +162,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       });
 
       // Register the provider now because collections can't be added later at runtime
-      state.provider = await localProvider.register({ strapi });
+      strapi.get('models').add(auditLog);
 
       // Check current state of license
       if (!strapi.ee.features.isEnabled('audit-logs')) {
@@ -170,47 +170,16 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
       }
 
       // Start saving events
-      state.eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
+      state.eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent);
 
       // Manage audit logs auto deletion
       const retentionDays = getRetentionDays(strapi);
       state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
         const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-        state.provider.deleteExpiredEvents(expirationDate);
+        auditLogsService.deleteExpiredEvents(expirationDate);
       });
 
       return this;
-    },
-
-    async findMany(query: unknown) {
-      const { results, pagination } = await state.provider.findMany(query);
-
-      const sanitizedResults = results.map((result: any) => {
-        const { user, ...rest } = result;
-        return {
-          ...rest,
-          user: user ? getSanitizedUser(user) : null,
-        };
-      });
-
-      return {
-        results: sanitizedResults,
-        pagination,
-      };
-    },
-
-    async findOne(id: unknown) {
-      const result = await state.provider.findOne(id);
-
-      if (!result) {
-        return null;
-      }
-
-      const { user, ...rest } = result;
-      return {
-        ...rest,
-        user: user ? getSanitizedUser(user) : null,
-      };
     },
 
     unsubscribe() {
@@ -235,4 +204,4 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
   };
 };
 
-export default createAuditLogsService;
+export { createAuditLogsLifecycle };

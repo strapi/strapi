@@ -1,4 +1,4 @@
-import { enableFeatureMiddleware } from './utils';
+import { enableFeatureMiddleware } from '../../routes/utils';
 
 export default {
   type: 'admin',
