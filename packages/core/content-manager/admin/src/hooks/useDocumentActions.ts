@@ -505,13 +505,14 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [unpublishManyDocuments] = useUnpublishManyDocumentsMutation();
   const unpublishMany: IUseDocumentActs['unpublishMany'] = React.useCallback(
-    async ({ model, documentIds }) => {
+    async ({ model, documentIds, params }) => {
       try {
         trackUsage('willBulkUnpublishEntries');
 
         const res = await unpublishManyDocuments({
           model,
           documentIds,
+          params,
         });
 
         if ('error' in res) {

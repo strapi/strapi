@@ -362,12 +362,18 @@ const documentApi = contentManagerApi.injectEndpoints({
     }),
     unpublishManyDocuments: builder.mutation<
       BulkUnpublish.Response,
-      BulkUnpublish.Params & BulkUnpublish.Request['body']
+      Pick<BulkUnpublish.Params, 'model'> &
+        BulkUnpublish.Request['body'] & {
+          params?: BulkUnpublish.Request['query'];
+        }
     >({
-      query: ({ model, ...body }) => ({
+      query: ({ model, params, ...body }) => ({
         url: `/content-manager/collection-types/${model}/actions/bulkUnpublish`,
         method: 'POST',
         data: body,
+        config: {
+          params,
+        },
       }),
       invalidatesTags: (_res, _error, { model, documentIds }) =>
         documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
