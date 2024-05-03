@@ -30,7 +30,15 @@
       "type": "relation",
       "relation": "manyToMany",
       "target": "api::address.address",
-      "mappedBy": "categories"
+      "mappedBy": "categories",
+      "pluginOptions": {
+        "graphql": {
+          "cacheHint": {
+            "maxAge": 10,
+            "scope": "PUBLIC"
+          }
+        }
+      }
     },
     "temps": {
       "type": "relation",

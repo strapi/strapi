@@ -323,13 +323,12 @@ export default (context: Context) => {
               const attribute = attributes[attributeName];
 
               const pluginOptions = (attribute.pluginOptions ?? {}) as {
-                // TODO: The value is not coming from the schema attribute pluginOptions
                 graphql?: { cacheHint?: CacheHint };
               };
 
               // If CacheHint is 0/Public, Cache-Control header is not added at all
               const cacheHint = pluginOptions.graphql?.cacheHint ?? {
-                maxAge: 60,
+                maxAge: 0,
                 scope: CacheScope.Public,
               };
 
