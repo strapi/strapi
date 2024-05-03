@@ -297,6 +297,7 @@ describe('CM API - Basic', () => {
         description: 'Product description updated',
       };
 
+      // Update the product
       await rq({
         method: 'PUT',
         url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${body.data.documentId}`,
@@ -322,6 +323,7 @@ describe('CM API - Basic', () => {
       expect(draft.body.data.name).toBe(product.name);
     });
   });
+
   // FIX: We don't return the draft entry when deleting in v5
   test.skip('Delete a draft', async () => {
     const res = await rq({
