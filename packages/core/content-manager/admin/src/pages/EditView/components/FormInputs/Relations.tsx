@@ -774,7 +774,7 @@ const RelationsList = ({
       : Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER);
 
   return (
-    <ShadowBox overflowDirection={overflow}>
+    <ShadowBox $overflowDirection={overflow}>
       <VisuallyHidden id={ariaDescriptionId}>
         {formatMessage({
           id: getTranslation('dnd.instructions'),
@@ -811,7 +811,7 @@ const RelationsList = ({
 };
 
 const ShadowBox = styled<BoxComponent>(Box)<{
-  overflowDirection?: 'top-bottom' | 'top' | 'bottom';
+  $overflowDirection?: 'top-bottom' | 'top' | 'bottom';
 }>`
   position: relative;
   overflow: hidden;
@@ -830,8 +830,8 @@ const ShadowBox = styled<BoxComponent>(Box)<{
     content: '';
     background: linear-gradient(rgba(3, 3, 5, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
     top: 0;
-    opacity: ${({ overflowDirection }) =>
-      overflowDirection === 'top-bottom' || overflowDirection === 'top' ? 1 : 0};
+    opacity: ${({ $overflowDirection }) =>
+      $overflowDirection === 'top-bottom' || $overflowDirection === 'top' ? 1 : 0};
     transition: opacity 0.2s ease-in-out;
   }
 
@@ -840,8 +840,8 @@ const ShadowBox = styled<BoxComponent>(Box)<{
     content: '';
     background: linear-gradient(0deg, rgba(3, 3, 5, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
     bottom: 0;
-    opacity: ${({ overflowDirection }) =>
-      overflowDirection === 'top-bottom' || overflowDirection === 'bottom' ? 1 : 0};
+    opacity: ${({ $overflowDirection }) =>
+      $overflowDirection === 'top-bottom' || $overflowDirection === 'bottom' ? 1 : 0};
     transition: opacity 0.2s ease-in-out;
   }
 `;

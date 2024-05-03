@@ -14,8 +14,8 @@ const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
 `;
 
-const RemoveButton = styled(Button)<{ visible: boolean }>`
-  visibility: ${(props) => (props.visible ? 'visible' : 'hidden')};
+const RemoveButton = styled(Button)<{ $visible: boolean }>`
+  visibility: ${(props) => (props.$visible ? 'visible' : 'hidden')};
 `;
 
 interface LinkContentProps extends RenderElementProps {
@@ -153,7 +153,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                 <RemoveButton
                   variant="danger-light"
                   onClick={() => removeLink(editor)}
-                  visible={showRemoveButton}
+                  $visible={showRemoveButton}
                 >
                   {formatMessage({
                     id: 'components.Blocks.popover.remove',

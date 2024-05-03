@@ -98,8 +98,8 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
             <ModalBody>
               <Grid gap={4}>
                 <GridItem xs={12} col={12}>
-                  <Flex direction="column" alignItems="stretch" gap={1}>
-                    <Field.Label htmlFor="folder-destination">
+                  <Field.Root id="folder-destination">
+                    <Field.Label>
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
@@ -120,16 +120,11 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
                     />
 
                     {errors.destination && (
-                      <Typography
-                        variant="pi"
-                        tag="p"
-                        id="folder-destination-error"
-                        textColor="danger600"
-                      >
+                      <Typography variant="pi" tag="p" textColor="danger600">
                         {errors.destination}
                       </Typography>
                     )}
-                  </Flex>
+                  </Field.Root>
                 </GridItem>
               </Grid>
             </ModalBody>

@@ -95,9 +95,12 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
                   defaultMessage: 'Description',
                 })}
               </Field.Label>
-              <Textarea disabled={disabled} onChange={onChange} onBlur={onBlur}>
-                {values.description || ''}
-              </Textarea>
+              <Textarea
+                disabled={disabled}
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values.description}
+              />
               <Field.Error />
             </Field.Root>
           </GridItem>

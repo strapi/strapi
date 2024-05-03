@@ -14,9 +14,10 @@ import {
   VisuallyHidden,
   Field,
 } from '@strapi/design-system';
-import { useFormikContext, FieldInputProps } from 'formik';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { styled } from 'styled-components';
+
+import { useField } from '../../../../../components/Form';
 
 /* -------------------------------------------------------------------------------------------------
  * EventsRoot
@@ -57,9 +58,8 @@ const StyledTable = styled(Table)`
   th {
     padding-block-start: ${({ theme }) => theme.spaces[3]};
     padding-block-end: ${({ theme }) => theme.spaces[3]};
-    width: 10%;
+    width: 6%;
     vertical-align: middle;
-    text-align: center;
   }
 
   tbody tr td:first-child {
@@ -149,10 +149,10 @@ interface EventsBodyProps {
 
 const EventsBody = ({ providedEvents }: EventsBodyProps) => {
   const events = providedEvents || getCEEvents();
-  const { values, handleChange: onChange } = useFormikContext<FormikContextValue>();
+  const { value = [], onChange } = useField<string[]>('events');
 
   const inputName = 'events';
-  const inputValue = values.events;
+  const inputValue = value;
   const disabledEvents: string[] = [];
 
   const formattedValue = inputValue.reduce<Record<string, string[]>>((acc, curr) => {
@@ -166,9 +166,7 @@ const EventsBody = ({ providedEvents }: EventsBodyProps) => {
     return acc;
   }, {});
 
-  const handleSelect: React.ChangeEventHandler<HTMLInputElement> = ({
-    target: { name, value },
-  }) => {
+  const handleSelect: EventsRowProps['handleSelect'] = (name, value) => {
     const set = new Set(inputValue);
 
     if (value) {
@@ -176,12 +174,11 @@ const EventsBody = ({ providedEvents }: EventsBodyProps) => {
     } else {
       set.delete(name);
     }
-    onChange({ target: { name: inputName, value: Array.from(set) } });
+
+    onChange(inputName, Array.from(set));
   };
 
-  const handleSelectAll: React.ChangeEventHandler<HTMLInputElement> = ({
-    target: { name, value },
-  }) => {
+  const handleSelectAll: EventsRowProps['handleSelectAll'] = (name, value) => {
     const set = new Set(inputValue);
 
     if (value) {
@@ -193,7 +190,8 @@ const EventsBody = ({ providedEvents }: EventsBodyProps) => {
     } else {
       events[name].forEach((event) => set.delete(event));
     }
-    onChange({ target: { name: inputName, value: Array.from(set) } });
+
+    onChange(inputName, Array.from(set));
   };
 
   return (
@@ -238,8 +236,8 @@ interface EventsRowProps {
   disabledEvents?: string[];
   events?: string[];
   inputValue?: string[];
-  handleSelect: FieldInputProps<string>['onChange'];
-  handleSelectAll: FieldInputProps<string>['onChange'];
+  handleSelect: (name: string, value: boolean) => void;
+  handleSelectAll: (name: string, value: boolean) => void;
   name: string;
 }
 
@@ -260,9 +258,7 @@ const EventsRow = ({
   const onChangeAll: React.ChangeEventHandler<HTMLInputElement> = ({ target: { name } }) => {
     const valueToSet = !areAllCheckboxesSelected;
 
-    handleSelectAll({
-      target: { name, value: valueToSet },
-    });
+    handleSelectAll(name, valueToSet);
   };
 
   const targetColumns = 5;
@@ -286,13 +282,13 @@ const EventsRow = ({
 
       {events.map((event) => {
         return (
-          <Td key={event}>
+          <Td key={event} textAlign="center">
             <BaseCheckbox
               disabled={disabledEvents.includes(event)}
               aria-label={event}
               name={event}
               value={inputValue.includes(event)}
-              onValueChange={(value) => handleSelect({ target: { name: event, value } })}
+              onValueChange={(value) => handleSelect(event, value)}
             />
           </Td>
         );

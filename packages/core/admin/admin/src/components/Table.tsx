@@ -201,7 +201,7 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
           <IconButton
             label={sortLabel}
             onClick={handleClickSort}
-            icon={<SortIcon isUp={sortOrder === 'ASC'} />}
+            icon={<SortIcon $isUp={sortOrder === 'ASC'} />}
             borderStyle="none"
           />
         )
@@ -221,12 +221,10 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
   );
 };
 
-interface SortIconProps {
-  isUp: boolean;
-}
-
-const SortIcon = styled(CaretDown)<SortIconProps>`
-  transform: ${({ isUp }) => `rotate(${isUp ? '180' : '0'}deg)`};
+const SortIcon = styled(CaretDown)<{
+  $isUp: boolean;
+}>`
+  transform: ${({ $isUp }) => `rotate(${$isUp ? '180' : '0'}deg)`};
 `;
 
 /* -------------------------------------------------------------------------------------------------

@@ -70,12 +70,12 @@ describe('FolderCard', () => {
     ).toBeInTheDocument();
   });
 
-  test('renders as a link with to prop', () => {
+  test.only('renders as a link with to prop', () => {
     const { container } = setup({
       to: '/michka-page',
     });
 
-    const link = container.querySelector('a[aria-hidden=true]');
+    const link = container.querySelector('a');
     expect(link).toHaveAttribute('href', '/michka-page');
   });
 

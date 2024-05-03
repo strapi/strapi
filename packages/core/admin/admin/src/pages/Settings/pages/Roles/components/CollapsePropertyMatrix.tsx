@@ -164,8 +164,8 @@ const ActionRow = ({
     <>
       <Wrapper
         alignItems="center"
-        isCollapsable={isCollapsable}
-        isActive={isActive}
+        $isCollapsable={isCollapsable}
+        $isActive={isActive}
         background={isOdd ? 'neutral100' : 'neutral0'}
       >
         <Flex>
@@ -321,12 +321,12 @@ const getRowLabelCheckboxState = (
   return getCheckboxState(data);
 };
 
-const Wrapper = styled<FlexComponent>(Flex)<{ isCollapsable?: boolean; isActive?: boolean }>`
+const Wrapper = styled<FlexComponent>(Flex)<{ $isCollapsable?: boolean; $isActive?: boolean }>`
   height: ${rowHeight};
   flex: 1;
 
-  ${({ isCollapsable, theme }) =>
-    isCollapsable &&
+  ${({ $isCollapsable, theme }) =>
+    $isCollapsable &&
     `
       ${CarretIcon} {
         display: block;
@@ -336,7 +336,7 @@ const Wrapper = styled<FlexComponent>(Flex)<{ isCollapsable?: boolean; isActive?
         ${activeStyle(theme)}
       }
   `}
-  ${({ isActive, theme }) => isActive && activeStyle(theme)};
+  ${({ $isActive, theme }) => $isActive && activeStyle(theme)};
 `;
 
 const CarretIcon = styled(CaretDown)<{ $isActive: boolean }>`
@@ -401,7 +401,7 @@ const SubActionRow = ({
         const isActive = rowToOpen === value;
 
         return (
-          <LeftBorderTimeline key={value} isVisible={isVisible}>
+          <LeftBorderTimeline key={value} $isVisible={isVisible}>
             <Flex height={rowHeight}>
               <StyledBox>
                 <Svg
@@ -410,7 +410,7 @@ const SubActionRow = ({
                   viewBox="0 0 20 23"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  color="primary200"
+                  $color="primary200"
                 >
                   <path
                     fillRule="evenodd"
@@ -421,10 +421,10 @@ const SubActionRow = ({
                 </Svg>
               </StyledBox>
               <Flex style={{ flex: 1 }}>
-                <RowStyle level={recursiveLevel} isActive={isActive} isCollapsable={isArrayType}>
+                <RowStyle $level={recursiveLevel} $isActive={isActive} $isCollapsable={isArrayType}>
                   <CollapseLabel
                     alignItems="center"
-                    isCollapsable={isArrayType}
+                    $isCollapsable={isArrayType}
                     {...(isArrayType && {
                       onClick: () => handleClickToggleSubLevel(value),
                       'aria-expanded': isActive,
@@ -556,21 +556,21 @@ const SubActionRow = ({
   );
 };
 
-const LeftBorderTimeline = styled<BoxComponent>(Box)<{ isVisible?: boolean }>`
-  border-left: ${({ isVisible, theme }) =>
-    isVisible ? `4px solid ${theme.colors.primary200}` : '4px solid transparent'};
+const LeftBorderTimeline = styled<BoxComponent>(Box)<{ $isVisible?: boolean }>`
+  border-left: ${({ $isVisible, theme }) =>
+    $isVisible ? `4px solid ${theme.colors.primary200}` : '4px solid transparent'};
 `;
 
 const RowStyle = styled<FlexComponent>(Flex)<{
-  level: number;
-  isCollapsable?: boolean;
-  isActive?: boolean;
+  $level: number;
+  $isCollapsable?: boolean;
+  $isActive?: boolean;
 }>`
   padding-left: ${({ theme }) => theme.spaces[4]};
-  width: ${({ level }) => 145 - level * 36}px;
+  width: ${({ $level }) => 145 - $level * 36}px;
 
-  ${({ isCollapsable, theme }) =>
-    isCollapsable &&
+  ${({ $isCollapsable, theme }) =>
+    $isCollapsable &&
     `
       ${CarretIcon} {
         display: block;
@@ -580,7 +580,7 @@ const RowStyle = styled<FlexComponent>(Flex)<{
         ${activeStyle(theme)}
       }
   `}
-  ${({ isActive, theme }) => isActive && activeStyle(theme)};
+  ${({ $isActive, theme }) => $isActive && activeStyle(theme)};
 `;
 
 const RowLabel = styled<TypographyComponent>(Typography)``;
@@ -606,13 +606,13 @@ const StyledBox = styled<BoxComponent>(Box)`
   }
 `;
 
-const Svg = styled.svg<{ color: keyof DefaultTheme['colors'] }>`
+const Svg = styled.svg<{ $color: keyof DefaultTheme['colors'] }>`
   position: relative;
   flex-shrink: 0;
   transform: translate(-0.5px, -1px);
 
   * {
-    fill: ${({ theme, color }) => theme.colors[color]};
+    fill: ${({ theme, $color }) => theme.colors[$color]};
   }
 `;
 

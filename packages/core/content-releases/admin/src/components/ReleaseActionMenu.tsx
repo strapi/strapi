@@ -13,12 +13,12 @@ import { Release } from '../../../shared/contracts/releases';
 import { PERMISSIONS } from '../constants';
 import { useDeleteReleaseActionMutation } from '../services/release';
 
-const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
+const StyledMenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger' }>`
   &:hover {
-    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
+    background: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}100`]};
 
     svg {
-      fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
+      fill: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}600`]};
     }
 
     a {
@@ -27,7 +27,7 @@ const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
   }
 
   svg {
-    fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
+    fill: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}600`]};
   }
 
   a {
@@ -101,7 +101,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
   }
 
   return (
-    <StyledMenuItem variant="danger" onSelect={handleDeleteAction}>
+    <StyledMenuItem $variant="danger" onSelect={handleDeleteAction}>
       <Flex gap={2}>
         <Cross width="1.6rem" height="1.6rem" />
         <Typography textColor="danger600" variant="omega">

@@ -67,53 +67,30 @@ describe('<UploadProgress />', () => {
         height: 8px;
       }
 
+      .c9 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        color: inherit;
+      }
+
       .c1 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
         flex-direction: row;
       }
 
       .c4 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
         flex-direction: column;
         gap: 8px;
       }
 
       .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
         flex-direction: row;
         gap: 8px;
-      }
-
-      .c9 {
-        font-size: 1.2rem;
-        line-height: 1.33;
       }
 
       .c6:before {
@@ -135,8 +112,6 @@ describe('<UploadProgress />', () => {
       .c7 {
         border: none;
         background: none;
-        width: -webkit-min-content;
-        width: -moz-min-content;
         width: min-content;
         color: #666687;
       }
@@ -168,7 +143,6 @@ describe('<UploadProgress />', () => {
             aria-valuenow="0"
             class="c5 c6"
             role="progressbar"
-            value="0"
           />
           <button
             class="c7"
@@ -212,16 +186,8 @@ describe('<UploadProgress />', () => {
       }
 
       .c1 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
         flex-direction: row;
       }
 
@@ -237,6 +203,7 @@ describe('<UploadProgress />', () => {
 
       <div
         class="c0 c1 c2"
+        error="Error: Something went wrong"
       >
         <svg
           aria-label="Something went wrong"

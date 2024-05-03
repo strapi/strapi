@@ -16,9 +16,9 @@ describe('Users | EditPage', () => {
     expect(screen.getByRole('heading', { name: /User's role/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
 
-    expect(screen.getByRole('textbox', { name: 'First name *' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'First name' })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Last name' })).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: 'Email *' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Email' })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'Username' })).toBeInTheDocument();
 
     expect(screen.getByRole('checkbox', { name: 'Active' })).toBeInTheDocument();

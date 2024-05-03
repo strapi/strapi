@@ -7,6 +7,7 @@ import {
   SingleSelectOption,
   Popover,
   SingleSelect,
+  Field,
 } from '@strapi/design-system';
 import {
   Bold,
@@ -80,19 +81,21 @@ const WysiwygNav = ({
         borderRadius={`0.4rem 0.4rem 0 0`}
       >
         <Flex>
-          <SingleSelect
-            disabled
-            placeholder={selectPlaceholder}
-            size="S"
-            aria-label={selectPlaceholder}
-          >
-            <SingleSelectOption value="h1">h1</SingleSelectOption>
-            <SingleSelectOption value="h2">h2</SingleSelectOption>
-            <SingleSelectOption value="h3">h3</SingleSelectOption>
-            <SingleSelectOption value="h4">h4</SingleSelectOption>
-            <SingleSelectOption value="h5">h5</SingleSelectOption>
-            <SingleSelectOption value="h6">h6</SingleSelectOption>
-          </SingleSelect>
+          <Field.Root>
+            <SingleSelect
+              disabled
+              placeholder={selectPlaceholder}
+              size="S"
+              aria-label={selectPlaceholder}
+            >
+              <SingleSelectOption value="h1">h1</SingleSelectOption>
+              <SingleSelectOption value="h2">h2</SingleSelectOption>
+              <SingleSelectOption value="h3">h3</SingleSelectOption>
+              <SingleSelectOption value="h4">h4</SingleSelectOption>
+              <SingleSelectOption value="h5">h5</SingleSelectOption>
+              <SingleSelectOption value="h6">h6</SingleSelectOption>
+            </SingleSelect>
+          </Field.Root>
 
           <MainButtons>
             <CustomIconButton disabled label="Bold" name="Bold" icon={<Bold />} />
@@ -123,20 +126,22 @@ const WysiwygNav = ({
       borderRadius={`0.4rem 0.4rem 0 0`}
     >
       <Flex>
-        <SingleSelect
-          placeholder={selectPlaceholder}
-          aria-label={selectPlaceholder}
-          size="S"
-          // @ts-expect-error – DS v2 will only allow strings.
-          onChange={(value) => onActionClick(value, editorRef)}
-        >
-          <SingleSelectOption value="h1">h1</SingleSelectOption>
-          <SingleSelectOption value="h2">h2</SingleSelectOption>
-          <SingleSelectOption value="h3">h3</SingleSelectOption>
-          <SingleSelectOption value="h4">h4</SingleSelectOption>
-          <SingleSelectOption value="h5">h5</SingleSelectOption>
-          <SingleSelectOption value="h6">h6</SingleSelectOption>
-        </SingleSelect>
+        <Field.Root>
+          <SingleSelect
+            placeholder={selectPlaceholder}
+            aria-label={selectPlaceholder}
+            size="S"
+            // @ts-expect-error – DS v2 will only allow strings.
+            onChange={(value) => onActionClick(value, editorRef)}
+          >
+            <SingleSelectOption value="h1">h1</SingleSelectOption>
+            <SingleSelectOption value="h2">h2</SingleSelectOption>
+            <SingleSelectOption value="h3">h3</SingleSelectOption>
+            <SingleSelectOption value="h4">h4</SingleSelectOption>
+            <SingleSelectOption value="h5">h5</SingleSelectOption>
+            <SingleSelectOption value="h6">h6</SingleSelectOption>
+          </SingleSelect>
+        </Field.Root>
 
         <MainButtons>
           <CustomIconButton

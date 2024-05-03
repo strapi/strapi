@@ -80,7 +80,7 @@ const ReleaseInfoWrapper = styled(Flex)`
 
 const StyledMenuItem = styled(Menu.Item)<{
   disabled?: boolean;
-  variant?: 'neutral' | 'danger';
+  $variant?: 'neutral' | 'danger';
 }>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
@@ -90,7 +90,7 @@ const StyledMenuItem = styled(Menu.Item)<{
   }
 
   &:hover {
-    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
+    background: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}100`]};
   }
 `;
 
@@ -411,7 +411,7 @@ const ReleaseDetailsLayout = ({
                     <StyledMenuItem
                       disabled={!canDelete}
                       onSelect={toggleWarningSubmit}
-                      variant="danger"
+                      $variant="danger"
                     >
                       <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <TrashIcon />

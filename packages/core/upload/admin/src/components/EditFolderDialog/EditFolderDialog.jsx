@@ -194,22 +194,25 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                 )}
 
                 <GridItem xs={12} col={6}>
-                  <TextInput
-                    label={formatMessage({
-                      id: getTrad('form.input.label.folder-name'),
-                      defaultMessage: 'Name',
-                    })}
-                    name="name"
-                    value={values.name}
-                    error={errors.name}
-                    onChange={handleChange}
-                    disabled={formDisabled}
-                  />
+                  <Field.Root name="name" error={errors.name}>
+                    <Field.Label>
+                      {formatMessage({
+                        id: getTrad('form.input.label.folder-name'),
+                        defaultMessage: 'Name',
+                      })}
+                    </Field.Label>
+                    <TextInput
+                      value={values.name}
+                      onChange={handleChange}
+                      disabled={formDisabled}
+                    />
+                    <Field.Error />
+                  </Field.Root>
                 </GridItem>
 
                 <GridItem xs={12} col={6}>
-                  <Flex direction="column" alignItems="stretch" gap={1}>
-                    <Field.Label htmlFor="folder-parent">
+                  <Field.Root id="folder-parent">
+                    <Field.Label>
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
@@ -241,7 +244,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                         {errors.parent}
                       </Typography>
                     )}
-                  </Flex>
+                  </Field.Root>
                 </GridItem>
               </Grid>
             </ModalBody>

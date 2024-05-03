@@ -15,15 +15,17 @@ const getBorderRightRadiusValue = (actionType: FieldWrapperProps['actionType']) 
   return actionType === 'publish' ? 0 : 1;
 };
 
-const FieldWrapper = styled(Field.Root)<FieldWrapperProps>`
-  border-top-left-radius: ${({ actionType, theme }) =>
-    theme.spaces[getBorderLeftRadiusValue(actionType)]};
-  border-bottom-left-radius: ${({ actionType, theme }) =>
-    theme.spaces[getBorderLeftRadiusValue(actionType)]};
-  border-top-right-radius: ${({ actionType, theme }) =>
-    theme.spaces[getBorderRightRadiusValue(actionType)]};
-  border-bottom-right-radius: ${({ actionType, theme }) =>
-    theme.spaces[getBorderRightRadiusValue(actionType)]};
+const FieldWrapper = styled(Field.Root)<{
+  $actionType: 'publish' | 'unpublish';
+}>`
+  border-top-left-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderLeftRadiusValue($actionType)]};
+  border-bottom-left-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderLeftRadiusValue($actionType)]};
+  border-top-right-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderRightRadiusValue($actionType)]};
+  border-bottom-right-radius: ${({ $actionType, theme }) =>
+    theme.spaces[getBorderRightRadiusValue($actionType)]};
 
   > label {
     color: inherit;
@@ -34,17 +36,17 @@ const FieldWrapper = styled(Field.Root)<FieldWrapperProps>`
   }
 
   &[data-checked='true'] {
-    color: ${({ theme, actionType }) =>
-      actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
-    background-color: ${({ theme, actionType }) =>
-      actionType === 'publish' ? theme.colors.primary100 : theme.colors.danger100};
-    border-color: ${({ theme, actionType }) =>
-      actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
+    color: ${({ theme, $actionType }) =>
+      $actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
+    background-color: ${({ theme, $actionType }) =>
+      $actionType === 'publish' ? theme.colors.primary100 : theme.colors.danger100};
+    border-color: ${({ theme, $actionType }) =>
+      $actionType === 'publish' ? theme.colors.primary700 : theme.colors.danger600};
   }
 
   &[data-checked='false'] {
-    border-left: ${({ actionType }) => actionType === 'unpublish' && 'none'};
-    border-right: ${({ actionType }) => actionType === 'publish' && 'none'};
+    border-left: ${({ $actionType }) => $actionType === 'unpublish' && 'none'};
+    border-right: ${({ $actionType }) => $actionType === 'publish' && 'none'};
   }
 
   &[data-checked='false'][data-disabled='false']:hover {
@@ -84,7 +86,7 @@ const ActionOption = ({
 }: OptionProps) => {
   return (
     <FieldWrapper
-      actionType={actionType}
+      $actionType={actionType}
       background="primary0"
       borderColor="neutral200"
       color={selected === actionType ? 'primary600' : 'neutral600'}

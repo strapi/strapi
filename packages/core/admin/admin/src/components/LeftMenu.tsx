@@ -38,7 +38,7 @@ const LinkUserWrapper = styled<BoxComponent>(Box)`
   left: ${({ theme }) => theme.spaces[5]};
 `;
 
-const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
+const LinkUser = styled(RouterNavLink)<{ $logout?: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -47,8 +47,8 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
   border-radius: ${({ theme }) => theme.spaces[1]};
 
   &:hover {
-    background: ${({ theme, logout }) =>
-      logout ? theme.colors.danger100 : theme.colors.primary100};
+    background: ${({ theme, $logout }) =>
+      $logout ? theme.colors.danger100 : theme.colors.primary100};
     text-decoration: none;
   }
 
@@ -251,7 +251,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     })}
                   </Typography>
                 </LinkUser>
-                <LinkUser tabIndex={0} onClick={logout} to="/auth/login">
+                <LinkUser $logout tabIndex={0} onClick={logout} to="/auth/login">
                   <Typography textColor="danger600">
                     {formatMessage({
                       id: 'app.components.LeftMenu.logout',

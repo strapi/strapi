@@ -91,7 +91,7 @@ export const RelationNaturePicker = ({
                 return (
                   <IconWrapper
                     tag="button"
-                    isSelected={relationType === relation}
+                    $isSelected={relationType === relation}
                     disabled={!isEnabled}
                     key={relation}
                     onClick={() => {

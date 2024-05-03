@@ -355,9 +355,8 @@ const NpsSurvey = () => {
                           id="npsSurveyFeedback" // formik element attribute "id" should be same as the values key to work
                           width="100%"
                           onChange={handleChange}
-                        >
-                          {values.npsSurveyFeedback}
-                        </Textarea>
+                          value={values.npsSurveyFeedback}
+                        />
                       </Box>
                       <Button marginBottom={2} type="submit" loading={isSubmitting}>
                         {formatMessage({

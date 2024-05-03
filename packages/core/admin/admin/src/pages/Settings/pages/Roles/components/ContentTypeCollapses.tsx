@@ -155,7 +155,7 @@ const Collapse = ({
   const doesConditionButtonHasConditions = checkboxesActions.some((action) => action.hasConditions);
 
   return (
-    <BoxWrapper isActive={isActive}>
+    <BoxWrapper $isActive={isActive}>
       <Wrapper
         height={rowHeight}
         flex={1}
@@ -381,16 +381,16 @@ const Wrapper = styled<FlexComponent>(Flex)`
   border: 1px solid transparent;
 `;
 
-const BoxWrapper = styled.div<{ isActive: boolean }>`
+const BoxWrapper = styled.div<{ $isActive: boolean }>`
   display: inline-flex;
   min-width: 100%;
 
   ${ConditionsButton} {
     display: none;
   }
-  ${({ isActive, theme }) => isActive && activeRowStyle(theme, isActive)}
+  ${({ $isActive, theme }) => $isActive && activeRowStyle(theme, $isActive)}
   &:hover {
-    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
+    ${({ theme, $isActive }) => activeRowStyle(theme, $isActive)}
   }
 `;
 

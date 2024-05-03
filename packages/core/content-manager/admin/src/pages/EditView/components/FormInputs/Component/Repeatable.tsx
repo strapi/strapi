@@ -17,6 +17,7 @@ import {
   Grid,
   FlexComponent,
   BoxComponent,
+  IconButtonComponent,
 } from '@strapi/design-system';
 import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -360,42 +361,23 @@ const AccordionGroup = ({ children, error }: AccordionGroupProps) => {
  * Field
  * -----------------------------------------------------------------------------------------------*/
 
-const CustomIconButton = styled(IconButton)<{ expanded?: boolean }>`
+const CustomIconButton = styled<IconButtonComponent>(IconButton)<{ $expanded?: boolean }>`
   background-color: transparent;
-
-  svg {
-    path {
-      fill: ${({ theme, expanded }) =>
-        expanded ? theme.colors.primary600 : theme.colors.neutral600};
-    }
-  }
+  color: ${({ theme, $expanded }) =>
+    $expanded ? theme.colors.primary600 : theme.colors.neutral600};
 
   &:hover {
-    svg {
-      path {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-    }
+    color: ${({ theme }) => theme.colors.primary600};
   }
 `;
 
-const ActionsFlex = styled<FlexComponent>(Flex)<{ expanded?: boolean }>`
+const ActionsFlex = styled<FlexComponent>(Flex)<{ $expanded?: boolean }>`
   & .drag-handle {
     background: unset;
-
-    svg {
-      path {
-        fill: ${({ theme, expanded }) => (expanded ? theme.colors.primary600 : undefined)};
-      }
-    }
+    color: ${({ theme, $expanded }) => ($expanded ? theme.colors.primary600 : undefined)};
 
     &:hover {
-      svg {
-        path {
-          /* keeps the hover style of the accordion */
-          fill: ${({ theme }) => theme.colors.primary600};
-        }
-      }
+      color: ${({ theme }) => theme.colors.primary600};
     }
   }
 `;
@@ -476,9 +458,9 @@ const Component = ({
           <AccordionToggle
             action={
               disabled ? null : (
-                <ActionsFlex gap={0} expanded={isOpen}>
+                <ActionsFlex gap={0} $expanded={isOpen}>
                   <CustomIconButton
-                    expanded={isOpen}
+                    $expanded={isOpen}
                     borderWidth={0}
                     onClick={onDeleteComponent}
                     label={formatMessage({

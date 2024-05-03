@@ -241,68 +241,81 @@ export const EditAssetDialog = ({
                         },
                       ]}
                     />
+                    <Field.Root name="name" error={errors.name}>
+                      <Field.Label>
+                        {formatMessage({
+                          id: getTrad('form.input.label.file-name'),
+                          defaultMessage: 'File name',
+                        })}
+                      </Field.Label>
+                      <TextInput
+                        value={values.name}
+                        onChange={handleChange}
+                        disabled={formDisabled}
+                      />
+                      <Field.Error />
+                    </Field.Root>
 
-                    <TextInput
-                      label={formatMessage({
-                        id: getTrad('form.input.label.file-name'),
-                        defaultMessage: 'File name',
-                      })}
-                      name="name"
-                      value={values.name}
-                      error={errors.name}
-                      onChange={handleChange}
-                      disabled={formDisabled}
-                    />
-
-                    <TextInput
-                      label={formatMessage({
-                        id: getTrad('form.input.label.file-alt'),
-                        defaultMessage: 'Alternative text',
-                      })}
+                    <Field.Root
                       name="alternativeText"
                       hint={formatMessage({
                         id: getTrad('form.input.decription.file-alt'),
                         defaultMessage: 'This text will be displayed if the asset can’t be shown.',
                       })}
-                      value={values.alternativeText}
                       error={errors.alternativeText}
-                      onChange={handleChange}
-                      disabled={formDisabled}
-                    />
-
-                    <TextInput
-                      label={formatMessage({
-                        id: getTrad('form.input.label.file-caption'),
-                        defaultMessage: 'Caption',
-                      })}
-                      name="caption"
-                      value={values.caption}
-                      error={errors.caption}
-                      onChange={handleChange}
-                      disabled={formDisabled}
-                    />
-
-                    <Flex direction="column" alignItems="stretch" gap={1}>
-                      <Field.Label htmlFor="asset-folder">
+                    >
+                      <Field.Label>
                         {formatMessage({
-                          id: getTrad('form.input.label.file-location'),
-                          defaultMessage: 'Location',
+                          id: getTrad('form.input.label.file-alt'),
+                          defaultMessage: 'Alternative text',
                         })}
                       </Field.Label>
-
-                      <SelectTree
-                        name="parent"
-                        defaultValue={values.parent}
-                        options={folderStructure}
-                        onChange={(value) => {
-                          setFieldValue('parent', value);
-                        }}
-                        menuPortalTarget={document.querySelector('body')}
-                        inputId="asset-folder"
-                        isDisabled={formDisabled}
-                        error={errors?.parent}
-                        ariaErrorMessage="folder-parent-error"
+                      <TextInput
+                        value={values.alternativeText}
+                        onChange={handleChange}
+                        disabled={formDisabled}
                       />
+                      <Field.Hint />
+                      <Field.Error />
+                    </Field.Root>
+
+                    <Field.Root name="caption" error={errors.caption}>
+                      <Field.Label>
+                        {formatMessage({
+                          id: getTrad('form.input.label.file-caption'),
+                          defaultMessage: 'Caption',
+                        })}
+                      </Field.Label>
+                      <TextInput
+                        value={values.caption}
+                        onChange={handleChange}
+                        disabled={formDisabled}
+                      />
+                    </Field.Root>
+
+                    <Flex direction="column" alignItems="stretch" gap={1}>
+                      <Field.Root name="parent" id="asset-folder">
+                        <Field.Label>
+                          {formatMessage({
+                            id: getTrad('form.input.label.file-location'),
+                            defaultMessage: 'Location',
+                          })}
+                        </Field.Label>
+
+                        <SelectTree
+                          name="parent"
+                          defaultValue={values.parent}
+                          options={folderStructure}
+                          onChange={(value) => {
+                            setFieldValue('parent', value);
+                          }}
+                          menuPortalTarget={document.querySelector('body')}
+                          inputId="asset-folder"
+                          isDisabled={formDisabled}
+                          error={errors?.parent}
+                          ariaErrorMessage="folder-parent-error"
+                        />
+                      </Field.Root>
                     </Flex>
                   </Flex>
 

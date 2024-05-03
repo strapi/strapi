@@ -288,7 +288,7 @@ const CreatePage = () => {
                                 defaultMessage: 'Description',
                               })}
                             </Field.Label>
-                            <Textarea onChange={handleChange}>{values.description}</Textarea>
+                            <Textarea onChange={handleChange} value={values.description} />
                           </Field.Root>
                         </GridItem>
                       </Grid>

@@ -14,7 +14,7 @@ const PaginationText = styled(Typography)`
 const LinkWrapper = styled.button`
   padding: ${({ theme }) => theme.spaces[3]};
   border-radius: ${({ theme }) => theme.borderRadius};
-  box-shadow: ${({ active, theme }) => (active ? theme.shadows.filterShadow : undefined)};
+  box-shadow: ${({ $active, theme }) => ($active ? theme.shadows.filterShadow : undefined)};
   text-decoration: none;
   display: flex;
 
@@ -24,8 +24,8 @@ const LinkWrapper = styled.button`
 LinkWrapper.defaultProps = { type: 'button' };
 
 const PageLinkWrapper = styled(LinkWrapper)`
-  color: ${({ theme, active }) => (active ? theme.colors.primary700 : theme.colors.neutral800)};
-  background: ${({ theme, active }) => (active ? theme.colors.neutral0 : undefined)};
+  color: ${({ theme, $active }) => ($active ? theme.colors.primary700 : theme.colors.neutral800)};
+  background: ${({ theme, $active }) => ($active ? theme.colors.neutral0 : undefined)};
 
   &:hover {
     box-shadow: ${({ theme }) => theme.shadows.filterShadow};
@@ -94,7 +94,7 @@ export const PageLink = ({ number, children, ...props }) => {
 
   return (
     <li>
-      <PageLinkWrapper {...props} active={isActive}>
+      <PageLinkWrapper {...props} $active={isActive}>
         <VisuallyHidden>{children}</VisuallyHidden>
         <PaginationText aria-hidden variant="pi" fontWeight={isActive ? 'bold' : ''}>
           {number}

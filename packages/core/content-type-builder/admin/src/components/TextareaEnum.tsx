@@ -60,9 +60,7 @@ export const TextareaEnum = ({
         onChange={handleChange}
         placeholder={formattedPlaceholder}
         value={inputValue}
-      >
-        {inputValue}
-      </Textarea>
+      />
       <Field.Error />
       <Field.Hint />
     </Field.Root>

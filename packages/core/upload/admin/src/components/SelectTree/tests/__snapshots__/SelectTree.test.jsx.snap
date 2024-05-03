@@ -9,7 +9,6 @@ exports[`SelectTree renders 1`] = `
 
 .c3 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -36,9 +35,6 @@ exports[`SelectTree renders 1`] = `
 }
 
 .c2 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   background: none;
   border: none;
@@ -110,7 +106,7 @@ exports[`SelectTree renders 1`] = `
           </div>
         </div>
       </div>
-      <div
+      <span
         class="c3"
       >
         <p
@@ -131,7 +127,7 @@ exports[`SelectTree renders 1`] = `
           id="live-region-alert"
           role="alert"
         />
-      </div>
+      </span>
     </div>
   </body>,
   "container": .c0 {
@@ -140,7 +136,6 @@ exports[`SelectTree renders 1`] = `
 
 .c3 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -167,9 +162,6 @@ exports[`SelectTree renders 1`] = `
 }
 
 .c2 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   background: none;
   border: none;
@@ -240,7 +232,7 @@ exports[`SelectTree renders 1`] = `
         </div>
       </div>
     </div>
-    <div
+    <span
       class="c3"
     >
       <p
@@ -261,7 +253,7 @@ exports[`SelectTree renders 1`] = `
         id="live-region-alert"
         role="alert"
       />
-    </div>
+    </span>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],

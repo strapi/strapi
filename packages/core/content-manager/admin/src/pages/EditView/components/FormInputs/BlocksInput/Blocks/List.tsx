@@ -29,13 +29,13 @@ const listStyle = css`
   }
 `;
 
-const Orderedlist = styled.ol<{ listStyleType: CSSProperties['listStyleType'] }>`
-  list-style-type: ${(props) => props.listStyleType};
+const Orderedlist = styled.ol<{ $listStyleType: CSSProperties['listStyleType'] }>`
+  list-style-type: ${(props) => props.$listStyleType};
   ${listStyle}
 `;
 
-const Unorderedlist = styled.ul<{ listStyleType: CSSProperties['listStyleType'] }>`
-  list-style-type: ${(props) => props.listStyleType};
+const Unorderedlist = styled.ul<{ $listStyleType: CSSProperties['listStyleType'] }>`
+  list-style-type: ${(props) => props.$listStyleType};
   ${listStyle}
 `;
 
@@ -55,14 +55,14 @@ const List = ({ attributes, children, element }: RenderElementProps) => {
 
   if (element.format === 'ordered') {
     return (
-      <Orderedlist listStyleType={listStyleType} {...attributes}>
+      <Orderedlist $listStyleType={listStyleType} {...attributes}>
         {children}
       </Orderedlist>
     );
   }
 
   return (
-    <Unorderedlist listStyleType={listStyleType} {...attributes}>
+    <Unorderedlist $listStyleType={listStyleType} {...attributes}>
       {children}
     </Unorderedlist>
   );

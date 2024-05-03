@@ -140,12 +140,18 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                       })}
                     </Typography>
                   </Box>
-                  <Field.Input
-                    style={{ textTransform: 'uppercase' }}
-                    value={value}
-                    placeholder="#000000"
-                    onChange={onChange}
-                  />
+                  <Field.Root>
+                    <Field.Input
+                      aria-label={formatMessage({
+                        id: getTrad('color-picker.input.aria-label'),
+                        defaultMessage: 'Color picker input',
+                      })}
+                      style={{ textTransform: 'uppercase' }}
+                      value={value}
+                      placeholder="#000000"
+                      onChange={onChange}
+                    />
+                  </Field.Root>
                 </Flex>
               </FocusTrap>
             </ColorPickerPopover>

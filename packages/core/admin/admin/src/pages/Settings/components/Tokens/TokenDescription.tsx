@@ -38,9 +38,7 @@ export const TokenDescription = ({
           defaultMessage: 'Description',
         })}
       </Field.Label>
-      <Textarea onChange={onChange} disabled={!canEditInputs}>
-        {value}
-      </Textarea>
+      <Textarea onChange={onChange} disabled={!canEditInputs} value={value} />
       <Field.Error />
     </Field.Root>
   );

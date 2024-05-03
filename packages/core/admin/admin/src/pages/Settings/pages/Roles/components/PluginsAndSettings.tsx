@@ -251,7 +251,7 @@ const SubCategory = ({
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
                 <GridItem col={3} key={action}>
-                  <CheckboxWrapper disabled={isFormDisabled} hasConditions={hasConditions}>
+                  <CheckboxWrapper $disabled={isFormDisabled} $hasConditions={hasConditions}>
                     <Checkbox
                       name={checkboxName}
                       disabled={isFormDisabled}
@@ -297,11 +297,11 @@ const Border = styled<BoxComponent>(Box)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const CheckboxWrapper = styled.div<{ hasConditions?: boolean; disabled?: boolean }>`
+const CheckboxWrapper = styled.div<{ $hasConditions?: boolean; $disabled?: boolean }>`
   position: relative;
   word-break: keep-all;
-  ${({ hasConditions, disabled, theme }) =>
-    hasConditions &&
+  ${({ $hasConditions, $disabled, theme }) =>
+    $hasConditions &&
     `
     &:before {
       content: '';
@@ -311,7 +311,7 @@ const CheckboxWrapper = styled.div<{ hasConditions?: boolean; disabled?: boolean
       width: 0.6rem;
       height: 0.6rem;
       border-radius: 2rem;
-      background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
+      background: ${$disabled ? theme.colors.neutral100 : theme.colors.primary600};
     }
   `}
 `;

@@ -80,7 +80,7 @@ export const DynamicZoneList = ({
   };
 
   return (
-    <Tr className="dynamiczone-row" isFromDynamicZone>
+    <Tr className="dynamiczone-row" $isFromDynamicZone>
       <td colSpan={12}>
         <FixedBox paddingLeft={8}>
           <ScrollableStack gap={2}>

@@ -194,7 +194,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
                   alignItems="center"
                   gap={1}
                   justifyContent="flex-end"
-                  available={!!availability?.isAvailable}
+                  $available={!!availability?.isAvailable}
                   data-not-here-outer
                   position="absolute"
                   pointerEvents="none"
@@ -291,14 +291,14 @@ const FieldActionWrapper = styled(Field.Action)`
  * TextValidation
  * -----------------------------------------------------------------------------------------------*/
 
-const TextValidation = styled<FlexComponent>(Flex)<{ available?: boolean }>`
+const TextValidation = styled<FlexComponent>(Flex)<{ $available?: boolean }>`
   svg {
     height: 1.2rem;
     width: 1.2rem;
 
     path {
-      fill: ${({ theme, available }) =>
-        available ? theme.colors.success600 : theme.colors.danger600};
+      fill: ${({ theme, $available }) =>
+        $available ? theme.colors.success600 : theme.colors.danger600};
     }
   }
 `;

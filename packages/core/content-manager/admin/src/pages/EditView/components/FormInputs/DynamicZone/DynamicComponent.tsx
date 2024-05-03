@@ -16,6 +16,7 @@ import {
   MenuItem,
   FlexComponent,
   BoxComponent,
+  IconButtonComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -270,12 +271,11 @@ const ActionsFlex = styled<FlexComponent>(Flex)`
   }
 `;
 
-const IconButtonCustom = styled(IconButton)<{ expanded?: boolean }>`
+const IconButtonCustom = styled(IconButton)`
   background-color: transparent;
 
-  svg path {
-    fill: ${({ theme, expanded }) =>
-      expanded ? theme.colors.primary600 : theme.colors.neutral600};
+  svg {
+    fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 

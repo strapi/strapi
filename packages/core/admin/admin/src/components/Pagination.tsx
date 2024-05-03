@@ -282,7 +282,6 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
           return (
             <PageLink
               tag={Link}
-              active={item === activePage}
               key={item}
               number={item}
               to={{ search: stringify({ ...query, page: item }) }}
