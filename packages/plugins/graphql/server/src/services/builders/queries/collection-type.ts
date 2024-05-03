@@ -2,7 +2,6 @@ import { extendType } from 'nexus';
 import type * as Nexus from 'nexus';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../../types';
-import type { CacheHint } from 'apollo-server-types';
 
 export default ({ strapi }: Context) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -65,7 +64,7 @@ export default ({ strapi }: Context) => {
     t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
     contentType: Schema.CollectionType
   ) => {
-    const { uid } = contentType;
+    const { uid, pluginOptions } = contentType;
 
     const findOneQueryName = getFindOneQueryName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
@@ -76,11 +75,7 @@ export default ({ strapi }: Context) => {
       args: getContentTypeArgs(contentType, { multiple: false }),
 
       async resolve(parent, args, ctx, info) {
-        // TODO: pluginOptions.graphql not recognised
-        const cacheHint = (contentType.pluginOptions as any)?.graphql?.cacheHint?.findOne as
-          | CacheHint
-          | undefined;
-
+        const cacheHint = pluginOptions?.graphql?.cacheHint?.findOne;
         if (cacheHint) info.cacheControl.setCacheHint(cacheHint);
 
         const transformedArgs = transformArgs(args, { contentType });
@@ -104,7 +99,7 @@ export default ({ strapi }: Context) => {
     t: Nexus.blocks.ObjectDefinitionBlock<'Query'>,
     contentType: Schema.CollectionType
   ) => {
-    const { uid } = contentType;
+    const { uid, pluginOptions } = contentType;
 
     const findQueryName = getFindQueryName(contentType);
     const responseCollectionTypeName = getEntityResponseCollectionName(contentType);
@@ -115,11 +110,7 @@ export default ({ strapi }: Context) => {
       args: getContentTypeArgs(contentType),
 
       async resolve(parent, args, ctx, info) {
-        // TODO: pluginOptions.graphql not recognised
-        const cacheHint = (contentType.pluginOptions as any)?.graphql?.cacheHint?.find as
-          | CacheHint
-          | undefined;
-
+        const cacheHint = pluginOptions?.graphql?.cacheHint?.find;
         if (cacheHint) info.cacheControl.setCacheHint(cacheHint);
 
         const transformedArgs = transformArgs(args, { contentType, usePagination: true });

@@ -4,7 +4,7 @@ import { contentTypes } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 import type { Context } from '../types';
 import { blocks } from 'nexus';
-import { CacheHint, CacheScope } from 'apollo-server-types';
+import { CacheHint } from 'apollo-server-types';
 
 export type TypeBuildersOptions<TypeName extends string = string> = {
   builder: Omit<blocks.OutputDefinitionBlock<TypeName>, 'nonNull' | 'nullable'>;
@@ -320,10 +320,15 @@ export default (context: Context) => {
             .forEach((attributeName) => {
               const attribute = attributes[attributeName];
 
+              // TODO: For some reason this cannot be augmented as Schema.PluginOptions
+              interface PluginOptions {
+                graphql?: {
+                  cacheHint?: CacheHint;
+                };
+              }
+
               // If CacheHint is 0/Public, Cache-Control header is not added at all
-              const cacheHint = (attribute.pluginOptions as any)?.graphql?.cacheHint as
-                | CacheHint
-                | undefined;
+              const cacheHint = (attribute.pluginOptions as PluginOptions)?.graphql?.cacheHint;
 
               // We create a copy of the builder (t) to apply custom
               // rules only on the current attribute (eg: nonNull, list, ...)
