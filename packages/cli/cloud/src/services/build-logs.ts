@@ -1,10 +1,10 @@
 import EventSource from 'eventsource';
-import { CLIContext } from '../types';
+import { CLIContext, type CloudCliConfig } from '../types';
 
 const buildLogsServiceFactory = ({ logger }: CLIContext) => {
-  return async (url: string, token: string) => {
-    const CONN_TIMEOUT = 120000; // 2 mins
-    const MAX_RETRIES = 5;
+  return async (url: string, token: string, cliConfig : CloudCliConfig) => {
+    const CONN_TIMEOUT = Number(cliConfig.buildLogsConnectionTimeout);
+    const MAX_RETRIES = Number(cliConfig.buildLogsMaxRetries);
 
     return new Promise((resolve, reject) => {
       let timeoutId: NodeJS.Timeout | null = null;

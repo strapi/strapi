@@ -142,12 +142,15 @@ export default async (ctx: CLIContext) => {
   const notificationService = notificationServiceFactory(ctx);
   const buildLogsService = buildLogsServiceFactory(ctx);
 
+  const cloudApiService =  cloudApiFactory();
+const   { data : cliConfig } = await  cloudApiService.config();
+
   const buildId = await upload(ctx, project, token);
 
   try {
     await Promise.all([
-      notificationService(`${apiConfig.apiBaseUrl}/notifications`, token),
-      buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token),
+      notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig),
+      buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig),
     ]);
   } catch (e: Error | unknown) {
     if (e instanceof Error) {

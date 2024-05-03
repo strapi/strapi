@@ -1,5 +1,5 @@
 import EventSource from 'eventsource';
-import type { CLIContext } from '../types';
+import type { CLIContext, CloudCliConfig } from '../types';
 
 type Event = {
   type: string;
@@ -8,10 +8,12 @@ type Event = {
   origin: string;
 };
 
-const CONN_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
 export function notificationServiceFactory({ logger }: CLIContext) {
-  return (url: string, token: string) => {
+  return (url: string, token: string, cliConfig: CloudCliConfig) => {
+
+    const CONN_TIMEOUT = Number(cliConfig.notificationsConnectionTimeout);
+
     const es = new EventSource(url, {
       headers: {
         Authorization: `Bearer ${token}`,

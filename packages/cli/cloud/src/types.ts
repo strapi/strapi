@@ -21,6 +21,9 @@ export type CloudCliConfig = {
     questions: ReadonlyArray<DistinctQuestion<ProjectAnswers>>;
     defaults: Partial<ProjectAnswers>;
   };
+  buildLogsConnectionTimeout: string;
+  buildLogsMaxRetries: string;
+  notificationsConnectionTimeout: string;
 };
 
 export interface CLIContext {
