@@ -14,7 +14,8 @@ export const navToHeader = async (page: Page, navItems: string[], headerText: st
     // This does not use getByRole because sometimes "Settings" is "Settings 1" if there's a badge notification
     // BUT if we don't match exact it conflicts with "Advanceed Settings"
     // As a workaround, we implement our own startsWith with page.locator
-    const item = page.locator(`role=link[name^="${navItem}"]`);
+    //const item = page.locator(`role=link[name^="${navItem}"]`);
+    const item = page.getByRole('link', { name: navItem });
     await expect(item).toBeVisible();
     await item.click();
   }
