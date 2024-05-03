@@ -12,7 +12,7 @@ type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[
 export type Document = Modules.Documents.Result<UID.ContentType>;
 
 const { ApplicationError } = errors;
-const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
+const { ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
@@ -193,53 +193,18 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .publish({ ...params, documentId: id })
-        .then((result) => result?.entries.at(0));
+        .then((result) => result?.entries);
     },
 
-    async publishMany(entities: Document[], uid: UID.ContentType) {
-      if (!entities.length) {
-        return null;
-      }
+    async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
+      return strapi.db.transaction(async () => {
+        const results = await Promise.all(
+          documentIds.map((documentId) => this.publish(documentId, uid, { locale }))
+        );
 
-      // Validate entities before publishing, throw if invalid
-      await Promise.all(
-        entities.map((document: Document) => {
-          return strapi.entityValidator.validateEntityCreation(
-            strapi.getModel(uid),
-            document,
-            undefined,
-            // @ts-expect-error - FIXME: entity here is unnecessary
-            document
-          );
-        })
-      );
-
-      // Only publish entities without a published_at date
-      const entitiesToPublish = entities
-        .filter((doc: Document) => !doc[PUBLISHED_AT_ATTRIBUTE])
-        .map((doc: Document) => doc.id);
-
-      const filters = { id: { $in: entitiesToPublish } };
-      const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
-      const populate = await buildDeepPopulate(uid);
-
-      // Everything is valid, publish
-      const publishedEntitiesCount = await strapi.db.query(uid).updateMany({
-        where: filters,
-        data,
+        const publishedEntitiesCount = results.flat().filter(Boolean).length;
+        return publishedEntitiesCount;
       });
-      // Get the updated entities since updateMany only returns the count
-      const publishedEntities = await strapi.db.query(uid).findMany({
-        where: filters,
-        populate,
-      });
-      // Emit the publish event for all updated entities
-      await Promise.all(
-        publishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_PUBLISH, doc))
-      );
-
-      // Return the number of published entities
-      return publishedEntitiesCount;
     },
 
     async unpublishMany(documents: Document[], uid: UID.CollectionType) {
@@ -317,21 +282,31 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
           `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
         );
       }
+
       return sumDraftCounts(document, uid);
     },
 
-    async countManyEntriesDraftRelations(ids: number[], uid: UID.CollectionType, locale: string) {
+    async countManyEntriesDraftRelations(
+      documentIds: string[],
+      uid: UID.CollectionType,
+      locale: string | string[]
+    ) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
         return 0;
       }
 
+      let localeFilter = {};
+      if (locale) {
+        localeFilter = Array.isArray(locale) ? { locale: { $in: locale } } : { locale };
+      }
+
       const entities = await strapi.db.query(uid).findMany({
         populate,
         where: {
-          id: { $in: ids },
-          ...(locale ? { locale } : {}),
+          documentId: { $in: documentIds },
+          ...localeFilter,
         },
       });
 

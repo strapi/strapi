@@ -1,9 +1,11 @@
-import { translatedErrors } from '@strapi/admin/strapi-admin';
+import { translatedErrors, FormErrors } from '@strapi/admin/strapi-admin';
 import pipe from 'lodash/fp/pipe';
-import { MessageDescriptor, PrimitiveType } from 'react-intl';
+import { type MessageDescriptor } from 'react-intl';
 import * as yup from 'yup';
 
 import { DOCUMENT_META_FIELDS } from '../constants/attributes';
+
+import { getIn, setIn } from './objects';
 
 import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
 import type { Schema as SchemaUtils } from '@strapi/types';
@@ -98,11 +100,32 @@ const createYupSchema = (
               return {
                 ...acc,
                 [name]: transformSchema(
-                  yup.array().of(
-                    yup.object().shape({
-                      id: yup.string().required(),
-                    })
-                  )
+                  yup.lazy((value) => {
+                    if (!value) {
+                      return yup.mixed().nullable(true);
+                    } else if (Array.isArray(value)) {
+                      // If a relation value is an array, we expect
+                      // an array of objects with {id} properties, representing the related entities.
+                      return yup.array().of(
+                        yup.object().shape({
+                          id: yup.string().required(),
+                        })
+                      );
+                    } else if (typeof value === 'object') {
+                      // A realtion value can also be an object. Some API
+                      // repsonses return the number of entities in the relation
+                      // as { count: x }
+                      return yup.object();
+                    } else {
+                      return yup
+                        .mixed()
+                        .test(
+                          'type-error',
+                          'Relation values must be either null, an array of objects with {id} or an object.',
+                          () => false
+                        );
+                    }
+                  })
                 ),
               };
             default:
@@ -199,7 +222,12 @@ const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
     });
   }
 
-  return schema.nullable();
+  return schema?.nullable
+    ? schema.nullable()
+    : // In some cases '.nullable' will not be available on the schema.
+      // e.g. when the schema has been built using yup.lazy (e.g. for relations).
+      // In these cases we should just return the schema as it is.
+      schema;
 };
 
 const addMinLengthValidation: ValidationFn =
@@ -310,34 +338,37 @@ const addRegexValidation: ValidationFn =
  * getInnerErrors
  * -----------------------------------------------------------------------------------------------*/
 
-interface TranslationMessage extends MessageDescriptor {
-  values?: Record<string, PrimitiveType>;
-}
-
-const extractValuesFromYupError = (
-  errorType?: string | undefined,
-  errorParams?: Record<string, any> | undefined
-) => {
-  if (!errorType || !errorParams) {
-    return {};
-  }
-
-  return {
-    [errorType]: errorParams[errorType],
-  };
+const isErrorMessageDescriptor = (object?: string | object): object is MessageDescriptor => {
+  return (
+    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
+  );
 };
 
-const getInnerErrors = (error: yup.ValidationError) =>
-  (error?.inner || []).reduce<Record<string, TranslationMessage>>((acc, currentError) => {
-    if (currentError.path) {
-      acc[currentError.path.split('[').join('.').split(']').join('')] = {
-        id: currentError.message,
-        defaultMessage: currentError.message,
-        values: extractValuesFromYupError(currentError?.type, currentError?.params),
-      };
+const getInnerErrors = (error: yup.ValidationError): FormErrors => {
+  let errors: FormErrors = {};
+
+  if (error.inner) {
+    if (error.inner.length === 0 && error.path) {
+      errors = setIn(errors, error.path, error.message);
+      return errors;
     }
 
-    return acc;
-  }, {});
+    error.inner.forEach((innerError) => {
+      if (innerError.path && !getIn(errors, innerError.path)) {
+        const message = isErrorMessageDescriptor(innerError.message)
+          ? innerError.message
+          : {
+              id: innerError.message,
+              defaultMessage: innerError.message,
+              values: innerError.params,
+            };
+
+        errors = setIn(errors, innerError.path, message);
+      }
+    });
+  }
+
+  return errors;
+};
 
 export { createYupSchema, getInnerErrors };

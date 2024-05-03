@@ -2,7 +2,8 @@ import { setCreatorFields, async, errors } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
-import { getDocumentLocaleAndStatus } from './utils/dimensions';
+import { getDocumentLocaleAndStatus } from './validation/dimensions';
+import { formatDocumentWithMetadata } from './utils/metadata';
 
 /**
  * Create a new document.
@@ -29,7 +30,7 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
   const sanitizeFn = async.pipe(pickPermittedFields, setCreator as any);
   const sanitizedBody = await sanitizeFn(body);
 
-  const { locale, status = 'draft' } = getDocumentLocaleAndStatus(body);
+  const { locale, status = 'draft' } = await getDocumentLocaleAndStatus(body);
 
   return documentManager.create(model, {
     data: sanitizedBody as any,
@@ -72,7 +73,7 @@ const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
     .populateFromQuery(permissionQuery)
     .build();
 
-  const { locale } = getDocumentLocaleAndStatus(body);
+  const { locale } = await getDocumentLocaleAndStatus(body);
 
   // Load document version to update
   const [documentVersion, documentExists] = await Promise.all([
@@ -130,7 +131,7 @@ export default {
       .countRelations({ toOne: false, toMany: true })
       .build();
 
-    const { locale, status } = getDocumentLocaleAndStatus(query);
+    const { locale, status } = await getDocumentLocaleAndStatus(query);
 
     const { results: documents, pagination } = await documentManager.findPage(
       { ...permissionQuery, populate, locale, status },
@@ -169,7 +170,6 @@ export default {
     const { model, id } = ctx.params;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.read()) {
@@ -183,7 +183,7 @@ export default {
       .countRelations()
       .build();
 
-    const { locale, status = 'draft' } = getDocumentLocaleAndStatus(ctx.query);
+    const { locale, status = 'draft' } = await getDocumentLocaleAndStatus(ctx.query);
 
     const version = await documentManager.findOne(id, model, {
       populate,
@@ -199,11 +199,14 @@ export default {
       }
 
       // If the requested locale doesn't exist, return an empty response
-      const { meta } = await documentMetadata.formatDocumentWithMetadata(
+      const { meta } = await formatDocumentWithMetadata(
+        permissionChecker,
         model,
+        // @ts-expect-error TODO: fix
         { id, locale, publishedAt: null },
         { availableLocales: true, availableStatus: false }
       );
+
       ctx.body = { data: {}, meta };
 
       return;
@@ -216,14 +219,13 @@ export default {
 
     // TODO: Count populated relations by permissions
     const sanitizedDocument = await permissionChecker.sanitizeOutput(version);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
   async create(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const [totalEntries, document] = await Promise.all([
@@ -233,7 +235,7 @@ export default {
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(document);
     ctx.status = 201;
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
       availableStatus: false,
@@ -250,13 +252,12 @@ export default {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
 
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     const updatedVersion = await updateDocument(ctx);
 
     const sanitizedVersion = await permissionChecker.sanitizeOutput(updatedVersion);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedVersion);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedVersion);
   },
 
   async clone(ctx: any) {
@@ -265,7 +266,6 @@ export default {
     const { body } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.create()) {
@@ -277,7 +277,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentLocaleAndStatus(body);
+    const { locale } = await getDocumentLocaleAndStatus(body);
     const document = await documentManager.findOne(id, model, {
       populate,
       locale,
@@ -297,7 +297,7 @@ export default {
     const clonedDocument = await documentManager.clone(document.documentId, sanitizedBody, model);
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(clonedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument, {
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument, {
       // Empty metadata as it's not relevant for a new document
       availableLocales: false,
       availableStatus: false,
@@ -339,7 +339,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentLocaleAndStatus(ctx.query);
+    const { locale } = await getDocumentLocaleAndStatus(ctx.query);
 
     // Find locales to delete
     const documentLocales = await documentManager.findLocales(id, model, { populate, locale });
@@ -370,7 +370,6 @@ export default {
     const { body } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.publish()) {
@@ -394,26 +393,34 @@ export default {
         throw new errors.ForbiddenError();
       }
 
-      // TODO: Publish many locales at once
-      const { locale } = getDocumentLocaleAndStatus(body);
-      return documentManager.publish(document!.documentId, model, {
+      const { locale } = await getDocumentLocaleAndStatus(body);
+
+      const publishResult = await documentManager.publish(document!.documentId, model, {
         locale,
         // TODO: Allow setting creator fields on publish
         // data: setCreatorFields({ user, isEdition: true })({}),
       });
+
+      if (!publishResult || publishResult.length === 0) {
+        throw new errors.NotFoundError('Document not found or already published.');
+      }
+
+      return publishResult[0];
     });
 
     const sanitizedDocument = await permissionChecker.sanitizeOutput(publishedDocument);
-    ctx.body = await documentMetadata.formatDocumentWithMetadata(model, sanitizedDocument);
+    ctx.body = await formatDocumentWithMetadata(permissionChecker, model, sanitizedDocument);
   },
 
   async bulkPublish(ctx: any) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
-    const { ids } = body;
+    const { documentIds } = body;
 
     await validateBulkActionInput(body);
+
+    const { locale } = await getDocumentLocaleAndStatus(body, { allowMultipleLocales: true });
 
     const documentManager = getService('document-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -429,8 +436,10 @@ export default {
       .countRelations()
       .build();
 
-    const entityPromises = ids.map((id: any) => documentManager.findOne(id, model, { populate }));
-    const entities = await Promise.all(entityPromises);
+    const entityPromises = documentIds.map((documentId: any) =>
+      documentManager.findLocales(documentId, model, { populate, locale })
+    );
+    const entities = (await Promise.all(entityPromises)).flat();
 
     for (const entity of entities) {
       if (!entity) {
@@ -442,8 +451,7 @@ export default {
       }
     }
 
-    // @ts-expect-error - publish many should not return null
-    const { count } = await documentManager.publishMany(entities, model);
+    const count = await documentManager.publishMany(model, documentIds, locale);
     ctx.body = { count };
   },
 
@@ -493,7 +501,6 @@ export default {
     } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.unpublish()) {
@@ -510,7 +517,8 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentLocaleAndStatus(body);
+    // TODO allow multiple locales for bulk locale unpublish
+    const { locale } = await getDocumentLocaleAndStatus(body);
     const document = await documentManager.findOne(id, model, {
       populate,
       locale,
@@ -537,7 +545,7 @@ export default {
       ctx.body = await async.pipe(
         (document) => documentManager.unpublish(document.documentId, model, { locale }),
         permissionChecker.sanitizeOutput,
-        (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+        (document) => formatDocumentWithMetadata(permissionChecker, model, document)
       )(document);
     });
   },
@@ -548,7 +556,6 @@ export default {
     const { body } = ctx.request;
 
     const documentManager = getService('document-manager');
-    const documentMetadata = getService('document-metadata');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
     if (permissionChecker.cannot.discard()) {
@@ -560,7 +567,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale } = getDocumentLocaleAndStatus(body);
+    const { locale } = await getDocumentLocaleAndStatus(body);
     const document = await documentManager.findOne(id, model, {
       populate,
       locale,
@@ -579,7 +586,7 @@ export default {
     ctx.body = await async.pipe(
       (document) => documentManager.discardDraft(document.documentId, model, { locale }),
       permissionChecker.sanitizeOutput,
-      (document) => documentMetadata.formatDocumentWithMetadata(model, document)
+      (document) => formatDocumentWithMetadata(permissionChecker, model, document)
     )(document);
   },
 
@@ -630,7 +637,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const { locale, status = 'draft' } = getDocumentLocaleAndStatus(ctx.query);
+    const { locale, status = 'draft' } = await getDocumentLocaleAndStatus(ctx.query);
     const entity = await documentManager.findOne(id, model, { populate, locale, status });
 
     if (!entity) {
@@ -650,8 +657,8 @@ export default {
 
   async countManyEntriesDraftRelations(ctx: any) {
     const { userAbility } = ctx.state;
-    const ids = ctx.request.query.ids as any;
-    const locale = ctx.request.query.locale;
+    const ids = ctx.request.query.documentIds as string[];
+    const locale = ctx.request.query.locale as string[];
     const { model } = ctx.params;
 
     const documentManager = getService('document-manager');
@@ -664,7 +671,7 @@ export default {
     const entities = await documentManager.findMany(
       {
         filters: {
-          id: ids,
+          documentId: ids,
         },
         locale,
       },
