@@ -30,6 +30,8 @@ import { useDocumentActions } from '../../../../hooks/useDocumentActions';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
 
+import { PublishAction } from './PublishAction';
+
 import type { BulkActionComponent, ContentManagerPlugin } from '../../../../content-manager';
 
 interface BulkActionDescription {
