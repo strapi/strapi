@@ -7,6 +7,9 @@ const release: Model = {
   tableName: 'strapi_releases',
   singularName: 'release',
   attributes: {
+    id: {
+      type: 'increments',
+    },
     name: {
       type: 'string',
       required: true,

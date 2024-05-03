@@ -7,6 +7,9 @@ const releaseAction: Model = {
   tableName: 'strapi_release_actions',
   singularName: 'release-action',
   attributes: {
+    id: {
+      type: 'increments',
+    },
     type: {
       type: 'enumeration',
       enum: ['publish', 'unpublish'],
