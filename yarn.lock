@@ -28811,7 +28811,6 @@ __metadata:
     prettier: "npm:2.8.4"
     qs: "npm:6.11.1"
     rimraf: "npm:3.0.2"
-    slate-hyperscript: "npm:0.100.0"
     supertest: "npm:6.3.3"
     ts-jest: "npm:29.1.0"
     typescript: "npm:5.2.2"

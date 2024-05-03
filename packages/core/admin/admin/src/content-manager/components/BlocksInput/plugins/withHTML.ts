@@ -1,22 +1,39 @@
-import { Transforms } from 'slate';
+import { Descendant, Transforms, Node } from 'slate';
 import { type Editor } from 'slate';
 import { jsx } from 'slate-hyperscript';
 
+type TElementTag =
+  | 'A'
+  | 'BLOCKQUOTE'
+  | 'H1'
+  | 'H2'
+  | 'H3'
+  | 'H4'
+  | 'H5'
+  | 'H6'
+  | 'IMG'
+  | 'LI'
+  | 'OL'
+  | 'P'
+  | 'PRE'
+  | 'UL';
+type TTextTag = 'CODE' | 'DEL' | 'EM' | 'I' | 'S' | 'STRONG' | 'U';
+
 const ELEMENT_TAGS = {
-  A: (el: HTMLAnchorElement) => ({ type: 'link', url: el.getAttribute('href') }),
+  A: (el: HTMLElement) => ({ type: 'link', url: el.getAttribute('href') }),
   BLOCKQUOTE: () => ({ type: 'quote' }),
-  H1: () => ({ type: 'heading-one' }),
-  H2: () => ({ type: 'heading-two' }),
-  H3: () => ({ type: 'heading-three' }),
-  H4: () => ({ type: 'heading-four' }),
-  H5: () => ({ type: 'heading-five' }),
-  H6: () => ({ type: 'heading-six' }),
-  IMG: (el: HTMLImageElement) => ({ type: 'image', url: el.getAttribute('src') }),
+  H1: () => ({ type: 'heading', level: 1 }),
+  H2: () => ({ type: 'heading', level: 2 }),
+  H3: () => ({ type: 'heading', level: 3 }),
+  H4: () => ({ type: 'heading', level: 4 }),
+  H5: () => ({ type: 'heading', level: 5 }),
+  H6: () => ({ type: 'heading', level: 6 }),
+  IMG: (el: HTMLElement) => ({ type: 'image', url: el.getAttribute('src') }),
   LI: () => ({ type: 'list-item' }),
-  OL: () => ({ type: 'numbered-list' }),
+  UL: () => ({ type: 'list', format: 'unordered' }),
+  OL: () => ({ type: 'list', format: 'ordered' }),
   P: () => ({ type: 'paragraph' }),
   PRE: () => ({ type: 'code' }),
-  UL: () => ({ type: 'bulleted-list' }),
 };
 
 // COMPAT: `B` is omitted here because Google Docs uses `<b>` in weird ways.
@@ -26,11 +43,33 @@ const TEXT_TAGS = {
   EM: () => ({ italic: true }),
   I: () => ({ italic: true }),
   S: () => ({ strikethrough: true }),
+  B: () => ({ bold: true }),
   STRONG: () => ({ bold: true }),
   U: () => ({ underline: true }),
 };
 
-const deserialize = (el: HTMLElement) => {
+function getSpan(el: HTMLElement) {
+  if (el.style.fontWeight === '700') {
+    return { bold: true };
+  }
+  if (el.style.fontStyle === 'italic') {
+    return { italic: true };
+  }
+}
+function isGoogleDoc(el: HTMLElement) {
+  return el.nodeName === 'B' && el.style.fontWeight === 'normal';
+}
+
+const deserialize = (
+  el: ChildNode
+): string | null | Descendant | (string | null | { text: string } | Descendant | Node)[] => {
+  console.log('------------------------------------------------');
+  console.log('------------------------------------------------');
+  console.log('------------------------------------------------');
+  console.log('el', el);
+  console.log('el.nodeType', el.nodeType);
+  console.log('el.nodeName', el.nodeName);
+
   if (el.nodeType === 3) {
     return el.textContent;
   } else if (el.nodeType !== 1) {
@@ -43,7 +82,7 @@ const deserialize = (el: HTMLElement) => {
   let parent = el;
 
   if (nodeName === 'PRE' && el.childNodes[0] && el.childNodes[0].nodeName === 'CODE') {
-    parent = el.childNodes[0] as HTMLElement;
+    parent = el.childNodes[0];
   }
   let children = Array.from(parent.childNodes).map(deserialize).flat();
 
@@ -51,17 +90,34 @@ const deserialize = (el: HTMLElement) => {
     children = [{ text: '' }];
   }
 
-  if (el.nodeName === 'BODY') {
+  if (nodeName === 'BODY') {
+    return jsx('fragment', {}, children);
+  }
+  if (isGoogleDoc(el as HTMLElement)) {
     return jsx('fragment', {}, children);
   }
 
-  if (ELEMENT_TAGS[nodeName]) {
-    const attrs = ELEMENT_TAGS[nodeName](el);
-    return jsx('element', attrs, children);
+  if (nodeName === 'SPAN') {
+    console.log('SPAN');
+    const attrs = getSpan(el as HTMLElement);
+    console.log('attrs', attrs);
+    console.log('children', children);
+    if (attrs) {
+      return children.map((child) => jsx('text', attrs, child));
+    }
   }
 
-  if (TEXT_TAGS[nodeName]) {
-    const attrs = TEXT_TAGS[nodeName](el);
+  if (ELEMENT_TAGS[nodeName as TElementTag]) {
+    console.log('ELEMENT TAGS');
+    const attrs = ELEMENT_TAGS[nodeName as TElementTag](el as HTMLElement);
+    if (children) {
+      return jsx('element', attrs, children);
+    }
+  }
+
+  if (TEXT_TAGS[nodeName as TTextTag]) {
+    console.log('TEXT TAGS');
+    const attrs = TEXT_TAGS[nodeName as TTextTag]();
     return children.map((child) => jsx('text', attrs, child));
   }
 
@@ -69,11 +125,7 @@ const deserialize = (el: HTMLElement) => {
 };
 
 export function withHtml(editor: Editor) {
-  const { insertData, isInline, isVoid } = editor;
-
-  editor.isInline = (element) => {
-    return element.type === 'link' ? true : isInline(element);
-  };
+  const { insertData, isVoid } = editor;
 
   editor.isVoid = (element) => {
     return element.type === 'image' ? true : isVoid(element);
@@ -85,7 +137,8 @@ export function withHtml(editor: Editor) {
     if (html) {
       const parsed = new DOMParser().parseFromString(html, 'text/html');
       const fragment = deserialize(parsed.body);
-      Transforms.insertFragment(editor, fragment);
+      console.log('fragment', fragment);
+      Transforms.insertFragment(editor, fragment as Node[]);
       return;
     }
 
