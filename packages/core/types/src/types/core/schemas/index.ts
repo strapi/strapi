@@ -1,4 +1,5 @@
 import type { Attribute, Common } from '../..';
+import type { CacheHint } from 'apollo-server-types';
 
 /**
  * Literal union type representing the possible natures of a content type
@@ -97,6 +98,12 @@ export interface Options {
 
 export interface PluginOptions {
   i18n?: { localized: boolean };
+  graphql?: {
+    cacheHint?: {
+      find?: CacheHint;
+      findOne?: CacheHint;
+    }
+  };
 }
 
 /**

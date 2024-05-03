@@ -74,7 +74,12 @@ export default ({ strapi }: Context) => {
 
       args: getContentTypeArgs(contentType, { multiple: false }),
 
-      async resolve(parent, args, ctx) {
+      async resolve(parent, args, ctx, info) {
+        // TODO: pluginOptions.graphql not recognised
+        if ((contentType.pluginOptions as any)?.graphql?.cacheHint?.findOne) {
+          info.cacheControl.setCacheHint((contentType.pluginOptions as any).graphql.cacheHint.findOne);
+        }
+
         const transformedArgs = transformArgs(args, { contentType });
 
         const { findOne } = getService('builders')
@@ -106,7 +111,12 @@ export default ({ strapi }: Context) => {
 
       args: getContentTypeArgs(contentType),
 
-      async resolve(parent, args, ctx) {
+      async resolve(parent, args, ctx, info) {
+        // TODO: pluginOptions.graphql not recognised
+        if ((contentType.pluginOptions as any)?.graphql?.cacheHint?.find) {
+          info.cacheControl.setCacheHint((contentType.pluginOptions as any).graphql.cacheHint.find);
+        }
+
         const transformedArgs = transformArgs(args, { contentType, usePagination: true });
 
         const { find } = getService('builders')

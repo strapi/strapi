@@ -76,7 +76,7 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
 
     plugins: [
       // TODO: Remove this. Will be added by user in config if they want to enable cache
-      ApolloServerPluginCacheControl({ defaultMaxAge: 90 }),
+      ApolloServerPluginCacheControl({ defaultMaxAge: 3600 }),
       process.env.NODE_ENV === 'production' && !config('playgroundAlways')
         ? ApolloServerPluginLandingPageDisabled()
         : ApolloServerPluginLandingPageGraphQLPlayground(),

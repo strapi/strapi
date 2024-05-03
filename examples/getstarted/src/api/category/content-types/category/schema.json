@@ -15,6 +15,18 @@
   "pluginOptions": {
     "i18n": {
       "localized": true
+    },
+    "graphql": {
+      "cacheHint": {
+        "find": {
+          "maxAge": 1000,
+          "scope": "PUBLIC"
+        },
+        "findOne": {
+          "maxAge": 2000,
+          "scope": "PUBLIC"
+        }
+      }
     }
   },
   "attributes": {
