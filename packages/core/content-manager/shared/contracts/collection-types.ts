@@ -315,7 +315,9 @@ export declare namespace BulkPublish {
   }
 
   export interface Response {
-    count: number;
+    data: {
+      count: number;
+    };
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }

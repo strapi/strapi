@@ -18,6 +18,7 @@ import {
   useDiscardDocumentMutation,
   useLazyGetDocumentQuery,
   usePublishDocumentMutation,
+  usePublishManyDocumentsMutation,
   useUnpublishDocumentMutation,
   useUnpublishManyDocumentsMutation,
   useUpdateDocumentMutation,
@@ -35,6 +36,7 @@ import type {
   Discard,
   FindOne,
   Publish,
+  BulkPublish,
   Update,
   Unpublish,
   BulkUnpublish,
@@ -45,10 +47,9 @@ const DEFAULT_UNEXPECTED_ERROR_MSG = {
   defaultMessage: 'An error occurred, please try again',
 } satisfies MessageDescriptor;
 
-type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }> =
+type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> =
   | Pick<TResponse, 'data' | 'meta'>
-  | { error: BaseQueryError | SerializedError }
-  | Pick<TResponse, 'data'>;
+  | { error: BaseQueryError | SerializedError };
 
 type BulkOperationResponse<TResponse extends { data: any; error?: any }> =
   | Pick<TResponse, 'data'>
@@ -125,6 +126,11 @@ type UseDocumentActions = () => {
     },
     document: Partial<Document>
   ) => Promise<OperationResponse<Publish.Response>>;
+  publishMany: (args: {
+    model: string;
+    documentIds: string[];
+    params?: object;
+  }) => Promise<BulkOperationResponse<BulkPublish.Response>>;
   update: (
     args: {
       collectionType: string;
@@ -360,6 +366,50 @@ const useDocumentActions: UseDocumentActions = () => {
       }
     },
     [trackUsage, publishDocument, toggleNotification, formatMessage, formatAPIError]
+  );
+
+  const [publishManyDocuments] = usePublishManyDocumentsMutation();
+  const publishMany: IUseDocumentActs['publishMany'] = React.useCallback(
+    async ({ model, documentIds, params }) => {
+      try {
+        trackUsage('willBulkPublishEntries');
+
+        const res = await publishManyDocuments({
+          model,
+          documentIds,
+          params,
+        });
+
+        if ('error' in res) {
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
+
+          return { error: res.error };
+        }
+
+        trackUsage('didBulkPublishEntries');
+
+        toggleNotification({
+          type: 'success',
+          title: formatMessage({
+            id: getTranslation('success.records.publish'),
+            defaultMessage: 'Successfully published.',
+          }),
+          message: '',
+        });
+
+        return res.data;
+      } catch (err) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
+        });
+
+        trackUsage('didNotBulkPublishEntries');
+
+        throw err;
+      }
+    },
+    [trackUsage, publishManyDocuments, toggleNotification, formatMessage, formatAPIError]
   );
 
   const [updateDocument] = useUpdateDocumentMutation();
@@ -644,6 +694,7 @@ const useDocumentActions: UseDocumentActions = () => {
     discard,
     getDocument,
     publish,
+    publishMany,
     unpublish,
     unpublishMany,
     update,
