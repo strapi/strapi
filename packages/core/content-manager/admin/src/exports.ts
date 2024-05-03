@@ -4,10 +4,6 @@
  * but should still export the same things.
  */
 
-export {
-  useGetDraftRelationCountQuery,
-  useGetManyDraftRelationCountQuery,
-} from './services/documents';
 export { buildValidParams } from './utils/api';
 
 export { useDocument as unstable_useDocument } from './hooks/useDocument';

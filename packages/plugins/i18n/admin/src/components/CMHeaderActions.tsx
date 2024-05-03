@@ -11,7 +11,6 @@ import {
   type DocumentActionComponent,
   unstable_useDocument as useDocument,
   unstable_useDocumentActions as useDocumentActions,
-  useGetManyDraftRelationCountQuery,
   buildValidParams,
 } from '@strapi/content-manager/strapi-admin';
 import { Flex, Status, Typography, Button } from '@strapi/design-system';
@@ -23,6 +22,7 @@ import styled from 'styled-components';
 
 import { useI18n } from '../hooks/useI18n';
 import { useGetLocalesQuery } from '../services/locales';
+import { useGetManyDraftRelationCountQuery } from '../services/relations';
 import { getTranslation } from '../utils/getTranslation';
 import { capitalize } from '../utils/strings';
 

@@ -222,7 +222,12 @@ const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
     });
   }
 
-  return schema?.nullable ? schema.nullable() : schema;
+  return schema?.nullable
+    ? schema.nullable()
+    : // In some cases '.nullable' will not be available on the schema.
+      // e.g. when the schema has been built using yup.lazy (e.g. for relations).
+      // In these cases we should just return the schema as it is.
+      schema;
 };
 
 const addMinLengthValidation: ValidationFn =
