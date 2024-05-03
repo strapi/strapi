@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, Typography, useCollator } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Box, Flex, IconButton, Typography, useCollator, Link } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';

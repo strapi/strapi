@@ -1,6 +1,5 @@
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
-import { Flex, Grid, GridItem, KeyboardNavigable } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Flex, Grid, GridItem, KeyboardNavigable, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';

@@ -10,7 +10,7 @@ import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
-import { InputRendererProps } from '../../InputRenderer';
+import { type InputRendererProps } from '../../InputRenderer';
 
 import { Initializer } from './Initializer';
 import { NonRepeatableComponent } from './NonRepeatable';
@@ -20,7 +20,12 @@ interface ComponentInputProps
   extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {
   labelAction?: React.ReactNode;
-  renderInput?: (props: InputRendererProps) => React.ReactNode;
+  children: (props: InputRendererProps) => React.ReactNode;
+  /**
+   * We need layout to come from the props, and not via a hook, because Content History needs
+   * a way to modify the normal component layout to add hidden fields.
+   */
+  layout: EditFieldLayout[][];
 }
 
 const ComponentInput = ({
@@ -90,15 +95,14 @@ const ComponentInput = ({
           <Initializer disabled={disabled} name={name} onClick={handleInitialisationClick} />
         )}
         {!attribute.repeatable && field.value ? (
-          <NonRepeatableComponent
-            attribute={attribute}
-            name={name}
-            disabled={disabled}
-            {...props}
-          />
+          <NonRepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>
+            {props.children}
+          </NonRepeatableComponent>
         ) : null}
         {attribute.repeatable && (
-          <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props} />
+          <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>
+            {props.children}
+          </RepeatableComponent>
         )}
       </Flex>
     </Box>
