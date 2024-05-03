@@ -23,6 +23,7 @@ import PropTypes from 'prop-types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
+import { useHistory } from 'react-router-dom';
 
 import { ModelsContext } from '../../contexts/models';
 import { checkIfAttributeIsDisplayable } from '../../utils/attributes';
@@ -38,6 +39,7 @@ export const ListSettingsView = ({ layout, slug }) => {
   const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
+  const { goBack } = useHistory();
   const [{ query }] = useQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = React.useContext(ModelsContext);
@@ -183,23 +185,16 @@ export const ListSettingsView = ({ layout, slug }) => {
             navigationAction={
               <Link
                 startIcon={<ArrowLeft />}
-                to={{
-                  to: `/content-manager/${kind}/${uid}`,
-                  search: stringify(
-                    {
-                      page: 1,
-                      pageSize,
-                      sort: `${defaultSortBy}:${defaultSortOrder}`,
-                      plugins: query.plugins,
-                    },
-                    {
-                      encode: false,
-                    }
-                  ),
+                onClick={(e) => {
+                  e.preventDefault();
+                  goBack();
                 }}
-                id="go-back"
+                to="/"
               >
-                {formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
+                {formatMessage({
+                  id: 'global.back',
+                  defaultMessage: 'Back',
+                })}
               </Link>
             }
             primaryAction={
