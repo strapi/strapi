@@ -53,38 +53,36 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
   }
 `;
 
-export const NavUser = React.forwardRef<HTMLDivElement, NavUserProps>(
-  ({ children, initials, ...props }, ref) => {
-    const { formatMessage } = useIntl();
-    const logout = useAuth('Logout', (state) => state.logout);
-    return (
-      <Flex ref={ref} justifyContent="center" {...props}>
-        <Menu.Root>
-          <MenuTrigger endIcon={null} fullWidth justifyContent="center">
-            <Initials>{initials}</Initials>
-            <VisuallyHidden as="span">{children}</VisuallyHidden>
-          </MenuTrigger>
-          <MenuContent popoverPlacement="top" zIndex={3} width="15rem">
-            <LinkUser to="/me">
-              <Typography>
-                {formatMessage({
-                  id: 'global.profile',
-                  defaultMessage: 'Profile',
-                })}
-              </Typography>
-            </LinkUser>
-            <LinkUser onClick={logout} to="/auth/login">
-              <Typography textColor="danger600">
-                {formatMessage({
-                  id: 'app.components.LeftMenu.logout',
-                  defaultMessage: 'Logout',
-                })}
-              </Typography>
-              <SignOut />
-            </LinkUser>
-          </MenuContent>
-        </Menu.Root>
-      </Flex>
-    );
-  }
-);
+export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
+  const { formatMessage } = useIntl();
+  const logout = useAuth('Logout', (state) => state.logout);
+  return (
+    <Flex justifyContent="center" {...props}>
+      <Menu.Root>
+        <MenuTrigger endIcon={null} fullWidth justifyContent="center">
+          <Initials>{initials}</Initials>
+          <VisuallyHidden as="span">{children}</VisuallyHidden>
+        </MenuTrigger>
+        <MenuContent popoverPlacement="top" zIndex={3} width="15rem">
+          <LinkUser to="/me">
+            <Typography>
+              {formatMessage({
+                id: 'global.profile',
+                defaultMessage: 'Profile',
+              })}
+            </Typography>
+          </LinkUser>
+          <LinkUser onClick={logout} to="/auth/login">
+            <Typography textColor="danger600">
+              {formatMessage({
+                id: 'app.components.LeftMenu.logout',
+                defaultMessage: 'Logout',
+              })}
+            </Typography>
+            <SignOut />
+          </LinkUser>
+        </MenuContent>
+      </Menu.Root>
+    </Flex>
+  );
+};

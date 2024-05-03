@@ -53,7 +53,11 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
       <NavListWrapper as="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3}>
         <Flex as="li">
-          <NavLink.Link to="/" onClick={() => handleClickOnLink('/')}>
+          <NavLink.Link
+            to="/"
+            onClick={() => handleClickOnLink('/')}
+            aria-label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
+          >
             <NavLink.Tooltip label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}>
               <NavLink.Icon>
                 <House fill="neutral500" />
@@ -62,11 +66,18 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
           </NavLink.Link>
         </Flex>
         <Flex as="li">
-          <NavLink.Link to="/content-manager" onClick={() => handleClickOnLink('/content-manager')}>
+          <NavLink.Link
+            to="/content-manager"
+            onClick={() => handleClickOnLink('/content-manager')}
+            aria-label={formatMessage({
+              id: 'global.content-manager',
+              defaultMessage: 'Content Manager',
+            })}
+          >
             <NavLink.Tooltip
               label={formatMessage({
                 id: 'global.content-manager',
-                defaultMessage: 'Content manager',
+                defaultMessage: 'Content Manager',
               })}
             >
               <NavLink.Icon>
@@ -83,10 +94,16 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
               const LinkIcon = link.icon;
               const badgeContent = link?.lockIcon ? <Lock /> : undefined;
+
+              const labelValue = formatMessage(link.intlLabel);
               return (
                 <Flex as="li" key={link.to}>
-                  <NavLink.Link to={link.to} onClick={() => handleClickOnLink(link.to)}>
-                    <NavLink.Tooltip label={formatMessage(link.intlLabel)}>
+                  <NavLink.Link
+                    to={link.to}
+                    onClick={() => handleClickOnLink(link.to)}
+                    aria-label={labelValue}
+                  >
+                    <NavLink.Tooltip label={labelValue}>
                       <NavLink.Icon>
                         <LinkIcon fill="neutral500" />
                       </NavLink.Icon>
@@ -114,10 +131,16 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                   ? link.notificationsCount.toString()
                   : undefined;
 
+              const labelValue = formatMessage(link.intlLabel);
+
               return (
                 <Flex as="li" key={link.to}>
-                  <NavLink.Link to={link.to} onClick={() => handleClickOnLink(link.to)}>
-                    <NavLink.Tooltip label={formatMessage(link.intlLabel)}>
+                  <NavLink.Link
+                    aria-label={labelValue}
+                    to={link.to}
+                    onClick={() => handleClickOnLink(link.to)}
+                  >
+                    <NavLink.Tooltip label={labelValue}>
                       <NavLink.Icon>
                         <LinkIcon fill="neutral500" />
                       </NavLink.Icon>
