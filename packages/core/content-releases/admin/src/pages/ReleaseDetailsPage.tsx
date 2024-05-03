@@ -13,6 +13,7 @@ import {
   useRBAC,
   useStrapiApp,
 } from '@strapi/admin/strapi-admin';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Button,
   ContentLayout,
@@ -33,7 +34,6 @@ import {
 } from '@strapi/design-system';
 import { CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';

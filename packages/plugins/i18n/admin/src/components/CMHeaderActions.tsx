@@ -6,8 +6,6 @@ import {
   Table,
   useAPIErrorHandler,
 } from '@strapi/admin/strapi-admin';
-import { Flex, Status, Typography, Button } from '@strapi/design-system';
-import { WarningCircle, ListPlus, Trash } from '@strapi/icons';
 import {
   type HeaderActionComponent,
   type DocumentActionComponent,
@@ -15,7 +13,9 @@ import {
   unstable_useDocumentActions as useDocumentActions,
   useGetManyDraftRelationCountQuery,
   buildValidParams,
-} from '@strapi/plugin-content-manager/strapi-admin';
+} from '@strapi/content-manager/strapi-admin';
+import { Flex, Status, Typography, Button } from '@strapi/design-system';
+import { WarningCircle, ListPlus, Trash } from '@strapi/icons';
 import { Modules } from '@strapi/types';
 import { useIntl, type MessageDescriptor } from 'react-intl';
 import { useNavigate } from 'react-router-dom';

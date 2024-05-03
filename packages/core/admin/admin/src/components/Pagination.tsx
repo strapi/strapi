@@ -1,8 +1,11 @@
 /* eslint-disable import/export */
 import * as React from 'react';
 
-import { Flex, SingleSelectOption, SingleSelect, Typography } from '@strapi/design-system';
 import {
+  Flex,
+  SingleSelectOption,
+  SingleSelect,
+  Typography,
   Dots,
   NextLink,
   PageLink,
