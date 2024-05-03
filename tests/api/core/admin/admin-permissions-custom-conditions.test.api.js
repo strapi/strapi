@@ -1,13 +1,11 @@
 'use strict';
 
-const { prop } = require('lodash/fp');
+const { prop, omit } = require('lodash/fp');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createRequest, createAuthRequest } = require('api-tests/request');
 const { createUtils } = require('api-tests/utils');
-
-const { testInTransaction } = require('../../utils');
 
 describe('Admin Permissions - Conditions', () => {
   let strapi;
@@ -263,7 +261,7 @@ describe('Admin Permissions - Conditions', () => {
     expect(res.statusCode).toBe(403);
   });
 
-  testInTransaction('User can publish cheap articles', async () => {
+  test('User can publish cheap articles', async () => {
     const { documentId } = localTestData.cheapArticle;
     const rq = getUserRequest(0);
     const res = await rq({
@@ -275,7 +273,7 @@ describe('Admin Permissions - Conditions', () => {
     expect(res.body.data).toMatchObject(localTestData.cheapArticle);
   });
 
-  testInTransaction('User cannot publish expensive articles', async () => {
+  test('User cannot publish expensive articles', async () => {
     const { documentId } = localTestData.expensiveArticle;
     const rq = getUserRequest(0);
     const res = await rq({
@@ -287,25 +285,40 @@ describe('Admin Permissions - Conditions', () => {
   });
 
   test('User can delete cheap articles', async () => {
-    const { documentId } = localTestData.cheapArticle;
-
     // Create a new cheap draft article
+    const { body } = await requests.admin({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::article.article`,
+      body: {
+        ...omit('documentId', localTestData.cheapArticle),
+        category: localTestData.categories[0].documentId,
+      },
+    });
 
     const rq = getUserRequest(0);
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::article.article/${documentId}`,
+      url: `/content-manager/collection-types/api::article.article/${body.data.documentId}`,
     });
 
     expect(res.statusCode).toBe(200);
   });
 
   test('User cannot delete expensive articles', async () => {
-    const { documentId } = localTestData.expensiveArticle;
+    // Create a new expensive draft article
+    const { body } = await requests.admin({
+      method: 'POST',
+      url: `/content-manager/collection-types/api::article.article`,
+      body: {
+        ...omit('documentId', localTestData.expensiveArticle),
+        category: localTestData.categories[1].documentId,
+      },
+    });
+
     const rq = getUserRequest(0);
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/api::article.article/${documentId}`,
+      url: `/content-manager/collection-types/api::article.article/${body.data.documentId}`,
     });
 
     expect(res.statusCode).toBe(403);
