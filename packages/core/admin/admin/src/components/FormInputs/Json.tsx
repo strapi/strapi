@@ -27,8 +27,8 @@ export const JsonInput = forwardRef<any, InputProps>((props, ref) => {
         const value = props.required && !json.length ? null : json;
         field.onChange(props.name, value);
       }}
-      minHeight={`${252 / 16}rem`}
-      maxHeight={`${504 / 16}rem`}
+      minHeight={`25.2rem`}
+      maxHeight={`50.4rem`}
       {...props}
     />
   );

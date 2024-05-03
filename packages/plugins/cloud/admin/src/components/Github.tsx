@@ -4,9 +4,8 @@
  *
  */
 
-import { Box, Flex, Typography } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { Github } from '@strapi/icons';
+import { Box, Flex, Typography, LinkButton } from '@strapi/design-system';
+import { GitHub } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -16,7 +15,7 @@ import { LinkIcon } from './Icons/LinkIcon';
 
 const EmptyStateIconWrapper = styled(Box)`
   svg {
-    height: ${88 / 16}rem;
+    height: 8.8rem;
   }
 `;
 
@@ -57,7 +56,7 @@ const GithubBox = () => {
         <Box marginTop={4}>
           <CustomGithubButton
             isExternal
-            startIcon={<Github />}
+            startIcon={<GitHub />}
             href="https://github.com/new"
             target="_blank"
           >

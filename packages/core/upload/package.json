@@ -1,6 +1,6 @@
 {
-  "name": "@strapi/plugin-upload",
-  "version": "5.0.0-beta.4",
+  "name": "@strapi/upload",
+  "version": "5.0.0-beta.6",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "license": "SEE LICENSE IN LICENSE",
   "author": {
@@ -48,16 +48,16 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.18.0",
-    "@strapi/icons": "1.18.0",
-    "@strapi/provider-upload-local": "5.0.0-beta.4",
-    "@strapi/utils": "5.0.0-beta.4",
+    "@strapi/design-system": "2.0.0-beta.2",
+    "@strapi/icons": "2.0.0-beta.2",
+    "@strapi/provider-upload-local": "5.0.0-beta.6",
+    "@strapi/utils": "5.0.0-beta.6",
     "axios": "1.6.8",
-    "byte-size": "7.0.1",
+    "byte-size": "8.1.1",
     "cropperjs": "1.6.1",
     "date-fns": "2.30.0",
     "formik": "2.4.5",
-    "fs-extra": "10.1.0",
+    "fs-extra": "11.2.0",
     "immer": "9.0.21",
     "koa-range": "0.3.0",
     "koa-static": "5.0.0",
@@ -74,12 +74,13 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.0.0-beta.4",
+    "@strapi/admin": "5.0.0-beta.6",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "5.0.0-beta.4",
+    "@strapi/types": "5.0.0-beta.6",
     "@testing-library/dom": "9.2.0",
     "@testing-library/react": "14.0.0",
     "@testing-library/user-event": "14.4.3",
+    "@types/fs-extra": "11.0.4",
     "@types/koa": "2.13.4",
     "@types/koa-range": "0.3.5",
     "@types/koa-static": "4.0.2",

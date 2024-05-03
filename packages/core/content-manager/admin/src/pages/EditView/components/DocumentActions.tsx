@@ -15,16 +15,15 @@ import {
   DialogFooter,
   DialogProps,
   Flex,
-  Icon,
   ModalBody,
   ModalHeader,
   ModalLayout,
   Radio,
   Typography,
   VisuallyHidden,
+  Menu,
 } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system/v2';
-import { CrossCircle, ExclamationMarkCircle, More } from '@strapi/icons';
+import { CrossCircle, More, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import styled, { DefaultTheme } from 'styled-components';
@@ -828,7 +827,7 @@ const UnpublishAction: DocumentActionComponent = ({
           content: (
             <Flex alignItems="flex-start" direction="column" gap={6}>
               <Flex width="100%" direction="column" gap={2}>
-                <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+                <WarningCircle width="24px" height="24px" fill="danger600" />
                 <Typography as="p" variant="omega" textAlign="center">
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.body',
@@ -937,7 +936,7 @@ const DiscardAction: DocumentActionComponent = ({
       }),
       content: (
         <Flex direction="column" gap={2}>
-          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
+          <WarningCircle width="24px" height="24px" fill="danger600" />
           <Typography as="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.discard.dialog.body',

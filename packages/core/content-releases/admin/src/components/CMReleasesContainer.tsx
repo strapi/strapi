@@ -7,6 +7,7 @@ import {
   useQueryParams,
   useRBAC,
 } from '@strapi/admin/strapi-admin';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Box,
   Button,
@@ -20,10 +21,10 @@ import {
   Typography,
   ModalFooter,
   EmptyStateLayout,
+  LinkButton,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { EmptyDocuments, Plus } from '@strapi/icons';
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
+import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -70,7 +71,7 @@ export const NoReleases = () => {
   const { formatMessage } = useIntl();
   return (
     <EmptyStateLayout
-      icon={<EmptyDocuments width="10rem" />}
+      icon={<EmptyDocuments width="16rem" />}
       content={formatMessage({
         id: 'content-releases.content-manager-edit-view.add-to-release.no-releases-message',
         defaultMessage:

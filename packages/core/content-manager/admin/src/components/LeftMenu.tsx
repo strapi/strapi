@@ -1,14 +1,15 @@
 import * as React from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { useCollator, useFilter } from '@strapi/design-system';
 import {
+  useCollator,
+  useFilter,
   SubNav,
   SubNavHeader,
   SubNavLink,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/v2';
+} from '@strapi/design-system';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';

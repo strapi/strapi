@@ -12,8 +12,9 @@ import {
   MultiSelectNested,
   MultiSelectNestedProps,
   Typography,
+  Breadcrumbs,
+  Crumb,
 } from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system/v2';
 import { produce } from 'immer';
 import get from 'lodash/get';
 import groupBy from 'lodash/groupBy';

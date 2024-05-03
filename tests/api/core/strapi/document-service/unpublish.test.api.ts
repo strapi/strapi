@@ -1,13 +1,26 @@
+import type { Core, Modules } from '@strapi/types';
+
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
 import { ARTICLE_UID, findArticleDb, findPublishedArticlesDb } from './utils';
+
+let strapi: Core.Strapi;
+
+const publishArticle = async (params: Modules.Documents.ServiceParams['publish']) => {
+  return strapi.documents(ARTICLE_UID).publish({ ...params });
+};
+
+const unpublishArticle = async (params: Modules.Documents.ServiceParams['unpublish']) => {
+  return strapi.documents(ARTICLE_UID).unpublish({ ...params });
+};
 
 describe('Document Service', () => {
   let testUtils;
 
   beforeAll(async () => {
     testUtils = await createTestSetup(resources);
+    strapi = testUtils.strapi;
   });
 
   afterAll(async () => {
@@ -15,17 +28,13 @@ describe('Document Service', () => {
   });
 
   describe('Unpublish', () => {
-    testInTransaction('unpublish all locales of a document', async () => {
+    testInTransaction('Can unpublish all locales of a document', async () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       // Publish first all locales
-      await strapi
-        .documents(ARTICLE_UID)
-        .publish({ documentId: articleDb.documentId, locale: '*' });
+      await publishArticle({ documentId: articleDb.documentId, locale: '*' });
       // Unpublish all locales
-      await strapi
-        .documents(ARTICLE_UID)
-        .unpublish({ documentId: articleDb.documentId, locale: '*' });
+      await unpublishArticle({ documentId: articleDb.documentId, locale: '*' });
 
       const publishedArticles = await findPublishedArticlesDb(articleDb.documentId);
 
@@ -37,14 +46,10 @@ describe('Document Service', () => {
       const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
 
       // Publish first all locales
-      await strapi
-        .documents(ARTICLE_UID)
-        .publish({ documentId: articleDb.documentId, locale: '*' });
+      await publishArticle({ documentId: articleDb.documentId, locale: '*' });
       const publishedArticlesBefore = await findPublishedArticlesDb(articleDb.documentId);
 
-      await strapi
-        .documents(ARTICLE_UID)
-        .unpublish({ documentId: articleDb.documentId, locale: 'en' });
+      await unpublishArticle({ documentId: articleDb.documentId, locale: 'en' });
 
       const publishedArticlesAfter = await findPublishedArticlesDb(articleDb.documentId);
 

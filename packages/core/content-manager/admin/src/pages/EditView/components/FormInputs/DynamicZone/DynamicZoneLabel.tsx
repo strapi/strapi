@@ -32,7 +32,7 @@ const DynamicZoneLabel = ({
         color="neutral500"
       >
         <Flex direction="column" justifyContent="center">
-          <Flex maxWidth={`${356 / 16}rem`}>
+          <Flex maxWidth="35.6rem">
             <Typography variant="pi" textColor="neutral600" fontWeight="bold" ellipsis>
               {label || name}&nbsp;
             </Typography>
@@ -43,7 +43,7 @@ const DynamicZoneLabel = ({
             {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
           </Flex>
           {hint && (
-            <Box paddingTop={1} maxWidth={`${356 / 16}rem`}>
+            <Box paddingTop={1} maxWidth="35.6rem">
               <Typography variant="pi" textColor="neutral600" ellipsis>
                 {hint}
               </Typography>

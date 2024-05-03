@@ -17,7 +17,7 @@ import {
   Typography,
   EmptyStateLayout,
 } from '@strapi/design-system';
-import { Eye as Show, Refresh as Reload, Trash } from '@strapi/icons';
+import { Eye as Show, ArrowClockwise as Reload, Trash } from '@strapi/icons';
 import {
   ConfirmDialog,
   useRBAC,

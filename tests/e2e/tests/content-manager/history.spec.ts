@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { describeOnCondition } from '../../utils/shared';
@@ -6,6 +6,14 @@ import { resetFiles } from '../../utils/file-reset';
 import { waitForRestart } from '../../utils/restart';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
+const goToHistoryPage = async (page: Page) => {
+  const moreActionsButton = await page.getByRole('button', { name: /more actions/i });
+  await expect(moreActionsButton).toBeEnabled();
+  await moreActionsButton.click();
+  const historyButton = await page.getByRole('menuitem', { name: /content history/i });
+  await historyButton.click();
+};
 
 describeOnCondition(edition === 'EE')('History', () => {
   test.describe('Collection Type', () => {
@@ -43,8 +51,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       await titleInput.fill(frenchTitle);
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await goToHistoryPage(page);
+
       await page.waitForURL(HISTORY_URL);
       await expect(titleInput).toHaveValue(frenchTitle);
 
@@ -59,8 +67,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await titleInput.fill(englishTitle);
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(1);
@@ -85,8 +92,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await titleInput.fill('Being from Kansas City');
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       await expect(versionCards).toHaveCount(2);
       // Assert the most recent version is the current version
@@ -105,8 +111,8 @@ describeOnCondition(edition === 'EE')('History', () => {
        */
       await page.getByRole('button', { name: 'Publish' }).click();
       // Go to the history page
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      // Go to the history page
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       // Publish also creates a new draft so we expect the count to increase by 2
       await expect(versionCards).toHaveCount(4);
@@ -129,8 +135,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await titleInput.fill('Being from Kansas City, Missouri');
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       await expect(versionCards).toHaveCount(5);
       // Assert the current version is the modified version
@@ -148,7 +153,6 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Create an initial entry to also create an initial version
        */
-      await page.goto('/admin');
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
       await page.waitForURL(CREATE_URL);
@@ -190,8 +194,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Go to the history page
        */
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: 'Content History' }).click();
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(2);
@@ -238,8 +241,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await titleInput.fill(frenchTitle);
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       await expect(titleInput).toHaveValue(frenchTitle);
 
@@ -253,8 +255,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await titleInput.fill(englishTitle);
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(1);
@@ -279,14 +280,14 @@ describeOnCondition(edition === 'EE')('History', () => {
        */
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      // Go to the history page
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       await expect(versionCards).toHaveCount(2);
       // Assert the most recent version is the current version
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
       // Assert the previous version in the list is the expected version
-      previousVersion.click();
+      await previousVersion.click();
       await expect(titleInput).toHaveValue('AFC Richmond');
 
       // Go back to the entry
@@ -296,8 +297,8 @@ describeOnCondition(edition === 'EE')('History', () => {
        * Publish
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      // Go to the history page
+      await goToHistoryPage(page);
       await page.waitForURL('**/content-manager/single-types/api::homepage.homepage/history**');
       // Publish also creates a new draft so we expect the count to increase by 2
       await expect(versionCards).toHaveCount(4);
@@ -305,7 +306,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(currentVersion.getByText('Draft')).toBeVisible();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
       // The second in the list is the published version
-      previousVersion.click();
+      await previousVersion.click();
       await expect(previousVersion.getByText('Published')).toBeVisible();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
 
@@ -318,8 +319,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await titleInput.fill('Welcome to AFC Richmond!');
       await page.getByRole('button', { name: 'Save' }).click();
       // Go to the history page
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       await expect(versionCards).toHaveCount(5);
       // Assert the current version is the most recent published version
@@ -373,14 +373,13 @@ describeOnCondition(edition === 'EE')('History', () => {
       /**
        * Go to the history page
        */
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: 'Content History' }).click();
+      await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(2);
 
       const previousVersion = versionCards.nth(1);
-      previousVersion.click();
+      await previousVersion.click();
 
       // Assert the unknown field is present
       await expect(page.getByText('Unknown fields')).toBeVisible();

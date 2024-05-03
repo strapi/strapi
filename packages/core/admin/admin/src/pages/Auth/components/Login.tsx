@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import { Box, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
 import camelCase from 'lodash/camelCase';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
