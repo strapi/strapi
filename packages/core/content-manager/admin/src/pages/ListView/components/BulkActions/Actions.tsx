@@ -109,7 +109,7 @@ const BulkActionsRenderer = () => {
  * BulkActionAction
  * -----------------------------------------------------------------------------------------------*/
 
-interface Action extends BulkActionDescription, Pick<BulkActionComponent, 'actionType'> {
+interface Action extends BulkActionDescription {
   id: string;
 }
 
@@ -138,7 +138,6 @@ const BulkActionAction = (action: Action) => {
           break;
         case 'dialog':
         case 'modal': {
-          if (action.actionType === 'delete') trackUsage('willBulkDeleteEntries');
           e.preventDefault();
           setDialogId(id);
         }
@@ -323,7 +322,6 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
   if (!hasDeletePermission) return null;
 
   return {
-    actionType: 'delete',
     variant: 'danger-light',
     label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
     dialog: {
@@ -363,6 +361,8 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
   };
 };
 
+DeleteAction.type = 'delete';
+
 const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
   const { schema } = useDoc();
@@ -387,7 +387,6 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   if (!showUnpublishButton) return null;
 
   return {
-    actionType: 'unpublish',
     variant: 'tertiary',
     label: formatMessage({ id: 'app.utils.unpublish', defaultMessage: 'Unpublish' }),
     dialog: {
@@ -430,6 +429,8 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
     },
   };
 };
+
+UnpublishAction.type = 'unpublish';
 
 const Emphasis = (chunks: React.ReactNode) => (
   <Typography fontWeight="semiBold" textColor="danger500">
