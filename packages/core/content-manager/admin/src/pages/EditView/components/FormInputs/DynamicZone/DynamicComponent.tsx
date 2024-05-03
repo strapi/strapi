@@ -12,8 +12,9 @@ import {
   IconButton,
   VisuallyHidden,
   useComposedRefs,
+  Menu,
+  MenuItem,
 } from '@strapi/design-system';
-import { Menu, MenuItem } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';

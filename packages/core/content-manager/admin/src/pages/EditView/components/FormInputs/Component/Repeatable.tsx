@@ -9,12 +9,12 @@ import {
   Accordion,
   AccordionContent as DSAccordionContent,
   AccordionToggle,
-  Grid,
-  GridItem,
   IconButton,
   Typography,
   KeyboardNavigable,
   useComposedRefs,
+  GridItem,
+  Grid,
 } from '@strapi/design-system';
 import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -24,13 +24,11 @@ import styled from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
-import { InputRenderer } from '../../InputRenderer';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
@@ -42,14 +40,15 @@ import type { Schema } from '@strapi/types';
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
 
-interface RepeatableComponentProps extends Omit<ComponentInputProps, 'label' | 'required'> {}
+type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
 
 const RepeatableComponent = ({
   attribute,
   disabled,
   name,
   mainField,
-  renderInput,
+  children,
+  layout,
 }: RepeatableComponentProps) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
@@ -211,6 +210,7 @@ const RepeatableComponent = ({
       <AccordionGroup error={error}>
         <AccordionContent aria-describedby={ariaDescriptionId}>
           {value.map(({ __temp_key__: key, id }, index) => {
+            const nameWithIndex = `${name}.${index}`;
             return (
               <ComponentProvider
                 key={key}
@@ -222,12 +222,11 @@ const RepeatableComponent = ({
               >
                 <Component
                   disabled={disabled}
-                  name={`${name}.${index}`}
+                  name={nameWithIndex}
                   attribute={attribute}
                   index={index}
                   isOpen={collapseToOpen === key}
                   mainField={mainField}
-                  renderInput={renderInput}
                   onMoveItem={handleMoveComponentField}
                   onClickToggle={handleToggle(key)}
                   onDeleteComponent={() => {
@@ -238,7 +237,29 @@ const RepeatableComponent = ({
                   onCancel={handleCancel}
                   onDropItem={handleDropItem}
                   onGrabItem={handleGrabItem}
-                />
+                >
+                  {layout.map((row, index) => {
+                    return (
+                      <Grid gap={4} key={index}>
+                        {row.map(({ size, ...field }) => {
+                          /**
+                           * Layouts are built from schemas so they don't understand the complete
+                           * schema tree, for components we append the parent name to the field name
+                           * because this is the structure for the data & permissions also understand
+                           * the nesting involved.
+                           */
+                          const completeFieldName = `${nameWithIndex}.${field.name}`;
+
+                          return (
+                            <GridItem col={size} key={completeFieldName} s={12} xs={12}>
+                              {children({ ...field, name: completeFieldName })}
+                            </GridItem>
+                          );
+                        })}
+                      </Grid>
+                    );
+                  })}
+                </Component>
               </ComponentProvider>
             );
           })}
@@ -379,7 +400,7 @@ const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
 
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
-    Pick<RepeatableComponentProps, 'mainField' | 'renderInput'> {
+    Pick<RepeatableComponentProps, 'mainField'> {
   attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
@@ -388,10 +409,10 @@ interface ComponentProps
   onClickToggle: () => void;
   onDeleteComponent?: React.MouseEventHandler<HTMLButtonElement>;
   toggleCollapses: () => void;
+  children: React.ReactNode;
 }
 
 const Component = ({
-  attribute,
   disabled,
   index,
   isOpen,
@@ -400,18 +421,13 @@ const Component = ({
     name: 'id',
     type: 'integer',
   },
+  children,
   onClickToggle,
   onDeleteComponent,
   toggleCollapses,
-  renderInput = InputRenderer,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
-  const {
-    edit: { components },
-  } = useDocLayout();
-
-  const { layout } = components[attribute.component];
 
   const displayValue = useForm('RepeatableComponent', (state) => {
     return getIn(state.values, [...name.split('.'), mainField.name]);
@@ -500,27 +516,7 @@ const Component = ({
               padding={6}
               gap={6}
             >
-              {layout.map((row, index) => {
-                return (
-                  <Grid gap={4} key={index}>
-                    {row.map(({ size, ...field }) => {
-                      /**
-                       * Layouts are built from schemas so they don't understand the complete
-                       * schema tree, for components we append the parent name to the field name
-                       * because this is the structure for the data & permissions also understand
-                       * the nesting involved.
-                       */
-                      const completeFieldName = `${name}.${field.name}`;
-
-                      return (
-                        <GridItem col={size} key={completeFieldName} s={12} xs={12}>
-                          {renderInput({ ...field, name: completeFieldName })}
-                        </GridItem>
-                      );
-                    })}
-                  </Grid>
-                );
-              })}
+              {children}
             </Flex>
           </DSAccordionContent>
         </Accordion>
