@@ -1,5 +1,4 @@
-import { Badge, Tooltip, Typography } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system';
+import { Badge, Tooltip, Typography, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 

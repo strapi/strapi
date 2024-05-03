@@ -4,7 +4,7 @@ import { StageFilter } from './components/StageFilter';
 import { AssigneeColumn, StageColumn } from './components/TableColumns';
 
 import type { Filters } from '@strapi/admin/strapi-admin';
-import type { ListFieldLayout } from '@strapi/plugin-content-manager/strapi-admin';
+import type { ListFieldLayout } from '@strapi/content-manager/strapi-admin';
 import type { MessageDescriptor } from 'react-intl';
 
 export const REVIEW_WORKFLOW_COLUMNS = [
