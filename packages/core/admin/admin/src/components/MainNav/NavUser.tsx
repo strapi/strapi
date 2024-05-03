@@ -1,16 +1,9 @@
 import React from 'react';
 
-import {
-  Initials,
-  Flex,
-  Menu,
-  ButtonProps,
-  VisuallyHidden,
-  Typography,
-} from '@strapi/design-system';
+import { Initials, Flex, Menu, ButtonProps, VisuallyHidden } from '@strapi/design-system';
 import { SignOut } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useAuth } from '../../features/Auth';
@@ -31,31 +24,25 @@ const MenuContent = styled(Menu.Content)`
   left: ${({ theme }) => theme.spaces[5]};
 `;
 
-const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  align-items: center;
-  text-decoration: none;
-  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
-  border-radius: ${({ theme }) => theme.spaces[1]};
-
-  &:hover {
-    background: ${({ theme, logout }) =>
-      logout ? theme.colors.danger100 : theme.colors.primary100};
-    text-decoration: none;
-  }
-
-  svg {
-    fill: ${({ theme }) => theme.colors.danger600};
-    width: 1.6rem;
-    height: 1.6rem;
+const MenuItem = styled(Menu.Item)`
+  span {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
   }
 `;
 
 export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
   const { formatMessage } = useIntl();
+  const navigate = useNavigate();
   const logout = useAuth('Logout', (state) => state.logout);
+  const handleProfile = () => {
+    navigate('/me');
+  };
+  const handleLogout = () => {
+    logout();
+    navigate('/auth/login');
+  };
   return (
     <Flex justifyContent="center" {...props}>
       <Menu.Root>
@@ -64,27 +51,20 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
           <VisuallyHidden as="span">{children}</VisuallyHidden>
         </MenuTrigger>
         <MenuContent popoverPlacement="top" zIndex={3} width="15rem">
-          <Menu.Item>
-            <LinkUser to="/me">
-              <Typography>
-                {formatMessage({
-                  id: 'global.profile',
-                  defaultMessage: 'Profile',
-                })}
-              </Typography>
-            </LinkUser>
-          </Menu.Item>
-          <Menu.Item>
-            <LinkUser onClick={logout} to="/auth/login">
-              <Typography textColor="danger600">
-                {formatMessage({
-                  id: 'app.components.LeftMenu.logout',
-                  defaultMessage: 'Logout',
-                })}
-              </Typography>
-              <SignOut />
-            </LinkUser>
-          </Menu.Item>
+          <MenuItem onSelect={handleProfile}>
+            {formatMessage({
+              id: 'global.profile',
+              defaultMessage: 'Profile',
+            })}
+          </MenuItem>
+
+          <MenuItem onSelect={handleLogout} color="danger600">
+            {formatMessage({
+              id: 'app.components.LeftMenu.logout',
+              defaultMessage: 'Logout',
+            })}
+            <SignOut />
+          </MenuItem>
         </MenuContent>
       </Menu.Root>
     </Flex>
