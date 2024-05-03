@@ -1,15 +1,24 @@
-import type { Model } from '@strapi/database';
+import { RELEASE_ACTION_MODEL_UID } from '../../constants';
 
-import { RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from '../constants';
-
-const release: Model = {
-  uid: RELEASE_MODEL_UID,
-  tableName: 'strapi_releases',
-  singularName: 'release',
-  attributes: {
-    id: {
-      type: 'increments',
+export default {
+  collectionName: 'strapi_releases',
+  info: {
+    singularName: 'release',
+    pluralName: 'releases',
+    displayName: 'Release',
+  },
+  options: {
+    draftAndPublish: false,
+  },
+  pluginOptions: {
+    'content-manager': {
+      visible: false,
     },
+    'content-type-builder': {
+      visible: false,
+    },
+  },
+  attributes: {
     name: {
       type: 'string',
       required: true,
@@ -28,7 +37,6 @@ const release: Model = {
       enum: ['ready', 'blocked', 'failed', 'done', 'empty'],
       required: true,
     },
-    // @ts-expect-error - joinTable is expected
     actions: {
       type: 'relation',
       relation: 'oneToMany',
@@ -37,5 +45,3 @@ const release: Model = {
     },
   },
 };
-
-export { release };
