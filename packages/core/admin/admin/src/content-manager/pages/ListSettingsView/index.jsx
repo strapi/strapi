@@ -9,18 +9,11 @@ import {
   Layout,
   Main,
 } from '@strapi/design-system';
-import {
-  Link,
-  useFetchClient,
-  useNotification,
-  useQueryParams,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { Link, useFetchClient, useNotification, useTracking } from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
-import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { useHistory } from 'react-router-dom';
@@ -40,7 +33,6 @@ export const ListSettingsView = ({ layout, slug }) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { goBack } = useHistory();
-  const [{ query }] = useQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = React.useContext(ModelsContext);
   const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = React.useReducer(
@@ -170,12 +162,6 @@ export const ListSettingsView = ({ layout, slug }) => {
       atIndex,
     });
   };
-
-  const {
-    settings: { pageSize, defaultSortBy, defaultSortOrder },
-    kind,
-    uid,
-  } = initialData;
 
   return (
     <Layout>
