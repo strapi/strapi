@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
+import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { Data } from '@strapi/types';
@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
@@ -138,7 +139,7 @@ export const ListView = () => {
           { name: 'API Tokens' }
         )}
       </Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         title={formatMessage({ id: 'Settings.apiTokens.title', defaultMessage: 'API Tokens' })}
         subtitle={formatMessage({
           id: 'Settings.apiTokens.description',
@@ -171,7 +172,7 @@ export const ListView = () => {
         <Page.NoPermissions />
       ) : (
         <Page.Main aria-busy={isLoading}>
-          <ContentLayout>
+          <Layouts.Content>
             {apiTokens.length > 0 && (
               <Table
                 permissions={{ canRead, canDelete, canUpdate }}
@@ -214,7 +215,7 @@ export const ListView = () => {
                 })}
               />
             ) : null}
-          </ContentLayout>
+          </Layouts.Content>
         </Page.Main>
       )}
     </>

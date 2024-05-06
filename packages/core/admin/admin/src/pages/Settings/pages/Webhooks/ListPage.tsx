@@ -2,15 +2,11 @@ import * as React from 'react';
 
 import {
   useNotifyAT,
-  ActionLayout,
   BaseCheckbox,
   Button,
-  ContentLayout,
   EmptyStateLayout,
   Flex,
-  HeaderLayout,
   IconButton,
-  Layout,
   Switch,
   Table,
   Tbody,
@@ -30,6 +26,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
@@ -153,7 +150,7 @@ const ListPage = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -163,7 +160,7 @@ const ListPage = () => {
         )}
       </Page.Title>
       <Page.Main aria-busy={isLoading}>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
           subtitle={formatMessage({
             id: 'Settings.webhooks.list.description',
@@ -189,7 +186,7 @@ const ListPage = () => {
           }
         />
         {webhooksToDeleteLength > 0 && canDelete && (
-          <ActionLayout
+          <Layouts.Action
             startActions={
               <>
                 <Typography variant="epsilon" textColor="neutral600">
@@ -217,7 +214,7 @@ const ListPage = () => {
             }
           />
         )}
-        <ContentLayout>
+        <Layouts.Content>
           {numberOfWebhooks > 0 ? (
             <Table
               colCount={5}
@@ -397,14 +394,14 @@ const ListPage = () => {
               }
             />
           )}
-        </ContentLayout>
+        </Layouts.Content>
       </Page.Main>
       <ConfirmDialog
         isOpen={showModal}
         onClose={() => setShowModal((prev) => !prev)}
         onConfirm={confirmDelete}
       />
-    </Layout>
+    </Layouts.Root>
   );
 };
 

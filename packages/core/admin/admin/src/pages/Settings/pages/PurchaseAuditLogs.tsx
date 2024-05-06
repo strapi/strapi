@@ -1,22 +1,17 @@
-import {
-  Box,
-  Layout,
-  Main,
-  HeaderLayout,
-  EmptyStateLayout,
-  LinkButton,
-} from '@strapi/design-system';
+import { Box, Main, EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
+
+import { Layouts } from '../../../components/Layouts/Layout';
 
 const PurchaseAuditLogs = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({ id: 'global.auditLogs', defaultMessage: 'Audit Logs' })}
           subtitle={formatMessage({
             id: 'Settings.permissions.auditLogs.listview.header.subtitle',
@@ -48,7 +43,7 @@ const PurchaseAuditLogs = () => {
           />
         </Box>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

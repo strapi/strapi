@@ -1,11 +1,12 @@
 import * as React from 'react';
 
-import { ContentLayout, Flex } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
 import { useGuidedTour } from '../../../../../components/GuidedTour/Provider';
+import { Layouts } from '../../../../../components/Layouts/Layout';
 import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { useNotification } from '../../../../../features/Notifications';
@@ -357,7 +358,7 @@ export const EditView = () => {
                   regenerateUrl="/admin/api-tokens/"
                 />
 
-                <ContentLayout>
+                <Layouts.Content>
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     {Boolean(apiToken?.name) && (
                       <TokenBox token={apiToken?.accessKey} tokenType={API_TOKEN_TYPE} />
@@ -380,7 +381,7 @@ export const EditView = () => {
                       }
                     />
                   </Flex>
-                </ContentLayout>
+                </Layouts.Content>
               </Form>
             );
           }}

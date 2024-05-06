@@ -5,12 +5,13 @@
  *
  */
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
+import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { ArrowRight } from '@strapi/icons';
 import { EmptyPictures } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
+import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
 
 export const InternalErrorPage = () => {
@@ -18,14 +19,14 @@ export const InternalErrorPage = () => {
 
   return (
     <Page.Main labelledBy="title">
-      <HeaderLayout
+      <Layouts.Header
         id="title"
         title={formatMessage({
           id: 'content-manager.pageNotFound',
           defaultMessage: 'Page not found',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <EmptyStateLayout
           action={
             // @ts-expect-error We need to accept the props of the component passed in the `as` prop
@@ -44,7 +45,7 @@ export const InternalErrorPage = () => {
           icon={<EmptyPictures width="16rem" />}
           shadow="tableShadow"
         />
-      </ContentLayout>
+      </Layouts.Content>
     </Page.Main>
   );
 };

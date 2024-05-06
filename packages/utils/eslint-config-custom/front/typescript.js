@@ -8,17 +8,22 @@ module.exports = {
         jest: true,
       },
     },
+    {
+      files: ['**/*.js', '**/*.jsx'],
+      rules: {
+        /**
+         * This is useful to have for JS files, it's overwritten
+         * by `plugin:@typescript-eslint/recommended` for TS files.
+         */
+        'no-undef': 'error',
+      },
+    },
   ],
   globals: {
     process: true,
   },
   rules: {
     '@typescript-eslint/no-explicit-any': 'warn',
-    /**
-     * This is useful to have for JS files, it's overwritten
-     * by `plugin:@typescript-eslint/recommended` for TS files.
-     */
-    'no-undef': 'error',
     /**
      * This causes problems with PropTypes, once we've removed PropTypes
      * we can remove this rule back to the recommended setting.

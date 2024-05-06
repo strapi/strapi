@@ -1,11 +1,8 @@
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
+import { useTracking, Layouts } from '@strapi/admin/strapi-admin';
 import {
-  ContentLayout,
-  HeaderLayout,
   IconButton,
-  Layout,
   Table,
   Tbody,
   Td,
@@ -147,7 +144,7 @@ export const ProvidersPage = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -160,13 +157,13 @@ export const ProvidersPage = () => {
         )}
       </Page.Title>
       <Page.Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: getTrad('HeaderNav.link.providers'),
             defaultMessage: 'Providers',
           })}
         />
-        <ContentLayout>
+        <Layouts.Content>
           <Table colCount={3} rowCount={providers.length + 1}>
             <Thead>
               <Tr>
@@ -233,7 +230,7 @@ export const ProvidersPage = () => {
               ))}
             </Tbody>
           </Table>
-        </ContentLayout>
+        </Layouts.Content>
       </Page.Main>
       <FormModal
         initialData={data[providerToEditName]}
@@ -251,7 +248,7 @@ export const ProvidersPage = () => {
         onSubmit={handleSubmit}
         providerToEditName={providerToEditName}
       />
-    </Layout>
+    </Layouts.Root>
   );
 };
 

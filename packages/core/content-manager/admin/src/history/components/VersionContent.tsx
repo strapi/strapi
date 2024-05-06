@@ -1,15 +1,7 @@
 import * as React from 'react';
 
-import { Form } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  ContentLayout,
-  Divider,
-  Flex,
-  Grid,
-  GridItem,
-  Typography,
-} from '@strapi/design-system';
+import { Form, Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Divider, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Schema } from '@strapi/types';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
@@ -216,7 +208,7 @@ const VersionContent = () => {
   }, [components, version.data, version.schema]);
 
   return (
-    <ContentLayout>
+    <Layouts.Content>
       <Box paddingBottom={8}>
         <Form disabled={true} method="PUT" initialValues={transformedData}>
           <Flex direction="column" alignItems="stretch" gap={6} position="relative">
@@ -264,7 +256,7 @@ const VersionContent = () => {
           </Box>
         </>
       )}
-    </ContentLayout>
+    </Layouts.Content>
   );
 };
 
