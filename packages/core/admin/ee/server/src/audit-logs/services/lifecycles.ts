@@ -90,6 +90,7 @@ const createAuditLogsLifecycle = (strapi: Core.Strapi) => {
 
   const processEvent = (name: string, ...args: any) => {
     const requestState = strapi.requestContext.get()?.state;
+    console.log('processing event', { name, args, requestState });
 
     // Ignore events with auth strategies different from admin
     const isUsingAdminAuth = requestState?.route.info.type === 'admin';
