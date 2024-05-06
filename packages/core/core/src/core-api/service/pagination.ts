@@ -1,4 +1,4 @@
-import { has, toNumber } from 'lodash/fp';
+import { omit, has, toNumber, pipe } from 'lodash/fp';
 
 import { errors, pagination } from '@strapi/utils';
 
@@ -83,14 +83,20 @@ const getPaginationInfo = (params: { pagination?: PaginationParams }): Paginatio
 
 const transformPaginationResponse = (
   paginationInfo: PaginationInfo,
-  count: number | undefined,
+  total: number | undefined,
   isPaged: boolean
 ) => {
-  if (isPaged) {
-    return pagination.transformPagedPaginationInfo(paginationInfo, count!);
+  const transform = isPaged
+    ? pagination.transformPagedPaginationInfo
+    : pagination.transformOffsetPaginationInfo;
+
+  const paginationResponse = transform(paginationInfo, total);
+
+  if (!total) {
+    return omit(['total', 'pageCount'], paginationResponse);
   }
 
-  return pagination.transformOffsetPaginationInfo(paginationInfo, count!);
+  return paginationResponse;
 };
 
 export { isPagedPagination, shouldCount, getPaginationInfo, transformPaginationResponse };
