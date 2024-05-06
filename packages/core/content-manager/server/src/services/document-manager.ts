@@ -35,7 +35,6 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       opts: {
         populate?: Modules.Documents.Params.Pick<any, 'populate'>;
         locale?: string | string[] | '*';
-        isPublished?: boolean;
       }
     ) {
       // Will look for a specific locale by default
@@ -52,11 +51,6 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       } else if (opts.locale && opts.locale !== '*') {
         // Look for a specific locale, ignore if looking for all locales
         where.locale = opts.locale;
-      }
-
-      // Published is passed, so we filter on it, otherwise we don't filter
-      if (typeof opts.isPublished === 'boolean') {
-        where.publishedAt = { $null: opts.isPublished };
       }
 
       return strapi.db.query(uid).findMany({ populate: opts.populate, where });
