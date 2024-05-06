@@ -103,8 +103,6 @@ const releaseController = {
       model: RELEASE_MODEL_UID,
     });
 
-    console.log('test', strapi.getModel(RELEASE_MODEL_UID));
-
     await permissionsManager.validateQuery(ctx.query);
 
     const releaseService = getService('release', { strapi });

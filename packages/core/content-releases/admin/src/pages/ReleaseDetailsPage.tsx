@@ -807,7 +807,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                                 <ReleaseActionMenu.Root>
                                   <ReleaseActionMenu.ReleaseActionEntryLinkItem
                                     contentTypeUid={contentType.uid}
-                                    entryId={entry.id}
+                                    documentId={entry.documentId}
                                     locale={locale?.code}
                                   />
                                   <ReleaseActionMenu.DeleteReleaseActionItem

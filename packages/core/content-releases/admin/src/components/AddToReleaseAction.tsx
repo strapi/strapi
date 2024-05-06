@@ -22,7 +22,7 @@ import { EmptyDocuments } from '@strapi/icons/symbols';
 import { isAxiosError } from 'axios';
 import { useFormik } from 'formik';
 import { useIntl } from 'react-intl';
-import { Link as ReactRouterLink } from 'react-router-dom';
+import { Link as ReactRouterLink, useParams } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
@@ -53,7 +53,7 @@ export const INITIAL_VALUES = {
 
 interface AddActionToReleaseModalProps {
   contentTypeUid: string;
-  documentId: string;
+  documentId?: string;
   onInputChange: (field: keyof FormValues, value: string | number) => void;
   values: FormValues;
 }
@@ -95,12 +95,15 @@ const AddActionToReleaseModal = ({
   values,
 }: AddActionToReleaseModalProps) => {
   const { formatMessage } = useIntl();
+  const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
+  const locale = query.plugins?.i18n?.locale;
 
   // Get all 'pending' releases that do not have the entry attached
   const response = useGetReleasesForEntryQuery({
     contentTypeUid,
     documentId,
     hasEntryAttached: false,
+    locale,
   });
 
   const releases = response.data?.data;
@@ -161,6 +164,7 @@ const AddToReleaseAction: DocumentActionComponent = ({ documentId, model }) => {
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const locale = query.plugins?.i18n?.locale;
+  const { collectionType } = useParams<{ collectionType: string }>();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, onClose: () => void) => {
     try {
@@ -190,7 +194,7 @@ const AddToReleaseAction: DocumentActionComponent = ({ documentId, model }) => {
     initialValues: INITIAL_VALUES,
     validationSchema: RELEASE_ACTION_FORM_SCHEMA,
     onSubmit: async (values: FormValues) => {
-      if (!documentId) {
+      if (collectionType === 'collection-types' && !documentId) {
         throw new Error('Document id is required');
       }
 
@@ -227,13 +231,12 @@ const AddToReleaseAction: DocumentActionComponent = ({ documentId, model }) => {
     edit: { options },
   } = useDocumentLayout(model);
 
-  if (
-    !window.strapi.isEE ||
-    !options?.draftAndPublish ||
-    !documentId ||
-    documentId === 'create' ||
-    !canCreateAction
-  ) {
+  // Project is not EE or contentType does not have draftAndPublish enabled
+  if (!window.strapi.isEE || !options?.draftAndPublish || !canCreateAction) {
+    return null;
+  }
+
+  if (collectionType === 'collection-types' && (!documentId || documentId === 'create')) {
     return null;
   }
 

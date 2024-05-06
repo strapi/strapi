@@ -54,10 +54,17 @@ export const getEntryId = async (
     contentTypeUid,
     documentId,
     locale,
-  }: { contentTypeUid: UID.ContentType; documentId: string; locale?: string },
+  }: { contentTypeUid: UID.ContentType; documentId?: string; locale?: string },
   { strapi }: { strapi: Core.Strapi }
 ) => {
-  const document = await strapi.documents(contentTypeUid).findOne({ documentId, locale });
+  if (documentId) {
+    const document = await strapi.documents(contentTypeUid).findOne({ documentId, locale });
 
-  return document?.id;
+    return document?.id;
+  }
+
+  // documentId is not defined in singleTypes, so we want to get the first document
+  const documents = await strapi.documents(contentTypeUid).findMany({ locale });
+
+  return documents[0].id;
 };

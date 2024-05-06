@@ -28,6 +28,7 @@ const Panel: PanelComponent = () => {
     edit: { options },
   } = useDocumentLayout(contentTypeUid);
   const { formatMessage, formatDate, formatTime } = useIntl();
+  const { collectionType } = useParams<{ collectionType: string }>();
 
   const { allowedActions } = useRBAC(PERMISSIONS);
   const { canRead, canDeleteAction } = allowedActions;
@@ -51,7 +52,12 @@ const Panel: PanelComponent = () => {
     return `success${shade}`;
   };
 
-  if (!window.strapi.isEE || !options?.draftAndPublish || !id || id === 'create' || !canRead) {
+  // Project is not EE or contentType does not have draftAndPublish enabled
+  if (!window.strapi.isEE || !options?.draftAndPublish || !canRead) {
+    return null;
+  }
+
+  if (collectionType === 'collection-types' && (!id || id === 'create')) {
     return null;
   }
 

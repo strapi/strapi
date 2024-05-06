@@ -4,7 +4,7 @@ const RELEASE_ACTION_SCHEMA = yup.object().shape({
   entry: yup
     .object()
     .shape({
-      documentId: yup.strapiID().required(),
+      documentId: yup.strapiID(),
       contentType: yup.string().required(),
       locale: yup.string(),
     })

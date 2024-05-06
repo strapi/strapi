@@ -35,11 +35,11 @@ type LocaleDictionary = {
   [key: Locale['code']]: Pick<Locale, 'name' | 'code'>;
 };
 
-const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
+const getGroupName = (queryValue: string) => {
   switch (queryValue) {
     case 'contentType':
       return 'contentType.displayName';
-    case 'action':
+    case 'type':
       return 'type';
     case 'locale':
       return _.getOr('No locale', 'locale.name');

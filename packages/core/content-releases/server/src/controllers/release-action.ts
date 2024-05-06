@@ -81,9 +81,11 @@ const releaseActionController = {
     });
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
+    query.sort = query.groupBy === 'action' ? 'type' : query.groupBy;
+    delete query.groupBy;
+
     const releaseService = getService('release', { strapi });
     const { results, pagination } = await releaseService.findActions(releaseId, {
-      sort: query.groupBy === 'action' ? 'type' : query.groupBy,
       ...query,
     });
 
@@ -118,7 +120,7 @@ const releaseActionController = {
       entry: await contentTypeOutputSanitizers[action.contentType](action.entry),
     }));
 
-    const groupedData = await releaseService.groupActions(sanitizedResults, query.groupBy);
+    const groupedData = await releaseService.groupActions(sanitizedResults, query.sort);
 
     const contentTypes = releaseService.getContentTypeModelsFromActions(results);
     const components = await releaseService.getAllComponents();

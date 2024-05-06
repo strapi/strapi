@@ -120,13 +120,13 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
  * -----------------------------------------------------------------------------------------------*/
 interface ReleaseActionEntryLinkItemProps {
   contentTypeUid: ReleaseAction['contentType'];
-  entryId: ReleaseAction['entry']['id'];
+  documentId: ReleaseAction['entry']['documentId'];
   locale: ReleaseAction['locale'];
 }
 
 const ReleaseActionEntryLinkItem = ({
   contentTypeUid,
-  entryId,
+  documentId,
   locale,
 }: ReleaseActionEntryLinkItemProps) => {
   const { formatMessage } = useIntl();
@@ -167,7 +167,7 @@ const ReleaseActionEntryLinkItem = ({
       forwardedAs={NavLink}
       isLink
       to={{
-        pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
+        pathname: `/content-manager/collection-types/${contentTypeUid}/${documentId}`,
         search: locale && `?plugins[i18n][locale]=${locale}`,
       }}
     >

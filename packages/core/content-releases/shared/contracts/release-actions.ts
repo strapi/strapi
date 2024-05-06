@@ -46,7 +46,7 @@ export declare namespace CreateReleaseAction {
     body: {
       type: ReleaseAction['type'];
       entry: {
-        documentId: ReleaseActionEntry['documentId'];
+        documentId?: ReleaseActionEntry['documentId'];
         locale?: ReleaseActionEntry['locale'];
         contentType: string;
       };
