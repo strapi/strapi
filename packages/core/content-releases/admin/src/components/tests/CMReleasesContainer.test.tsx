@@ -7,8 +7,8 @@ import { Route, Routes } from 'react-router-dom';
 
 import { CMReleasesContainer } from '../CMReleasesContainer';
 
-jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
-  ...jest.requireActual('@strapi/plugin-content-manager/strapi-admin'),
+jest.mock('@strapi/content-manager/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/content-manager/strapi-admin'),
   unstable_useDocument: jest.fn().mockReturnValue({
     schema: {
       options: {
@@ -30,9 +30,6 @@ const render = (
       ),
     },
     initialEntries,
-    userEventOptions: {
-      skipHover: true,
-    },
   });
 
 describe('CMReleasesContainer', () => {
@@ -123,16 +120,14 @@ describe('CMReleasesContainer', () => {
     render();
 
     const informationBox = await screen.findByRole('complementary', { name: 'Releases' });
+    await within(informationBox).findAllByRole('button', { name: /release action options/i });
     const release1 = await within(informationBox).findByText('release1');
     const release2 = await within(informationBox).findByText('release2');
     expect(release1).toBeInTheDocument();
     expect(release2).toBeInTheDocument();
   });
 
-  /**
-   * TODO: this needs re-implementing without the act warning appearing.
-   */
-  it.skip('should show the scheduled date for a release', async () => {
+  it('should show the scheduled date for a release', async () => {
     // Mock the response from the server
     server.use(
       rest.get('/content-releases', (req, res, ctx) => {
@@ -155,6 +150,7 @@ describe('CMReleasesContainer', () => {
     render();
 
     await screen.findByRole('complementary', { name: 'Releases' });
+    await screen.findByRole('button', { name: /release action options/i });
     expect(screen.getByText('01/01/2024 at 11:00 (UTC+01:00)')).toBeInTheDocument();
   });
 });

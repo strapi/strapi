@@ -1,8 +1,8 @@
 import * as React from 'react';
 
+import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
 import { Box, Flex, Popover, Typography, useCollator } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
-import { unstable_useDocument as useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
