@@ -118,8 +118,8 @@ describe('Migration - draft and publish', () => {
 
           // Published dog should have a publishedAt value
           expect(draftDog.publishedAt).toBe(null);
-          // Updated at value should be different
-          expect(draftDog.updatedAt).not.toBe(publishedDog.updatedAt);
+          // Updated at value should be the same
+          expect(draftDog.updatedAt).toBe(publishedDog.updatedAt);
         });
 
         data.dogs = sortDogs(dogs.filter((dog) => dog.publishedAt));

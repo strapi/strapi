@@ -6,7 +6,6 @@ import {
   Flex,
   Grid,
   GridItem,
-  Layout,
   Main,
   Typography,
   Link,
@@ -32,6 +31,7 @@ import styled from 'styled-components';
 import { ContentBox } from '../components/ContentBox';
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
 import { useGuidedTour } from '../components/GuidedTour/Provider';
+import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
 import { useAppInfo } from '../features/AppInfo';
 import { useTracking } from '../features/Tracking';
@@ -74,7 +74,7 @@ const HomePageCE = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>
         {formatMessage({
           id: 'HomePage.head.title',
@@ -145,7 +145,7 @@ const HomePageCE = () => {
           </Grid>
         </Box>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

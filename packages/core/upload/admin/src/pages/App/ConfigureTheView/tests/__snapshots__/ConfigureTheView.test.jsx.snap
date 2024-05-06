@@ -452,6 +452,10 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   max-width: 100%;
 }
 
+.c3:focus-visible {
+  outline: none;
+}
+
 .c0 {
   display: grid;
   grid-template-columns: 1fr;
@@ -459,10 +463,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c2 {
   overflow-x: hidden;
-}
-
-.c3:focus-visible {
-  outline: none;
 }
 
 @media (max-width:1100px) {
