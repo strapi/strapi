@@ -1,21 +1,9 @@
 import React, { useReducer } from 'react';
 
-import { Page, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Layout,
-  ToggleInput,
-  Typography,
-} from '@strapi/design-system';
+import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Button, Flex, Grid, GridItem, ToggleInput, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
@@ -102,7 +90,7 @@ export const SettingsPage = () => {
         })}
       </Page.Title>
       <form onSubmit={handleSubmit}>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: getTrad('settings.header.label'),
             defaultMessage: 'Media Library',
@@ -126,8 +114,8 @@ export const SettingsPage = () => {
             defaultMessage: 'Configure the settings for the Media Library',
           })}
         />
-        <ContentLayout>
-          <Layout>
+        <Layouts.Content>
+          <Layouts.Root>
             <Flex direction="column" alignItems="stretch" gap={12}>
               <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                 <Flex direction="column" alignItems="stretch" gap={4}>
@@ -231,8 +219,8 @@ export const SettingsPage = () => {
                 </Flex>
               </Box>
             </Flex>
-          </Layout>
-        </ContentLayout>
+          </Layouts.Root>
+        </Layouts.Content>
       </form>
     </Page.Main>
   );

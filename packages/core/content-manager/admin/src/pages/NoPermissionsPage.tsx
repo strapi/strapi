@@ -1,5 +1,4 @@
-import { Page } from '@strapi/admin/strapi-admin';
-import { ContentLayout, HeaderLayout } from '@strapi/design-system';
+import { Page, Layouts } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 
 import { getTranslation } from '../utils/translations';
@@ -9,15 +8,15 @@ const NoPermissions = () => {
 
   return (
     <>
-      <HeaderLayout
+      <Layouts.Header
         title={formatMessage({
           id: getTranslation('header.name'),
           defaultMessage: 'Content',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <Page.NoPermissions />
-      </ContentLayout>
+      </Layouts.Content>
     </>
   );
 };

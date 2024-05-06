@@ -396,15 +396,6 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c0 {
-  display: grid;
-  grid-template-columns: auto 1fr;
-}
-
-.c46 {
-  overflow-x: hidden;
-}
-
 .c1 {
   width: 23.2rem;
   background: #f6f6f9;
@@ -509,6 +500,15 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 
 .c19 svg path {
   fill: #8e8ea9;
+}
+
+.c0 {
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+.c46 {
+  overflow-x: hidden;
 }
 
 <div>
