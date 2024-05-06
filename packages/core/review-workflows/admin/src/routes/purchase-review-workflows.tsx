@@ -1,15 +1,16 @@
-import { Box, Layout, Main, HeaderLayout, EmptyStateLayout } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { ExternalLink, EmptyPermissions } from '@strapi/icons';
+import { Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Main, EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { ExternalLink } from '@strapi/icons';
+import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 const PurchaseReviewWorkflows = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: 'Settings.review-workflows.list.page.title',
             defaultMessage: 'Review Workflows',
@@ -21,7 +22,7 @@ const PurchaseReviewWorkflows = () => {
         />
         <Box paddingLeft={10} paddingRight={10}>
           <EmptyStateLayout
-            icon={<EmptyPermissions width="10rem" />}
+            icon={<EmptyPermissions width="16rem" />}
             content={formatMessage({
               id: 'Settings.review-workflows.not-available',
               defaultMessage:
@@ -44,7 +45,7 @@ const PurchaseReviewWorkflows = () => {
           />
         </Box>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

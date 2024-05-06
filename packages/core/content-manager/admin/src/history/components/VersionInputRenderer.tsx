@@ -15,7 +15,9 @@ import styled from 'styled-components';
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
 import { useDoc } from '../../hooks/useDocument';
+import { useDocLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
+import { useTypedSelector } from '../../modules/hooks';
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
 import { BlocksInput } from '../../pages/EditView/components/FormInputs/BlocksInput/BlocksInput';
 import { ComponentInput } from '../../pages/EditView/components/FormInputs/Component/Input';
@@ -29,6 +31,8 @@ import { Wysiwyg } from '../../pages/EditView/components/FormInputs/Wysiwyg/Fiel
 import { useFieldHint } from '../../pages/EditView/components/InputRenderer';
 import { getRelationLabel } from '../../utils/relations';
 import { useHistoryContext } from '../pages/History';
+
+import { getRemaingFieldsLayout } from './VersionContent';
 
 import type { EditFieldLayout } from '../../hooks/useDocumentLayout';
 import type { RelationsFieldProps } from '../../pages/EditView/components/FormInputs/Relations';
@@ -59,8 +63,41 @@ const LinkEllipsis = styled(Link)`
 
 const CustomRelationInput = (props: RelationsFieldProps) => {
   const { formatMessage } = useIntl();
-  const field = useField<{ results: RelationResult[]; meta: { missingCount: number } }>(props.name);
-  const { results, meta } = field.value!;
+  const field = useField<
+    { results: RelationResult[]; meta: { missingCount: number } } | RelationResult[]
+  >(props.name);
+
+  /**
+   * Ideally the server would return the correct shape, however, for admin user relations
+   * it sanitizes everything out when it finds an object for the relation value.
+   */
+  const formattedFieldValue = Array.isArray(field.value)
+    ? {
+        results: field.value,
+        meta: { missingCount: 0 },
+      }
+    : field.value;
+
+  if (
+    !formattedFieldValue ||
+    (formattedFieldValue.results.length === 0 && formattedFieldValue.meta.missingCount === 0)
+  ) {
+    return (
+      <>
+        <FieldLabel>{props.label}</FieldLabel>
+        <Box marginTop={1}>
+          <StyledAlert variant="default">
+            {formatMessage({
+              id: 'content-manager.history.content.no-relations',
+              defaultMessage: 'No relations.',
+            })}
+          </StyledAlert>
+        </Box>
+      </>
+    );
+  }
+
+  const { results, meta } = formattedFieldValue;
 
   return (
     <Box>
@@ -68,7 +105,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       {results.length > 0 && (
         <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
           {results.map((relationData) => {
-            // @ts-expect-error – targetModel does exist on the attribute. But it's not typed.
+            // @ts-expect-error - targetModel does exist on the attribute. But it's not typed.
             const href = `../${COLLECTION_TYPES}/${props.attribute.targetModel}/${relationData.documentId}`;
             const label = getRelationLabel(relationData, props.mainField);
 
@@ -119,16 +156,6 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
             { number: meta.missingCount }
           )}
         </StyledAlert>
-      )}
-      {results.length === 0 && meta.missingCount === 0 && (
-        <Box marginTop={1}>
-          <StyledAlert variant="default">
-            {formatMessage({
-              id: 'content-manager.history.content.no-relations',
-              defaultMessage: 'No relations.',
-            })}
-          </StyledAlert>
-        </Box>
       )}
     </Box>
   );
@@ -203,10 +230,11 @@ const VersionInputRenderer = ({
   ...props
 }: VersionInputRendererProps) => {
   const { formatMessage } = useIntl();
-  const { version } = useHistoryContext('VersionContent', (state) => ({
-    version: state.selectedVersion,
-  }));
-  const { id } = useDoc();
+  const version = useHistoryContext('VersionContent', (state) => state.selectedVersion);
+  const configuration = useHistoryContext('VersionContent', (state) => state.configuration);
+  const fieldSizes = useTypedSelector((state) => state['content-manager'].app.fieldSizes);
+
+  const { id, components } = useDoc();
   const isFormDisabled = useForm('InputRenderer', (state) => state.disabled);
 
   const isInDynamicZone = useDynamicZone('isInDynamicZone', (state) => state.isInDynamicZone);
@@ -231,6 +259,9 @@ const VersionInputRenderer = ({
   );
 
   const hint = useFieldHint(providedHint, props.attribute);
+  const {
+    edit: { components: componentsLayout },
+  } = useDocLayout();
 
   if (!visible) {
     return null;
@@ -323,13 +354,24 @@ const VersionInputRenderer = ({
     case 'blocks':
       return <BlocksInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
     case 'component':
+      const { layout } = componentsLayout[props.attribute.component];
+      // Components can only have one panel, so only save the first layout item
+      const [remainingFieldsLayout] = getRemaingFieldsLayout({
+        layout: [layout],
+        metadatas: configuration.components[props.attribute.component].metadatas,
+        fieldSizes,
+        schemaAttributes: components[props.attribute.component].attributes,
+      });
+
       return (
         <ComponentInput
           {...props}
+          layout={[...layout, ...(remainingFieldsLayout || [])]}
           hint={hint}
           disabled={fieldIsDisabled}
-          renderInput={(props) => <VersionInputRenderer {...props} shouldIgnoreRBAC={true} />}
-        />
+        >
+          {(inputProps) => <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />}
+        </ComponentInput>
       );
     case 'dynamiczone':
       return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;

@@ -1,12 +1,11 @@
 import * as React from 'react';
 
 import { useAPIErrorHandler, useNotification, useAuth, useRBAC } from '@strapi/admin/strapi-admin';
-import { Flex, IconButton, Typography, Icon } from '@strapi/design-system';
-import { Menu, Link } from '@strapi/design-system/v2';
+import { Flex, IconButton, Typography, Menu } from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { isAxiosError } from 'axios';
 import { useIntl } from 'react-intl';
-import { NavLink } from 'react-router-dom';
+import { Link as NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
@@ -19,9 +18,7 @@ const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
     background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
 
     svg {
-      path {
-        fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
-      }
+      fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
     }
 
     a {
@@ -30,9 +27,7 @@ const StyledMenuItem = styled(Menu.Item)<{ variant?: 'neutral' | 'danger' }>`
   }
 
   svg {
-    path {
-      fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
-    }
+    fill: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}600`]};
   }
 
   a {
@@ -108,7 +103,7 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
   return (
     <StyledMenuItem variant="danger" onSelect={handleDeleteAction}>
       <Flex gap={2}>
-        <Icon as={Cross} width={3} height={3} />
+        <Cross width="1.6rem" height="1.6rem" />
         <Typography textColor="danger600" variant="omega">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.remove-from-release',
@@ -168,23 +163,23 @@ const ReleaseActionEntryLinkItem = ({
   }
 
   return (
-    <StyledMenuItem>
-      <Link
-        as={NavLink}
-        // @ts-expect-error TODO: This component from DS is not using types from NavLink
-        to={{
-          pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
-          search: locale && `?plugins[i18n][locale]=${locale}`,
-        }}
-        startIcon={<Icon as={Pencil} width={3} height={3} />}
-      >
+    <StyledMenuItem
+      forwardedAs={NavLink}
+      isLink
+      to={{
+        pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
+        search: locale && `?plugins[i18n][locale]=${locale}`,
+      }}
+    >
+      <Flex gap={2}>
+        <Pencil width="1.6rem" height="1.6rem" />
         <Typography variant="omega">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.edit-entry',
             defaultMessage: 'Edit entry',
           })}
         </Typography>
-      </Link>
+      </Flex>
     </StyledMenuItem>
   );
 };
@@ -200,19 +195,16 @@ const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <StyledMenuItem>
-      <Link
-        href={`/admin/plugins/content-releases/${releaseId}`}
-        startIcon={<Icon as={Pencil} width={3} height={3} />}
-        isExternal={false}
-      >
+    <StyledMenuItem forwardedAs={NavLink} isLink to={`/plugins/content-releases/${releaseId}`}>
+      <Flex gap={2}>
+        <Pencil width="1.6rem" height="1.6rem" />
         <Typography variant="omega">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.edit-release',
             defaultMessage: 'Edit release',
           })}
         </Typography>
-      </Link>
+      </Flex>
     </StyledMenuItem>
   );
 };
@@ -235,7 +227,7 @@ const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release
     allowedActions.canDeleteAction || allowedActions.canUpdate ? (
       <Menu.Root>
-        {/* 
+        {/*
           TODO Fix in the DS
           - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
           - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange

@@ -4,8 +4,8 @@
  *
  */
 
-import { Box, GridLayout, Flex, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import { Box, Flex, Typography, Link } from '@strapi/design-system';
+import { Layouts } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -23,7 +23,7 @@ const LogoContainer = styled(Box)`
   right: 0;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
@@ -33,7 +33,7 @@ const RightSideCloudContainer = styled(Box)`
   right: 0;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
@@ -43,7 +43,7 @@ const LeftSideCloudContainer = styled(Box)`
   left: 220px;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
@@ -84,10 +84,10 @@ const HomePage = () => {
         </Flex>
       </Box>
       <Box padding={10}>
-        <GridLayout>
+        <Layouts.Grid size="M">
           <GithubBox />
           <CloudBox />
-        </GridLayout>
+        </Layouts.Grid>
         <Box padding={6} borderRadius={8} hasRadius background="neutral0" borderColor="neutral200">
           <Box paddingBottom={2}>
             <Typography variant="delta" fontWeight="bold" textColor="neutral1000" as="p">

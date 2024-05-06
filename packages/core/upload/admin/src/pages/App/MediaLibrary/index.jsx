@@ -6,21 +6,19 @@ import {
   Pagination,
   useTracking,
   useQueryParams,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
 import {
-  ActionLayout,
   BaseCheckbox,
   Box,
-  ContentLayout,
   Divider,
   Flex,
   GridItem,
   IconButton,
-  Layout,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Cog, Grid, List, Pencil } from '@strapi/icons';
+import { Cog, GridFour as Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
@@ -54,7 +52,7 @@ import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 
 const BoxWithHeight = styled(Box)`
-  height: ${32 / 16}rem;
+  height: 3.2rem;
   display: flex;
   align-items: center;
 `;
@@ -217,7 +215,7 @@ export const MediaLibrary = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Main>
         <Header
           breadcrumbs={
@@ -228,7 +226,7 @@ export const MediaLibrary = () => {
           onToggleUploadAssetDialog={toggleUploadAssetDialog}
           folder={currentFolder}
         />
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <>
               {canUpdate && isGridView && (assetCount > 0 || folderCount > 0) && (
@@ -306,7 +304,7 @@ export const MediaLibrary = () => {
           }
         />
 
-        <ContentLayout>
+        <Layouts.Content>
           {selected.length > 0 && (
             <BulkActions
               currentFolder={currentFolder}
@@ -478,7 +476,7 @@ export const MediaLibrary = () => {
             <Pagination.PageSize />
             <Pagination.Links />
           </Pagination.Root>
-        </ContentLayout>
+        </Layouts.Content>
       </Page.Main>
 
       {showUploadAssetDialog && (
@@ -515,6 +513,6 @@ export const MediaLibrary = () => {
           trackedLocation="upload"
         />
       )}
-    </Layout>
+    </Layouts.Root>
   );
 };

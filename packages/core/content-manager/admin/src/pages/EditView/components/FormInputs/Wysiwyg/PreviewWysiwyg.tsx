@@ -38,7 +38,7 @@ const Wrapper = styled.div`
   height: 100%;
   overflow: auto;
   padding: ${({ theme }) => `${theme.spaces[3]} ${theme.spaces[4]}`};
-  font-size: ${14 / 16}rem;
+  font-size: 1.4rem;
   background-color: ${({ theme }) => theme.colors.neutral0};
   color: ${({ theme }) => theme.colors.neutral800};
   line-height: ${({ theme }) => theme.lineHeights[6]};
@@ -58,22 +58,22 @@ const Wrapper = styled.div`
   }
 
   h1 {
-    font-size: ${36 / 16}rem;
+    font-size: 3.6rem;
     font-weight: 600;
   }
 
   h2 {
-    font-size: ${30 / 16}rem;
+    font-size: 3rem;
     font-weight: 500;
   }
 
   h3 {
-    font-size: ${24 / 16}rem;
+    font-size: 2.4rem;
     font-weight: 500;
   }
 
   h4 {
-    font-size: ${20 / 16}rem;
+    font-size: 2rem;
     font-weight: 500;
   }
 
@@ -88,7 +88,7 @@ const Wrapper = styled.div`
   blockquote {
     margin-top: ${({ theme }) => theme.spaces[8]};
     margin-bottom: ${({ theme }) => theme.spaces[7]};
-    font-size: ${14 / 16}rem;
+    font-size: 1.4rem;
     font-weight: 400;
     border-left: 4px solid ${({ theme }) => theme.colors.neutral150};
     font-style: italic;
@@ -121,7 +121,7 @@ const Wrapper = styled.div`
 
   pre,
   code {
-    font-size: ${14 / 16}rem;
+    font-size: 1.4rem;
     border-radius: 4px;
     /* 
       Hard coded since the color is the same between themes,

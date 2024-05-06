@@ -1,5 +1,4 @@
-import { Badge, Tooltip, Typography } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system/v2';
+import { Badge, Tooltip, Typography, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -83,8 +82,8 @@ const RepeatableComponentTypography = styled(Typography)`
  */
 const MenuTrigger = styled(Menu.Trigger)`
   svg {
-    width: ${6 / 16}rem;
-    height: ${4 / 16}rem;
+    width: 0.6rem;
+    height: 0.4rem;
   }
 `;
 

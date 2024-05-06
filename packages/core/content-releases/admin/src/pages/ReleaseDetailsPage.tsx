@@ -12,12 +12,12 @@ import {
   useQueryParams,
   useRBAC,
   useStrapiApp,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Button,
-  ContentLayout,
   Flex,
-  HeaderLayout,
   IconButton,
   Main,
   Tr,
@@ -26,13 +26,13 @@ import {
   Badge,
   SingleSelect,
   SingleSelectOption,
-  Icon,
   Tooltip,
   EmptyStateLayout,
+  LinkButton,
+  Menu,
 } from '@strapi/design-system';
-import { LinkButton, Menu } from '@strapi/design-system/v2';
-import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
+import { CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
@@ -146,7 +146,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
 
     return (
       <Flex gap={2}>
-        <Icon color="danger600" as={CrossCircle} />
+        <CrossCircle fill="danger600" />
         <Tooltip description={validationErrorsMessages}>
           <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
             {validationErrorsMessages}
@@ -159,7 +159,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
   if (action == 'publish') {
     return (
       <Flex gap={2}>
-        <Icon color="success600" as={CheckCircle} />
+        <CheckCircle fill="success600" />
         {entry.publishedAt ? (
           <Typography textColor="success600" fontWeight="bold">
             {formatMessage({
@@ -181,7 +181,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
 
   return (
     <Flex gap={2}>
-      <Icon color="success600" as={CheckCircle} />
+      <CheckCircle fill="success600" />
       {!entry.publishedAt ? (
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
@@ -352,7 +352,7 @@ const ReleaseDetailsLayout = ({
 
   return (
     <Main aria-busy={isLoadingDetails}>
-      <HeaderLayout
+      <Layouts.Header
         title={release.name}
         subtitle={
           <Flex gap={2} lineHeight={6}>
@@ -388,7 +388,7 @@ const ReleaseDetailsLayout = ({
                   TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
                   Refactor this once fixed in the DS
                 */}
-                <Menu.Content top={1} popoverPlacement="bottom-end">
+                <Menu.Content top={1} popoverPlacement="bottom-end" maxHeight={undefined}>
                   <Flex
                     alignItems="center"
                     justifyContent="center"
@@ -627,7 +627,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   if (Object.keys(releaseActions).length === 0) {
     return (
-      <ContentLayout>
+      <Layouts.Content>
         <EmptyStateLayout
           action={
             <LinkButton
@@ -645,14 +645,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               })}
             </LinkButton>
           }
-          icon={<EmptyDocuments width="10rem" />}
+          icon={<EmptyDocuments width="16rem" />}
           content={formatMessage({
             id: 'content-releases.pages.Details.tab.emptyEntries',
             defaultMessage:
               'This release is empty. Open the Content Manager, select an entry and add it to the release.',
           })}
         />
-      </ContentLayout>
+      </Layouts.Content>
     );
   }
 
@@ -698,7 +698,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
 
   return (
-    <ContentLayout>
+    <Layouts.Content>
       <Flex gap={8} direction="column" alignItems="stretch">
         <Flex>
           <SingleSelect
@@ -832,7 +832,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           <Pagination.Links />
         </Pagination.Root>
       </Flex>
-    </ContentLayout>
+    </Layouts.Content>
   );
 };
 

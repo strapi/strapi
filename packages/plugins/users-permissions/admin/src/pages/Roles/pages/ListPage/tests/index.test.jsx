@@ -71,7 +71,7 @@ describe('Roles – ListPage', () => {
 
     await waitForElementToBeRemoved(() => queryByText('Loading content.'));
 
-    await user.click(getByRole('link', { name: 'Edit Authenticated', hidden: true }));
+    await user.click(getByRole('gridcell', { name: 'Edit Authenticated' }));
 
     expect(getByTestId('location-display')).toHaveTextContent('/1');
   });

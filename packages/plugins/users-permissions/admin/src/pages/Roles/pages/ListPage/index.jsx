@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 
 import {
-  ActionLayout,
-  ContentLayout,
-  HeaderLayout,
-  Layout,
   Table,
   Th,
   Thead,
@@ -16,7 +12,7 @@ import {
   useCollator,
   useFilter,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import {
   ConfirmDialog,
@@ -28,6 +24,7 @@ import {
   useQueryParams,
   useFetchClient,
   useRBAC,
+  Layouts,
 } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
@@ -156,7 +153,7 @@ export const RolesListPage = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -164,7 +161,7 @@ export const RolesListPage = () => {
         )}
       </Page.Title>
       <Page.Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: 'global.roles',
             defaultMessage: 'Roles',
@@ -192,7 +189,7 @@ export const RolesListPage = () => {
           navigationAction={<BackButton />}
         />
 
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <SearchInput
               label={formatMessage({
@@ -203,7 +200,7 @@ export const RolesListPage = () => {
           }
         />
 
-        <ContentLayout>
+        <Layouts.Content>
           {!canRead && <Page.NoPermissions />}
           {canRead && sortedRoles && sortedRoles?.length ? (
             <Table colCount={colCount} rowCount={rowCount}>
@@ -252,14 +249,14 @@ export const RolesListPage = () => {
           ) : (
             <EmptyStateLayout content={formatMessage(emptyLayout[emptyContent])} />
           )}
-        </ContentLayout>
+        </Layouts.Content>
         <ConfirmDialog
           onConfirm={handleConfirmDelete}
           onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

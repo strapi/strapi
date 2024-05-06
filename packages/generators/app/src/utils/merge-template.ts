@@ -187,5 +187,5 @@ async function mergePackageJSON({
 // Merge all allowed files and directories
 async function mergeFilesAndDirectories(rootPath: string, templatePath: string) {
   const templateDir = path.join(templatePath, 'template');
-  await fse.copy(templateDir, rootPath, { overwrite: true, recursive: true });
+  await fse.copy(templateDir, rootPath, { overwrite: true });
 }

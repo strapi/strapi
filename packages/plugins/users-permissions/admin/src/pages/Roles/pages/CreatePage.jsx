@@ -2,18 +2,16 @@ import * as React from 'react';
 
 import {
   Button,
-  ContentLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
   Main,
   Textarea,
   TextInput,
   Typography,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
-import { Page, useTracking, useNotification, useFetchClient } from '@strapi/strapi/admin';
+import { Page, useTracking, useNotification, useFetchClient, Layouts } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
@@ -85,7 +83,7 @@ export const CreatePage = () => {
       >
         {({ handleSubmit, values, handleChange, errors }) => (
           <Form noValidate onSubmit={handleSubmit}>
-            <HeaderLayout
+            <Layouts.Header
               primaryAction={
                 !isLoadingPlugins && (
                   <Button type="submit" loading={mutation.isLoading} startIcon={<Check />}>
@@ -105,7 +103,7 @@ export const CreatePage = () => {
                 defaultMessage: 'Define the rights given to the role',
               })}
             />
-            <ContentLayout>
+            <Layouts.Content>
               <Flex
                 background="neutral0"
                 direction="column"
@@ -175,7 +173,7 @@ export const CreatePage = () => {
                   />
                 )}
               </Flex>
-            </ContentLayout>
+            </Layouts.Content>
           </Form>
         )}
       </Formik>

@@ -3,11 +3,9 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  ContentLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
   TextInput,
   ToggleInput,
   Typography,
@@ -15,7 +13,7 @@ import {
 } from '@strapi/design-system';
 // Strapi Icons
 import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
-import { translatedErrors, useRBAC } from '@strapi/strapi/admin';
+import { translatedErrors, useRBAC, Layouts } from '@strapi/strapi/admin';
 import { Form, Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -34,8 +32,8 @@ const schema = yup.object().shape({
 
 const FieldActionWrapper = styled(FieldAction)`
   svg {
-    height: 1rem;
-    width: 1rem;
+    height: 1.6rem;
+    width: 1.6rem;
     path {
       fill: ${({ theme }) => theme.colors.neutral600};
     }
@@ -74,7 +72,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
       }) => {
         return (
           <Form noValidate onSubmit={handleSubmit}>
-            <HeaderLayout
+            <Layouts.Header
               title={formatMessage({
                 id: getTrad('plugin.name'),
                 defaultMessage: 'Documentation',
@@ -96,7 +94,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                 </Button>
               }
             />
-            <ContentLayout>
+            <Layouts.Content>
               <Box
                 background="neutral0"
                 hasRadius
@@ -186,7 +184,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                   </Grid>
                 </Flex>
               </Box>
-            </ContentLayout>
+            </Layouts.Content>
           </Form>
         );
       }}

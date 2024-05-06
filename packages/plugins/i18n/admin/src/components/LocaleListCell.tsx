@@ -1,8 +1,8 @@
 import * as React from 'react';
 
+import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
 import { Box, Flex, Popover, Typography, useCollator } from '@strapi/design-system';
-import { CarretDown } from '@strapi/icons';
-import { unstable_useDocument as useDocument } from '@strapi/plugin-content-manager/strapi-admin';
+import { CaretDown } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -75,14 +75,14 @@ const LocaleListCell = ({
         minWidth="100%"
         alignItems="center"
         justifyContent="center"
-        height="2rem"
-        width="2rem"
+        height="3.2rem"
+        width="3.2rem"
       >
         <Typography textColor="neutral800" ellipsis>
           {localesForDocument.join(', ')}
         </Typography>
         <Flex>
-          <CarretDown />
+          <CaretDown />
         </Flex>
       </ActionWrapper>
       {visible && (
@@ -134,7 +134,7 @@ const Button = styled.button`
 
 const ActionWrapper = styled(Flex)`
   svg {
-    height: ${4 / 16}rem;
+    height: 0.4rem;
   }
 `;
 

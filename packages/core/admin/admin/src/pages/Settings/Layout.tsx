@@ -1,7 +1,7 @@
-import { Layout as DSLayout } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Navigate, Outlet, useMatch } from 'react-router-dom';
 
+import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { useSettingsMenu } from '../../hooks/useSettingsMenu';
 
@@ -27,7 +27,7 @@ const Layout = () => {
   }
 
   return (
-    <DSLayout sideNav={<SettingsNav menu={menu} />}>
+    <Layouts.Root sideNav={<SettingsNav menu={menu} />}>
       <Page.Title>
         {formatMessage({
           id: 'global.settings',
@@ -35,7 +35,7 @@ const Layout = () => {
         })}
       </Page.Title>
       <Outlet />
-    </DSLayout>
+    </Layouts.Root>
   );
 };
 

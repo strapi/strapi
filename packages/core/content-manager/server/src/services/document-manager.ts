@@ -1,6 +1,6 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, sanitize, errors } from '@strapi/utils';
+import { contentTypes, sanitize, errors, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
@@ -82,23 +82,18 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async findPage(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
-      // Pagination
-      const page = Number(opts?.page) || 1;
-      const pageSize = Number(opts?.pageSize) || 10;
+      const params = pagination.withDefaultPagination(opts || {}, {
+        maxLimit: 1000,
+      });
 
       const [documents, total = 0] = await Promise.all([
-        strapi.documents(uid).findMany(opts),
-        strapi.documents(uid).count(opts),
+        strapi.documents(uid).findMany(params),
+        strapi.documents(uid).count(params),
       ]);
 
       return {
         results: documents,
-        pagination: {
-          page,
-          pageSize,
-          pageCount: Math.ceil(total! / pageSize),
-          total,
-        },
+        pagination: pagination.transformPagedPaginationInfo(params, total),
       };
     },
 
@@ -138,7 +133,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .clone({ ...params, documentId: id })
-        .then((result) => result?.versions.at(0));
+        .then((result) => result?.entries.at(0));
     },
 
     /**
@@ -193,7 +188,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .publish({ ...params, documentId: id })
-        .then((result) => result?.versions.at(0));
+        .then((result) => result?.entries.at(0));
     },
 
     async publishMany(entities: Document[], uid: UID.ContentType) {
@@ -288,7 +283,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .unpublish({ ...params, documentId: id })
-        .then((result) => result?.versions.at(0));
+        .then((result) => result?.entries.at(0));
     },
 
     async discardDraft(
@@ -302,7 +297,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .discardDraft({ ...params, documentId: id })
-        .then((result) => result?.versions.at(0));
+        .then((result) => result?.entries.at(0));
     },
 
     async countDraftRelations(id: string, uid: UID.ContentType, locale: string) {

@@ -9,9 +9,9 @@ const BrandIconWrapper = styled(Box)`
   img {
     border-radius: ${({ theme }) => theme.borderRadius};
     object-fit: contain;
-    height: ${24 / 16}rem;
-    width: ${24 / 16}rem;
-    margin: ${3 / 16}rem;
+    height: 2.4rem;
+    width: 2.4rem;
+    margin: 0.4rem;
   }
 `;
 
@@ -22,7 +22,7 @@ export const NavBrand = () => {
   } = useConfiguration('LeftMenu');
   return (
     <Box padding={3}>
-      <BrandIconWrapper>
+      <BrandIconWrapper width="3.2rem" height="3.2rem">
         <img
           src={menu.custom?.url || menu.default}
           alt={formatMessage({

@@ -1,14 +1,15 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { EmptyDocuments, Plus } from '@strapi/icons';
+import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { Data } from '@strapi/types';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
@@ -138,7 +139,7 @@ export const ListView = () => {
           { name: 'API Tokens' }
         )}
       </Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         title={formatMessage({ id: 'Settings.apiTokens.title', defaultMessage: 'API Tokens' })}
         subtitle={formatMessage({
           id: 'Settings.apiTokens.description',
@@ -171,7 +172,7 @@ export const ListView = () => {
         <Page.NoPermissions />
       ) : (
         <Page.Main aria-busy={isLoading}>
-          <ContentLayout>
+          <Layouts.Content>
             {apiTokens.length > 0 && (
               <Table
                 permissions={{ canRead, canDelete, canUpdate }}
@@ -184,7 +185,7 @@ export const ListView = () => {
             )}
             {canCreate && apiTokens.length === 0 ? (
               <EmptyStateLayout
-                icon={<EmptyDocuments width="10rem" />}
+                icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({
                   id: 'Settings.apiTokens.addFirstToken',
                   defaultMessage: 'Add your first API Token',
@@ -207,14 +208,14 @@ export const ListView = () => {
             ) : null}
             {!canCreate && apiTokens.length === 0 ? (
               <EmptyStateLayout
-                icon={<EmptyDocuments width="10rem" />}
+                icon={<EmptyDocuments width="16rem" />}
                 content={formatMessage({
                   id: 'Settings.apiTokens.emptyStateLayout',
                   defaultMessage: 'You don’t have any content yet...',
                 })}
               />
             ) : null}
-          </ContentLayout>
+          </Layouts.Content>
         </Page.Main>
       )}
     </>

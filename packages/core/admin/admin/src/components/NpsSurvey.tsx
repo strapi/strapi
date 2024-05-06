@@ -25,8 +25,8 @@ import { useNotification } from '../features/Notifications';
 import { usePersistentState } from '../hooks/usePersistentState';
 
 const FieldWrapper = styled(Field)`
-  height: ${32 / 16}rem;
-  width: ${32 / 16}rem;
+  height: 3.2rem;
+  width: 3.2rem;
 
   > label,
   ~ input {
