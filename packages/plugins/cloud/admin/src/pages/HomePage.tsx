@@ -4,8 +4,8 @@
  *
  */
 
-import { Box, GridLayout, Flex, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Box, Flex, Typography, Link } from '@strapi/design-system';
+import { Layouts } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
@@ -84,10 +84,10 @@ const HomePage = () => {
         </Flex>
       </Box>
       <Box padding={10}>
-        <GridLayout>
+        <Layouts.Grid size="M">
           <GithubBox />
           <CloudBox />
-        </GridLayout>
+        </Layouts.Grid>
         <Box padding={6} borderRadius={8} hasRadius background="neutral0" borderColor="neutral200">
           <Box paddingBottom={2}>
             <Typography variant="delta" fontWeight="bold" textColor="neutral1000" as="p">

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Tooltip, Flex, Badge } from '@strapi/design-system';
+import { Tooltip, Flex, Badge, BadgeProps } from '@strapi/design-system';
 import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -12,8 +12,9 @@ const MainNavLinkWrapper = styled(RouterLink)`
   display: block;
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
-  color: ${({ theme }) => theme.colors.neutral600};
+  color: ${({ theme }) => theme.colors.neutral500};
   position: relative;
+  width: fit-content;
 
   &:hover,
   &.active {
@@ -74,14 +75,23 @@ const IconImpl = ({ children }: { children: React.ReactNode }) => {
 const CustomBadge = styled(Badge)`
   /* override default badge styles to change the border radius of the Base element in the Design System */
   border-radius: ${({ theme }) => theme.spaces[10]};
+  height: 2rem;
 `;
 
-const BadgeImpl = ({ children, label, ...props }: NavLink.BadgeProps) => {
+const BadgeImpl = ({ children, label, ...props }: NavLink.NavBadgeProps) => {
   if (!children) {
     return null;
   }
   return (
-    <CustomBadge position="absolute" top="-1.2rem" right="-0.4rem" aria-label={label} {...props}>
+    <CustomBadge
+      position="absolute"
+      width="2.3rem"
+      top="-0.8rem"
+      left="1.7rem"
+      aria-label={label}
+      active={false}
+      {...props}
+    >
       {children}
     </CustomBadge>
   );
@@ -100,7 +110,7 @@ const NavLink = {
 
 // eslint-disable-next-line @typescript-eslint/no-namespace
 namespace NavLink {
-  export interface BadgeProps {
+  export interface NavBadgeProps extends BadgeProps {
     children: React.ReactNode;
     label: string;
   }
