@@ -36,8 +36,11 @@ const getLimitConfigDefaults = () => ({
   maxLimit: toNumber(strapi.config.get('api.rest.maxLimit')) || null,
 });
 
+const isOffsetPagination = (pagination?: PaginationParams): pagination is OffsetPagination =>
+  has('start', pagination) || has('limit', pagination);
+
 const isPagedPagination = (pagination?: PaginationParams): pagination is PagedPagination =>
-  has('page', pagination) || has('pageSize', pagination);
+  has('page', pagination) || has('pageSize', pagination) || !isOffsetPagination(pagination);
 
 const shouldCount = (params: { pagination?: PaginationParams }) => {
   if (has('pagination.withCount', params)) {
@@ -80,14 +83,14 @@ const getPaginationInfo = (params: { pagination?: PaginationParams }): Paginatio
 
 const transformPaginationResponse = (
   paginationInfo: PaginationInfo,
-  count: number,
+  count: number | undefined,
   isPaged: boolean
 ) => {
   if (isPaged) {
-    return pagination.transformPagedPaginationInfo(paginationInfo, count);
+    return pagination.transformPagedPaginationInfo(paginationInfo, count!);
   }
 
-  return pagination.transformOffsetPaginationInfo(paginationInfo, count);
+  return pagination.transformOffsetPaginationInfo(paginationInfo, count!);
 };
 
 export { isPagedPagination, shouldCount, getPaginationInfo, transformPaginationResponse };

@@ -49,7 +49,7 @@ export class CollectionTypeService
 
     return {
       results,
-      pagination: paginationInfo,
+      pagination: transformPaginationResponse(paginationInfo, undefined, isPaged),
     };
   }
 
