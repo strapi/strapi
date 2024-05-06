@@ -1,6 +1,11 @@
 import type { Core, Struct, Modules } from '@strapi/types';
 
-import { getPaginationInfo, shouldCount, transformPaginationResponse } from './pagination';
+import {
+  getPaginationInfo,
+  shouldCount,
+  isPagedPagination,
+  transformPaginationResponse,
+} from './pagination';
 
 import { CoreService } from './core-service';
 
@@ -22,6 +27,7 @@ export class CollectionTypeService
     const fetchParams = this.getFetchParams(params);
 
     const paginationInfo = getPaginationInfo(fetchParams);
+    const isPaged = isPagedPagination(fetchParams.pagination);
 
     const results = await strapi.documents(uid).findMany({
       ...fetchParams,
@@ -37,13 +43,13 @@ export class CollectionTypeService
 
       return {
         results,
-        pagination: transformPaginationResponse(paginationInfo, count),
+        pagination: transformPaginationResponse(paginationInfo, count, isPaged),
       };
     }
 
     return {
       results,
-      pagination: paginationInfo,
+      pagination: transformPaginationResponse(paginationInfo, undefined, isPaged),
     };
   }
 
