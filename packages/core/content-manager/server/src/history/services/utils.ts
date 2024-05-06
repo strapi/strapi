@@ -5,11 +5,12 @@ import { contentTypes } from '@strapi/utils';
 import { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import { FIELDS_TO_IGNORE } from '../constants';
 import { HistoryVersions } from '../../../../shared/contracts';
+import { RelationResult } from '../../../../shared/contracts/relations';
 
 const DEFAULT_RETENTION_DAYS = 90;
 
 type RelationResponse = {
-  results: any[];
+  results: RelationResult[];
   meta: { missingCount: number };
 };
 

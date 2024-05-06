@@ -106,6 +106,11 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
 
                 return {
                   ...(await currentDataWithRelations),
+                  /**
+                   * Ideally we would return the same "{results: [], meta: {}}" shape, however,
+                   * when sanitizing the data as a whole in the controller before sending to the client,
+                   * the data for admin relation user is completely sanitized if we return an object here as opposed to an array.
+                   */
                   [attributeKey]: adminUsers,
                 };
               }
