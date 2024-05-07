@@ -1,82 +1,38 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Divider,
-  Flex,
-  FocusTrap,
-  Typography,
-  MainNav,
-  NavBrand,
-  NavCondense,
-  NavFooter,
-  NavLink,
-  NavSection,
-  NavSections,
-  NavUser,
-} from '@strapi/design-system';
-import { SignOut, Feather, Lock, House } from '@strapi/icons';
+import { Divider, Flex } from '@strapi/design-system';
+import { Feather, Lock, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { useAuth } from '../features/Auth';
-import { useConfiguration } from '../features/Configuration';
 import { useTracking } from '../features/Tracking';
 import { Menu } from '../hooks/useMenu';
-import { usePersistentState } from '../hooks/usePersistentState';
 import { getDisplayName } from '../utils/users';
 
-import { NavBrand as NewNavBrand } from './MainNav/NavBrand';
-import { NavLink as NewNavLink } from './MainNav/NavLink';
+import { MainNav } from './MainNav/MainNav';
+import { NavBrand } from './MainNav/NavBrand';
+import { NavLink } from './MainNav/NavLink';
+import { NavUser } from './MainNav/NavUser';
 
-const LinkUserWrapper = styled(Box)`
-  width: 15rem;
-  position: absolute;
-  bottom: ${({ theme }) => theme.spaces[9]};
-  left: ${({ theme }) => theme.spaces[5]};
-`;
-
-const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  text-decoration: none;
-  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
-  border-radius: ${({ theme }) => theme.spaces[1]};
-
-  &:hover {
-    background: ${({ theme, logout }) =>
-      logout ? theme.colors.danger100 : theme.colors.primary100};
-    text-decoration: none;
-  }
-
-  svg {
-    fill: ${({ theme }) => theme.colors.danger600};
+const NewNavLinkBadge = styled(NavLink.Badge)`
+  span {
+    color: ${({ theme }) => theme.colors.neutral0};
   }
 `;
 
-const NavLinkWrapper = styled(Box)`
-  div:nth-child(2) {
-    /* remove badge background color */
-    background: transparent;
-  }
+const NavListWrapper = styled(Flex)`
+  overflow-y: auto;
 `;
 
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
-  const navUserRef = React.useRef<HTMLDivElement>(null!);
-  const [userLinksVisible, setUserLinksVisible] = React.useState(false);
-  const {
-    logos: { menu },
-  } = useConfiguration('LeftMenu');
-  const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const user = useAuth('AuthenticatedApp', (state) => state.user);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
-  const logout = useAuth('Logout', (state) => state.logout);
   const userDisplayName = getDisplayName(user);
 
   const initials = userDisplayName
@@ -85,198 +41,122 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     .join('')
     .substring(0, 2);
 
-  const handleToggleUserLinks = () => setUserLinksVisible((prev) => !prev);
-
-  const handleBlur: React.FocusEventHandler = (e) => {
-    if (
-      !e.currentTarget.contains(e.relatedTarget) &&
-      /**
-       * TODO: can we replace this by just using the navUserRef?
-       */
-      e.relatedTarget?.parentElement?.id !== 'main-nav-user-button'
-    ) {
-      setUserLinksVisible(false);
-    }
-  };
-
   const handleClickOnLink = (destination: string) => {
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
-  const menuTitle = formatMessage({
-    id: 'app.components.LeftMenu.navbrand.title',
-    defaultMessage: 'Strapi Dashboard',
-  });
-
   return (
-    <MainNav condensed={condensed}>
-      {condensed ? (
-        /**
-         * TODO: remove the conditional rendering once the new Main nav is fully implemented
-         */
-        <NewNavBrand />
-      ) : (
-        <NavBrand
-          as={RouterNavLink}
-          workplace={formatMessage({
-            id: 'app.components.LeftMenu.navbrand.workplace',
-            defaultMessage: 'Workplace',
-          })}
-          title={menuTitle}
-          icon={
-            <img
-              src={menu.custom?.url || menu.default}
-              alt={formatMessage({
-                id: 'app.components.LeftMenu.logo.alt',
-                defaultMessage: 'Application logo',
-              })}
-            />
-          }
-        />
-      )}
+    <MainNav>
+      <NavBrand />
 
       <Divider />
 
-      <NavSections>
-        {condensed && (
-          <NewNavLink.Link to="/" onClick={() => handleClickOnLink('/')}>
-            <NewNavLink.Tooltip
-              label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
-            >
-              <NewNavLink.Icon>
+      <NavListWrapper as="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3}>
+        <Flex as="li">
+          <NavLink.Link
+            to="/"
+            onClick={() => handleClickOnLink('/')}
+            aria-label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
+          >
+            <NavLink.Tooltip label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}>
+              <NavLink.Icon>
                 <House fill="neutral500" />
-              </NewNavLink.Icon>
-            </NewNavLink.Tooltip>
-          </NewNavLink.Link>
-        )}
-        <NavLink
-          as={RouterNavLink}
-          // @ts-expect-error the props from the passed as prop are not inferred // joined together
-          to="/content-manager"
-          icon={<Feather />}
-          onClick={() => handleClickOnLink('/content-manager')}
-        >
-          {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
-        </NavLink>
-
-        {pluginsSectionLinks.length > 0 ? (
-          <NavSection
-            label={formatMessage({
-              id: 'app.components.LeftMenu.plugins',
-              defaultMessage: 'Plugins',
+              </NavLink.Icon>
+            </NavLink.Tooltip>
+          </NavLink.Link>
+        </Flex>
+        <Flex as="li">
+          <NavLink.Link
+            to="/content-manager"
+            onClick={() => handleClickOnLink('/content-manager')}
+            aria-label={formatMessage({
+              id: 'global.content-manager',
+              defaultMessage: 'Content Manager',
             })}
           >
-            {pluginsSectionLinks.map((link) => {
+            <NavLink.Tooltip
+              label={formatMessage({
+                id: 'global.content-manager',
+                defaultMessage: 'Content Manager',
+              })}
+            >
+              <NavLink.Icon>
+                <Feather fill="neutral500" />
+              </NavLink.Icon>
+            </NavLink.Tooltip>
+          </NavLink.Link>
+        </Flex>
+        {pluginsSectionLinks.length > 0
+          ? pluginsSectionLinks.map((link) => {
               if (link.to === 'content-manager') {
                 return null;
               }
 
               const LinkIcon = link.icon;
-              return (
-                <NavLinkWrapper key={link.to}>
-                  <NavLink
-                    as={RouterNavLink}
-                    to={link.to}
-                    icon={<LinkIcon />}
-                    onClick={() => handleClickOnLink(link.to)}
-                    // @ts-expect-error: badgeContent in the DS accept only strings
-                    badgeContent={
-                      link?.lockIcon ? <Lock width="1.5rem" height="1.5rem" /> : undefined
-                    }
-                  >
-                    {formatMessage(link.intlLabel)}
-                  </NavLink>
-                </NavLinkWrapper>
-              );
-            })}
-          </NavSection>
-        ) : null}
+              const badgeContent = link?.lockIcon ? <Lock /> : undefined;
 
-        {generalSectionLinks.length > 0 ? (
-          <NavSection
-            label={formatMessage({
-              id: 'app.components.LeftMenu.general',
-              defaultMessage: 'General',
-            })}
-          >
-            {generalSectionLinks.map((link) => {
+              const labelValue = formatMessage(link.intlLabel);
+              return (
+                <Flex as="li" key={link.to}>
+                  <NavLink.Link
+                    to={link.to}
+                    onClick={() => handleClickOnLink(link.to)}
+                    aria-label={labelValue}
+                  >
+                    <NavLink.Tooltip label={labelValue}>
+                      <NavLink.Icon>
+                        <LinkIcon fill="neutral500" />
+                      </NavLink.Icon>
+                      {badgeContent && (
+                        <NavLink.Badge
+                          label="locked"
+                          background="transparent"
+                          textColor="neutral500"
+                        >
+                          {badgeContent}
+                        </NavLink.Badge>
+                      )}
+                    </NavLink.Tooltip>
+                  </NavLink.Link>
+                </Flex>
+              );
+            })
+          : null}
+        {generalSectionLinks.length > 0
+          ? generalSectionLinks.map((link) => {
               const LinkIcon = link.icon;
 
+              const badgeContent =
+                link.notificationsCount && link.notificationsCount > 0
+                  ? link.notificationsCount.toString()
+                  : undefined;
+
+              const labelValue = formatMessage(link.intlLabel);
+
               return (
-                <NavLink
-                  as={RouterNavLink}
-                  badgeContent={
-                    link.notificationsCount && link.notificationsCount > 0
-                      ? link.notificationsCount.toString()
-                      : undefined
-                  }
-                  // @ts-expect-error the props from the passed as prop are not inferred // joined together
-                  to={link.to}
-                  key={link.to}
-                  icon={<LinkIcon />}
-                  onClick={() => handleClickOnLink(link.to)}
-                >
-                  {formatMessage(link.intlLabel)}
-                </NavLink>
+                <Flex as="li" key={link.to}>
+                  <NavLink.Link
+                    aria-label={labelValue}
+                    to={link.to}
+                    onClick={() => handleClickOnLink(link.to)}
+                  >
+                    <NavLink.Tooltip label={labelValue}>
+                      <NavLink.Icon>
+                        <LinkIcon fill="neutral500" />
+                      </NavLink.Icon>
+                      {badgeContent && (
+                        <NewNavLinkBadge label={badgeContent} backgroundColor="primary600">
+                          {badgeContent}
+                        </NewNavLinkBadge>
+                      )}
+                    </NavLink.Tooltip>
+                  </NavLink.Link>
+                </Flex>
               );
-            })}
-          </NavSection>
-        ) : null}
-      </NavSections>
-
-      <NavFooter>
-        <NavUser
-          id="main-nav-user-button"
-          ref={navUserRef}
-          onClick={handleToggleUserLinks}
-          initials={initials}
-        >
-          {userDisplayName}
-        </NavUser>
-        {userLinksVisible && (
-          <LinkUserWrapper
-            onBlur={handleBlur}
-            padding={1}
-            shadow="tableShadow"
-            background="neutral0"
-            hasRadius
-          >
-            <FocusTrap onEscape={handleToggleUserLinks}>
-              <Flex direction="column" alignItems="stretch" gap={0}>
-                <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
-                  <Typography>
-                    {formatMessage({
-                      id: 'global.profile',
-                      defaultMessage: 'Profile',
-                    })}
-                  </Typography>
-                </LinkUser>
-                <LinkUser tabIndex={0} onClick={logout} to="/auth/login">
-                  <Typography textColor="danger600">
-                    {formatMessage({
-                      id: 'app.components.LeftMenu.logout',
-                      defaultMessage: 'Logout',
-                    })}
-                  </Typography>
-                  <SignOut />
-                </LinkUser>
-              </Flex>
-            </FocusTrap>
-          </LinkUserWrapper>
-        )}
-
-        <NavCondense onClick={() => setCondensed((s) => !s)}>
-          {condensed
-            ? formatMessage({
-                id: 'app.components.LeftMenu.expand',
-                defaultMessage: 'Expand the navbar',
-              })
-            : formatMessage({
-                id: 'app.components.LeftMenu.collapse',
-                defaultMessage: 'Collapse the navbar',
-              })}
-        </NavCondense>
-      </NavFooter>
+            })
+          : null}
+      </NavListWrapper>
+      <NavUser initials={initials}>{userDisplayName}</NavUser>
     </MainNav>
   );
 };

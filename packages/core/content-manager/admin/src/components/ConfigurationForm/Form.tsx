@@ -1,18 +1,14 @@
 import * as React from 'react';
 
-import { Form, FormProps, useForm, InputRenderer, BackButton } from '@strapi/admin/strapi-admin';
 import {
-  Button,
-  ContentLayout,
-  Divider,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Layout,
-  Main,
-  Typography,
-} from '@strapi/design-system';
+  Form,
+  FormProps,
+  useForm,
+  InputRenderer,
+  BackButton,
+  Layouts,
+} from '@strapi/admin/strapi-admin';
+import { Button, Divider, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
@@ -88,11 +84,11 @@ const ConfigurationForm = ({
   }, [layout, settings]);
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Main>
         <Form initialValues={initialValues} onSubmit={onSubmit} method="PUT">
           <Header name={settings.displayName ?? ''} />
-          <ContentLayout>
+          <Layouts.Content>
             <Flex
               alignItems="stretch"
               background="neutral0"
@@ -170,10 +166,10 @@ const ConfigurationForm = ({
                 </GridItem>
               </Grid>
             </Flex>
-          </ContentLayout>
+          </Layouts.Content>
         </Form>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 
@@ -282,7 +278,7 @@ const Header = ({ name }: HeaderProps) => {
   const isSubmitting = useForm('Header', (state) => state.isSubmitting);
 
   return (
-    <HeaderLayout
+    <Layouts.Header
       title={formatMessage(
         {
           id: getTranslation('components.SettingsViewWrapper.pluginHeader.title'),

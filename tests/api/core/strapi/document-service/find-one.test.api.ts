@@ -85,7 +85,5 @@ describe('Document Service', () => {
 
       expect(author).toMatchObject(authorDb);
     });
-
-    it.todo('ignores pagination parameters');
   });
 });

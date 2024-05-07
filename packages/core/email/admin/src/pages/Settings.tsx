@@ -1,14 +1,12 @@
 import * as React from 'react';
 
-import { Page, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
-  ContentLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
   SingleSelectOption,
   SingleSelect,
   TextInput,
@@ -136,7 +134,7 @@ const SettingsPage = () => {
           }
         )}
       </Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         id="title"
         title={formatMessage({
           id: 'email.Settings.email.plugin.title',
@@ -148,7 +146,7 @@ const SettingsPage = () => {
         })}
       />
 
-      <ContentLayout>
+      <Layouts.Content>
         {data && (
           <form onSubmit={handleSubmit}>
             <Flex direction="column" alignItems="stretch" gap={7}>
@@ -308,7 +306,7 @@ const SettingsPage = () => {
             </Flex>
           </form>
         )}
-      </ContentLayout>
+      </Layouts.Content>
     </Page.Main>
   );
 };

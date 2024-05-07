@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Page } from '@strapi/admin/strapi-admin';
-import { Box, ContentLayout, HeaderLayout } from '@strapi/design-system';
+import { Page, Layouts } from '@strapi/admin/strapi-admin';
+import { Box } from '@strapi/design-system';
 import { XYCoord, useDragLayer } from 'react-dnd';
 import { useIntl } from 'react-intl';
 
@@ -61,7 +61,7 @@ const DragLayerRendered = () => {
 const Root: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <Page.Main>
-      <ContentLayout>{children}</ContentLayout>
+      <Layouts.Content>{children}</Layouts.Content>
     </Page.Main>
   );
 };
@@ -86,7 +86,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, navigationAction, prim
           }
         )}
       </Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         navigationAction={navigationAction}
         primaryAction={primaryAction}
         title={title}

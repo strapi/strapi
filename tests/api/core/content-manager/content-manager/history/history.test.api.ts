@@ -2,8 +2,42 @@ import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
 import { createUtils, describeOnCondition } from 'api-tests/utils';
 import { createTestBuilder } from 'api-tests/builder';
+import fs from 'fs';
+import path from 'path';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
+
+const relationUid = 'api::tag.tag';
+const relationModel = {
+  draftAndPublish: true,
+  singularName: 'tag',
+  pluralName: 'tags',
+  displayName: 'Tag',
+  kind: 'collectionType',
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
+  attributes: {
+    name: {
+      type: 'string',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    password: {
+      type: 'password',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+  },
+};
 
 const collectionTypeUid = 'api::product.product';
 const collectionTypeModel = {
@@ -28,6 +62,44 @@ const collectionTypeModel = {
     },
     description: {
       type: 'string',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    tags_one_to_one: {
+      type: 'relation',
+      relation: 'oneToOne',
+      target: relationUid,
+      targetAttribute: 'product',
+    },
+    tags_one_to_many: {
+      type: 'relation',
+      relation: 'oneToMany',
+      target: relationUid,
+      targetAttribute: 'tag_one_to_many',
+    },
+    image: {
+      type: 'media',
+      multiple: false,
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    images: {
+      type: 'media',
+      multiple: true,
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    password: {
+      type: 'password',
       pluginOptions: {
         i18n: {
           localized: true,
@@ -86,6 +158,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
   let rq;
   let collectionTypeDocumentId;
   let singleTypeDocumentId;
+  let relations;
 
   const createEntry = async ({ uid, data, isCollectionType = true }: CreateEntryArgs) => {
     const type = isCollectionType ? 'collection-types' : 'single-types';
@@ -111,6 +184,21 @@ describeOnCondition(edition === 'EE')('History API', () => {
     });
 
     return body;
+  };
+
+  const uploadFiles = async () => {
+    const res = await rq({
+      method: 'POST',
+      url: '/upload',
+      formData: {
+        files: [
+          fs.createReadStream(path.join(__dirname, 'rec.jpg')),
+          fs.createReadStream(path.join(__dirname, 'strapi.jpg')),
+        ],
+      },
+    });
+
+    return res.body;
   };
 
   const createUserAndReq = async (
@@ -139,7 +227,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
   };
 
   beforeAll(async () => {
-    await builder.addContentTypes([collectionTypeModel, singleTypeModel]).build();
+    await builder.addContentTypes([relationModel, collectionTypeModel, singleTypeModel]).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
@@ -148,11 +236,41 @@ describeOnCondition(edition === 'EE')('History API', () => {
     const localeService = strapi.plugin('i18n').service('locales');
     await localeService.create({ code: 'fr', name: 'French' });
 
+    // Create the relations to be added to versions
+    relations = await Promise.all([
+      createEntry({
+        uid: relationUid,
+        data: {
+          name: 'Tag 1',
+        },
+      }),
+      createEntry({
+        uid: relationUid,
+        data: {
+          name: 'Tag 2',
+        },
+      }),
+      createEntry({
+        uid: relationUid,
+        data: {
+          name: 'Tag 3',
+        },
+      }),
+    ]);
+    const relationIds = relations.map((relation) => relation.data.documentId);
+
+    // Upload media assets to be added to versions
+    const [imageA, imageB] = await uploadFiles();
     // Create a collection type to create an initial history version
     const collectionTypeEntry = await createEntry({
       uid: collectionTypeUid,
       data: {
         name: 'Product 1',
+        tags_one_to_one: relationIds[0],
+        tags_one_to_many: relationIds,
+
+        image: imageA.id,
+        images: [imageA.id, imageB.id],
       },
     });
 
@@ -226,7 +344,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
   });
 
   describe('Find many history versions', () => {
-    test('A collection type throws with invalid query params', async () => {
+    test('Throws with invalid query params for a collection type', async () => {
       const noDocumentId = await rq({
         method: 'GET',
         url: `/content-manager/history-versions/?contentType=${collectionTypeUid}`,
@@ -241,7 +359,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(noContentTypeUid.statusCode).toBe(403);
     });
 
-    test('A single type throws with invalid query params', async () => {
+    test('Throws with invalid query params for a single type', async () => {
       const singleTypeNoContentTypeUid = await rq({
         method: 'GET',
         url: `/content-manager/history-versions/`,
@@ -260,7 +378,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(res.statusCode).toBe(403);
     });
 
-    test('A collection type finds many versions in the default locale', async () => {
+    test('Finds many versions in the default locale for a collection type', async () => {
       const collectionType = await rq({
         method: 'GET',
         url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}`,
@@ -280,7 +398,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
     });
 
-    test('A collection type finds many versions in the provided locale', async () => {
+    test('Finds many versions in the provided locale for a collection type', async () => {
       const collectionType = await rq({
         method: 'GET',
         url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&locale=fr`,
@@ -300,7 +418,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
     });
 
-    test('A single type finds many versions in the default locale', async () => {
+    test('Finds many versions in the default locale for a single type', async () => {
       const singleType = await rq({
         method: 'GET',
         url: `/content-manager/history-versions/?contentType=${singleTypeUid}`,
@@ -320,7 +438,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
     });
 
-    test('A single type finds many versions in the provided locale', async () => {
+    test('Finds many versions in the provided locale for a single type', async () => {
       const singleType = await rq({
         method: 'GET',
         url: `/content-manager/history-versions/?contentType=${singleTypeUid}&locale=fr`,
@@ -340,7 +458,7 @@ describeOnCondition(edition === 'EE')('History API', () => {
       });
     });
 
-    test('Applies pagination params', async () => {
+    test('Finds many versions with pagination params', async () => {
       const collectionType = await rq({
         method: 'GET',
         url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=1&pageSize=1`,
@@ -353,6 +471,21 @@ describeOnCondition(edition === 'EE')('History API', () => {
         pageCount: 2,
         total: 2,
       });
+    });
+
+    test('Finds many versions with sensitive data', async () => {
+      const collectionType = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${collectionTypeDocumentId}&page=1&pageSize=1`,
+      });
+
+      expect(collectionType.body.data).toHaveLength(1);
+      expect(Object.keys(collectionType.body.data[0].data).includes('password')).toBe(false);
+      expect(
+        Object.keys(collectionType.body.data[0].data.tags_one_to_one.results[0]).includes(
+          'password'
+        )
+      ).toBe(false);
     });
   });
 
@@ -463,6 +596,53 @@ describeOnCondition(edition === 'EE')('History API', () => {
 
       expect(currentDocument.description).toBe('Coucou');
       expect(restoredDocument.description).toBe(null);
+    });
+
+    test('Restores a history version with missing relations', async () => {
+      // All versions of the document were created with relations
+      const currentDocument = await strapi.documents(collectionTypeUid).findOne({
+        documentId: collectionTypeDocumentId,
+        populate: ['tags_one_to_one', 'tags_one_to_many'],
+      });
+
+      // Delete a relation
+      await strapi.documents(relationUid).delete({ documentId: relations[0].data.documentId });
+
+      // Restore the version containing the deleted relation
+      const restoredDocument = await strapi.documents(collectionTypeUid).findOne({
+        documentId: collectionTypeDocumentId,
+        populate: ['tags_one_to_one', 'tags_one_to_many', 'image'],
+      });
+
+      expect(currentDocument['tags_one_to_one']).not.toBe(null);
+      expect(currentDocument['tags_one_to_many']).toHaveLength(3);
+      expect(restoredDocument['tags_one_to_one']).toBe(null);
+      expect(restoredDocument['tags_one_to_many']).toHaveLength(2);
+    });
+
+    test('Restores a history version with missing media assets', async () => {
+      // All versions of the document were created with media
+      const currentDocument = await strapi.documents(collectionTypeUid).findOne({
+        documentId: collectionTypeDocumentId,
+        populate: ['image', 'images'],
+      });
+
+      // Delete the asset
+      await rq({
+        method: 'DELETE',
+        url: `/upload/files/1`,
+      });
+
+      // Restore the version containing the deleted media
+      const restoredDocument = await strapi.documents(collectionTypeUid).findOne({
+        documentId: collectionTypeDocumentId,
+        populate: ['image', 'images'],
+      });
+
+      expect(currentDocument['image']).not.toBe(null);
+      expect(currentDocument['images']).toHaveLength(2);
+      expect(restoredDocument['image']).toBe(null);
+      expect(restoredDocument['images']).toHaveLength(1);
     });
   });
 });
