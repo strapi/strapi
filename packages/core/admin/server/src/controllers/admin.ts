@@ -156,7 +156,15 @@ export default {
 
     // List of core plugins that are always enabled,
     // and so it's not necessary to display them in the plugins list
-    const CORE_PLUGINS = ['content-manager', 'content-type-builder', 'email', 'upload', 'i18n'];
+    const CORE_PLUGINS = [
+      'content-manager',
+      'content-type-builder',
+      'email',
+      'upload',
+      'i18n',
+      'content-releases',
+      'review-workflows',
+    ];
 
     const plugins = Object.entries(enabledPlugins)
       .filter(([key]: any) => !CORE_PLUGINS.includes(key))
