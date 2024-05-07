@@ -246,9 +246,8 @@ describe('CM API - Basic + compo', () => {
       // TODO: Validate document is published
     });
 
-    // TODO: Implement bulk publish
-    test.skip('Can bulk publish product with compo - required', async () => {
-      const product = {
+    test('Can bulk publish product with compo - required', async () => {
+      const product1 = {
         name: 'Product 1',
         description: 'Product description',
         compo: {
@@ -256,22 +255,38 @@ describe('CM API - Basic + compo', () => {
           description: 'short',
         },
       };
-      const res = await rq({
+
+      const product2 = {
+        name: 'Product 2',
+        description: 'Product description',
+        compo: {
+          name: 'compo name',
+          description: 'short',
+        },
+      };
+
+      const res1 = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
-        body: product,
+        body: product1,
+      });
+
+      const res2 = await rq({
+        method: 'POST',
+        url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+        body: product2,
       });
 
       const publishRes = await rq({
         method: 'POST',
         url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/actions/bulkPublish`,
         body: {
-          ids: [res.body.documentId],
+          documentIds: [res1.body.data.documentId, res2.body.data.documentId],
         },
       });
 
       expect(publishRes.statusCode).toBe(200);
-      expect(publishRes.body).toMatchObject({ count: 1 });
+      expect(publishRes.body).toMatchObject({ count: 2 });
     });
   });
 });
