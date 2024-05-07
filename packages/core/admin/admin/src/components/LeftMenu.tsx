@@ -8,7 +8,7 @@ import styled from 'styled-components';
 
 import { useAuth } from '../features/Auth';
 import { useTracking } from '../features/Tracking';
-import { Menu } from '../hooks/useMenu';
+import { Menu, MenuItem } from '../hooks/useMenu';
 import { getDisplayName } from '../utils/users';
 
 import { MainNav } from './MainNav/MainNav';
@@ -28,6 +28,14 @@ const NavListWrapper = styled(Flex)`
 
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
 
+const arrayMove = (arr: MenuItem[], oldIndex: number, newIndex: number) => {
+  if (newIndex >= arr.length) {
+    return arr;
+  }
+  arr.splice(newIndex, 0, arr.splice(oldIndex, 1)[0]);
+  return arr;
+};
+
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
   const user = useAuth('AuthenticatedApp', (state) => state.user);
   const { formatMessage } = useIntl();
@@ -44,6 +52,17 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const handleClickOnLink = (destination: string) => {
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
+
+  let listLinks = [...pluginsSectionLinks, ...generalSectionLinks];
+
+  /**
+   * Move the documentation link before the settings
+   */
+  const documentLinkIndex = listLinks.findIndex((link) => link.to.includes('documentation'));
+
+  if (documentLinkIndex > -1) {
+    listLinks = arrayMove(listLinks, documentLinkIndex, listLinks.length - 2);
+  }
 
   return (
     <MainNav>
@@ -86,14 +105,19 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             </NavLink.Tooltip>
           </NavLink.Link>
         </Flex>
-        {pluginsSectionLinks.length > 0
-          ? pluginsSectionLinks.map((link) => {
+        {listLinks.length > 0
+          ? listLinks.map((link) => {
               if (link.to === 'content-manager') {
                 return null;
               }
 
               const LinkIcon = link.icon;
-              const badgeContent = link?.lockIcon ? <Lock /> : undefined;
+              const badgeContentLock = link?.lockIcon ? <Lock /> : undefined;
+
+              const badgeContentNumeric =
+                link.notificationsCount && link.notificationsCount > 0
+                  ? link.notificationsCount.toString()
+                  : undefined;
 
               const labelValue = formatMessage(link.intlLabel);
               return (
@@ -107,22 +131,26 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                       <NavLink.Icon>
                         <LinkIcon fill="neutral500" />
                       </NavLink.Icon>
-                      {badgeContent && (
+                      {badgeContentLock ? (
                         <NavLink.Badge
                           label="locked"
                           background="transparent"
                           textColor="neutral500"
                         >
-                          {badgeContent}
+                          {badgeContentLock}
                         </NavLink.Badge>
-                      )}
+                      ) : badgeContentNumeric ? (
+                        <NewNavLinkBadge label={badgeContentNumeric} backgroundColor="primary600">
+                          {badgeContentNumeric}
+                        </NewNavLinkBadge>
+                      ) : null}
                     </NavLink.Tooltip>
                   </NavLink.Link>
                 </Flex>
               );
             })
           : null}
-        {generalSectionLinks.length > 0
+        {/* {generalSectionLinks.length > 0
           ? generalSectionLinks.map((link) => {
               const LinkIcon = link.icon;
 
@@ -154,7 +182,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                 </Flex>
               );
             })
-          : null}
+          : null} */}
       </NavListWrapper>
       <NavUser initials={initials}>{userDisplayName}</NavUser>
     </MainNav>
