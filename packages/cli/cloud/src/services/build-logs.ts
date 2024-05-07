@@ -28,9 +28,12 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
         const resetTimeout = () => {
           clearExistingTimeout();
           timeoutId = setTimeout(() => {
-            logger.log(
-              'We were unable to connect to the server to get build logs at this time. This could be due to a temporary issue.'
-            );
+            const message = 'We were unable to connect to the server to get build logs at this time. This could be due to a temporary issue.';
+            if (spinner.isSpinning) {
+              spinner.fail(message);
+            } else {
+              logger.error(message);
+            }
             es.close();
             reject(new Error('Connection timed out'));
           }, CONN_TIMEOUT);
