@@ -304,6 +304,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                 >
                   <h1
                     class="c7"
+                    tag="span"
                   >
                     Email templates
                   </h1>

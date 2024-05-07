@@ -282,6 +282,7 @@ exports[`Header renders 1`] = `
         >
           <h1
             class="c8"
+            tag="span"
           >
             Media Library
           </h1>

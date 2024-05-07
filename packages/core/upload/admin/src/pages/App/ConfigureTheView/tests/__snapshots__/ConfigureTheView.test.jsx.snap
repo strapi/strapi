@@ -343,6 +343,10 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   max-width: 100%;
 }
 
+.c3:focus-visible {
+  outline: none;
+}
+
 .c0 {
   display: grid;
   grid-template-columns: 1fr;
@@ -350,10 +354,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c2 {
   overflow-x: hidden;
-}
-
-.c3:focus-visible {
-  outline: none;
 }
 
 @media (max-width: 1100px) {
@@ -426,6 +426,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                 >
                   <h1
                     class="c12"
+                    tag="span"
                   >
                     Configure the view - Media Library
                   </h1>
@@ -461,6 +462,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
               </div>
               <p
                 class="c18"
+                tag="span"
               >
                 Define the view settings of the media library.
               </p>
