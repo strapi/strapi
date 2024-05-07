@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import ora from 'ora';
+import ora, { Ora } from 'ora';
 import * as cliProgress from 'cli-progress';
 
 export interface LoggerOptions {
@@ -23,6 +23,31 @@ export interface Logger {
     text: string
   ) => Pick<cliProgress.SingleBar, 'start' | 'stop' | 'update'>;
 }
+
+const silentSpinner = {
+  succeed() {
+    return this;
+  },
+  fail() {
+    return this;
+  },
+  start() {
+    return this;
+  },
+  text: '',
+} as Ora;
+
+const silentProgressBar = {
+  start() {
+    return this;
+  },
+  stop() {
+    return this;
+  },
+  update() {
+    return this;
+  },
+} as unknown as cliProgress.SingleBar;
 
 const createLogger = (options: LoggerOptions = {}): Logger => {
   const { silent = false, debug = false, timestamp = true } = options;
@@ -105,21 +130,9 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       );
     },
 
-    // @ts-expect-error – returning a subpart of ora is fine because the types tell us what is what.
     spinner(text: string) {
       if (silent) {
-        return {
-          succeed() {
-            return this;
-          },
-          fail() {
-            return this;
-          },
-          start() {
-            return this;
-          },
-          text: '',
-        };
+        return silentSpinner;
       }
 
       return ora(text);
@@ -127,17 +140,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
     progressBar(totalSize: number, text: string) {
       if (silent) {
-        return {
-          start() {
-            return this;
-          },
-          stop() {
-            return this;
-          },
-          update() {
-            return this;
-          },
-        };
+        return silentProgressBar;
       }
 
       const progressBar = new cliProgress.SingleBar({
