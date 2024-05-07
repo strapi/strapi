@@ -1,15 +1,6 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
 import { useIntl } from 'react-intl';
@@ -19,6 +10,7 @@ import * as yup from 'yup';
 import { Update } from '../../../../../../shared/contracts/user';
 import { Form, FormHelpers } from '../../../../components/Form';
 import { InputRenderer } from '../../../../components/FormInputs/Renderer';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
@@ -192,7 +184,7 @@ const EditPage = () => {
         {({ isSubmitting, modified }) => {
           return (
             <>
-              <HeaderLayout
+              <Layouts.Header
                 primaryAction={
                   <Button
                     disabled={isSubmitting || !canUpdate || !modified}
@@ -216,7 +208,7 @@ const EditPage = () => {
                 )}
                 navigationAction={<BackButton />}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 {user?.registrationToken && (
                   <Box paddingBottom={6}>
                     <MagicLink registrationToken={user.registrationToken} />
@@ -285,7 +277,7 @@ const EditPage = () => {
                     </Flex>
                   </Box>
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </>
           );
         }}

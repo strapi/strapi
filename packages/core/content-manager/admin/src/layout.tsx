@@ -1,8 +1,7 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { Page, useGuidedTour } from '@strapi/admin/strapi-admin';
-import { Layout as DSLayout } from '@strapi/design-system';
+import { Page, useGuidedTour, Layouts } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Navigate, Route, Routes, useLocation, useMatch } from 'react-router-dom';
 
@@ -89,14 +88,14 @@ const Layout = () => {
           defaultMessage: 'Content Manager',
         })}
       </Page.Title>
-      <DSLayout sideNav={<LeftMenu />}>
+      <Layouts.Root sideNav={<LeftMenu />}>
         <DragLayer renderItem={renderDraglayerItem} />
         <Routes>
           {routes.map((route) => (
             <Route key={route.path} {...route} />
           ))}
         </Routes>
-      </DSLayout>
+      </Layouts.Root>
     </>
   );
 };

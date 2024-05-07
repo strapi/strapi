@@ -1,11 +1,8 @@
 import {
   Button,
-  ContentLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
-  Layout,
   MultiSelect,
   MultiSelectOption,
   Typography,
@@ -22,6 +19,7 @@ import {
   useField,
 } from '../../../../../../admin/src/components/Form';
 import { InputRenderer } from '../../../../../../admin/src/components/FormInputs/Renderer';
+import { Layouts } from '../../../../../../admin/src/components/Layouts/Layout';
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useNotification } from '../../../../../../admin/src/features/Notifications';
@@ -115,7 +113,7 @@ export const SingleSignOnPage = () => {
   const isLoadingData = isLoadingRoles || isLoadingPermissions || isLoadingProviderOptions;
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -140,7 +138,7 @@ export const SingleSignOnPage = () => {
         >
           {({ modified, isSubmitting }) => (
             <>
-              <HeaderLayout
+              <Layouts.Header
                 primaryAction={
                   <Button
                     disabled={!modified}
@@ -164,7 +162,7 @@ export const SingleSignOnPage = () => {
                   defaultMessage: 'Configure the settings for the Single Sign-On feature.',
                 })}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 {isSubmitting || isLoadingData ? (
                   <Page.Loading />
                 ) : (
@@ -250,12 +248,12 @@ export const SingleSignOnPage = () => {
                     </Grid>
                   </Flex>
                 )}
-              </ContentLayout>
+              </Layouts.Content>
             </>
           )}
         </Form>
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

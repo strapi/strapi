@@ -1,14 +1,6 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-} from '@strapi/design-system';
+import { Box, Button, Flex, Grid, GridItem, TextInput } from '@strapi/design-system';
 import { Check, Play as Publish } from '@strapi/icons';
 import { IntlShape, useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -16,6 +8,7 @@ import * as yup from 'yup';
 import { TriggerWebhook } from '../../../../../../../shared/contracts/webhooks';
 import { Form, FormHelpers } from '../../../../../components/Form';
 import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
+import { Layouts } from '../../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../../features/BackButton';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
 
@@ -94,7 +87,7 @@ const WebhookForm = ({
     >
       {({ isSubmitting, modified }) => (
         <>
-          <HeaderLayout
+          <Layouts.Header
             primaryAction={
               <Flex gap={2}>
                 <Button
@@ -136,7 +129,7 @@ const WebhookForm = ({
             }
             navigationAction={<BackButton />}
           />
-          <ContentLayout>
+          <Layouts.Content>
             <Flex direction="column" alignItems="stretch" gap={4}>
               {showTriggerResponse && (
                 <TriggerContainer
@@ -180,7 +173,7 @@ const WebhookForm = ({
                 </Flex>
               </Box>
             </Flex>
-          </ContentLayout>
+          </Layouts.Content>
         </>
       )}
     </Form>

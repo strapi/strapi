@@ -6,17 +6,15 @@ import {
   Pagination,
   useTracking,
   useQueryParams,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
 import {
-  ActionLayout,
   BaseCheckbox,
   Box,
-  ContentLayout,
   Divider,
   Flex,
   GridItem,
   IconButton,
-  Layout,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
@@ -217,7 +215,7 @@ export const MediaLibrary = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Main>
         <Header
           breadcrumbs={
@@ -228,7 +226,7 @@ export const MediaLibrary = () => {
           onToggleUploadAssetDialog={toggleUploadAssetDialog}
           folder={currentFolder}
         />
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <>
               {canUpdate && isGridView && (assetCount > 0 || folderCount > 0) && (
@@ -306,7 +304,7 @@ export const MediaLibrary = () => {
           }
         />
 
-        <ContentLayout>
+        <Layouts.Content>
           {selected.length > 0 && (
             <BulkActions
               currentFolder={currentFolder}
@@ -478,7 +476,7 @@ export const MediaLibrary = () => {
             <Pagination.PageSize />
             <Pagination.Links />
           </Pagination.Root>
-        </ContentLayout>
+        </Layouts.Content>
       </Page.Main>
 
       {showUploadAssetDialog && (
@@ -515,6 +513,6 @@ export const MediaLibrary = () => {
           trackedLocation="upload"
         />
       )}
-    </Layout>
+    </Layouts.Root>
   );
 };

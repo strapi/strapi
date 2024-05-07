@@ -1,8 +1,6 @@
 import * as React from 'react';
 
 import {
-  ContentLayout,
-  HeaderLayout,
   Main,
   Button,
   Flex,
@@ -20,6 +18,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useFetchClient,
+  Layouts,
 } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -103,7 +102,7 @@ export const EditPage = () => {
       >
         {({ handleSubmit, values, handleChange, errors }) => (
           <Form noValidate onSubmit={handleSubmit}>
-            <HeaderLayout
+            <Layouts.Header
               primaryAction={
                 !isLoadingPlugins ? (
                   <Button
@@ -123,7 +122,7 @@ export const EditPage = () => {
               subtitle={role.description}
               navigationAction={<BackButton />}
             />
-            <ContentLayout>
+            <Layouts.Content>
               <Flex
                 background="neutral0"
                 direction="column"
@@ -202,7 +201,7 @@ export const EditPage = () => {
                   />
                 )}
               </Flex>
-            </ContentLayout>
+            </Layouts.Content>
           </Form>
         )}
       </Formik>

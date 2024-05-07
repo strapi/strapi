@@ -8,6 +8,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
 import {
@@ -15,13 +16,11 @@ import {
   Badge,
   Box,
   Button,
-  ContentLayout,
   Divider,
   EmptyStateLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
   Main,
   Tab,
   TabGroup,
@@ -291,7 +290,7 @@ const ReleasesPage = () => {
 
   return (
     <Main aria-busy={isLoading}>
-      <HeaderLayout
+      <Layouts.Header
         title={formatMessage({
           id: 'content-releases.pages.Releases.title',
           defaultMessage: 'Releases',
@@ -315,7 +314,7 @@ const ReleasesPage = () => {
           ) : null
         }
       />
-      <ContentLayout>
+      <Layouts.Content>
         <>
           {hasReachedMaximumPendingReleases && (
             <StyledAlert
@@ -404,7 +403,7 @@ const ReleasesPage = () => {
             <Pagination.Links />
           </Pagination.Root>
         </>
-      </ContentLayout>
+      </Layouts.Content>
       {releaseModalShown && (
         <ReleaseModal
           handleClose={toggleAddReleaseModal}

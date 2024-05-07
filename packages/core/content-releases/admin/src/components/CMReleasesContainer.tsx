@@ -264,6 +264,7 @@ export const CMReleasesContainer = () => {
     collectionType: string;
   }>();
   const isCreatingEntry = id === 'create';
+  const entryId = parseInt(id!, 10);
   const { allowedActions } = useRBAC(PERMISSIONS);
 
   const { canCreateAction, canRead: canMain, canDeleteAction } = allowedActions;
@@ -280,12 +281,11 @@ export const CMReleasesContainer = () => {
   const fetchParams = canFetch
     ? {
         contentTypeUid: contentTypeUid,
-        entryId: id,
+        entryId,
         hasEntryAttached: true,
       }
     : skipToken;
   // Get all 'pending' releases that have the entry attached
-  // @ts-expect-error – we'll fix this when we fix content-releases for v5
   const response = useGetReleasesForEntryQuery(fetchParams);
   const releases = response.data?.data;
 
@@ -442,8 +442,7 @@ export const CMReleasesContainer = () => {
         <AddActionToReleaseModal
           handleClose={toggleModal}
           contentTypeUid={contentTypeUid}
-          // @ts-expect-error – we'll fix this when we fix content-releases for v5
-          entryId={id}
+          entryId={entryId}
         />
       )}
     </Box>

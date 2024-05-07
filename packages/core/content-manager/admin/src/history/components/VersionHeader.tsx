@@ -5,8 +5,9 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
-import { BaseHeaderLayout, Button, Typography, Flex, Link } from '@strapi/design-system';
+import { Button, Typography, Flex, Link } from '@strapi/design-system';
 import { ArrowLeft, WarningCircle } from '@strapi/icons';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
@@ -107,7 +108,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
 
   return (
     <>
-      <BaseHeaderLayout
+      <Layouts.BaseHeader
         id={headerId}
         title={formatDate(new Date(version.createdAt), {
           year: 'numeric',

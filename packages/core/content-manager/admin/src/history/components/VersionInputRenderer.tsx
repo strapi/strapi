@@ -78,7 +78,10 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       }
     : field.value;
 
-  if (!formattedFieldValue || formattedFieldValue.results.length === 0) {
+  if (
+    !formattedFieldValue ||
+    (formattedFieldValue.results.length === 0 && formattedFieldValue.meta.missingCount === 0)
+  ) {
     return (
       <>
         <Field.Label>{props.label}</Field.Label>
@@ -155,17 +158,6 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
             { number: meta.missingCount }
           )}
         </StyledAlert>
-      )}
-      {results.length === 0 && meta.missingCount === 0 && (
-        <Box marginTop={1}>
-          {/* @ts-expect-error – we dont need closeLabel */}
-          <StyledAlert variant="default">
-            {formatMessage({
-              id: 'content-manager.history.content.no-relations',
-              defaultMessage: 'No relations.',
-            })}
-          </StyledAlert>
-        </Box>
       )}
     </Box>
   );
