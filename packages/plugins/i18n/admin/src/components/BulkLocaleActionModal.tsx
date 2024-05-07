@@ -212,7 +212,7 @@ const BulkLocaleActionModal = ({
                         size={'S'}
                         variant={statusVariant}
                       >
-                        <Typography as="span" variant="pi" fontWeight="bold">
+                        <Typography tag="span" variant="pi" fontWeight="bold">
                           {capitalize(status)}
                         </Typography>
                       </Status>
