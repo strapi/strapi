@@ -1,7 +1,7 @@
-import { Box, Button, ButtonProps } from '@strapi/design-system';
+import { Box, BoxComponent, Button, ButtonProps } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface ConditionsButtonProps extends Pick<ButtonProps, 'className' | 'onClick' | 'variant'> {
   hasConditions?: boolean;
@@ -16,7 +16,7 @@ const ConditionsButtonImpl = ({
   const { formatMessage } = useIntl();
 
   return (
-    <ButtonContainer hasConditions={hasConditions} className={className}>
+    <ButtonContainer $hasConditions={hasConditions} className={className}>
       <Button variant={variant} startIcon={<Cog />} onClick={onClick}>
         {formatMessage({
           id: 'global.settings',
@@ -27,13 +27,9 @@ const ConditionsButtonImpl = ({
   );
 };
 
-interface ButtonContainerProps extends Pick<ConditionsButtonProps, 'hasConditions'> {
-  disabled?: boolean;
-}
-
-const ButtonContainer = styled(Box)<ButtonContainerProps>`
-  ${({ hasConditions, disabled, theme }) =>
-    hasConditions &&
+const ButtonContainer = styled<BoxComponent>(Box)<{ $hasConditions?: boolean }>`
+  ${({ $hasConditions, theme }) =>
+    $hasConditions &&
     `
     &:before {
       content: '';
@@ -43,7 +39,7 @@ const ButtonContainer = styled(Box)<ButtonContainerProps>`
       width: 6px;
       height: 6px;
       border-radius: 2rem;
-      background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
+      background: ${theme.colors.primary600};
     }
   `}
 `;

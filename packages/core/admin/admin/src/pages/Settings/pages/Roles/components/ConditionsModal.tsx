@@ -241,7 +241,7 @@ const ActionRow = ({
   };
 
   return (
-    <Flex as="li" background={isGrey ? 'neutral100' : 'neutral0'} paddingBottom={3} paddingTop={3}>
+    <Flex tag="li" background={isGrey ? 'neutral100' : 'neutral0'} paddingBottom={3} paddingTop={3}>
       <Flex paddingLeft={6} style={{ width: 180 }}>
         <Typography variant="sigma" textColor="neutral600">
           {formatMessage({
@@ -265,7 +265,6 @@ const ActionRow = ({
         </Typography>
       </Flex>
       <Box style={{ maxWidth: 430, width: '100%' }}>
-        {/* @ts-expect-error – fix this label issue */}
         <MultiSelectNested
           id={name}
           customizeContent={(values = []) => `${values.length} currently selected`}

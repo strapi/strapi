@@ -60,8 +60,8 @@
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.0.0-beta.2",
-    "@strapi/icons": "2.0.0-beta.2",
+    "@strapi/design-system": "2.0.0-beta.3",
+    "@strapi/icons": "2.0.0-beta.3",
     "@strapi/types": "5.0.0-beta.6",
     "@strapi/utils": "5.0.0-beta.6",
     "axios": "1.6.8",
@@ -109,14 +109,14 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "6.22.3",
-    "styled-components": "5.3.11"
+    "styled-components": "6.1.8"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
-    "styled-components": "^5.2.1"
+    "styled-components": "^6.0.0"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

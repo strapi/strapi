@@ -6,7 +6,7 @@ import { Box, Flex, Typography, TypographyProps, useCallbackRef } from '@strapi/
  * BaseHeaderLayout
  * -----------------------------------------------------------------------------------------------*/
 
-interface BaseHeaderLayoutProps extends TypographyProps {
+interface BaseHeaderLayoutProps extends Omit<TypographyProps<'div'>, 'tag'> {
   navigationAction?: React.ReactNode;
   primaryAction?: React.ReactNode;
   secondaryAction?: React.ReactNode;
@@ -42,7 +42,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
             <Flex>
               {navigationAction && <Box paddingRight={3}>{navigationAction}</Box>}
               <Box>
-                <Typography variant="beta" as="h1" {...props}>
+                <Typography variant="beta" tag="h1" {...props}>
                   {title}
                 </Typography>
                 {isSubtitleString ? (
@@ -74,7 +74,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
         {navigationAction ? <Box paddingBottom={2}>{navigationAction}</Box> : null}
         <Flex justifyContent="space-between">
           <Flex minWidth={0}>
-            <Typography as="h1" variant="alpha" {...props}>
+            <Typography tag="h1" variant="alpha" {...props}>
               {title}
             </Typography>
             {secondaryAction ? <Box paddingLeft={4}>{secondaryAction}</Box> : null}
@@ -82,7 +82,7 @@ const BaseHeaderLayout = React.forwardRef<HTMLDivElement, BaseHeaderLayoutProps>
           {primaryAction}
         </Flex>
         {isSubtitleString ? (
-          <Typography variant="epsilon" textColor="neutral600" as="p">
+          <Typography variant="epsilon" textColor="neutral600" tag="p">
             {subtitle}
           </Typography>
         ) : (

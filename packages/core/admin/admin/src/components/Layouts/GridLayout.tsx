@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Box } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface GridColSize {
   S: number;

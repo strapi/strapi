@@ -93,7 +93,7 @@ const LeftMenu = () => {
   });
 
   return (
-    <SubNav ariaLabel={label}>
+    <SubNav aria-label={label}>
       <SubNavHeader
         label={label}
         searchable
@@ -116,9 +116,8 @@ const LeftMenu = () => {
               {section.links.map((link) => {
                 return (
                   <SubNavLink
-                    as={NavLink}
+                    tag={NavLink}
                     key={link.uid}
-                    // @ts-expect-error – DS inference does not work with the `as` prop.
                     to={{
                       pathname: link.to,
                       /**

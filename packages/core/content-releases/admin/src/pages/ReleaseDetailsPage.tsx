@@ -37,7 +37,7 @@ import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
@@ -79,7 +79,7 @@ const ReleaseInfoWrapper = styled(Flex)`
 
 const StyledMenuItem = styled(Menu.Item)<{
   disabled?: boolean;
-  variant?: 'neutral' | 'danger';
+  $variant?: 'neutral' | 'danger';
 }>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
@@ -89,7 +89,7 @@ const StyledMenuItem = styled(Menu.Item)<{
   }
 
   &:hover {
-    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
+    background: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}100`]};
   }
 `;
 
@@ -369,18 +369,18 @@ const ReleaseDetailsLayout = ({
               <Menu.Root>
                 {/*
                   TODO Fix in the DS
-                  - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
+                  - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
                   - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
                 */}
                 <Menu.Trigger
-                  as={IconButton}
+                  // @ts-expect-error See above
+                  tag={IconButton}
                   paddingLeft={2}
                   paddingRight={2}
                   aria-label={formatMessage({
                     id: 'content-releases.header.actions.open-release-actions',
                     defaultMessage: 'Release edit and delete menu',
                   })}
-                  // @ts-expect-error See above
                   icon={<More />}
                   variant="tertiary"
                 />
@@ -410,7 +410,7 @@ const ReleaseDetailsLayout = ({
                     <StyledMenuItem
                       disabled={!canDelete}
                       onSelect={toggleWarningSubmit}
-                      variant="danger"
+                      $variant="danger"
                     >
                       <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <TrashIcon />
@@ -631,8 +631,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         <EmptyStateLayout
           action={
             <LinkButton
-              as={ReactRouterLink}
-              // @ts-expect-error - types are not inferred correctly through the as prop.
+              tag={ReactRouterLink}
               to={{
                 pathname: '/content-manager',
               }}

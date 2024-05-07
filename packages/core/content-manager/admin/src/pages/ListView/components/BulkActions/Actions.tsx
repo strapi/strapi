@@ -279,7 +279,7 @@ const BulkActionModal = ({
   return (
     <ModalLayout borderRadius="4px" overflow="hidden" onClose={handleClose} labelledBy={id}>
       <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
+        <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={id}>
           {title}
         </Typography>
       </ModalHeader>

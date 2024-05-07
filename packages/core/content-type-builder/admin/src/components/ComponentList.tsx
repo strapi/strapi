@@ -30,7 +30,7 @@ export const ComponentList = ({
   });
 
   return (
-    <Tr isChildOfDynamicZone={isFromDynamicZone} className="component-row">
+    <Tr $isChildOfDynamicZone={isFromDynamicZone} className="component-row">
       <td colSpan={12}>
         <List
           customRowComponent={customRowComponent}

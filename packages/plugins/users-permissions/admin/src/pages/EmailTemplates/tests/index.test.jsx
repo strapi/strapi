@@ -58,7 +58,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       .c9 {
         background: #ffffff;
         border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
       }
 
       .c11 {
@@ -84,76 +84,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         cursor: pointer;
       }
 
-      .c1 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .c26 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
-      .c4 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c6 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
       .c7 {
         font-weight: 600;
         font-size: 3.2rem;
         line-height: 1.25;
-        color: #32324d;
+        color: currentcolor;
       }
 
       .c22 {
@@ -167,12 +102,38 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       .c24 {
         font-size: 1.4rem;
         line-height: 1.43;
-        color: #32324d;
+        color: currentcolor;
+      }
+
+      .c1 {
+        align-items: stretch;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .c26 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .c4 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .c6 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
       }
 
       .c20 {
         border: 0;
-        -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
         height: 1px;
         margin: -1px;
@@ -192,9 +153,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c27:after {
-        -webkit-transition-property: all;
         transition-property: all;
-        -webkit-transition-duration: 0.2s;
         transition-duration: 0.2s;
         border-radius: 8px;
         content: '';
@@ -252,21 +211,21 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c12:before {
-        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        background: linear-gradient(90deg, #c0c0cf 0%, rgba(0, 0, 0, 0) 100%);
         opacity: 0.2;
         position: absolute;
         height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
         width: 8px;
         left: 0;
       }
 
       .c12:after {
-        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        background: linear-gradient(270deg, #c0c0cf 0%, rgba(0, 0, 0, 0) 100%);
         opacity: 0.2;
         position: absolute;
         height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
         width: 8px;
         right: 0;
         top: 0;
@@ -386,11 +345,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <div
                             class="c6"
                           >
-                            <div
+                            <span
                               class="c20"
                             >
                               icon
-                            </div>
+                            </span>
                             <span
                               class="c21"
                             />
@@ -424,11 +383,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <div
                             class="c6"
                           >
-                            <div
+                            <span
                               class="c20"
                             >
                               action
-                            </div>
+                            </span>
                             <span
                               class="c21"
                             />
@@ -452,9 +411,9 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <svg
                             aria-label="Reset password"
                             fill="currentColor"
-                            height="1.6rem"
+                            height="16"
                             viewBox="0 0 32 32"
-                            width="1.6rem"
+                            width="16"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -496,9 +455,9 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                                 aria-hidden="true"
                                 fill="currentColor"
                                 focusable="false"
-                                height="1.6rem"
+                                height="16"
                                 viewBox="0 0 32 32"
-                                width="1.6rem"
+                                width="16"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
@@ -522,9 +481,9 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <svg
                             aria-label="Email address confirmation"
                             fill="currentColor"
-                            height="1.6rem"
+                            height="16"
                             viewBox="0 0 32 32"
-                            width="1.6rem"
+                            width="16"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -566,9 +525,9 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                                 aria-hidden="true"
                                 fill="currentColor"
                                 focusable="false"
-                                height="1.6rem"
+                                height="16"
                                 viewBox="0 0 32 32"
-                                width="1.6rem"
+                                width="16"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
@@ -586,7 +545,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
             </div>
           </div>
         </main>
-        <div
+        <span
           class="c20"
         >
           <p
@@ -607,7 +566,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
             id="live-region-alert"
             role="alert"
           />
-        </div>
+        </span>
       </div>
     `);
   });

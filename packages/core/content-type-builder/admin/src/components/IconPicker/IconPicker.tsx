@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Field,
-  FieldInput,
-  FieldLabel,
   Flex,
   IconButton,
   inputFocusStyle,
@@ -15,7 +13,7 @@ import {
 } from '@strapi/design-system';
 import { Search, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../../utils';
 
@@ -45,31 +43,26 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickPr
   const Icon = COMPONENT_ICONS[iconKey];
 
   return (
-    <Field name={name} required={false}>
-      <FieldLabel htmlFor={iconKey} id={`${iconKey}-label`}>
-        <VisuallyHidden>
-          <FieldInput
-            type="radio"
-            id={iconKey}
-            name={name}
-            checked={isSelected}
-            onChange={onChange}
-            value={iconKey}
-            aria-checked={isSelected}
-            aria-labelledby={`${iconKey}-label`}
-          />
-          {ariaLabel}
-        </VisuallyHidden>
-        <Flex
-          padding={2}
-          cursor="pointer"
-          hasRadius
-          background={isSelected ? 'primary200' : undefined}
-        >
-          <Icon fill={isSelected ? 'primary600' : 'neutral300'} />
-        </Flex>
-      </FieldLabel>
-    </Field>
+    <Field.Root name={name} required={false}>
+      <Field.Label>{ariaLabel}</Field.Label>
+      <VisuallyHidden>
+        <Field.Input
+          type="radio"
+          checked={isSelected}
+          onChange={onChange}
+          value={iconKey}
+          aria-checked={isSelected}
+        />
+      </VisuallyHidden>
+      <Flex
+        padding={2}
+        cursor="pointer"
+        hasRadius
+        background={isSelected ? 'primary200' : undefined}
+      >
+        <Icon fill={isSelected ? 'primary600' : 'neutral300'} />
+      </Flex>
+    </Field.Root>
   );
 };
 
@@ -117,7 +110,7 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
   return (
     <>
       <Flex justifyContent="space-between" paddingBottom={2}>
-        <Typography variant="pi" fontWeight="bold" textColor="neutral800" as="label">
+        <Typography variant="pi" fontWeight="bold" textColor="neutral800" tag="label">
           {formatMessage(intlLabel)}
         </Typography>
         <Flex gap={1}>

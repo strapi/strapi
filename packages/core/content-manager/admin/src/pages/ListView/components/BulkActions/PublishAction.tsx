@@ -17,12 +17,13 @@ import {
   Flex,
   Tooltip,
   Loader,
+  TypographyComponent,
 } from '@strapi/design-system';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { useQueryClient } from 'react-query';
 import { Link, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { Document, useDoc } from '../../../../hooks/useDocument';
@@ -40,7 +41,7 @@ import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './Confirm
 import type { BulkActionComponent } from '../../../../content-manager';
 import type { Data } from '@strapi/types';
 
-const TypographyMaxWidth = styled(Typography)`
+const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
   max-width: 300px;
 `;
 
@@ -185,12 +186,11 @@ const SelectedEntriesTableContent = ({
             </Table.Cell>
             <Table.Cell>
               <IconButton
-                forwardedAs={Link}
-                // @ts-expect-error – DS does not correctly infer props from the as prop.
+                tag={Link}
                 to={{
                   pathname: `${pathname}/${row.id}`,
-                  state: { from: pathname },
                 }}
+                state={{ from: pathname }}
                 label={formatMessage(
                   { id: 'app.component.HelperPluginTable.edit', defaultMessage: 'Edit {target}' },
                   {

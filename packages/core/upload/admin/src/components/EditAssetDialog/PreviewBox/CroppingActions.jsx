@@ -5,7 +5,7 @@ import { Menu } from '@strapi/design-system';
 import { Check, Cross } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import getTrad from '../../../utils/getTrad';
 
@@ -29,7 +29,7 @@ export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
 
           <Menu.Root>
             <Trigger variant="tertiary" paddingLeft={2} paddingRight={2} endIcon={null}>
-              <VisuallyHidden as="span">
+              <VisuallyHidden tag="span">
                 {formatMessage({
                   id: getTrad('control-card.crop'),
                   defaultMessage: 'Crop',

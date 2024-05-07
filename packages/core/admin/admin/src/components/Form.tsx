@@ -738,7 +738,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
         <DialogBody>
           <Flex direction="column" gap={2}>
             <WarningCircle width="24px" height="24px" fill="danger600" />
-            <Typography as="p" variant="omega" textAlign="center">
+            <Typography tag="p" variant="omega" textAlign="center">
               {formatMessage({
                 id: 'global.prompt.unsaved',
                 defaultMessage: 'You have unsaved changes, are you sure you want to leave?',

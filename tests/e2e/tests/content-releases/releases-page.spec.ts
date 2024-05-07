@@ -77,7 +77,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
 
     await page
       .getByRole('combobox', {
-        name: 'Time *',
+        name: 'Time',
       })
       .click();
 

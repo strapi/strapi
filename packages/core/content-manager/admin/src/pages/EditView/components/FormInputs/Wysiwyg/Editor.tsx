@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import CodeMirror, { EditorFromTextArea } from 'codemirror5';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PreviewWysiwyg } from './PreviewWysiwyg';
 import { newlineAndIndentContinueMarkdownList } from './utils/continueList';
@@ -106,7 +106,7 @@ const Editor = React.forwardRef<EditorApi, EditorProps>(
 
     return (
       <EditorAndPreviewWrapper>
-        <EditorStylesContainer isExpandMode={isExpandMode} disabled={disabled || isPreviewMode}>
+        <EditorStylesContainer $isExpandMode={isExpandMode} $disabled={disabled || isPreviewMode}>
           <textarea ref={textareaRef} />
         </EditorStylesContainer>
         {isPreviewMode && <PreviewWysiwyg data={value} />}
@@ -120,8 +120,8 @@ const EditorAndPreviewWrapper = styled.div`
   height: calc(100% - 48px);
 `;
 
-const EditorStylesContainer = styled.div<{ disabled?: boolean; isExpandMode?: boolean }>`
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed !important' : 'auto')};
+const EditorStylesContainer = styled.div<{ $disabled?: boolean; $isExpandMode?: boolean }>`
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed !important' : 'auto')};
   height: 100%;
   /* BASICS */
   .CodeMirror-placeholder {
@@ -131,8 +131,8 @@ const EditorStylesContainer = styled.div<{ disabled?: boolean; isExpandMode?: bo
   .CodeMirror {
     /* Set height, width, borders, and global font properties here */
     font-size: 1.4rem;
-    height: ${({ isExpandMode }) =>
-      isExpandMode
+    height: ${({ $isExpandMode }) =>
+      $isExpandMode
         ? '100%'
         : '410px'}; //  512px(total height) - 48px (header) - 52px(footer) - 2px border
     color: ${({ theme }) => theme.colors.neutral800};

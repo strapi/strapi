@@ -22,7 +22,7 @@ import { Cog, GridFour as Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetGridList } from '../../../components/AssetGridList';
 import { EditAssetDialog } from '../../../components/EditAssetDialog';
@@ -262,7 +262,7 @@ export const MediaLibrary = () => {
               {canConfigureView ? (
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    forwardedAs={ReactRouterLink}
+                    tag={ReactRouterLink}
                     to={{
                       pathname: `${pathname}/configuration`,
                       search: stringify(query, { encode: false }),
@@ -406,14 +406,14 @@ export const MediaLibrary = () => {
                         >
                           <FolderCardBody>
                             <FolderCardBodyAction to={url}>
-                              <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                              <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
                                 <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                                   {folder.name}
                                   <VisuallyHidden>:</VisuallyHidden>
                                 </TypographyMaxWidth>
 
                                 <TypographyMaxWidth
-                                  as="span"
+                                  tag="span"
                                   textColor="neutral600"
                                   variant="pi"
                                   ellipsis
