@@ -9,7 +9,7 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import { Flex, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
-import { Cog, Pencil, Trash, WarningCircle } from '@strapi/icons';
+import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -376,7 +376,7 @@ const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model
       id: 'app.links.configure-view',
       defaultMessage: 'Configure the view',
     }),
-    icon: <StyledCog />,
+    icon: <StyledListPlus />,
     onClick: () => {
       navigate(`../${collectionType}/${model}/configurations/edit`);
     },
@@ -390,7 +390,7 @@ ConfigureTheViewAction.type = 'configure-the-view';
  * Because the icon system is completely broken, we have to do
  * this to remove the fill from the cog.
  */
-const StyledCog = styled(Cog)`
+const StyledListPlus = styled(ListPlus)`
   path {
     fill: currentColor;
   }
