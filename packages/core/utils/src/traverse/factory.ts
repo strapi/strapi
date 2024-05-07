@@ -26,7 +26,7 @@ export interface VisitorOptions {
   value: unknown;
   schema: Model;
   key: string;
-  attribute: AnyAttribute;
+  attribute?: AnyAttribute;
   path: Path;
   getModel(uid: string): Model;
 }

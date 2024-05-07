@@ -38,7 +38,7 @@ describe('Edit Locale', () => {
       'aria-disabled',
       'true'
     );
-    expect(screen.getByRole('textbox', { name: 'Locale display name *' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Locale display name' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('tab', { name: 'Advanced settings' }));
 
@@ -51,8 +51,8 @@ describe('Edit Locale', () => {
 
     await user.click(screen.getByRole('combobox', { name: 'Locales' }));
 
-    await user.clear(screen.getByRole('textbox', { name: 'Locale display name *' }));
-    await user.type(screen.getByRole('textbox', { name: 'Locale display name *' }), 'Afrikaans');
+    await user.clear(screen.getByRole('textbox', { name: 'Locale display name' }));
+    await user.type(screen.getByRole('textbox', { name: 'Locale display name' }), 'Afrikaans');
 
     await user.click(screen.getByRole('tab', { name: 'Advanced settings' }));
 
@@ -78,7 +78,7 @@ describe('Edit Locale', () => {
     const { user } = render(<EditLocale {...LOCALE} />);
     await user.click(screen.getByRole('button', { name: 'Edit English locale' }));
 
-    await user.type(screen.getByRole('textbox', { name: 'Locale display name *' }), 'Afrikaans');
+    await user.type(screen.getByRole('textbox', { name: 'Locale display name' }), 'Afrikaans');
 
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
@@ -89,14 +89,14 @@ describe('Edit Locale', () => {
     it("should handle it's own validation", async () => {
       const { user } = render(<EditLocale {...LOCALE} />);
       await user.click(screen.getByRole('button', { name: 'Edit English locale' }));
-      await user.clear(screen.getByRole('textbox', { name: 'Locale display name *' }));
+      await user.clear(screen.getByRole('textbox', { name: 'Locale display name' }));
 
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
       expect(await screen.findByText('Please give the locale a display name')).toBeInTheDocument();
 
       await user.type(
-        screen.getByRole('textbox', { name: 'Locale display name *' }),
+        screen.getByRole('textbox', { name: 'Locale display name' }),
         Array(256).fill('a').join('')
       );
 
@@ -128,7 +128,7 @@ describe('Edit Locale', () => {
 
       const { user } = render(<EditLocale {...LOCALE} />);
       await user.click(screen.getByRole('button', { name: 'Edit English locale' }));
-      await user.type(screen.getByRole('textbox', { name: 'Locale display name *' }), 'Afrikaans');
+      await user.type(screen.getByRole('textbox', { name: 'Locale display name' }), 'Afrikaans');
 
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 

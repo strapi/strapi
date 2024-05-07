@@ -424,25 +424,24 @@ export default {
 
     const { locale } = getDocumentLocaleAndStatus(body);
 
-    const documentLocales = await documentManager.findLocales(documentIds, model, {
-      locale,
-    });
+    const entityPromises = documentIds.map((documentId: any) =>
+      documentManager.findLocales(documentId, model, { locale, isPublished: false })
+    );
+    const entities = (await Promise.all(entityPromises)).flat();
 
-    if (documentLocales.length === 0) {
-      return ctx.notFound();
-    }
+    for (const entity of entities) {
+      if (!entity) {
+        return ctx.notFound();
+      }
 
-    for (const document of documentLocales) {
-      if (permissionChecker.cannot.publish(document)) {
+      if (permissionChecker.cannot.publish(entity)) {
         return ctx.forbidden();
       }
     }
 
-    const localeDocumentsIds = documentLocales
-      .filter((document) => !document.publishedAt)
-      .map((document) => document.documentId);
+    const entitiesIds = entities.map((document) => document.documentId);
 
-    const { count } = await documentManager.publishMany(localeDocumentsIds, model, { locale });
+    const { count } = await documentManager.publishMany(entitiesIds, model, { locale });
     ctx.body = { count };
   },
 
@@ -463,25 +462,24 @@ export default {
 
     const { locale } = getDocumentLocaleAndStatus(body);
 
-    const documentLocales = await documentManager.findLocales(documentIds, model, {
-      locale,
-    });
+    const entityPromises = documentIds.map((documentId: any) =>
+      documentManager.findLocales(documentId, model, { locale, isPublished: true })
+    );
+    const entities = (await Promise.all(entityPromises)).flat();
 
-    if (documentLocales.length === 0) {
-      return ctx.notFound();
-    }
+    for (const entity of entities) {
+      if (!entity) {
+        return ctx.notFound();
+      }
 
-    for (const document of documentLocales) {
-      if (permissionChecker.cannot.unpublish(document)) {
+      if (permissionChecker.cannot.publish(entity)) {
         return ctx.forbidden();
       }
     }
 
-    const localeDocumentsIds = documentLocales
-      .filter((document) => !!document.publishedAt)
-      .map((document) => document.documentId);
+    const entitiesIds = entities.map((document) => document.documentId);
 
-    const { count } = await documentManager.unpublishMany(localeDocumentsIds, model, { locale });
+    const { count } = await documentManager.unpublishMany(entitiesIds, model, { locale });
 
     ctx.body = { count };
   },

@@ -57,7 +57,7 @@ export const useKeyboardDragAndDrop = <TIndex extends number | Array<number> = n
     }
   };
 
-  const handleKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
+  const handleKeyDown = <E extends Element>(e: React.KeyboardEvent<E>) => {
     if (!active) {
       return;
     }

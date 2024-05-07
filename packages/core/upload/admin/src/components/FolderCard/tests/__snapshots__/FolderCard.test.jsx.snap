@@ -13,7 +13,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   border-style: solid;
   border-width: 1px;
   border-color: #eaeaef;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
   cursor: pointer;
 }
 
@@ -48,45 +48,28 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   right: 16px;
 }
 
+.c13 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: currentcolor;
+}
+
 .c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
 }
 
 .c9 {
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
   align-items: flex-start;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
   flex-direction: column;
-}
-
-.c13 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
 }
 
 .c17 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -121,8 +104,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   height: 10px;
   left: 50%;
   top: 50%;
-  -webkit-transform: translateX(-50%) translateY(-50%);
-  -ms-transform: translateX(-50%) translateY(-50%);
   transform: translateX(-50%) translateY(-50%);
 }
 
@@ -150,8 +131,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   background-color: #ffffff;
   left: 50%;
   top: 50%;
-  -webkit-transform: translateX(-50%) translateY(-50%);
-  -ms-transform: translateX(-50%) translateY(-50%);
   transform: translateX(-50%) translateY(-50%);
 }
 
@@ -180,7 +159,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 
 .c1:hover,
 .c1:focus {
-  -webkit-text-decoration: none;
   text-decoration: none;
 }
 
@@ -193,9 +171,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c10 {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -214,6 +189,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       aria-label="Folder 1"
       class="c1"
       tabindex="-1"
+      tag="button"
       type="button"
     />
     <div
@@ -251,7 +227,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       <h2
         class="c8 c9 c10"
         id="folder-3-title"
-        overflow="hidden"
       >
         <button
           class="c11 c12"
@@ -277,7 +252,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       </div>
     </div>
   </div>
-  <div
+  <span
     class="c17"
   >
     <p
@@ -298,7 +273,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -315,7 +290,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   border-style: solid;
   border-width: 1px;
   border-color: #eaeaef;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
   cursor: pointer;
 }
 
@@ -345,45 +320,28 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
   right: 16px;
 }
 
+.c11 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: currentcolor;
+}
+
 .c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
 }
 
 .c7 {
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
   align-items: flex-start;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
   flex-direction: column;
-}
-
-.c11 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
 }
 
 .c15 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -409,7 +367,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 
 .c1:hover,
 .c1:focus {
-  -webkit-text-decoration: none;
   text-decoration: none;
 }
 
@@ -422,9 +379,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
 }
 
 .c8 {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -443,6 +397,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       aria-label="Folder 1"
       class="c1"
       tabindex="-1"
+      tag="button"
       type="button"
     />
     <div
@@ -467,7 +422,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       <h2
         class="c6 c7 c8"
         id="folder-1-title"
-        overflow="hidden"
       >
         <button
           class="c9 c10"
@@ -493,7 +447,7 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       </div>
     </div>
   </div>
-  <div
+  <span
     class="c15"
   >
     <p
@@ -514,6 +468,6 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

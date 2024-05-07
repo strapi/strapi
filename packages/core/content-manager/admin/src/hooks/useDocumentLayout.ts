@@ -131,7 +131,7 @@ const DEFAULT_SETTINGS = {
  * const { model } = useParams<{ model: string }>();
  * const { edit: { schema: layout } } = useDocumentLayout(model);
  *
- * return layout.map(panel => panel.map(row => row.map(field => <Field {...field} />)))
+ * return layout.map(panel => panel.map(row => row.map(field => <Field.Root {...field} />)))
  * ```
  *
  */
@@ -224,7 +224,7 @@ type LayoutData = FindContentTypeConfiguration.Response['data'];
 /**
  * @internal
  * @description takes the configuration data, the schema & the components used in the schema and formats the edit view
- * vesions of the schema & components. This is then used to redner the edit view of the content-type.
+ * versions of the schema & components. This is then used to render the edit view of the content-type.
  */
 const formatEditLayout = (
   data: LayoutData,

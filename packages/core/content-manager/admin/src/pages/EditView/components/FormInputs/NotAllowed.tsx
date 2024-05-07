@@ -1,7 +1,7 @@
 import { TextInput } from '@strapi/design-system';
 import { EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import type { InputProps } from '@strapi/admin/strapi-admin';
 import type { Schema } from '@strapi/types';

@@ -1,8 +1,9 @@
 import * as React from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { useCollator, useFilter } from '@strapi/design-system';
 import {
+  useCollator,
+  useFilter,
   SubNav,
   SubNavHeader,
   SubNavLink,
@@ -92,7 +93,7 @@ const LeftMenu = () => {
   });
 
   return (
-    <SubNav ariaLabel={label}>
+    <SubNav aria-label={label}>
       <SubNavHeader
         label={label}
         searchable
@@ -115,9 +116,8 @@ const LeftMenu = () => {
               {section.links.map((link) => {
                 return (
                   <SubNavLink
-                    as={NavLink}
+                    tag={NavLink}
                     key={link.uid}
-                    // @ts-expect-error – DS inference does not work with the `as` prop.
                     to={{
                       pathname: link.to,
                       /**

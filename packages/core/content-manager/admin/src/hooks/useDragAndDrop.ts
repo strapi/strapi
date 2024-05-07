@@ -41,15 +41,15 @@ interface UseDragAndDropOptions<
 
 type Identifier = ReturnType<HandlerManager['getHandlerId']>;
 
-type UseDragAndDropReturn<Element extends HTMLElement = HTMLElement> = [
+type UseDragAndDropReturn<E extends Element = HTMLElement> = [
   props: {
     handlerId: Identifier;
     isDragging: boolean;
-    handleKeyDown: (event: React.KeyboardEvent<HTMLButtonElement>) => void;
+    handleKeyDown: <E extends Element>(event: React.KeyboardEvent<E>) => void;
     isOverDropTarget: boolean;
     direction: (typeof DIRECTIONS)[keyof typeof DIRECTIONS] | null;
   },
-  objectRef: React.RefObject<Element>,
+  objectRef: React.RefObject<E>,
   dropRef: ConnectDropTarget,
   dragRef: ConnectDragSource,
   dragPreviewRef: ConnectDragPreview,
@@ -70,7 +70,7 @@ const useDragAndDrop = <
     index: TIndex;
     [key: string]: unknown;
   },
-  Element extends HTMLElement = HTMLElement,
+  E extends Element = HTMLElement,
 >(
   active: boolean,
   {
@@ -85,8 +85,8 @@ const useDragAndDrop = <
     onMoveItem,
     dropSensitivity = DROP_SENSITIVITY.REGULAR,
   }: UseDragAndDropOptions<TIndex, TItem>
-): UseDragAndDropReturn<Element> => {
-  const objectRef = React.useRef<Element>(null);
+): UseDragAndDropReturn<E> => {
+  const objectRef = React.useRef<E>(null);
 
   const [{ handlerId, isOver }, dropRef] = useDrop<TItem, void, DropCollectedProps>({
     accept: type,

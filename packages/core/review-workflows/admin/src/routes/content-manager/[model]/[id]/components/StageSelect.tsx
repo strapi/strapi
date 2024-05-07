@@ -2,17 +2,15 @@ import * as React from 'react';
 
 import { useNotification, useAPIErrorHandler, useQueryParams } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   SingleSelect,
   SingleSelectOption,
   Field,
-  FieldError,
-  FieldHint,
   Flex,
   Loader,
   Typography,
 } from '@strapi/design-system';
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -158,7 +156,7 @@ export const StageSelect = () => {
 
   return (
     <>
-      <Field
+      <Field.Root
         hint={
           !isLoading &&
           stages.length === 0 &&
@@ -167,81 +165,79 @@ export const StageSelect = () => {
             defaultMessage: 'You don’t have the permission to update this stage.',
           })
         }
+        error={(error && formatAPIError(error)) || undefined}
         name={STAGE_ATTRIBUTE_NAME}
         id={STAGE_ATTRIBUTE_NAME}
       >
-        <Flex direction="column" gap={2} alignItems="stretch">
-          <SingleSelect
-            disabled={stages.length === 0}
-            error={(error && formatAPIError(error)) || undefined}
-            name={STAGE_ATTRIBUTE_NAME}
-            id={STAGE_ATTRIBUTE_NAME}
-            value={activeWorkflowStage?.id}
-            onChange={handleChange}
-            label={formatMessage({
-              id: 'content-manager.reviewWorkflows.stage.label',
-              defaultMessage: 'Review stage',
-            })}
-            placeholder={formatMessage({
-              id: 'content-manager.reviewWorkflows.assignee.placeholder',
-              defaultMessage: 'Select…',
-            })}
-            startIcon={
-              activeWorkflowStage && (
-                <Flex
-                  as="span"
-                  height={2}
-                  background={activeWorkflowStage?.color}
-                  borderColor={themeColorName === 'neutral0' ? 'neutral150' : undefined}
-                  hasRadius
-                  shrink={0}
-                  width={2}
-                  marginRight="-3px"
-                />
-              )
-            }
-            // @ts-expect-error – `customizeContent` is not correctly typed in the DS.
-            customizeContent={() => {
-              return (
-                <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
-                  <Typography textColor="neutral800" ellipsis>
-                    {activeWorkflowStage?.name ?? ''}
-                  </Typography>
-                  {isLoading ? (
-                    <Loader small style={{ display: 'flex' }} data-testid="loader" />
-                  ) : null}
-                </Flex>
-              );
-            }}
-          >
-            {stages.map(({ id, color, name }) => {
-              const { themeColorName } = getStageColorByHex(color) ?? {};
+        <Field.Label>
+          {formatMessage({
+            id: 'content-manager.reviewWorkflows.stage.label',
+            defaultMessage: 'Review stage',
+          })}
+        </Field.Label>
+        <SingleSelect
+          disabled={stages.length === 0}
+          value={activeWorkflowStage?.id}
+          onChange={handleChange}
+          placeholder={formatMessage({
+            id: 'content-manager.reviewWorkflows.assignee.placeholder',
+            defaultMessage: 'Select…',
+          })}
+          startIcon={
+            activeWorkflowStage && (
+              <Flex
+                tag="span"
+                height={2}
+                background={activeWorkflowStage?.color}
+                borderColor={themeColorName === 'neutral0' ? 'neutral150' : undefined}
+                hasRadius
+                shrink={0}
+                width={2}
+                marginRight="-3px"
+              />
+            )
+          }
+          // @ts-expect-error – `customizeContent` is not correctly typed in the DS.
+          customizeContent={() => {
+            return (
+              <Flex tag="span" justifyContent="space-between" alignItems="center" width="100%">
+                <Typography textColor="neutral800" ellipsis>
+                  {activeWorkflowStage?.name ?? ''}
+                </Typography>
+                {isLoading ? (
+                  <Loader small style={{ display: 'flex' }} data-testid="loader" />
+                ) : null}
+              </Flex>
+            );
+          }}
+        >
+          {stages.map(({ id, color, name }) => {
+            const { themeColorName } = getStageColorByHex(color) ?? {};
 
-              return (
-                <SingleSelectOption
-                  key={id}
-                  startIcon={
-                    <Flex
-                      height={2}
-                      background={color}
-                      borderColor={themeColorName === 'neutral0' ? 'neutral150' : undefined}
-                      hasRadius
-                      shrink={0}
-                      width={2}
-                    />
-                  }
-                  value={id}
-                  textValue={name}
-                >
-                  {name}
-                </SingleSelectOption>
-              );
-            })}
-          </SingleSelect>
-          <FieldHint />
-          <FieldError />
-        </Flex>
-      </Field>
+            return (
+              <SingleSelectOption
+                key={id}
+                startIcon={
+                  <Flex
+                    height={2}
+                    background={color}
+                    borderColor={themeColorName === 'neutral0' ? 'neutral150' : undefined}
+                    hasRadius
+                    shrink={0}
+                    width={2}
+                  />
+                }
+                value={id}
+                textValue={name}
+              >
+                {name}
+              </SingleSelectOption>
+            );
+          })}
+        </SingleSelect>
+        <Field.Hint />
+        <Field.Error />
+      </Field.Root>
 
       <LimitsModal.Root
         isOpen={showLimitModal === 'workflow'}

@@ -16,6 +16,7 @@ import {
   Button,
   ButtonProps,
   Divider,
+  Field,
   Flex,
   Grid,
   GridItem,
@@ -164,7 +165,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
         onSubmit={handleSubmit}
       >
         <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" as="h2" id={titleId}>
+          <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={titleId}>
             {formatMessage({
               id: getTranslation('Settings.list.actions.add'),
               defaultMessage: 'Add new locale',
@@ -180,7 +181,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
             variant="simple"
           >
             <Flex justifyContent="space-between">
-              <Typography as="h2" variant="beta">
+              <Typography tag="h2" variant="beta">
                 {formatMessage({
                   id: getTranslation('Settings.locales.modal.title'),
                   defaultMessage: 'Configuration',
@@ -414,25 +415,24 @@ const EnumerationInput = ({
   };
 
   return (
-    <SingleSelect
-      disabled={disabled}
-      error={error}
-      hint={hint}
-      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-      label={label}
-      name={name}
-      // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
-      onChange={handleChange}
-      placeholder={placeholder}
-      required={required}
-      value={value}
-    >
-      {options.map((option) => (
-        <SingleSelectOption value={option.value} key={option.value}>
-          {option.label}
-        </SingleSelectOption>
-      ))}
-    </SingleSelect>
+    <Field.Root error={error} hint={hint} name={name} required={required}>
+      <Field.Label>{label}</Field.Label>
+      <SingleSelect
+        disabled={disabled}
+        // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
+        onChange={handleChange}
+        placeholder={placeholder}
+        value={value}
+      >
+        {options.map((option) => (
+          <SingleSelectOption value={option.value} key={option.value}>
+            {option.label}
+          </SingleSelectOption>
+        ))}
+      </SingleSelect>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
   );
 };
 

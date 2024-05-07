@@ -12,6 +12,7 @@ import {
   Typography,
   Breadcrumbs,
   Crumb,
+  Field,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -142,14 +143,15 @@ const ActionBody = ({ isLoading, data, formattedDate }: ActionBodyProps) => {
           actionName={user?.id.toString() || '-'}
         />
       </Grid>
-      <JSONInput
-        value={JSON.stringify(payload, null, 2)}
-        disabled
-        label={formatMessage({
-          id: 'Settings.permissions.auditLogs.payload',
-          defaultMessage: 'Payload',
-        })}
-      />
+      <Field.Root>
+        <Field.Label>
+          {formatMessage({
+            id: 'Settings.permissions.auditLogs.payload',
+            defaultMessage: 'Payload',
+          })}
+        </Field.Label>
+        <JSONInput value={JSON.stringify(payload, null, 2)} disabled />
+      </Field.Root>
     </>
   );
 };

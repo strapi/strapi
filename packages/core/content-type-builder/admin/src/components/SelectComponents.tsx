@@ -1,4 +1,4 @@
-import { MultiSelectNested } from '@strapi/design-system';
+import { Field, MultiSelectNested } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useDataManager } from '../hooks/useDataManager';
@@ -77,16 +77,17 @@ export const SelectComponents = ({
   );
 
   return (
-    <MultiSelectNested
-      id="select1"
-      label={formatMessage(intlLabel)}
-      customizeContent={() => displayedValue}
-      name={name}
-      onChange={(values) => {
-        onChange({ target: { name, value: values, type: 'select-components' } });
-      }}
-      options={options}
-      value={value || []}
-    />
+    <Field.Root name={name}>
+      <Field.Label>{formatMessage(intlLabel)}</Field.Label>
+      <MultiSelectNested
+        id="select1"
+        customizeContent={() => displayedValue}
+        onChange={(values) => {
+          onChange({ target: { name, value: values, type: 'select-components' } });
+        }}
+        options={options}
+        value={value || []}
+      />
+    </Field.Root>
   );
 };

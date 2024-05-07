@@ -95,11 +95,11 @@ describe('Stages', () => {
 
     await user.click(screen.getByRole('button', { name: 'stage-1' }));
 
-    expect(screen.getByRole('textbox', { name: 'Stage name *' })).toHaveAttribute(
+    expect(screen.getByRole('textbox', { name: 'Stage name' })).toHaveAttribute(
       'name',
       'stages.0.name'
     );
-    expect(screen.getByRole('textbox', { name: 'Stage name *' })).toHaveValue('stage-1');
+    expect(screen.getByRole('textbox', { name: 'Stage name' })).toHaveValue('stage-1');
 
     // Color combobox
     await waitFor(() =>

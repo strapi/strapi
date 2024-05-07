@@ -19,8 +19,8 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
   })),
 }));
 
-jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
-  ...jest.requireActual('@strapi/plugin-content-manager/strapi-admin'),
+jest.mock('@strapi/content-manager/strapi-admin', () => ({
+  ...jest.requireActual('@strapi/content-manager/strapi-admin'),
   unstable_useDocument: jest.fn().mockReturnValue({ validate: jest.fn().mockReturnValue({}) }),
 }));
 

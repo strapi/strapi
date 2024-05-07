@@ -19,8 +19,6 @@ import {
   CarouselSlide,
   Divider,
   Field,
-  FieldError,
-  FieldInput,
   Flex,
   IconButton,
   ModalFooter,
@@ -38,7 +36,7 @@ import {
 import { PlusCircle, Plus, ArrowClockwise } from '@strapi/icons';
 import axios, { AxiosError } from 'axios';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ConfigurationContextValue } from '../../../../../features/Configuration';
 import { ACCEPTED_FORMAT, DIMENSION, SIZE } from '../utils/constants';
@@ -141,7 +139,7 @@ const LogoInput = ({
           <Box
             maxHeight="40%"
             maxWidth="40%"
-            as="img"
+            tag="img"
             src={customLogo?.url || defaultLogo}
             alt={formatMessage({
               id: 'Settings.application.customization.carousel.title',
@@ -153,7 +151,7 @@ const LogoInput = ({
       {currentStep ? (
         <ModalLayout labelledBy="modal" onClose={handleClose}>
           <ModalHeader>
-            <Typography fontWeight="bold" as="h2" id="modal">
+            <Typography fontWeight="bold" tag="h2" id="modal">
               {formatMessage(
                 currentStep === 'upload'
                   ? {
@@ -277,16 +275,16 @@ const URLForm = () => {
   return (
     <form onSubmit={handleSubmit}>
       <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
-        <TextInput
-          label={formatMessage({
-            id: 'Settings.application.customization.modal.upload.from-url.input-label',
-            defaultMessage: 'URL',
-          })}
-          error={error}
-          onChange={handleChange}
-          value={logoUrl}
-          name="logo-url"
-        />
+        <Field.Root error={error} name="logo-url">
+          <Field.Label>
+            {formatMessage({
+              id: 'Settings.application.customization.modal.upload.from-url.input-label',
+              defaultMessage: 'URL',
+            })}
+          </Field.Label>
+          <TextInput onChange={handleChange} value={logoUrl} />
+          <Field.Error />
+        </Field.Root>
       </Box>
       <ModalFooter
         startActions={
@@ -355,7 +353,7 @@ const ComputerForm = () => {
     <>
       <form>
         <Box paddingLeft={8} paddingRight={8} paddingTop={6} paddingBottom={6}>
-          <Field name={id} error={fileError}>
+          <Field.Root name={id} error={fileError}>
             <Flex direction="column" alignItems="stretch" gap={2}>
               <Flex
                 paddingTop={9}
@@ -373,7 +371,7 @@ const ComputerForm = () => {
               >
                 <PlusCircle fill="primary600" width="6rem" height="6rem" aria-hidden />
                 <Box paddingTop={3} paddingBottom={5}>
-                  <Typography variant="delta" as="label" htmlFor={id}>
+                  <Typography variant="delta" tag="label" htmlFor={id}>
                     {formatMessage({
                       id: 'Settings.application.customization.modal.upload.drag-drop',
                       defaultMessage: 'Drag and Drop here or',
@@ -408,9 +406,9 @@ const ComputerForm = () => {
                   </Typography>
                 </Box>
               </Flex>
-              <FieldError />
+              <Field.Error />
             </Flex>
-          </Field>
+          </Field.Root>
         </Box>
       </form>
       <ModalFooter
@@ -427,7 +425,7 @@ const ComputerForm = () => {
   );
 };
 
-const FileInput = styled(FieldInput)`
+const FileInput = styled(Field.Input)`
   opacity: 0;
   position: absolute;
   top: 0;

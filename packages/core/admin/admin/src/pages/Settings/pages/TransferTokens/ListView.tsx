@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, LinkButton } from '@strapi/design-system';
+import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { Data } from '@strapi/types';
@@ -8,6 +8,7 @@ import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router-dom';
 
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
@@ -148,7 +149,7 @@ const ListView = () => {
           }
         )}
       </Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         title={formatMessage({
           id: 'Settings.transferTokens.title',
           defaultMessage: 'Transfer Tokens',
@@ -160,7 +161,7 @@ const ListView = () => {
         primaryAction={
           canCreate ? (
             <LinkButton
-              forwardedAs={Link}
+              tag={Link}
               data-testid="create-transfer-token-button"
               startIcon={<Plus />}
               size="S"
@@ -169,7 +170,6 @@ const ListView = () => {
                   tokenType: TRANSFER_TOKEN_TYPE,
                 })
               }
-              // @ts-expect-error We need to accept the props of the component passed in the `as` prop
               to="/settings/transfer-tokens/create"
             >
               {formatMessage({
@@ -184,7 +184,7 @@ const ListView = () => {
         <Page.NoPermissions />
       ) : (
         <Page.Main aria-busy={isLoading}>
-          <ContentLayout>
+          <Layouts.Content>
             {transferTokens.length > 0 && (
               <Table
                 permissions={{ canRead, canDelete, canUpdate }}
@@ -199,10 +199,9 @@ const ListView = () => {
               <EmptyStateLayout
                 action={
                   <LinkButton
-                    forwardedAs={Link}
+                    tag={Link}
                     variant="secondary"
                     startIcon={<Plus />}
-                    // @ts-expect-error We need to accept the props of the component passed in the `as` prop
                     to="/settings/transfer-tokens/create"
                   >
                     {formatMessage({
@@ -227,7 +226,7 @@ const ListView = () => {
                 })}
               />
             ) : null}
-          </ContentLayout>
+          </Layouts.Content>
         </Page.Main>
       )}
     </>

@@ -6,17 +6,15 @@ import {
   Pagination,
   useTracking,
   useQueryParams,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
 import {
-  ActionLayout,
   BaseCheckbox,
   Box,
-  ContentLayout,
   Divider,
   Flex,
   GridItem,
   IconButton,
-  Layout,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
@@ -24,7 +22,7 @@ import { Cog, GridFour as Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetGridList } from '../../../components/AssetGridList';
 import { EditAssetDialog } from '../../../components/EditAssetDialog';
@@ -217,7 +215,7 @@ export const MediaLibrary = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Main>
         <Header
           breadcrumbs={
@@ -228,7 +226,7 @@ export const MediaLibrary = () => {
           onToggleUploadAssetDialog={toggleUploadAssetDialog}
           folder={currentFolder}
         />
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <>
               {canUpdate && isGridView && (assetCount > 0 || folderCount > 0) && (
@@ -264,7 +262,7 @@ export const MediaLibrary = () => {
               {canConfigureView ? (
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    forwardedAs={ReactRouterLink}
+                    tag={ReactRouterLink}
                     to={{
                       pathname: `${pathname}/configuration`,
                       search: stringify(query, { encode: false }),
@@ -306,7 +304,7 @@ export const MediaLibrary = () => {
           }
         />
 
-        <ContentLayout>
+        <Layouts.Content>
           {selected.length > 0 && (
             <BulkActions
               currentFolder={currentFolder}
@@ -408,14 +406,14 @@ export const MediaLibrary = () => {
                         >
                           <FolderCardBody>
                             <FolderCardBodyAction to={url}>
-                              <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                              <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
                                 <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                                   {folder.name}
                                   <VisuallyHidden>:</VisuallyHidden>
                                 </TypographyMaxWidth>
 
                                 <TypographyMaxWidth
-                                  as="span"
+                                  tag="span"
                                   textColor="neutral600"
                                   variant="pi"
                                   ellipsis
@@ -478,7 +476,7 @@ export const MediaLibrary = () => {
             <Pagination.PageSize />
             <Pagination.Links />
           </Pagination.Root>
-        </ContentLayout>
+        </Layouts.Content>
       </Page.Main>
 
       {showUploadAssetDialog && (
@@ -515,6 +513,6 @@ export const MediaLibrary = () => {
           trackedLocation="upload"
         />
       )}
-    </Layout>
+    </Layouts.Root>
   );
 };

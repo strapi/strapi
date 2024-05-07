@@ -1,19 +1,10 @@
 import * as React from 'react';
 
-import {
-  BaseLink,
-  Button,
-  Field,
-  FieldInput,
-  FieldLabel,
-  Flex,
-  Popover,
-  useComposedRefs,
-} from '@strapi/design-system';
+import { BaseLink, Button, Field, Flex, Popover, useComposedRefs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
@@ -23,8 +14,8 @@ const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
 `;
 
-const RemoveButton = styled(Button)<{ visible: boolean }>`
-  visibility: ${(props) => (props.visible ? 'visible' : 'hidden')};
+const RemoveButton = styled(Button)<{ $visible: boolean }>`
+  visibility: ${(props) => (props.$visible ? 'visible' : 'hidden')};
 `;
 
 interface LinkContentProps extends RenderElementProps {
@@ -116,16 +107,16 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
         </StyledBaseLink>
         {popoverOpen && (
           <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
-            <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
-              <Field width="368px">
+            <Flex tag="form" onSubmit={handleSave} direction="column" gap={4}>
+              <Field.Root width="368px">
                 <Flex direction="column" gap={1} alignItems="stretch">
-                  <FieldLabel>
+                  <Field.Label>
                     {formatMessage({
                       id: 'components.Blocks.popover.text',
                       defaultMessage: 'Text',
                     })}
-                  </FieldLabel>
-                  <FieldInput
+                  </Field.Label>
+                  <Field.Input
                     name="text"
                     placeholder={formatMessage({
                       id: 'components.Blocks.popover.text.placeholder',
@@ -137,16 +128,16 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                     }}
                   />
                 </Flex>
-              </Field>
-              <Field width="368px">
+              </Field.Root>
+              <Field.Root width="368px">
                 <Flex direction="column" gap={1} alignItems="stretch">
-                  <FieldLabel>
+                  <Field.Label>
                     {formatMessage({
                       id: 'components.Blocks.popover.link',
                       defaultMessage: 'Link',
                     })}
-                  </FieldLabel>
-                  <FieldInput
+                  </Field.Label>
+                  <Field.Input
                     ref={linkInputRef}
                     name="url"
                     placeholder={formatMessage({
@@ -157,12 +148,12 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                     onChange={onLinkChange}
                   />
                 </Flex>
-              </Field>
+              </Field.Root>
               <Flex justifyContent="space-between" width="100%">
                 <RemoveButton
                   variant="danger-light"
                   onClick={() => removeLink(editor)}
-                  visible={showRemoveButton}
+                  $visible={showRemoveButton}
                 >
                   {formatMessage({
                     id: 'components.Blocks.popover.remove',

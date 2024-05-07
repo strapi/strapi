@@ -1,10 +1,7 @@
 import * as React from 'react';
 
 import {
-  ActionLayout,
   Button,
-  ContentLayout,
-  HeaderLayout,
   Table,
   Tbody,
   TFooter,
@@ -21,6 +18,7 @@ import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -130,7 +128,7 @@ const ListPage = () => {
           }
         )}
       </Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         primaryAction={
           canCreate ? (
             <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
@@ -149,10 +147,9 @@ const ListPage = () => {
           id: 'Settings.roles.list.description',
           defaultMessage: 'List of roles',
         })}
-        as="h2"
       />
       {canRead && (
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <SearchInput
               label={formatMessage(
@@ -169,7 +166,7 @@ const ListPage = () => {
         />
       )}
       {canRead && (
-        <ContentLayout>
+        <Layouts.Content>
           <Table
             colCount={colCount}
             rowCount={rowCount}
@@ -259,7 +256,7 @@ const ListPage = () => {
               ))}
             </Tbody>
           </Table>
-        </ContentLayout>
+        </Layouts.Content>
       )}
       <ConfirmDialog
         isOpen={isWarningDeleteAllOpened}

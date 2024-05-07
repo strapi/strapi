@@ -1,5 +1,5 @@
 import { Quotes } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';

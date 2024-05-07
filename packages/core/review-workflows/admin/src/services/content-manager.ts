@@ -6,7 +6,7 @@ import type {
   UpdateStage,
   UpdateAssignee,
 } from '../../../shared/contracts/review-workflows';
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { Contracts } from '@strapi/content-manager/_internal/shared';
 
 type ContentType = Contracts.ContentTypes.ContentType;
 interface ContentTypes {

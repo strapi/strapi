@@ -4,7 +4,7 @@ import { Typography } from '@strapi/design-system';
 import { BulletList, NumberList } from '@strapi/icons';
 import { type Text, Editor, Node, Transforms, Path } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
-import styled, { type CSSProperties, css } from 'styled-components';
+import { styled, type CSSProperties, css } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
@@ -29,13 +29,13 @@ const listStyle = css`
   }
 `;
 
-const Orderedlist = styled.ol<{ listStyleType: CSSProperties['listStyleType'] }>`
-  list-style-type: ${(props) => props.listStyleType};
+const Orderedlist = styled.ol<{ $listStyleType: CSSProperties['listStyleType'] }>`
+  list-style-type: ${(props) => props.$listStyleType};
   ${listStyle}
 `;
 
-const Unorderedlist = styled.ul<{ listStyleType: CSSProperties['listStyleType'] }>`
-  list-style-type: ${(props) => props.listStyleType};
+const Unorderedlist = styled.ul<{ $listStyleType: CSSProperties['listStyleType'] }>`
+  list-style-type: ${(props) => props.$listStyleType};
   ${listStyle}
 `;
 
@@ -55,14 +55,14 @@ const List = ({ attributes, children, element }: RenderElementProps) => {
 
   if (element.format === 'ordered') {
     return (
-      <Orderedlist listStyleType={listStyleType} {...attributes}>
+      <Orderedlist $listStyleType={listStyleType} {...attributes}>
         {children}
       </Orderedlist>
     );
   }
 
   return (
-    <Unorderedlist listStyleType={listStyleType} {...attributes}>
+    <Unorderedlist $listStyleType={listStyleType} {...attributes}>
       {children}
     </Unorderedlist>
   );
@@ -356,7 +356,7 @@ const listBlocks: Pick<BlocksStore, 'list-ordered' | 'list-unordered' | 'list-it
   },
   'list-item': {
     renderElement: (props) => (
-      <Typography as="li" {...props.attributes}>
+      <Typography tag="li" {...props.attributes}>
         {props.children}
       </Typography>
     ),

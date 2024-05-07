@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { BaseButton, Flex, Typography } from '@strapi/design-system';
+import { BaseButton, Flex, Typography, TypographyComponent } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface AddComponentButtonProps {
   children: React.ReactNode;
@@ -31,15 +31,15 @@ const AddComponentButton = ({
       paddingRight={4}
       style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
     >
-      <Flex as="span" gap={2}>
+      <Flex tag="span" gap={2}>
         <StyledAddIcon aria-hidden $isOpen={isOpen} $hasError={hasError && !isOpen} />
-        <Typography
+        <AddComponentTitle
           variant="pi"
           fontWeight="bold"
           textColor={hasError && !isOpen ? 'danger600' : 'neutral500'}
         >
           {children}
-        </Typography>
+        </AddComponentTitle>
       </Flex>
     </StyledButton>
   );
@@ -60,13 +60,15 @@ const StyledAddIcon = styled(PlusCircle)<{ $isOpen?: boolean; $hasError?: boolea
   }
 `;
 
+const AddComponentTitle = styled<TypographyComponent>(Typography)``;
+
 const StyledButton = styled(BaseButton)`
   border-radius: 26px;
   border-color: ${({ theme }) => theme.colors.neutral150};
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 
   &:hover {
-    ${Typography} {
+    ${AddComponentTitle} {
       color: ${({ theme }) => theme.colors.primary600};
     }
 
@@ -80,7 +82,7 @@ const StyledButton = styled(BaseButton)`
     }
   }
   &:active {
-    ${Typography} {
+    ${AddComponentTitle} {
       color: ${({ theme }) => theme.colors.primary600};
     }
     ${StyledAddIcon} {

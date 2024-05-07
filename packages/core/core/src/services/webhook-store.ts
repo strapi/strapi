@@ -107,7 +107,14 @@ export interface WebhookStore {
 
 const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
   return {
-    allowedEvents: new Map([]),
+    allowedEvents: new Map([
+      ['ENTRY_CREATE', 'entry.create'],
+      ['ENTRY_UPDATE', 'entry.update'],
+      ['ENTRY_DELETE', 'entry.delete'],
+      ['ENTRY_PUBLISH', 'entry.publish'],
+      ['ENTRY_UNPUBLISH', 'entry.unpublish'],
+      ['ENTRY_DRAFT_DISCARD', 'entry.draft-discard'],
+    ]),
     addAllowedEvent(key, value) {
       this.allowedEvents.set(key, value);
     },

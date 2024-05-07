@@ -9,28 +9,29 @@ import {
   Accordion,
   AccordionContent as DSAccordionContent,
   AccordionToggle,
-  Grid,
-  GridItem,
   IconButton,
   Typography,
   KeyboardNavigable,
   useComposedRefs,
+  GridItem,
+  Grid,
+  FlexComponent,
+  BoxComponent,
+  IconButtonComponent,
 } from '@strapi/design-system';
 import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
-import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
-import { InputRenderer } from '../../InputRenderer';
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
 import { Initializer } from './Initializer';
@@ -42,14 +43,15 @@ import type { Schema } from '@strapi/types';
  * RepeatableComponent
  * -----------------------------------------------------------------------------------------------*/
 
-interface RepeatableComponentProps extends Omit<ComponentInputProps, 'label' | 'required'> {}
+type RepeatableComponentProps = Omit<ComponentInputProps, 'required' | 'label'>;
 
 const RepeatableComponent = ({
   attribute,
   disabled,
   name,
   mainField,
-  renderInput,
+  children,
+  layout,
 }: RepeatableComponentProps) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
@@ -211,6 +213,7 @@ const RepeatableComponent = ({
       <AccordionGroup error={error}>
         <AccordionContent aria-describedby={ariaDescriptionId}>
           {value.map(({ __temp_key__: key, id }, index) => {
+            const nameWithIndex = `${name}.${index}`;
             return (
               <ComponentProvider
                 key={key}
@@ -222,12 +225,11 @@ const RepeatableComponent = ({
               >
                 <Component
                   disabled={disabled}
-                  name={`${name}.${index}`}
+                  name={nameWithIndex}
                   attribute={attribute}
                   index={index}
                   isOpen={collapseToOpen === key}
                   mainField={mainField}
-                  renderInput={renderInput}
                   onMoveItem={handleMoveComponentField}
                   onClickToggle={handleToggle(key)}
                   onDeleteComponent={() => {
@@ -238,7 +240,29 @@ const RepeatableComponent = ({
                   onCancel={handleCancel}
                   onDropItem={handleDropItem}
                   onGrabItem={handleGrabItem}
-                />
+                >
+                  {layout.map((row, index) => {
+                    return (
+                      <Grid gap={4} key={index}>
+                        {row.map(({ size, ...field }) => {
+                          /**
+                           * Layouts are built from schemas so they don't understand the complete
+                           * schema tree, for components we append the parent name to the field name
+                           * because this is the structure for the data & permissions also understand
+                           * the nesting involved.
+                           */
+                          const completeFieldName = `${nameWithIndex}.${field.name}`;
+
+                          return (
+                            <GridItem col={size} key={completeFieldName} s={12} xs={12}>
+                              {children({ ...field, name: completeFieldName })}
+                            </GridItem>
+                          );
+                        })}
+                      </Grid>
+                    );
+                  })}
+                </Component>
               </ComponentProvider>
             );
           })}
@@ -274,7 +298,7 @@ const TextButtonCustom = styled(TextButton)`
  * Accordion
  * -----------------------------------------------------------------------------------------------*/
 
-const AccordionFooter = styled(Box)`
+const AccordionFooter = styled<BoxComponent>(Box)`
   overflow: hidden;
   border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
@@ -282,7 +306,7 @@ const AccordionFooter = styled(Box)`
   border-radius: 0 0 ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius};
 `;
 
-const AccordionContent = styled(Box)`
+const AccordionContent = styled<BoxComponent>(Box)`
   border-bottom: none;
 
   /* add the borders and make sure the top is transparent to avoid jumping with the hover effect  */
@@ -337,49 +361,30 @@ const AccordionGroup = ({ children, error }: AccordionGroupProps) => {
  * Field
  * -----------------------------------------------------------------------------------------------*/
 
-const CustomIconButton = styled(IconButton)<{ expanded?: boolean }>`
+const CustomIconButton = styled<IconButtonComponent>(IconButton)<{ $expanded?: boolean }>`
   background-color: transparent;
-
-  svg {
-    path {
-      fill: ${({ theme, expanded }) =>
-        expanded ? theme.colors.primary600 : theme.colors.neutral600};
-    }
-  }
+  color: ${({ theme, $expanded }) =>
+    $expanded ? theme.colors.primary600 : theme.colors.neutral600};
 
   &:hover {
-    svg {
-      path {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-    }
+    color: ${({ theme }) => theme.colors.primary600};
   }
 `;
 
-const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
+const ActionsFlex = styled<FlexComponent>(Flex)<{ $expanded?: boolean }>`
   & .drag-handle {
     background: unset;
-
-    svg {
-      path {
-        fill: ${({ theme, expanded }) => (expanded ? theme.colors.primary600 : undefined)};
-      }
-    }
+    color: ${({ theme, $expanded }) => ($expanded ? theme.colors.primary600 : undefined)};
 
     &:hover {
-      svg {
-        path {
-          /* keeps the hover style of the accordion */
-          fill: ${({ theme }) => theme.colors.primary600};
-        }
-      }
+      color: ${({ theme }) => theme.colors.primary600};
     }
   }
 `;
 
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
-    Pick<RepeatableComponentProps, 'mainField' | 'renderInput'> {
+    Pick<RepeatableComponentProps, 'mainField'> {
   attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
@@ -388,10 +393,10 @@ interface ComponentProps
   onClickToggle: () => void;
   onDeleteComponent?: React.MouseEventHandler<HTMLButtonElement>;
   toggleCollapses: () => void;
+  children: React.ReactNode;
 }
 
 const Component = ({
-  attribute,
   disabled,
   index,
   isOpen,
@@ -400,18 +405,13 @@ const Component = ({
     name: 'id',
     type: 'integer',
   },
+  children,
   onClickToggle,
   onDeleteComponent,
   toggleCollapses,
-  renderInput = InputRenderer,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
-  const {
-    edit: { components },
-  } = useDocLayout();
-
-  const { layout } = components[attribute.component];
 
   const displayValue = useForm('RepeatableComponent', (state) => {
     return getIn(state.values, [...name.split('.'), mainField.name]);
@@ -450,7 +450,7 @@ const Component = ({
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
 
   return (
-    <Box ref={(ref) => composedBoxRefs(ref!)}>
+    <Box ref={composedBoxRefs}>
       {isDragging ? (
         <Preview />
       ) : (
@@ -458,9 +458,9 @@ const Component = ({
           <AccordionToggle
             action={
               disabled ? null : (
-                <ActionsFlex gap={0} expanded={isOpen}>
+                <ActionsFlex gap={0} $expanded={isOpen}>
                   <CustomIconButton
-                    expanded={isOpen}
+                    $expanded={isOpen}
                     borderWidth={0}
                     onClick={onDeleteComponent}
                     label={formatMessage({
@@ -472,7 +472,7 @@ const Component = ({
                   <IconButton
                     className="drag-handle"
                     ref={composedAccordionRefs}
-                    forwardedAs="div"
+                    tag="div"
                     role="button"
                     borderWidth={0}
                     tabIndex={0}
@@ -500,27 +500,7 @@ const Component = ({
               padding={6}
               gap={6}
             >
-              {layout.map((row, index) => {
-                return (
-                  <Grid gap={4} key={index}>
-                    {row.map(({ size, ...field }) => {
-                      /**
-                       * Layouts are built from schemas so they don't understand the complete
-                       * schema tree, for components we append the parent name to the field name
-                       * because this is the structure for the data & permissions also understand
-                       * the nesting involved.
-                       */
-                      const completeFieldName = `${name}.${field.name}`;
-
-                      return (
-                        <GridItem col={size} key={completeFieldName} s={12} xs={12}>
-                          {renderInput({ ...field, name: completeFieldName })}
-                        </GridItem>
-                      );
-                    })}
-                  </Grid>
-                );
-              })}
+              {children}
             </Flex>
           </DSAccordionContent>
         </Accordion>
@@ -530,10 +510,10 @@ const Component = ({
 };
 
 const Preview = () => {
-  return <StyledSpan as="span" padding={6} background="primary100" />;
+  return <StyledSpan tag="span" padding={6} background="primary100" />;
 };
 
-const StyledSpan = styled(Box)`
+const StyledSpan = styled<BoxComponent<'span'>>(Box)`
   display: block;
   outline: 1px dashed ${({ theme }) => theme.colors.primary500};
   outline-offset: -1px;

@@ -72,7 +72,7 @@ describe('ReleaseModal', () => {
     expect(dateField).toBeInTheDocument();
 
     const time = await screen.findByRole('combobox', {
-      name: /time\s/i,
+      name: 'Timezone',
     });
     expect(time).toBeInTheDocument();
 

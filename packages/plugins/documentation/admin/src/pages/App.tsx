@@ -3,11 +3,8 @@ import * as React from 'react';
 
 import {
   LinkButton,
-  ContentLayout,
   Flex,
-  HeaderLayout,
   IconButton,
-  Layout,
   Table,
   Tbody,
   Td,
@@ -24,9 +21,10 @@ import {
   Page,
   useAPIErrorHandler,
   useNotification,
+  Layouts,
 } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PERMISSIONS } from '../constants';
 import {
@@ -122,10 +120,10 @@ const App = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>{title}</Page.Title>
       <Page.Main>
-        <HeaderLayout
+        <Layouts.Header
           title={title}
           subtitle={formatMessage({
             id: getTrad('pages.PluginPage.header.description'),
@@ -144,7 +142,7 @@ const App = () => {
             </OpenDocLink>
           }
         />
-        <ContentLayout>
+        <Layouts.Content>
           {data?.docVersions.length ? (
             <Table colCount={colCount} rowCount={rowCount}>
               <Thead>
@@ -182,9 +180,8 @@ const App = () => {
                       <Td>
                         <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
                           <IconButton
-                            forwardedAs="a"
+                            tag="a"
                             disabled={!allowedActions.canRead}
-                            // @ts-expect-error invalid typing in IconButton
                             href={createDocumentationHref(`${data.prefix}/v${doc.version}`)}
                             noBorder
                             icon={<Show />}
@@ -235,14 +232,14 @@ const App = () => {
           ) : (
             <EmptyStateLayout content="" icon={null} />
           )}
-        </ContentLayout>
+        </Layouts.Content>
         <ConfirmDialog
           onConfirm={handleConfirmDelete}
           onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

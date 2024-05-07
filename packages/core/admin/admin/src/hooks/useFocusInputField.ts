@@ -1,8 +1,6 @@
-import { MutableRefObject, useEffect, useMemo, useState } from 'react';
+import { Ref, useEffect, useMemo, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
-
-type InputFieldRefs<T extends HTMLElement> = T | { input: MutableRefObject<T> } | null;
 
 /**
  * @description Given the name of an input field (this does not need to be the name you pass as a prop to the DOM element),
@@ -18,9 +16,7 @@ type InputFieldRefs<T extends HTMLElement> = T | { input: MutableRefObject<T> } 
  * );
  * ```
  */
-const useFocusInputField = <T extends HTMLElement>(
-  name: string
-): ((node: InputFieldRefs<T>) => void) => {
+const useFocusInputField = <T extends HTMLElement>(name: string): Ref<T> => {
   const { search: searchString } = useLocation();
   const search = useMemo(() => new URLSearchParams(searchString), [searchString]);
 
@@ -30,24 +26,14 @@ const useFocusInputField = <T extends HTMLElement>(
    * Realistically, it will only be an `HTMLElement` but `TextInput` in the design-system
    * has an imperativeHandle we can't remove until v2 of the design-system.
    */
-  const [field, setField] = useState<InputFieldRefs<T>>(null);
+  const [field, setField] = useState<HTMLElement | null>(null);
 
   useEffect(() => {
     if (search.has('field') && search.get('field') === name && field) {
-      /**
-       * TODO: simplify this when we use v2 of the design-system
-       */
-      if ('input' in field) {
-        field.input.current.focus();
-        field.input.current.scrollIntoView({
-          block: 'center',
-        });
-      } else {
-        field.focus();
-        field.scrollIntoView({
-          block: 'center',
-        });
-      }
+      field.focus();
+      field.scrollIntoView({
+        block: 'center',
+      });
     }
   }, [search, name, field]);
 

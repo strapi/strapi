@@ -224,7 +224,7 @@ export const PreviewBox = ({
           paddingLeft={2}
           paddingRight={2}
           justifyContent="flex-end"
-          blurry={isInCroppingMode}
+          $blurry={isInCroppingMode}
         >
           {isInCroppingMode && width && height && (
             <BadgeOverride background="neutral900" color="neutral0">

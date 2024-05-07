@@ -56,14 +56,7 @@ describe('Validate Body', () => {
 
       const response = await rq.post('/products', { body: createPayload });
 
-      expect(response.statusCode).toBe(201);
-
-      const { documentId, ...attributes } = response.body.data;
-
-      expect(documentId).not.toBe(createPayload.data.documentId);
-
-      expect(attributes).toHaveProperty('name', createPayload.data.name);
-      expect(attributes).toHaveProperty('description', createPayload.data.description);
+      expect(response.statusCode).toBe(400);
     });
   });
 
@@ -78,13 +71,7 @@ describe('Validate Body', () => {
         body: updatePayload,
       });
 
-      expect(response.statusCode).toBe(200);
-
-      const { documentId, ...attributes } = response.body.data;
-
-      expect(documentId).toBe(target.documentId);
-      expect(attributes).toHaveProperty('name', updatePayload.data.name);
-      expect(attributes).toHaveProperty('description', target.description);
+      expect(response.statusCode).toBe(400);
     });
   });
 });
