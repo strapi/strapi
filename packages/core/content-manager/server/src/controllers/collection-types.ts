@@ -424,15 +424,18 @@ export default {
 
     const { locale } = getDocumentLocaleAndStatus(body);
 
-    const documentLocales = await strapi.db.query(model).findMany({
-      where: {
-        documentId: { $in: documentIds },
-        locale,
-        publishedAt: { $null: true },
-      },
-    });
+    const where: any = {
+      documentId: { $in: documentIds },
+      publishedAt: { $null: true },
+    };
 
-    console.log('test', documentLocales);
+    if (locale) {
+      where.locale = locale;
+    }
+
+    const documentLocales = await strapi.db.query(model).findMany({
+      where,
+    });
 
     if (documentLocales.length === 0) {
       return ctx.notFound();
@@ -467,12 +470,17 @@ export default {
 
     const { locale } = getDocumentLocaleAndStatus(body);
 
+    const where: any = {
+      documentId: { $in: documentIds },
+      publishedAt: { $notNull: true },
+    };
+
+    if (locale) {
+      where.locale = locale;
+    }
+
     const documentLocales = await strapi.db.query(model).findMany({
-      where: {
-        documentId: { $in: documentIds },
-        locale,
-        publishedAt: { $notNull: true },
-      },
+      where,
     });
 
     if (documentLocales.length === 0) {

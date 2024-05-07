@@ -246,7 +246,6 @@ describe('CM API - Basic + compo', () => {
       // TODO: Validate document is published
     });
 
-    // TODO: Implement bulk publish
     test('Can bulk publish product with compo - required', async () => {
       const product = {
         name: 'Product 1',
