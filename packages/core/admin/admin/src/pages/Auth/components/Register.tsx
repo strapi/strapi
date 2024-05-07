@@ -46,7 +46,7 @@ import {
   useRegisterUserMutation,
 } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
-import { AuthType } from '../constants';
+import { AuthType, RTL_LOCALES } from '../constants';
 
 import { FieldActionWrapper } from './FieldActionWrapper';
 
@@ -111,7 +111,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
   const [submitCount, setSubmitCount] = React.useState(0);
   const [apiError, setApiError] = React.useState<string>();
   const { trackUsage } = useTracking();
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const { setSkipped } = useGuidedTour();
   const query = useQuery();
   const match = useRouteMatch<{ authType: Extract<AuthType, `register${string}`> }>(
@@ -320,7 +320,13 @@ const Register = ({ hasAdmin }: RegisterProps) => {
             return (
               <Form>
                 <Main>
-                  <Flex direction="column" alignItems="stretch" gap={6} marginTop={7}>
+                  <Flex
+                    direction="column"
+                    alignItems="stretch"
+                    gap={6}
+                    marginTop={7}
+                    dir={RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'}
+                  >
                     <Grid gap={4}>
                       <GridItem col={6}>
                         <TextInput

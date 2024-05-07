@@ -16,10 +16,11 @@ import { useForgotPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
 
 import type { ForgotPassword } from '../../../../../shared/contracts/authentication';
+import { RTL_LOCALES } from '../constants';
 
 const ForgotPassword = () => {
   const { push } = useHistory();
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const [forgotPassword, { error }] = useForgotPasswordMutation();
@@ -68,7 +69,12 @@ const ForgotPassword = () => {
           >
             {({ values, errors, handleChange }) => (
               <Form>
-                <Flex direction="column" alignItems="stretch" gap={6}>
+                <Flex
+                  direction="column"
+                  alignItems="stretch"
+                  gap={6}
+                  dir={RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'}
+                >
                   <TextInput
                     error={
                       errors.email

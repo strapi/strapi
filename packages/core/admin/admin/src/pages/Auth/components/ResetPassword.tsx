@@ -22,6 +22,7 @@ import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
 
 import { FieldActionWrapper } from './FieldActionWrapper';
+import { RTL_LOCALES } from '../constants';
 
 const RESET_PASSWORD_SCHEMA = yup.object().shape({
   password: yup
@@ -40,7 +41,7 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
 const ResetPassword = () => {
   const [passwordShown, setPasswordShown] = React.useState(false);
   const [confirmPasswordShown, setConfirmPasswordShown] = React.useState(false);
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const { push } = useHistory();
   const query = useQuery();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -105,7 +106,12 @@ const ResetPassword = () => {
           >
             {({ values, errors, handleChange }) => (
               <Form>
-                <Flex direction="column" alignItems="stretch" gap={6}>
+                <Flex
+                  direction="column"
+                  alignItems="stretch"
+                  gap={6}
+                  dir={RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'}
+                >
                   <PasswordInput
                     name="password"
                     onChange={handleChange}
