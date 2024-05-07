@@ -33,10 +33,46 @@ const LOGIN_SCHEMA = yup.object().shape({
   rememberMe: yup.bool().nullable(),
 });
 
+const RTL_LOCALES = [
+  'ar',
+  'ar-AE',
+  'ar-BH',
+  'ar-DJ',
+  'ar-DZ',
+  'ar-EG',
+  'ar-IQ',
+  'ar-JO',
+  'ar-KW',
+  'ar-LB',
+  'ar-LY',
+  'ar-MA',
+  'ar-OM',
+  'ar-QA',
+  'ar-SA',
+  'ar-SD',
+  'ar-SY',
+  'ar-TN',
+  'ar-YE',
+  'fa-AF',
+  'fa-IR',
+  'he',
+  'he-IL',
+  'iw',
+  'kd',
+  'pk-PK',
+  'ps',
+  'ug',
+  'ur',
+  'ur-IN',
+  'ur-PK',
+  'yi',
+  'yi-US',
+];
+
 const Login = ({ children }: LoginProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const [passwordShown, setPasswordShown] = React.useState(false);
-  const { formatMessage } = useIntl();
+  const { formatMessage, locale } = useIntl();
   const query = useQuery();
   const { push } = useHistory();
 
@@ -107,7 +143,12 @@ const Login = ({ children }: LoginProps) => {
           >
             {({ values, errors, handleChange }) => (
               <Form>
-                <Flex direction="column" alignItems="stretch" gap={6}>
+                <Flex
+                  direction="column"
+                  alignItems="stretch"
+                  gap={6}
+                  dir={RTL_LOCALES.includes(locale) ? 'rtl' : 'ltr'}
+                >
                   <TextInput
                     error={
                       errors.email
