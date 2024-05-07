@@ -10,6 +10,8 @@ const command: StrapiCloudCommand = ({ command, ctx }) => {
     .command('cloud:deploy')
     .alias('deploy')
     .description('Deploy a Strapi Cloud project')
+    .option('-d, --debug', 'Enable debugging mode with verbose logs')
+    .option('-s, --silent', "Don't log anything")
     .action(() => runAction('deploy', action)(ctx));
 };
 

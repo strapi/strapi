@@ -37,4 +37,11 @@ export type StrapiCloudCommand = (params: {
   ctx: CLIContext;
 }) => void;
 
+export type StrapiCloudCommandInfo = {
+  name: string;
+  description: string;
+  command: StrapiCloudCommand;
+  action: (ctx: CLIContext) => Promise<unknown>;
+};
+
 export type * from './services/cli-api';

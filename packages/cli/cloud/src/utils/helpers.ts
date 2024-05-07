@@ -26,7 +26,7 @@ const assertCwdContainsStrapiProject = (name: string) => {
 };
 
 const runAction =
-  (name: string, action: (...args: any[]) => Promise<void>) =>
+  (name: string, action: (...args: any[]) => Promise<unknown>) =>
   (...args: unknown[]) => {
     assertCwdContainsStrapiProject(name);
 

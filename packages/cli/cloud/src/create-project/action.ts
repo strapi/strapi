@@ -33,29 +33,27 @@ function handleError(ctx: CLIContext, error: Error) {
   );
 }
 
-export default (ctx: CLIContext) => {
+export default async (ctx: CLIContext) => {
   const { getValidToken } = tokenServiceFactory(ctx);
 
-  return async () => {
-    const token = await getValidToken();
-    if (!token) {
-      return;
-    }
-    const cloudApi = cloudApiFactory(token);
-    const { data: config } = await cloudApi.config();
-    const { questions, defaults: defaultValues } = config.projectCreation;
+  const token = await getValidToken();
+  if (!token) {
+    return;
+  }
+  const cloudApi = cloudApiFactory(token);
+  const { data: config } = await cloudApi.config();
+  const { questions, defaults: defaultValues } = config.projectCreation;
 
-    const projectAnswersDefaulted = defaults(defaultValues);
-    const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
+  const projectAnswersDefaulted = defaults(defaultValues);
+  const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
 
-    const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
+  const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
 
-    try {
-      const { data } = await cloudApi.createProject(projectInput);
-      local.save({ project: data });
-      return data;
-    } catch (error: Error | unknown) {
-      handleError(ctx, error as Error);
-    }
-  };
+  try {
+    const { data } = await cloudApi.createProject(projectInput);
+    local.save({ project: data });
+    return data;
+  } catch (error: Error | unknown) {
+    handleError(ctx, error as Error);
+  }
 };

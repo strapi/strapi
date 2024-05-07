@@ -10,7 +10,12 @@ const command: StrapiCloudCommand = ({ command, ctx }) => {
     .command('cloud:login')
     .alias('login')
     .description('Strapi Cloud Login')
-    .addHelpText('after', '\nAfter running this command, you will be prompted to enter your authentication information.')
+    .addHelpText(
+      'after',
+      '\nAfter running this command, you will be prompted to enter your authentication information.'
+    )
+    .option('-d, --debug', 'Enable debugging mode with verbose logs')
+    .option('-s, --silent', "Don't log anything")
     .action(() => runAction('login', action)(ctx));
 };
 

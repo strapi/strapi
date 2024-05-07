@@ -115,7 +115,7 @@ async function getProject(ctx: CLIContext) {
   const { project } = local.retrieve();
   if (!project) {
     try {
-      return await createProjectAction(ctx)();
+      return await createProjectAction(ctx);
     } catch (error: any) {
       ctx.logger.error('An error occurred while deploying the project. Please try again later.');
       ctx.logger.debug(JSON.stringify(error));
