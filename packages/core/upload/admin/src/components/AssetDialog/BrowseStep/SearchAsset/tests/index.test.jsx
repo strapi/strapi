@@ -126,9 +126,9 @@ describe('SearchAsset', () => {
               aria-hidden="true"
               fill="currentColor"
               focusable="false"
-              height="1.6rem"
+              height="16"
               viewBox="0 0 32 32"
-              width="1.6rem"
+              width="16"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path

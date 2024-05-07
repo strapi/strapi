@@ -288,7 +288,7 @@ describe('Audit logs service', () => {
       await auditLogsService.register();
 
       expect(mockScheduleJob).toHaveBeenCalledTimes(1);
-      expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * *', expect.any(Function));
+      expect(mockScheduleJob).toHaveBeenCalledWith('0 0 * * *', expect.any(Function));
       expect(mockDeleteExpiredEvents).toHaveBeenCalledWith(expect.any(Date));
     });
 

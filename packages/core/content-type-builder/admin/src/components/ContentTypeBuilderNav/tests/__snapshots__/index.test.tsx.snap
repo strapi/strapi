@@ -423,9 +423,9 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                 aria-hidden="true"
                 fill="currentColor"
                 focusable="false"
-                height="1.6rem"
+                height="16"
                 viewBox="0 0 32 32"
-                width="1.6rem"
+                width="16"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
@@ -476,7 +476,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     <svg
                       aria-hidden="true"
                       fill="#8e8ea9"
-                      height="1.6rem"
+                      height="16"
                       style="transform: rotateX(0deg);"
                       viewBox="0 0 32 32"
                       width="1.2rem"
@@ -599,7 +599,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     <svg
                       aria-hidden="true"
                       fill="#8e8ea9"
-                      height="1.6rem"
+                      height="16"
                       style="transform: rotateX(0deg);"
                       viewBox="0 0 32 32"
                       width="1.2rem"
@@ -701,7 +701,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
                     <svg
                       aria-hidden="true"
                       fill="#8e8ea9"
-                      height="1.6rem"
+                      height="16"
                       style="transform: rotateX(0deg);"
                       viewBox="0 0 32 32"
                       width="1.2rem"

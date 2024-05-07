@@ -402,9 +402,9 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                 >
                   <svg
                     fill="currentColor"
-                    height="1.6rem"
+                    height="16"
                     viewBox="0 0 32 32"
-                    width="1.6rem"
+                    width="16"
                     xmlns="http://www.w3.org/2000/svg"
                   >
                     <path
@@ -426,7 +426,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                 >
                   <h1
                     class="c12"
-                    tag="span"
                   >
                     Configure the view - Media Library
                   </h1>
@@ -443,9 +442,9 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                   >
                     <svg
                       fill="currentColor"
-                      height="1.6rem"
+                      height="16"
                       viewBox="0 0 32 32"
-                      width="1.6rem"
+                      width="16"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -462,7 +461,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
               </div>
               <p
                 class="c18"
-                tag="span"
               >
                 Define the view settings of the media library.
               </p>
@@ -527,9 +525,9 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         >
                           <svg
                             fill="currentColor"
-                            height="1.6rem"
+                            height="16"
                             viewBox="0 0 32 32"
-                            width="1.6rem"
+                            width="16"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path
@@ -597,9 +595,9 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                         >
                           <svg
                             fill="currentColor"
-                            height="1.6rem"
+                            height="16"
                             viewBox="0 0 32 32"
-                            width="1.6rem"
+                            width="16"
                             xmlns="http://www.w3.org/2000/svg"
                           >
                             <path

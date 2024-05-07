@@ -52,7 +52,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
       <Divider />
 
       <NavListWrapper as="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3}>
-        <Flex as="li">
+        <Flex tag="li">
           <NavLink.Link
             to="/"
             onClick={() => handleClickOnLink('/')}
@@ -65,7 +65,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             </NavLink.Tooltip>
           </NavLink.Link>
         </Flex>
-        <Flex as="li">
+        <Flex tag="li">
           <NavLink.Link
             to="/content-manager"
             onClick={() => handleClickOnLink('/content-manager')}
@@ -97,7 +97,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
               const labelValue = formatMessage(link.intlLabel);
               return (
-                <Flex as="li" key={link.to}>
+                <Flex tag="li" key={link.to}>
                   <NavLink.Link
                     to={link.to}
                     onClick={() => handleClickOnLink(link.to)}
@@ -134,7 +134,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
               const labelValue = formatMessage(link.intlLabel);
 
               return (
-                <Flex as="li" key={link.to}>
+                <Flex tag="li" key={link.to}>
                   <NavLink.Link
                     aria-label={labelValue}
                     to={link.to}
