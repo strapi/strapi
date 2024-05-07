@@ -52,16 +52,25 @@ const areDatesEqual = (
   date1: Date | string | null,
   date2: Date | string | null,
   threshold: number
-): boolean => {
+): {
+  isEqual: boolean;
+  isPrimaryVersionNewer: boolean;
+} => {
   if (!date1 || !date2) {
-    return false;
+    return {
+      isEqual: false,
+      isPrimaryVersionNewer: false,
+    };
   }
 
   const time1 = new Date(date1).getTime();
   const time2 = new Date(date2).getTime();
   const difference = Math.abs(time1 - time2);
 
-  return difference <= threshold;
+  return {
+    isEqual: difference <= threshold,
+    isPrimaryVersionNewer: time1 > time2,
+  };
 };
 
 /**
@@ -199,7 +208,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const isDraft = version.publishedAt === null;
 
     if (!otherDocumentStatuses?.length) {
-      // It there are no other versions we take the current version status
+      // If there are no other versions, we take the current version status
       return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
     }
 
@@ -212,12 +221,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     // The draft version is the same as the published version
-    if (areDatesEqual(version.updatedAt, otherDocumentStatuses.at(0)?.updatedAt, 500)) {
+    const { isEqual, isPrimaryVersionNewer = false } = areDatesEqual(
+      version.updatedAt,
+      otherDocumentStatuses.at(0)?.updatedAt,
+      500
+    );
+
+    if (isEqual) {
       return CONTENT_MANAGER_STATUS.PUBLISHED;
     }
-
-    // The draft version is newer than the published version
-    return CONTENT_MANAGER_STATUS.MODIFIED;
+    return isPrimaryVersionNewer && isDraft
+      ? // The draft version is newer than the published version
+        CONTENT_MANAGER_STATUS.MODIFIED
+      : CONTENT_MANAGER_STATUS.PUBLISHED;
   },
 
   // TODO is it necessary to return metadata on every page of the CM
