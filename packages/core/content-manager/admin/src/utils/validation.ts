@@ -82,15 +82,19 @@ const createYupSchema = (
                       (
                         data: SchemaUtils.Attribute.Value<SchemaUtils.Attribute.DynamicZone>[number]
                       ) => {
-                        const { attributes } = components[data.__component];
+                        const attributes = components?.[data?.__component]?.attributes;
 
-                        return yup
+                        const validation = yup
                           .object()
                           .shape({
                             __component: yup.string().required().oneOf(Object.keys(components)),
                           })
-                          .nullable(false)
-                          .concat(createModelSchema(attributes));
+                          .nullable(false);
+                        if (!attributes) {
+                          return validation;
+                        }
+
+                        return validation.concat(createModelSchema(attributes));
                       }
                     ) as unknown as yup.ObjectSchema<any>
                   )
