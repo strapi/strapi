@@ -147,7 +147,7 @@ const Login = ({ children }: LoginProps) => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            <Link tag={NavLink} to="/auth/forgot-password">
+            <Link isExternal={false} tag={NavLink} to="/auth/forgot-password">
               {formatMessage({
                 id: 'Auth.link.forgot-password',
                 defaultMessage: 'Forgot your password?',

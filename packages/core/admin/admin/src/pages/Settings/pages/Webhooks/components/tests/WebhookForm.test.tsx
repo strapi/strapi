@@ -62,5 +62,7 @@ describe('WebhookForm', () => {
       events: ['entry.create'],
       headers: [{ key: '', value: '' }],
     });
+
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
   });
 });

@@ -211,7 +211,7 @@ const ContentBlocks = () => {
             </CloudIconWrapper>
           </CloudCustomWrapper>
           <Flex gap={1} direction="column" alignItems="start">
-            <Typography fontWeight="semiBold" variant="pi">
+            <Typography fontWeight="semiBold" variant="pi" textColor="neutral800">
               {formatMessage({
                 id: 'app.components.BlockLink.cloud',
                 defaultMessage: 'Strapi Cloud',
@@ -394,6 +394,12 @@ const SocialLinks = () => {
   );
 };
 
+const StyledGithub = styled(GitHub)`
+  path {
+    fill: ${(props) => props.theme.colors.neutral800} !important;
+  }
+`;
+
 const StyledDiscord = styled(Discord)`
   path {
     fill: #7289da !important;
@@ -476,7 +482,7 @@ const SOCIAL_LINKS = [
   {
     name: { id: 'app.components.HomePage.community.links.github', defaultMessage: 'Github' },
     link: 'https://github.com/strapi/strapi/',
-    icon: <GitHub fill="#7289DA" />,
+    icon: <StyledGithub />,
     alt: 'github',
   },
   {

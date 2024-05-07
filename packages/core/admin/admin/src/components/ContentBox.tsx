@@ -56,6 +56,7 @@ const IconWrapper = styled<FlexComponent>(Flex)`
 `;
 
 const TypographyWordBreak = styled<TypographyComponent>(Typography)`
+  color: ${({ theme }) => theme.colors.neutral800};
   word-break: break-all;
 `;
 

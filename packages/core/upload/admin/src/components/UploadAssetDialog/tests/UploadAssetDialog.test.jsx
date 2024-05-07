@@ -94,6 +94,11 @@ describe('UploadAssetDialog', () => {
       await waitFor(() => expect(screen.getByText('An error occured')).toBeInTheDocument());
     }, 10000);
 
+    /**
+     * We should review this test and understand what value it brings,
+     * atm it requires a lot of mocking and triggers many async operations
+     * which are hard to follow.
+     */
     it.skip('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
       const { user, getByText, getByRole } = render(<UploadAssetDialog />);
 

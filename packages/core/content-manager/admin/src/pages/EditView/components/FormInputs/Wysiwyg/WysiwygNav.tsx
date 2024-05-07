@@ -24,7 +24,6 @@ import {
 } from '@strapi/icons';
 import { EditorFromTextArea } from 'codemirror5';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import {
   CustomIconButton,

@@ -16,7 +16,6 @@ import {
   MenuItem,
   FlexComponent,
   BoxComponent,
-  IconButtonComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';

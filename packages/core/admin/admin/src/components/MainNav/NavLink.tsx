@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Tooltip, Flex, Badge, BadgeProps, AccessibleIcon } from '@strapi/design-system';
+import { Tooltip, Badge, BadgeProps, AccessibleIcon } from '@strapi/design-system';
 import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
 import { styled } from 'styled-components';
 
