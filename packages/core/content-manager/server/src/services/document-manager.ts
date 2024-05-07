@@ -35,6 +35,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       opts: {
         populate?: Modules.Documents.Params.Pick<any, 'populate'>;
         locale?: string | string[] | '*';
+        isPublished?: boolean;
       }
     ) {
       // Will look for a specific locale by default
@@ -51,6 +52,11 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       } else if (opts.locale && opts.locale !== '*') {
         // Look for a specific locale, ignore if looking for all locales
         where.locale = opts.locale;
+      }
+
+      // Published is passed, so we filter on it, otherwise we don't filter
+      if (typeof opts.isPublished === 'boolean') {
+        where.publishedAt = { $notNull: opts.isPublished };
       }
 
       return strapi.db.query(uid).findMany({ populate: opts.populate, where });
@@ -184,13 +190,15 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
             strapi
               .documents(uid)
               .publish({ ...opts, documentId: id })
-              .then((result) => result?.entries.at(0))
+              .then((result) => result?.entries)
           )
         );
       });
 
+      const publishedEntitiesCount = publishedEntries.flat().filter(Boolean).length;
+
       // Return the number of published entities
-      return { count: publishedEntries.length };
+      return { count: publishedEntitiesCount };
     },
 
     async unpublishMany(
@@ -204,13 +212,15 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
             strapi
               .documents(uid)
               .unpublish({ ...opts, documentId: id })
-              .then((result) => result?.entries.at(0))
+              .then((result) => result?.entries)
           )
         );
       });
 
+      const unpublishedEntitiesCount = unpublishedEntries.flat().filter(Boolean).length;
+
       // Return the number of unpublished entities
-      return { count: unpublishedEntries.length };
+      return { count: unpublishedEntitiesCount };
     },
 
     async unpublish(
