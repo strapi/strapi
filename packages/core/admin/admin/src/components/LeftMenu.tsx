@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { Divider, Flex } from '@strapi/design-system';
+import { Divider, Flex, FlexComponent } from '@strapi/design-system';
 import { Feather, Lock, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useAuth } from '../features/Auth';
 import { useTracking } from '../features/Tracking';
@@ -22,7 +22,7 @@ const NewNavLinkBadge = styled(NavLink.Badge)`
   }
 `;
 
-const NavListWrapper = styled(Flex)`
+const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
   overflow-y: auto;
 `;
 
@@ -51,7 +51,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
 
       <Divider />
 
-      <NavListWrapper as="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3}>
+      <NavListWrapper tag="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3}>
         <Flex tag="li">
           <NavLink.Link
             to="/"
@@ -59,8 +59,8 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             aria-label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
           >
             <NavLink.Tooltip label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}>
-              <NavLink.Icon>
-                <House fill="neutral500" />
+              <NavLink.Icon label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}>
+                <House width="2rem" height="2rem" fill="neutral500" />
               </NavLink.Icon>
             </NavLink.Tooltip>
           </NavLink.Link>
@@ -80,8 +80,13 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                 defaultMessage: 'Content Manager',
               })}
             >
-              <NavLink.Icon>
-                <Feather fill="neutral500" />
+              <NavLink.Icon
+                label={formatMessage({
+                  id: 'global.content-manager',
+                  defaultMessage: 'Content Manager',
+                })}
+              >
+                <Feather width="2rem" height="2rem" fill="neutral500" />
               </NavLink.Icon>
             </NavLink.Tooltip>
           </NavLink.Link>
@@ -104,8 +109,8 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     aria-label={labelValue}
                   >
                     <NavLink.Tooltip label={labelValue}>
-                      <NavLink.Icon>
-                        <LinkIcon fill="neutral500" />
+                      <NavLink.Icon label={labelValue}>
+                        <LinkIcon width="2rem" height="2rem" fill="neutral500" />
                       </NavLink.Icon>
                       {badgeContent && (
                         <NavLink.Badge
@@ -141,8 +146,8 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     onClick={() => handleClickOnLink(link.to)}
                   >
                     <NavLink.Tooltip label={labelValue}>
-                      <NavLink.Icon>
-                        <LinkIcon fill="neutral500" />
+                      <NavLink.Icon label={labelValue}>
+                        <LinkIcon width="2rem" height="2rem" fill="neutral500" />
                       </NavLink.Icon>
                       {badgeContent && (
                         <NewNavLinkBadge label={badgeContent} backgroundColor="primary600">
