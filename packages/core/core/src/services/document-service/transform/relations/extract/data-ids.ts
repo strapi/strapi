@@ -49,6 +49,10 @@ const addRelationDocId = curry(
 const extractDataIds = (idMap: IdMap, data: Record<string, any>, source: Options) => {
   return traverseEntityRelations(
     async ({ attribute, value }) => {
+      if (!attribute) {
+        return;
+      }
+
       const targetUid = attribute.target!;
       const addDocId = addRelationDocId(idMap, targetUid, source);
 

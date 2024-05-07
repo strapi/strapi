@@ -3,7 +3,7 @@ import { isArray, isObject } from 'lodash/fp';
 
 import { getNonWritableAttributes, constants } from '../content-types';
 import { pipe as pipeAsync } from '../async';
-import { throwInvalidParam } from './utils';
+import { throwInvalidKey } from './utils';
 
 import * as visitors from './visitors';
 import * as validators from './validators';
@@ -12,6 +12,7 @@ import traverseEntity from '../traverse-entity';
 import { traverseQueryFilters, traverseQuerySort, traverseQueryPopulate } from '../traverse';
 
 import { Model, Data } from '../types';
+import { ValidationError } from '../errors';
 
 const { ID_ATTRIBUTE, DOC_ID_ATTRIBUTE } = constants;
 
@@ -54,16 +55,19 @@ const createAPIValidators = (opts: APIOptions) => {
       (data: unknown) => {
         if (isObject(data)) {
           if (ID_ATTRIBUTE in data) {
-            throwInvalidParam({ key: ID_ATTRIBUTE });
+            throwInvalidKey({ key: ID_ATTRIBUTE });
           }
 
           if (DOC_ID_ATTRIBUTE in data) {
-            throwInvalidParam({ key: DOC_ID_ATTRIBUTE });
+            throwInvalidKey({ key: DOC_ID_ATTRIBUTE });
           }
         }
+        return data;
       },
       // non-writable attributes
       traverseEntity(visitors.throwRestrictedFields(nonWritableAttributes), { schema, getModel }),
+      // unrecognized attributes
+      traverseEntity(visitors.throwUnrecognizedFields, { schema, getModel }),
     ];
 
     if (auth) {
@@ -79,7 +83,14 @@ const createAPIValidators = (opts: APIOptions) => {
     // Apply validators from registry if exists
     opts?.validators?.input?.forEach((validator: Validator) => transforms.push(validator(schema)));
 
-    await pipeAsync(...transforms)(data as Data);
+    try {
+      await pipeAsync(...transforms)(data as Data);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        e.details.source = 'body';
+      }
+      throw e;
+    }
   };
 
   const validateQuery = async (
@@ -130,7 +141,15 @@ const createAPIValidators = (opts: APIOptions) => {
       );
     }
 
-    await pipeAsync(...transforms)(filters);
+    try {
+      await pipeAsync(...transforms)(filters);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        e.details.source = 'query';
+        e.details.param = 'filters';
+      }
+      throw e;
+    }
   };
 
   const validateSort: ValidateFunc = async (sort, schema: Model, { auth } = {}) => {
@@ -148,7 +167,15 @@ const createAPIValidators = (opts: APIOptions) => {
       );
     }
 
-    await pipeAsync(...transforms)(sort);
+    try {
+      await pipeAsync(...transforms)(sort);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        e.details.source = 'query';
+        e.details.param = 'sort';
+      }
+      throw e;
+    }
   };
 
   const validateFields: ValidateFunc = async (fields, schema: Model) => {
@@ -157,7 +184,15 @@ const createAPIValidators = (opts: APIOptions) => {
     }
     const transforms = [validators.defaultValidateFields({ schema, getModel })];
 
-    await pipeAsync(...transforms)(fields);
+    try {
+      await pipeAsync(...transforms)(fields);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        e.details.source = 'query';
+        e.details.param = 'fields';
+      }
+      throw e;
+    }
   };
 
   const validatePopulate: ValidateFunc = async (populate, schema: Model, { auth } = {}) => {
@@ -175,7 +210,15 @@ const createAPIValidators = (opts: APIOptions) => {
       );
     }
 
-    await pipeAsync(...transforms)(populate);
+    try {
+      await pipeAsync(...transforms)(populate);
+    } catch (e) {
+      if (e instanceof ValidationError) {
+        e.details.source = 'query';
+        e.details.param = 'populate';
+      }
+      throw e;
+    }
   };
 
   return {
