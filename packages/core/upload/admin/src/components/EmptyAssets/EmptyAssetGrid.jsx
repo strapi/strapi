@@ -3,7 +3,7 @@ import React from 'react';
 import { Layouts } from '@strapi/admin/strapi-admin';
 import { Box } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const EmptyAssetCard = styled(Box)`
   background: linear-gradient(

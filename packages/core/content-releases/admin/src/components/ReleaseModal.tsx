@@ -15,6 +15,7 @@ import {
   TimePicker,
   Combobox,
   ComboboxOption,
+  Field,
 } from '@strapi/design-system';
 import { formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
@@ -109,17 +110,16 @@ export const ReleaseModal = ({
           <Form>
             <ModalBody>
               <Flex direction="column" alignItems="stretch" gap={6}>
-                <TextInput
-                  label={formatMessage({
-                    id: 'content-releases.modal.form.input.label.release-name',
-                    defaultMessage: 'Name',
-                  })}
-                  name="name"
-                  value={values.name}
-                  error={errors.name}
-                  onChange={handleChange}
-                  required
-                />
+                <Field.Root name="name" error={errors.name} required>
+                  <Field.Label>
+                    {formatMessage({
+                      id: 'content-releases.modal.form.input.label.release-name',
+                      defaultMessage: 'Name',
+                    })}
+                  </Field.Label>
+                  <TextInput value={values.name} onChange={handleChange} />
+                  <Field.Error />
+                </Field.Root>
                 <Box width="max-content">
                   <Checkbox
                     name="isScheduled"
@@ -154,52 +154,56 @@ export const ReleaseModal = ({
                   <>
                     <Flex gap={4} alignItems="start">
                       <Box width="100%">
-                        <DatePicker
-                          label={formatMessage({
-                            id: 'content-releases.modal.form.input.label.date',
-                            defaultMessage: 'Date',
-                          })}
-                          name="date"
-                          error={errors.date}
-                          onChange={(date) => {
-                            const isoFormatDate = date
-                              ? formatISO(date, { representation: 'date' })
-                              : null;
-                            setFieldValue('date', isoFormatDate);
-                          }}
-                          clearLabel={formatMessage({
-                            id: 'content-releases.modal.form.input.clearLabel',
-                            defaultMessage: 'Clear',
-                          })}
-                          onClear={() => {
-                            setFieldValue('date', null);
-                          }}
-                          selectedDate={values.date || undefined}
-                          required
-                          minDate={utcToZonedTime(new Date(), values.timezone.split('&')[1])}
-                        />
+                        <Field.Root name="date" error={errors.date} required>
+                          <Field.Label>
+                            {formatMessage({
+                              id: 'content-releases.modal.form.input.label.date',
+                              defaultMessage: 'Date',
+                            })}
+                          </Field.Label>
+                          <DatePicker
+                            onChange={(date) => {
+                              const isoFormatDate = date
+                                ? formatISO(date, { representation: 'date' })
+                                : null;
+                              setFieldValue('date', isoFormatDate);
+                            }}
+                            clearLabel={formatMessage({
+                              id: 'content-releases.modal.form.input.clearLabel',
+                              defaultMessage: 'Clear',
+                            })}
+                            onClear={() => {
+                              setFieldValue('date', null);
+                            }}
+                            selectedDate={values.date || undefined}
+                            minDate={utcToZonedTime(new Date(), values.timezone.split('&')[1])}
+                          />
+                          <Field.Error />
+                        </Field.Root>
                       </Box>
                       <Box width="100%">
-                        <TimePicker
-                          label={formatMessage({
-                            id: 'content-releases.modal.form.input.label.time',
-                            defaultMessage: 'Time',
-                          })}
-                          name="time"
-                          error={errors.time}
-                          onChange={(time) => {
-                            setFieldValue('time', time);
-                          }}
-                          clearLabel={formatMessage({
-                            id: 'content-releases.modal.form.input.clearLabel',
-                            defaultMessage: 'Clear',
-                          })}
-                          onClear={() => {
-                            setFieldValue('time', '');
-                          }}
-                          value={values.time || undefined}
-                          required
-                        />
+                        <Field.Root name="time" error={errors.time} required>
+                          <Field.Label>
+                            {formatMessage({
+                              id: 'content-releases.modal.form.input.label.time',
+                              defaultMessage: 'Time',
+                            })}
+                          </Field.Label>
+                          <TimePicker
+                            onChange={(time) => {
+                              setFieldValue('time', time);
+                            }}
+                            clearLabel={formatMessage({
+                              id: 'content-releases.modal.form.input.clearLabel',
+                              defaultMessage: 'Clear',
+                            })}
+                            onClear={() => {
+                              setFieldValue('time', '');
+                            }}
+                            value={values.time || undefined}
+                          />
+                          <Field.Error />
+                        </Field.Root>
                       </Box>
                     </Flex>
                     <TimezoneComponent timezoneOptions={timezoneList} />
@@ -278,32 +282,34 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
   }, [setFieldValue, values.date, values.timezone]);
 
   return (
-    <Combobox
-      label={formatMessage({
-        id: 'content-releases.modal.form.input.label.timezone',
-        defaultMessage: 'Timezone',
-      })}
-      autocomplete={{ type: 'list', filter: 'contains' }}
-      name="timezone"
-      value={values.timezone || undefined}
-      textValue={values.timezone ? values.timezone.replace(/&/, ' ') : undefined} // textValue is required to show the updated DST timezone
-      onChange={(timezone) => {
-        setFieldValue('timezone', timezone);
-      }}
-      onTextValueChange={(timezone) => {
-        setFieldValue('timezone', timezone);
-      }}
-      onClear={() => {
-        setFieldValue('timezone', '');
-      }}
-      error={errors.timezone}
-      required
-    >
-      {timezoneList.map((timezone) => (
-        <ComboboxOption key={timezone.value} value={timezone.value}>
-          {timezone.value.replace(/&/, ' ')}
-        </ComboboxOption>
-      ))}
-    </Combobox>
+    <Field.Root name="timezone" error={errors.timezone} required>
+      <Field.Label>
+        {formatMessage({
+          id: 'content-releases.modal.form.input.label.timezone',
+          defaultMessage: 'Timezone',
+        })}
+      </Field.Label>
+      <Combobox
+        autocomplete={{ type: 'list', filter: 'contains' }}
+        value={values.timezone || undefined}
+        textValue={values.timezone ? values.timezone.replace(/&/, ' ') : undefined} // textValue is required to show the updated DST timezone
+        onChange={(timezone) => {
+          setFieldValue('timezone', timezone);
+        }}
+        onTextValueChange={(timezone) => {
+          setFieldValue('timezone', timezone);
+        }}
+        onClear={() => {
+          setFieldValue('timezone', '');
+        }}
+      >
+        {timezoneList.map((timezone) => (
+          <ComboboxOption key={timezone.value} value={timezone.value}>
+            {timezone.value.replace(/&/, ' ')}
+          </ComboboxOption>
+        ))}
+      </Combobox>
+      <Field.Error />
+    </Field.Root>
   );
 };

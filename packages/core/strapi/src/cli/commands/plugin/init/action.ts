@@ -307,7 +307,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                   react: '*',
                   'react-dom': '*',
                   'react-router-dom': '*',
-                  'styled-components': '5.3.3',
+                  'styled-components': '*',
                 };
 
                 pkgJson.peerDependencies = {
@@ -315,7 +315,7 @@ const PLUGIN_TEMPLATE = defineTemplate(async ({ logger, gitConfig, packagePath }
                   react: '^17.0.0 || ^18.0.0',
                   'react-dom': '^17.0.0 || ^18.0.0',
                   'react-router-dom': '^6.0.0',
-                  'styled-components': '^5.2.1',
+                  'styled-components': '^6.0.0',
                 };
               }
 

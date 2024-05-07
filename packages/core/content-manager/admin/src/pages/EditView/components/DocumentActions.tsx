@@ -26,7 +26,7 @@ import {
 import { CrossCircle, More, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
-import styled, { DefaultTheme } from 'styled-components';
+import { styled, DefaultTheme } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
@@ -275,7 +275,7 @@ const DocumentActionsMenu = ({
         variant={variant}
       >
         <More aria-hidden focusable={false} />
-        <VisuallyHidden as="span">
+        <VisuallyHidden tag="span">
           {label ||
             formatMessage({
               id: 'content-manager.containers.edit.panels.default.more-actions',
@@ -294,7 +294,7 @@ const DocumentActionsMenu = ({
               key={action.id}
             >
               <Flex justifyContent="space-between" gap={4}>
-                <Flex color={convertActionVariantToColor(action.variant)} gap={2} as="span">
+                <Flex color={convertActionVariantToColor(action.variant)} gap={2} tag="span">
                   {action.icon}
                   {action.label}
                 </Flex>
@@ -458,7 +458,7 @@ const DocumentActionModal = ({
   return (
     <ModalLayout borderRadius="4px" overflow="hidden" onClose={handleClose} labelledBy={id}>
       <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
+        <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={id}>
           {title}
         </Typography>
       </ModalHeader>
@@ -828,7 +828,7 @@ const UnpublishAction: DocumentActionComponent = ({
             <Flex alignItems="flex-start" direction="column" gap={6}>
               <Flex width="100%" direction="column" gap={2}>
                 <WarningCircle width="24px" height="24px" fill="danger600" />
-                <Typography as="p" variant="omega" textAlign="center">
+                <Typography tag="p" variant="omega" textAlign="center">
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.body',
                     defaultMessage: 'Are you sure?',
@@ -839,10 +839,10 @@ const UnpublishAction: DocumentActionComponent = ({
                 onChange={handleChange}
                 direction="column"
                 alignItems="flex-start"
-                as="fieldset"
+                tag="fieldset"
                 gap={3}
               >
-                <VisuallyHidden as="legend"></VisuallyHidden>
+                <VisuallyHidden tag="legend"></VisuallyHidden>
                 <Radio
                   checked={shouldKeepDraft}
                   value={UNPUBLISH_DRAFT_OPTIONS.KEEP}
@@ -937,7 +937,7 @@ const DiscardAction: DocumentActionComponent = ({
       content: (
         <Flex direction="column" gap={2}>
           <WarningCircle width="24px" height="24px" fill="danger600" />
-          <Typography as="p" variant="omega" textAlign="center">
+          <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.discard.dialog.body',
               defaultMessage: 'Are you sure?',

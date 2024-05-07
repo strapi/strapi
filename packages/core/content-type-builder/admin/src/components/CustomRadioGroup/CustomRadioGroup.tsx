@@ -30,7 +30,7 @@ export const CustomRadioGroup = ({
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
-      <Typography variant="pi" fontWeight="bold" textColor="neutral800" htmlFor={name} as="label">
+      <Typography variant="pi" fontWeight="bold" textColor="neutral800" htmlFor={name} tag="label">
         {formatMessage(intlLabel)}
       </Typography>
       <Wrapper gap={4} alignItems="stretch">

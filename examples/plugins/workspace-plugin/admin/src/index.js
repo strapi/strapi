@@ -1,4 +1,5 @@
-import PluginIcon from './components/PluginIcon';
+import { PuzzlePiece } from '@strapi/icons';
+
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 
@@ -8,7 +9,7 @@ export default {
   register(app) {
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
-      icon: PluginIcon,
+      icon: PuzzlePiece,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'My plugin',

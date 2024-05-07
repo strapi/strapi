@@ -20,7 +20,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 .c5 {
   background: #ffffff;
   border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33,33,52,0.1);
+  box-shadow: 0px 2px 15px rgba(33, 33, 52, 0.1);
 }
 
 .c7 {
@@ -28,23 +28,23 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   padding-inline: 24px;
 }
 
-.c12 {
+.c11 {
   padding-block-start: 40px;
   padding-inline-end: 24px;
   padding-block-end: 40px;
   padding-inline-start: 24px;
 }
 
-.c13 {
+.c12 {
   padding-block-end: 8px;
 }
 
-.c16 {
+.c15 {
   padding-block: 16px;
   padding-inline: 16px;
 }
 
-.c19 {
+.c18 {
   background: #4945ff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -56,77 +56,49 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   cursor: pointer;
 }
 
+.c10 {
+  font-weight: 600;
+  font-size: 1.8rem;
+  line-height: 1.22;
+  color: currentcolor;
+}
+
+.c14 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: currentcolor;
+}
+
+.c21 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
+}
+
 .c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
   align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
   flex-direction: column;
   gap: 8px;
 }
 
 .c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
 }
 
-.c18 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
+.c17 {
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
 }
 
-.c11 {
-  font-weight: 600;
-  font-size: 1.8rem;
-  line-height: 1.22;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  color: #32324d;
-}
-
-.c22 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #ffffff;
-}
-
 .c2 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -136,19 +108,17 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   width: 1px;
 }
 
-.c20 {
+.c19 {
   position: relative;
   outline: none;
 }
 
-.c20[aria-disabled='true'] {
+.c19[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c20:after {
-  -webkit-transition-property: all;
+.c19:after {
   transition-property: all;
-  -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
   border-radius: 8px;
   content: '';
@@ -160,11 +130,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c20:focus-visible {
+.c19:focus-visible {
   outline: none;
 }
 
-.c20:focus-visible:after {
+.c19:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -175,111 +145,68 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c21 {
+.c20 {
   height: 3.2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
-}
-
-.c21 svg {
-  height: 1.2rem;
-}
-
-.c21[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c21[aria-disabled='true'] .c10 {
-  color: #666687;
-}
-
-.c21[aria-disabled='true'] svg > g,
-.c21[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c21[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c21[aria-disabled='true']:active .c10 {
-  color: #666687;
-}
-
-.c21[aria-disabled='true']:active svg > g,
-.c21[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c21:hover {
-  background-color: #f6f6f9;
-}
-
-.c21:active {
-  background-color: #eaeaef;
-}
-
-.c21 .c10 {
   color: #32324d;
 }
 
-.c21 svg > g,
-.c21 svg path {
-  fill: #32324d;
-}
-
-.c23 {
-  height: 3.2rem;
-  border: 1px solid #d02b20;
-  background: #d02b20;
-}
-
-.c23 svg {
+.c20 svg {
   height: 1.2rem;
 }
 
-.c23[aria-disabled='true'] {
+.c20[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c23[aria-disabled='true'] .c10 {
   color: #666687;
 }
 
-.c23[aria-disabled='true'] svg > g,
-.c23[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c23[aria-disabled='true']:active {
+.c20[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c23[aria-disabled='true']:active .c10 {
   color: #666687;
 }
 
-.c23[aria-disabled='true']:active svg > g,
-.c23[aria-disabled='true']:active svg path {
-  fill: #666687;
+.c20:hover {
+  background-color: #f6f6f9;
 }
 
-.c23:hover {
+.c20:active {
+  background-color: #eaeaef;
+}
+
+.c22 {
+  height: 3.2rem;
+  border: 1px solid #d02b20;
+  background: #d02b20;
+  color: #ffffff;
+}
+
+.c22 svg {
+  height: 1.2rem;
+}
+
+.c22[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+}
+
+.c22[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+}
+
+.c22:hover {
   border: 1px solid #ee5e52;
   background: #ee5e52;
 }
 
-.c23:active {
+.c22:active {
   border: 1px solid #d02b20;
   background: #d02b20;
-}
-
-.c23 .c10 {
-  color: #ffffff;
 }
 
 .c4 {
@@ -298,28 +225,22 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c14 svg {
+.c13 svg {
   width: 24px;
   height: 24px;
 }
 
-.c14 svg path {
+.c13 svg path {
   fill: #d02b20;
 }
 
-.c17 {
+.c16 {
   border-top: 1px solid #eaeaef;
 }
 
-.c17 button {
+.c16 button {
   width: 100%;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
   display: inline-flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
 }
 
@@ -330,7 +251,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
     <div
       class="c0 c1"
     />
-    <div
+    <span
       class="c2"
     >
       <p
@@ -351,7 +272,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
         id="live-region-alert"
         role="alert"
       />
-    </div>
+    </span>
   </div>
   <div
     class=""
@@ -371,8 +292,9 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
               class="c7 c8 c9"
             >
               <h2
-                class="c10 c11"
+                class="c10"
                 id=":r0:-label"
+                tag="span"
               >
                 Confirmation
               </h2>
@@ -381,19 +303,19 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
               class=""
             >
               <div
-                class="c12"
+                class="c11"
               >
                 <div
-                  class="c13 c14"
+                  class="c12 c13"
                 >
                   <div
                     class="c8"
                   >
                     <svg
                       fill="currentColor"
-                      height="1.6rem"
+                      height="16"
                       viewBox="0 0 32 32"
-                      width="1.6rem"
+                      width="16"
                       xmlns="http://www.w3.org/2000/svg"
                     >
                       <path
@@ -409,7 +331,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
                     class="c8"
                   >
                     <span
-                      class="c10 c15"
+                      class="c14"
                     >
                       Are you sure?
                     </span>
@@ -417,29 +339,29 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
                 </div>
               </div>
               <div
-                class="c16 c17"
+                class="c15 c16"
               >
                 <div
-                  class="c18"
+                  class="c17"
                 >
                   <button
                     aria-disabled="false"
-                    class="c19 c18 c20 c21"
+                    class="c18 c17 c19 c20"
                     type="button"
                   >
                     <span
-                      class="c10 c22"
+                      class="c21"
                     >
                       Cancel
                     </span>
                   </button>
                   <button
                     aria-disabled="false"
-                    class="c19 c18 c20 c23"
+                    class="c18 c17 c19 c22"
                     type="button"
                   >
                     <span
-                      class="c10 c22"
+                      class="c21"
                     >
                       Confirm
                     </span>

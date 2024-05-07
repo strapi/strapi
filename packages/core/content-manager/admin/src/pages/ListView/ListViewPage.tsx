@@ -20,7 +20,7 @@ import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
 import { HOOKS } from '../../constants/hooks';
@@ -341,13 +341,12 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
   return (
     <Button
       variant={variant}
-      forwardedAs={ReactRouterLink}
+      tag={ReactRouterLink}
       onClick={() => {
         trackUsage('willCreateEntry', { status: 'draft' });
       }}
       startIcon={<Plus />}
       style={{ textDecoration: 'none' }}
-      // @ts-expect-error – DS inference does not work with as or forwardedAs
       to={{
         pathname: 'create',
         search: stringify({ plugins: query.plugins }),

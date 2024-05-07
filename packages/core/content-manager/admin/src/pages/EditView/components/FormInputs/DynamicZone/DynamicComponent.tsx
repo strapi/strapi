@@ -14,11 +14,13 @@ import {
   useComposedRefs,
   Menu,
   MenuItem,
+  FlexComponent,
+  BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ComponentIcon } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
@@ -143,7 +145,7 @@ const DynamicComponent = ({
         <Trash />
       </IconButtonCustom>
       <IconButton
-        forwardedAs="div"
+        tag="div"
         role="button"
         borderWidth={0}
         tabIndex={0}
@@ -161,7 +163,7 @@ const DynamicComponent = ({
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
           <More aria-hidden focusable={false} />
-          <VisuallyHidden as="span">
+          <VisuallyHidden tag="span">
             {formatMessage({
               id: getTranslation('components.DynamicZone.more-actions'),
               defaultMessage: 'More actions',
@@ -215,11 +217,10 @@ const DynamicComponent = ({
   );
 
   return (
-    <ComponentContainer as="li" width="100%">
+    <ComponentContainer tag="li" width="100%">
       <Flex justifyContent="center">
         <Rectangle background="neutral200" />
       </Flex>
-      {/* @ts-expect-error – Fix this ref issue */}
       <StyledBox ref={composedBoxRefs} hasRadius>
         {isDragging ? (
           <Preview />
@@ -258,7 +259,7 @@ const DynamicComponent = ({
   );
 };
 
-const ActionsFlex = styled(Flex)`
+const ActionsFlex = styled<FlexComponent>(Flex)`
   /* 
     we need to remove the background from the button but we can't 
     wrap the element in styled because it breaks the forwardedAs which
@@ -269,28 +270,27 @@ const ActionsFlex = styled(Flex)`
   }
 `;
 
-const IconButtonCustom = styled(IconButton)<{ expanded?: boolean }>`
+const IconButtonCustom = styled(IconButton)`
   background-color: transparent;
 
-  svg path {
-    fill: ${({ theme, expanded }) =>
-      expanded ? theme.colors.primary600 : theme.colors.neutral600};
+  svg {
+    fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
 // TODO: Delete once https://github.com/strapi/design-system/pull/858
 // is merged and released.
-const StyledBox = styled(Box)`
+const StyledBox = styled<BoxComponent>(Box)`
   > div:first-child {
     box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   }
 `;
 
-const AccordionContentRadius = styled(Box)`
+const AccordionContentRadius = styled<BoxComponent>(Box)`
   border-radius: 0 0 ${({ theme }) => theme.spaces[1]} ${({ theme }) => theme.spaces[1]};
 `;
 
-const Rectangle = styled(Box)`
+const Rectangle = styled<BoxComponent>(Box)`
   width: ${({ theme }) => theme.spaces[2]};
   height: ${({ theme }) => theme.spaces[4]};
 `;
@@ -303,7 +303,7 @@ const Preview = styled.span`
   padding: ${({ theme }) => theme.spaces[6]};
 `;
 
-const ComponentContainer = styled(Box)`
+const ComponentContainer = styled<BoxComponent<'li'>>(Box)`
   list-style: none;
   padding: 0;
   margin: 0;

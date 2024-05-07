@@ -9,6 +9,7 @@ import {
   Textarea,
   TextInput,
   Typography,
+  Field,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { Page, useTracking, useNotification, useFetchClient, Layouts } from '@strapi/strapi/admin';
@@ -117,7 +118,7 @@ export const CreatePage = () => {
                 shadow="filterShadow"
               >
                 <Flex direction="column" alignItems="stretch">
-                  <Typography variant="delta" as="h2">
+                  <Typography variant="delta" tag="h2">
                     {formatMessage({
                       id: getTrad('EditPage.form.roles'),
                       defaultMessage: 'Role details',
@@ -126,31 +127,28 @@ export const CreatePage = () => {
 
                   <Grid gap={4}>
                     <GridItem col={6}>
-                      <TextInput
+                      <Field.Root
                         name="name"
-                        value={values.name || ''}
-                        onChange={handleChange}
-                        label={formatMessage({
-                          id: 'global.name',
-                          defaultMessage: 'Name',
-                        })}
                         error={
                           errors?.name
                             ? formatMessage({ id: errors.name, defaultMessage: 'Name is required' })
                             : false
                         }
                         required
-                      />
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'global.name',
+                            defaultMessage: 'Name',
+                          })}
+                        </Field.Label>
+                        <TextInput value={values.name || ''} onChange={handleChange} />
+                        <Field.Error />
+                      </Field.Root>
                     </GridItem>
                     <GridItem col={6}>
-                      <Textarea
-                        id="description"
-                        value={values.description || ''}
-                        onChange={handleChange}
-                        label={formatMessage({
-                          id: 'global.description',
-                          defaultMessage: 'Description',
-                        })}
+                      <Field.Root
+                        name="description"
                         error={
                           errors?.description
                             ? formatMessage({
@@ -160,7 +158,16 @@ export const CreatePage = () => {
                             : false
                         }
                         required
-                      />
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'global.description',
+                            defaultMessage: 'Description',
+                          })}
+                        </Field.Label>
+                        <Textarea value={values.description || ''} onChange={handleChange} />
+                        <Field.Error />
+                      </Field.Root>
                     </GridItem>
                   </Grid>
                 </Flex>

@@ -42,7 +42,7 @@ export const CustomFieldOption = ({ customFieldUid, customField }: CustomFieldOp
   };
 
   return (
-    <OptionBoxWrapper padding={4} as="button" hasRadius type="button" onClick={handleClick}>
+    <OptionBoxWrapper padding={4} tag="button" hasRadius type="button" onClick={handleClick}>
       <Flex>
         <AttributeIcon type={type} customField={customFieldUid} />
         <Box paddingLeft={4}>

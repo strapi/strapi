@@ -21,7 +21,7 @@ import {
   UidField,
   BlocksField,
 } from '@strapi/icons/symbols';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const iconByTypes: Record<string, ComponentType<SVGProps<SVGSVGElement>>> = {
   biginteger: NumberField,
@@ -89,7 +89,7 @@ export const AttributeIcon = ({ type, customField = null, ...rest }: AttributeIc
 
   return (
     <IconBox width="3.2rem" shrink={0} {...rest} aria-hidden>
-      <Box as={Compo} />
+      <Box tag={Compo} />
     </IconBox>
   );
 };

@@ -1,6 +1,6 @@
 import { Box, Divider, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { Login, LoginProps } from '../../../../../../admin/src/pages/Auth/components/Login';
 import { useGetProvidersQuery } from '../../../../../../admin/src/services/auth';

@@ -3,6 +3,7 @@ import * as React from 'react';
 import {
   Box,
   Button,
+  Field,
   Flex,
   Grid,
   GridItem,
@@ -15,7 +16,7 @@ import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { Layouts } from '../../../../components/Layouts/Layout';
@@ -260,30 +261,34 @@ const CreatePage = () => {
                       </Flex>
                       <Grid gap={4}>
                         <GridItem col={6}>
-                          <TextInput
+                          <Field.Root
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
-                            label={formatMessage({
-                              id: 'global.name',
-                              defaultMessage: 'Name',
-                            })}
-                            onChange={handleChange}
                             required
-                            value={values.name}
-                          />
+                          >
+                            <Field.Label>
+                              {formatMessage({
+                                id: 'global.name',
+                                defaultMessage: 'Name',
+                              })}
+                            </Field.Label>
+                            <TextInput onChange={handleChange} value={values.name} />
+                            <Field.Error />
+                          </Field.Root>
                         </GridItem>
                         <GridItem col={6}>
-                          <Textarea
-                            label={formatMessage({
-                              id: 'global.description',
-                              defaultMessage: 'Description',
-                            })}
-                            id="description"
+                          <Field.Root
+                            name="description"
                             error={errors.description && formatMessage({ id: errors.description })}
-                            onChange={handleChange}
                           >
-                            {values.description}
-                          </Textarea>
+                            <Field.Label>
+                              {formatMessage({
+                                id: 'global.description',
+                                defaultMessage: 'Description',
+                              })}
+                            </Field.Label>
+                            <Textarea onChange={handleChange} value={values.description} />
+                          </Field.Root>
                         </GridItem>
                       </Grid>
                     </Flex>

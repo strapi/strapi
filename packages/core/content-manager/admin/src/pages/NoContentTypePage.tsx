@@ -22,10 +22,9 @@ const NoContentType = () => {
         <EmptyStateLayout
           action={
             <LinkButton
-              as={NavLink}
+              tag={NavLink}
               variant="secondary"
               startIcon={<Plus />}
-              // @ts-expect-error – DS inference does not work with the `as` prop.
               to="/plugins/content-type-builder/content-types/create-content-type"
             >
               {formatMessage({

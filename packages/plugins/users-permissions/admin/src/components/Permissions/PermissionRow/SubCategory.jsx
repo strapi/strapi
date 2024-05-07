@@ -13,7 +13,7 @@ import { Cog as CogIcon } from '@strapi/icons';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useUsersPermissions } from '../../../contexts/UsersPermissionsContext';
 
@@ -101,7 +101,7 @@ const SubCategory = ({ subCategory }) => {
                     onClick={() => onSelectedAction(action.name)}
                     style={{ display: 'inline-flex', alignItems: 'center' }}
                   >
-                    <VisuallyHidden as="span">
+                    <VisuallyHidden tag="span">
                       {formatMessage(
                         {
                           id: 'app.utils.show-bound-route',

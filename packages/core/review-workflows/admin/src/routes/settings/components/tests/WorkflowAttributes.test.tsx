@@ -34,7 +34,7 @@ describe('WorkflowAttributes', () => {
 
     await screen.findByText(/workflow name/i);
 
-    expect(getByRole('textbox', { name: /workflow name \*/i })).toHaveValue('Default');
+    expect(getByRole('textbox', { name: /workflow name/i })).toHaveValue('Default');
     expect(getByText(/1 content type selected/i)).toBeInTheDocument();
     expect(getByRole('textbox')).toBeEnabled();
 

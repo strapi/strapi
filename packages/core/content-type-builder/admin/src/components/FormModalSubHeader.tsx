@@ -75,7 +75,7 @@ export const FormModalSubHeader = ({
 
   return (
     <Flex direction="column" alignItems="flex-start" paddingBottom={2} gap={1}>
-      <Typography as="h2" variant="beta">
+      <Typography tag="h2" variant="beta">
         {formatMessage(
           {
             id: getModalTitleSubHeader({
