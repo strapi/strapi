@@ -139,11 +139,11 @@ describe('Create Locale', () => {
       );
 
       const { user } = render(<CreateLocale />);
-      await user.click(screen.getByRole('button', { name: 'Add new locale' }));
-      await user.click(screen.getByRole('combobox', { name: 'Locales' }));
-      await user.click(screen.getByRole('option', { name: 'Afrikaans (af)' }));
+      await user.click(await screen.findByRole('button', { name: 'Add new locale' }));
+      await user.click(await screen.findByRole('combobox', { name: 'Locales' }));
+      await user.click(await screen.findByRole('option', { name: 'Afrikaans (af)' }));
 
-      fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'Save' }));
 
       expect(await screen.findByText('This code is already in use')).toBeInTheDocument();
       expect(await screen.findByText('This name has unsupported characters')).toBeInTheDocument();

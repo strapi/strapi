@@ -6,6 +6,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  isFetchError,
 } from '@strapi/admin/strapi-admin';
 import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
@@ -25,7 +26,6 @@ import {
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import { isAxiosError } from 'axios';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useParams } from 'react-router-dom';
@@ -143,8 +143,8 @@ const AddActionToReleaseModal = ({
     }
 
     if ('error' in response) {
-      if (isAxiosError(response.error)) {
-        // Handle axios error
+      if (isFetchError(response.error)) {
+        // Handle fetch error
         toggleNotification({
           type: 'danger',
           message: formatAPIError(response.error),

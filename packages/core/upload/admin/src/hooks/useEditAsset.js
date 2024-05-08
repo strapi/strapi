@@ -1,14 +1,13 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
-import axios from 'axios';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
 import { getTrad } from '../utils';
 
-const editAssetRequest = (asset, file, cancelToken, onProgress, post) => {
+const editAssetRequest = (asset, file, signal, onProgress, post) => {
   const endpoint = `/${pluginId}?id=${asset.id}`;
 
   const formData = new FormData();
@@ -27,14 +26,13 @@ const editAssetRequest = (asset, file, cancelToken, onProgress, post) => {
     })
   );
 
+  /**
+   * onProgress is not possible using native fetch
+   * need to look into an alternative to make it work
+   * perhaps using xhr like Axios does
+   */
   return post(endpoint, formData, {
-    cancelToken: cancelToken.token,
-    onUploadProgress({ total, loaded }) {
-      onProgress((loaded / total) * 100);
-    },
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+    signal,
   }).then((res) => res.data);
 };
 
@@ -43,11 +41,12 @@ export const useEditAsset = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const queryClient = useQueryClient();
-  const tokenRef = useRef(axios.CancelToken.source());
+  const abortController = new AbortController();
+  const signal = abortController.signal;
   const { post } = useFetchClient();
 
   const mutation = useMutation(
-    ({ asset, file }) => editAssetRequest(asset, file, tokenRef.current, setProgress, post),
+    ({ asset, file }) => editAssetRequest(asset, file, signal, setProgress, post),
     {
       onSuccess() {
         queryClient.refetchQueries([pluginId, 'assets'], { active: true });
@@ -69,10 +68,7 @@ export const useEditAsset = () => {
 
   const editAsset = (asset, file) => mutation.mutateAsync({ asset, file });
 
-  const cancel = () =>
-    tokenRef.current.cancel(
-      formatMessage({ id: getTrad('modal.upload.cancelled'), defaultMessage: '' })
-    );
+  const cancel = () => abortController.abort();
 
   return { ...mutation, cancel, editAsset, progress, status: mutation.status };
 };

@@ -56,7 +56,6 @@
     "@strapi/design-system": "2.0.0-beta.3",
     "@strapi/icons": "2.0.0-beta.3",
     "@strapi/utils": "5.0.0-beta.6",
-    "axios": "1.6.8",
     "lodash": "4.17.21",
     "qs": "6.11.1",
     "react-intl": "6.6.2",
