@@ -48,26 +48,28 @@ export interface GetMetadataOptions {
 /**
  * Operator types for version comparison.
  */
-type Operator = 'eq' | 'gt';
+type Operator = 'lt' | 'gt';
 
 /**
  * Compares the update time of a document version against other document statuses based on the operator.
- *
- * @param operator - The comparison operator ('eq' for equal, 'gt' for greater than).
  */
 const versionComparison = (
   version: DocumentVersion,
   otherDocumentStatuses: DocumentMetadata['availableStatus'],
   operator: Operator
 ): boolean => {
+  if (!version || !version.updatedAt) {
+    return false;
+  }
+
   const versionUpdatedAt = version?.updatedAt ? new Date(version.updatedAt).getTime() : 0;
 
   return otherDocumentStatuses.every((otherStatus) => {
     const otherUpdatedAt = otherStatus?.updatedAt ? new Date(otherStatus.updatedAt).getTime() : 0;
 
     switch (operator) {
-      case 'eq':
-        return versionUpdatedAt === otherUpdatedAt;
+      case 'lt':
+        return versionUpdatedAt < otherUpdatedAt;
       case 'gt':
         return versionUpdatedAt > otherUpdatedAt;
       default:
@@ -77,32 +79,20 @@ const versionComparison = (
 };
 
 /**
- * Checks if the provided document version has been modified after other versions.
+ * Checks if the provided document version has been modified after all other versions.
  */
-const getIsModifiedSinceOtherVersion = (
+const getIsVersionLatestModification = (
   version: DocumentVersion,
   otherDocumentStatuses: DocumentMetadata['availableStatus']
-): boolean => {
-  if (!version || !version.updatedAt) {
-    return false;
-  }
-
-  return versionComparison(version, otherDocumentStatuses, 'gt');
-};
+): boolean => versionComparison(version, otherDocumentStatuses, 'gt');
 
 /**
- * Checks if the updated time of the provided document version is equal to the updated times of other versions.
+ * Checks if there are any versions that have been modified after the provided document version.
  */
-const getAreAllUpdatedTimesEqual = (
+const getAnyLaterModifications = (
   version: DocumentVersion,
   otherDocumentStatuses: DocumentMetadata['availableStatus']
-): boolean => {
-  if (!version || !version.updatedAt) {
-    return false;
-  }
-
-  return versionComparison(version, otherDocumentStatuses, 'eq');
-};
+): boolean => versionComparison(version, otherDocumentStatuses, 'lt');
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
@@ -205,7 +195,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       }
     }
 
-    const isLatestModification = getIsModifiedSinceOtherVersion(version, otherDocumentStatuses);
     /*
      * If the current version is a draft, the document is modified if this version is
      * the latest modification.
@@ -214,8 +203,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
      * other version has been updated more recently.
      */
     const isModified = isDraft
-      ? isLatestModification
-      : !getAreAllUpdatedTimesEqual(version, otherDocumentStatuses);
+      ? getIsVersionLatestModification(version, otherDocumentStatuses)
+      : getAnyLaterModifications(version, otherDocumentStatuses);
 
     return isModified ? CONTENT_MANAGER_STATUS.MODIFIED : CONTENT_MANAGER_STATUS.PUBLISHED;
   },
