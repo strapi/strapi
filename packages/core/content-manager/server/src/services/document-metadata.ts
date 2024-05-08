@@ -6,7 +6,7 @@ import type { Core, UID } from '@strapi/types';
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
 export interface DocumentVersion {
-  id: string;
+  id: number;
   documentId: string;
   locale: string;
   updatedAt: string | null | Date;
@@ -46,17 +46,11 @@ export interface GetMetadataOptions {
 }
 
 /**
- * Operator types for version comparison.
+ * Checks if the provided document version has been modified after all other versions.
  */
-type Operator = 'lt' | 'gt';
-
-/**
- * Compares the update time of a document version against other document statuses based on the operator.
- */
-const versionComparison = (
-  version: DocumentVersion,
-  otherDocumentStatuses: DocumentMetadata['availableStatus'],
-  operator: Operator
+const getIsVersionLatestModification = (
+  version?: DocumentVersion,
+  otherVersion?: DocumentVersion
 ): boolean => {
   if (!version || !version.updatedAt) {
     return false;
@@ -64,35 +58,10 @@ const versionComparison = (
 
   const versionUpdatedAt = version?.updatedAt ? new Date(version.updatedAt).getTime() : 0;
 
-  return otherDocumentStatuses.every((otherStatus) => {
-    const otherUpdatedAt = otherStatus?.updatedAt ? new Date(otherStatus.updatedAt).getTime() : 0;
+  const otherUpdatedAt = otherVersion?.updatedAt ? new Date(otherVersion.updatedAt).getTime() : 0;
 
-    switch (operator) {
-      case 'lt':
-        return versionUpdatedAt < otherUpdatedAt;
-      case 'gt':
-        return versionUpdatedAt > otherUpdatedAt;
-      default:
-        return false;
-    }
-  });
+  return versionUpdatedAt > otherUpdatedAt;
 };
-
-/**
- * Checks if the provided document version has been modified after all other versions.
- */
-const getIsVersionLatestModification = (
-  version: DocumentVersion,
-  otherDocumentStatuses: DocumentMetadata['availableStatus']
-): boolean => versionComparison(version, otherDocumentStatuses, 'gt');
-
-/**
- * Checks if there are any versions that have been modified after the provided document version.
- */
-const getAnyLaterModifications = (
-  version: DocumentVersion,
-  otherDocumentStatuses: DocumentMetadata['availableStatus']
-): boolean => versionComparison(version, otherDocumentStatuses, 'lt');
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
@@ -180,7 +149,25 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
+    let draftVersion: DocumentVersion | undefined;
+    let publishedVersion: DocumentVersion | undefined;
+
     const isDraft = version.publishedAt === null;
+
+    if (isDraft) {
+      draftVersion = version;
+    } else {
+      publishedVersion = version;
+    }
+
+    if (otherDocumentStatuses && otherDocumentStatuses.at(0)) {
+      const otherVersion = otherDocumentStatuses.at(0);
+      if (otherVersion?.publishedAt) {
+        publishedVersion = otherVersion;
+      } else {
+        draftVersion = otherVersion;
+      }
+    }
 
     if (!otherDocumentStatuses?.length) {
       // If there are no other versions, the current version is the latest
@@ -188,7 +175,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     if (isDraft) {
-      const hasPublished = otherDocumentStatuses.some((d) => d.publishedAt !== null);
+      const hasPublished = publishedVersion?.publishedAt !== null;
+
       if (!hasPublished) {
         // If there are no published versions, the draft is considered the latest
         return CONTENT_MANAGER_STATUS.DRAFT;
@@ -196,16 +184,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     }
 
     /*
-     * If the current version is a draft, the document is modified if this version is
-     * the latest modification.
-     *
-     * If the current version is published, the document is modified if any
-     * other version has been updated more recently.
+     * The document is modified if the draft version has been updated more
+     * recently than the published version.
      */
-    const isModified = isDraft
-      ? getIsVersionLatestModification(version, otherDocumentStatuses)
-      : getAnyLaterModifications(version, otherDocumentStatuses);
-
+    const isModified = getIsVersionLatestModification(draftVersion, publishedVersion);
     return isModified ? CONTENT_MANAGER_STATUS.MODIFIED : CONTENT_MANAGER_STATUS.PUBLISHED;
   },
 
