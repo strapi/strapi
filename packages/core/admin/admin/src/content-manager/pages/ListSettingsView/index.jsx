@@ -175,7 +175,7 @@ export const ListSettingsView = ({ layout, slug }) => {
                   e.preventDefault();
                   goBack();
                 }}
-                to="/"
+                to={{ pathname: '/' }}
               >
                 {formatMessage({
                   id: 'global.back',
