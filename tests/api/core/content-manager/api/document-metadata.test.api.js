@@ -230,7 +230,7 @@ describe('CM API - Document metadata', () => {
         {}
       );
 
-      expect(dataPublished.status).toBe('modified');
+      expect(dataPublished.status).toBe('published');
       expect(metaPublished.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
     }
   );

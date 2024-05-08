@@ -40,18 +40,6 @@ const CONTENT_MANAGER_STATUS = {
   MODIFIED: 'modified',
 };
 
-const areDatesEqual = (date1: Date | string | null, date2: Date | string | null): boolean => {
-  if (!date1 || !date2) {
-    return false;
-  }
-
-  const time1 = new Date(date1).getTime();
-  const time2 = new Date(date2).getTime();
-  const difference = Math.abs(time1 - time2);
-
-  return difference === 0;
-};
-
 /**
  * Controls the metadata properties to be returned
  *
@@ -185,26 +173,35 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
     const isDraft = version.publishedAt === null;
+    const currentStatus = isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
 
     if (!otherDocumentStatuses?.length) {
-      // If there are no other versions, we take the current version status
-      return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
+      return currentStatus;
     }
 
-    // Check if there is only a draft version
     if (isDraft) {
-      const publishedVersion = otherDocumentStatuses?.find((d) => d.publishedAt !== null);
-      if (!publishedVersion) {
+      const hasPublished = otherDocumentStatuses.some((d) => d.publishedAt !== null);
+      if (!hasPublished) {
         return CONTENT_MANAGER_STATUS.DRAFT;
       }
     }
 
-    // The draft version is the same as the published version
-    if (areDatesEqual(version.updatedAt, otherDocumentStatuses.at(0)?.updatedAt)) {
+    const primaryTime = new Date(version.updatedAt ?? 0).getTime();
+    const otherTime = new Date(otherDocumentStatuses[0]?.updatedAt ?? 0).getTime();
+    const isPrimaryNewer = primaryTime > otherTime;
+
+    // If the difference between the primary and the other document is less than 500ms
+    const isSameOrLessThanThreshold = Math.abs(primaryTime - otherTime) <= 500;
+
+    if (isSameOrLessThanThreshold) {
       return CONTENT_MANAGER_STATUS.PUBLISHED;
     }
 
-    return CONTENT_MANAGER_STATUS.MODIFIED;
+    return isPrimaryNewer && isDraft
+      ? // A document is only modified if the draft and published entries are updated at different times
+        // and the draft is newer than the published version
+        CONTENT_MANAGER_STATUS.MODIFIED
+      : currentStatus;
   },
 
   // TODO is it necessary to return metadata on every page of the CM
