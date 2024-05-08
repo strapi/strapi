@@ -23,7 +23,7 @@ describe('Create Locale', () => {
     expect(screen.getByRole('tabpanel', { name: 'Basic settings' })).toBeInTheDocument();
 
     expect(screen.getByRole('combobox', { name: 'Locales' })).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: 'Locale display name *' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Locale display name' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('tab', { name: 'Advanced settings' }));
 
@@ -48,7 +48,7 @@ describe('Create Locale', () => {
     await screen.findByRole('option', { name: 'Afrikaans (af)' });
     await user.click(screen.getByRole('option', { name: 'Afrikaans (af)' }));
 
-    await user.type(screen.getByRole('textbox', { name: 'Locale display name *' }), 'Afrikaans');
+    await user.type(screen.getByRole('textbox', { name: 'Locale display name' }), 'Afrikaans');
 
     await user.click(screen.getByRole('tab', { name: 'Advanced settings' }));
 
@@ -77,7 +77,7 @@ describe('Create Locale', () => {
     await user.click(screen.getByRole('combobox', { name: 'Locales' }));
     await user.click(screen.getByRole('option', { name: 'Afrikaans (af)' }));
 
-    await user.type(screen.getByRole('textbox', { name: 'Locale display name *' }), 'Afrikaans');
+    await user.type(screen.getByRole('textbox', { name: 'Locale display name' }), 'Afrikaans');
 
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
@@ -89,7 +89,7 @@ describe('Create Locale', () => {
       const { user } = render(<CreateLocale />);
       await user.click(screen.getByRole('button', { name: 'Add new locale' }));
 
-      await user.type(screen.getByRole('textbox', { name: 'Locale display name *' }), 'a');
+      await user.type(screen.getByRole('textbox', { name: 'Locale display name' }), 'a');
 
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
@@ -97,14 +97,14 @@ describe('Create Locale', () => {
 
       await user.click(screen.getByRole('combobox', { name: 'Locales' }));
       await user.click(screen.getByRole('option', { name: 'Afrikaans (af)' }));
-      await user.clear(screen.getByRole('textbox', { name: 'Locale display name *' }));
+      await user.clear(screen.getByRole('textbox', { name: 'Locale display name' }));
 
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
       expect(await screen.findByText('Please give the locale a display name')).toBeInTheDocument();
 
       await user.type(
-        screen.getByRole('textbox', { name: 'Locale display name *' }),
+        screen.getByRole('textbox', { name: 'Locale display name' }),
         Array(256).fill('a').join('')
       );
 

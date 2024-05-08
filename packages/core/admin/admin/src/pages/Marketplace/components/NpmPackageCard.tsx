@@ -1,10 +1,19 @@
-import { Box, Flex, Tooltip, Typography, Divider, Button, LinkButton } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  Tooltip,
+  Typography,
+  Divider,
+  Button,
+  LinkButton,
+  TypographyComponent,
+} from '@strapi/design-system';
 import { CheckCircle, ExternalLink, Download, Star, Check, Duplicate } from '@strapi/icons';
 import { GitHub } from '@strapi/icons/symbols';
 import pluralize from 'pluralize';
 import { useIntl } from 'react-intl';
 import * as semver from 'semver';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import StrapiLogo from '../../../assets/images/logo-strapi-2022.svg';
 import { AppInfoContextValue } from '../../../features/AppInfo';
@@ -16,7 +25,7 @@ import type { Plugin, Provider } from '../hooks/useMarketplaceData';
 import type { NpmPackageType } from '../MarketplacePage';
 
 // Custom component to have an ellipsis after the 2nd line
-const EllipsisText = styled(Typography)`
+const EllipsisText = styled<TypographyComponent<'p'>>(Typography)`
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -74,7 +83,7 @@ const NpmPackageCard = ({
       <Box>
         <Flex direction="row" justifyContent="space-between" alignItems="flex-start">
           <Box
-            as="img"
+            tag="img"
             src={attributes.logo.url}
             alt={`${attributes.name} logo`}
             hasRadius
@@ -88,7 +97,7 @@ const NpmPackageCard = ({
           />
         </Flex>
         <Box paddingTop={4}>
-          <Typography as="h3" variant="delta">
+          <Typography tag="h3" variant="delta">
             <Flex
               alignItems="center"
               gap={attributes.validated && !attributes.madeByStrapi ? 2 : 1}
@@ -107,7 +116,7 @@ const NpmPackageCard = ({
               {attributes.madeByStrapi && (
                 <Tooltip description={madeByStrapiMessage}>
                   <Box
-                    as="img"
+                    tag="img"
                     src={StrapiLogo}
                     alt={madeByStrapiMessage}
                     width={6}
@@ -119,7 +128,7 @@ const NpmPackageCard = ({
           </Typography>
         </Box>
         <Box paddingTop={2}>
-          <EllipsisText as="p" variant="omega" textColor="neutral600">
+          <EllipsisText tag="p" variant="omega" textColor="neutral600">
             {attributes.description}
           </EllipsisText>
         </Box>

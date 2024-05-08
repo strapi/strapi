@@ -2,11 +2,12 @@ import * as React from 'react';
 
 import { Box, Button, Flex, Grid, GridItem, TextInput } from '@strapi/design-system';
 import { Check, Play as Publish } from '@strapi/icons';
-import { Field, Form, FormikHelpers, FormikProvider, useFormik } from 'formik';
 import { IntlShape, useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { TriggerWebhook } from '../../../../../../../shared/contracts/webhooks';
+import { Form, FormHelpers } from '../../../../../components/Form';
+import { InputRenderer } from '../../../../../components/FormInputs/Renderer';
 import { Layouts } from '../../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../../features/BackButton';
 import { useEnterprise } from '../../../../../hooks/useEnterprise';
@@ -28,7 +29,7 @@ interface WebhookFormProps {
   data?: Modules.WebhookStore.Webhook;
   handleSubmit: (
     values: WebhookFormValues,
-    formik: FormikHelpers<WebhookFormValues>
+    helpers: FormHelpers<WebhookFormValues>
   ) => Promise<void>;
   isCreating: boolean;
   isTriggering: boolean;
@@ -67,118 +68,115 @@ const WebhookForm = ({
     return Object.entries(headers).map(([key, value]) => ({ key, value }));
   };
 
-  const formik = useFormik({
-    initialValues: {
-      name: data?.name || '',
-      url: data?.url || '',
-      headers: mapHeaders(data?.headers || {}),
-      events: data?.events || [],
-    },
-    async onSubmit(values, formik) {
-      await handleSubmit(values, formik);
-
-      formik.resetForm({ values });
-    },
-    validationSchema: makeWebhookValidationSchema({ formatMessage }),
-    validateOnChange: false,
-    validateOnBlur: false,
-  });
-
   // block rendering until the EE component is fully loaded
   if (!EventTable) {
     return null;
   }
 
   return (
-    <FormikProvider value={formik}>
-      <Form>
-        <Layouts.Header
-          primaryAction={
-            <Flex gap={2}>
-              <Button
-                onClick={() => {
-                  triggerWebhook();
-                  setShowTriggerResponse(true);
-                }}
-                variant="tertiary"
-                startIcon={<Publish />}
-                disabled={isCreating || isTriggering}
-                size="L"
-              >
-                {formatMessage({
-                  id: 'Settings.webhooks.trigger',
-                  defaultMessage: 'Trigger',
-                })}
-              </Button>
-              <Button
-                startIcon={<Check />}
-                type="submit"
-                size="L"
-                disabled={!formik.dirty}
-                loading={formik.isSubmitting}
-              >
-                {formatMessage({
-                  id: 'global.save',
-                  defaultMessage: 'Save',
-                })}
-              </Button>
-            </Flex>
-          }
-          title={
-            isCreating
-              ? formatMessage({
-                  id: 'Settings.webhooks.create',
-                  defaultMessage: 'Create a webhook',
-                })
-              : data?.name
-          }
-          navigationAction={<BackButton />}
-        />
-        <Layouts.Content>
-          <Flex direction="column" alignItems="stretch" gap={4}>
-            {showTriggerResponse && (
-              <TriggerContainer
-                isPending={isTriggering}
-                response={triggerResponse}
-                onCancel={() => setShowTriggerResponse(false)}
-              />
-            )}
-            <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
-              <Flex direction="column" alignItems="stretch" gap={6}>
-                <Grid gap={6}>
-                  <GridItem col={6}>
-                    <Field
-                      as={TextInput}
-                      name="name"
-                      error={formik.errors.name}
-                      label={formatMessage({
-                        id: 'global.name',
-                        defaultMessage: 'Name',
-                      })}
-                      required
-                    />
-                  </GridItem>
-                  <GridItem col={12}>
-                    <Field
-                      as={TextInput}
-                      name="url"
-                      error={formik.errors.url}
-                      label={formatMessage({
-                        id: 'Settings.roles.form.input.url',
-                        defaultMessage: 'Url',
-                      })}
-                      required
-                    />
-                  </GridItem>
-                </Grid>
-                <HeadersInput />
-                <EventTable />
+    <Form
+      initialValues={{
+        name: data?.name || '',
+        url: data?.url || '',
+        headers: mapHeaders(data?.headers || {}),
+        events: data?.events || [],
+      }}
+      method={isCreating ? 'POST' : 'PUT'}
+      onSubmit={handleSubmit}
+      validationSchema={makeWebhookValidationSchema({ formatMessage })}
+    >
+      {({ isSubmitting, modified }) => (
+        <>
+          <Layouts.Header
+            primaryAction={
+              <Flex gap={2}>
+                <Button
+                  onClick={() => {
+                    triggerWebhook();
+                    setShowTriggerResponse(true);
+                  }}
+                  variant="tertiary"
+                  startIcon={<Publish />}
+                  disabled={isCreating || isTriggering}
+                  size="L"
+                >
+                  {formatMessage({
+                    id: 'Settings.webhooks.trigger',
+                    defaultMessage: 'Trigger',
+                  })}
+                </Button>
+                <Button
+                  startIcon={<Check />}
+                  type="submit"
+                  size="L"
+                  disabled={!modified}
+                  loading={isSubmitting}
+                >
+                  {formatMessage({
+                    id: 'global.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
               </Flex>
-            </Box>
-          </Flex>
-        </Layouts.Content>
-      </Form>
-    </FormikProvider>
+            }
+            title={
+              isCreating
+                ? formatMessage({
+                    id: 'Settings.webhooks.create',
+                    defaultMessage: 'Create a webhook',
+                  })
+                : data?.name
+            }
+            navigationAction={<BackButton />}
+          />
+          <Layouts.Content>
+            <Flex direction="column" alignItems="stretch" gap={4}>
+              {showTriggerResponse && (
+                <TriggerContainer
+                  isPending={isTriggering}
+                  response={triggerResponse}
+                  onCancel={() => setShowTriggerResponse(false)}
+                />
+              )}
+              <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
+                <Flex direction="column" alignItems="stretch" gap={6}>
+                  <Grid gap={6}>
+                    {[
+                      {
+                        label: formatMessage({
+                          id: 'global.name',
+                          defaultMessage: 'Name',
+                        }),
+                        name: 'name',
+                        required: true,
+                        size: 6,
+                        type: 'string' as const,
+                      },
+                      {
+                        label: formatMessage({
+                          id: 'Settings.roles.form.input.url',
+                          defaultMessage: 'Url',
+                        }),
+                        name: 'url',
+                        required: true,
+                        size: 12,
+                        type: 'string' as const,
+                      },
+                    ].map(({ size, ...field }) => (
+                      <GridItem key={field.name} col={size}>
+                        <InputRenderer {...field} />
+                      </GridItem>
+                    ))}
+                  </Grid>
+                  <HeadersInput />
+                  <EventTable />
+                </Flex>
+              </Box>
+            </Flex>
+          </Layouts.Content>
+        </>
+      )}
+    </Form>
   );
 };
 

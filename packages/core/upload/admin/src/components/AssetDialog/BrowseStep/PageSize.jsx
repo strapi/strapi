@@ -34,7 +34,7 @@ const PageSize = ({ onChangePageSize, pageSize }) => {
         <SingleSelectOption value="100">100</SingleSelectOption>
       </SingleSelect>
       <Box paddingLeft={2}>
-        <Typography textColor="neutral600" as="label" htmlFor="page-size">
+        <Typography textColor="neutral600" tag="label" htmlFor="page-size">
           {formatMessage({
             id: 'components.PageFooter.select',
             defaultMessage: 'Entries per page',

@@ -12,7 +12,6 @@ import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Box,
   Button,
-  FieldLabel,
   Flex,
   ModalBody,
   ModalHeader,
@@ -23,6 +22,7 @@ import {
   ModalFooter,
   EmptyStateLayout,
   LinkButton,
+  Field,
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -79,11 +79,10 @@ export const NoReleases = () => {
       })}
       action={
         <LinkButton
-          // @ts-expect-error - types are not inferred correctly through the as prop.
           to={{
             pathname: '/plugins/content-releases',
           }}
-          as={ReactRouterLink}
+          tag={ReactRouterLink}
           variant="secondary"
         >
           {formatMessage({
@@ -184,32 +183,35 @@ const AddActionToReleaseModal = ({
                 <ModalBody>
                   <Flex direction="column" alignItems="stretch" gap={2}>
                     <Box paddingBottom={6}>
-                      <SingleSelect
-                        required
-                        label={formatMessage({
-                          id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
-                          defaultMessage: 'Select a release',
-                        })}
-                        placeholder={formatMessage({
-                          id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
-                          defaultMessage: 'Select',
-                        })}
-                        onChange={(value) => setFieldValue('releaseId', value)}
-                        value={values.releaseId}
-                      >
-                        {releases?.map((release) => (
-                          <SingleSelectOption key={release.id} value={release.id}>
-                            {release.name}
-                          </SingleSelectOption>
-                        ))}
-                      </SingleSelect>
+                      <Field.Root required>
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
+                            defaultMessage: 'Select a release',
+                          })}
+                        </Field.Label>
+                        <SingleSelect
+                          placeholder={formatMessage({
+                            id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
+                            defaultMessage: 'Select',
+                          })}
+                          onChange={(value) => setFieldValue('releaseId', value)}
+                          value={values.releaseId}
+                        >
+                          {releases?.map((release) => (
+                            <SingleSelectOption key={release.id} value={release.id}>
+                              {release.name}
+                            </SingleSelectOption>
+                          ))}
+                        </SingleSelect>
+                      </Field.Root>
                     </Box>
-                    <FieldLabel>
+                    <Field.Label>
                       {formatMessage({
                         id: 'content-releases.content-manager-edit-view.add-to-release.action-type-label',
                         defaultMessage: 'What do you want to do with this entry?',
                       })}
-                    </FieldLabel>
+                    </Field.Label>
                     <ReleaseActionOptions
                       selected={values.type}
                       handleChange={(e) => setFieldValue('type', e.target.value)}
@@ -321,7 +323,7 @@ export const CMReleasesContainer = () => {
 
   return (
     <Box
-      as="aside"
+      tag="aside"
       aria-label={formatMessage({
         id: 'content-releases.plugin.name',
         defaultMessage: 'Releases',

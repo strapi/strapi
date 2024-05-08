@@ -55,8 +55,8 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
-    "@strapi/design-system": "2.0.0-beta.2",
-    "@strapi/icons": "2.0.0-beta.2",
+    "@strapi/design-system": "2.0.0-beta.3",
+    "@strapi/icons": "2.0.0-beta.3",
     "@strapi/types": "workspace:*",
     "@strapi/utils": "5.0.0-beta.6",
     "date-fns": "2.30.0",
@@ -83,7 +83,7 @@
     "react-dom": "^18.2.0",
     "react-query": "3.39.3",
     "react-router-dom": "6.22.3",
-    "styled-components": "5.3.11",
+    "styled-components": "6.1.8",
     "typescript": "5.2.2"
   },
   "peerDependencies": {
@@ -92,7 +92,7 @@
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
-    "styled-components": "5.3.3"
+    "styled-components": "^6.0.0"
   },
   "engines": {
     "node": ">=16.0.0 <=20.x.x",

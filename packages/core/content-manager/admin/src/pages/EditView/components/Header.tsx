@@ -12,7 +12,7 @@ import { Flex, SingleSelect, SingleSelectOption, Typography } from '@strapi/desi
 import { Cog, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { RelativeTime } from '../../../components/RelativeTime';
 import {
@@ -66,7 +66,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
         gap="80px"
         alignItems="flex-start"
       >
-        <Typography variant="alpha" as="h1">
+        <Typography variant="alpha" tag="h1">
           {title}
         </Typography>
         <HeaderToolbar />
@@ -298,7 +298,7 @@ const Information = ({ activeTab }: InformationProps) => {
       borderColor="neutral150"
       direction="column"
       marginTop={2}
-      as="dl"
+      tag="dl"
       padding={5}
       gap={3}
       alignItems="flex-start"
@@ -312,10 +312,10 @@ const Information = ({ activeTab }: InformationProps) => {
     >
       {information.map((info) => (
         <Flex gap={1} direction="column" alignItems="flex-start" key={info.label}>
-          <Typography as="dt" variant="pi" fontWeight="bold">
+          <Typography tag="dt" variant="pi" fontWeight="bold">
             {info.label}
           </Typography>
-          <Typography as="dd" variant="pi" textColor="neutral600">
+          <Typography tag="dd" variant="pi" textColor="neutral600">
             {info.value}
           </Typography>
         </Flex>
@@ -450,7 +450,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
       content: (
         <Flex direction="column" gap={2}>
           <WarningCircle width="24px" height="24px" fill="danger600" />
-          <Typography as="p" variant="omega" textAlign="center">
+          <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.delete.dialog.body',
               defaultMessage: 'Are you sure?',

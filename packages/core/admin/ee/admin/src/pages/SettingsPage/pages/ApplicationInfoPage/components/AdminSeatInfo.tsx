@@ -52,7 +52,7 @@ export const AdminSeatInfoEE = () => {
       </Typography>
       <Flex gap={2}>
         <Flex>
-          <Typography as="p">
+          <Typography tag="p">
             {formatMessage(
               {
                 id: 'Settings.application.ee.admin-seats.count',

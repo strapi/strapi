@@ -4,7 +4,7 @@ import { useField } from '@strapi/admin/strapi-admin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTranslation } from '../../../../../utils/translations';
 
@@ -22,7 +22,7 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
   return (
     <>
       <Box
-        as="button"
+        tag="button"
         background="neutral100"
         borderColor={field.error ? 'danger600' : 'neutral200'}
         hasRadius

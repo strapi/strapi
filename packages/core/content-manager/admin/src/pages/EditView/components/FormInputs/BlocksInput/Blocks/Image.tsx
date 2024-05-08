@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
-import { Box, Flex } from '@strapi/design-system';
+import { Box, Flex, FlexComponent } from '@strapi/design-system';
 import { Image as Picture } from '@strapi/icons';
 import { type Element, Transforms, Editor } from 'slate';
 import { useFocused, type RenderElementProps, useSelected } from 'slate-react';
-import styled, { css } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../../utils/urls';
 import { useBlocksEditorContext, type BlocksStore } from '../BlocksEditor';
@@ -13,15 +13,11 @@ import { type Block } from '../utils/types';
 
 import type { Schema } from '@strapi/types';
 
-interface ImageWrapperProps extends React.ComponentProps<typeof Box> {
-  isFocused: boolean;
-}
-
-const ImageWrapper = styled(Flex)<ImageWrapperProps>`
+const ImageWrapper = styled<FlexComponent>(Flex)<{ $isFocused?: boolean }>`
   transition-property: box-shadow;
   transition-duration: 0.2s;
   ${(props) =>
-    props.isFocused &&
+    props.$isFocused &&
     css`
       box-shadow: ${props.theme.colors.primary600} 0px 0px 0px 3px;
     `}
@@ -81,7 +77,7 @@ const Image = ({ attributes, children, element }: RenderElementProps) => {
         background="neutral100"
         contentEditable={false}
         justifyContent="center"
-        isFocused={editorIsFocused && imageIsSelected}
+        $isFocused={editorIsFocused && imageIsSelected}
         hasRadius
       >
         <img src={url} alt={alternativeText} width={width} height={height} />

@@ -48,7 +48,7 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
       react: '18.2.0',
       'react-dom': '18.2.0',
       'react-router-dom': '^6.0.0',
-      'styled-components': '5.3.3',
+      'styled-components': '^6.0.0',
     },
     template: template ? path.resolve(template) : template,
   };
