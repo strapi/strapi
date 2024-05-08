@@ -31,18 +31,6 @@ const CONTENT_MANAGER_STATUS = {
   MODIFIED: 'modified',
 };
 
-const areDatesEqual = (date1: Date | string | null, date2: Date | string | null): boolean => {
-  if (!date1 || !date2) {
-    return false;
-  }
-
-  const time1 = new Date(date1).getTime();
-  const time2 = new Date(date2).getTime();
-  const difference = Math.abs(time1 - time2);
-
-  return difference === 0;
-};
-
 /**
  * Controls the metadata properties to be returned
  *
@@ -147,7 +135,7 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
 
     // It can only be a draft if there are no other versions
     if (!otherDocumentStatuses?.length) {
-      return CONTENT_MANAGER_STATUS.DRAFT;
+      return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
     }
 
     // Check if there is only a draft version
@@ -158,13 +146,9 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
       }
     }
 
-    // The draft version is the same as the published version
-    if (areDatesEqual(version.updatedAt, otherDocumentStatuses.at(0)?.updatedAt)) {
-      return CONTENT_MANAGER_STATUS.PUBLISHED;
-    }
+    const haveSameUpdatedAt = version.updatedAt === otherDocumentStatuses.at(0)?.updatedAt;
 
-    // The draft version is newer than the published version
-    return CONTENT_MANAGER_STATUS.MODIFIED;
+    return haveSameUpdatedAt ? CONTENT_MANAGER_STATUS.PUBLISHED : CONTENT_MANAGER_STATUS.MODIFIED;
   },
 
   async getMetadata(
