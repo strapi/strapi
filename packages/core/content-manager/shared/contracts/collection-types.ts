@@ -11,7 +11,10 @@ type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
 type BY_FIELDS = 'createdBy' | 'updatedBy' | 'publishedBy';
 
 export type AvailableLocaleDocument = Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>;
-export type AvailableStatusDocument = Pick<Document, 'id' | BY_FIELDS | AT_FIELDS>;
+export type AvailableStatusDocument = Pick<
+  Document,
+  'id' | 'documentId' | 'locale' | BY_FIELDS | AT_FIELDS
+>[];
 export type DocumentMetadata = {
   // All status of the returned locale
   availableStatus: AvailableStatusDocument[];
