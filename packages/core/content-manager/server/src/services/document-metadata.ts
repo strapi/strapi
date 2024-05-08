@@ -55,23 +55,62 @@ export interface GetMetadataOptions {
 }
 
 /**
- * Determines if the provided version of the document has been modified since the other versions
+ * Operator types for version comparison.
+ */
+type Operator = 'eq' | 'gt';
+
+/**
+ * Compares the update time of a document version against other document statuses based on the operator.
  *
- * @param version - The version of the document to check.
- * @param otherDocumentStatuses - The statuses of other versions of the document.
- * @returns A boolean indicating whether the provided version has been modified after the other versions.
+ * @param operator - The comparison operator ('eq' for equal, 'gt' for greater than).
+ */
+const versionComparison = (
+  version: DocumentVersion,
+  otherDocumentStatuses: DocumentMetadata['availableStatus'],
+  operator: Operator
+): boolean => {
+  const versionUpdatedAt = version?.updatedAt ? new Date(version.updatedAt).getTime() : 0;
+
+  return otherDocumentStatuses.every((otherStatus) => {
+    const otherUpdatedAt = otherStatus?.updatedAt ? new Date(otherStatus.updatedAt).getTime() : 0;
+
+    switch (operator) {
+      case 'eq':
+        return versionUpdatedAt === otherUpdatedAt;
+      case 'gt':
+        return versionUpdatedAt > otherUpdatedAt;
+      default:
+        return false;
+    }
+  });
+};
+
+/**
+ * Checks if the provided document version has been modified after other versions.
  */
 const getIsModifiedSinceOtherVersion = (
   version: DocumentVersion,
   otherDocumentStatuses: DocumentMetadata['availableStatus']
 ): boolean => {
-  const versionUpdatedAt = version?.updatedAt ? new Date(version.updatedAt).getTime() : 0;
+  if (!version || !version.updatedAt) {
+    return false;
+  }
 
-  // Check if the version's updatedAt timestamp is greater than all other updatedAt timestamps
-  return otherDocumentStatuses.every((otherStatus) => {
-    const otherUpdatedAt = otherStatus?.updatedAt ? new Date(otherStatus.updatedAt).getTime() : 0;
-    return versionUpdatedAt > otherUpdatedAt;
-  });
+  return versionComparison(version, otherDocumentStatuses, 'gt');
+};
+
+/**
+ * Checks if the updated time of the provided document version is equal to the updated times of other versions.
+ */
+const getAreAllUpdatedTimesEqual = (
+  version: DocumentVersion,
+  otherDocumentStatuses: DocumentMetadata['availableStatus']
+): boolean => {
+  if (!version || !version.updatedAt) {
+    return false;
+  }
+
+  return versionComparison(version, otherDocumentStatuses, 'eq');
 };
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
@@ -207,20 +246,18 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       }
     }
 
-    /**
-     * Determines the status of the document version based on whether it has been modified.
-     *
-     * If the document version is a draft, it checks that it is the latest modification.
+    const isLatestModification = getIsModifiedSinceOtherVersion(version, otherDocumentStatuses);
+    /*
+     * If the current version is a draft, the document is modified if this version is
+     * the latest modification.
      *
      * If the current version is published, the document is modified if any
      * other version has been updated more recently.
      */
-    const isModifiedSinceOtherVersion = getIsModifiedSinceOtherVersion(
-      version,
-      otherDocumentStatuses
-    );
+    const isModified = isDraft
+      ? isLatestModification
+      : !getAreAllUpdatedTimesEqual(version, otherDocumentStatuses);
 
-    const isModified = isDraft ? isModifiedSinceOtherVersion : !isModifiedSinceOtherVersion;
     return isModified ? CONTENT_MANAGER_STATUS.MODIFIED : CONTENT_MANAGER_STATUS.PUBLISHED;
   },
 
