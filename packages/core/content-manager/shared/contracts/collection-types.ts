@@ -285,7 +285,9 @@ export declare namespace BulkDelete {
     body: {
       documentIds: Modules.Documents.ID[];
     };
-    query: {};
+    query: {
+      locale?: string;
+    };
   }
 
   export interface Params {

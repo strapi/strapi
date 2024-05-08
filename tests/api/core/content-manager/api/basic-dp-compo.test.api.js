@@ -268,7 +268,7 @@ describe('CM API - Basic + compo', () => {
     });
 
     test('Can bulk publish product with compo - required', async () => {
-      const product = {
+      const product1 = {
         name: 'Product 1',
         description: 'Product description',
         compo: {
@@ -276,26 +276,46 @@ describe('CM API - Basic + compo', () => {
           description: 'short',
         },
       };
+
+      const product2 = {
+        name: 'Product 2',
+        description: 'Product description',
+        compo: {
+          name: 'compo name',
+          description: 'short',
+        },
+      };
+
       const {
         body: {
-          data: { documentId },
+          data: { documentId: documentId1 },
         },
       } = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
-        body: product,
+        body: product1,
+      });
+
+      const {
+        body: {
+          data: { documentId: documentId2 },
+        },
+      } = await rq({
+        method: 'POST',
+        url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+        body: product2,
       });
 
       const publishRes = await rq({
         method: 'POST',
         url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/actions/bulkPublish`,
         body: {
-          documentIds: [documentId],
+          documentIds: [documentId1, documentId2],
         },
       });
 
       expect(publishRes.statusCode).toBe(200);
-      expect(publishRes.body).toMatchObject({ count: 1 });
+      expect(publishRes.body).toMatchObject({ count: 2 });
     });
 
     test('BulkPublish across multiple documents and locales', async () => {
