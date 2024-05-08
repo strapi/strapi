@@ -9,14 +9,20 @@ import {
   Layout,
   Main,
 } from '@strapi/design-system';
-import { Link, useFetchClient, useNotification, useTracking } from '@strapi/helper-plugin';
+import {
+  Link,
+  useFetchClient,
+  useNotification,
+  useQueryParams,
+  useTracking,
+} from '@strapi/helper-plugin';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
+import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
-import { useHistory } from 'react-router-dom';
 
 import { ModelsContext } from '../../contexts/models';
 import { checkIfAttributeIsDisplayable } from '../../utils/attributes';
@@ -32,7 +38,7 @@ export const ListSettingsView = ({ layout, slug }) => {
   const { put } = useFetchClient();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { goBack } = useHistory();
+  const [{ query }] = useQueryParams();
   const toggleNotification = useNotification();
   const { refetchData } = React.useContext(ModelsContext);
   const [{ fieldToEdit, fieldForm, initialData, modifiedData }, dispatch] = React.useReducer(
@@ -163,6 +169,12 @@ export const ListSettingsView = ({ layout, slug }) => {
     });
   };
 
+  const {
+    settings: { pageSize, defaultSortBy, defaultSortOrder },
+    kind,
+    uid,
+  } = initialData;
+
   return (
     <Layout>
       <Main aria-busy={isSubmittingForm}>
@@ -171,16 +183,23 @@ export const ListSettingsView = ({ layout, slug }) => {
             navigationAction={
               <Link
                 startIcon={<ArrowLeft />}
-                onClick={(e) => {
-                  e.preventDefault();
-                  goBack();
+                to={{
+                  pathname: `/content-manager/${kind}/${uid}`,
+                  search: stringify(
+                    {
+                      page: 1,
+                      pageSize,
+                      sort: `${defaultSortBy}:${defaultSortOrder}`,
+                      plugins: query.plugins,
+                    },
+                    {
+                      encode: false,
+                    }
+                  ),
                 }}
-                to={{ pathname: '/' }}
+                id="go-back"
               >
-                {formatMessage({
-                  id: 'global.back',
-                  defaultMessage: 'Back',
-                })}
+                {formatMessage({ id: 'global.back', defaultMessage: 'Back' })}
               </Link>
             }
             primaryAction={
