@@ -54,6 +54,26 @@ export interface GetMetadataOptions {
   availableStatus?: boolean;
 }
 
+/**
+ * Determines if the provided version of the document has been modified since the other versions
+ *
+ * @param version - The version of the document to check.
+ * @param otherDocumentStatuses - The statuses of other versions of the document.
+ * @returns A boolean indicating whether the provided version has been modified after the other versions.
+ */
+const getIsModifiedSinceOtherVersion = (
+  version: DocumentVersion,
+  otherDocumentStatuses: DocumentMetadata['availableStatus']
+): boolean => {
+  const versionUpdatedAt = version?.updatedAt ? new Date(version.updatedAt).getTime() : 0;
+
+  // Check if the version's updatedAt timestamp is greater than all other updatedAt timestamps
+  return otherDocumentStatuses.every((otherStatus) => {
+    const otherUpdatedAt = otherStatus?.updatedAt ? new Date(otherStatus.updatedAt).getTime() : 0;
+    return versionUpdatedAt > otherUpdatedAt;
+  });
+};
+
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
@@ -175,19 +195,33 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     const isDraft = version.publishedAt === null;
 
     if (!otherDocumentStatuses?.length) {
+      // If there are no other versions, the current version is the latest
       return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
     }
 
     if (isDraft) {
       const hasPublished = otherDocumentStatuses.some((d) => d.publishedAt !== null);
       if (!hasPublished) {
+        // If there are no published versions, the draft is considered the latest
         return CONTENT_MANAGER_STATUS.DRAFT;
       }
     }
 
-    const haveSameUpdatedAt = version.updatedAt === otherDocumentStatuses.at(0)?.updatedAt;
+    /**
+     * Determines the status of the document version based on whether it has been modified.
+     *
+     * If the document version is a draft, it checks that it is the latest modification.
+     *
+     * If the current version is published, the document is modified if any
+     * other version has been updated more recently.
+     */
+    const isModifiedSinceOtherVersion = getIsModifiedSinceOtherVersion(
+      version,
+      otherDocumentStatuses
+    );
 
-    return haveSameUpdatedAt ? CONTENT_MANAGER_STATUS.PUBLISHED : CONTENT_MANAGER_STATUS.MODIFIED;
+    const isModified = isDraft ? isModifiedSinceOtherVersion : !isModifiedSinceOtherVersion;
+    return isModified ? CONTENT_MANAGER_STATUS.MODIFIED : CONTENT_MANAGER_STATUS.PUBLISHED;
   },
 
   // TODO is it necessary to return metadata on every page of the CM
