@@ -161,6 +161,7 @@ const ListView = () => {
         primaryAction={
           canCreate ? (
             <LinkButton
+              role="button"
               tag={Link}
               data-testid="create-transfer-token-button"
               startIcon={<Plus />}

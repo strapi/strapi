@@ -59,7 +59,6 @@
     "@strapi/design-system": "2.0.0-beta.3",
     "@strapi/icons": "2.0.0-beta.3",
     "@strapi/utils": "5.0.0-beta.6",
-    "axios": "1.6.8",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
     "formik": "2.4.5",

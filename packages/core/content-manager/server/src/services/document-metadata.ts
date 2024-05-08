@@ -186,22 +186,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
       }
     }
 
-    const primaryTime = new Date(version.updatedAt ?? 0).getTime();
-    const otherTime = new Date(otherDocumentStatuses[0]?.updatedAt ?? 0).getTime();
-    const isPrimaryNewer = primaryTime > otherTime;
+    const haveSameUpdatedAt = version.updatedAt === otherDocumentStatuses.at(0)?.updatedAt;
 
-    // If the difference between the primary and the other document is less than 500ms
-    const isSameOrLessThanThreshold = Math.abs(primaryTime - otherTime) <= 500;
-
-    if (isSameOrLessThanThreshold) {
-      return CONTENT_MANAGER_STATUS.PUBLISHED;
-    }
-
-    return isPrimaryNewer && isDraft
-      ? // A document is only modified if the draft and published entries are updated at different times
-        // and the draft is newer than the published version
-        CONTENT_MANAGER_STATUS.MODIFIED
-      : currentStatus;
+    return haveSameUpdatedAt ? CONTENT_MANAGER_STATUS.PUBLISHED : CONTENT_MANAGER_STATUS.MODIFIED;
   },
 
   // TODO is it necessary to return metadata on every page of the CM

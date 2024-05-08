@@ -4,12 +4,9 @@ import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { navToHeader } from '../../utils/shared';
 
 const createTransferToken = async (page, tokenName, duration, type) => {
-  await navToHeader(
-    page,
-    ['Settings', 'Transfer Tokens', 'Create new Transfer Token'],
-    'Create Transfer Token'
-  );
+  await navToHeader(page, ['Settings', 'Transfer Tokens'], 'Transfer Tokens');
 
+  await page.getByRole('button', { name: 'Create new Transfer Token' }).click();
   await page.getByLabel('Name*').click();
   await page.getByLabel('Name*').fill(tokenName);
 

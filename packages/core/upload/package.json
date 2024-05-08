@@ -52,7 +52,6 @@
     "@strapi/icons": "2.0.0-beta.3",
     "@strapi/provider-upload-local": "5.0.0-beta.6",
     "@strapi/utils": "5.0.0-beta.6",
-    "axios": "1.6.8",
     "byte-size": "8.1.1",
     "cropperjs": "1.6.1",
     "date-fns": "2.30.0",

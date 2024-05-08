@@ -11,6 +11,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  isFetchError,
   useStrapiApp,
   Layouts,
 } from '@strapi/admin/strapi-admin';
@@ -44,7 +45,6 @@ import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { isAxiosError } from '../services/axios';
 import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
@@ -254,8 +254,8 @@ const ReleaseDetailsLayout = ({
         totalPublishedEntries,
         totalUnpublishedEntries,
       });
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -574,8 +574,8 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     });
 
     if ('error' in response) {
-      if (isAxiosError(response.error)) {
-        // When the response returns an object with 'error', handle axios error
+      if (isFetchError(response.error)) {
+        // When the response returns an object with 'error', handle fetch error
         toggleNotification({
           type: 'danger',
           message: formatAPIError(response.error),
@@ -909,8 +909,8 @@ const ReleaseDetailsPage = () => {
         }),
       });
       toggleEditReleaseModal();
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -931,8 +931,8 @@ const ReleaseDetailsPage = () => {
 
     if ('data' in response) {
       navigate('..');
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),

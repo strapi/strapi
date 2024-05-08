@@ -2,7 +2,6 @@
 
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
-const { createAuthRequest } = require('api-tests/request');
 const { testInTransaction } = require('../../../utils');
 
 const builder = createTestBuilder();
@@ -73,7 +72,39 @@ const product = {
   collectionName: '',
 };
 
-const createProduct = async (id, locale, status, data = {}) => {
+const getProduct = async (documentId, locale, status) => {
+  return strapi.documents(PRODUCT_UID).findOne({ documentId, locale, status });
+};
+
+const createProduct = async (identifier, locale, status) => {
+  return strapi.documents(PRODUCT_UID).create({
+    data: {
+      name: `prod-${identifier}-${locale}-${status}`,
+      features: {
+        name: `${identifier}-Feature1-${locale}`,
+        description: `${identifier}-Description1`,
+        slogan: `${identifier}-Slogan1`,
+      },
+    },
+  });
+};
+
+const createProductLocale = async (documentId, locale, status) => {
+  return strapi.documents(PRODUCT_UID).update({
+    documentId,
+    locale,
+    data: {
+      name: `prod-${locale}-${status}`,
+      features: {
+        name: `Feature1-${locale}`,
+        description: `Description1-${locale}`,
+        slogan: `Slogan1-${locale}`,
+      },
+    },
+  });
+};
+
+const createProductQuery = async (id, locale, status, data = {}) => {
   await strapi.db.query(PRODUCT_UID).create({
     data: {
       documentId: id,
@@ -83,10 +114,6 @@ const createProduct = async (id, locale, status, data = {}) => {
       ...data,
     },
   });
-};
-
-const getProduct = async (documentId, locale, status) => {
-  return strapi.documents(PRODUCT_UID).findOne({ documentId, locale, status });
 };
 
 describe('CM API - Document metadata', () => {
@@ -102,18 +129,6 @@ describe('CM API - Document metadata', () => {
         .plugin('content-manager')
         .service('document-metadata')
         .formatDocumentWithMetadata(...props);
-
-    rq = await createAuthRequest({ strapi });
-
-    await rq({
-      method: 'POST',
-      url: '/i18n/locales',
-      body: {
-        code: extraLocaleCode,
-        name: `Locale name: (${extraLocaleCode})`,
-        isDefault: false,
-      },
-    });
   });
 
   afterAll(async () => {
@@ -122,8 +137,8 @@ describe('CM API - Document metadata', () => {
   });
 
   testInTransaction('Returns empty metadata when there is only a draft', async () => {
-    const documentId = 'product-empty-metadata';
-    await createProduct(documentId, 'en', 'draft');
+    const identifier = 'product-empty-metadata';
+    const { documentId } = await createProduct(identifier, 'en', 'draft');
 
     const product = await getProduct(documentId);
     const { data, meta } = await formatDocument(PRODUCT_UID, product, {});
@@ -134,12 +149,11 @@ describe('CM API - Document metadata', () => {
   });
 
   testInTransaction('Returns availableStatus when draft has a published version', async () => {
-    const documentId = 'product-available-status';
+    const identifier = 'product-available-status';
 
-    await createProduct(documentId, 'en', 'draft');
-    await createProduct(documentId, 'en', 'published');
+    const draftProduct = await createProduct(identifier, 'en', 'draft');
 
-    const draftProduct = await getProduct(documentId, 'en', 'draft');
+    await strapi.documents(PRODUCT_UID).publish(draftProduct);
 
     const { data, meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
 
@@ -162,13 +176,13 @@ describe('CM API - Document metadata', () => {
   testInTransaction(
     'Returns availableStatus when published version has a draft version',
     async () => {
-      const documentId = 'product-available-status-published';
-      await createProduct(documentId, 'en', 'draft');
-      await createProduct(documentId, 'en', 'published');
+      const identifier = 'product-available-status-published';
+      const draftProduct = await createProduct(identifier, 'en', 'draft');
+      const publishedProduct = (
+        await strapi.documents(PRODUCT_UID).publish(draftProduct)
+      ).entries.at(0);
 
-      const draftProduct = await getProduct(documentId, 'en', 'published');
-
-      const { meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
+      const { meta } = await formatDocument(PRODUCT_UID, publishedProduct, {});
 
       expect(meta.availableLocales).toEqual([]);
       expect(meta.availableStatus).toMatchObject([
@@ -187,13 +201,13 @@ describe('CM API - Document metadata', () => {
   );
 
   testInTransaction('Returns available locales when there are multiple locales', async () => {
-    const documentId = 'product-available-locales';
-    await createProduct(documentId, 'en', 'draft');
-    await createProduct(documentId, 'fr', 'draft');
+    const identifier = 'product-available-locales';
+    const defaultLocaleDocument = await createProduct(identifier, 'en', 'draft');
 
-    const draftProduct = await getProduct(documentId, 'en', 'draft');
+    const { documentId } = defaultLocaleDocument;
+    await createProductLocale(documentId, 'fr', 'draft');
 
-    const { meta } = await formatDocument(PRODUCT_UID, draftProduct, {});
+    const { meta } = await formatDocument(PRODUCT_UID, defaultLocaleDocument, {});
 
     expect(meta.availableLocales).toMatchObject([
       {
@@ -211,10 +225,12 @@ describe('CM API - Document metadata', () => {
     async () => {
       const documentId = 'product-modified-status';
       // Published versions should have different dates
-      await createProduct(documentId, 'en', 'draft');
-      await createProduct(documentId, 'en', 'published', { updatedAt: '2024-02-11' });
-      await createProduct(documentId, 'fr', 'draft');
-      await createProduct(documentId, 'fr', 'published', { updatedAt: '2024-02-11' });
+      // We use the DB query layer here so we have control over the dates
+      const documentId = 'product-modified-status';
+      await createProductQuery(documentId, 'en', 'draft');
+      await createProductQuery(documentId, 'en', 'published', { updatedAt: '2024-02-11' });
+      await createProductQuery(documentId, 'fr', 'draft');
+      await createProductQuery(documentId, 'fr', 'published', { updatedAt: '2024-02-11' });
 
       const draftProduct = await getProduct(documentId, 'en', 'draft');
       const { data, meta } = await formatDocument(PRODUCT_UID, draftProduct, {});

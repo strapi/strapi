@@ -1,4 +1,4 @@
-import { fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
+import { fireEvent, getByText, waitForElementToBeRemoved } from '@testing-library/react';
 import { mockData } from '@tests/mockData';
 import { render, waitFor, server, screen } from '@tests/utils';
 import { rest } from 'msw';
@@ -80,17 +80,14 @@ describe('Webhooks | ListPage', () => {
   });
 
   it('should delete a single webhook', async () => {
-    const { getByText, getByRole, findByText, getAllByRole, user } = render(<ListPage />);
-    await waitFor(() => {
-      getByText('http:://strapi.io');
-    });
+    const { findByText, user, findByRole, findAllByRole, queryByText } = render(<ListPage />);
 
-    const deleteButtons = getAllByRole('button', { name: /delete webhook/i });
+    await findByText('http:://strapi.io');
+
+    const deleteButtons = await findAllByRole('button', { name: /delete webhook/i });
     await user.click(deleteButtons[0]);
 
-    await waitFor(async () => {
-      expect(await findByText('Are you sure?')).toBeInTheDocument();
-    });
+    await findByText('Are you sure?');
 
     server.use(
       rest.get('/admin/webhooks', (req, res, ctx) => {
@@ -102,11 +99,11 @@ describe('Webhooks | ListPage', () => {
       })
     );
 
-    await user.click(getByRole('button', { name: /confirm/i }));
+    const confirmButton = await findByRole('button', { name: /confirm/i });
+    await user.click(confirmButton);
+    await findByText('http://me.io');
 
-    await waitFor(async () => {
-      expect(await findByText('http://me.io')).toBeInTheDocument();
-    });
+    await waitFor(() => expect(queryByText('http:://strapi.io')).not.toBeInTheDocument());
   });
 
   it('should disable a webhook', async () => {

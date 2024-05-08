@@ -8,6 +8,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  isFetchError,
   Layouts,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
@@ -40,7 +41,6 @@ import { GetReleases, type Release } from '../../../shared/contracts/releases';
 import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { isAxiosError } from '../services/axios';
 import {
   useGetReleasesQuery,
   GetReleasesQueryParams,
@@ -273,8 +273,8 @@ const ReleasesPage = () => {
 
       trackUsage('didCreateRelease');
       navigate(response.data.data.id.toString());
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
