@@ -116,7 +116,6 @@ interface Action extends BulkActionDescription {
 const BulkActionAction = (action: Action) => {
   const [dialogId, setDialogId] = React.useState<string | null>(null);
   const { toggleNotification } = useNotification();
-  const { trackUsage } = useTracking();
 
   const handleClick = (action: Action) => (e: React.MouseEvent) => {
     const { onClick, dialog, id } = action;
@@ -369,6 +368,7 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const selectRow = useTable('UnpublishAction', (state) => state.selectRow);
   const hasPublishPermission = useDocumentRBAC('unpublishAction', (state) => state.canPublish);
   const hasI18nEnabled = Boolean(schema?.pluginOptions?.i18n);
+  const hasDraftAndPublishEnabled = Boolean(schema?.options?.draftAndPublish);
   const { unpublishMany: bulkUnpublishAction } = useDocumentActions();
   const documentIds = documents.map(({ documentId }) => documentId);
   const [{ query }] = useQueryParams();
@@ -382,7 +382,9 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   };
 
   const showUnpublishButton =
-    hasPublishPermission && documents.some((entry) => entry.status === 'published');
+    hasDraftAndPublishEnabled &&
+    hasPublishPermission &&
+    documents.some((entry) => entry.status === 'published');
 
   if (!showUnpublishButton) return null;
 
