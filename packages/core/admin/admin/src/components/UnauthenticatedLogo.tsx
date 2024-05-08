@@ -1,9 +1,9 @@
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useConfiguration } from '../features/Configuration';
 
 const Img = styled.img`
-  height: ${72 / 16}rem;
+  height: 7.2rem;
 `;
 
 const Logo = () => {

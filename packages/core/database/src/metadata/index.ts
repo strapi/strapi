@@ -25,7 +25,7 @@ export {
 /**
  * Create Metadata from models configurations
  */
-export const createMetadata = (models: Model[] = []): Metadata => {
+export const createMetadata = (models: Model[]): Metadata => {
   const metadata = new Metadata();
 
   if (models.length) {

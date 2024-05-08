@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import {
   Page,
-  unstable_useDocument,
   Pagination,
   Table,
   BackButton,
@@ -12,12 +11,14 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  isFetchError,
+  useStrapiApp,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Button,
-  ContentLayout,
   Flex,
-  HeaderLayout,
   IconButton,
   Main,
   Tr,
@@ -26,24 +27,24 @@ import {
   Badge,
   SingleSelect,
   SingleSelectOption,
-  Icon,
   Tooltip,
   EmptyStateLayout,
+  LinkButton,
+  Menu,
 } from '@strapi/design-system';
-import { LinkButton, Menu } from '@strapi/design-system/v2';
-import { CheckCircle, More, Pencil, Trash, CrossCircle, EmptyDocuments } from '@strapi/icons';
+import { CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { isAxiosError } from '../services/axios';
 import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
@@ -78,7 +79,7 @@ const ReleaseInfoWrapper = styled(Flex)`
 
 const StyledMenuItem = styled(Menu.Item)<{
   disabled?: boolean;
-  variant?: 'neutral' | 'danger';
+  $variant?: 'neutral' | 'danger';
 }>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
@@ -88,7 +89,7 @@ const StyledMenuItem = styled(Menu.Item)<{
   }
 
   &:hover {
-    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
+    background: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}100`]};
   }
 `;
 
@@ -145,7 +146,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
 
     return (
       <Flex gap={2}>
-        <Icon color="danger600" as={CrossCircle} />
+        <CrossCircle fill="danger600" />
         <Tooltip description={validationErrorsMessages}>
           <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
             {validationErrorsMessages}
@@ -158,7 +159,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
   if (action == 'publish') {
     return (
       <Flex gap={2}>
-        <Icon color="success600" as={CheckCircle} />
+        <CheckCircle fill="success600" />
         {entry.publishedAt ? (
           <Typography textColor="success600" fontWeight="bold">
             {formatMessage({
@@ -180,7 +181,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
 
   return (
     <Flex gap={2}>
-      <Icon color="success600" as={CheckCircle} />
+      <CheckCircle fill="success600" />
       {!entry.publishedAt ? (
         <Typography textColor="success600" fontWeight="bold">
           {formatMessage({
@@ -253,8 +254,8 @@ const ReleaseDetailsLayout = ({
         totalPublishedEntries,
         totalUnpublishedEntries,
       });
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -351,7 +352,7 @@ const ReleaseDetailsLayout = ({
 
   return (
     <Main aria-busy={isLoadingDetails}>
-      <HeaderLayout
+      <Layouts.Header
         title={release.name}
         subtitle={
           <Flex gap={2} lineHeight={6}>
@@ -368,18 +369,18 @@ const ReleaseDetailsLayout = ({
               <Menu.Root>
                 {/*
                   TODO Fix in the DS
-                  - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
+                  - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
                   - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
                 */}
                 <Menu.Trigger
-                  as={IconButton}
+                  // @ts-expect-error See above
+                  tag={IconButton}
                   paddingLeft={2}
                   paddingRight={2}
                   aria-label={formatMessage({
                     id: 'content-releases.header.actions.open-release-actions',
                     defaultMessage: 'Release edit and delete menu',
                   })}
-                  // @ts-expect-error See above
                   icon={<More />}
                   variant="tertiary"
                 />
@@ -387,7 +388,7 @@ const ReleaseDetailsLayout = ({
                   TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
                   Refactor this once fixed in the DS
                 */}
-                <Menu.Content top={1} popoverPlacement="bottom-end">
+                <Menu.Content top={1} popoverPlacement="bottom-end" maxHeight={undefined}>
                   <Flex
                     alignItems="center"
                     justifyContent="center"
@@ -409,7 +410,7 @@ const ReleaseDetailsLayout = ({
                     <StyledMenuItem
                       disabled={!canDelete}
                       onSelect={toggleWarningSubmit}
-                      variant="danger"
+                      $variant="danger"
                     >
                       <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <TrashIcon />
@@ -482,6 +483,7 @@ const ReleaseDetailsLayout = ({
  * ReleaseDetailsBody
  * -----------------------------------------------------------------------------------------------*/
 const GROUP_BY_OPTIONS = ['contentType', 'locale', 'action'] as const;
+const GROUP_BY_OPTIONS_NO_LOCALE = ['contentType', 'action'] as const;
 const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   if (value === 'locale') {
     return {
@@ -521,6 +523,22 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const {
     allowedActions: { canUpdate },
   } = useRBAC(PERMISSIONS);
+  const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
+
+  // TODO: Migrated displayedHeader to v5
+  const { hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } = runHookWaterfall(
+    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+    {
+      displayedHeaders: {
+        label: formatMessage({
+          id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+          defaultMessage: 'locale',
+        }),
+        name: 'locale',
+      },
+      hasI18nEnabled: false,
+    }
+  );
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -556,8 +574,8 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     });
 
     if ('error' in response) {
-      if (isAxiosError(response.error)) {
-        // When the response returns an object with 'error', handle axios error
+      if (isFetchError(response.error)) {
+        // When the response returns an object with 'error', handle fetch error
         toggleNotification({
           type: 'danger',
           message: formatAPIError(response.error),
@@ -609,12 +627,11 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   if (Object.keys(releaseActions).length === 0) {
     return (
-      <ContentLayout>
+      <Layouts.Content>
         <EmptyStateLayout
           action={
             <LinkButton
-              as={ReactRouterLink}
-              // @ts-expect-error - types are not inferred correctly through the as prop.
+              tag={ReactRouterLink}
               to={{
                 pathname: '/content-manager',
               }}
@@ -627,14 +644,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               })}
             </LinkButton>
           }
-          icon={<EmptyDocuments width="10rem" />}
+          icon={<EmptyDocuments width="16rem" />}
           content={formatMessage({
             id: 'content-releases.pages.Details.tab.emptyEntries',
             defaultMessage:
               'This release is empty. Open the Content Manager, select an entry and add it to the release.',
           })}
         />
-      </ContentLayout>
+      </Layouts.Content>
     );
   }
 
@@ -643,19 +660,13 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     defaultMessage: 'Group by',
   });
   const headers = [
+    // ...displayedHeaders,
     {
       label: formatMessage({
         id: 'content-releases.page.ReleaseDetails.table.header.label.name',
         defaultMessage: 'name',
       }),
       name: 'name',
-    },
-    {
-      label: formatMessage({
-        id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-        defaultMessage: 'locale',
-      }),
-      name: 'locale',
     },
     {
       label: formatMessage({
@@ -683,9 +694,10 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         ]
       : []),
   ];
+  const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
 
   return (
-    <ContentLayout>
+    <Layouts.Content>
       <Flex gap={8} direction="column" alignItems="stretch">
         <Flex>
           <SingleSelect
@@ -705,7 +717,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
             onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
           >
-            {GROUP_BY_OPTIONS.map((option) => (
+            {options.map((option) => (
               <SingleSelectOption key={option} value={option}>
                 {formatMessage(getGroupByOptionLabel(option))}
               </SingleSelectOption>
@@ -741,9 +753,12 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                             contentType.mainFieldValue || entry.id
                           }`}</Typography>
                         </Td>
-                        <Td width="10%">
-                          <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
-                        </Td>
+                        {hasI18nEnabled && (
+                          <Td width="10%">
+                            <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
+                          </Td>
+                        )}
+
                         <Td width="10%">
                           <Typography>{contentType.displayName || ''}</Typography>
                         </Td>
@@ -816,7 +831,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           <Pagination.Links />
         </Pagination.Root>
       </Flex>
-    </ContentLayout>
+    </Layouts.Content>
   );
 };
 
@@ -873,7 +888,7 @@ const ReleaseDetailsPage = () => {
   const scheduledAt =
     releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
   // Just get the date and time to display without considering updated timezone time
-  const date = scheduledAt ? new Date(format(scheduledAt, 'yyyy-MM-dd')) : null;
+  const date = scheduledAt ? format(scheduledAt, 'yyyy-MM-dd') : null;
   const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
@@ -893,8 +908,9 @@ const ReleaseDetailsPage = () => {
           defaultMessage: 'Release updated.',
         }),
       });
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+      toggleEditReleaseModal();
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -906,8 +922,6 @@ const ReleaseDetailsPage = () => {
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
-
-    toggleEditReleaseModal();
   };
 
   const handleDeleteRelease = async () => {
@@ -917,8 +931,8 @@ const ReleaseDetailsPage = () => {
 
     if ('data' in response) {
       navigate('..');
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),

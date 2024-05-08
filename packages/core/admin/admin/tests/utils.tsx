@@ -26,9 +26,7 @@ import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-rou
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
 import { Theme } from '../src/components/Theme';
-import { reducer as cmAppReducer } from '../src/content-manager/layout';
-import { reducer as contentManagerReducer } from '../src/content-manager/modules/reducers';
-import { contentManagerApi } from '../src/content-manager/services/api';
+import { RBAC } from '../src/core/apis/rbac';
 import { AppInfoProvider } from '../src/features/AppInfo';
 import { AuthProvider, type Permission } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
@@ -58,9 +56,6 @@ const defaultTestStoreConfig = {
   reducer: {
     [adminApi.reducerPath]: adminApi.reducer,
     admin_app: appReducer,
-    'content-manager_app': cmAppReducer,
-    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-    'content-manager': contentManagerReducer,
   },
   // @ts-expect-error – this fails.
   middleware: (getDefaultMiddleware) => [
@@ -70,7 +65,6 @@ const defaultTestStoreConfig = {
       serializableCheck: false,
     }),
     adminApi.middleware,
-    contentManagerApi.middleware,
   ],
 };
 
@@ -110,60 +104,59 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
       {
         path: '/*',
         element: (
-          <Provider store={store}>
-            <AuthProvider _defaultPermissions={allPermissions}>
-              <QueryClientProvider client={queryClient}>
-                <DndProvider backend={HTML5Backend}>
-                  <LanguageProvider messages={{}}>
-                    <Theme
-                      themes={{
-                        dark: darkTheme,
-                        light: lightTheme,
-                      }}
-                    >
-                      <StrapiAppProvider
-                        components={{}}
-                        customFields={{
-                          customFields: {},
-                          get: jest.fn().mockReturnValue({
-                            name: 'color',
-                            pluginId: 'mycustomfields',
-                            type: 'text',
-                            icon: jest.fn(),
-                            intlLabel: {
-                              id: 'mycustomfields.color.label',
-                              defaultMessage: 'Color',
-                            },
-                            intlDescription: {
-                              id: 'mycustomfields.color.description',
-                              defaultMessage: 'Select any color',
-                            },
-                            components: {
-                              Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
-                            },
-                          }),
-                          getAll: jest.fn(),
-                          register: jest.fn(),
+          <StrapiAppProvider
+            components={{}}
+            rbac={new RBAC()}
+            customFields={{
+              customFields: {},
+              get: jest.fn().mockReturnValue({
+                name: 'color',
+                pluginId: 'mycustomfields',
+                type: 'text',
+                icon: jest.fn(),
+                intlLabel: {
+                  id: 'mycustomfields.color.label',
+                  defaultMessage: 'Color',
+                },
+                intlDescription: {
+                  id: 'mycustomfields.color.description',
+                  defaultMessage: 'Select any color',
+                },
+                components: {
+                  Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
+                },
+              }),
+              getAll: jest.fn(),
+              register: jest.fn(),
+            }}
+            fields={{}}
+            menu={[]}
+            getAdminInjectedComponents={jest.fn()}
+            getPlugin={jest.fn()}
+            plugins={{}}
+            runHookParallel={jest.fn()}
+            runHookWaterfall={jest.fn().mockImplementation((_name, initialValue) => initialValue)}
+            runHookSeries={jest.fn()}
+            settings={{}}
+          >
+            <Provider store={store}>
+              <AuthProvider _defaultPermissions={allPermissions}>
+                <QueryClientProvider client={queryClient}>
+                  <DndProvider backend={HTML5Backend}>
+                    <LanguageProvider messages={{}}>
+                      <Theme
+                        themes={{
+                          dark: darkTheme,
+                          light: lightTheme,
                         }}
-                        fields={{}}
-                        menu={[]}
-                        getAdminInjectedComponents={jest.fn()}
-                        getPlugin={jest.fn()}
-                        plugins={{}}
-                        runHookParallel={jest.fn()}
-                        runHookWaterfall={jest
-                          .fn()
-                          .mockImplementation((_name, initialValue) => initialValue)}
-                        runHookSeries={jest.fn()}
-                        settings={{}}
                       >
                         <NotificationsProvider>
                           <ConfigurationContextProvider
                             showReleaseNotification={false}
                             showTutorials={false}
                             logos={{
-                              auth: { default: '' },
-                              menu: { default: '' },
+                              auth: { default: 'default' },
+                              menu: { default: 'default' },
                             }}
                             updateProjectSettings={jest.fn()}
                           >
@@ -182,13 +175,13 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
                             </AppInfoProvider>
                           </ConfigurationContextProvider>
                         </NotificationsProvider>
-                      </StrapiAppProvider>
-                    </Theme>
-                  </LanguageProvider>
-                </DndProvider>
-              </QueryClientProvider>
-            </AuthProvider>
-          </Provider>
+                      </Theme>
+                    </LanguageProvider>
+                  </DndProvider>
+                </QueryClientProvider>
+              </AuthProvider>
+            </Provider>
+          </StrapiAppProvider>
         ),
       },
     ],
@@ -245,7 +238,7 @@ const renderHook = <
   Props,
   Q extends Queries,
   Container extends Element | DocumentFragment = HTMLElement,
-  BaseElement extends Element | DocumentFragment = Container
+  BaseElement extends Element | DocumentFragment = Container,
 >(
   hook: (initialProps: Props) => Result,
   options?: RenderHookOptions<Props, Q, Container, BaseElement> &

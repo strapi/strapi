@@ -102,7 +102,7 @@ describe('Permissions Manager - Validate', () => {
       expect(async () => {
         // @ts-expect-error
         await validateHelpers.validateInput(data, { subject: fooModel.uid });
-      }).rejects.toThrow('Invalid parameter a');
+      }).rejects.toThrow('Invalid key a');
     });
   });
 
@@ -115,7 +115,7 @@ describe('Permissions Manager - Validate', () => {
       expect(async () => {
         // @ts-expect-error
         await validateHelpers.validateQuery(data, { subject: fooModel.uid });
-      }).rejects.toThrow(`Invalid parameter ${invalidParam}`);
+      }).rejects.toThrow(`Invalid key ${invalidParam}`);
     });
   });
 });

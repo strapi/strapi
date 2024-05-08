@@ -57,7 +57,7 @@ export const formatContentType = (contentType: any) => {
 
 export const createContentTypes = async (contentTypes: any[]) => {
   const builder = createBuilder();
-  const createdContentTypes = [];
+  const createdContentTypes: any[] = [];
 
   for (const contentType of contentTypes) {
     createdContentTypes.push(await createContentType(contentType, { defaultBuilder: builder }));

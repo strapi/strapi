@@ -1,5 +1,5 @@
 import * as contentTypeUtils from '../../content-types';
-import { throwInvalidParam } from '../utils';
+import { throwInvalidKey } from '../utils';
 import type { Visitor } from '../../traverse/factory';
 
 const ACTIONS_TO_VERIFY = ['find'];
@@ -25,7 +25,7 @@ export default (auth: unknown): Visitor =>
         const isAllowed = await hasAccessToSomeScopes(scopes, auth);
 
         if (!isAllowed) {
-          throwInvalidParam({ key, path: path.attribute });
+          throwInvalidKey({ key, path: path.attribute });
         }
       }
     };
@@ -37,7 +37,7 @@ export default (auth: unknown): Visitor =>
 
       // If the authenticated user don't have access to any of the scopes
       if (!isAllowed) {
-        throwInvalidParam({ key, path: path.attribute });
+        throwInvalidKey({ key, path: path.attribute });
       }
     };
 

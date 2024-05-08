@@ -1,0 +1,9 @@
+{
+  "extends": "tsconfig/base.json",
+  "include": ["src", "custom.d.ts", "../shared"],
+  "compilerOptions": {
+    "rootDir": "../",
+    "baseUrl": ".",
+    "esModuleInterop": true
+  }
+}

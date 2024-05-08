@@ -1,6 +1,9 @@
 import type { Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
+/**
+ * Represents a boolean Strapi attribute along with its options
+ */
 type BooleanAttribute = Intersect<
   [
     Attribute.OfType<'boolean'>,
@@ -10,7 +13,7 @@ type BooleanAttribute = Intersect<
     Attribute.PrivateOption,
     Attribute.RequiredOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

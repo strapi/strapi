@@ -5,19 +5,19 @@ import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const EditLink = styled(Link)`
   align-items: center;
-  height: ${32 / 16}rem;
+  height: 3.2rem;
   display: flex;
   justify-content: center;
   padding: ${({ theme }) => `${theme.spaces[2]}}`};
-  width: ${32 / 16}rem;
+  width: 3.2rem;
 
   svg {
-    height: ${12 / 16}rem;
-    width: ${12 / 16}rem;
+    height: 1.2rem;
+    width: 1.2rem;
 
     path {
       fill: ${({ theme }) => theme.colors.neutral500};

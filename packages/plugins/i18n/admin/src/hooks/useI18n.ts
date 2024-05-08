@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { useAuth, unstable_useDocument as useDocument } from '@strapi/admin/strapi-admin';
+import { useAuth } from '@strapi/admin/strapi-admin';
+import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
 import { useParams } from 'react-router-dom';
 
 import { doesPluginOptionsHaveI18nLocalized } from '../utils/fields';

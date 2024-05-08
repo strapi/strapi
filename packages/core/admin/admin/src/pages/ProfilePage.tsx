@@ -1,24 +1,14 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  HeaderLayout,
-  useNotifyAT,
-  Grid,
-  GridItem,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Button, Flex, useNotifyAT, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { Form, FormHelpers } from '../components/Form';
 import { InputRenderer } from '../components/FormInputs/Renderer';
+import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
@@ -142,11 +132,7 @@ const ProfilePage = () => {
     }
 
     if ('error' in res) {
-      if (
-        isBaseQueryError(res.error) &&
-        (res.error.name === 'ValidationError' || res.error.message === 'ValidationError')
-      ) {
-        // @ts-expect-error – We get a BadRequest error here instead of a ValidationError if the currentPassword is wrong.
+      if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
         setErrors(formatValidationErrors(res.error));
       } else if (isBaseQueryError(res.error)) {
         toggleNotification({
@@ -181,12 +167,12 @@ const ProfilePage = () => {
 
   return (
     <Page.Main aria-busy={isSubmittingForm}>
-      <Helmet
-        title={formatMessage({
-          id: 'Settings.profile.form.section.helmet.title',
+      <Page.Title>
+        {formatMessage({
+          id: 'Settings.profile.form.section.head.title',
           defaultMessage: 'User profile',
         })}
-      />
+      </Page.Title>
       <Form
         method="PUT"
         onSubmit={handleSubmit}
@@ -195,8 +181,8 @@ const ProfilePage = () => {
       >
         {({ isSubmitting, modified }) => (
           <>
-            <HeaderLayout
-              title={getDisplayName(user, formatMessage)}
+            <Layouts.Header
+              title={getDisplayName(user)}
               primaryAction={
                 <Button
                   startIcon={<Check />}
@@ -209,13 +195,13 @@ const ProfilePage = () => {
               }
             />
             <Box paddingBottom={10}>
-              <ContentLayout>
+              <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   <UserInfoSection />
                   {!hasLockedRole && <PasswordSection />}
                   <PreferencesSection localeNames={localeNames} />
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </Box>
           </>
         )}
@@ -242,7 +228,7 @@ const PasswordSection = () => {
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.change-password',
             defaultMessage: 'Change password',
@@ -320,7 +306,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <Typography variant="delta" as="h2">
+          <Typography variant="delta" tag="h2">
             {formatMessage({
               id: 'Settings.profile.form.section.experience.title',
               defaultMessage: 'Experience',
@@ -336,7 +322,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
               {
                 here: (
                   <Box
-                    as="a"
+                    tag="a"
                     color="primary600"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -445,7 +431,7 @@ const UserInfoSection = () => {
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.profile',
             defaultMessage: 'Profile',

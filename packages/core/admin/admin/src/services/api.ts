@@ -1,19 +1,17 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { TokenRegenerate } from '../../../shared/contracts/transfer';
-import { axiosBaseQuery, type UnknownApiError } from '../utils/baseQuery';
+import { fetchBaseQuery, type UnknownApiError } from '../utils/baseQuery';
 
 const adminApi = createApi({
   reducerPath: 'adminApi',
-  baseQuery: axiosBaseQuery(),
+  baseQuery: fetchBaseQuery(),
   tagTypes: [
     'ApiToken',
     'LicenseLimits',
     'Me',
     'ProjectSettings',
     'ProvidersOptions',
-    'ReviewWorkflow',
-    'ReviewWorkflowStage',
     'Role',
     'RolePermissions',
     'TransferToken',

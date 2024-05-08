@@ -1,6 +1,9 @@
 import type { Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
+/**
+ * Represents a time Strapi attribute along with its options
+ */
 export type Time = Intersect<
   [
     Attribute.OfType<'time'>,
@@ -11,7 +14,7 @@ export type Time = Intersect<
     Attribute.RequiredOption,
     Attribute.UniqueOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

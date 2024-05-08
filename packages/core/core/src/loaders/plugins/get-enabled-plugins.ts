@@ -30,12 +30,13 @@ interface PluginDeclaration {
  * otherwise known as "core features"
  */
 const INTERNAL_PLUGINS = [
-  '@strapi/plugin-content-manager',
-  '@strapi/plugin-content-type-builder',
-  '@strapi/plugin-email',
-  '@strapi/plugin-upload',
-  '@strapi/plugin-i18n',
+  '@strapi/content-manager',
+  '@strapi/content-type-builder',
+  '@strapi/email',
+  '@strapi/upload',
+  '@strapi/i18n',
   '@strapi/content-releases',
+  '@strapi/review-workflows',
 ];
 
 const isStrapiPlugin = (info: PluginInfo) => get('strapi.kind', info) === 'plugin';

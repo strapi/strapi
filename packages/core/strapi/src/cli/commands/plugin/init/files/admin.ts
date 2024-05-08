@@ -4,7 +4,7 @@ import { outdent } from 'outdent';
 const PLUGIN_ICON_CODE = outdent`
 import { Puzzle } from '@strapi/icons';
 
-const PluginIcon = () => <Puzzle />;
+const PluginIcon = Puzzle;
 
 export { PluginIcon };
 `;

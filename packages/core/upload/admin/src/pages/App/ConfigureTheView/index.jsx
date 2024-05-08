@@ -1,8 +1,13 @@
 import React, { useReducer, useState } from 'react';
 
-import { ConfirmDialog, useTracking, useNotification, Page } from '@strapi/admin/strapi-admin';
-import { Button, ContentLayout, HeaderLayout, Layout } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import {
+  ConfirmDialog,
+  useTracking,
+  useNotification,
+  Page,
+  Layouts,
+} from '@strapi/admin/strapi-admin';
+import { Button, Link } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
@@ -55,12 +60,17 @@ const ConfigureTheView = ({ config }) => {
   };
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Main aria-busy={isSubmittingForm}>
         <form onSubmit={handleSubmit}>
-          <HeaderLayout
+          <Layouts.Header
             navigationAction={
-              <Link as={NavLink} startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
+              <Link
+                tag={NavLink}
+                startIcon={<ArrowLeft />}
+                to={`/plugins/${pluginID}`}
+                id="go-back"
+              >
                 {formatMessage({ id: getTrad('config.back'), defaultMessage: 'Back' })}
               </Link>
             }
@@ -84,14 +94,14 @@ const ConfigureTheView = ({ config }) => {
             })}
           />
 
-          <ContentLayout>
+          <Layouts.Content>
             <Settings
               data-testid="settings"
               pageSize={modifiedData.pageSize || ''}
               sort={modifiedData.sort || ''}
               onChange={handleChange}
             />
-          </ContentLayout>
+          </Layouts.Content>
 
           <ConfirmDialog
             isOpen={showWarningSubmit}
@@ -106,7 +116,7 @@ const ConfigureTheView = ({ config }) => {
           </ConfirmDialog>
         </form>
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

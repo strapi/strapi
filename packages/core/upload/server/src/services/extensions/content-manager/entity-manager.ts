@@ -31,6 +31,10 @@ const signEntityMediaVisitor: SignEntityMediaVisitor = async (
 ) => {
   const { signFileUrls } = getService('file');
 
+  if (!attribute) {
+    return;
+  }
+
   if (attribute.type !== 'media') {
     return;
   }
@@ -63,8 +67,12 @@ const signEntityMediaVisitor: SignEntityMediaVisitor = async (
  */
 const signEntityMedia = async (entity: any, uid: UID.Schema) => {
   const model = strapi.getModel(uid);
-  // @ts-expect-error - FIXME: fix traverseEntity types
-  return traverseEntity(signEntityMediaVisitor, { schema: model }, entity);
+  return traverseEntity(
+    // @ts-expect-error - FIXME: fix traverseEntity types
+    signEntityMediaVisitor,
+    { schema: model, getModel: strapi.getModel.bind(strapi) },
+    entity
+  );
 };
 
 const addSignedFileUrlsToAdmin = async () => {

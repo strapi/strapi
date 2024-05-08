@@ -1,3 +1,4 @@
+import { queryParams } from '@strapi/utils';
 import entityServiceDecoratorFactory from '../entity-service-decorator';
 import localizationsServiceFactory from '../localizations';
 import localesServiceFactory from '../locales';
@@ -75,6 +76,19 @@ describe('Entity service decorator', () => {
         return models[uid || 'test-model'];
       },
       store: () => ({ get: () => 'en' }),
+      get(name: string) {
+        if (name === 'query-params') {
+          const transformer = queryParams.createTransformer({
+            getModel(name: string) {
+              return strapi.getModel(name as any);
+            },
+          });
+
+          return {
+            transform: transformer.transformQueryParams,
+          };
+        }
+      },
     } as any;
   });
 
@@ -181,102 +195,6 @@ describe('Entity service decorator', () => {
       const output = await service.wrapParams(input, { uid: 'test-model' });
 
       expect(output).toMatchObject({ filters: { $and: [{ locale: 'fr' }] } });
-    });
-  });
-
-  describe('create', () => {
-    test('Calls original create', async () => {
-      const entry = {
-        id: 1,
-      };
-
-      const defaultService = {
-        create: jest.fn(() => Promise.resolve(entry)),
-      };
-
-      const service = decorator(defaultService);
-
-      const input = { data: { title: 'title ' } };
-      await service.create('test-model', input);
-
-      expect(defaultService.create).toHaveBeenCalledWith('test-model', input);
-    });
-
-    test('Skip processing if model is not localized', async () => {
-      const entry = {
-        id: 1,
-        localizations: [{ id: 2 }],
-      };
-
-      const defaultService = {
-        create: jest.fn(() => Promise.resolve(entry)),
-      };
-
-      const service = decorator(defaultService);
-
-      const input = { data: { title: 'title ' } };
-      const output = await service.create('non-localized-model', input);
-
-      expect(defaultService.create).toHaveBeenCalledWith('non-localized-model', input);
-      expect(output).toStrictEqual(entry);
-    });
-  });
-
-  describe('update', () => {
-    test('Calls original update', async () => {
-      const entry = {
-        id: 1,
-      };
-
-      const defaultService = {
-        update: jest.fn(() => Promise.resolve(entry)),
-      };
-
-      const service = decorator(defaultService);
-
-      const input = { data: { title: 'title ' } };
-      await service.update('test-model', 1, input);
-
-      expect(defaultService.update).toHaveBeenCalledWith('test-model', 1, input);
-    });
-
-    test('Calls syncNonLocalizedAttributes if model is localized', async () => {
-      const entry = {
-        id: 1,
-        localizations: [{ id: 2 }],
-      };
-
-      const defaultService = {
-        update: jest.fn(() => Promise.resolve(entry)),
-      };
-
-      const service = decorator(defaultService);
-
-      const input = { data: { title: 'title ' } };
-      const output = await service.update('test-model', 1, input);
-
-      expect(defaultService.update).toHaveBeenCalledWith('test-model', 1, input);
-      expect(syncNonLocalizedAttributes).toHaveBeenCalledWith(entry, { model });
-      expect(output).toStrictEqual(entry);
-    });
-
-    test('Skip processing if model is not localized', async () => {
-      const entry = {
-        id: 1,
-        localizations: [{ id: 2 }],
-      };
-
-      const defaultService = {
-        update: jest.fn(() => Promise.resolve(entry)),
-      };
-
-      const service = decorator(defaultService);
-
-      const input = { data: { title: 'title ' } };
-      await service.update('non-localized-model', 1, input);
-
-      expect(defaultService.update).toHaveBeenCalledWith('non-localized-model', 1, input);
-      expect(syncNonLocalizedAttributes).not.toHaveBeenCalled();
     });
   });
 

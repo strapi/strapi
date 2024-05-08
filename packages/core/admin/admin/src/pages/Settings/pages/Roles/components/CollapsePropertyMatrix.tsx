@@ -1,10 +1,18 @@
 import React, { useMemo } from 'react';
 
-import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
-import { CarretDown } from '@strapi/icons';
+import {
+  BaseCheckbox,
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  Typography,
+  TypographyComponent,
+} from '@strapi/design-system';
+import { CaretDown } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
-import styled, { DefaultTheme, css } from 'styled-components';
+import { styled, DefaultTheme, css } from 'styled-components';
 
 import { Action, SubjectProperty } from '../../../../../../../shared/contracts/permissions';
 import { capitalise } from '../../../../../utils/strings';
@@ -156,8 +164,8 @@ const ActionRow = ({
     <>
       <Wrapper
         alignItems="center"
-        isCollapsable={isCollapsable}
-        isActive={isActive}
+        $isCollapsable={isCollapsable}
+        $isActive={isActive}
         background={isOdd ? 'neutral100' : 'neutral0'}
       >
         <Flex>
@@ -313,12 +321,12 @@ const getRowLabelCheckboxState = (
   return getCheckboxState(data);
 };
 
-const Wrapper = styled(Flex)<{ isCollapsable?: boolean; isActive?: boolean }>`
+const Wrapper = styled<FlexComponent>(Flex)<{ $isCollapsable?: boolean; $isActive?: boolean }>`
   height: ${rowHeight};
   flex: 1;
 
-  ${({ isCollapsable, theme }) =>
-    isCollapsable &&
+  ${({ $isCollapsable, theme }) =>
+    $isCollapsable &&
     `
       ${CarretIcon} {
         display: block;
@@ -328,12 +336,12 @@ const Wrapper = styled(Flex)<{ isCollapsable?: boolean; isActive?: boolean }>`
         ${activeStyle(theme)}
       }
   `}
-  ${({ isActive, theme }) => isActive && activeStyle(theme)};
+  ${({ $isActive, theme }) => $isActive && activeStyle(theme)};
 `;
 
-const CarretIcon = styled(CarretDown)<{ $isActive: boolean }>`
+const CarretIcon = styled(CaretDown)<{ $isActive: boolean }>`
   display: none;
-  width: ${10 / 16}rem;
+  width: 1rem;
   transform: rotate(${({ $isActive }) => ($isActive ? '180' : '0')}deg);
   margin-left: ${({ theme }) => theme.spaces[2]};
 `;
@@ -385,7 +393,7 @@ const SubActionRow = ({
   }, [rowToOpen, childrenForm]);
 
   return (
-    <Box paddingLeft={`2rem`}>
+    <Box paddingLeft={`3.2rem`}>
       <TopTimeline />
       {childrenForm.map(({ label, value, required, children: subChildrenForm }, index) => {
         const isVisible = index + 1 < childrenForm.length;
@@ -393,7 +401,7 @@ const SubActionRow = ({
         const isActive = rowToOpen === value;
 
         return (
-          <LeftBorderTimeline key={value} isVisible={isVisible}>
+          <LeftBorderTimeline key={value} $isVisible={isVisible}>
             <Flex height={rowHeight}>
               <StyledBox>
                 <Svg
@@ -402,7 +410,7 @@ const SubActionRow = ({
                   viewBox="0 0 20 23"
                   fill="none"
                   xmlns="http://www.w3.org/2000/svg"
-                  color="primary200"
+                  $color="primary200"
                 >
                   <path
                     fillRule="evenodd"
@@ -413,21 +421,21 @@ const SubActionRow = ({
                 </Svg>
               </StyledBox>
               <Flex style={{ flex: 1 }}>
-                <RowStyle level={recursiveLevel} isActive={isActive} isCollapsable={isArrayType}>
+                <RowStyle $level={recursiveLevel} $isActive={isActive} $isCollapsable={isArrayType}>
                   <CollapseLabel
                     alignItems="center"
-                    isCollapsable={isArrayType}
+                    $isCollapsable={isArrayType}
                     {...(isArrayType && {
                       onClick: () => handleClickToggleSubLevel(value),
                       'aria-expanded': isActive,
-                      onKeyDown: ({ key }) =>
+                      onKeyDown: ({ key }: React.KeyboardEvent<HTMLDivElement>) =>
                         (key === 'Enter' || key === ' ') && handleClickToggleSubLevel(value),
                       tabIndex: 0,
                       role: 'button',
                     })}
                     title={label}
                   >
-                    <Typography ellipsis>{capitalise(label)}</Typography>
+                    <RowLabel ellipsis>{capitalise(label)}</RowLabel>
                     {required && <RequiredSign />}
                     <CarretIcon $isActive={isActive} />
                   </CollapseLabel>
@@ -548,17 +556,21 @@ const SubActionRow = ({
   );
 };
 
-const LeftBorderTimeline = styled(Box)<{ isVisible?: boolean }>`
-  border-left: ${({ isVisible, theme }) =>
-    isVisible ? `4px solid ${theme.colors.primary200}` : '4px solid transparent'};
+const LeftBorderTimeline = styled<BoxComponent>(Box)<{ $isVisible?: boolean }>`
+  border-left: ${({ $isVisible, theme }) =>
+    $isVisible ? `4px solid ${theme.colors.primary200}` : '4px solid transparent'};
 `;
 
-const RowStyle = styled(Flex)<{ level: number; isCollapsable?: boolean; isActive?: boolean }>`
+const RowStyle = styled<FlexComponent>(Flex)<{
+  $level: number;
+  $isCollapsable?: boolean;
+  $isActive?: boolean;
+}>`
   padding-left: ${({ theme }) => theme.spaces[4]};
-  width: ${({ level }) => 145 - level * 36}px;
+  width: ${({ $level }) => 145 - $level * 36}px;
 
-  ${({ isCollapsable, theme }) =>
-    isCollapsable &&
+  ${({ $isCollapsable, theme }) =>
+    $isCollapsable &&
     `
       ${CarretIcon} {
         display: block;
@@ -568,37 +580,39 @@ const RowStyle = styled(Flex)<{ level: number; isCollapsable?: boolean; isActive
         ${activeStyle(theme)}
       }
   `}
-  ${({ isActive, theme }) => isActive && activeStyle(theme)};
+  ${({ $isActive, theme }) => $isActive && activeStyle(theme)};
 `;
+
+const RowLabel = styled<TypographyComponent>(Typography)``;
 
 const TopTimeline = styled.div`
   padding-top: ${({ theme }) => theme.spaces[2]};
   margin-top: ${({ theme }) => theme.spaces[2]};
-  width: ${4 / 16}rem;
+  width: 0.4rem;
   background-color: ${({ theme }) => theme.colors.primary200};
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
 `;
 
-const StyledBox = styled(Box)`
+const StyledBox = styled<BoxComponent>(Box)`
   transform: translate(-4px, -12px);
 
   &:before {
     content: '';
-    width: ${4 / 16}rem;
-    height: ${12 / 16}rem;
+    width: 0.4rem;
+    height: 1.2rem;
     background: ${({ theme }) => theme.colors.primary200};
     display: block;
   }
 `;
 
-const Svg = styled.svg<{ color: keyof DefaultTheme['colors'] }>`
+const Svg = styled.svg<{ $color: keyof DefaultTheme['colors'] }>`
   position: relative;
   flex-shrink: 0;
   transform: translate(-0.5px, -1px);
 
   * {
-    fill: ${({ theme, color }) => theme.colors[color]};
+    fill: ${({ theme, $color }) => theme.colors[$color]};
   }
 `;
 
@@ -655,7 +669,7 @@ const Header = ({ headers = [], label }: HeaderProps) => {
  * @internal
  */
 const activeStyle = (theme: DefaultTheme) => css`
-  ${Typography} {
+  ${RowLabel} {
     color: ${theme.colors.primary600};
     font-weight: ${theme.fontWeights.bold};
   }

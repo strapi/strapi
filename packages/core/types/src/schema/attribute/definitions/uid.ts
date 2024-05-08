@@ -11,15 +11,18 @@ export interface UIDOptions {
 
 export interface UIDProperties<
   TTargetAttribute extends string = string,
-  TOptions extends UIDOptions = UIDOptions
+  TOptions extends UIDOptions = UIDOptions,
 > {
   targetField?: TTargetAttribute;
   options?: UIDOptions & TOptions;
 }
 
+/**
+ * Represents a UID Strapi attribute along with its options
+ */
 export type UID<
   TTargetAttribute extends string = string,
-  TOptions extends UIDOptions = UIDOptions
+  TOptions extends UIDOptions = UIDOptions,
 > = Intersect<
   [
     Attribute.OfType<'uid'>,
@@ -32,7 +35,7 @@ export type UID<
     Attribute.PrivateOption,
     Attribute.RequiredOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

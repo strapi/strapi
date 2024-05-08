@@ -19,7 +19,7 @@ import {
 } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetDefinition } from '../../constants';
 import { useAssets } from '../../hooks/useAssets';
@@ -39,7 +39,7 @@ import { SelectedStep } from './SelectedStep';
 
 const LoadingBody = styled(Flex)`
   /* 80px are coming from the Tabs component that is not included in the ModalBody */
-  min-height: ${() => `calc(60vh + ${80 / 16}rem)`};
+  min-height: ${() => `calc(60vh + 8rem)`};
 `;
 
 export const AssetDialog = ({

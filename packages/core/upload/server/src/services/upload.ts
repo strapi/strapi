@@ -11,10 +11,9 @@ import {
   contentTypes as contentTypesUtils,
   errors,
   file as fileUtils,
-  convertQueryParams,
 } from '@strapi/utils';
 
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
 import { getService } from '../utils';
@@ -82,9 +81,42 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     return tmpWorkingDirectory;
   };
 
+  function filenameReservedRegex() {
+    // eslint-disable-next-line no-control-regex
+    return /[<>:"/\\|?*\u0000-\u001F]/g;
+  }
+
+  function windowsReservedNameRegex() {
+    return /^(con|prn|aux|nul|com\d|lpt\d)$/i;
+  }
+
+  /**
+   * Copied from https://github.com/sindresorhus/valid-filename package
+   */
+  function isValidFilename(string: string) {
+    if (!string || string.length > 255) {
+      return false;
+    }
+    if (filenameReservedRegex().test(string) || windowsReservedNameRegex().test(string)) {
+      return false;
+    }
+    if (string === '.' || string === '..') {
+      return false;
+    }
+    return true;
+  }
+
   async function emitEvent(event: string, data: Record<string, any>) {
     const modelDef = strapi.getModel(FILE_MODEL_UID);
-    const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, data);
+    const sanitizedData = await sanitize.sanitizers.defaultSanitizeOutput(
+      {
+        schema: modelDef,
+        getModel(uid: string) {
+          return strapi.getModel(uid as UID.Schema);
+        },
+      },
+      data
+    );
 
     strapi.eventHub.emit(event, { media: sanitizedData });
   }
@@ -102,12 +134,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   ): Promise<Omit<UploadableFile, 'getStream'>> {
     const fileService = getService('file');
 
+    if (!isValidFilename(filename)) {
+      throw new ApplicationError('File name contains invalid characters');
+    }
+
     let ext = path.extname(filename);
     if (!ext) {
       ext = `.${extension(type)}`;
     }
     const usedName = (fileInfo.name || filename).normalize();
     const basename = path.basename(usedName, ext);
+
+    // Prevent null characters in file name
+    if (!isValidFilename(filename)) {
+      throw new ApplicationError('File name contains invalid characters');
+    }
 
     const entity: Omit<UploadableFile, 'getStream'> = {
       name: usedName,
@@ -152,8 +193,8 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   ): Promise<UploadableFile> {
     const currentFile = (await formatFileInfo(
       {
-        filename: file.name ?? 'unamed',
-        type: file.type ?? 'application/octet-stream',
+        filename: file.originalFilename ?? 'unamed',
+        type: file.mimetype ?? 'application/octet-stream',
         size: file.size,
       },
       fileInfo,
@@ -163,7 +204,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
     )) as UploadableFile;
 
-    currentFile.getStream = () => fs.createReadStream(file.path);
+    currentFile.getStream = () => fs.createReadStream(file.filepath);
 
     const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
       .plugin('upload')
@@ -195,7 +236,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     // create temporary folder to store files for stream manipulation
     const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
-    let uploadedFiles = [];
+    let uploadedFiles: any[] = [];
 
     try {
       const { fileInfo, ...metas } = data;
@@ -252,7 +293,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       _.set(fileData, ['formats', key], file);
     };
 
-    const uploadPromises = [];
+    const uploadPromises: Promise<void>[] = [];
 
     // Upload image
     uploadPromises.push(getService('provider').upload(fileData));
@@ -430,7 +471,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   function findOne(id: ID, populate = {}) {
-    const query = convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, {
+    const query = strapi.get('query-params').transform(FILE_MODEL_UID, {
       populate,
     });
 
@@ -443,13 +484,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   function findMany(query: any = {}): Promise<File[]> {
     return strapi.db
       .query(FILE_MODEL_UID)
-      .findMany(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
+      .findMany(strapi.get('query-params').transform(FILE_MODEL_UID, query));
   }
 
   function findPage(query: any = {}) {
     return strapi.db
       .query(FILE_MODEL_UID)
-      .findPage(convertQueryParams.transformParamsToQuery(FILE_MODEL_UID, query));
+      .findPage(strapi.get('query-params').transform(FILE_MODEL_UID, query));
   }
 
   async function remove(file: File) {

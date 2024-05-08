@@ -4,7 +4,7 @@ import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Lock, Pencil, Trash } from '@strapi/icons';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../hooks/useDataManager';
 import { Curve } from '../icons/Curve';
@@ -101,7 +101,7 @@ export const ListRow = memo(
 
     return (
       <BoxWrapper
-        as="tr"
+        tag="tr"
         onClick={isInDevelopmentMode && configurable && !isMorph ? handleClick : undefined}
       >
         <td style={{ position: 'relative' }}>
@@ -178,7 +178,7 @@ export const ListRow = memo(
             we need to reserve the same space, otherwise the height of the
             row might collapse, leading to bad positioned curve icons
           */
-            <Box height={`${32 / 16}rem`} />
+            <Box height="3.2rem" />
           )}
         </td>
       </BoxWrapper>

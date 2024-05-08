@@ -1,6 +1,11 @@
 import type { Core, Struct, Modules } from '@strapi/types';
 
-import { getPaginationInfo, shouldCount, transformPaginationResponse } from './pagination';
+import {
+  getPaginationInfo,
+  shouldCount,
+  isPagedPagination,
+  transformPaginationResponse,
+} from './pagination';
 
 import { CoreService } from './core-service';
 
@@ -22,6 +27,7 @@ export class CollectionTypeService
     const fetchParams = this.getFetchParams(params);
 
     const paginationInfo = getPaginationInfo(fetchParams);
+    const isPaged = isPagedPagination(fetchParams.pagination);
 
     const results = await strapi.documents(uid).findMany({
       ...fetchParams,
@@ -37,20 +43,23 @@ export class CollectionTypeService
 
       return {
         results,
-        pagination: transformPaginationResponse(paginationInfo, count),
+        pagination: transformPaginationResponse(paginationInfo, count, isPaged),
       };
     }
 
     return {
       results,
-      pagination: paginationInfo,
+      pagination: transformPaginationResponse(paginationInfo, undefined, isPaged),
     };
   }
 
   findOne(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).findOne(documentId, this.getFetchParams(params));
+    return strapi.documents(uid).findOne({
+      ...this.getFetchParams(params),
+      documentId,
+    });
   }
 
   async create(params = { data: {} }) {
@@ -59,16 +68,24 @@ export class CollectionTypeService
     return strapi.documents(uid).create(this.getFetchParams(params));
   }
 
-  update(docId: Modules.Documents.ID, params = { data: {} }) {
+  update(documentId: Modules.Documents.ID, params = { data: {} }) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).update(docId, this.getFetchParams(params));
+    return strapi.documents(uid).update({
+      ...this.getFetchParams(params),
+      documentId,
+    });
   }
 
-  async delete(docId: Modules.Documents.ID, params = {}) {
+  async delete(documentId: Modules.Documents.ID, params = {}) {
     const { uid } = this.contentType;
 
-    return strapi.documents(uid).delete(docId, this.getFetchParams(params));
+    const { entries } = await strapi.documents(uid).delete({
+      ...this.getFetchParams(params),
+      documentId,
+    });
+
+    return { deletedEntries: entries.length };
   }
 }
 

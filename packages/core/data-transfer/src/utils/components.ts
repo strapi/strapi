@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import { has, omit, pipe, assign } from 'lodash/fp';
+import { get, has, omit, pipe, assign } from 'lodash/fp';
 
 import { contentTypes as contentTypesUtils, async, errors } from '@strapi/utils';
-import type { Modules, UID, Data, Utils, Schema } from '@strapi/types';
+import type { Modules, UID, Data, Utils, Schema, Core } from '@strapi/types';
 
 type LoadedComponents<TUID extends UID.Schema> = Data.Entity<
   TUID,
@@ -48,7 +48,7 @@ function omitComponentData(
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async <
   TUID extends UID.Schema,
-  TData extends Modules.EntityService.Params.Data.Input<TUID>
+  TData extends Modules.EntityService.Params.Data.Input<TUID>,
 >(
   uid: TUID,
   data: TData
@@ -168,7 +168,7 @@ const getComponents = async <TUID extends UID.Schema>(
 */
 const updateComponents = async <
   TUID extends UID.Schema,
-  TData extends Partial<Modules.EntityService.Params.Data.Input<TUID>>
+  TData extends Partial<Modules.EntityService.Params.Data.Input<TUID>>,
 >(
   uid: TUID,
   entityToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
@@ -414,11 +414,11 @@ const deleteComponents = async <TUID extends UID.Schema, TEntity extends Data.En
 ************************** */
 
 // components can have nested compos so this must be recursive
-const createComponent = async <TUID extends UID.Component>(
+const createComponent = async <TUID extends UID.Component = UID.Component>(
   uid: TUID,
   data: Modules.EntityService.Params.Data.Input<TUID>
 ) => {
-  const model = strapi.getModel(uid);
+  const model = strapi.getModel(uid) as Schema.Component;
 
   const componentData = await createComponents(uid, data);
   const transform = pipe(
@@ -439,7 +439,7 @@ const updateComponent = async <TUID extends UID.Component>(
   componentToUpdate: { id: Modules.EntityService.Params.Attribute.ID },
   data: Modules.EntityService.Params.Data.Input<TUID>
 ) => {
-  const model = strapi.getModel(uid);
+  const model = strapi.getModel(uid) as Schema.Component;
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
@@ -477,6 +477,55 @@ const deleteComponent = async <TUID extends UID.Component>(
   await strapi.db.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
+/**
+ * Resolve the component UID of an entity's attribute based
+ * on a given path (components & dynamic zones only)
+ */
+const resolveComponentUID = ({
+  paths,
+  strapi,
+  data,
+  contentType,
+}: {
+  paths: string[];
+  strapi: Core.Strapi;
+  data: any;
+  contentType: Schema.ContentType;
+}): UID.Schema | undefined => {
+  let value: unknown = data;
+  let cType:
+    | Schema.ContentType
+    | Schema.Component
+    | ((...opts: any[]) => Schema.ContentType | Schema.Component) = contentType;
+  for (const path of paths) {
+    value = get(path, value);
+
+    // Needed when the value of cType should be computed
+    // based on the next value (eg: dynamic zones)
+    if (typeof cType === 'function') {
+      cType = cType(value);
+    }
+
+    if (path in cType.attributes) {
+      const attribute: Schema.Attribute.AnyAttribute = cType.attributes[path];
+
+      if (attribute.type === 'component') {
+        cType = strapi.getModel(attribute.component);
+      }
+
+      if (attribute.type === 'dynamiczone') {
+        cType = ({ __component }: { __component: UID.Component }) => strapi.getModel(__component);
+      }
+    }
+  }
+
+  if ('uid' in cType) {
+    return cType.uid;
+  }
+
+  return undefined;
+};
+
 export {
   omitComponentData,
   getComponents,
@@ -484,4 +533,5 @@ export {
   updateComponents,
   deleteComponents,
   deleteComponent,
+  resolveComponentUID,
 };

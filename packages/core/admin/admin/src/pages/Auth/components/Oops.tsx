@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Main, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import { Box, Flex, Main, Typography, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 
@@ -31,7 +30,7 @@ const Oops = () => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={7}>
-              <Typography as="h1" variant="alpha">
+              <Typography tag="h1" variant="alpha">
                 {formatMessage({ id: 'Auth.components.Oops.title', defaultMessage: 'Oops...' })}
               </Typography>
             </Box>
@@ -48,8 +47,7 @@ const Oops = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            {/* @ts-expect-error – error with inferring the props from the as component */}
-            <Link as={NavLink} to="/auth/login">
+            <Link tag={NavLink} to="/auth/login">
               {formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}
             </Link>
           </Box>

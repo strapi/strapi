@@ -1,5 +1,4 @@
 import { defaultsDeep } from 'lodash/fp';
-import { convertQueryParams } from '@strapi/utils';
 
 import type { Context } from 'koa';
 
@@ -11,7 +10,7 @@ export default {
   async findOne(ctx: Context) {
     const { id } = ctx.params;
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });
@@ -20,7 +19,7 @@ export default {
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const { results } = await strapi.db.query(FOLDER_MODEL_UID).findPage(
-      convertQueryParams.transformParamsToQuery(
+      strapi.get('query-params').transform(
         FOLDER_MODEL_UID,
         defaultsDeep(
           {
@@ -49,7 +48,7 @@ export default {
   },
 
   async find(ctx: Context) {
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });
@@ -58,7 +57,7 @@ export default {
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const results = await strapi.db.query(FOLDER_MODEL_UID).findMany(
-      convertQueryParams.transformParamsToQuery(
+      strapi.get('query-params').transform(
         FOLDER_MODEL_UID,
         defaultsDeep(
           {
@@ -90,14 +89,14 @@ export default {
 
     const folder = await folderService.create(body, { user });
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });
 
-    ctx.body = {
+    ctx.created({
       data: await permissionsManager.sanitizeOutput(folder),
-    };
+    });
   },
 
   async update(ctx: Context) {
@@ -105,7 +104,7 @@ export default {
     const { user } = ctx.state;
     const { body } = ctx.request;
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: FOLDER_MODEL_UID,
     });

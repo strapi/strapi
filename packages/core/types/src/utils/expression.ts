@@ -223,7 +223,7 @@ export type Not<TExpression extends Constants.BooleanValue> = If<
  * ```
  */
 export type If<TExpression extends Constants.BooleanValue, TOnTrue, TOnFalse = never> = [
-  TExpression
+  TExpression,
 ] extends [Constants.True]
   ? TOnTrue
   : TOnFalse;
@@ -268,7 +268,7 @@ export type If<TExpression extends Constants.BooleanValue, TOnTrue, TOnFalse = n
  */
 export type MatchFirst<TTests extends Test[], TDefault = never> = TTests extends [
   infer THead extends Test,
-  ...infer TTail extends Test[]
+  ...infer TTail extends Test[],
 ]
   ? THead extends Test<infer TExpression, infer TValue>
     ? If<TExpression, TValue, If<Array.IsNotEmpty<TTail>, MatchFirst<TTail, TDefault>, TDefault>>
@@ -316,7 +316,7 @@ export type MatchFirst<TTests extends Test[], TDefault = never> = TTests extends
  */
 export type MatchAllIntersect<TTests extends Test[], TDefault = unknown> = TTests extends [
   infer THead extends Test,
-  ...infer TTail extends Test[]
+  ...infer TTail extends Test[],
 ]
   ? THead extends Test<infer TExpression, infer TValue>
     ? // Actual test case evaluation
@@ -357,7 +357,7 @@ export type MatchAllIntersect<TTests extends Test[], TDefault = unknown> = TTest
  */
 export type Test<
   TExpression extends Constants.BooleanValue = Constants.BooleanValue,
-  TValue = unknown
+  TValue = unknown,
 > = [TExpression, TValue];
 
 /**
@@ -387,7 +387,7 @@ export type Test<
  */
 export type Some<TExpressions extends Constants.BooleanValue[]> = TExpressions extends [
   infer THead extends Constants.BooleanValue,
-  ...infer TTail extends Constants.BooleanValue[]
+  ...infer TTail extends Constants.BooleanValue[],
 ]
   ? If<Array.IsNotEmpty<TTail>, Or<THead, Some<TTail>>, Or<THead, false>>
   : never;
@@ -418,7 +418,7 @@ export type Some<TExpressions extends Constants.BooleanValue[]> = TExpressions e
  */
 export type Every<TExpressions extends Constants.BooleanValue[]> = TExpressions extends [
   infer THead extends Constants.BooleanValue,
-  ...infer TTail extends Constants.BooleanValue[]
+  ...infer TTail extends Constants.BooleanValue[],
 ]
   ? If<Array.IsNotEmpty<TTail>, And<THead, Every<TTail>>, And<THead, Constants.True>>
   : never;
@@ -447,7 +447,7 @@ export type Every<TExpressions extends Constants.BooleanValue[]> = TExpressions 
  */
 export type And<
   TLeft extends Constants.BooleanValue,
-  TRight extends Constants.BooleanValue
+  TRight extends Constants.BooleanValue,
 > = IsTrue<IsTrue<TLeft> | IsTrue<TRight>>;
 
 /**
@@ -533,7 +533,7 @@ export type Or<TLeft extends Constants.BooleanValue, TRight extends Constants.Bo
  */
 export type Intersect<TValues extends unknown[]> = TValues extends [
   infer THead,
-  ...infer TTail extends unknown[]
+  ...infer TTail extends unknown[],
 ]
   ? THead & If<Array.IsNotEmpty<TTail>, Intersect<TTail>, unknown>
   : never;

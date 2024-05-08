@@ -2,7 +2,7 @@ import _ from 'lodash/fp';
 import fse from 'fs-extra';
 // eslint-disable-next-line node/no-unpublished-import
 import SwaggerParser from '@apidevtools/swagger-parser';
-import { api, plugins, components, contentTypes } from '../__mocks__/mock-strapi-data';
+import { apis, plugins, components, contentTypes } from '../__mocks__/mock-strapi-data';
 import documentation from '../documentation';
 import override from '../override';
 import { defaultConfig } from '../../config/default-plugin-config';
@@ -16,7 +16,7 @@ const mockStrapiInstance = {
   },
   contentTypes,
   components,
-  api,
+  apis,
   plugins,
   config: {
     get: () => defaultConfig,
@@ -42,7 +42,6 @@ describe('Documentation plugin | Documentation service', () => {
 
       return global.strapi.contentTypes[uid];
     }) as any;
-    global.strapi.plugin = jest.fn((name) => global.strapi.plugins[name]);
 
     global.strapi.plugins.documentation = {
       service: jest.fn((name) => {
@@ -152,7 +151,7 @@ describe('Documentation plugin | Documentation service', () => {
         ({
           ...defaultConfig,
           'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: ['upload'] },
-        } as any);
+        }) as any;
 
       const docService = documentation({ strapi: global.strapi });
 
@@ -169,7 +168,7 @@ describe('Documentation plugin | Documentation service', () => {
         ({
           ...defaultConfig,
           'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
-        } as any);
+        }) as any;
 
       const docService = documentation({ strapi: global.strapi });
 
@@ -219,7 +218,7 @@ describe('Documentation plugin | Documentation service', () => {
         ],
       };
 
-      global.strapi.config.get = () => ({ ...userConfig } as any);
+      global.strapi.config.get = () => ({ ...userConfig }) as any;
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
       const lastMockCall = jest.mocked(fse.writeJson).mock.calls[
@@ -241,7 +240,7 @@ describe('Documentation plugin | Documentation service', () => {
         ({
           ...defaultConfig,
           'x-strapi-config': { ...defaultConfig['x-strapi-config'], plugins: [] },
-        } as any);
+        }) as any;
       const docService = documentation({ strapi: global.strapi });
       const overrideService = override({ strapi: global.strapi });
 
@@ -500,7 +499,7 @@ describe('Documentation plugin | Documentation service', () => {
               };
             },
           },
-        } as any);
+        }) as any;
       const docService = documentation({ strapi: global.strapi });
       await docService.generateFullDoc();
       const lastMockCall = jest.mocked(fse.writeJson).mock.calls[

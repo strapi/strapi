@@ -1,6 +1,6 @@
 import { prop } from 'lodash/fp';
 import type Koa from 'koa';
-import { contentTypes as contentTypeUtils, sanitize, validate } from '@strapi/utils';
+import { contentTypes as contentTypeUtils } from '@strapi/utils';
 import type { Core, Struct } from '@strapi/types';
 
 import { transformResponse } from './transform';
@@ -38,31 +38,31 @@ function createController({
     async sanitizeOutput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
-      return sanitize.contentAPI.output(data, contentType, { auth });
+      return strapi.contentAPI.sanitize.output(data, contentType, { auth });
     },
 
     async sanitizeInput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
-      return sanitize.contentAPI.input(data, contentType, { auth });
+      return strapi.contentAPI.sanitize.input(data, contentType, { auth });
     },
 
     async sanitizeQuery(ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
-      return sanitize.contentAPI.query(ctx.query, contentType, { auth });
+      return strapi.contentAPI.sanitize.query(ctx.query, contentType, { auth });
     },
 
     async validateQuery(ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
-      return validate.contentAPI.query(ctx.query, contentType, { auth });
+      return strapi.contentAPI.validate.query(ctx.query, contentType, { auth });
     },
 
     async validateInput(data, ctx) {
       const auth = getAuthFromKoaContext(ctx);
 
-      return validate.contentAPI.input(data, contentType, { auth });
+      return strapi.contentAPI.validate.input(data, contentType, { auth });
     },
   };
 

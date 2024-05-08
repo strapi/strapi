@@ -89,7 +89,7 @@ const plugins = {
   },
 };
 
-const api = {
+const apis = {
   homepage: {
     contentTypes: {
       homepage: contentTypes['api::homepage.homepage'],
@@ -179,4 +179,4 @@ const api = {
   },
 };
 
-export { components, plugins, api, contentTypes };
+export { components, plugins, apis, contentTypes };

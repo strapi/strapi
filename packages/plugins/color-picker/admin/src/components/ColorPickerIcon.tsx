@@ -1,6 +1,6 @@
-import { Flex, Icon } from '@strapi/design-system';
-import { Paint } from '@strapi/icons';
-import styled from 'styled-components';
+import { Flex } from '@strapi/design-system';
+import { PaintBrush } from '@strapi/icons';
+import { styled } from 'styled-components';
 
 const IconBox = styled(Flex)`
   /* Hard code color values */
@@ -16,7 +16,7 @@ const IconBox = styled(Flex)`
 export const ColorPickerIcon = () => {
   return (
     <IconBox justifyContent="center" alignItems="center" width={7} height={6} hasRadius aria-hidden>
-      <Icon as={Paint} />
+      <PaintBrush />
     </IconBox>
   );
 };

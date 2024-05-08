@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../hooks/useDataManager';
 import { getTrad } from '../utils/getTrad';
@@ -23,10 +23,10 @@ interface DynamicZoneListProps {
 }
 
 const StyledAddIcon = styled(Plus)`
-  width: ${32 / 16}rem;
-  height: ${32 / 16}rem;
-  padding: ${9 / 16}rem;
-  border-radius: ${64 / 16}rem;
+  width: 3.2rem;
+  height: 3.2rem;
+  padding: 0.9rem;
+  border-radius: 6.4rem;
   background: ${({ theme }) => theme.colors.primary100};
   path {
     fill: ${({ theme }) => theme.colors.primary600};
@@ -34,7 +34,7 @@ const StyledAddIcon = styled(Plus)`
 `;
 
 const FixedBox = styled(Box)`
-  height: ${90 / 16}rem;
+  height: 9rem;
   position: absolute;
   width: 100%;
   top: 0;
@@ -47,13 +47,13 @@ const ScrollableStack = styled(Flex)`
 `;
 
 const ComponentContentBox = styled(Box)`
-  padding-top: ${90 / 16}rem;
+  padding-top: 9rem;
 `;
 
 const ComponentStack = styled(Flex)`
   flex-shrink: 0;
-  width: ${140 / 16}rem;
-  height: ${80 / 16}rem;
+  width: 14rem;
+  height: 8rem;
   justify-content: center;
   align-items: center;
 `;
@@ -80,7 +80,7 @@ export const DynamicZoneList = ({
   };
 
   return (
-    <Tr className="dynamiczone-row" isFromDynamicZone>
+    <Tr className="dynamiczone-row" $isFromDynamicZone>
       <td colSpan={12}>
         <FixedBox paddingLeft={8}>
           <ScrollableStack gap={2}>

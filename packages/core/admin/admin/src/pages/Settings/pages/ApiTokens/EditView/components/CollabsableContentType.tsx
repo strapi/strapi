@@ -5,6 +5,7 @@ import {
   AccordionContent,
   AccordionToggle,
   Box,
+  BoxComponent,
   Checkbox,
   Flex,
   Grid,
@@ -14,7 +15,7 @@ import {
 import { Cog } from '@strapi/icons';
 import capitalize from 'lodash/capitalize';
 import { useIntl } from 'react-intl';
-import styled, { css } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 import { ContentApiPermission } from '../../../../../../../../shared/contracts/content-api/permissions';
 import { useApiTokenPermissions } from '../apiTokenPermissions';
@@ -26,7 +27,7 @@ const activeCheckboxWrapperStyles = css`
   }
 `;
 
-const CheckboxWrapper = styled(Box)<{ isActive: boolean }>`
+const CheckboxWrapper = styled<BoxComponent>(Box)<{ $isActive: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -39,7 +40,7 @@ const CheckboxWrapper = styled(Box)<{ isActive: boolean }>`
   }
 
   /* Show active style both on hover and when the action is selected */
-  ${(props) => props.isActive && activeCheckboxWrapperStyles}
+  ${(props) => props.$isActive && activeCheckboxWrapperStyles}
   &:hover {
     ${activeCheckboxWrapperStyles}
   }
@@ -136,7 +137,7 @@ export const CollapsableContentType = ({
                     return (
                       <GridItem col={6} key={action.actionId}>
                         <CheckboxWrapper
-                          isActive={isActionSelected(action.actionId)}
+                          $isActive={isActionSelected(action.actionId)}
                           padding={2}
                           hasRadius
                         >

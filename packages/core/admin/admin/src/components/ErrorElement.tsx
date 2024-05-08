@@ -1,9 +1,16 @@
-import { Alert, Button, Flex, Icon, Main, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { Duplicate, ExclamationMarkCircle } from '@strapi/icons';
+import {
+  Alert,
+  Button,
+  Flex,
+  Main,
+  Typography,
+  Link,
+  TypographyComponent,
+} from '@strapi/design-system';
+import { Duplicate, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useRouteError } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useClipboard } from '../hooks/useClipboard';
 
@@ -42,7 +49,7 @@ ${error.stack}
             maxWidth="512px"
           >
             <Flex direction="column" gap={2}>
-              <Icon as={ExclamationMarkCircle} width="32px" height="32px" color="danger600" />
+              <WarningCircle width="32px" height="32px" fill="danger600" />
               <Typography fontSize={4} fontWeight="bold" textAlign="center">
                 {formatMessage({
                   id: 'app.error',
@@ -99,7 +106,7 @@ const StyledAlert = styled(Alert)`
   }
 `;
 
-const ErrorType = styled(Typography)`
+const ErrorType = styled<TypographyComponent>(Typography)`
   word-break: break-all;
   color: ${({ theme }) => theme.colors.danger600};
 `;

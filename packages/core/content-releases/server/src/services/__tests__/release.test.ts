@@ -1,3 +1,5 @@
+import { queryParams } from '@strapi/utils';
+
 import createReleaseService from '../release';
 import releaseCT from '../../content-types/release/schema';
 
@@ -54,6 +56,19 @@ const baseStrapiMock = {
   },
   log: {
     info: jest.fn(),
+  },
+  get(name: string) {
+    if (name === 'query-params') {
+      const transformer = queryParams.createTransformer({
+        getModel(name: string) {
+          return strapi.getModel(name as any);
+        },
+      });
+
+      return {
+        transform: transformer.transformQueryParams,
+      };
+    }
   },
 };
 
@@ -501,7 +516,7 @@ describe('release service', () => {
         1
       );
 
-      expect(releases).toEqual([{ name: 'test release', action: { type: 'publish' } }]);
+      expect(releases).toEqual([{ name: 'test release', actions: [{ type: 'publish' }] }]);
     });
   });
 

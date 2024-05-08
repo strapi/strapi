@@ -3,11 +3,8 @@ import * as React from 'react';
 
 import {
   LinkButton,
-  ContentLayout,
   Flex,
-  HeaderLayout,
   IconButton,
-  Layout,
   Table,
   Tbody,
   Td,
@@ -17,21 +14,21 @@ import {
   Typography,
   EmptyStateLayout,
 } from '@strapi/design-system';
-import { Eye as Show, Refresh as Reload, Trash } from '@strapi/icons';
+import { Eye as Show, ArrowClockwise as Reload, Trash } from '@strapi/icons';
 import {
   ConfirmDialog,
   useRBAC,
   Page,
   useAPIErrorHandler,
   useNotification,
+  Layouts,
 } from '@strapi/strapi/admin';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PERMISSIONS } from '../constants';
 import {
-  useGetInfosQuery,
+  useGetInfoQuery,
   useRegenerateDocMutation,
   useDeleteVersionMutation,
 } from '../services/api';
@@ -41,12 +38,14 @@ const App = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { data, isLoading, isError } = useGetInfosQuery();
+  const { data, isLoading: isLoadingInfo, isError } = useGetInfoQuery();
   const [regenerate] = useRegenerateDocMutation();
   const [deleteVersion] = useDeleteVersionMutation();
   const [showConfirmDelete, setShowConfirmDelete] = React.useState<boolean>(false);
   const [versionToDelete, setVersionToDelete] = React.useState<string>();
-  const { allowedActions } = useRBAC(PERMISSIONS);
+  const { allowedActions, isLoading: isLoadingRBAC } = useRBAC(PERMISSIONS);
+
+  const isLoading = isLoadingInfo || isLoadingRBAC;
 
   const colCount = 4;
   const rowCount = (data?.docVersions?.length || 0) + 1;
@@ -121,10 +120,10 @@ const App = () => {
   }
 
   return (
-    <Layout>
-      <Helmet title={title} />
+    <Layouts.Root>
+      <Page.Title>{title}</Page.Title>
       <Page.Main>
-        <HeaderLayout
+        <Layouts.Header
           title={title}
           subtitle={formatMessage({
             id: getTrad('pages.PluginPage.header.description'),
@@ -132,7 +131,7 @@ const App = () => {
           })}
           primaryAction={
             <OpenDocLink
-              disabled={!allowedActions.canOpen || !data?.currentVersion || !data?.prefix}
+              disabled={!allowedActions.canRead || !data?.currentVersion || !data?.prefix}
               href={createDocumentationHref(`${data?.prefix}/v${data?.currentVersion}`)}
               startIcon={<Show />}
             >
@@ -143,7 +142,7 @@ const App = () => {
             </OpenDocLink>
           }
         />
-        <ContentLayout>
+        <Layouts.Content>
           {data?.docVersions.length ? (
             <Table colCount={colCount} rowCount={rowCount}>
               <Thead>
@@ -181,9 +180,8 @@ const App = () => {
                       <Td>
                         <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
                           <IconButton
-                            forwardedAs="a"
-                            disabled={!allowedActions.canOpen}
-                            // @ts-expect-error invalid typing in IconButton
+                            tag="a"
+                            disabled={!allowedActions.canRead}
                             href={createDocumentationHref(`${data.prefix}/v${doc.version}`)}
                             noBorder
                             icon={<Show />}
@@ -234,14 +232,14 @@ const App = () => {
           ) : (
             <EmptyStateLayout content="" icon={null} />
           )}
-        </ContentLayout>
+        </Layouts.Content>
         <ConfirmDialog
           onConfirm={handleConfirmDelete}
           onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

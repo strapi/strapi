@@ -1,10 +1,10 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
-import { axiosBaseQuery, type UnknownApiError } from '../utils/baseQuery';
+import { fetchBaseQuery, type UnknownApiError } from '../utils/baseQuery';
 
 const i18nApi = createApi({
   reducerPath: 'i18nApi',
-  baseQuery: axiosBaseQuery(),
+  baseQuery: fetchBaseQuery(),
   tagTypes: ['Locale'],
   endpoints: () => ({}),
 });

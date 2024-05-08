@@ -15,22 +15,13 @@ import { getEERoutes as getSettingsEERoutes } from '../../ee/admin/src/pages/Set
 import { App } from './App';
 import Logo from './assets/images/logo-strapi-2022.svg';
 import { ErrorElement } from './components/ErrorElement';
-import {
-  INJECTION_ZONES,
-  InjectionZoneBlock,
-  InjectionZoneComponent,
-  InjectionZoneContainer,
-  InjectionZoneModule,
-  InjectionZones,
-} from './components/InjectionZone';
 import { LanguageProvider } from './components/LanguageProvider';
 import { Page } from './components/PageHelpers';
 import { Theme } from './components/Theme';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
-import { routes as cmRoutes } from './content-manager/router';
-import { ContentManagerPlugin } from './core/apis/content-manager';
 import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
+import { RBAC, RBACMiddleware } from './core/apis/rbac';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
@@ -81,20 +72,22 @@ interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCoun
 
 interface StrapiAppPlugin {
   bootstrap: (
-    args: Pick<
-      StrapiApp,
-      | 'addSettingsLink'
-      | 'addSettingsLinks'
-      | 'getPlugin'
-      | 'injectContentManagerComponent'
-      | 'injectAdminComponent'
-      | 'registerHook'
-    >
+    args: Pick<StrapiApp, 'addSettingsLink' | 'addSettingsLinks' | 'getPlugin' | 'registerHook'>
   ) => void;
   register: (app: StrapiApp) => void;
   registerTrads: (args: {
     locales: string[];
   }) => Promise<{ data: Record<string, string>; locale: string }[]>;
+}
+
+interface InjectionZoneComponent {
+  Component: React.ComponentType;
+  name: string;
+  // TODO: in theory this could receive and forward any React component prop
+  // but in practice there only seems to be once instance, where `slug` is
+  // forwarded. The type needs to become either more generic or we disallow
+  // prop spreading and offer a different way to access context data.
+  slug: string;
 }
 
 interface UnloadedSettingsLink extends Omit<StrapiAppSettingLink, 'Component'> {
@@ -130,7 +123,7 @@ class StrapiApp {
   hooksDict: Record<string, ReturnType<typeof createHook>> = {};
 
   admin = {
-    injectionZones: INJECTION_ZONES,
+    injectionZones: {},
   };
 
   translations: StrapiApp['configurations']['translations'] = {};
@@ -164,7 +157,7 @@ class StrapiApp {
   /**
    * APIs
    */
-  private contentManager = new ContentManagerPlugin();
+  rbac = new RBAC();
   library: Library = {
     components: {},
     fields: {},
@@ -177,8 +170,6 @@ class StrapiApp {
     this.appPlugins = appPlugins || {};
 
     this.createCustomConfigurations(config ?? {});
-
-    this.registerPlugin(this.contentManager.config);
 
     this.createHook(INJECT_COLUMN_IN_TABLE);
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
@@ -238,10 +229,6 @@ class StrapiApp {
       link.Component && typeof link.Component === 'function',
       `[${link.intlLabel.defaultMessage}]: link.Component must be a function returning a Promise that returns a default component. Please use: \`Component: () => import(path)\` instead.`
     );
-    invariant(
-      link.icon && typeof link.icon === 'function',
-      `[${link.intlLabel.defaultMessage}]: link.Icon should be a valid React Component`
-    );
 
     if (
       link.Component &&
@@ -249,10 +236,11 @@ class StrapiApp {
       // @ts-expect-error – shh
       link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
-      console.warn(`
-      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed
-        in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-      `);
+      console.warn(
+        `
+      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      `.trim()
+      );
     }
 
     if (link.to.startsWith('/')) {
@@ -281,6 +269,14 @@ class StrapiApp {
     middlewares.forEach((middleware) => {
       this.middlewares.push(middleware);
     });
+  };
+
+  addRBACMiddleware = (m: RBACMiddleware | RBACMiddleware[]) => {
+    if (Array.isArray(m)) {
+      this.rbac.use(m);
+    } else {
+      this.rbac.use(m);
+    }
   };
 
   addReducers = (reducers: ReducersMapObject) => {
@@ -313,10 +309,11 @@ class StrapiApp {
       // @ts-expect-error – shh
       link.Component[Symbol.toStringTag] === 'AsyncFunction'
     ) {
-      console.warn(`
-      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed
-        in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-      `);
+      console.warn(
+        `
+      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
+      `.trim()
+      );
     }
 
     if (link.to.startsWith('/')) {
@@ -370,8 +367,6 @@ class StrapiApp {
           addSettingsLink: this.addSettingsLink,
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
-          injectContentManagerComponent: this.injectContentManagerComponent,
-          injectAdminComponent: this.injectAdminComponent,
           registerHook: this.registerHook,
         });
       }
@@ -386,8 +381,6 @@ class StrapiApp {
         addSettingsLink: this.addSettingsLink,
         addSettingsLinks: this.addSettingsLinks,
         getPlugin: this.getPlugin,
-        injectContentManagerComponent: this.injectContentManagerComponent,
-        injectAdminComponent: this.injectAdminComponent,
         registerHook: this.registerHook,
       });
     }
@@ -419,7 +412,7 @@ class StrapiApp {
 
       if (!darkTheme && !lightTheme) {
         console.warn(
-          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`
+          `[deprecated] In future versions, Strapi will stop supporting this theme customization syntax. The theme configuration accepts a light and a dark key to customize each theme separately. See https://docs.strapi.io/developer-docs/latest/development/admin-customization.html#theme-extension.`.trim()
         );
         merge(this.configurations.themes.light, customConfig.theme);
       }
@@ -460,9 +453,9 @@ class StrapiApp {
   };
 
   getAdminInjectedComponents = (
-    moduleName: InjectionZoneModule,
-    containerName: InjectionZoneContainer,
-    blockName: InjectionZoneBlock
+    moduleName: string,
+    containerName: string,
+    blockName: string
   ): InjectionZoneComponent[] => {
     try {
       // @ts-expect-error – we have a catch block so if you don't pass it correctly we still return an array.
@@ -481,42 +474,6 @@ class StrapiApp {
       this.appPlugins[plugin].register(this);
     });
   }
-
-  injectContentManagerComponent = <TContainerName extends keyof InjectionZones['contentManager']>(
-    containerName: TContainerName,
-    blockName: keyof InjectionZones['contentManager'][TContainerName],
-    component: InjectionZoneComponent
-  ) => {
-    invariant(
-      this.admin.injectionZones.contentManager[containerName]?.[blockName],
-      `The ${containerName} ${String(blockName)} zone is not defined in the content manager`
-    );
-    invariant(component, 'A Component must be provided');
-
-    if (containerName === 'editView' && blockName === 'right-links') {
-      console.warn(
-        `Injecting components into editView.right-links is deprecated. Please use the \`addEditViewSidePanel\` API instead.`
-      );
-    }
-
-    // @ts-expect-error – we've alredy checked above that the block exists.
-    this.admin.injectionZones.contentManager[containerName][blockName].push(component);
-  };
-
-  injectAdminComponent = <TContainerName extends keyof InjectionZones['admin']>(
-    containerName: TContainerName,
-    blockName: keyof InjectionZones['admin'][TContainerName],
-    component: InjectionZoneComponent
-  ) => {
-    invariant(
-      this.admin.injectionZones.admin[containerName]?.[blockName],
-      `The ${containerName} ${String(blockName)} zone is not defined in the admin`
-    );
-    invariant(component, 'A Component must be provided');
-
-    // @ts-expect-error – we've alredy checked above that the block exists.
-    this.admin.injectionZones.admin[containerName][blockName].push(component);
-  };
 
   async loadAdminTrads() {
     const adminLocales = await Promise.all(
@@ -674,6 +631,8 @@ class StrapiApp {
                 };
               },
             },
+            // this needs to go before auth/:authType because otherwise it won't match the route
+            ...getBaseEERoutes(),
             {
               path: 'auth/:authType',
               element: <AuthPage />,
@@ -775,13 +734,12 @@ class StrapiApp {
                     </React.Suspense>
                   ),
                 })),
-                ...getBaseEERoutes(),
-                ...cmRoutes,
+
+                {
+                  path: '*',
+                  element: <NotFoundPage />,
+                },
               ],
-            },
-            {
-              path: '*',
-              element: <NotFoundPage />,
             },
           ],
         },
@@ -802,4 +760,5 @@ export type {
   StrapiAppSetting,
   MenuItem,
   StrapiAppConstructorArgs,
+  InjectionZoneComponent,
 };

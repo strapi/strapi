@@ -1,5 +1,4 @@
 import { extendType, nonNull, idArg } from 'nexus';
-import { sanitize } from '@strapi/utils';
 import type * as Nexus from 'nexus';
 import type { Struct } from '@strapi/types';
 import type { Context } from '../../types';
@@ -46,7 +45,7 @@ export default ({ strapi }: Context) => {
         const { auth } = context.state;
 
         // Sanitize input data
-        const sanitizedInputData = await sanitize.contentAPI.input(args.data, contentType, {
+        const sanitizedInputData = await strapi.contentAPI.sanitize.input(args.data, contentType, {
           auth,
         });
 
@@ -85,14 +84,14 @@ export default ({ strapi }: Context) => {
       async resolve(parent, args, context) {
         const { auth } = context.state;
 
-        const { data, documentId, ...restParams } = args;
+        const { data, ...restParams } = args;
 
         // Sanitize input data
-        const sanitizedInputData = await sanitize.contentAPI.input(data, contentType, {
+        const sanitizedInputData = await strapi.contentAPI.sanitize.input(data, contentType, {
           auth,
         });
 
-        return strapi.documents!(uid).update(documentId, {
+        return strapi.documents!(uid).update({
           ...restParams,
           data: sanitizedInputData,
         });
@@ -126,7 +125,7 @@ export default ({ strapi }: Context) => {
       async resolve(parent, args) {
         const { documentId } = args;
 
-        await strapi.documents!(uid).delete(documentId);
+        await strapi.documents!(uid).delete({ documentId });
 
         return { documentId };
       },

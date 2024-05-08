@@ -33,6 +33,7 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
   it('should not show the create button when the user does not have the rights to create', async () => {
     jest.mocked(useRBAC).mockReturnValue({
       isLoading: false,
+      permissions: [],
       allowedActions: {
         canCreate: false,
         canDelete: true,
@@ -42,14 +43,16 @@ describe('ADMIN | Pages | API TOKENS | ListPage', () => {
       },
     });
 
-    const { queryByTestId } = render(<ListView />);
+    const { queryByTestId, findByText } = render(<ListView />);
 
+    await findByText('API Tokens');
     await waitFor(() => expect(queryByTestId('create-api-token-button')).not.toBeInTheDocument());
   });
 
   it('should show the delete button when the user have the rights to delete', async () => {
     jest.mocked(useRBAC).mockReturnValue({
       isLoading: false,
+      permissions: [],
       allowedActions: {
         canCreate: false,
         canDelete: true,

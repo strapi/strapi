@@ -6,6 +6,9 @@ export interface EnumerationProperties<TValues extends string[] = []> {
   enumName?: string;
 }
 
+/**
+ * Represents an enumeration Strapi attribute along with its options
+ */
 export type Enumeration<TValues extends string[] = []> = Intersect<
   [
     Attribute.OfType<'enumeration'>,
@@ -17,7 +20,7 @@ export type Enumeration<TValues extends string[] = []> = Intersect<
     Attribute.PrivateOption,
     Attribute.RequiredOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

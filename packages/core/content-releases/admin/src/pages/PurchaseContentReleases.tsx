@@ -1,15 +1,16 @@
-import { Box, Layout, Main, HeaderLayout, EmptyStateLayout } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { ExternalLink, EmptyPermissions } from '@strapi/icons';
+import { Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Main, EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { ExternalLink } from '@strapi/icons';
+import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 const PurchaseContentReleases = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: 'content-releases.pages.Releases.title',
             defaultMessage: 'Releases',
@@ -21,11 +22,11 @@ const PurchaseContentReleases = () => {
         />
         <Box paddingLeft={10} paddingRight={10}>
           <EmptyStateLayout
-            icon={<EmptyPermissions width="10rem" />}
+            icon={<EmptyPermissions width="16rem" />}
             content={formatMessage({
               id: 'content-releases.pages.PurchaseRelease.not-available',
               defaultMessage:
-                'Releases is only available as part of the Enterprise Edition. Upgrade to create and manage releases.',
+                'Releases is only available as part of a paid plan. Upgrade to create and manage releases.',
             })}
             action={
               <LinkButton
@@ -44,7 +45,7 @@ const PurchaseContentReleases = () => {
           />
         </Box>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

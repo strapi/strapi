@@ -1,22 +1,14 @@
 import * as React from 'react';
 
-import {
-  ActionLayout,
-  ContentLayout,
-  HeaderLayout,
-  Flex,
-  Typography,
-  Status,
-  IconButton,
-} from '@strapi/design-system';
+import { Flex, Typography, Status, IconButton } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
-import { Helmet } from 'react-helmet';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
 import { Filters } from '../../../../components/Filters';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { Pagination } from '../../../../components/Pagination';
 import { SearchInput } from '../../../../components/SearchInput';
@@ -118,15 +110,15 @@ const ListPageCE = () => {
 
   return (
     <Page.Main aria-busy={isLoading}>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Users',
           }
         )}
-      />
-      <HeaderLayout
+      </Page.Title>
+      <Layouts.Header
         primaryAction={canCreate && <CreateAction onClick={handleToggle} />}
         title={title}
         subtitle={formatMessage({
@@ -134,7 +126,7 @@ const ListPageCE = () => {
           defaultMessage: 'All the users who have access to the Strapi admin panel',
         })}
       />
-      <ActionLayout
+      <Layouts.Action
         startActions={
           <>
             <SearchInput
@@ -151,7 +143,7 @@ const ListPageCE = () => {
           </>
         }
       />
-      <ContentLayout>
+      <Layouts.Content>
         <Table.Root rows={users} headers={headers}>
           <Table.ActionBar />
           <Table.Content>
@@ -188,12 +180,11 @@ const ListPageCE = () => {
                       <Flex justifyContent="end">
                         {canRead ? (
                           <IconButton
-                            forwardedAs={NavLink}
-                            // @ts-expect-error – This is an issue in the DS with the as prop not adding the inferred props to the component.
+                            tag={NavLink}
                             to={user.id.toString()}
                             label={formatMessage(
                               { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
-                              { target: getDisplayName(user, formatMessage) }
+                              { target: getDisplayName(user) }
                             )}
                             noBorder
                             icon={<Pencil />}
@@ -204,7 +195,7 @@ const ListPageCE = () => {
                             onClick={handleDeleteClick(user.id)}
                             label={formatMessage(
                               { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
-                              { target: getDisplayName(user, formatMessage) }
+                              { target: getDisplayName(user) }
                             )}
                             noBorder
                             icon={<Trash />}
@@ -222,7 +213,7 @@ const ListPageCE = () => {
           <Pagination.PageSize />
           <Pagination.Links />
         </Pagination.Root>
-      </ContentLayout>
+      </Layouts.Content>
       {isModalOpened && <ModalForm onToggle={handleToggle} />}
     </Page.Main>
   );
@@ -290,7 +281,7 @@ const TABLE_HEADERS: Array<
             color="neutral800"
             variant={isActive ? 'success' : 'danger'}
           >
-            {isActive ? 'Active' : 'Inactive'}
+            <Typography>{isActive ? 'Active' : 'Inactive'}</Typography>
           </Status>
         </Flex>
       );

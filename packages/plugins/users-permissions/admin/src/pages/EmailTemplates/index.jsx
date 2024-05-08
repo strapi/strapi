@@ -1,15 +1,15 @@
 import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
-import { ContentLayout, HeaderLayout, useNotifyAT } from '@strapi/design-system';
+import { useNotifyAT } from '@strapi/design-system';
 import {
   Page,
   useAPIErrorHandler,
   useNotification,
   useFetchClient,
   useRBAC,
+  Layouts,
 } from '@strapi/strapi/admin';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -115,8 +115,8 @@ const EmailTemplatesPage = () => {
 
   return (
     <Page.Main aria-busy={submitMutation.isLoading}>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -125,14 +125,14 @@ const EmailTemplatesPage = () => {
             }),
           }
         )}
-      />
-      <HeaderLayout
+      </Page.Title>
+      <Layouts.Header
         title={formatMessage({
           id: getTrad('HeaderNav.link.emailTemplates'),
           defaultMessage: 'Email templates',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <EmailTable onEditClick={handleEditClick} canUpdate={canUpdate} />
         {isModalOpen && (
           <EmailForm
@@ -141,7 +141,7 @@ const EmailTemplatesPage = () => {
             onSubmit={handleSubmit}
           />
         )}
-      </ContentLayout>
+      </Layouts.Content>
     </Page.Main>
   );
 };

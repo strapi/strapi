@@ -1,8 +1,9 @@
 import React from 'react';
 
+import { Layouts } from '@strapi/admin/strapi-admin';
 import { Box } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const EmptyAssetCard = styled(Box)`
   background: linear-gradient(
@@ -13,25 +14,14 @@ const EmptyAssetCard = styled(Box)`
   opacity: 0.33;
 `;
 
-const GridColSize = {
-  S: 180,
-  M: 250,
-};
-
 const PlaceholderSize = {
   S: 138,
   M: 234,
 };
 
-const GridLayout = styled(Box)`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(${({ size }) => `${GridColSize[size]}px`}, 1fr));
-  grid-gap: ${({ theme }) => theme.spaces[4]};
-`;
-
 export const EmptyAssetGrid = ({ count, size }) => {
   return (
-    <GridLayout size={size}>
+    <Layouts.Grid size={size}>
       {Array(count)
         .fill(null)
         .map((_, idx) => (
@@ -42,7 +32,7 @@ export const EmptyAssetGrid = ({ count, size }) => {
             hasRadius
           />
         ))}
-    </GridLayout>
+    </Layouts.Grid>
   );
 };
 

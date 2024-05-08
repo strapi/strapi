@@ -1,6 +1,9 @@
 import type { Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
+/**
+ * Represents a decimal Strapi attribute along with its options
+ */
 export type Decimal = Intersect<
   [
     Attribute.OfType<'decimal'>,
@@ -12,7 +15,7 @@ export type Decimal = Intersect<
     Attribute.RequiredOption,
     Attribute.WritableOption,
     Attribute.VisibleOption,
-    Attribute.UniqueOption
+    Attribute.UniqueOption,
   ]
 >;
 

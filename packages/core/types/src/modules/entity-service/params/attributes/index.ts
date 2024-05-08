@@ -71,7 +71,7 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute, TGuard = unk
         Extends<TAttribute, Schema.Attribute.OfType<'relation'>>,
         TAttribute extends Schema.Attribute.Relation<infer TRelationKind, infer TTarget>
           ? If<IsNotNever<TTarget>, RelationInputValue<TRelationKind>>
-          : never
+          : never,
       ],
       // DynamicZone
       [
@@ -85,7 +85,7 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute, TGuard = unk
                   : never
                 : never
             >
-          : never
+          : never,
       ],
       // Component
       [
@@ -96,7 +96,7 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute, TGuard = unk
               ? If<TRepeatable, TValues[], TValues>
               : never
             : never
-          : never
+          : never,
       ],
       // Boolean
       [Extends<TAttribute, Schema.Attribute.Boolean>, Literals.BooleanValue],
@@ -109,18 +109,18 @@ export type GetValue<TAttribute extends Schema.Attribute.Attribute, TGuard = unk
           | Schema.Attribute.Float
           | Schema.Attribute.Decimal
         >,
-        Literals.NumberValue
+        Literals.NumberValue,
       ],
       // Date / Time
       [Extends<TAttribute, Schema.Attribute.Time>, Literals.TimeValue],
       [Extends<TAttribute, Schema.Attribute.Date>, Literals.DateValue],
       [
         Extends<TAttribute, Schema.Attribute.Timestamp | Schema.Attribute.DateTime>,
-        Literals.DateTimeValue
+        Literals.DateTimeValue,
       ],
       // Fallback
       // If none of the above attribute type, fallback to the original Attribute.GetValue (while making sure it's an attribute)
-      [Constants.True, Schema.Attribute.Value<TAttribute, TGuard>]
+      [Constants.True, Schema.Attribute.Value<TAttribute, TGuard>],
     ],
     unknown
   >,

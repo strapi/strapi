@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { ContentLayout, Flex } from '@strapi/design-system';
+import { Flex } from '@strapi/design-system';
 import { Formik, Form, FormikHelpers } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useLocation, useMatch, useNavigate } from 'react-router-dom';
 
 import { useGuidedTour } from '../../../../../components/GuidedTour/Provider';
+import { Layouts } from '../../../../../components/Layouts/Layout';
 import { Page } from '../../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../../core/store/hooks';
 import { useNotification } from '../../../../../features/Notifications';
@@ -191,7 +191,8 @@ export const EditView = () => {
         const res = await createToken({
           ...body,
           // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
-          lifespan: body?.lifespan || null,
+          lifespan:
+            body?.lifespan && body.lifespan !== '0' ? parseInt(body.lifespan.toString(), 10) : null,
           permissions: body.type === 'custom' ? state.selectedActions : null,
         });
 
@@ -221,7 +222,7 @@ export const EditView = () => {
           tokenType: API_TOKEN_TYPE,
         });
 
-        navigate(res.data.id.toString(), {
+        navigate(`../api-tokens/${res.data.id.toString()}`, {
           state: { apiToken: res.data },
           replace: true,
         });
@@ -319,12 +320,12 @@ export const EditView = () => {
   return (
     <ApiTokenPermissionsProvider value={providerValue}>
       <Page.Main>
-        <Helmet
-          title={formatMessage(
+        <Page.Title>
+          {formatMessage(
             { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
             { name: 'API Tokens' }
           )}
-        />
+        </Page.Title>
         <Formik
           validationSchema={schema}
           validateOnChange={false}
@@ -357,7 +358,7 @@ export const EditView = () => {
                   regenerateUrl="/admin/api-tokens/"
                 />
 
-                <ContentLayout>
+                <Layouts.Content>
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     {Boolean(apiToken?.name) && (
                       <TokenBox token={apiToken?.accessKey} tokenType={API_TOKEN_TYPE} />
@@ -380,7 +381,7 @@ export const EditView = () => {
                       }
                     />
                   </Flex>
-                </ContentLayout>
+                </Layouts.Content>
               </Form>
             );
           }}

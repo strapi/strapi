@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
-import { Box, Button, ModalFooter, Textarea } from '@strapi/design-system';
+import { Box, Button, Field, ModalFooter, Textarea } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -47,9 +47,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
       {({ values, errors, handleChange }) => (
         <Form noValidate>
           <Box paddingLeft={8} paddingRight={8} paddingBottom={6} paddingTop={6}>
-            <Textarea
-              label={formatMessage({ id: getTrad('input.url.label'), defaultMessage: 'URL' })}
-              id="urls"
+            <Field.Root
               hint={formatMessage({
                 id: getTrad('input.url.description'),
                 defaultMessage: 'Separate your URL links by a carriage return.',
@@ -60,9 +58,14 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
                   ? formatMessage({ id: errors.urls, defaultMessage: 'An error occured' })
                   : undefined)
               }
-              onChange={handleChange}
-              value={values.urls}
-            />
+            >
+              <Field.Label>
+                {formatMessage({ id: getTrad('input.url.label'), defaultMessage: 'URL' })}
+              </Field.Label>
+              <Textarea onChange={handleChange} value={values.urls} />
+              <Field.Hint />
+              <Field.Error />
+            </Field.Root>
           </Box>
 
           <ModalFooter

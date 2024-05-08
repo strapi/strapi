@@ -1,6 +1,9 @@
 import type { Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
+/**
+ * Represents a float Strapi attribute along with its options
+ */
 export type Float = Intersect<
   [
     Attribute.OfType<'float'>,
@@ -12,7 +15,7 @@ export type Float = Intersect<
     Attribute.RequiredOption,
     Attribute.WritableOption,
     Attribute.VisibleOption,
-    Attribute.UniqueOption
+    Attribute.UniqueOption,
   ]
 >;
 

@@ -2,10 +2,7 @@ import * as React from 'react';
 
 import {
   Box,
-  ContentLayout,
   Flex,
-  Icon,
-  Layout,
   Searchbar,
   Tab,
   TabGroup,
@@ -13,11 +10,12 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import { ExternalLink, GlassesSquare } from '@strapi/icons';
-import { Helmet } from 'react-helmet';
+import { ExternalLink } from '@strapi/icons';
+import { GlassesSquare } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { ContentBox } from '../../components/ContentBox';
+import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { Pagination } from '../../components/Pagination';
 import { useTypedSelector } from '../../core/store/hooks';
@@ -164,16 +162,16 @@ const MarketplacePage = () => {
   const installedPackageNames = Object.keys(dependencies ?? {});
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Main>
-        <Helmet
-          title={formatMessage({
-            id: 'admin.pages.MarketPlacePage.helmet',
+        <Page.Title>
+          {formatMessage({
+            id: 'admin.pages.MarketPlacePage.head',
             defaultMessage: 'Marketplace - Plugins',
           })}
-        />
+        </Page.Title>
         <PageHeader isOnline={isOnline} npmPackageType={npmPackageType} />
-        <ContentLayout>
+        <Layouts.Content>
           <TabGroup
             label={formatMessage({
               id: 'admin.pages.MarketPlacePage.tab-group.label',
@@ -292,14 +290,19 @@ const MarketplacePage = () => {
                 icon={<GlassesSquare />}
                 iconBackground="alternative100"
                 endAction={
-                  <Icon as={ExternalLink} color="neutral600" width={3} height={3} marginLeft={2} />
+                  <ExternalLink
+                    fill="neutral600"
+                    width="1.2rem"
+                    height="1.2rem"
+                    style={{ marginLeft: '0.8rem' }}
+                  />
                 }
               />
             </a>
           </Box>
-        </ContentLayout>
+        </Layouts.Content>
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

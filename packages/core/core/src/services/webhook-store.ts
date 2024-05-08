@@ -106,10 +106,15 @@ export interface WebhookStore {
 }
 
 const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
-  const webhookQueries = db.query('strapi::webhook');
-
   return {
-    allowedEvents: new Map([]),
+    allowedEvents: new Map([
+      ['ENTRY_CREATE', 'entry.create'],
+      ['ENTRY_UPDATE', 'entry.update'],
+      ['ENTRY_DELETE', 'entry.delete'],
+      ['ENTRY_PUBLISH', 'entry.publish'],
+      ['ENTRY_UNPUBLISH', 'entry.unpublish'],
+      ['ENTRY_DRAFT_DISCARD', 'entry.draft-discard'],
+    ]),
     addAllowedEvent(key, value) {
       this.allowedEvents.set(key, value);
     },
@@ -123,18 +128,19 @@ const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
       return this.allowedEvents.get(key);
     },
     async findWebhooks() {
-      const results = await webhookQueries.findMany();
+      const results = await db.query('strapi::webhook').findMany();
 
       return results.map(fromDBObject);
     },
     async findWebhook(id) {
-      const result = await webhookQueries.findOne({ where: { id } });
+      const result = await db.query('strapi::webhook').findOne({ where: { id } });
       return result ? fromDBObject(result) : null;
     },
     async createWebhook(data) {
       await webhookEventValidator(this.allowedEvents, data.events);
 
-      return webhookQueries
+      return db
+        .query('strapi::webhook')
         .create({
           data: toDBObject({ ...data, isEnabled: true }),
         })
@@ -143,7 +149,7 @@ const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
     async updateWebhook(id, data) {
       await webhookEventValidator(this.allowedEvents, data.events);
 
-      const webhook = await webhookQueries.update({
+      const webhook = await db.query('strapi::webhook').update({
         where: { id },
         data: toDBObject(data),
       });
@@ -151,7 +157,7 @@ const createWebhookStore = ({ db }: { db: Database }): WebhookStore => {
       return webhook ? fromDBObject(webhook) : null;
     },
     async deleteWebhook(id) {
-      const webhook = await webhookQueries.delete({ where: { id } });
+      const webhook = await db.query('strapi::webhook').delete({ where: { id } });
       return webhook ? fromDBObject(webhook) : null;
     },
   };

@@ -1,6 +1,13 @@
 import React from 'react';
 
-import { Box, Grid, GridItem, Option, Select } from '@strapi/design-system';
+import {
+  Box,
+  Grid,
+  GridItem,
+  SingleSelectOption,
+  SingleSelect,
+  Field,
+} from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -22,52 +29,64 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
     >
       <Grid gap={4}>
         <GridItem s={12} col={6}>
-          <Select
-            label={formatMessage({
-              id: getTrad('config.entries.title'),
-              defaultMessage: 'Entries per page',
-            })}
+          <Field.Root
             hint={formatMessage({
               id: getTrad('config.entries.note'),
               defaultMessage: 'Number of assets displayed by default in the Media Library',
             })}
-            onChange={(value) => onChange({ target: { name: 'pageSize', value } })}
             name="pageSize"
-            value={pageSize}
           >
-            {pageSizes.map((pageSize) => (
-              <Option key={pageSize} value={pageSize}>
-                {pageSize}
-              </Option>
-            ))}
-          </Select>
+            <Field.Label>
+              {formatMessage({
+                id: getTrad('config.entries.title'),
+                defaultMessage: 'Entries per page',
+              })}
+            </Field.Label>
+            <SingleSelect
+              onChange={(value) => onChange({ target: { name: 'pageSize', value } })}
+              value={pageSize}
+            >
+              {pageSizes.map((pageSize) => (
+                <SingleSelectOption key={pageSize} value={pageSize}>
+                  {pageSize}
+                </SingleSelectOption>
+              ))}
+            </SingleSelect>
+            <Field.Hint />
+          </Field.Root>
         </GridItem>
         <GridItem s={12} col={6}>
-          <Select
-            label={formatMessage({
-              id: getTrad('config.sort.title'),
-              defaultMessage: 'Default sort order',
-            })}
+          <Field.Root
             hint={formatMessage({
               id: getTrad('config.note'),
               defaultMessage: 'Note: You can override this value in the media library.',
             })}
-            onChange={(value) => onChange({ target: { name: 'sort', value } })}
             name="sort"
-            value={sort}
-            test-sort={sort}
-            data-testid="sort-select"
           >
-            {sortOptions.map((filter) => (
-              <Option
-                data-testid={`sort-option-${filter.value}`}
-                key={filter.key}
-                value={filter.value}
-              >
-                {formatMessage({ id: getTrad(filter.key), defaultMessage: `${filter.value}` })}
-              </Option>
-            ))}
-          </Select>
+            <Field.Label>
+              {formatMessage({
+                id: getTrad('config.sort.title'),
+                defaultMessage: 'Default sort order',
+              })}
+            </Field.Label>
+            <SingleSelect
+              onChange={(value) => onChange({ target: { name: 'sort', value } })}
+              value={sort}
+              test-sort={sort}
+              data-testid="sort-select"
+            >
+              {sortOptions.map((filter) => (
+                <SingleSelectOption
+                  data-testid={`sort-option-${filter.value}`}
+                  key={filter.key}
+                  value={filter.value}
+                >
+                  {formatMessage({ id: getTrad(filter.key), defaultMessage: `${filter.value}` })}
+                </SingleSelectOption>
+              ))}
+            </SingleSelect>
+            <Field.Hint />
+          </Field.Root>
         </GridItem>
       </Grid>
     </Box>

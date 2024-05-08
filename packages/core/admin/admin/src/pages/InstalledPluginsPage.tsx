@@ -1,22 +1,10 @@
 import * as React from 'react';
 
-import {
-  ContentLayout,
-  HeaderLayout,
-  Layout,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  Typography,
-  useNotifyAT,
-} from '@strapi/design-system';
-import { Helmet } from 'react-helmet';
+import { Table, Tbody, Td, Th, Thead, Tr, Typography, useNotifyAT } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
 import { useNotification } from '../features/Notifications';
 import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
@@ -62,9 +50,9 @@ const InstalledPluginsPage = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: 'global.plugins',
             defaultMessage: 'Plugins',
@@ -74,7 +62,7 @@ const InstalledPluginsPage = () => {
             defaultMessage: 'List of the installed plugins in the project.',
           })}
         />
-        <ContentLayout>
+        <Layouts.Content>
           <Table colCount={2} rowCount={data?.plugins?.length ?? 0 + 1}>
             <Thead>
               <Tr>
@@ -121,9 +109,9 @@ const InstalledPluginsPage = () => {
               })}
             </Tbody>
           </Table>
-        </ContentLayout>
+        </Layouts.Content>
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 
@@ -133,12 +121,12 @@ const ProtectedInstalledPluginsPage = () => {
 
   return (
     <Page.Protect permissions={permissions.marketplace?.main}>
-      <Helmet
-        title={formatMessage({
+      <Page.Title>
+        {formatMessage({
           id: 'global.plugins',
           defaultMessage: 'Plugins',
         })}
-      />
+      </Page.Title>
       <InstalledPluginsPage />
     </Page.Protect>
   );

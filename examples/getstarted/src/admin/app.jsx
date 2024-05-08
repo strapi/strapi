@@ -7,7 +7,7 @@ const config = {
 const bootstrap = (app) => {
   console.log('I AM  BOOTSTRAPPED');
 
-  app.injectContentManagerComponent('editView', 'right-links', {
+  app.getPlugin('content-manager').injectComponent('editView', 'right-links', {
     name: 'PreviewButton',
     Component: () => (
       <Button onClick={() => window.alert('Not here, The preview is.')}>Preview</Button>

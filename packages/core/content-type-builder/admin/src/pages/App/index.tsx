@@ -3,9 +3,7 @@
 /* eslint-disable check-file/no-index */
 import { lazy, Suspense, useEffect, useRef } from 'react';
 
-import { Page, useGuidedTour } from '@strapi/admin/strapi-admin';
-import { Layout } from '@strapi/design-system';
-import { Helmet } from 'react-helmet';
+import { Page, useGuidedTour, Layouts } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
@@ -34,22 +32,23 @@ const App = () => {
     }
   }, []);
 
+  // FIXME Error here
   return (
     <Page.Protect permissions={PERMISSIONS.main}>
-      <Helmet title={title} />
+      <Page.Title>{title}</Page.Title>
       <AutoReloadOverlayBlockerProvider>
         <FormModalNavigationProvider>
           {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
           {/* @ts-ignore */}
           <DataManagerProvider>
-            <Layout sideNav={<ContentTypeBuilderNav />}>
+            <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
               <Suspense fallback={<Page.Loading />}>
                 <Routes>
                   <Route path="content-types/:uid" element={<ListView />} />
                   <Route path={`component-categories/:categoryUid/*`} element={<RecursivePath />} />
                 </Routes>
               </Suspense>
-            </Layout>
+            </Layouts.Root>
           </DataManagerProvider>
         </FormModalNavigationProvider>
       </AutoReloadOverlayBlockerProvider>

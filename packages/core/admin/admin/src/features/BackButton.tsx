@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Link, LinkProps } from '@strapi/design-system/v2';
+import { Link, LinkProps } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
@@ -211,9 +211,8 @@ const BackButton = React.forwardRef<HTMLAnchorElement, BackButtonProps>(({ disab
   return (
     <Link
       ref={ref}
-      as={NavLink}
-      // @ts-expect-error – the DS does not infer the props from the `as` prop to the component.
-      to={history.at(-1)}
+      tag={NavLink}
+      to={history.at(-1) ?? ''}
       onClick={handleClick}
       disabled={disabled || !canGoBack}
       aria-disabled={disabled || !canGoBack}

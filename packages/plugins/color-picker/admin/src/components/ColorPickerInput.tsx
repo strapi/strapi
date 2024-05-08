@@ -4,21 +4,17 @@ import {
   BaseButton,
   Box,
   Field,
-  FieldError,
-  FieldHint,
-  FieldInput,
-  FieldLabel,
   Flex,
   FocusTrap,
   Popover,
   Typography,
   useComposedRefs,
 } from '@strapi/design-system';
-import { CarretDown } from '@strapi/icons';
+import { CaretDown } from '@strapi/icons';
 import { useField, type InputProps } from '@strapi/strapi/admin';
 import { HexColorPicker } from 'react-colorful';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../utils/getTrad';
 
@@ -98,16 +94,9 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
     const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
 
     return (
-      <Field
-        name={name}
-        id={name}
-        // GenericInput calls formatMessage and returns a string for the error
-        error={error}
-        hint={hint}
-        required={required}
-      >
+      <Field.Root name={name} id={name} error={error} hint={hint} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <FieldLabel action={labelAction}>{label}</FieldLabel>
+          <Field.Label action={labelAction}>{label}</Field.Label>
           <ColorPickerToggle
             ref={composedRefs}
             aria-label={formatMessage({
@@ -131,7 +120,7 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                 {color}
               </Typography>
             </Flex>
-            <CarretDown aria-hidden />
+            <CaretDown aria-hidden />
           </ColorPickerToggle>
           {showColorPicker && (
             <ColorPickerPopover
@@ -144,32 +133,33 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                 <ColorPicker color={color} onChange={(hexValue) => onChange(name, hexValue)} />
                 <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
                   <Box paddingRight={2}>
-                    <Typography variant="omega" as="label" textColor="neutral600">
+                    <Typography variant="omega" tag="label" textColor="neutral600">
                       {formatMessage({
                         id: getTrad('color-picker.input.format'),
                         defaultMessage: 'HEX',
                       })}
                     </Typography>
                   </Box>
-                  <FieldInput
-                    id="color-picker-value"
-                    aria-label={formatMessage({
-                      id: getTrad('color-picker.input.aria-label'),
-                      defaultMessage: 'Color picker input',
-                    })}
-                    style={{ textTransform: 'uppercase' }}
-                    value={value}
-                    placeholder="#000000"
-                    onChange={onChange}
-                  />
+                  <Field.Root>
+                    <Field.Input
+                      aria-label={formatMessage({
+                        id: getTrad('color-picker.input.aria-label'),
+                        defaultMessage: 'Color picker input',
+                      })}
+                      style={{ textTransform: 'uppercase' }}
+                      value={value}
+                      placeholder="#000000"
+                      onChange={onChange}
+                    />
+                  </Field.Root>
                 </Flex>
               </FocusTrap>
             </ColorPickerPopover>
           )}
-          <FieldHint />
-          <FieldError />
+          <Field.Hint />
+          <Field.Error />
         </Flex>
-      </Field>
+      </Field.Root>
     );
   }
 );

@@ -132,7 +132,7 @@ export declare namespace Clone {
 }
 
 /**
- * POST /collection-types/:model/:id
+ * PUT /collection-types/:model/:id
  */
 export declare namespace Update {
   export interface Request {
@@ -282,7 +282,9 @@ export declare namespace BulkDelete {
     body: {
       documentIds: Modules.Documents.ID[];
     };
-    query: {};
+    query: {
+      locale?: string;
+    };
   }
 
   export interface Params {

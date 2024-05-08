@@ -45,7 +45,7 @@ export interface GetMetadataOptions {
   availableStatus?: boolean;
 }
 
-export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
+export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
@@ -133,8 +133,8 @@ export default ({ strapi }: { strapi: Core.LoadedStrapi }) => ({
   getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
     const isDraft = version.publishedAt === null;
 
-    // It can only be a draft if there are no other versions
     if (!otherDocumentStatuses?.length) {
+      // It there are no other versions we take the current version status
       return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
     }
 

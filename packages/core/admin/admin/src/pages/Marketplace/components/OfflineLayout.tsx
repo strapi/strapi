@@ -1,5 +1,7 @@
-import { Box, Flex, Layout, Main, Typography } from '@strapi/design-system';
+import { Box, Flex, Main, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+
+import { Layouts } from '../../../components/Layouts/Layout';
 
 import { PageHeader } from './PageHeader';
 
@@ -7,7 +9,7 @@ const OfflineLayout = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Main>
         <PageHeader />
         <Flex
@@ -15,7 +17,7 @@ const OfflineLayout = () => {
           direction="column"
           alignItems="center"
           justifyContent="center"
-          paddingTop={`${120 / 16}rem`}
+          paddingTop={`12rem`}
         >
           <Box paddingBottom={2}>
             <Typography textColor="neutral700" variant="alpha">
@@ -49,7 +51,7 @@ const OfflineLayout = () => {
           </svg>
         </Flex>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

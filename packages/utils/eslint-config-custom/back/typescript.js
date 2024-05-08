@@ -20,6 +20,7 @@ module.exports = {
     // to be solved in configuration
     'node/no-unsupported-features/es-syntax': 'off',
     'import/prefer-default-export': 'off',
+    'import/namespace': 'off',
     'node/no-missing-import': 'off',
     '@typescript-eslint/brace-style': 'off', // TODO: fix conflict with prettier/prettier in data-transfer/engine/index.ts
     // to be cleaned up throughout codebase (too many to fix at the moment)

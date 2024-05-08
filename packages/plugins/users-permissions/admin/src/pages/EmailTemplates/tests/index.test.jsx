@@ -29,9 +29,111 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
     });
 
     expect(container).toMatchInlineSnapshot(`
+      .c0 {
+        margin-inline-start: -250px;
+        position: fixed;
+        left: 50%;
+        top: 4.6rem;
+        z-index: 10;
+        width: 50rem;
+      }
+
+      .c3 {
+        background: #f6f6f9;
+        padding-block-start: 40px;
+        padding-inline-end: 56px;
+        padding-block-end: 40px;
+        padding-inline-start: 56px;
+      }
+
+      .c5 {
+        min-width: 0;
+      }
+
+      .c8 {
+        padding-inline-end: 56px;
+        padding-inline-start: 56px;
+      }
+
+      .c9 {
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+      }
+
+      .c11 {
+        position: relative;
+      }
+
+      .c13 {
+        padding-inline-end: 24px;
+        padding-inline-start: 24px;
+      }
+
+      .c18 {
+        width: 1%;
+      }
+
+      .c25 {
+        background: #ffffff;
+        padding-block: 8px;
+        padding-inline: 8px;
+        border-radius: 4px;
+        border-width: 0;
+        border-color: #dcdce4;
+        cursor: pointer;
+      }
+
+      .c7 {
+        font-weight: 600;
+        font-size: 3.2rem;
+        line-height: 1.25;
+        color: currentcolor;
+      }
+
+      .c22 {
+        font-weight: 600;
+        font-size: 1.1rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        color: #666687;
+      }
+
+      .c24 {
+        font-size: 1.4rem;
+        line-height: 1.43;
+        color: currentcolor;
+      }
+
+      .c1 {
+        align-items: stretch;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .c26 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .c4 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+
+      .c6 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+      }
+
       .c20 {
         border: 0;
-        -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
         height: 1px;
         margin: -1px;
@@ -41,177 +143,17 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         width: 1px;
       }
 
-      .c7 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c22 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c26 {
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c0 {
-        margin-left: -250px;
-        position: fixed;
-        left: 50%;
-        top: 2.875rem;
-        z-index: 10;
-        width: 31.25rem;
-      }
-
-      .c3 {
-        background: #f6f6f9;
-        padding-top: 40px;
-        padding-right: 56px;
-        padding-bottom: 40px;
-        padding-left: 56px;
-      }
-
-      .c5 {
-        min-width: 0;
-      }
-
-      .c8 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c9 {
-        background: #ffffff;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c11 {
-        position: relative;
-      }
-
-      .c13 {
-        padding-right: 24px;
-        padding-left: 24px;
-      }
-
-      .c18 {
-        width: 1%;
-      }
-
-      .c24 {
-        color: #666687;
-      }
-
       .c27 {
-        background: #ffffff;
-        padding: 8px;
-        border-radius: 4px;
-        border-width: 0;
-        border-color: #dcdce4;
-        cursor: pointer;
-      }
-
-      .c1 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .c28 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
-      .c4 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c6 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c25 path {
-        fill: #666687;
-      }
-
-      .c29 {
         position: relative;
         outline: none;
       }
 
-      .c29 > svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c29 > svg > g,
-      .c29 > svg path {
-        fill: #ffffff;
-      }
-
-      .c29[aria-disabled='true'] {
+      .c27[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c29:after {
-        -webkit-transition-property: all;
+      .c27:after {
         transition-property: all;
-        -webkit-transition-duration: 0.2s;
         transition-duration: 0.2s;
         border-radius: 8px;
         content: '';
@@ -223,11 +165,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 2px solid transparent;
       }
 
-      .c29:focus-visible {
+      .c27:focus-visible {
         outline: none;
       }
 
-      .c29:focus-visible:after {
+      .c27:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -238,26 +180,20 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
         border: 2px solid #4945ff;
       }
 
-      .c30 {
+      .c28 {
         border-color: #dcdce4;
-        height: 2rem;
-        width: 2rem;
+        height: 3.2rem;
+        width: 3.2rem;
+        color: #8e8ea9;
       }
 
-      .c30 svg g,
-      .c30 svg path {
-        fill: #8e8ea9;
+      .c28:hover,
+      .c28:focus {
+        color: #666687;
       }
 
-      .c30:hover svg g,
-      .c30:focus svg g,
-      .c30:hover svg path,
-      .c30:focus svg path {
-        fill: #666687;
-      }
-
-      .c30[aria-disabled='true'] svg path {
-        fill: #666687;
+      .c28[aria-disabled='true'] {
+        color: #666687;
       }
 
       .c2:focus-visible {
@@ -275,21 +211,21 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c12:before {
-        background: linear-gradient(90deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        background: linear-gradient(90deg, #c0c0cf 0%, rgba(0, 0, 0, 0) 100%);
         opacity: 0.2;
         position: absolute;
         height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
         width: 8px;
         left: 0;
       }
 
       .c12:after {
-        background: linear-gradient(270deg,#c0c0cf 0%,rgba(0,0,0,0) 100%);
+        background: linear-gradient(270deg, #c0c0cf 0%, rgba(0, 0, 0, 0) 100%);
         opacity: 0.2;
         position: absolute;
         height: 100%;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+        box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
         width: 8px;
         right: 0;
         top: 0;
@@ -324,7 +260,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       .c17 th {
         padding-top: 0;
         padding-bottom: 0;
-        height: 3.5rem;
+        height: 5.6rem;
       }
 
       .c19 {
@@ -339,7 +275,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
       }
 
       .c21 svg {
-        height: 0.25rem;
+        height: 0.4rem;
       }
 
       <div>
@@ -409,11 +345,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <div
                             class="c6"
                           >
-                            <div
+                            <span
                               class="c20"
                             >
                               icon
-                            </div>
+                            </span>
                             <span
                               class="c21"
                             />
@@ -447,11 +383,11 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           <div
                             class="c6"
                           >
-                            <div
+                            <span
                               class="c20"
                             >
                               action
-                            </div>
+                            </span>
                             <span
                               class="c21"
                             />
@@ -472,25 +408,18 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           role="gridcell"
                           tabindex="-1"
                         >
-                          <div
-                            class="c24 c25"
+                          <svg
+                            aria-label="Reset password"
+                            fill="currentColor"
+                            height="16"
+                            viewBox="0 0 32 32"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <svg
-                              aria-label="Reset password"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                clip-rule="evenodd"
-                                d="M15.681 2.804A9.64 9.64 0 0 0 11.818 2C6.398 2 2 6.48 2 12c0 5.521 4.397 10 9.818 10 2.03 0 4.011-.641 5.67-1.835a9.987 9.987 0 0 0 3.589-4.831 1.117 1.117 0 0 0-.664-1.418 1.086 1.086 0 0 0-1.393.676 7.769 7.769 0 0 1-2.792 3.758 7.546 7.546 0 0 1-4.41 1.428V4.222h.002a7.492 7.492 0 0 1 3.003.625 7.61 7.61 0 0 1 2.5 1.762l.464.551-2.986 3.042a.186.186 0 0 0 .129.316H22V3.317a.188.188 0 0 0-.112-.172.179.179 0 0 0-.199.04l-2.355 2.4-.394-.468-.02-.02a9.791 9.791 0 0 0-3.239-2.293Zm-3.863 1.418V2v2.222Zm0 0v15.556c-4.216 0-7.636-3.484-7.636-7.778s3.42-7.777 7.636-7.778Z"
-                                fill="#212134"
-                                fill-rule="evenodd"
-                              />
-                            </svg>
-                          </div>
+                            <path
+                              d="M30.5 7v6a1.5 1.5 0 0 1-1.5 1.5h-6a1.5 1.5 0 0 1 0-3h2.137l-2.375-2.173-.047-.046a9.5 9.5 0 1 0-6.84 16.219H16a9.44 9.44 0 0 0 6.519-2.59 1.5 1.5 0 1 1 2.061 2.181A12.43 12.43 0 0 1 16 28.5h-.171a12.5 12.5 0 1 1 8.985-21.368L27.5 9.59V7a1.5 1.5 0 0 1 3 0"
+                            />
+                          </svg>
                         </td>
                         <td
                           aria-colindex="2"
@@ -499,7 +428,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           tabindex="-1"
                         >
                           <span
-                            class="c26"
+                            class="c24"
                           >
                             Reset password
                           </span>
@@ -513,7 +442,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                             <button
                               aria-disabled="false"
                               aria-labelledby=":r0:"
-                              class="c27 c28 c29 c30"
+                              class="c25 c26 c27 c28"
                               tabindex="-1"
                               type="button"
                             >
@@ -524,18 +453,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                               </span>
                               <svg
                                 aria-hidden="true"
-                                fill="none"
+                                fill="currentColor"
                                 focusable="false"
-                                height="1rem"
-                                viewBox="0 0 24 24"
-                                width="1rem"
+                                height="16"
+                                viewBox="0 0 32 32"
+                                width="16"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
-                                  clip-rule="evenodd"
-                                  d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
-                                  fill="#212134"
-                                  fill-rule="evenodd"
+                                  d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
                                 />
                               </svg>
                             </button>
@@ -552,23 +478,18 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           role="gridcell"
                           tabindex="-1"
                         >
-                          <div
-                            class="c24 c25"
+                          <svg
+                            aria-label="Email address confirmation"
+                            fill="currentColor"
+                            height="16"
+                            viewBox="0 0 32 32"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
                           >
-                            <svg
-                              aria-label="Email address confirmation"
-                              fill="none"
-                              height="1rem"
-                              viewBox="0 0 24 24"
-                              width="1rem"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M20.727 2.97a.2.2 0 0 1 .286 0l2.85 2.89a.2.2 0 0 1 0 .28L9.554 20.854a.2.2 0 0 1-.285 0l-9.13-9.243a.2.2 0 0 1 0-.281l2.85-2.892a.2.2 0 0 1 .284 0l6.14 6.209L20.726 2.97Z"
-                                fill="#212134"
-                              />
-                            </svg>
-                          </div>
+                            <path
+                              d="m29.061 10.061-16 16a1.5 1.5 0 0 1-2.125 0l-7-7a1.504 1.504 0 0 1 2.125-2.125L12 22.875 26.939 7.939a1.502 1.502 0 1 1 2.125 2.125z"
+                            />
+                          </svg>
                         </td>
                         <td
                           aria-colindex="2"
@@ -577,7 +498,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                           tabindex="-1"
                         >
                           <span
-                            class="c26"
+                            class="c24"
                           >
                             Email address confirmation
                           </span>
@@ -591,7 +512,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                             <button
                               aria-disabled="false"
                               aria-labelledby=":r2:"
-                              class="c27 c28 c29 c30"
+                              class="c25 c26 c27 c28"
                               tabindex="-1"
                               type="button"
                             >
@@ -602,18 +523,15 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
                               </span>
                               <svg
                                 aria-hidden="true"
-                                fill="none"
+                                fill="currentColor"
                                 focusable="false"
-                                height="1rem"
-                                viewBox="0 0 24 24"
-                                width="1rem"
+                                height="16"
+                                viewBox="0 0 32 32"
+                                width="16"
                                 xmlns="http://www.w3.org/2000/svg"
                               >
                                 <path
-                                  clip-rule="evenodd"
-                                  d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
-                                  fill="#212134"
-                                  fill-rule="evenodd"
+                                  d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
                                 />
                               </svg>
                             </button>
@@ -627,7 +545,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
             </div>
           </div>
         </main>
-        <div
+        <span
           class="c20"
         >
           <p
@@ -648,7 +566,7 @@ describe('ADMIN | Pages | Settings | Email Templates', () => {
             id="live-region-alert"
             role="alert"
           />
-        </div>
+        </span>
       </div>
     `);
   });

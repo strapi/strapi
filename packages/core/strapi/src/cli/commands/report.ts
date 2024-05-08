@@ -1,6 +1,6 @@
 import { createCommand } from 'commander';
 import { EOL } from 'os';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi, compileStrapi } from '@strapi/core';
 import type { StrapiCommand } from '../types';
 import { runAction } from '../utils/helpers';
 
@@ -16,8 +16,8 @@ const action = async ({ uuid, dependencies, all }: CmdOptions) => {
     reportDependencies: Boolean(all || dependencies),
   };
 
-  const appContext = await strapiFactory.compile();
-  const app = await strapiFactory(appContext).register();
+  const appContext = await compileStrapi();
+  const app = await createStrapi(appContext).register();
 
   let debugInfo = `Launched In: ${Date.now() - app.config.launchedAt} ms
 Environment: ${app.config.environment}

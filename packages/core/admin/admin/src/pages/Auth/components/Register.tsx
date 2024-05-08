@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import { Box, Button, Flex, Grid, GridItem, Typography, Link } from '@strapi/design-system';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 import { ValidationError } from 'yup';
 
@@ -292,7 +291,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         <Flex direction="column" alignItems="center" gap={3}>
           <Logo />
 
-          <Typography as="h1" variant="alpha" textAlign="center">
+          <Typography tag="h1" variant="alpha" textAlign="center">
             {formatMessage({
               id: 'Auth.form.welcome.title',
               defaultMessage: 'Welcome to Strapi!',
@@ -474,8 +473,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         {match?.params.authType === 'register' && (
           <Box paddingTop={4}>
             <Flex justifyContent="center">
-              {/* @ts-expect-error – error with inferring the props from the as component */}
-              <Link as={NavLink} to="/auth/login">
+              <Link tag={NavLink} to="/auth/login">
                 {formatMessage({
                   id: 'Auth.link.signin.account',
                   defaultMessage: 'Already have an account?',

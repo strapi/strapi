@@ -3,14 +3,14 @@ import CLITable from 'cli-table3';
 import chalk from 'chalk';
 import { toUpper } from 'lodash/fp';
 
-import { strapiFactory } from '@strapi/core';
+import { createStrapi, compileStrapi } from '@strapi/core';
 
 import type { StrapiCommand } from '../../types';
 import { runAction } from '../../utils/helpers';
 
 const action = async () => {
-  const appContext = await strapiFactory.compile();
-  const app = await strapiFactory(appContext).load();
+  const appContext = await compileStrapi();
+  const app = await createStrapi(appContext).load();
 
   const list = app.server.mount().listRoutes();
 

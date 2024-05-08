@@ -1,11 +1,8 @@
 import * as React from 'react';
 
-import { useTracking } from '@strapi/admin/strapi-admin';
+import { useTracking, Layouts } from '@strapi/admin/strapi-admin';
 import {
-  ContentLayout,
-  HeaderLayout,
   IconButton,
-  Layout,
   Table,
   Tbody,
   Td,
@@ -25,7 +22,6 @@ import {
   useRBAC,
 } from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -148,9 +144,9 @@ export const ProvidersPage = () => {
   }
 
   return (
-    <Layout>
-      <Helmet
-        title={formatMessage(
+    <Layouts.Root>
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -159,15 +155,15 @@ export const ProvidersPage = () => {
             }),
           }
         )}
-      />
+      </Page.Title>
       <Page.Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: getTrad('HeaderNav.link.providers'),
             defaultMessage: 'Providers',
           })}
         />
-        <ContentLayout>
+        <Layouts.Content>
           <Table colCount={3} rowCount={providers.length + 1}>
             <Thead>
               <Tr>
@@ -234,7 +230,7 @@ export const ProvidersPage = () => {
               ))}
             </Tbody>
           </Table>
-        </ContentLayout>
+        </Layouts.Content>
       </Page.Main>
       <FormModal
         initialData={data[providerToEditName]}
@@ -252,7 +248,7 @@ export const ProvidersPage = () => {
         onSubmit={handleSubmit}
         providerToEditName={providerToEditName}
       />
-    </Layout>
+    </Layouts.Root>
   );
 };
 

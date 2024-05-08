@@ -1,4 +1,4 @@
-import { setCreatorFields, errors, convertQueryParams } from '@strapi/utils';
+import { setCreatorFields, errors } from '@strapi/utils';
 
 import type { Core, Modules, Struct, Internal, UID } from '@strapi/types';
 
@@ -14,6 +14,7 @@ import type {
   Release,
   DeleteRelease,
   GetContentTypeEntryReleases,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type {
   CreateReleaseAction,
@@ -48,7 +49,7 @@ const getGroupName = (queryValue?: ReleaseActionGroupBy) => {
   }
 };
 
-const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
+const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
     event: string,
     { isPublished, release, error }: { isPublished: boolean; release?: any; error?: unknown }
@@ -236,7 +237,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     },
 
     async findOne(id: GetRelease.Request['params']['id'], query = {}) {
-      const dbQuery = convertQueryParams.transformParamsToQuery(RELEASE_MODEL_UID, query);
+      const dbQuery = strapi.get('query-params').transform(RELEASE_MODEL_UID, query);
       const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
         ...dbQuery,
         where: { id },
@@ -246,7 +247,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     },
 
     findPage(query?: GetReleases.Request['query']) {
-      const dbQuery = convertQueryParams.transformParamsToQuery(RELEASE_MODEL_UID, query ?? {});
+      const dbQuery = strapi.get('query-params').transform(RELEASE_MODEL_UID, query ?? {});
 
       return strapi.db.query(RELEASE_MODEL_UID).findPage({
         ...dbQuery,
@@ -260,13 +261,23 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
     async findManyWithContentTypeEntryAttached(
       contentTypeUid: GetContentTypeEntryReleases.Request['query']['contentTypeUid'],
-      entryId: GetContentTypeEntryReleases.Request['query']['entryId']
+      entriesIds:
+        | GetContentTypeEntryReleases.Request['query']['entryId']
+        | MapEntriesToReleases.Request['query']['entriesIds']
     ) {
+      // entriesIds could be an array or a single value
+      let entries = entriesIds;
+      if (!Array.isArray(entriesIds)) {
+        entries = [entriesIds];
+      }
+
       const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
         where: {
           actions: {
             target_type: contentTypeUid,
-            target_id: entryId,
+            target_id: {
+              $in: entries,
+            },
           },
           releasedAt: {
             $null: true,
@@ -277,7 +288,14 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
           actions: {
             where: {
               target_type: contentTypeUid,
-              target_id: entryId,
+              target_id: {
+                $in: entries,
+              },
+            },
+            populate: {
+              entry: {
+                select: ['id'],
+              },
             },
           },
         },
@@ -285,14 +303,14 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
       return releases.map((release) => {
         if (release.actions?.length) {
-          const [actionForEntry] = release.actions;
+          const actionsForEntry = release.actions;
 
           // Remove the actions key to replace it with an action key
           delete release.actions;
 
           return {
             ...release,
-            action: actionForEntry,
+            actions: actionsForEntry,
           };
         }
 
@@ -467,10 +485,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      const dbQuery = convertQueryParams.transformParamsToQuery(
-        RELEASE_ACTION_MODEL_UID,
-        query ?? {}
-      );
+      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
 
       return strapi.db.query(RELEASE_ACTION_MODEL_UID).findPage({
         ...dbQuery,
@@ -488,10 +503,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
     async countActions(
       query: Modules.EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
     ) {
-      const dbQuery = convertQueryParams.transformParamsToQuery(
-        RELEASE_ACTION_MODEL_UID,
-        query ?? {}
-      );
+      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
 
       return strapi.db.query(RELEASE_ACTION_MODEL_UID).count(dbQuery);
     },
@@ -504,9 +516,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
 
         return acc;
       }, []);
-      const allReleaseContentTypesDictionary = await this.getContentTypesDataForActions(
-        contentTypeUids
-      );
+      const allReleaseContentTypesDictionary =
+        await this.getContentTypesDataForActions(contentTypeUids);
       const allLocalesDictionary = await this.getLocalesDataForActions();
 
       const formattedData = actions.map((action: ReleaseAction) => {
@@ -689,9 +700,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
           try {
             strapi.log.info(`[Content Releases] Starting to publish release ${lockedRelease.name}`);
 
-            const { collectionTypeActions, singleTypeActions } = await getFormattedActions(
-              releaseId
-            );
+            const { collectionTypeActions, singleTypeActions } =
+              await getFormattedActions(releaseId);
 
             await strapi.db.transaction(async () => {
               // First we publish all the singleTypes

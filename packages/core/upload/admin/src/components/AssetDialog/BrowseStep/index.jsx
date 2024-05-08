@@ -11,10 +11,10 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { Grid, List, Pencil, Plus } from '@strapi/icons';
+import { GridFour as Grid, List, Pencil, Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import {
   AssetDefinition,
@@ -131,7 +131,7 @@ export const BrowseStep = ({
                     background="neutral0"
                     hasRadius
                     borderColor="neutral200"
-                    height={`${32 / 16}rem`}
+                    height="3.2rem"
                   >
                     <BaseCheckbox
                       aria-label={formatMessage({
@@ -182,7 +182,7 @@ export const BrowseStep = ({
         <Box paddingTop={3}>
           <Breadcrumbs
             onChangeFolder={onChangeFolder}
-            as="nav"
+            tag="nav"
             label={formatMessage({
               id: getTrad('header.breadcrumbs.nav.label'),
               defaultMessage: 'Folders navigation',
@@ -218,14 +218,14 @@ export const BrowseStep = ({
                     defaultMessage: 'There are no assets with the applied filters',
                   })
                 : canCreate && !isSearching
-                ? formatMessage({
-                    id: getTrad('list.assets.empty'),
-                    defaultMessage: 'Upload your first assets...',
-                  })
-                : formatMessage({
-                    id: getTrad('list.assets.empty.no-permissions'),
-                    defaultMessage: 'The asset list is empty',
-                  })
+                  ? formatMessage({
+                      id: getTrad('list.assets.empty'),
+                      defaultMessage: 'Upload your first assets...',
+                    })
+                  : formatMessage({
+                      id: getTrad('list.assets.empty.no-permissions'),
+                      defaultMessage: 'The asset list is empty',
+                    })
             }
           />
         </Box>
@@ -291,7 +291,7 @@ export const BrowseStep = ({
                         <FolderCardBodyAction
                           onClick={() => handleClickFolderCard(folder.id, folder.path)}
                         >
-                          <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                          <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
                             <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                               {folder.name}
                               {/* VisuallyHidden dash here allows to separate folder title and count informations
@@ -299,7 +299,7 @@ export const BrowseStep = ({
                               <VisuallyHidden>-</VisuallyHidden>
                             </TypographyMaxWidth>
                             <TypographyMaxWidth
-                              as="span"
+                              tag="span"
                               textColor="neutral600"
                               variant="pi"
                               ellipsis

@@ -1,6 +1,9 @@
 import type { Intersect } from '../../../utils';
 import type { Attribute } from '../..';
 
+/**
+ * Represents a date Strapi attribute along with its options
+ */
 export type Date = Intersect<
   [
     Attribute.OfType<'date'>,
@@ -11,7 +14,7 @@ export type Date = Intersect<
     Attribute.RequiredOption,
     Attribute.UniqueOption,
     Attribute.WritableOption,
-    Attribute.VisibleOption
+    Attribute.VisibleOption,
   ]
 >;
 

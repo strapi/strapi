@@ -1,151 +1,25 @@
-import type { Core, Modules } from '@strapi/types';
-import { omit, pick } from 'lodash/fp';
-
-import { scheduleJob } from 'node-schedule';
+import type { Core, Data, Schema, Struct } from '@strapi/types';
+import { async, errors } from '@strapi/utils';
+import { omit } from 'lodash/fp';
 
 import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 import type { HistoryVersions } from '../../../../shared/contracts';
-import { getSchemaAttributesDiff } from './utils';
+import {
+  CreateHistoryVersion,
+  HistoryVersionDataResponse,
+} from '../../../../shared/contracts/history-versions';
+import { createServiceUtils } from './utils';
+import { getService as getContentManagerService } from '../../utils';
 
-const DEFAULT_RETENTION_DAYS = 90;
+// Needed because the query engine doesn't return any types yet
+type HistoryVersionQueryResult = Omit<HistoryVersionDataResponse, 'locale'> &
+  Pick<CreateHistoryVersion, 'locale'>;
 
-const createHistoryService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
-  const state: {
-    deleteExpiredJob: ReturnType<typeof scheduleJob> | null;
-    isInitialized: boolean;
-  } = {
-    deleteExpiredJob: null,
-    isInitialized: false,
-  };
-
+const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
   const query = strapi.db.query(HISTORY_VERSION_UID);
-
-  const getRetentionDays = (strapi: Core.LoadedStrapi) => {
-    const licenseRetentionDays =
-      strapi.ee.features.get('cms-content-history')?.options.retentionDays;
-    const userRetentionDays: number = strapi.config.get('admin.history.retentionDays');
-
-    // Allow users to override the license retention days, but not to increase it
-    if (userRetentionDays && userRetentionDays < licenseRetentionDays) {
-      return userRetentionDays;
-    }
-
-    // User didn't provide retention days value, use the license or fallback to default
-    return Math.min(licenseRetentionDays, DEFAULT_RETENTION_DAYS);
-  };
-
-  const localesService = strapi.plugin('i18n').service('locales');
-  const getLocaleDictionary = async () => {
-    const locales = (await localesService.find()) || [];
-    return locales.reduce(
-      (
-        acc: Record<string, NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>>,
-        locale: NonNullable<HistoryVersions.HistoryVersionDataResponse['locale']>
-      ) => {
-        acc[locale.code] = { name: locale.name, code: locale.code };
-
-        return acc;
-      },
-      {}
-    );
-  };
-
-  const getVersionStatus = async (
-    contentTypeUid: HistoryVersions.CreateHistoryVersion['contentType'],
-    document: Modules.Documents.AnyDocument | null
-  ) => {
-    const documentMetadataService = strapi.plugin('content-manager').service('document-metadata');
-    const meta = await documentMetadataService.getMetadata(contentTypeUid, document);
-
-    return documentMetadataService.getStatus(document, meta.availableStatus);
-  };
+  const serviceUtils = createServiceUtils({ strapi });
 
   return {
-    async bootstrap() {
-      // Prevent initializing the service twice
-      if (state.isInitialized) {
-        return;
-      }
-      /**
-       * TODO: Fix the types for the middleware
-       */
-      strapi.documents.use(async (context, next) => {
-        // Ignore requests that are not related to the content manager
-        if (!strapi.requestContext.get()?.request.url.startsWith('/content-manager')) {
-          return next(context);
-        }
-
-        // Ignore actions that don't mutate documents
-        if (
-          !['create', 'update', 'publish', 'unpublish', 'discardDraft'].includes(context.action)
-        ) {
-          return next(context);
-        }
-
-        // @ts-expect-error ContentType is not typed correctly on the context
-        const contentTypeUid = context.contentType.uid;
-        // Ignore content types not created by the user
-        if (!contentTypeUid.startsWith('api::')) {
-          return next(context);
-        }
-
-        const result = (await next(context)) as any;
-
-        const documentContext =
-          context.action === 'create'
-            ? // @ts-expect-error The context args are not typed correctly
-              { documentId: result.documentId, locale: context.args[0]?.locale }
-            : { documentId: context.args[0], locale: context.args[1]?.locale };
-
-        const locale = documentContext.locale ?? (await localesService.getDefaultLocale());
-        const document = await strapi
-          .documents(contentTypeUid)
-          .findOne(documentContext.documentId, {
-            locale,
-          });
-        const status = await getVersionStatus(contentTypeUid, document);
-
-        // Prevent creating a history version for an action that wasn't actually executed
-        await strapi.db.transaction(async ({ onCommit }) => {
-          onCommit(() => {
-            this.createVersion({
-              contentType: contentTypeUid,
-              data: omit(FIELDS_TO_IGNORE, document),
-              schema: omit(FIELDS_TO_IGNORE, strapi.contentType(contentTypeUid).attributes),
-              relatedDocumentId: documentContext.documentId,
-              locale,
-              status,
-            });
-          });
-        });
-
-        return result;
-      });
-
-      const retentionDays = getRetentionDays(strapi);
-      // Schedule a job to delete expired history versions every day at midnight
-      state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
-        const retentionDaysInMilliseconds = retentionDays * 24 * 60 * 60 * 1000;
-        const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
-
-        query.deleteMany({
-          where: {
-            created_at: {
-              $lt: expirationDate.toISOString(),
-            },
-          },
-        });
-      });
-
-      state.isInitialized = true;
-    },
-
-    async destroy() {
-      if (state.deleteExpiredJob) {
-        state.deleteExpiredJob.cancel();
-      }
-    },
-
     async createVersion(historyVersionData: HistoryVersions.CreateHistoryVersion) {
       await query.create({
         data: {
@@ -156,48 +30,211 @@ const createHistoryService = ({ strapi }: { strapi: Core.LoadedStrapi }) => {
       });
     },
 
-    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request['query']) {
+    async findVersionsPage(params: HistoryVersions.GetHistoryVersions.Request): Promise<{
+      results: HistoryVersions.HistoryVersionDataResponse[];
+      pagination: HistoryVersions.Pagination;
+    }> {
+      const locale = params.query.locale || (await serviceUtils.getDefaultLocale());
       const [{ results, pagination }, localeDictionary] = await Promise.all([
         query.findPage({
-          ...params,
+          ...params.query,
           where: {
             $and: [
-              { contentType: params.contentType },
-              ...(params.documentId ? [{ relatedDocumentId: params.documentId }] : []),
-              ...(params.locale ? [{ locale: params.locale }] : []),
+              { contentType: params.query.contentType },
+              ...(params.query.documentId ? [{ relatedDocumentId: params.query.documentId }] : []),
+              ...(locale ? [{ locale }] : []),
             ],
           },
           populate: ['createdBy'],
           orderBy: [{ createdAt: 'desc' }],
         }),
-        getLocaleDictionary(),
+        serviceUtils.getLocaleDictionary(),
       ]);
 
-      const versionsWithMeta = results.map((version) => {
-        const { added, removed } = getSchemaAttributesDiff(
-          version.schema,
-          strapi.getModel(params.contentType).attributes
+      const populateEntryRelations = async (
+        entry: HistoryVersionQueryResult
+      ): Promise<CreateHistoryVersion['data']> => {
+        const entryWithRelations = await Object.entries(entry.schema).reduce(
+          async (currentDataWithRelations, [attributeKey, attributeSchema]) => {
+            const attributeValue = entry.data[attributeKey];
+            const attributeValues = Array.isArray(attributeValue)
+              ? attributeValue
+              : [attributeValue];
+
+            if (attributeSchema.type === 'media') {
+              const permissionChecker = getContentManagerService('permission-checker').create({
+                userAbility: params.state.userAbility,
+                model: 'plugin::upload.file',
+              });
+
+              const response = await serviceUtils.buildMediaResponse(attributeValues);
+              const sanitizedResults = await Promise.all(
+                response.results.map((media) => permissionChecker.sanitizeOutput(media))
+              );
+
+              return {
+                ...(await currentDataWithRelations),
+                [attributeKey]: {
+                  results: sanitizedResults,
+                  meta: response.meta,
+                },
+              };
+            }
+
+            // TODO: handle relations that are inside components
+            if (
+              attributeSchema.type === 'relation' &&
+              attributeSchema.relation !== 'morphToOne' &&
+              attributeSchema.relation !== 'morphToMany'
+            ) {
+              /**
+               * Don't build the relations response object for relations to admin users,
+               * because pickAllowedAdminUserFields will sanitize the data in the controller.
+               */
+              if (attributeSchema.target === 'admin::user') {
+                const adminUsers = await Promise.all(
+                  attributeValues.map((userToPopulate) => {
+                    if (userToPopulate == null) {
+                      return null;
+                    }
+
+                    return strapi
+                      .query('admin::user')
+                      .findOne({ where: { id: userToPopulate.id } });
+                  })
+                );
+
+                return {
+                  ...(await currentDataWithRelations),
+                  /**
+                   * Ideally we would return the same "{results: [], meta: {}}" shape, however,
+                   * when sanitizing the data as a whole in the controller before sending to the client,
+                   * the data for admin relation user is completely sanitized if we return an object here as opposed to an array.
+                   */
+                  [attributeKey]: adminUsers,
+                };
+              }
+
+              const permissionChecker = getContentManagerService('permission-checker').create({
+                userAbility: params.state.userAbility,
+                model: attributeSchema.target,
+              });
+
+              const response = await serviceUtils.buildRelationReponse(
+                attributeValues,
+                attributeSchema
+              );
+              const sanitizedResults = await Promise.all(
+                response.results.map((media) => permissionChecker.sanitizeOutput(media))
+              );
+
+              return {
+                ...(await currentDataWithRelations),
+                [attributeKey]: {
+                  results: sanitizedResults,
+                  meta: response.meta,
+                },
+              };
+            }
+
+            // Not a media or relation, nothing to change
+            return currentDataWithRelations;
+          },
+          Promise.resolve(entry.data)
         );
-        const hasSchemaDiff = Object.keys(added).length > 0 || Object.keys(removed).length > 0;
 
-        return {
-          ...version,
-          ...(hasSchemaDiff ? { meta: { unknownAttributes: { added, removed } } } : {}),
-        };
-      });
+        return entryWithRelations;
+      };
 
-      const sanitizedResults = versionsWithMeta.map((result) => ({
-        ...result,
-        locale: result.locale ? localeDictionary[result.locale] : null,
-        createdBy: result.createdBy
-          ? pick(['id', 'firstname', 'lastname', 'username', 'email'], result.createdBy)
-          : null,
-      }));
+      const formattedResults = await Promise.all(
+        (results as HistoryVersionQueryResult[]).map(async (result) => {
+          return {
+            ...result,
+            data: await populateEntryRelations(result),
+            meta: {
+              unknownAttributes: serviceUtils.getSchemaAttributesDiff(
+                result.schema,
+                strapi.getModel(params.query.contentType).attributes
+              ),
+            },
+            locale: result.locale ? localeDictionary[result.locale] : null,
+          };
+        })
+      );
 
       return {
-        results: sanitizedResults,
+        results: formattedResults,
         pagination,
       };
+    },
+
+    async restoreVersion(versionId: Data.ID) {
+      const version = await query.findOne({ where: { id: versionId } });
+      const contentTypeSchemaAttributes = strapi.getModel(version.contentType).attributes;
+      const schemaDiff = serviceUtils.getSchemaAttributesDiff(
+        version.schema,
+        contentTypeSchemaAttributes
+      );
+
+      // Set all added attribute values to null
+      const dataWithoutAddedAttributes = Object.keys(schemaDiff.added).reduce(
+        (currentData, addedKey) => {
+          currentData[addedKey] = null;
+          return currentData;
+        },
+        // Clone to avoid mutating the original version data
+        structuredClone(version.data)
+      );
+      const sanitizedSchemaAttributes = omit(
+        FIELDS_TO_IGNORE,
+        contentTypeSchemaAttributes
+      ) as Struct.SchemaAttributes;
+
+      // Set all deleted relation values to null
+      const reducer = async.reduce(Object.entries(sanitizedSchemaAttributes));
+      const dataWithoutMissingRelations = await reducer(
+        async (
+          previousRelationAttributes: Record<string, unknown>,
+          [name, attribute]: [string, Schema.Attribute.AnyAttribute]
+        ) => {
+          const versionRelationData = version.data[name];
+          if (!versionRelationData) {
+            return previousRelationAttributes;
+          }
+
+          if (
+            attribute.type === 'relation' &&
+            // TODO: handle polymorphic relations
+            attribute.relation !== 'morphToOne' &&
+            attribute.relation !== 'morphToMany'
+          ) {
+            const data = await serviceUtils.getRelationRestoreValue(versionRelationData, attribute);
+            previousRelationAttributes[name] = data;
+          }
+
+          if (attribute.type === 'media') {
+            const data = await serviceUtils.getMediaRestoreValue(versionRelationData, attribute);
+            previousRelationAttributes[name] = data;
+          }
+
+          return previousRelationAttributes;
+        },
+        // Clone to avoid mutating the original version data
+        structuredClone(dataWithoutAddedAttributes)
+      );
+
+      const data = omit(['id', ...Object.keys(schemaDiff.removed)], dataWithoutMissingRelations);
+      const restoredDocument = await strapi.documents(version.contentType).update({
+        documentId: version.relatedDocumentId,
+        locale: version.locale,
+        data,
+      });
+
+      if (!restoredDocument) {
+        throw new errors.ApplicationError('Failed to restore version');
+      }
+
+      return restoredDocument;
     },
   };
 };

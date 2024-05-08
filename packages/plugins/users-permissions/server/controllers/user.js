@@ -11,28 +11,27 @@ const utils = require('@strapi/utils');
 const { getService } = require('../utils');
 const { validateCreateUserBody, validateUpdateUserBody } = require('./validation/user');
 
-const { sanitize, validate } = utils;
 const { ApplicationError, ValidationError, NotFoundError } = utils.errors;
 
 const sanitizeOutput = async (user, ctx) => {
   const schema = strapi.getModel('plugin::users-permissions.user');
   const { auth } = ctx.state;
 
-  return sanitize.contentAPI.output(user, schema, { auth });
+  return strapi.contentAPI.sanitize.output(user, schema, { auth });
 };
 
 const validateQuery = async (query, ctx) => {
   const schema = strapi.getModel('plugin::users-permissions.user');
   const { auth } = ctx.state;
 
-  return validate.contentAPI.query(query, schema, { auth });
+  return strapi.contentAPI.validate.query(query, schema, { auth });
 };
 
 const sanitizeQuery = async (query, ctx) => {
   const schema = strapi.getModel('plugin::users-permissions.user');
   const { auth } = ctx.state;
 
-  return sanitize.contentAPI.query(query, schema, { auth });
+  return strapi.contentAPI.sanitize.query(query, schema, { auth });
 };
 
 module.exports = {

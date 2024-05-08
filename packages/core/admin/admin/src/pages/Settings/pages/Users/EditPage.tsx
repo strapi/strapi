@@ -1,18 +1,8 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
@@ -20,6 +10,7 @@ import * as yup from 'yup';
 import { Update } from '../../../../../../shared/contracts/user';
 import { Form, FormHelpers } from '../../../../components/Form';
 import { InputRenderer } from '../../../../components/FormInputs/Renderer';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
@@ -176,14 +167,14 @@ const EditPage = () => {
 
   return (
     <Page.Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Users',
           }
         )}
-      />
+      </Page.Title>
       <Form
         method="PUT"
         onSubmit={handleSubmit}
@@ -193,7 +184,7 @@ const EditPage = () => {
         {({ isSubmitting, modified }) => {
           return (
             <>
-              <HeaderLayout
+              <Layouts.Header
                 primaryAction={
                   <Button
                     disabled={isSubmitting || !canUpdate || !modified}
@@ -211,12 +202,13 @@ const EditPage = () => {
                     defaultMessage: 'Edit {name}',
                   },
                   {
-                    name: getDisplayName(initialData, formatMessage),
+                    // @ts-expect-error – issues with the Entity ID type, still.
+                    name: getDisplayName(initialData),
                   }
                 )}
                 navigationAction={<BackButton />}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 {user?.registrationToken && (
                   <Box paddingBottom={6}>
                     <MagicLink registrationToken={user.registrationToken} />
@@ -233,7 +225,7 @@ const EditPage = () => {
                     paddingRight={7}
                   >
                     <Flex direction="column" alignItems="stretch" gap={4}>
-                      <Typography variant="delta" as="h2">
+                      <Typography variant="delta" tag="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
                           defaultMessage: 'Details',
@@ -271,7 +263,7 @@ const EditPage = () => {
                     paddingRight={7}
                   >
                     <Flex direction="column" alignItems="stretch" gap={4}>
-                      <Typography variant="delta" as="h2">
+                      <Typography variant="delta" tag="h2">
                         {formatMessage({
                           id: 'global.roles',
                           defaultMessage: "User's role",
@@ -285,7 +277,7 @@ const EditPage = () => {
                     </Flex>
                   </Box>
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </>
           );
         }}

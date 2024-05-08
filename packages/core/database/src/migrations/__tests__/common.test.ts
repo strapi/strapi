@@ -8,9 +8,8 @@ describe('wrapTransaction', () => {
 
   beforeEach(() => {
     db = {
-      connection: {
-        transaction: jest.fn().mockImplementation((cb) => cb(trx)),
-      },
+      // eslint-disable-next-line node/no-callback-literal
+      transaction: jest.fn((cb) => cb({ trx })),
     } as any;
 
     fn = jest.fn().mockResolvedValue(undefined);
@@ -20,7 +19,7 @@ describe('wrapTransaction', () => {
     const wrappedFn = wrapTransaction(db)(fn);
     await wrappedFn();
 
-    expect(db.connection.transaction).toHaveBeenCalledWith(expect.any(Function));
+    expect(db.transaction).toHaveBeenCalledWith(expect.any(Function));
     expect(fn).toHaveBeenCalledWith(trx, db);
   });
 
@@ -41,7 +40,7 @@ describe('wrapTransaction', () => {
     const wrappedFn = wrapTransaction(db)(fn);
 
     await expect(wrappedFn()).rejects.toThrow(error);
-    expect(db.connection.transaction).toHaveBeenCalledWith(expect.any(Function));
+    expect(db.transaction).toHaveBeenCalledWith(expect.any(Function));
     expect(fn).toHaveBeenCalledWith(trx, db);
   });
 });
