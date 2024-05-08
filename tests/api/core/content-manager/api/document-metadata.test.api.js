@@ -2,6 +2,7 @@
 
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createTestBuilder } = require('api-tests/builder');
+const { createAuthRequest } = require('api-tests/request');
 const { testInTransaction } = require('../../../utils');
 
 const builder = createTestBuilder();
@@ -129,6 +130,18 @@ describe('CM API - Document metadata', () => {
         .plugin('content-manager')
         .service('document-metadata')
         .formatDocumentWithMetadata(...props);
+
+    rq = await createAuthRequest({ strapi });
+
+    await rq({
+      method: 'POST',
+      url: '/i18n/locales',
+      body: {
+        code: extraLocaleCode,
+        name: `Locale name: (${extraLocaleCode})`,
+        isDefault: false,
+      },
+    });
   });
 
   afterAll(async () => {
@@ -223,7 +236,6 @@ describe('CM API - Document metadata', () => {
   testInTransaction(
     'Returns modified status when draft is different from published version',
     async () => {
-      const documentId = 'product-modified-status';
       // Published versions should have different dates
       // We use the DB query layer here so we have control over the dates
       const documentId = 'product-modified-status';
@@ -246,7 +258,7 @@ describe('CM API - Document metadata', () => {
         {}
       );
 
-      expect(dataPublished.status).toBe('published');
+      expect(dataPublished.status).toBe('modified');
       expect(metaPublished.availableLocales).toMatchObject([{ locale: 'fr', status: 'modified' }]);
     }
   );
@@ -319,28 +331,14 @@ describe('CM API - Document metadata', () => {
   });
 
   test('Does not return any sensitive information in the available status', async () => {
-    const prefix = 'product-sensitive-info-test';
-    const defaultLocaleProduct = await rq({
-      method: 'POST',
-      url: `/content-manager/collection-types/${PRODUCT_UID}`,
-      body: {
-        name: `${prefix}-en-draft`,
-        features: {
-          name: `${prefix} Feature 1`,
-          description: `${prefix} Description 1`,
-          slogan: `${prefix} Slogan 1`,
-        },
-      },
-    });
-    const documentId = defaultLocaleProduct.body.data.documentId;
+    const identifier = 'product-sensitive-info-test';
 
-    await rq({
-      method: 'POST',
-      url: `/content-manager/collection-types/${PRODUCT_UID}/${documentId}/actions/publish`,
-      body: {},
-    });
+    const draftProduct = await createProduct(identifier, 'en', 'draft');
 
-    const publishedProduct = await getProduct(documentId, 'en', 'published');
+    const publishedProduct = (await strapi.documents(PRODUCT_UID).publish(draftProduct)).entries.at(
+      0
+    );
+
     const { data, meta } = await formatDocument(PRODUCT_UID, publishedProduct, {});
 
     expect(data.status).toBe('published');

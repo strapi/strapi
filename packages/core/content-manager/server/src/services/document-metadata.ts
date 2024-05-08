@@ -173,10 +173,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
   getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
     const isDraft = version.publishedAt === null;
-    const currentStatus = isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
 
     if (!otherDocumentStatuses?.length) {
-      return currentStatus;
+      return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
     }
 
     if (isDraft) {
