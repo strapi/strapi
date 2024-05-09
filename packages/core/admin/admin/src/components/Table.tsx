@@ -410,8 +410,8 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
     <Cell {...props} onClick={(e) => e.stopPropagation()}>
       <BaseCheckbox
         aria-label={formatMessage({
-          id: 'global.select-all-entries',
-          defaultMessage: 'Select all entries',
+          id: 'global.select',
+          defaultMessage: 'Select',
         })}
         disabled={rows.length === 0}
         checked={isChecked}

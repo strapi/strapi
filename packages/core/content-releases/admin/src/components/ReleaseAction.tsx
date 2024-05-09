@@ -48,7 +48,7 @@ const getContentPermissions = (subject: string) => {
   return permissions;
 };
 
-const ReleaseAction: BulkActionComponent = ({ documentIds, model }) => {
+const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -65,6 +65,7 @@ const ReleaseAction: BulkActionComponent = ({ documentIds, model }) => {
   const response = useGetReleasesQuery();
   const releases = response.data?.data;
   const [createManyReleaseActions, { isLoading }] = useCreateManyReleaseActionsMutation();
+  const documentIds = documents.map((doc) => doc.documentId);
 
   const handleSubmit = async (values: FormValues) => {
     const locale = query.plugins?.i18n?.locale;

@@ -39,6 +39,7 @@ import { getTranslation } from '../../utils/translations';
 import { getDisplayName } from '../../utils/users';
 import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
+import { BulkActionsRenderer } from './components/BulkActions/Actions';
 import { Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
@@ -238,7 +239,9 @@ const ListViewPage = () => {
       <Layouts.Content>
         <Flex gap={4} direction="column" alignItems="stretch">
           <Table.Root rows={results} headers={tableHeaders} isLoading={isLoading}>
-            <Table.ActionBar />
+            <Table.ActionBar>
+              <BulkActionsRenderer />
+            </Table.ActionBar>
             <Table.Content>
               <Table.Head>
                 <Table.HeaderCheckboxCell />
