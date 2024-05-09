@@ -322,5 +322,7 @@ const LoadingWrapper = styled<FlexComponent>(Flex)`
   animation: ${rotation} 2s infinite linear;
 `;
 
-export { UIDInput };
+const MemoizedUIDInput = React.memo(UIDInput);
+
+export { MemoizedUIDInput as UIDInput };
 export type { UIDInputProps };

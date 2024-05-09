@@ -38,4 +38,6 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
   }
 );
 
-export { BlocksInput };
+const MemoizedBlocksInput = React.memo(BlocksInput);
+
+export { MemoizedBlocksInput as BlocksInput };
