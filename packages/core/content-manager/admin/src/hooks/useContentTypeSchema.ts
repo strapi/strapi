@@ -26,32 +26,25 @@ const useContentTypeSchema = (model?: string) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { components, contentType, contentTypes, error, isLoading, isFetching } =
-    useGetInitialDataQuery(undefined, {
-      selectFromResult: (res) => {
-        const contentType = res.data?.contentTypes.find((ct) => ct.uid === model);
+  const { data, error, isLoading, isFetching } = useGetInitialDataQuery(undefined);
 
-        const componentsByKey = res.data?.components.reduce<ComponentsDictionary>(
-          (acc, component) => {
-            acc[component.uid] = component;
+  const { components, contentType, contentTypes } = React.useMemo(() => {
+    const contentType = data?.contentTypes.find((ct) => ct.uid === model);
 
-            return acc;
-          },
-          {}
-        );
+    const componentsByKey = data?.components.reduce<ComponentsDictionary>((acc, component) => {
+      acc[component.uid] = component;
 
-        const components = extractContentTypeComponents(contentType?.attributes, componentsByKey);
+      return acc;
+    }, {});
 
-        return {
-          isLoading: res.isLoading,
-          isFetching: res.isFetching,
-          error: res.error,
-          components: Object.keys(components).length === 0 ? undefined : components,
-          contentType,
-          contentTypes: res.data?.contentTypes ?? [],
-        };
-      },
-    });
+    const components = extractContentTypeComponents(contentType?.attributes, componentsByKey);
+
+    return {
+      components: Object.keys(components).length === 0 ? undefined : components,
+      contentType,
+      contentTypes: data?.contentTypes ?? [],
+    };
+  }, [model, data]);
 
   React.useEffect(() => {
     if (error) {
