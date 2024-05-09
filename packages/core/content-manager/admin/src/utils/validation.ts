@@ -331,8 +331,10 @@ const getInnerErrors = (error: yup.ValidationError) =>
   (error?.inner || []).reduce<Record<string, TranslationMessage>>((acc, currentError) => {
     if (currentError.path) {
       acc[currentError.path.split('[').join('.').split(']').join('')] = {
-        id: currentError.message,
-        defaultMessage: currentError.message,
+        // @ts-expect-error - Yup ValidationError.message type is a string, but it's returning an object
+        id: currentError.message.id,
+        // @ts-expect-error - Yup ValidationError.message type is a string, but it's returning an object
+        defaultMessage: currentError.message.defaultMessage,
         values: extractValuesFromYupError(currentError?.type, currentError?.params),
       };
     }

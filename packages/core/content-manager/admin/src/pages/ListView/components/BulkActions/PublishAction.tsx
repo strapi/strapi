@@ -188,7 +188,8 @@ const SelectedEntriesTableContent = ({
               <IconButton
                 tag={Link}
                 to={{
-                  pathname: `${pathname}/${row.id}`,
+                  pathname: `${pathname}/${row.documentId}`,
+                  search: row.locale && `?plugins[i18n][locale]=${row.locale}`,
                 }}
                 state={{ from: pathname }}
                 label={formatMessage(
