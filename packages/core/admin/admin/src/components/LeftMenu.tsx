@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { Divider, Flex, FlexComponent, Tooltip } from '@strapi/design-system';
+import { Divider, Flex, FlexComponent } from '@strapi/design-system';
 import { Feather, Lock, House } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useLocation, NavLink as RouterNavLink } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useAuth } from '../features/Auth';
