@@ -3,6 +3,7 @@ import React from 'react';
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { ThemeProvider, lightTheme } from '@strapi/design-system';
 import {
+  act,
   fireEvent,
   render as renderRTL,
   waitFor,
@@ -125,7 +126,9 @@ describe('Roles – EditPage', () => {
     /**
      * @note user.click will not trigger the form.
      */
-    fireEvent.click(getByRole('button', { name: 'Save' }));
+    await act(async () => {
+      fireEvent.click(getByRole('button', { name: 'Save' }));
+    });
 
     await waitFor(() => expect(getByText('Role edited')).toBeInTheDocument());
 
