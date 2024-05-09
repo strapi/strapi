@@ -28,43 +28,42 @@ test.describe('List View', () => {
       expect(items).toHaveCount(2);
       const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
       await checkbox.check();
-      const publishButton = page.getByRole('button', { name: 'Publish' });
-      await publishButton.click();
+      const publish = page.getByRole('button', { name: 'Publish' });
+      await publish.click();
 
       // Wait for the selected entries modal to appear
       await page.waitForSelector(
         'text=0 entries already published. 2 entries ready to publish. 0 entries waiting for action'
       );
-
-      const entry1 = page
+      // All entries should be selected
+      const checkboxEntry1 = page
         .getByLabel('Publish entries')
-        .getByRole('row', { name: 'West Ham post match analysis' })
-        .getByLabel('Select');
-      const entry2 = page
+        .getByRole('checkbox', { name: 'Select 1' });
+      const checkboxEntry2 = page
         .getByLabel('Publish entries')
-        .getByRole('row', { name: 'Why I prefer football over soccer' })
-        .getByLabel('Select');
+        .getByRole('checkbox', { name: 'Select 2' });
+      await expect(checkboxEntry1).toBeChecked();
+      await expect(checkboxEntry2).toBeChecked();
 
-      await expect(entry1).toBeChecked();
-      await expect(entry2).toBeChecked();
-
-      const selectAll = page
-        .getByLabel('Publish entries')
-        .getByRole('checkbox', { name: 'Select all entries' });
-      await selectAll.uncheck();
+      await checkboxEntry1.uncheck();
+      await checkboxEntry2.uncheck();
 
       await page.waitForSelector(
         'text=0 entries already published. 0 entries ready to publish. 0 entries waiting for action'
       );
 
-      // Check if the publish button is disabled
+      const publishButton = page
+        .getByLabel('Publish entries')
+        .getByRole('button', { name: 'Publish' });
+      expect(await publishButton.isDisabled()).toBeTruthy();
+
+      // Select all entries to publish
+      await checkboxEntry1.check();
+      await checkboxEntry2.check();
+
       const publishModalButton = page
         .getByLabel('Publish entries')
         .getByRole('button', { name: 'Publish' });
-      expect(await publishModalButton.isDisabled()).toBeTruthy();
-
-      // Select all entries to publish
-      await selectAll.check();
       await publishModalButton.click();
 
       // Wait for the confirmation dialog to appear

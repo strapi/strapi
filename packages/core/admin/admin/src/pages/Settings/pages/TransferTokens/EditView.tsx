@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
@@ -268,7 +269,7 @@ const EditView = () => {
                 isSubmitting={isSubmitting}
                 regenerateUrl="/admin/transfer/tokens/"
               />
-              <ContentLayout>
+              <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   {transferToken &&
                     Boolean(transferToken?.name) &&
@@ -284,7 +285,7 @@ const EditView = () => {
                     transferToken={transferToken}
                   />
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </Form>
           );
         }}
@@ -371,7 +372,7 @@ const FormTransferTokenContainer = ({
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.details',
             defaultMessage: 'Details',

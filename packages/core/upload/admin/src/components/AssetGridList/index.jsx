@@ -21,7 +21,7 @@ export const AssetGridList = ({
     <KeyboardNavigable tagName="article">
       {title && (
         <Box paddingTop={2} paddingBottom={2}>
-          <Typography as="h2" variant="delta" fontWeight="semiBold">
+          <Typography tag="h2" variant="delta" fontWeight="semiBold">
             {title}
           </Typography>
         </Box>

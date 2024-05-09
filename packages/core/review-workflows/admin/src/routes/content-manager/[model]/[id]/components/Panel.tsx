@@ -1,12 +1,12 @@
+import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content-manager/strapi-admin';
 import { Flex } from '@strapi/design-system';
-import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/plugin-content-manager/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
 import { AssigneeSelect } from './AssigneeSelect';
 import { StageSelect } from './StageSelect';
 
-import type { PanelComponent } from '@strapi/plugin-content-manager/strapi-admin';
+import type { PanelComponent } from '@strapi/content-manager/strapi-admin';
 
 const Panel: PanelComponent = () => {
   const { slug = '', id } = useParams<{

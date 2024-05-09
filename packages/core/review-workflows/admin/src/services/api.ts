@@ -1,10 +1,10 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
-import { axiosBaseQuery, type UnknownApiError } from '../utils/api';
+import { fetchBaseQuery, type UnknownApiError } from '../utils/api';
 
 const reviewWorkflowsApi = createApi({
   reducerPath: 'reviewWorkflowsApi',
-  baseQuery: axiosBaseQuery(),
+  baseQuery: fetchBaseQuery(),
   tagTypes: ['ReviewWorkflow', 'ReviewWorkflowStages'],
   endpoints: () => ({}),
 });

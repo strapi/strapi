@@ -4,7 +4,7 @@ import { Box } from '@strapi/design-system';
 import { Cross, CaretDown } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import ReactSelect, { components } from 'react-select';
-import styled, { useTheme } from 'styled-components';
+import { styled, useTheme } from 'styled-components';
 
 import Option from './Option';
 import flattenTree from './utils/flattenTree';
@@ -126,7 +126,7 @@ const ClearIndicator = (props) => {
 
   return (
     <Component {...props}>
-      <IconBox as="button" type="button">
+      <IconBox tag="button" type="button">
         <Cross />
       </IconBox>
     </Component>

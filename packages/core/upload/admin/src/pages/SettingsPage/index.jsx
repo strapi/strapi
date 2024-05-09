@@ -1,21 +1,18 @@
 import React, { useReducer } from 'react';
 
-import { Page, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
-  ContentLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
-  Layout,
-  ToggleInput,
+  Toggle,
   Typography,
+  Field,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
-
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
@@ -102,7 +99,7 @@ export const SettingsPage = () => {
         })}
       </Page.Title>
       <form onSubmit={handleSubmit}>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: getTrad('settings.header.label'),
             defaultMessage: 'Media Library',
@@ -126,13 +123,13 @@ export const SettingsPage = () => {
             defaultMessage: 'Configure the settings for the Media Library',
           })}
         />
-        <ContentLayout>
-          <Layout>
+        <Layouts.Content>
+          <Layouts.Root>
             <Flex direction="column" alignItems="stretch" gap={12}>
               <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                 <Flex direction="column" alignItems="stretch" gap={4}>
                   <Flex>
-                    <Typography variant="delta" as="h2">
+                    <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: getTrad('settings.blockTitle'),
                         defaultMessage: 'Asset management',
@@ -141,98 +138,113 @@ export const SettingsPage = () => {
                   </Flex>
                   <Grid gap={6}>
                     <GridItem col={6} s={12}>
-                      <ToggleInput
-                        aria-label="responsiveDimensions"
-                        checked={modifiedData.responsiveDimensions}
+                      <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.responsiveDimensions.description'),
                           defaultMessage:
                             'Enabling this option will generate multiple formats (small, medium and large) of the uploaded asset.',
                         })}
-                        label={formatMessage({
-                          id: getTrad('settings.form.responsiveDimensions.label'),
-                          defaultMessage: 'Responsive friendly upload',
-                        })}
                         name="responsiveDimensions"
-                        offLabel={formatMessage({
-                          id: 'app.components.ToggleCheckbox.off-label',
-                          defaultMessage: 'Off',
-                        })}
-                        onLabel={formatMessage({
-                          id: 'app.components.ToggleCheckbox.on-label',
-                          defaultMessage: 'On',
-                        })}
-                        onChange={(e) => {
-                          handleChange({
-                            target: { name: 'responsiveDimensions', value: e.target.checked },
-                          });
-                        }}
-                      />
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: getTrad('settings.form.responsiveDimensions.label'),
+                            defaultMessage: 'Responsive friendly upload',
+                          })}
+                        </Field.Label>
+                        <Toggle
+                          checked={modifiedData.responsiveDimensions}
+                          offLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.off-label',
+                            defaultMessage: 'Off',
+                          })}
+                          onLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.on-label',
+                            defaultMessage: 'On',
+                          })}
+                          onChange={(e) => {
+                            handleChange({
+                              target: { name: 'responsiveDimensions', value: e.target.checked },
+                            });
+                          }}
+                        />
+                        <Field.Hint />
+                      </Field.Root>
                     </GridItem>
                     <GridItem col={6} s={12}>
-                      <ToggleInput
-                        aria-label="sizeOptimization"
-                        checked={modifiedData.sizeOptimization}
+                      <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.sizeOptimization.description'),
                           defaultMessage:
                             'Enabling this option will reduce the image size and slightly reduce its quality.',
                         })}
-                        label={formatMessage({
-                          id: getTrad('settings.form.sizeOptimization.label'),
-                          defaultMessage: 'Size optimization',
-                        })}
                         name="sizeOptimization"
-                        offLabel={formatMessage({
-                          id: 'app.components.ToggleCheckbox.off-label',
-                          defaultMessage: 'Off',
-                        })}
-                        onLabel={formatMessage({
-                          id: 'app.components.ToggleCheckbox.on-label',
-                          defaultMessage: 'On',
-                        })}
-                        onChange={(e) => {
-                          handleChange({
-                            target: { name: 'sizeOptimization', value: e.target.checked },
-                          });
-                        }}
-                      />
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: getTrad('settings.form.sizeOptimization.label'),
+                            defaultMessage: 'Size optimization',
+                          })}
+                        </Field.Label>
+                        <Toggle
+                          checked={modifiedData.sizeOptimization}
+                          offLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.off-label',
+                            defaultMessage: 'Off',
+                          })}
+                          onLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.on-label',
+                            defaultMessage: 'On',
+                          })}
+                          onChange={(e) => {
+                            handleChange({
+                              target: { name: 'sizeOptimization', value: e.target.checked },
+                            });
+                          }}
+                        />
+                        <Field.Hint />
+                      </Field.Root>
                     </GridItem>
                     <GridItem col={6} s={12}>
-                      <ToggleInput
-                        aria-label="autoOrientation"
-                        checked={modifiedData.autoOrientation}
+                      <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.autoOrientation.description'),
                           defaultMessage:
                             'Enabling this option will automatically rotate the image according to EXIF orientation tag.',
                         })}
-                        label={formatMessage({
-                          id: getTrad('settings.form.autoOrientation.label'),
-                          defaultMessage: 'Auto orientation',
-                        })}
                         name="autoOrientation"
-                        offLabel={formatMessage({
-                          id: 'app.components.ToggleCheckbox.off-label',
-                          defaultMessage: 'Off',
-                        })}
-                        onLabel={formatMessage({
-                          id: 'app.components.ToggleCheckbox.on-label',
-                          defaultMessage: 'On',
-                        })}
-                        onChange={(e) => {
-                          handleChange({
-                            target: { name: 'autoOrientation', value: e.target.checked },
-                          });
-                        }}
-                      />
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: getTrad('settings.form.autoOrientation.label'),
+                            defaultMessage: 'Auto orientation',
+                          })}
+                        </Field.Label>
+                        <Toggle
+                          checked={modifiedData.autoOrientation}
+                          offLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.off-label',
+                            defaultMessage: 'Off',
+                          })}
+                          onLabel={formatMessage({
+                            id: 'app.components.ToggleCheckbox.on-label',
+                            defaultMessage: 'On',
+                          })}
+                          onChange={(e) => {
+                            handleChange({
+                              target: { name: 'autoOrientation', value: e.target.checked },
+                            });
+                          }}
+                        />
+                        <Field.Hint />
+                      </Field.Root>
                     </GridItem>
                   </Grid>
                 </Flex>
               </Box>
             </Flex>
-          </Layout>
-        </ContentLayout>
+          </Layouts.Root>
+        </Layouts.Content>
       </form>
     </Page.Main>
   );

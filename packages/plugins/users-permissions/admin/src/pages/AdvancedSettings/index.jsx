@@ -1,16 +1,6 @@
 import React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Typography,
-  useNotifyAT,
-} from '@strapi/design-system';
+import { Box, Button, Flex, Grid, GridItem, Typography, useNotifyAT } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import {
   useAPIErrorHandler,
@@ -20,8 +10,8 @@ import {
   useNotification,
   useFetchClient,
   useRBAC,
+  Layouts,
 } from '@strapi/strapi/admin';
-
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -133,7 +123,7 @@ const AdvancedSettingsPage = () => {
         {({ values, isSubmitting, modified }) => {
           return (
             <>
-              <HeaderLayout
+              <Layouts.Header
                 title={formatMessage({
                   id: getTrad('HeaderNav.link.advancedSettings'),
                   defaultMessage: 'Advanced Settings',
@@ -150,7 +140,7 @@ const AdvancedSettingsPage = () => {
                   </Button>
                 }
               />
-              <ContentLayout>
+              <Layouts.Content>
                 <Box
                   background="neutral0"
                   hasRadius
@@ -161,7 +151,7 @@ const AdvancedSettingsPage = () => {
                   paddingRight={7}
                 >
                   <Flex direction="column" alignItems="stretch" gap={4}>
-                    <Typography variant="delta" as="h2">
+                    <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: 'global.settings',
                         defaultMessage: 'Settings',
@@ -207,7 +197,7 @@ const AdvancedSettingsPage = () => {
                     </Grid>
                   </Flex>
                 </Box>
-              </ContentLayout>
+              </Layouts.Content>
             </>
           );
         }}

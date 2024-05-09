@@ -57,6 +57,8 @@ const createCollectionTypeController = ({
         throw new errors.ValidationError('Missing "data" payload in the request body');
       }
 
+      await this.validateInput(body.data, ctx);
+
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
       const entity = await strapi.service(uid).create({
@@ -83,6 +85,8 @@ const createCollectionTypeController = ({
       if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
       }
+
+      await this.validateInput(body.data, ctx);
 
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 

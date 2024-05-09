@@ -61,7 +61,7 @@ const ComponentInput = ({
             htmlFor={name}
             variant="pi"
             fontWeight="bold"
-            as="label"
+            tag="label"
           >
             {label}
             {attribute.repeatable && (
@@ -108,12 +108,6 @@ const ComponentInput = ({
     </Box>
   );
 };
-
-// const LabelAction = styled(Box)`
-//   svg path {
-//     fill: ${({ theme }) => theme.colors.neutral500};
-//   }
-// `;
 
 export { ComponentInput };
 export type { ComponentInputProps };

@@ -1,6 +1,6 @@
 import { Flex } from '@strapi/design-system';
 import { PaintBrush } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const IconBox = styled(Flex)`
   /* Hard code color values */

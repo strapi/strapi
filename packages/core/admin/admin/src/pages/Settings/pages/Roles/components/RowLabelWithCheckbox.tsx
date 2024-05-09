@@ -65,11 +65,12 @@ const RowLabelWithCheckbox = ({
       <CollapseLabel
         title={label}
         alignItems="center"
-        isCollapsable={isCollapsable}
+        $isCollapsable={isCollapsable}
         {...(isCollapsable && {
           onClick,
           'aria-expanded': isActive,
-          onKeyDown: ({ key }) => (key === 'Enter' || key === ' ') && onClick(),
+          onKeyDown: ({ key }: React.KeyboardEvent<HTMLDivElement>) =>
+            (key === 'Enter' || key === ' ') && onClick(),
           tabIndex: 0,
           role: 'button',
         })}

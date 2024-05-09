@@ -1,6 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
+.c1 {
+  display: flex;
+}
+
 .c3 {
   background: #ffffff;
   padding-block: 8px;
@@ -11,36 +15,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   cursor: pointer;
 }
 
-.c0 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c4 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c1 {
+.c2 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
@@ -53,9 +28,21 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
+.c0 {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c4 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+}
+
 .c9 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -75,9 +62,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
 }
 
 .c5:after {
-  -webkit-transition-property: all;
   transition-property: all;
-  -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
   border-radius: 8px;
   content: '';
@@ -104,38 +89,18 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c2 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
 .c7 {
   border-radius: 50%;
   width: 20px;
   height: 20px;
   margin-right: 10px;
   background-color: #000000;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
   justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
 }
 
@@ -144,7 +109,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   height: 8px;
 }
 
-.c6 svg > path {
+.c6 svg>path {
   fill: #8e8ea9;
   justify-self: flex-end;
 }
@@ -155,14 +120,16 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
     novalidate=""
   >
     <div
-      class=""
+      class="c0"
     >
       <div
         class="c0"
       >
         <label
+          alignitems="center"
           class="c1 c2"
           for="color"
+          id="color-label"
         >
           color-picker
         </label>
@@ -192,9 +159,9 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
           <svg
             aria-hidden="true"
             fill="currentColor"
-            height="1.6rem"
+            height="16"
             viewBox="0 0 32 32"
-            width="1.6rem"
+            width="16"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
@@ -205,7 +172,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
       </div>
     </div>
   </form>
-  <div
+  <span
     class="c9"
   >
     <p
@@ -226,6 +193,6 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

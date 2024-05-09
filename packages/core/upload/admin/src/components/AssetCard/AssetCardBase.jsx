@@ -17,7 +17,7 @@ import {
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../../utils';
 
@@ -111,7 +111,7 @@ export const AssetCardBase = ({
       <CardBody>
         <CardContent>
           <Box paddingTop={1}>
-            <CardTitle as="h2">{name}</CardTitle>
+            <CardTitle tag="h2">{name}</CardTitle>
           </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>

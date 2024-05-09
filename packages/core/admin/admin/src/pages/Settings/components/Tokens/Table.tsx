@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, Typography, useCollator } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Box, Flex, IconButton, Typography, useCollator, Link } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
@@ -167,7 +166,7 @@ const DefaultButton = ({
 
   return (
     <LinkStyled
-      forwardedAs={NavLink}
+      tag={NavLink}
       to={tokenId.toString()}
       title={formatMessage(MESSAGES_MAP[buttonType], { target: tokenName })}
     >

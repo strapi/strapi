@@ -1,5 +1,5 @@
 import { fireEvent } from '@testing-library/react';
-import { render } from '@tests/utils';
+import { render, waitFor } from '@tests/utils';
 import { Routes, Route } from 'react-router-dom';
 
 import { EditConfigurationPage } from '../EditConfigurationPage';
@@ -65,20 +65,22 @@ describe('EditConfigurationPage', () => {
 
     await findByRole('heading', { name: 'Configure the view - Address' });
 
-    await user.click(getByRole('button', { name: 'Insert another field' }));
+    await user.click(await findByRole('button', { name: 'Insert another field' }));
 
-    await user.click(getByRole('menuitem', { name: 'postal_code' }));
+    await user.click(await findByRole('menuitem', { name: 'postal_code' }));
 
-    EDIT_ATTRIBUTES.forEach((attributeRow) =>
-      [...attributeRow, { name: 'postal_code' }].forEach((attribute) => {
-        expect(getByRole('button', { name: `Edit ${attribute.name}` })).toBeInTheDocument();
-        expect(getByRole('button', { name: `Delete ${attribute.name}` })).toBeInTheDocument();
+    EDIT_ATTRIBUTES.forEach(async (attributeRow) =>
+      [...attributeRow, { name: 'postal_code' }].forEach(async (attribute) => {
+        expect(await findByRole('button', { name: `Edit ${attribute.name}` })).toBeInTheDocument();
+        expect(
+          await findByRole('button', { name: `Delete ${attribute.name}` })
+        ).toBeInTheDocument();
       })
     );
 
-    expect(getByRole('button', { name: 'Insert another field' })).toBeDisabled();
+    expect(await findByRole('button', { name: 'Insert another field' })).toBeDisabled();
 
-    fireEvent.click(getByRole('button', { name: 'Save' }));
+    fireEvent.click(await findByRole('button', { name: 'Save' }));
 
     await findByText('Saved');
   });
@@ -100,14 +102,18 @@ describe('EditConfigurationPage', () => {
 
     await findByRole('heading', { name: 'Configure the view - Address' });
 
-    expect(getByRole('button', { name: 'Delete json' })).toBeInTheDocument();
+    expect(await findByRole('button', { name: 'Delete json' })).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Delete json' }));
 
-    expect(queryByRole('button', { name: 'Delete json' })).not.toBeInTheDocument();
-    expect(queryByRole('button', { name: 'Edit json' })).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(queryByRole('button', { name: 'Delete json' })).not.toBeInTheDocument();
+    });
+    await waitFor(() => {
+      expect(queryByRole('button', { name: 'Edit json' })).not.toBeInTheDocument();
+    });
 
-    fireEvent.click(getByRole('button', { name: 'Save' }));
+    fireEvent.click(await findByRole('button', { name: 'Save' }));
 
     await findByText('Saved');
   });

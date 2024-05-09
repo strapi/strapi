@@ -61,8 +61,8 @@ describe('Roles – EditPage', () => {
 
     expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
 
-    expect(getByRole('textbox', { name: 'Name *' })).toBeInTheDocument();
-    expect(getByRole('textbox', { name: 'Description *' })).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
+    expect(getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
 
     await user.click(getByRole('button', { name: 'Address' }));
 
@@ -77,11 +77,11 @@ describe('Roles – EditPage', () => {
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    await user.clear(getByRole('textbox', { name: 'Name *' }));
+    await user.clear(getByRole('textbox', { name: 'Name' }));
 
     await user.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('textbox', { name: 'Name *' })).toHaveAttribute('aria-invalid', 'true');
+    expect(getByRole('textbox', { name: 'Name' })).toHaveAttribute('aria-invalid', 'true');
   });
 
   it('will show an error if the user does not fill out the description field', async () => {
@@ -89,44 +89,35 @@ describe('Roles – EditPage', () => {
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    await user.clear(getByRole('textbox', { name: 'Description *' }));
+    await user.clear(getByRole('textbox', { name: 'Description' }));
 
     await user.click(getByRole('button', { name: 'Save' }));
 
-    expect(getByRole('textbox', { name: 'Description *' })).toHaveAttribute('aria-invalid', 'true');
+    expect(getByRole('textbox', { name: 'Description' })).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it("can update a role's name and description", async () => {
-    const { getByRole, user, getByText } = render();
+  it("can update a role's name, description and permissions", async () => {
+    const { getByRole, user, getByText, findByRole, findByText } = render();
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    await user.type(getByRole('textbox', { name: 'Name *' }), 'test');
-    await user.type(getByRole('textbox', { name: 'Description *' }), 'testing');
-
-    /**
-     * @note user.click will not trigger the form.
-     */
-    fireEvent.click(getByRole('button', { name: 'Save' }));
-
-    await waitFor(() => expect(getByText('Role edited')).toBeInTheDocument());
-  });
-
-  it("can update a role's permissions", async () => {
-    const { getByRole, user, getByText } = render();
-
-    await waitForElementToBeRemoved(() => getByText('Loading content.'));
-
+    await user.type(getByRole('textbox', { name: 'Name' }), 'test');
+    await user.type(getByRole('textbox', { name: 'Description' }), 'testing');
     await user.click(getByRole('button', { name: 'Address' }));
-
     await user.click(getByRole('checkbox', { name: 'create' }));
 
+    const button = await findByRole('button', { name: 'Save' });
     /**
      * @note user.click will not trigger the form.
      */
-    fireEvent.click(getByRole('button', { name: 'Save' }));
+    fireEvent.click(button);
+    await findByText('Role edited');
+    await findByText('Authenticated');
 
-    await waitFor(() => expect(getByText('Role edited')).toBeInTheDocument());
+    /**
+     * @note the permissions are refetched, because we're mocking calls no real update will be made.
+     */
+    await waitFor(() => expect(getByRole('checkbox', { name: 'create' })).not.toBeChecked());
   });
 
   it('will update the Advanced Settings panel when you click on the cog icon of a specific permission', async () => {
