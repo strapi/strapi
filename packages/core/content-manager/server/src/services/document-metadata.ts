@@ -1,13 +1,13 @@
 import { groupBy, pick } from 'lodash/fp';
 
 import { contentTypes } from '@strapi/utils';
-import type { Core, UID } from '@strapi/types';
+import type { Core, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
 export interface DocumentVersion {
   id: number;
-  documentId: string;
+  documentId: Modules.Documents.ID;
   locale: string;
   updatedAt: string | null | Date;
   publishedAt: string | null | Date;
