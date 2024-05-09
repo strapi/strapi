@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { TimePicker, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -36,4 +36,6 @@ const TimeInput = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-export { TimeInput };
+const MemoizedTimeInput = memo(TimeInput);
+
+export { MemoizedTimeInput as TimeInput };

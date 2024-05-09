@@ -93,4 +93,6 @@ const NotSupportedField = forwardRef<any, InputProps>(
   }
 );
 
-export { InputRenderer };
+const MemoizedInputRenderer = memo(InputRenderer);
+
+export { MemoizedInputRenderer as InputRenderer };
