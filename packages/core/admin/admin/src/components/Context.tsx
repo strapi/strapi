@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import * as ContextSelector from 'use-context-selector';
+// import * as ContextSelector from 'use-context-selector';
 
 function createContext<ContextValueType extends object | null>(
   rootComponentName: string,
   defaultContext?: ContextValueType
 ) {
-  const Context = ContextSelector.createContext<ContextValueType | undefined>(defaultContext);
+  const Context = React.createContext<ContextValueType | undefined>(defaultContext);
 
   const Provider = (props: ContextValueType & { children: React.ReactNode }) => {
     const { children, ...context } = props;
@@ -19,12 +19,13 @@ function createContext<ContextValueType extends object | null>(
   const useContext = <Selected,>(
     consumerName: string,
     selector: (value: ContextValueType) => Selected
-  ): Selected =>
-    ContextSelector.useContextSelector(Context, (ctx) => {
-      if (ctx) return selector(ctx);
-      // it's a required context.
+  ): Selected => {
+    const ctx = React.useContext(Context);
+    if (!ctx) {
       throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
-    });
+    }
+    return selector(ctx);
+  };
 
   Provider.displayName = rootComponentName + 'Provider';
 
