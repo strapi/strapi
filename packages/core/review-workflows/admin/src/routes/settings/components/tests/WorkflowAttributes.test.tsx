@@ -84,13 +84,13 @@ describe('WorkflowAttributes', () => {
     const { getByRole, user } = setup();
     await user.click(getByRole('combobox', { name: /associated to/i }));
 
-    await waitFor(async () => {
-      expect(await screen.findByRole('option', { name: /Single Types/i })).toBeInTheDocument();
-    });
+    await waitFor(async () =>
+      expect(screen.queryByRole('option', { name: /Collection Types/i })).not.toBeInTheDocument()
+    );
 
-    await waitFor(async () => {
-      expect(screen.queryByRole('option', { name: /Collection Types/i })).not.toBeInTheDocument();
-    });
+    await waitFor(async () =>
+      expect(await screen.findByRole('option', { name: /Single Types/i })).toBeInTheDocument()
+    );
   });
 
   it('should not render a collection-type group if there are no single-types', async () => {
