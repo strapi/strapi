@@ -11,7 +11,7 @@ import { Duplicate, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { Document, useDoc } from '../../../hooks/useDocument';
@@ -208,8 +208,7 @@ const CloneAction: DocumentActionComponent = ({ model, documentId }) => {
               })}
             </Button>
             <LinkButton
-              as={NavLink}
-              // @ts-expect-error – the DS LinkButton can't infer props from the `as` prop component
+              tag={NavLink}
               to={{
                 pathname: `clone/${documentId}`,
               }}

@@ -4,6 +4,7 @@ import { Form, useField, InputRenderer, useNotification } from '@strapi/admin/st
 import {
   Button,
   Flex,
+  FlexComponent,
   Grid,
   GridItem,
   ModalBody,
@@ -13,7 +14,7 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { FieldTypeIcon } from '../../../components/FieldTypeIcon';
@@ -78,7 +79,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
           <HeaderContainer>
             {/* @ts-expect-error attribute.type === custom does not work here */}
             <FieldTypeIcon type={attribute.type} />
-            <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
+            <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={id}>
               {formatMessage(
                 {
                   id: getTranslation('containers.list-settings.modal-form.label'),
@@ -144,7 +145,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   );
 };
 
-const HeaderContainer = styled(Flex)`
+const HeaderContainer = styled<FlexComponent>(Flex)`
   svg {
     width: 3.2rem;
     margin-right: ${({ theme }) => theme.spaces[3]};

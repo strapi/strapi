@@ -20,7 +20,7 @@ import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
 import { HOOKS } from '../../constants/hooks';
@@ -39,6 +39,7 @@ import { getTranslation } from '../../utils/translations';
 import { getDisplayName } from '../../utils/users';
 import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
+import { BulkActionsRenderer } from './components/BulkActions/Actions';
 import { Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
@@ -238,7 +239,9 @@ const ListViewPage = () => {
       <Layouts.Content>
         <Flex gap={4} direction="column" alignItems="stretch">
           <Table.Root rows={results} headers={tableHeaders} isLoading={isLoading}>
-            <Table.ActionBar />
+            <Table.ActionBar>
+              <BulkActionsRenderer />
+            </Table.ActionBar>
             <Table.Content>
               <Table.Head>
                 <Table.HeaderCheckboxCell />
@@ -341,13 +344,12 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
   return (
     <Button
       variant={variant}
-      forwardedAs={ReactRouterLink}
+      tag={ReactRouterLink}
       onClick={() => {
         trackUsage('willCreateEntry', { status: 'draft' });
       }}
       startIcon={<Plus />}
       style={{ textDecoration: 'none' }}
-      // @ts-expect-error – DS inference does not work with as or forwardedAs
       to={{
         pathname: 'create',
         search: stringify({ plugins: query.plugins }),

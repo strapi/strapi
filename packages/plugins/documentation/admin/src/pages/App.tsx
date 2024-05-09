@@ -24,11 +24,11 @@ import {
   Layouts,
 } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PERMISSIONS } from '../constants';
 import {
-  useGetInfosQuery,
+  useGetInfoQuery,
   useRegenerateDocMutation,
   useDeleteVersionMutation,
 } from '../services/api';
@@ -38,7 +38,7 @@ const App = () => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { data, isLoading: isLoadingInfo, isError } = useGetInfosQuery();
+  const { data, isLoading: isLoadingInfo, isError } = useGetInfoQuery();
   const [regenerate] = useRegenerateDocMutation();
   const [deleteVersion] = useDeleteVersionMutation();
   const [showConfirmDelete, setShowConfirmDelete] = React.useState<boolean>(false);
@@ -180,9 +180,8 @@ const App = () => {
                       <Td>
                         <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
                           <IconButton
-                            forwardedAs="a"
+                            tag="a"
                             disabled={!allowedActions.canRead}
-                            // @ts-expect-error invalid typing in IconButton
                             href={createDocumentationHref(`${data.prefix}/v${doc.version}`)}
                             noBorder
                             icon={<Show />}

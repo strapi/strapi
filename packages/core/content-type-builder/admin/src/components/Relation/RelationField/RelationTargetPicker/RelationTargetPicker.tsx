@@ -1,6 +1,6 @@
 import { Menu } from '@strapi/design-system';
 import { useDispatch } from 'react-redux';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../../../../hooks/useDataManager';
 import { isAllowedContentTypesForRelations } from '../../../../utils';

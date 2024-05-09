@@ -1,5 +1,5 @@
 import { Box } from '@strapi/design-system';
-import styled, { css } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 const activeCheckboxWrapperStyles = css`
   background: ${(props) => props.theme.colors.primary100};

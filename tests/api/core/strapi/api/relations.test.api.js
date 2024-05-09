@@ -130,6 +130,7 @@ const updateEntry = async (pluralName, id, data, populate) => {
     body: { data },
     qs: { populate },
   });
+
   return body;
 };
 
@@ -142,7 +143,7 @@ const createShop = async ({
 }) => {
   const options = strict ? { strict } : {};
 
-  return createEntry(
+  const result = await createEntry(
     'shops',
     {
       name: 'Cazotte Shop',
@@ -160,6 +161,8 @@ const createShop = async ({
     },
     populate || populateShop
   );
+
+  return result;
 };
 
 const updateShop = async (
@@ -173,7 +176,7 @@ const updateShop = async (
     strict = true,
   }
 ) => {
-  return updateEntry(
+  const result = await updateEntry(
     'shops',
     shop.documentId,
     {
@@ -195,6 +198,8 @@ const updateShop = async (
     },
     populate || populateShop
   );
+
+  return result;
 };
 
 const shopFactory = ({

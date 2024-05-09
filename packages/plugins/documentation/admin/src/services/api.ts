@@ -1,7 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
 import { DocumentInfos } from '../types';
-import { axiosBaseQuery } from '../utils/baseQuery';
+import { baseQuery } from '../utils/baseQuery';
 
 type SettingsInput = {
   restrictedAccess: boolean;
@@ -10,37 +10,35 @@ type SettingsInput = {
 
 const api = createApi({
   reducerPath: 'plugin::documentation',
-  baseQuery: axiosBaseQuery({
-    baseURL: '/documentation',
-  }),
-  tagTypes: ['DocumentInfos'],
+  baseQuery: baseQuery(),
+  tagTypes: ['DocumentInfo'],
   endpoints: (builder) => {
     return {
-      getInfos: builder.query<DocumentInfos, void>({
-        query: () => '/getInfos',
-        providesTags: ['DocumentInfos'],
+      getInfo: builder.query<DocumentInfos, void>({
+        query: () => '/documentation/getInfos',
+        providesTags: ['DocumentInfo'],
       }),
 
       deleteVersion: builder.mutation<void, { version: string }>({
         query: ({ version }) => ({
-          url: `/deleteDoc/${version}`,
+          url: `/documentation/deleteDoc/${version}`,
           method: 'DELETE',
         }),
-        invalidatesTags: ['DocumentInfos'],
+        invalidatesTags: ['DocumentInfo'],
       }),
 
       updateSettings: builder.mutation<void, { body: SettingsInput }>({
         query: ({ body }) => ({
-          url: `/updateSettings`,
+          url: `/documentation/updateSettings`,
           method: 'PUT',
           data: body,
         }),
-        invalidatesTags: ['DocumentInfos'],
+        invalidatesTags: ['DocumentInfo'],
       }),
 
       regenerateDoc: builder.mutation<void, { version: string }>({
         query: ({ version }) => ({
-          url: `/regenerateDoc`,
+          url: `/documentation/regenerateDoc`,
           method: 'POST',
           data: { version },
         }),
@@ -52,7 +50,7 @@ const api = createApi({
 export { api };
 
 export const {
-  useGetInfosQuery,
+  useGetInfoQuery,
   useDeleteVersionMutation,
   useUpdateSettingsMutation,
   useRegenerateDocMutation,

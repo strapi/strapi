@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Field,
   Flex,
   Grid,
   GridItem,
@@ -63,34 +64,45 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
         </Flex>
         <Grid gap={4}>
           <GridItem col={6}>
-            <TextInput
-              disabled={disabled}
+            <Field.Root
               name="name"
               error={errors.name && formatMessage({ id: errors.name })}
-              label={formatMessage({
-                id: 'global.name',
-                defaultMessage: 'Name',
-              })}
-              onChange={onChange}
-              onBlur={onBlur}
               required
-              value={values.name || ''}
-            />
+            >
+              <Field.Label>
+                {formatMessage({
+                  id: 'global.name',
+                  defaultMessage: 'Name',
+                })}
+              </Field.Label>
+              <TextInput
+                disabled={disabled}
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values.name || ''}
+              />
+              <Field.Error />
+            </Field.Root>
           </GridItem>
           <GridItem col={6}>
-            <Textarea
-              disabled={disabled}
-              label={formatMessage({
-                id: 'global.description',
-                defaultMessage: 'Description',
-              })}
-              id="description"
+            <Field.Root
+              name="description"
               error={errors.name && formatMessage({ id: errors.name })}
-              onChange={onChange}
-              onBlur={onBlur}
             >
-              {values.description || ''}
-            </Textarea>
+              <Field.Label>
+                {formatMessage({
+                  id: 'global.description',
+                  defaultMessage: 'Description',
+                })}
+              </Field.Label>
+              <Textarea
+                disabled={disabled}
+                onChange={onChange}
+                onBlur={onBlur}
+                value={values.description}
+              />
+              <Field.Error />
+            </Field.Root>
           </GridItem>
         </Grid>
       </Flex>

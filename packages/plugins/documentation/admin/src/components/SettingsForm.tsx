@@ -7,16 +7,16 @@ import {
   Grid,
   GridItem,
   TextInput,
-  ToggleInput,
+  Toggle,
   Typography,
-  FieldAction,
+  Field,
 } from '@strapi/design-system';
 // Strapi Icons
 import { Check, Eye as Show, EyeStriked as Hide } from '@strapi/icons';
 import { translatedErrors, useRBAC, Layouts } from '@strapi/strapi/admin';
 import { Form, Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { PERMISSIONS } from '../constants';
@@ -30,7 +30,7 @@ const schema = yup.object().shape({
   }),
 });
 
-const FieldActionWrapper = styled(FieldAction)`
+const FieldActionWrapper = styled(Field.Action)`
   svg {
     height: 1.6rem;
     width: 1.6rem;
@@ -105,7 +105,7 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                 paddingRight={7}
               >
                 <Flex direction="column" alignItems="stretch" gap={4}>
-                  <Typography variant="delta" as="h2">
+                  <Typography variant="delta" tag="h2">
                     {formatMessage({
                       id: 'global.settings',
                       defaultMessage: 'Settings',
@@ -113,42 +113,40 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                   </Typography>
                   <Grid gap={4}>
                     <GridItem col={6} s={12}>
-                      <ToggleInput
+                      <Field.Root
                         name="restrictedAccess"
-                        label={formatMessage({
-                          id: getTrad('pages.SettingsPage.toggle.label'),
-                          defaultMessage: 'Restricted Access',
-                        })}
                         hint={formatMessage({
                           id: getTrad('pages.SettingsPage.toggle.hint'),
                           defaultMessage: 'Make the documentation endpoint private',
                         })}
-                        checked={values.restrictedAccess}
-                        onChange={() => {
-                          if (values.restrictedAccess === true) {
-                            setFieldValue('password', '', false);
-                            setFieldTouched('password', false, false);
-                            setFieldError('password', undefined);
-                          }
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: getTrad('pages.SettingsPage.toggle.label'),
+                            defaultMessage: 'Restricted Access',
+                          })}
+                        </Field.Label>
+                        <Toggle
+                          checked={values.restrictedAccess}
+                          onChange={() => {
+                            if (values.restrictedAccess === true) {
+                              setFieldValue('password', '', false);
+                              setFieldTouched('password', false, false);
+                              setFieldError('password', undefined);
+                            }
 
-                          setFieldValue('restrictedAccess', !values.restrictedAccess, false);
-                        }}
-                        onLabel="On"
-                        offLabel="Off"
-                      />
+                            setFieldValue('restrictedAccess', !values.restrictedAccess, false);
+                          }}
+                          onLabel="On"
+                          offLabel="Off"
+                        />
+                        <Field.Hint />
+                      </Field.Root>
                     </GridItem>
                     {values.restrictedAccess && (
                       <GridItem col={6} s={12}>
-                        <TextInput
-                          label={formatMessage({
-                            id: 'global.password',
-                            defaultMessage: 'Password',
-                          })}
+                        <Field.Root
                           name="password"
-                          placeholder="**********"
-                          type={passwordShown ? 'text' : 'password'}
-                          value={values.password}
-                          onChange={handleChange}
                           error={
                             errors.password
                               ? formatMessage({
@@ -157,28 +155,42 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                                 })
                               : undefined
                           }
-                          endAction={
-                            <FieldActionWrapper
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setPasswordShown((prev) => !prev);
-                              }}
-                              label={formatMessage(
-                                passwordShown
-                                  ? {
-                                      id: 'Auth.form.password.show-password',
-                                      defaultMessage: 'Show password',
-                                    }
-                                  : {
-                                      id: 'Auth.form.password.hide-password',
-                                      defaultMessage: 'Hide password',
-                                    }
-                              )}
-                            >
-                              {passwordShown ? <Show /> : <Hide />}
-                            </FieldActionWrapper>
-                          }
-                        />
+                        >
+                          <Field.Label>
+                            {formatMessage({
+                              id: 'global.password',
+                              defaultMessage: 'Password',
+                            })}
+                          </Field.Label>
+                          <TextInput
+                            placeholder="**********"
+                            type={passwordShown ? 'text' : 'password'}
+                            value={values.password}
+                            onChange={handleChange}
+                            endAction={
+                              <FieldActionWrapper
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPasswordShown((prev) => !prev);
+                                }}
+                                label={formatMessage(
+                                  passwordShown
+                                    ? {
+                                        id: 'Auth.form.password.show-password',
+                                        defaultMessage: 'Show password',
+                                      }
+                                    : {
+                                        id: 'Auth.form.password.hide-password',
+                                        defaultMessage: 'Hide password',
+                                      }
+                                )}
+                              >
+                                {passwordShown ? <Show /> : <Hide />}
+                              </FieldActionWrapper>
+                            }
+                          />
+                          <Field.Error />
+                        </Field.Root>
                       </GridItem>
                     )}
                   </Grid>

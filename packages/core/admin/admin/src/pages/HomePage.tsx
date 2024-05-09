@@ -10,6 +10,9 @@ import {
   Typography,
   Link,
   LinkButton,
+  TypographyComponent,
+  BoxComponent,
+  FlexComponent,
 } from '@strapi/design-system';
 import { ArrowRight, ExternalLink } from '@strapi/icons';
 import {
@@ -26,7 +29,7 @@ import {
 } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ContentBox } from '../components/ContentBox';
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
@@ -91,7 +94,7 @@ const HomePageCE = () => {
               <div>
                 <Box paddingLeft={6} paddingBottom={10}>
                   <Flex direction="column" alignItems="flex-start" gap={5}>
-                    <Typography as="h1" variant="alpha">
+                    <Typography tag="h1" variant="alpha">
                       {hasAlreadyCreatedContentTypes
                         ? formatMessage({
                             id: 'app.components.HomePage.welcome.again',
@@ -149,7 +152,7 @@ const HomePageCE = () => {
   );
 };
 
-const LogoContainer = styled(Box)`
+const LogoContainer = styled<BoxComponent>(Box)`
   position: absolute;
   top: 0;
   right: 0;
@@ -159,7 +162,7 @@ const LogoContainer = styled(Box)`
   }
 `;
 
-const WordWrap = styled(Typography)`
+const WordWrap = styled<TypographyComponent>(Typography)`
   word-break: break-word;
 `;
 
@@ -208,7 +211,7 @@ const ContentBlocks = () => {
             </CloudIconWrapper>
           </CloudCustomWrapper>
           <Flex gap={1} direction="column" alignItems="start">
-            <Typography fontWeight="semiBold" variant="pi">
+            <Typography fontWeight="semiBold" variant="pi" textColor="neutral800">
               {formatMessage({
                 id: 'app.components.BlockLink.cloud',
                 defaultMessage: 'Strapi Cloud',
@@ -221,7 +224,7 @@ const ContentBlocks = () => {
                   'A fully composable, and collaborative platform to boost your team velocity.',
               })}
             </Typography>
-            <Box src={cloudFlagsImage} position="absolute" top={0} right={0} as="img" />
+            <Box src={cloudFlagsImage} position="absolute" top={0} right={0} tag="img" />
           </Flex>
         </Flex>
       </BlockLink>
@@ -309,11 +312,11 @@ const BlockLink = styled.a`
   text-decoration: none;
 `;
 
-const CloudCustomWrapper = styled(Box)`
+const CloudCustomWrapper = styled<BoxComponent>(Box)`
   background-image: url(${cloudIconBackgroundImage});
 `;
 
-const CloudIconWrapper = styled(Flex)`
+const CloudIconWrapper = styled<FlexComponent>(Flex)`
   background: rgba(255, 255, 255, 0.3);
 `;
 
@@ -341,7 +344,7 @@ const SocialLinks = () => {
 
   return (
     <Flex
-      as="aside"
+      tag="aside"
       direction="column"
       aria-labelledby="join-the-community"
       background="neutral0"
@@ -355,7 +358,7 @@ const SocialLinks = () => {
     >
       <Flex direction="column" alignItems="stretch" gap={5}>
         <Flex direction="column" alignItems="stretch" gap={3}>
-          <Typography variant="delta" as="h2" id="join-the-community">
+          <Typography variant="delta" tag="h2" id="join-the-community">
             {formatMessage({
               id: 'app.components.HomePage.community',
               defaultMessage: 'Join the community',
@@ -390,6 +393,12 @@ const SocialLinks = () => {
     </Flex>
   );
 };
+
+const StyledGithub = styled(GitHub)`
+  path {
+    fill: ${(props) => props.theme.colors.neutral800} !important;
+  }
+`;
 
 const StyledDiscord = styled(Discord)`
   path {
@@ -473,7 +482,7 @@ const SOCIAL_LINKS = [
   {
     name: { id: 'app.components.HomePage.community.links.github', defaultMessage: 'Github' },
     link: 'https://github.com/strapi/strapi/',
-    icon: <GitHub fill="#7289DA" />,
+    icon: <StyledGithub />,
     alt: 'github',
   },
   {

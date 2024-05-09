@@ -7,6 +7,7 @@ import {
   SingleSelectOption,
   Popover,
   SingleSelect,
+  Field,
 } from '@strapi/design-system';
 import {
   Bold,
@@ -23,7 +24,6 @@ import {
 } from '@strapi/icons';
 import { EditorFromTextArea } from 'codemirror5';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
 
 import {
   CustomIconButton,
@@ -79,15 +79,22 @@ const WysiwygNav = ({
         justifyContent="space-between"
         borderRadius={`0.4rem 0.4rem 0 0`}
       >
-        <StyledFlex>
-          <SingleSelect disabled placeholder={selectPlaceholder} size="S" label={selectPlaceholder}>
-            <SingleSelectOption value="h1">h1</SingleSelectOption>
-            <SingleSelectOption value="h2">h2</SingleSelectOption>
-            <SingleSelectOption value="h3">h3</SingleSelectOption>
-            <SingleSelectOption value="h4">h4</SingleSelectOption>
-            <SingleSelectOption value="h5">h5</SingleSelectOption>
-            <SingleSelectOption value="h6">h6</SingleSelectOption>
-          </SingleSelect>
+        <Flex>
+          <Field.Root>
+            <SingleSelect
+              disabled
+              placeholder={selectPlaceholder}
+              size="S"
+              aria-label={selectPlaceholder}
+            >
+              <SingleSelectOption value="h1">h1</SingleSelectOption>
+              <SingleSelectOption value="h2">h2</SingleSelectOption>
+              <SingleSelectOption value="h3">h3</SingleSelectOption>
+              <SingleSelectOption value="h4">h4</SingleSelectOption>
+              <SingleSelectOption value="h5">h5</SingleSelectOption>
+              <SingleSelectOption value="h6">h6</SingleSelectOption>
+            </SingleSelect>
+          </Field.Root>
 
           <MainButtons>
             <CustomIconButton disabled label="Bold" name="Bold" icon={<Bold />} />
@@ -96,7 +103,7 @@ const WysiwygNav = ({
           </MainButtons>
 
           <MoreButton disabled label="More" icon={<More />} />
-        </StyledFlex>
+        </Flex>
 
         {!isExpandMode && (
           <Button onClick={onTogglePreviewMode} variant="tertiary">
@@ -117,21 +124,23 @@ const WysiwygNav = ({
       justifyContent="space-between"
       borderRadius={`0.4rem 0.4rem 0 0`}
     >
-      <StyledFlex>
-        <SingleSelect
-          placeholder={selectPlaceholder}
-          label={selectPlaceholder}
-          size="S"
-          // @ts-expect-error – DS v2 will only allow strings.
-          onChange={(value) => onActionClick(value, editorRef)}
-        >
-          <SingleSelectOption value="h1">h1</SingleSelectOption>
-          <SingleSelectOption value="h2">h2</SingleSelectOption>
-          <SingleSelectOption value="h3">h3</SingleSelectOption>
-          <SingleSelectOption value="h4">h4</SingleSelectOption>
-          <SingleSelectOption value="h5">h5</SingleSelectOption>
-          <SingleSelectOption value="h6">h6</SingleSelectOption>
-        </SingleSelect>
+      <Flex>
+        <Field.Root>
+          <SingleSelect
+            placeholder={selectPlaceholder}
+            aria-label={selectPlaceholder}
+            size="S"
+            // @ts-expect-error – DS v2 will only allow strings.
+            onChange={(value) => onActionClick(value, editorRef)}
+          >
+            <SingleSelectOption value="h1">h1</SingleSelectOption>
+            <SingleSelectOption value="h2">h2</SingleSelectOption>
+            <SingleSelectOption value="h3">h3</SingleSelectOption>
+            <SingleSelectOption value="h4">h4</SingleSelectOption>
+            <SingleSelectOption value="h5">h5</SingleSelectOption>
+            <SingleSelectOption value="h6">h6</SingleSelectOption>
+          </SingleSelect>
+        </Field.Root>
 
         <MainButtons>
           <CustomIconButton
@@ -216,7 +225,7 @@ const WysiwygNav = ({
             </Flex>
           </Popover>
         )}
-      </StyledFlex>
+      </Flex>
 
       {onTogglePreviewMode && (
         <Button onClick={onTogglePreviewMode} variant="tertiary">
@@ -232,17 +241,3 @@ const WysiwygNav = ({
 
 export { WysiwygNav };
 export type { WysiwygNavProps };
-
-const StyledFlex = styled(Flex)`
-  /* Hide the label, every input needs a label. */
-  label {
-    border: 0;
-    clip: rect(0 0 0 0);
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    padding: 0;
-    position: absolute;
-    width: 1px;
-  }
-`;

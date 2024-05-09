@@ -236,23 +236,23 @@ describe('EditFieldForm', () => {
         },
       });
 
-      expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
+      expect(await screen.findByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
 
-      expect(screen.getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Finish' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
-      expect(screen.getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
-      expect(screen.getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
-      expect(screen.getByRole('textbox', { name: 'Placeholder' })).toBeInTheDocument();
-      expect(screen.getByRole('combobox', { name: 'Size' })).toBeInTheDocument();
-      expect(screen.getByRole('combobox', { name: 'Entry title' })).toBeInTheDocument();
+      expect(await screen.findByRole('textbox', { name: 'Label' })).toBeInTheDocument();
+      expect(await screen.findByRole('textbox', { name: 'Description' })).toBeInTheDocument();
+      expect(await screen.findByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
+      expect(await screen.findByRole('textbox', { name: 'Placeholder' })).toBeInTheDocument();
+      expect(await screen.findByRole('combobox', { name: 'Size' })).toBeInTheDocument();
+      expect(await screen.findByRole('combobox', { name: 'Entry title' })).toBeInTheDocument();
 
-      await user.click(screen.getByRole('combobox', { name: 'Entry title' }));
+      await user.click(await screen.findByRole('combobox', { name: 'Entry title' }));
 
-      expect(screen.getByRole('option', { name: 'id' })).toBeInTheDocument();
+      expect(await screen.findByRole('option', { name: 'id' })).toBeInTheDocument();
     });
   });
 });
