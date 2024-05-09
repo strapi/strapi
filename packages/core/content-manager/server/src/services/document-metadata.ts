@@ -152,43 +152,28 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     let draftVersion: DocumentVersion | undefined;
     let publishedVersion: DocumentVersion | undefined;
 
-    const isDraft = version.publishedAt === null;
-
-    if (isDraft) {
-      draftVersion = version;
-    } else {
+    if (version.publishedAt) {
       publishedVersion = version;
+    } else {
+      draftVersion = version;
     }
 
-    if (otherDocumentStatuses && otherDocumentStatuses.at(0)) {
-      const otherVersion = otherDocumentStatuses.at(0);
-      if (otherVersion?.publishedAt) {
-        publishedVersion = otherVersion;
-      } else {
-        draftVersion = otherVersion;
-      }
+    const otherVersion = otherDocumentStatuses?.at(0);
+    if (otherVersion?.publishedAt) {
+      publishedVersion = otherVersion;
+    } else if (otherVersion) {
+      draftVersion = otherVersion;
     }
 
-    if (!otherDocumentStatuses?.length) {
-      // If there are no other versions, the current version is the latest
-      return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
-    }
-
-    if (isDraft) {
-      const hasPublished = publishedVersion?.publishedAt !== null;
-
-      if (!hasPublished) {
-        // If there are no published versions, the draft is considered the latest
-        return CONTENT_MANAGER_STATUS.DRAFT;
-      }
-    }
+    if (!draftVersion) return CONTENT_MANAGER_STATUS.PUBLISHED;
+    if (!publishedVersion) return CONTENT_MANAGER_STATUS.DRAFT;
 
     /*
      * The document is modified if the draft version has been updated more
      * recently than the published version.
      */
-    const isModified = getIsVersionLatestModification(draftVersion, publishedVersion);
-    return isModified ? CONTENT_MANAGER_STATUS.MODIFIED : CONTENT_MANAGER_STATUS.PUBLISHED;
+    const isDraftModified = getIsVersionLatestModification(draftVersion, publishedVersion);
+    return isDraftModified ? CONTENT_MANAGER_STATUS.MODIFIED : CONTENT_MANAGER_STATUS.PUBLISHED;
   },
 
   async getMetadata(
