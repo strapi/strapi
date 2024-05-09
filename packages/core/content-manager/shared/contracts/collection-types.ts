@@ -14,7 +14,7 @@ export type AvailableLocaleDocument = Pick<Document, 'id' | 'locale' | AT_FIELDS
 export type AvailableStatusDocument = Pick<
   Document,
   'id' | 'documentId' | 'locale' | BY_FIELDS | AT_FIELDS
->[];
+>;
 export type DocumentMetadata = {
   // All status of the returned locale
   availableStatus: AvailableStatusDocument[];

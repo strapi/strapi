@@ -272,6 +272,8 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
  * -----------------------------------------------------------------------------------------------*/
 
 const FieldActionWrapper = styled(Field.Action)`
+  width: 1.6rem;
+
   svg {
     height: 1.6rem;
     width: 1.6rem;
