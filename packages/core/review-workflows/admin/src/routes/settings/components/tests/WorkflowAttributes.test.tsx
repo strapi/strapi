@@ -81,21 +81,16 @@ describe('WorkflowAttributes', () => {
       })
     );
 
-    const { getByRole, queryByRole, user } = setup();
+    const { getByRole, user, queryByRole } = setup();
 
-    await user.click(getByRole('combobox', { name: /associated to/i }));
+    const contentTypesSelect = getByRole('combobox', { name: /associated to/i });
+    await user.click(contentTypesSelect);
 
-    await waitFor(() => {
-      const singleTypeOption = screen.queryByRole('option', { name: /Single Types/i });
-      expect(singleTypeOption).toBeInTheDocument();
+    await waitFor(async () => {
+      expect(queryByRole('option', { name: /Collection Types/i })).not.toBeInTheDocument();
     });
-
     await waitFor(() => {
-      const collectionTypeOption = queryByRole('option', { name: /Collection Types/i });
-      expect(collectionTypeOption).not.toBeInTheDocument();
-      if (collectionTypeOption) {
-        console.error('Collection type option was unexpectedly found in the document.');
-      }
+      expect(getByRole('option', { name: /Single Types/i })).toBeInTheDocument();
     });
   });
 
