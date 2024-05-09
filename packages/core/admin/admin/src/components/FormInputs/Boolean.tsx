@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { Toggle, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -40,4 +40,6 @@ const BooleanInput = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-export { BooleanInput };
+const MemoizedBooleanInput = memo(BooleanInput);
+
+export { MemoizedBooleanInput as BooleanInput };

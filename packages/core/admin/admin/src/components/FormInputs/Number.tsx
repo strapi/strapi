@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { NumberInput, useComposedRefs, Field } from '@strapi/design-system';
 
@@ -34,4 +34,6 @@ const NumberInputImpl = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-export { NumberInputImpl as NumberInput };
+const MemoizedNumberInput = memo(NumberInputImpl);
+
+export { MemoizedNumberInput as NumberInput };

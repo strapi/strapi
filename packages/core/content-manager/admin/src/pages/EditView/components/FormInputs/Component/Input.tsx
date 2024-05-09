@@ -109,5 +109,7 @@ const ComponentInput = ({
   );
 };
 
-export { ComponentInput };
+const MemoizedComponentInput = React.memo(ComponentInput);
+
+export { MemoizedComponentInput as ComponentInput };
 export type { ComponentInputProps };

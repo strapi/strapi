@@ -1032,5 +1032,7 @@ const RelationItemPlaceholder = () => (
   />
 );
 
-export { RelationsField as RelationsInput, FlexWrapper, DisconnectButton, LinkEllipsis };
+const MemoizedRelationsField = React.memo(RelationsField);
+
+export { MemoizedRelationsField as RelationsInput, FlexWrapper, DisconnectButton, LinkEllipsis };
 export type { RelationsFieldProps };

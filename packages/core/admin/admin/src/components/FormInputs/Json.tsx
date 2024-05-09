@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import {
   JSONInput as JSONInputImpl,
@@ -12,7 +12,7 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-export const JsonInput = forwardRef<JSONInputRef, InputProps>(
+const JsonInput = forwardRef<JSONInputRef, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField(name);
@@ -40,3 +40,7 @@ export const JsonInput = forwardRef<JSONInputRef, InputProps>(
     );
   }
 );
+
+const MemoizedJsonInput = memo(JsonInput);
+
+export { MemoizedJsonInput as JsonInput };
