@@ -1,14 +1,14 @@
 import * as React from 'react';
 
 import { Divider, Flex, FlexComponent } from '@strapi/design-system';
-import { Feather, Lock, House } from '@strapi/icons';
+import { Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { useAuth } from '../features/Auth';
 import { useTracking } from '../features/Tracking';
-import { Menu } from '../hooks/useMenu';
+import { Menu, MenuItem } from '../hooks/useMenu';
 import { getDisplayName } from '../utils/users';
 
 import { MainNav } from './MainNav/MainNav';
@@ -16,10 +16,29 @@ import { NavBrand } from './MainNav/NavBrand';
 import { NavLink } from './MainNav/NavLink';
 import { NavUser } from './MainNav/NavUser';
 
-const NewNavLinkBadge = styled(NavLink.Badge)`
+const sortLinks = (links: MenuItem[]) => {
+  return links.sort((a, b) => {
+    const positionA = a.position ?? 0;
+    const positionB = b.position ?? 0;
+
+    if (positionA === positionB) {
+      return 0;
+    } else if (positionA < positionB) {
+      return -1;
+    } else {
+      return 1;
+    }
+  });
+};
+
+const NavLinkBadgeCounter = styled(NavLink.Badge)`
   span {
     color: ${({ theme }) => theme.colors.neutral0};
   }
+`;
+
+const NavLinkBadgeLock = styled(NavLink.Badge)`
+  background-color: transparent;
 `;
 
 const NavListWrapper = styled<FlexComponent<'ul'>>(Flex)`
@@ -45,6 +64,8 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
+  const listLinks = sortLinks([...pluginsSectionLinks, ...generalSectionLinks]);
+
   return (
     <MainNav>
       <NavBrand />
@@ -52,108 +73,47 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
       <Divider />
 
       <NavListWrapper tag="ul" gap={3} direction="column" flex={1} paddingTop={3} paddingBottom={3}>
-        <Flex tag="li">
-          <NavLink.Tooltip label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}>
-            <NavLink.Link
-              to="/"
-              onClick={() => handleClickOnLink('/')}
-              aria-label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}
-            >
-              <NavLink.Icon label={formatMessage({ id: 'global.home', defaultMessage: 'Home' })}>
-                <House width="2rem" height="2rem" fill="neutral500" />
-              </NavLink.Icon>
-            </NavLink.Link>
-          </NavLink.Tooltip>
-        </Flex>
-        <Flex tag="li">
-          <NavLink.Tooltip
-            label={formatMessage({
-              id: 'global.content-manager',
-              defaultMessage: 'Content Manager',
-            })}
-          >
-            <NavLink.Link
-              to="/content-manager"
-              onClick={() => handleClickOnLink('/content-manager')}
-              aria-label={formatMessage({
-                id: 'global.content-manager',
-                defaultMessage: 'Content Manager',
-              })}
-            >
-              <NavLink.Icon
-                label={formatMessage({
-                  id: 'global.content-manager',
-                  defaultMessage: 'Content Manager',
-                })}
-              >
-                <Feather width="2rem" height="2rem" fill="neutral500" />
-              </NavLink.Icon>
-            </NavLink.Link>
-          </NavLink.Tooltip>
-        </Flex>
-        {pluginsSectionLinks.length > 0
-          ? pluginsSectionLinks.map((link) => {
-              if (link.to === 'content-manager') {
-                return null;
-              }
-
+        {listLinks.length > 0
+          ? listLinks.map((link) => {
               const LinkIcon = link.icon;
-              const badgeContent = link?.lockIcon ? <Lock /> : undefined;
+              const badgeContentLock = link?.lockIcon ? <Lock /> : undefined;
 
-              const labelValue = formatMessage(link.intlLabel);
-              return (
-                <Flex tag="li" key={link.to}>
-                  <NavLink.Tooltip label={labelValue}>
-                    <NavLink.Link
-                      to={link.to}
-                      onClick={() => handleClickOnLink(link.to)}
-                      aria-label={labelValue}
-                    >
-                      <NavLink.Icon label={labelValue}>
-                        <LinkIcon width="2rem" height="2rem" fill="neutral500" />
-                      </NavLink.Icon>
-                      {badgeContent && (
-                        <NavLink.Badge
-                          label="locked"
-                          background="transparent"
-                          textColor="neutral500"
-                        >
-                          {badgeContent}
-                        </NavLink.Badge>
-                      )}
-                    </NavLink.Link>
-                  </NavLink.Tooltip>
-                </Flex>
-              );
-            })
-          : null}
-        {generalSectionLinks.length > 0
-          ? generalSectionLinks.map((link) => {
-              const LinkIcon = link.icon;
-
-              const badgeContent =
+              const badgeContentNumeric =
                 link.notificationsCount && link.notificationsCount > 0
                   ? link.notificationsCount.toString()
                   : undefined;
 
               const labelValue = formatMessage(link.intlLabel);
-
               return (
                 <Flex tag="li" key={link.to}>
                   <NavLink.Tooltip label={labelValue}>
                     <NavLink.Link
-                      aria-label={labelValue}
                       to={link.to}
                       onClick={() => handleClickOnLink(link.to)}
+                      aria-label={labelValue}
                     >
                       <NavLink.Icon label={labelValue}>
                         <LinkIcon width="2rem" height="2rem" fill="neutral500" />
                       </NavLink.Icon>
-                      {badgeContent && (
-                        <NewNavLinkBadge label={badgeContent} backgroundColor="primary600">
-                          {badgeContent}
-                        </NewNavLinkBadge>
-                      )}
+                      {badgeContentLock ? (
+                        <NavLinkBadgeLock
+                          label="locked"
+                          textColor="neutral500"
+                          paddingLeft={0}
+                          paddingRight={0}
+                        >
+                          {badgeContentLock}
+                        </NavLinkBadgeLock>
+                      ) : badgeContentNumeric ? (
+                        <NavLinkBadgeCounter
+                          label={badgeContentNumeric}
+                          backgroundColor="primary600"
+                          width="2.3rem"
+                          color="neutral0"
+                        >
+                          {badgeContentNumeric}
+                        </NavLinkBadgeCounter>
+                      ) : null}
                     </NavLink.Link>
                   </NavLink.Tooltip>
                 </Flex>

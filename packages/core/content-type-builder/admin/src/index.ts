@@ -23,6 +23,7 @@ export default {
       },
       permissions: PERMISSIONS.main,
       Component: () => import('./pages/App'),
+      position: 0,
     });
 
     app.registerPlugin({

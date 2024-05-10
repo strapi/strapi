@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Cog, PuzzlePiece, ShoppingCart } from '@strapi/icons';
+import { Cog, PuzzlePiece, ShoppingCart, House } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 import { useSelector } from 'react-redux';
 
@@ -27,6 +27,16 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
       {
+        icon: House,
+        intlLabel: {
+          id: 'global.home',
+          defaultMessage: 'Home',
+        },
+        to: '/',
+        permissions: [],
+        position: -3,
+      },
+      {
         icon: PuzzlePiece,
         intlLabel: {
           id: 'global.plugins',
@@ -43,6 +53,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         },
         to: '/marketplace',
         permissions: permissions.marketplace?.main ?? [],
+        position: 3,
       },
       {
         icon: Cog,
@@ -55,6 +66,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         // using the settings menu
         permissions: [],
         notificationsCount: 0,
+        position: 5,
       },
     ],
     pluginsSectionLinks: [],

@@ -27,6 +27,7 @@ export default {
       },
       permissions: [],
       Component: () => import('./layout').then((mod) => ({ default: mod.Layout })),
+      position: -2,
     });
 
     app.registerPlugin(cm.config);

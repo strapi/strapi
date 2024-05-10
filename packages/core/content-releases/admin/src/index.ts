@@ -32,6 +32,7 @@ const admin: Plugin.Config.AdminInput = {
         },
         Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
         permissions: PERMISSIONS.main,
+        position: -2,
       });
 
       /**

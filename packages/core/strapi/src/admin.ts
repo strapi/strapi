@@ -12,12 +12,16 @@ const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderA
   return renderAdmin(mountNode, {
     ...restArgs,
     plugins: {
+      // @ts-expect-error – TODO: fix this
       'content-manager': contentManager,
-      contentReleases,
-      upload,
       'content-type-builder': contentTypeBuilder,
+      // @ts-expect-error – TODO: fix this
       email,
+      upload,
+      // @ts-expect-error – TODO: fix this, the "types" folder has it wrong.
+      contentReleases,
       i18n,
+      // @ts-expect-error – TODO: fix this, the "types" folder has it wrong.
       reviewWorkflows,
       ...plugins,
     },
