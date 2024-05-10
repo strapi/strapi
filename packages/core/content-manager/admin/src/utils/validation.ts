@@ -1,11 +1,8 @@
-import { translatedErrors, FormErrors } from '@strapi/admin/strapi-admin';
+import { translatedErrors } from '@strapi/admin/strapi-admin';
 import pipe from 'lodash/fp/pipe';
-import { type MessageDescriptor } from 'react-intl';
 import * as yup from 'yup';
 
 import { DOCUMENT_META_FIELDS } from '../constants/attributes';
-
-import { getIn, setIn } from './objects';
 
 import type { ComponentsDictionary, Schema } from '../hooks/useDocument';
 import type { Schema as SchemaUtils } from '@strapi/types';
@@ -338,41 +335,4 @@ const addRegexValidation: ValidationFn =
     return schema;
   };
 
-/* -------------------------------------------------------------------------------------------------
- * getInnerErrors
- * -----------------------------------------------------------------------------------------------*/
-
-const isErrorMessageDescriptor = (object?: string | object): object is MessageDescriptor => {
-  return (
-    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
-  );
-};
-
-const getInnerErrors = (error: yup.ValidationError): FormErrors => {
-  let errors: FormErrors = {};
-
-  if (error.inner) {
-    if (error.inner.length === 0 && error.path) {
-      errors = setIn(errors, error.path, error.message);
-      return errors;
-    }
-
-    error.inner.forEach((innerError) => {
-      if (innerError.path && !getIn(errors, innerError.path)) {
-        const message = isErrorMessageDescriptor(innerError.message)
-          ? innerError.message
-          : {
-              id: innerError.message,
-              defaultMessage: innerError.message,
-              values: innerError.params,
-            };
-
-        errors = setIn(errors, innerError.path, message);
-      }
-    });
-  }
-
-  return errors;
-};
-
-export { createYupSchema, getInnerErrors };
+export { createYupSchema };

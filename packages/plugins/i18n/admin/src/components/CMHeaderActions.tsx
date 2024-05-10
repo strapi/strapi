@@ -5,6 +5,7 @@ import {
   useQueryParams,
   Table,
   useAPIErrorHandler,
+  FormErrors,
 } from '@strapi/admin/strapi-admin';
 import {
   type HeaderActionComponent,
@@ -16,7 +17,7 @@ import {
 import { Flex, Status, Typography, Button } from '@strapi/design-system';
 import { WarningCircle, ListPlus, Trash } from '@strapi/icons';
 import { Modules } from '@strapi/types';
-import { useIntl, type MessageDescriptor } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
 
@@ -331,9 +332,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
 
     // Build the validation errors for each locale.
     const allDocuments = [document, ...(documentMeta?.availableLocales ?? [])];
-    const errors = allDocuments.reduce<
-      Record<Modules.Documents.Params.Locale.StringNotation, Record<string, MessageDescriptor>>
-    >((errs, document) => {
+    const errors = allDocuments.reduce<FormErrors>((errs, document) => {
       if (!document) {
         return errs;
       }

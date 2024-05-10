@@ -1,11 +1,11 @@
 import * as React from 'react';
 
-import { Table, useTable } from '@strapi/admin/strapi-admin';
+import { FormErrors, Table, useTable } from '@strapi/admin/strapi-admin';
 import { Box, Typography, IconButton, Flex, Tooltip, Status } from '@strapi/design-system';
 import { Pencil, CheckCircle, CrossCircle, ArrowsCounterClockwise } from '@strapi/icons';
 import { Modules } from '@strapi/types';
 import { stringify } from 'qs';
-import { type MessageDescriptor, useIntl } from 'react-intl';
+import { type MessageDescriptor, useIntl, PrimitiveType } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
 import { Locale } from '../../../shared/contracts/locales';
@@ -22,10 +22,14 @@ type Status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 
 interface EntryValidationTextProps {
   status: Status;
-  validationErrors?: Record<string, MessageDescriptor>;
+  validationErrors: FormErrors[string] | null;
 }
 
-const isErrorMessageDescriptor = (object?: string | object): object is MessageDescriptor => {
+interface TranslationMessage extends MessageDescriptor {
+  values?: Record<string, PrimitiveType>;
+}
+
+const isErrorMessageDescriptor = (object?: string | object): object is TranslationMessage => {
   return (
     typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
   );
@@ -34,20 +38,33 @@ const isErrorMessageDescriptor = (object?: string | object): object is MessageDe
 const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
 
+  /**
+   * TODO: Should this be extracted an made into a factory to recursively get
+   * error messages??
+   */
+  const getErrorStr = (key: string, value?: FormErrors[string]): string => {
+    if (typeof value === 'string') {
+      return `${key}: ${value}`;
+    } else if (isErrorMessageDescriptor(value)) {
+      return `${key}: ${formatMessage(value)}`;
+    } else if (Array.isArray(value)) {
+      return value.map((v) => getErrorStr(key, v)).join(' ');
+    } else if (typeof value === 'object' && !Array.isArray(value)) {
+      return Object.entries(value)
+        .map(([k, v]) => getErrorStr(k, v))
+        .join(' ');
+    } else {
+      /**
+       * unlikely to happen, but we need to return something
+       */
+      return '';
+    }
+  };
+
   if (validationErrors) {
     const validationErrorsMessages = Object.entries(validationErrors)
       .map(([key, value]) => {
-        const builtKey = [key];
-
-        let currentValue = value;
-        while (typeof currentValue === 'object' && !isErrorMessageDescriptor(currentValue)) {
-          // We need to extract errors from nested components
-          const newKey = Object.keys(currentValue)[0];
-          builtKey.push(newKey);
-          currentValue = currentValue[newKey];
-        }
-
-        return `${builtKey.join('.')}: ${formatMessage(currentValue as MessageDescriptor)}`;
+        return getErrorStr(key, value);
       })
       .join(' ');
 
@@ -128,10 +145,7 @@ interface BulkLocaleActionModalProps {
   }[];
   onClose: () => void;
   localesMetadata: Locale[];
-  validationErrors?: Record<
-    Modules.Documents.Params.Locale.StringNotation,
-    Record<string, MessageDescriptor>
-  >;
+  validationErrors?: FormErrors;
 }
 
 const BulkLocaleActionModal = ({
