@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Divider, Flex, FlexComponent } from '@strapi/design-system';
+import { Divider, Flex, FlexComponent, useCollator } from '@strapi/design-system';
 import { Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -22,9 +22,7 @@ const sortLinks = (links: MenuItem[]) => {
     const positionA = a.position ?? 6;
     const positionB = b.position ?? 6;
 
-    if (positionA === positionB) {
-      return (a.intlLabel.defaultMessage ?? '') < (b.intlLabel.defaultMessage ?? '') ? -1 : 1;
-    } else if (positionA < positionB) {
+    if (positionA < positionB) {
       return -1;
     } else {
       return 1;
@@ -50,10 +48,13 @@ interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSecti
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
   const user = useAuth('AuthenticatedApp', (state) => state.user);
-  const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
   const userDisplayName = getDisplayName(user);
+  const { formatMessage, locale } = useIntl();
+  const formatter = useCollator(locale, {
+    sensitivity: 'base',
+  });
 
   const initials = userDisplayName
     .split(' ')
@@ -65,7 +66,10 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     trackUsage('willNavigate', { from: pathname, to: destination });
   };
 
-  const listLinks = sortLinks([...pluginsSectionLinks, ...generalSectionLinks]);
+  const listLinksAlphabeticallySorted = [...pluginsSectionLinks, ...generalSectionLinks].sort(
+    (a, b) => formatter.compare(formatMessage(a.intlLabel), formatMessage(b.intlLabel))
+  );
+  const listLinks = sortLinks(listLinksAlphabeticallySorted);
 
   return (
     <MainNav>
