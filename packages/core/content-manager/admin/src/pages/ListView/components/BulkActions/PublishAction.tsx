@@ -58,12 +58,24 @@ const EntryValidationText = ({
 
   if (validationErrors) {
     const validationErrorsMessages = Object.entries(validationErrors)
-      .map(([key, value]) =>
-        formatMessage(
-          { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+      .map(([key, value]) => {
+        if (typeof value.id === 'string' && typeof value.defaultMessage === 'string') {
+          return formatMessage(
+            { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+            { field: key }
+          );
+        }
+
+        return formatMessage(
+          {
+            // @ts-expect-error @TODO: validate return type is a ValidationError and message should be a string, instead we receive an object some times
+            id: `${value.defaultMessage.id}.withField`,
+            // @ts-expect-error - read above
+            defaultMessage: value.defaultMessage.defaultMessage,
+          },
           { field: key }
-        )
-      )
+        );
+      })
       .join(' ');
 
     return (
