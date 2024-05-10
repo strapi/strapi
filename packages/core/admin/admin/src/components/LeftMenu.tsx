@@ -18,11 +18,12 @@ import { NavUser } from './MainNav/NavUser';
 
 const sortLinks = (links: MenuItem[]) => {
   return links.sort((a, b) => {
-    const positionA = a.position ?? 0;
-    const positionB = b.position ?? 0;
+    // if no position is defined, we put the link in the position of the external plugins, before the plugins list
+    const positionA = a.position ?? 6;
+    const positionB = b.position ?? 6;
 
     if (positionA === positionB) {
-      return 0;
+      return (a.intlLabel.defaultMessage ?? '') < (b.intlLabel.defaultMessage ?? '') ? -1 : 1;
     } else if (positionA < positionB) {
       return -1;
     } else {

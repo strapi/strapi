@@ -32,7 +32,7 @@ const admin: Plugin.Config.AdminInput = {
         },
         Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
         permissions: PERMISSIONS.main,
-        position: -2,
+        position: 2,
       });
 
       /**
@@ -78,6 +78,7 @@ const admin: Plugin.Config.AdminInput = {
           return { default: PurchaseContentReleases };
         },
         lockIcon: true,
+        position: 2,
       });
     }
   },

@@ -34,7 +34,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         },
         to: '/',
         permissions: [],
-        position: -3,
+        position: 0,
       },
       {
         icon: PuzzlePiece,
@@ -44,6 +44,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         },
         to: '/list-plugins',
         permissions: permissions.marketplace?.main ?? [],
+        position: 7,
       },
       {
         icon: ShoppingCart,
@@ -53,7 +54,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         },
         to: '/marketplace',
         permissions: permissions.marketplace?.main ?? [],
-        position: 3,
+        position: 8,
       },
       {
         icon: Cog,
@@ -66,7 +67,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         // using the settings menu
         permissions: [],
         notificationsCount: 0,
-        position: 5,
+        position: 10,
       },
     ],
     pluginsSectionLinks: [],

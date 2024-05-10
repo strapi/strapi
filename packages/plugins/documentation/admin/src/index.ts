@@ -20,7 +20,7 @@ export default {
         const { App } = await import('./pages/App');
         return App;
       },
-      position: 4,
+      position: 9,
     });
 
     app.addMiddlewares([() => api.middleware]);
