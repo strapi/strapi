@@ -9,11 +9,17 @@ type SortQuery = Modules.Documents.Params.Sort.StringNotation<UID.Schema> & stri
 type Document = Modules.Documents.Document<any>;
 type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
 type BY_FIELDS = 'createdBy' | 'updatedBy' | 'publishedBy';
+
+export type AvailableLocaleDocument = Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>;
+export type AvailableStatusDocument = Pick<
+  Document,
+  'id' | 'documentId' | 'locale' | BY_FIELDS | AT_FIELDS
+>;
 export type DocumentMetadata = {
   // All status of the returned locale
-  availableStatus: Pick<Document, 'id' | 'documentId' | 'locale' | BY_FIELDS | AT_FIELDS>[];
+  availableStatus: AvailableStatusDocument[];
   // Available locales within the same status of the returned document
-  availableLocales: Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>[];
+  availableLocales: AvailableLocaleDocument[];
 };
 
 /**
@@ -307,7 +313,11 @@ export declare namespace BulkPublish {
     body: {
       documentIds: Modules.Documents.ID[];
     };
-    query: {};
+    query: {
+      // If not provided, the default locale will be used
+      // Otherwise specify the locales to publish of the documents
+      locale?: string | string[] | null;
+    };
   }
 
   export interface Params {
@@ -315,7 +325,9 @@ export declare namespace BulkPublish {
   }
 
   export interface Response {
-    count: number;
+    data: {
+      count: number;
+    };
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -350,6 +362,7 @@ export declare namespace CountDraftRelations {
   export interface Request {
     body: {};
     query: {
+      // Count the draft relations of one entity, locale + documentId
       locale?: string | null;
     };
   }
@@ -371,8 +384,10 @@ export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
     body: {};
     query: {
+      // We can use this endpoint to count the draft relations across multiple
+      // entities (documents + locales).
       documentIds?: Modules.Documents.ID[];
-      locale?: string;
+      locale?: string | string[] | null;
     };
   }
 

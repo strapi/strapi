@@ -18,6 +18,7 @@ import {
   useDiscardDocumentMutation,
   useLazyGetDocumentQuery,
   usePublishDocumentMutation,
+  usePublishManyDocumentsMutation,
   useUnpublishDocumentMutation,
   useUnpublishManyDocumentsMutation,
   useUpdateDocumentMutation,
@@ -37,6 +38,7 @@ import type {
   Publish,
   Update,
   Unpublish,
+  BulkPublish,
   BulkUnpublish,
 } from '../../../shared/contracts/collection-types';
 
@@ -45,7 +47,8 @@ const DEFAULT_UNEXPECTED_ERROR_MSG = {
   defaultMessage: 'An error occurred, please try again',
 } satisfies MessageDescriptor;
 
-type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> =
+type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }> =
+  | Pick<TResponse, 'data'>
   | Pick<TResponse, 'data' | 'meta'>
   | { error: BaseQueryError | SerializedError };
 
@@ -124,6 +127,11 @@ type UseDocumentActions = () => {
     },
     document: Partial<Document>
   ) => Promise<OperationResponse<Publish.Response>>;
+  publishMany: (args: {
+    model: string;
+    documentIds: string[];
+    params?: object;
+  }) => Promise<BulkOperationResponse<BulkPublish.Response>>;
   update: (
     args: {
       collectionType: string;
@@ -359,6 +367,48 @@ const useDocumentActions: UseDocumentActions = () => {
       }
     },
     [trackUsage, publishDocument, toggleNotification, formatMessage, formatAPIError]
+  );
+
+  const [publishManyDocuments] = usePublishManyDocumentsMutation();
+  const publishMany: IUseDocumentActs['publishMany'] = React.useCallback(
+    async ({ model, documentIds, params }) => {
+      try {
+        // TODO Confirm tracking events for bulk publish?
+
+        const res = await publishManyDocuments({
+          model,
+          documentIds,
+          params,
+        });
+        if ('error' in res) {
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
+          return { error: res.error };
+        }
+
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: getTranslation('success.record.publish'),
+            defaultMessage: 'Published document',
+          }),
+        });
+
+        return res.data;
+      } catch (err) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
+        });
+        throw err;
+      }
+    },
+    [
+      // trackUsage,
+      publishManyDocuments,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+    ]
   );
 
   const [updateDocument] = useUpdateDocumentMutation();
@@ -644,6 +694,7 @@ const useDocumentActions: UseDocumentActions = () => {
     discard,
     getDocument,
     publish,
+    publishMany,
     unpublish,
     unpublishMany,
     update,

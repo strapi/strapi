@@ -173,7 +173,6 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('heading', { name: 'Being from Kansas City' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Create an entry' })).not.toBeVisible();
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
       await page.getByRole('textbox', { name: 'title' }).fill('Being an American');

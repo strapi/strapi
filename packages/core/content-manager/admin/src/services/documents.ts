@@ -289,12 +289,15 @@ const documentApi = contentManagerApi.injectEndpoints({
     }),
     publishManyDocuments: builder.mutation<
       BulkPublish.Response,
-      BulkPublish.Params & BulkPublish.Request['body']
+      BulkPublish.Params & BulkPublish.Request['body'] & { params?: BulkPublish.Request['query'] }
     >({
-      query: ({ model, ...body }) => ({
+      query: ({ model, params, ...body }) => ({
         url: `/content-manager/collection-types/${model}/actions/bulkPublish`,
         method: 'POST',
         data: body,
+        config: {
+          params,
+        },
       }),
       invalidatesTags: (_res, _error, { model, documentIds }) =>
         documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),

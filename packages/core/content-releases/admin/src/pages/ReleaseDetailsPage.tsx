@@ -138,6 +138,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
     const validationErrorsMessages = Object.entries(errors)
       .map(([key, value]) =>
         formatMessage(
+          // @ts-expect-error – TODO: fix this will better checks
           { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
           { field: key }
         )
