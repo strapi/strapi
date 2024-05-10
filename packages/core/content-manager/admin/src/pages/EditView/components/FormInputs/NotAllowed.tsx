@@ -1,7 +1,6 @@
-import { TextInput } from '@strapi/design-system';
+import { Field, TextInput } from '@strapi/design-system';
 import { EyeStriked } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { styled } from 'styled-components';
 
 import type { InputProps } from '@strapi/admin/strapi-admin';
 import type { Schema } from '@strapi/types';
@@ -19,26 +18,18 @@ const NotAllowedInput = ({ hint, label, required, name }: NotAllowedInputProps) 
   });
 
   return (
-    <TextInput
-      disabled
-      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-      label={label}
-      id={name}
-      hint={hint}
-      name={name}
-      placeholder={placeholder}
-      required={required}
-      startAction={<StyledIcon />}
-      type="text"
-      value=""
-    />
+    <Field.Root id={name} hint={hint} name={name} required={required}>
+      <Field.Label>{label}</Field.Label>
+      <TextInput
+        disabled
+        placeholder={placeholder}
+        startAction={<EyeStriked fill="neutral600" />}
+        type="text"
+        value=""
+      />
+      <Field.Hint />
+    </Field.Root>
   );
 };
-
-const StyledIcon = styled(EyeStriked)`
-  & > path {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-`;
 
 export { NotAllowedInput };
