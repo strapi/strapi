@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 
 import {
   useStrapiApp,
@@ -228,5 +228,7 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
   }
 };
 
+const MemoizedInputRenderer = memo(InputRenderer);
+
 export type { InputRendererProps };
-export { InputRenderer, useFieldHint };
+export { MemoizedInputRenderer as InputRenderer, useFieldHint };

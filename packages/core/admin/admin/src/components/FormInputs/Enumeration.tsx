@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { SingleSelect, SingleSelectOption, useComposedRefs, Field } from '@strapi/design-system';
 
@@ -7,7 +7,7 @@ import { useField } from '../Form';
 
 import { EnumerationProps } from './types';
 
-export const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
+const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
   ({ name, required, label, hint, labelAction, options = [], ...props }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLDivElement>(name);
@@ -39,3 +39,7 @@ export const EnumerationInput = forwardRef<HTMLDivElement, EnumerationProps>(
     );
   }
 );
+
+const MemoizedEnumerationInput = memo(EnumerationInput);
+
+export { MemoizedEnumerationInput as EnumerationInput };

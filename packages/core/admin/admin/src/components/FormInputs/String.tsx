@@ -1,11 +1,11 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { TextInput, useComposedRefs, Field } from '@strapi/design-system';
 
 import { useFocusInputField } from '../../hooks/useFocusInputField';
 import { type InputProps, useField } from '../Form';
 
-export const StringInput = forwardRef<HTMLInputElement, InputProps>(
+const StringInput = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
@@ -28,3 +28,7 @@ export const StringInput = forwardRef<HTMLInputElement, InputProps>(
     );
   }
 );
+
+const MemoizedStringInput = memo(StringInput);
+
+export { MemoizedStringInput as StringInput };
