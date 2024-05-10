@@ -6,13 +6,14 @@ import {
   useQueryParams,
   useRBAC,
   Layouts,
+  BackButton,
 } from '@strapi/admin/strapi-admin';
-import { Button, Typography, Flex, Link } from '@strapi/design-system';
-import { ArrowLeft, WarningCircle } from '@strapi/icons';
+import { Button, Typography, Flex } from '@strapi/design-system';
+import { WarningCircle } from '@strapi/icons';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate, useParams, type To } from 'react-router-dom';
+import { useNavigate, useParams, type To } from 'react-router-dom';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
@@ -133,14 +134,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
             )}
           </Typography>
         }
-        navigationAction={
-          <Link startIcon={<ArrowLeft />} tag={NavLink} to={getNextNavigation()}>
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
+        navigationAction={<BackButton />}
         sticky={false}
         primaryAction={
           <Button

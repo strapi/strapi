@@ -78,12 +78,6 @@ describe('VersionHeader', () => {
 
       expect(await screen.findByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
       expect(await screen.findByText('Test Title (kitchensink)')).toBeInTheDocument();
-
-      const backLink = screen.getByRole('link', { name: 'Back' });
-      expect(backLink).toHaveAttribute(
-        'href',
-        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr'
-      );
     });
 
     it('should display the correct title and subtitle for a localized entry', async () => {
@@ -109,12 +103,6 @@ describe('VersionHeader', () => {
       expect(
         await screen.findByText('Test Title (kitchensink), in English (en)')
       ).toBeInTheDocument();
-
-      const backLink = screen.getByRole('link', { name: 'Back' });
-      expect(backLink).toHaveAttribute(
-        'href',
-        '/content-manager/collection-types/api::kitchensink.kitchensink/pcwmq3rlmp5w0be3cuplhnpr?plugins[i18n][locale]=en'
-      );
     });
 
     it('should display the correct subtitle without an entry title (mainField)', async () => {
@@ -160,12 +148,6 @@ describe('VersionHeader', () => {
 
       expect(await screen.findByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
       expect(await screen.findByText('Test Title (homepage)')).toBeInTheDocument();
-
-      const backLink = screen.getByRole('link', { name: 'Back' });
-      expect(backLink).toHaveAttribute(
-        'href',
-        '/content-manager/single-types/api::homepage.homepage'
-      );
     });
 
     it('should display the correct title and subtitle for a localized entry', async () => {
@@ -188,12 +170,6 @@ describe('VersionHeader', () => {
 
       expect(await screen.findByText('1/1/2022, 12:00 AM')).toBeInTheDocument();
       expect(await screen.findByText('Test Title (homepage), in English (en)')).toBeInTheDocument();
-
-      const backLink = screen.getByRole('link', { name: 'Back' });
-      expect(backLink).toHaveAttribute(
-        'href',
-        '/content-manager/single-types/api::homepage.homepage?plugins[i18n][locale]=en'
-      );
     });
   });
 });

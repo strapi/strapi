@@ -1,7 +1,7 @@
 import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { describeOnCondition } from '../../utils/shared';
+import { describeOnCondition, findAndClose } from '../../utils/shared';
 import { resetFiles } from '../../utils/file-reset';
 import { waitForRestart } from '../../utils/restart';
 
@@ -13,6 +13,21 @@ const goToHistoryPage = async (page: Page) => {
   await moreActionsButton.click();
   const historyButton = await page.getByRole('menuitem', { name: /content history/i });
   await historyButton.click();
+};
+
+// Click the back button until we're back at the entry in the CM or the maximum number of clicks is reached
+// By checking that we have left the history page and are back at the entry
+const goBackToEntry = async (page: Page, cmUrl: RegExp, historyUrl: RegExp) => {
+  const maxClicks = 10;
+  let clicks = 0;
+  while ((page.url().match(historyUrl) || !page.url().match(cmUrl)) && clicks < maxClicks) {
+    await page.getByRole('link', { name: 'Back' }).click();
+    clicks++;
+  }
+
+  if (clicks === maxClicks) {
+    throw new Error('Reached the maximum number of clicks without returning to the entry.');
+  }
 };
 
 describeOnCondition(edition === 'EE')('History', () => {
@@ -33,8 +48,13 @@ describeOnCondition(edition === 'EE')('History', () => {
     }) => {
       const CREATE_URL =
         /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
+      const CREATE_OR_UPDATE_URL = new RegExp(
+        CREATE_URL.source.replace('create', '(create|[a-z0-9]+)'),
+        CREATE_URL.flags
+      );
       const HISTORY_URL =
         /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+\/history(\?.*)?/;
+
       // Navigate to the content-manager - collection type - article
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('combobox', { name: 'Select a locale' }).click();
@@ -50,6 +70,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       const frenchTitle = "N'importe quoi";
       await titleInput.fill(frenchTitle);
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
       // Go to the history page
       await goToHistoryPage(page);
 
@@ -66,6 +88,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       const englishTitle = 'Being from Kansas is a pity';
       await titleInput.fill(englishTitle);
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
@@ -83,14 +107,15 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Assert only the english versions are available
       await expect(page.getByText(frenchTitle)).not.toBeVisible();
 
-      // Go back to the entry
-      await page.getByRole('link', { name: 'Back' }).click();
+      await goBackToEntry(page, CREATE_OR_UPDATE_URL, HISTORY_URL);
 
       /**
        * Update
        */
       await titleInput.fill('Being from Kansas City');
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
@@ -103,14 +128,14 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(titleInput).toHaveValue('Being from Kansas is a pity');
       await expect(previousVersion.getByText('(current)')).not.toBeVisible();
 
-      // Go back to the entry
-      await page.getByRole('link', { name: 'Back' }).click();
+      await goBackToEntry(page, CREATE_OR_UPDATE_URL, HISTORY_URL);
 
       /**
        * Publish
        */
       await page.getByRole('button', { name: 'Publish' }).click();
-      // Go to the history page
+      await findAndClose(page, 'Published Document');
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
@@ -120,20 +145,20 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(titleInput).toHaveValue('Being from Kansas City');
       // The current version is the most recent draft
       await expect(currentVersion.getByText('Draft')).toBeVisible();
-      await expect(titleInput).toHaveValue('Being from Kansas City');
-      // The second in the list is the published version
+      // The previous version is the published version
       await expect(previousVersion.getByText('Published')).toBeVisible();
       previousVersion.click();
       await expect(titleInput).toHaveValue('Being from Kansas City');
 
-      // Go back to the entry
-      await page.getByRole('link', { name: 'Back' }).click();
+      await goBackToEntry(page, CREATE_OR_UPDATE_URL, HISTORY_URL);
 
       /**
        * Modified
        */
       await titleInput.fill('Being from Kansas City, Missouri');
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
@@ -159,6 +184,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas');
       await page.getByRole('textbox', { name: 'slug' }).fill('being-from-kansas');
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
       /**
        * Rename field in content-type builder
@@ -178,6 +204,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
+
       await waitForRestart(page);
       await expect(page.getByRole('cell', { name: 'titleRename', exact: true })).toBeVisible();
 
@@ -190,6 +217,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('gridcell', { name: 'being-from-kansas' }).click();
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Being from Kansas City');
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
       /**
        * Go to the history page
@@ -225,6 +253,7 @@ describeOnCondition(edition === 'EE')('History', () => {
     }) => {
       const HISTORY_URL =
         /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
+      const CM_URL = /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
 
       // Navigate to the content-manager - single type - homepage
       await page.getByRole('link', { name: 'Content Manager' }).click();
@@ -240,13 +269,14 @@ describeOnCondition(edition === 'EE')('History', () => {
       const frenchTitle = 'Paris Saint-Germain';
       await titleInput.fill(frenchTitle);
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
       await expect(titleInput).toHaveValue(frenchTitle);
 
-      // Go back to the CM to create a new english entry
-      await page.getByRole('link', { name: 'Back' }).click();
+      await goBackToEntry(page, CM_URL, HISTORY_URL);
       await page.getByRole('combobox', { name: 'Locales' }).click();
       await page.getByRole('option', { name: 'English (en)' }).click();
 
@@ -254,6 +284,8 @@ describeOnCondition(edition === 'EE')('History', () => {
       const englishTitle = 'AFC Richmond';
       await titleInput.fill(englishTitle);
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
@@ -272,14 +304,15 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Assert only the english versions are available
       await expect(page.getByText(frenchTitle)).not.toBeVisible();
 
-      // Go back to the entry
-      await page.getByRole('link', { name: 'Back' }).click();
+      await goBackToEntry(page, CM_URL, HISTORY_URL);
 
       /**
        * Update
        */
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
@@ -290,13 +323,14 @@ describeOnCondition(edition === 'EE')('History', () => {
       await previousVersion.click();
       await expect(titleInput).toHaveValue('AFC Richmond');
 
-      // Go back to the entry
-      await page.getByRole('link', { name: 'Back' }).click();
+      await goBackToEntry(page, CM_URL, HISTORY_URL);
 
       /**
        * Publish
        */
       await page.getByRole('button', { name: 'Publish' }).click();
+      await findAndClose(page, 'Published Document');
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL('**/content-manager/single-types/api::homepage.homepage/history**');
@@ -310,14 +344,15 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(previousVersion.getByText('Published')).toBeVisible();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
 
-      // Go back to the entry
-      await page.getByRole('link', { name: 'Back' }).click();
+      await goBackToEntry(page, CM_URL, HISTORY_URL);
 
       /**
        * Modified
        */
       await titleInput.fill('Welcome to AFC Richmond!');
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
+
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
@@ -339,6 +374,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('link', { name: 'Homepage' }).click();
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
       /**
        * Rename field in content-type builder
@@ -358,6 +394,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
+
       await waitForRestart(page);
       await expect(page.getByRole('cell', { name: 'titleRename', exact: true })).toBeVisible();
 
@@ -369,6 +406,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('link', { name: 'Homepage' }).click();
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Welcome to AFC Richmond!');
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
       /**
        * Go to the history page
