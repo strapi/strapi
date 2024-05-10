@@ -7,7 +7,6 @@ import { Modules } from '@strapi/types';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 
 import { Locale } from '../../../shared/contracts/locales';
 import { getTranslation } from '../utils/getTranslation';
@@ -20,10 +19,6 @@ type Status = Modules.Documents.Params.PublicationStatus.Kind | 'modified';
 /* -------------------------------------------------------------------------------------------------
  * EntryValidationText
  * -----------------------------------------------------------------------------------------------*/
-
-const TypographyMaxWidth = styled(Typography)`
-  max-width: 300px;
-`;
 
 interface EntryValidationTextProps {
   status: Status;
@@ -59,10 +54,16 @@ const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValida
     return (
       <Flex gap={2}>
         <CrossCircle fill="danger600" />
-        <Tooltip description={validationErrorsMessages}>
-          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
+        <Tooltip label={validationErrorsMessages}>
+          <Typography
+            maxWidth={'30rem'}
+            textColor="danger600"
+            variant="omega"
+            fontWeight="semiBold"
+            ellipsis
+          >
             {validationErrorsMessages}
-          </TypographyMaxWidth>
+          </Typography>
         </Tooltip>
       </Flex>
     );
@@ -143,7 +144,7 @@ const BulkLocaleActionModal = ({
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
 
-  const selectedRows: LocaleStatus[] = useTable<LocaleStatus[]>(
+  const selectedRows = useTable<LocaleStatus[]>(
     'BulkLocaleActionModal',
     (state) => state.selectedRows
   );
@@ -253,9 +254,10 @@ const BulkLocaleActionModal = ({
                           name: locale,
                         }
                       )}
-                      icon={<Pencil />}
                       borderWidth={0}
-                    />
+                    >
+                      <Pencil />
+                    </IconButton>
                   </Table.Cell>
                 </Table.Row>
               );

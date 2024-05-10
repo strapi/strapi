@@ -308,51 +308,56 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     },
   ];
 
+  // Extract the rows for the bulk locale publish modal and any validation
+  // errors per locale
   const [rows, validationErrors] = React.useMemo(() => {
     if (!document || !documentMeta?.availableLocales) {
+      // If we don't have a document or available locales, we return empty rows
+      // and no validation errors
       return [[], {}];
     }
 
+    // Build the rows for the bulk locale publish modal by combining the current
+    // document with all the available locales from the document meta
     const rowsFromMeta: LocaleStatus[] = documentMeta?.availableLocales.map((doc) => {
       const { locale, status } = doc;
 
       return { locale, status };
     });
     rowsFromMeta.unshift({
-      locale: document?.locale ?? '',
-      status: document?.status ?? 'draft',
+      locale: document.locale,
+      status: document.status,
     });
 
+    // Build the validation errors for each locale.
     const allDocuments = [document, ...(documentMeta?.availableLocales ?? [])];
-
-    const errors: Record<
-      Modules.Documents.Params.Locale.StringNotation,
-      Record<string, MessageDescriptor>
-    > = {};
-
-    allDocuments.map((document) => {
+    const errors = allDocuments.reduce<
+      Record<Modules.Documents.Params.Locale.StringNotation, Record<string, MessageDescriptor>>
+    >((errs, document) => {
       if (!document) {
-        return document;
+        return errs;
       }
 
+      // Validate each locale entry via the useDocument validate function and store any errors in a dictionary
       const validation = validate(document as Modules.Documents.AnyDocument);
       if (validation !== null) {
-        errors[document.locale] = validation;
+        errs[document.locale] = validation;
       }
-
-      return document;
-    });
+      return errs;
+    }, {});
 
     return [rowsFromMeta, errors];
   }, [document, documentMeta?.availableLocales, validate]);
 
-  const localesToPublish = selectedRows
-    .filter(
-      (selectedRow) =>
-        selectedRow.status !== 'published' &&
-        !Object.keys(validationErrors || {}).includes(selectedRow.locale)
-    )
-    .map((selectedRow) => selectedRow.locale);
+  const localesToPublish = selectedRows.reduce((acc, selectedRow) => {
+    if (
+      selectedRow.status !== 'published' &&
+      !Object.keys(validationErrors).includes(selectedRow.locale)
+    ) {
+      acc.push(selectedRow.locale);
+    }
+    return acc;
+  }, []);
 
   const {
     data: draftRelationsCount = 0,
@@ -394,34 +399,16 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
   // enabled and we can publish the current locale.
 
   const publish = async () => {
-    try {
-      const bulkPublishRes = await publishManyAction({
-        model,
-        documentIds: [documentId],
-        params: {
-          ...params,
-          locale: localesToPublish,
-        },
-      });
+    await publishManyAction({
+      model,
+      documentIds: [documentId],
+      params: {
+        ...params,
+        locale: localesToPublish,
+      },
+    });
 
-      if ('error' in bulkPublishRes) {
-        toggleNotification({
-          type: 'danger',
-          message: formatAPIError(bulkPublishRes.error),
-        });
-        return;
-      }
-
-      setSelectedRows([]);
-    } catch (error) {
-      toggleNotification({
-        type: 'danger',
-        message: formatMessage({
-          id: 'notification.error',
-          defaultMessage: 'An error occurred',
-        }),
-      });
-    }
+    setSelectedRows([]);
   };
 
   const handleAction = async () => {
@@ -461,7 +448,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         }),
         content: (
           <Flex direction="column" alignItems="center" gap={2}>
-            <WarningCircle width="24px" height="24px" fill="danger600" />
+            <WarningCircle width="2.4rem" height="2.4rem" fill="danger600" />
             <Typography textAlign="center">
               {formatMessage({
                 id: 'content-manager.actions.discard.dialog.body',
