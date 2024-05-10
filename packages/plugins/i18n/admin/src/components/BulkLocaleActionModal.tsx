@@ -30,12 +30,30 @@ interface EntryValidationTextProps {
   validationErrors?: Record<string, MessageDescriptor>;
 }
 
+const isErrorMessageDescriptor = (object?: string | object): object is MessageDescriptor => {
+  return (
+    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
+  );
+};
+
 const EntryValidationText = ({ status = 'draft', validationErrors }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
 
   if (validationErrors) {
     const validationErrorsMessages = Object.entries(validationErrors)
-      .map(([key, value]) => `${key}: ${formatMessage(value)}`)
+      .map(([key, value]) => {
+        const builtKey = [key];
+
+        let currentValue = value;
+        while (typeof currentValue === 'object' && !isErrorMessageDescriptor(currentValue)) {
+          // We need to extract errors from nested components
+          const newKey = Object.keys(currentValue)[0];
+          builtKey.push(newKey);
+          currentValue = currentValue[newKey];
+        }
+
+        return `${builtKey.join('.')}: ${formatMessage(currentValue as MessageDescriptor)}`;
+      })
       .join(' ');
 
     return (
