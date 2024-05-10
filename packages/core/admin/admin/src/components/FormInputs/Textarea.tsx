@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { Textarea, useComposedRefs, Field } from '@strapi/design-system';
 
@@ -7,7 +7,7 @@ import { useField } from '../Form';
 
 import type { StringProps } from './types';
 
-export const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
+const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const field = useField(name);
     const fieldRef = useFocusInputField<HTMLTextAreaElement>(name);
@@ -30,3 +30,7 @@ export const TextareaInput = forwardRef<HTMLTextAreaElement, StringProps>(
     );
   }
 );
+
+const MemoizedTextareaInput = memo(TextareaInput);
+
+export { MemoizedTextareaInput as TextareaInput };

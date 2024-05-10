@@ -1,13 +1,13 @@
 import { groupBy, pick } from 'lodash/fp';
 
 import { contentTypes } from '@strapi/utils';
-import type { Core, UID } from '@strapi/types';
+import type { Core, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
 
 export interface DocumentVersion {
-  id: string;
-  documentId: string;
+  id: number;
+  documentId: Modules.Documents.ID;
   locale: string;
   updatedAt: string | null | Date;
   publishedAt: string | null | Date;
@@ -32,30 +32,6 @@ const CONTENT_MANAGER_STATUS = {
 };
 
 /**
- * TODO: Remove this and make updatedAt dates be equal when publishing on the document-engine
- * Compares two dates and returns true if the absolute difference between them is less than or equal to the specified threshold.
- * @param date1 The first date to compare.
- * @param date2 The second date to compare.
- * @param threshold The threshold in milliseconds.
- * @returns True if the absolute difference between the dates is less than or equal to the threshold, false otherwise.
- */
-const areDatesEqual = (
-  date1: Date | string | null,
-  date2: Date | string | null,
-  threshold: number
-): boolean => {
-  if (!date1 || !date2) {
-    return false;
-  }
-
-  const time1 = new Date(date1).getTime();
-  const time2 = new Date(date2).getTime();
-  const difference = Math.abs(time1 - time2);
-
-  return difference <= threshold;
-};
-
-/**
  * Controls the metadata properties to be returned
  *
  * If `availableLocales` is set to `true` (default), the returned metadata will include
@@ -68,6 +44,24 @@ export interface GetMetadataOptions {
   availableLocales?: boolean;
   availableStatus?: boolean;
 }
+
+/**
+ * Checks if the provided document version has been modified after all other versions.
+ */
+const getIsVersionLatestModification = (
+  version?: DocumentVersion,
+  otherVersion?: DocumentVersion
+): boolean => {
+  if (!version || !version.updatedAt) {
+    return false;
+  }
+
+  const versionUpdatedAt = version?.updatedAt ? new Date(version.updatedAt).getTime() : 0;
+
+  const otherUpdatedAt = otherVersion?.updatedAt ? new Date(otherVersion.updatedAt).getTime() : 0;
+
+  return versionUpdatedAt > otherUpdatedAt;
+};
 
 export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
@@ -155,28 +149,31 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   },
 
   getStatus(version: DocumentVersion, otherDocumentStatuses?: DocumentMetadata['availableStatus']) {
-    const isDraft = version.publishedAt === null;
+    let draftVersion: DocumentVersion | undefined;
+    let publishedVersion: DocumentVersion | undefined;
 
-    if (!otherDocumentStatuses?.length) {
-      // It there are no other versions we take the current version status
-      return isDraft ? CONTENT_MANAGER_STATUS.DRAFT : CONTENT_MANAGER_STATUS.PUBLISHED;
+    if (version.publishedAt) {
+      publishedVersion = version;
+    } else {
+      draftVersion = version;
     }
 
-    // Check if there is only a draft version
-    if (isDraft) {
-      const publishedVersion = otherDocumentStatuses?.find((d) => d.publishedAt !== null);
-      if (!publishedVersion) {
-        return CONTENT_MANAGER_STATUS.DRAFT;
-      }
+    const otherVersion = otherDocumentStatuses?.at(0);
+    if (otherVersion?.publishedAt) {
+      publishedVersion = otherVersion;
+    } else if (otherVersion) {
+      draftVersion = otherVersion;
     }
 
-    // The draft version is the same as the published version
-    if (areDatesEqual(version.updatedAt, otherDocumentStatuses.at(0)?.updatedAt, 500)) {
-      return CONTENT_MANAGER_STATUS.PUBLISHED;
-    }
+    if (!draftVersion) return CONTENT_MANAGER_STATUS.PUBLISHED;
+    if (!publishedVersion) return CONTENT_MANAGER_STATUS.DRAFT;
 
-    // The draft version is newer than the published version
-    return CONTENT_MANAGER_STATUS.MODIFIED;
+    /*
+     * The document is modified if the draft version has been updated more
+     * recently than the published version.
+     */
+    const isDraftModified = getIsVersionLatestModification(draftVersion, publishedVersion);
+    return isDraftModified ? CONTENT_MANAGER_STATUS.MODIFIED : CONTENT_MANAGER_STATUS.PUBLISHED;
   },
 
   async getMetadata(

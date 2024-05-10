@@ -104,12 +104,9 @@ const DocumentRBAC = ({ children, permissions }: DocumentRBACProps) => {
         .filter((field) => field.split('.').length > 1);
 
       if (fieldType === 'component') {
-        const componentOrDynamicZoneFields = componentFieldNames
-          // then map to give us the dot separate path as an array
-          .map((field) => field.split('.'));
         // check if the field name is within any of those arrays
-        return componentOrDynamicZoneFields.some((field) => {
-          return field.includes(fieldName);
+        return componentFieldNames.some((field) => {
+          return field.includes(name.join('.'));
         });
       }
 
