@@ -6,7 +6,7 @@ import { Pencil, CheckCircle, CrossCircle, ArrowsCounterClockwise } from '@strap
 import { Modules } from '@strapi/types';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl, PrimitiveType } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 import { Locale } from '../../../shared/contracts/locales';
 import { getTranslation } from '../utils/getTranslation';
@@ -198,13 +198,6 @@ const BulkLocaleActionModal = ({
     );
   };
 
-  const navigateToLocale = (locale: string) => {
-    navigate({
-      search: stringify({ plugins: { i18n: { locale } } }),
-    });
-    onClose();
-  };
-
   return (
     <React.Fragment>
       <Typography>{getFormattedCountMessage()}</Typography>
@@ -256,8 +249,9 @@ const BulkLocaleActionModal = ({
                   </Table.Cell>
                   <Table.Cell>
                     <IconButton
-                      onClick={() => {
-                        navigateToLocale(locale);
+                      tag={Link}
+                      to={{
+                        search: stringify({ plugins: { i18n: { locale } } }),
                       }}
                       label={formatMessage(
                         {
