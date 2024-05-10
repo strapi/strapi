@@ -6,7 +6,7 @@ import { Pencil, CheckCircle, CrossCircle, ArrowsCounterClockwise } from '@strap
 import { Modules } from '@strapi/types';
 import { stringify } from 'qs';
 import { type MessageDescriptor, useIntl, PrimitiveType } from 'react-intl';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import { Locale } from '../../../shared/contracts/locales';
 import { getTranslation } from '../utils/getTranslation';
@@ -143,7 +143,6 @@ interface BulkLocaleActionModalProps {
     label: string;
     name: string;
   }[];
-  onClose: () => void;
   localesMetadata: Locale[];
   validationErrors?: FormErrors;
 }
@@ -152,11 +151,10 @@ const BulkLocaleActionModal = ({
   headers,
   rows,
   localesMetadata,
-  onClose,
+
   validationErrors = {},
 }: BulkLocaleActionModalProps) => {
   const { formatMessage } = useIntl();
-  const navigate = useNavigate();
 
   const selectedRows = useTable<LocaleStatus[]>(
     'BulkLocaleActionModal',

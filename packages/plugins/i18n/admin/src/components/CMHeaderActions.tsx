@@ -476,7 +476,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         id: getTranslation('CMEditViewBulkLocale.publish-title'),
         defaultMessage: 'Publish Multiple Locales',
       }),
-      content: ({ onClose }) => {
+      content: () => {
         return (
           <Table.Root
             headers={headers}
@@ -491,7 +491,6 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
               validationErrors={validationErrors}
               headers={headers}
               rows={rows}
-              onClose={onClose}
               localesMetadata={localesMetadata as Locale[]}
             />
           </Table.Root>
