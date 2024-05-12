@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import type { Context, Request } from './types';
+import type Koa from 'koa';
 
-export = (ctx: Context) => {
+export const parseMultipartData = (ctx: Koa.Context) => {
   if (!ctx.is('multipart')) {
     return { data: ctx.request.body, files: {} };
   }
@@ -34,7 +34,7 @@ For example, when a media file is named "avatar", make sure the form key name is
     const path = _.tail(fullPath);
     acc[path.join('.')] = files[key];
     return acc;
-  }, {} as NonNullable<Request['files']>);
+  }, {} as NonNullable<Koa.Request['files']>);
 
   return {
     data,

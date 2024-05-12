@@ -1,12 +1,20 @@
 import type { Knex } from 'knex';
 import { clone, isNil } from 'lodash/fp';
+import type { LoadedStrapi } from '@strapi/types';
+
 import { ILink } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) => {
+export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) => {
   const query = () => {
     const { connection } = strapi.db;
+
+    // TODO: Export utils from database and use the addSchema that is already written
+    const addSchema = (tableName: string) => {
+      const schemaName = connection.client.connectionSettings.schema;
+      return schemaName ? `${schemaName}.${tableName}` : tableName;
+    };
 
     async function* generateAllForAttribute(uid: string, fieldName: string): AsyncGenerator<ILink> {
       const metadata = strapi.db.metadata.get(uid);
@@ -31,7 +39,10 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
       if (attribute.joinColumn) {
         const joinColumnName: string = attribute.joinColumn.name;
 
-        const qb = connection.queryBuilder().select('id', joinColumnName).from(metadata.tableName);
+        const qb = connection
+          .queryBuilder()
+          .select('id', joinColumnName)
+          .from(addSchema(metadata.tableName));
 
         if (trx) {
           qb.transacting(trx);
@@ -65,7 +76,7 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
           inverseOrderColumnName,
         } = attribute.joinTable;
 
-        const qb = connection.queryBuilder().from(name);
+        const qb = connection.queryBuilder().from(addSchema(name));
 
         type Columns = {
           left: { ref: string | null; order?: string };
@@ -160,6 +171,34 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
           yield link;
         }
       }
+
+      if (attribute.morphColumn) {
+        const { typeColumn, idColumn } = attribute.morphColumn;
+
+        const qb = connection
+          .queryBuilder()
+          .select('id', typeColumn.name, idColumn.name)
+          .from(addSchema(metadata.tableName))
+          .whereNotNull(typeColumn.name)
+          .whereNotNull(idColumn.name);
+
+        if (trx) {
+          qb.transacting(trx);
+        }
+
+        const entries = await qb;
+
+        for (const entry of entries) {
+          const ref = entry[idColumn.name];
+
+          yield {
+            kind,
+            relation,
+            left: { type: uid, ref: entry.id, field: fieldName },
+            right: { type: entry[typeColumn.name], ref },
+          };
+        }
+      }
     }
 
     async function* generateAll(uid: string): AsyncGenerator<ILink> {
@@ -186,9 +225,15 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
 
       const payload = {};
 
-      if (attribute.joinColumn) {
+      if (attribute.type !== 'relation') {
+        throw new Error(`Attribute ${left.field} is not a relation`);
+      }
+
+      if ('joinColumn' in attribute && attribute.joinColumn) {
         const joinColumnName = attribute.joinColumn.name;
-        const qb = connection(metadata.tableName)
+
+        // Note: this addSchema may not be necessary, but is added for safety
+        const qb = connection(addSchema(metadata.tableName))
           .where('id', left.ref)
           .update({ [joinColumnName]: right.ref });
         if (trx) {
@@ -197,50 +242,45 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
         await qb;
       }
 
-      if (attribute.joinTable) {
-        const {
-          name,
-          joinColumn,
-          inverseJoinColumn,
-          orderColumnName,
-          inverseOrderColumnName,
-          morphColumn,
-        } = attribute.joinTable;
+      if ('joinTable' in attribute && attribute.joinTable) {
+        const { joinTable } = attribute;
 
-        if (joinColumn) {
-          Object.assign(payload, { [joinColumn.name]: left.ref });
+        if (joinTable.joinColumn) {
+          Object.assign(payload, { [joinTable.joinColumn.name]: left.ref });
         }
 
         const assignInverseColumn = () => {
-          if (inverseJoinColumn) {
+          if ('inverseJoinColumn' in joinTable && joinTable.inverseJoinColumn) {
             Object.assign(payload, {
-              [inverseJoinColumn.name]: right.ref,
+              [joinTable.inverseJoinColumn.name]: right.ref,
             });
           }
         };
 
         const assignOrderColumns = () => {
-          if (orderColumnName) {
-            Object.assign(payload, { [orderColumnName]: left.pos ?? null });
+          if ('orderColumnName' in joinTable && joinTable.orderColumnName) {
+            Object.assign(payload, { [joinTable.orderColumnName]: left.pos ?? null });
           }
 
-          if (inverseOrderColumnName) {
-            Object.assign(payload, { [inverseOrderColumnName]: right.pos ?? null });
+          if ('inverseOrderColumnName' in joinTable && joinTable.inverseOrderColumnName) {
+            Object.assign(payload, { [joinTable.inverseOrderColumnName]: right.pos ?? null });
           }
         };
 
         const assignMorphColumns = () => {
-          const { idColumn, typeColumn } = morphColumn ?? {};
+          if ('morphColumn' in joinTable && joinTable.morphColumn) {
+            const { idColumn, typeColumn } = joinTable.morphColumn ?? {};
 
-          if (idColumn) {
-            Object.assign(payload, { [idColumn.name]: right.ref });
+            if (idColumn) {
+              Object.assign(payload, { [idColumn.name]: right.ref });
+            }
+
+            if (typeColumn) {
+              Object.assign(payload, { [typeColumn.name]: right.type });
+            }
+
+            Object.assign(payload, { order: right.pos ?? null, field: right.field ?? null });
           }
-
-          if (typeColumn) {
-            Object.assign(payload, { [typeColumn.name]: right.type });
-          }
-
-          Object.assign(payload, { order: right.pos ?? null, field: right.field ?? null });
         };
 
         if (kind === 'relation.basic' || kind === 'relation.circular') {
@@ -252,11 +292,28 @@ export const createLinkQuery = (strapi: Strapi.Strapi, trx?: Knex.Transaction) =
         }
 
         assignOrderColumns();
+        const qb = connection.insert(payload).into(addSchema(joinTable.name));
+        if (trx) {
+          await trx.transaction(async (nestedTrx) => {
+            await qb.transacting(nestedTrx);
+          });
+        }
+      }
 
-        const qb = connection.insert(payload).into(name);
+      if ('morphColumn' in attribute && attribute.morphColumn) {
+        const { morphColumn } = attribute;
+
+        const qb = connection(addSchema(metadata.tableName))
+          .where('id', left.ref)
+          .update({
+            [morphColumn.idColumn.name]: right.ref,
+            [morphColumn.typeColumn.name]: right.type,
+          });
+
         if (trx) {
           qb.transacting(trx);
         }
+
         await qb;
       }
     };

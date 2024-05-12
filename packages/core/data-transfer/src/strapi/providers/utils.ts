@@ -25,7 +25,7 @@ export const createDispatcher = (
   ws: WebSocket,
   retryMessageOptions = {
     retryMessageMaxRetries: 5,
-    retryMessageTimeout: 15000,
+    retryMessageTimeout: 30000,
   }
 ) => {
   const state: IDispatcherState = {};

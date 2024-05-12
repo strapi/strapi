@@ -31,4 +31,4 @@ const templateConfiguration = (obj: Record<string, unknown>, configPath = '') =>
   }, {} as Record<string, unknown>);
 };
 
-export = templateConfiguration;
+export { templateConfiguration };

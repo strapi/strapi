@@ -1,7 +1,7 @@
 import { curry, isEmpty, isNil, isArray, isObject } from 'lodash/fp';
 
 import { pipeAsync } from '../async';
-import traverseEntity, { Data } from '../traverse-entity';
+import traverseEntity from '../traverse-entity';
 import { isScalarAttribute } from '../content-types';
 
 import {
@@ -19,7 +19,7 @@ import {
 } from './visitors';
 import { isOperator } from '../operators';
 
-import type { Model } from '../types';
+import type { Model, Data } from '../types';
 
 const sanitizePasswords = (schema: Model) => async (entity: Data) => {
   if (!schema) {

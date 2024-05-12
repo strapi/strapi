@@ -27,6 +27,7 @@ const signFileUrls = async (file) => {
   const { provider } = strapi.plugins.upload;
   const { provider: providerConfig } = strapi.config.get('plugin.upload');
   const isPrivate = await provider.isPrivate();
+  file.isUrlSigned = false;
 
   // Check file provider and if provider is private
   if (file.provider !== providerConfig || !isPrivate) {
@@ -36,6 +37,7 @@ const signFileUrls = async (file) => {
   const signUrl = async (file) => {
     const signedUrl = await provider.getSignedUrl(file);
     file.url = signedUrl.url;
+    file.isUrlSigned = true;
   };
 
   const signedFile = cloneDeep(file);

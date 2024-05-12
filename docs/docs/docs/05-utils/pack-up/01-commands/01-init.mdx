@@ -1,0 +1,48 @@
+---
+title: Init
+tags:
+  - pack-up
+  - CLI
+---
+
+## Usage
+
+```bash
+$ npx @strapi/pack-up init my-package
+```
+
+Creates a new package at the given path, by default uses the inbuilt template sensible options for your package to choose from.
+
+### Options
+
+- `--template [path]` – path to a custom template of type `TemplateOrTemplateResolver`.
+
+## API
+
+### Usage
+
+```ts
+import { init } from '@strapi/pack-up';
+
+init({
+  path: 'my-package',
+});
+```
+
+## Typescript
+
+```ts
+interface InitOptions {
+  cwd?: string;
+  debug?: boolean;
+  path: string;
+  silent?: boolean;
+  template?: TemplateOrTemplateResolver | string;
+}
+
+type Init = (options: InitOptions) => Promise<void>;
+
+type TemplateOrTemplateResolver = Template | TemplateResolver;
+```
+
+You can see `Template` and `TemplateResolver` in on [Templates](/docs/utils/pack-up/templates#template)

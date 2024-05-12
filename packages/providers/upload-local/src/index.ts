@@ -15,6 +15,7 @@ interface File {
   ext?: string;
   mime: string;
   size: number;
+  sizeInBytes: number;
   url: string;
   previewUrl?: string;
   path?: string;
@@ -37,7 +38,7 @@ interface CheckFileSizeOptions {
   sizeLimit?: number;
 }
 
-export = {
+export default {
   init({ sizeLimit: providerOptionsSizeLimit }: InitOptions = {}) {
     // TODO V5: remove providerOptions sizeLimit
     if (providerOptionsSizeLimit) {

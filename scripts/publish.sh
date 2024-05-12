@@ -11,10 +11,12 @@ echo "Please enter the version you want to publish"
 read -r version
 
 # publish packages
+./node_modules/.bin/nx run-many --target=clean --nx-ignore-cycles
+./node_modules/.bin/nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
 ./node_modules/.bin/lerna publish --no-push --force-publish --dist-tag latest --exact "$version"
 
 # push main branch
-git push origin main
+git push origin HEAD
 
 # push tag
 git push origin v"$version"

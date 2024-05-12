@@ -1,19 +1,20 @@
 {
-    "$schema": "https://json.schemastore.org/tsconfig",
-    
-    "compilerOptions": {
-        "module": "CommonJS",
-        "moduleResolution": "Node",
-        "lib": ["ES2020"],
-        "target": "ES2019",
+  "$schema": "https://json.schemastore.org/tsconfig",
 
-        "strict": false,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "lib": ["ES2020"],
+    "target": "ES2019",
 
-        "incremental": true,
-        "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "noEmitOnError": true
-    }
+    "strict": false,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    "incremental": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "noEmitOnError": true,
+    "noImplicitThis": true
+  }
 }

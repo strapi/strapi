@@ -2,7 +2,7 @@ import produce from 'immer'; // current
 import get from 'lodash/get';
 import set from 'lodash/set';
 
-import { arrayMoveItem } from '../../utils';
+import { arrayMoveItem } from '../../utils/arrayMoveItem';
 
 const initialState = {
   fieldForm: {},

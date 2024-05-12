@@ -1,11 +1,13 @@
 /**
  * Export shared utilities
  */
-import parseMultipartData from './parse-multipart';
+import { parseMultipartData } from './parse-multipart';
 import parseType from './parse-type';
 import * as policy from './policy';
-import templateConfiguration from './template-configuration';
-import { yup, handleYupError, validateYupSchema, validateYupSchemaSync } from './validators';
+import { templateConfiguration } from './template-configuration';
+import { handleYupError, validateYupSchema, validateYupSchemaSync } from './validators';
+import * as yup from './yup';
+
 import * as errors from './errors';
 import {
   nameToSlug,
@@ -43,7 +45,7 @@ import * as traverse from './traverse';
 import webhook from './webhook';
 import { isOperator, isOperatorOfType } from './operators';
 
-export = {
+export {
   parseMultipartData,
   parseType,
   policy,

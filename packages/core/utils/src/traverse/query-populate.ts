@@ -11,6 +11,7 @@ import {
   join,
   first,
   omit,
+  merge,
 } from 'lodash/fp';
 
 import traverseFactory from './factory';
@@ -210,7 +211,9 @@ const populate = traverseFactory()
 
       for (const componentUID of components) {
         const componentSchema = strapi.getModel(componentUID);
-        newProperties = await recurse(visitor, { schema: componentSchema, path }, newProperties);
+
+        const properties = await recurse(visitor, { schema: componentSchema, path }, value);
+        newProperties = merge(newProperties, properties);
       }
 
       Object.assign(newValue, newProperties);

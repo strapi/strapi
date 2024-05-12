@@ -47,10 +47,7 @@
         }
       },
       "type": "dynamiczone",
-      "components": [
-        "basic.relation",
-        "basic.simple"
-      ]
+      "components": ["basic.relation", "basic.simple"]
     },
     "single_relation": {
       "type": "component",

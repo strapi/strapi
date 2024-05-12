@@ -6,7 +6,7 @@ import {
   AsyncParallelHook,
 } from './hooks';
 
-interface ProviderHooksMap {
+export interface ProviderHooksMap {
   willRegister: AsyncSeriesHook;
   didRegister: AsyncParallelHook;
   willDelete: AsyncParallelHook;

@@ -1,7 +1,7 @@
 import { posix, win32 } from 'path';
 import { cloneDeep } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
 
 import type {

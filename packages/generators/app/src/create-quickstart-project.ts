@@ -14,7 +14,7 @@ export default async function createQuickStartProject(scope: Scope) {
   const configuration: Configuration = {
     client,
     connection: defaultConfigs[client],
-    dependencies: clientDependencies({ client }),
+    dependencies: { ...clientDependencies({ client }), ...scope.additionalsDependencies },
   };
 
   await createProject(scope, configuration);

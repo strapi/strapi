@@ -1,71 +1,7 @@
-import React from 'react';
-
-import { lightTheme, ThemeProvider, useNotifyAT } from '@strapi/design-system';
-import { NotificationsProvider, useFetchClient, useNotification } from '@strapi/helper-plugin';
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { BrowserRouter as Router, Route } from 'react-router-dom';
+import { renderHook, waitFor, screen, server } from '@tests/utils';
+import { rest } from 'msw';
 
 import { useFolders } from '../useFolders';
-
-const notifyStatusMock = jest.fn();
-
-jest.mock('@strapi/design-system', () => ({
-  ...jest.requireActual('@strapi/design-system'),
-  useNotifyAT: () => ({
-    notifyStatus: notifyStatusMock,
-  }),
-}));
-
-const notificationStatusMock = jest.fn();
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: () => notificationStatusMock,
-  useFetchClient: jest.fn().mockReturnValue({
-    get: jest.fn().mockResolvedValue({
-      data: {
-        id: 1,
-      },
-    }),
-  }),
-}));
-
-const client = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: false,
-    },
-  },
-});
-
-// eslint-disable-next-line react/prop-types
-function ComponentFixture({ children }) {
-  return (
-    <Router>
-      <Route>
-        <QueryClientProvider client={client}>
-          <ThemeProvider theme={lightTheme}>
-            <NotificationsProvider>
-              <IntlProvider locale="en" messages={{}}>
-                {children}
-              </IntlProvider>
-            </NotificationsProvider>
-          </ThemeProvider>
-        </QueryClientProvider>
-      </Route>
-    </Router>
-  );
-}
-
-function setup(...args) {
-  return new Promise((resolve) => {
-    act(() => {
-      resolve(renderHook(() => useFolders(...args), { wrapper: ComponentFixture }));
-    });
-  });
-}
 
 describe('useFolders', () => {
   afterEach(() => {
@@ -73,151 +9,130 @@ describe('useFolders', () => {
   });
 
   test('fetches data from the right URL if no query param was set', async () => {
-    const { get } = useFetchClient();
-    const { result } = await setup({});
+    const { result } = renderHook(() => useFolders());
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    const expected = {
-      pagination: {
-        pageSize: -1,
-      },
-      filters: {
-        $and: [
-          {
-            parent: {
-              id: {
-                $null: true,
-              },
-            },
+    expect(result.current.data).toMatchInlineSnapshot(`
+      [
+        {
+          "children": {
+            "count": 2,
           },
-        ],
-      },
-    };
-
-    await waitFor(() =>
-      expect(get).toBeCalledWith(`/upload/folders`, {
-        params: expected,
-      })
-    );
+          "createdAt": "2023-06-26T12:48:54.054Z",
+          "files": {
+            "count": 0,
+          },
+          "id": 1,
+          "name": "test",
+          "path": "/1",
+          "pathId": 1,
+          "updatedAt": "2023-06-26T12:48:54.054Z",
+        },
+      ]
+    `);
   });
 
   test('does not use parent filter in params if _q', async () => {
-    const { get } = useFetchClient();
+    const { result } = renderHook(() =>
+      useFolders({
+        query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
+      })
+    );
 
-    await setup({
-      query: { folder: 5, _q: 'something', filters: { $and: [{ something: 'true' }] } },
-    });
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    const expected = {
-      filters: {
-        $and: [
-          {
-            something: 'true',
+    expect(result.current.data).toMatchInlineSnapshot(`
+      [
+        {
+          "children": {
+            "count": 2,
           },
-        ],
-      },
-      pagination: {
-        pageSize: -1,
-      },
-      _q: 'something',
-    };
+          "createdAt": "2023-06-26T12:48:54.054Z",
+          "files": {
+            "count": 0,
+          },
+          "id": 1,
+          "name": "something",
+          "path": "/1",
+          "pathId": 1,
+          "updatedAt": "2023-06-26T12:48:54.054Z",
+        },
+      ]
+    `);
 
-    expect(get).toBeCalledWith(`/upload/folders`, {
-      params: expected,
-    });
+    expect(result.current.data[0].name).toBe('something');
   });
 
   test('fetches data from the right URL if a query param was set', async () => {
-    const { get } = useFetchClient();
-    const { result } = await setup({ query: { folder: 1 } });
+    const { result } = renderHook(() => useFolders({ query: { folder: 1 } }));
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    const expected = {
-      pagination: {
-        pageSize: -1,
-      },
-      filters: {
-        $and: [
-          {
-            parent: {
-              id: 1,
-            },
+    expect(result.current.data).toMatchInlineSnapshot(`
+      [
+        {
+          "children": {
+            "count": 0,
           },
-        ],
-      },
-    };
-
-    expect(get).toBeCalledWith(`/upload/folders`, {
-      params: expected,
-    });
-  });
-
-  test('allows to merge filter query params using filters.$and', async () => {
-    const { get } = useFetchClient();
-    await setup({
-      query: { folder: 5, filters: { $and: [{ something: 'true' }] } },
-    });
-
-    const expected = {
-      filters: {
-        $and: [
-          {
-            something: 'true',
+          "createdAt": "2023-06-26T12:49:31.354Z",
+          "files": {
+            "count": 3,
           },
-          {
-            parent: {
-              id: 5,
-            },
+          "id": 3,
+          "name": "2022",
+          "path": "/1/3",
+          "pathId": 3,
+          "updatedAt": "2023-06-26T12:49:31.354Z",
+        },
+        {
+          "children": {
+            "count": 0,
           },
-        ],
-      },
-      pagination: {
-        pageSize: -1,
-      },
-    };
+          "createdAt": "2023-06-26T12:49:08.466Z",
+          "files": {
+            "count": 3,
+          },
+          "id": 2,
+          "name": "2023",
+          "path": "/1/2",
+          "pathId": 2,
+          "updatedAt": "2023-06-26T12:49:08.466Z",
+        },
+      ]
+    `);
 
-    expect(get).toBeCalledWith(`/upload/folders`, {
-      params: expected,
+    result.current.data.forEach((folder) => {
+      /**
+       * We're passing a "current folder" in the query, which means
+       * any folders returned should include the current folder's ID
+       * in it's path because this get's the children of current.
+       */
+      expect(folder.path.includes('1')).toBe(true);
     });
   });
 
   test('it does not fetch, if enabled is set to false', async () => {
-    const { get } = useFetchClient();
-    const { result } = await setup({ enabled: false });
+    const { result } = renderHook(() => useFolders({ enabled: false }));
 
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(get).toBeCalledTimes(0);
-  });
-
-  test('calls notifyStatus in case of success', async () => {
-    const { notifyStatus } = useNotifyAT();
-    const toggleNotification = useNotification();
-    await setup({});
-
-    await waitFor(() => {
-      expect(notifyStatus).toBeCalledWith('The folders have finished loading.');
-    });
-
-    expect(toggleNotification).toBeCalledTimes(0);
+    expect(result.current.data).toBe(undefined);
   });
 
   test('calls toggleNotification in case of error', async () => {
-    const { get } = useFetchClient();
     const originalConsoleError = console.error;
     console.error = jest.fn();
 
-    get.mockRejectedValueOnce(new Error('Jest mock error'));
+    server.use(rest.get('/upload/folders', (req, res, ctx) => res(ctx.status(500))));
 
-    const { notifyStatus } = useNotifyAT();
-    const toggleNotification = useNotification();
-    await setup({});
+    const { result } = renderHook(() => useFolders());
 
-    await waitFor(() => expect(toggleNotification).toBeCalled());
-    await waitFor(() => expect(notifyStatus).not.toBeCalled());
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    await waitFor(() => expect(screen.getByText('notification.error')).toBeInTheDocument());
 
     console.error = originalConsoleError;
+    server.restoreHandlers();
   });
 });

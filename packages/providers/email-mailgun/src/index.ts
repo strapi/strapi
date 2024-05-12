@@ -31,7 +31,7 @@ const optionsMap: Record<string, LegacyOptionMapper> = {
   host: { field: 'url', fn: (value) => `https://${value || 'api.mailgun.net'}` },
 };
 
-export = {
+export default {
   convertProviderOptions(providerOptions: ProviderOptions): Record<string, unknown> {
     const newOptions: Record<string, unknown> = {};
     if (typeof providerOptions === 'object') {

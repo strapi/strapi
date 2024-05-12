@@ -32,6 +32,9 @@ const editAssetRequest = (asset, file, cancelToken, onProgress, post) => {
     onUploadProgress({ total, loaded }) {
       onProgress((loaded / total) * 100);
     },
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
   }).then((res) => res.data);
 };
 

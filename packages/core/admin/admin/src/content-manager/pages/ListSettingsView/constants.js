@@ -5,4 +5,5 @@ export const EXCLUDED_SORT_ATTRIBUTE_TYPES = [
   'relation',
   'component',
   'json',
+  'blocks',
 ];

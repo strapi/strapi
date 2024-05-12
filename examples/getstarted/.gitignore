@@ -113,3 +113,5 @@ dist
 build
 documentation
 .strapi-updater.json
+types/generated
+.strapi
