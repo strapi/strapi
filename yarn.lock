@@ -7874,17 +7874,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/provider-audit-logs-local@npm:5.0.0-beta.7, @strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local":
-  version: 0.0.0-use.local
-  resolution: "@strapi/provider-audit-logs-local@workspace:packages/providers/audit-logs-local"
+"@strapi/provider-audit-logs-local@npm:5.0.0-beta.7":
+  version: 5.0.0-beta.7
+  resolution: "@strapi/provider-audit-logs-local@npm:5.0.0-beta.7"
   dependencies:
-    "@strapi/pack-up": "npm:5.0.0"
-    "@strapi/types": "npm:5.0.0-beta.7"
     "@strapi/utils": "npm:5.0.0-beta.7"
-    eslint-config-custom: "npm:5.0.0-beta.7"
-    tsconfig: "npm:5.0.0-beta.7"
-  languageName: unknown
-  linkType: soft
+  checksum: 12e6577be1b5011469381717d15a26c70ac4ca5a26ad357387d2af91ae17a952fa9c6da058b1d55a2cbbb5dd8e15890ec28eb3e3439d2c3e4149e48c8be1f192
+  languageName: node
+  linkType: hard
 
 "@strapi/provider-email-amazon-ses@workspace:packages/providers/email-amazon-ses":
   version: 0.0.0-use.local
