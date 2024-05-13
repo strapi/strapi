@@ -12,7 +12,6 @@ import {
   useComposedRefs,
   Menu,
   MenuItem,
-  FlexComponent,
   BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
@@ -20,7 +19,7 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { COMPONENT_ICONS, ComponentIcon } from '../../../../../components/ComponentIcon';
+import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
@@ -66,7 +65,8 @@ const DynamicComponent = ({
 
     const mainFieldValue = getIn(formValues, `${name}.${index}.${mainField}`);
 
-    const displayedValue = mainField === 'id' ? '' : String(mainFieldValue).trim();
+    const displayedValue =
+      mainField === 'id' || !mainFieldValue ? '' : String(mainFieldValue).trim();
 
     const mainValue = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
@@ -187,6 +187,13 @@ const DynamicComponent = ({
     </>
   );
 
+  const accordionTitle = title ? `${displayName} ${title}` : displayName;
+  /**
+   * We don't need the accordion's to communicate with each other,
+   * so a unique value for their state is enough.
+   */
+  const accordionValue = React.useId();
+
   return (
     <ComponentContainer tag="li" width="100%">
       <Flex justifyContent="center">
@@ -197,7 +204,7 @@ const DynamicComponent = ({
           <Preview />
         ) : (
           <Accordion.Root>
-            <Accordion.Item value={`${displayName} ${title}`}>
+            <Accordion.Item value={accordionValue}>
               <Accordion.Header>
                 <Accordion.Trigger
                   icon={
@@ -205,7 +212,9 @@ const DynamicComponent = ({
                       ? COMPONENT_ICONS[icon]
                       : COMPONENT_ICONS.dashboard
                   }
-                >{`${displayName} ${title}`}</Accordion.Trigger>
+                >
+                  {accordionTitle}
+                </Accordion.Trigger>
                 <Accordion.Actions>{accordionActions}</Accordion.Actions>
               </Accordion.Header>
               <Accordion.Content>
