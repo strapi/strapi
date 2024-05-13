@@ -51,9 +51,9 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
 
   const title = isCreating
     ? formatMessage({
-      id: 'content-manager.containers.edit.title.new',
-      defaultMessage: 'Create an entry',
-    })
+        id: 'content-manager.containers.edit.title.new',
+        defaultMessage: 'Create an entry',
+      })
     : documentTitle;
 
   return (
