@@ -1,5 +1,4 @@
 import type { Core } from '@strapi/types';
-import { auditLog } from '../models/audit-log';
 import { scheduleJob } from 'node-schedule';
 
 const DEFAULT_RETENTION_DAYS = 90;
