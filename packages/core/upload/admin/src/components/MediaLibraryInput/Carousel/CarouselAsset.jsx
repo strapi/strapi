@@ -2,7 +2,7 @@ import React from 'react';
 
 import { Box, Flex } from '@strapi/design-system';
 import { File, FilePdf } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetDefinition, AssetType } from '../../../constants';
 import { createAssetUrl } from '../../../utils';
@@ -52,7 +52,7 @@ export const CarouselAsset = ({ asset }) => {
   if (asset.mime.includes(AssetType.Image)) {
     return (
       <Box
-        as="img"
+        tag="img"
         maxHeight="100%"
         maxWidth="100%"
         src={createAssetUrl(asset, true)}

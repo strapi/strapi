@@ -8,7 +8,7 @@ export const FolderGridList = ({ title, children }) => {
     <KeyboardNavigable tagName="article">
       {title && (
         <Box paddingBottom={2}>
-          <Typography as="h2" variant="delta" fontWeight="semiBold">
+          <Typography tag="h2" variant="delta" fontWeight="semiBold">
             {title}
           </Typography>
         </Box>

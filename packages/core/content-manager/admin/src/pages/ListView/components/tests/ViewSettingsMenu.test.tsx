@@ -36,13 +36,13 @@ describe('ViewSettingsMenu', () => {
     const { user } = render();
 
     expect(
-      screen.getByRole('button', {
+      await screen.findByRole('button', {
         name: 'View Settings',
       })
     ).toBeInTheDocument();
 
     await user.click(
-      screen.getByRole('button', {
+      await screen.findByRole('button', {
         name: 'View Settings',
       })
     );
@@ -51,15 +51,15 @@ describe('ViewSettingsMenu', () => {
       name: 'Configure the view',
     });
 
-    expect(screen.getByText('Displayed fields')).toBeInTheDocument();
+    expect(await screen.findByText('Displayed fields')).toBeInTheDocument();
 
-    expect(screen.getByRole('checkbox', { name: 'createdAt' })).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'id' })).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'slug' })).toBeInTheDocument();
-    expect(screen.getByRole('checkbox', { name: 'updatedAt' })).toBeInTheDocument();
+    expect(await screen.findByRole('checkbox', { name: 'createdAt' })).toBeInTheDocument();
+    expect(await screen.findByRole('checkbox', { name: 'id' })).toBeInTheDocument();
+    expect(await screen.findByRole('checkbox', { name: 'slug' })).toBeInTheDocument();
+    expect(await screen.findByRole('checkbox', { name: 'updatedAt' })).toBeInTheDocument();
 
     expect(
-      screen.getByRole('button', {
+      await screen.findByRole('button', {
         name: 'Reset',
       })
     ).toBeInTheDocument();
@@ -73,15 +73,15 @@ describe('ViewSettingsMenu', () => {
     });
 
     await user.click(
-      screen.getByRole('button', {
+      await screen.findByRole('button', {
         name: 'View Settings',
       })
     );
 
-    expect(screen.getByRole('checkbox', { name: 'createdAt' })).not.toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'id' })).toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'postal_code' })).not.toBeChecked();
-    expect(screen.getByRole('checkbox', { name: 'updatedAt' })).not.toBeChecked();
+    expect(await screen.findByRole('checkbox', { name: 'createdAt' })).not.toBeChecked();
+    expect(await screen.findByRole('checkbox', { name: 'id' })).toBeChecked();
+    expect(await screen.findByRole('checkbox', { name: 'postal_code' })).not.toBeChecked();
+    expect(await screen.findByRole('checkbox', { name: 'updatedAt' })).not.toBeChecked();
 
     await user.click(document.body);
   });
@@ -98,8 +98,8 @@ describe('ViewSettingsMenu', () => {
       })
     );
 
-    expect(screen.getByRole('checkbox', { name: 'createdAt' })).not.toBeChecked();
-    fireEvent.click(screen.getByRole('checkbox', { name: 'createdAt' }));
+    expect(await screen.findByRole('checkbox', { name: 'createdAt' })).not.toBeChecked();
+    fireEvent.click(await screen.findByRole('checkbox', { name: 'createdAt' }));
 
     expect(setHeadersMock).toHaveBeenCalledWith(['createdAt']);
 

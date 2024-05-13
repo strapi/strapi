@@ -1,10 +1,17 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography, useComposedRefs } from '@strapi/design-system';
+import {
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  Typography,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { Cross, Drag, Pencil } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
 import { ItemTypes } from '../../../constants/dragAndDrop';
@@ -65,7 +72,7 @@ const DraggableCard = ({
     }
   }, [isDraggingSibling]);
 
-  const composedRefs = useComposedRefs<HTMLSpanElement>(dragRef, objectRef);
+  const composedRefs = useComposedRefs(dragRef, objectRef);
 
   return (
     <FieldWrapper ref={dropRef}>
@@ -82,7 +89,7 @@ const DraggableCard = ({
         >
           <Flex gap={3}>
             <DragButton
-              as="span"
+              tag="span"
               aria-label={formatMessage(
                 {
                   id: getTranslation('components.DraggableCard.move.field'),
@@ -91,6 +98,7 @@ const DraggableCard = ({
                 { item: label }
               )}
               onClick={(e) => e.stopPropagation()}
+              // @ts-expect-error – TODO: fix this TS error
               ref={composedRefs}
             >
               <Drag />
@@ -163,12 +171,12 @@ const DragButton = styled(ActionButton)`
   cursor: all-scroll;
 `;
 
-const FieldContainer = styled(Flex)`
+const FieldContainer = styled<FlexComponent>(Flex)`
   max-height: 3.2rem;
   cursor: pointer;
 `;
 
-const FieldWrapper = styled(Box)`
+const FieldWrapper = styled<BoxComponent>(Box)`
   &:last-child {
     padding-right: ${({ theme }) => theme.spaces[3]};
   }

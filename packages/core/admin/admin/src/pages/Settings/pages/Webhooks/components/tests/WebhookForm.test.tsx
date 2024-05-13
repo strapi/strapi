@@ -22,8 +22,8 @@ describe('WebhookForm', () => {
     expect(screen.getByRole('button', { name: 'Trigger' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
 
-    expect(screen.getByRole('textbox', { name: 'Name *' })).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: 'Url *' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Url' })).toBeInTheDocument();
     expect(screen.getByRole('combobox', { name: 'row 1 key' })).toBeInTheDocument();
     expect(screen.getByRole('textbox', { name: 'row 1 value' })).toBeInTheDocument();
 
@@ -48,8 +48,8 @@ describe('WebhookForm', () => {
       />
     );
 
-    await user.type(screen.getByRole('textbox', { name: 'Name *' }), 'My webhook');
-    await user.type(screen.getByRole('textbox', { name: 'Url *' }), 'https://google.fr');
+    await user.type(screen.getByRole('textbox', { name: 'Name' }), 'My webhook');
+    await user.type(screen.getByRole('textbox', { name: 'Url' }), 'https://google.fr');
 
     fireEvent.click(screen.getByRole('checkbox', { name: /entry.create/i }));
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
@@ -62,6 +62,7 @@ describe('WebhookForm', () => {
       events: ['entry.create'],
       headers: [{ key: '', value: '' }],
     });
-    expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled();
+
+    expect(screen.getByRole('button', { name: 'Save' })).toBeEnabled();
   });
 });

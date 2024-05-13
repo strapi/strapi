@@ -6,12 +6,13 @@ import {
   Dialog,
   DialogBody,
   DialogFooter,
+  Field,
   Flex,
   Typography,
 } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTranslation } from '../utils/getTranslation';
 
@@ -78,16 +79,12 @@ const CheckboxConfirmation = ({
 
   return (
     <>
-      <Checkbox
-        hint={hint}
-        id={name}
-        name={name}
-        onValueChange={handleChange}
-        value={value}
-        type="checkbox"
-      >
-        {label}
-      </Checkbox>
+      <Field.Root hint={hint} name={name}>
+        <Checkbox onValueChange={handleChange} value={value} type="checkbox">
+          {label}
+        </Checkbox>
+        <Field.Hint />
+      </Field.Root>
       {isOpen && (
         <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
           <DialogBody icon={<WarningCircle />}>

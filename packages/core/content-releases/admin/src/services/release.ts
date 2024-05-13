@@ -7,7 +7,7 @@ import {
 } from '../../../shared/contracts/release-actions';
 import { pluginId } from '../pluginId';
 
-import { axiosBaseQuery } from './axios';
+import { fetchBaseQuery } from './baseQuery';
 
 import type {
   GetReleaseActions,
@@ -50,7 +50,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
 
 const releaseApi = createApi({
   reducerPath: pluginId,
-  baseQuery: axiosBaseQuery,
+  baseQuery: fetchBaseQuery,
   tagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease'],
   endpoints: (build) => {
     return {

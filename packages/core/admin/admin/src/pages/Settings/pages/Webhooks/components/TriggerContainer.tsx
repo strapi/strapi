@@ -1,7 +1,6 @@
 import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Check, Cross, Loader } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled, { DefaultTheme, css } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * TriggerContainer

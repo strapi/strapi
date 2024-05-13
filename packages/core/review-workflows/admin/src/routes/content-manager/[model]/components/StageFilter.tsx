@@ -39,7 +39,7 @@ const StageFilter = (props: Filters.ValueInputProps) => {
       loading={isLoading}
       // @ts-expect-error – DS type error with SingleSelect['customizeContent']
       customizeContent={() => (
-        <Flex as="span" justifyContent="space-between" alignItems="center" width="100%">
+        <Flex tag="span" justifyContent="space-between" alignItems="center" width="100%">
           <Typography textColor="neutral800" ellipsis>
             {field.value}
           </Typography>

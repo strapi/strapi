@@ -92,12 +92,12 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
       paddingBottom={4}
       paddingLeft={5}
       paddingRight={5}
-      as={Link}
+      tag={Link}
       to={`?${stringify({ ...query, id: version.id })}`}
       style={{ textDecoration: 'none' }}
     >
       <Flex direction="column" gap={1} alignItems="flex-start">
-        <Typography as="h3" fontWeight="semiBold">
+        <Typography tag="h3" fontWeight="semiBold">
           {formatDate(version.createdAt, {
             day: 'numeric',
             month: 'numeric',
@@ -106,7 +106,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
             minute: '2-digit',
           })}
         </Typography>
-        <Typography as="p" variant="pi" textColor="neutral600">
+        <Typography tag="p" variant="pi" textColor="neutral600">
           {formatMessage(
             {
               id: 'content-manager.history.sidebar.versionDescription',
@@ -191,7 +191,7 @@ const VersionsList = () => {
       borderColor="neutral200"
       borderWidth="0 0 0 1px"
       borderStyle="solid"
-      as="aside"
+      tag="aside"
     >
       <Flex
         direction="row"
@@ -200,9 +200,9 @@ const VersionsList = () => {
         borderColor="neutral200"
         borderWidth="0 0 1px"
         borderStyle="solid"
-        as="header"
+        tag="header"
       >
-        <Typography as="h2" variant="omega" fontWeight="semiBold">
+        <Typography tag="h2" variant="omega" fontWeight="semiBold">
           {formatMessage({
             id: 'content-manager.history.sidebar.title',
             defaultMessage: 'Versions',
@@ -232,7 +232,7 @@ const VersionsList = () => {
           paddingBottom={5}
           paddingLeft={4}
           paddingRight={4}
-          as="ul"
+          tag="ul"
           alignItems="stretch"
         >
           {versions.data.map((version, index) => (

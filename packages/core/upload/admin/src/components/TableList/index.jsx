@@ -91,7 +91,7 @@ export const TableList = ({
                   {isSortable ? (
                     <Typography
                       onClick={() => handleClickSort(isSorted, name)}
-                      as={isSorted ? 'span' : 'button'}
+                      tag={isSorted ? 'span' : 'button'}
                       label={!isSorted ? sortLabel : ''}
                       textColor="neutral600"
                       variant="sigma"

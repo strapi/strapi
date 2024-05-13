@@ -105,7 +105,7 @@ const Settings = () => {
 
   return (
     <Flex direction="column" alignItems="stretch" gap={4}>
-      <Typography variant="delta" as="h2">
+      <Typography variant="delta" tag="h2">
         {formatMessage({
           id: getTranslation('containers.SettingPage.settings'),
           defaultMessage: 'Settings',

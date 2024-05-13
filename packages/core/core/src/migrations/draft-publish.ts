@@ -1,5 +1,7 @@
-import { contentTypes as contentTypesUtils } from '@strapi/utils';
+import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
 import { Schema } from '@strapi/types';
+
+import { getBatchToDiscard } from './database/5.0.0-discard-drafts';
 
 interface Input {
   oldContentTypes: Record<string, Schema.ContentType>;
@@ -20,66 +22,36 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) =
   }
 
   // run the after content types migrations
+  return strapi.db.transaction(async (trx) => {
+    for (const uid in contentTypes) {
+      if (!oldContentTypes[uid]) {
+        continue;
+      }
 
-  for (const uid in contentTypes) {
-    if (!oldContentTypes[uid]) {
-      continue;
-    }
+      const oldContentType = oldContentTypes[uid];
+      const contentType = contentTypes[uid];
 
-    const oldContentType = oldContentTypes[uid];
-    const contentType = contentTypes[uid];
+      // if d&p was enabled set publishedAt to eq createdAt
+      if (
+        !contentTypesUtils.hasDraftAndPublish(oldContentType) &&
+        contentTypesUtils.hasDraftAndPublish(contentType)
+      ) {
+        const discardDraft = async (entry: { documentId: string; locale: string }) =>
+          strapi
+            .documents(uid as any)
+            // Discard draft by referencing the documentId and locale
+            .discardDraft({ documentId: entry.documentId, locale: entry.locale });
 
-    // if d&p was enabled set publishedAt to eq createdAt
-    if (
-      !contentTypesUtils.hasDraftAndPublish(oldContentType) &&
-      contentTypesUtils.hasDraftAndPublish(contentType)
-    ) {
-      const metadata = strapi.db.metadata.get(uid);
-
-      // Extract all scalar attributes to use in the insert query
-      const attributes = Object.values(metadata.attributes).reduce((acc, attribute: any) => {
-        if (['id'].includes(attribute.columnName)) {
-          return acc;
+        /**
+         * Load a batch of entries (batched to prevent loading millions of rows at once ),
+         * and discard them using the document service.
+         */
+        for await (const batch of getBatchToDiscard({ db: strapi.db, trx, uid })) {
+          await async.map(batch, discardDraft, { concurrency: 10 });
         }
-
-        if (contentTypesUtils.isScalarAttribute(attribute)) {
-          acc.push(attribute.columnName);
-        }
-
-        return acc;
-      }, [] as string[]);
-
-      /**
-       * INSERT INTO tableName (columnName1, columnName2, columnName3, ...)
-       * SELECT columnName1, columnName2, columnName3, ...
-       * FROM tableName
-       */
-      const qb = strapi.db?.getConnection();
-      await qb
-        // INSERT INTO tableName (columnName1, columnName2, columnName3, ...)
-        .into(qb.raw(`${metadata.tableName} (${attributes.join(', ')})`))
-        .insert((subQb: typeof qb) => {
-          // SELECT columnName1, columnName2, columnName3, ...
-          subQb
-            .select(
-              ...attributes.map((att) => {
-                // Override 'publishedAt' and 'updatedAt' attributes
-                if (att === 'published_at') {
-                  return qb.raw('NULL as published_at');
-                }
-
-                if (att === 'updated_at') {
-                  return qb.raw(`? as updated_at`, [new Date()]);
-                }
-
-                return att;
-              })
-            )
-            .from(metadata.tableName)
-            .whereNotNull('published_at');
-        });
+      }
     }
-  }
+  });
 };
 
 const disableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) => {

@@ -8,8 +8,9 @@ import {
   ModalFooter,
   ModalHeader,
   ModalLayout,
+  Breadcrumbs,
+  Crumb,
 } from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system';
 import { Form, InputRenderer } from '@strapi/strapi/admin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

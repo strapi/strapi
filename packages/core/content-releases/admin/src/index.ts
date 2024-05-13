@@ -36,6 +36,7 @@ const admin: Plugin.Config.AdminInput = {
         },
         Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
         permissions: PERMISSIONS.main,
+        position: 2,
       });
 
       /**
@@ -70,14 +71,13 @@ const admin: Plugin.Config.AdminInput = {
         });
       }
 
-      // @ts-expect-error – plugins are not typed on the StrapiApp, fix this.
-      app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
-        // We want to add this action to just before the delete action all the time
-        const deleteActionIndex = actions.findIndex((action) => action.name === 'DeleteAction');
+      // app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
+      //   // We want to add this action to just before the delete action all the time
+      //   const deleteActionIndex = actions.findIndex((action) => action.type === 'delete');
 
-        actions.splice(deleteActionIndex, 0, ReleaseAction);
-        return actions;
-      });
+      //   actions.splice(deleteActionIndex, 0, ReleaseAction);
+      //   return actions;
+      // });
       // Hook that adds a column into the CM's LV table
       // app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     } else if (
@@ -97,6 +97,7 @@ const admin: Plugin.Config.AdminInput = {
           return { default: PurchaseContentReleases };
         },
         lockIcon: true,
+        position: 2,
       });
     }
   },

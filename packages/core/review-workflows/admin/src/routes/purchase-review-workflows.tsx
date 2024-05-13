@@ -1,11 +1,5 @@
-import {
-  Box,
-  Layout,
-  Main,
-  HeaderLayout,
-  EmptyStateLayout,
-  LinkButton,
-} from '@strapi/design-system';
+import { Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Main, EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
@@ -14,9 +8,9 @@ const PurchaseReviewWorkflows = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: 'Settings.review-workflows.list.page.title',
             defaultMessage: 'Review Workflows',
@@ -51,7 +45,7 @@ const PurchaseReviewWorkflows = () => {
           />
         </Box>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

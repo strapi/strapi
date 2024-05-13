@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Typography, Badge, Flex, Loader, useNotifyAT, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDoc } from '../../../../hooks/useDocument';
 import { useGetRelationsQuery } from '../../../../services/relations';
@@ -19,15 +19,11 @@ interface RelationSingleProps extends Pick<CellContentProps, 'mainField' | 'cont
 
 const RelationSingle = ({ mainField, content }: RelationSingleProps) => {
   return (
-    <TypographyMaxWidth textColor="neutral800" ellipsis>
+    <Typography maxWidth="50rem" textColor="neutral800" ellipsis>
       {getRelationLabel(content, mainField)}
-    </TypographyMaxWidth>
+    </Typography>
   );
 };
-
-const TypographyMaxWidth = styled(Typography)`
-  max-width: 500px;
-`;
 
 /* -------------------------------------------------------------------------------------------------
  * RelationMultiple
@@ -99,9 +95,9 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
           <>
             {data.results.map((entry) => (
               <Menu.Item key={entry.documentId} disabled>
-                <TypographyMaxWidth ellipsis>
+                <Typography maxWidth="50rem" ellipsis>
                   {getRelationLabel(entry, mainField)}
-                </TypographyMaxWidth>
+                </Typography>
               </Menu.Item>
             ))}
 

@@ -11,14 +11,14 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  isFetchError,
   useStrapiApp,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
 import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Button,
-  ContentLayout,
   Flex,
-  HeaderLayout,
   IconButton,
   Main,
   Tr,
@@ -38,14 +38,13 @@ import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
 import { useParams, useNavigate, Link as ReactRouterLink, Navigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { RelativeTime } from '../components/RelativeTime';
 import { ReleaseActionMenu } from '../components/ReleaseActionMenu';
 import { ReleaseActionOptions } from '../components/ReleaseActionOptions';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { isAxiosError } from '../services/axios';
 import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
@@ -80,7 +79,7 @@ const ReleaseInfoWrapper = styled(Flex)`
 
 const StyledMenuItem = styled(Menu.Item)<{
   disabled?: boolean;
-  variant?: 'neutral' | 'danger';
+  $variant?: 'neutral' | 'danger';
 }>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
@@ -90,7 +89,7 @@ const StyledMenuItem = styled(Menu.Item)<{
   }
 
   &:hover {
-    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
+    background: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}100`]};
   }
 `;
 
@@ -141,6 +140,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
     const validationErrorsMessages = Object.entries(errors)
       .map(([key, value]) =>
         formatMessage(
+          // @ts-expect-error – TODO: fix this will better checks
           { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
           { field: key }
         )
@@ -257,8 +257,8 @@ const ReleaseDetailsLayout = ({
         totalPublishedEntries,
         totalUnpublishedEntries,
       });
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -355,7 +355,7 @@ const ReleaseDetailsLayout = ({
 
   return (
     <Main aria-busy={isLoadingDetails}>
-      <HeaderLayout
+      <Layouts.Header
         title={release.name}
         subtitle={
           <Flex gap={2} lineHeight={6}>
@@ -372,18 +372,18 @@ const ReleaseDetailsLayout = ({
               <Menu.Root>
                 {/*
                   TODO Fix in the DS
-                  - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
+                  - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
                   - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
                 */}
                 <Menu.Trigger
-                  as={IconButton}
+                  // @ts-expect-error See above
+                  tag={IconButton}
                   paddingLeft={2}
                   paddingRight={2}
                   aria-label={formatMessage({
                     id: 'content-releases.header.actions.open-release-actions',
                     defaultMessage: 'Release edit and delete menu',
                   })}
-                  // @ts-expect-error See above
                   icon={<More />}
                   variant="tertiary"
                 />
@@ -413,7 +413,7 @@ const ReleaseDetailsLayout = ({
                     <StyledMenuItem
                       disabled={!canDelete}
                       onSelect={toggleWarningSubmit}
-                      variant="danger"
+                      $variant="danger"
                     >
                       <Flex alignItems="center" gap={2} hasRadius width="100%">
                         <TrashIcon />
@@ -577,8 +577,8 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     });
 
     if ('error' in response) {
-      if (isAxiosError(response.error)) {
-        // When the response returns an object with 'error', handle axios error
+      if (isFetchError(response.error)) {
+        // When the response returns an object with 'error', handle fetch error
         toggleNotification({
           type: 'danger',
           message: formatAPIError(response.error),
@@ -630,12 +630,11 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
 
   if (Object.keys(releaseActions).length === 0) {
     return (
-      <ContentLayout>
+      <Layouts.Content>
         <EmptyStateLayout
           action={
             <LinkButton
-              as={ReactRouterLink}
-              // @ts-expect-error - types are not inferred correctly through the as prop.
+              tag={ReactRouterLink}
               to={{
                 pathname: '/content-manager',
               }}
@@ -655,7 +654,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
               'This release is empty. Open the Content Manager, select an entry and add it to the release.',
           })}
         />
-      </ContentLayout>
+      </Layouts.Content>
     );
   }
 
@@ -701,7 +700,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
 
   return (
-    <ContentLayout>
+    <Layouts.Content>
       <Flex gap={8} direction="column" alignItems="stretch">
         <Flex>
           <SingleSelect
@@ -835,7 +834,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
           <Pagination.Links />
         </Pagination.Root>
       </Flex>
-    </ContentLayout>
+    </Layouts.Content>
   );
 };
 
@@ -913,8 +912,8 @@ const ReleaseDetailsPage = () => {
         }),
       });
       toggleEditReleaseModal();
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
@@ -935,8 +934,8 @@ const ReleaseDetailsPage = () => {
 
     if ('data' in response) {
       navigate('..');
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),
