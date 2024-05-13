@@ -61,7 +61,7 @@ const ComponentInput = ({
             htmlFor={name}
             variant="pi"
             fontWeight="bold"
-            as="label"
+            tag="label"
           >
             {label}
             {attribute.repeatable && (
@@ -109,11 +109,7 @@ const ComponentInput = ({
   );
 };
 
-// const LabelAction = styled(Box)`
-//   svg path {
-//     fill: ${({ theme }) => theme.colors.neutral500};
-//   }
-// `;
+const MemoizedComponentInput = React.memo(ComponentInput);
 
-export { ComponentInput };
+export { MemoizedComponentInput as ComponentInput };
 export type { ComponentInputProps };

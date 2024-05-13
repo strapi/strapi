@@ -54,9 +54,9 @@ const AutoCloneFailureModalBody = ({ prohibitedFields }: AutoCloneFailureModalBo
             padding={6}
             key={fieldPath.join()}
           >
-            <Flex direction="row" as="ol">
+            <Flex direction="row" tag="ol">
               {fieldPath.map((pathSegment, index) => (
-                <Typography fontWeight="semiBold" as="li" key={index}>
+                <Typography fontWeight="semiBold" tag="li" key={index}>
                   {pathSegment}
                   {index !== fieldPath.length - 1 && (
                     <ChevronRight
@@ -69,7 +69,7 @@ const AutoCloneFailureModalBody = ({ prohibitedFields }: AutoCloneFailureModalBo
                 </Typography>
               ))}
             </Flex>
-            <Typography as="p" textColor="neutral600">
+            <Typography tag="p" textColor="neutral600">
               {formatMessage({
                 id: getTranslation(`containers.list.autoCloneModal.error.${reason}`),
                 defaultMessage: getDefaultErrorMessage(reason),

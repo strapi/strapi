@@ -7,7 +7,7 @@ import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
-import styled, { type CSSProperties } from 'styled-components';
+import { styled, type CSSProperties } from 'styled-components';
 
 import { getTranslation } from '../../../../../utils/translations';
 

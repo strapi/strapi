@@ -1,10 +1,10 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
-import { axiosBaseQuery, type UnknownApiError } from '../utils/api';
+import { fetchBaseQuery, type UnknownApiError } from '../utils/api';
 
 const contentManagerApi = createApi({
   reducerPath: 'contentManagerApi',
-  baseQuery: axiosBaseQuery(),
+  baseQuery: fetchBaseQuery(),
   tagTypes: [
     'ComponentConfiguration',
     'ContentTypesConfiguration',

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { Box, Flex, Typography } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const IconBox = styled(Box)`
   height: 2.4rem;
@@ -39,7 +39,7 @@ interface NestedTFooterProps {
 
 export const NestedTFooter = ({ children, icon, color, ...props }: NestedTFooterProps) => {
   return (
-    <ButtonBox paddingBottom={4} paddingTop={4} as="button" type="button" {...props}>
+    <ButtonBox paddingBottom={4} paddingTop={4} tag="button" type="button" {...props}>
       <Flex>
         <IconBox color={color} aria-hidden background={`${color}200`}>
           {icon}

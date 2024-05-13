@@ -4,7 +4,7 @@ import { Flex, ProgressBar, Typography } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const BoxWrapper = styled(Flex)`
   border-radius: ${({ theme }) => `${theme.borderRadius} ${theme.borderRadius} 0 0`};
@@ -52,7 +52,7 @@ export const UploadProgress = ({ onCancel, progress, error }) => {
 
           <CancelButton type="button" onClick={onCancel}>
             <Flex gap={2}>
-              <Typography variant="pi" as="span" textColor="inherit">
+              <Typography variant="pi" tag="span" textColor="inherit">
                 {formatMessage({
                   id: 'app.components.Button.cancel',
                   defaultMessage: 'Cancel',

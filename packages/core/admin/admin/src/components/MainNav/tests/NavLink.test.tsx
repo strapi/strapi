@@ -8,7 +8,7 @@ describe('NavLink', () => {
     <NavLink.Link to="/test-link">
       <NavLink.Tooltip label="test-tooltip">
         <>
-          <NavLink.Icon>
+          <NavLink.Icon label="house">
             <House data-testid="nav-link-icon" />
           </NavLink.Icon>
           <NavLink.Badge label="badge label">

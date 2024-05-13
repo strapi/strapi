@@ -1,5 +1,5 @@
-import { Box } from '@strapi/design-system';
-import styled from 'styled-components';
+import { Box, BoxComponent } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
 import { ContentPermission } from '../../../../../../../shared/contracts/permissions';
 
@@ -31,7 +31,7 @@ const ContentTypes = ({
   );
 };
 
-const StyledBox = styled(Box)`
+const StyledBox = styled<BoxComponent>(Box)`
   overflow-x: auto;
 `;
 

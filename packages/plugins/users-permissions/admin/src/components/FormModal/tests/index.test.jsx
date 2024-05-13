@@ -42,7 +42,6 @@ describe('<FormModal />', () => {
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
         border: 0;
-        -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
         height: 1px;
         margin: -1px;
@@ -52,7 +51,7 @@ describe('<FormModal />', () => {
         width: 1px;
       }
 
-      <div
+      <span
         class="c0"
       >
         <p
@@ -73,7 +72,7 @@ describe('<FormModal />', () => {
           id="live-region-alert"
           role="alert"
         />
-      </div>
+      </span>
     `);
   });
 
@@ -98,7 +97,6 @@ describe('<FormModal />', () => {
       )
     );
 
-    // expect(container).toMatchSnapshot();
-    expect(getByLabelText('enabled')).toBeInTheDocument();
+    expect(getByLabelText('Enabled')).toBeInTheDocument();
   });
 });

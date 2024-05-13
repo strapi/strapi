@@ -37,9 +37,8 @@ const COMPONENT_FIELDS = ['__component'];
 
 const STATIC_FIELDS = [ID_ATTRIBUTE, DOC_ID_ATTRIBUTE];
 
-const throwInvalidParam = ({ key, path }: { key: string; path?: string | null }) => {
-  const msg =
-    path && path !== key ? `Invalid parameter ${key} at ${path}` : `Invalid parameter ${key}`;
+const throwInvalidKey = ({ key, path }: { key: string; path?: string | null }) => {
+  const msg = path && path !== key ? `Invalid key ${key} at ${path}` : `Invalid key ${key}`;
 
   throw new ValidationError(msg);
 };
@@ -64,7 +63,7 @@ export default ({ action, ability, model }: any) => {
       traverse.traverseQueryFilters(throwPassword, ctx),
       traverse.traverseQueryFilters(({ key, value, path }) => {
         if (isObject(value) && isEmpty(value)) {
-          throwInvalidParam({ key, path: path.attribute });
+          throwInvalidKey({ key, path: path.attribute });
         }
       }, ctx)
     );
@@ -75,7 +74,7 @@ export default ({ action, ability, model }: any) => {
       traverse.traverseQuerySort(throwPassword, ctx),
       traverse.traverseQuerySort(({ key, attribute, value, path }) => {
         if (!isScalarAttribute(attribute) && isEmpty(value)) {
-          throwInvalidParam({ key, path: path.attribute });
+          throwInvalidKey({ key, path: path.attribute });
         }
       }, ctx)
     );
@@ -182,7 +181,7 @@ export default ({ action, ability, model }: any) => {
     const isHidden = getOr(false, ['config', 'attributes', key, 'hidden'], schema);
 
     if (isHidden) {
-      throwInvalidParam({ key, path: path.attribute });
+      throwInvalidKey({ key, path: path.attribute });
     }
   };
 
@@ -191,7 +190,7 @@ export default ({ action, ability, model }: any) => {
    */
   const throwDisallowedAdminUserFields = ({ key, attribute, schema, path }: any) => {
     if (schema.uid === 'admin::user' && attribute && !ADMIN_USER_ALLOWED_FIELDS.includes(key)) {
-      throwInvalidParam({ key, path: path.attribute });
+      throwInvalidKey({ key, path: path.attribute });
     }
   };
 

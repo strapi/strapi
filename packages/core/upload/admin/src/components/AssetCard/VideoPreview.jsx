@@ -32,7 +32,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }) => {
   };
 
   return (
-    <Box as="figure" {...props} key={url}>
+    <Box tag="figure" {...props} key={url}>
       <video
         muted
         onLoadedData={handleThumbnailVisibility}
@@ -42,7 +42,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }) => {
       >
         <source type={mime} />
       </video>
-      <VisuallyHidden as="figcaption">{alt}</VisuallyHidden>
+      <VisuallyHidden tag="figcaption">{alt}</VisuallyHidden>
     </Box>
   );
 };

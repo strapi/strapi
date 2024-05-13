@@ -34,7 +34,7 @@ export const TabForm = ({
           <Box key={sectionIndex}>
             {section.sectionTitle && (
               <Box paddingBottom={4}>
-                <Typography variant="delta" as="h3">
+                <Typography variant="delta" tag="h3">
                   {formatMessage(section.sectionTitle)}
                 </Typography>
               </Box>

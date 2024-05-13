@@ -32,7 +32,7 @@ const ForgotPassword = () => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={7}>
-              <Typography as="h1" variant="alpha">
+              <Typography tag="h1" variant="alpha">
                 {formatMessage({
                   id: 'Auth.form.button.password-recovery',
                   defaultMessage: 'Password Recovery',
@@ -95,8 +95,7 @@ const ForgotPassword = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            {/* @ts-expect-error – error with inferring the props from the as component */}
-            <Link as={NavLink} to="/auth/login">
+            <Link tag={NavLink} to="/auth/login">
               {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
             </Link>
           </Box>

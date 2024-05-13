@@ -1,12 +1,12 @@
 import * as React from 'react';
 
-import { BaseCheckbox, Box, Flex } from '@strapi/design-system';
+import { BaseCheckbox, Box, BoxComponent, Flex, FlexComponent } from '@strapi/design-system';
 import { ChevronDown, ChevronUp } from '@strapi/icons';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
-import styled, { DefaultTheme } from 'styled-components';
+import { styled, DefaultTheme } from 'styled-components';
 
 import { Action, Subject } from '../../../../../../../shared/contracts/permissions';
 import {
@@ -155,7 +155,7 @@ const Collapse = ({
   const doesConditionButtonHasConditions = checkboxesActions.some((action) => action.hasConditions);
 
   return (
-    <BoxWrapper isActive={isActive}>
+    <BoxWrapper $isActive={isActive}>
       <Wrapper
         height={rowHeight}
         flex={1}
@@ -196,7 +196,7 @@ const Collapse = ({
                   <Cell key={actionId} justifyContent="center" alignItems="center">
                     {hasConditions && (
                       <Box
-                        as="span"
+                        tag="span"
                         position="absolute"
                         top="-6px"
                         left="37px"
@@ -236,7 +236,7 @@ const Collapse = ({
                 <Cell key={actionId} justifyContent="center" alignItems="center">
                   {hasConditions && (
                     <Box
-                      as="span"
+                      tag="span"
                       position="absolute"
                       top="-6px"
                       left="37px"
@@ -377,29 +377,29 @@ const activeRowStyle = (theme: DefaultTheme, isActive?: boolean): string => `
   }
 `;
 
-const Wrapper = styled(Flex)`
+const Wrapper = styled<FlexComponent>(Flex)`
   border: 1px solid transparent;
 `;
 
-const BoxWrapper = styled.div<{ isActive: boolean }>`
+const BoxWrapper = styled.div<{ $isActive: boolean }>`
   display: inline-flex;
   min-width: 100%;
 
   ${ConditionsButton} {
     display: none;
   }
-  ${({ isActive, theme }) => isActive && activeRowStyle(theme, isActive)}
+  ${({ $isActive, theme }) => $isActive && activeRowStyle(theme, $isActive)}
   &:hover {
-    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
+    ${({ theme, $isActive }) => activeRowStyle(theme, $isActive)}
   }
 `;
 
-const Cell = styled(Flex)`
+const Cell = styled<FlexComponent>(Flex)`
   width: ${cellWidth};
   position: relative;
 `;
 
-const Chevron = styled(Box)`
+const Chevron = styled<BoxComponent>(Box)`
   display: none;
   svg {
     width: 11px;

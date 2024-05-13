@@ -53,7 +53,7 @@ const MyComponent = ({ onMoveItem }) => {
       ) : (
         <Flex ref={composedRefs} data-handler-id={handlerId}>
           <IconButton
-            forwardedAs="div"
+            tag="div"
             role="button"
             tabIndex={0}
             aria-label="Drag"
@@ -99,7 +99,7 @@ const MyComponent = ({ onDropItem }) => {
       {isOverDropTarget && <Placeholder direction={direction} />}
       <Flex ref={composedRefs} data-handler-id={handlerId}>
         <IconButton
-          forwardedAs="div"
+          tag="div"
           role="button"
           tabIndex={0}
           aria-label="Drag"
@@ -153,7 +153,7 @@ const MyComponent = ({ onMoveItem }) => {
       ) : (
         <Flex ref={composedRefs} data-handler-id={handlerId}>
           <IconButton
-            forwardedAs="div"
+            tag="div"
             role="button"
             tabIndex={0}
             aria-label="Drag"
@@ -252,7 +252,7 @@ You might notice in the [basic usage](#basic-usage) section this piece of code:
 
 ```jsx
 <IconButton
-  forwardedAs="div"
+  tag="div"
   role="button"
   tabIndex={0}
   aria-label="Drag"

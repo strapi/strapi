@@ -29,7 +29,7 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
       DP.defaultToDraft,
       DP.statusToLookup(contentType),
       i18n.defaultLocale(contentType),
-      i18n.localeToLookup(contentType),
+      i18n.multiLocaleToLookup(contentType),
       transformParamsDocumentId(uid),
       transformParamsToQuery(uid)
     )(params || {});

@@ -34,6 +34,10 @@ const signEntityMediaVisitor: SignEntityMediaVisitor = async (
 ) => {
   const { signFileUrls } = getService('file');
 
+  if (!attribute) {
+    return;
+  }
+
   if (attribute.type !== 'media') {
     return;
   }

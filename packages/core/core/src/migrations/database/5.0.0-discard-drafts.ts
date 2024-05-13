@@ -12,7 +12,7 @@ type Knex = Parameters<Migration['up']>[0];
  * Versions with only a draft version will be ignored.
  * Only versions with a published version (which always have a draft version) will be discarded.
  */
-async function* getBatchToDiscard({
+export async function* getBatchToDiscard({
   db,
   trx,
   uid,

@@ -38,26 +38,14 @@ describe('SearchAsset', () => {
       }
 
       .c1 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
         justify-content: center;
       }
 
       .c4 {
         border: 0;
-        -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
         height: 1px;
         margin: -1px;
@@ -77,9 +65,7 @@ describe('SearchAsset', () => {
       }
 
       .c2:after {
-        -webkit-transition-property: all;
         transition-property: all;
-        -webkit-transition-duration: 0.2s;
         transition-duration: 0.2s;
         border-radius: 8px;
         content: '';
@@ -140,9 +126,9 @@ describe('SearchAsset', () => {
               aria-hidden="true"
               fill="currentColor"
               focusable="false"
-              height="1.6rem"
+              height="16"
               viewBox="0 0 32 32"
-              width="1.6rem"
+              width="16"
               xmlns="http://www.w3.org/2000/svg"
             >
               <path
@@ -151,7 +137,7 @@ describe('SearchAsset', () => {
             </svg>
           </button>
         </span>
-        <div
+        <span
           class="c4"
         >
           <p
@@ -172,7 +158,7 @@ describe('SearchAsset', () => {
             id="live-region-alert"
             role="alert"
           />
-        </div>
+        </span>
       </div>
     `);
   });

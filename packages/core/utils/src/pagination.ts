@@ -13,6 +13,19 @@ export interface Pagination {
   limit: number;
 }
 
+export interface PagePatinationInformation {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+}
+
+export interface OffsetPaginationInformation {
+  start: number;
+  limit: number;
+  total: number;
+}
+
 const STRAPI_DEFAULTS = {
   offset: {
     start: 0,
@@ -53,8 +66,8 @@ const withNoLimit = (pagination: Pagination, maxLimit = -1) => ({
   limit: pagination.limit === -1 ? maxLimit : pagination.limit,
 });
 
-const withDefaultPagination = (
-  args: Partial<PaginationArgs>,
+const withDefaultPagination = <T extends Partial<PaginationArgs>>(
+  args: T,
   { defaults = {}, maxLimit = -1 } = {}
 ) => {
   const defaultValues = merge(STRAPI_DEFAULTS, defaults);
@@ -112,4 +125,88 @@ const withDefaultPagination = (
   return replacePaginationAttributes(args);
 };
 
-export { withDefaultPagination };
+/**
+ * Transform pagination information into a paginated response:
+ * {
+ *    page: number,
+ *    pageSize: number,
+ *    pageCount: number,
+ *    total: number
+ * }
+ */
+const transformPagedPaginationInfo = (
+  paginationInfo: Partial<PaginationArgs>,
+  total: number
+): PagePatinationInformation => {
+  if (!isNil(paginationInfo.page)) {
+    const page = paginationInfo.page;
+    const pageSize = paginationInfo.pageSize ?? total;
+
+    return {
+      page,
+      pageSize,
+      pageCount: pageSize > 0 ? Math.ceil(total / pageSize) : 0,
+      total,
+    };
+  }
+
+  if (!isNil(paginationInfo.start)) {
+    const start = paginationInfo.start;
+    const limit = paginationInfo.limit ?? total;
+
+    // Start limit to page page size
+    return {
+      page: Math.floor(start / limit) + 1,
+      pageSize: limit,
+      pageCount: limit > 0 ? Math.ceil(total / limit) : 0,
+      total,
+    };
+  }
+
+  // Default pagination
+  return {
+    ...paginationInfo,
+    page: 1,
+    pageSize: 10,
+    pageCount: 1,
+    total,
+  };
+};
+
+/**
+ * Transform pagination information into a offset response:
+ * {
+ *    start: number,
+ *    limit: number,
+ *    total: number
+ * }
+ */
+const transformOffsetPaginationInfo = (
+  paginationInfo: Partial<PaginationArgs>,
+  total: number
+): OffsetPaginationInformation => {
+  if (!isNil(paginationInfo.page)) {
+    const limit = paginationInfo.pageSize ?? total;
+    const start = (paginationInfo.page - 1) * limit;
+
+    return { start, limit, total };
+  }
+
+  if (!isNil(paginationInfo.start)) {
+    const start = paginationInfo.start;
+    const limit = paginationInfo.limit ?? total;
+
+    // Start limit to page page size
+    return { start, limit, total };
+  }
+
+  // Default pagination
+  return {
+    ...paginationInfo,
+    start: 0,
+    limit: 10,
+    total,
+  };
+};
+
+export { withDefaultPagination, transformPagedPaginationInfo, transformOffsetPaginationInfo };

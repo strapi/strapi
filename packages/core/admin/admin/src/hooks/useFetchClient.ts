@@ -4,9 +4,9 @@ import { getFetchClient } from '../utils/getFetchClient';
 
 /**
  * @public
- * @description This is an abstraction around the axios instance exposed by a hook. It provides a simple interface to handle API calls
+ * @description This is an abstraction around the native fetch exposed by a hook. It provides a simple interface to handle API calls
  * to the Strapi backend.
- * It handles request cancellations inside the hook with an {@link https://axios-http.com/docs/cancellation} AbortController.
+ * It handles request cancellations inside the hook with an {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortController} AbortController.
  * This is typically triggered when the component is unmounted so all the requests that it is currently making are aborted.
  * The expected URL style includes either a protocol (such as HTTP or HTTPS) or a relative URL. The URLs with domain and path but not protocol are not allowed (ex: `www.example.com`).
  * @example
@@ -35,8 +35,7 @@ import { getFetchClient } from '../utils/getFetchClient';
  *   );
  * };
  * ```
- * @see {@link https://axios-http.com/docs/instance} axios instance API.
- * @see {@link https://axios-http.com/docs/cancellation} AbortController.
+ * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortController} AbortController.
  */
 const useFetchClient = () => {
   const controller = React.useRef<AbortController | null>(null);

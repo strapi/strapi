@@ -23,25 +23,6 @@ describe('<MediaLibraryInput />', () => {
         height: 100%;
       }
 
-      .c1 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        gap: 12px;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
       .c2 {
         font-size: 1.2rem;
         line-height: 1.33;
@@ -49,10 +30,15 @@ describe('<MediaLibraryInput />', () => {
         color: #666687;
       }
 
+      .c1 {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        justify-content: center;
+      }
+
       .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
       }
 

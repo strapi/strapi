@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { Typography } from '@strapi/design-system';
+import { Typography, TypographyComponent } from '@strapi/design-system';
 import { Bold, Italic, Underline, StrikeThrough, Code } from '@strapi/icons';
 import { type MessageDescriptor } from 'react-intl';
 import { Editor, Text, Transforms } from 'slate';
-import styled, { css } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 const stylesToInherit = css`
   font-size: inherit;
@@ -12,20 +12,24 @@ const stylesToInherit = css`
   line-height: inherit;
 `;
 
-const BoldText = styled(Typography).attrs({ fontWeight: 'bold' })`
+const BoldText = styled<TypographyComponent>(Typography).attrs({ fontWeight: 'bold' })`
   ${stylesToInherit}
 `;
 
-const ItalicText = styled(Typography)`
+const ItalicText = styled<TypographyComponent>(Typography)`
   font-style: italic;
   ${stylesToInherit}
 `;
 
-const UnderlineText = styled(Typography).attrs({ textDecoration: 'underline' })`
+const UnderlineText = styled<TypographyComponent>(Typography).attrs({
+  textDecoration: 'underline',
+})`
   ${stylesToInherit}
 `;
 
-const StrikeThroughText = styled(Typography).attrs({ textDecoration: 'line-through' })`
+const StrikeThroughText = styled<TypographyComponent>(Typography).attrs({
+  textDecoration: 'line-through',
+})`
   ${stylesToInherit}
 `;
 

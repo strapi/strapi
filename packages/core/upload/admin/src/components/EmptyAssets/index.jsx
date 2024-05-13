@@ -16,7 +16,7 @@ export const EmptyAssets = ({ icon: Icon = EmptyDocuments, content, action, size
           <Flex direction="column" alignItems="center" gap={6}>
             <Icon width="160px" height="88px" />
 
-            <Typography variant="delta" as="p" textColor="neutral600">
+            <Typography variant="delta" tag="p" textColor="neutral600">
               {content}
             </Typography>
           </Flex>
