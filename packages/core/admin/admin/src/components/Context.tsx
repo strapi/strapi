@@ -22,7 +22,6 @@ function createContext<ContextValueType extends object | null>(
     return ctx;
   };
 
-
   Provider.displayName = rootComponentName + 'Provider';
 
   return [Provider, useContext] as const;
