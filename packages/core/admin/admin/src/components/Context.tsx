@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-// import * as ContextSelector from 'use-context-selector';
-
 function createContext<ContextValueType extends object | null>(
   rootComponentName: string,
   defaultContext?: ContextValueType
@@ -16,16 +14,14 @@ function createContext<ContextValueType extends object | null>(
     return <Context.Provider value={value}>{children}</Context.Provider>;
   };
 
-  const useContext = <Selected,>(
-    consumerName: string,
-    selector: (value: ContextValueType) => Selected
-  ): Selected => {
+  const useContext = (consumerName: string) => {
     const ctx = React.useContext(Context);
     if (!ctx) {
       throw new Error(`\`${consumerName}\` must be used within \`${rootComponentName}\``);
     }
-    return selector(ctx);
+    return ctx;
   };
+
 
   Provider.displayName = rootComponentName + 'Provider';
 

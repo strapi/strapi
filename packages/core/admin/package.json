@@ -160,7 +160,6 @@
     "slate-react": "0.98.3",
     "style-loader": "3.3.4",
     "typescript": "5.2.2",
-    "use-context-selector": "1.4.1",
     "vite": "5.0.13",
     "webpack": "^5.89.0",
     "webpack-bundle-analyzer": "^4.10.1",
