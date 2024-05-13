@@ -2,17 +2,6 @@ import type { Core } from '@strapi/types';
 import { auditLog } from '../models/audit-log';
 import { scheduleJob } from 'node-schedule';
 
-interface Event {
-  action: string;
-  date: Date;
-  userId: string | number;
-  payload: Record<string, unknown>;
-}
-
-interface Log extends Omit<Event, 'userId'> {
-  user: string | number;
-}
-
 const DEFAULT_RETENTION_DAYS = 90;
 
 const defaultEvents = [
@@ -90,7 +79,6 @@ const createAuditLogsLifecycle = (strapi: Core.Strapi) => {
 
   const processEvent = (name: string, ...args: any) => {
     const requestState = strapi.requestContext.get()?.state;
-    console.log('processing event', { name, args, requestState });
 
     // Ignore events with auth strategies different from admin
     const isUsingAdminAuth = requestState?.route.info.type === 'admin';
@@ -107,6 +95,7 @@ const createAuditLogsLifecycle = (strapi: Core.Strapi) => {
     }
 
     // Ignore some events based on payload
+    // TODO: What does this ignore in upload? Why would we want to ignore anything?
     const ignoredUids = ['plugin::upload.file', 'plugin::upload.folder'];
     if (ignoredUids.includes(args[0]?.uid)) {
       return null;
@@ -161,9 +150,6 @@ const createAuditLogsLifecycle = (strapi: Core.Strapi) => {
         // Only ee.enable and ee.update listeners remain active to recreate the service
         this.destroy();
       });
-
-      // Register the provider now because collections can't be added later at runtime
-      strapi.get('models').add(auditLog);
 
       // Check current state of license
       if (!strapi.ee.features.isEnabled('audit-logs')) {

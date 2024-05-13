@@ -18,7 +18,7 @@ export default {
 
     const auditLogs = strapi.get('audit-logs');
     const body = await auditLogs.findOne(id);
-    console.log({ body });
+
     ctx.body = body;
 
     strapi.telemetry.send('didWatchAnAuditLog');
