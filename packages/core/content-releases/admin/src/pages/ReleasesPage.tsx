@@ -174,7 +174,7 @@ const StyledAlert = styled(Alert)`
 
 const INITIAL_FORM_VALUES = {
   name: '',
-  date: null,
+  date: undefined,
   time: '',
   isScheduled: true,
   scheduledAt: null,

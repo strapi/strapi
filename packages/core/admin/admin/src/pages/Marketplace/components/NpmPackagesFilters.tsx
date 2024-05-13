@@ -135,7 +135,8 @@ const NpmPackagesFilters = ({
 };
 
 const ButtonToggle = styled(Button)`
-  height: ${({ theme }) => theme.sizes.input.S};
+  height: unset;
+  padding-block: 1.1rem;
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -163,7 +164,6 @@ const FilterSelect = ({
       data-testid={`${message}-button`}
       aria-label={message}
       placeholder={message}
-      size="M"
       onChange={onChange}
       onClear={onClear}
       value={value}

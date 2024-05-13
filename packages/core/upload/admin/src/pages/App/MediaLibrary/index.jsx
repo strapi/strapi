@@ -267,17 +267,17 @@ export const MediaLibrary = () => {
                       pathname: `${pathname}/configuration`,
                       search: stringify(query, { encode: false }),
                     }}
-                    icon={<Cog />}
                     label={formatMessage({
                       id: 'app.links.configure-view',
                       defaultMessage: 'Configure the view',
                     })}
-                  />
+                  >
+                    <Cog />
+                  </IconButton>
                 </ActionContainer>
               ) : null}
               <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
-                  icon={isGridView ? <List /> : <Grid />}
                   label={
                     isGridView
                       ? formatMessage({
@@ -290,7 +290,9 @@ export const MediaLibrary = () => {
                         })
                   }
                   onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
-                />
+                >
+                  {isGridView ? <List /> : <Grid />}
+                </IconButton>
               </ActionContainer>
               <SearchInput
                 label={formatMessage({

@@ -118,7 +118,6 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
             <Searchbar
               ref={searchBarRef}
               name="searchbar"
-              size="S"
               placeholder={formatMessage({
                 id: getTrad('ComponentIconPicker.search.placeholder'),
                 defaultMessage: 'Search for an icon',
@@ -145,13 +144,15 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
             <IconButton
               ref={searchIconRef}
               onClick={toggleSearch}
-              aria-label={formatMessage({
+              withTooltip={false}
+              label={formatMessage({
                 id: getTrad('IconPicker.search.button.label'),
                 defaultMessage: 'Search icon button',
               })}
-              icon={<Search />}
-              noBorder
-            />
+              borderWidth={0}
+            >
+              <Search />
+            </IconButton>
           )}
           {value && (
             <Tooltip
@@ -162,13 +163,15 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
             >
               <IconButton
                 onClick={removeIconSelected}
-                aria-label={formatMessage({
+                withTooltip={false}
+                label={formatMessage({
                   id: getTrad('IconPicker.remove.button'),
                   defaultMessage: 'Remove the selected icon button',
                 })}
-                icon={<Trash />}
-                noBorder
-              />
+                borderWidth={0}
+              >
+                <Trash />
+              </IconButton>
             </Tooltip>
           )}
         </Flex>

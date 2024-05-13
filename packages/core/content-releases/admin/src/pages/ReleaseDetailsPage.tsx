@@ -19,7 +19,6 @@ import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import {
   Button,
   Flex,
-  IconButton,
   Main,
   Tr,
   Td,
@@ -374,17 +373,16 @@ const ReleaseDetailsLayout = ({
                   - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
                 */}
                 <Menu.Trigger
-                  // @ts-expect-error See above
-                  tag={IconButton}
                   paddingLeft={2}
                   paddingRight={2}
                   aria-label={formatMessage({
                     id: 'content-releases.header.actions.open-release-actions',
                     defaultMessage: 'Release edit and delete menu',
                   })}
-                  icon={<More />}
                   variant="tertiary"
-                />
+                >
+                  <More />
+                </Menu.Trigger>
                 {/*
                   TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
                   Refactor this once fixed in the DS
@@ -889,7 +887,7 @@ const ReleaseDetailsPage = () => {
   const scheduledAt =
     releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
   // Just get the date and time to display without considering updated timezone time
-  const date = scheduledAt ? format(scheduledAt, 'yyyy-MM-dd') : null;
+  const date = scheduledAt ? format(scheduledAt, 'yyyy-MM-dd') : undefined;
   const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {

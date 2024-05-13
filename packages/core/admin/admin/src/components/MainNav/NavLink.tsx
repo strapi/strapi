@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { Tooltip, Badge, BadgeProps, AccessibleIcon } from '@strapi/design-system';
+import {
+  Tooltip,
+  TooltipProps as DSTooltipProps,
+  Badge,
+  BadgeProps,
+  AccessibleIcon,
+} from '@strapi/design-system';
 import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
 import { styled } from 'styled-components';
 
@@ -49,7 +55,7 @@ const LinkImpl = ({ children, ...props }: LinkProps) => {
  * -----------------------------------------------------------------------------------------------*/
 const TooltipImpl = ({ children, label, position = 'right' }: NavLink.TooltipProps) => {
   return (
-    <Tooltip position={position} label={label}>
+    <Tooltip side={position} label={label}>
       <span>{children}</span>
     </Tooltip>
   );
@@ -111,9 +117,9 @@ namespace NavLink {
   }
 
   export interface TooltipProps {
-    position?: 'top' | 'bottom' | 'left' | 'right';
-    label?: string;
     children: React.ReactNode;
+    label?: string;
+    position?: DSTooltipProps['side'];
   }
 }
 

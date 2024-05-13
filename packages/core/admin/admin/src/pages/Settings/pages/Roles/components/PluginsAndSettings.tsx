@@ -2,8 +2,6 @@ import * as React from 'react';
 
 import {
   Accordion,
-  AccordionContent,
-  AccordionToggle,
   Box,
   BoxComponent,
   Checkbox,
@@ -49,28 +47,22 @@ const PluginsAndSettingsPermissions = ({
   layout,
   ...restProps
 }: PluginsAndSettingsPermissionsProps) => {
-  const [openedCategory, setOpenedCategory] = React.useState<string | null>(null);
-
-  const handleOpenCategory = (categoryName: string) => {
-    setOpenedCategory(categoryName === openedCategory ? null : categoryName);
-  };
-
   return (
     <Box padding={6} background="neutral0">
-      {layout.map(({ category, categoryId, childrenForm }, index) => {
-        return (
-          <Row
-            key={category}
-            childrenForm={childrenForm}
-            isOpen={openedCategory === category}
-            isWhite={index % 2 === 1}
-            name={category}
-            onOpenCategory={handleOpenCategory}
-            pathToData={[restProps.kind, categoryId]}
-            {...restProps}
-          />
-        );
-      })}
+      <Accordion.Root size="M">
+        {layout.map(({ category, categoryId, childrenForm }, index) => {
+          return (
+            <Row
+              key={category}
+              childrenForm={childrenForm}
+              variant={index % 2 === 1 ? 'primary' : 'secondary'}
+              name={category}
+              pathToData={[restProps.kind, categoryId]}
+              {...restProps}
+            />
+          );
+        })}
+      </Accordion.Root>
     </Box>
   );
 };
@@ -79,13 +71,12 @@ const PluginsAndSettingsPermissions = ({
  * Row
  * -----------------------------------------------------------------------------------------------*/
 
-interface RowProps extends Pick<Layout[number], 'childrenForm'> {
+interface RowProps
+  extends Pick<Layout[number], 'childrenForm'>,
+    Pick<Accordion.HeaderProps, 'variant'> {
   kind: Exclude<keyof PermissionsDataManagerContextValue['modifiedData'], `${string}Types`>;
   name: string;
   isFormDisabled?: boolean;
-  isOpen?: boolean;
-  isWhite?: boolean;
-  onOpenCategory: (categoryName: string) => void;
   pathToData: string[];
 }
 
@@ -93,35 +84,27 @@ const Row = ({
   childrenForm,
   kind,
   name,
-  isOpen = false,
   isFormDisabled = false,
-  isWhite,
-  onOpenCategory,
+  variant,
   pathToData,
 }: RowProps) => {
   const { formatMessage } = useIntl();
-  const handleClick = () => {
-    onOpenCategory(name);
-  };
 
   const categoryName = name.split('::').pop() ?? '';
 
   return (
-    <Accordion
-      expanded={isOpen}
-      onToggle={handleClick}
-      id={`accordion-${name}`}
-      variant={isWhite ? 'primary' : 'secondary'}
-    >
-      <AccordionToggle
-        title={capitalise(categoryName)}
-        description={`${formatMessage(
-          { id: 'Settings.permissions.category', defaultMessage: categoryName },
-          { category: categoryName }
-        )} ${kind === 'plugins' ? 'plugin' : kind}`}
-      />
-
-      <AccordionContent>
+    <Accordion.Item value={name}>
+      <Accordion.Header variant={variant}>
+        <Accordion.Trigger
+          description={`${formatMessage(
+            { id: 'Settings.permissions.category', defaultMessage: categoryName },
+            { category: categoryName }
+          )} ${kind === 'plugins' ? 'plugin' : kind}`}
+        >
+          {capitalise(categoryName)}
+        </Accordion.Trigger>
+      </Accordion.Header>
+      <Accordion.Content>
         <Box padding={6}>
           {childrenForm.map(({ actions, subCategoryName, subCategoryId }) => (
             <SubCategory
@@ -134,8 +117,8 @@ const Row = ({
             />
           ))}
         </Box>
-      </AccordionContent>
-    </Accordion>
+      </Accordion.Content>
+    </Accordion.Item>
   );
 };
 

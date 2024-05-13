@@ -345,7 +345,7 @@ const PackageStats = ({ githubStars = 0, npmDownloads = 0, npmPackageType }: Pac
               {githubStars}
             </Typography>
           </p>
-          <VerticalDivider unsetMargin={false} />
+          <VerticalDivider />
         </>
       )}
       <Download height="1.2rem" width="1.2rem" aria-hidden />

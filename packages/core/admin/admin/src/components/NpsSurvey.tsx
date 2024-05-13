@@ -14,7 +14,7 @@ import {
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { styled, useTheme } from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { useAppInfo } from '../features/AppInfo';
@@ -130,7 +130,6 @@ const checkIfShouldShowSurvey = (settings: NpsSurveySettings) => {
 };
 
 const NpsSurvey = () => {
-  const theme = useTheme();
   const { formatMessage } = useIntl();
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
   const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
@@ -266,7 +265,7 @@ const NpsSurvey = () => {
               bottom={0}
               left="50%"
               transform="translateX(-50%)"
-              zIndex={theme.zIndices[2]}
+              zIndex="popover"
               width="50%"
             >
               {isFeedbackResponse ? (
@@ -277,7 +276,7 @@ const NpsSurvey = () => {
                   })}
                 </Typography>
               ) : (
-                <Box tag="fieldset" width="100%">
+                <Box tag="fieldset" width="100%" borderWidth={0}>
                   <Flex justifyContent="space-between" width="100%">
                     <Box marginLeft="auto" marginRight="auto">
                       <Typography fontWeight="semiBold" tag="legend">
@@ -290,12 +289,14 @@ const NpsSurvey = () => {
                     </Box>
                     <IconButton
                       onClick={handleDismiss}
-                      aria-label={formatMessage({
+                      withTooltip={false}
+                      label={formatMessage({
                         id: 'app.components.NpsSurvey.dismiss-survey-label',
                         defaultMessage: 'Dismiss survey',
                       })}
-                      icon={<Cross />}
-                    />
+                    >
+                      <Cross />
+                    </IconButton>
                   </Flex>
                   <Flex gap={2} marginTop={2} marginBottom={2} justifyContent="center">
                     <Typography variant="pi" textColor="neutral600">

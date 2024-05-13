@@ -2,8 +2,6 @@ import * as React from 'react';
 
 import {
   Accordion,
-  AccordionContent,
-  AccordionToggle,
   Box,
   BoxComponent,
   Checkbox,
@@ -57,8 +55,6 @@ interface CollapsableContentTypeProps {
   label: ContentApiPermission['label'];
   orderNumber?: number;
   disabled?: boolean;
-  onExpanded?: (orderNumber: number) => void;
-  indexExpandendCollapsedContent: number | null;
 }
 
 export const CollapsableContentType = ({
@@ -66,40 +62,20 @@ export const CollapsableContentType = ({
   label,
   orderNumber = 0,
   disabled = false,
-  onExpanded = () => null,
-  indexExpandendCollapsedContent = null,
 }: CollapsableContentTypeProps) => {
   const {
     value: { onChangeSelectAll, onChange, selectedActions, setSelectedAction, selectedAction },
   } = useApiTokenPermissions();
-  const [expanded, setExpanded] = React.useState(false);
   const { formatMessage } = useIntl();
-
-  const handleExpandedAccordion = () => {
-    setExpanded((s) => !s);
-    onExpanded(orderNumber);
-  };
-
-  React.useEffect(() => {
-    if (
-      indexExpandendCollapsedContent !== null &&
-      indexExpandendCollapsedContent !== orderNumber &&
-      expanded
-    ) {
-      setExpanded(false);
-    }
-  }, [indexExpandendCollapsedContent, orderNumber, expanded]);
 
   const isActionSelected = (actionId: string) => actionId === selectedAction;
 
   return (
-    <Accordion
-      expanded={expanded}
-      onToggle={handleExpandedAccordion}
-      variant={orderNumber % 2 ? 'primary' : 'secondary'}
-    >
-      <AccordionToggle title={capitalize(label)} />
-      <AccordionContent>
+    <Accordion.Item value={`${label}-${orderNumber}`}>
+      <Accordion.Header variant={orderNumber % 2 ? 'primary' : 'secondary'}>
+        <Accordion.Trigger>{capitalize(label)}</Accordion.Trigger>
+      </Accordion.Header>
+      <Accordion.Content>
         {controllers?.map((controller) => {
           const allActionsSelected = controller.actions.every((action) =>
             selectedActions.includes(action.actionId)
@@ -169,7 +145,7 @@ export const CollapsableContentType = ({
             </Box>
           );
         })}
-      </AccordionContent>
-    </Accordion>
+      </Accordion.Content>
+    </Accordion.Item>
   );
 };

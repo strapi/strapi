@@ -127,7 +127,6 @@ const AssigneeSelect = () => {
         })}
         disabled={(!isLoadingPermissions && !isLoading && users.length === 0) || !id}
         value={currentAssignee ? currentAssignee.id.toString() : null}
-        // @ts-expect-error - DS Combobox wants to return number or string, this will be fixed in V2.
         onChange={handleChange}
         onClear={() => handleChange(null)}
         placeholder={formatMessage({

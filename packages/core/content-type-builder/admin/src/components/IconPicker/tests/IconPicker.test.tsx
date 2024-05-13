@@ -1,4 +1,4 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -22,9 +22,9 @@ const setup = (props?: Partial<IconPickerProps>) => {
     ...render(<IconPicker {...defaultProps} {...props} />, {
       wrapper: ({ children }) => (
         <IntlProvider locale="en" defaultLocale="en">
-          <ThemeProvider theme={lightTheme}>
+          <DesignSystemProvider>
             <MemoryRouter>{children}</MemoryRouter>
-          </ThemeProvider>
+          </DesignSystemProvider>
         </IntlProvider>
       ),
     }),

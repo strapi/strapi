@@ -228,20 +228,22 @@ export const ReviewWorkflowsListView = () => {
                       ) : null}
                       {workflows.length > 1 && canDelete ? (
                         <IconButton
-                          aria-label={formatMessage(
+                          withTooltip={false}
+                          label={formatMessage(
                             {
                               id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
                               defaultMessage: 'Delete {name}',
                             },
                             { name: 'Default workflow' }
                           )}
-                          icon={<Trash />}
                           borderWidth={0}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteWorkflow(String(workflow.id));
                           }}
-                        />
+                        >
+                          <Trash />
+                        </IconButton>
                       ) : null}
                     </Flex>
                   </Table.Cell>

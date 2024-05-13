@@ -4,19 +4,11 @@ import { ComponentCategory, ComponentCategoryProps } from '../ComponentCategory'
 
 describe('ComponentCategory', () => {
   const render = (props?: Partial<ComponentCategoryProps>) => ({
-    ...renderRTL(
-      <ComponentCategory
-        onAddComponent={jest.fn()}
-        onToggle={jest.fn()}
-        category="testing"
-        {...props}
-      />
-    ),
+    ...renderRTL(<ComponentCategory onAddComponent={jest.fn()} category="testing" {...props} />),
   });
 
   it('should render my array of components when passed and the accordion is open', () => {
     const { getByRole } = render({
-      isOpen: true,
       components: [
         {
           uid: 'test.test',
@@ -37,21 +29,9 @@ describe('ComponentCategory', () => {
     expect(getByText(/myCategory/)).toBeInTheDocument();
   });
 
-  it('should call the onToggle callback when the accordion trigger is pressed', async () => {
-    const onToggle = jest.fn();
-    const { getByRole, user } = render({
-      onToggle,
-    });
-
-    await user.click(getByRole('button', { name: /testing/ }));
-
-    expect(onToggle).toHaveBeenCalledWith('testing');
-  });
-
   it('should call onAddComponent with the componentUid when a ComponentCard is clicked', async () => {
     const onAddComponent = jest.fn();
     const { getByRole, user } = render({
-      isOpen: true,
       onAddComponent,
       components: [
         {
