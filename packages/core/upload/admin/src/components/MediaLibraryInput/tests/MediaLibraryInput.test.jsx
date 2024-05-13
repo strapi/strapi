@@ -23,19 +23,19 @@ describe('<MediaLibraryInput />', () => {
         height: 100%;
       }
 
-      .c2 {
-        font-size: 1.2rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #666687;
-      }
-
       .c1 {
         align-items: center;
         display: flex;
         flex-direction: column;
         gap: 12px;
         justify-content: center;
+      }
+
+      .c2 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #666687;
       }
 
       .c3 {

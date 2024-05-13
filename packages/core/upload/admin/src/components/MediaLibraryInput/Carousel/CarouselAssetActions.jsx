@@ -21,9 +21,10 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
             id: getTrad('control-card.add'),
             defaultMessage: 'Add',
           })}
-          icon={<Plus />}
           onClick={() => onAddAsset(asset)}
-        />
+        >
+          <Plus />
+        </IconButton>
       )}
 
       <CopyLinkButton url={prefixFileUrlWithBackendUrl(asset.url)} />

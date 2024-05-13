@@ -89,47 +89,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   bottom: 4px;
 }
 
-.c3 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c13 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c14 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c18 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: currentcolor;
-}
-
-.c44 {
-  font-weight: 600;
-  font-size: 1.1rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c50 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  color: #ffffff;
-}
-
 .c2 {
   align-items: center;
   display: flex;
@@ -183,6 +142,48 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   justify-content: center;
 }
 
+.c3 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c13 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c14 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c18 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
+}
+
+.c44 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  line-height: 1rem;
+  color: #666687;
+}
+
+.c50 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #ffffff;
+}
+
 .c8 {
   border: 0;
   clip: rect(0 0 0 0);
@@ -196,7 +197,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 
 .c42 {
   border-radius: 4px;
-  height: 2.4rem;
+  padding-block: 0.7rem;
 }
 
 .c6 {
@@ -237,12 +238,12 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 }
 
 .c26 {
-  height: 18px;
-  min-width: 18px;
+  min-width: 1.8rem;
+  height: 1.8rem;
   margin: 0;
+  appearance: none;
   border-radius: 4px;
   border: 1px solid #c0c0cf;
-  -webkit-appearance: none;
   background-color: #ffffff;
   cursor: pointer;
 }
@@ -257,8 +258,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   display: block;
   position: relative;
   background: url("data:image/svg+xml,%3csvg%20width='10'%20height='8'%20viewBox='0%200%2010%208'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M8.55323%200.396973C8.63135%200.316355%208.76051%200.315811%208.83931%200.395768L9.86256%201.43407C9.93893%201.51157%209.93935%201.6359%209.86349%201.7139L4.06401%207.67724C3.9859%207.75755%203.85707%207.75805%203.77834%207.67834L0.13866%203.99333C0.0617798%203.91549%200.0617102%203.79032%200.138504%203.7124L1.16213%202.67372C1.24038%202.59432%201.36843%202.59422%201.4468%202.67348L3.92174%205.17647L8.55323%200.396973Z'%20fill='white'%20/%3e%3c/svg%3e") no-repeat no-repeat center center;
-  width: 10px;
-  height: 10px;
+  width: 1rem;
+  height: 1rem;
   left: 50%;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
@@ -519,11 +520,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
           class="c4 c5 c6 c7"
           type="button"
         >
-          <span
-            class="c8"
-          >
-            Close the modal
-          </span>
           <svg
             aria-hidden="true"
             fill="currentColor"
@@ -537,6 +533,11 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
               d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
             />
           </svg>
+          <span
+            class="c8"
+          >
+            Close the modal
+          </span>
         </button>
       </div>
     </div>
@@ -597,76 +598,66 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                     <div
                       class="c16 c25"
                     >
-                      <div
-                        class=""
-                      >
-                        <input
-                          aria-labelledby=":r0:-title"
-                          class="c26"
-                          type="checkbox"
-                        />
-                      </div>
+                      <input
+                        aria-labelledby=":r0:-title"
+                        class="c26"
+                        type="checkbox"
+                      />
                     </div>
                   </div>
                   <div
                     class="c16 c27 c28 c29"
                   >
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":r1:"
-                        class="c4 c5 c6 c7"
-                        tabindex="0"
-                        type="button"
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <span
-                          class="c8"
-                        >
-                          Remove from selection
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="16"
-                          viewBox="0 0 32 32"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":r3:"
-                        class="c4 c5 c6 c7"
-                        tabindex="0"
-                        type="button"
+                        <path
+                          d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
                       >
-                        <span
-                          class="c8"
-                        >
-                          Edit
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="16"
-                          viewBox="0 0 32 32"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
+                        Remove from selection
+                      </span>
+                    </button>
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
+                      >
+                        Edit
+                      </span>
+                    </button>
                   </div>
                   <div
                     class="c30"
@@ -733,7 +724,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
               class="c20"
             >
               <article
-                aria-labelledby=":r5:-title"
+                aria-labelledby=":r3:-title"
                 class="c21 c22"
                 role="button"
                 tabindex="-1"
@@ -745,76 +736,66 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                     <div
                       class="c16 c25"
                     >
-                      <div
-                        class=""
-                      >
-                        <input
-                          aria-labelledby=":r5:-title"
-                          class="c26"
-                          type="checkbox"
-                        />
-                      </div>
+                      <input
+                        aria-labelledby=":r3:-title"
+                        class="c26"
+                        type="checkbox"
+                      />
                     </div>
                   </div>
                   <div
                     class="c16 c27 c28 c29"
                   >
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":r6:"
-                        class="c4 c5 c6 c7"
-                        tabindex="0"
-                        type="button"
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <span
-                          class="c8"
-                        >
-                          Remove from selection
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="16"
-                          viewBox="0 0 32 32"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":r8:"
-                        class="c4 c5 c6 c7"
-                        tabindex="0"
-                        type="button"
+                        <path
+                          d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
                       >
-                        <span
-                          class="c8"
-                        >
-                          Edit
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="16"
-                          viewBox="0 0 32 32"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
+                        Remove from selection
+                      </span>
+                    </button>
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
+                      >
+                        Edit
+                      </span>
+                    </button>
                   </div>
                   <div
                     class="c45 c5 c46"
@@ -851,7 +832,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       >
                         <h2
                           class="c13"
-                          id=":r5:-title"
+                          id=":r3:-title"
                         >
                           something.pdf
                         </h2>
@@ -891,7 +872,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
               class="c20"
             >
               <article
-                aria-labelledby=":ra:-title"
+                aria-labelledby=":r6:-title"
                 class="c21 c22"
                 role="button"
                 tabindex="-1"
@@ -903,104 +884,90 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                     <div
                       class="c16 c25"
                     >
-                      <div
-                        class=""
-                      >
-                        <input
-                          aria-labelledby=":ra:-title"
-                          class="c26"
-                          type="checkbox"
-                        />
-                      </div>
+                      <input
+                        aria-labelledby=":r6:-title"
+                        class="c26"
+                        type="checkbox"
+                      />
                     </div>
                   </div>
                   <div
                     class="c16 c27 c28 c29"
                   >
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":rb:"
-                        class="c4 c5 c6 c7"
-                        tabindex="0"
-                        type="button"
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <span
-                          class="c8"
-                        >
-                          Remove from selection
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="16"
-                          viewBox="0 0 32 32"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":rd:"
-                        class="c4 c5 c6 c7"
-                        tabindex="0"
-                        type="button"
+                        <path
+                          d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
                       >
-                        <span
-                          class="c8"
-                        >
-                          Edit
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="16"
-                          viewBox="0 0 32 32"
-                          width="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
+                        Remove from selection
+                      </span>
+                    </button>
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
+                      >
+                        Edit
+                      </span>
+                    </button>
                   </div>
                   <div
                     class="c30"
                   >
                     <div
-                      class="c38"
+                      class="c48"
                     >
-                      <div
-                        class="c48"
+                      <figure
+                        class=""
                       >
-                        <figure
-                          class=""
+                        <video
+                          crossorigin="anonymous"
+                          src="http://localhost:5000/mov_bbb.mp4"
                         >
-                          <video
-                            crossorigin="anonymous"
-                            src="http://localhost:5000/mov_bbb.mp4"
-                          >
-                            <source
-                              type="video/mp4"
-                            />
-                          </video>
-                          <figcaption
-                            class="c8"
-                          >
-                            something.mp4
-                          </figcaption>
-                        </figure>
-                      </div>
+                          <source
+                            type="video/mp4"
+                          />
+                        </video>
+                        <figcaption
+                          class="c8"
+                        >
+                          something.mp4
+                        </figcaption>
+                      </figure>
                     </div>
                   </div>
                   <time
@@ -1027,7 +994,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                       >
                         <h2
                           class="c13"
-                          id=":ra:-title"
+                          id=":r6:-title"
                         >
                           something.mp4
                         </h2>

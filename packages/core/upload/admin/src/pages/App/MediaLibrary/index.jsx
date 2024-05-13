@@ -397,13 +397,14 @@ export const MediaLibrary = () => {
                           }
                           cardActions={
                             <IconButton
-                              icon={<Pencil />}
                               aria-label={formatMessage({
                                 id: getTrad('list.folder.edit'),
                                 defaultMessage: 'Edit folder',
                               })}
                               onClick={() => handleEditFolder(folder)}
-                            />
+                            >
+                              <Pencil />
+                            </IconButton>
                           }
                         >
                           <FolderCardBody>

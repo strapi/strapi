@@ -70,9 +70,9 @@ describe('IconPicker', () => {
 
   it('should call onChange with an empty string when clicking on the delete button', async () => {
     const onChangeMock = jest.fn();
-    const { user, getByText } = setup({ value: 'calendar', onChange: onChangeMock });
+    const { user, getByRole } = setup({ value: 'calendar', onChange: onChangeMock });
 
-    await user.click(getByText('Remove the selected icon button'));
+    await user.click(getByRole('button', { name: 'Remove the selected icon' }));
 
     expect(onChangeMock).toHaveBeenCalledWith({
       target: { name: 'componentToCreate.icon', value: '' },

@@ -35,6 +35,26 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   width: 100%;
 }
 
+.c2 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.c13 {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.c18 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+}
+
 .c3 {
   font-weight: 600;
   font-size: 1.8rem;
@@ -71,26 +91,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   color: #666687;
 }
 
-.c2 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.c13 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
-  gap: 40px;
-}
-
-.c18 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-}
-
 .c24 {
   border: 0;
   clip: rect(0 0 0 0);
@@ -106,7 +106,6 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   height: 1px;
   border: none;
   flex-shrink: 0;
-  margin: 0;
 }
 
 .c14 {

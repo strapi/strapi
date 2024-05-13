@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 
 import en from '../../../translations/en.json';
@@ -18,7 +18,7 @@ jest.mock('react-intl', () => ({
 describe('ImageAssetCard', () => {
   it('snapshots the component', () => {
     const { container } = renderTL(
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <ImageAssetCard
           alt=""
           name="hello.png"
@@ -31,7 +31,7 @@ describe('ImageAssetCard', () => {
           onEdit={jest.fn()}
           isUrlSigned={false}
         />
-      </ThemeProvider>
+      </DesignSystemProvider>
     );
 
     expect(container).toMatchInlineSnapshot(`
@@ -82,27 +82,6 @@ describe('ImageAssetCard', () => {
         min-width: 20px;
       }
 
-      .c21 {
-        font-size: 1.2rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c22 {
-        font-size: 1.2rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c31 {
-        font-weight: 600;
-        font-size: 1.1rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
       .c3 {
         align-items: center;
         display: flex;
@@ -136,6 +115,28 @@ describe('ImageAssetCard', () => {
         justify-content: center;
       }
 
+      .c21 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c22 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c31 {
+        font-weight: 600;
+        font-size: 1.1rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        line-height: 1rem;
+        color: #666687;
+      }
+
       .c14 {
         border: 0;
         clip: rect(0 0 0 0);
@@ -149,7 +150,7 @@ describe('ImageAssetCard', () => {
 
       .c29 {
         border-radius: 4px;
-        height: 2.4rem;
+        padding-block: 0.7rem;
       }
 
       .c12 {
@@ -190,12 +191,12 @@ describe('ImageAssetCard', () => {
       }
 
       .c7 {
-        height: 18px;
-        min-width: 18px;
+        min-width: 1.8rem;
+        height: 1.8rem;
         margin: 0;
+        appearance: none;
         border-radius: 4px;
         border: 1px solid #c0c0cf;
-        -webkit-appearance: none;
         background-color: #ffffff;
         cursor: pointer;
       }
@@ -210,8 +211,8 @@ describe('ImageAssetCard', () => {
         display: block;
         position: relative;
         background: url("data:image/svg+xml,%3csvg%20width='10'%20height='8'%20viewBox='0%200%2010%208'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M8.55323%200.396973C8.63135%200.316355%208.76051%200.315811%208.83931%200.395768L9.86256%201.43407C9.93893%201.51157%209.93935%201.6359%209.86349%201.7139L4.06401%207.67724C3.9859%207.75755%203.85707%207.75805%203.77834%207.67834L0.13866%203.99333C0.0617798%203.91549%200.0617102%203.79032%200.138504%203.7124L1.16213%202.67372C1.24038%202.59432%201.36843%202.59422%201.4468%202.67348L3.92174%205.17647L8.55323%200.396973Z'%20fill='white'%20/%3e%3c/svg%3e") no-repeat no-repeat center center;
-        width: 10px;
-        height: 10px;
+        width: 1rem;
+        height: 1rem;
         left: 50%;
         top: 50%;
         transform: translateX(-50%) translateY(-50%);
@@ -350,48 +351,41 @@ describe('ImageAssetCard', () => {
               <div
                 class="c5 c6"
               >
-                <div
-                  class=""
-                >
-                  <input
-                    aria-labelledby=":r0:-title"
-                    class="c7"
-                    type="checkbox"
-                  />
-                </div>
+                <input
+                  aria-labelledby=":r0:-title"
+                  class="c7"
+                  type="checkbox"
+                />
               </div>
             </div>
             <div
               class="c5 c8 c9 c10"
             >
-              <span>
-                <button
-                  aria-disabled="false"
-                  aria-labelledby=":r1:"
-                  class="c11 c3 c12 c13"
-                  tabindex="0"
-                  type="button"
+              <button
+                aria-disabled="false"
+                class="c11 c3 c12 c13"
+                data-state="closed"
+                type="button"
+              >
+                <svg
+                  aria-hidden="true"
+                  fill="currentColor"
+                  focusable="false"
+                  height="16"
+                  viewBox="0 0 32 32"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
-                  <span
-                    class="c14"
-                  >
-                    Edit
-                  </span>
-                  <svg
-                    aria-hidden="true"
-                    fill="currentColor"
-                    focusable="false"
-                    height="16"
-                    viewBox="0 0 32 32"
-                    width="16"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
-                    />
-                  </svg>
-                </button>
-              </span>
+                  <path
+                    d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
+                  />
+                </svg>
+                <span
+                  class="c14"
+                >
+                  Edit
+                </span>
+              </button>
             </div>
             <div
               class="c15"

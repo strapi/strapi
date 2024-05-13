@@ -156,7 +156,7 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
           )}
           {value && (
             <Tooltip
-              description={formatMessage({
+              label={formatMessage({
                 id: getTrad('IconPicker.remove.tooltip'),
                 defaultMessage: 'Remove the selected icon',
               })}
@@ -166,7 +166,7 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
                 withTooltip={false}
                 label={formatMessage({
                   id: getTrad('IconPicker.remove.button'),
-                  defaultMessage: 'Remove the selected icon button',
+                  defaultMessage: 'Remove the selected icon',
                 })}
                 borderWidth={0}
               >

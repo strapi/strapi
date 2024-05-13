@@ -7,7 +7,14 @@ import {
   useRBAC,
   isFetchError,
 } from '@strapi/admin/strapi-admin';
-import { Flex, IconButton, Typography, Menu } from '@strapi/design-system';
+import {
+  Flex,
+  IconButton,
+  Typography,
+  Menu,
+  IconButtonComponent,
+  AccessibleIcon,
+} from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link as NavLink } from 'react-router-dom';
@@ -48,7 +55,7 @@ const StyledMenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger' }>`
 /* -------------------------------------------------------------------------------------------------
  * DeleteReleaseActionItemProps
  * -----------------------------------------------------------------------------------------------*/
-const StyledIconButton = styled(IconButton)`
+const StyledIconButton = styled<IconButtonComponent>(IconButton)`
   /* Setting this style inline with borderColor will not apply the style */
   border: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
 `;
@@ -225,7 +232,7 @@ interface RootProps {
   hasTriggerBorder?: boolean;
 }
 
-const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
+const Root = ({ children }: RootProps) => {
   const { formatMessage } = useIntl();
 
   const { allowedActions } = useRBAC(PERMISSIONS);
@@ -239,17 +246,16 @@ const Root = ({ children, hasTriggerBorder = false }: RootProps) => {
           - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
           - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
          */}
-        <Menu.Trigger
-          // @ts-expect-error See above
-          tag={hasTriggerBorder ? StyledIconButton : IconButton}
-          paddingLeft={2}
-          paddingRight={2}
-          aria-label={formatMessage({
-            id: 'content-releases.content-manager-edit-view.release-action-menu',
-            defaultMessage: 'Release action options',
-          })}
-          icon={<More />}
-        />
+        <Menu.Trigger paddingLeft={2} paddingRight={2}>
+          <AccessibleIcon
+            label={formatMessage({
+              id: 'content-releases.content-manager-edit-view.release-action-menu',
+              defaultMessage: 'Release action options',
+            })}
+          >
+            <More />
+          </AccessibleIcon>
+        </Menu.Trigger>
         {/*
           TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
           Refactor this once fixed in the DS

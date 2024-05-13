@@ -266,7 +266,7 @@ const CardButton = ({
       return (
         <Tooltip
           data-testid={`tooltip-${pluginName}`}
-          description={
+          label={
             !versionRange
               ? formatMessage(
                   {
@@ -289,15 +289,17 @@ const CardButton = ({
                 )
           }
         >
-          <Button
-            size="S"
-            startIcon={<Duplicate />}
-            variant="secondary"
-            onClick={handleCopy}
-            disabled={!isCompatible}
-          >
-            {installMessage}
-          </Button>
+          <span>
+            <Button
+              size="S"
+              startIcon={<Duplicate />}
+              variant="secondary"
+              onClick={handleCopy}
+              disabled={!isCompatible}
+            >
+              {installMessage}
+            </Button>
+          </span>
         </Tooltip>
       );
     }

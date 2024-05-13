@@ -1,14 +1,19 @@
+import { Accordion } from '@strapi/design-system';
 import { render as renderRTL } from '@tests/utils';
 
 import { ComponentCategory, ComponentCategoryProps } from '../ComponentCategory';
 
 describe('ComponentCategory', () => {
   const render = (props?: Partial<ComponentCategoryProps>) => ({
-    ...renderRTL(<ComponentCategory onAddComponent={jest.fn()} category="testing" {...props} />),
+    ...renderRTL(
+      <Accordion.Root>
+        <ComponentCategory onAddComponent={jest.fn()} category="testing" {...props} />
+      </Accordion.Root>
+    ),
   });
 
-  it('should render my array of components when passed and the accordion is open', () => {
-    const { getByRole } = render({
+  it('should render my array of components when passed and the accordion is open', async () => {
+    const { user, getByRole } = render({
       components: [
         {
           uid: 'test.test',
@@ -17,6 +22,8 @@ describe('ComponentCategory', () => {
         },
       ],
     });
+
+    await user.click(getByRole('button', { name: /testing/ }));
 
     expect(getByRole('button', { name: /myComponent/ })).toBeInTheDocument();
   });
@@ -41,6 +48,8 @@ describe('ComponentCategory', () => {
         },
       ],
     });
+
+    await user.click(getByRole('button', { name: /testing/ }));
 
     await user.click(getByRole('button', { name: /myComponent/ }));
 

@@ -28,13 +28,16 @@ export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
           </IconButton>
 
           <Menu.Root>
-            <Trigger variant="tertiary" paddingLeft={2} paddingRight={2} endIcon={null}>
-              <VisuallyHidden tag="span">
-                {formatMessage({
-                  id: getTrad('control-card.crop'),
-                  defaultMessage: 'Crop',
-                })}
-              </VisuallyHidden>
+            <Trigger
+              aria-label={formatMessage({
+                id: getTrad('control-card.crop'),
+                defaultMessage: 'Crop',
+              })}
+              variant="tertiary"
+              paddingLeft={2}
+              paddingRight={2}
+              endIcon={null}
+            >
               <Check
                 aria-hidden
                 focusable={false}

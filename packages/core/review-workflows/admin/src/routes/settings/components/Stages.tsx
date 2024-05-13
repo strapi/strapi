@@ -54,7 +54,7 @@ interface StagesProps {
   isCreating?: boolean;
 }
 
-const Stages = ({ canDelete = true, canUpdate = true }: StagesProps) => {
+const Stages = ({ canDelete = true, canUpdate = true, isCreating }: StagesProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const addFieldRow = useForm('Stages', (state) => state.addFieldRow);
@@ -90,6 +90,7 @@ const Stages = ({ canDelete = true, canUpdate = true }: StagesProps) => {
                   canReorder={stages.length > 1}
                   canUpdate={canUpdate}
                   stagesCount={stages.length}
+                  defaultOpen={isCreating}
                   {...stage}
                 />
               </Box>
@@ -129,6 +130,7 @@ interface StageProps extends WorkflowStage {
   canUpdate?: boolean;
   index: number;
   stagesCount: number;
+  defaultOpen?: boolean;
 }
 
 const Stage = ({
@@ -140,6 +142,7 @@ const Stage = ({
   name,
   permissions,
   color,
+  defaultOpen,
 }: StageProps) => {
   const [liveText, setLiveText] = React.useState<string>();
   const { formatMessage } = useIntl();
@@ -260,7 +263,7 @@ const Stage = ({
               trackUsage('willEditStage');
             }
           }}
-          defaultValue={id}
+          defaultValue={defaultOpen ? id : undefined}
           $error={Object.values(error ?? {}).length > 0}
         >
           <Accordion.Item value={id}>
