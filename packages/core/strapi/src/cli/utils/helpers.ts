@@ -116,6 +116,7 @@ const assertCwdContainsStrapiProject = (name: string) => {
         `strapi ${name}`
       )} in a Strapi project. Make sure you are in the right directory.`
     );
+    console.log('Error in assert strapi');
     process.exit(1);
   };
 
@@ -143,6 +144,7 @@ const runAction =
       })
       .catch((error) => {
         console.error(error);
+        console.log('Error in runaction');
         process.exit(1);
       });
   };
