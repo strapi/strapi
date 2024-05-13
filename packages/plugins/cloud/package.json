@@ -36,8 +36,8 @@
     "test:ts:front": "run -T tsc -p admin/tsconfig.json"
   },
   "dependencies": {
-    "@strapi/design-system": "2.0.0-beta.3",
-    "@strapi/icons": "2.0.0-beta.3",
+    "@strapi/design-system": "2.0.0-beta.4",
+    "@strapi/icons": "2.0.0-beta.4",
     "react-intl": "6.6.2"
   },
   "devDependencies": {
