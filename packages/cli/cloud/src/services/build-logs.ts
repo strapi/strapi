@@ -2,7 +2,7 @@ import EventSource from 'eventsource';
 import { CLIContext, type CloudCliConfig } from '../types';
 
 const buildLogsServiceFactory = ({ logger }: CLIContext) => {
-  return async (url: string, token: string, cliConfig : CloudCliConfig) => {
+  return async (url: string, token: string, cliConfig: CloudCliConfig) => {
     const CONN_TIMEOUT = Number(cliConfig.buildLogsConnectionTimeout);
     const MAX_RETRIES = Number(cliConfig.buildLogsMaxRetries);
 
@@ -28,11 +28,10 @@ const buildLogsServiceFactory = ({ logger }: CLIContext) => {
         const resetTimeout = () => {
           clearExistingTimeout();
           timeoutId = setTimeout(() => {
-            const message = 'We were unable to connect to the server to get build logs at this time. This could be due to a temporary issue.';
             if (spinner.isSpinning) {
-              spinner.fail(message);
-            } else {
-              logger.error(message);
+              spinner.fail(
+                'We were unable to connect to the server to get build logs at this time. This could be due to a temporary issue.'
+              );
             }
             es.close();
             reject(new Error('Connection timed out'));
