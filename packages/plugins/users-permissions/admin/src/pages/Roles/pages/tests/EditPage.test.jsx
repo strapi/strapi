@@ -96,13 +96,15 @@ describe('Roles – EditPage', () => {
     expect(getByRole('textbox', { name: 'Description' })).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it("can update a role's name and description", async () => {
+  it("can update a role's name, description and permissions", async () => {
     const { getByRole, user, getByText, findByRole, findByText } = render();
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
     await user.type(getByRole('textbox', { name: 'Name' }), 'test');
     await user.type(getByRole('textbox', { name: 'Description' }), 'testing');
+    await user.click(getByRole('button', { name: 'Address' }));
+    await user.click(getByRole('checkbox', { name: 'create' }));
 
     const button = await findByRole('button', { name: 'Save' });
     /**
@@ -111,23 +113,6 @@ describe('Roles – EditPage', () => {
     fireEvent.click(button);
     await findByText('Role edited');
     await findByText('Authenticated');
-  });
-
-  it("can update a role's permissions", async () => {
-    const { getByRole, user, getByText } = render();
-
-    await waitForElementToBeRemoved(() => getByText('Loading content.'));
-
-    await user.click(getByRole('button', { name: 'Address' }));
-
-    await user.click(getByRole('checkbox', { name: 'create' }));
-
-    /**
-     * @note user.click will not trigger the form.
-     */
-    fireEvent.click(getByRole('button', { name: 'Save' }));
-
-    await waitFor(() => expect(getByText('Role edited')).toBeInTheDocument());
 
     /**
      * @note the permissions are refetched, because we're mocking calls no real update will be made.

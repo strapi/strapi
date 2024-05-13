@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { DatePicker, useComposedRefs, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
@@ -37,4 +37,6 @@ const DateInput = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-export { DateInput };
+const MemoizedDateInput = memo(DateInput);
+
+export { MemoizedDateInput as DateInput };

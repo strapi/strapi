@@ -6,20 +6,26 @@
 
 import * as React from 'react';
 
-import { useNotification, useAPIErrorHandler, useQueryParams } from '@strapi/admin/strapi-admin';
+import {
+  useNotification,
+  useAPIErrorHandler,
+  useQueryParams,
+  FormErrors,
+  getYupValidationErrors,
+} from '@strapi/admin/strapi-admin';
+import { Modules } from '@strapi/types';
 import { useParams } from 'react-router-dom';
 import { ValidationError } from 'yup';
 
 import { SINGLE_TYPES } from '../constants/collections';
 import { useGetDocumentQuery } from '../services/documents';
 import { buildValidParams } from '../utils/api';
-import { createYupSchema, getInnerErrors } from '../utils/validation';
+import { createYupSchema } from '../utils/validation';
 
 import { useContentTypeSchema, ComponentsDictionary } from './useContentTypeSchema';
 
 import type { FindOne } from '../../../shared/contracts/collection-types';
 import type { ContentType } from '../../../shared/contracts/content-types';
-import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
 interface UseDocumentArgs {
   collectionType: string;
@@ -50,9 +56,7 @@ type UseDocument = (
    * This is the schema of the content type, it is not the same as the layout.
    */
   schema?: Schema;
-  validate: (
-    document: Document
-  ) => null | Record<string, MessageDescriptor & { values?: Record<string, PrimitiveType> }>;
+  validate: (document: Document) => null | FormErrors;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -117,7 +121,7 @@ const useDocument: UseDocument = (args, opts) => {
   }, [schema, components]);
 
   const validate = React.useCallback(
-    (document: Document) => {
+    (document: Modules.Documents.AnyDocument): FormErrors | null => {
       if (!validationSchema) {
         throw new Error(
           'There is no validation schema generated, this is likely due to the schema not being loaded yet.'
@@ -126,11 +130,10 @@ const useDocument: UseDocument = (args, opts) => {
 
       try {
         validationSchema.validateSync(document, { abortEarly: false, strict: true });
-
         return null;
       } catch (error) {
         if (error instanceof ValidationError) {
-          return getInnerErrors(error);
+          return getYupValidationErrors(error);
         }
 
         throw error;

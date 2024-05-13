@@ -22,6 +22,7 @@ export default {
       },
       permissions: PERMISSIONS.main,
       Component: () => import('./pages/App'),
+      position: 4,
     });
 
     app.addSettingsLink('global', {

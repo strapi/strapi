@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, memo, useState } from 'react';
 
 import { TextInput, useComposedRefs, Field } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
@@ -9,7 +9,7 @@ import { useField } from '../Form';
 
 import type { StringProps } from './types';
 
-export const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
+const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const [showPassword, setShowPassword] = useState(false);
     const { formatMessage } = useIntl();
@@ -55,3 +55,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, StringProps>(
     );
   }
 );
+
+const MemoizedPasswordInput = memo(PasswordInput);
+
+export { MemoizedPasswordInput as PasswordInput };

@@ -150,5 +150,7 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
   }
 );
 
-export { Wysiwyg };
+const MemoizedWysiwyg = React.memo(Wysiwyg);
+
+export { MemoizedWysiwyg as Wysiwyg };
 export type { WysiwygProps };

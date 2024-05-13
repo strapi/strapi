@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import { forwardRef, memo } from 'react';
 
 import { Checkbox, useComposedRefs, Field } from '@strapi/design-system';
 
@@ -31,4 +31,6 @@ const CheckboxInput = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-export { CheckboxInput };
+const MemoizedCheckboxInput = memo(CheckboxInput);
+
+export { MemoizedCheckboxInput as CheckboxInput };

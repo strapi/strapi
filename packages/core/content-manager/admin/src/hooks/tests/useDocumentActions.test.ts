@@ -11,14 +11,17 @@ describe('useDocumentActions', () => {
 
     expect(result.current).toEqual({
       autoClone: expect.any(Function),
+      publishMany: expect.any(Function),
       clone: expect.any(Function),
       create: expect.any(Function),
       discard: expect.any(Function),
       delete: expect.any(Function),
+      deleteMany: expect.any(Function),
       getDocument: expect.any(Function),
       publish: expect.any(Function),
       update: expect.any(Function),
       unpublish: expect.any(Function),
+      unpublishMany: expect.any(Function),
     });
   });
 
@@ -240,6 +243,71 @@ describe('useDocumentActions', () => {
               `);
 
       await screen.findByText("Couldn't delete entry.");
+    });
+  });
+
+  describe('bulk delete', () => {
+    it('should return the deleted documents when successful', async () => {
+      const { result } = renderHook(() => useDocumentActions());
+
+      let response;
+
+      await act(async () => {
+        const res = await result.current.deleteMany({
+          model: mockData.contentManager.contentType,
+          documentIds: ['12345', '6789'],
+          params: {
+            locale: 'en',
+          },
+        });
+
+        response = res;
+      });
+
+      expect(response).toMatchInlineSnapshot(`
+        {
+          "count": 2,
+        }
+      `);
+    });
+
+    it('should return the errors when unsuccessful', async () => {
+      server.use(
+        rest.post('/content-manager/collection-types/:uid/actions/bulkDelete', (_, res, ctx) => {
+          return res(
+            ctx.status(500),
+            ctx.json({
+              error: new errors.ApplicationError("Couldn't delete entries."),
+            })
+          );
+        })
+      );
+
+      const { result } = renderHook(() => useDocumentActions());
+
+      let response;
+
+      await act(async () => {
+        const res = await result.current.deleteMany({
+          model: mockData.contentManager.contentType,
+          documentIds: ['12345', '6789'],
+          params: { locale: 'en' },
+        });
+
+        response = res;
+      });
+
+      expect(response).toMatchInlineSnapshot(`
+                {
+                  "error": {
+                    "details": {},
+                    "message": "Couldn't delete entries.",
+                    "name": "ApplicationError",
+                  },
+                }
+              `);
+
+      await screen.findByText("Couldn't delete entries.");
     });
   });
 
@@ -595,6 +663,67 @@ describe('useDocumentActions', () => {
       `);
 
       await screen.findByText("Couldn't unpublish entry.");
+    });
+  });
+
+  describe('bulk unpublish', () => {
+    it('should return the unpublished document when successful', async () => {
+      const { result } = renderHook(() => useDocumentActions());
+
+      let response;
+
+      await act(async () => {
+        const res = await result.current.unpublishMany({
+          model: mockData.contentManager.contentType,
+          documentIds: ['12345', '6789'],
+        });
+
+        response = res;
+      });
+
+      expect(response).toMatchInlineSnapshot(`
+          {
+            "count": 2,
+          }
+      `);
+    });
+
+    it('should return the errors when unsuccessful', async () => {
+      server.use(
+        rest.post('/content-manager/collection-types/:uid/actions/bulkUnpublish', (_, res, ctx) => {
+          return res(
+            ctx.status(500),
+            ctx.json({
+              error: new errors.ApplicationError("Couldn't unpublish entries."),
+            })
+          );
+        })
+      );
+
+      const { result } = renderHook(() => useDocumentActions());
+
+      let response;
+
+      await act(async () => {
+        const res = await result.current.unpublishMany({
+          model: mockData.contentManager.contentType,
+          documentIds: ['12345', '6789'],
+        });
+
+        response = res;
+      });
+
+      expect(response).toMatchInlineSnapshot(`
+        {
+          "error": {
+            "details": {},
+            "message": "Couldn't unpublish entries.",
+            "name": "ApplicationError",
+          },
+        }
+      `);
+
+      await screen.findByText("Couldn't unpublish entries.");
     });
   });
 });

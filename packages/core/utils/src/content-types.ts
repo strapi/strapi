@@ -162,6 +162,17 @@ const isPrivateAttribute = (model: Model, attributeName: string) => {
 const isScalarAttribute = (attribute?: Attribute) => {
   return attribute && !['media', 'component', 'relation', 'dynamiczone'].includes(attribute.type);
 };
+
+const getDoesAttributeRequireValidation = (attribute: Attribute) => {
+  return (
+    attribute.required ||
+    attribute.unique ||
+    Object.prototype.hasOwnProperty.call(attribute, 'max') ||
+    Object.prototype.hasOwnProperty.call(attribute, 'min') ||
+    Object.prototype.hasOwnProperty.call(attribute, 'maxLength') ||
+    Object.prototype.hasOwnProperty.call(attribute, 'minLength')
+  );
+};
 const isMediaAttribute = (attribute?: Attribute) => attribute?.type === 'media';
 const isRelationalAttribute = (attribute?: Attribute): attribute is RelationalAttribute =>
   attribute?.type === 'relation';
@@ -269,4 +280,5 @@ export {
   isCollectionType,
   isKind,
   getContentTypeRoutePrefix,
+  getDoesAttributeRequireValidation,
 };

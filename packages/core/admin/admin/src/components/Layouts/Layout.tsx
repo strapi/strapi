@@ -5,7 +5,7 @@ import { styled } from 'styled-components';
 
 import { ActionLayout } from './ActionLayout';
 import { ContentLayout } from './ContentLayout';
-import { GridLayout } from './GridLayout';
+import { GridLayout, GridLayoutProps } from './GridLayout';
 import { HeaderLayout, BaseHeaderLayout } from './HeaderLayout';
 
 interface LayoutProps {
@@ -40,4 +40,4 @@ const Layouts = {
   Content: ContentLayout,
 };
 
-export { Layouts, type LayoutProps };
+export { Layouts, type LayoutProps, type GridLayoutProps };

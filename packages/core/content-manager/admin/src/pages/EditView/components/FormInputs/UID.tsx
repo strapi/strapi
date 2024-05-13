@@ -272,6 +272,8 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
  * -----------------------------------------------------------------------------------------------*/
 
 const FieldActionWrapper = styled(Field.Action)`
+  width: 1.6rem;
+
   svg {
     height: 1.6rem;
     width: 1.6rem;
@@ -320,5 +322,7 @@ const LoadingWrapper = styled<FlexComponent>(Flex)`
   animation: ${rotation} 2s infinite linear;
 `;
 
-export { UIDInput };
+const MemoizedUIDInput = React.memo(UIDInput);
+
+export { MemoizedUIDInput as UIDInput };
 export type { UIDInputProps };
