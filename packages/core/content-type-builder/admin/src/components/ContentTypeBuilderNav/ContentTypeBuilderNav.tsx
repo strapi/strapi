@@ -25,7 +25,7 @@ export const ContentTypeBuilderNav = () => {
 
   return (
     <SubNav
-      ariaLabel={formatMessage({
+      aria-label={formatMessage({
         id: `${getTrad('plugin.name')}`,
         defaultMessage: 'Content-Types Builder',
       })}
@@ -61,8 +61,7 @@ export const ContentTypeBuilderNav = () => {
                     <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
                       {link.links.map((subLink: any) => (
                         <SubNavLink
-                          as={NavLink}
-                          // @ts-expect-error verify if "to" is needed
+                          tag={NavLink}
                           to={subLink.to}
                           active={subLink.active}
                           key={subLink.name}
@@ -78,8 +77,7 @@ export const ContentTypeBuilderNav = () => {
                 }
 
                 return (
-                  // @ts-expect-error verify if "to" is needed
-                  <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
+                  <SubNavLink tag={NavLink} to={link.to} active={link.active} key={link.name}>
                     {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
                   </SubNavLink>
                 );

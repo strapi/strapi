@@ -1,5 +1,5 @@
 import { Badge, Box, Flex } from '@strapi/design-system';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 export const RelativeBox = styled(Box)`
   position: relative;
@@ -30,7 +30,7 @@ export const Wrapper = styled.div`
 
 export const ActionRow = styled(Flex)`
   height: 5.2rem;
-  background-color: ${({ blurry }) => (blurry ? `rgba(33, 33, 52, 0.4)` : undefined)};
+  background-color: ${({ $blurry }) => ($blurry ? `rgba(33, 33, 52, 0.4)` : undefined)};
 `;
 
 export const CroppingActionRow = styled(Flex)`

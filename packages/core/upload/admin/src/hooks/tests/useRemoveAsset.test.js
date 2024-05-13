@@ -131,7 +131,7 @@ describe('useRemoveAsset', () => {
 
     await waitFor(() =>
       expect(toggleNotification).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'danger', message: 'Request failed with status code 500' })
+        expect.objectContaining({ type: 'danger', message: 'Unexpected end of JSON input' })
       )
     );
 

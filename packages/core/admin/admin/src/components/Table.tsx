@@ -30,7 +30,7 @@ import {
 import { CaretDown } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useControllableState } from '../hooks/useControllableState';
 import { useQueryParams } from '../hooks/useQueryParams';
@@ -201,7 +201,7 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
           <IconButton
             label={sortLabel}
             onClick={handleClickSort}
-            icon={<SortIcon isUp={sortOrder === 'ASC'} />}
+            icon={<SortIcon $isUp={sortOrder === 'ASC'} />}
             borderStyle="none"
           />
         )
@@ -210,7 +210,7 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
       <Tooltip label={sortable ? sortLabel : label}>
         <Typography
           textColor="neutral600"
-          as={!isSorted && sortable ? 'button' : 'span'}
+          tag={!isSorted && sortable ? 'button' : 'span'}
           onClick={handleClickSort}
           variant="sigma"
         >
@@ -221,12 +221,10 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
   );
 };
 
-interface SortIconProps {
-  isUp: boolean;
-}
-
-const SortIcon = styled(CaretDown)<SortIconProps>`
-  transform: ${({ isUp }) => `rotate(${isUp ? '180' : '0'}deg)`};
+const SortIcon = styled(CaretDown)<{
+  $isUp: boolean;
+}>`
+  transform: ${({ $isUp }) => `rotate(${$isUp ? '180' : '0'}deg)`};
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -412,8 +410,8 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
     <Cell {...props} onClick={(e) => e.stopPropagation()}>
       <BaseCheckbox
         aria-label={formatMessage({
-          id: 'global.select-all-entries',
-          defaultMessage: 'Select all entries',
+          id: 'global.select',
+          defaultMessage: 'Select',
         })}
         disabled={rows.length === 0}
         checked={isChecked}

@@ -1,7 +1,13 @@
 import * as React from 'react';
 
-import { Page, useAPIErrorHandler, useNotification, useRBAC } from '@strapi/admin/strapi-admin';
-import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
+import {
+  Page,
+  useAPIErrorHandler,
+  useNotification,
+  useRBAC,
+  Layouts,
+} from '@strapi/admin/strapi-admin';
+import { EmptyStateLayout } from '@strapi/design-system';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
@@ -42,7 +48,7 @@ const SettingsPage = () => {
 
   return (
     <Page.Main tabIndex={-1}>
-      <HeaderLayout
+      <Layouts.Header
         primaryAction={<CreateLocale disabled={!canCreate} />}
         title={formatMessage({
           id: getTranslation('plugin.name'),
@@ -53,7 +59,7 @@ const SettingsPage = () => {
           defaultMessage: 'Configure the settings',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         {locales.length > 0 ? (
           <LocaleTable locales={locales} canDelete={canDelete} canUpdate={canUpdate} />
         ) : (
@@ -66,7 +72,7 @@ const SettingsPage = () => {
             action={<CreateLocale disabled={!canCreate} variant="secondary" />}
           />
         )}
-      </ContentLayout>
+      </Layouts.Content>
     </Page.Main>
   );
 };

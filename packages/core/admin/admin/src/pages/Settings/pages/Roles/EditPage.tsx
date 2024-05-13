@@ -1,11 +1,12 @@
 import * as React from 'react';
 
-import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
+import { Box, Button, Flex, Main } from '@strapi/design-system';
 import { Formik, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
@@ -185,7 +186,7 @@ const EditPage = () => {
       >
         {({ handleSubmit, values, errors, handleChange, handleBlur, isSubmitting }) => (
           <form onSubmit={handleSubmit}>
-            <HeaderLayout
+            <Layouts.Header
               primaryAction={
                 <Flex gap={2}>
                   <Button
@@ -211,7 +212,7 @@ const EditPage = () => {
               })}
               navigationAction={<BackButton />}
             />
-            <ContentLayout>
+            <Layouts.Content>
               <Flex direction="column" alignItems="stretch" gap={6}>
                 <RoleForm
                   disabled={isFormDisabled}
@@ -230,7 +231,7 @@ const EditPage = () => {
                   />
                 </Box>
               </Flex>
-            </ContentLayout>
+            </Layouts.Content>
           </form>
         )}
       </Formik>

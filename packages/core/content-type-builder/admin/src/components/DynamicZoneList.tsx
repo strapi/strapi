@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../hooks/useDataManager';
 import { getTrad } from '../utils/getTrad';
@@ -80,7 +80,7 @@ export const DynamicZoneList = ({
   };
 
   return (
-    <Tr className="dynamiczone-row" isFromDynamicZone>
+    <Tr className="dynamiczone-row" $isFromDynamicZone>
       <td colSpan={12}>
         <FixedBox paddingLeft={8}>
           <ScrollableStack gap={2}>

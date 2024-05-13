@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import sanitizeHtml from 'sanitize-html';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { md } from './utils/mdRenderer';
 

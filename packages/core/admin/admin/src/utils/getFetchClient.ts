@@ -1,58 +1,65 @@
-import axios, { AxiosRequestConfig, AxiosResponse, AxiosInstance } from 'axios';
+import pipe from 'lodash/fp/pipe';
 import qs from 'qs';
+
+import type { ApiError } from '../hooks/useAPIErrorHandler';
 
 const STORAGE_KEYS = {
   TOKEN: 'jwtToken',
   USER: 'userInfo',
 };
 
-const fetchClient = (): AxiosInstance => {
-  const instance = axios.create({
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json',
-    },
-    paramsSerializer: (params) => {
-      return qs.stringify(params, { encode: false });
-    },
-  });
+type FetchParams = Parameters<typeof fetch>;
+type FetchURL = FetchParams[0];
 
-  // Add a request interceptor to add authorization token to headers, rejects errors
-  instance.interceptors.request.use(
-    async (config) => {
-      config.headers.Authorization = `Bearer ${getToken()}`;
+export type Method = 'GET' | 'POST' | 'DELETE' | 'PUT';
 
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
-
-  // Add a response interceptor to return the response or handle the error
-  instance.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (error?.response?.status === 401) {
-        clearItem(STORAGE_KEYS.TOKEN);
-        clearItem(STORAGE_KEYS.USER);
-
-        window.location.reload();
-      }
-
-      throw error;
-    }
-  );
-
-  return instance;
+export type FetchResponse<TData = any> = {
+  data: TData;
+  status?: number;
 };
 
-const clearItem = (key: string) => {
-  if (window.localStorage.getItem(key)) {
-    return window.localStorage.removeItem(key);
-  }
+export type FetchOptions = {
+  params?: any;
+  signal?: AbortSignal;
+  headers?: Record<string, string>;
+  validateStatus?: ((status: number) => boolean) | null;
+};
 
-  if (window.sessionStorage.getItem(key)) {
-    return window.sessionStorage.removeItem(key);
+export type FetchConfig = {
+  signal?: AbortSignal;
+};
+
+type ErrorResponse = {
+  data: {
+    data?: any;
+    error: ApiError & { status?: number };
+  };
+};
+
+export class FetchError extends Error {
+  public name: string;
+  public message: string;
+  public response?: ErrorResponse;
+  public code?: number;
+  public status?: number;
+
+  constructor(message: string, response?: ErrorResponse) {
+    super(message);
+    this.name = 'FetchError';
+    this.message = message;
+    this.response = response;
+    this.code = response?.data?.error?.status;
+    this.status = response?.data?.error?.status;
+
+    // Ensure correct stack trace in error object
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, FetchError);
+    }
   }
+}
+
+export const isFetchError = (error: unknown): error is FetchError => {
+  return error instanceof FetchError;
 };
 
 const getToken = () =>
@@ -60,42 +67,26 @@ const getToken = () =>
     localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN) ?? '""'
   );
 
-const instance = fetchClient();
-
-const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
-
-// This regular expression matches a string that starts with either "http://" or "https://" or any other protocol name in lower case letters, followed by "://" and ends with anything else
-const hasProtocol = (url: string) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(url);
-
-// Check if the url has a prepending slash, if not add a slash
-const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
-
 type FetchClient = {
-  get: <TData = any, R = AxiosResponse<TData>, TSend = any>(
-    url: string,
-    config?: AxiosRequestConfig<TSend>
-  ) => Promise<R>;
-  put: <TData = any, R = AxiosResponse<TData>, TSend = any>(
+  get: <TData = any>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
+  put: <TData = any, TSend = any>(
     url: string,
     data?: TSend,
-    config?: AxiosRequestConfig<TSend>
-  ) => Promise<R>;
-  post: <TData = any, R = AxiosResponse<TData>, TSend = any>(
+    config?: FetchOptions
+  ) => Promise<FetchResponse<TData>>;
+  post: <TData = any, TSend = any>(
     url: string,
     data?: TSend,
-    config?: AxiosRequestConfig<TSend>
-  ) => Promise<R>;
-  del: <TData = any, R = AxiosResponse<TData>, TSend = any>(
-    url: string,
-    config?: AxiosRequestConfig<TSend>
-  ) => Promise<R>;
+    config?: FetchOptions
+  ) => Promise<FetchResponse<TData>>;
+  del: <TData = any>(url: string, config?: FetchOptions) => Promise<FetchResponse<TData>>;
 };
 
 /**
  * @public
- * @param {AxiosRequestConfig} [defaultOptions={}] - Default options for Axios requests.
+ * @param {FetchConfig} [defaultOptions={}] - Fetch Configs.
  * @returns {FetchClient} A fetch client object with methods for making HTTP requests.
- * @description This is an abstraction around the axios instance exposed by a function. It provides a simple interface to handle API calls
+ * @description This is an abstraction around the native fetch exposed by a function. It provides a simple interface to handle API calls
  * to the Strapi backend.
  * @example
  * ```tsx
@@ -111,20 +102,170 @@ type FetchClient = {
  * };
  * ```
  */
-const getFetchClient = (defaultOptions: AxiosRequestConfig = {}): FetchClient => {
-  instance.defaults.baseURL = window.strapi.backendURL;
-  return {
-    get: (url, config) =>
-      instance.get(normalizeUrl(url), {
-        ...defaultOptions,
-        ...config,
-      }),
-    put: (url, data, config) =>
-      instance.put(normalizeUrl(url), data, { ...defaultOptions, ...config }),
-    post: (url, data, config) =>
-      instance.post(normalizeUrl(url), data, { ...defaultOptions, ...config }),
-    del: (url, config) => instance.delete(normalizeUrl(url), { ...defaultOptions, ...config }),
+const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
+  const backendURL = window.strapi.backendURL;
+  const defaultHeader = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${getToken()}`,
   };
+
+  const isFormDataRequest = (body: unknown) => body instanceof FormData;
+  const addPrependingSlash = (url: string) => (url.charAt(0) !== '/' ? `/${url}` : url);
+
+  // This regular expression matches a string that starts with either "http://" or "https://" or any other protocol name in lower case letters, followed by "://" and ends with anything else
+  const hasProtocol = (url: string) => new RegExp('^(?:[a-z+]+:)?//', 'i').test(url);
+
+  // Check if the url has a prepending slash, if not add a slash
+  const normalizeUrl = (url: string) => (hasProtocol(url) ? url : addPrependingSlash(url));
+
+  // Add a response interceptor to return the response
+  const responseInterceptor = async <TData = any>(
+    response: Response,
+    validateStatus?: FetchOptions['validateStatus']
+  ): Promise<FetchResponse<TData>> => {
+    try {
+      const result = await response.json();
+
+      /**
+       * validateStatus allows us to customize when a response should throw an error
+       * In native Fetch API, a response is considered "not ok"
+       * when the status code falls in the 200 to 299 (inclusive) range
+       */
+      if (!response.ok && result.error && !validateStatus?.(response.status)) {
+        throw new FetchError(result.error.message, { data: result });
+      }
+
+      if (!response.ok && !validateStatus?.(response.status)) {
+        throw new FetchError('Unknown Server Error');
+      }
+
+      return { data: result };
+    } catch (error) {
+      if (error instanceof SyntaxError && response.ok) {
+        // Making sure that a SyntaxError doesn't throw if it's successful
+        return { data: [], status: response.status } as FetchResponse<any>;
+      } else {
+        throw error;
+      }
+    }
+  };
+
+  const paramsSerializer =
+    <Param = unknown>(params?: Param) =>
+    (url: string) => {
+      if (params) {
+        const serializedParams = qs.stringify(params, { encode: false });
+        return `${url}?${serializedParams}`;
+      }
+      return url;
+    };
+
+  const addBaseUrl = (url: FetchURL) => {
+    return `${backendURL}${url}`;
+  };
+
+  /**
+   * We use the factory method because the options
+   * are unique to the individual request
+   */
+  const makeCreateRequestUrl = (options?: FetchOptions) =>
+    pipe(normalizeUrl, addBaseUrl, paramsSerializer(options?.params));
+
+  const fetchClient: FetchClient = {
+    get: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
+      const headers = new Headers({
+        ...defaultHeader,
+        ...options?.headers,
+      });
+      /**
+       * this applies all our transformations to the URL
+       * - normalizing (making sure it has the correct slash)
+       * - appending our BaseURL which comes from the window.strapi object
+       * - serializing our params with QS
+       */
+      const createRequestUrl = makeCreateRequestUrl(options);
+      const response = await fetch(createRequestUrl(url), {
+        signal: options?.signal ?? defaultOptions.signal,
+        method: 'GET',
+        headers,
+      });
+      return responseInterceptor<TData>(response, options?.validateStatus);
+    },
+    post: async <TData, TSend = any>(
+      url: string,
+      data?: TSend,
+      options?: FetchOptions
+    ): Promise<FetchResponse<TData>> => {
+      const headers = new Headers({
+        ...defaultHeader,
+        ...options?.headers,
+      });
+
+      const createRequestUrl = makeCreateRequestUrl(options);
+
+      /**
+       * we have to remove the Content-Type value if it was a formData request
+       * the browser will automatically set the header value
+       */
+      if (isFormDataRequest(data)) {
+        headers.delete('Content-Type');
+      }
+
+      const response = await fetch(createRequestUrl(url), {
+        signal: options?.signal ?? defaultOptions.signal,
+        method: 'POST',
+        headers,
+        body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
+      });
+      return responseInterceptor<TData>(response, options?.validateStatus);
+    },
+    put: async <TData, TSend = any>(
+      url: string,
+      data?: TSend,
+      options?: FetchOptions
+    ): Promise<FetchResponse<TData>> => {
+      const headers = new Headers({
+        ...defaultHeader,
+        ...options?.headers,
+      });
+
+      const createRequestUrl = makeCreateRequestUrl(options);
+
+      /**
+       * we have to remove the Content-Type value if it was a formData request
+       * the browser will automatically set the header value
+       */
+      if (isFormDataRequest(data)) {
+        headers.delete('Content-Type');
+      }
+
+      const response = await fetch(createRequestUrl(url), {
+        signal: options?.signal ?? defaultOptions.signal,
+        method: 'PUT',
+        headers,
+        body: isFormDataRequest(data) ? (data as FormData) : JSON.stringify(data),
+      });
+
+      return responseInterceptor<TData>(response, options?.validateStatus);
+    },
+    del: async <TData>(url: string, options?: FetchOptions): Promise<FetchResponse<TData>> => {
+      const headers = new Headers({
+        ...defaultHeader,
+        ...options?.headers,
+      });
+
+      const createRequestUrl = makeCreateRequestUrl(options);
+      const response = await fetch(createRequestUrl(url), {
+        signal: options?.signal ?? defaultOptions.signal,
+        method: 'DELETE',
+        headers,
+      });
+      return responseInterceptor<TData>(response, options?.validateStatus);
+    },
+  };
+
+  return fetchClient;
 };
 
-export { instance, getFetchClient };
+export { getFetchClient };

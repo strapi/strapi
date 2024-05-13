@@ -42,10 +42,14 @@ describe('ADMIN | Pages | TRANSFER TOKENS | ListPage', () => {
       },
     });
 
-    const { queryByTestId } = render(<ListView />);
-
+    const { queryByRole, findByText } = render(<ListView />);
+    await findByText('Transfer Tokens');
     await waitFor(() =>
-      expect(queryByTestId('create-transfer-token-button')).not.toBeInTheDocument()
+      expect(
+        queryByRole('button', {
+          name: 'Create new Transfer Token',
+        })
+      ).not.toBeInTheDocument()
     );
   });
 

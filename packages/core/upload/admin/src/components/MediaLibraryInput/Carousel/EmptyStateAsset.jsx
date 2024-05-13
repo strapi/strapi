@@ -4,7 +4,7 @@ import { Flex, Typography } from '@strapi/design-system';
 import { PlusCircle as PicturePlus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetSource } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
@@ -63,7 +63,7 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       alignItems="center"
       height="100%"
       width="100%"
-      as="button"
+      tag="button"
       type="button"
       disabled={disabled}
       onClick={onClick}
@@ -85,7 +85,7 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
         fontWeight="bold"
         textColor="neutral600"
         style={{ textAlign: 'center' }}
-        as="span"
+        tag="span"
       >
         {formatMessage({
           id: getTrad('mediaLibraryInput.placeholder'),

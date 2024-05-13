@@ -14,7 +14,7 @@ import {
 import { GridFour as Grid, List, Pencil, Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import {
   AssetDefinition,
@@ -182,7 +182,7 @@ export const BrowseStep = ({
         <Box paddingTop={3}>
           <Breadcrumbs
             onChangeFolder={onChangeFolder}
-            as="nav"
+            tag="nav"
             label={formatMessage({
               id: getTrad('header.breadcrumbs.nav.label'),
               defaultMessage: 'Folders navigation',
@@ -291,7 +291,7 @@ export const BrowseStep = ({
                         <FolderCardBodyAction
                           onClick={() => handleClickFolderCard(folder.id, folder.path)}
                         >
-                          <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                          <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
                             <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                               {folder.name}
                               {/* VisuallyHidden dash here allows to separate folder title and count informations
@@ -299,7 +299,7 @@ export const BrowseStep = ({
                               <VisuallyHidden>-</VisuallyHidden>
                             </TypographyMaxWidth>
                             <TypographyMaxWidth
-                              as="span"
+                              tag="span"
                               textColor="neutral600"
                               variant="pi"
                               ellipsis

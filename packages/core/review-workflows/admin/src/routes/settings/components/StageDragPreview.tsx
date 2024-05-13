@@ -1,6 +1,6 @@
 import { Flex, Typography } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface StageDragPreviewType {
   name: string | null;

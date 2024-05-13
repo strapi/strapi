@@ -88,7 +88,7 @@ export const FormModalHeader = ({
             <AttributeIcon type={icon} />
           </Box>
           <Box paddingLeft={3}>
-            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+            <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
               {formatMessage({ id: headerId }, { name: displayName })}
             </Typography>
           </Box>

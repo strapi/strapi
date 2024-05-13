@@ -1,7 +1,8 @@
 /* eslint-disable check-file/filename-naming-convention */
 
+import { Cloud } from '@strapi/icons';
+
 import { Initializer } from './components/Initializer';
-import { PluginIcon } from './components/PluginIcon';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
@@ -16,7 +17,7 @@ export default {
     if (backendURL?.includes('localhost')) {
       app.addMenuLink({
         to: `plugins/${pluginId}`,
-        icon: PluginIcon,
+        icon: Cloud,
         intlLabel: {
           id: `${pluginId}.plugin.name`,
           defaultMessage: name,

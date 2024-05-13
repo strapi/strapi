@@ -1,5 +1,5 @@
-import { useForm, BackButton } from '@strapi/admin/strapi-admin';
-import { Button, HeaderLayout } from '@strapi/design-system';
+import { useForm, BackButton, Layouts } from '@strapi/admin/strapi-admin';
+import { Button } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { capitalise } from '../../../utils/strings';
@@ -18,7 +18,7 @@ const Header = ({ name }: HeaderProps) => {
   const isSubmitting = useForm('Header', (state) => state.isSubmitting);
 
   return (
-    <HeaderLayout
+    <Layouts.Header
       navigationAction={<BackButton />}
       primaryAction={
         <Button size="S" disabled={!modified} type="submit" loading={isSubmitting}>

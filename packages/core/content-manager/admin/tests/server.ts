@@ -190,6 +190,28 @@ export const handlers: RequestHandler[] = [
       );
     }
   ),
+  rest.post(
+    '/content-manager/collection-types/:uid/actions/bulkUnpublish',
+    async (req, res, ctx) => {
+      const { documentIds } = await req.json();
+
+      if (documentIds.length === 2) {
+        return res(
+          ctx.status(200),
+          ctx.json({
+            count: 2,
+          })
+        );
+      }
+
+      return res(
+        ctx.status(404),
+        ctx.json({
+          error: new errors.NotFoundError('Document not found'),
+        })
+      );
+    }
+  ),
   rest.delete('/content-manager/:collectionType/:uid/:id', (req, res, ctx) => {
     const { id } = req.params;
 
@@ -200,6 +222,25 @@ export const handlers: RequestHandler[] = [
           documentId: id,
           id: 1,
           title: 'test',
+        })
+      );
+    }
+
+    return res(
+      ctx.status(404),
+      ctx.json({
+        error: new errors.NotFoundError('Document not found'),
+      })
+    );
+  }),
+  rest.post('/content-manager/collection-types/:uid/actions/bulkDelete', async (req, res, ctx) => {
+    const { documentIds } = await req.json();
+
+    if (documentIds.length === 2) {
+      return res(
+        ctx.status(200),
+        ctx.json({
+          count: 2,
         })
       );
     }

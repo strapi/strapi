@@ -15,9 +15,17 @@ module.exports = {
       type: 'string',
       private: true,
     },
+    name_hidden: {
+      type: 'string',
+      hidden: true,
+    },
     name_non_searchable: {
       type: 'string',
       searchable: false,
+    },
+    name_non_writable: {
+      type: 'string',
+      writable: false,
     },
     password: {
       type: 'password',

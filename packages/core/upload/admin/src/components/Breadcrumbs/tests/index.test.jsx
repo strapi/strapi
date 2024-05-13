@@ -34,7 +34,7 @@ const defaultBreadcrumbs = [
 const setup = (props) => ({
   user: userEvent.setup(),
   ...renderRTL(
-    <Breadcrumbs breadcrumbs={defaultBreadcrumbs} label="Navigation" as="nav" {...props} />,
+    <Breadcrumbs breadcrumbs={defaultBreadcrumbs} label="Navigation" tag="nav" {...props} />,
     {
       wrapper: ({ children }) => (
         <QueryClientProvider client={queryClient}>
