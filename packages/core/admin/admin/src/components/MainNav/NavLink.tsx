@@ -81,7 +81,6 @@ const BadgeImpl = ({ children, label, ...props }: NavLink.NavBadgeProps) => {
   return (
     <CustomBadge
       position="absolute"
-      width="2.3rem"
       top="-0.8rem"
       left="1.7rem"
       aria-label={label}

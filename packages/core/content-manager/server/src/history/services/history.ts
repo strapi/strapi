@@ -50,7 +50,6 @@ const createHistoryService = ({ strapi }: { strapi: Core.Strapi }) => {
         }),
         serviceUtils.getLocaleDictionary(),
       ]);
-
       const populateEntryRelations = async (
         entry: HistoryVersionQueryResult
       ): Promise<CreateHistoryVersion['data']> => {

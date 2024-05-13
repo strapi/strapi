@@ -1,6 +1,12 @@
 import * as React from 'react';
 
-import { useQueryParams, Table, useTable } from '@strapi/admin/strapi-admin';
+import {
+  useQueryParams,
+  Table,
+  useTable,
+  getYupValidationErrors,
+  FormErrors,
+} from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -30,7 +36,7 @@ import {
 } from '../../../../services/documents';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
-import { getInnerErrors, createYupSchema } from '../../../../utils/validation';
+import { createYupSchema } from '../../../../utils/validation';
 import { DocumentStatus } from '../../../EditView/components/DocumentStatus';
 
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
@@ -46,7 +52,7 @@ const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
  * -----------------------------------------------------------------------------------------------*/
 
 interface EntryValidationTextProps {
-  validationErrors?: Record<string, MessageDescriptor>;
+  validationErrors?: FormErrors;
   isPublished?: boolean;
 }
 
@@ -59,19 +65,12 @@ const EntryValidationText = ({
   if (validationErrors) {
     const validationErrorsMessages = Object.entries(validationErrors)
       .map(([key, value]) => {
-        if (typeof value.id === 'string' && typeof value.defaultMessage === 'string') {
-          return formatMessage(
-            { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
-            { field: key }
-          );
-        }
-
         return formatMessage(
           {
-            // @ts-expect-error @TODO: validate return type is a ValidationError and message should be a string, instead we receive an object some times
-            id: `${value.defaultMessage.id}.withField`,
-            // @ts-expect-error - read above
-            defaultMessage: value.defaultMessage.defaultMessage,
+            // @ts-expect-error - test
+            id: `${value.id}.withField`,
+            // @ts-expect-error - test
+            defaultMessage: value.defaultMessage,
           },
           { field: key }
         );
@@ -440,18 +439,15 @@ const PublishAction: BulkActionComponent = ({ documents }) => {
   const { rows, validationErrors } = React.useMemo(() => {
     if (data.length > 0 && schema) {
       const validate = createYupSchema(schema.attributes, components);
-      const validationErrors: Record<
-        TableRow['documentId'],
-        Record<string, MessageDescriptor>
-      > = {};
-      const rows = data.map((entry) => {
+      const validationErrors: Record<TableRow['documentId'], FormErrors> = {};
+      const rows = data.map((entry: Document) => {
         try {
           validate.validateSync(entry, { abortEarly: false });
 
           return entry;
         } catch (e) {
           if (e instanceof ValidationError) {
-            validationErrors[entry.documentId] = getInnerErrors(e);
+            validationErrors[entry.documentId] = getYupValidationErrors(e);
           }
 
           return entry;

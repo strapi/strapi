@@ -4,6 +4,8 @@
  * but should still export the same things.
  */
 
+export { buildValidParams } from './utils/api';
+
 export { useDocument as unstable_useDocument } from './hooks/useDocument';
 export { useDocumentActions as unstable_useDocumentActions } from './hooks/useDocumentActions';
 export { useDocumentLayout as unstable_useDocumentLayout } from './hooks/useDocumentLayout';

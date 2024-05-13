@@ -34,4 +34,4 @@ const GridLayout = ({ size, children }: GridLayoutProps) => {
 };
 
 export { GridLayout };
-export type { GridColSize };
+export type { GridLayoutProps, GridColSize };

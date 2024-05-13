@@ -11,6 +11,7 @@ describe('useDocumentActions', () => {
 
     expect(result.current).toEqual({
       autoClone: expect.any(Function),
+      publishMany: expect.any(Function),
       clone: expect.any(Function),
       create: expect.any(Function),
       discard: expect.any(Function),
@@ -18,7 +19,6 @@ describe('useDocumentActions', () => {
       deleteMany: expect.any(Function),
       getDocument: expect.any(Function),
       publish: expect.any(Function),
-      publishMany: expect.any(Function),
       update: expect.any(Function),
       unpublish: expect.any(Function),
       unpublishMany: expect.any(Function),

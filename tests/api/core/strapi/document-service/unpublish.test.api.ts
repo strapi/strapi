@@ -61,5 +61,7 @@ describe('Document Service', () => {
         expect(article.locale).not.toBe('en');
       });
     });
+
+    it.todo('unpublish multiple locales of a document');
   });
 });

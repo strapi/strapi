@@ -1,9 +1,10 @@
 import { groupBy, pick } from 'lodash/fp';
 
-import { contentTypes } from '@strapi/utils';
+import { async, contentTypes, traverseEntity } from '@strapi/utils';
 import type { Core, UID, Modules } from '@strapi/types';
 
 import type { DocumentMetadata } from '../../../shared/contracts/collection-types';
+import { getValidatableFieldsPopulate } from './utils/populate';
 
 export interface DocumentVersion {
   id: number;
@@ -23,7 +24,15 @@ const AVAILABLE_STATUS_FIELDS = [
   'updatedBy',
   'status',
 ];
-const AVAILABLE_LOCALES_FIELDS = ['id', 'locale', 'updatedAt', 'createdAt', 'status'];
+const AVAILABLE_LOCALES_FIELDS = [
+  'id',
+  'locale',
+  'updatedAt',
+  'createdAt',
+  'status',
+  'publishedAt',
+  'documentId',
+];
 
 const CONTENT_MANAGER_STATUS = {
   PUBLISHED: 'published',
@@ -67,10 +76,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
   /**
    * Returns available locales of a document for the current status
    */
-  getAvailableLocales(
+  async getAvailableLocales(
     uid: UID.ContentType,
     version: DocumentVersion,
-    allVersions: DocumentVersion[]
+    allVersions: DocumentVersion[],
+    validatableFields: string[] = []
   ) {
     // Group all versions by locale
     const versionsByLocale = groupBy('locale', allVersions);
@@ -79,26 +89,57 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     delete versionsByLocale[version.locale];
 
     // For each locale, get the ones with the same status
-    return (
-      Object.values(versionsByLocale)
-        .map((localeVersions: DocumentVersion[]) => {
-          // There will not be a draft and a version counterpart if the content type does not have draft and publish
-          if (!contentTypes.hasDraftAndPublish(strapi.getModel(uid))) {
-            return pick(AVAILABLE_LOCALES_FIELDS, localeVersions[0]);
+    // There will not be a draft and a version counterpart if the content
+    // type does not have draft and publish
+    const model = strapi.getModel(uid);
+    const keysToKeep = [...AVAILABLE_LOCALES_FIELDS, ...validatableFields];
+
+    const traversalFunction = async (localeVersion: DocumentVersion) =>
+      traverseEntity(
+        ({ key }, { remove }) => {
+          if (keysToKeep.includes(key)) {
+            // Keep the value if it is a field to pick
+            return;
           }
 
-          const draftVersion = localeVersions.find((v) => v.publishedAt === null);
-          const otherVersions = localeVersions.filter((v) => v.id !== draftVersion?.id);
+          // Otherwise remove this key from the data
+          remove(key);
+        },
+        { schema: model, getModel: strapi.getModel.bind(strapi) },
+        // @ts-expect-error fix types DocumentVersion incompatible with Data
+        localeVersion
+      );
 
-          if (!draftVersion) return;
+    const mappingResult = await async.map(
+      Object.values(versionsByLocale),
+      async (localeVersions: DocumentVersion[]) => {
+        const mappedLocaleVersions: DocumentVersion[] = await async.map(
+          localeVersions,
+          traversalFunction
+        );
 
-          return {
-            ...pick(AVAILABLE_LOCALES_FIELDS, draftVersion),
-            status: this.getStatus(draftVersion, otherVersions as any),
-          };
-        })
+        if (!contentTypes.hasDraftAndPublish(model)) {
+          return mappedLocaleVersions[0];
+        }
+
+        const draftVersion = mappedLocaleVersions.find((v) => v.publishedAt === null);
+        const otherVersions = mappedLocaleVersions.filter((v) => v.id !== draftVersion?.id);
+
+        if (!draftVersion) {
+          return;
+        }
+
+        return {
+          ...draftVersion,
+          status: this.getStatus(draftVersion, otherVersions as any),
+        };
+      }
+    );
+
+    return (
+      mappingResult
         // Filter just in case there is a document with no drafts
-        .filter(Boolean)
+        .filter(Boolean) as unknown as DocumentMetadata['availableLocales']
     );
   },
 
@@ -176,17 +217,23 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     return isDraftModified ? CONTENT_MANAGER_STATUS.MODIFIED : CONTENT_MANAGER_STATUS.PUBLISHED;
   },
 
+  // TODO is it necessary to return metadata on every page of the CM
+  // We could refactor this so the locales are only loaded when they're
+  // needed. e.g. in the bulk locale action modal.
   async getMetadata(
     uid: UID.ContentType,
     version: DocumentVersion,
     { availableLocales = true, availableStatus = true }: GetMetadataOptions = {}
   ) {
-    // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if i18n is disabled
-    // TODO: Sanitize createdBy
+    // TODO: Ignore publishedAt if availableStatus=false, and ignore locale if
+    // i18n is disabled
+    const populate = getValidatableFieldsPopulate(uid);
     const versions = await strapi.db.query(uid).findMany({
       where: { documentId: version.documentId },
-      select: ['createdAt', 'updatedAt', 'locale', 'publishedAt', 'documentId'],
       populate: {
+        // Populate only fields that require validation for bulk locale actions
+        ...populate,
+        // NOTE: creator fields are selected in this way to avoid exposing sensitive data
         createdBy: {
           select: ['id', 'firstname', 'lastname', 'email'],
         },
@@ -197,7 +244,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     });
 
     const availableLocalesResult = availableLocales
-      ? this.getAvailableLocales(uid, version, versions)
+      ? await this.getAvailableLocales(uid, version, versions, Object.keys(populate))
       : [];
 
     const availableStatusResult = availableStatus
@@ -220,7 +267,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     document: DocumentVersion,
     opts: GetMetadataOptions = {}
   ) {
-    if (!document) return document;
+    if (!document) {
+      return document;
+    }
 
     const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(uid));
 
@@ -231,7 +280,6 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
 
     const meta = await this.getMetadata(uid, document, opts);
 
-    // TODO: Sanitize output of metadata
     return {
       data: {
         ...document,

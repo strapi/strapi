@@ -64,6 +64,7 @@ interface MenuItem {
   Component: React.LazyExoticComponent<React.ComponentType>;
   exact?: boolean;
   lockIcon?: boolean;
+  position?: number;
 }
 
 interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCount'> {

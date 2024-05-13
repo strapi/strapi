@@ -156,7 +156,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async deleteMany(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
-      opts: DocServiceParams<'findMany'>
+      opts: DocServiceParams<'findMany'> & { locale?: string } = {}
     ) {
       const deletedEntries = await strapi.db.transaction(async () => {
         return Promise.all(documentIds.map(async (id) => this.delete(id, uid, opts)));
@@ -176,29 +176,18 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .publish({ ...params, documentId: id })
-        .then((result) => result?.entries.at(0));
+        .then((result) => result?.entries);
     },
 
-    async publishMany(
-      documentIds: Modules.Documents.ID[],
-      uid: UID.ContentType,
-      opts: Omit<DocServiceParams<'publish'>, 'documentId'> = {} as any
-    ) {
-      const publishedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(
-          documentIds.map((id) =>
-            strapi
-              .documents(uid)
-              .publish({ ...opts, documentId: id })
-              .then((result) => result?.entries)
-          )
+    async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
+      return strapi.db.transaction(async () => {
+        const results = await Promise.all(
+          documentIds.map((documentId) => this.publish(documentId, uid, { locale }))
         );
+
+        const publishedEntitiesCount = results.flat().filter(Boolean).length;
+        return publishedEntitiesCount;
       });
-
-      const publishedEntitiesCount = publishedEntries.flat().filter(Boolean).length;
-
-      // Return the number of published entities
-      return { count: publishedEntitiesCount };
     },
 
     async unpublishMany(
@@ -263,13 +252,14 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
           `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
         );
       }
+
       return sumDraftCounts(document, uid);
     },
 
     async countManyEntriesDraftRelations(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
-      locale: string
+      locale: string | string[]
     ) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
@@ -277,15 +267,20 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         return 0;
       }
 
-      const documents = await strapi.documents(uid).findMany({
+      let localeFilter = {};
+      if (locale) {
+        localeFilter = Array.isArray(locale) ? { locale: { $in: locale } } : { locale };
+      }
+
+      const entities = await strapi.db.query(uid).findMany({
         populate,
-        filters: {
-          documentId: documentIds,
+        where: {
+          documentId: { $in: documentIds },
+          ...localeFilter,
         },
-        locale,
       });
 
-      const totalNumberDraftRelations: number = documents!.reduce(
+      const totalNumberDraftRelations: number = entities!.reduce(
         (count: number, entity: Document) => sumDraftCounts(entity, uid) + count,
         0
       );

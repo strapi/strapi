@@ -88,7 +88,7 @@ interface NotificationOptions {
 interface ModalOptions {
   type: 'modal';
   title: string;
-  content: React.ReactNode;
+  content: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
   footer: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
   onClose?: () => void;
 }
@@ -438,7 +438,7 @@ const DocumentActionModal = ({
   title,
   onClose,
   footer: Footer,
-  content,
+  content: Content,
   onModalClose,
 }: DocumentActionModalProps) => {
   const id = React.useId();
@@ -462,7 +462,9 @@ const DocumentActionModal = ({
           {title}
         </Typography>
       </ModalHeader>
-      <ModalBody>{content}</ModalBody>
+      <ModalBody>
+        {typeof Content === 'function' ? <Content onClose={handleClose} /> : Content}
+      </ModalBody>
       <Box
         paddingTop={4}
         paddingBottom={4}

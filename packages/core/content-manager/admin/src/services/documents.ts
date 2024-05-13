@@ -289,10 +289,7 @@ const documentApi = contentManagerApi.injectEndpoints({
     }),
     publishManyDocuments: builder.mutation<
       BulkPublish.Response,
-      Pick<BulkPublish.Params, 'model'> &
-        BulkPublish.Request['body'] & {
-          params?: BulkPublish.Request['query'];
-        }
+      BulkPublish.Params & BulkPublish.Request['body'] & { params?: BulkPublish.Request['query'] }
     >({
       query: ({ model, params, ...body }) => ({
         url: `/content-manager/collection-types/${model}/actions/bulkPublish`,

@@ -47,7 +47,8 @@ const DEFAULT_UNEXPECTED_ERROR_MSG = {
   defaultMessage: 'An error occurred, please try again',
 } satisfies MessageDescriptor;
 
-type OperationResponse<TResponse extends { data: any; meta: any; error?: any }> =
+type OperationResponse<TResponse extends { data: any; meta?: any; error?: any }> =
+  | Pick<TResponse, 'data'>
   | Pick<TResponse, 'data' | 'meta'>
   | { error: BaseQueryError | SerializedError };
 
@@ -372,29 +373,24 @@ const useDocumentActions: UseDocumentActions = () => {
   const publishMany: IUseDocumentActs['publishMany'] = React.useCallback(
     async ({ model, documentIds, params }) => {
       try {
-        trackUsage('willBulkPublishEntries');
+        // TODO Confirm tracking events for bulk publish?
 
         const res = await publishManyDocuments({
           model,
           documentIds,
           params,
         });
-
         if ('error' in res) {
           toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
-
           return { error: res.error };
         }
 
-        trackUsage('didBulkPublishEntries');
-
         toggleNotification({
           type: 'success',
-          title: formatMessage({
-            id: getTranslation('success.records.publish'),
-            defaultMessage: 'Successfully published.',
+          message: formatMessage({
+            id: getTranslation('success.record.publish'),
+            defaultMessage: 'Published document',
           }),
-          message: '',
         });
 
         return res.data;
@@ -403,13 +399,16 @@ const useDocumentActions: UseDocumentActions = () => {
           type: 'danger',
           message: formatMessage(DEFAULT_UNEXPECTED_ERROR_MSG),
         });
-
-        trackUsage('didNotBulkPublishEntries');
-
         throw err;
       }
     },
-    [trackUsage, publishManyDocuments, toggleNotification, formatMessage, formatAPIError]
+    [
+      // trackUsage,
+      publishManyDocuments,
+      toggleNotification,
+      formatMessage,
+      formatAPIError,
+    ]
   );
 
   const [updateDocument] = useUpdateDocumentMutation();

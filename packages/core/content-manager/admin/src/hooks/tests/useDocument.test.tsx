@@ -93,13 +93,7 @@ describe('useDocument', () => {
       })
     ).toMatchInlineSnapshot(`
       {
-        "postal_code": {
-          "defaultMessage": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
-          "id": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
-          "values": {
-            "typeError": undefined,
-          },
-        },
+        "postal_code": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
       }
     `);
   });

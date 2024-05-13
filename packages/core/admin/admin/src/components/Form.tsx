@@ -228,18 +228,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           return { data };
         } catch (err) {
           if (isErrorYupValidationError(err)) {
-            let errors: FormErrors = {};
-
-            if (err.inner) {
-              if (err.inner.length === 0) {
-                return setIn(errors, err.path!, err.message);
-              }
-              for (const error of err.inner) {
-                if (!getIn(errors, error.path!)) {
-                  errors = setIn(errors, error.path!, error.message);
-                }
-              }
-            }
+            const errors = getYupValidationErrors(err);
 
             if (shouldSetErrors) {
               setErrors(errors);
@@ -469,6 +458,31 @@ const isErrorYupValidationError = (err: any): err is Yup.ValidationError =>
   'name' in err &&
   typeof err.name === 'string' &&
   err.name === 'ValidationError';
+
+/* -------------------------------------------------------------------------------------------------
+ * getYupValidationErrors
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @description handy utility to convert a yup validation error into a form
+ * error object. To be used elsewhere.
+ */
+const getYupValidationErrors = (err: Yup.ValidationError): FormErrors => {
+  let errors: FormErrors = {};
+
+  if (err.inner) {
+    if (err.inner.length === 0) {
+      return setIn(errors, err.path!, err.message);
+    }
+    for (const error of err.inner) {
+      if (!getIn(errors, error.path!)) {
+        errors = setIn(errors, error.path!, error.message);
+      }
+    }
+  }
+
+  return errors;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * reducer
@@ -777,8 +791,9 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   return null;
 };
 
-export { Form, Blocker, useField, useForm };
+export { Form, Blocker, useField, useForm, getYupValidationErrors };
 export type {
+  FormErrors,
   FormHelpers,
   FormProps,
   FormValues,
