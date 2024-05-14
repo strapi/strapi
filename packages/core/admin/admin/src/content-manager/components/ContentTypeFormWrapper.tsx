@@ -88,7 +88,13 @@ const ContentTypeFormWrapper = ({
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
   const { push, replace } = useHistory();
-  const [{ query, rawQuery }] = useQueryParams();
+  const [{ query, rawQuery }] = useQueryParams<{
+    plugins?: {
+      i18n?: {
+        locale?: string;
+      };
+    };
+  }>();
   const dispatch = useTypedDispatch();
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useTypedSelector((state) => state['content-manager_editViewCrudReducer']);
@@ -210,7 +216,7 @@ const ContentTypeFormWrapper = ({
 
     // This is needed in order to reset the form when the query changes
     const init = async () => {
-      dispatch(getData());
+      await dispatch(getData());
       dispatch(initForm(rawQuery));
     };
 
@@ -252,8 +258,12 @@ const ContentTypeFormWrapper = ({
       try {
         trackUsage('willDeleteEntry', trackerProperty);
 
+        const locale = query?.plugins?.i18n?.locale;
+        const params = isSingleType && locale ? { locale } : {};
+
         const { data } = await del<Contracts.CollectionTypes.Delete.Response>(
-          `/content-manager/${collectionType}/${slug}/${id}`
+          `/content-manager/${collectionType}/${slug}/${id}`,
+          { params }
         );
 
         toggleNotification({

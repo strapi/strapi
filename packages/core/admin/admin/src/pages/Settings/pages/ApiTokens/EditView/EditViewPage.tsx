@@ -201,8 +201,8 @@ export const EditView = () => {
       if (isCreating) {
         const res = await createToken({
           ...body,
-          // in case a token has a lifespan of "unlimited" the API only accepts zero as a number
-          lifespan: body.lifespan === '0' ? parseInt(body.lifespan) : null,
+          // lifespan must be "null" for unlimited (0 would mean instantly expired and isn't accepted)
+          lifespan: body?.lifespan || null,
           permissions: body.type === 'custom' ? state.selectedActions : null,
         });
 
@@ -338,7 +338,7 @@ export const EditView = () => {
             name: apiToken?.name || '',
             description: apiToken?.description || '',
             type: apiToken?.type,
-            lifespan: apiToken?.lifespan ? apiToken.lifespan.toString() : apiToken?.lifespan,
+            lifespan: apiToken?.lifespan,
           }}
           enableReinitialize
           onSubmit={(body, actions) => handleSubmit(body, actions)}

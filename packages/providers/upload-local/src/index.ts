@@ -15,6 +15,7 @@ interface File {
   ext?: string;
   mime: string;
   size: number;
+  sizeInBytes: number;
   url: string;
   previewUrl?: string;
   path?: string;

@@ -137,7 +137,13 @@ export const App = ({ authLogo, menuLogo, showReleaseNotification, showTutorials
     [uuid, telemetryPropertiesQuery.data]
   );
 
-  if (initQuery.isLoading) {
+  /**
+   * `routes` will only be an array if EE mode is activated,
+   * therefore we need to ensure the lazy loading of EE routes
+   * has been complete otherwise the SSO repsonse URL will not be
+   * caught by the component and you won't be able to login with it.
+   */
+  if (initQuery.isLoading || (Array.isArray(routes) && routes.length === 0)) {
     return <LoadingIndicatorPage />;
   }
 
