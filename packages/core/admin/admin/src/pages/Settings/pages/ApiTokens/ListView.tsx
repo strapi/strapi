@@ -15,7 +15,6 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
-import { useOnce } from '../../../../hooks/useOnce';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { useDeleteAPITokenMutation, useGetAPITokensQuery } from '../../../../services/apiTokens';
 import { API_TOKEN_TYPE } from '../../components/Tokens/constants';
@@ -83,11 +82,11 @@ export const ListView = () => {
     label: formatMessage(header.label),
   }));
 
-  useOnce(() => {
+  React.useEffect(() => {
     trackUsage('willAccessTokenList', {
       tokenType: API_TOKEN_TYPE,
     });
-  });
+  }, [trackUsage]);
 
   const { data: apiTokens = [], isLoading, error } = useGetAPITokensQuery();
 

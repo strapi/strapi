@@ -21,7 +21,7 @@ import {
 
 import type { Schema } from '@strapi/types';
 
-const iconByTypes: Record<Schema.Attribute.Kind, React.ReactElement> = {
+const iconByTypes: Record<Schema.Attribute.Kind, React.ReactElement<any>> = {
   biginteger: <NumberField />,
   boolean: <BooleanField />,
   date: <DateField />,

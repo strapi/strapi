@@ -102,7 +102,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
   const fetchClient = useFetchClient();
   const { put, post, del } = fetchClient;
 
-  const formatMessageRef = useRef<any>();
+  const formatMessageRef = useRef<any>(undefined);
   formatMessageRef.current = formatMessage;
   const isInDevelopmentMode = autoReload;
 
@@ -112,7 +112,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     ? get(contentTypeMatch, 'params.uid', null)
     : get(componentMatch, 'params.componentUid', null);
 
-  const getDataRef = useRef<any>();
+  const getDataRef = useRef<any>(undefined);
   const endPoint = isInContentTypeView ? 'content-types' : 'components';
 
   getDataRef.current = async () => {

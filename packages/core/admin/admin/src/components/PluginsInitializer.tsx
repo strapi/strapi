@@ -11,14 +11,10 @@ import { StrapiAppContextValue, useStrapiApp } from '../features/StrapiApp';
  */
 const PluginsInitializer = ({ children }: { children: React.ReactNode }) => {
   const appPlugins = useStrapiApp('PluginsInitializer', (state) => state.plugins);
-  const [{ plugins }, dispatch] = React.useReducer<React.Reducer<State, Action>, State>(
-    reducer,
-    initialState,
-    () => init(appPlugins)
-  );
-  const setPlugin = React.useRef((pluginId: string) => {
+  const [{ plugins }, dispatch] = React.useReducer(reducer, initialState, () => init(appPlugins));
+  const setPlugin = React.useCallback((pluginId: string) => {
     dispatch({ type: 'SET_PLUGIN_READY', pluginId });
-  });
+  }, []);
 
   const hasApluginNotReady = Object.keys(plugins).some(
     (plugin) => plugins[plugin].isReady === false
@@ -47,26 +43,26 @@ const PluginsInitializer = ({ children }: { children: React.ReactNode }) => {
    *
    */
 
-  if (hasApluginNotReady) {
-    const initializers = Object.keys(plugins).reduce((acc, current) => {
-      const InitializerComponent = plugins[current].initializer;
+  // if (hasApluginNotReady) {
+  //   const initializers = Object.keys(plugins).reduce((acc, current) => {
+  //     const InitializerComponent = plugins[current].initializer;
 
-      if (InitializerComponent) {
-        const key = plugins[current].pluginId;
+  //     if (InitializerComponent) {
+  //       const key = plugins[current].pluginId;
 
-        acc.push(<InitializerComponent key={key} setPlugin={setPlugin.current} />);
-      }
+  //       acc.push(<InitializerComponent key={key} setPlugin={setPlugin} />);
+  //     }
 
-      return acc;
-    }, [] as React.ReactNode[]);
+  //     return acc;
+  //   }, [] as React.ReactNode[]);
 
-    return (
-      <>
-        {initializers}
-        <Page.Loading />
-      </>
-    );
-  }
+  //   return (
+  //     <>
+  //       {initializers}
+  //       <Page.Loading />
+  //     </>
+  //   );
+  // }
 
   return children;
 };

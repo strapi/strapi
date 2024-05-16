@@ -93,7 +93,6 @@ const DescriptionComponentRenderer = <Props, Description>({
      * the `ids` will most likely be stable unless we get new actions, but we can't respond to the Description
      * Component changing the ref data in any other way.
      */
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [ids, tick]
   );
 
@@ -175,7 +174,6 @@ const useShallowCompareMemoize = <T,>(value: T): Array<T | undefined> => {
 };
 
 const useShallowCompareEffect = (callback: React.EffectCallback, dependencies?: unknown) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps -- the linter isn't able to see that deps are properly handled here
   React.useEffect(callback, useShallowCompareMemoize(dependencies));
 };
 

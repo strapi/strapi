@@ -42,9 +42,6 @@
   },
   "devDependencies": {
     "@strapi/strapi": "5.0.0-beta.7",
-    "@types/react": "18.2.66",
-    "@types/react-dom": "18.2.22",
-    "@types/styled-components": "5.1.34",
     "eslint-config-custom": "5.0.0-beta.7",
     "react": "18.2.0",
     "react-dom": "18.2.0",

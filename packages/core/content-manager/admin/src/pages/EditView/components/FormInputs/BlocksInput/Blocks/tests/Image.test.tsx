@@ -35,7 +35,7 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
 const mockMediaLibraryTitle = 'dialog component';
 const mockMediaLibrarySubmitButton = 'upload images';
 
-const render = (ui: ReactElement, { baseEditor }: { baseEditor?: Editor } = {}) =>
+const render = (ui: ReactElement<any>, { baseEditor }: { baseEditor?: Editor } = {}) =>
   renderRTL(ui, {
     renderOptions: {
       wrapper: ({ children }) => <Wrapper baseEditor={baseEditor}>{children}</Wrapper>,

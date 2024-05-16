@@ -446,7 +446,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
   }
 ) as <TFormValues extends FormValues>(
   p: FormProps<TFormValues> & { ref?: React.Ref<HTMLFormElement> }
-) => React.ReactElement; // we've cast this because we need the generic to infer the type of the form values.
+) => React.ReactElement<any>; // we've cast this because we need the generic to infer the type of the form values.
 
 /**
  * @internal

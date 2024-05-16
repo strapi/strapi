@@ -606,11 +606,11 @@ const RelationsList = ({
       return setOverflow('top-bottom');
     };
 
-    const outerListRefCurrent = outerListRef?.current;
-
-    if (!isLoading && data.length > 0 && outerListRefCurrent) {
+    if (!isLoading && data.length > 0 && outerListRef?.current) {
       outerListRef.current.addEventListener('scroll', handleNativeScroll);
     }
+
+    const outerListRefCurrent = outerListRef?.current;
 
     return () => {
       if (outerListRefCurrent) {
@@ -902,6 +902,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
       }
     );
 
+  // @ts-expect-error – issue with react-dnd with react19 types
   const composedRefs = useComposedRefs<HTMLDivElement>(relationRef, dragRef);
 
   React.useEffect(() => {
@@ -912,6 +913,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
     <Box
       style={style}
       tag="li"
+      // @ts-expect-error – issue with react-dnd with react19 types
       ref={dropRef}
       aria-describedby={ariaDescribedBy}
       cursor={canDrag ? 'all-scroll' : 'default'}

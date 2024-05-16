@@ -14,7 +14,6 @@ import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
 import { useTracking } from '../../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
-import { useOnce } from '../../../../hooks/useOnce';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import {
   useDeleteTransferTokenMutation,
@@ -80,11 +79,11 @@ const ListView = () => {
     navigate({ search: qs.stringify({ sort: 'name:ASC' }, { encode: false }) });
   }, [navigate]);
 
-  useOnce(() => {
+  React.useEffect(() => {
     trackUsage('willAccessTokenList', {
       tokenType: TRANSFER_TOKEN_TYPE,
     });
-  });
+  }, [trackUsage]);
 
   const headers = tableHeaders.map((header) => ({
     ...header,

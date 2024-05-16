@@ -75,7 +75,9 @@
     "test:unit:watch": "run test:unit --watch"
   },
   "resolutions": {
-    "@types/koa": "2.13.4"
+    "@types/koa": "2.13.4",
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
@@ -94,9 +96,8 @@
     "@types/fs-extra": "11.0.4",
     "@types/git-url-parse": "9.0.3",
     "@types/prompts": "2.4.9",
-    "@types/react": "18.2.66",
-    "@types/react-dom": "18.2.22",
-    "@types/styled-components": "5.1.34",
+    "@types/react": "npm:types-react@beta",
+    "@types/react-dom": "npm:types-react-dom@beta",
     "@typescript-eslint/eslint-plugin": "6.7.3",
     "@typescript-eslint/parser": "6.7.3",
     "babel-eslint": "10.1.0",
@@ -119,6 +120,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^5.1.3",
     "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-compiler": "0.0.0-experimental-53bb89e-20240515",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-rxjs": "5.0.3",
     "eslint-plugin-testing-library": "6.0.2",

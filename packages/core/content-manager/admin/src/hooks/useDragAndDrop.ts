@@ -49,7 +49,7 @@ type UseDragAndDropReturn<E extends Element = HTMLElement> = [
     isOverDropTarget: boolean;
     direction: (typeof DIRECTIONS)[keyof typeof DIRECTIONS] | null;
   },
-  objectRef: React.RefObject<E>,
+  objectRef: React.RefObject<E | null>,
   dropRef: ConnectDropTarget,
   dragRef: ConnectDragSource,
   dragPreviewRef: ConnectDragPreview,

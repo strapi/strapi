@@ -446,7 +446,9 @@ const Component = ({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
+  // @ts-expect-error – issue with react-dnd with react19 types
   const composedAccordionRefs = useComposedRefs<HTMLButtonElement>(accordionRef, dragRef);
+  // @ts-expect-error – issue with react-dnd with react19 types
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
 
   return (

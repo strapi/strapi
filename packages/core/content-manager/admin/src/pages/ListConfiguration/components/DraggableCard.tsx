@@ -72,9 +72,11 @@ const DraggableCard = ({
     }
   }, [isDraggingSibling]);
 
+  // @ts-expect-error – issue with react-dnd with react19 types
   const composedRefs = useComposedRefs(dragRef, objectRef);
 
   return (
+    // @ts-expect-error – issue with react-dnd with react19 types
     <FieldWrapper ref={dropRef}>
       {isDragging && <CardDragPreview label={label} />}
       {!isDragging && isDraggingSibling && <CardDragPreview isSibling label={label} />}

@@ -100,7 +100,7 @@ const LabelAction = ({ title, icon }: LabelActionProps) => {
   return (
     <Span tag="span">
       <VisuallyHidden tag="span">{`(${formatMessage(title)})`}</VisuallyHidden>
-      {React.cloneElement(icon as React.ReactElement, {
+      {React.cloneElement(icon as React.ReactElement<any>, {
         'aria-hidden': true,
         focusable: false, // See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable
       })}

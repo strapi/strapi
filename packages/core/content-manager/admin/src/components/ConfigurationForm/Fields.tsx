@@ -337,6 +337,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef]);
 
+  // @ts-expect-error – issue with react-dnd with react19 types
   const composedRefs = useComposedRefs<HTMLSpanElement>(dragRef, objectRef);
 
   const handleRemoveField: React.MouseEventHandler<HTMLButtonElement> = (e) => {
@@ -344,6 +345,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
     onRemoveField(e);
   };
 
+  // @ts-expect-error – issue with react-dnd with react19 types
   const tempRefs = useComposedRefs<HTMLSpanElement>(dropRef, objectRef);
 
   if (!value) {
@@ -361,6 +363,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
         background="neutral100"
         hasRadius
         style={{ opacity: isDragging ? 0.5 : 1 }}
+        // @ts-expect-error – issue with react-dnd with react19 types
         ref={dropRef}
         gap={3}
         cursor="pointer"

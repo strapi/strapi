@@ -1,6 +1,7 @@
 module.exports = {
   parser: '@babel/eslint-parser',
   extends: ['@strapi/eslint-config/front/javascript'],
+  plugins: ['eslint-plugin-react-compiler'],
   env: {
     browser: true,
     commonjs: true,
@@ -27,6 +28,7 @@ module.exports = {
     },
   },
   rules: {
+    'react-compiler/react-compiler': 2,
     'prettier/prettier': 'off',
     'react/jsx-no-constructed-context-values': 'warn',
     'react/jsx-no-useless-fragment': 'warn',

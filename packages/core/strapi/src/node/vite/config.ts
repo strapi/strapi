@@ -1,6 +1,7 @@
 import type { InlineConfig, UserConfig } from 'vite';
 import browserslistToEsbuild from 'browserslist-to-esbuild';
-import react from '@vitejs/plugin-react-swc';
+import reactSwc from '@vitejs/plugin-react-swc';
+import react from '@vitejs/plugin-react';
 
 import { getUserConfig } from '../core/config';
 import { loadStrapiMonorepo } from '../core/monorepo';
@@ -10,6 +11,14 @@ import { buildFilesPlugin } from './plugins';
 
 const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
   const target = browserslistToEsbuild(ctx.target);
+
+  const USE_REACT_COMPILER = process.env.USE_REACT_COMPILER === 'true';
+
+  if (USE_REACT_COMPILER) {
+    ctx.logger.log('--------------------------');
+    ctx.logger.log('-- Using React Compiler --');
+    ctx.logger.log('--------------------------');
+  }
 
   return {
     root: ctx.cwd,
@@ -40,7 +49,12 @@ const resolveBaseConfig = async (ctx: BuildContext): Promise<InlineConfig> => {
       // https://react.dev/warnings/invalid-hook-call-warning#duplicate-react
       dedupe: ['react', 'react-dom', 'react-router-dom', 'styled-components'],
     },
-    plugins: [react(), buildFilesPlugin(ctx)],
+    plugins: [
+      USE_REACT_COMPILER
+        ? react({ babel: { plugins: ['babel-plugin-react-compiler', {}] } })
+        : reactSwc(),
+      buildFilesPlugin(ctx),
+    ],
   };
 };
 

@@ -19,7 +19,7 @@ interface EditorProps extends Omit<FieldValue, 'initialValue'>, Omit<InputProps,
   editorRef: React.MutableRefObject<EditorFromTextArea>;
   isPreviewMode?: boolean;
   isExpandMode?: boolean;
-  textareaRef: React.RefObject<HTMLTextAreaElement>;
+  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
 }
 
 const Editor = React.forwardRef<EditorApi, EditorProps>(

@@ -22,7 +22,6 @@ import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
 import { useTracking } from '../features/Tracking';
 import { useMenu } from '../hooks/useMenu';
-import { useOnce } from '../hooks/useOnce';
 import { useInformationQuery } from '../services/admin';
 import { hashAdminUserEmail } from '../utils/users';
 
@@ -100,9 +99,9 @@ const AdminLayout = () => {
    * and not at runtime for example when regenerating the permissions with the ctb
    * or with i18n
    */
-  useOnce(() => {
+  React.useEffect(() => {
     trackUsage('didAccessAuthenticatedAdministration');
-  });
+  }, [trackUsage]);
 
   // We don't need to wait for the release query to be fetched before rendering the plugins
   // however, we need the appInfos and the permissions

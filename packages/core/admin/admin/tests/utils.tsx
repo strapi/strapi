@@ -210,7 +210,7 @@ export interface RenderOptions {
  * for use of testing components within the Strapi Admin.
  */
 const render = (
-  ui: React.ReactElement,
+  ui: React.ReactElement<any>,
   { renderOptions, userEventOptions, initialEntries, providerOptions }: RenderOptions = {}
 ): RenderResult & { user: ReturnType<typeof userEvent.setup> } => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = renderOptions ?? {};

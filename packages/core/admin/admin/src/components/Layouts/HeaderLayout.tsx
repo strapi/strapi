@@ -139,8 +139,8 @@ HeaderLayout.displayName = 'HeaderLayout';
  */
 const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
   options?: IntersectionObserverInit
-): [containerRef: React.RefObject<TElement>, isVisible: boolean] => {
-  const containerRef = React.useRef<TElement>(null);
+): [containerRef: React.RefObject<TElement | null>, isVisible: boolean] => {
+  const containerRef = React.useRef<TElement | null>(null);
 
   const [isVisible, setIsVisible] = React.useState<boolean>(true);
 
@@ -153,7 +153,7 @@ const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
     const observer = new IntersectionObserver(callback, options);
 
     if (containerEl) {
-      observer.observe(containerRef.current);
+      observer.observe(containerRef.current as TElement);
     }
 
     return () => {
@@ -170,7 +170,7 @@ const useElementOnScreen = <TElement extends HTMLElement = HTMLElement>(
  * useResizeObserver: hook that observes the size of an element and calls a callback when it changes.
  */
 const useResizeObserver = (
-  sources: React.RefObject<HTMLElement> | React.RefObject<HTMLElement>[],
+  sources: React.RefObject<HTMLElement | null> | React.RefObject<HTMLElement | null>[],
   onResize: ResizeObserverCallback
 ) => {
   const handleResize = useCallbackRef(onResize);

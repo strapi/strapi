@@ -129,7 +129,9 @@
     "@strapi/upload": "5.0.0-beta.7",
     "@strapi/utils": "5.0.0-beta.7",
     "@types/nodemon": "1.19.6",
+    "@vitejs/plugin-react": "4.2.1",
     "@vitejs/plugin-react-swc": "3.6.0",
+    "babel-plugin-react-compiler": "0.0.0-experimental-c23de8d-20240515",
     "boxen": "5.1.2",
     "browserslist": "^4.23.0",
     "browserslist-to-esbuild": "1.2.0",
@@ -181,8 +183,8 @@
     "@types/webpack-bundle-analyzer": "4.7.0",
     "@types/webpack-hot-middleware": "2.25.9",
     "eslint-config-custom": "5.0.0-beta.7",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "rc",
+    "react-dom": "rc",
     "tsconfig": "5.0.0-beta.7"
   },
   "peerDependencies": {

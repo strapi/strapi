@@ -125,21 +125,27 @@ const checkRequiredDependencies = async ({
         // Intentional fall-through (variable will be left as null, throwing below)
       }
 
-      if (!minDeclaredVersion) {
-        errors.push(
-          `The declared dependency, ${dep.name} has an invalid version in package.json: ${dep.declaredVersion}`
-        );
-      } else if (!semver.satisfies(minDeclaredVersion, dep.wantedVersion)) {
-        /**
-         * The delcared version should be semver compatible with our required version
-         * of the dependency. If it's not, we should advise the user to change it.
-         */
-        logger.warn(
-          [
-            `Declared version of ${dep.name} (${minDeclaredVersion}) is not compatible with the version required by Strapi (${dep.wantedVersion}).`,
-            'You may experience issues, we recommend you change this.',
-          ].join(os.EOL)
-        );
+      const isBetaReact =
+        (dep.declaredVersion === 'next' || dep.declaredVersion === 'beta') &&
+        (dep.name === 'react' || dep.name === 'react-dom');
+
+      if (!isBetaReact) {
+        if (!minDeclaredVersion) {
+          errors.push(
+            `The declared dependency, ${dep.name} has an invalid version in package.json: ${dep.declaredVersion}`
+          );
+        } else if (!semver.satisfies(minDeclaredVersion, dep.wantedVersion)) {
+          /**
+           * The delcared version should be semver compatible with our required version
+           * of the dependency. If it's not, we should advise the user to change it.
+           */
+          logger.warn(
+            [
+              `Declared version of ${dep.name} (${minDeclaredVersion}) is not compatible with the version required by Strapi (${dep.wantedVersion}).`,
+              'You may experience issues, we recommend you change this.',
+            ].join(os.EOL)
+          );
+        }
       }
 
       const installedVersion = await getModuleVersion(dep.name, cwd);

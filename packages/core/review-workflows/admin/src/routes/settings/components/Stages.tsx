@@ -234,6 +234,7 @@ const Stage = ({
       type: DRAG_DROP_TYPES.STAGE,
     });
 
+  // @ts-expect-error – issue with react-dnd with react19 types
   const composedRef = useComposedRefs(stageRef, dropRef);
 
   React.useEffect(() => {
@@ -326,6 +327,7 @@ const Stage = ({
                       noBorder
                       tabIndex={0}
                       data-handler-id={handlerId}
+                      // @ts-expect-error – issue with react-dnd with react19 types
                       ref={dragRef}
                       label={formatMessage({
                         id: 'Settings.review-workflows.stage.drag',

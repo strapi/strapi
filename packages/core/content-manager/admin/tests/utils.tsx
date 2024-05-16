@@ -31,7 +31,7 @@ const storeConfig: ConfigureStoreOptions = {
 };
 
 const render = (
-  ui: React.ReactElement,
+  ui: React.ReactElement<any>,
   options: RenderOptions = {}
 ): ReturnType<typeof renderAdmin> =>
   renderAdmin(ui, {

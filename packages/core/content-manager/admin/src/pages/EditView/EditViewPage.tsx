@@ -29,7 +29,6 @@ import { DocumentRBAC, useDocumentRBAC } from '../../features/DocumentRBAC';
 import { type UseDocument, useDoc } from '../../hooks/useDocument';
 import { useDocumentLayout } from '../../hooks/useDocumentLayout';
 import { useLazyComponents } from '../../hooks/useLazyComponents';
-import { useOnce } from '../../hooks/useOnce';
 import { getTranslation } from '../../utils/translations';
 import { createYupSchema } from '../../utils/validation';
 
@@ -72,7 +71,7 @@ const EditViewPage = () => {
 
   const hasDraftAndPublished = schema?.options?.draftAndPublish ?? false;
 
-  useOnce(() => {
+  React.useEffect(() => {
     /**
      * We only ever want to fire the notification once otherwise
      * whenever the app re-renders it'll pop up regardless of
@@ -85,7 +84,7 @@ const EditViewPage = () => {
         timeout: 5000,
       });
     }
-  });
+  }, [location.state, toggleNotification]);
 
   const isLoadingActionsRBAC = useDocumentRBAC('EditViewPage', (state) => state.isLoading);
 

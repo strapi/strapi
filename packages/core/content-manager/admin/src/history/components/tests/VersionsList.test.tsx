@@ -14,7 +14,7 @@ const LocationDisplay = () => {
   return <span data-testid="location">{location.search}</span>;
 };
 
-const render = (ui: React.ReactElement) =>
+const render = (ui: React.ReactElement<any>) =>
   renderRTL(ui, {
     renderOptions: {
       wrapper({ children }) {

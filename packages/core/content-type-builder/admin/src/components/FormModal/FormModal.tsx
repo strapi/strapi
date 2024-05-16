@@ -104,7 +104,7 @@ export const FormModal = () => {
   const getCustomField = useStrapiApp('FormModal', (state) => state.customFields.get);
   const customField = getCustomField(customFieldUid);
 
-  const tabGroupRef = useRef<any>();
+  const tabGroupRef = useRef<any>(undefined);
 
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
@@ -147,8 +147,13 @@ export const FormModal = () => {
     modifiedData,
   } = reducerState;
 
-  const pathToSchema =
-    forTarget === 'contentType' || forTarget === 'component' ? [forTarget] : [forTarget, targetUid];
+  const pathToSchema = useMemo(
+    () =>
+      forTarget === 'contentType' || forTarget === 'component'
+        ? [forTarget]
+        : [forTarget, targetUid],
+    [forTarget, targetUid]
+  );
 
   useEffect(() => {
     if (isOpen) {
@@ -314,16 +319,23 @@ export const FormModal = () => {
     } else {
       dispatch({ type: RESET_PROPS });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     actionType,
+    allDataSchema,
     attributeName,
     attributeType,
     categoryName,
+    customField,
+    dispatch,
     dynamicZoneTarget,
     forTarget,
     isOpen,
     modalType,
+    pathToSchema,
+    setModifiedData,
+    sortedContentTypesList,
+    step,
+    trackUsage,
   ]);
 
   const isCreatingContentType = modalType === 'contentType';

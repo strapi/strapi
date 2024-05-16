@@ -1,6 +1,7 @@
 module.exports = {
   root: true,
   extends: ['@strapi/eslint-config/front/typescript'],
+  plugins: ['eslint-plugin-react-compiler'],
   overrides: [
     {
       files: ['**/*.test.[j|t]s', '**/*.test.[j|t]sx', '**/__mocks__/**/*'],
@@ -23,6 +24,7 @@ module.exports = {
     process: true,
   },
   rules: {
+    'react-compiler/react-compiler': 2,
     '@typescript-eslint/no-explicit-any': 'warn',
     /**
      * This causes problems with PropTypes, once we've removed PropTypes

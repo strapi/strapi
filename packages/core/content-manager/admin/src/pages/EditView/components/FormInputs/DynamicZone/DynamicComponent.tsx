@@ -127,6 +127,7 @@ const DynamicComponent = ({
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
   }, [dragPreviewRef, index]);
 
+  // @ts-expect-error – issue with react-dnd with react19 types
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
 
   const accordionActions = disabled ? null : (
@@ -151,6 +152,7 @@ const DynamicComponent = ({
         tabIndex={0}
         onClick={(e) => e.stopPropagation()}
         data-handler-id={handlerId}
+        // @ts-expect-error – issue with react-dnd with react19 types
         ref={dragRef}
         label={formatMessage({
           id: getTranslation('components.DragHandle-label'),

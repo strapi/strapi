@@ -173,6 +173,7 @@ const DragAndDropElement = ({
       },
     });
 
+  // @ts-expect-error – issue with react-dnd with react19 types
   const composedBoxRefs = useComposedRefs(blockRef, dropRef);
 
   // Set Drag direction before loosing state while dragging
@@ -205,6 +206,7 @@ const DragAndDropElement = ({
         <CloneDragItem dragHandleTopMargin={dragHandleTopMargin}>{children}</CloneDragItem>
       ) : (
         <DragItem
+          // @ts-expect-error – issue with react-dnd with react19 types
           ref={dragRef}
           data-handler-id={handlerId}
           gap={2}
