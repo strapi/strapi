@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useStore } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
@@ -187,11 +188,29 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
     [loginMutation]
   );
 
+  const store = useStore();
+
   const logout = React.useCallback(async () => {
     await logoutMutation();
+
+    /**
+     * This will reset all the API states in the store.
+     * Because it has to be managed per API slice, we
+     * look for all the API slices in the strapi app
+     * defined by ending with `Api` which we've standardised
+     * and manually create the resetApiState action.
+     */
+    Object.keys(store.getState() ?? {})
+      .filter((key) => key.endsWith('Api'))
+      .forEach((path) => {
+        store.dispatch({
+          type: `${path}/resetApiState`,
+        });
+      });
+
     clearStorage();
     navigate('/auth/login');
-  }, [clearStorage, logoutMutation, navigate]);
+  }, [clearStorage, logoutMutation, navigate, store]);
 
   const refetchPermissions = React.useCallback(async () => {
     if (!isUninitialized) {

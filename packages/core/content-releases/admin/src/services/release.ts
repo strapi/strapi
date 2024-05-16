@@ -49,7 +49,7 @@ type GetReleasesTabResponse = GetReleases.Response & {
 };
 
 const releaseApi = createApi({
-  reducerPath: pluginId,
+  reducerPath: 'contentReleasesApi',
   baseQuery: fetchBaseQuery,
   tagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease'],
   endpoints: (build) => {
