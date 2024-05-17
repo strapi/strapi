@@ -39,7 +39,7 @@ import {
 } from '@strapi/helper-plugin';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
-import { AxiosError } from 'axios';
+import { AxiosError, isAxiosError } from 'axios';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
@@ -425,7 +425,7 @@ const ListViewPage = ({
           message: { id: getTranslation('success.record.delete') },
         });
       } catch (err) {
-        if (err instanceof AxiosError) {
+        if (isAxiosError(err)) {
           toggleNotification({
             type: 'warning',
             message: formatAPIError(err),
@@ -554,7 +554,7 @@ const ListViewPage = ({
           });
         }
       } catch (err) {
-        if (err instanceof AxiosError) {
+        if (isAxiosError(err)) {
           const { prohibitedFields } = err.response?.data.error.details;
           setClonedEntryId(id);
           setProhibitedCloningFields(prohibitedFields);
