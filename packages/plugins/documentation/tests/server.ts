@@ -1,7 +1,5 @@
-'use strict';
-
-const { setupServer } = require('msw/node');
-const { rest } = require('msw');
+import { setupServer } from 'msw/node';
+import { rest } from 'msw';
 
 const handlers = [
   rest.get('*/getInfos', (req, res, ctx) => {
@@ -32,6 +30,4 @@ const handlers = [
 
 const server = setupServer(...handlers);
 
-module.exports = {
-  server,
-};
+export { server };

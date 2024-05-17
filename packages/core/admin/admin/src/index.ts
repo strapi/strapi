@@ -52,7 +52,6 @@ export { useAdminUsers } from './services/users';
 export type { StrapiApp, MenuItem, InjectionZoneComponent } from './StrapiApp';
 export type { Store } from './core/store/configure';
 export type { Plugin, PluginConfig } from './core/apis/Plugin';
-export type { FetchOptions, FetchResponse, FetchConfig } from './utils/getFetchClient';
 export type {
   SanitizedAdminUser,
   AdminUser,
@@ -66,7 +65,9 @@ export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
  * Utils
  */
 export { translatedErrors } from './utils/translatedErrors';
-export { getFetchClient, isFetchError, FetchError } from './utils/getFetchClient';
+export * from './utils/getFetchClient';
+export * from './utils/baseQuery';
+export * from './services/api';
 
 /**
  * Components

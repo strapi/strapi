@@ -55,6 +55,7 @@ import {
   releaseApi,
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
+import { isBaseQueryError } from '../utils/api';
 import { getTimezoneOffset } from '../utils/time';
 
 import { getBadgeProps } from './ReleasesPage';
@@ -216,7 +217,6 @@ const ReleaseDetailsLayout = ({
   const {
     data,
     isLoading: isLoadingDetails,
-    isError,
     error,
   } = useGetReleaseQuery(
     { id: releaseId! },
@@ -301,13 +301,14 @@ const ReleaseDetailsLayout = ({
     return <Page.Loading />;
   }
 
-  if (isError || !release) {
+  if ((isBaseQueryError(error) && 'code' in error) || !release) {
     return (
       <Navigate
         to=".."
         state={{
           errors: [
             {
+              // @ts-expect-error – TODO: fix this weird error flow
               code: error?.code,
             },
           ],
@@ -516,7 +517,6 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const {
     data: releaseData,
     isLoading: isReleaseLoading,
-    isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
   const {
@@ -598,14 +598,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const contentTypes = releaseMeta?.contentTypes || {};
   const components = releaseMeta?.components || {};
 
-  if (isReleaseError || !release) {
+  if (isBaseQueryError(releaseError) || !release) {
     const errorsArray = [];
-    if (releaseError) {
+    if (releaseError && 'code' in releaseError) {
       errorsArray.push({
         code: releaseError.code,
       });
     }
-    if (releaseActionsError) {
+    if (releaseActionsError && 'code' in releaseActionsError) {
       errorsArray.push({
         code: releaseActionsError.code,
       });
