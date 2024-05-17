@@ -397,7 +397,10 @@ const ContentTypeFormWrapper = ({
         } = await fetchClient.get<Contracts.CollectionTypes.CountDraftRelations.Response>(
           isSingleType
             ? `/content-manager/${collectionType}/${slug}/actions/countDraftRelations`
-            : `/content-manager/${collectionType}/${slug}/${id}/actions/countDraftRelations`
+            : `/content-manager/${collectionType}/${slug}/${id}/actions/countDraftRelations`,
+          {
+            params: validParams,
+          }
         );
         trackUsage('didCheckDraftRelations');
 
