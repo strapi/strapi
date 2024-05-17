@@ -1,0 +1,33 @@
+name: Update Browserslist database
+
+on:
+  schedule:
+    # runs twice a month, day 1 & day 15.
+    - cron: '0 2 1,15 * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-browserslist-database:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Configure git
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+      - name: Update Browserslist database and create PR if applies
+        uses: c2corg/browserslist-update-action@v2
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: browserslist-update
+          base_branch: main
+          commit_message: 'chore(deps): update Browserslist db'
+          title: 'chore(deps): update Browserslist db'
+          labels: 'pr: chore, source: dependencies'
+          reviewers: 'joshuaellis,simotae14,madhurisandbhor'
