@@ -181,8 +181,8 @@
     "@types/webpack-bundle-analyzer": "4.7.0",
     "@types/webpack-hot-middleware": "2.25.9",
     "eslint-config-custom": "5.0.0-beta.7",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "tsconfig": "5.0.0-beta.7"
   },
   "peerDependencies": {
