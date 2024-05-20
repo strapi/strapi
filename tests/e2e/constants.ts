@@ -1,5 +1,3 @@
-'use strict';
-
 export const {
   CUSTOM_TRANSFER_TOKEN_ACCESS_KEY,
 } = require('./app-template/template/src/constants');
