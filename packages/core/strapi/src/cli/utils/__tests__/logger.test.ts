@@ -23,7 +23,6 @@ describe('logger', () => {
   let mockLogger: jest.Mocked<Logger>;
 
   beforeEach(() => {
-    // Reset the mocks before each test
     jest.clearAllMocks();
 
     // Create a mock logger with jest.fn() methods
@@ -47,7 +46,6 @@ describe('logger', () => {
 
   describe('formatDiagnostic', () => {
     it('only creates a single logger', () => {
-      // Call formatDiagnostic to get the diagnostic reporter function
       const diagnosticReporter = formatDiagnostic('export');
 
       // Use the diagnostic reporter to log different levels of messages
