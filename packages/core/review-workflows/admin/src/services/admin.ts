@@ -8,7 +8,7 @@ type RolesResponse = { data: Roles };
 const adminApi = reviewWorkflowsApi.injectEndpoints({
   endpoints(builder) {
     return {
-      getRoles: builder.query<Roles, void>({
+      getAdminRoles: builder.query<Roles, void>({
         query: () => ({
           url: `/admin/roles`,
           method: 'GET',
@@ -21,7 +21,7 @@ const adminApi = reviewWorkflowsApi.injectEndpoints({
   },
 });
 
-const { useGetRolesQuery } = adminApi;
+const { useGetAdminRolesQuery } = adminApi;
 
-export { useGetRolesQuery };
+export { useGetAdminRolesQuery };
 export type { SanitizedAdminUser, Roles };

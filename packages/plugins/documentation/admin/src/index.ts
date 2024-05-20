@@ -2,7 +2,6 @@ import { Information } from '@strapi/icons';
 
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
-import { api } from './services/api';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 // eslint-disable-next-line import/no-default-export
@@ -21,12 +20,6 @@ export default {
         return App;
       },
       position: 9,
-    });
-
-    app.addMiddlewares([() => api.middleware]);
-
-    app.addReducers({
-      [api.reducerPath]: api.reducer,
     });
 
     app.registerPlugin({

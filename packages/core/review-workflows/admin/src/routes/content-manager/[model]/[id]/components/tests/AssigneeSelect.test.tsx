@@ -119,10 +119,8 @@ describe('AssigneeSelect', () => {
           return res.once(
             ctx.status(500),
             ctx.json({
-              data: {
-                error: {
-                  message: 'Server side error message',
-                },
+              error: {
+                message: 'Server side error message',
               },
             })
           );
@@ -136,7 +134,7 @@ describe('AssigneeSelect', () => {
     await waitFor(() => expect(queryByText('Loading content...')).not.toBeInTheDocument());
     await user.click(getByText('John Doe'));
 
-    await findByText('There was an unknown error response from the API');
+    await findByText('Server side error message');
 
     console.error = origConsoleError;
   });

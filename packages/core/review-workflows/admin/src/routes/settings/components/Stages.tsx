@@ -34,7 +34,7 @@ import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { Stage as IStage, StagePermission } from '../../../../../shared/contracts/review-workflows';
-import { useGetRolesQuery } from '../../../services/admin';
+import { useGetAdminRolesQuery } from '../../../services/admin';
 import { AVAILABLE_COLORS, getStageColorByHex } from '../../../utils/colors';
 import { DRAG_DROP_TYPES } from '../constants';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
@@ -517,7 +517,7 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
   const allStages = useForm<WorkflowStage[]>('PermissionsField', (state) => state.values.stages);
   const onFormValueChange = useForm('PermissionsField', (state) => state.onChange);
 
-  const { data: roles = [], isLoading } = useGetRolesQuery();
+  const { data: roles = [], isLoading } = useGetAdminRolesQuery();
 
   // Super admins always have permissions to do everything and therefore
   // there is no point for this role to show up in the role combobox
