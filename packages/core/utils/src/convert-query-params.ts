@@ -341,17 +341,16 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     const { attributes } = schema;
-
     return Object.entries(populate).reduce((acc, [key, subPopulate]) => {
-      if (_.isString(subPopulate)) {
-        try {
-          const subPopulateAsBoolean = parseType({ type: 'boolean', value: subPopulate });
-          return { ...acc, [key]: subPopulateAsBoolean };
-        } catch {
-          // ignore
-        }
-      }
-
+      // if (_.isString(subPopulate)) {
+      //   try {
+      //     const subPopulateAsBoolean = parseType({ type: 'boolean', value: subPopulate });
+      //     console.log('sub Populate as boolen', key, subPopulateAsBoolean);
+      //     return { ...acc, [key]: subPopulateAsBoolean };
+      //   } catch {
+      //     // ignore
+      //   }
+      // }
       if (_.isBoolean(subPopulate)) {
         return { ...acc, [key]: subPopulate };
       }
@@ -381,7 +380,6 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
             },
           };
         }
-
         throw new Error(
           `Invalid nested populate. Expected a fragment ("on") but found ${JSON.stringify(subPopulate)}`
         );
