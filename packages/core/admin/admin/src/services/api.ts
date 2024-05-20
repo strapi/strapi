@@ -1,6 +1,5 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 
-import { TokenRegenerate } from '../../../shared/contracts/transfer';
 import { fetchBaseQuery } from '../utils/baseQuery';
 
 /**
