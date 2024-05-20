@@ -2,7 +2,7 @@ import { Accordion, Box } from '@strapi/design-system';
 
 import { ContentApiPermission } from '../../../../../../../../shared/contracts/content-api/permissions';
 
-import { CollapsableContentType } from './CollabsableContentType';
+import { CollapsableContentType } from './CollapsableContentType';
 
 interface ContentTypesSectionProps {
   section: ContentApiPermission[] | null;

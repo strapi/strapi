@@ -1,13 +1,6 @@
 import * as React from 'react';
 
-import {
-  Accordion,
-  Box,
-  Flex,
-  FlexComponent,
-  Typography,
-  TypographyComponent,
-} from '@strapi/design-system';
+import { Accordion, Box, Flex, FlexComponent, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 

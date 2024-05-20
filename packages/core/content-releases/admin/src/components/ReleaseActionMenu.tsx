@@ -55,10 +55,6 @@ const StyledMenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger' }>`
 /* -------------------------------------------------------------------------------------------------
  * DeleteReleaseActionItemProps
  * -----------------------------------------------------------------------------------------------*/
-const StyledIconButton = styled<IconButtonComponent>(IconButton)`
-  /* Setting this style inline with borderColor will not apply the style */
-  border: ${({ theme }) => `1px solid ${theme.colors.neutral200}`};
-`;
 interface DeleteReleaseActionItemProps {
   releaseId: DeleteReleaseAction.Request['params']['releaseId'];
   actionId: DeleteReleaseAction.Request['params']['actionId'];
