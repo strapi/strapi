@@ -841,7 +841,11 @@ class TransferEngine<
           const { type, data } = entity;
           const attributes = schemas[type].attributes;
 
-          const attributesToRemove = difference(Object.keys(data), Object.keys(attributes));
+          const attributesToRemove = difference(
+            Object.keys(data).filter((attr) => attr !== 'documentId'),
+            Object.keys(attributes)
+          );
+
           const updatedEntity = set('data', omit(attributesToRemove, data), entity);
 
           callback(null, updatedEntity);
