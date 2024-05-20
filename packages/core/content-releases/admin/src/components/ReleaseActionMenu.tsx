@@ -7,14 +7,7 @@ import {
   useRBAC,
   isFetchError,
 } from '@strapi/admin/strapi-admin';
-import {
-  Flex,
-  IconButton,
-  Typography,
-  Menu,
-  IconButtonComponent,
-  AccessibleIcon,
-} from '@strapi/design-system';
+import { Flex, Typography, Menu, AccessibleIcon } from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link as NavLink } from 'react-router-dom';
