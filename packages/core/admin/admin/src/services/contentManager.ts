@@ -6,21 +6,38 @@
 import { adminApi } from './api';
 
 import type { ContentType } from '../../../shared/contracts/content-types';
+interface ContentTypes {
+  collectionType: ContentType[];
+  singleType: ContentType[];
+}
 
 const contentManager = adminApi.injectEndpoints({
   endpoints: (builder) => ({
     /**
      * Content Types
      */
-    getContentTypes: builder.query<ContentType[], void>({
+    getContentTypes: builder.query<ContentTypes, void>({
       query: () => ({
         url: `/content-manager/content-types`,
         method: 'GET',
       }),
-      transformResponse: (res: { data: ContentType[] }) => res.data,
+      transformResponse: (res: { data: ContentType[] }) => {
+        return res.data.reduce<ContentTypes>(
+          (acc, curr) => {
+            if (curr.isDisplayed) {
+              acc[curr.kind].push(curr);
+            }
+            return acc;
+          },
+          {
+            collectionType: [],
+            singleType: [],
+          }
+        );
+      },
     }),
   }),
-  overrideExisting: false,
+  overrideExisting: true,
 });
 
 const { useGetContentTypesQuery } = contentManager;
