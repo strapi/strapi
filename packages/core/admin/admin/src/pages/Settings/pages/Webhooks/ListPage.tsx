@@ -342,9 +342,10 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.update',
                               defaultMessage: 'Update',
                             })}
-                            icon={<Pencil />}
-                            noBorder
-                          />
+                            borderWidth={0}
+                          >
+                            <Pencil />
+                          </IconButton>
                         )}
                         {canDelete && (
                           <IconButton
@@ -357,9 +358,10 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.delete',
                               defaultMessage: 'Delete webhook',
                             })}
-                            icon={<Trash />}
-                            noBorder
-                          />
+                            borderWidth={0}
+                          >
+                            <Trash />
+                          </IconButton>
                         )}
                       </Flex>
                     </Td>

@@ -14,8 +14,6 @@ import {
   Flex,
   MultiSelectOption,
   Accordion,
-  AccordionContent,
-  AccordionToggle,
   Grid,
   GridItem,
   IconButton,
@@ -28,7 +26,6 @@ import {
   useComposedRefs,
   Menu,
   MenuItem,
-  IconButtonComponent,
   Field,
 } from '@strapi/design-system';
 import { Duplicate, Drag, More, EyeStriked } from '@strapi/icons';
@@ -57,7 +54,7 @@ interface StagesProps {
   isCreating?: boolean;
 }
 
-const Stages = ({ canDelete = true, canUpdate = true, isCreating = false }: StagesProps) => {
+const Stages = ({ canDelete = true, canUpdate = true, isCreating }: StagesProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const addFieldRow = useForm('Stages', (state) => state.addFieldRow);
@@ -93,7 +90,7 @@ const Stages = ({ canDelete = true, canUpdate = true, isCreating = false }: Stag
                   canReorder={stages.length > 1}
                   canUpdate={canUpdate}
                   stagesCount={stages.length}
-                  isOpen={isCreating}
+                  defaultOpen={isCreating}
                   {...stage}
                 />
               </Box>
@@ -131,9 +128,9 @@ interface StageProps extends WorkflowStage {
   canDelete?: boolean;
   canReorder?: boolean;
   canUpdate?: boolean;
-  isOpen?: boolean;
   index: number;
   stagesCount: number;
+  defaultOpen?: boolean;
 }
 
 const Stage = ({
@@ -141,16 +138,15 @@ const Stage = ({
   canDelete = false,
   canReorder = false,
   canUpdate = false,
-  isOpen: isOpenDefault = false,
   stagesCount,
   name,
   permissions,
   color,
+  defaultOpen,
 }: StageProps) => {
   const [liveText, setLiveText] = React.useState<string>();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [isOpen, setIsOpen] = React.useState(isOpenDefault);
   const stageErrors = useForm('Stages', (state) => state.errors.stages as object[]);
   const error = stageErrors?.[index];
   const addFieldRow = useForm('Stage', (state) => state.addFieldRow);
@@ -244,6 +240,8 @@ const Stage = ({
     addFieldRow('stages', { name, color, permissions });
   };
 
+  const id = React.useId();
+
   return (
     <Box ref={composedRef}>
       {liveText && <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>}
@@ -257,142 +255,138 @@ const Stage = ({
           display="block"
           hasRadius
           padding={6}
-          shadow="tableShadow"
         />
       ) : (
-        <Accordion
-          size="S"
-          variant="primary"
-          onToggle={() => {
-            setIsOpen(!isOpen);
-
-            if (!isOpen) {
+        <AccordionRoot
+          onValueChange={(value) => {
+            if (value) {
               trackUsage('willEditStage');
             }
           }}
-          expanded={isOpen}
-          shadow="tableShadow"
-          error={Object.values(error ?? {})[0]}
-          hasErrorMessage={false}
+          defaultValue={defaultOpen ? id : undefined}
+          $error={Object.values(error ?? {}).length > 0}
         >
-          <AccordionToggle
-            title={name}
-            togglePosition="left"
-            action={
-              (canDelete || canUpdate) && (
-                <Flex>
-                  <Menu.Root>
-                    <ContextMenuTrigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
-                      <More aria-hidden focusable={false} />
-                      <VisuallyHidden tag="span">
-                        {formatMessage({
-                          id: '[tbdb].components.DynamicZone.more-actions',
-                          defaultMessage: 'More actions',
+          <Accordion.Item value={id}>
+            <Accordion.Header>
+              <Accordion.Trigger>{name}</Accordion.Trigger>
+              <Accordion.Actions>
+                {canDelete || canUpdate ? (
+                  <>
+                    <Menu.Root>
+                      <ContextMenuTrigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
+                        <More aria-hidden focusable={false} />
+                        <VisuallyHidden tag="span">
+                          {formatMessage({
+                            id: '[tbdb].components.DynamicZone.more-actions',
+                            defaultMessage: 'More actions',
+                          })}
+                        </VisuallyHidden>
+                      </ContextMenuTrigger>
+                      {/* z-index needs to be as big as the one defined for the wrapper in Stages, otherwise the menu
+                       * disappears behind the accordion
+                       */}
+                      <Menu.Content popoverPlacement="bottom-end" zIndex={2}>
+                        <Menu.SubRoot>
+                          {canUpdate && (
+                            <MenuItem onClick={handleCloneClick}>
+                              {formatMessage({
+                                id: 'Settings.review-workflows.stage.delete',
+                                defaultMessage: 'Duplicate stage',
+                              })}
+                            </MenuItem>
+                          )}
+
+                          {canDelete && (
+                            <DeleteMenuItem onClick={() => removeFieldRow('stages', index)}>
+                              {formatMessage({
+                                id: 'Settings.review-workflows.stage.delete',
+                                defaultMessage: 'Delete',
+                              })}
+                            </DeleteMenuItem>
+                          )}
+                        </Menu.SubRoot>
+                      </Menu.Content>
+                    </Menu.Root>
+
+                    {canUpdate && (
+                      <IconButton
+                        background="transparent"
+                        hasRadius
+                        borderWidth={0}
+                        data-handler-id={handlerId}
+                        ref={dragRef}
+                        label={formatMessage({
+                          id: 'Settings.review-workflows.stage.drag',
+                          defaultMessage: 'Drag',
                         })}
-                      </VisuallyHidden>
-                    </ContextMenuTrigger>
-                    {/* z-index needs to be as big as the one defined for the wrapper in Stages, otherwise the menu
-                     * disappears behind the accordion
-                     */}
-                    <Menu.Content popoverPlacement="bottom-end" zIndex={2}>
-                      <Menu.SubRoot>
-                        {canUpdate && (
-                          <MenuItem onClick={handleCloneClick}>
-                            {formatMessage({
-                              id: 'Settings.review-workflows.stage.delete',
-                              defaultMessage: 'Duplicate stage',
-                            })}
-                          </MenuItem>
-                        )}
-
-                        {canDelete && (
-                          <DeleteMenuItem onClick={() => removeFieldRow('stages', index)}>
-                            {formatMessage({
-                              id: 'Settings.review-workflows.stage.delete',
-                              defaultMessage: 'Delete',
-                            })}
-                          </DeleteMenuItem>
-                        )}
-                      </Menu.SubRoot>
-                    </Menu.Content>
-                  </Menu.Root>
-
-                  {canUpdate && (
-                    <DragIconButton
-                      background="transparent"
-                      tag="div"
-                      hasRadius
-                      role="button"
-                      noBorder
-                      tabIndex={0}
-                      data-handler-id={handlerId}
-                      ref={dragRef}
-                      label={formatMessage({
-                        id: 'Settings.review-workflows.stage.drag',
-                        defaultMessage: 'Drag',
-                      })}
-                      onClick={(e) => e.stopPropagation()}
-                      onKeyDown={handleKeyDown}
-                    >
-                      <Drag />
-                    </DragIconButton>
-                  )}
-                </Flex>
-              )
-            }
-          />
-          <AccordionContent padding={6} background="neutral0" hasRadius>
-            <Grid gap={4}>
-              {[
-                {
-                  disabled: !canUpdate,
-                  label: formatMessage({
-                    id: 'Settings.review-workflows.stage.name.label',
-                    defaultMessage: 'Stage name',
-                  }),
-                  name: `stages.${index}.name`,
-                  required: true,
-                  size: 6,
-                  type: 'string' as const,
-                },
-                {
-                  disabled: !canUpdate,
-                  label: formatMessage({
-                    id: 'content-manager.reviewWorkflows.stage.color',
-                    defaultMessage: 'Color',
-                  }),
-                  name: `stages.${index}.color`,
-                  required: true,
-                  size: 6,
-                  type: 'color' as const,
-                },
-                {
-                  disabled: !canUpdate,
-                  label: formatMessage({
-                    id: 'Settings.review-workflows.stage.permissions.label',
-                    defaultMessage: 'Roles that can change this stage',
-                  }),
-                  name: `stages.${index}.permissions`,
-                  placeholder: formatMessage({
-                    id: 'Settings.review-workflows.stage.permissions.placeholder',
-                    defaultMessage: 'Select a role',
-                  }),
-                  required: true,
-                  size: 6,
-                  type: 'permissions' as const,
-                },
-              ].map(({ size, ...field }) => (
-                <GridItem key={field.name} col={size}>
-                  <InputRenderer {...field} />
-                </GridItem>
-              ))}
-            </Grid>
-          </AccordionContent>
-        </Accordion>
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={handleKeyDown}
+                      >
+                        <Drag />
+                      </IconButton>
+                    )}
+                  </>
+                ) : null}
+              </Accordion.Actions>
+            </Accordion.Header>
+            <Accordion.Content>
+              <Grid gap={4} padding={6}>
+                {[
+                  {
+                    disabled: !canUpdate,
+                    label: formatMessage({
+                      id: 'Settings.review-workflows.stage.name.label',
+                      defaultMessage: 'Stage name',
+                    }),
+                    name: `stages.${index}.name`,
+                    required: true,
+                    size: 6,
+                    type: 'string' as const,
+                  },
+                  {
+                    disabled: !canUpdate,
+                    label: formatMessage({
+                      id: 'content-manager.reviewWorkflows.stage.color',
+                      defaultMessage: 'Color',
+                    }),
+                    name: `stages.${index}.color`,
+                    required: true,
+                    size: 6,
+                    type: 'color' as const,
+                  },
+                  {
+                    disabled: !canUpdate,
+                    label: formatMessage({
+                      id: 'Settings.review-workflows.stage.permissions.label',
+                      defaultMessage: 'Roles that can change this stage',
+                    }),
+                    name: `stages.${index}.permissions`,
+                    placeholder: formatMessage({
+                      id: 'Settings.review-workflows.stage.permissions.placeholder',
+                      defaultMessage: 'Select a role',
+                    }),
+                    required: true,
+                    size: 6,
+                    type: 'permissions' as const,
+                  },
+                ].map(({ size, ...field }) => (
+                  <GridItem key={field.name} col={size}>
+                    <InputRenderer {...field} />
+                  </GridItem>
+                ))}
+              </Grid>
+            </Accordion.Content>
+          </Accordion.Item>
+        </AccordionRoot>
       )}
     </Box>
   );
 };
+
+const AccordionRoot = styled(Accordion.Root)<{ $error?: boolean }>`
+  border: 1px solid
+    ${({ theme, $error }) => ($error ? theme.colors.danger600 : theme.colors.neutral200)};
+`;
 
 const DeleteMenuItem = styled(MenuItem)`
   color: ${({ theme }) => theme.colors.danger600};
@@ -408,23 +402,6 @@ const ContextMenuTrigger = styled(Menu.Trigger)`
 
   > span {
     font-size: 0;
-  }
-`;
-
-const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton)`
-  align-items: center;
-  border-radius: ${({ theme }) => theme.borderRadius};
-  display: flex;
-  justify-content: center;
-
-  &:hover,
-  &:focus {
-    background-color: ${({ theme }) => theme.colors.neutral100};
-  }
-
-  svg {
-    height: auto;
-    width: ${({ theme }) => theme.spaces[3]};
   }
 `;
 
@@ -581,7 +558,7 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
             id: 'components.NotAllowedInput.text',
             defaultMessage: 'No permissions to see this field',
           })}
-          startAction={<StyledIcon />}
+          startAction={<EyeStriked fill="neutral600" />}
           type="text"
           value=""
         />
@@ -641,7 +618,6 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
 
         <IconButton
           disabled={disabled}
-          icon={<Duplicate />}
           label={formatMessage({
             id: 'Settings.review-workflows.stage.permissions.apply.label',
             defaultMessage: 'Apply to all stages',
@@ -649,7 +625,9 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
           size="L"
           variant="secondary"
           onClick={() => setIsApplyAllConfirmationOpen(true)}
-        />
+        >
+          <Duplicate />
+        </IconButton>
       </Flex>
       <ConfirmDialog
         isOpen={isApplyAllConfirmationOpen}
@@ -683,12 +661,6 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
     </>
   );
 };
-
-const StyledIcon = styled(EyeStriked)`
-  & > path {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-`;
 
 const NestedOption = styled(MultiSelectOption)`
   padding-left: ${({ theme }) => theme.spaces[7]};

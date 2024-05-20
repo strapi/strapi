@@ -147,9 +147,10 @@ export const ListRow = memo(
                         id: 'app.utils.edit',
                         defaultMessage: 'Edit',
                       })} ${name}`}
-                      noBorder
-                      icon={<Pencil />}
-                    />
+                      borderWidth={0}
+                    >
+                      <Pencil />
+                    </IconButton>
                   )}
                   <IconButton
                     onClick={(e) => {
@@ -164,9 +165,10 @@ export const ListRow = memo(
                       id: 'global.delete',
                       defaultMessage: 'Delete',
                     })} ${name}`}
-                    noBorder
-                    icon={<Trash />}
-                  />
+                    borderWidth={0}
+                  >
+                    <Trash />
+                  </IconButton>
                 </Flex>
               ) : (
                 <Lock />

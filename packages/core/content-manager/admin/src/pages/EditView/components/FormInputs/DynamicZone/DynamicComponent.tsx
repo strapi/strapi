@@ -3,8 +3,6 @@ import * as React from 'react';
 import { useForm } from '@strapi/admin/strapi-admin';
 import {
   Accordion,
-  AccordionContent,
-  AccordionToggle,
   Box,
   Flex,
   Grid,
@@ -14,7 +12,6 @@ import {
   useComposedRefs,
   Menu,
   MenuItem,
-  FlexComponent,
   BoxComponent,
 } from '@strapi/design-system';
 import { Drag, More, Trash } from '@strapi/icons';
@@ -22,7 +19,7 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { ComponentIcon } from '../../../../../components/ComponentIcon';
+import { COMPONENT_ICONS } from '../../../../../components/ComponentIcon';
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDocLayout } from '../../../../../hooks/useDocumentLayout';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../../../../hooks/useDragAndDrop';
@@ -57,7 +54,6 @@ const DynamicComponent = ({
   dynamicComponentsByCategory = {},
   onAddComponent,
 }: DynamicComponentProps) => {
-  const [isOpen, setIsOpen] = React.useState(true);
   const { formatMessage } = useIntl();
   const formValues = useForm('DynamicComponent', (state) => state.values);
   const {
@@ -69,7 +65,8 @@ const DynamicComponent = ({
 
     const mainFieldValue = getIn(formValues, `${name}.${index}.${mainField}`);
 
-    const displayedValue = mainField === 'id' ? '' : String(mainFieldValue).trim();
+    const displayedValue =
+      mainField === 'id' || !mainFieldValue ? '' : String(mainFieldValue).trim();
 
     const mainValue = displayedValue.length > 0 ? `- ${displayedValue}` : displayedValue;
 
@@ -84,29 +81,6 @@ const DynamicComponent = ({
 
     return { icon, displayName };
   }, [componentUid, dynamicComponentsByCategory]);
-
-  // const fieldsErrors = Object.keys(formErrors).filter((errorKey) => {
-  //   const errorKeysArray = errorKey.split('.');
-
-  //   if (`${errorKeysArray[0]}.${errorKeysArray[1]}` === `${name}.${index}`) {
-  //     return true;
-  //   }
-
-  //   return false;
-  // });
-
-  // let errorMessage;
-
-  // if (fieldsErrors.length > 0) {
-  //   errorMessage = formatMessage({
-  //     id: getTranslation('components.DynamicZone.error-message'),
-  //     defaultMessage: 'The component contains error(s)',
-  //   });
-  // }
-
-  const handleToggle = () => {
-    setIsOpen((s) => !s);
-  };
 
   const [{ handlerId, isDragging, handleKeyDown }, boxRef, dropRef, dragRef, dragPreviewRef] =
     useDragAndDrop(!disabled, {
@@ -130,8 +104,8 @@ const DynamicComponent = ({
   const composedBoxRefs = useComposedRefs(boxRef, dropRef);
 
   const accordionActions = disabled ? null : (
-    <ActionsFlex gap={0}>
-      <IconButtonCustom
+    <>
+      <IconButton
         borderWidth={0}
         label={formatMessage(
           {
@@ -143,12 +117,9 @@ const DynamicComponent = ({
         onClick={onRemoveComponentClick}
       >
         <Trash />
-      </IconButtonCustom>
+      </IconButton>
       <IconButton
-        tag="div"
-        role="button"
         borderWidth={0}
-        tabIndex={0}
         onClick={(e) => e.stopPropagation()}
         data-handler-id={handlerId}
         ref={dragRef}
@@ -213,8 +184,15 @@ const DynamicComponent = ({
           </Menu.SubRoot>
         </Menu.Content>
       </Menu.Root>
-    </ActionsFlex>
+    </>
   );
+
+  const accordionTitle = title ? `${displayName} ${title}` : displayName;
+  /**
+   * We don't need the accordion's to communicate with each other,
+   * so a unique value for their state is enough.
+   */
+  const accordionValue = React.useId();
 
   return (
     <ComponentContainer tag="li" width="100%">
@@ -225,58 +203,46 @@ const DynamicComponent = ({
         {isDragging ? (
           <Preview />
         ) : (
-          <Accordion expanded={isOpen} onToggle={handleToggle} size="S" /*error={errorMessage}*/>
-            <AccordionToggle
-              // @ts-expect-error – Issue in DS where AccordionToggle props don't extend TextButton
-              startIcon={<ComponentIcon icon={icon} showBackground={false} size="S" />}
-              action={accordionActions}
-              title={`${displayName} ${title}`}
-              togglePosition="left"
-            />
-            <AccordionContent>
-              <AccordionContentRadius background="neutral0">
-                <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
-                  {components[componentUid]?.layout?.map((row, rowInd) => (
-                    <Grid gap={4} key={rowInd}>
-                      {row.map(({ size, ...field }) => {
-                        const fieldName = `${name}.${index}.${field.name}`;
+          <Accordion.Root>
+            <Accordion.Item value={accordionValue}>
+              <Accordion.Header>
+                <Accordion.Trigger
+                  icon={
+                    icon && COMPONENT_ICONS[icon]
+                      ? COMPONENT_ICONS[icon]
+                      : COMPONENT_ICONS.dashboard
+                  }
+                >
+                  {accordionTitle}
+                </Accordion.Trigger>
+                <Accordion.Actions>{accordionActions}</Accordion.Actions>
+              </Accordion.Header>
+              <Accordion.Content>
+                <AccordionContentRadius background="neutral0">
+                  <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
+                    {components[componentUid]?.layout?.map((row, rowInd) => (
+                      <Grid gap={4} key={rowInd}>
+                        {row.map(({ size, ...field }) => {
+                          const fieldName = `${name}.${index}.${field.name}`;
 
-                        return (
-                          <GridItem col={size} key={fieldName} s={12} xs={12}>
-                            <InputRenderer {...field} name={fieldName} />
-                          </GridItem>
-                        );
-                      })}
-                    </Grid>
-                  ))}
-                </Box>
-              </AccordionContentRadius>
-            </AccordionContent>
-          </Accordion>
+                          return (
+                            <GridItem col={size} key={fieldName} s={12} xs={12}>
+                              <InputRenderer {...field} name={fieldName} />
+                            </GridItem>
+                          );
+                        })}
+                      </Grid>
+                    ))}
+                  </Box>
+                </AccordionContentRadius>
+              </Accordion.Content>
+            </Accordion.Item>
+          </Accordion.Root>
         )}
       </StyledBox>
     </ComponentContainer>
   );
 };
-
-const ActionsFlex = styled<FlexComponent>(Flex)`
-  /* 
-    we need to remove the background from the button but we can't 
-    wrap the element in styled because it breaks the forwardedAs which
-    we need for drag handler to work on firefox
-  */
-  div[role='button'] {
-    background: transparent;
-  }
-`;
-
-const IconButtonCustom = styled(IconButton)`
-  background-color: transparent;
-
-  svg {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-`;
 
 // TODO: Delete once https://github.com/strapi/design-system/pull/858
 // is merged and released.

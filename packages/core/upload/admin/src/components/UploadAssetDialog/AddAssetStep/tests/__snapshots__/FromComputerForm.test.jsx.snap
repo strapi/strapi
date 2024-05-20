@@ -57,20 +57,6 @@ exports[`FromComputerForm snapshots the component 1`] = `
   padding-inline-start: 20px;
 }
 
-.c8 {
-  font-weight: 500;
-  font-size: 1.6rem;
-  line-height: 1.25;
-  color: #666687;
-}
-
-.c16 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: currentcolor;
-}
-
 .c3 {
   align-items: center;
   display: flex;
@@ -96,6 +82,20 @@ exports[`FromComputerForm snapshots the component 1`] = `
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.c8 {
+  font-weight: 500;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  color: #666687;
+}
+
+.c16 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
 }
 
 .c21 {

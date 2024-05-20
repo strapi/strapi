@@ -224,7 +224,10 @@ const render = (
       ),
       ...restOptions,
     }),
-    user: userEvent.setup(userEventOptions),
+    user: userEvent.setup({
+      skipHover: true,
+      ...userEventOptions,
+    }),
   };
 };
 

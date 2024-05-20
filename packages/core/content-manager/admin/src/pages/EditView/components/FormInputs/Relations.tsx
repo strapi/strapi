@@ -937,7 +937,8 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
                 tag="div"
                 role="button"
                 tabIndex={0}
-                aria-label={formatMessage({
+                withTooltip={false}
+                label={formatMessage({
                   id: getTranslation('components.RelationInput.icon-button-aria-label'),
                   defaultMessage: 'Drag',
                 })}

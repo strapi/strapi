@@ -18,18 +18,18 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
   height: 3.2rem;
 }
 
-.c4 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: currentcolor;
-}
-
 .c2 {
   align-items: center;
   display: flex;
   flex-direction: row;
   gap: 8px;
+}
+
+.c4 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
 }
 
 .c6 {

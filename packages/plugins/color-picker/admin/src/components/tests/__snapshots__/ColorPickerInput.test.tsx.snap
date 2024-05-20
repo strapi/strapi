@@ -15,19 +15,6 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   cursor: pointer;
 }
 
-.c2 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c8 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
 .c0 {
   align-items: stretch;
   display: flex;
@@ -39,6 +26,19 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   align-items: center;
   display: flex;
   flex-direction: row;
+}
+
+.c2 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c8 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: #666687;
 }
 
 .c9 {

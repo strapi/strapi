@@ -79,7 +79,7 @@ export const TableRows = ({
                     })}
                     to={folderURL}
                     onClick={() => !folderURL && onChangeFolder(id)}
-                    noBorder
+                    borderWidth={0}
                   >
                     <Eye />
                   </IconButton>
@@ -92,7 +92,7 @@ export const TableRows = ({
                   onClick={() =>
                     contentType === 'asset' ? onEditAsset(element) : onEditFolder(element)
                   }
-                  noBorder
+                  borderWidth={0}
                 >
                   <Pencil />
                 </IconButton>

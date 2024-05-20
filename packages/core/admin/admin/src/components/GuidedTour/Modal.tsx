@@ -92,7 +92,8 @@ const GuidedTourModal = () => {
             <Flex justifyContent="flex-end">
               <IconButton
                 onClick={handleCtaClick}
-                aria-label={formatMessage({
+                withTooltip={false}
+                label={formatMessage({
                   id: 'app.utils.close-label',
                   defaultMessage: 'Close',
                 })}

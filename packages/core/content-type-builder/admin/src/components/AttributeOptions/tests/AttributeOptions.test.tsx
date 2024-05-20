@@ -1,5 +1,5 @@
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
@@ -58,7 +58,7 @@ const mockAttributes: IconByType[][] = [
 const makeApp = () => {
   return (
     <IntlProvider locale="en" messages={{}} textComponent="span">
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <MemoryRouter>
           <FormModalNavigationProvider>
             <AttributeOptions
@@ -68,7 +68,7 @@ const makeApp = () => {
             />
           </FormModalNavigationProvider>
         </MemoryRouter>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </IntlProvider>
   );
 };

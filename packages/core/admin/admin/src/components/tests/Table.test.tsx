@@ -85,7 +85,6 @@ describe('Table', () => {
       </Table.Root>
     );
 
-    expect(screen.getByRole('button', { name: 'Sort on id' })).toBeInTheDocument();
     expect(screen.getByRole('checkbox', { name: 'Select all entries' })).toBeInTheDocument();
 
     expect(screen.getByRole('gridcell', { name: '1' })).toBeInTheDocument();

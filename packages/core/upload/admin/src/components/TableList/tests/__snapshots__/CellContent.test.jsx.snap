@@ -206,19 +206,19 @@ exports[`TableList | CellContent should render image cell type when element type
   height: 32px;
 }
 
+.c1 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
 .c3 {
   font-size: 1.4rem;
   line-height: 1.43;
   font-weight: 600;
   color: #0c75af;
   text-transform: uppercase;
-}
-
-.c1 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
 }
 
 .c4 {
@@ -343,19 +343,19 @@ exports[`TableList | CellContent should render image cell type when element type
   height: 32px;
 }
 
+.c1 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
 .c3 {
   font-size: 1.4rem;
   line-height: 1.43;
   font-weight: 600;
   color: #0c75af;
   text-transform: uppercase;
-}
-
-.c1 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
 }
 
 .c4 {

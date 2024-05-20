@@ -1,15 +1,21 @@
-import { Flex } from '@strapi/design-system';
+import * as React from 'react';
+
+import { Flex, FlexProps } from '@strapi/design-system';
 import * as Icons from '@strapi/icons';
 import * as Symbols from '@strapi/icons/symbols';
 
 import type { Struct } from '@strapi/types';
 
-interface ComponentIconProps {
+interface ComponentIconProps extends FlexProps {
   showBackground?: boolean;
   icon?: Struct.ContentTypeSchemaInfo['icon'];
 }
 
-const ComponentIcon = ({ showBackground = true, icon = 'dashboard' }: ComponentIconProps) => {
+const ComponentIcon = ({
+  showBackground = true,
+  icon = 'dashboard',
+  ...props
+}: ComponentIconProps) => {
   const Icon = COMPONENT_ICONS[icon as keyof typeof COMPONENT_ICONS] || COMPONENT_ICONS.dashboard;
 
   return (
@@ -21,13 +27,14 @@ const ComponentIcon = ({ showBackground = true, icon = 'dashboard' }: ComponentI
       width={8}
       color="neutral600"
       borderRadius={showBackground ? '50%' : 0}
+      {...props}
     >
       <Icon height="2rem" width="2rem" />
     </Flex>
   );
 };
 
-const COMPONENT_ICONS = {
+const COMPONENT_ICONS: Record<string, React.ComponentType<any>> = {
   alien: Icons.Alien,
   apps: Icons.GridNine,
   archive: Icons.Archive,
@@ -155,5 +162,5 @@ const COMPONENT_ICONS = {
   write: Icons.Feather,
 };
 
-export { ComponentIcon };
+export { ComponentIcon, COMPONENT_ICONS };
 export type { ComponentIconProps };

@@ -1,8 +1,13 @@
-import { BaseButton, IconButton, IconButtonGroup } from '@strapi/design-system';
+import {
+  BaseButton,
+  IconButton,
+  IconButtonComponent,
+  IconButtonGroup,
+} from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 // NAV BUTTONS
-export const CustomIconButton = styled(IconButton)`
+export const CustomIconButton = styled<IconButtonComponent>(IconButton)`
   padding: ${({ theme }) => theme.spaces[2]};
   /* Trick to prevent the outline from overflowing because of the general outline-offset */
   outline-offset: -2px !important;
@@ -24,7 +29,7 @@ export const MainButtons = styled(IconButtonGroup)`
   margin-left: ${({ theme }) => theme.spaces[4]};
 `;
 
-export const MoreButton = styled(IconButton)`
+export const MoreButton = styled<IconButtonComponent>(IconButton)`
   margin: ${({ theme }) => `0 ${theme.spaces[2]}`};
   padding: ${({ theme }) => theme.spaces[2]};
 
