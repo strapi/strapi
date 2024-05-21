@@ -3,7 +3,7 @@ import { extname } from 'path';
 import { EOL } from 'os';
 import type Chain from 'stream-chain';
 import { chain } from 'stream-chain';
-import { isEmpty, uniq, last, isNumber, difference, set, omit, pick } from 'lodash/fp';
+import { isEmpty, uniq, last, isNumber, set, pick } from 'lodash/fp';
 import { diff as semverDiff } from 'semver';
 
 import type { Struct, Utils } from '@strapi/types';
