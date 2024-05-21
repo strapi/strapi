@@ -25,6 +25,24 @@ export const navToHeader = async (page: Page, navItems: string[], headerText: st
 };
 
 /**
+ * Skip the tour if the modal is visible
+ */
+export const skipCtbTour = async (page: Page) => {
+  const modalSelector = 'role=button[name="Skip the tour"]';
+
+  try {
+    await page.waitForSelector(modalSelector, { timeout: 1000 });
+    const modal = page.locator(modalSelector);
+    if (await modal.isVisible()) {
+      await modal.click();
+      await expect(modal).not.toBeVisible();
+    }
+  } catch (e) {
+    // The modal did not appear, continue with the test
+  }
+};
+
+/**
  * Look for an element containing text, and then click a sibling close button
  */
 export const findAndClose = async (
