@@ -27,7 +27,7 @@ const DateInput = forwardRef<HTMLInputElement, InputProps>(
             field.onChange(name, date);
           }}
           onClear={() => field.onChange(name, undefined)}
-          selectedDate={value}
+          value={value}
           {...props}
         />
         <Field.Hint />

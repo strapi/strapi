@@ -1,12 +1,7 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
+import { adminApi } from '@strapi/admin/strapi-admin';
 
-import { fetchBaseQuery, type UnknownApiError } from '../utils/api';
-
-const reviewWorkflowsApi = createApi({
-  reducerPath: 'reviewWorkflowsApi',
-  baseQuery: fetchBaseQuery(),
-  tagTypes: ['ReviewWorkflow', 'ReviewWorkflowStages'],
-  endpoints: () => ({}),
+const reviewWorkflowsApi = adminApi.enhanceEndpoints({
+  addTagTypes: ['ReviewWorkflow', 'ReviewWorkflowStages'],
 });
 
-export { reviewWorkflowsApi, type UnknownApiError };
+export { reviewWorkflowsApi };

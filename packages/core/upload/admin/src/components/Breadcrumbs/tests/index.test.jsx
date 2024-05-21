@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -40,7 +40,7 @@ const setup = (props) => ({
         <QueryClientProvider client={queryClient}>
           <MemoryRouter>
             <IntlProvider locale="en" messages={{}}>
-              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+              <DesignSystemProvider>{children}</DesignSystemProvider>
             </IntlProvider>
           </MemoryRouter>
         </QueryClientProvider>

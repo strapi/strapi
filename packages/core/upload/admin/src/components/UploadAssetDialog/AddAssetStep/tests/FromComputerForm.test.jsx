@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -17,9 +17,9 @@ describe('FromComputerForm', () => {
   it('snapshots the component', async () => {
     const { container } = renderTL(
       <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
+        <DesignSystemProvider>
           <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
-        </ThemeProvider>
+        </DesignSystemProvider>
       </IntlProvider>
     );
 

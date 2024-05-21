@@ -87,6 +87,7 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
       },
     }),
   }),
+  overrideExisting: true,
 });
 
 const {

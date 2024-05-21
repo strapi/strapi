@@ -223,8 +223,9 @@ const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps
         )}
         name="delete"
         borderWidth={0}
-        icon={<Trash />}
-      />
+      >
+        <Trash />
+      </IconButton>
       <ConfirmDialog
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleClickDelete}

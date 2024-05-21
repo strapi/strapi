@@ -160,9 +160,10 @@ export const PreviewBox = ({
                   id: 'global.delete',
                   defaultMessage: 'Delete',
                 })}
-                icon={<Trash />}
                 onClick={() => setShowConfirmDialog(true)}
-              />
+              >
+                <Trash />
+              </IconButton>
             )}
 
             {canDownload && (
@@ -171,9 +172,10 @@ export const PreviewBox = ({
                   id: getTrad('control-card.download'),
                   defaultMessage: 'Download',
                 })}
-                icon={<DownloadIcon />}
                 onClick={() => downloadFile(assetUrl, asset.name)}
-              />
+              >
+                <DownloadIcon />
+              </IconButton>
             )}
 
             {canCopyLink && <CopyLinkButton url={assetUrl} />}
@@ -181,9 +183,10 @@ export const PreviewBox = ({
             {canUpdate && asset.mime.includes(AssetType.Image) && (
               <IconButton
                 label={formatMessage({ id: getTrad('control-card.crop'), defaultMessage: 'Crop' })}
-                icon={<Resize />}
                 onClick={handleCropStart}
-              />
+              >
+                <Resize />
+              </IconButton>
             )}
           </Flex>
         </ActionRow>

@@ -43,8 +43,9 @@
     "watch:link": "strapi-plugin watch:link"
   },
   "dependencies": {
-    "@strapi/design-system": "^2.0.0-beta",
-    "@strapi/icons": "^1.18.0"
+    "@strapi/design-system": "2.0.0-beta.4",
+    "@strapi/icons": "2.0.0-beta.4",
+    "react-intl": "6.6.2"
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.0.0-beta.8",

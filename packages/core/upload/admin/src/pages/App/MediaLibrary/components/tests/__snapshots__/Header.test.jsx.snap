@@ -33,26 +33,6 @@ exports[`Header renders 1`] = `
   cursor: pointer;
 }
 
-.c4 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  color: #4945ff;
-}
-
-.c8 {
-  font-weight: 600;
-  font-size: 3.2rem;
-  line-height: 1.25;
-  color: currentcolor;
-}
-
-.c13 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: currentcolor;
-}
-
 .c5 {
   align-items: center;
   display: flex;
@@ -71,6 +51,26 @@ exports[`Header renders 1`] = `
   display: flex;
   flex-direction: row;
   gap: 8px;
+}
+
+.c4 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: #4945ff;
+}
+
+.c8 {
+  font-weight: 600;
+  font-size: 3.2rem;
+  line-height: 1.25;
+  color: currentcolor;
+}
+
+.c13 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
 }
 
 .c15 {

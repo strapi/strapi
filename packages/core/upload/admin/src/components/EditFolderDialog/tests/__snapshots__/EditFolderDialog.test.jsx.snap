@@ -14,7 +14,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   padding-inline-end: 40px;
   padding-inline-start: 40px;
   position: fixed;
-  z-index: 4;
+  z-index: 310;
 }
 
 .c6 {
@@ -52,7 +52,9 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 }
 
 .c21 {
+  padding-block-start: 8px;
   padding-inline-end: 12px;
+  padding-block-end: 8px;
   padding-inline-start: 12px;
 }
 
@@ -70,27 +72,6 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border-color: #4945ff;
   border: 1px solid #4945ff;
   cursor: pointer;
-}
-
-.c10 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c20 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c32 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: currentcolor;
 }
 
 .c1 {
@@ -134,6 +115,27 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   display: flex;
   flex-direction: row;
   gap: 8px;
+}
+
+.c10 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c20 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c32 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
 }
 
 .c2 {
@@ -249,9 +251,6 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 .c24 {
   border: none;
   border-radius: 4px;
-  padding: 0;
-  padding-bottom: 0.8rem;
-  padding-top: 0.8rem;
   color: #32324d;
   font-weight: 400;
   font-size: 1.4rem;
@@ -440,11 +439,6 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                     class="c11 c4 c12 c13"
                     type="button"
                   >
-                    <span
-                      class="c2"
-                    >
-                      Close the modal
-                    </span>
                     <svg
                       aria-hidden="true"
                       fill="currentColor"
@@ -458,6 +452,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                         d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
                       />
                     </svg>
+                    <span
+                      class="c2"
+                    >
+                      Close the modal
+                    </span>
                   </button>
                 </div>
               </div>

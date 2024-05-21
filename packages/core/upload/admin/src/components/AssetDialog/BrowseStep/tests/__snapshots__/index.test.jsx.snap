@@ -16,9 +16,9 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c5 {
   background: #ffffff;
-  padding-block-start: 4px;
+  padding-block-start: 8px;
   padding-inline-end: 12px;
-  padding-block-end: 4px;
+  padding-block-end: 8px;
   padding-inline-start: 12px;
   border-radius: 4px;
   position: relative;
@@ -140,81 +140,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   padding-inline-start: 8px;
 }
 
-.c10 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c18 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: currentcolor;
-}
-
-.c32 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 400;
-  color: #32324d;
-}
-
-.c34 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  color: #8e8ea9;
-}
-
-.c38 {
-  font-weight: 500;
-  font-size: 1.6rem;
-  line-height: 1.25;
-  font-weight: 500;
-  color: currentcolor;
-}
-
-.c54 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: currentcolor;
-}
-
-.c56 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #666687;
-}
-
-.c63 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: #32324d;
-}
-
-.c65 {
-  font-size: 1.4rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
 .c1 {
   align-items: stretch;
   display: flex;
@@ -309,6 +234,81 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   display: flex;
   flex-direction: row;
   gap: 4px;
+}
+
+.c10 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c18 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
+}
+
+.c32 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 400;
+  color: #32324d;
+}
+
+.c34 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #8e8ea9;
+}
+
+.c38 {
+  font-weight: 500;
+  font-size: 1.6rem;
+  line-height: 1.25;
+  font-weight: 500;
+  color: currentcolor;
+}
+
+.c54 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+  color: currentcolor;
+}
+
+.c56 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #666687;
+}
+
+.c63 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #32324d;
+}
+
+.c65 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: #666687;
 }
 
 .c26 {
@@ -416,7 +416,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 
 .c7 {
   border: 1px solid #dcdce4;
-  min-height: 3.2rem;
   outline: none;
   box-shadow: 0;
   transition-property: border-color,box-shadow,fill;
@@ -437,12 +436,13 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 }
 
 .c13>svg {
-  width: 1.2rem;
   fill: #666687;
 }
 
 .c11 {
   flex: 1;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
 }
 
 .c12 {
@@ -733,48 +733,12 @@ exports[`BrowseStep renders and match snapshot 1`] = `
           <div
             class="c21 c22"
           >
-            <span>
-              <button
-                aria-disabled="false"
-                aria-labelledby=":r2:"
-                class="c23 c24 c16 c25"
-                tabindex="0"
-                type="button"
-              >
-                <span
-                  class="c26"
-                >
-                  List View
-                </span>
-                <svg
-                  aria-hidden="true"
-                  fill="currentColor"
-                  focusable="false"
-                  height="16"
-                  viewBox="0 0 32 32"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 1 1 0-3h22a1.5 1.5 0 0 1 1.5 1.5M5 9.5h22a1.5 1.5 0 0 0 0-3H5a1.5 1.5 0 0 0 0 3m22 13H5a1.5 1.5 0 1 0 0 3h22a1.5 1.5 0 1 0 0-3"
-                  />
-                </svg>
-              </button>
-            </span>
-          </div>
-          <span>
             <button
               aria-disabled="false"
-              aria-labelledby=":r4:"
               class="c23 c24 c16 c25"
-              tabindex="0"
+              data-state="closed"
               type="button"
             >
-              <span
-                class="c26"
-              >
-                Search
-              </span>
               <svg
                 aria-hidden="true"
                 fill="currentColor"
@@ -785,11 +749,41 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
-                  d="M29.061 26.939 23.125 21A11.515 11.515 0 1 0 21 23.125l5.941 5.942a1.503 1.503 0 0 0 2.125-2.125zM5.5 14a8.5 8.5 0 1 1 8.5 8.5A8.51 8.51 0 0 1 5.5 14"
+                  d="M28.5 16a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 1 1 0-3h22a1.5 1.5 0 0 1 1.5 1.5M5 9.5h22a1.5 1.5 0 0 0 0-3H5a1.5 1.5 0 0 0 0 3m22 13H5a1.5 1.5 0 1 0 0 3h22a1.5 1.5 0 1 0 0-3"
                 />
               </svg>
+              <span
+                class="c26"
+              >
+                List View
+              </span>
             </button>
-          </span>
+          </div>
+          <button
+            aria-disabled="false"
+            class="c23 c24 c16 c25"
+            data-state="closed"
+            type="button"
+          >
+            <svg
+              aria-hidden="true"
+              fill="currentColor"
+              focusable="false"
+              height="16"
+              viewBox="0 0 32 32"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M29.061 26.939 23.125 21A11.515 11.515 0 1 0 21 23.125l5.941 5.942a1.503 1.503 0 0 0 2.125-2.125zM5.5 14a8.5 8.5 0 1 1 8.5 8.5A8.51 8.51 0 0 1 5.5 14"
+              />
+            </svg>
+            <span
+              class="c26"
+            >
+              Search
+            </span>
+          </button>
         </div>
       </div>
     </div>
@@ -953,11 +947,6 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                     class="c23 c24 c16 c25"
                     type="button"
                   >
-                    <span
-                      class="c26"
-                    >
-                      Edit folder
-                    </span>
                     <svg
                       aria-hidden="true"
                       fill="currentColor"
@@ -971,6 +960,11 @@ exports[`BrowseStep renders and match snapshot 1`] = `
                         d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
                       />
                     </svg>
+                    <span
+                      class="c26"
+                    >
+                      Edit folder
+                    </span>
                   </button>
                 </div>
               </div>
@@ -987,7 +981,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
       >
         <div
           aria-autocomplete="none"
-          aria-controls="radix-:r7:"
+          aria-controls="radix-:r5:"
           aria-expanded="false"
           aria-label="Entries per page"
           class="c5 c6 c7"

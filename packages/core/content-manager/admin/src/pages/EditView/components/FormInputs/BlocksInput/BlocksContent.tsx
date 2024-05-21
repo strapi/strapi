@@ -236,7 +236,8 @@ const DragAndDropElement = ({
             tag="div"
             role="button"
             tabIndex={0}
-            aria-label={formatMessage({
+            withTooltip={false}
+            label={formatMessage({
               id: getTranslation('components.DragHandle-label'),
               defaultMessage: 'Drag',
             })}
@@ -270,7 +271,8 @@ const CloneDragItem = ({ children, dragHandleTopMargin }: CloneDragItemProps) =>
       <DragIconButton
         tag="div"
         role="button"
-        aria-label={formatMessage({
+        withTooltip={false}
+        label={formatMessage({
           id: getTranslation('components.DragHandle-label'),
           defaultMessage: 'Drag',
         })}

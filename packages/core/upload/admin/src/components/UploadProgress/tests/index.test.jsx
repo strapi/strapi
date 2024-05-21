@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -34,11 +34,11 @@ const renderCompo = (props) => {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
           <UploadProgress onCancel={jest.fn()} error={undefined} {...props} />
         </IntlProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>,
     { container: target }
   );
@@ -67,12 +67,6 @@ describe('<UploadProgress />', () => {
         height: 8px;
       }
 
-      .c9 {
-        font-size: 1.2rem;
-        line-height: 1.33;
-        color: inherit;
-      }
-
       .c1 {
         align-items: center;
         display: flex;
@@ -91,6 +85,12 @@ describe('<UploadProgress />', () => {
         display: flex;
         flex-direction: row;
         gap: 8px;
+      }
+
+      .c9 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        color: inherit;
       }
 
       .c6:before {

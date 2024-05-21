@@ -21,14 +21,12 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
     expect(screen.getByRole('heading', { name: 'Audit Logs' })).toBeInTheDocument();
 
     expect(screen.getByRole('button', { name: 'Filters' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sort on Action' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Sort on Date' })).toBeInTheDocument();
 
     expect(screen.getByRole('grid')).toBeInTheDocument();
 
     [
-      'Sort on Action',
-      'Sort on Date',
+      'Action',
+      'Date',
       'User',
       'Actions',
       'Admin logout',

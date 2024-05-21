@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -16,7 +16,7 @@ const messages = {};
 
 const makeApp = (name, type, value) => (
   <IntlProvider locale="en" messages={messages} textComponent="span">
-    <ThemeProvider theme={lightTheme}>
+    <DesignSystemProvider>
       <Input
         intlLabel={{ id: 'enabled', defaultMessage: 'Enabled' }}
         name={name}
@@ -25,7 +25,7 @@ const makeApp = (name, type, value) => (
         type={type}
         value={value}
       />
-    </ThemeProvider>
+    </DesignSystemProvider>
   </IntlProvider>
 );
 
@@ -41,15 +41,10 @@ describe('<Input />', () => {
       }
 
       .c3 {
+        padding-block-start: 8px;
         padding-inline-end: 12px;
+        padding-block-end: 8px;
         padding-inline-start: 12px;
-      }
-
-      .c2 {
-        font-size: 1.2rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
       }
 
       .c0 {
@@ -67,12 +62,16 @@ describe('<Input />', () => {
         justify-content: space-between;
       }
 
+      .c2 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
       .c6 {
         border: none;
         border-radius: 4px;
-        padding: 0;
-        padding-bottom: 0.8rem;
-        padding-top: 0.8rem;
         color: #32324d;
         font-weight: 400;
         font-size: 1.4rem;

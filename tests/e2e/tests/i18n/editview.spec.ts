@@ -439,7 +439,10 @@ test.describe('Edit view', () => {
        * Edit the field and apply the validation constraint
        */
       await page.getByRole('link', { name: 'Article' }).click();
-      await page.getByLabel(`Edit ${field}`).first().click();
+      await page
+        .getByRole('button', { name: `Edit ${field}` })
+        .first()
+        .click();
       await page.getByRole('tab', { name: 'Advanced settings' }).click();
 
       const ctbOperatonType = ctbOperation?.type ?? '';

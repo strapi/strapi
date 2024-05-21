@@ -1,6 +1,5 @@
 import { Flex, Typography } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
-import { styled } from 'styled-components';
 
 interface StageDragPreviewType {
   name: string | null;
@@ -19,7 +18,7 @@ const StageDragPreview = ({ name }: StageDragPreviewType) => {
       shadow="tableShadow"
       width="30rem"
     >
-      <Toggle
+      <Flex
         alignItems="center"
         background="neutral200"
         borderRadius="50%"
@@ -27,19 +26,13 @@ const StageDragPreview = ({ name }: StageDragPreviewType) => {
         justifyContent="center"
         width={6}
       >
-        <CaretDown width="0.8rem" />
-      </Toggle>
+        <CaretDown width="0.8rem" fill="neutral600" />
+      </Flex>
 
       <Typography fontWeight="bold">{name}</Typography>
     </Flex>
   );
 };
-
-const Toggle = styled(Flex)`
-  svg path {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-`;
 
 export { StageDragPreview };
 export type { StageDragPreviewType };

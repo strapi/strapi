@@ -43,7 +43,7 @@ interface DynamicZoneProps
 
 const DynamicZone = ({
   attribute,
-  disabled,
+  disabled: disabledProp,
   hint,
   label,
   labelAction,
@@ -55,7 +55,8 @@ const DynamicZone = ({
 
   const [addComponentIsOpen, setAddComponentIsOpen] = React.useState(false);
   const [liveText, setLiveText] = React.useState('');
-  const { components } = useDoc();
+  const { components, isLoading } = useDoc();
+  const disabled = disabledProp || isLoading;
   const { addFieldRow, removeFieldRow, moveFieldRow } = useForm(
     'DynamicZone',
     ({ addFieldRow, removeFieldRow, moveFieldRow }) => ({

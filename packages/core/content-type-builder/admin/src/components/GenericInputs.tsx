@@ -298,7 +298,7 @@ const GenericInput = ({
             }}
             onClear={() => onChange({ target: { name, value: null, type } })}
             placeholder={formattedPlaceholder}
-            selectedDate={value}
+            value={value}
           />
         );
       }

@@ -183,8 +183,7 @@ const App = () => {
                             tag="a"
                             disabled={!allowedActions.canRead}
                             href={createDocumentationHref(`${data.prefix}/v${doc.version}`)}
-                            noBorder
-                            icon={<Show />}
+                            borderWidth={0}
                             target="_blank"
                             rel="noopener noreferrer"
                             label={formatMessage(
@@ -194,12 +193,13 @@ const App = () => {
                               },
                               { target: `${doc.version}` }
                             )}
-                          />
+                          >
+                            <Show />
+                          </IconButton>
                           {allowedActions.canRegenerate ? (
                             <IconButton
                               onClick={() => handleRegenerateDoc(doc.version)}
-                              noBorder
-                              icon={<Reload />}
+                              borderWidth={0}
                               label={formatMessage(
                                 {
                                   id: getTrad('pages.PluginPage.table.icon.regenerate'),
@@ -207,13 +207,14 @@ const App = () => {
                                 },
                                 { target: `${doc.version}` }
                               )}
-                            />
+                            >
+                              <Reload />
+                            </IconButton>
                           ) : null}
                           {allowedActions.canUpdate && doc.version !== data.currentVersion ? (
                             <IconButton
                               onClick={() => handleClickDelete(doc.version)}
-                              noBorder
-                              icon={<Trash />}
+                              borderWidth={0}
                               label={formatMessage(
                                 {
                                   id: 'global.delete-target',
@@ -221,7 +222,9 @@ const App = () => {
                                 },
                                 { target: `${doc.version}` }
                               )}
-                            />
+                            >
+                              <Trash />
+                            </IconButton>
                           ) : null}
                         </Flex>
                       </Td>
