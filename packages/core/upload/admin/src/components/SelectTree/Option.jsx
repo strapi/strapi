@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { components } from 'react-select';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const ToggleButton = styled(Flex)`
   align-self: flex-end;
@@ -41,7 +41,7 @@ const Option = ({ children, data, selectProps, ...props }) => {
               id: 'app.utils.toggle',
               defaultMessage: 'Toggle',
             })}
-            as="button"
+            tag="button"
             alignItems="center"
             hasRadius
             justifyContent="center"

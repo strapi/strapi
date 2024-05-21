@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
@@ -45,9 +45,9 @@ const ComponentFixture = (props) => {
   return (
     <MemoryRouter>
       <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
+        <DesignSystemProvider>
           <TableList {...customProps} />
-        </ThemeProvider>
+        </DesignSystemProvider>
       </IntlProvider>
     </MemoryRouter>
   );
@@ -73,11 +73,14 @@ describe('TableList', () => {
     expect(getByRole('gridcell', { name: 'actions' })).toBeInTheDocument();
   });
 
-  it('should call onChangeSort callback when changing sort order', () => {
+  it('should call onChangeSort callback when changing sort order', async () => {
     const onChangeSortSpy = jest.fn();
-    const { getByRole } = setup({ sortQuery: 'updatedAt:ASC', onChangeSort: onChangeSortSpy });
+    const { findByRole } = setup({
+      sortQuery: 'updatedAt:ASC',
+      onChangeSort: onChangeSortSpy,
+    });
 
-    const sortButton = getByRole('button', { name: 'Sort on last update' });
+    const sortButton = await findByRole('button', { name: 'Sort on last update' });
     expect(sortButton).toBeInTheDocument();
 
     fireEvent.click(sortButton);
@@ -85,14 +88,13 @@ describe('TableList', () => {
     expect(onChangeSortSpy).toHaveBeenCalledWith('updatedAt:DESC');
   });
 
-  it('should call onChangeSort callback when changing sort by', () => {
+  it('should call onChangeSort callback when changing sort by', async () => {
     const onChangeSortSpy = jest.fn();
-    const { getByRole } = setup({ sortQuery: 'updatedAt:ASC', onChangeSort: onChangeSortSpy });
+    const { getByText } = setup({ sortQuery: 'updatedAt:ASC', onChangeSort: onChangeSortSpy });
 
-    const sortButton = getByRole('button', { name: 'Sort on name' });
-    expect(sortButton).toBeInTheDocument();
+    expect(getByText('name')).toBeInTheDocument();
 
-    fireEvent.click(sortButton);
+    fireEvent.click(getByText('name'));
 
     expect(onChangeSortSpy).toHaveBeenCalledWith('name:ASC');
   });

@@ -1,20 +1,12 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { fireEvent, render } from '@testing-library/react';
+import { screen, render } from '@tests/utils';
 
-import { ComponentCard, ComponentCardProps } from '../ComponentCard';
+import { ComponentCard } from '../ComponentCard';
 
 describe('ComponentCard', () => {
-  const setup = (props?: Partial<ComponentCardProps>) =>
-    render(
-      <ThemeProvider theme={lightTheme}>
-        <ComponentCard {...props}>test</ComponentCard>
-      </ThemeProvider>
-    );
-
-  it('should call the onClick handler when passed', () => {
+  it('should call the onClick handler when passed', async () => {
     const onClick = jest.fn();
-    const { getByText } = setup({ onClick });
-    fireEvent.click(getByText('test'));
+    const { user } = render(<ComponentCard onClick={onClick}>test</ComponentCard>);
+    await user.click(screen.getByText('test'));
     expect(onClick).toHaveBeenCalled();
   });
 });

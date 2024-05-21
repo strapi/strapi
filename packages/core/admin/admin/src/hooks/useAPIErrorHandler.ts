@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { AxiosError } from 'axios';
 import { IntlFormatters, useIntl } from 'react-intl';
 
+import { FetchError } from '../utils/getFetchClient';
 import { getPrefixedId } from '../utils/getPrefixedId';
 import { NormalizeErrorOptions, normalizeAPIError } from '../utils/normalizeAPIError';
 
@@ -120,18 +120,18 @@ export function useAPIErrorHandler(
   /**
    * @description This method try to normalize the passed error
    * and then call formatAPIError to stringify the ResponseObject
-   * into a string. If it fails it will call formatAxiosError and
+   * into a string. If it fails it will call formatFetchError and
    * return the error message.
    */
   const formatError = React.useCallback(
-    (error: AxiosError<{ error: ApiError }>) => {
+    (error: FetchError) => {
       // Try to normalize the passed error first. This will fail for e.g. network
-      // errors which are thrown by Axios directly.
+      // errors which are thrown by fetchClient directly.
       try {
         const formattedErr = formatAPIError(error, { intlMessagePrefixCallback, formatMessage });
 
         if (!formattedErr) {
-          return formatAxiosError(error, { intlMessagePrefixCallback, formatMessage });
+          return formatFetchError(error, { intlMessagePrefixCallback, formatMessage });
         }
 
         return formattedErr;
@@ -191,7 +191,7 @@ export function useAPIErrorHandler(
               error,
             },
           },
-        } as AxiosError<{ error: BaseQueryError }>;
+        } as FetchError;
 
         /**
          * There's a chance with SerializedErrors that the message is not set.
@@ -201,7 +201,6 @@ export function useAPIErrorHandler(
           return 'Unknown error occured.';
         }
 
-        // @ts-expect-error – UnknownApiError is in the same shape as ApiError, but we don't want to expose this to users yet.
         return formatError(err);
       },
       [formatError]
@@ -210,8 +209,8 @@ export function useAPIErrorHandler(
   };
 }
 
-function formatAxiosError(
-  error: AxiosError<unknown>,
+function formatFetchError(
+  error: FetchError,
   { intlMessagePrefixCallback, formatMessage }: FormatAPIErrorOptions
 ) {
   const { code, message } = error;
@@ -237,7 +236,7 @@ type FormatAPIErrorOptions = Partial<Pick<NormalizeErrorOptions, 'intlMessagePre
  * will bo concatenated into a single string.
  */
 function formatAPIError(
-  error: AxiosError<{ error: ApiError }>,
+  error: FetchError,
   { formatMessage, intlMessagePrefixCallback }: FormatAPIErrorOptions
 ) {
   if (!formatMessage) {

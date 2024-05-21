@@ -12,6 +12,9 @@ const categories = {
   draft: [],
 };
 
+const UID_PRODUCT = 'api::product.product';
+const UID_CATEGORY = 'api::category.category';
+
 const productModel = {
   displayName: 'Product',
   singularName: 'product',
@@ -28,31 +31,61 @@ const productModel = {
     name: {
       type: 'string',
       required: true,
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
     },
     categories: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'api::category.category',
+      target: UID_CATEGORY,
       targetAttribute: 'product',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
     },
     onecategory: {
       type: 'relation',
       relation: 'oneToOne',
-      target: 'api::category.category',
+      target: UID_CATEGORY,
       targetAttribute: 'oneproduct',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
     },
     compo: {
       component: 'default.compo',
       type: 'component',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
     },
     comporep: {
       component: 'default.compo',
       type: 'component',
       repeatable: true,
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
     },
     dz: {
       components: ['default.compo'],
       type: 'dynamiczone',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
     },
   },
 };
@@ -83,18 +116,18 @@ const compoModel = {
     categories: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'api::category.category',
+      target: UID_CATEGORY,
     },
     onecategory: {
       type: 'relation',
       relation: 'oneToOne',
-      target: 'api::category.category',
+      target: UID_CATEGORY,
     },
   },
 };
 
 describe('CM API - Number of draft relations', () => {
-  const locale = 'fr';
+  const nonDefaultLocale = 'fr';
 
   beforeAll(async () => {
     await builder
@@ -112,7 +145,7 @@ describe('CM API - Number of draft relations', () => {
       },
     } = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/api::category.category',
+      url: `/content-manager/collection-types/${UID_CATEGORY}`,
       body: { name: 'Food' },
     });
 
@@ -120,7 +153,7 @@ describe('CM API - Number of draft relations', () => {
       body: { data: categoryPublished },
     } = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::category.category/${idToPublish}/actions/publish`,
+      url: `/content-manager/collection-types/${UID_CATEGORY}/${idToPublish}/actions/publish`,
     });
 
     categories.published.push(categoryPublished);
@@ -129,7 +162,7 @@ describe('CM API - Number of draft relations', () => {
       body: { data: categoryDraft1 },
     } = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/api::category.category',
+      url: `/content-manager/collection-types/${UID_CATEGORY}`,
       body: { name: 'Food' },
     });
 
@@ -139,7 +172,7 @@ describe('CM API - Number of draft relations', () => {
       body: { data: categoryDraft2 },
     } = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/api::category.category',
+      url: `/content-manager/collection-types/${UID_CATEGORY}`,
       body: { name: 'Food' },
     });
 
@@ -150,8 +183,8 @@ describe('CM API - Number of draft relations', () => {
       method: 'POST',
       url: '/i18n/locales',
       body: {
-        code: locale,
-        name: `French (${locale})`,
+        code: nonDefaultLocale,
+        name: `French (${nonDefaultLocale})`,
         isDefault: false,
       },
     });
@@ -167,13 +200,13 @@ describe('CM API - Number of draft relations', () => {
       body: { data: product },
     } = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/api::product.product',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
       body: { name: 'Pizza' },
     });
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(0);
@@ -186,7 +219,7 @@ describe('CM API - Number of draft relations', () => {
       body: { data: product },
     } = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/api::product.product',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
       body: {
         name: 'Pizza',
         onecategory: publishedId,
@@ -208,7 +241,7 @@ describe('CM API - Number of draft relations', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(0);
@@ -221,7 +254,7 @@ describe('CM API - Number of draft relations', () => {
       body: { data: product },
     } = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/api::product.product',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
       body: {
         name: 'Pizza',
         onecategory: draftId,
@@ -243,7 +276,7 @@ describe('CM API - Number of draft relations', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(8);
@@ -257,7 +290,7 @@ describe('CM API - Number of draft relations', () => {
       body: { data: product },
     } = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/api::product.product',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
       body: {
         name: 'Pizza',
         onecategory: draftId,
@@ -284,7 +317,7 @@ describe('CM API - Number of draft relations', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(8);
@@ -299,7 +332,7 @@ describe('CM API - Number of draft relations', () => {
       body: { data: product },
     } = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/api::product.product',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
       body: {
         name: 'Pizza',
         onecategory: draft1Id,
@@ -326,15 +359,13 @@ describe('CM API - Number of draft relations', () => {
 
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${product.documentId}/actions/countDraftRelations`,
+      url: `/content-manager/collection-types/${UID_PRODUCT}/${product.documentId}/actions/countDraftRelations`,
     });
 
     expect(body.data).toBe(12);
   });
 
   test('Return 8 when there are 8 drafts in a non default locale', async () => {
-    const localeQuery = `plugins[i18n][locale]=${locale}`;
-
     // Create categories in a non default locale
     const {
       body: {
@@ -342,25 +373,26 @@ describe('CM API - Number of draft relations', () => {
       },
     } = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::category.category?${localeQuery}`,
+      url: `/content-manager/collection-types/${UID_CATEGORY}`,
       body: { name: 'Nourriture' },
+      qs: { locale: nonDefaultLocale },
     });
 
     const {
       body: { data: categoryPublished },
     } = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::category.category/${idToPublish}/actions/publish`,
-      qs: { locale },
+      url: `/content-manager/collection-types/${UID_CATEGORY}/${idToPublish}/actions/publish`,
+      qs: { locale: nonDefaultLocale },
     });
 
     const {
       body: { data: categoryDraft },
     } = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::category.category`,
+      url: `/content-manager/collection-types/${UID_CATEGORY}`,
       body: { name: 'Nourriture' },
-      qs: { locale },
+      qs: { locale: nonDefaultLocale },
     });
 
     const publishedId = categoryPublished.id;
@@ -371,8 +403,8 @@ describe('CM API - Number of draft relations', () => {
       body: { data: localisedProduct },
     } = await rq({
       method: 'POST',
-      url: `/content-manager/collection-types/api::product.product`,
-      qs: { locale },
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
+      qs: { locale: nonDefaultLocale },
       body: {
         name: 'PizzaFR',
         onecategory: draftId,
@@ -400,10 +432,80 @@ describe('CM API - Number of draft relations', () => {
     // Ensure we can count the number of draft relations when the entry is in a non default locale
     const { body } = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/api::product.product/${localisedProduct.documentId}/actions/countDraftRelations`,
-      qs: { locale },
+      url: `/content-manager/collection-types/${UID_PRODUCT}/${localisedProduct.documentId}/actions/countDraftRelations`,
+      qs: { locale: nonDefaultLocale },
     });
 
     expect(body.data).toBe(8);
+  });
+
+  test('Correctly count the number of draft relations across multiple locales and document IDs', async () => {
+    // Reset the database and create new data for this test
+    await strapi.query(UID_PRODUCT).deleteMany({});
+    await strapi.query(UID_CATEGORY).deleteMany({});
+
+    // Create multiple new categories and products
+    const categories = await Promise.all([
+      rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${UID_CATEGORY}`,
+        body: { name: 'New Draft Category 1' },
+      }),
+      rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${UID_CATEGORY}`,
+        body: { name: 'New Draft Category 2' },
+      }),
+      rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${UID_CATEGORY}`,
+        body: { name: 'New Draft Category 3' },
+      }),
+    ]);
+
+    const categoryIds = categories.map(({ body: { data } }) => data.id);
+
+    const products = await Promise.all([
+      rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${UID_PRODUCT}`,
+        body: {
+          name: 'New Product 1',
+          categories: [categoryIds[0]],
+        },
+      }),
+      rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${UID_PRODUCT}`,
+        body: {
+          name: 'New Product 2',
+          categories: [categoryIds[1], categoryIds[0]],
+        },
+      }),
+      rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${UID_PRODUCT}`,
+        body: {
+          name: 'New Product 3',
+          categories: [categoryIds[2]],
+        },
+      }),
+    ]);
+
+    const productIds = products.map(({ body: { data } }) => data.documentId);
+
+    // Count draft relations for each new product
+    const counts = await Promise.all(
+      productIds.map((documentId) =>
+        rq({
+          method: 'GET',
+          url: `/content-manager/collection-types/${UID_PRODUCT}/${documentId}/actions/countDraftRelations`,
+        })
+      )
+    );
+
+    const totalDraftRelations = counts.reduce((acc, { body }) => acc + body.data, 0);
+
+    expect(totalDraftRelations).toBe(3);
   });
 });

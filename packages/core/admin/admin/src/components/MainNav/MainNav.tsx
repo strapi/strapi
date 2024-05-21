@@ -1,14 +1,14 @@
-import { Flex, FlexProps } from '@strapi/design-system';
-import styled from 'styled-components';
+import { Flex, FlexComponent, FlexProps } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
-const MainNavWrapper = styled(Flex)`
+const MainNavWrapper = styled<FlexComponent<'nav'>>(Flex)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
 const MainNav = (props: FlexProps<'nav'>) => (
   <MainNavWrapper
     alignItems="normal"
-    as="nav"
+    tag="nav"
     background="neutral0"
     direction="column"
     height="100vh"

@@ -4,7 +4,7 @@ import { Initials, Flex, Menu, ButtonProps, VisuallyHidden } from '@strapi/desig
 import { SignOut } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useAuth } from '../../features/Auth';
 
@@ -48,7 +48,7 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
           <Initials>{initials}</Initials>
-          <VisuallyHidden as="span">{children}</VisuallyHidden>
+          <VisuallyHidden tag="span">{children}</VisuallyHidden>
         </MenuTrigger>
         <MenuContent popoverPlacement="top" zIndex={3} width="15rem">
           <MenuItem onSelect={handleProfile}>

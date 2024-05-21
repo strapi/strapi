@@ -126,17 +126,23 @@ const traverseEntityRelations = async (
 ) => {
   return traverseEntity(
     async (options, utils) => {
-      if (options.attribute.type !== 'relation') {
+      const { attribute } = options;
+
+      if (!attribute) {
+        return;
+      }
+
+      if (attribute.type !== 'relation') {
         return;
       }
 
       // TODO: Handle join columns
-      if (options.attribute.useJoinTable === false) {
+      if (attribute.useJoinTable === false) {
         return;
       }
 
       // TODO: Handle morph relations (they have multiple targets)
-      const target = options.attribute.target as UID.Schema | undefined;
+      const target = attribute.target as UID.Schema | undefined;
       if (!target) {
         return;
       }

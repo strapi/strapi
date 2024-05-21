@@ -5,7 +5,7 @@ import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const EditLink = styled(Link)`
   align-items: center;
@@ -85,13 +85,14 @@ const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelet
               {checkCanDeleteRole(role) && (
                 <IconButton
                   onClick={() => handleClickDelete(role.id.toString())}
-                  noBorder
-                  icon={<Trash />}
+                  borderWidth={0}
                   label={formatMessage(
                     { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
                     { target: `${role.name}` }
                   )}
-                />
+                >
+                  <Trash />
+                </IconButton>
               )}
             </Flex>
           </Td>
@@ -110,7 +111,6 @@ TableBody.defaultProps = {
 
 TableBody.propTypes = {
   onDelete: PropTypes.array.isRequired,
-  permissions: PropTypes.object.isRequired,
   setRoleToDelete: PropTypes.func.isRequired,
   sortedRoles: PropTypes.array.isRequired,
   canDelete: PropTypes.bool,

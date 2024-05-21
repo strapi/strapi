@@ -15,18 +15,15 @@ import {
 } from '@strapi/admin/strapi-admin/test';
 
 import { reducer } from '../src/modules/reducers';
-import { contentManagerApi } from '../src/services/api';
 
 const storeConfig: ConfigureStoreOptions = {
   preloadedState: defaultTestStoreConfig.preloadedState,
   reducer: {
     ...defaultTestStoreConfig.reducer,
-    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
     'content-manager': reducer,
   },
   middleware: (getDefaultMiddleware) => [
     ...defaultTestStoreConfig.middleware(getDefaultMiddleware),
-    contentManagerApi.middleware,
   ],
 };
 

@@ -2,9 +2,8 @@ import * as React from 'react';
 
 import {
   Accordion,
-  AccordionContent,
-  AccordionToggle,
   Box,
+  BoxComponent,
   Checkbox,
   Flex,
   Grid,
@@ -14,7 +13,7 @@ import {
 import { Cog } from '@strapi/icons';
 import capitalize from 'lodash/capitalize';
 import { useIntl } from 'react-intl';
-import styled, { css } from 'styled-components';
+import { styled, css } from 'styled-components';
 
 import { ContentApiPermission } from '../../../../../../../../shared/contracts/content-api/permissions';
 import { useApiTokenPermissions } from '../apiTokenPermissions';
@@ -26,7 +25,7 @@ const activeCheckboxWrapperStyles = css`
   }
 `;
 
-const CheckboxWrapper = styled(Box)<{ isActive: boolean }>`
+const CheckboxWrapper = styled<BoxComponent>(Box)<{ $isActive: boolean }>`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -39,7 +38,7 @@ const CheckboxWrapper = styled(Box)<{ isActive: boolean }>`
   }
 
   /* Show active style both on hover and when the action is selected */
-  ${(props) => props.isActive && activeCheckboxWrapperStyles}
+  ${(props) => props.$isActive && activeCheckboxWrapperStyles}
   &:hover {
     ${activeCheckboxWrapperStyles}
   }
@@ -56,8 +55,6 @@ interface CollapsableContentTypeProps {
   label: ContentApiPermission['label'];
   orderNumber?: number;
   disabled?: boolean;
-  onExpanded?: (orderNumber: number) => void;
-  indexExpandendCollapsedContent: number | null;
 }
 
 export const CollapsableContentType = ({
@@ -65,40 +62,20 @@ export const CollapsableContentType = ({
   label,
   orderNumber = 0,
   disabled = false,
-  onExpanded = () => null,
-  indexExpandendCollapsedContent = null,
 }: CollapsableContentTypeProps) => {
   const {
     value: { onChangeSelectAll, onChange, selectedActions, setSelectedAction, selectedAction },
   } = useApiTokenPermissions();
-  const [expanded, setExpanded] = React.useState(false);
   const { formatMessage } = useIntl();
-
-  const handleExpandedAccordion = () => {
-    setExpanded((s) => !s);
-    onExpanded(orderNumber);
-  };
-
-  React.useEffect(() => {
-    if (
-      indexExpandendCollapsedContent !== null &&
-      indexExpandendCollapsedContent !== orderNumber &&
-      expanded
-    ) {
-      setExpanded(false);
-    }
-  }, [indexExpandendCollapsedContent, orderNumber, expanded]);
 
   const isActionSelected = (actionId: string) => actionId === selectedAction;
 
   return (
-    <Accordion
-      expanded={expanded}
-      onToggle={handleExpandedAccordion}
-      variant={orderNumber % 2 ? 'primary' : 'secondary'}
-    >
-      <AccordionToggle title={capitalize(label)} />
-      <AccordionContent>
+    <Accordion.Item value={`${label}-${orderNumber}`}>
+      <Accordion.Header variant={orderNumber % 2 ? 'primary' : 'secondary'}>
+        <Accordion.Trigger>{capitalize(label)}</Accordion.Trigger>
+      </Accordion.Header>
+      <Accordion.Content>
         {controllers?.map((controller) => {
           const allActionsSelected = controller.actions.every((action) =>
             selectedActions.includes(action.actionId)
@@ -136,7 +113,7 @@ export const CollapsableContentType = ({
                     return (
                       <GridItem col={6} key={action.actionId}>
                         <CheckboxWrapper
-                          isActive={isActionSelected(action.actionId)}
+                          $isActive={isActionSelected(action.actionId)}
                           padding={2}
                           hasRadius
                         >
@@ -168,7 +145,7 @@ export const CollapsableContentType = ({
             </Box>
           );
         })}
-      </AccordionContent>
-    </Accordion>
+      </Accordion.Content>
+    </Accordion.Item>
   );
 };

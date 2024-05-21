@@ -1,12 +1,20 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
+import {
+  Flex,
+  Tooltip,
+  SingleSelect,
+  SingleSelectOption,
+  Box,
+  FlexComponent,
+  BoxComponent,
+} from '@strapi/design-system';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import {
   type BlocksStore,
@@ -17,7 +25,7 @@ import {
 import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
-const ToolbarWrapper = styled(Flex)`
+const ToolbarWrapper = styled<FlexComponent>(Flex)`
   &[aria-disabled='true'] {
     cursor: not-allowed;
   }
@@ -29,7 +37,7 @@ const Separator = styled(Toolbar.Separator)`
   height: 2.4rem;
 `;
 
-const FlexButton = styled(Flex)`
+const FlexButton = styled<FlexComponent<'button'>>(Flex)`
   // Inherit the not-allowed cursor from ToolbarWrapper when disabled
   &[aria-disabled] {
     cursor: inherit;
@@ -45,7 +53,7 @@ const FlexButton = styled(Flex)`
   }
 `;
 
-const SelectWrapper = styled(Box)`
+const SelectWrapper = styled<BoxComponent>(Box)`
   // Styling changes to SingleSelect component don't work, so adding wrapper to target SingleSelect
   div[role='combobox'] {
     border: none;
@@ -128,7 +136,7 @@ const ToolbarButton = ({
         asChild
       >
         <FlexButton
-          as="button"
+          tag="button"
           background={isActive ? 'primary100' : ''}
           alignItems="center"
           justifyContent="center"

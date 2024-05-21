@@ -1,6 +1,6 @@
 {
   "name": "@strapi/content-manager",
-  "version": "5.0.0-beta.6",
+  "version": "5.0.0-beta.7",
   "description": "A powerful UI to easily manage your data.",
   "repository": {
     "type": "git",
@@ -60,11 +60,10 @@
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/design-system": "2.0.0-beta.2",
-    "@strapi/icons": "2.0.0-beta.2",
-    "@strapi/types": "5.0.0-beta.6",
-    "@strapi/utils": "5.0.0-beta.6",
-    "axios": "1.6.8",
+    "@strapi/design-system": "2.0.0-beta.4",
+    "@strapi/icons": "2.0.0-beta.4",
+    "@strapi/types": "5.0.0-beta.7",
+    "@strapi/utils": "5.0.0-beta.7",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "fractional-indexing": "3.2.0",
@@ -98,25 +97,25 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.0.0-beta.6",
+    "@strapi/admin": "5.0.0-beta.7",
     "@strapi/database": "workspace:*",
     "@strapi/pack-up": "5.0.0",
-    "@testing-library/react": "14.0.0",
+    "@testing-library/react": "15.0.7",
     "@types/jest": "29.5.2",
     "@types/lodash": "^4.14.191",
     "koa-body": "6.0.1",
     "msw": "1.3.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
-    "styled-components": "5.3.11"
+    "styled-components": "6.1.8"
   },
   "peerDependencies": {
     "@strapi/admin": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
-    "styled-components": "^5.2.1"
+    "styled-components": "^6.0.0"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

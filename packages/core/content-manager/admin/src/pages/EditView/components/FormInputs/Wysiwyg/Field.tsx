@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useField, useStrapiApp, type InputProps } from '@strapi/admin/strapi-admin';
-import { Field, FieldError, FieldHint, FieldLabel, Flex } from '@strapi/design-system';
+import { Field, Flex } from '@strapi/design-system';
 import { EditorFromTextArea } from 'codemirror5';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../../utils/urls';
@@ -103,9 +103,9 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
     };
 
     return (
-      <Field name={name} hint={hint} error={field.error} required={required}>
+      <Field.Root name={name} hint={hint} error={field.error} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <FieldLabel action={labelAction}>{label}</FieldLabel>
+          <Field.Label action={labelAction}>{label}</Field.Label>
           <EditorLayout
             isExpandMode={isExpandMode}
             error={field.error}
@@ -138,17 +138,19 @@ const Wysiwyg = React.forwardRef<EditorApi, WysiwygProps>(
 
             {!isExpandMode && <WysiwygFooter onToggleExpand={handleToggleExpand} />}
           </EditorLayout>
-          <FieldHint />
-          <FieldError />
+          <Field.Hint />
+          <Field.Error />
         </Flex>
         {mediaLibVisible && (
           // @ts-expect-error – TODO: fix this way of injecting because it's not really typeable without a registry.
           <MediaLibraryDialog onClose={handleToggleMediaLib} onSelectAssets={handleSelectAssets} />
         )}
-      </Field>
+      </Field.Root>
     );
   }
 );
 
-export { Wysiwyg };
+const MemoizedWysiwyg = React.memo(Wysiwyg);
+
+export { MemoizedWysiwyg as Wysiwyg };
 export type { WysiwygProps };

@@ -1,11 +1,10 @@
 import React from 'react';
 
-import { Flex, FocusTrap, IconButton, VisuallyHidden } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system';
+import { Flex, FocusTrap, IconButton, Menu } from '@strapi/design-system';
 import { Check, Cross } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import getTrad from '../../../utils/getTrad';
 
@@ -23,18 +22,22 @@ export const CroppingActions = ({ onCancel, onValidate, onDuplicate }) => {
               id: getTrad('control-card.stop-crop'),
               defaultMessage: 'Stop cropping',
             })}
-            icon={<Cross />}
             onClick={onCancel}
-          />
+          >
+            <Cross />
+          </IconButton>
 
           <Menu.Root>
-            <Trigger variant="tertiary" paddingLeft={2} paddingRight={2} endIcon={null}>
-              <VisuallyHidden as="span">
-                {formatMessage({
-                  id: getTrad('control-card.crop'),
-                  defaultMessage: 'Crop',
-                })}
-              </VisuallyHidden>
+            <Trigger
+              aria-label={formatMessage({
+                id: getTrad('control-card.crop'),
+                defaultMessage: 'Crop',
+              })}
+              variant="tertiary"
+              paddingLeft={2}
+              paddingRight={2}
+              endIcon={null}
+            >
               <Check
                 aria-hidden
                 focusable={false}

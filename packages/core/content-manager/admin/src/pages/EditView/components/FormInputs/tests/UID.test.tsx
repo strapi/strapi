@@ -81,7 +81,7 @@ describe('UIDInput', () => {
     await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
     await waitFor(() =>
-      expect(screen.getByRole('textbox', { name: 'Label *' })).toHaveValue('regenerated')
+      expect(screen.getByRole('textbox', { name: 'Label' })).toHaveValue('regenerated')
     );
   });
 
@@ -95,7 +95,7 @@ describe('UIDInput', () => {
 
     await waitFor(() => expect(screen.queryByTestId('loading-wrapper')).not.toBeInTheDocument());
 
-    expect(screen.getByRole('textbox', { name: 'Label *' })).not.toHaveValue('regenerated');
+    expect(screen.getByRole('textbox', { name: 'Label' })).not.toHaveValue('regenerated');
   });
 
   test('Checks the initial availability (isAvailable)', async () => {

@@ -9,7 +9,7 @@ import { Layouts } from '../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
-import { useRegenerateTokenMutation } from '../../../../services/api';
+import { useRegenerateTokenMutation } from '../../../../services/transferTokens';
 
 import type { Data } from '@strapi/types';
 

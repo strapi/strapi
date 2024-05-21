@@ -15,9 +15,9 @@ describe('SettingsPage', () => {
 
     expect(getByRole('button', { name: 'Save' })).toBeInTheDocument();
 
-    expect(getByRole('checkbox', { name: 'responsiveDimensions' })).toBeInTheDocument();
-    expect(getByRole('checkbox', { name: 'sizeOptimization' })).toBeInTheDocument();
-    expect(getByRole('checkbox', { name: 'autoOrientation' })).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: 'Responsive friendly upload' })).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: 'Size optimization' })).toBeInTheDocument();
+    expect(getByRole('checkbox', { name: 'Auto orientation' })).toBeInTheDocument();
   });
 
   it('should display the form correctly with the initial values', async () => {
@@ -27,8 +27,8 @@ describe('SettingsPage', () => {
 
     expect(getByRole('button', { name: 'Save' })).toBeDisabled();
 
-    expect(getByRole('checkbox', { name: 'responsiveDimensions' })).toBeChecked();
-    expect(getByRole('checkbox', { name: 'sizeOptimization' })).toBeChecked();
-    expect(getByRole('checkbox', { name: 'autoOrientation' })).toBeChecked();
+    expect(getByRole('checkbox', { name: 'Responsive friendly upload' })).toBeChecked();
+    expect(getByRole('checkbox', { name: 'Size optimization' })).toBeChecked();
+    expect(getByRole('checkbox', { name: 'Auto orientation' })).toBeChecked();
   });
 });

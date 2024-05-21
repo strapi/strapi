@@ -1,8 +1,8 @@
-import { AxiosError, AxiosHeaders } from 'axios';
+import { FetchError } from '@strapi/admin/strapi-admin';
 
 import getAPIInnerErrors from '../getAPIInnerErrors';
 
-const API_VALIDATION_ERROR_FIXTURE = new AxiosError(undefined, undefined, undefined, undefined, {
+const API_VALIDATION_ERROR_FIXTURE = new FetchError('ValidationError', {
   data: {
     error: {
       name: 'ValidationError',
@@ -25,12 +25,9 @@ const API_VALIDATION_ERROR_FIXTURE = new AxiosError(undefined, undefined, undefi
     },
   },
   status: 422,
-  statusText: 'Validation',
-  headers: {},
-  config: { headers: new AxiosHeaders() },
 });
 
-const API_APPLICATION_ERROR_FIXTURE = new AxiosError(undefined, undefined, undefined, undefined, {
+const API_APPLICATION_ERROR_FIXTURE = new FetchError('ApplicationError', {
   data: {
     error: {
       name: 'ApplicationError',
@@ -39,9 +36,6 @@ const API_APPLICATION_ERROR_FIXTURE = new AxiosError(undefined, undefined, undef
     },
   },
   status: 400,
-  statusText: 'Bad Request',
-  headers: {},
-  config: { headers: new AxiosHeaders() },
 });
 
 describe('getAPIInnerError', () => {

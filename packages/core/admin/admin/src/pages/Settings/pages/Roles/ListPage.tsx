@@ -12,7 +12,6 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
-import { AxiosError } from 'axios';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -29,6 +28,7 @@ import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
+import { isFetchError } from '../../../../utils/getFetchClient';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
 
@@ -72,7 +72,7 @@ const ListPage = () => {
         type: 'RESET_DATA_TO_DELETE',
       });
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (isFetchError(error)) {
         toggleNotification({
           type: 'danger',
           message: formatAPIError(error),
@@ -147,7 +147,6 @@ const ListPage = () => {
           id: 'Settings.roles.list.description',
           defaultMessage: 'List of roles',
         })}
-        as="h2"
       />
       {canRead && (
         <Layouts.Action
@@ -235,19 +234,19 @@ const ListPage = () => {
                             id: 'app.utils.duplicate',
                             defaultMessage: 'Duplicate',
                           }),
-                          icon: <Duplicate />,
+                          children: <Duplicate />,
                         } satisfies RoleRowProps['icons'][number]),
                       canUpdate &&
                         ({
                           onClick: () => navigate(role.id.toString()),
                           label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
-                          icon: <Pencil />,
+                          children: <Pencil />,
                         } satisfies RoleRowProps['icons'][number]),
                       canDelete &&
                         ({
                           onClick: handleClickDelete(role),
                           label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
-                          icon: <Trash />,
+                          children: <Trash />,
                         } satisfies RoleRowProps['icons'][number]),
                     ].filter(Boolean) as RoleRowProps['icons']
                   }

@@ -168,7 +168,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
                   <Box>
-                    <Typography variant="beta" as="h2">
+                    <Typography variant="beta" tag="h2">
                       {formatMessage({
                         id: 'app.components.Users.ModalCreateBody.block-title.details',
                         defaultMessage: 'User details',
@@ -196,7 +196,7 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                     </Box>
                   </Box>
                   <Box>
-                    <Typography variant="beta" as="h2">
+                    <Typography variant="beta" tag="h2">
                       {formatMessage({
                         id: 'global.roles',
                         defaultMessage: "User's role",

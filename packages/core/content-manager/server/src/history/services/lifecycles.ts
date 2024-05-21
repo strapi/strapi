@@ -65,6 +65,15 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         const defaultLocale = await serviceUtils.getDefaultLocale();
         const locale = documentContext.locale || defaultLocale;
 
+        if (Array.isArray(locale)) {
+          strapi.log.warn(
+            '[Content manager history middleware]: An array of locales was provided, but only a single locale is supported for the findOne operation.'
+          );
+          // TODO calls picked from the middleware could contain an array of
+          // locales. This is incompatible with our call to findOne below.
+          return next();
+        }
+
         const document = await strapi.documents(contentTypeUid).findOne({
           documentId: documentContext.documentId,
           locale,

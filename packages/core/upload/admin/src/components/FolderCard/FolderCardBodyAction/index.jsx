@@ -3,7 +3,7 @@ import React from 'react';
 import { Box } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 const BoxOutline = styled(Box)`
   &:focus {
@@ -23,7 +23,7 @@ export const FolderCardBodyAction = ({ to, ...props }) => {
         // padding needed to give outline space to appear
         // since FolderCardBody needs overflow hidden property
         padding={1}
-        as={NavLink}
+        tag={NavLink}
         maxWidth="100%"
         to={to}
         {...props}
@@ -31,7 +31,7 @@ export const FolderCardBodyAction = ({ to, ...props }) => {
     );
   }
 
-  return <BoxOutline padding={1} as="button" type="button" maxWidth="100%" {...props} />;
+  return <BoxOutline padding={1} tag="button" type="button" maxWidth="100%" {...props} />;
 };
 
 FolderCardBodyAction.defaultProps = {

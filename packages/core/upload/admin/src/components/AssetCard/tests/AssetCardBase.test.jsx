@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -12,7 +12,7 @@ const render = (props) => ({
   ...renderRTL(<AssetCardBase name="Card" extension="png" {...props} />, {
     wrapper: ({ children }) => (
       <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+        <DesignSystemProvider>{children}</DesignSystemProvider>
       </IntlProvider>
     ),
   }),

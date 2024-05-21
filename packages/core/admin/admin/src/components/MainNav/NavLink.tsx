@@ -1,8 +1,14 @@
 import * as React from 'react';
 
-import { Tooltip, Flex, Badge, BadgeProps } from '@strapi/design-system';
+import {
+  Tooltip,
+  TooltipProps as DSTooltipProps,
+  Badge,
+  BadgeProps,
+  AccessibleIcon,
+} from '@strapi/design-system';
 import { NavLink as RouterLink, LinkProps } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * Link
@@ -15,6 +21,8 @@ const MainNavLinkWrapper = styled(RouterLink)`
   color: ${({ theme }) => theme.colors.neutral500};
   position: relative;
   width: fit-content;
+  padding-block: 0.6rem;
+  padding-inline: 0.6rem;
 
   &:hover,
   &.active {
@@ -47,10 +55,8 @@ const LinkImpl = ({ children, ...props }: LinkProps) => {
  * -----------------------------------------------------------------------------------------------*/
 const TooltipImpl = ({ children, label, position = 'right' }: NavLink.TooltipProps) => {
   return (
-    <Tooltip position={position} label={label}>
-      <Flex justifyContent="center" width={7} height={7}>
-        {children}
-      </Flex>
+    <Tooltip side={position} label={label}>
+      <span>{children}</span>
     </Tooltip>
   );
 };
@@ -58,15 +64,11 @@ const TooltipImpl = ({ children, label, position = 'right' }: NavLink.TooltipPro
 /* -------------------------------------------------------------------------------------------------
  * Icon
  * -----------------------------------------------------------------------------------------------*/
-const IconImpl = ({ children }: { children: React.ReactNode }) => {
+const IconImpl = ({ label, children }: { label: string; children: React.ReactNode }) => {
   if (!children) {
     return null;
   }
-  return (
-    <Flex justifyContent="center" aria-hidden as="span" width={5} height={5}>
-      {children}
-    </Flex>
-  );
+  return <AccessibleIcon label={label}>{children}</AccessibleIcon>;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -85,7 +87,6 @@ const BadgeImpl = ({ children, label, ...props }: NavLink.NavBadgeProps) => {
   return (
     <CustomBadge
       position="absolute"
-      width="2.3rem"
       top="-0.8rem"
       left="1.7rem"
       aria-label={label}
@@ -116,9 +117,9 @@ namespace NavLink {
   }
 
   export interface TooltipProps {
-    position?: 'top' | 'bottom' | 'left' | 'right';
-    label?: string;
     children: React.ReactNode;
+    label?: string;
+    position?: DSTooltipProps['side'];
   }
 }
 

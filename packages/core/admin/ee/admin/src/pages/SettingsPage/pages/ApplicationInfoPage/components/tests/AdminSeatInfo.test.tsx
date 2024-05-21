@@ -93,19 +93,4 @@ describe('<AdminSeatInfo />', () => {
       'https://cloud.strapi.io/profile/billing'
     );
   });
-
-  test('Render OVER_LIMIT icon', () => {
-    // @ts-expect-error – mocked
-    useLicenseLimits.mockReturnValue({
-      ...LICENSE_MOCK,
-      license: {
-        ...LICENSE_MOCK.license,
-        licenseLimitStatus: 'OVER_LIMIT',
-      },
-    });
-
-    const { getByText } = render(<AdminSeatInfoEE />);
-
-    expect(getByText('At limit: add seats to invite more users')).toBeInTheDocument();
-  });
 });

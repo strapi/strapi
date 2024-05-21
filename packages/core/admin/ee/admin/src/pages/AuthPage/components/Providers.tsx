@@ -1,7 +1,7 @@
 import { Box, Button, Divider, Flex, Loader, Main, Typography, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { Logo } from '../../../../../../admin/src/components/UnauthenticatedLogo';
 import {
@@ -38,7 +38,7 @@ const Providers = () => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={1}>
-              <Typography as="h1" variant="alpha">
+              <Typography tag="h1" variant="alpha">
                 {formatMessage({ id: 'Auth.form.welcome.title' })}
               </Typography>
             </Box>
@@ -72,8 +72,7 @@ const Providers = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            {/* @ts-expect-error – error with inferring the props from the as component */}
-            <Link as={NavLink} to="/auth/forgot-password">
+            <Link tag={NavLink} to="/auth/forgot-password">
               <Typography variant="pi">
                 {formatMessage({ id: 'Auth.link.forgot-password' })}
               </Typography>

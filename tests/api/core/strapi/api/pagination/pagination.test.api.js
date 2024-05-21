@@ -82,8 +82,7 @@ describe('Pagination API', () => {
   });
 
   describe('Paginate entities', () => {
-    // TODO V5: Fix page and page size on document service
-    describe.skip('Use page & pageSize', () => {
+    describe('Use page & pageSize', () => {
       test('First page', async () => {
         const { body } = await getProductAPI({ page: 1, pageSize: 2 });
 
