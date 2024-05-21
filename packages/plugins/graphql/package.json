@@ -42,7 +42,7 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "strapi-plugin build --force",
+    "build": "strapi-plugin build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "watch": "strapi-plugin watch"
