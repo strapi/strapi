@@ -46,7 +46,7 @@ test.describe('Edit collection type', () => {
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
 
-  test('Can toggle draft&publish', async ({ page }) => {    
+  test('Can toggle draft&publish', async ({ page }) => {
     await page.getByRole('button', { name: 'Edit' }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
@@ -60,7 +60,9 @@ test.describe('Edit collection type', () => {
 
   test('Can add a field with default value', async ({ page }) => {
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
-    await page.getByRole('button', { name: 'Text Small or long text like title or description' }).click();
+    await page
+      .getByRole('button', { name: 'Text Small or long text like title or description' })
+      .click();
     await page.getByLabel('Name', { exact: true }).fill('testfield');
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByRole('textbox', { name: 'Default value' }).fill('mydefault');

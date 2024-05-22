@@ -5,7 +5,6 @@ import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
 import { createSingleType, navToHeader, skipCtbTour } from '../../../utils/shared';
 
-
 test.describe('Edit single type', () => {
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
@@ -47,7 +46,7 @@ test.describe('Edit single type', () => {
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
 
-  test('Can toggle draft&publish', async ({ page }) => {    
+  test('Can toggle draft&publish', async ({ page }) => {
     await page.getByRole('button', { name: 'Edit' }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
@@ -61,7 +60,9 @@ test.describe('Edit single type', () => {
 
   test('Can add a field with default value', async ({ page }) => {
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
-    await page.getByRole('button', { name: 'Text Small or long text like title or description' }).click();
+    await page
+      .getByRole('button', { name: 'Text Small or long text like title or description' })
+      .click();
     await page.getByLabel('Name', { exact: true }).fill('testfield');
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByRole('textbox', { name: 'Default value' }).fill('mydefault');

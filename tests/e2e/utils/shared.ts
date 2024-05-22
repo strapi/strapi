@@ -66,7 +66,6 @@ export const findAndClose = async (
   await closeBtn.click();
 };
 
-
 type ContentTypeData = {
   name: string;
   pluralId?: string;
