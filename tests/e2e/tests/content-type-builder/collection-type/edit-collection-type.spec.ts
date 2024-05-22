@@ -67,6 +67,8 @@ test.describe('Edit collection type', () => {
     await createCollectionType(page, {
       name: ctName,
     });
+
+    await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
 
   // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
@@ -75,31 +77,40 @@ test.describe('Edit collection type', () => {
     await resetFiles();
   });
 
-  test('Can edit a collection type', async ({ page }) => {
-    await navToHeader(page, ['Content-Type Builder', ctName], ctName);
-    // await page.getByRole('button', { name: 'Create new collection type' }).click();
+  test('Can toggle internationalization', async ({ page }) => {
+    await page.getByRole('button', { name: 'Edit' }).click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Internationalization').click();
+    await page.getByRole('button', { name: 'Finish' }).click();
 
-    // await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
+    await waitForRestart(page);
 
-    // const displayName = page.getByLabel('Display name');
-    // await displayName.fill('Secret Document');
+    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+  });
 
-    // const singularId = page.getByLabel('API ID (Singular)');
-    // await expect(singularId).toHaveValue('secret-document');
+  test('Can toggle draft&publish', async ({ page }) => {    
+    await page.getByRole('button', { name: 'Edit' }).click();
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByText('Draft & publish').click();
+    await page.getByRole('button', { name: 'Yes, disable' }).click();
+    await page.getByRole('button', { name: 'Finish' }).click();
 
-    // const pluralId = page.getByLabel('API ID (Plural)');
-    // await expect(pluralId).toHaveValue('secret-documents');
+    await waitForRestart(page);
 
-    // await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+  });
 
-    // await expect(page.getByText('Select a field for your collection type')).toBeVisible();
-    // await page.getByText('Small or long text').click();
-    // await page.getByLabel('Name', { exact: true }).fill('myattribute');
-    // await page.getByRole('button', { name: 'Finish' }).click();
-    // await page.getByRole('button', { name: 'Save' }).click();
+  test('Can add a field with default value', async ({ page }) => {
+    await page.getByRole('button', { name: 'Add another field', exact: true }).click();
+    await page.getByRole('button', { name: 'Text Small or long text like title or description' }).click();
+    await page.getByLabel('Name', { exact: true }).fill('testfield');
+    await page.getByRole('tab', { name: 'Advanced settings' }).click();
+    await page.getByRole('textbox', { name: 'Default value' }).fill('mydefault');
+    await page.getByRole('button', { name: 'Finish' }).click();
+    await page.getByRole('button', { name: 'Save' }).click();
 
-    // await waitForRestart(page);
+    await waitForRestart(page);
 
-    // await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
 });
