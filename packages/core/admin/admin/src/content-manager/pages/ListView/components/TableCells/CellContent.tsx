@@ -95,7 +95,7 @@ const hasContent = (
     // Repeatable fields show the ID as fallback, in case the mainField
     // doesn't have any content
     if (fieldSchema?.repeatable || !mainField) {
-      return content.length > 0;
+      return content && Array.isArray(content) && content.length > 0;
     }
 
     const value = content?.[mainField.name];
@@ -130,7 +130,7 @@ const hasContent = (
     return content?.count > 0;
   }
 
-  /* 
+  /*
       Biginteger fields need to be treated as strings, as `isNumber`
       doesn't deal with them.
   */

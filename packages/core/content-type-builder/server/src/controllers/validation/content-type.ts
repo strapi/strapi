@@ -1,6 +1,6 @@
 /* eslint-disable no-template-curly-in-string */ // yup templates need to be in this format
 
-import { flatMap, getOr, has } from 'lodash/fp';
+import { flatMap, getOr, has, snakeCase } from 'lodash/fp';
 import { yup, validateYupSchema } from '@strapi/utils';
 
 import type { Schema, UID } from '@strapi/types';
@@ -140,7 +140,11 @@ const forbiddenContentTypeNameValidator = () => {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
     test(value: unknown) {
-      return !(value && reservedNames.includes(value as string));
+      if (typeof value !== 'string') {
+        return true;
+      }
+      // compare snake case to check the actual column names that will be used in the database
+      return reservedNames.every((reservedName) => snakeCase(reservedName) !== snakeCase(value));
     },
   };
 };
@@ -158,7 +162,13 @@ const nameIsAvailable = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      return !usedNames.includes(value as string);
+      // ignore if not a string (will be caught in another validator)
+      if (typeof value !== 'string') {
+        return true;
+      }
+
+      // compare snake case to check the actual column names that will be used in the database
+      return usedNames.every((usedName) => snakeCase(usedName) !== snakeCase(value));
     },
   };
 };
@@ -166,7 +176,7 @@ const nameIsAvailable = (isEdition: boolean) => {
 const nameIsNotExistingCollectionName = (isEdition: boolean) => {
   const usedNames = Object.keys(strapi.contentTypes).map(
     (key) => strapi.contentTypes[key as UID.ContentType].collectionName
-  );
+  ) as string[];
 
   return {
     name: 'nameAlreadyUsed',
@@ -175,7 +185,13 @@ const nameIsNotExistingCollectionName = (isEdition: boolean) => {
       // don't check on edition
       if (isEdition) return true;
 
-      return !usedNames.includes(value as string);
+      // ignore if not a string (will be caught in another validator)
+      if (typeof value !== 'string') {
+        return true;
+      }
+
+      // compare snake case to check the actual column names that will be used in the database
+      return usedNames.every((usedName) => snakeCase(usedName) !== snakeCase(value));
     },
   };
 };

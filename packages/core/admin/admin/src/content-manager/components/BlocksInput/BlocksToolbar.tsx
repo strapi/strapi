@@ -5,7 +5,7 @@ import { Flex, Icon, Tooltip, SingleSelect, SingleSelectOption, Box } from '@str
 import { pxToRem } from '@strapi/helper-plugin';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import { Editor, Transforms, Element as SlateElement, Node } from 'slate';
+import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
 import styled from 'styled-components';
 
@@ -159,7 +159,7 @@ const BlocksDropdown = () => {
 
   const [blockSelected, setBlockSelected] = React.useState<SelectorBlockKey>('paragraph');
 
-  const selectOption = (optionKey: unknown) => {
+  const handleSelect = (optionKey: unknown) => {
     if (!isSelectorBlockKey(optionKey)) {
       return;
     }
@@ -187,6 +187,24 @@ const BlocksDropdown = () => {
       Transforms.select(editor, Editor.start(editor, [0, 0]));
     }
 
+    // If selection is already a list block, toggle its format
+    const currentListEntry = Editor.above(editor, {
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
+    });
+
+    if (currentListEntry && ['list-ordered', 'list-unordered'].includes(optionKey)) {
+      const [currentList, currentListPath] = currentListEntry;
+      const format = optionKey === 'list-ordered' ? 'ordered' : 'unordered';
+
+      if (!Editor.isEditor(currentList) && isListNode(currentList)) {
+        // Format is different, toggle list format
+        if (currentList.format !== format) {
+          Transforms.setNodes(editor, { format }, { at: currentListPath });
+        }
+      }
+      return;
+    }
+
     // Let the block handle the Slate conversion logic
     const maybeRenderModal = blocks[optionKey].handleConvert?.(editor);
     handleConversionResult(maybeRenderModal);
@@ -209,15 +227,41 @@ const BlocksDropdown = () => {
   // Listen to the selection change and update the selected block in the dropdown
   React.useEffect(() => {
     if (editor.selection) {
-      // Get the parent node of the anchor
-      // with a depth of two to retrieve also the list item parents
-      const [anchorNode] = Editor.parent(editor, editor.selection.anchor, {
-        edge: 'start',
-        depth: 2,
+      let selectedNode: Ancestor;
+
+      // If selection anchor is a list-item, get its parent
+      const currentListEntry = Editor.above(editor, {
+        match: (node) => !Editor.isEditor(node) && node.type === 'list',
+        at: editor.selection.anchor,
       });
+
+      if (currentListEntry) {
+        const [currentList] = currentListEntry;
+        selectedNode = currentList;
+      } else {
+        // Get the parent node of the anchor other than list-item
+        const [anchorNode] = Editor.parent(editor, editor.selection.anchor, {
+          edge: 'start',
+          depth: 2,
+        });
+
+        // @ts-expect-error slate's delete behaviour creates an exceptional type
+        if (anchorNode.type === 'list-item') {
+          // When the last node in the selection is a list item,
+          // slate's default delete operation leaves an empty list-item instead of converting it into a paragraph.
+          // Issue: https://github.com/ianstormtaylor/slate/issues/2500
+
+          Transforms.setNodes(editor, { type: 'paragraph' });
+          // @ts-expect-error convert explicitly type to paragraph
+          selectedNode = { ...anchorNode, type: 'paragraph' };
+        } else {
+          selectedNode = anchorNode;
+        }
+      }
+
       // Find the block key that matches the anchor node
       const anchorBlockKey = getKeys(blocks).find(
-        (blockKey) => !Editor.isEditor(anchorNode) && blocks[blockKey].matchNode(anchorNode)
+        (blockKey) => !Editor.isEditor(selectedNode) && blocks[blockKey].matchNode(selectedNode)
       );
 
       // Change the value selected in the dropdown if it doesn't match the anchor block key
@@ -232,7 +276,7 @@ const BlocksDropdown = () => {
       <SelectWrapper>
         <SingleSelect
           startIcon={<Icon as={blocks[blockSelected].icon} />}
-          onChange={selectOption}
+          onChange={handleSelect}
           placeholder={formatMessage(blocks[blockSelected].label)}
           value={blockSelected}
           onCloseAutoFocus={preventSelectFocus}
@@ -284,98 +328,74 @@ const isListNode = (node: unknown): node is Block<'list'> => {
   return Node.isNode(node) && !Editor.isEditor(node) && node.type === 'list';
 };
 
-const isListActive = (editor: Editor, matchNode: (node: Node) => boolean) => {
-  const { selection } = editor;
-
-  if (!selection) return false;
-
-  const [match] = Array.from(
-    Editor.nodes(editor, {
-      at: Editor.unhangRange(editor, selection),
-      match: matchNode,
-    })
-  );
-
-  return Boolean(match);
-};
-
-const toggleList = (editor: Editor, isActive: boolean, format: Block<'list'>['format']) => {
-  // If we have selected a portion of content in the editor,
-  // we want to convert it to a list or if it is already a list,
-  // convert it back to a paragraph
-  if (editor.selection) {
-    Transforms.unwrapNodes(editor, {
-      match: (node) => isListNode(node) && ['ordered', 'unordered'].includes(node.format),
-      split: true,
-    });
-
-    Transforms.setNodes(editor, {
-      type: isActive ? 'paragraph' : 'list-item',
-    });
-
-    if (!isActive) {
-      const block = { type: 'list' as const, format, children: [] };
-      Transforms.wrapNodes(editor, block);
-    }
-  } else {
-    // There is no selection, convert the last inserted node to a list
-    // If it is already a list, convert it back to a paragraph
-    const [, lastNodePath] = Editor.last(editor, []);
-
-    const [parentNode] = Editor.parent(editor, lastNodePath);
-
-    Transforms.removeNodes(editor, {
-      voids: true,
-      hanging: true,
-      at: {
-        anchor: { path: lastNodePath, offset: 0 },
-        focus: { path: lastNodePath, offset: 0 },
-      },
-    });
-
-    Transforms.insertNodes(
-      editor,
-      {
-        type: isActive ? 'paragraph' : 'list-item',
-        children: [...parentNode.children],
-      } as Node,
-      {
-        at: [lastNodePath[0]],
-        select: true,
-      }
-    );
-
-    if (!isActive) {
-      // If the selection is now a list item, wrap it inside a list
-      const block = { type: 'list' as const, format, children: [] };
-      Transforms.wrapNodes(editor, block);
-    }
-  }
-};
-
 interface ListButtonProps {
   block: BlocksStore['list-ordered'] | BlocksStore['list-unordered'];
   format: Block<'list'>['format'];
 }
 
 const ListButton = ({ block, format }: ListButtonProps) => {
-  const { editor, disabled } = useBlocksEditorContext('ListButton');
+  const { editor, disabled, blocks } = useBlocksEditorContext('ListButton');
 
-  const { icon, matchNode, label } = block;
+  const isListActive = () => {
+    if (!editor.selection) return false;
 
-  const isActive = isListActive(
-    editor,
-    (node) => !Editor.isEditor(node) && node.type !== 'text' && matchNode(node)
-  );
+    // Get the parent list at selection anchor node
+    const currentListEntry = Editor.above(editor, {
+      match: (node) => !Editor.isEditor(node) && node.type === 'list',
+      at: editor.selection.anchor,
+    });
+
+    if (currentListEntry) {
+      const [currentList] = currentListEntry;
+      if (!Editor.isEditor(currentList) && isListNode(currentList) && currentList.format === format)
+        return true;
+    }
+    return false;
+  };
+
+  const toggleList = (format: Block<'list'>['format']) => {
+    let currentListEntry;
+    if (editor.selection) {
+      currentListEntry = Editor.above(editor, {
+        match: (node) => !Editor.isEditor(node) && node.type === 'list',
+      });
+    } else {
+      // If no selection, toggle last inserted node
+      const [_, lastNodePath] = Editor.last(editor, []);
+      currentListEntry = Editor.above(editor, {
+        match: (node) => !Editor.isEditor(node) && node.type === 'list',
+        at: lastNodePath,
+      });
+    }
+
+    if (!currentListEntry) {
+      // If selection is not a list then convert it to list
+      blocks[`list-${format}`].handleConvert!(editor);
+      return;
+    }
+
+    // If selection is already a list then toggle format
+    const [currentList, currentListPath] = currentListEntry;
+
+    if (!Editor.isEditor(currentList) && isListNode(currentList)) {
+      if (currentList.format !== format) {
+        // Format is different, toggle list format
+        Transforms.setNodes(editor, { format }, { at: currentListPath });
+      } else {
+        // Format is same, convert selected list-item to paragraph
+        blocks['paragraph'].handleConvert!(editor);
+      }
+    }
+  };
 
   return (
     <ToolbarButton
-      icon={icon}
+      icon={block.icon}
       name={format}
-      label={label}
-      isActive={isActive}
+      label={block.label}
+      isActive={isListActive()}
       disabled={disabled}
-      handleClick={() => toggleList(editor, isActive, format)}
+      handleClick={() => toggleList(format)}
     />
   );
 };

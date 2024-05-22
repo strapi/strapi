@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Flex, IconButton } from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { Editor, Range, Transforms, Element } from 'slate';
+import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
 import styled, { CSSProperties, css } from 'styled-components';
 
@@ -15,7 +15,6 @@ import { getTranslation } from '../../utils/translations';
 import { type BlocksStore, useBlocksEditorContext } from './BlocksEditor';
 import { useConversionModal } from './BlocksToolbar';
 import { type ModifiersStore } from './Modifiers';
-import { getAttributesToClear } from './utils/conversions';
 import { getEntries, isLinkNode, isListNode } from './utils/types';
 
 const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
@@ -127,9 +126,6 @@ const DragAndDropElement = ({
 
   const handleMoveBlock = React.useCallback(
     (newIndex: Array<number>, currentIndex: Array<number>) => {
-      const [newNode] = Editor.node(editor, newIndex);
-      const [draggedNode] = Editor.node(editor, currentIndex);
-
       Transforms.moveNodes(editor, {
         at: currentIndex,
         to: newIndex,
@@ -151,70 +147,6 @@ const DragAndDropElement = ({
           }
         )
       );
-
-      if (Element.isElement(newNode) && Element.isElement(draggedNode)) {
-        // If a node is dragged into the list block then convert it to a list-item
-        if (newNode.type === 'list-item' && draggedNode.type !== 'list-item') {
-          Transforms.setNodes(
-            editor,
-            { ...getAttributesToClear(draggedNode), type: 'list-item' },
-            {
-              at:
-                newIndex[0] > currentIndex[0] ? [newIndex[0] - 1, ...newIndex.slice(1)] : newIndex,
-            }
-          );
-
-          // When a node is dragged downward into the list, the items shift upward by one index
-          if (newIndex[0] > currentIndex[0]) {
-            Transforms.moveNodes(editor, {
-              at: [newIndex[0] - 1, ...newIndex.slice(1)],
-              to: [newIndex[0] - 1, newIndex[1] + 1, ...newIndex.slice(2)],
-            });
-          }
-        }
-
-        // If a node is dragged out of the list block then convert it to a paragraph
-        if (newNode.type !== 'list-item' && draggedNode.type === 'list-item') {
-          Transforms.setNodes(editor, { type: 'paragraph' }, { at: newIndex });
-
-          if (newIndex[0] < currentIndex[0]) {
-            // Node is dragged upwards out of list block
-            currentIndex[0] += 1;
-          }
-
-          // Node is dragged downwards out of list block, as items are not shifting by 1 we move the item below the dragged index
-          if (newIndex[0] > currentIndex[0]) {
-            Transforms.moveNodes(editor, {
-              at: newIndex,
-              to: [newIndex[0] + 1],
-            });
-          }
-        }
-
-        // If a list item is dragged into the another list block
-        if (newNode.type === 'list-item' && draggedNode.type === 'list-item') {
-          // Node is dragged downwards out of list block, as items are not shifting by 1 we move the item below the dragged index
-          if (newIndex[0] > currentIndex[0]) {
-            Transforms.moveNodes(editor, {
-              at: newIndex,
-              to: [newIndex[0], newIndex[1] + 1, ...newIndex.slice(2)],
-            });
-          }
-        }
-
-        // If a dragged node is the only list-item then delete list block
-        if (draggedNode.type === 'list-item') {
-          const [listNode, listNodePath] = Editor.parent(editor, currentIndex);
-
-          const isListEmpty =
-            listNode.children?.length === 1 &&
-            listNode.children?.[0].type === 'text' &&
-            listNode.children?.[0].text === '';
-          if (isListEmpty) {
-            Transforms.removeNodes(editor, { at: listNodePath });
-          }
-        }
-      }
     },
     [editor, formatMessage, name, setLiveText]
   );
@@ -370,13 +302,21 @@ const baseRenderElement = ({
   setDragDirection,
   dragDirection,
 }: BaseRenderElementProps) => {
-  const blockMatch = Object.values(blocks).find((block) => block.matchNode(props.element));
+  const { element } = props;
+
+  const blockMatch = Object.values(blocks).find((block) => block.matchNode(element));
   const block = blockMatch || blocks.paragraph;
-  const nodePath = ReactEditor.findPath(editor, props.element);
+  const nodePath = ReactEditor.findPath(editor, element);
 
   // Link is inline block so it cannot be dragged
-  // List is skipped from dragged items
-  if (isLinkNode(props.element) || isListNode(props.element)) return block.renderElement(props);
+  // List items and nested list blocks i.e. lists with indent level higher than 0 are skipped from dragged items
+  if (
+    isLinkNode(element) ||
+    (isListNode(element) && element.indentLevel && element.indentLevel > 0) ||
+    element.type === 'list-item'
+  ) {
+    return block.renderElement(props);
+  }
 
   return (
     <DragAndDropElement
@@ -390,11 +330,12 @@ const baseRenderElement = ({
   );
 };
 
-interface BlocksInputProps {
+interface BlocksContentProps {
   placeholder?: string;
+  ariaLabelId: string;
 }
 
-const BlocksContent = ({ placeholder }: BlocksInputProps) => {
+const BlocksContent = ({ placeholder, ariaLabelId }: BlocksContentProps) => {
   const { editor, disabled, blocks, modifiers, setLiveText, isExpandedMode } =
     useBlocksEditorContext('BlocksContent');
   const blocksRef = React.useRef<HTMLDivElement>(null);
@@ -534,6 +475,23 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
     }
   };
 
+  const handleTab = (event: React.KeyboardEvent<HTMLElement>) => {
+    if (!editor.selection) {
+      return;
+    }
+
+    const selectedNode = editor.children[editor.selection.anchor.path[0]];
+    const selectedBlock = Object.values(blocks).find((block) => block.matchNode(selectedNode));
+    if (!selectedBlock) {
+      return;
+    }
+
+    if (selectedBlock.handleTab) {
+      event.preventDefault();
+      selectedBlock.handleTab(editor);
+    }
+  };
+
   const handleKeyboardShortcuts = (event: React.KeyboardEvent<HTMLElement>) => {
     const isCtrlOrCmd = event.metaKey || event.ctrlKey;
 
@@ -553,12 +511,16 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLElement> = (event) => {
     // Find the right block-specific handlers for enter and backspace key presses
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      return handleEnter(event);
-    }
-    if (event.key === 'Backspace') {
-      return handleBackspaceEvent(event);
+    switch (event.key) {
+      case 'Enter':
+        event.preventDefault();
+        return handleEnter(event);
+      case 'Backspace':
+        return handleBackspaceEvent(event);
+      case 'Tab':
+        return handleTab(event);
+      case 'Escape':
+        return ReactEditor.blur(editor);
     }
 
     handleKeyboardShortcuts(event);
@@ -612,6 +574,7 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
       paddingBottom={3}
     >
       <StyledEditable
+        aria-labelledby={ariaLabelId}
         readOnly={disabled}
         placeholder={placeholder}
         isExpandedMode={isExpandedMode}
@@ -632,4 +595,4 @@ const BlocksContent = ({ placeholder }: BlocksInputProps) => {
   );
 };
 
-export { BlocksContent };
+export { BlocksContent, BlocksContentProps };

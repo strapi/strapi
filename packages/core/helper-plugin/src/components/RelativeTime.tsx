@@ -12,6 +12,7 @@ interface CustomInterval {
 export interface RelativeTimeProps {
   timestamp: Date;
   customIntervals?: CustomInterval[];
+  className?: string;
 }
 
 /**
@@ -28,7 +29,7 @@ export interface RelativeTimeProps {
  *  ]}
  * ```
  */
-const RelativeTime = ({ timestamp, customIntervals = [] }: RelativeTimeProps) => {
+const RelativeTime = ({ timestamp, customIntervals = [], className }: RelativeTimeProps) => {
   const { formatRelativeTime, formatDate, formatTime } = useIntl();
 
   const interval = intervalToDuration({
@@ -54,6 +55,7 @@ const RelativeTime = ({ timestamp, customIntervals = [] }: RelativeTimeProps) =>
     <time
       dateTime={timestamp.toISOString()}
       title={`${formatDate(timestamp)} ${formatTime(timestamp)}`}
+      className={className}
     >
       {displayText}
     </time>

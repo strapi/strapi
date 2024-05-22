@@ -15,7 +15,7 @@ describe('Content type validator', () => {
           builder: {
             getReservedNames() {
               return {
-                models: [],
+                models: ['reserved-name'],
                 attributes: ['thisIsReserved'],
               };
             },
@@ -41,7 +41,7 @@ describe('Content type validator', () => {
     });
   });
 
-  describe('Prevents use of reservedNames', () => {
+  describe('Prevents use of reservedNames in attributes', () => {
     test('Throws when reserved names are used', async () => {
       const data = {
         contentType: {
@@ -69,6 +69,79 @@ describe('Content type validator', () => {
                 path: ['contentType', 'attributes', 'thisIsReserved'],
                 message:
                   'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        });
+      });
+    });
+
+    test('Uses snake_case to compare reserved name', async () => {
+      const data = {
+        contentType: {
+          singularName: 'test',
+          pluralName: 'tests',
+          displayName: 'Test',
+          attributes: {
+            THIS_IS_RESERVED: {
+              type: 'string',
+              default: '',
+            },
+          },
+        },
+      } as unknown as CreateContentTypeInput;
+
+      expect.assertions(1);
+
+      await validateUpdateContentTypeInput(data).catch((err) => {
+        expect(err).toMatchObject({
+          name: 'ValidationError',
+          message: 'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
+          details: {
+            errors: [
+              {
+                path: ['contentType', 'attributes', 'THIS_IS_RESERVED'],
+                message:
+                  'Attribute keys cannot be one of __component, __contentType, thisIsReserved',
+                name: 'ValidationError',
+              },
+            ],
+          },
+        });
+      });
+    });
+  });
+
+  describe('Prevents use of reservedNames in models', () => {
+    const reservedNames = ['singularName', 'pluralName'];
+
+    test.each(reservedNames)('Throws when reserved model names are used in %s', async (name) => {
+      const data = {
+        contentType: {
+          singularName: name === 'singularName' ? 'reserved-name' : 'not-reserved-single',
+          pluralName: name === 'pluralName' ? 'reserved-name' : 'not-reserved-plural',
+          displayName: 'Test',
+          attributes: {
+            notReserved: {
+              type: 'string',
+              default: '',
+            },
+          },
+        },
+      } as unknown as CreateContentTypeInput;
+
+      expect.assertions(1);
+
+      await validateUpdateContentTypeInput(data).catch((err) => {
+        expect(err).toMatchObject({
+          name: 'ValidationError',
+          message: `Content Type name cannot be one of reserved-name`,
+          details: {
+            errors: [
+              {
+                path: ['contentType', name],
+                message: `Content Type name cannot be one of reserved-name`,
                 name: 'ValidationError',
               },
             ],

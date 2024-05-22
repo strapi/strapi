@@ -1,7 +1,7 @@
 /* eslint-disable import/no-relative-packages */
 import { errors } from '@strapi/utils';
 // @ts-expect-error - test purposes
-import createContext from '../../../../../../../test/helpers/create-context';
+import createContext from '../../../../../../../tests/helpers/create-context';
 import apiTokenStrategy from '../api-token';
 
 describe('API Token Auth Strategy', () => {

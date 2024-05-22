@@ -9,7 +9,6 @@ import {
   IconButton,
   Link,
   Main,
-  Popover,
   Tr,
   Td,
   Typography,
@@ -19,7 +18,7 @@ import {
   Icon,
   Tooltip,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton, Menu } from '@strapi/design-system/v2';
 import {
   CheckPermissions,
   LoadingIndicatorPage,
@@ -34,8 +33,13 @@ import {
   ConfirmDialog,
   useRBAC,
   AnErrorOccurred,
+  useTracking,
+  useStrapiApp,
 } from '@strapi/helper-plugin';
 import { ArrowLeft, CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import { Attribute, Schema } from '@strapi/types';
+import format from 'date-fns/format';
+import { utcToZonedTime } from 'date-fns-tz';
 import { useIntl } from 'react-intl';
 import { useParams, useHistory, Link as ReactRouterLink, Redirect } from 'react-router-dom';
 import styled from 'styled-components';
@@ -56,18 +60,19 @@ import {
   releaseApi,
 } from '../services/release';
 import { useTypedDispatch } from '../store/hooks';
+import { getTimezoneOffset } from '../utils/time';
+
+import { getBadgeProps } from './ReleasesPage';
 
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
   ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
-import type { Schema } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
  * -----------------------------------------------------------------------------------------------*/
-// @ts-expect-error – issue with styled-components types.
 const ReleaseInfoWrapper = styled(Flex)`
   align-self: stretch;
   border-bottom-right-radius: ${({ theme }) => theme.borderRadius};
@@ -75,29 +80,33 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledFlex = styled(Flex)<{ disabled?: boolean }>`
-  align-self: stretch;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-
+const StyledMenuItem = styled(Menu.Item)<{
+  disabled?: boolean;
+  variant?: 'neutral' | 'danger';
+}>`
   svg path {
     fill: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
   }
   span {
     color: ${({ theme, disabled }) => disabled && theme.colors.neutral500};
   }
+
+  &:hover {
+    background: ${({ theme, variant = 'neutral' }) => theme.colors[`${variant}100`]};
+  }
 `;
 
 const PencilIcon = styled(Pencil)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.neutral600};
   }
 `;
 
 const TrashIcon = styled(Trash)`
-  width: ${({ theme }) => theme.spaces[4]};
-  height: ${({ theme }) => theme.spaces[4]};
+  width: ${({ theme }) => theme.spaces[3]};
+  height: ${({ theme }) => theme.spaces[3]};
   path {
     fill: ${({ theme }) => theme.colors.danger600};
   }
@@ -106,31 +115,6 @@ const TrashIcon = styled(Trash)`
 const TypographyMaxWidth = styled(Typography)`
   max-width: 300px;
 `;
-
-interface PopoverButtonProps {
-  onClick?: (event: React.MouseEvent<HTMLElement>) => void;
-  disabled?: boolean;
-  children: React.ReactNode;
-}
-
-const PopoverButton = ({ onClick, disabled, children }: PopoverButtonProps) => {
-  return (
-    <StyledFlex
-      paddingTop={2}
-      paddingBottom={2}
-      paddingLeft={4}
-      paddingRight={4}
-      alignItems="center"
-      gap={2}
-      as="button"
-      hasRadius
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {children}
-    </StyledFlex>
-  );
-};
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
@@ -226,10 +210,8 @@ export const ReleaseDetailsLayout = ({
   toggleWarningSubmit,
   children,
 }: ReleaseDetailsLayoutProps) => {
-  const { formatMessage } = useIntl();
+  const { formatMessage, formatDate, formatTime } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
-  const [isPopoverVisible, setIsPopoverVisible] = React.useState(false);
-  const moreButtonRef = React.useRef<HTMLButtonElement>(null!);
   const {
     data,
     isLoading: isLoadingDetails,
@@ -243,17 +225,9 @@ export const ReleaseDetailsLayout = ({
     allowedActions: { canUpdate, canDelete },
   } = useRBAC(PERMISSIONS);
   const dispatch = useTypedDispatch();
+  const { trackUsage } = useTracking();
 
   const release = data?.data;
-
-  const handleTogglePopover = () => {
-    setIsPopoverVisible((prev) => !prev);
-  };
-
-  const openReleaseModal = () => {
-    toggleEditReleaseModal();
-    handleTogglePopover();
-  };
 
   const handlePublishRelease = async () => {
     const response = await publishRelease({ id: releaseId });
@@ -266,6 +240,14 @@ export const ReleaseDetailsLayout = ({
           id: 'content-releases.pages.ReleaseDetails.publish-notification-success',
           defaultMessage: 'Release was published successfully.',
         }),
+      });
+
+      const { totalEntries, totalPublishedEntries, totalUnpublishedEntries } = response.data.meta;
+
+      trackUsage('didPublishRelease', {
+        totalEntries,
+        totalPublishedEntries,
+        totalUnpublishedEntries,
       });
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
@@ -282,13 +264,32 @@ export const ReleaseDetailsLayout = ({
     }
   };
 
-  const openWarningConfirmDialog = () => {
-    toggleWarningSubmit();
-    handleTogglePopover();
+  const handleRefresh = () => {
+    dispatch(
+      releaseApi.util.invalidateTags([
+        { type: 'ReleaseAction', id: 'LIST' },
+        { type: 'Release', id: releaseId },
+      ])
+    );
   };
 
-  const handleRefresh = () => {
-    dispatch(releaseApi.util.invalidateTags([{ type: 'ReleaseAction', id: 'LIST' }]));
+  const getCreatedByUser = () => {
+    if (!release?.createdBy) {
+      return null;
+    }
+
+    // Favor the username
+    if (release.createdBy.username) {
+      return release.createdBy.username;
+    }
+
+    // Firstname may not exist if created with SSO
+    if (release.createdBy.firstname) {
+      return `${release.createdBy.firstname} ${release.createdBy.lastname || ''}`.trim();
+    }
+
+    // All users must have at least an email
+    return release.createdBy.email;
   };
 
   if (isLoadingDetails) {
@@ -317,21 +318,51 @@ export const ReleaseDetailsLayout = ({
   }
 
   const totalEntries = release.actions.meta.count || 0;
-  const createdBy = release.createdBy.lastname
-    ? `${release.createdBy.firstname} ${release.createdBy.lastname}`
-    : `${release.createdBy.firstname}`;
+  const hasCreatedByUser = Boolean(getCreatedByUser());
+
+  const isScheduled = release.scheduledAt && release.timezone;
+  const numberOfEntriesText = formatMessage(
+    {
+      id: 'content-releases.pages.Details.header-subtitle',
+      defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
+    },
+    { number: totalEntries }
+  );
+  const scheduledText = isScheduled
+    ? formatMessage(
+        {
+          id: 'content-releases.pages.ReleaseDetails.header-subtitle.scheduled',
+          defaultMessage: 'Scheduled for {date} at {time} ({offset})',
+        },
+        {
+          date: formatDate(new Date(release.scheduledAt!), {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+            timeZone: release.timezone!,
+          }),
+          time: formatTime(new Date(release.scheduledAt!), {
+            timeZone: release.timezone!,
+            hourCycle: 'h23',
+          }),
+          offset: getTimezoneOffset(release.timezone!, new Date(release.scheduledAt!)),
+        }
+      )
+    : '';
 
   return (
     <Main aria-busy={isLoadingDetails}>
       <HeaderLayout
         title={release.name}
-        subtitle={formatMessage(
-          {
-            id: 'content-releases.pages.Details.header-subtitle',
-            defaultMessage: '{number, plural, =0 {No entries} one {# entry} other {# entries}}',
-          },
-          { number: totalEntries }
-        )}
+        subtitle={
+          <Flex gap={2} lineHeight={6}>
+            <Typography textColor="neutral600" variant="epsilon">
+              {numberOfEntriesText + (isScheduled ? ` - ${scheduledText}` : '')}
+            </Typography>
+            <Badge {...getBadgeProps(release.status)}>{release.status}</Badge>
+          </Flex>
+        }
         navigationAction={
           <Link startIcon={<ArrowLeft />} to="/plugins/content-releases">
             {formatMessage({
@@ -343,43 +374,62 @@ export const ReleaseDetailsLayout = ({
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
-              <IconButton
-                label={formatMessage({
-                  id: 'content-releases.header.actions.open-release-actions',
-                  defaultMessage: 'Release actions',
-                })}
-                ref={moreButtonRef}
-                onClick={handleTogglePopover}
-              >
-                <More />
-              </IconButton>
-              {isPopoverVisible && (
-                <Popover
-                  source={moreButtonRef}
-                  placement="bottom-end"
-                  onDismiss={handleTogglePopover}
-                  spacing={4}
-                  minWidth="242px"
-                >
-                  <Flex alignItems="center" justifyContent="center" direction="column" padding={1}>
-                    <PopoverButton disabled={!canUpdate} onClick={openReleaseModal}>
-                      <PencilIcon />
-                      <Typography ellipsis>
-                        {formatMessage({
-                          id: 'content-releases.header.actions.edit',
-                          defaultMessage: 'Edit',
-                        })}
-                      </Typography>
-                    </PopoverButton>
-                    <PopoverButton disabled={!canDelete} onClick={openWarningConfirmDialog}>
-                      <TrashIcon />
-                      <Typography ellipsis textColor="danger600">
-                        {formatMessage({
-                          id: 'content-releases.header.actions.delete',
-                          defaultMessage: 'Delete',
-                        })}
-                      </Typography>
-                    </PopoverButton>
+              <Menu.Root>
+                {/* 
+                  TODO Fix in the DS
+                  - as={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
+                  - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
+                */}
+                <Menu.Trigger
+                  as={IconButton}
+                  paddingLeft={2}
+                  paddingRight={2}
+                  aria-label={formatMessage({
+                    id: 'content-releases.header.actions.open-release-actions',
+                    defaultMessage: 'Release edit and delete menu',
+                  })}
+                  // @ts-expect-error See above
+                  icon={<More />}
+                  variant="tertiary"
+                />
+                {/*
+                  TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
+                  Refactor this once fixed in the DS
+                */}
+                <Menu.Content top={1} popoverPlacement="bottom-end">
+                  <Flex
+                    alignItems="center"
+                    justifyContent="center"
+                    direction="column"
+                    padding={1}
+                    width="100%"
+                  >
+                    <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
+                        <PencilIcon />
+                        <Typography ellipsis>
+                          {formatMessage({
+                            id: 'content-releases.header.actions.edit',
+                            defaultMessage: 'Edit',
+                          })}
+                        </Typography>
+                      </Flex>
+                    </StyledMenuItem>
+                    <StyledMenuItem
+                      disabled={!canDelete}
+                      onSelect={toggleWarningSubmit}
+                      variant="danger"
+                    >
+                      <Flex alignItems="center" gap={2} hasRadius width="100%">
+                        <TrashIcon />
+                        <Typography ellipsis textColor="danger600">
+                          {formatMessage({
+                            id: 'content-releases.header.actions.delete',
+                            defaultMessage: 'Delete',
+                          })}
+                        </Typography>
+                      </Flex>
+                    </StyledMenuItem>
                   </Flex>
                   <ReleaseInfoWrapper
                     direction="column"
@@ -399,14 +449,15 @@ export const ReleaseDetailsLayout = ({
                       {formatMessage(
                         {
                           id: 'content-releases.header.actions.created.description',
-                          defaultMessage: ' by {createdBy}',
+                          defaultMessage:
+                            '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
                         },
-                        { createdBy }
+                        { createdBy: getCreatedByUser(), hasCreatedByUser }
                       )}
                     </Typography>
                   </ReleaseInfoWrapper>
-                </Popover>
-              )}
+                </Menu.Content>
+              </Menu.Root>
               <Button size="S" variant="tertiary" onClick={handleRefresh}>
                 {formatMessage({
                   id: 'content-releases.header.actions.refresh',
@@ -440,6 +491,7 @@ export const ReleaseDetailsLayout = ({
  * ReleaseDetailsBody
  * -----------------------------------------------------------------------------------------------*/
 const GROUP_BY_OPTIONS = ['contentType', 'locale', 'action'] as const;
+const GROUP_BY_OPTIONS_NO_LOCALE = ['contentType', 'action'] as const;
 const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   if (value === 'locale') {
     return {
@@ -461,6 +513,33 @@ const getGroupByOptionLabel = (value: (typeof GROUP_BY_OPTIONS)[number]) => {
   };
 };
 
+interface ReleaseHeaderItem {
+  key: string;
+  fieldSchema: { type: Attribute.Kind | 'custom' };
+  metadatas: {
+    label: { id: string; defaultMessage: string };
+    searchable: boolean;
+    sortable: boolean;
+  };
+  name: string;
+}
+
+const DEFAULT_RELEASE_DETAILS_HEADER: ReleaseHeaderItem[] = [
+  {
+    key: '__name__',
+    fieldSchema: { type: 'string' },
+    metadatas: {
+      label: {
+        id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+        defaultMessage: 'name',
+      },
+      searchable: false,
+      sortable: false,
+    },
+    name: 'name',
+  },
+];
+
 const ReleaseDetailsBody = () => {
   const { formatMessage } = useIntl();
   const { releaseId } = useParams<{ releaseId: string }>();
@@ -473,6 +552,21 @@ const ReleaseDetailsBody = () => {
     isError: isReleaseError,
     error: releaseError,
   } = useGetReleaseQuery({ id: releaseId });
+  const {
+    allowedActions: { canUpdate },
+  } = useRBAC(PERMISSIONS);
+  const { runHookWaterfall } = useStrapiApp();
+
+  const {
+    displayedHeaders,
+    hasI18nEnabled,
+  }: { displayedHeaders: ReleaseHeaderItem[]; hasI18nEnabled: boolean } = runHookWaterfall(
+    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+    {
+      displayedHeaders: DEFAULT_RELEASE_DETAILS_HEADER,
+      hasI18nEnabled: false,
+    }
+  );
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -492,7 +586,8 @@ const ReleaseDetailsBody = () => {
 
   const handleChangeType = async (
     e: React.ChangeEvent<HTMLInputElement>,
-    actionId: ReleaseAction['id']
+    actionId: ReleaseAction['id'],
+    actionPath: [string, number]
   ) => {
     const response = await updateReleaseAction({
       params: {
@@ -502,6 +597,8 @@ const ReleaseDetailsBody = () => {
       body: {
         type: e.target.value as ReleaseAction['type'],
       },
+      query, // We are passing the query params to make optimistic updates
+      actionPath, // We are passing the action path to found the position in the cache of the action for optimistic updates
     });
 
     if ('error' in response) {
@@ -596,13 +693,15 @@ const ReleaseDetailsBody = () => {
     );
   }
 
+  const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
+
   return (
     <ContentLayout>
       <Flex gap={8} direction="column" alignItems="stretch">
         <Flex>
           <SingleSelect
             aria-label={formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.groupBy.label',
+              id: 'content-releases.pages.ReleaseDetails.groupBy.aria-label',
               defaultMessage: 'Group by',
             })}
             customizeContent={(value) =>
@@ -619,7 +718,7 @@ const ReleaseDetailsBody = () => {
             value={formatMessage(getGroupByOptionLabel(selectedGroupBy))}
             onChange={(value) => setQuery({ groupBy: value as ReleaseActionGroupBy })}
           >
-            {GROUP_BY_OPTIONS.map((option) => (
+            {options.map((option) => (
               <SingleSelectOption key={option} value={option}>
                 {formatMessage(getGroupByOptionLabel(option))}
               </SingleSelectOption>
@@ -628,7 +727,7 @@ const ReleaseDetailsBody = () => {
         </Flex>
         {Object.keys(releaseActions).map((key) => (
           <Flex key={`releases-group-${key}`} gap={4} direction="column" alignItems="stretch">
-            <Flex>
+            <Flex role="separator" aria-label={key}>
               <Badge>{key}</Badge>
             </Flex>
             <Table.Root
@@ -642,22 +741,14 @@ const ReleaseDetailsBody = () => {
             >
               <Table.Content>
                 <Table.Head>
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.name',
-                      defaultMessage: 'name',
-                    })}
-                    name="name"
-                  />
-                  <Table.HeaderCell
-                    fieldSchemaType="string"
-                    label={formatMessage({
-                      id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-                      defaultMessage: 'locale',
-                    })}
-                    name="locale"
-                  />
+                  {displayedHeaders.map(({ key, fieldSchema, metadatas, name }) => (
+                    <Table.HeaderCell
+                      key={key}
+                      fieldSchemaType={fieldSchema.type}
+                      label={formatMessage(metadatas.label)}
+                      name={name}
+                    />
+                  ))}
                   <Table.HeaderCell
                     fieldSchemaType="string"
                     label={formatMessage({
@@ -687,73 +778,79 @@ const ReleaseDetailsBody = () => {
                 </Table.Head>
                 <Table.LoadingBody />
                 <Table.Body>
-                  {releaseActions[key].map(({ id, contentType, locale, type, entry }) => (
-                    <Tr key={id}>
-                      <Td width="25%" maxWidth="200px">
-                        <Typography ellipsis>{`${
-                          contentType.mainFieldValue || entry.id
-                        }`}</Typography>
-                      </Td>
-                      <Td width="10%">
-                        <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
-                      </Td>
-                      <Td width="10%">
-                        <Typography>{contentType.displayName || ''}</Typography>
-                      </Td>
-                      <Td width="20%">
-                        {release.releasedAt ? (
-                          <Typography>
-                            {formatMessage(
-                              {
-                                id: 'content-releases.page.ReleaseDetails.table.action-published',
-                                defaultMessage:
-                                  'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
-                              },
-                              {
-                                isPublish: type === 'publish',
-                                b: (children: React.ReactNode) => (
-                                  <Typography fontWeight="bold">{children}</Typography>
-                                ),
-                              }
-                            )}
-                          </Typography>
-                        ) : (
-                          <ReleaseActionOptions
-                            selected={type}
-                            handleChange={(e) => handleChangeType(e, id)}
-                            name={`release-action-${id}-type`}
-                          />
+                  {releaseActions[key].map(
+                    ({ id, contentType, locale, type, entry }, actionIndex) => (
+                      <Tr key={id}>
+                        <Td width="25%" maxWidth="200px">
+                          <Typography ellipsis>{`${
+                            contentType.mainFieldValue || entry.id
+                          }`}</Typography>
+                        </Td>
+                        {hasI18nEnabled && (
+                          <Td width="10%">
+                            <Typography>{`${locale?.name ? locale.name : '-'}`}</Typography>
+                          </Td>
                         )}
-                      </Td>
-                      {!release.releasedAt && (
-                        <>
-                          <Td width="20%" minWidth="200px">
-                            <EntryValidationText
-                              action={type}
-                              schema={contentTypes?.[contentType.uid]}
-                              components={components}
-                              entry={entry}
+
+                        <Td width="10%">
+                          <Typography>{contentType.displayName || ''}</Typography>
+                        </Td>
+                        <Td width="20%">
+                          {release.releasedAt ? (
+                            <Typography>
+                              {formatMessage(
+                                {
+                                  id: 'content-releases.page.ReleaseDetails.table.action-published',
+                                  defaultMessage:
+                                    'This entry was <b>{isPublish, select, true {published} other {unpublished}}</b>.',
+                                },
+                                {
+                                  isPublish: type === 'publish',
+                                  b: (children: React.ReactNode) => (
+                                    <Typography fontWeight="bold">{children}</Typography>
+                                  ),
+                                }
+                              )}
+                            </Typography>
+                          ) : (
+                            <ReleaseActionOptions
+                              selected={type}
+                              handleChange={(e) => handleChangeType(e, id, [key, actionIndex])}
+                              name={`release-action-${id}-type`}
+                              disabled={!canUpdate}
                             />
-                          </Td>
-                          <Td>
-                            <Flex justifyContent="flex-end">
-                              <ReleaseActionMenu.Root>
-                                <ReleaseActionMenu.ReleaseActionEntryLinkItem
-                                  contentTypeUid={contentType.uid}
-                                  entryId={entry.id}
-                                  locale={locale?.code}
-                                />
-                                <ReleaseActionMenu.DeleteReleaseActionItem
-                                  releaseId={release.id}
-                                  actionId={id}
-                                />
-                              </ReleaseActionMenu.Root>
-                            </Flex>
-                          </Td>
-                        </>
-                      )}
-                    </Tr>
-                  ))}
+                          )}
+                        </Td>
+                        {!release.releasedAt && (
+                          <>
+                            <Td width="20%" minWidth="200px">
+                              <EntryValidationText
+                                action={type}
+                                schema={contentTypes?.[contentType.uid]}
+                                components={components}
+                                entry={entry}
+                              />
+                            </Td>
+                            <Td>
+                              <Flex justifyContent="flex-end">
+                                <ReleaseActionMenu.Root>
+                                  <ReleaseActionMenu.ReleaseActionEntryLinkItem
+                                    contentTypeUid={contentType.uid}
+                                    entryId={entry.id}
+                                    locale={locale?.code}
+                                  />
+                                  <ReleaseActionMenu.DeleteReleaseActionItem
+                                    releaseId={release.id}
+                                    actionId={id}
+                                  />
+                                </ReleaseActionMenu.Root>
+                              </Flex>
+                            </Td>
+                          </>
+                        )}
+                      </Tr>
+                    )
+                  )}
                 </Table.Body>
               </Table.Content>
             </Table.Root>
@@ -780,7 +877,7 @@ const ReleaseDetailsPage = () => {
   const { releaseId } = useParams<{ releaseId: string }>();
   const toggleNotification = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const { push } = useHistory();
+  const { replace } = useHistory();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const [showWarningSubmit, setWarningSubmit] = React.useState(false);
 
@@ -811,12 +908,22 @@ const ReleaseDetailsPage = () => {
     );
   }
 
-  const title = (isSuccessDetails && data?.data?.name) || '';
+  const releaseData = (isSuccessDetails && data?.data) || null;
+
+  const title = releaseData?.name || '';
+  const timezone = releaseData?.timezone ?? null;
+  const scheduledAt =
+    releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
+  // Just get the date and time to display without considering updated timezone time
+  const date = scheduledAt ? format(scheduledAt, 'yyyy-MM-dd') : null;
+  const time = scheduledAt ? format(scheduledAt, 'HH:mm') : '';
 
   const handleEditRelease = async (values: FormValues) => {
     const response = await updateRelease({
       id: releaseId,
       name: values.name,
+      scheduledAt: values.scheduledAt,
+      timezone: values.timezone,
     });
 
     if ('data' in response) {
@@ -828,6 +935,7 @@ const ReleaseDetailsPage = () => {
           defaultMessage: 'Release updated.',
         }),
       });
+      toggleEditReleaseModal();
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
@@ -841,8 +949,6 @@ const ReleaseDetailsPage = () => {
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
-
-    toggleEditReleaseModal();
   };
 
   const handleDeleteRelease = async () => {
@@ -851,7 +957,7 @@ const ReleaseDetailsPage = () => {
     });
 
     if ('data' in response) {
-      push('/plugins/content-releases');
+      replace('/plugins/content-releases');
     } else if (isAxiosError(response.error)) {
       // When the response returns an object with 'error', handle axios error
       toggleNotification({
@@ -878,7 +984,14 @@ const ReleaseDetailsPage = () => {
           handleClose={toggleEditReleaseModal}
           handleSubmit={handleEditRelease}
           isLoading={isLoadingDetails || isSubmittingForm}
-          initialValues={{ name: title || '' }}
+          initialValues={{
+            name: title || '',
+            scheduledAt,
+            date,
+            time,
+            isScheduled: Boolean(scheduledAt),
+            timezone,
+          }}
         />
       )}
       <ConfirmDialog

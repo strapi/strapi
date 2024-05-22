@@ -1,11 +1,21 @@
 import { Events } from '../../../../../../../../admin/src/pages/Settings/pages/Webhooks/components/Events';
 
-const events = {
-  'review-workflows': ['review-workflows.updateEntryStage'],
+const eeTables = {
+  'review-workflows': {
+    'review-workflows': ['review-workflows.updateEntryStage'],
+  },
+  releases: {
+    releases: ['releases.publish'],
+  },
 };
 
-const getHeaders = () => {
-  return [{ id: 'review-workflows.updateEntryStage', defaultMessage: 'Stage Change' }];
+const getHeaders = (table: keyof typeof eeTables) => {
+  switch (table) {
+    case 'review-workflows':
+      return () => [{ id: 'review-workflows.updateEntryStage', defaultMessage: 'Stage Change' }];
+    case 'releases':
+      return () => [{ id: 'releases.publish', defaultMessage: 'Publish' }];
+  }
 };
 
 const EventsTableEE = () => {
@@ -13,8 +23,12 @@ const EventsTableEE = () => {
     <Events.Root>
       <Events.Headers />
       <Events.Body />
-      <Events.Headers getHeaders={getHeaders} />
-      <Events.Body providedEvents={events} />
+      {(Object.keys(eeTables) as Array<keyof typeof eeTables>).map((table) => (
+        <>
+          <Events.Headers getHeaders={getHeaders(table)} />
+          <Events.Body providedEvents={eeTables[table]} />
+        </>
+      ))}
     </Events.Root>
   );
 };
