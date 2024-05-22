@@ -49,6 +49,7 @@ const createCollectionType = async (page, data) => {
 };
 
 test.describe('Edit collection type', () => {
+  // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
 
   test.beforeEach(async ({ page }) => {
