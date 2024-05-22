@@ -342,17 +342,19 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
     const { attributes } = schema;
     return Object.entries(populate).reduce((acc, [key, subPopulate]) => {
-      // if (_.isString(subPopulate)) {
-      //   try {
-      //     const subPopulateAsBoolean = parseType({ type: 'boolean', value: subPopulate });
-      //     console.log('sub Populate as boolen', key, subPopulateAsBoolean);
-      //     return { ...acc, [key]: subPopulateAsBoolean };
-      //   } catch {
-      //     // ignore
-      //   }
-      // }
+      if (_.isString(subPopulate)) {
+        try {
+          const subPopulateAsBoolean = parseType({ type: 'boolean', value: subPopulate });
+          // Only true is accepted as a boolean populate value
+          return subPopulateAsBoolean === true ? { ...acc, [key]: true } : acc;
+        } catch {
+          // ignore
+        }
+      }
+
       if (_.isBoolean(subPopulate)) {
-        return { ...acc, [key]: subPopulate };
+        // Only true is accepted as a boolean populate value
+        return subPopulate === true ? { ...acc, [key]: true } : acc;
       }
 
       const attribute = attributes[key];
@@ -367,6 +369,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
 
       if (isAllowedAttributeForFragmentPopulate) {
         if (hasFragmentPopulateDefined(subPopulate)) {
+          // does it have 'on' AND no other property
           return {
             ...acc,
             [key]: {

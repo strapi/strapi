@@ -187,7 +187,7 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
   let hasRelations = false;
 
   const populate = Object.keys(model.attributes).reduce((populateAcc: any, attributeName) => {
-    const attribute: any = model.attributes[attributeName];
+    const attribute: Schema.Attribute.AnyAttribute = model.attributes[attributeName];
 
     switch (attribute.type) {
       case 'relation': {
@@ -205,24 +205,29 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
           attribute.component
         );
         if (childHasRelations) {
-          populateAcc[attributeName] = { populate };
+          populateAcc[attributeName] = {
+            populate,
+          };
           hasRelations = true;
         }
         break;
       }
       case 'dynamiczone': {
-        const dzPopulate = (attribute.components || []).reduce((acc: any, componentUID: any) => {
-          const { populate, hasRelations: childHasRelations } =
+        const dzPopulateFragment = attribute.components?.reduce((acc, componentUID) => {
+          const { populate: componentPopulate, hasRelations: componentHasRelations } =
             getDeepPopulateDraftCount(componentUID);
-          if (childHasRelations) {
+
+          if (componentHasRelations) {
             hasRelations = true;
-            return merge(acc, populate);
+
+            return { ...acc, [componentUID]: { populate: componentPopulate } };
           }
+
           return acc;
         }, {});
 
-        if (!isEmpty(dzPopulate)) {
-          populateAcc[attributeName] = { populate: dzPopulate };
+        if (!isEmpty(dzPopulateFragment)) {
+          populateAcc[attributeName] = { on: dzPopulateFragment };
         }
         break;
       }
