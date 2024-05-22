@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Cog, PuzzlePiece, ShoppingCart } from '@strapi/icons';
+import { Cog, PuzzlePiece, ShoppingCart, House } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 import { useSelector } from 'react-redux';
 
@@ -12,7 +12,7 @@ import { selectAdminPermissions } from '../selectors';
  * useMenu
  * -----------------------------------------------------------------------------------------------*/
 
-type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'>;
+export type MenuItem = Omit<StrapiAppContextValue['menu'][number], 'Component'>;
 
 export interface Menu {
   generalSectionLinks: MenuItem[];
@@ -27,6 +27,16 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
       {
+        icon: House,
+        intlLabel: {
+          id: 'global.home',
+          defaultMessage: 'Home',
+        },
+        to: '/',
+        permissions: [],
+        position: 0,
+      },
+      {
         icon: PuzzlePiece,
         intlLabel: {
           id: 'global.plugins',
@@ -34,6 +44,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         },
         to: '/list-plugins',
         permissions: permissions.marketplace?.main ?? [],
+        position: 7,
       },
       {
         icon: ShoppingCart,
@@ -43,6 +54,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         },
         to: '/marketplace',
         permissions: permissions.marketplace?.main ?? [],
+        position: 8,
       },
       {
         icon: Cog,
@@ -55,6 +67,7 @@ const useMenu = (shouldUpdateStrapi: boolean) => {
         // using the settings menu
         permissions: [],
         notificationsCount: 0,
+        position: 10,
       },
     ],
     pluginsSectionLinks: [],

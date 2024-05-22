@@ -169,14 +169,7 @@ const ListPage = () => {
           primaryAction={
             canCreate &&
             !isLoading && (
-              <LinkButton
-                as={NavLink}
-                startIcon={<Plus />}
-                variant="default"
-                // @ts-expect-error – this is an issue with the DS where as props are not inferred
-                to="create"
-                size="S"
-              >
+              <LinkButton tag={NavLink} startIcon={<Plus />} variant="default" to="create" size="S">
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
                   defaultMessage: 'Create new webhook',
@@ -349,9 +342,10 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.update',
                               defaultMessage: 'Update',
                             })}
-                            icon={<Pencil />}
-                            noBorder
-                          />
+                            borderWidth={0}
+                          >
+                            <Pencil />
+                          </IconButton>
                         )}
                         {canDelete && (
                           <IconButton
@@ -364,9 +358,10 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.delete',
                               defaultMessage: 'Delete webhook',
                             })}
-                            icon={<Trash />}
-                            noBorder
-                          />
+                            borderWidth={0}
+                          >
+                            <Trash />
+                          </IconButton>
                         )}
                       </Flex>
                     </Td>
@@ -383,8 +378,7 @@ const ListPage = () => {
               })}
               action={
                 canCreate ? (
-                  // @ts-expect-error – this is an issue with the DS where as props are not inferred
-                  <LinkButton variant="secondary" startIcon={<Plus />} as={NavLink} to="create">
+                  <LinkButton variant="secondary" startIcon={<Plus />} tag={NavLink} to="create">
                     {formatMessage({
                       id: 'Settings.webhooks.list.button.add',
                       defaultMessage: 'Create new webhook',

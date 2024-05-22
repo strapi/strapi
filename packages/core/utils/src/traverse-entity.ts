@@ -10,9 +10,10 @@ export interface VisitorOptions {
   schema: Model;
   key: string;
   value: Data[keyof Data];
-  attribute: AnyAttribute;
+  attribute?: AnyAttribute;
   path: Path;
   getModel(uid: string): Model;
+  parent?: Parent;
 }
 
 export type Visitor = (visitorOptions: VisitorOptions, visitorUtils: VisitorUtils) => void;
@@ -23,25 +24,35 @@ export interface Path {
 }
 
 export interface TraverseOptions {
-  path?: Path;
   schema: Model;
+  path?: Path;
+  parent?: Parent;
   getModel(uid: string): Model;
+}
+
+export interface Parent {
+  path: Path;
+  schema?: Model;
+  key?: string;
+  attribute?: AnyAttribute;
 }
 
 const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity: Data) => {
   const { path = { raw: null, attribute: null }, schema, getModel } = options;
 
+  let parent = options.parent;
+
   const traverseMorphRelationTarget = async (visitor: Visitor, path: Path, entry: Data) => {
     const targetSchema = getModel(entry.__type!);
 
-    const traverseOptions = { schema: targetSchema, path, getModel };
+    const traverseOptions: TraverseOptions = { schema: targetSchema, path, getModel, parent };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
   const traverseRelationTarget =
     (schema: Model) => async (visitor: Visitor, path: Path, entry: Data) => {
-      const traverseOptions = { schema, path, getModel };
+      const traverseOptions: TraverseOptions = { schema, path, getModel, parent };
 
       return traverseEntity(visitor, traverseOptions, entry);
     };
@@ -50,20 +61,20 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     const targetSchemaUID = 'plugin::upload.file';
     const targetSchema = getModel(targetSchemaUID);
 
-    const traverseOptions = { schema: targetSchema, path, getModel };
+    const traverseOptions: TraverseOptions = { schema: targetSchema, path, getModel, parent };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
   const traverseComponent = async (visitor: Visitor, path: Path, schema: Model, entry: Data) => {
-    const traverseOptions = { schema, path, getModel };
+    const traverseOptions: TraverseOptions = { schema, path, getModel, parent };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
 
   const visitDynamicZoneEntry = async (visitor: Visitor, path: Path, entry: Data) => {
     const targetSchema = getModel(entry.__component!);
-    const traverseOptions = { schema: targetSchema, path, getModel };
+    const traverseOptions: TraverseOptions = { schema: targetSchema, path, getModel, parent };
 
     return traverseEntity(visitor, traverseOptions, entry);
   };
@@ -82,12 +93,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
   for (let i = 0; i < keys.length; i += 1) {
     const key = keys[i];
     // Retrieve the attribute definition associated to the key from the schema
-    const attribute = schema.attributes[key];
-
-    // If the attribute doesn't exist within the schema, ignore it
-    if (isNil(attribute)) {
-      continue;
-    }
+    const attribute = schema.attributes[key] as AnyAttribute | undefined;
 
     const newPath = { ...path };
 
@@ -106,6 +112,7 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
       attribute,
       path: newPath,
       getModel,
+      parent,
     };
 
     await visitor(visitorOptions, visitorUtils);
@@ -113,10 +120,13 @@ const traverseEntity = async (visitor: Visitor, options: TraverseOptions, entity
     // Extract the value for the current key (after calling the visitor)
     const value = copy[key];
 
-    // Ignore Nil values
-    if (isNil(value)) {
+    // Ignore Nil values or attributes
+    if (isNil(value) || isNil(attribute)) {
       continue;
     }
+
+    // The current attribute becomes the parent once visited
+    parent = { schema, key, attribute, path: newPath };
 
     if (isRelationalAttribute(attribute)) {
       const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');

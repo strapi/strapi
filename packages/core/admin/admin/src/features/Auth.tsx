@@ -7,6 +7,7 @@ import { createContext } from '../components/Context';
 import { useTypedDispatch } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
 import { setLocale } from '../reducer';
+import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
   useGetMyPermissionsQuery,
@@ -189,9 +190,10 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
 
   const logout = React.useCallback(async () => {
     await logoutMutation();
+    dispatch(adminApi.util.resetApiState());
     clearStorage();
     navigate('/auth/login');
-  }, [clearStorage, logoutMutation, navigate]);
+  }, [clearStorage, dispatch, logoutMutation, navigate]);
 
   const refetchPermissions = React.useCallback(async () => {
     if (!isUninitialized) {

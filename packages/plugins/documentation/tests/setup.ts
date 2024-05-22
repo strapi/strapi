@@ -1,6 +1,4 @@
-'use strict';
-
-const { server } = require('./server');
+import { server } from './server';
 
 beforeAll(() => {
   server.listen();

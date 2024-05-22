@@ -8,7 +8,7 @@ import { Flex, IconButton, TFooter, Typography, Link, LinkButton } from '@strapi
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { LimitsModal } from '../../components/LimitsModal';
 import { CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME } from '../../constants';
@@ -137,8 +137,7 @@ export const ReviewWorkflowsListView = () => {
             <LinkButton
               startIcon={<Plus />}
               size="S"
-              as={NavLink}
-              // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
+              tag={NavLink}
               to="create"
               onClick={handleCreateClick}
             >
@@ -215,7 +214,6 @@ export const ReviewWorkflowsListView = () => {
                     <Flex alignItems="center" justifyContent="end">
                       {canRead || canUpdate ? (
                         <ActionLink
-                          // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
                           to={`${workflow.id}`}
                           aria-label={formatMessage(
                             {
@@ -230,20 +228,22 @@ export const ReviewWorkflowsListView = () => {
                       ) : null}
                       {workflows.length > 1 && canDelete ? (
                         <IconButton
-                          aria-label={formatMessage(
+                          withTooltip={false}
+                          label={formatMessage(
                             {
                               id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
                               defaultMessage: 'Delete {name}',
                             },
                             { name: 'Default workflow' }
                           )}
-                          icon={<Trash />}
                           borderWidth={0}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteWorkflow(String(workflow.id));
                           }}
-                        />
+                        >
+                          <Trash />
+                        </IconButton>
                       ) : null}
                     </Flex>
                   </Table.Cell>

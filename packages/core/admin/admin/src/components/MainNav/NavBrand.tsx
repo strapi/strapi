@@ -1,10 +1,10 @@
-import { Box, VisuallyHidden } from '@strapi/design-system';
+import { Box, BoxComponent, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useConfiguration } from '../../features/Configuration';
 
-const BrandIconWrapper = styled(Box)`
+const BrandIconWrapper = styled<BoxComponent>(Box)`
   svg,
   img {
     border-radius: ${({ theme }) => theme.borderRadius};

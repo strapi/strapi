@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -57,7 +57,7 @@ describe('PendingAssetStep', () => {
 
     const { container } = renderTL(
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={lightTheme}>
+        <DesignSystemProvider>
           <IntlProvider locale="en">
             <PendingAssetStep
               assets={assets}
@@ -70,7 +70,7 @@ describe('PendingAssetStep', () => {
               onUploadSucceed={jest.fn()}
             />
           </IntlProvider>
-        </ThemeProvider>
+        </DesignSystemProvider>
       </QueryClientProvider>
     );
 

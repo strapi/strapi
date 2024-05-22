@@ -180,16 +180,16 @@ const ListPageCE = () => {
                       <Flex justifyContent="end">
                         {canRead ? (
                           <IconButton
-                            forwardedAs={NavLink}
-                            // @ts-expect-error – This is an issue in the DS with the as prop not adding the inferred props to the component.
+                            tag={NavLink}
                             to={user.id.toString()}
                             label={formatMessage(
                               { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
                               { target: getDisplayName(user) }
                             )}
-                            noBorder
-                            icon={<Pencil />}
-                          />
+                            borderWidth={0}
+                          >
+                            <Pencil />
+                          </IconButton>
                         ) : null}
                         {canDelete ? (
                           <IconButton
@@ -198,9 +198,10 @@ const ListPageCE = () => {
                               { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
                               { target: getDisplayName(user) }
                             )}
-                            noBorder
-                            icon={<Trash />}
-                          />
+                            borderWidth={0}
+                          >
+                            <Trash />
+                          </IconButton>
                         ) : null}
                       </Flex>
                     </Table.Cell>

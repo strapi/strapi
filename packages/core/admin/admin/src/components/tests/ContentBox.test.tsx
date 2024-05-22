@@ -1,8 +1,6 @@
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { GlassesSquare } from '@strapi/icons/symbols';
-import { render as renderRTL, screen } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { render as renderRTL, screen } from '@tests/utils';
 
 import { ContentBox, ContentBoxProps } from '../ContentBox';
 
@@ -27,16 +25,7 @@ describe('ContentBox', () => {
         }
         titleEllipsis={false}
         {...props}
-      />,
-      {
-        wrapper: ({ children }) => (
-          <ThemeProvider theme={lightTheme}>
-            <IntlProvider locale="en" messages={{}} textComponent="span">
-              {children}
-            </IntlProvider>
-          </ThemeProvider>
-        ),
-      }
+      />
     ),
   });
 

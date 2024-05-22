@@ -20,6 +20,9 @@ import {
   VisuallyHidden,
   useComposedRefs,
   Link,
+  Field,
+  FlexComponent,
+  BoxComponent,
 } from '@strapi/design-system';
 import { Cross, Drag, ArrowClockwise } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
@@ -28,7 +31,7 @@ import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { RelationDragPreviewProps } from '../../../../components/DragPreviews/RelationDragPreview';
 import { COLLECTION_TYPES } from '../../../../constants/collections';
@@ -293,7 +296,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
  * TODO: this can be removed once we stop shipping Inputs with
  * labels wrapped round in DS@2.
  */
-const StyledFlex = styled(Flex)`
+const StyledFlex = styled<FlexComponent>(Flex)`
   & > div {
     width: 100%;
   }
@@ -370,11 +373,15 @@ interface RelationsInputProps extends Omit<RelationsFieldProps, 'type'> {
  * for relations and then add them to the field's connect array.
  */
 const RelationsInput = ({
+  hint,
   id,
   model,
+  label,
+  labelAction,
   name,
   mainField,
   placeholder,
+  required,
   unique: _unique,
   'aria-label': _ariaLabel,
   onChange,
@@ -389,7 +396,7 @@ const RelationsInput = ({
   const [{ query }] = useQueryParams();
 
   const { formatMessage } = useIntl();
-  const fieldRef = useFocusInputField(name);
+  const fieldRef = useFocusInputField<HTMLInputElement>(name);
   const field = useField<RelationsFormValue>(name);
 
   const [searchForTrigger, { data, isLoading }] = useLazySearchRelationsQuery();
@@ -486,57 +493,61 @@ const RelationsInput = ({
   }, [field.value]);
 
   return (
-    <Combobox
-      ref={fieldRef}
-      name={name}
-      autocomplete="none"
-      error={field.error}
-      placeholder={
-        placeholder ||
-        formatMessage({
-          id: getTranslation('relation.add'),
-          defaultMessage: 'Add relation',
-        })
-      }
-      hasMoreItems={hasNextPage}
-      loading={isLoading}
-      onOpenChange={() => {
-        handleSearch(textValue ?? '');
-      }}
-      noOptionsMessage={() =>
-        formatMessage({
-          id: getTranslation('relation.notAvailable'),
-          defaultMessage: 'No relations available',
-        })
-      }
-      loadingMessage={formatMessage({
-        id: getTranslation('relation.isLoading'),
-        defaultMessage: 'Relations are loading',
-      })}
-      onLoadMore={handleLoadMore}
-      textValue={textValue}
-      onChange={handleChange}
-      onTextValueChange={(text) => {
-        setTextValue(text);
-      }}
-      onInputChange={(event) => {
-        handleSearch(event.currentTarget.value);
-      }}
-      {...props}
-    >
-      {options.map((opt) => {
-        const textValue = getRelationLabel(opt, mainField);
+    <Field.Root error={field.error} hint={hint} name={name} required={required}>
+      <Field.Label action={labelAction}>{label}</Field.Label>
+      <Combobox
+        ref={fieldRef}
+        name={name}
+        autocomplete="none"
+        placeholder={
+          placeholder ||
+          formatMessage({
+            id: getTranslation('relation.add'),
+            defaultMessage: 'Add relation',
+          })
+        }
+        hasMoreItems={hasNextPage}
+        loading={isLoading}
+        onOpenChange={() => {
+          handleSearch(textValue ?? '');
+        }}
+        noOptionsMessage={() =>
+          formatMessage({
+            id: getTranslation('relation.notAvailable'),
+            defaultMessage: 'No relations available',
+          })
+        }
+        loadingMessage={formatMessage({
+          id: getTranslation('relation.isLoading'),
+          defaultMessage: 'Relations are loading',
+        })}
+        onLoadMore={handleLoadMore}
+        textValue={textValue}
+        onChange={handleChange}
+        onTextValueChange={(text) => {
+          setTextValue(text);
+        }}
+        onInputChange={(event) => {
+          handleSearch(event.currentTarget.value);
+        }}
+        {...props}
+      >
+        {options.map((opt) => {
+          const textValue = getRelationLabel(opt, mainField);
 
-        return (
-          <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
-            <Flex gap={2} justifyContent="space-between">
-              <Typography ellipsis>{textValue}</Typography>
-              {opt.status ? <DocumentStatus status={opt.status} /> : null}
-            </Flex>
-          </ComboboxOption>
-        );
-      })}
-    </Combobox>
+          return (
+            <ComboboxOption key={opt.id} value={opt.id.toString()} textValue={textValue}>
+              <Flex gap={2} justifyContent="space-between">
+                <Typography ellipsis>{textValue}</Typography>
+                {opt.status ? <DocumentStatus status={opt.status} /> : null}
+              </Flex>
+            </ComboboxOption>
+          );
+        })}
+      </Combobox>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
   );
 };
 
@@ -763,7 +774,7 @@ const RelationsList = ({
       : Math.min(data.length, RELATIONS_TO_DISPLAY) * (RELATION_ITEM_HEIGHT + RELATION_GUTTER);
 
   return (
-    <ShadowBox overflowDirection={overflow}>
+    <ShadowBox $overflowDirection={overflow}>
       <VisuallyHidden id={ariaDescriptionId}>
         {formatMessage({
           id: getTranslation('dnd.instructions'),
@@ -799,7 +810,9 @@ const RelationsList = ({
   );
 };
 
-const ShadowBox = styled(Box)<{ overflowDirection?: 'top-bottom' | 'top' | 'bottom' }>`
+const ShadowBox = styled<BoxComponent>(Box)<{
+  $overflowDirection?: 'top-bottom' | 'top' | 'bottom';
+}>`
   position: relative;
   overflow: hidden;
   flex: 1;
@@ -817,8 +830,8 @@ const ShadowBox = styled(Box)<{ overflowDirection?: 'top-bottom' | 'top' | 'bott
     content: '';
     background: linear-gradient(rgba(3, 3, 5, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
     top: 0;
-    opacity: ${({ overflowDirection }) =>
-      overflowDirection === 'top-bottom' || overflowDirection === 'top' ? 1 : 0};
+    opacity: ${({ $overflowDirection }) =>
+      $overflowDirection === 'top-bottom' || $overflowDirection === 'top' ? 1 : 0};
     transition: opacity 0.2s ease-in-out;
   }
 
@@ -827,8 +840,8 @@ const ShadowBox = styled(Box)<{ overflowDirection?: 'top-bottom' | 'top' | 'bott
     content: '';
     background: linear-gradient(0deg, rgba(3, 3, 5, 0.2) 0%, rgba(0, 0, 0, 0) 100%);
     bottom: 0;
-    opacity: ${({ overflowDirection }) =>
-      overflowDirection === 'top-bottom' || overflowDirection === 'bottom' ? 1 : 0};
+    opacity: ${({ $overflowDirection }) =>
+      $overflowDirection === 'top-bottom' || $overflowDirection === 'bottom' ? 1 : 0};
     transition: opacity 0.2s ease-in-out;
   }
 `;
@@ -898,7 +911,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   return (
     <Box
       style={style}
-      as="li"
+      tag="li"
       ref={dropRef}
       aria-describedby={ariaDescribedBy}
       cursor={canDrag ? 'all-scroll' : 'default'}
@@ -921,10 +934,11 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
           <FlexWrapper gap={1}>
             {canDrag ? (
               <IconButton
-                forwardedAs="div"
+                tag="div"
                 role="button"
                 tabIndex={0}
-                aria-label={formatMessage({
+                withTooltip={false}
+                label={formatMessage({
                   id: getTranslation('components.RelationInput.icon-button-aria-label'),
                   defaultMessage: 'Drag',
                 })}
@@ -939,7 +953,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                 <Tooltip description={label}>
                   {href ? (
-                    <LinkEllipsis forwardedAs={NavLink} to={href}>
+                    <LinkEllipsis tag={NavLink} to={href}>
                       {label}
                     </LinkEllipsis>
                   ) : (
@@ -971,7 +985,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
   );
 };
 
-const FlexWrapper = styled(Flex)`
+const FlexWrapper = styled<FlexComponent>(Flex)`
   width: 100%;
   /* Used to prevent endAction to be pushed out of container */
   min-width: 0;
@@ -1019,5 +1033,7 @@ const RelationItemPlaceholder = () => (
   />
 );
 
-export { RelationsField as RelationsInput, FlexWrapper, DisconnectButton, LinkEllipsis };
+const MemoizedRelationsField = React.memo(RelationsField);
+
+export { MemoizedRelationsField as RelationsInput, FlexWrapper, DisconnectButton, LinkEllipsis };
 export type { RelationsFieldProps };

@@ -52,7 +52,7 @@ export const AdminSeatInfoEE = () => {
       </Typography>
       <Flex gap={2}>
         <Flex>
-          <Typography as="p">
+          <Typography tag="p">
             {formatMessage(
               {
                 id: 'Settings.application.ee.admin-seats.count',
@@ -76,7 +76,7 @@ export const AdminSeatInfoEE = () => {
         </Flex>
         {licenseLimitStatus === 'OVER_LIMIT' && (
           <Tooltip
-            description={formatMessage({
+            label={formatMessage({
               id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
               defaultMessage: 'At limit: add seats to invite more users',
             })}

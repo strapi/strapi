@@ -127,7 +127,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         { data: reservedNames },
       ] = await Promise.all(
         ['components', 'content-types', 'reserved-names'].map((endPoint) => {
-          return fetchClient.get(`/${pluginId}/${endPoint}`);
+          return fetchClient.get<{ data: any }>(`/${pluginId}/${endPoint}`);
         })
       );
 

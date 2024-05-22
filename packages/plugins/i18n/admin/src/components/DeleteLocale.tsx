@@ -65,9 +65,10 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
             name,
           }
         )}
-        icon={<Trash />}
         borderWidth={0}
-      />
+      >
+        <Trash />
+      </IconButton>
       <ConfirmDialog onConfirm={handleConfirm} onClose={() => setVisible(false)} isOpen={visible} />
     </>
   );

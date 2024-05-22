@@ -14,8 +14,6 @@ import {
   Flex,
   MultiSelectOption,
   Accordion,
-  AccordionContent,
-  AccordionToggle,
   Grid,
   GridItem,
   IconButton,
@@ -28,14 +26,15 @@ import {
   useComposedRefs,
   Menu,
   MenuItem,
+  Field,
 } from '@strapi/design-system';
 import { Duplicate, Drag, More, EyeStriked } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { Stage as IStage, StagePermission } from '../../../../../shared/contracts/review-workflows';
-import { useGetRolesQuery } from '../../../services/admin';
+import { useGetAdminRolesQuery } from '../../../services/admin';
 import { AVAILABLE_COLORS, getStageColorByHex } from '../../../utils/colors';
 import { DRAG_DROP_TYPES } from '../constants';
 import { useDragAndDrop } from '../hooks/useDragAndDrop';
@@ -55,7 +54,7 @@ interface StagesProps {
   isCreating?: boolean;
 }
 
-const Stages = ({ canDelete = true, canUpdate = true, isCreating = false }: StagesProps) => {
+const Stages = ({ canDelete = true, canUpdate = true, isCreating }: StagesProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const addFieldRow = useForm('Stages', (state) => state.addFieldRow);
@@ -80,18 +79,18 @@ const Stages = ({ canDelete = true, canUpdate = true, isCreating = false }: Stag
           gap={6}
           zIndex={2}
           position="relative"
-          as="ol"
+          tag="ol"
         >
           {stages.map((stage, index) => {
             return (
-              <Box key={stage.__temp_key__} as="li">
+              <Box key={stage.__temp_key__} tag="li">
                 <Stage
                   index={index}
                   canDelete={stages.length > 1 && canDelete}
                   canReorder={stages.length > 1}
                   canUpdate={canUpdate}
                   stagesCount={stages.length}
-                  isOpen={isCreating}
+                  defaultOpen={isCreating}
                   {...stage}
                 />
               </Box>
@@ -129,9 +128,9 @@ interface StageProps extends WorkflowStage {
   canDelete?: boolean;
   canReorder?: boolean;
   canUpdate?: boolean;
-  isOpen?: boolean;
   index: number;
   stagesCount: number;
+  defaultOpen?: boolean;
 }
 
 const Stage = ({
@@ -139,16 +138,15 @@ const Stage = ({
   canDelete = false,
   canReorder = false,
   canUpdate = false,
-  isOpen: isOpenDefault = false,
   stagesCount,
   name,
   permissions,
   color,
+  defaultOpen,
 }: StageProps) => {
   const [liveText, setLiveText] = React.useState<string>();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [isOpen, setIsOpen] = React.useState(isOpenDefault);
   const stageErrors = useForm('Stages', (state) => state.errors.stages as object[]);
   const error = stageErrors?.[index];
   const addFieldRow = useForm('Stage', (state) => state.addFieldRow);
@@ -242,8 +240,10 @@ const Stage = ({
     addFieldRow('stages', { name, color, permissions });
   };
 
+  const id = React.useId();
+
   return (
-    <Box ref={(ref) => composedRef(ref!)}>
+    <Box ref={composedRef}>
       {liveText && <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>}
 
       {isDragging ? (
@@ -255,143 +255,138 @@ const Stage = ({
           display="block"
           hasRadius
           padding={6}
-          shadow="tableShadow"
         />
       ) : (
-        <Accordion
-          size="S"
-          variant="primary"
-          onToggle={() => {
-            setIsOpen(!isOpen);
-
-            if (!isOpen) {
+        <AccordionRoot
+          onValueChange={(value) => {
+            if (value) {
               trackUsage('willEditStage');
             }
           }}
-          expanded={isOpen}
-          shadow="tableShadow"
-          error={Object.values(error ?? {})[0]}
-          hasErrorMessage={false}
+          defaultValue={defaultOpen ? id : undefined}
+          $error={Object.values(error ?? {}).length > 0}
         >
-          <AccordionToggle
-            title={name}
-            togglePosition="left"
-            action={
-              (canDelete || canUpdate) && (
-                <Flex>
-                  <Menu.Root>
-                    <ContextMenuTrigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
-                      <More aria-hidden focusable={false} />
-                      <VisuallyHidden as="span">
-                        {formatMessage({
-                          id: '[tbdb].components.DynamicZone.more-actions',
-                          defaultMessage: 'More actions',
+          <Accordion.Item value={id}>
+            <Accordion.Header>
+              <Accordion.Trigger>{name}</Accordion.Trigger>
+              <Accordion.Actions>
+                {canDelete || canUpdate ? (
+                  <>
+                    <Menu.Root>
+                      <ContextMenuTrigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
+                        <More aria-hidden focusable={false} />
+                        <VisuallyHidden tag="span">
+                          {formatMessage({
+                            id: '[tbdb].components.DynamicZone.more-actions',
+                            defaultMessage: 'More actions',
+                          })}
+                        </VisuallyHidden>
+                      </ContextMenuTrigger>
+                      {/* z-index needs to be as big as the one defined for the wrapper in Stages, otherwise the menu
+                       * disappears behind the accordion
+                       */}
+                      <Menu.Content popoverPlacement="bottom-end" zIndex={2}>
+                        <Menu.SubRoot>
+                          {canUpdate && (
+                            <MenuItem onClick={handleCloneClick}>
+                              {formatMessage({
+                                id: 'Settings.review-workflows.stage.delete',
+                                defaultMessage: 'Duplicate stage',
+                              })}
+                            </MenuItem>
+                          )}
+
+                          {canDelete && (
+                            <DeleteMenuItem onClick={() => removeFieldRow('stages', index)}>
+                              {formatMessage({
+                                id: 'Settings.review-workflows.stage.delete',
+                                defaultMessage: 'Delete',
+                              })}
+                            </DeleteMenuItem>
+                          )}
+                        </Menu.SubRoot>
+                      </Menu.Content>
+                    </Menu.Root>
+
+                    {canUpdate && (
+                      <IconButton
+                        background="transparent"
+                        hasRadius
+                        borderWidth={0}
+                        data-handler-id={handlerId}
+                        ref={dragRef}
+                        label={formatMessage({
+                          id: 'Settings.review-workflows.stage.drag',
+                          defaultMessage: 'Drag',
                         })}
-                      </VisuallyHidden>
-                    </ContextMenuTrigger>
-                    {/* z-index needs to be as big as the one defined for the wrapper in Stages, otherwise the menu
-                     * disappears behind the accordion
-                     */}
-                    <Menu.Content popoverPlacement="bottom-end" zIndex={2}>
-                      <Menu.SubRoot>
-                        {canUpdate && (
-                          <MenuItem onClick={handleCloneClick}>
-                            {formatMessage({
-                              id: 'Settings.review-workflows.stage.delete',
-                              defaultMessage: 'Duplicate stage',
-                            })}
-                          </MenuItem>
-                        )}
-
-                        {canDelete && (
-                          <DeleteMenuItem onClick={() => removeFieldRow('stages', index)}>
-                            {formatMessage({
-                              id: 'Settings.review-workflows.stage.delete',
-                              defaultMessage: 'Delete',
-                            })}
-                          </DeleteMenuItem>
-                        )}
-                      </Menu.SubRoot>
-                    </Menu.Content>
-                  </Menu.Root>
-
-                  {canUpdate && (
-                    <DragIconButton
-                      background="transparent"
-                      // @ts-expect-error – `forwardedAs` can be a string.
-                      forwardedAs="div"
-                      hasRadius
-                      role="button"
-                      noBorder
-                      tabIndex={0}
-                      data-handler-id={handlerId}
-                      ref={dragRef}
-                      label={formatMessage({
-                        id: 'Settings.review-workflows.stage.drag',
-                        defaultMessage: 'Drag',
-                      })}
-                      onClick={(e) => e.stopPropagation()}
-                      onKeyDown={handleKeyDown}
-                    >
-                      <Drag />
-                    </DragIconButton>
-                  )}
-                </Flex>
-              )
-            }
-          />
-          <AccordionContent padding={6} background="neutral0" hasRadius>
-            <Grid gap={4}>
-              {[
-                {
-                  disabled: !canUpdate,
-                  label: formatMessage({
-                    id: 'Settings.review-workflows.stage.name.label',
-                    defaultMessage: 'Stage name',
-                  }),
-                  name: `stages.${index}.name`,
-                  required: true,
-                  size: 6,
-                  type: 'string' as const,
-                },
-                {
-                  disabled: !canUpdate,
-                  label: formatMessage({
-                    id: 'content-manager.reviewWorkflows.stage.color',
-                    defaultMessage: 'Color',
-                  }),
-                  name: `stages.${index}.color`,
-                  required: true,
-                  size: 6,
-                  type: 'color' as const,
-                },
-                {
-                  disabled: !canUpdate,
-                  label: formatMessage({
-                    id: 'Settings.review-workflows.stage.permissions.label',
-                    defaultMessage: 'Roles that can change this stage',
-                  }),
-                  name: `stages.${index}.permissions`,
-                  placeholder: formatMessage({
-                    id: 'Settings.review-workflows.stage.permissions.placeholder',
-                    defaultMessage: 'Select a role',
-                  }),
-                  required: true,
-                  size: 6,
-                  type: 'permissions' as const,
-                },
-              ].map(({ size, ...field }) => (
-                <GridItem key={field.name} col={size}>
-                  <InputRenderer {...field} />
-                </GridItem>
-              ))}
-            </Grid>
-          </AccordionContent>
-        </Accordion>
+                        onClick={(e) => e.stopPropagation()}
+                        onKeyDown={handleKeyDown}
+                      >
+                        <Drag />
+                      </IconButton>
+                    )}
+                  </>
+                ) : null}
+              </Accordion.Actions>
+            </Accordion.Header>
+            <Accordion.Content>
+              <Grid gap={4} padding={6}>
+                {[
+                  {
+                    disabled: !canUpdate,
+                    label: formatMessage({
+                      id: 'Settings.review-workflows.stage.name.label',
+                      defaultMessage: 'Stage name',
+                    }),
+                    name: `stages.${index}.name`,
+                    required: true,
+                    size: 6,
+                    type: 'string' as const,
+                  },
+                  {
+                    disabled: !canUpdate,
+                    label: formatMessage({
+                      id: 'content-manager.reviewWorkflows.stage.color',
+                      defaultMessage: 'Color',
+                    }),
+                    name: `stages.${index}.color`,
+                    required: true,
+                    size: 6,
+                    type: 'color' as const,
+                  },
+                  {
+                    disabled: !canUpdate,
+                    label: formatMessage({
+                      id: 'Settings.review-workflows.stage.permissions.label',
+                      defaultMessage: 'Roles that can change this stage',
+                    }),
+                    name: `stages.${index}.permissions`,
+                    placeholder: formatMessage({
+                      id: 'Settings.review-workflows.stage.permissions.placeholder',
+                      defaultMessage: 'Select a role',
+                    }),
+                    required: true,
+                    size: 6,
+                    type: 'permissions' as const,
+                  },
+                ].map(({ size, ...field }) => (
+                  <GridItem key={field.name} col={size}>
+                    <InputRenderer {...field} />
+                  </GridItem>
+                ))}
+              </Grid>
+            </Accordion.Content>
+          </Accordion.Item>
+        </AccordionRoot>
       )}
     </Box>
   );
 };
+
+const AccordionRoot = styled(Accordion.Root)<{ $error?: boolean }>`
+  border: 1px solid
+    ${({ theme, $error }) => ($error ? theme.colors.danger600 : theme.colors.neutral200)};
+`;
 
 const DeleteMenuItem = styled(MenuItem)`
   color: ${({ theme }) => theme.colors.danger600};
@@ -407,26 +402,6 @@ const ContextMenuTrigger = styled(Menu.Trigger)`
 
   > span {
     font-size: 0;
-  }
-`;
-
-// As soon as either `as` or `forwardedAs` is set, the component
-// resets some styles and e.g. the `hasBorder` prop no longer works,
-// which is why this bit of CSS has been added manually ¯\_(ツ)_/¯
-const DragIconButton = styled(IconButton)`
-  align-items: center;
-  border-radius: ${({ theme }) => theme.borderRadius};
-  display: flex;
-  justify-content: center;
-
-  &:hover,
-  &:focus {
-    background-color: ${({ theme }) => theme.colors.neutral100};
-  }
-
-  svg {
-    height: auto;
-    width: ${({ theme }) => theme.spaces[3]};
   }
 `;
 
@@ -475,54 +450,54 @@ const ColorSelector = ({ disabled, label, name, required }: ColorSelectorProps) 
   const { themeColorName } = getStageColorByHex(value) ?? {};
 
   return (
-    <SingleSelect
-      disabled={disabled}
-      error={error}
-      required={required}
-      // @ts-expect-error – ReactNode is fine for the `label` prop.
-      label={label}
-      onChange={(v) => {
-        onChange(name, v.toString());
-      }}
-      value={value?.toUpperCase()}
-      startIcon={
-        <Flex
-          as="span"
-          height={2}
-          background={value}
-          // @ts-expect-error - transparent doesn't exist in theme.colors
-          borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
-          hasRadius
-          shrink={0}
-          width={2}
-        />
-      }
-    >
-      {colorOptions.map(({ value, label, color }) => {
-        const { themeColorName } = getStageColorByHex(color) || {};
+    <Field.Root error={error} name={name} required={required}>
+      <Field.Label>{label}</Field.Label>
+      <SingleSelect
+        disabled={disabled}
+        onChange={(v) => {
+          onChange(name, v.toString());
+        }}
+        value={value?.toUpperCase()}
+        startIcon={
+          <Flex
+            tag="span"
+            height={2}
+            background={value}
+            // @ts-expect-error - transparent doesn't exist in theme.colors
+            borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+            hasRadius
+            shrink={0}
+            width={2}
+          />
+        }
+      >
+        {colorOptions.map(({ value, label, color }) => {
+          const { themeColorName } = getStageColorByHex(color) || {};
 
-        return (
-          <SingleSelectOption
-            value={value}
-            key={value}
-            startIcon={
-              <Flex
-                as="span"
-                height={2}
-                background={color}
-                // @ts-expect-error - transparent doesn't exist in theme.colors
-                borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
-                hasRadius
-                shrink={0}
-                width={2}
-              />
-            }
-          >
-            {label}
-          </SingleSelectOption>
-        );
-      })}
-    </SingleSelect>
+          return (
+            <SingleSelectOption
+              value={value}
+              key={value}
+              startIcon={
+                <Flex
+                  tag="span"
+                  height={2}
+                  background={color}
+                  // @ts-expect-error - transparent doesn't exist in theme.colors
+                  borderColor={themeColorName === 'neutral0' ? 'neutral150' : 'transparent'}
+                  hasRadius
+                  shrink={0}
+                  width={2}
+                />
+              }
+            >
+              {label}
+            </SingleSelectOption>
+          );
+        })}
+      </SingleSelect>
+      <Field.Error />
+    </Field.Root>
   );
 };
 
@@ -542,7 +517,7 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
   const allStages = useForm<WorkflowStage[]>('PermissionsField', (state) => state.values.stages);
   const onFormValueChange = useForm('PermissionsField', (state) => state.onChange);
 
-  const { data: roles = [], isLoading } = useGetRolesQuery();
+  const { data: roles = [], isLoading } = useGetAdminRolesQuery();
 
   // Super admins always have permissions to do everything and therefore
   // there is no point for this role to show up in the role combobox
@@ -563,26 +538,32 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
 
   if (!isLoading && filteredRoles.length === 0) {
     return (
-      <TextInput
-        disabled
+      <Field.Root
         name={name}
         hint={formatMessage({
           id: 'Settings.review-workflows.stage.permissions.noPermissions.description',
           defaultMessage: 'You don’t have the permission to see roles',
         })}
-        label={formatMessage({
-          id: 'Settings.review-workflows.stage.permissions.label',
-          defaultMessage: 'Roles that can change this stage',
-        })}
-        placeholder={formatMessage({
-          id: 'components.NotAllowedInput.text',
-          defaultMessage: 'No permissions to see this field',
-        })}
         required={required}
-        startAction={<StyledIcon />}
-        type="text"
-        value=""
-      />
+      >
+        <Field.Label>
+          {formatMessage({
+            id: 'Settings.review-workflows.stage.permissions.label',
+            defaultMessage: 'Roles that can change this stage',
+          })}
+        </Field.Label>
+        <TextInput
+          disabled
+          placeholder={formatMessage({
+            id: 'components.NotAllowedInput.text',
+            defaultMessage: 'No permissions to see this field',
+          })}
+          startAction={<EyeStriked fill="neutral600" />}
+          type="text"
+          value=""
+        />
+        <Field.Hint />
+      </Field.Root>
     );
   }
 
@@ -590,52 +571,53 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
     <>
       <Flex alignItems="flex-end" gap={3}>
         <PermissionWrapper grow={1}>
-          <MultiSelect
-            disabled={disabled}
-            error={error}
-            id={name}
-            label={formatMessage({
-              id: 'Settings.review-workflows.stage.permissions.label',
-              defaultMessage: 'Roles that can change this stage',
-            })}
-            onChange={(values) => {
-              // Because the select components expects strings for values, but
-              // the yup schema validates we are sending full permission objects to the API,
-              // we must coerce the string value back to an object
-              const permissions = values.map((value) => ({
-                role: parseInt(value, 10),
-                action: 'admin::review-workflows.stage.transition',
-              }));
+          <Field.Root error={error} name={name} required>
+            <Field.Label>
+              {formatMessage({
+                id: 'Settings.review-workflows.stage.permissions.label',
+                defaultMessage: 'Roles that can change this stage',
+              })}
+            </Field.Label>
+            <MultiSelect
+              disabled={disabled}
+              onChange={(values) => {
+                // Because the select components expects strings for values, but
+                // the yup schema validates we are sending full permission objects to the API,
+                // we must coerce the string value back to an object
+                const permissions = values.map((value) => ({
+                  role: parseInt(value, 10),
+                  action: 'admin::review-workflows.stage.transition',
+                }));
 
-              onChange(name, permissions);
-            }}
-            placeholder={placeholder}
-            required
-            // The Select component expects strings for values
-            value={value.map((permission) => `${permission.role}`)}
-            withTags
-          >
-            <MultiSelectGroup
-              label={formatMessage({
-                id: 'Settings.review-workflows.stage.permissions.allRoles.label',
-                defaultMessage: 'All roles',
-              })}
-              values={filteredRoles.map((r) => `${r.id}`)}
+                onChange(name, permissions);
+              }}
+              placeholder={placeholder}
+              // The Select component expects strings for values
+              value={value.map((permission) => `${permission.role}`)}
+              withTags
             >
-              {filteredRoles.map((role) => {
-                return (
-                  <NestedOption key={role.id} value={`${role.id}`}>
-                    {role.name}
-                  </NestedOption>
-                );
-              })}
-            </MultiSelectGroup>
-          </MultiSelect>
+              <MultiSelectGroup
+                label={formatMessage({
+                  id: 'Settings.review-workflows.stage.permissions.allRoles.label',
+                  defaultMessage: 'All roles',
+                })}
+                values={filteredRoles.map((r) => `${r.id}`)}
+              >
+                {filteredRoles.map((role) => {
+                  return (
+                    <NestedOption key={role.id} value={`${role.id}`}>
+                      {role.name}
+                    </NestedOption>
+                  );
+                })}
+              </MultiSelectGroup>
+            </MultiSelect>
+            <Field.Error />
+          </Field.Root>
         </PermissionWrapper>
 
         <IconButton
           disabled={disabled}
-          icon={<Duplicate />}
           label={formatMessage({
             id: 'Settings.review-workflows.stage.permissions.apply.label',
             defaultMessage: 'Apply to all stages',
@@ -643,7 +625,9 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
           size="L"
           variant="secondary"
           onClick={() => setIsApplyAllConfirmationOpen(true)}
-        />
+        >
+          <Duplicate />
+        </IconButton>
       </Flex>
       <ConfirmDialog
         isOpen={isApplyAllConfirmationOpen}
@@ -677,12 +661,6 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
     </>
   );
 };
-
-const StyledIcon = styled(EyeStriked)`
-  & > path {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-`;
 
 const NestedOption = styled(MultiSelectOption)`
   padding-left: ${({ theme }) => theme.spaces[7]};

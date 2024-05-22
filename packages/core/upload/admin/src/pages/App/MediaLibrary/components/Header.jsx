@@ -38,7 +38,7 @@ export const Header = ({
         breadcrumbs &&
         folder && (
           <Breadcrumbs
-            as="nav"
+            tag="nav"
             label={formatMessage({
               id: getTrad('header.breadcrumbs.nav.label'),
               defaultMessage: 'Folders navigation',

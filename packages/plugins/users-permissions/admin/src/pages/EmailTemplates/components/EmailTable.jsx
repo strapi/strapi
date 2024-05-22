@@ -75,9 +75,11 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 id: getTrad('Email.template.form.edit.label'),
                 defaultMessage: 'Edit a template',
               })}
-              noBorder
-              icon={canUpdate && <Pencil />}
-            />
+              borderWidth={0}
+              disabled={!canUpdate}
+            >
+              <Pencil />
+            </IconButton>
           </Td>
         </Tr>
         <Tr onClick={() => onEditClick('email_confirmation')}>
@@ -104,9 +106,11 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 id: getTrad('Email.template.form.edit.label'),
                 defaultMessage: 'Edit a template',
               })}
-              noBorder
-              icon={canUpdate && <Pencil />}
-            />
+              borderWidth={0}
+              disabled={!canUpdate}
+            >
+              <Pencil />
+            </IconButton>
           </Td>
         </Tr>
       </Tbody>

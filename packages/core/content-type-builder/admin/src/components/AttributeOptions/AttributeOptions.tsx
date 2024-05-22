@@ -50,7 +50,7 @@ export const AttributeOptions = ({ attributes, forTarget, kind }: AttributeOptio
         variant="simple"
       >
         <Flex justifyContent="space-between">
-          <Typography variant="beta" as="h2">
+          <Typography variant="beta" tag="h2">
             {formatMessage({ id: titleId, defaultMessage: 'Select a field' })}
           </Typography>
           <Tabs>

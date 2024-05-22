@@ -8,6 +8,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  isFetchError,
   Layouts,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
@@ -33,14 +34,13 @@ import {
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import { useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { GetReleases, type Release } from '../../../shared/contracts/releases';
 import { RelativeTime as BaseRelativeTime } from '../components/RelativeTime';
 import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
-import { isAxiosError } from '../services/axios';
 import {
   useGetReleasesQuery,
   GetReleasesQueryParams,
@@ -122,7 +122,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
     <Grid gap={4}>
       {releases.map(({ id, name, scheduledAt, status }) => (
         <GridItem col={3} s={6} xs={12} key={id}>
-          <LinkCard href={`content-releases/${id}`} isExternal={false}>
+          <LinkCard tag={NavLink} to={`${id}`} isExternal={false}>
             <Flex
               direction="column"
               justifyContent="space-between"
@@ -136,7 +136,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               gap={4}
             >
               <Flex direction="column" alignItems="start" gap={1}>
-                <Typography as="h3" variant="delta" fontWeight="bold">
+                <Typography tag="h3" variant="delta" fontWeight="bold">
                   {name}
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">
@@ -174,7 +174,7 @@ const StyledAlert = styled(Alert)`
 
 const INITIAL_FORM_VALUES = {
   name: '',
-  date: null,
+  date: undefined,
   time: '',
   isScheduled: true,
   scheduledAt: null,
@@ -273,8 +273,8 @@ const ReleasesPage = () => {
 
       trackUsage('didCreateRelease');
       navigate(response.data.data.id.toString());
-    } else if (isAxiosError(response.error)) {
-      // When the response returns an object with 'error', handle axios error
+    } else if (isFetchError(response.error)) {
+      // When the response returns an object with 'error', handle fetch error
       toggleNotification({
         type: 'danger',
         message: formatAPIError(response.error),

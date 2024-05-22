@@ -7,6 +7,7 @@ import {
   Grid,
   GridItem,
   IconButton,
+  IconButtonComponent,
   Typography,
   useComposedRefs,
   Link,
@@ -17,7 +18,7 @@ import { generateNKeysBetween as generateNKeysBetweenImpl } from 'fractional-ind
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../constants/dragAndDrop';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
@@ -350,7 +351,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
   }
 
   if (value.name === TEMP_FIELD_NAME) {
-    return <Flex as="span" height="100%" style={{ opacity: 0 }} ref={tempRefs} />;
+    return <Flex tag="span" height="100%" style={{ opacity: 0 }} ref={tempRefs} />;
   }
 
   return (
@@ -368,8 +369,9 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
         }}
       >
         <DragButton
-          as="span"
-          aria-label={formatMessage(
+          tag="span"
+          withTooltip={false}
+          label={formatMessage(
             {
               id: getTranslation('components.DraggableCard.move.field'),
               defaultMessage: 'Move {item}',
@@ -394,7 +396,8 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                   e.stopPropagation();
                   setIsModalOpen(true);
                 }}
-                aria-label={formatMessage(
+                withTooltip={false}
+                label={formatMessage(
                   {
                     id: getTranslation('components.DraggableCard.edit.field'),
                     defaultMessage: 'Edit {item}',
@@ -408,7 +411,8 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                 borderWidth={0}
                 onClick={handleRemoveField}
                 background="transparent"
-                aria-label={formatMessage(
+                withTooltip={false}
+                label={formatMessage(
                   {
                     id: getTranslation('components.DraggableCard.delete.field'),
                     defaultMessage: 'Delete {item}',
@@ -455,8 +459,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                 // used to stop the edit form from appearing when we click here.
                 onClick={(e) => e.stopPropagation()}
                 startIcon={<Cog />}
-                as={NavLink}
-                // @ts-expect-error – DS does not infer props from the `as` prop
+                tag={NavLink}
                 to={`../components/${attribute.component}/configurations/edit`}
               >
                 {formatMessage({
@@ -500,7 +503,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
   );
 };
 
-const DragButton = styled(IconButton)`
+const DragButton = styled<IconButtonComponent<'span'>>(IconButton)`
   height: unset;
   align-self: stretch;
   display: flex;

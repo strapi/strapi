@@ -1,11 +1,19 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, useComposedRefs } from '@strapi/design-system';
+import {
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  IconButton,
+  IconButtonComponent,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { Drag } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Editor, Range, Transforms } from 'slate';
 import { ReactEditor, type RenderElementProps, type RenderLeafProps, Editable } from 'slate-react';
-import styled, { CSSProperties, css } from 'styled-components';
+import { styled, CSSProperties, css } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDragAndDrop, DIRECTIONS } from '../../../../../hooks/useDragAndDrop';
@@ -32,13 +40,13 @@ const StyledEditable = styled(Editable)<{ isExpandedMode: boolean }>`
   }
 `;
 
-const Wrapper = styled(Box)<{ isOverDropTarget: boolean }>`
+const Wrapper = styled<BoxComponent>(Box)<{ isOverDropTarget: boolean }>`
   position: ${({ isOverDropTarget }) => isOverDropTarget && 'relative'};
 `;
 
 type DragDirection = (typeof DIRECTIONS)[keyof typeof DIRECTIONS];
 
-const DropPlaceholder = styled(Box)<{
+const DropPlaceholder = styled<BoxComponent>(Box)<{
   dragDirection: DragDirection | null;
   placeholderMargin: 1 | 2;
 }>`
@@ -52,7 +60,7 @@ const DropPlaceholder = styled(Box)<{
   `}
 `;
 
-const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
+const DragItem = styled<FlexComponent>(Flex)<{ $dragVisibility: CSSProperties['visibility'] }>`
   // Style each block rendered using renderElement()
   & > [data-slate-node='element'] {
     width: 100%;
@@ -61,7 +69,7 @@ const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
 
   // Set the visibility of drag button
   [role='button'] {
-    visibility: ${(props) => props.dragVisibility};
+    visibility: ${(props) => props.$dragVisibility};
     opacity: inherit;
   }
   &[aria-disabled='true'] {
@@ -69,7 +77,9 @@ const DragItem = styled(Flex)<{ dragVisibility: CSSProperties['visibility'] }>`
   }
 `;
 
-const DragIconButton = styled(IconButton)<{ dragHandleTopMargin?: CSSProperties['marginTop'] }>`
+const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton)<{
+  $dragHandleTopMargin?: CSSProperties['marginTop'];
+}>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -79,7 +89,7 @@ const DragIconButton = styled(IconButton)<{ dragHandleTopMargin?: CSSProperties[
   visibility: hidden;
   cursor: grab;
   opacity: inherit;
-  margin-top: ${(props) => props.dragHandleTopMargin ?? 0};
+  margin-top: ${(props) => props.$dragHandleTopMargin ?? 0};
 
   &:hover {
     background: ${({ theme }) => theme.colors.neutral200};
@@ -178,7 +188,7 @@ const DragAndDropElement = ({
   }, [editor.selection]);
 
   return (
-    <Wrapper ref={(ref) => composedBoxRefs(ref!)} isOverDropTarget={isOverDropTarget}>
+    <Wrapper ref={composedBoxRefs} isOverDropTarget={isOverDropTarget}>
       {isOverDropTarget && (
         <DropPlaceholder
           borderStyle="solid"
@@ -220,13 +230,14 @@ const DragAndDropElement = ({
           onSelect={() => setDragVisibility('visible')}
           onMouseLeave={() => setDragVisibility('hidden')}
           aria-disabled={disabled}
-          dragVisibility={dragVisibility}
+          $dragVisibility={dragVisibility}
         >
           <DragIconButton
-            forwardedAs="div"
+            tag="div"
             role="button"
             tabIndex={0}
-            aria-label={formatMessage({
+            withTooltip={false}
+            label={formatMessage({
               id: getTranslation('components.DragHandle-label'),
               defaultMessage: 'Drag',
             })}
@@ -235,7 +246,7 @@ const DragAndDropElement = ({
             disabled={disabled}
             draggable
             // For some blocks top margin added to drag handle to align at the text level
-            dragHandleTopMargin={dragHandleTopMargin}
+            $dragHandleTopMargin={dragHandleTopMargin}
           >
             <Drag color="neutral600" />
           </DragIconButton>
@@ -256,15 +267,16 @@ const CloneDragItem = ({ children, dragHandleTopMargin }: CloneDragItemProps) =>
   const { formatMessage } = useIntl();
 
   return (
-    <DragItem gap={2} paddingLeft={2} alignItems="start" dragVisibility="visible">
+    <DragItem gap={2} paddingLeft={2} alignItems="start" $dragVisibility="visible">
       <DragIconButton
-        forwardedAs="div"
+        tag="div"
         role="button"
-        aria-label={formatMessage({
+        withTooltip={false}
+        label={formatMessage({
           id: getTranslation('components.DragHandle-label'),
           defaultMessage: 'Drag',
         })}
-        dragHandleTopMargin={dragHandleTopMargin}
+        $dragHandleTopMargin={dragHandleTopMargin}
       >
         <Drag color="neutral600" />
       </DragIconButton>

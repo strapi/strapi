@@ -1,5 +1,5 @@
 import { isPrivateAttribute } from '../../content-types';
-import { throwInvalidParam } from '../utils';
+import { throwInvalidKey } from '../utils';
 import type { Visitor } from '../../traverse/factory';
 
 const visitor: Visitor = ({ schema, key, attribute, path }) => {
@@ -10,7 +10,7 @@ const visitor: Visitor = ({ schema, key, attribute, path }) => {
   const isPrivate = attribute.private === true || isPrivateAttribute(schema, key);
 
   if (isPrivate) {
-    throwInvalidParam({ key, path: path.attribute });
+    throwInvalidKey({ key, path: path.attribute });
   }
 };
 

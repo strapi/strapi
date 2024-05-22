@@ -1,15 +1,11 @@
 'use strict';
 
-// TODO: add tests for components, media, dynamic zone and relations (for each param)
-// TODO: add tests for populate
-
 const { values, zip, symmetricDifference } = require('lodash/fp');
-
-const resources = require('./resources');
 
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
+const resources = require('./resources');
 
 const { fixtures, schemas } = resources;
 
@@ -749,6 +745,8 @@ describe('Core API - Validate', () => {
       'locale',
       'name',
       'name_non_searchable',
+      'name_hidden',
+      'name_non_writable',
       'misc',
       'createdAt',
       'updatedAt',

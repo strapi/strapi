@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME } from '../../constants';
 
 /**
  * Fill in the sign up form with valid values
@@ -33,7 +33,7 @@ test.describe('Sign Up', () => {
   });
 
   test('a user cannot submit the form if the first name field is not filled', async ({ page }) => {
-    const nameInput = page.getByRole('textbox', { name: 'First name *' });
+    const nameInput = page.getByRole('textbox', { name: 'First name' });
 
     await nameInput.fill('');
     await page.getByRole('button', { name: "Let's start" }).click();
@@ -44,7 +44,7 @@ test.describe('Sign Up', () => {
   test('a user cannot submit the form if the email is: not provided, not lowercase or not a valid email address', async ({
     page,
   }) => {
-    const emailInput = page.getByRole('textbox', { name: 'Email *' });
+    const emailInput = page.getByRole('textbox', { name: 'Email' });
     const letsStartButton = page.getByRole('button', { name: "Let's start" });
 
     const fillEmailAndSubmit = async (emailValue) => {
@@ -66,7 +66,7 @@ test.describe('Sign Up', () => {
   test("a user cannot submit the form if a password isn't provided or doesn't meet the password validation requirements", async ({
     page,
   }) => {
-    const passwordInput = page.getByRole('textbox', { name: 'Password *', exact: true });
+    const passwordInput = page.getByRole('textbox', { name: 'Password', exact: true });
     const letsStartButton = page.getByRole('button', { name: "Let's start" });
 
     const fillPasswordAndSubmit = async (passwordValue) => {
@@ -98,6 +98,6 @@ test.describe('Sign Up', () => {
   }) => {
     await page.getByRole('button', { name: "Let's start" }).click();
 
-    await expect(page).toHaveTitle('Homepage | Strapi');
+    await expect(page).toHaveTitle(TITLE_HOME);
   });
 });

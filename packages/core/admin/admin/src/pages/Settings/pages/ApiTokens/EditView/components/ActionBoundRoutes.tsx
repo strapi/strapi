@@ -35,13 +35,13 @@ export const ActionBoundRoutes = () => {
         </Flex>
       ) : (
         <Flex direction="column" alignItems="stretch" gap={2}>
-          <Typography variant="delta" as="h3">
+          <Typography variant="delta" tag="h3">
             {formatMessage({
               id: 'Settings.apiTokens.createPage.permissions.header.title',
               defaultMessage: 'Advanced settings',
             })}
           </Typography>
-          <Typography as="p" textColor="neutral600">
+          <Typography tag="p" textColor="neutral600">
             {formatMessage({
               id: 'Settings.apiTokens.createPage.permissions.header.hint',
               defaultMessage:

@@ -1,9 +1,18 @@
 import * as React from 'react';
 
-import { BaseButton, Box, Flex, FocusTrap, Portal, Typography } from '@strapi/design-system';
+import {
+  BaseButton,
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  FocusTrap,
+  Portal,
+  Typography,
+} from '@strapi/design-system';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PreviewWysiwyg } from './PreviewWysiwyg';
 
@@ -104,14 +113,14 @@ const EditorLayout = ({
   );
 };
 
-const ExpandWrapper = styled(Flex)`
+const ExpandWrapper = styled<FlexComponent>(Flex)`
   background: ${({ theme }) =>
     `${theme.colors.neutral800}${Math.floor(0.2 * 255)
       .toString(16)
       .padStart(2, '0')}`};
 `;
 
-const BoxWithBorder = styled(Box)`
+const BoxWithBorder = styled<BoxComponent>(Box)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 

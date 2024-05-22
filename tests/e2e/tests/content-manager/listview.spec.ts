@@ -19,34 +19,14 @@ test.describe('List View', () => {
     await expect(page.getByRole('link', { name: /Create new entry/ }).first()).toBeVisible();
   });
 
+  // Should be enabled once bulk publish is in action
   test.skip('A user should be able to perform bulk actions on entries', async ({ page }) => {
-    await test.step('bulk unpublish', async () => {
-      await page.getByRole('link', { name: 'Content Manager' }).click();
-
-      await expect(page).toHaveTitle('Article | Strapi');
-      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      const publishedItems = page.getByRole('gridcell', { name: 'published' });
-      expect(publishedItems).toHaveCount(2);
-      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
-
-      // Select all entries to unpublish
-      await checkbox.check();
-      const unpublish = page.getByRole('button', { name: 'Unpublish' });
-      await unpublish.click();
-
-      // Wait for the confirmation dialog to appear
-      await page.waitForSelector('text=Are you sure you want to unpublish these entries?');
-      const unpublishButton = page
-        .getByLabel('Confirmation')
-        .getByRole('button', { name: 'Unpublish' });
-      await unpublishButton.click();
-
-      await expect(page.getByRole('gridcell', { name: 'draft' })).toHaveCount(2);
-    });
-
     await test.step('bulk publish', async () => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
       // Select all entries to publish
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+      const items = page.getByRole('gridcell', { name: 'draft' });
+      expect(items).toHaveCount(2);
       const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
       await checkbox.check();
       const publish = page.getByRole('button', { name: 'Publish' });
@@ -96,6 +76,30 @@ test.describe('List View', () => {
       await confirmPublishButton.click();
 
       await expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
+    });
+
+    await test.step('bulk unpublish', async () => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+
+      await expect(page).toHaveTitle('Article | Strapi');
+      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+      const items = page.getByRole('gridcell', { name: 'publish' });
+      expect(items).toHaveCount(2);
+      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
+
+      // Select all entries to unpublish
+      await checkbox.check();
+      const unpublish = page.getByRole('button', { name: 'Unpublish' });
+      await unpublish.click();
+
+      // Wait for the confirmation dialog to appear
+      await page.waitForSelector('text=Are you sure you want to unpublish these entries?');
+      const unpublishButton = page
+        .getByLabel('Confirmation')
+        .getByRole('button', { name: 'Unpublish' });
+      await unpublishButton.click();
+
+      await expect(page.getByRole('gridcell', { name: 'draft' })).toHaveCount(2);
     });
 
     await test.step('bulk delete', async () => {

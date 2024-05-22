@@ -22,7 +22,7 @@ import { Cog, GridFour as Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetGridList } from '../../../components/AssetGridList';
 import { EditAssetDialog } from '../../../components/EditAssetDialog';
@@ -262,22 +262,22 @@ export const MediaLibrary = () => {
               {canConfigureView ? (
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    forwardedAs={ReactRouterLink}
+                    tag={ReactRouterLink}
                     to={{
                       pathname: `${pathname}/configuration`,
                       search: stringify(query, { encode: false }),
                     }}
-                    icon={<Cog />}
                     label={formatMessage({
                       id: 'app.links.configure-view',
                       defaultMessage: 'Configure the view',
                     })}
-                  />
+                  >
+                    <Cog />
+                  </IconButton>
                 </ActionContainer>
               ) : null}
               <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
-                  icon={isGridView ? <List /> : <Grid />}
                   label={
                     isGridView
                       ? formatMessage({
@@ -290,7 +290,9 @@ export const MediaLibrary = () => {
                         })
                   }
                   onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
-                />
+                >
+                  {isGridView ? <List /> : <Grid />}
+                </IconButton>
               </ActionContainer>
               <SearchInput
                 label={formatMessage({
@@ -395,25 +397,26 @@ export const MediaLibrary = () => {
                           }
                           cardActions={
                             <IconButton
-                              icon={<Pencil />}
                               aria-label={formatMessage({
                                 id: getTrad('list.folder.edit'),
                                 defaultMessage: 'Edit folder',
                               })}
                               onClick={() => handleEditFolder(folder)}
-                            />
+                            >
+                              <Pencil />
+                            </IconButton>
                           }
                         >
                           <FolderCardBody>
                             <FolderCardBodyAction to={url}>
-                              <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                              <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
                                 <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                                   {folder.name}
                                   <VisuallyHidden>:</VisuallyHidden>
                                 </TypographyMaxWidth>
 
                                 <TypographyMaxWidth
-                                  as="span"
+                                  tag="span"
                                   textColor="neutral600"
                                   variant="pi"
                                   ellipsis

@@ -28,6 +28,9 @@ interface PluginDeclaration {
 
 /**
  * otherwise known as "core features"
+ *
+ * NOTE: These are excluded from the content manager plugin list, as they are always enabled.
+ *       See admin.ts server controller on the content-manager plugin for more details.
  */
 const INTERNAL_PLUGINS = [
   '@strapi/content-manager',
