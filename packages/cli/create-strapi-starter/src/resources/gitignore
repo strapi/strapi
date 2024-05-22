@@ -82,6 +82,8 @@ ssl
 nbproject
 public/uploads/*
 !public/uploads/.gitkeep
+.tsbuildinfo
+.eslintcache
 
 ############################
 # Node.js
@@ -100,6 +102,21 @@ node_modules
 ############################
 
 coverage
+
+############################
+# Package managers
+############################
+
+.yarn/*
+!.yarn/cache
+!.yarn/unplugged
+!.yarn/patches
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
+yarn-error.log
+
 
 ############################
 # Strapi
