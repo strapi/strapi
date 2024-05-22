@@ -13,7 +13,6 @@ import {
   isObject,
   cloneDeep,
   get,
-  mergeAll,
   isArray,
   isString,
 } from 'lodash/fp';
