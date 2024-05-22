@@ -8,32 +8,32 @@
     "email": "hi@strapi.io",
     "url": "https://strapi.io"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+ssh://git@github.com//.git"
-  },
-  "type": "commonjs",
+  "maintainers": [
+    {
+      "name": "Strapi Solutions SAS",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
   "exports": {
-    "./package.json": "./package.json",
     "./strapi-admin": {
       "types": "./dist/admin/src/index.d.ts",
       "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
-    }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
-    "dist",
-    "./strapi-server.js"
+    "dist/"
   ],
   "scripts": {
     "build": "strapi-plugin build",
-    "test:ts:back": "run -T tsc -p server/tsconfig.json",
-    "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "verify": "strapi-plugin verify",
-    "watch": "strapi-plugin watch",
-    "watch:link": "strapi-plugin watch:link"
+    "clean": "run -T rimraf ./dist",
+    "develop": "strapi-plugin watch",
+    "lint": "run -T eslint .",
+    "test:ts:front": "run -T tsc -p admin/tsconfig.json"
   },
   "dependencies": {
     "@strapi/design-system": "2.0.0-beta.4",
@@ -52,16 +52,20 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^5.0.0-beta.6",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-router-dom": "^6.23.0",
-    "styled-components": "^5.3.11"
+    "@strapi/strapi": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
+    "react": "^17.0.0 || ^18.0.0",
+    "react-dom": "^17.0.0 || ^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "styled-components": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0 <=20.x.x",
+    "npm": ">=6.0.0"
   },
   "strapi": {
+    "name": "strapi-cloud",
+    "description": "Instructions to deploy your local project to Strapi Cloud",
     "kind": "plugin",
-    "name": "asdf",
-    "displayName": "sadf",
-    "description": "asdf"
+    "displayName": "Strapi Cloud"
   }
 }
