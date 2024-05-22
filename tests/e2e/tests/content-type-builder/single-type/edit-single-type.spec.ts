@@ -3,9 +3,10 @@ import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
-import { createCollectionType, navToHeader, skipCtbTour } from '../../../utils/shared';
+import { createSingleType, navToHeader, skipCtbTour } from '../../../utils/shared';
 
-test.describe('Edit collection type', () => {
+
+test.describe('Edit single type', () => {
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
 
@@ -22,7 +23,7 @@ test.describe('Edit collection type', () => {
 
     // TODO: create a "saveFileState" mechanism to be used so we don't have to do a full server restart before each test
     // create a collection type to be used
-    await createCollectionType(page, {
+    await createSingleType(page, {
       name: ctName,
     });
 
