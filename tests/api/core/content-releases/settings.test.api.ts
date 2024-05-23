@@ -11,6 +11,7 @@ import type { Settings } from '../../../../packages/core/content-releases/shared
 const builder = createTestBuilder();
 let strapi: Core.Strapi;
 let rq: any;
+let rqUnauth: any;
 let rqReader: any;
 let rqEditor: any;
 
@@ -64,6 +65,18 @@ describe('Content releases settings', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     const utils = createUtils(strapi);
+
+    /**
+     * Unauthorized role
+     */
+    rqUnauth = await createUserRequest(
+      {
+        user: { firstname: 'Pepe', lastname: 'Frog', email: 'pepe.frog@test.com' },
+        role: { name: 'noAuth' },
+        permissions: [],
+      },
+      utils
+    );
 
     /**
      * Reader role
@@ -157,6 +170,18 @@ describe('Content releases settings', () => {
   });
 
   describe('Permissions', () => {
+    test('Unauthorized user cannot read settings', async () => {
+      const { status } = await getSettings(rqUnauth);
+
+      expect(status).toBe(403);
+    });
+
+    test('Unauthorized user cannot update settings', async () => {
+      const { status } = await updateSettings({ defaultTimezone: 'Europe/Paris' }, rqUnauth);
+
+      expect(status).toBe(403);
+    });
+
     test('Reader can read settings', async () => {
       const { status } = await getSettings(rqReader);
 
