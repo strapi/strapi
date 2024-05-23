@@ -1,7 +1,11 @@
 import axios, { type AxiosResponse } from 'axios';
 import * as fs from 'fs';
+import os from 'os';
 import { apiConfig } from '../config/api';
 import type { CloudCliConfig } from '../types';
+import { getLocalConfig } from '../config/local';
+
+import packageJson from '../../package.json';
 
 export const VERSION = 'v1';
 
@@ -18,6 +22,8 @@ export type DeployResponse = {
   build_id: string;
   image: string;
 };
+
+export type TrackPayload = Record<string, unknown>;
 
 export interface CloudApiService {
   deploy(
@@ -42,13 +48,21 @@ export interface CloudApiService {
   config(): Promise<AxiosResponse<CloudCliConfig>>;
 
   listProjects(): Promise<AxiosResponse<ProjectInfos[]>>;
+
+  track(event: string, payload?: TrackPayload): Promise<AxiosResponse<void>>;
 }
 
 export function cloudApiFactory(token?: string): CloudApiService {
+  const localConfig = getLocalConfig();
+  const customHeaders = {
+    'x-device-id': localConfig.deviceId,
+    'x-app-version': packageJson.version,
+  };
   const axiosCloudAPI = axios.create({
     baseURL: `${apiConfig.apiBaseUrl}/${VERSION}`,
     headers: {
       'Content-Type': 'application/json',
+      ...customHeaders,
     },
   });
 
@@ -99,6 +113,24 @@ export function cloudApiFactory(token?: string): CloudApiService {
 
     listProjects() {
       return axiosCloudAPI.get<ProjectInfos[]>('/projects');
+    },
+
+    track(event, payload = {}) {
+      return axiosCloudAPI.post<void>(
+        '/track',
+        {
+          event,
+          payload,
+        },
+        {
+          headers: {
+            'x-os-name': os.type(),
+            'x-os-version': os.version(),
+            'x-language': Intl.DateTimeFormat().resolvedOptions().locale,
+            'x-node-version': process.versions.node,
+          },
+        }
+      );
     },
   };
 }

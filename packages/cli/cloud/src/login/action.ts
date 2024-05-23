@@ -4,12 +4,18 @@ import type { CloudCliConfig, CLIContext } from '../types';
 
 const openModule = import('open');
 
-
 export default async (ctx: CLIContext) => {
   const { logger } = ctx;
   const tokenService = tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
   const cloudApiService = cloudApiFactory(existingToken || undefined);
+  const trackFailedLogin = async () => {
+    try {
+      await cloudApiService.track('didNotLogin', { loginMethod: 'cli' });
+    } catch (e) {
+      logger.debug('Failed to track failed login', e);
+    }
+  };
 
   if (existingToken) {
     const isTokenValid = await tokenService.isTokenValid(existingToken);
@@ -19,7 +25,7 @@ export default async (ctx: CLIContext) => {
       if (email) {
         logger.log(`You are already logged into your account (${email}).`);
       } else {
-        logger.log("You are already logged in.");
+        logger.log('You are already logged in.');
       }
       return;
     }
@@ -34,6 +40,12 @@ export default async (ctx: CLIContext) => {
     logger.error('🥲 Oops! Something went wrong while logging you in. Please try again.');
     logger.debug(error);
     return;
+  }
+
+  try {
+    await cloudApiService.track('willLoginAttempt', {});
+  } catch (e) {
+    logger.debug('Failed to track login attempt', e);
   }
 
   logger.debug('🔐 Creating device authentication request...', {
@@ -127,6 +139,7 @@ export default async (ctx: CLIContext) => {
             'There seems to be a problem with your login information. Please try logging in again.'
           );
           spinnerFail();
+          await trackFailedLogin();
           return;
         }
         if (
@@ -135,6 +148,7 @@ export default async (ctx: CLIContext) => {
         ) {
           logger.debug(error);
           spinnerFail();
+          await trackFailedLogin();
           return;
         }
         // Await interval before retrying
@@ -145,6 +159,11 @@ export default async (ctx: CLIContext) => {
     }
     spinner.succeed('Authentication successful!');
     logger.log('You are now logged into Strapi Cloud.');
+    try {
+      await cloudApiService.track('didLogin', { loginMethod: 'cli' });
+    } catch (e) {
+      logger.debug('Failed to track login', e);
+    }
   };
 
   await authenticate();

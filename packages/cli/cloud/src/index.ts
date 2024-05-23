@@ -1,9 +1,11 @@
 import { Command } from 'commander';
+import crypto from 'crypto';
 import deployProject from './deploy-project';
 import login from './login';
 import logout from './logout';
 import createProject from './create-project';
 import { CLIContext } from './types';
+import { getLocalConfig, saveLocalConfig } from './config/local';
 
 export const cli = {
   deployProject,
@@ -14,6 +16,16 @@ export const cli = {
 
 const cloudCommands = [deployProject, login, logout];
 
+async function initCloudCLIConfig() {
+  const localConfig = getLocalConfig();
+
+  if (!localConfig.deviceId) {
+    localConfig.deviceId = crypto.randomUUID();
+  }
+
+  saveLocalConfig(localConfig);
+}
+
 export function buildStrapiCloudCommands({
   command,
   ctx,
@@ -23,6 +35,7 @@ export function buildStrapiCloudCommands({
   ctx: CLIContext;
   argv: string[];
 }) {
+  initCloudCLIConfig();
   // Load all commands
   cloudCommands.forEach((cloudCommand) => {
     try {
