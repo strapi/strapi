@@ -68,6 +68,16 @@ describe('Content releases settings', () => {
     expect(settings).toEqual({ defaultTimezone: 'Europe/Paris' });
   });
 
+  test('Can update timezone to null', async () => {
+    // Set settings
+    await updateSettings({ defaultTimezone: 'Europe/Paris' });
+    const { status, settings } = await updateSettings({ defaultTimezone: null });
+
+    // Returned settings should be the updated ones
+    expect(status).toBe(200);
+    expect(settings).toEqual({ defaultTimezone: null });
+  });
+
   test('Find settings', async () => {
     // Set settings
     await updateSettings({ defaultTimezone: 'Europe/Paris' });

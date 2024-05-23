@@ -28,7 +28,7 @@ export const RELEASE_SCHEMA = yup
 export const SETTINGS_SCHEMA = yup
   .object()
   .shape({
-    defaultTimezone: yup.string().required().nullable(),
+    defaultTimezone: yup.string().nullable().default(null),
   })
   .required()
   .noUnknown();
