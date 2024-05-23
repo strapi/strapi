@@ -4,12 +4,14 @@ import type { Core } from '@strapi/types';
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
+import { createUtils } from 'api-tests/utils';
 
 import type { Settings } from '../../../../packages/core/content-releases/shared/contracts/settings';
 
 const builder = createTestBuilder();
 let strapi: Core.Strapi;
 let rq: any;
+let rqReader: any;
 let rqEditor: any;
 
 const getSettings = async (request = rq) => {
@@ -34,11 +36,61 @@ const updateSettings = async (settings: Settings, request = rq) => {
   }));
 };
 
+/**
+ * Creates a request utility with a user having the specified role and permissions
+ */
+const createUserRequest = async (params: { user; role; permissions }, utils) => {
+  // Create user role
+  const role = await utils.createRole(params.role);
+
+  // Assign permissions
+  const permissions = await utils.assignPermissionsToRole(role.id, params.permissions);
+  Object.assign(role, permissions);
+
+  // Create user
+  const createdUser = await utils.createUser({
+    ...params.user,
+    roles: [role.id],
+    password: '1234',
+  });
+
+  // Return request
+  return createAuthRequest({ strapi, userInfo: createdUser });
+};
+
 describe('Content releases settings', () => {
   beforeAll(async () => {
     await builder.build();
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+    const utils = createUtils(strapi);
+
+    /**
+     * Reader role
+     */
+    rqReader = await createUserRequest(
+      {
+        user: { firstname: 'Alice', lastname: 'Foo', email: 'alice.foo@test.com' },
+        role: { name: 'reader' },
+        permissions: [{ action: 'plugin::content-releases.settings.read' }],
+      },
+      utils
+    );
+
+    /**
+     * Full access role
+     */
+    rqEditor = await createUserRequest(
+      {
+        user: { firstname: 'Bob', lastname: 'Bar', email: 'bob.bar@test.com' },
+        role: { name: 'editor' },
+        permissions: [
+          { action: 'plugin::content-releases.settings.read' },
+          { action: 'plugin::content-releases.settings.update' },
+        ],
+      },
+      utils
+    );
   });
 
   beforeEach(async () => {
@@ -101,6 +153,32 @@ describe('Content releases settings', () => {
 
       // Should throw a validation error
       expect(status).toBe(400);
+    });
+  });
+
+  describe('Permissions', () => {
+    test('Reader can read settings', async () => {
+      const { status } = await getSettings(rqReader);
+
+      expect(status).toBe(200);
+    });
+
+    test('Reader cannot update settings', async () => {
+      const { status } = await updateSettings({ defaultTimezone: 'Europe/Paris' }, rqReader);
+
+      expect(status).toBe(403);
+    });
+
+    test('Editor can read settings', async () => {
+      const { status } = await getSettings(rqEditor);
+
+      expect(status).toBe(200);
+    });
+
+    test('Editor can update settings', async () => {
+      const { status } = await updateSettings({ defaultTimezone: 'Europe/Paris' }, rqEditor);
+
+      expect(status).toBe(200);
     });
   });
 });

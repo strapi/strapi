@@ -44,6 +44,25 @@ export const ACTIONS = [
     uid: 'create-action',
     pluginName: 'content-releases',
   },
+
+  // Settings
+  {
+    uid: 'settings.read',
+    section: 'settings',
+    displayName: 'Read',
+    category: 'content releases',
+    subCategory: 'options',
+    pluginName: 'content-releases',
+  },
+
+  {
+    uid: 'settings.update',
+    section: 'settings',
+    displayName: 'Edit',
+    category: 'content releases',
+    subCategory: 'options',
+    pluginName: 'content-releases',
+  },
 ];
 
 export const ALLOWED_WEBHOOK_EVENTS = {
