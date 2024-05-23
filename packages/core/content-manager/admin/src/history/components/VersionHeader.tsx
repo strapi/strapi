@@ -134,7 +134,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           </Typography>
         }
         navigationAction={
-          <Link startIcon={<ArrowLeft />} tag={NavLink} to={getNextNavigation()}>
+          <Link startIcon={<ArrowLeft />} tag={NavLink} to={getNextNavigation()} isExternal={false}>
             {formatMessage({
               id: 'global.back',
               defaultMessage: 'Back',

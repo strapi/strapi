@@ -8,26 +8,34 @@ import { waitForRestart } from '../../utils/restart';
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const goToHistoryPage = async (page: Page) => {
-  const moreActionsButton = await page.getByRole('button', { name: /more actions/i });
+  const moreActionsButton = page.getByRole('button', { name: /more actions/i });
   await expect(moreActionsButton).toBeEnabled();
   await moreActionsButton.click();
-  const historyButton = await page.getByRole('menuitem', { name: /content history/i });
-  await historyButton.click();
+  const historyButton = page.getByRole('menuitem', { name: /content history/i });
+
+  // TODO find out why the history button sometimes doesn't appear. Reloading shouldn't be necessary
+  if (await historyButton.isVisible()) {
+    await historyButton.click();
+  } else {
+    await page.reload();
+    await goToHistoryPage(page);
+  }
 };
 
 describeOnCondition(edition === 'EE')('History', () => {
+  test.beforeEach(async ({ page }) => {
+    await resetDatabaseAndImportDataFromPath('with-admin.tar', (cts) => cts, { coreStore: false });
+    await resetFiles();
+    await page.goto('/admin');
+    await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
+    await login({ page });
+  });
+
+  test.afterAll(async () => {
+    await resetFiles();
+  });
+
   test.describe('Collection Type', () => {
-    test.beforeEach(async ({ page }) => {
-      await resetDatabaseAndImportDataFromPath('with-admin.tar');
-      await resetFiles();
-      await page.goto('/admin');
-      await login({ page });
-    });
-
-    test.afterAll(async () => {
-      await resetFiles();
-    });
-
     test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
       page,
     }) => {
@@ -147,9 +155,11 @@ describeOnCondition(edition === 'EE')('History', () => {
       const AUTHOR_CREATE_URL =
         /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
       const AUTHOR_EDIT_URL =
-        /\/admin\/content-manager\/collection-types\/api::author.author\/[^/]+(\?.*)?/;
+        /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
       const ARTICLE_CREATE_URL =
         /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
+      const ARTICLE_LIST_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
       const ARTICLE_EDIT_URL =
         /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
       const ARTICLE_HISTORY_URL =
@@ -162,17 +172,19 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(AUTHOR_CREATE_URL);
       await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
       await page.getByRole('button', { name: 'Save' }).click();
+      await page.waitForURL(AUTHOR_EDIT_URL);
 
       // Create new article and add authors to it
       await page.getByRole('link', { name: 'Article' }).click();
+      await page.waitForURL(ARTICLE_LIST_URL);
       await page.getByRole('link', { name: 'Create new entry' }).click();
-      await page.waitForURL(ARTICLE_CREATE_URL);
       await page.getByRole('textbox', { name: 'title' }).fill('Zava retires');
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Will Kitman').click();
       await page.getByRole('combobox', { name: 'Authors' }).click();
       await page.getByText('Coach Beard').click();
       await page.getByRole('button', { name: 'Save' }).click();
+      await page.waitForURL(ARTICLE_EDIT_URL);
 
       // Delete one of the authors, leaving only Coach Beard
       await page.getByRole('link', { name: 'Will Kitman' }).click();
@@ -185,8 +197,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('link', { name: 'Article' }).click();
       await page.getByRole('gridcell', { name: 'Zava retires' }).click();
       await page.waitForURL(ARTICLE_EDIT_URL);
-      await page.getByRole('button', { name: /more actions/i }).click();
-      await page.getByRole('menuitem', { name: /content history/i }).click();
+      await goToHistoryPage(page);
       await page.waitForURL(ARTICLE_HISTORY_URL);
 
       // Assert that the unknown relation alert is displayed
@@ -198,30 +209,28 @@ describeOnCondition(edition === 'EE')('History', () => {
     test('A user should be able to rename (delete + create) a field in the content-type builder and see the changes as "unknown fields" in concerned history versions', async ({
       page,
     }) => {
-      const CREATE_URL =
+      const ARTICLE_CREATE_URL =
         /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
-      const HISTORY_URL =
+      const ARTICLE_EDIT_URL =
+        /\/admin\/content-manager\/collection-types\/api::article.article\/(?!create)[^/]/;
+      const ARTICLE_HISTORY_URL =
         /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+\/history(\?.*)?/;
       /**
        * Create an initial entry to also create an initial version
        */
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
-      await page.waitForURL(CREATE_URL);
+      await page.waitForURL(ARTICLE_CREATE_URL);
       await page.getByRole('textbox', { name: 'title' }).fill('Being from Kansas');
       await page.getByRole('textbox', { name: 'slug' }).fill('being-from-kansas');
       await page.getByRole('button', { name: 'Save' }).click();
+      await page.waitForURL(ARTICLE_EDIT_URL);
 
       /**
        * Rename field in content-type builder
        */
       await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-
-      const skipTheTour = await page.getByRole('button', { name: 'Skip the tour' });
-      if (skipTheTour.isVisible()) {
-        skipTheTour.click();
-      }
-
+      await page.waitForURL('**/content-type-builder');
       await page.getByRole('link', { name: 'Article' }).click();
       await page.waitForURL(
         '/admin/plugins/content-type-builder/content-types/api::article.article'
@@ -240,6 +249,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: 'Article' }).click();
       await page.getByRole('gridcell', { name: 'being-from-kansas' }).click();
+      await page.waitForURL(ARTICLE_EDIT_URL);
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Being from Kansas City');
       await page.getByRole('button', { name: 'Save' }).click();
 
@@ -247,7 +257,7 @@ describeOnCondition(edition === 'EE')('History', () => {
        * Go to the history page
        */
       await goToHistoryPage(page);
-      await page.waitForURL(HISTORY_URL);
+      await page.waitForURL(ARTICLE_HISTORY_URL);
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(2);
 
@@ -265,13 +275,6 @@ describeOnCondition(edition === 'EE')('History', () => {
   });
 
   test.describe('Single Type', () => {
-    test.beforeEach(async ({ page }) => {
-      await resetDatabaseAndImportDataFromPath('with-admin.tar');
-      await resetFiles();
-      await page.goto('/admin');
-      await login({ page });
-    });
-
     test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
       page,
     }) => {
@@ -383,7 +386,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       const AUTHOR_CREATE_URL =
         /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
       const AUTHOR_EDIT_URL =
-        /\/admin\/content-manager\/collection-types\/api::author.author\/[^/]+(\?.*)?/;
+        /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
       const HOMEPAGE_EDIT_URL =
         /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
       const HOMEPAGE_HISTORY_URL =
@@ -391,10 +394,6 @@ describeOnCondition(edition === 'EE')('History', () => {
 
       // Create relation in Content-Type Builder
       await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-      const skipTheTour = await page.getByRole('button', { name: 'Skip the tour' });
-      if (skipTheTour.isVisible()) {
-        skipTheTour.click();
-      }
       await page.getByRole('link', { name: 'Homepage' }).click();
       await page.waitForURL(
         '/admin/plugins/content-type-builder/content-types/api::homepage.homepage'
@@ -416,6 +415,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(AUTHOR_CREATE_URL);
       await page.getByRole('textbox', { name: 'name' }).fill('Will Kitman');
       await page.getByRole('button', { name: 'Save' }).click();
+      await page.waitForURL(AUTHOR_EDIT_URL);
 
       // Add author to homepage
       await page.getByRole('link', { name: 'Homepage' }).click();
@@ -463,11 +463,7 @@ describeOnCondition(edition === 'EE')('History', () => {
        * Rename field in content-type builder
        */
       await page.getByRole('link', { name: 'Content-Type Builder' }).click();
-
-      const skipTheTour = await page.getByRole('button', { name: 'Skip the tour' });
-      if (skipTheTour.isVisible()) {
-        skipTheTour.click();
-      }
+      await page.waitForURL('**/content-type-builder');
 
       await page.getByRole('link', { name: 'Homepage' }).click();
       await page.waitForURL(
