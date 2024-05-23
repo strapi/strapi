@@ -29,6 +29,7 @@ describeOnCondition(edition === 'EE')('History', () => {
     await page.goto('/admin');
     await page.evaluate(() => window.localStorage.setItem('GUIDED_TOUR_SKIPPED', 'true'));
     await login({ page });
+    await page.waitForURL('/admin');
   });
 
   test.afterAll(async () => {

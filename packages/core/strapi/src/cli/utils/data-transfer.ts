@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
-import { configs, createLogger } from '@strapi/logger';
+import { configs, createLogger, type winston } from '@strapi/logger';
 import { createStrapi, compileStrapi } from '@strapi/core';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
@@ -209,14 +209,23 @@ const errorColors = {
   silly: chalk.yellow,
 } as const;
 
-const formatDiagnostic =
-  (
-    operation: string
-  ): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] =>
-  ({ details, kind }) => {
-    const logger = createLogger(
-      configs.createOutputFileConfiguration(`${operation}_error_log_${Date.now()}.log`)
-    );
+const formatDiagnostic = (
+  operation: string
+): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] => {
+  // Create log file for all incoming diagnostics
+  let logger: undefined | winston.Logger;
+  const getLogger = () => {
+    if (!logger) {
+      logger = createLogger(
+        configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, { level: 'info' })
+      );
+    }
+    return logger;
+  };
+
+  // We don't want to write a log file until there is something to be logged
+
+  return ({ details, kind }) => {
     try {
       if (kind === 'error') {
         const { message, severity = 'fatal' } = details;
@@ -224,24 +233,25 @@ const formatDiagnostic =
         const colorizeError = errorColors[severity];
         const errorMessage = colorizeError(`[${severity.toUpperCase()}] ${message}`);
 
-        logger.error(errorMessage);
+        getLogger().error(errorMessage);
       }
       if (kind === 'info') {
         const { message, params } = details;
 
         const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
 
-        logger.info(msg);
+        getLogger().info(msg);
       }
       if (kind === 'warning') {
         const { origin, message } = details;
 
-        logger.warn(`(${origin ?? 'transfer'}) ${message}`);
+        getLogger().warn(`(${origin ?? 'transfer'}) ${message}`);
       }
     } catch (err) {
-      logger.error(err);
+      getLogger().error(err);
     }
   };
+};
 
 type Loaders = {
   [key in engineDataTransfer.TransferStage]: ora.Ora;
