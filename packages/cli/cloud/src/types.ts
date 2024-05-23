@@ -24,6 +24,7 @@ export type CloudCliConfig = {
   buildLogsConnectionTimeout: string;
   buildLogsMaxRetries: string;
   notificationsConnectionTimeout: string;
+  maxProjectFileSize: string;
 };
 
 export interface CLIContext {

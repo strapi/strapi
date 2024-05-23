@@ -12,8 +12,6 @@ import { notificationServiceFactory } from '../services/notification';
 import { loadPkg } from '../utils/pkg';
 import { buildLogsServiceFactory } from '../services/build-logs';
 
-const FILE_SIZE_LIMIT = 100 * 1024 * 1024; // 100MB
-
 type PackageJson = {
   name: string;
   strapi?: {
@@ -21,7 +19,7 @@ type PackageJson = {
   };
 };
 
-async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
+async function upload(ctx: CLIContext, project: ProjectInfos, token: string, maxProjectFileSize: number) {
   const cloudApi = cloudApiFactory(token);
   // * Upload project
   try {
@@ -60,7 +58,7 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string) {
     const tarFilePath = path.resolve(storagePath, compressedFilename);
     const fileStats = fs.statSync(tarFilePath);
 
-    if (fileStats.size > FILE_SIZE_LIMIT) {
+    if (fileStats.size > maxProjectFileSize) {
       return ctx.logger.log(
         'Unable to proceed: Your project is too big to be transferred, please use a git repo instead.'
       );
@@ -143,9 +141,14 @@ export default async (ctx: CLIContext) => {
   const buildLogsService = buildLogsServiceFactory(ctx);
 
   const cloudApiService =  cloudApiFactory();
-const   { data : cliConfig } = await  cloudApiService.config();
+  const   { data : cliConfig } = await  cloudApiService.config();
 
-  const buildId = await upload(ctx, project, token);
+  const maxSize: number = parseInt(cliConfig.maxProjectFileSize, 10);
+  if (Number.isNaN(maxSize)) {
+    throw new Error("An error occurred while fetching the project's configuration: maxProjectFileSize is NaN");
+  }
+
+  const buildId = await upload(ctx, project, token, maxSize);
 
   try {
     await Promise.all([
