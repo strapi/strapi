@@ -3,44 +3,78 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  Divider,
   Flex,
   Icon,
   PopoverPrimitives,
   Portal,
   Typography,
-  VisuallyHidden,
 } from '@strapi/design-system';
-import { useAppInfo } from '@strapi/helper-plugin';
-import { Cross, Message, Play, Question, Book, PaperPlane } from '@strapi/icons';
+import { Cross, Question, Book, PaperPlane } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import onboardingPreview from '../assets/images/onboarding-preview.png';
+import StrapiLogo from '../assets/images/logo-strapi-2022.svg';
+
+import { SparkIcon } from './SparkIcon';
 
 const Onboarding = () => {
   const triggerRef = React.useRef<HTMLButtonElement>(null!);
   const [isOpen, setIsOpen] = React.useState(false);
   const { formatMessage } = useIntl();
-  const { communityEdition } = useAppInfo();
+  // const { communityEdition } = useAppInfo();
 
   const handlePopoverVisibility = () => {
+    loadKapaScript();
     setIsOpen((prev) => !prev);
   };
 
-  const docLinks = [
-    ...DOCUMENTATION_LINKS,
-    {
-      label: { id: 'Settings.application.get-help', defaultMessage: 'Get help' },
-      icon: Message,
-      href: communityEdition
-        ? 'https://discord.strapi.io'
-        : 'https://support.strapi.io/support/home',
-    },
-  ];
+  // const docLinks = [
+  //   ...DOCUMENTATION_LINKS,
+  //   {
+  //     label: { id: 'Settings.application.get-help', defaultMessage: 'Get help' },
+  //     icon: Message,
+  //     href: communityEdition
+  //       ? 'https://discord.strapi.io'
+  //       : 'https://support.strapi.io/support/home',
+  //   },
+  // ];
+
+  // React.useEffect(() => {
+  //   const script = document.getElementsByTagName("a[href='http://domain.example']");
+
+  //   return () => {
+  //     document.body.removeChild(script);
+  //   };
+  // }, []);
+
+  const loadKapaScript = () => {
+    const script = document.createElement('script');
+
+    script.src = 'https://widget.kapa.ai/kapa-widget.bundle.js';
+    script.async = true;
+
+    script.setAttribute('data-website-id', 'f1838a12-ad58-4224-9fab-2f0704eeeb52');
+    script.setAttribute('data-project-name', 'Strapi');
+    script.setAttribute('data-project-color', '#4945FF');
+    script.setAttribute('data-project-logo', 'https://strapi.io/assets/favicon-32x32.png');
+    script.setAttribute('data-button-hide', 'true');
+    script.setAttribute('data-modal-open-on-command-k', 'true');
+    script.setAttribute('data-modal-override-open-class', 'ai-modal-open-action');
+    script.setAttribute(
+      'data-modal-disclaimer',
+      'Disclaimer: Answers are AI-generated and might be inaccurate. Please ensure you double-check the information provided by visiting source pages.'
+    );
+    script.setAttribute('data-modal-title', 'Strapi Media library AI assistant');
+    script.setAttribute(
+      'data-modal-example-questions',
+      '[Canny] Permission Management for Media Library Folders?, How to use media library filters?, How to upload a file?, Where is the video of Marco running from ducks?'
+    );
+
+    document.body.appendChild(script);
+  };
 
   return (
-    <Box as="aside" position="fixed" bottom={2} right={2}>
+    <Box as="aside" position="fixed" bottom={2} right={4}>
       <HelperButton
         aria-label={formatMessage(
           isOpen
@@ -68,96 +102,30 @@ const Onboarding = () => {
             placement="top-end"
             spacing={12}
           >
-            <Flex
-              justifyContent="space-between"
-              paddingBottom={5}
-              paddingRight={6}
-              paddingLeft={6}
-              paddingTop={6}
-            >
-              <TypographyLineHeight fontWeight="bold">
-                {formatMessage({
-                  id: 'app.components.Onboarding.title',
-                  defaultMessage: 'Get started videos',
-                })}
-              </TypographyLineHeight>
-              <TextLink
-                as="a"
-                href={WATCH_MORE.href}
+            <Flex maxWidth="600px" direction="column" alignItems="stretch" gap={2} padding={4}>
+              <Typography variant="beta" fontWeight="bold">
+                Looking for the Media library documentation?
+              </Typography>
+              <Typography variant="epsilon">We&apos;ve got you covered!</Typography>
+              <a
+                href="https://docs.strapi.io/user-docs/media-library"
                 target="_blank"
-                rel="noreferrer noopener"
-                variant="pi"
-                textColor="primary600"
+                rel="noreferrer"
+                style={{ textDecoration: 'none' }}
               >
-                {formatMessage(WATCH_MORE.label)}
-              </TextLink>
-            </Flex>
-            <Divider />
-            {VIDEO_LINKS.map(({ href, duration, label }, index) => (
-              <VideoLinkWrapper
-                as="a"
-                href={href}
-                target="_blank"
-                rel="noreferrer noopener"
-                key={href}
-                hasRadius
-                paddingTop={4}
-                paddingBottom={4}
-                paddingLeft={6}
-                paddingRight={11}
-              >
-                <Box paddingRight={5}>
-                  <Typography textColor="neutral200" variant="alpha">
-                    {index + 1}
-                  </Typography>
-                </Box>
-                <Box position="relative">
-                  <Preview src={onboardingPreview} alt="" />
-                  <IconWrapper
-                    position="absolute"
-                    top="50%"
-                    left="50%"
-                    background="primary600"
-                    borderRadius="50%"
-                    justifyContent="center"
-                    width={6}
-                    height={6}
-                  >
-                    <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
-                  </IconWrapper>
-                </Box>
-                <Flex direction="column" alignItems="start" paddingLeft={4}>
-                  <Typography fontWeight="bold">{formatMessage(label)}</Typography>
-                  <VisuallyHidden>:</VisuallyHidden>
-                  <Typography textColor="neutral600" variant="pi">
-                    {duration}
+                <Flex borderColor="neutral150" gap={2} padding={4}>
+                  <Preview src={StrapiLogo} alt="" />
+                  <Typography>
+                    Introduction to the Media Library which allows to display and manage all assets
+                    uploaded in the application.
                   </Typography>
                 </Flex>
-              </VideoLinkWrapper>
-            ))}
-            <Flex
-              direction="column"
-              alignItems="stretch"
-              gap={2}
-              paddingLeft={5}
-              paddingTop={2}
-              paddingBottom={5}
-            >
-              {docLinks.map(({ label, href, icon }) => (
-                <Flex gap={3} key={href}>
-                  <Icon as={icon} color="primary600" />
-                  <TextLink
-                    as="a"
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    variant="sigma"
-                    textColor="primary700"
-                  >
-                    {formatMessage(label)}
-                  </TextLink>
-                </Flex>
-              ))}
+              </a>
+              <Box>
+                <Button className="ai-modal-open-action" startIcon={<Icon as={SparkIcon} />}>
+                  Ask AI!
+                </Button>
+              </Box>
             </Flex>
           </PopoverPrimitives.Content>
         </Portal>
@@ -173,6 +141,60 @@ const HelperButton = styled(Button)`
   /* Resetting 2rem height defined by Button component */
   height: 100%;
 `;
+// const HelperButton = styled.button`
+//   position: relative;
+//   border-radius: 8px;
+//   padding: ${({ theme }) => theme.spaces[3]};
+//   background: ${({ theme }) => theme.colors.buttonNeutral0};
+
+//   &:before,
+//   &:after {
+//     border-radius: 8px;
+//     content: '';
+//     position: absolute;
+//     top: -2px;
+//     left: -2px;
+//     width: calc(100% + 4px);
+//     height: calc(100% + 4px);
+//     background: linear-gradient(
+//       45deg,
+//       #fb0094,
+//       #0000ff,
+//       #00ff00,
+//       #ffff00,
+//       #ff0000,
+//       #fb0094,
+//       #0000ff,
+//       #00ff00,
+//       #ffff00,
+//       #ff0000
+//     );
+//     background-size: 400%;
+//     z-index: -1;
+//     animation: shadow 20s linear infinite;
+//   }
+
+//   &:after {
+//     top: -8px;
+//     left: -8px;
+//     width: calc(100% + 16px);
+//     height: calc(100% + 16px);
+//     filter: blur(24px);
+//     opacity: 0.9;
+//   }
+
+//   @keyframes shadow {
+//     0% {
+//       background-position: 0 0;
+//     }
+//     50.01% {
+//       background-position: 200% 0;
+//     }
+//     100% {
+//       background-position: 0 0;
+//     }
+//   }
+// `;
 
 const IconWrapper = styled(Flex)`
   transform: translate(-50%, -50%);
@@ -204,7 +226,6 @@ const Preview = styled.img`
   width: ${({ theme }) => theme.spaces[10]};
   height: ${({ theme }) => theme.spaces[8]};
   /* Same overlay used in ModalLayout */
-  background: ${({ theme }) => `${theme.colors.neutral800}1F`};
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
