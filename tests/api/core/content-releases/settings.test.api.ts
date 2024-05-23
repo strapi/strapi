@@ -52,7 +52,7 @@ describe('Content releases settings', () => {
     await builder.cleanup();
   });
 
-  describe('Find settings', async () => {
+  describe('Find settings', () => {
     test('Find settings when there is none set', async () => {
       const { status, settings } = await getSettings();
 
@@ -73,7 +73,7 @@ describe('Content releases settings', () => {
     });
   });
 
-  describe('Update settings', async () => {
+  describe('Update settings', () => {
     test('Can update settings', async () => {
       // Set settings
       const { status, settings } = await updateSettings({ defaultTimezone: 'Europe/Paris' });
