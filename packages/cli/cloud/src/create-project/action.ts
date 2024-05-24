@@ -34,6 +34,7 @@ function handleError(ctx: CLIContext, error: Error) {
 }
 
 export default async (ctx: CLIContext) => {
+  const { logger } = ctx;
   const { getValidToken } = tokenServiceFactory(ctx);
 
   const token = await getValidToken();
@@ -49,11 +50,14 @@ export default async (ctx: CLIContext) => {
 
   const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
 
+  const spinner = logger.spinner('Setting up your project...').start();
   try {
     const { data } = await cloudApi.createProject(projectInput);
     local.save({ project: data });
+    spinner.succeed('Project created successfully!');
     return data;
   } catch (error: Error | unknown) {
+    spinner.fail('Failed to create project on Strapi Cloud.');
     handleError(ctx, error as Error);
   }
 };
