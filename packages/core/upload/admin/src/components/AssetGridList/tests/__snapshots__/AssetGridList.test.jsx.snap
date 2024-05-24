@@ -58,33 +58,6 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   height: 16.4rem;
 }
 
-.c17 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c18 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  color: #666687;
-}
-
-.c27 {
-  font-weight: 600;
-  font-size: 1.1rem;
-  line-height: 1.45;
-  text-transform: uppercase;
-  color: #666687;
-}
-
-.c31 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  color: #ffffff;
-}
-
 .c6 {
   align-items: center;
   display: flex;
@@ -118,6 +91,34 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   justify-content: center;
 }
 
+.c17 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c18 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #666687;
+}
+
+.c27 {
+  font-weight: 600;
+  font-size: 1.1rem;
+  line-height: 1.45;
+  text-transform: uppercase;
+  line-height: 1rem;
+  color: #666687;
+}
+
+.c31 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  color: #ffffff;
+}
+
 .c29 {
   border: 0;
   clip: rect(0 0 0 0);
@@ -131,16 +132,16 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 
 .c25 {
   border-radius: 4px;
-  height: 2.4rem;
+  padding-block: 0.7rem;
 }
 
 .c10 {
-  height: 18px;
-  min-width: 18px;
+  min-width: 1.8rem;
+  height: 1.8rem;
   margin: 0;
+  appearance: none;
   border-radius: 4px;
   border: 1px solid #c0c0cf;
-  -webkit-appearance: none;
   background-color: #ffffff;
   cursor: pointer;
 }
@@ -155,8 +156,8 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   display: block;
   position: relative;
   background: url("data:image/svg+xml,%3csvg%20width='10'%20height='8'%20viewBox='0%200%2010%208'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M8.55323%200.396973C8.63135%200.316355%208.76051%200.315811%208.83931%200.395768L9.86256%201.43407C9.93893%201.51157%209.93935%201.6359%209.86349%201.7139L4.06401%207.67724C3.9859%207.75755%203.85707%207.75805%203.77834%207.67834L0.13866%203.99333C0.0617798%203.91549%200.0617102%203.79032%200.138504%203.7124L1.16213%202.67372C1.24038%202.59432%201.36843%202.59422%201.4468%202.67348L3.92174%205.17647L8.55323%200.396973Z'%20fill='white'%20/%3e%3c/svg%3e") no-repeat no-repeat center center;
-  width: 10px;
-  height: 10px;
+  width: 1rem;
+  height: 1rem;
   left: 50%;
   top: 50%;
   transform: translateX(-50%) translateY(-50%);
@@ -310,15 +311,11 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
               <div
                 class="c8 c9"
               >
-                <div
-                  class=""
-                >
-                  <input
-                    aria-labelledby=":r0:-title"
-                    class="c10"
-                    type="checkbox"
-                  />
-                </div>
+                <input
+                  aria-labelledby=":r0:-title"
+                  class="c10"
+                  type="checkbox"
+                />
               </div>
             </div>
             <div
@@ -399,44 +396,36 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
               <div
                 class="c8 c9"
               >
-                <div
-                  class=""
-                >
-                  <input
-                    aria-labelledby=":r1:-title"
-                    class="c10"
-                    type="checkbox"
-                  />
-                </div>
+                <input
+                  aria-labelledby=":r1:-title"
+                  class="c10"
+                  type="checkbox"
+                />
               </div>
             </div>
             <div
               class="c11"
             >
               <div
-                class="c21"
+                class="c28"
               >
-                <div
-                  class="c28"
+                <figure
+                  class=""
                 >
-                  <figure
-                    class=""
+                  <video
+                    crossorigin="anonymous"
+                    src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4"
                   >
-                    <video
-                      crossorigin="anonymous"
-                      src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4"
-                    >
-                      <source
-                        type="video/mp4"
-                      />
-                    </video>
-                    <figcaption
-                      class="c29"
-                    >
-                      mov_bbb.mp4
-                    </figcaption>
-                  </figure>
-                </div>
+                    <source
+                      type="video/mp4"
+                    />
+                  </video>
+                  <figcaption
+                    class="c29"
+                  >
+                    mov_bbb.mp4
+                  </figcaption>
+                </figure>
               </div>
             </div>
             <time
@@ -515,15 +504,11 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
               <div
                 class="c8 c9"
               >
-                <div
-                  class=""
-                >
-                  <input
-                    aria-labelledby=":r2:-title"
-                    class="c10"
-                    type="checkbox"
-                  />
-                </div>
+                <input
+                  aria-labelledby=":r2:-title"
+                  class="c10"
+                  type="checkbox"
+                />
               </div>
             </div>
             <div

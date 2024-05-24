@@ -66,7 +66,11 @@ const SearchAsset = ({ onChangeSearch, queryValue }) => {
     );
   }
 
-  return <IconButton icon={<Search />} label="Search" onClick={handleToggle} />;
+  return (
+    <IconButton label="Search" onClick={handleToggle}>
+      <Search />
+    </IconButton>
+  );
 };
 
 SearchAsset.defaultProps = {

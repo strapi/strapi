@@ -4,7 +4,7 @@ import { useIntl } from 'react-intl';
 import type { AdminRole } from '../../../../../hooks/useAdminRoles';
 
 interface RoleRowProps extends Pick<AdminRole, 'id' | 'name' | 'description' | 'usersCount'> {
-  icons: Array<Required<Pick<IconButtonProps, 'icon' | 'label' | 'onClick'>>>;
+  icons: Array<Required<Pick<IconButtonProps, 'children' | 'label' | 'onClick'>>>;
   rowIndex: number;
   canUpdate?: boolean;
 }
@@ -51,18 +51,17 @@ const RoleRow = ({
       </Td>
       <Td>
         <Flex justifyContent="flex-end" onClick={(e) => e.stopPropagation()}>
-          {icons.map((icon, i) =>
-            icon ? (
-              <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>
-                <IconButton
-                  onClick={icon.onClick}
-                  label={icon.label}
-                  borderWidth={0}
-                  icon={icon.icon}
-                />
-              </Box>
-            ) : null
-          )}
+          {icons.map((icon, i) => {
+            if (icon) {
+              return (
+                <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>
+                  <IconButton {...icon} borderWidth={0} />
+                </Box>
+              );
+            }
+
+            return null;
+          })}
         </Flex>
       </Td>
     </Tr>

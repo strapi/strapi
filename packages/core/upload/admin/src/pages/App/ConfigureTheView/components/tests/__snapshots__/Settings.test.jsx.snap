@@ -17,9 +17,9 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c6 {
   background: #ffffff;
-  padding-block-start: 4px;
+  padding-block-start: 8px;
   padding-inline-end: 12px;
-  padding-block-end: 4px;
+  padding-block-end: 8px;
   padding-inline-start: 12px;
   border-radius: 4px;
   position: relative;
@@ -29,6 +29,28 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c9 {
   flex: 1;
+}
+
+.c3 {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c7 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.c10 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
 }
 
 .c5 {
@@ -54,28 +76,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   color: #666687;
 }
 
-.c3 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c7 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  justify-content: space-between;
-}
-
-.c10 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-}
-
 .c16 {
   border: 0;
   clip: rect(0 0 0 0);
@@ -89,7 +89,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c8 {
   border: 1px solid #dcdce4;
-  min-height: 4rem;
   outline: none;
   box-shadow: 0;
   transition-property: border-color,box-shadow,fill;
@@ -110,12 +109,13 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 }
 
 .c14>svg {
-  width: 1.2rem;
   fill: #666687;
 }
 
 .c12 {
   flex: 1;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
 }
 
 .c13 {

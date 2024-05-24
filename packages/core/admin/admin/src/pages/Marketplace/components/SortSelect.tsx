@@ -56,8 +56,6 @@ const SortSelect = ({ sortQuery, handleSelectChange }: SortSelectProps) => {
   return (
     <SelectWrapper>
       <SingleSelect
-        size="S"
-        id="sort-by-select"
         value={sortQuery}
         customizeContent={() => formatMessage(SORT_TYPES[sortQuery].selected)}
         onChange={(sortName) => {

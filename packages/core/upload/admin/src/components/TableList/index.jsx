@@ -79,7 +79,7 @@ export const TableList = ({
                     <IconButton
                       label={sortLabel}
                       onClick={() => handleClickSort(isSorted, name)}
-                      noBorder
+                      borderWidth={0}
                     >
                       {isUp ? <CaretUp /> : <CaretDown />}
                     </IconButton>

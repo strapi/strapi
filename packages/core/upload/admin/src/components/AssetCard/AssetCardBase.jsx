@@ -92,17 +92,19 @@ export const AssetCardBase = ({
                   id: getTrad('control-card.remove-selection'),
                   defaultMessage: 'Remove from selection',
                 })}
-                icon={<Trash />}
                 onClick={onRemove}
-              />
+              >
+                <Trash />
+              </IconButton>
             )}
 
             {onEdit && (
               <IconButton
                 label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-                icon={<Pencil />}
                 onClick={onEdit}
-              />
+              >
+                <Pencil />
+              </IconButton>
             )}
           </CardActionsContainer>
         )}

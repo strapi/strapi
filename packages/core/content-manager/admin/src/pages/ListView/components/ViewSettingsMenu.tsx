@@ -44,14 +44,15 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
   return (
     <>
       <IconButton
-        icon={<Cog />}
         label={formatMessage({
           id: 'components.ViewSettings.tooltip',
           defaultMessage: 'View Settings',
         })}
         ref={cogButtonRef}
         onClick={handleToggle}
-      />
+      >
+        <Cog />
+      </IconButton>
       {isVisible && (
         <Popover
           placement="bottom-end"
@@ -134,7 +135,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
   };
 
   return (
-    <Flex tag="fieldset" direction="column" alignItems="stretch" gap={3}>
+    <Flex tag="fieldset" direction="column" alignItems="stretch" gap={3} borderWidth={0}>
       <Flex justifyContent="space-between">
         <Typography tag="legend" variant="pi" fontWeight="bold">
           {formatMessage({

@@ -1,6 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import { Layouts } from '@strapi/admin/strapi-admin';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
@@ -22,13 +22,13 @@ jest.mock('../useContentTypeBuilderMenu.ts', () => {
 const makeApp = () => {
   return (
     <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <MemoryRouter>
           <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
             <div />
           </Layouts.Root>
         </MemoryRouter>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </IntlProvider>
   );
 };

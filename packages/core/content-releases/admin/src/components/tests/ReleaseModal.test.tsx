@@ -1,6 +1,5 @@
 import { fireEvent } from '@testing-library/react';
 import { render, screen, waitFor } from '@tests/utils';
-import { MemoryRouter } from 'react-router-dom';
 
 import { pluginId } from '../../pluginId';
 import { ReleaseModal } from '../ReleaseModal';
@@ -24,7 +23,7 @@ describe('ReleaseModal', () => {
       <ReleaseModal
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
-        initialValues={{ name: '', date: null, time: '', timezone: '', scheduledAt: null }}
+        initialValues={{ name: '', time: '', timezone: '', scheduledAt: null }}
         isLoading={false}
       />,
       {
@@ -44,7 +43,7 @@ describe('ReleaseModal', () => {
       <ReleaseModal
         handleClose={jest.fn()}
         handleSubmit={jest.fn()}
-        initialValues={{ name: 'title', date: null, time: '', timezone: '', scheduledAt: null }}
+        initialValues={{ name: 'title', time: '', timezone: '', scheduledAt: null }}
         isLoading={false}
       />
     );

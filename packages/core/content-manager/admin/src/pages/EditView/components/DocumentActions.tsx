@@ -842,6 +842,7 @@ const UnpublishAction: DocumentActionComponent = ({
                 direction="column"
                 alignItems="flex-start"
                 tag="fieldset"
+                borderWidth={0}
                 gap={3}
               >
                 <VisuallyHidden tag="legend"></VisuallyHidden>

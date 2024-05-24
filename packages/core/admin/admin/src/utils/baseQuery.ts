@@ -1,30 +1,25 @@
 import { SerializedError } from '@reduxjs/toolkit';
 import { BaseQueryFn } from '@reduxjs/toolkit/query';
 
-import {
-  getFetchClient,
-  isFetchError,
-  type FetchOptions,
-  type Method,
-} from '../utils/getFetchClient';
+import { getFetchClient, isFetchError, type FetchOptions } from '../utils/getFetchClient';
 
 import type { ApiError } from '../hooks/useAPIErrorHandler';
 
-export interface QueryArguments {
+interface QueryArguments {
   url: string;
-  method?: Method;
+  method?: 'GET' | 'POST' | 'DELETE' | 'PUT';
   data?: unknown;
   config?: FetchOptions;
 }
 
-export interface UnknownApiError {
+interface UnknownApiError {
   name: 'UnknownError';
   message: string;
   details?: unknown;
   status?: number;
 }
 
-export type BaseQueryError = ApiError | UnknownApiError;
+type BaseQueryError = ApiError | UnknownApiError;
 
 const fetchBaseQuery =
   (): BaseQueryFn<string | QueryArguments, unknown, BaseQueryError> =>
@@ -114,3 +109,4 @@ const isBaseQueryError = (error: BaseQueryError | SerializedError): error is Bas
 };
 
 export { fetchBaseQuery, isBaseQueryError };
+export type { BaseQueryError, UnknownApiError, QueryArguments };

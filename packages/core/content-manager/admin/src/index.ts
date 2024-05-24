@@ -12,11 +12,8 @@ export default {
     const cm = new ContentManagerPlugin();
 
     app.addReducers({
-      [contentManagerApi.reducerPath]: contentManagerApi.reducer,
       [PLUGIN_ID]: reducer,
     });
-
-    app.addMiddlewares([() => contentManagerApi.middleware]);
 
     app.addMenuLink({
       to: PLUGIN_ID,

@@ -58,9 +58,9 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c26 {
   background: #ffffff;
-  padding-block-start: 4px;
+  padding-block-start: 8px;
   padding-inline-end: 12px;
-  padding-block-end: 4px;
+  padding-block-end: 8px;
   padding-inline-start: 12px;
   border-radius: 4px;
   position: relative;
@@ -70,6 +70,48 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c29 {
   flex: 1;
+}
+
+.c9 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.c11 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+}
+
+.c14 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c23 {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c27 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.c30 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
 }
 
 .c8 {
@@ -119,48 +161,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
   font-size: 1.2rem;
   line-height: 1.33;
   color: #666687;
-}
-
-.c9 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-}
-
-.c11 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-}
-
-.c14 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c23 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c27 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  gap: 16px;
-  justify-content: space-between;
-}
-
-.c30 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
 }
 
 .c36 {
@@ -297,7 +297,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c28 {
   border: 1px solid #dcdce4;
-  min-height: 4rem;
   outline: none;
   box-shadow: 0;
   transition-property: border-color,box-shadow,fill;
@@ -318,12 +317,13 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 }
 
 .c34>svg {
-  width: 1.2rem;
   fill: #666687;
 }
 
 .c32 {
   flex: 1;
+  font-size: 1.4rem;
+  line-height: 2.2rem;
 }
 
 .c33 {

@@ -23,7 +23,7 @@ describe('Create Locale', () => {
     expect(screen.getByRole('tabpanel', { name: 'Basic settings' })).toBeInTheDocument();
 
     expect(screen.getByRole('combobox', { name: 'Locales' })).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: 'Locale display name' })).toBeInTheDocument();
+    expect(await screen.findByRole('textbox', { name: 'Locale display name' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('tab', { name: 'Advanced settings' }));
 

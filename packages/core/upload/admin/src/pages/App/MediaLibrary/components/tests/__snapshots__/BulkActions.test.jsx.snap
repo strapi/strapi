@@ -17,6 +17,13 @@ exports[`BulkActions renders 1`] = `
   cursor: pointer;
 }
 
+.c1 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
 .c2 {
   font-size: 1.6rem;
   line-height: 1.5;
@@ -28,13 +35,6 @@ exports[`BulkActions renders 1`] = `
   line-height: 1.33;
   font-weight: 600;
   color: currentcolor;
-}
-
-.c1 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
 }
 
 .c8 {

@@ -1,31 +1,12 @@
-import * as React from 'react';
-
-import { fireEvent, render, waitFor, defaultTestStoreConfig } from '@strapi/strapi/admin/test';
+import { fireEvent, render, waitFor } from '@strapi/strapi/admin/test';
 import { rest } from 'msw';
 
-// @ts-expect-error - js file
 import { server } from '../../../../tests/server';
-import { api } from '../../services/api';
 import { SettingsPage } from '../Settings';
-
-const renderSettingsPage = () =>
-  render(<SettingsPage />, {
-    providerOptions: {
-      storeConfig: {
-        ...defaultTestStoreConfig,
-        reducer: {
-          ...defaultTestStoreConfig.reducer,
-          [api.reducerPath]: api.reducer,
-        },
-        middleware: (getDefaultMiddleware) =>
-          defaultTestStoreConfig.middleware(getDefaultMiddleware).concat(api.middleware),
-      },
-    },
-  });
 
 describe('SettingsPage', () => {
   it('renders the setting page correctly', async () => {
-    const { getByRole, queryByText, getByText } = renderSettingsPage();
+    const { getByRole, queryByText, getByText } = render(<SettingsPage />);
 
     await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
@@ -50,7 +31,7 @@ describe('SettingsPage', () => {
       })
     );
 
-    const { getByLabelText, queryByText } = renderSettingsPage();
+    const { getByLabelText, queryByText } = render(<SettingsPage />);
 
     await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
@@ -60,7 +41,7 @@ describe('SettingsPage', () => {
   });
 
   it('should render the password field when the Restricted Access checkbox is checked', async () => {
-    const { getByRole, getByLabelText, queryByText } = renderSettingsPage();
+    const { getByRole, getByLabelText, queryByText } = render(<SettingsPage />);
 
     await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 
@@ -72,7 +53,7 @@ describe('SettingsPage', () => {
   });
 
   it('should allow me to type a password and save that settings change successfully', async () => {
-    const { getByRole, getByLabelText, queryByText, user, findByText } = renderSettingsPage();
+    const { getByRole, getByLabelText, queryByText, user, findByText } = render(<SettingsPage />);
 
     await waitFor(() => expect(queryByText('Loading content.')).not.toBeInTheDocument());
 

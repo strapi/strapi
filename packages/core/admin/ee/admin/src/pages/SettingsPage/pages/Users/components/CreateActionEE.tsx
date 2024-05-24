@@ -21,11 +21,11 @@ export const CreateActionEE = ({ onClick }: CreateActionCEProps) => {
     <Flex gap={2}>
       {!isNil(permittedSeats) && shouldStopCreate && (
         <Tooltip
-          description={formatMessage({
+          label={formatMessage({
             id: 'Settings.application.admin-seats.at-limit-tooltip',
             defaultMessage: 'At limit: add seats to invite more users',
           })}
-          position="left"
+          side="left"
         >
           <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
         </Tooltip>
