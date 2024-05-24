@@ -42,7 +42,6 @@ describeOnCondition(edition === 'EE')('Audit logs', () => {
   let strapi;
   let rq;
   let contentApiRq;
-  let initialEntries;
 
   const builder = createTestBuilder();
 
@@ -66,7 +65,7 @@ describeOnCondition(edition === 'EE')('Audit logs', () => {
     // Ensure the audit logs are empty
     await strapi.db.query('admin::audit-log').deleteMany();
 
-    initialEntries = await Promise.all([
+    await Promise.all([
       createArticle({ title: 'Article1', password: 'password' }),
       createArticle({ title: 'Article2', password: 'password' }),
       createArticle({ title: 'Article3', password: 'password' }),
@@ -121,14 +120,29 @@ describeOnCondition(edition === 'EE')('Audit logs', () => {
     const { body } = await rq({ method: 'GET', url: '/admin/audit-logs' });
 
     expect(body.results.length).toBe(3);
+    expect(body.results[0]).toMatchObject({
+      id: expect.any(Number),
+      action: expect.any(String),
+      date: expect.any(String),
+      payload: expect.any(Object),
+      user: expect.any(Object),
+    });
   });
 
   test('Finds one audit log', async () => {
+    const [auditLogToGet] = await strapi.db?.query('admin::audit-log').findMany();
     const { body } = await rq({
       method: 'GET',
-      url: `/admin/audit-logs/${initialEntries[0].data.id}`,
+      url: `/admin/audit-logs/${auditLogToGet.id}`,
     });
 
-    expect(body.id).toBe(initialEntries[0].data.id);
+    expect(body.id).toBe(auditLogToGet.id);
+    expect(body).toMatchObject({
+      id: expect.any(Number),
+      action: expect.any(String),
+      date: expect.any(String),
+      payload: expect.any(Object),
+      user: expect.any(Object),
+    });
   });
 });
