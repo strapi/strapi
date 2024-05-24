@@ -143,9 +143,10 @@ export default async (ctx: CLIContext) => {
   const cloudApiService =  cloudApiFactory();
   const   { data : cliConfig } = await  cloudApiService.config();
 
-  const maxSize: number = parseInt(cliConfig.maxProjectFileSize, 10);
+  let maxSize: number = parseInt(cliConfig.maxProjectFileSize, 10);
   if (Number.isNaN(maxSize)) {
-    throw new Error("An error occurred while fetching the project's configuration: maxProjectFileSize is NaN");
+    ctx.logger.debug("An error occurred while parsing the maxProjectFileSize. Using default value.")
+    maxSize = 100000000
   }
 
   const buildId = await upload(ctx, project, token, maxSize);

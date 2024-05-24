@@ -50,6 +50,7 @@
     "cli-progress": "3.12.0",
     "commander": "8.3.0",
     "eventsource": "2.0.2",
+    "fast-safe-stringify": "2.1.1",
     "inquirer": "8.2.5",
     "jsonwebtoken": "9.0.0",
     "jwks-rsa": "3.1.0",

@@ -1,4 +1,6 @@
 import chalk from 'chalk';
+import stringify from 'fast-safe-stringify';
+
 import ora from 'ora';
 import * as cliProgress from 'cli-progress';
 
@@ -24,6 +26,10 @@ export interface Logger {
   ) => Pick<cliProgress.SingleBar, 'start' | 'stop' | 'update'>;
 }
 
+const stringifyArg = (arg: unknown) => {
+  return typeof arg === 'object' ? stringify(arg) : arg;
+}
+
 const createLogger = (options: LoggerOptions = {}): Logger => {
   const { silent = false, debug = false, timestamp = true } = options;
 
@@ -43,12 +49,9 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
         return;
       }
 
-      const safeStringify = (await import('safe-stringify')).default;
-      const stringifiedArgs = await Promise.all(args.map(arg => safeStringify(arg)));
-
       console.log(
         chalk.cyan(`[DEBUG]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...stringifiedArgs
+        ...args.map(stringifyArg)
       );
     },
 
@@ -59,7 +62,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
       console.info(
         chalk.blue(`[INFO]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...args.map(stringifyArg)
       );
     },
 
@@ -68,7 +71,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
         return;
       }
 
-      console.info(chalk.blue(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`), ...args);
+      console.info(chalk.blue(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`), ...args.map(stringifyArg));
     },
 
     success(...args) {
@@ -78,7 +81,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
       console.info(
         chalk.green(`[SUCCESS]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...args.map(stringifyArg)
       );
     },
 
@@ -91,7 +94,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
       console.warn(
         chalk.yellow(`[WARN]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...args.map(stringifyArg)
       );
     },
 
@@ -104,7 +107,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
       console.error(
         chalk.red(`[ERROR]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...args.map(stringifyArg)
       );
     },
 
