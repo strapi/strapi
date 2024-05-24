@@ -8,7 +8,7 @@ function handleError(ctx: CLIContext, error: Error) {
   const tokenService = tokenServiceFactory(ctx);
   const { logger } = ctx;
 
-  logger.debug(JSON.stringify(error));
+  logger.debug(error);
   if (error instanceof AxiosError) {
     switch (error.response?.status) {
       case 401:
@@ -56,8 +56,8 @@ export default async (ctx: CLIContext) => {
     local.save({ project: data });
     spinner.succeed('Project created successfully!');
     return data;
-  } catch (error: Error | unknown) {
+  } catch (e: Error | unknown) {
     spinner.fail('Failed to create project on Strapi Cloud.');
-    handleError(ctx, error as Error);
+    handleError(ctx, e as Error);
   }
 };

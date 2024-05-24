@@ -17,9 +17,9 @@ export default async (ctx: CLIContext) => {
     logger.log(
       '🔌 You have been logged out from the CLI. If you are on a shared computer, please make sure to log out from the Strapi Cloud Dashboard as well.'
     );
-  } catch (error) {
+  } catch (e) {
     logger.error('🥲 Oops! Something went wrong while logging you out. Please try again.');
-    logger.debug(error);
+    logger.debug(e);
   }
   try {
     await cloudApiService.track('didLogout', { loginMethod: 'cli' });

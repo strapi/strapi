@@ -38,14 +38,17 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       return state.errors;
     },
 
-    debug(...args) {
+    async debug(...args) {
       if (silent || !debug) {
         return;
       }
 
+      const safeStringify = (await import('safe-stringify')).default;
+      const stringifiedArgs = await Promise.all(args.map(arg => safeStringify(arg)));
+
       console.log(
         chalk.cyan(`[DEBUG]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...stringifiedArgs
       );
     },
 

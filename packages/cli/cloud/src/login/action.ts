@@ -9,6 +9,7 @@ export default async (ctx: CLIContext) => {
   const tokenService = tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
   const cloudApiService = cloudApiFactory(existingToken || undefined);
+
   const trackFailedLogin = async () => {
     try {
       await cloudApiService.track('didNotLogin', { loginMethod: 'cli' });
@@ -36,9 +37,9 @@ export default async (ctx: CLIContext) => {
     logger.info('🔌 Connecting to the Strapi Cloud API...');
     const config = await cloudApiService.config();
     cliConfig = config.data;
-  } catch (error: unknown) {
+  } catch (e: unknown) {
     logger.error('🥲 Oops! Something went wrong while logging you in. Please try again.');
-    logger.debug(error);
+    logger.debug(e);
     return;
   }
 
@@ -59,19 +60,19 @@ export default async (ctx: CLIContext) => {
       scope: cliConfig.scope,
       audience: cliConfig.audience,
     })
-    .catch((error: AxiosError) => {
+    .catch((e: AxiosError) => {
       logger.error('There was an issue with the authentication process. Please try again.');
-      if (error.message) {
-        logger.debug(error.message, error);
+      if (e.message) {
+        logger.debug(e.message,e);
       } else {
-        logger.debug(error);
+        logger.debug(e);
       }
     })) as AxiosResponse;
 
   openModule.then((open) => {
-    open.default(deviceAuthResponse.data.verification_uri_complete).catch((err: Error) => {
+    open.default(deviceAuthResponse.data.verification_uri_complete).catch((e: Error) => {
       logger.error('We encountered an issue opening the browser. Please try again later.');
-      logger.debug(err.message, err);
+      logger.debug(e.message, e);
     });
   });
 
@@ -107,8 +108,8 @@ export default async (ctx: CLIContext) => {
             logger.debug('🔐 Validating token...');
             await tokenService.validateToken(authTokenData.id_token, cliConfig.jwksUrl);
             logger.debug('🔐 Token validation successful!');
-          } catch (error: any) {
-            logger.debug(error);
+          } catch (e: any) {
+            logger.debug(e);
             spinnerFail();
             throw new Error('Unable to proceed: Token validation failed');
           }
@@ -124,17 +125,17 @@ export default async (ctx: CLIContext) => {
             await tokenService.saveToken(authTokenData.access_token);
             logger.debug('📝 Login information saved successfully!');
             isAuthenticated = true;
-          } catch (error) {
+          } catch (e) {
             logger.error(
               'There was a problem saving your login information. Please try logging in again.'
             );
-            logger.debug(error);
+            logger.debug(e);
             spinnerFail();
             return;
           }
         }
-      } catch (error: any) {
-        if (error.message === 'Unable to proceed: Token validation failed') {
+      } catch (e: any) {
+        if (e.message === 'Unable to proceed: Token validation failed') {
           logger.error(
             'There seems to be a problem with your login information. Please try logging in again.'
           );
@@ -143,10 +144,10 @@ export default async (ctx: CLIContext) => {
           return;
         }
         if (
-          error.response?.data.error &&
-          !['authorization_pending', 'slow_down'].includes(error!.response.data.error)
+          e.response?.data.error &&
+          !['authorization_pending', 'slow_down'].includes(e!.response.data.error)
         ) {
-          logger.debug(error);
+          logger.debug(e);
           spinnerFail();
           await trackFailedLogin();
           return;

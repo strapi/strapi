@@ -47,11 +47,11 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string, max
       );
       await compressFilesToTar(storagePath, projectFolder, compressedFilename);
       ctx.logger.log('📦 Project compressed successfully!');
-    } catch (error: unknown) {
+    } catch (e: unknown) {
       ctx.logger.error(
         '⚠️ Project compression failed. Try again later or check for large/incompatible files.'
       );
-      ctx.logger.debug(error);
+      ctx.logger.debug(e);
       process.exit(1);
     }
 
@@ -83,28 +83,28 @@ async function upload(ctx: CLIContext, project: ProjectInfos, token: string, max
       progressBar.stop();
       ctx.logger.success('✨ Upload finished!');
       return data.build_id;
-    } catch (error: any) {
+    } catch (e: any) {
       progressBar.stop();
-      if (error instanceof AxiosError && error.response?.data) {
-        if (error.response.status === 404) {
+      if (e instanceof AxiosError && e.response?.data) {
+        if (e.response.status === 404) {
           ctx.logger.error(
             `The project does not exist. Remove the ${local.LOCAL_SAVE_FILENAME} file and try again.`
           );
         } else {
-          ctx.logger.error(error.response.data);
+          ctx.logger.error(e.response.data);
         }
       } else {
         ctx.logger.error('An error occurred while deploying the project. Please try again later.');
       }
 
-      ctx.logger.debug(JSON.stringify(error));
+      ctx.logger.debug(e);
     } finally {
       fs.rmSync(tarFilePath, { force: true });
     }
     process.exit(0);
   } catch (e: any) {
     ctx.logger.error('An error occurred while deploying the project. Please try again later.');
-    ctx.logger.debug(JSON.stringify(e));
+    ctx.logger.debug(e);
     process.exit(1);
   }
 }
@@ -114,9 +114,9 @@ async function getProject(ctx: CLIContext) {
   if (!project) {
     try {
       return await createProjectAction(ctx);
-    } catch (error: any) {
+    } catch (e: any) {
       ctx.logger.error('An error occurred while deploying the project. Please try again later.');
-      ctx.logger.debug(JSON.stringify(error));
+      ctx.logger.debug(e);
       process.exit(1);
     }
   }
@@ -158,6 +158,8 @@ export default async (ctx: CLIContext) => {
   } catch (e: Error | unknown) {
     if (e instanceof Error) {
       ctx.logger.error(e.message);
+    } else {
+      throw e
     }
   }
 };
