@@ -4,7 +4,7 @@
  */
 
 import { errors } from '@strapi/utils';
-import { OneOf } from '../types';
+import { Utils } from '@strapi/types';
 
 export interface Settings {
   defaultTimezone: string | null;
@@ -36,7 +36,7 @@ export declare namespace UpdateSettings {
     body: Settings;
   }
 
-  export type Response = OneOf<
+  export type Response = Utils.OneOf<
     { data: Settings },
     { error?: errors.ApplicationError | errors.ValidationError }
   >;
