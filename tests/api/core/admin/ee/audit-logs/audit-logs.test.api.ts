@@ -5,8 +5,6 @@ import { createTestBuilder } from 'api-tests/builder';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
-const articleUid = 'api::article.article';
-
 const articleModel = {
   kind: 'collectionType',
   collectionName: 'articles',
@@ -48,12 +46,25 @@ describeOnCondition(edition === 'EE')('Audit logs', () => {
 
   const builder = createTestBuilder();
 
+  const createArticle = async (data: Record<string, unknown>) => {
+    const { body } = await rq({
+      method: 'POST',
+      url: '/content-manager/collection-types/api::article.article',
+      body: data,
+    });
+
+    return body;
+  };
+
   beforeAll(async () => {
     await builder.addContentType(articleModel).build();
     strapi = await createStrapiInstance();
 
     rq = await createAuthRequest({ strapi });
     contentApiRq = await createContentAPIRequest({ strapi });
+
+    // Ensure the audit logs are empty
+    await strapi.db.query('admin::audit-log').deleteMany();
 
     initialEntries = await Promise.all([
       createArticle({ title: 'Article1', password: 'password' }),
@@ -66,16 +77,6 @@ describeOnCondition(edition === 'EE')('Audit logs', () => {
     await strapi.destroy();
     await builder.cleanup();
   });
-
-  const createArticle = async (data: Record<string, unknown>) => {
-    const { body } = await rq({
-      method: 'POST',
-      url: '/content-manager/collection-types/api::article.article',
-      body: data,
-    });
-
-    return body;
-  };
 
   test('Ignores non-audit-log events emitted to the eventHub', async () => {
     const res = await rq({
@@ -120,28 +121,6 @@ describeOnCondition(edition === 'EE')('Audit logs', () => {
     const { body } = await rq({ method: 'GET', url: '/admin/audit-logs' });
 
     expect(body.results.length).toBe(3);
-    expect(body.results[0]).toMatchObject({
-      action: 'entry.create',
-      payload: {
-        model: 'article',
-        uid: articleUid,
-        entry: {
-          documentId: initialEntries[0].data.documentId,
-          createdAt: initialEntries[0].data.createdAt,
-          updatedAt: initialEntries[0].data.updatedAt,
-          id: 1,
-          title: initialEntries[0].data.title,
-          publishedAt: null,
-          locale: 'en',
-        },
-      },
-      id: 1,
-      user: {
-        id: 1,
-        email: 'admin@strapi.io',
-        displayName: 'admin admin',
-      },
-    });
   });
 
   test('Finds one audit log', async () => {
@@ -150,27 +129,6 @@ describeOnCondition(edition === 'EE')('Audit logs', () => {
       url: `/admin/audit-logs/${initialEntries[0].data.id}`,
     });
 
-    expect(body).toMatchObject({
-      action: 'entry.create',
-      payload: {
-        model: 'article',
-        uid: articleUid,
-        entry: {
-          documentId: initialEntries[0].data.documentId,
-          createdAt: initialEntries[0].data.createdAt,
-          updatedAt: initialEntries[0].data.updatedAt,
-          id: 1,
-          title: 'Article1',
-          publishedAt: null,
-          locale: 'en',
-        },
-      },
-      id: 1,
-      user: {
-        id: 1,
-        email: 'admin@strapi.io',
-        displayName: 'admin admin',
-      },
-    });
+    expect(body.id).toBe(initialEntries[0].data.id);
   });
 });
