@@ -7,6 +7,21 @@ import { waitForRestart } from '../../utils/restart';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
+const AUTHOR_CREATE_URL =
+  /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
+const AUTHOR_EDIT_URL =
+  /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
+const ARTICLE_CREATE_URL =
+  /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
+const ARTICLE_LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
+const ARTICLE_EDIT_URL =
+  /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
+const ARTICLE_HISTORY_URL =
+  /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+\/history(\?.*)?/;
+const HOMEPAGE_EDIT_URL = /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
+const HOMEPAGE_HISTORY_URL =
+  /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
+
 const goToHistoryPage = async (page: Page) => {
   const moreActionsButton = page.getByRole('button', { name: /more actions/i });
   await expect(moreActionsButton).toBeEnabled();
@@ -19,6 +34,17 @@ const goToHistoryPage = async (page: Page) => {
   } else {
     await page.reload();
     await goToHistoryPage(page);
+  }
+};
+
+/**
+ * The success notification lets us make sure an action is completed before moving on.
+ * We also close it to make sure only one appears at a time, otherwise the test fails.
+ */
+const closeSuccessNotification = async (page: Page) => {
+  const successNotification = page.getByRole('alert', { name: /success/i });
+  if (await successNotification.isVisible()) {
+    await successNotification.getByRole('button', { name: /close/i }).click();
   }
 };
 
@@ -40,16 +66,12 @@ describeOnCondition(edition === 'EE')('History', () => {
     test('A user should be able create, edit, or publish/unpublish an entry, navigate to the history page, and select versions to view from a list', async ({
       page,
     }) => {
-      const CREATE_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
-      const HISTORY_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+\/history(\?.*)?/;
       // Navigate to the content-manager - collection type - article
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('combobox', { name: 'Select a locale' }).click();
       await page.getByRole('option', { name: 'French (fr)' }).click();
       await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
-      await page.waitForURL(CREATE_URL);
+      await page.waitForURL(ARTICLE_CREATE_URL);
 
       /**
        * Create
@@ -59,30 +81,32 @@ describeOnCondition(edition === 'EE')('History', () => {
       const frenchTitle = "N'importe quoi";
       await titleInput.fill(frenchTitle);
       await page.getByRole('button', { name: 'Save' }).click();
+      await page.waitForURL(ARTICLE_EDIT_URL);
+
       // Go to the history page
       await goToHistoryPage(page);
-
-      await page.waitForURL(HISTORY_URL);
+      await page.waitForURL(ARTICLE_HISTORY_URL);
       await expect(titleInput).toHaveValue(frenchTitle);
 
       // Go back to the CM to create a new english entry
       await page.goto('/admin');
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
-      await page.waitForURL(CREATE_URL);
+      await page.waitForURL(ARTICLE_CREATE_URL);
 
       // Create an english version
       const englishTitle = 'Being from Kansas is a pity';
       await titleInput.fill(englishTitle);
       await page.getByRole('button', { name: 'Save' }).click();
+      await page.waitForURL(ARTICLE_EDIT_URL);
       // Go to the history page
       await goToHistoryPage(page);
-      await page.waitForURL(HISTORY_URL);
-      const versionCards = await page.getByRole('listitem', { name: 'Version card' });
+      await page.waitForURL(ARTICLE_HISTORY_URL);
+      const versionCards = page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(1);
       // Assert the id was added after page load
       const idRegex = /id=\d+/;
-      await expect(idRegex.test(page.url())).toBe(true);
+      expect(idRegex.test(page.url())).toBe(true);
       // Assert the most recent version is the current version
       const currentVersion = versionCards.nth(0);
       await expect(currentVersion.getByText('(current)')).toBeVisible();
@@ -100,9 +124,10 @@ describeOnCondition(edition === 'EE')('History', () => {
        */
       await titleInput.fill('Being from Kansas City');
       await page.getByRole('button', { name: 'Save' }).click();
+      await closeSuccessNotification(page);
       // Go to the history page
       await goToHistoryPage(page);
-      await page.waitForURL(HISTORY_URL);
+      await page.waitForURL(ARTICLE_HISTORY_URL);
       await expect(versionCards).toHaveCount(2);
       // Assert the most recent version is the current version
       await expect(titleInput).toHaveValue('Being from Kansas City');
@@ -122,7 +147,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Go to the history page
       // Go to the history page
       await goToHistoryPage(page);
-      await page.waitForURL(HISTORY_URL);
+      await page.waitForURL(ARTICLE_HISTORY_URL);
       // Publish also creates a new draft so we expect the count to increase by 2
       await expect(versionCards).toHaveCount(4);
       // Assert the current version is the most recent published version
@@ -143,9 +168,10 @@ describeOnCondition(edition === 'EE')('History', () => {
        */
       await titleInput.fill('Being from Kansas City, Missouri');
       await page.getByRole('button', { name: 'Save' }).click();
+      await closeSuccessNotification(page);
       // Go to the history page
       await goToHistoryPage(page);
-      await page.waitForURL(HISTORY_URL);
+      await page.waitForURL(ARTICLE_HISTORY_URL);
       await expect(versionCards).toHaveCount(5);
       // Assert the current version is the modified version
       await expect(currentVersion.getByText('Modified')).toBeVisible();
@@ -153,19 +179,6 @@ describeOnCondition(edition === 'EE')('History', () => {
     });
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
-      const AUTHOR_CREATE_URL =
-        /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
-      const AUTHOR_EDIT_URL =
-        /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
-      const ARTICLE_CREATE_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
-      const ARTICLE_LIST_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
-      const ARTICLE_EDIT_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
-      const ARTICLE_HISTORY_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+\/history(\?.*)?/;
-
       // Create new author
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: 'Author' }).click();
@@ -210,12 +223,6 @@ describeOnCondition(edition === 'EE')('History', () => {
     test('A user should be able to rename (delete + create) a field in the content-type builder and see the changes as "unknown fields" in concerned history versions', async ({
       page,
     }) => {
-      const ARTICLE_CREATE_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
-      const ARTICLE_EDIT_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article\/(?!create)[^/]/;
-      const ARTICLE_HISTORY_URL =
-        /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+\/history(\?.*)?/;
       /**
        * Create an initial entry to also create an initial version
        */
@@ -253,6 +260,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.waitForURL(ARTICLE_EDIT_URL);
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Being from Kansas City');
       await page.getByRole('button', { name: 'Save' }).click();
+      await closeSuccessNotification(page);
 
       /**
        * Go to the history page
@@ -384,15 +392,6 @@ describeOnCondition(edition === 'EE')('History', () => {
     });
 
     test('A user should see the relations and whether some are missing', async ({ page }) => {
-      const AUTHOR_CREATE_URL =
-        /\/admin\/content-manager\/collection-types\/api::author.author\/create(\?.*)?/;
-      const AUTHOR_EDIT_URL =
-        /\/admin\/content-manager\/collection-types\/api::author.author\/(?!create)[^/]/;
-      const HOMEPAGE_EDIT_URL =
-        /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
-      const HOMEPAGE_HISTORY_URL =
-        /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
-
       // Create relation in Content-Type Builder
       await page.getByRole('link', { name: 'Content-Type Builder' }).click();
       await page.getByRole('link', { name: 'Homepage' }).click();
@@ -450,8 +449,6 @@ describeOnCondition(edition === 'EE')('History', () => {
     test('A user should be able to rename (delete + create) a field in the content-type builder and see the changes as "unknown fields" in concerned history versions', async ({
       page,
     }) => {
-      const HISTORY_URL =
-        /\/admin\/content-manager\/single-types\/api::homepage.homepage\/history(\?.*)?/;
       /**
        * Create an initial entry to also create an initial version
        */
@@ -459,6 +456,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('link', { name: 'Homepage' }).click();
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
       await page.getByRole('button', { name: 'Save' }).click();
+      await closeSuccessNotification(page);
 
       /**
        * Rename field in content-type builder
@@ -474,6 +472,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('textbox', { name: 'name' }).fill('titleRename');
       await page.getByRole('button', { name: 'Finish' }).click();
       await page.getByRole('button', { name: 'Save' }).click();
+      await closeSuccessNotification(page);
       await waitForRestart(page);
       await expect(page.getByRole('cell', { name: 'titleRename', exact: true })).toBeVisible();
 
@@ -485,12 +484,13 @@ describeOnCondition(edition === 'EE')('History', () => {
       await page.getByRole('link', { name: 'Homepage' }).click();
       await page.getByRole('textbox', { name: 'titleRename' }).fill('Welcome to AFC Richmond!');
       await page.getByRole('button', { name: 'Save' }).click();
+      await closeSuccessNotification(page);
 
       /**
        * Go to the history page
        */
       await goToHistoryPage(page);
-      await page.waitForURL(HISTORY_URL);
+      await page.waitForURL(HOMEPAGE_HISTORY_URL);
       const versionCards = await page.getByRole('listitem', { name: 'Version card' });
       await expect(versionCards).toHaveCount(2);
 
