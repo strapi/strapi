@@ -8,7 +8,7 @@ import routes from './routes';
 import auditLogsRoutes from './audit-logs/routes/audit-logs';
 import auditLogsController from './audit-logs/controllers/audit-logs';
 import { createAuditLogsService } from './audit-logs/services/audit-logs';
-import { createAuditLogsLifecycle } from './audit-logs/services/lifecycles';
+import { createAuditLogsLifecycleService } from './audit-logs/services/lifecycles';
 import { auditLog } from './audit-logs/content-types/audit-log';
 import { Core } from '@strapi/types';
 
@@ -48,7 +48,7 @@ const getAdminEE = () => {
         // Register an internal audit logs service
         strapi.add('audit-logs', createAuditLogsService(strapi));
         // Register an internal audit logs lifecycle service
-        const auditLogsLifecycle = createAuditLogsLifecycle(strapi);
+        const auditLogsLifecycle = createAuditLogsLifecycleService(strapi);
         strapi.add('audit-logs-lifecycle', auditLogsLifecycle);
 
         await auditLogsLifecycle.register();

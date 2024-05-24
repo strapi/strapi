@@ -1,4 +1,4 @@
-import { createAuditLogsLifecycle } from '../lifecycles';
+import { createAuditLogsLifecycleService } from '../lifecycles';
 import createEventHub from '../../../../../../../core/dist/services/event-hub';
 import { scheduleJob } from 'node-schedule';
 
@@ -69,7 +69,7 @@ describe('Audit logs service', () => {
 
   it('should not subscribe to events when the license does not allow it', async () => {
     // Should not subscribe to events at first
-    const lifecycle = createAuditLogsLifecycle(strapi);
+    const lifecycle = createAuditLogsLifecycleService(strapi);
     await lifecycle.register();
     expect(mockSubscribe).not.toHaveBeenCalled();
 
@@ -98,7 +98,7 @@ describe('Audit logs service', () => {
       jest.fn((rule, callback) => callback())
     );
 
-    const lifecycle = createAuditLogsLifecycle(strapi);
+    const lifecycle = createAuditLogsLifecycleService(strapi);
     await lifecycle.register();
 
     expect(mockScheduleJob).toHaveBeenCalledTimes(1);

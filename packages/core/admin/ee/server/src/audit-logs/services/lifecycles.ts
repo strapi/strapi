@@ -68,7 +68,7 @@ const getRetentionDays = (strapi: Core.Strapi) => {
  * @description
  * Manages the the lifecycle of audit logs. Accessible via strapi.get('audit-logs-lifecycles')
  */
-const createAuditLogsLifecycle = (strapi: Core.Strapi) => {
+const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
   // Manage internal service state privately
   const state = {} as any;
   const auditLogsService = strapi.get('audit-logs');
@@ -190,4 +190,4 @@ const createAuditLogsLifecycle = (strapi: Core.Strapi) => {
   };
 };
 
-export { createAuditLogsLifecycle };
+export { createAuditLogsLifecycleService };
