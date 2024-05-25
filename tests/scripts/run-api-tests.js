@@ -23,6 +23,17 @@ const databases = {
       schema: 'myschema',
     },
   },
+  cockroachdb: {
+    client: 'cockroachdb',
+    connection: {
+      host: '127.0.0.1',
+      port: 26257,
+      database: 'defaultdb',
+      username: 'root',
+      password: '',
+      schema: 'public',
+    },
+  },
   mysql: {
     client: 'mysql',
     connection: {
