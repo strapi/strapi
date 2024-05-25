@@ -38,6 +38,7 @@ export const applySearch = (knex: Knex.QueryBuilder, query: string, ctx: Ctx) =>
   }
 
   switch (db.dialect.client) {
+    case 'cockroachdb':
     case 'postgres': {
       searchColumns.forEach((attr) => {
         const columnName = toColumnName(meta, attr);

@@ -45,7 +45,7 @@ export interface Configuration {
   dependencies: Record<string, string>;
 }
 
-export type ClientName = 'mysql' | 'postgres' | 'sqlite';
+export type ClientName = 'mysql' | 'postgres' | 'sqlite' | 'cockroachdb';
 
 export interface DatabaseInfo {
   client?: string;

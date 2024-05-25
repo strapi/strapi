@@ -31,6 +31,16 @@ export const createStartupLogger = (app: Core.Strapi) => {
       console.log();
       console.log(chalk.black.bgWhite(_.padEnd(columns, ' Actions available')));
       console.log();
+      if (app.db.dialect.client === 'cockroachdb') {
+        console.log(
+          chalk.black.bgRed(
+            _.padEnd(
+              columns,
+              ' WARNING: CockroachDB is currently experimental. Do not use in production.'
+            )
+          )
+        );
+      }
     },
 
     logFirstStartupMessage() {

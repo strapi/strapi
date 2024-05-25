@@ -71,8 +71,8 @@ export default (db: Database) => {
    */
   const diffIndexes = (oldIndex: Index, index: Index): IndexDiff => {
     const changes: string[] = [];
-
-    if (!_.isEqual(oldIndex.columns, index.columns)) {
+    // we need to sort the array because sometimes the column indexes are returned in a different order
+    if (!_.isEqual(oldIndex.columns.sort(), index.columns.sort())) {
       changes.push('columns');
     }
 
@@ -256,6 +256,8 @@ export default (db: Database) => {
     }
 
     for (const srcIndex of srcTable.indexes) {
+      console.log("destTable", destTable);
+      console.log("srcIndex", srcIndex);
       if (!helpers.hasIndex(destTable, srcIndex.name)) {
         removedIndexes.push(srcIndex);
       }

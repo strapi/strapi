@@ -2,11 +2,12 @@ import type { Question } from 'inquirer';
 import type { Scope } from '../types';
 
 interface QuestionFactory {
-  (options: { scope: Scope; client: 'postgres' | 'mysql' | 'sqlite' }): Question;
+  (options: { scope: Scope; client: 'postgres' | 'mysql' | 'sqlite' | 'cockroachdb' }): Question;
 }
 
 const DEFAULT_PORTS = {
   postgres: 5432,
+  cockroachdb: 26257,
   mysql: 3306,
   sqlite: undefined,
 };
@@ -69,5 +70,6 @@ const filename: QuestionFactory = () => ({
 export default {
   sqlite: [filename],
   postgres: [database, host, port, username, password, ssl],
+  cockroachdb: [database, host, port, username, password, ssl],
   mysql: [database, host, port, username, password, ssl],
 };

@@ -9,5 +9,6 @@ export default {
     useNullAsDefault: true,
   },
   postgres: {},
+  cockroachdb: {},
   mysql: {},
 };

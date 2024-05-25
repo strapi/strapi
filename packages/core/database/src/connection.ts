@@ -5,6 +5,7 @@ const clientMap = {
   sqlite: 'better-sqlite3',
   mysql: 'mysql2',
   postgres: 'pg',
+  cockroachdb: 'cockroachdb',
 };
 
 function isClientValid(config: { client?: unknown }): config is { client: keyof typeof clientMap } {
@@ -16,7 +17,10 @@ export const createConnection = (userConfig: Knex.Config, strapiConfig?: Partial
     throw new Error(`Unsupported database client ${userConfig.client}`);
   }
 
-  const knexConfig: Knex.Config = { ...userConfig, client: (clientMap as any)[userConfig.client] };
+  const knexConfig: Knex.Config = {
+    ...userConfig,
+    client: (clientMap as any)[userConfig.client],
+  };
 
   // initialization code to run upon opening a new connection
   if (strapiConfig?.pool?.afterCreate) {

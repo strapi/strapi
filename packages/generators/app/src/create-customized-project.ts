@@ -47,12 +47,12 @@ async function askDbInfosAndTest(scope: Scope) {
 }
 
 async function askDatabaseInfos(scope: Scope) {
-  const { client } = await inquirer.prompt<{ client: 'sqlite' | 'postgres' | 'mysql' }>([
+  const { client } = await inquirer.prompt<{ client: 'sqlite' | 'postgres' | 'mysql' | 'cockroachdb' }>([
     {
       type: 'list',
       name: 'client',
       message: 'Choose your default database client',
-      choices: ['sqlite', 'postgres', 'mysql'],
+      choices: ['sqlite', 'postgres', 'mysql', 'cockroachdb (experimental)'],
       default: 'sqlite',
     },
   ]);

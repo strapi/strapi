@@ -1,6 +1,7 @@
 import type { Database } from '..';
 import Dialect from './dialect';
 import PostgresClass from './postgresql';
+import CockroachDBClass from './cockroachdb';
 import MysqlClass from './mysql';
 import SqliteClass from './sqlite';
 
@@ -11,6 +12,8 @@ const getDialectClass = (client: string): typeof Dialect => {
   switch (client) {
     case 'postgres':
       return PostgresClass;
+    case 'cockroachdb':
+      return CockroachDBClass;
     case 'mysql':
       return MysqlClass;
     case 'sqlite':
@@ -27,6 +30,8 @@ const getDialectName = (client: unknown) => {
   switch (client) {
     case 'postgres':
       return 'postgres';
+    case 'cockroachdb':
+      return 'cockroachdb';
     case 'mysql':
       return 'mysql';
     case 'sqlite':
