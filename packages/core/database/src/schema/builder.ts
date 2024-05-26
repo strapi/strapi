@@ -97,14 +97,6 @@ export default (db: Database) => {
           debug(`Updating table: ${table.name}`);
           // alter table
           const schemaBuilder = this.getSchemaBuilder(trx);
-          console.log('====ALTERING TABLE=====');
-          console.log(schemaBuilder);
-          console.log('table');
-          console.log(table);
-          console.log('indexes', table.indexes);
-          console.log('columns', table.columns);
-          console.log('foreignKeys', table.foreignKeys);
-          console.log('====ALTERING TABLE=====');
 
           await helpers.alterTable(schemaBuilder, table);
         }
