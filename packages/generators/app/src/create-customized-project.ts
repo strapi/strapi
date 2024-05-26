@@ -47,7 +47,9 @@ async function askDbInfosAndTest(scope: Scope) {
 }
 
 async function askDatabaseInfos(scope: Scope) {
-  const { client } = await inquirer.prompt<{ client: 'sqlite' | 'postgres' | 'mysql' | 'cockroachdb' }>([
+  const { client } = await inquirer.prompt<{
+    client: 'sqlite' | 'postgres' | 'mysql' | 'cockroachdb';
+  }>([
     {
       type: 'list',
       name: 'client',

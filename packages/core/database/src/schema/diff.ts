@@ -256,8 +256,8 @@ export default (db: Database) => {
     }
 
     for (const srcIndex of srcTable.indexes) {
-      console.log("destTable", destTable);
-      console.log("srcIndex", srcIndex);
+      console.log('destTable', destTable);
+      console.log('srcIndex', srcIndex);
       if (!helpers.hasIndex(destTable, srcIndex.name)) {
         removedIndexes.push(srcIndex);
       }

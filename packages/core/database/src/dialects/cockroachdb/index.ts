@@ -35,7 +35,7 @@ export default class CockroachDBDialect extends Dialect {
       parseFloat
     );
     // sets default int to 32 bit and sets serial normalization to sql_sequence to mimic postgres
-    this.db.connection.client.pool.on('acquireSuccess', async (eventId:any, resource:any) => {
+    this.db.connection.client.pool.on('acquireSuccess', async (eventId: any, resource: any) => {
       resource.query('SET serial_normalization = "sql_sequence";');
       resource.query('SET default_int_size = 4;');
       resource.query('SET default_transaction_isolation = "READ COMMITTED";');
