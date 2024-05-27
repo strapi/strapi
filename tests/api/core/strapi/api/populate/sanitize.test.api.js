@@ -151,7 +151,6 @@ describe('Sanitize populated entries', () => {
           },
         },
       });
-      console.log(body);
       expect(status).toBe(200);
       expect(body.related).toBeDefined();
       expect(Array.isArray(body.related)).toBeTruthy();
