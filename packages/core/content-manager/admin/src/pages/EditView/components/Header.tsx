@@ -9,7 +9,7 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import { Flex, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
-import { Cog, Pencil, Trash, WarningCircle } from '@strapi/icons';
+import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -376,7 +376,7 @@ const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model
       id: 'app.links.configure-view',
       defaultMessage: 'Configure the view',
     }),
-    icon: <StyledCog />,
+    icon: <ListPlus />,
     onClick: () => {
       navigate(`../${collectionType}/${model}/configurations/edit`);
     },
@@ -385,16 +385,6 @@ const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model
 };
 
 ConfigureTheViewAction.type = 'configure-the-view';
-
-/**
- * Because the icon system is completely broken, we have to do
- * this to remove the fill from the cog.
- */
-const StyledCog = styled(Cog)`
-  path {
-    fill: currentColor;
-  }
-`;
 
 const EditTheModelAction: DocumentActionComponent = ({ model }) => {
   const navigate = useNavigate();
@@ -405,7 +395,7 @@ const EditTheModelAction: DocumentActionComponent = ({ model }) => {
       id: 'content-manager.link-to-ctb',
       defaultMessage: 'Edit the model',
     }),
-    icon: <StyledPencil />,
+    icon: <Pencil />,
     onClick: () => {
       navigate(`/plugins/content-type-builder/content-types/${model}`);
     },
@@ -414,16 +404,6 @@ const EditTheModelAction: DocumentActionComponent = ({ model }) => {
 };
 
 EditTheModelAction.type = 'edit-the-model';
-
-/**
- * Because the icon system is completely broken, we have to do
- * this to remove the fill from the cog.
- */
-const StyledPencil = styled(Pencil)`
-  path {
-    fill: currentColor;
-  }
-`;
 
 const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionType, document }) => {
   const navigate = useNavigate();
@@ -440,7 +420,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
       id: 'content-manager.actions.delete.label',
       defaultMessage: 'Delete document',
     }),
-    icon: <StyledTrash />,
+    icon: <Trash />,
     dialog: {
       type: 'dialog',
       title: formatMessage({
@@ -509,16 +489,6 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
 };
 
 DeleteAction.type = 'delete';
-
-/**
- * Because the icon system is completely broken, we have to do
- * this to remove the fill from the cog.
- */
-const StyledTrash = styled(Trash)`
-  path {
-    fill: currentColor;
-  }
-`;
 
 const DEFAULT_HEADER_ACTIONS = [EditTheModelAction, ConfigureTheViewAction, DeleteAction];
 

@@ -81,12 +81,7 @@ const WysiwygNav = ({
       >
         <Flex>
           <Field.Root>
-            <SingleSelect
-              disabled
-              placeholder={selectPlaceholder}
-              size="S"
-              aria-label={selectPlaceholder}
-            >
+            <SingleSelect disabled placeholder={selectPlaceholder} aria-label={selectPlaceholder}>
               <SingleSelectOption value="h1">h1</SingleSelectOption>
               <SingleSelectOption value="h2">h2</SingleSelectOption>
               <SingleSelectOption value="h3">h3</SingleSelectOption>
@@ -97,12 +92,20 @@ const WysiwygNav = ({
           </Field.Root>
 
           <MainButtons>
-            <CustomIconButton disabled label="Bold" name="Bold" icon={<Bold />} />
-            <CustomIconButton disabled label="Italic" name="Italic" icon={<Italic />} />
-            <CustomIconButton disabled label="Underline" name="Underline" icon={<Underline />} />
+            <CustomIconButton disabled label="Bold" name="Bold">
+              <Bold />
+            </CustomIconButton>
+            <CustomIconButton disabled label="Italic" name="Italic">
+              <Italic />
+            </CustomIconButton>
+            <CustomIconButton disabled label="Underline" name="Underline">
+              <Underline />
+            </CustomIconButton>
           </MainButtons>
 
-          <MoreButton disabled label="More" icon={<More />} />
+          <MoreButton disabled label="More">
+            <More />
+          </MoreButton>
         </Flex>
 
         {!isExpandMode && (
@@ -129,7 +132,6 @@ const WysiwygNav = ({
           <SingleSelect
             placeholder={selectPlaceholder}
             aria-label={selectPlaceholder}
-            size="S"
             // @ts-expect-error – DS v2 will only allow strings.
             onChange={(value) => onActionClick(value, editorRef)}
           >
@@ -147,28 +149,28 @@ const WysiwygNav = ({
             onClick={() => onActionClick('Bold', editorRef)}
             label="Bold"
             name="Bold"
-            icon={<Bold />}
-          />
+          >
+            <Bold />
+          </CustomIconButton>
           <CustomIconButton
             onClick={() => onActionClick('Italic', editorRef)}
             label="Italic"
             name="Italic"
-            icon={<Italic />}
-          />
+          >
+            <Italic />
+          </CustomIconButton>
           <CustomIconButton
             onClick={() => onActionClick('Underline', editorRef)}
             label="Underline"
             name="Underline"
-            icon={<Underline />}
-          />
+          >
+            <Underline />
+          </CustomIconButton>
         </MainButtons>
 
-        <MoreButton
-          ref={buttonMoreRef}
-          onClick={handleTogglePopover}
-          label="More"
-          icon={<More />}
-        />
+        <MoreButton ref={buttonMoreRef} onClick={handleTogglePopover} label="More">
+          <More />
+        </MoreButton>
         {visiblePopover && (
           <Popover onDismiss={handleTogglePopover} centered source={buttonMoreRef} spacing={4}>
             <Flex>
@@ -177,28 +179,32 @@ const WysiwygNav = ({
                   onClick={() => onActionClick('Strikethrough', editorRef, handleTogglePopover)}
                   label="Strikethrough"
                   name="Strikethrough"
-                  icon={<StrikeThrough />}
-                />
+                >
+                  <StrikeThrough />
+                </CustomIconButton>
                 <CustomIconButton
                   onClick={() => onActionClick('BulletList', editorRef, handleTogglePopover)}
                   label="BulletList"
                   name="BulletList"
-                  icon={<BulletList />}
-                />
+                >
+                  <BulletList />
+                </CustomIconButton>
                 <CustomIconButton
                   onClick={() => onActionClick('NumberList', editorRef, handleTogglePopover)}
                   label="NumberList"
                   name="NumberList"
-                  icon={<NumberList />}
-                />
+                >
+                  <NumberList />
+                </CustomIconButton>
               </IconButtonGroupMargin>
               <IconButtonGroup>
                 <CustomIconButton
                   onClick={() => onActionClick('Code', editorRef, handleTogglePopover)}
                   label="Code"
                   name="Code"
-                  icon={<Code />}
-                />
+                >
+                  <Code />
+                </CustomIconButton>
                 <CustomIconButton
                   onClick={() => {
                     handleTogglePopover();
@@ -206,21 +212,23 @@ const WysiwygNav = ({
                   }}
                   label="Image"
                   name="Image"
-                  icon={<Image />}
-                />
+                >
+                  <Image />
+                </CustomIconButton>
                 <CustomLinkIconButton
                   onClick={() => onActionClick('Link', editorRef, handleTogglePopover)}
                   label="Link"
                   name="Link"
-                  // eslint-disable-next-line jsx-a11y/anchor-is-valid
-                  icon={<Link />}
-                />
+                >
+                  <Link />
+                </CustomLinkIconButton>
                 <CustomIconButton
                   onClick={() => onActionClick('Quote', editorRef, handleTogglePopover)}
                   label="Quote"
                   name="Quote"
-                  icon={<Quotes />}
-                />
+                >
+                  <Quotes />
+                </CustomIconButton>
               </IconButtonGroup>
             </Flex>
           </Popover>

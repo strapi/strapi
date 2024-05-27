@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
-import { ThemeProvider, lightTheme } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import {
   fireEvent,
   render as renderRTL,
@@ -28,7 +28,7 @@ const render = () => ({
 
       return (
         <IntlProvider locale="en" messages={{}} textComponent="span">
-          <ThemeProvider theme={lightTheme}>
+          <DesignSystemProvider>
             <QueryClientProvider client={client}>
               <NotificationsProvider>
                 <MemoryRouter initialEntries={[`/settings/users-permissions/roles/1`]}>
@@ -36,7 +36,7 @@ const render = () => ({
                 </MemoryRouter>
               </NotificationsProvider>
             </QueryClientProvider>
-          </ThemeProvider>
+          </DesignSystemProvider>
         </IntlProvider>
       );
     },
@@ -64,9 +64,17 @@ describe('Roles – EditPage', () => {
     expect(getByRole('textbox', { name: 'Name' })).toBeInTheDocument();
     expect(getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
 
-    await user.click(getByRole('button', { name: 'Address' }));
+    await user.click(
+      getByRole('button', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    );
 
-    expect(getByRole('region', { name: 'Address' })).toBeInTheDocument();
+    expect(
+      getByRole('region', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    ).toBeInTheDocument();
 
     expect(getByRole('checkbox', { name: 'Select all' })).toBeInTheDocument();
     expect(getByRole('checkbox', { name: 'create' })).toBeInTheDocument();
@@ -103,7 +111,11 @@ describe('Roles – EditPage', () => {
 
     await user.type(getByRole('textbox', { name: 'Name' }), 'test');
     await user.type(getByRole('textbox', { name: 'Description' }), 'testing');
-    await user.click(getByRole('button', { name: 'Address' }));
+    await user.click(
+      getByRole('button', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    );
     await user.click(getByRole('checkbox', { name: 'create' }));
 
     const button = await findByRole('button', { name: 'Save' });
@@ -125,7 +137,11 @@ describe('Roles – EditPage', () => {
 
     await waitForElementToBeRemoved(() => getByText('Loading content.'));
 
-    await user.click(getByRole('button', { name: 'Address' }));
+    await user.click(
+      getByRole('button', {
+        name: 'Address Define all allowed actions for the api::address plugin.',
+      })
+    );
 
     await user.hover(getByRole('checkbox', { name: 'create' }));
 

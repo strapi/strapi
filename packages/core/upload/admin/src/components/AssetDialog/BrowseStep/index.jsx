@@ -156,7 +156,6 @@ export const BrowseStep = ({
               <Flex marginLeft="auto" shrink={0}>
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    icon={isGridView ? <List /> : <Grid />}
                     label={
                       isGridView
                         ? formatMessage({
@@ -169,7 +168,9 @@ export const BrowseStep = ({
                           })
                     }
                     onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
-                  />
+                  >
+                    {isGridView ? <List /> : <Grid />}
+                  </IconButton>
                 </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
               </Flex>
@@ -277,13 +278,15 @@ export const BrowseStep = ({
                       cardActions={
                         onEditFolder && (
                           <IconButton
-                            icon={<Pencil />}
-                            aria-label={formatMessage({
+                            withTooltip={false}
+                            label={formatMessage({
                               id: getTrad('list.folder.edit'),
                               defaultMessage: 'Edit folder',
                             })}
                             onClick={() => onEditFolder(folder)}
-                          />
+                          >
+                            <Pencil />
+                          </IconButton>
                         )
                       }
                     >

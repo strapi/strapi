@@ -1,19 +1,14 @@
 import { PaperPlane } from '@strapi/icons';
 
 import { AddToReleaseAction } from './components/AddToReleaseAction';
-import { ReleaseAction } from './components/ReleaseAction';
 import { Panel as ReleasesPanel } from './components/ReleasesPanel';
 // import { addColumnToTableHook } from './components/ReleaseListCell';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
-import { releaseApi } from './services/release';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
-import type {
-  BulkActionComponent,
-  DocumentActionComponent,
-} from '@strapi/content-manager/strapi-admin';
+import type { DocumentActionComponent } from '@strapi/content-manager/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 // eslint-disable-next-line import/no-default-export
@@ -37,17 +32,6 @@ const admin: Plugin.Config.AdminInput = {
         Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
         permissions: PERMISSIONS.main,
         position: 2,
-      });
-
-      /**
-       * For some reason every middleware you pass has to a function
-       * that returns the actual middleware. It's annoying but no one knows why....
-       */
-      // @ts-expect-error – this API needs to be typed better.
-      app.addMiddlewares([() => releaseApi.middleware]);
-
-      app.addReducers({
-        [releaseApi.reducerPath]: releaseApi.reducer,
       });
 
       // Insert the releases container into the CM's sidebar on the Edit View

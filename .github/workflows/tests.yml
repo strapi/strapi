@@ -188,7 +188,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: ce-playwright-trace
+          name: ce-${{ matrix.project }}--playwright-trace
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
@@ -231,7 +231,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: ee-playwright-trace
+          name: ee-${{ matrix.project }}--playwright-trace
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 

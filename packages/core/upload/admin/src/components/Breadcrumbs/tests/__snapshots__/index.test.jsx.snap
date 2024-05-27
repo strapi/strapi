@@ -31,6 +31,25 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   padding-inline-start: 8px;
 }
 
+.c0 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+}
+
+.c2 {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: row;
+}
+
+.c8 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
 .c6 {
   font-size: 1.2rem;
   line-height: 1.33;
@@ -49,25 +68,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
-}
-
-.c0 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-}
-
-.c2 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
-}
-
-.c8 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  gap: 8px;
 }
 
 .c15 {

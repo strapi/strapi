@@ -114,8 +114,9 @@ const LogoInput = ({
                 id: 'Settings.application.customization.carousel.change-action',
                 defaultMessage: 'Change logo',
               })}
-              icon={<Plus />}
-            />
+            >
+              <Plus />
+            </IconButton>
             {customLogo?.url && (
               <IconButton
                 disabled={!canUpdate}
@@ -124,8 +125,9 @@ const LogoInput = ({
                   id: 'Settings.application.customization.carousel.reset-action',
                   defaultMessage: 'Reset logo',
                 })}
-                icon={<ArrowClockwise />}
-              />
+              >
+                <ArrowClockwise />
+              </IconButton>
             )}
           </CarouselActions>
         }

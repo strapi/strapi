@@ -220,10 +220,11 @@ export const ProvidersPage = () => {
                     {canUpdate && (
                       <IconButton
                         onClick={() => handleClickEdit(provider)}
-                        noBorder
-                        icon={<Pencil />}
+                        borderWidth={0}
                         label="Edit"
-                      />
+                      >
+                        <Pencil />
+                      </IconButton>
                     )}
                   </Td>
                 </Tr>

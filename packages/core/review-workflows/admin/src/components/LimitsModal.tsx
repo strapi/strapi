@@ -92,13 +92,15 @@ const Root: React.FC<React.PropsWithChildren<LimitsModalProps>> = ({
 
             <Box display="flex" position="absolute" right={0} top={0}>
               <IconButton
-                icon={<Cross />}
-                aria-label={formatMessage({
+                withTooltip={false}
+                label={formatMessage({
                   id: 'global.close',
                   defaultMessage: 'Close',
                 })}
                 onClick={onClose}
-              />
+              >
+                <Cross />
+              </IconButton>
             </Box>
           </Flex>
         </Flex>

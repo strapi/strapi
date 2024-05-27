@@ -1,6 +1,5 @@
 import { PLUGIN_ID, FEATURE_ID } from './constants';
 import { Panel } from './routes/content-manager/[model]/[id]/components/Panel';
-import { reviewWorkflowsApi } from './services/api';
 import { addColumnToTableHook } from './utils/cm-hooks';
 import { prefixPluginTranslations } from './utils/translations';
 
@@ -10,13 +9,6 @@ import type { Plugin } from '@strapi/types';
 const admin: Plugin.Config.AdminInput = {
   register(app: StrapiApp) {
     if (window.strapi.features.isEnabled(FEATURE_ID)) {
-      app.addReducers({
-        [reviewWorkflowsApi.reducerPath]: reviewWorkflowsApi.reducer,
-      });
-
-      // @ts-expect-error TS doesn't want you to extend the middleware.
-      app.addMiddlewares([() => reviewWorkflowsApi.middleware]);
-
       app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
 
       const contentManagerPluginApis = app.getPlugin('content-manager').apis;

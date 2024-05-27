@@ -8,35 +8,30 @@ const STORAGE_KEYS = {
   USER: 'userInfo',
 };
 
-type FetchParams = Parameters<typeof fetch>;
-type FetchURL = FetchParams[0];
-
-export type Method = 'GET' | 'POST' | 'DELETE' | 'PUT';
-
-export type FetchResponse<TData = any> = {
+type FetchResponse<TData = any> = {
   data: TData;
   status?: number;
 };
 
-export type FetchOptions = {
+type FetchOptions = {
   params?: any;
   signal?: AbortSignal;
   headers?: Record<string, string>;
   validateStatus?: ((status: number) => boolean) | null;
 };
 
-export type FetchConfig = {
+type FetchConfig = {
   signal?: AbortSignal;
 };
 
-type ErrorResponse = {
+interface ErrorResponse {
   data: {
     data?: any;
     error: ApiError & { status?: number };
   };
-};
+}
 
-export class FetchError extends Error {
+class FetchError extends Error {
   public name: string;
   public message: string;
   public response?: ErrorResponse;
@@ -58,7 +53,7 @@ export class FetchError extends Error {
   }
 }
 
-export const isFetchError = (error: unknown): error is FetchError => {
+const isFetchError = (error: unknown): error is FetchError => {
   return error instanceof FetchError;
 };
 
@@ -161,7 +156,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
       return url;
     };
 
-  const addBaseUrl = (url: FetchURL) => {
+  const addBaseUrl = (url: Parameters<typeof fetch>[0]) => {
     return `${backendURL}${url}`;
   };
 
@@ -190,6 +185,7 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
         method: 'GET',
         headers,
       });
+
       return responseInterceptor<TData>(response, options?.validateStatus);
     },
     post: async <TData, TSend = any>(
@@ -268,4 +264,5 @@ const getFetchClient = (defaultOptions: FetchConfig = {}): FetchClient => {
   return fetchClient;
 };
 
-export { getFetchClient };
+export { getFetchClient, isFetchError, FetchError };
+export type { FetchOptions, FetchResponse, FetchConfig, FetchClient, ErrorResponse };

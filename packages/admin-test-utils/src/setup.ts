@@ -68,6 +68,8 @@ window.console = {
       /Unknown event handler property/.test(message)
     ) {
       // do nothing
+    } else if (/Support for defaultProps will be removed/gi.test(message)) {
+      // do nothing
     } else {
       throw new Error(message);
     }

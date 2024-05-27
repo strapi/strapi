@@ -16,14 +16,9 @@ exports[`AddStage should render a list of stages 1`] = `
   padding-inline-end: 16px;
   padding-block-end: 12px;
   padding-inline-start: 16px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
-}
-
-.c4 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: currentcolor;
 }
 
 .c1 {
@@ -38,6 +33,13 @@ exports[`AddStage should render a list of stages 1`] = `
   display: flex;
   flex-direction: row;
   gap: 8px;
+}
+
+.c4 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
 }
 
 .c6 {
@@ -69,7 +71,6 @@ exports[`AddStage should render a list of stages 1`] = `
     class="c0 c1"
   />
   <button
-    border="neutral150"
     class="c2 c3"
   >
     <span

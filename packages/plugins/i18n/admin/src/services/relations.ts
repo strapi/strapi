@@ -3,6 +3,7 @@ import { i18nApi } from './api';
 import type { CountManyEntriesDraftRelations } from '../../../shared/contracts/content-manager';
 
 const relationsApi = i18nApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     getManyDraftRelationCount: builder.query<
       CountManyEntriesDraftRelations.Response['data'],

@@ -233,7 +233,11 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
     return <NoPermissions />;
   }
 
-  return typeof children === 'function' ? children({ permissions: matchingPermissions }) : children;
+  return (
+    <>
+      {typeof children === 'function' ? children({ permissions: matchingPermissions }) : children}
+    </>
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------

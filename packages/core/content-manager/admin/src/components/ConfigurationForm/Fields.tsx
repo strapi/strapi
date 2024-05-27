@@ -370,7 +370,8 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
       >
         <DragButton
           tag="span"
-          aria-label={formatMessage(
+          withTooltip={false}
+          label={formatMessage(
             {
               id: getTranslation('components.DraggableCard.move.field'),
               defaultMessage: 'Move {item}',
@@ -395,7 +396,8 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                   e.stopPropagation();
                   setIsModalOpen(true);
                 }}
-                aria-label={formatMessage(
+                withTooltip={false}
+                label={formatMessage(
                   {
                     id: getTranslation('components.DraggableCard.edit.field'),
                     defaultMessage: 'Edit {item}',
@@ -409,7 +411,8 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                 borderWidth={0}
                 onClick={handleRemoveField}
                 background="transparent"
-                aria-label={formatMessage(
+                withTooltip={false}
+                label={formatMessage(
                   {
                     id: getTranslation('components.DraggableCard.delete.field'),
                     defaultMessage: 'Delete {item}',

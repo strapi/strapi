@@ -57,7 +57,7 @@ const MyComponent = ({ onMoveItem }) => {
             role="button"
             tabIndex={0}
             aria-label="Drag"
-            noBorder
+            borderWidth={0}
             onKeyDown={handleKeyDown}
           >
             <Drag />
@@ -103,7 +103,7 @@ const MyComponent = ({ onDropItem }) => {
           role="button"
           tabIndex={0}
           aria-label="Drag"
-          noBorder
+          borderWidth={0}
           onKeyDown={handleKeyDown}
         >
           <Drag />
@@ -157,7 +157,7 @@ const MyComponent = ({ onMoveItem }) => {
             role="button"
             tabIndex={0}
             aria-label="Drag"
-            noBorder
+            borderWidth={0}
             onKeyDown={handleKeyDown}
           >
             <Drag />
@@ -256,7 +256,7 @@ You might notice in the [basic usage](#basic-usage) section this piece of code:
   role="button"
   tabIndex={0}
   aria-label="Drag"
-  noBorder
+  borderWidth={0}
   onKeyDown={handleKeyDown}
 >
   <Drag />

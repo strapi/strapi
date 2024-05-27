@@ -10,6 +10,13 @@ exports[`ContextInfo renders 1`] = `
   border-radius: 4px;
 }
 
+.c3 {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .c4 {
   font-weight: 600;
   font-size: 1.1rem;
@@ -22,13 +29,6 @@ exports[`ContextInfo renders 1`] = `
   font-size: 1.2rem;
   line-height: 1.33;
   color: #4a4a6a;
-}
-
-.c3 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .c6 {

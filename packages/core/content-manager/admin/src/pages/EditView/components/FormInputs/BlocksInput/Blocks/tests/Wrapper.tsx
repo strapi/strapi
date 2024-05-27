@@ -1,10 +1,9 @@
 import * as React from 'react';
 
-import { lightTheme } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { IntlProvider } from 'react-intl';
 import { type Editor, createEditor } from 'slate';
 import { Slate, withReact } from 'slate-react';
-import { ThemeProvider } from 'styled-components';
 
 import { type BlocksStore, BlocksEditorProvider } from '../../BlocksEditor';
 import { modifiers } from '../../Modifiers';
@@ -37,7 +36,7 @@ const Wrapper = ({ children, baseEditor = defaultBaseEditor }: WrapperProps) => 
   };
 
   return (
-    <ThemeProvider theme={lightTheme}>
+    <DesignSystemProvider>
       <IntlProvider messages={{}} locale="en">
         <Slate initialValue={baseEditor.children} editor={editor}>
           <BlocksEditorProvider
@@ -52,7 +51,7 @@ const Wrapper = ({ children, baseEditor = defaultBaseEditor }: WrapperProps) => 
           </BlocksEditorProvider>
         </Slate>
       </IntlProvider>
-    </ThemeProvider>
+    </DesignSystemProvider>
   );
 };
 
