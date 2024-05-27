@@ -28,7 +28,7 @@ export interface Logger {
 
 const stringifyArg = (arg: unknown) => {
   return typeof arg === 'object' ? stringify(arg) : arg;
-}
+};
 
 const createLogger = (options: LoggerOptions = {}): Logger => {
   const { silent = false, debug = false, timestamp = true } = options;
@@ -71,7 +71,10 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
         return;
       }
 
-      console.info(chalk.blue(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`), ...args.map(stringifyArg));
+      console.info(
+        chalk.blue(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        ...args.map(stringifyArg)
+      );
     },
 
     success(...args) {

@@ -63,7 +63,7 @@ export default async (ctx: CLIContext) => {
     .catch((e: AxiosError) => {
       logger.error('There was an issue with the authentication process. Please try again.');
       if (e.message) {
-        logger.debug(e.message,e);
+        logger.debug(e.message, e);
       } else {
         logger.debug(e);
       }

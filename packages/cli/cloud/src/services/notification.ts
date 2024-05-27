@@ -8,10 +8,8 @@ type Event = {
   origin: string;
 };
 
-
 export function notificationServiceFactory({ logger }: CLIContext) {
   return (url: string, token: string, cliConfig: CloudCliConfig) => {
-
     const CONN_TIMEOUT = Number(cliConfig.notificationsConnectionTimeout);
 
     const es = new EventSource(url, {

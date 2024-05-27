@@ -19,7 +19,12 @@ type PackageJson = {
   };
 };
 
-async function upload(ctx: CLIContext, project: ProjectInfos, token: string, maxProjectFileSize: number) {
+async function upload(
+  ctx: CLIContext,
+  project: ProjectInfos,
+  token: string,
+  maxProjectFileSize: number
+) {
   const cloudApi = cloudApiFactory(token);
   // * Upload project
   try {
@@ -140,27 +145,27 @@ export default async (ctx: CLIContext) => {
   const notificationService = notificationServiceFactory(ctx);
   const buildLogsService = buildLogsServiceFactory(ctx);
 
-  const cloudApiService =  cloudApiFactory();
-  const   { data : cliConfig } = await  cloudApiService.config();
+  const cloudApiService = cloudApiFactory();
+  const { data: cliConfig } = await cloudApiService.config();
 
   let maxSize: number = parseInt(cliConfig.maxProjectFileSize, 10);
   if (Number.isNaN(maxSize)) {
-    ctx.logger.debug("An error occurred while parsing the maxProjectFileSize. Using default value.")
-    maxSize = 100000000
+    ctx.logger.debug(
+      'An error occurred while parsing the maxProjectFileSize. Using default value.'
+    );
+    maxSize = 100000000;
   }
 
   const buildId = await upload(ctx, project, token, maxSize);
 
   try {
-    await Promise.all([
-      notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig),
-      buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig),
-    ]);
+    notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig);
+    await buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig);
   } catch (e: Error | unknown) {
     if (e instanceof Error) {
       ctx.logger.error(e.message);
     } else {
-      throw e
+      throw e;
     }
   }
 };

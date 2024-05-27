@@ -43,6 +43,7 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
+    "@strapi/cloud-cli": "4.24.3",
     "@strapi/generate-new": "4.24.3",
     "commander": "8.3.0",
     "inquirer": "8.2.5"

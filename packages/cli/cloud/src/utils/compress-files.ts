@@ -22,7 +22,7 @@ const getFiles = (
   dirPath: string,
   ignorePatterns: string[] = [],
   arrayOfFiles: string[] = [],
-  subfolder: string = '',
+  subfolder: string = ''
 ): string[] => {
   const entries = fs.readdirSync(path.join(dirPath, subfolder));
   entries.forEach((entry) => {
