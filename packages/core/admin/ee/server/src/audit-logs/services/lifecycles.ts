@@ -1,5 +1,4 @@
 import type { Core } from '@strapi/types';
-import localProvider from '@strapi/provider-audit-logs-local';
 import { scheduleJob } from 'node-schedule';
 
 const DEFAULT_RETENTION_DAYS = 90;
@@ -35,22 +34,6 @@ const defaultEvents = [
   'permission.delete',
 ];
 
-const getSanitizedUser = (user: any) => {
-  let displayName = user.email;
-
-  if (user.username) {
-    displayName = user.username;
-  } else if (user.firstname && user.lastname) {
-    displayName = `${user.firstname} ${user.lastname}`;
-  }
-
-  return {
-    id: user.id,
-    email: user.email,
-    displayName,
-  };
-};
-
 const getEventMap = (defaultEvents: any) => {
   const getDefaultPayload = (...args: any) => args[0];
 
@@ -62,7 +45,9 @@ const getEventMap = (defaultEvents: any) => {
 };
 
 const getRetentionDays = (strapi: Core.Strapi) => {
-  const licenseRetentionDays = strapi.ee.features.get('audit-logs')?.options.retentionDays;
+  const featureConfig = strapi.ee.features.get('audit-logs');
+  const licenseRetentionDays =
+    typeof featureConfig === 'object' && featureConfig?.options.retentionDays;
   const userRetentionDays = strapi.config.get('admin.auditLogs.retentionDays');
 
   // For enterprise plans, use 90 days by default, but allow users to override it
@@ -79,9 +64,14 @@ const getRetentionDays = (strapi: Core.Strapi) => {
   return licenseRetentionDays;
 };
 
-const createAuditLogsService = (strapi: Core.Strapi) => {
+/**
+ * @description
+ * Manages the the lifecycle of audit logs. Accessible via strapi.get('audit-logs-lifecycles')
+ */
+const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
   // Manage internal service state privately
   const state = {} as any;
+  const auditLogsService = strapi.get('audit-logs');
 
   // NOTE: providers should be able to replace getEventMap to add or remove events
   const eventMap = getEventMap(defaultEvents);
@@ -90,9 +80,8 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     const requestState = strapi.requestContext.get()?.state;
 
     // Ignore events with auth strategies different from admin
-    const isUsingAdminAuth = requestState?.auth?.strategy.name === 'admin';
+    const isUsingAdminAuth = requestState?.route.info.type === 'admin';
     const user = requestState?.user;
-
     if (!isUsingAdminAuth || !user) {
       return null;
     }
@@ -105,6 +94,7 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     }
 
     // Ignore some events based on payload
+    // TODO: What does this ignore in upload? Why would we want to ignore anything?
     const ignoredUids = ['plugin::upload.file', 'plugin::upload.folder'];
     if (ignoredUids.includes(args[0]?.uid)) {
       return null;
@@ -118,17 +108,17 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
     };
   };
 
-  async function handleEvent(name: string, ...args: any) {
+  const handleEvent = async (name: string, ...args: any) => {
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
       // This stores the event when after the transaction is committed,
       // so it's not stored if the transaction is rolled back
       await strapi.db.transaction(({ onCommit }) => {
-        onCommit(() => state.provider.saveEvent(processedEvent));
+        onCommit(() => auditLogsService.saveEvent(processedEvent));
       });
     }
-  }
+  };
 
   return {
     async register() {
@@ -160,56 +150,22 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
         this.destroy();
       });
 
-      // Register the provider now because collections can't be added later at runtime
-      state.provider = await localProvider.register({ strapi });
-
       // Check current state of license
       if (!strapi.ee.features.isEnabled('audit-logs')) {
         return this;
       }
 
       // Start saving events
-      state.eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent.bind(this));
+      state.eventHubUnsubscribe = strapi.eventHub.subscribe(handleEvent);
 
       // Manage audit logs auto deletion
       const retentionDays = getRetentionDays(strapi);
       state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
         const expirationDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
-        state.provider.deleteExpiredEvents(expirationDate);
+        auditLogsService.deleteExpiredEvents(expirationDate);
       });
 
       return this;
-    },
-
-    async findMany(query: unknown) {
-      const { results, pagination } = await state.provider.findMany(query);
-
-      const sanitizedResults = results.map((result: any) => {
-        const { user, ...rest } = result;
-        return {
-          ...rest,
-          user: user ? getSanitizedUser(user) : null,
-        };
-      });
-
-      return {
-        results: sanitizedResults,
-        pagination,
-      };
-    },
-
-    async findOne(id: unknown) {
-      const result = await state.provider.findOne(id);
-
-      if (!result) {
-        return null;
-      }
-
-      const { user, ...rest } = result;
-      return {
-        ...rest,
-        user: user ? getSanitizedUser(user) : null,
-      };
     },
 
     unsubscribe() {
@@ -234,4 +190,4 @@ const createAuditLogsService = (strapi: Core.Strapi) => {
   };
 };
 
-export default createAuditLogsService;
+export { createAuditLogsLifecycleService };

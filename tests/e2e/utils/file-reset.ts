@@ -2,7 +2,7 @@ import execa from 'execa';
 
 const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
 
-function delay(seconds) {
+function delay(seconds: number) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 }
 
