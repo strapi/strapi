@@ -26,7 +26,7 @@ import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
-import { useDoc, type Document } from '../../../../hooks/useDocument';
+import { useContentTypeSchema } from '../../../../hooks/useContentTypeSchema';
 import { useDocumentActions } from '../../../../hooks/useDocumentActions';
 import { useDocLayout } from '../../../../hooks/useDocumentLayout';
 import { contentManagerApi } from '../../../../services/api';
@@ -42,6 +42,7 @@ import { DocumentStatus } from '../../../EditView/components/DocumentStatus';
 import { ConfirmDialogPublishAll, ConfirmDialogPublishAllProps } from './ConfirmBulkActionDialog';
 
 import type { BulkActionComponent } from '../../../../content-manager';
+import type { Document } from '../../../../hooks/useDocument';
 
 const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
   max-width: 300px;
@@ -50,6 +51,32 @@ const TypographyMaxWidth = styled<TypographyComponent>(Typography)`
 /* -------------------------------------------------------------------------------------------------
  * EntryValidationText
  * -----------------------------------------------------------------------------------------------*/
+
+const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessage: any) => {
+  const messages: string[] = [];
+
+  Object.entries(errors).forEach(([key, value]) => {
+    const currentKey = parentKey ? `${parentKey}.${key}` : key;
+
+    if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+      if ('id' in value && 'defaultMessage' in value) {
+        messages.push(
+          formatMessage(
+            {
+              id: `${value.id}.withField`,
+              defaultMessage: value.defaultMessage,
+            },
+            { field: currentKey }
+          )
+        );
+      } else {
+        messages.push(...formatErrorMessages(value, currentKey, formatMessage));
+      }
+    }
+  });
+
+  return messages;
+};
 
 interface EntryValidationTextProps {
   validationErrors?: FormErrors;
@@ -63,19 +90,9 @@ const EntryValidationText = ({
   const { formatMessage } = useIntl();
 
   if (validationErrors) {
-    const validationErrorsMessages = Object.entries(validationErrors)
-      .map(([key, value]) => {
-        return formatMessage(
-          {
-            // @ts-expect-error - test
-            id: `${value.id}.withField`,
-            // @ts-expect-error - test
-            defaultMessage: value.defaultMessage,
-          },
-          { field: key }
-        );
-      })
-      .join(' ');
+    const validationErrorsMessages = formatErrorMessages(validationErrors, '', formatMessage).join(
+      ' '
+    );
 
     return (
       <Flex gap={2}>
@@ -240,34 +257,83 @@ const BoldChunk = (chunks: React.ReactNode) => <Typography fontWeight="bold">{ch
 
 interface TableRow extends Document {}
 
-interface SelectedEntriesModalContentProps
-  extends Pick<SelectedEntriesTableContentProps, 'validationErrors'> {
-  refetchModalData: () => void;
-  setSelectedDocuments: (documents: TableRow[]) => void;
+interface SelectedEntriesModalContentProps {
+  listViewSelectedEntries: TableRow[];
   toggleModal: ConfirmDialogPublishAllProps['onToggleDialog'];
-  isFetching: boolean;
+  setListViewSelectedDocuments: (documents: TableRow[]) => void;
+  model: string;
 }
 
 const SelectedEntriesModalContent = ({
+  listViewSelectedEntries,
   toggleModal,
-  refetchModalData,
-  setSelectedDocuments,
-  isFetching,
-  validationErrors = {},
+  setListViewSelectedDocuments,
+  model,
 }: SelectedEntriesModalContentProps) => {
   const { formatMessage } = useIntl();
-  const {
-    selectedRows: selectedEntries,
-    rows,
-    isLoading,
-  } = useTable('SelectedEntriesModal', (state) => state);
+  const { schema, components } = useContentTypeSchema(model);
+  const documentIds = listViewSelectedEntries.map(({ documentId }) => documentId);
+
+  // We want to keep the selected entries order same as the list view
+  const [{ query }] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
+  const params = React.useMemo(() => buildValidParams(query), [query]);
+
+  // Fetch the documents based on the selected entries and update the modal table
+  const { data, isLoading, isFetching, refetch } = useGetAllDocumentsQuery(
+    {
+      model,
+      params: {
+        page: '1',
+        pageSize: documentIds.length.toString(),
+        sort: query.sort,
+        filters: {
+          documentId: {
+            $in: documentIds,
+          },
+        },
+        locale: query.plugins?.i18n?.locale,
+      },
+    },
+    {
+      selectFromResult: ({ data, ...restRes }) => ({ data: data?.results ?? [], ...restRes }),
+    }
+  );
+
+  // Validate the entries based on the schema to show errors if any
+  const { rows, validationErrors } = React.useMemo(() => {
+    if (data.length > 0 && schema) {
+      const validate = createYupSchema(schema.attributes, components);
+      const validationErrors: Record<TableRow['documentId'], FormErrors> = {};
+      const rows = data.map((entry: Document) => {
+        try {
+          validate.validateSync(entry, { abortEarly: false });
+
+          return entry;
+        } catch (e) {
+          if (e instanceof ValidationError) {
+            validationErrors[entry.documentId] = getYupValidationErrors(e);
+          }
+
+          return entry;
+        }
+      });
+
+      return { rows, validationErrors };
+    }
+
+    return {
+      rows: [],
+      validationErrors: {},
+    };
+  }, [components, data, schema]);
+
   const [publishedCount, setPublishedCount] = React.useState(0);
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const { model } = useDoc();
-  const [{ query }] = useQueryParams();
-  const params = React.useMemo(() => buildValidParams(query), [query]);
+
   const { publishMany: bulkPublishAction } = useDocumentActions();
   const [, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
+
+  const selectedEntries = useTable('publishAction', (state) => state.selectedRows);
 
   const entriesToPublish = selectedEntries.reduce((acc, entry) => {
     if (!validationErrors[entry.documentId]) {
@@ -300,7 +366,7 @@ const SelectedEntriesModalContent = ({
         return !entriesToPublish.includes(row.documentId);
       });
       // Keep selection of the entries in list view that were not published
-      setSelectedDocuments(unpublishedEntries);
+      setListViewSelectedDocuments(unpublishedEntries);
     }
   };
 
@@ -359,7 +425,7 @@ const SelectedEntriesModalContent = ({
         }
         endActions={
           <Flex gap={2}>
-            <Button onClick={refetchModalData} variant="tertiary" loading={isFetching}>
+            <Button onClick={refetch} variant="tertiary" loading={isFetching}>
               {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
             </Button>
             <Button
@@ -390,77 +456,14 @@ const SelectedEntriesModalContent = ({
  * PublishAction
  * -----------------------------------------------------------------------------------------------*/
 
-const PublishAction: BulkActionComponent = ({ documents }) => {
+const PublishAction: BulkActionComponent = ({ documents, model }) => {
   const { formatMessage } = useIntl();
   // Publish button visibility
   const hasPublishPermission = useDocumentRBAC('unpublishAction', (state) => state.canPublish);
   const showPublishButton =
     hasPublishPermission && documents.some(({ status }) => status !== 'published');
 
-  const { model, schema, components, isLoading: isLoadingDoc } = useDoc();
-  const setSelectedDocuments = useTable('publishAction', (state) => state.selectRow);
-  const documentIds = documents.map(({ documentId }) => documentId);
-
-  // We want to keep the selected entries order same as the list view
-  const [
-    {
-      query: { sort, plugins },
-    },
-  ] = useQueryParams<{ sort?: string; plugins?: Record<string, any> }>();
-
-  // Fetch the documents based on the selected entries and update the modal table
-  const {
-    data,
-    isLoading: isLoadingModalContent,
-    isFetching: isFetchingModalContent,
-    refetch,
-  } = useGetAllDocumentsQuery(
-    {
-      model,
-      params: {
-        page: '1',
-        pageSize: documentIds.length.toString(),
-        sort,
-        filters: {
-          documentId: {
-            $in: documentIds,
-          },
-        },
-        locale: plugins?.i18n?.locale,
-      },
-    },
-    {
-      selectFromResult: ({ data, ...restRes }) => ({ data: data?.results ?? [], ...restRes }),
-    }
-  );
-
-  // Validate the entries based on the schema to show errors if any
-  const { rows, validationErrors } = React.useMemo(() => {
-    if (data.length > 0 && schema) {
-      const validate = createYupSchema(schema.attributes, components);
-      const validationErrors: Record<TableRow['documentId'], FormErrors> = {};
-      const rows = data.map((entry: Document) => {
-        try {
-          validate.validateSync(entry, { abortEarly: false });
-
-          return entry;
-        } catch (e) {
-          if (e instanceof ValidationError) {
-            validationErrors[entry.documentId] = getYupValidationErrors(e);
-          }
-
-          return entry;
-        }
-      });
-
-      return { rows, validationErrors };
-    }
-
-    return {
-      rows: [],
-      validationErrors: {},
-    };
-  }, [components, data, schema]);
+  const setListViewSelectedDocuments = useTable('publishAction', (state) => state.selectRow);
 
   const refetchList = () => {
     contentManagerApi.util.invalidateTags([{ type: 'Document', id: `${model}_LIST` }]);
@@ -480,21 +483,15 @@ const PublishAction: BulkActionComponent = ({ documents }) => {
       }),
       content: ({ onClose }) => {
         return (
-          <Table.Root
-            rows={rows}
-            defaultSelectedRows={documents}
-            headers={TABLE_HEADERS}
-            isLoading={isLoadingModalContent || isLoadingDoc || isFetchingModalContent}
-          >
+          <Table.Root rows={documents} defaultSelectedRows={documents} headers={TABLE_HEADERS}>
             <SelectedEntriesModalContent
-              setSelectedDocuments={setSelectedDocuments}
+              listViewSelectedEntries={documents}
               toggleModal={() => {
                 onClose();
                 refetchList();
               }}
-              refetchModalData={refetch}
-              validationErrors={validationErrors}
-              isFetching={isFetchingModalContent}
+              setListViewSelectedDocuments={setListViewSelectedDocuments}
+              model={model}
             />
           </Table.Root>
         );
