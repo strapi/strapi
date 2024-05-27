@@ -1,4 +1,4 @@
-import { enableFeatureMiddleware } from './utils';
+import { enableFeatureMiddleware } from '../../routes/utils';
 
 export default {
   type: 'admin',
@@ -6,7 +6,7 @@ export default {
     {
       method: 'GET',
       path: '/audit-logs',
-      handler: 'auditLogs.findMany',
+      handler: 'audit-logs.findMany',
       config: {
         middlewares: [enableFeatureMiddleware('audit-logs')],
         policies: [
@@ -23,7 +23,7 @@ export default {
     {
       method: 'GET',
       path: '/audit-logs/:id',
-      handler: 'auditLogs.findOne',
+      handler: 'audit-logs.findOne',
       config: {
         middlewares: [enableFeatureMiddleware('audit-logs')],
         policies: [

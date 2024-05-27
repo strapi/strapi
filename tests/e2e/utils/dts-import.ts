@@ -11,6 +11,10 @@ const {
   engine: { createTransferEngine },
 } = require('@strapi/data-transfer');
 
+interface RestoreConfiguration {
+  coreStore: boolean;
+}
+
 /**
  * Reset the DB and import data from a DTS backup
  * This function ensures we keep all admin user's and roles in the DB
@@ -18,12 +22,13 @@ const {
  */
 export const resetDatabaseAndImportDataFromPath = async (
   file: string,
-  modifiedContentTypesFn: (cts: string[]) => string[] = (cts) => cts
+  modifiedContentTypesFn: (cts: string[]) => string[] = (cts) => cts,
+  configuration: RestoreConfiguration = { coreStore: true }
 ) => {
   const filePath = join('./tests/e2e/data/', file);
   const source = createSourceProvider(filePath);
   const includedTypes = modifiedContentTypesFn(ALLOWED_CONTENT_TYPES);
-  const destination = createDestinationProvider(includedTypes);
+  const destination = createDestinationProvider(includedTypes, configuration);
 
   const engine = createTransferEngine(source, destination, {
     versionStrategy: 'ignore',
@@ -81,7 +86,7 @@ const createSourceProvider = (filePath) =>
     compression: { enabled: false },
   });
 
-const createDestinationProvider = (includedTypes = []) => {
+const createDestinationProvider = (includedTypes = [], configuration: RestoreConfiguration) => {
   return createRemoteStrapiDestinationProvider({
     url: new URL(`http://127.0.0.1:${process.env.PORT ?? 1337}/admin`),
     auth: { type: 'token', token: CUSTOM_TRANSFER_TOKEN_ACCESS_KEY },
@@ -91,10 +96,7 @@ const createDestinationProvider = (includedTypes = []) => {
       entities: {
         include: includedTypes,
       },
-      configuration: {
-        coreStore: true,
-        webhook: false,
-      },
+      configuration,
     },
   });
 };
