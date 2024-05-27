@@ -149,8 +149,8 @@ export const getEnabledPlugins = async (strapi: Strapi, { client } = { client: f
   );
 
   const enabledPlugins = pipe(
-    defaultsDeep(declaredPlugins),
     defaultsDeep(installedPluginsNotAlreadyUsed),
+    defaultsDeep(declaredPlugins),
     pickBy((p: PluginMeta) => p.enabled)
   )(internalPlugins);
 
