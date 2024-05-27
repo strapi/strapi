@@ -70,6 +70,24 @@ const baseStrapiMock = {
       };
     }
   },
+  getModel: jest.fn().mockReturnValue((contentType: string) => {
+    console.log(contentType);
+
+    const map: Record<string, any> = {
+      'api::contentTypeA.contentTypeA': {
+        info: {
+          displayName: 'contentTypeA',
+        },
+      },
+      'api::contentTypeB.contentTypeB': {
+        info: {
+          displayName: 'contentTypeB',
+        },
+      },
+    };
+
+    return map[contentType];
+  }),
 };
 
 global.strapi = {
@@ -628,6 +646,7 @@ describe('release service', () => {
         ...baseStrapiMock,
         plugin: jest.fn().mockReturnValue({
           service: jest.fn().mockReturnValue({
+            findConfiguration: jest.fn().mockReturnValue({ settings: { mainField: 'name' } }),
             find: jest.fn().mockReturnValue([
               { name: 'English (en)', code: 'en' },
               { name: 'French (fr)', code: 'fr' },
@@ -653,18 +672,6 @@ describe('release service', () => {
 
       // @ts-expect-error Ignore missing properties
       const releaseService = createReleaseService({ strapi: strapiMock });
-
-      // Mock getContentTypesDataForActions inside the release service
-      releaseService.getContentTypesDataForActions = jest.fn().mockReturnValue({
-        'api::contentTypeA.contentTypeA': {
-          mainField: 'name',
-          displayName: 'contentTypeA',
-        },
-        'api::contentTypeB.contentTypeB': {
-          mainField: 'name',
-          displayName: 'contentTypeB',
-        },
-      });
 
       // @ts-expect-error ignore missing properties
       const groupedData = await releaseService.groupActions(mockActions, 'contentType');

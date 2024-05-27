@@ -81,6 +81,12 @@ const releaseActionController = {
     });
     const query = await permissionsManager.sanitizeQuery(ctx.query);
 
+    if (query.groupBy) {
+      if (!['action', 'contentType', 'locale'].includes(query.groupBy)) {
+        ctx.badRequest('Invalid groupBy parameter');
+      }
+    }
+
     query.sort = query.groupBy === 'action' ? 'type' : query.groupBy;
     delete query.groupBy;
 

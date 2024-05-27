@@ -7220,6 +7220,7 @@ __metadata:
     "@testing-library/user-event": "npm:14.4.3"
     "@types/koa": "npm:2.13.4"
     "@types/styled-components": "npm:5.1.34"
+    axios: "npm:1.6.8"
     date-fns: "npm:2.30.0"
     date-fns-tz: "npm:2.0.1"
     formik: "npm:2.4.5"

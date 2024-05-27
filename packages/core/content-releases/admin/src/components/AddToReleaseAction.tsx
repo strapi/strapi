@@ -10,12 +10,12 @@ import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content
 import {
   Box,
   Button,
-  FieldLabel,
   Flex,
   SingleSelect,
   SingleSelectOption,
   EmptyStateLayout,
   LinkButton,
+  Field,
 } from '@strapi/design-system';
 import { Cursor } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -31,7 +31,10 @@ import { useCreateReleaseActionMutation, useGetReleasesForEntryQuery } from '../
 
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
-import type { DocumentActionComponent } from '@strapi/content-manager/strapi-admin';
+import type {
+  DocumentActionComponent,
+  DocumentActionProps,
+} from '@strapi/content-manager/strapi-admin';
 
 /* -------------------------------------------------------------------------------------------------
  * AddActionToReleaseModal
@@ -70,11 +73,10 @@ export const NoReleases = () => {
       })}
       action={
         <LinkButton
-          // @ts-expect-error - types are not inferred correctly through the as prop.
           to={{
             pathname: '/plugins/content-releases',
           }}
-          as={ReactRouterLink}
+          tag={ReactRouterLink}
           variant="secondary"
         >
           {formatMessage({
@@ -115,33 +117,37 @@ const AddActionToReleaseModal = ({
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
       <Box paddingBottom={6}>
-        <SingleSelect
-          required
-          label={formatMessage({
-            id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
-            defaultMessage: 'Select a release',
-          })}
-          placeholder={formatMessage({
-            id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
-            defaultMessage: 'Select',
-          })}
-          name="releaseId"
-          onChange={(value) => onInputChange('releaseId', value)}
-          value={values.releaseId}
-        >
-          {releases?.map((release: any) => (
-            <SingleSelectOption key={release.id} value={release.id}>
-              {release.name}
-            </SingleSelectOption>
-          ))}
-        </SingleSelect>
+        <Field.Root required>
+          <Field.Label>
+            {formatMessage({
+              id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
+              defaultMessage: 'Select a release',
+            })}
+          </Field.Label>
+          <SingleSelect
+            required
+            placeholder={formatMessage({
+              id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
+              defaultMessage: 'Select',
+            })}
+            name="releaseId"
+            onChange={(value) => onInputChange('releaseId', value)}
+            value={values.releaseId}
+          >
+            {releases?.map((release: any) => (
+              <SingleSelectOption key={release.id} value={release.id}>
+                {release.name}
+              </SingleSelectOption>
+            ))}
+          </SingleSelect>
+        </Field.Root>
       </Box>
-      <FieldLabel>
+      <Field.Label>
         {formatMessage({
           id: 'content-releases.content-manager-edit-view.add-to-release.action-type-label',
           defaultMessage: 'What do you want to do with this entry?',
         })}
-      </FieldLabel>
+      </Field.Label>
       <ReleaseActionOptions
         selected={values.type}
         handleChange={(e) => onInputChange('type', e.target.value)}
@@ -155,7 +161,11 @@ const AddActionToReleaseModal = ({
  * AddToReleaseAction
  * -----------------------------------------------------------------------------------------------*/
 
-const AddToReleaseAction: DocumentActionComponent = ({ documentId, model }) => {
+const AddToReleaseAction: DocumentActionComponent = ({
+  documentId,
+  model,
+  collectionType,
+}: DocumentActionProps) => {
   const { formatMessage } = useIntl();
   const { allowedActions } = useRBAC(PERMISSIONS);
   const { canCreateAction } = allowedActions;
@@ -164,7 +174,6 @@ const AddToReleaseAction: DocumentActionComponent = ({ documentId, model }) => {
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }] = useQueryParams<{ plugins?: { i18n?: { locale?: string } } }>();
   const locale = query.plugins?.i18n?.locale;
-  const { collectionType } = useParams<{ collectionType: string }>();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>, onClose: () => void) => {
     try {
