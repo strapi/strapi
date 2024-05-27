@@ -7,7 +7,7 @@
 import React from 'react';
 
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -101,13 +101,13 @@ const queryClient = new QueryClient({
 const renderCompo = () =>
   render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
           <NotificationsProvider>
             <EditAssetDialog asset={asset} onClose={jest.fn()} canUpdate canCopyLink canDownload />
           </NotificationsProvider>
         </IntlProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );
@@ -133,7 +133,7 @@ describe('<EditAssetDialog />', () => {
     it('opens the delete dialog when pressing the delete button', () => {
       renderCompo();
 
-      fireEvent.click(screen.getByLabelText('Delete'));
+      fireEvent.click(screen.getByRole('button', { name: 'Delete' }));
 
       expect(screen.getByText('Confirmation')).toBeVisible();
       expect(screen.getByText('Are you sure?')).toBeVisible();
@@ -142,7 +142,7 @@ describe('<EditAssetDialog />', () => {
     it('copies the link and shows a notification when pressing "Copy link"', async () => {
       renderCompo();
 
-      fireEvent.click(screen.getByLabelText('Copy link'));
+      fireEvent.click(screen.getByRole('button', { name: 'Copy link' }));
 
       await waitFor(() =>
         expect(screen.getByText('Link copied into the clipboard')).toBeInTheDocument()
@@ -152,7 +152,7 @@ describe('<EditAssetDialog />', () => {
     it('downloads the file when pressing "Download"', () => {
       renderCompo();
 
-      fireEvent.click(screen.getByLabelText('Download'));
+      fireEvent.click(screen.getByRole('button', { name: 'Download' }));
       expect(downloadFile).toHaveBeenCalledWith(
         'http://localhost:1337/uploads/Screenshot_2_5d4a574d61.png',
         'Screenshot 2.png'

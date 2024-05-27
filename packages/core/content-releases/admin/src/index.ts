@@ -5,7 +5,6 @@ import { ReleaseAction } from './components/ReleaseAction';
 // import { addColumnToTableHook } from './components/ReleaseListCell';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
-import { releaseApi } from './services/release';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
@@ -33,17 +32,6 @@ const admin: Plugin.Config.AdminInput = {
         Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
         permissions: PERMISSIONS.main,
         position: 2,
-      });
-
-      /**
-       * For some reason every middleware you pass has to a function
-       * that returns the actual middleware. It's annoying but no one knows why....
-       */
-      // @ts-expect-error – this API needs to be typed better.
-      app.addMiddlewares([() => releaseApi.middleware]);
-
-      app.addReducers({
-        [releaseApi.reducerPath]: releaseApi.reducer,
       });
 
       // Insert the Releases container in the 'right-links' zone of the Content Manager's edit view

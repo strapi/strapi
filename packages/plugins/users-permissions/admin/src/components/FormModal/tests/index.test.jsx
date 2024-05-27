@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -17,7 +17,7 @@ const messages = {};
 const makeApp = (layout = { forms: [], schema: {} }, isOpen = false) => {
   return (
     <IntlProvider locale="en" messages={messages} textComponent="span">
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <FormModal
           layout={layout}
           isOpen={isOpen}
@@ -28,7 +28,7 @@ const makeApp = (layout = { forms: [], schema: {} }, isOpen = false) => {
           initialData={{}}
           providerToEditName="test"
         />
-      </ThemeProvider>
+      </DesignSystemProvider>
     </IntlProvider>
   );
 };

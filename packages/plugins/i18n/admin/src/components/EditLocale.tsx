@@ -58,9 +58,10 @@ const EditLocale = (props: EditLocaleProps) => {
             name: props.name,
           }
         )}
-        icon={<Pencil />}
         borderWidth={0}
-      />
+      >
+        <Pencil />
+      </IconButton>
       {visible ? <EditModal {...props} onClose={() => setVisible(false)} /> : null}
     </>
   );

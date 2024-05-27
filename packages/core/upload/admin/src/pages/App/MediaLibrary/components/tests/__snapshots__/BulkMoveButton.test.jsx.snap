@@ -13,18 +13,18 @@ exports[`BulkMoveButton renders 1`] = `
   cursor: pointer;
 }
 
-.c4 {
-  font-size: 1.2rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: currentcolor;
-}
-
 .c1 {
   align-items: center;
   display: flex;
   flex-direction: row;
   gap: 8px;
+}
+
+.c4 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
 }
 
 .c5 {

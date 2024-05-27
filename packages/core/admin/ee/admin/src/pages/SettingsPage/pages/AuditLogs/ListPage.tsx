@@ -186,13 +186,15 @@ const ListPage = () => {
                     <Flex justifyContent="end">
                       <IconButton
                         onClick={() => setQuery({ id: log.id })}
-                        aria-label={formatMessage(
+                        withTooltip={false}
+                        label={formatMessage(
                           { id: 'app.component.table.view', defaultMessage: '{target} details' },
                           { target: `${log.action} action` }
                         )}
-                        noBorder
-                        icon={<Eye />}
-                      />
+                        borderWidth={0}
+                      >
+                        <Eye />
+                      </IconButton>
                     </Flex>
                   </Table.Cell>
                 </Table.Row>

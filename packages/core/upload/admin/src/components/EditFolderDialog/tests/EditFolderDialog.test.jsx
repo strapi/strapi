@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { within } from '@testing-library/dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -39,11 +39,11 @@ function ComponentFixture(props) {
   return (
     <QueryClientProvider client={client}>
       <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
+        <DesignSystemProvider>
           <NotificationsProvider toggleNotification={() => {}}>
             <EditFolderDialog onClose={() => {}} {...nextProps} />
           </NotificationsProvider>
-        </ThemeProvider>
+        </DesignSystemProvider>
       </IntlProvider>
     </QueryClientProvider>
   );

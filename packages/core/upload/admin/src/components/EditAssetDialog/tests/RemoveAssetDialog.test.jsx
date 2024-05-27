@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -91,13 +91,13 @@ const renderCompo = (handleCloseSpy = jest.fn()) => {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
           <NotificationsProvider>
             <RemoveAssetDialog onClose={handleCloseSpy} asset={asset} />
           </NotificationsProvider>
         </IntlProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>,
     { container: document.getElementById('app') }
   );

@@ -37,11 +37,11 @@ const ComponentDragPreview = ({ displayedValue }: ComponentDragPreviewProps) => 
       </ToggleButton>
 
       <Flex gap={2}>
-        <IconButton aria-label="" borderWidth={0}>
+        <IconButton withTooltip={false} label="" borderWidth={0}>
           <Trash />
         </IconButton>
 
-        <IconButton aria-label="" borderWidth={0}>
+        <IconButton withTooltip={false} label="" borderWidth={0}>
           <Drag />
         </IconButton>
       </Flex>

@@ -47,9 +47,10 @@ export const TokenBox = ({ token, tokenType }: TokenBoxProps) => {
               })}
               onClick={handleClick(token)}
               borderWidth={0}
-              icon={<Duplicate />}
               style={{ padding: 0, height: '1.6rem' }}
-            />
+            >
+              <Duplicate />
+            </IconButton>
           </span>
         )
       }

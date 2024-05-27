@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -124,9 +124,9 @@ const data = [
 const setup = (props = { assets: data, selectedAssets: [], onSelectAsset: jest.fn() }) =>
   renderTL(
     <MemoryRouter>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <AssetGridList {...props} />
-      </ThemeProvider>
+      </DesignSystemProvider>
     </MemoryRouter>
   );
 

@@ -234,19 +234,19 @@ const ListPage = () => {
                             id: 'app.utils.duplicate',
                             defaultMessage: 'Duplicate',
                           }),
-                          icon: <Duplicate />,
+                          children: <Duplicate />,
                         } satisfies RoleRowProps['icons'][number]),
                       canUpdate &&
                         ({
                           onClick: () => navigate(role.id.toString()),
                           label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
-                          icon: <Pencil />,
+                          children: <Pencil />,
                         } satisfies RoleRowProps['icons'][number]),
                       canDelete &&
                         ({
                           onClick: handleClickDelete(role),
                           label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
-                          icon: <Trash />,
+                          children: <Trash />,
                         } satisfies RoleRowProps['icons'][number]),
                     ].filter(Boolean) as RoleRowProps['icons']
                   }
