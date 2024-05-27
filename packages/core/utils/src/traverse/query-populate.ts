@@ -176,6 +176,8 @@ const populate = traverseFactory()
         const newValue = await recurse(visitor, { schema, path, getModel }, { on: value?.on });
 
         set(key, { on: newValue });
+
+        return;
       }
 
       const targetSchemaUID = attribute.target;

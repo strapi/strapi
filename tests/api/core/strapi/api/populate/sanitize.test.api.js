@@ -21,7 +21,9 @@ const schemas = {
       singularName: 'a',
       pluralName: 'as',
       attributes: {
-        cover: { type: 'media' },
+        cover: {
+          type: 'media',
+        },
       },
     },
     b: {
@@ -143,9 +145,13 @@ describe('Sanitize populated entries', () => {
 
     test("Media's relations (from related) can be populated without restricted attributes", async () => {
       const { status, body } = await contentAPIRequest.get(`/upload/files/${file.id}`, {
-        qs: { populate: { related: { populate: '*' } } },
+        qs: {
+          populate: {
+            related: true,
+          },
+        },
       });
-
+      console.log(body);
       expect(status).toBe(200);
       expect(body.related).toBeDefined();
       expect(Array.isArray(body.related)).toBeTruthy();
@@ -170,7 +176,10 @@ describe('Sanitize populated entries', () => {
       });
 
       const { status } = await contentAPIRequest.get(`/${schemas.contentTypes.b.pluralName}`, {
-        qs: { fields: ['id'], populate: '*' },
+        qs: {
+          fields: ['id'],
+          populate: '*',
+        },
       });
 
       expect(status).toBe(200);
