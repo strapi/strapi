@@ -20,7 +20,7 @@ import {
   TypographyComponent,
 } from '@strapi/design-system';
 import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
-import { MessageDescriptor, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
@@ -215,7 +215,6 @@ const SelectedEntriesTableContent = ({
                     ),
                   }
                 )}
-                noBorder
                 target="_blank"
                 marginLeft="auto"
               >
