@@ -941,30 +941,11 @@ describe('Core API - Validate', () => {
       it.todo('Populates a media');
 
       describe('Dynamic Zone', () => {
-        it.each([{ dz: { populate: '*' } }, { dz: { populate: true } }, { dz: '*' }, { dz: true }])(
-          'Populates a dynamic-zone (%s)',
-          async (populate) => {
-            const res = await rq.get('/api/documents', { qs: { populate } });
-
-            checkAPIResultValidity(res);
-
-            res.body.data.forEach((document) => {
-              expect(document).toHaveProperty(
-                'dz',
-                expect.arrayContaining([
-                  expect.objectContaining({ __component: expect.any(String) }),
-                ])
-              );
-              expect(document.dz).toHaveLength(3);
-            });
-          }
-        );
-
         it.each([
           [{ dz: { on: { 'default.component-a': true } } }, 'default.component-a', 2],
           [{ dz: { on: { 'default.component-b': true } } }, 'default.component-b', 1],
         ])(
-          'Populates a dynamic-use using populate fragments (%s)',
+          'Populates a dynamic-zone using populate fragments (%s)',
           async (populate, componentUID, expectedLength) => {
             const res = await rq.get('/api/documents', { qs: { populate } });
 

@@ -1,9 +1,11 @@
-import type { UID } from '@strapi/types';
+import type { UID, Modules } from '@strapi/types';
 import { setCreatorFields, async, errors } from '@strapi/utils';
 
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { getService } from '../utils';
 import { formatDocumentWithMetadata } from './utils/metadata';
+
+type OptionsWithPopulate = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
 const buildPopulateFromQuery = async (query: any, model: any) => {
   return getService('populate-builder')(model)
@@ -25,7 +27,7 @@ const findDocument = async (query: any, uid: UID.SingleType, opts: any = {}) => 
   );
 };
 
-const createOrUpdateDocument = async (ctx: any, opts?: { populate: object }) => {
+const createOrUpdateDocument = async (ctx: any, opts?: OptionsWithPopulate) => {
   const { user, userAbility } = ctx.state;
   const { model } = ctx.params;
   const { body, query } = ctx.request;
