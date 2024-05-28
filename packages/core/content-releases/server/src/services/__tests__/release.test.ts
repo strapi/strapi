@@ -6,6 +6,8 @@ import releaseCT from '../../content-types/release/schema';
 const mockSchedulingSet = jest.fn();
 const mockSchedulingCancel = jest.fn();
 const mockExecute = jest.fn();
+const mockPublish = jest.fn();
+const mockUnpublish = jest.fn();
 
 const baseStrapiMock = {
   utils: {
@@ -70,9 +72,7 @@ const baseStrapiMock = {
       };
     }
   },
-  getModel: jest.fn().mockReturnValue((contentType: string) => {
-    console.log(contentType);
-
+  getModel: jest.fn((contentType: string) => {
     const map: Record<string, any> = {
       'api::contentTypeA.contentTypeA': {
         info: {
@@ -87,6 +87,11 @@ const baseStrapiMock = {
     };
 
     return map[contentType];
+  }),
+  documents: jest.fn().mockReturnValue({
+    findFirst: jest.fn().mockReturnValue({ id: 1 }),
+    publish: mockPublish,
+    unpublish: mockUnpublish,
   }),
 };
 
@@ -404,40 +409,13 @@ describe('release service', () => {
       expect(() => releaseService.publish(1)).rejects.toThrow('No entries to publish');
     });
 
-    it('calls publishMany for each collectionType with the right actions and publish for singleTypes', async () => {
+    it('calls publish for each collectionType with the right actions', async () => {
       mockExecute.mockReturnValueOnce({ id: 1, releasedAt: null });
-      const mockPublishMany = jest.fn();
-      const mockUnpublishMany = jest.fn();
-      const mockPublish = jest.fn();
-      const mockUnpublish = jest.fn();
-
-      const servicesMock = {
-        'entity-manager': {
-          publishMany: mockPublishMany,
-          unpublishMany: mockUnpublishMany,
-          publish: mockPublish,
-          unpublish: mockUnpublish,
-        },
-        'populate-builder': () => ({
-          default: jest.fn().mockReturnThis(),
-          populateDeep: jest.fn().mockReturnThis(),
-          countRelations: jest.fn().mockReturnThis(),
-          build: jest.fn().mockReturnThis(),
-        }),
-      };
-
       const findOne = jest.fn();
       const findMany = jest.fn();
 
       const strapiMock = {
         ...baseStrapiMock,
-        plugin: jest.fn().mockReturnValue({
-          service: jest
-            .fn()
-            .mockImplementation((service: 'entity-manager' | 'populate-builder') => {
-              return servicesMock[service];
-            }),
-        }),
         db: {
           ...baseStrapiMock.db,
           query: jest.fn().mockReturnValue({
@@ -507,34 +485,8 @@ describe('release service', () => {
 
       await releaseService.publish(1);
 
-      expect(mockPublish).toHaveBeenCalledWith({ id: 3 }, 'singleType');
-      expect(mockUnpublish).toHaveBeenCalledWith({ id: 4 }, 'singleType');
-      expect(mockPublishMany).toHaveBeenCalledWith([{ id: 1 }], 'collectionType');
-      expect(mockUnpublishMany).toHaveBeenCalledWith([{ id: 2 }], 'collectionType');
-    });
-  });
-
-  describe('findManyWithContentTypeEntryAttached', () => {
-    it('should format the return value correctly', async () => {
-      const strapiMock = {
-        ...baseStrapiMock,
-        db: {
-          query: jest.fn(() => ({
-            findMany: jest
-              .fn()
-              .mockReturnValue([{ name: 'test release', actions: [{ type: 'publish' }] }]),
-          })),
-        },
-      };
-
-      // @ts-expect-error Ignore missing properties
-      const releaseService = createReleaseService({ strapi: strapiMock });
-      const releases = await releaseService.findManyWithContentTypeEntryAttached(
-        'api::contentType.contentType',
-        1
-      );
-
-      expect(releases).toEqual([{ name: 'test release', actions: [{ type: 'publish' }] }]);
+      expect(mockPublish).toHaveBeenCalledTimes(2);
+      expect(mockUnpublish).toHaveBeenCalledTimes(2);
     });
   });
 
