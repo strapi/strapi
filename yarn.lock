@@ -7979,8 +7979,8 @@ __metadata:
     "@strapi/strapi": ^4.15.1
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8285,8 +8285,8 @@ __metadata:
     "@strapi/strapi": ^4.4.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-    react-router-dom: 5.3.4
-    styled-components: 5.3.3
+    react-router-dom: ^5.3.4
+    styled-components: ^5.3.3
   languageName: unknown
   linkType: soft
 
@@ -8446,7 +8446,7 @@ __metadata:
     styled-components: "npm:5.3.3"
     yup: "npm:0.32.9"
   peerDependencies:
-    koa: 2.13.4
+    koa: ^2.13.4
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
