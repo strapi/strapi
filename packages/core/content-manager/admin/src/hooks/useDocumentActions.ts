@@ -36,9 +36,9 @@ import type {
   Discard,
   FindOne,
   Publish,
+  BulkPublish,
   Update,
   Unpublish,
-  BulkPublish,
   BulkUnpublish,
 } from '../../../shared/contracts/collection-types';
 

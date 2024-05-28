@@ -247,6 +247,7 @@
   "success.record.unpublish": "Unpublished document",
   "success.records.delete": "Successfully deleted.",
   "success.records.unpublish": "Successfully unpublished.",
+  "success.records.publish": "Successfully published.",
   "utils.data-loaded": "The {number, plural, =1 {entry has} other {entries have}} successfully been loaded",
   "listView.validation.errors.title": "Action required",
   "listView.validation.errors.message": "Please make sure all fields are valid before publishing (required field, min/max character limit, etc.)",
