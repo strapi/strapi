@@ -340,13 +340,9 @@ const SelectedEntriesModalContent = ({
     selectedRows.some((selectedEntry) => selectedEntry.documentId === entry.documentId)
   );
 
-  const entriesToPublish = selectedEntries.reduce((acc, entry) => {
-    if (!validationErrors[entry.documentId]) {
-      acc.push(entry.documentId);
-    }
-
-    return acc;
-  }, []);
+  const entriesToPublish = selectedEntries
+    .filter((entry) => !validationErrors[entry.documentId])
+    .map((entry) => entry.documentId);
 
   const selectedEntriesWithErrorsCount = selectedEntries.filter(
     ({ documentId }) => validationErrors[documentId]
