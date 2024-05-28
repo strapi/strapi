@@ -120,18 +120,7 @@ const LeftMenu = () => {
                     key={link.uid}
                     to={{
                       pathname: link.to,
-                      /**
-                       * We re-add the plugins query to the params available in the menu,
-                       * this means once you've changed the locale in the app, you continue
-                       * to see the same locale when changing content-type.
-                       *
-                       * NOTE: if you go to a content-type that does not have i18n enabled,
-                       * we return the default documents anyway.
-                       */
-                      search: stringify({
-                        ...parse(link.search ?? ''),
-                        plugins: query.plugins,
-                      }),
+                      search: link.search ?? '',
                     }}
                   >
                     {link.title}
