@@ -338,7 +338,16 @@ const filterValidRelationalAttributes = (attributes: Record<string, any>) => {
   };
 
   const isComponentLike = (attribute: any) => {
-    return attribute.component || attribute.components;
+    return (
+      /**
+       * probably can remove attribute.component & attribute.components
+       * to be checked
+       *  */
+      attribute.component ||
+      attribute.components ||
+      attribute.joinTable?.name.includes('components') ||
+      attribute.joinTable?.name.includes('cmps')
+    );
   };
 
   return Object.entries(attributes)
