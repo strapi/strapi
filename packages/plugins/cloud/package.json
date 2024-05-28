@@ -29,9 +29,9 @@
     "dist/"
   ],
   "scripts": {
-    "build": "strapi plugin:build --force",
+    "build": "strapi-plugin build",
     "clean": "run -T rimraf ./dist",
-    "develop": "strapi plugin:watch",
+    "develop": "strapi-plugin watch",
     "lint": "run -T eslint .",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json"
   },
@@ -41,6 +41,7 @@
     "react-intl": "6.6.2"
   },
   "devDependencies": {
+    "@strapi/sdk-plugin": "^5.0.0",
     "@strapi/strapi": "5.0.0-beta.8",
     "eslint-config-custom": "5.0.0-beta.8",
     "react": "18.3.1",
