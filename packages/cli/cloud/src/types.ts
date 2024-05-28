@@ -20,6 +20,7 @@ export type CloudCliConfig = {
   projectCreation: {
     questions: ReadonlyArray<DistinctQuestion<ProjectAnswers>>;
     defaults: Partial<ProjectAnswers>;
+    introText: string;
   };
   buildLogsConnectionTimeout: string;
   buildLogsMaxRetries: string;

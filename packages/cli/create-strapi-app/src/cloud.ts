@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
-import chalk  from 'chalk';
 import { resolve } from 'node:path';
 import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
+import parseToChalk from './utils/parse-to-chalk';
 
 interface CloudError {
   response: {
@@ -17,8 +17,9 @@ function assertCloudError(e: unknown): asserts e is CloudError {
 }
 
 export async function handleCloudProject(projectName: string): Promise<void> {
-  console.log(`\nWe can't find any auth credentials in your Strapi config.`);
-  console.log(`\nCreate a ${chalk.bold('free account on Strapi Cloud')} and benefit from:\n\n- ${chalk.magentaBright('✦ Blazing-fast ✦')} deployment for your projects\n- ${chalk.blueBright('✦ Exclusive ✦')} access to resources to make your project successful\n- An ${chalk.yellowBright('✦ Awesome ✦')} community and full enjoyment of Strapi's ecosystem\n\n${chalk.green('Start your 14-day free trial now!\n')}`);
+  let cloudApiService = cloudServices.cloudApiFactory();
+  const { data: config } = await cloudApiService.config();
+  console.log(parseToChalk(config.projectCreation.introText));
   const { userChoice } = await inquirer.prompt<{ userChoice: string }>([
     {
       type: 'list',
@@ -46,7 +47,7 @@ export async function handleCloudProject(projectName: string): Promise<void> {
       logger.debug('Retrieving token');
       const token = await tokenService.retrieveToken();
 
-      const cloudApiService = cloudServices.cloudApiFactory(token);
+      cloudApiService = cloudServices.cloudApiFactory(token);
 
       logger.debug('Retrieving config');
       const { data: config } = await cloudApiService.config();
@@ -84,7 +85,8 @@ export async function handleCloudProject(projectName: string): Promise<void> {
       } catch (e) {
         /* empty */
       }
-      const defaultErrorMessage = 'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.';
+      const defaultErrorMessage =
+        'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.';
       if (projectCreationSpinner.isSpinning) {
         projectCreationSpinner.fail(defaultErrorMessage);
       } else {
