@@ -1,4 +1,5 @@
 import inquirer from 'inquirer';
+import chalk  from 'chalk';
 import { resolve } from 'node:path';
 import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
 
@@ -16,15 +17,18 @@ function assertCloudError(e: unknown): asserts e is CloudError {
 }
 
 export async function handleCloudProject(projectName: string): Promise<void> {
-  const { isCloudProjectAsked } = await inquirer.prompt<{ isCloudProjectAsked: boolean }>([
+  console.log(`\nWe can't find any auth credentials in your Strapi config.`);
+  console.log(`\nCreate a ${chalk.bold('free account on Strapi Cloud')} and benefit from:\n\n- ${chalk.magentaBright('✦ Blazing-fast ✦')} deployment for your projects\n- ${chalk.blueBright('✦ Exclusive ✦')} access to resources to make your project successful\n- An ${chalk.yellowBright('✦ Awesome ✦')} community and full enjoyment of Strapi's ecosystem\n\n${chalk.green('Start your 14-day free trial now!\n')}`);
+  const { userChoice } = await inquirer.prompt<{ userChoice: string }>([
     {
-      type: 'confirm',
-      name: 'isCloudProjectAsked',
-      message: 'Do you want to connect to Strapi Cloud and host your Strapi project?',
+      type: 'list',
+      name: 'userChoice',
+      message: `Please log in or sign up.`,
+      choices: ['Login/Sign up', 'Skip'],
     },
   ]);
 
-  if (isCloudProjectAsked) {
+  if (userChoice !== 'Skip') {
     const logger = cloudServices.createLogger({
       silent: false,
       debug: process.argv.includes('--debug'),
