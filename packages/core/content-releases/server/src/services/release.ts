@@ -149,6 +149,24 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     return contentTypesData;
   };
 
+  const getContentTypesUidsOnRelease = async (releaseId: Release['id']) => {
+    const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
+      where: {
+        release: {
+          id: releaseId,
+        },
+      },
+    })) as ReleaseAction[];
+
+    return actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
+      if (!acc.includes(action.contentType)) {
+        acc.push(action.contentType);
+      }
+
+      return acc;
+    }, []);
+  };
+
   return {
     async create(releaseData: CreateRelease.Request['body'], { user }: { user: UserInfo }) {
       const releaseWithCreatorFields = await setCreatorFields({ user })(releaseData);
@@ -343,9 +361,28 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
 
       const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
 
+      // For each contentType on the release, we create a custom populate object for nested relations
+      const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
+      const contentTypesUids = await getContentTypesUidsOnRelease(releaseId);
+      const morphPopulate = await contentTypesUids.reduce(async (acc, contentTypeUid) => {
+        const populate = await populateBuilderService('api::restaurant.restaurant')
+          .populateDeep(Infinity)
+          .build();
+
+        acc[contentTypeUid] = {
+          populate,
+        };
+
+        return acc;
+      }, {});
+
       return strapi.db.query(RELEASE_ACTION_MODEL_UID).findPage({
         ...dbQuery,
-        populate: ['entry'],
+        populate: {
+          entry: {
+            on: morphPopulate,
+          },
+        },
         where: {
           release: releaseId,
         },
