@@ -7743,6 +7743,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@strapi/pack-up@npm:>=5.0.1-alpha.1 <6.0.0":
+  version: 5.0.1-alpha.1
+  resolution: "@strapi/pack-up@npm:5.0.1-alpha.1"
+  dependencies:
+    "@vitejs/plugin-react-swc": "npm:3.6.0"
+    boxen: "npm:5.1.2"
+    browserslist-to-esbuild: "npm:1.2.0"
+    chalk: "npm:4.1.2"
+    chokidar: "npm:3.6.0"
+    commander: "npm:8.3.0"
+    esbuild: "npm:0.20.2"
+    esbuild-register: "npm:3.5.0"
+    get-latest-version: "npm:5.1.0"
+    git-url-parse: "npm:13.1.1"
+    ini: "npm:4.1.2"
+    ora: "npm:5.4.1"
+    outdent: "npm:0.8.0"
+    pkg-up: "npm:3.1.0"
+    prettier: "npm:2.8.8"
+    prettier-plugin-packagejson: "npm:2.4.14"
+    prompts: "npm:2.4.2"
+    rxjs: "npm:7.8.1"
+    typescript: "npm:5.4.4"
+    vite: "npm:5.2.8"
+    yup: "npm:0.32.9"
+  bin:
+    pack-up: bin/pack-up.js
+  checksum: 4e928bff3a759c3196091553f1f57fa5f678fd1da0f0de138e425afdfb1e4279f9272e1dafb5da1767a4a891f928a89d1d2dd41434d63eaad82a1215195abc4c
+  languageName: node
+  linkType: hard
+
 "@strapi/permissions@npm:5.0.0-beta.8, @strapi/permissions@workspace:packages/core/permissions":
   version: 0.0.0-use.local
   resolution: "@strapi/permissions@workspace:packages/core/permissions"
@@ -7764,6 +7795,7 @@ __metadata:
   dependencies:
     "@strapi/design-system": "npm:2.0.0-beta.4"
     "@strapi/icons": "npm:2.0.0-beta.4"
+    "@strapi/sdk-plugin": "npm:^5.0.0"
     "@strapi/strapi": "npm:5.0.0-beta.8"
     eslint-config-custom: "npm:5.0.0-beta.8"
     react: "npm:18.3.1"
@@ -7788,6 +7820,7 @@ __metadata:
   dependencies:
     "@strapi/design-system": "npm:2.0.0-beta.4"
     "@strapi/icons": "npm:2.0.0-beta.4"
+    "@strapi/sdk-plugin": "npm:^5.0.0"
     "@strapi/strapi": "npm:5.0.0-beta.8"
     "@testing-library/react": "npm:15.0.7"
     "@testing-library/user-event": "npm:14.5.2"
@@ -7818,6 +7851,7 @@ __metadata:
     "@strapi/design-system": "npm:2.0.0-beta.4"
     "@strapi/icons": "npm:2.0.0-beta.4"
     "@strapi/pack-up": "npm:5.0.0"
+    "@strapi/sdk-plugin": "npm:^5.0.0"
     "@strapi/strapi": "npm:5.0.0-beta.8"
     "@strapi/types": "npm:5.0.0-beta.8"
     "@strapi/utils": "npm:5.0.0-beta.8"
@@ -7868,6 +7902,7 @@ __metadata:
     "@koa/cors": "npm:5.0.0"
     "@strapi/design-system": "npm:2.0.0-beta.4"
     "@strapi/icons": "npm:2.0.0-beta.4"
+    "@strapi/sdk-plugin": "npm:^5.0.0"
     "@strapi/strapi": "npm:5.0.0-beta.8"
     "@strapi/types": "npm:5.0.0-beta.8"
     "@strapi/utils": "npm:5.0.0-beta.8"
@@ -7909,6 +7944,7 @@ __metadata:
     "@strapi/design-system": "npm:2.0.0-beta.4"
     "@strapi/icons": "npm:2.0.0-beta.4"
     "@strapi/pack-up": "npm:5.0.0"
+    "@strapi/sdk-plugin": "npm:^5.0.0"
     "@strapi/strapi": "npm:5.0.0-beta.8"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.1"
@@ -8116,6 +8152,31 @@ __metadata:
     styled-components: ^6.0.0
   languageName: unknown
   linkType: soft
+
+"@strapi/sdk-plugin@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@strapi/sdk-plugin@npm:5.0.0"
+  dependencies:
+    "@strapi/pack-up": "npm:>=5.0.1-alpha.1 <6.0.0"
+    "@types/prompts": "npm:2.4.9"
+    boxen: "npm:5.1.2"
+    chalk: "npm:4.1.2"
+    commander: "npm:12.1.0"
+    concurrently: "npm:^8.2.2"
+    get-latest-version: "npm:5.1.0"
+    git-url-parse: "npm:13.1.1"
+    nodemon: "npm:^3.1.0"
+    ora: "npm:5.4.1"
+    outdent: "npm:0.8.0"
+    pkg-up: "npm:3.1.0"
+    prettier: "npm:2.8.8"
+    typescript: "npm:5.4.4"
+    yup: "npm:0.32.9"
+  bin:
+    strapi-plugin: bin/strapi-plugin.js
+  checksum: 715d2a2f6fadc28b22ef3b01ae9637d157a88c5228b4298acf03ca75cbe7de96b830fa0b135ff671431d4e9040c8d3f77a63e6da2fd43edc24804592ca662bba
+  languageName: node
+  linkType: hard
 
 "@strapi/strapi@npm:5.0.0-beta.8, @strapi/strapi@workspace:packages/core/strapi":
   version: 0.0.0-use.local
@@ -12905,6 +12966,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"commander@npm:12.1.0":
+  version: 12.1.0
+  resolution: "commander@npm:12.1.0"
+  checksum: cdaeb672d979816853a4eed7f1310a9319e8b976172485c2a6b437ed0db0a389a44cfb222bfbde772781efa9f215bdd1b936f80d6b249485b465c6cb906e1f93
+  languageName: node
+  linkType: hard
+
 "commander@npm:8.3.0, commander@npm:^8.3.0":
   version: 8.3.0
   resolution: "commander@npm:8.3.0"
@@ -13030,7 +13098,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"concurrently@npm:8.2.2":
+"concurrently@npm:8.2.2, concurrently@npm:^8.2.2":
   version: 8.2.2
   resolution: "concurrently@npm:8.2.2"
   dependencies:
@@ -22721,6 +22789,26 @@ __metadata:
   bin:
     nodemon: bin/nodemon.js
   checksum: 092373295426be7e0dd2f31f3473b53aa4c6cb1b888903a56ff9d84a71f19d75c6d0b322099eff7de164ed31539b8c9a9f038fcad3963a01249189f62a67f4a7
+  languageName: node
+  linkType: hard
+
+"nodemon@npm:^3.1.0":
+  version: 3.1.0
+  resolution: "nodemon@npm:3.1.0"
+  dependencies:
+    chokidar: "npm:^3.5.2"
+    debug: "npm:^4"
+    ignore-by-default: "npm:^1.0.1"
+    minimatch: "npm:^3.1.2"
+    pstree.remy: "npm:^1.1.8"
+    semver: "npm:^7.5.3"
+    simple-update-notifier: "npm:^2.0.0"
+    supports-color: "npm:^5.5.0"
+    touch: "npm:^3.1.0"
+    undefsafe: "npm:^2.0.5"
+  bin:
+    nodemon: bin/nodemon.js
+  checksum: a8757f3eda5e11fbe0e50ef47177d5e86cf8a22e99723373100d37d5f25fb758280419c02d286210d242d0675adf5ef0d61052948f10c8318d656761d3dfa2b1
   languageName: node
   linkType: hard
 

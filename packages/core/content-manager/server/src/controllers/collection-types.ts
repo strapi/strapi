@@ -1,9 +1,14 @@
 import { setCreatorFields, async, errors } from '@strapi/utils';
+
+import type { Modules, UID } from '@strapi/types';
+
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
 import { getDocumentLocaleAndStatus } from './validation/dimensions';
 import { formatDocumentWithMetadata } from './utils/metadata';
+
+type Options = Modules.Documents.Params.Pick<UID.ContentType, 'populate:object'>;
 
 /**
  * Create a new document.
@@ -13,7 +18,7 @@ import { formatDocumentWithMetadata } from './utils/metadata';
  * @param opts.populate - Populate options of the returned document.
  *                        By default documentManager will populate all relations.
  */
-const createDocument = async (ctx: any, opts?: { populate?: object }) => {
+const createDocument = async (ctx: any, opts?: Options) => {
   const { userAbility, user } = ctx.state;
   const { model } = ctx.params;
   const { body } = ctx.request;
@@ -55,7 +60,7 @@ const createDocument = async (ctx: any, opts?: { populate?: object }) => {
  * @param opts - Options
  * @param opts.populate - Populate options of the returned document
  */
-const updateDocument = async (ctx: any, opts?: { populate?: object }) => {
+const updateDocument = async (ctx: any, opts?: Options) => {
   const { userAbility, user } = ctx.state;
   const { id, model } = ctx.params;
   const { body } = ctx.request;

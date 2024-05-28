@@ -42,10 +42,10 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "strapi plugin:build --force",
+    "build": "strapi-plugin build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
-    "watch": "strapi plugin:watch"
+    "watch": "strapi-plugin watch"
   },
   "dependencies": {
     "@apollo/server": "4.10.0",
@@ -67,6 +67,7 @@
     "pluralize": "8.0.0"
   },
   "devDependencies": {
+    "@strapi/sdk-plugin": "^5.0.0",
     "@strapi/strapi": "5.0.0-beta.8",
     "@strapi/types": "5.0.0-beta.8",
     "@types/graphql-depth-limit": "1.1.5",

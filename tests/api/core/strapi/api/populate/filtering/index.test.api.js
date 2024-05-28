@@ -325,7 +325,12 @@ describe('Populate filters', () => {
     test('Populate every component in the dynamic zone', async () => {
       const qs = {
         populate: {
-          dz: '*',
+          dz: {
+            on: {
+              'default.foo': true,
+              'default.bar': true,
+            },
+          },
         },
       };
 
