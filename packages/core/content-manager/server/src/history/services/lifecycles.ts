@@ -38,10 +38,11 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           return next();
         }
 
-        // NOTE: can do type narrowing with array includes
+        // NOTE: cannot do type narrowing with array includes
         if (
           context.action !== 'create' &&
           context.action !== 'update' &&
+          context.action !== 'clone' &&
           context.action !== 'publish' &&
           context.action !== 'unpublish' &&
           context.action !== 'discardDraft'
@@ -57,10 +58,13 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const result = (await next()) as any;
 
-        const documentContext =
-          context.action === 'create'
-            ? { documentId: result.documentId, locale: context.params?.locale }
-            : { documentId: context.params.documentId, locale: context.params?.locale };
+        const documentContext = {
+          documentId:
+            context.action === 'create' || context.action === 'clone'
+              ? result.documentId
+              : context.params.documentId,
+          locale: context.params?.locale,
+        };
 
         const defaultLocale = await serviceUtils.getDefaultLocale();
         const locale = documentContext.locale || defaultLocale;
@@ -122,10 +126,9 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         return result;
       });
 
-      const retentionDays = serviceUtils.getRetentionDays();
       // Schedule a job to delete expired history versions every day at midnight
       state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
-        const retentionDaysInMilliseconds = retentionDays * 24 * 60 * 60 * 1000;
+        const retentionDaysInMilliseconds = serviceUtils.getRetentionDays() * 24 * 60 * 60 * 1000;
         const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
 
         query.deleteMany({
