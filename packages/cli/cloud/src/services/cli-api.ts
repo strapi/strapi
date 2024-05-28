@@ -57,6 +57,10 @@ export function cloudApiFactory(token?: string): CloudApiService {
   const customHeaders = {
     'x-device-id': localConfig.deviceId,
     'x-app-version': packageJson.version,
+    'x-os-name': os.type(),
+    'x-os-version': os.version(),
+    'x-language': Intl.DateTimeFormat().resolvedOptions().locale,
+    'x-node-version': process.versions.node,
   };
   const axiosCloudAPI = axios.create({
     baseURL: `${apiConfig.apiBaseUrl}/${VERSION}`,
@@ -116,21 +120,10 @@ export function cloudApiFactory(token?: string): CloudApiService {
     },
 
     track(event, payload = {}) {
-      return axiosCloudAPI.post<void>(
-        '/track',
-        {
-          event,
-          payload,
-        },
-        {
-          headers: {
-            'x-os-name': os.type(),
-            'x-os-version': os.version(),
-            'x-language': Intl.DateTimeFormat().resolvedOptions().locale,
-            'x-node-version': process.versions.node,
-          },
-        }
-      );
+      return axiosCloudAPI.post<void>('/track', {
+        event,
+        payload,
+      });
     },
   };
 }
