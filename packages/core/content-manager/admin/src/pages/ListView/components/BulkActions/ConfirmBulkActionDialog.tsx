@@ -155,7 +155,7 @@ const ConfirmDialogPublishAll = ({
           {schema?.pluginOptions &&
             'i18n' in schema.pluginOptions &&
             schema?.pluginOptions.i18n && (
-              <Typography textColor="danger500">
+              <Typography textColor="danger500" textAlign="center">
                 {formatMessage(
                   {
                     id: getTranslation('Settings.list.actions.publishAdditionalInfos'),
