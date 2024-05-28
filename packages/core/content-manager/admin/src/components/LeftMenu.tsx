@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
 import {
   useCollator,
   useFilter,
@@ -10,7 +9,6 @@ import {
   SubNavSection,
   SubNavSections,
 } from '@strapi/design-system';
-import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
@@ -19,7 +17,6 @@ import { getTranslation } from '../utils/translations';
 
 const LeftMenu = () => {
   const [search, setSearch] = React.useState('');
-  const [{ query }] = useQueryParams<{ plugins?: object }>();
   const { formatMessage, locale } = useIntl();
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager'].app.collectionTypeLinks
