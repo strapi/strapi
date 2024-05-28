@@ -208,7 +208,7 @@ const SelectedEntriesTableContent = ({
               ) : (
                 <EntryValidationText
                   validationErrors={validationErrors[row.documentId]}
-                  isPublished={row.publishedAt !== null}
+                  isPublished={row.status === 'published'}
                 />
               )}
             </Table.Cell>
@@ -347,7 +347,7 @@ const SelectedEntriesModalContent = ({
     ({ documentId }) => validationErrors[documentId]
   ).length;
   const selectedEntriesPublished = selectedEntries.filter(
-    ({ publishedAt }) => !!publishedAt
+    ({ status }) => status === 'published'
   ).length;
   const selectedEntriesWithNoErrorsCount =
     selectedEntries.length - selectedEntriesWithErrorsCount - selectedEntriesPublished;
