@@ -24,6 +24,11 @@ function handleError(ctx: CLIContext, error: Error) {
       case 400:
         logger.error('Invalid input. Please check your inputs and try again.');
         return;
+      case 503:
+        logger.error(
+          'Strapi Cloud project creation is currently unavailable. Please try again later.'
+        );
+        return;
       default:
         break;
     }
