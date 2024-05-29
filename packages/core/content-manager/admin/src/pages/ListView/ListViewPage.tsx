@@ -129,9 +129,14 @@ const ListViewPage = () => {
     }
   }, [pagination, formatMessage, query, navigate]);
 
-  const { canCreate } = useDocumentRBAC('ListViewPage', ({ canCreate }) => ({
-    canCreate,
-  }));
+  const { canCreate, canDelete, canPublish } = useDocumentRBAC(
+    'ListViewPage',
+    ({ canCreate, canDelete, canPublish }) => ({
+      canCreate,
+      canDelete,
+      canPublish,
+    })
+  );
 
   const runHookWaterfall = useStrapiApp('ListViewPage', ({ runHookWaterfall }) => runHookWaterfall);
   /**
@@ -244,7 +249,7 @@ const ListViewPage = () => {
             </Table.ActionBar>
             <Table.Content>
               <Table.Head>
-                <Table.HeaderCheckboxCell />
+                <Table.HeaderCheckboxCell disabled={!canDelete && !canPublish} />
                 {tableHeaders.map((header: ListFieldLayout) => (
                   <Table.HeaderCell key={header.name} {...header} />
                 ))}
@@ -259,7 +264,7 @@ const ListViewPage = () => {
                       key={row.id}
                       onClick={handleRowClick(row.documentId)}
                     >
-                      <Table.CheckboxCell id={row.id} />
+                      <Table.CheckboxCell id={row.id} disabled={!canDelete && !canPublish} />
                       {tableHeaders.map(({ cellFormatter, ...header }) => {
                         if (header.name === 'status') {
                           const { status } = row;

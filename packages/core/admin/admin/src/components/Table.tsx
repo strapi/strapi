@@ -254,7 +254,7 @@ const ActionBar = ({ children }: Table.ActionBarProps) => {
  * HeaderCheckboxCell
  * -----------------------------------------------------------------------------------------------*/
 
-const HeaderCheckboxCell = () => {
+const HeaderCheckboxCell = ({ disabled = false }: { disabled?: boolean }) => {
   const rows = useTable('HeaderCheckboxCell', (state) => state.rows);
   const selectedRows = useTable('HeaderCheckboxCell', (state) => state.selectedRows);
   const selectRow = useTable('HeaderCheckboxCell', (state) => state.selectRow);
@@ -289,7 +289,7 @@ const HeaderCheckboxCell = () => {
           id: 'global.select-all-entries',
           defaultMessage: 'Select all entries',
         })}
-        disabled={rows.length === 0}
+        disabled={disabled || rows.length === 0}
         checked={areAllEntriesSelected}
         indeterminate={isIndeterminate}
         onChange={handleSelectAll}
@@ -390,7 +390,7 @@ const Cell = Td;
 /* -------------------------------------------------------------------------------------------------
  * Row
  * -----------------------------------------------------------------------------------------------*/
-const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
+const CheckboxCell = ({ id, disabled = false, ...props }: Table.CheckboxCellProps) => {
   const rows = useTable('CheckboxCell', (state) => state.rows);
   const selectedRows = useTable('CheckboxCell', (state) => state.selectedRows);
   const selectRow = useTable('CheckboxCell', (state) => state.selectRow);
@@ -413,7 +413,7 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
           },
           { target: id }
         )}
-        disabled={rows.length === 0}
+        disabled={disabled || rows.length === 0}
         checked={isChecked}
         onChange={handleSelectRow}
       />
@@ -526,7 +526,9 @@ namespace Table {
 
   export interface CellProps extends RawTdProps {}
 
-  export interface CheckboxCellProps extends Pick<BaseRow, 'id'>, Omit<RawTdProps, 'id'> {}
+  export interface CheckboxCellProps extends Pick<BaseRow, 'id'>, Omit<RawTdProps, 'id'> {
+    disabled?: boolean;
+  }
 }
 
 export { Table, useTable };
