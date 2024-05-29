@@ -392,7 +392,7 @@ const ListPage = () => {
       </Page.Main>
       <ConfirmDialog
         isOpen={showModal}
-        onClose={() => setShowModal((prev) => !prev)}
+        onClose={() => setShowModal(false)}
         onConfirm={confirmDelete}
       />
     </Layouts.Root>

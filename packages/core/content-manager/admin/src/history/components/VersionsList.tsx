@@ -88,6 +88,7 @@ const VersionCard = ({ version, isCurrent }: VersionCardProps) => {
       borderWidth="1px"
       borderStyle="solid"
       borderColor={isActive ? 'primary600' : 'neutral200'}
+      color="neutral800"
       paddingTop={4}
       paddingBottom={4}
       paddingLeft={5}

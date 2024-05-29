@@ -42,12 +42,12 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "strapi plugin:build --force",
+    "build": "strapi-plugin build",
     "clean": "run -T rimraf dist",
     "lint": "run -T eslint .",
     "test:unit": "run -T jest",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "strapi plugin:watch"
+    "watch": "strapi-plugin watch"
   },
   "dependencies": {
     "@sentry/node": "7.112.2",
@@ -56,6 +56,7 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
+    "@strapi/sdk-plugin": "^5.0.0",
     "@strapi/strapi": "5.0.0-beta.8",
     "react": "18.3.1",
     "react-dom": "18.3.1",

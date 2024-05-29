@@ -42,7 +42,7 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "strapi plugin:build --force",
+    "build": "strapi-plugin build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -51,7 +51,7 @@
     "test:ts:back": "run -T tsc --noEmit -p server/tsconfig.json",
     "test:unit": "run -T jest --verbose",
     "test:unit:watch": "run -T jest --watch",
-    "watch": "strapi plugin:watch"
+    "watch": "strapi-plugin watch"
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
@@ -76,6 +76,7 @@
     "@apidevtools/swagger-parser": "^10.1.0",
     "@strapi/admin-test-utils": "5.0.0-beta.8",
     "@strapi/pack-up": "5.0.0",
+    "@strapi/sdk-plugin": "^5.0.0",
     "@strapi/strapi": "5.0.0-beta.8",
     "@strapi/types": "5.0.0-beta.8",
     "@testing-library/react": "15.0.7",

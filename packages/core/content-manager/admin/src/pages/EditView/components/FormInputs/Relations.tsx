@@ -953,7 +953,7 @@ const ListItem = ({ data, index, style }: ListItemProps) => {
               <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                 <Tooltip description={label}>
                   {href ? (
-                    <LinkEllipsis tag={NavLink} to={href}>
+                    <LinkEllipsis tag={NavLink} to={href} isExternal={false}>
                       {label}
                     </LinkEllipsis>
                   ) : (
