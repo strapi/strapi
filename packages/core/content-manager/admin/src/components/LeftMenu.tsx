@@ -103,14 +103,7 @@ const LeftMenu = () => {
    */
   const getPluginsParamsForLink = (link: ContentManagerLink) => {
     const schema = schemas.find((schema) => schema.uid === link.uid);
-    const isI18nEnabled = Boolean(
-      schema?.pluginOptions &&
-        'i18n' in schema?.pluginOptions &&
-        // 'localized' is not typed on pluginOptions.i18n so it can't be accessed directly
-        Object.entries(schema.pluginOptions.i18n || {}).filter(
-          ([key, value]) => key === 'localized' && value === true
-        )
-    );
+    const isI18nEnabled = Boolean((schema?.pluginOptions?.i18n as any)?.localized);
 
     // The search params have the i18n plugin
     if (query.plugins && 'i18n' in query.plugins) {
