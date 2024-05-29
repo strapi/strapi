@@ -9,7 +9,7 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   padding-inline-start: 20px;
 }
 
-.c5 {
+.c4 {
   background: #ffffff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -19,12 +19,12 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   cursor: pointer;
 }
 
-.c10 {
+.c9 {
   padding-block: 32px;
   padding-inline: 32px;
 }
 
-.c16 {
+.c15 {
   background: #4945ff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -36,60 +36,49 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   cursor: pointer;
 }
 
-.c22 {
+.c21 {
   background: #ffffff;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
   border-color: #eaeaef;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
   height: 100%;
 }
 
-.c24 {
+.c23 {
   position: relative;
 }
 
-.c26 {
-  position: start;
-}
-
-.c30 {
-  position: end;
-}
-
-.c35 {
+.c32 {
   padding-block-start: 8px;
   padding-inline-end: 12px;
   padding-block-end: 8px;
   padding-inline-start: 12px;
 }
 
-.c38 {
+.c35 {
   padding-block-start: 4px;
 }
 
-.c40 {
+.c37 {
   padding-block-start: 4px;
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-  -ms-flex-positive: 1;
   flex-grow: 1;
 }
 
-.c43 {
+.c40 {
   background: #eaeaef;
   padding-inline-end: 8px;
   padding-inline-start: 8px;
   min-width: 20px;
 }
 
-.c48 {
+.c45 {
   width: 100%;
   height: 8.8rem;
 }
 
-.c52 {
+.c49 {
   background: #32324d;
   color: #ffffff;
   padding-block: 4px;
@@ -101,134 +90,68 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 }
 
 .c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
   justify-content: space-between;
 }
 
-.c6 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
+.c5 {
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
 }
 
-.c12 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
+.c11 {
   align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
   flex-direction: column;
   gap: 32px;
 }
 
-.c13 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
+.c12 {
   align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
   flex-direction: column;
 }
 
-.c17 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
+.c16 {
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
 }
 
-.c36 {
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
+.c33 {
   align-items: flex-start;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.c38 {
+  align-items: center;
+  display: flex;
   flex-direction: row;
 }
 
 .c41 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c44 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
   display: inline-flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
 }
 
-.c4 {
+.c3 {
   font-size: 1.4rem;
   line-height: 1.43;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c13 {
+  font-size: 1.2rem;
+  line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
@@ -236,40 +159,33 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
 .c14 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c15 {
-  font-size: 1.2rem;
-  line-height: 1.33;
   color: #666687;
 }
 
-.c19 {
+.c18 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
-  color: #ffffff;
+  color: currentcolor;
 }
 
-.c47 {
+.c44 {
   font-weight: 600;
   font-size: 1.1rem;
   line-height: 1.45;
   text-transform: uppercase;
+  line-height: 1rem;
   color: #666687;
 }
 
-.c53 {
+.c50 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #ffffff;
 }
 
-.c9 {
+.c8 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -279,24 +195,22 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   width: 1px;
 }
 
-.c45 {
+.c42 {
   border-radius: 4px;
-  height: 2.4rem;
+  padding-block: 0.7rem;
 }
 
-.c7 {
+.c6 {
   position: relative;
   outline: none;
 }
 
-.c7[aria-disabled='true'] {
+.c6[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c7:after {
-  -webkit-transition-property: all;
+.c6:after {
   transition-property: all;
-  -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
   border-radius: 8px;
   content: '';
@@ -308,11 +222,11 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   border: 2px solid transparent;
 }
 
-.c7:focus-visible {
+.c6:focus-visible {
   outline: none;
 }
 
-.c7:focus-visible:after {
+.c6:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -323,51 +237,49 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c28 {
-  height: 18px;
-  min-width: 18px;
+.c26 {
+  min-width: 1.8rem;
+  height: 1.8rem;
   margin: 0;
+  appearance: none;
   border-radius: 4px;
   border: 1px solid #c0c0cf;
-  -webkit-appearance: none;
   background-color: #ffffff;
   cursor: pointer;
 }
 
-.c28:checked {
+.c26:checked {
   background-color: #4945ff;
   border: 1px solid #4945ff;
 }
 
-.c28:checked:after {
+.c26:checked:after {
   content: '';
   display: block;
   position: relative;
   background: url("data:image/svg+xml,%3csvg%20width='10'%20height='8'%20viewBox='0%200%2010%208'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M8.55323%200.396973C8.63135%200.316355%208.76051%200.315811%208.83931%200.395768L9.86256%201.43407C9.93893%201.51157%209.93935%201.6359%209.86349%201.7139L4.06401%207.67724C3.9859%207.75755%203.85707%207.75805%203.77834%207.67834L0.13866%203.99333C0.0617798%203.91549%200.0617102%203.79032%200.138504%203.7124L1.16213%202.67372C1.24038%202.59432%201.36843%202.59422%201.4468%202.67348L3.92174%205.17647L8.55323%200.396973Z'%20fill='white'%20/%3e%3c/svg%3e") no-repeat no-repeat center center;
-  width: 10px;
-  height: 10px;
+  width: 1rem;
+  height: 1rem;
   left: 50%;
   top: 50%;
-  -webkit-transform: translateX(-50%) translateY(-50%);
-  -ms-transform: translateX(-50%) translateY(-50%);
   transform: translateX(-50%) translateY(-50%);
 }
 
-.c28:checked:disabled:after {
+.c26:checked:disabled:after {
   background: url("data:image/svg+xml,%3csvg%20width='10'%20height='8'%20viewBox='0%200%2010%208'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M8.55323%200.396973C8.63135%200.316355%208.76051%200.315811%208.83931%200.395768L9.86256%201.43407C9.93893%201.51157%209.93935%201.6359%209.86349%201.7139L4.06401%207.67724C3.9859%207.75755%203.85707%207.75805%203.77834%207.67834L0.13866%203.99333C0.0617798%203.91549%200.0617102%203.79032%200.138504%203.7124L1.16213%202.67372C1.24038%202.59432%201.36843%202.59422%201.4468%202.67348L3.92174%205.17647L8.55323%200.396973Z'%20fill='%238E8EA9'%20/%3e%3c/svg%3e") no-repeat no-repeat center center;
 }
 
-.c28:disabled {
+.c26:disabled {
   background-color: #dcdce4;
   border: 1px solid #c0c0cf;
 }
 
-.c28:indeterminate {
+.c26:indeterminate {
   background-color: #4945ff;
   border: 1px solid #4945ff;
 }
 
-.c28:indeterminate:after {
+.c26:indeterminate:after {
   content: '';
   display: block;
   position: relative;
@@ -377,139 +289,93 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   background-color: #ffffff;
   left: 50%;
   top: 50%;
-  -webkit-transform: translateX(-50%) translateY(-50%);
-  -ms-transform: translateX(-50%) translateY(-50%);
   transform: translateX(-50%) translateY(-50%);
 }
 
-.c28:indeterminate:disabled {
+.c26:indeterminate:disabled {
   background-color: #dcdce4;
   border: 1px solid #c0c0cf;
 }
 
-.c28:indeterminate:disabled:after {
+.c26:indeterminate:disabled:after {
   background-color: #8e8ea9;
 }
 
-.c18 {
+.c17 {
   height: 3.2rem;
+  color: #ffffff;
 }
 
-.c18 svg {
+.c17 svg {
   height: 1.2rem;
 }
 
-.c18[aria-disabled='true'] {
+.c17[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c18[aria-disabled='true'] .c3 {
   color: #666687;
 }
 
-.c18[aria-disabled='true'] svg > g,
-.c18[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c18[aria-disabled='true']:active {
+.c17[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c18[aria-disabled='true']:active .c3 {
   color: #666687;
 }
 
-.c18[aria-disabled='true']:active svg > g,
-.c18[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c18:hover {
+.c17:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c18:active {
+.c17:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c18 svg > g,
-.c18 svg path {
-  fill: #ffffff;
-}
-
-.c55 {
+.c52 {
   height: 3.2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
-}
-
-.c55 svg {
-  height: 1.2rem;
-}
-
-.c55[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c55[aria-disabled='true'] .c3 {
-  color: #666687;
-}
-
-.c55[aria-disabled='true'] svg > g,
-.c55[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c55[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c55[aria-disabled='true']:active .c3 {
-  color: #666687;
-}
-
-.c55[aria-disabled='true']:active svg > g,
-.c55[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c55:hover {
-  background-color: #f6f6f9;
-}
-
-.c55:active {
-  background-color: #eaeaef;
-}
-
-.c55 .c3 {
   color: #32324d;
 }
 
-.c55 svg > g,
-.c55 svg path {
-  fill: #32324d;
+.c52 svg {
+  height: 1.2rem;
 }
 
-.c27 {
+.c52[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+}
+
+.c52[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+}
+
+.c52:hover {
+  background-color: #f6f6f9;
+}
+
+.c52:active {
+  background-color: #eaeaef;
+}
+
+.c25 {
   position: absolute;
   top: 12px;
   left: 12px;
 }
 
-.c31 {
+.c27 {
   position: absolute;
   top: 12px;
   right: 12px;
 }
 
-.c34 {
+.c31 {
   margin: 0;
   padding: 0;
   max-height: 100%;
@@ -517,65 +383,57 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   object-fit: contain;
 }
 
-.c33 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
+.c30 {
   display: flex;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
   height: 8.8rem;
   width: 100%;
-  background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
+  background: repeating-conic-gradient(#f6f6f9 0% 25%, transparent 0% 50%) 50%/20px 20px;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
 }
 
-.c42 {
+.c39 {
   margin-left: auto;
-  -webkit-flex-shrink: 0;
-  -ms-flex-negative: 0;
   flex-shrink: 0;
 }
 
-.c46 {
+.c43 {
   margin-left: 4px;
 }
 
-.c37 {
+.c34 {
   word-break: break-all;
 }
 
-.c25 {
+.c24 {
   border-bottom: 1px solid #eaeaef;
 }
 
-.c20 {
+.c19 {
   display: grid;
-  grid-template-columns: repeat(12,1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 16px;
 }
 
-.c21 {
+.c20 {
   grid-column: span 4;
   max-width: 100%;
 }
 
-.c8 {
+.c7 {
   border-color: #dcdce4;
   height: 3.2rem;
   width: 3.2rem;
   color: #8e8ea9;
 }
 
-.c8:hover,
-.c8:focus {
+.c7:hover,
+.c7:focus {
   color: #666687;
 }
 
-.c8[aria-disabled='true'] {
+.c7[aria-disabled='true'] {
   color: #666687;
 }
 
@@ -584,61 +442,61 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
   border-bottom: 1px solid #eaeaef;
 }
 
-.c54 {
+.c51 {
   border-radius: 0 0 4px 4px;
   border-top: 1px solid #eaeaef;
 }
 
-.c11 {
+.c10 {
   overflow: auto;
   max-height: 60vh;
 }
 
-.c39 {
+.c36 {
   text-transform: uppercase;
 }
 
-.c32 {
+.c29 {
   opacity: 0;
 }
 
-.c32:focus-within {
+.c29:focus-within {
   opacity: 1;
 }
 
-.c23 {
+.c22 {
   cursor: pointer;
 }
 
-.c23:hover .c29 {
+.c22:hover .c28 {
   opacity: 1;
 }
 
-.c50 svg {
+.c47 svg {
   font-size: 4.8rem;
 }
 
-.c49 {
+.c46 {
   border-radius: 4px 4px 0 0;
-  background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
+  background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 }
 
-.c51 canvas,
-.c51 video {
+.c48 canvas,
+.c48 video {
   display: block;
   pointer-events: none;
   max-width: 100%;
   max-height: 8.8rem;
 }
 
-@media (max-width:1100px) {
-  .c21 {
+@media (max-width: 1100px) {
+  .c20 {
     grid-column: span;
   }
 }
 
-@media (max-width:550px) {
-  .c21 {
+@media (max-width: 550px) {
+  .c20 {
     grid-column: span;
   }
 }
@@ -652,67 +510,67 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
         class="c2"
       >
         <h2
-          class="c3 c4"
+          class="c3"
           id="title"
         >
           Add new assets
         </h2>
         <button
           aria-disabled="false"
-          class="c5 c6 c7 c8"
+          class="c4 c5 c6 c7"
           type="button"
         >
-          <span
-            class="c9"
-          >
-            Close the modal
-          </span>
           <svg
             aria-hidden="true"
             fill="currentColor"
             focusable="false"
-            height="1.6rem"
+            height="16"
             viewBox="0 0 32 32"
-            width="1.6rem"
+            width="16"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
               d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
             />
           </svg>
+          <span
+            class="c8"
+          >
+            Close the modal
+          </span>
         </button>
       </div>
     </div>
     <div
-      class="c10 c11"
+      class="c9 c10"
     >
       <div
-        class="c12"
+        class="c11"
       >
         <div
           class="c2"
         >
           <div
-            class="c13"
+            class="c12"
           >
             <span
-              class="c3 c14"
+              class="c13"
             >
               3 assets ready to upload
             </span>
             <span
-              class="c3 c15"
+              class="c14"
             >
               Manage the assets before adding them to the Media Library
             </span>
           </div>
           <button
             aria-disabled="false"
-            class="c16 c17 c7 c18"
+            class="c15 c16 c6 c17"
             type="button"
           >
             <span
-              class="c3 c19"
+              class="c18"
             >
               Add new assets
             </span>
@@ -722,146 +580,136 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
           class=""
         >
           <div
-            class="c20"
+            class="c19"
           >
             <div
-              class="c21"
+              class="c20"
             >
               <article
                 aria-labelledby=":r0:-title"
-                class="c22 c23"
+                class="c21 c22"
                 role="button"
                 tabindex="-1"
               >
                 <div
-                  class="c24 c6 c25"
+                  class="c23 c5 c24"
                 >
                   <div>
                     <div
-                      class="c26 c17 c27"
+                      class="c16 c25"
                     >
-                      <div
-                        class=""
-                      >
-                        <input
-                          aria-labelledby=":r0:-title"
-                          class="c28"
-                          type="checkbox"
-                        />
-                      </div>
+                      <input
+                        aria-labelledby=":r0:-title"
+                        class="c26"
+                        type="checkbox"
+                      />
                     </div>
                   </div>
                   <div
-                    class="c29 c30 c17 c31 c32"
+                    class="c16 c27 c28 c29"
                   >
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":r1:"
-                        class="c5 c6 c7 c8"
-                        tabindex="0"
-                        type="button"
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <span
-                          class="c9"
-                        >
-                          Remove from selection
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="1.6rem"
-                          viewBox="0 0 32 32"
-                          width="1.6rem"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":r3:"
-                        class="c5 c6 c7 c8"
-                        tabindex="0"
-                        type="button"
+                        <path
+                          d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
                       >
-                        <span
-                          class="c9"
-                        >
-                          Edit
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="1.6rem"
-                          viewBox="0 0 32 32"
-                          width="1.6rem"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
+                        Remove from selection
+                      </span>
+                    </button>
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
+                      >
+                        Edit
+                      </span>
+                    </button>
                   </div>
                   <div
-                    class="c33"
+                    class="c30"
                   >
                     <img
                       alt="something.jpg"
                       aria-hidden="true"
-                      class="c34"
+                      class="c31"
                       src="http://localhost:5000/CPAM.jpg"
                     />
                   </div>
                 </div>
                 <div
-                  class="c35"
+                  class="c32"
                 >
                   <div
-                    class="c36"
+                    class="c33"
                   >
                     <div
-                      class="c37"
+                      class="c34"
                     >
                       <div
-                        class="c38"
+                        class="c35"
                       >
                         <h2
-                          class="c3 c14"
+                          class="c13"
                           id=":r0:-title"
                         >
                           something.jpg
                         </h2>
                       </div>
                       <div
-                        class="c3 c15"
+                        class="c14"
                       >
                         <span
-                          class="c39"
+                          class="c36"
                         >
                           jpg
                         </span>
                       </div>
                     </div>
                     <div
-                      class="c40 c41"
+                      class="c37 c38"
                     >
                       <div
-                        class="c42"
+                        class="c39"
                       >
                         <div
-                          class="c43 c44 c45 c46"
+                          class="c40 c41 c42 c43"
                         >
                           <span
-                            class="c3 c47"
+                            class="c44"
                           >
                             Image
                           </span>
@@ -873,104 +721,94 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
               </article>
             </div>
             <div
-              class="c21"
+              class="c20"
             >
               <article
-                aria-labelledby=":r5:-title"
-                class="c22 c23"
+                aria-labelledby=":r3:-title"
+                class="c21 c22"
                 role="button"
                 tabindex="-1"
               >
                 <div
-                  class="c24 c6 c25"
+                  class="c23 c5 c24"
                 >
                   <div>
                     <div
-                      class="c26 c17 c27"
+                      class="c16 c25"
                     >
-                      <div
-                        class=""
-                      >
-                        <input
-                          aria-labelledby=":r5:-title"
-                          class="c28"
-                          type="checkbox"
-                        />
-                      </div>
+                      <input
+                        aria-labelledby=":r3:-title"
+                        class="c26"
+                        type="checkbox"
+                      />
                     </div>
                   </div>
                   <div
-                    class="c29 c30 c17 c31 c32"
+                    class="c16 c27 c28 c29"
                   >
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":r6:"
-                        class="c5 c6 c7 c8"
-                        tabindex="0"
-                        type="button"
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <span
-                          class="c9"
-                        >
-                          Remove from selection
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="1.6rem"
-                          viewBox="0 0 32 32"
-                          width="1.6rem"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":r8:"
-                        class="c5 c6 c7 c8"
-                        tabindex="0"
-                        type="button"
+                        <path
+                          d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
                       >
-                        <span
-                          class="c9"
-                        >
-                          Edit
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="1.6rem"
-                          viewBox="0 0 32 32"
-                          width="1.6rem"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
+                        Remove from selection
+                      </span>
+                    </button>
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
+                      >
+                        Edit
+                      </span>
+                    </button>
                   </div>
                   <div
-                    class="c48 c6 c49"
+                    class="c45 c5 c46"
                   >
                     <span
-                      class="c50"
+                      class="c47"
                     >
                       <svg
                         aria-label="something.pdf"
                         fill="currentColor"
-                        height="1.6rem"
+                        height="16"
                         viewBox="0 0 32 32"
-                        width="1.6rem"
+                        width="16"
                         xmlns="http://www.w3.org/2000/svg"
                       >
                         <path
@@ -981,45 +819,45 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
                   </div>
                 </div>
                 <div
-                  class="c35"
+                  class="c32"
                 >
                   <div
-                    class="c36"
+                    class="c33"
                   >
                     <div
-                      class="c37"
+                      class="c34"
                     >
                       <div
-                        class="c38"
+                        class="c35"
                       >
                         <h2
-                          class="c3 c14"
-                          id=":r5:-title"
+                          class="c13"
+                          id=":r3:-title"
                         >
                           something.pdf
                         </h2>
                       </div>
                       <div
-                        class="c3 c15"
+                        class="c14"
                       >
                         <span
-                          class="c39"
+                          class="c36"
                         >
                           pdf
                         </span>
                       </div>
                     </div>
                     <div
-                      class="c40 c41"
+                      class="c37 c38"
                     >
                       <div
-                        class="c42"
+                        class="c39"
                       >
                         <div
-                          class="c43 c44 c45 c46"
+                          class="c40 c41 c42 c43"
                         >
                           <span
-                            class="c3 c47"
+                            class="c44"
                           >
                             Doc
                           </span>
@@ -1031,171 +869,157 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
               </article>
             </div>
             <div
-              class="c21"
+              class="c20"
             >
               <article
-                aria-labelledby=":ra:-title"
-                class="c22 c23"
+                aria-labelledby=":r6:-title"
+                class="c21 c22"
                 role="button"
                 tabindex="-1"
               >
                 <div
-                  class="c24 c6 c25"
+                  class="c23 c5 c24"
                 >
                   <div>
                     <div
-                      class="c26 c17 c27"
+                      class="c16 c25"
                     >
-                      <div
-                        class=""
-                      >
-                        <input
-                          aria-labelledby=":ra:-title"
-                          class="c28"
-                          type="checkbox"
-                        />
-                      </div>
+                      <input
+                        aria-labelledby=":r6:-title"
+                        class="c26"
+                        type="checkbox"
+                      />
                     </div>
                   </div>
                   <div
-                    class="c29 c30 c17 c31 c32"
+                    class="c16 c27 c28 c29"
                   >
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":rb:"
-                        class="c5 c6 c7 c8"
-                        tabindex="0"
-                        type="button"
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <span
-                          class="c9"
-                        >
-                          Remove from selection
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="1.6rem"
-                          viewBox="0 0 32 32"
-                          width="1.6rem"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby=":rd:"
-                        class="c5 c6 c7 c8"
-                        tabindex="0"
-                        type="button"
+                        <path
+                          d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
                       >
-                        <span
-                          class="c9"
-                        >
-                          Edit
-                        </span>
-                        <svg
-                          aria-hidden="true"
-                          fill="currentColor"
-                          focusable="false"
-                          height="1.6rem"
-                          viewBox="0 0 32 32"
-                          width="1.6rem"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
-                          />
-                        </svg>
-                      </button>
-                    </span>
+                        Remove from selection
+                      </span>
+                    </button>
+                    <button
+                      aria-disabled="false"
+                      class="c4 c5 c6 c7"
+                      data-state="closed"
+                      type="button"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        fill="currentColor"
+                        focusable="false"
+                        height="16"
+                        viewBox="0 0 32 32"
+                        width="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
+                        />
+                      </svg>
+                      <span
+                        class="c8"
+                      >
+                        Edit
+                      </span>
+                    </button>
                   </div>
                   <div
-                    class="c33"
+                    class="c30"
                   >
                     <div
-                      class="c41"
+                      class="c48"
                     >
-                      <div
-                        class="c51"
+                      <figure
+                        class=""
                       >
-                        <figure
-                          class=""
+                        <video
+                          crossorigin="anonymous"
+                          src="http://localhost:5000/mov_bbb.mp4"
                         >
-                          <video
-                            crossorigin="anonymous"
-                            src="http://localhost:5000/mov_bbb.mp4"
-                          >
-                            <source
-                              type="video/mp4"
-                            />
-                          </video>
-                          <figcaption
-                            class="c9"
-                          >
-                            something.mp4
-                          </figcaption>
-                        </figure>
-                      </div>
+                          <source
+                            type="video/mp4"
+                          />
+                        </video>
+                        <figcaption
+                          class="c8"
+                        >
+                          something.mp4
+                        </figcaption>
+                      </figure>
                     </div>
                   </div>
                   <time
-                    class="c52"
+                    class="c49"
                   >
                     <span
-                      class="c3 c53"
+                      class="c50"
                     >
                       ...
                     </span>
                   </time>
                 </div>
                 <div
-                  class="c35"
+                  class="c32"
                 >
                   <div
-                    class="c36"
+                    class="c33"
                   >
                     <div
-                      class="c37"
+                      class="c34"
                     >
                       <div
-                        class="c38"
+                        class="c35"
                       >
                         <h2
-                          class="c3 c14"
-                          id=":ra:-title"
+                          class="c13"
+                          id=":r6:-title"
                         >
                           something.mp4
                         </h2>
                       </div>
                       <div
-                        class="c3 c15"
+                        class="c14"
                       >
                         <span
-                          class="c39"
+                          class="c36"
                         >
                           mp4
                         </span>
                       </div>
                     </div>
                     <div
-                      class="c40 c41"
+                      class="c37 c38"
                     >
                       <div
-                        class="c42"
+                        class="c39"
                       >
                         <div
-                          class="c43 c44 c45 c46"
+                          class="c40 c41 c42 c43"
                         >
                           <span
-                            class="c3 c47"
+                            class="c44"
                           >
                             Video
                           </span>
@@ -1211,36 +1035,36 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
       </div>
     </div>
     <div
-      class="c0 c54"
+      class="c0 c51"
     >
       <div
         class="c2"
       >
         <div
-          class="c17"
+          class="c16"
         >
           <button
             aria-disabled="false"
-            class="c16 c17 c7 c55"
+            class="c15 c16 c6 c52"
             type="button"
           >
             <span
-              class="c3 c19"
+              class="c18"
             >
               cancel
             </span>
           </button>
         </div>
         <div
-          class="c17"
+          class="c16"
         >
           <button
             aria-disabled="false"
-            class="c16 c17 c7 c18"
+            class="c15 c16 c6 c17"
             type="submit"
           >
             <span
-              class="c3 c19"
+              class="c18"
             >
               Upload 3 assets to the library
             </span>
@@ -1249,8 +1073,8 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
       </div>
     </div>
   </form>
-  <div
-    class="c9"
+  <span
+    class="c8"
   >
     <p
       aria-live="polite"
@@ -1270,6 +1094,6 @@ exports[`PendingAssetStep snapshots the component with valid cards 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

@@ -1,12 +1,10 @@
-import styled from 'styled-components';
-
-interface TrProps {
-  isFromDynamicZone?: boolean;
-  isChildOfDynamicZone?: boolean;
-}
+import { styled } from 'styled-components';
 
 // Keep component-row for css specificity
-export const Tr = styled.tr<TrProps>`
+export const Tr = styled.tr<{
+  $isFromDynamicZone?: boolean;
+  $isChildOfDynamicZone?: boolean;
+}>`
   &.component-row,
   &.dynamiczone-row {
     position: relative;
@@ -29,12 +27,12 @@ export const Tr = styled.tr<TrProps>`
         left: 2.6rem;
         border-radius: 4px;
 
-        ${({ isFromDynamicZone, isChildOfDynamicZone, theme }) => {
-          if (isChildOfDynamicZone) {
+        ${({ $isFromDynamicZone, $isChildOfDynamicZone, theme }) => {
+          if ($isChildOfDynamicZone) {
             return `background-color: ${theme.colors.primary200};`;
           }
 
-          if (isFromDynamicZone) {
+          if ($isFromDynamicZone) {
             return `background-color: ${theme.colors.primary200};`;
           }
 

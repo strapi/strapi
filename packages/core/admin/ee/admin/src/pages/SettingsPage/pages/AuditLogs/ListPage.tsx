@@ -1,15 +1,9 @@
-import {
-  ActionLayout,
-  ContentLayout,
-  Flex,
-  HeaderLayout,
-  IconButton,
-  Typography,
-} from '@strapi/design-system';
+import { Flex, IconButton, Typography } from '@strapi/design-system';
 import { Eye } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { Filters } from '../../../../../../../admin/src/components/Filters';
+import { Layouts } from '../../../../../../../admin/src/components/Layouts/Layout';
 import { Page } from '../../../../../../../admin/src/components/PageHelpers';
 import { Pagination } from '../../../../../../../admin/src/components/Pagination';
 import { Table } from '../../../../../../../admin/src/components/Table';
@@ -109,7 +103,7 @@ const ListPage = () => {
           }
         )}
       </Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         title={formatMessage({
           id: 'global.auditLogs',
           defaultMessage: 'Audit Logs',
@@ -119,7 +113,7 @@ const ListPage = () => {
           defaultMessage: 'Logs of all the activities that happened in your environment',
         })}
       />
-      <ActionLayout
+      <Layouts.Action
         startActions={
           <Filters.Root options={displayedFilters}>
             <Filters.Trigger />
@@ -128,7 +122,7 @@ const ListPage = () => {
           </Filters.Root>
         }
       />
-      <ContentLayout>
+      <Layouts.Content>
         <Table.Root rows={results} headers={headers} isLoading={isLoading}>
           <Table.Content>
             <Table.Head>
@@ -192,13 +186,15 @@ const ListPage = () => {
                     <Flex justifyContent="end">
                       <IconButton
                         onClick={() => setQuery({ id: log.id })}
-                        aria-label={formatMessage(
+                        withTooltip={false}
+                        label={formatMessage(
                           { id: 'app.component.table.view', defaultMessage: '{target} details' },
                           { target: `${log.action} action` }
                         )}
-                        noBorder
-                        icon={<Eye />}
-                      />
+                        borderWidth={0}
+                      >
+                        <Eye />
+                      </IconButton>
                     </Flex>
                   </Table.Cell>
                 </Table.Row>
@@ -210,7 +206,7 @@ const ListPage = () => {
           <Pagination.PageSize options={['12', '24', '50', '100']} />
           <Pagination.Links />
         </Pagination.Root>
-      </ContentLayout>
+      </Layouts.Content>
       {query?.id && (
         <Modal handleClose={() => setQuery({ id: '' }, 'remove')} logId={query.id.toString()} />
       )}

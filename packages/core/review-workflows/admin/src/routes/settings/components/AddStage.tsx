@@ -1,13 +1,13 @@
-import { Box, ButtonProps, Flex, Typography } from '@strapi/design-system';
+import { Box, BoxComponent, ButtonProps, Flex, Typography } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 export const AddStage = ({ children, ...props }: ButtonProps) => {
   return (
     <StyledButton
-      as="button"
+      tag="button"
       background="neutral0"
-      border="neutral150"
+      borderColor="neutral150"
       paddingBottom={3}
       paddingLeft={4}
       paddingRight={4}
@@ -15,9 +15,8 @@ export const AddStage = ({ children, ...props }: ButtonProps) => {
       shadow="filterShadow"
       {...props}
     >
-      {/* @ts-expect-error – textColor can accept css properties in the next DS release */}
-      <Typography variant="pi" fontWeight="bold" textColor="inherit">
-        <Flex as="span" gap={2}>
+      <Typography variant="pi" fontWeight="bold">
+        <Flex tag="span" gap={2}>
           <PlusCircle width="2.4rem" height="2.4rem" aria-hidden />
           {children}
         </Flex>
@@ -26,7 +25,7 @@ export const AddStage = ({ children, ...props }: ButtonProps) => {
   );
 };
 
-const StyledButton = styled(Box)`
+const StyledButton = styled<BoxComponent<'button'>>(Box)`
   border-radius: 26px;
   color: ${({ theme }) => theme.colors.neutral500};
 

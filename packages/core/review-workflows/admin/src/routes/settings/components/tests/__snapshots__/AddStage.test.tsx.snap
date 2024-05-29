@@ -16,35 +16,21 @@ exports[`AddStage should render a list of stages 1`] = `
   padding-inline-end: 16px;
   padding-block-end: 12px;
   padding-inline-start: 16px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
 }
 
 .c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
   align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
   flex-direction: column;
   gap: 8px;
 }
 
 .c5 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
 }
@@ -53,11 +39,11 @@ exports[`AddStage should render a list of stages 1`] = `
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
+  color: currentcolor;
 }
 
 .c6 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -109,7 +95,7 @@ exports[`AddStage should render a list of stages 1`] = `
       </span>
     </span>
   </button>
-  <div
+  <span
     class="c6"
   >
     <p
@@ -130,6 +116,6 @@ exports[`AddStage should render a list of stages 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

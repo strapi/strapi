@@ -100,54 +100,55 @@ const AssigneeSelect = () => {
   };
 
   return (
-    <Field name={ASSIGNEE_ATTRIBUTE_NAME} id={ASSIGNEE_ATTRIBUTE_NAME}>
-      <Flex direction="column" gap={2} alignItems="stretch">
-        <Combobox
-          clearLabel={formatMessage({
-            id: 'content-manager.reviewWorkflows.assignee.clear',
-            defaultMessage: 'Clear assignee',
-          })}
-          error={
-            ((isError &&
-              canRead &&
-              formatMessage({
-                id: 'content-manager.reviewWorkflows.assignee.error',
-                defaultMessage: 'An error occurred while fetching users',
-              })) ||
-              (error && formatAPIError(error))) ??
-            undefined
-          }
-          disabled={(!isLoadingPermissions && !isLoading && users.length === 0) || !id}
-          name={ASSIGNEE_ATTRIBUTE_NAME}
-          id={ASSIGNEE_ATTRIBUTE_NAME}
-          value={currentAssignee ? currentAssignee.id.toString() : null}
-          // @ts-expect-error - DS Combobox wants to return number or string, this will be fixed in V2.
-          onChange={handleChange}
-          onClear={() => handleChange(null)}
-          placeholder={formatMessage({
-            id: 'content-manager.reviewWorkflows.assignee.placeholder',
-            defaultMessage: 'Select…',
-          })}
-          label={formatMessage({
-            id: 'content-manager.reviewWorkflows.assignee.label',
-            defaultMessage: 'Assignee',
-          })}
-          loading={isLoading || isLoadingPermissions || isMutating}
-        >
-          {users.map((user) => {
-            return (
-              <ComboboxOption
-                key={user.id}
-                value={user.id.toString()}
-                textValue={getDisplayName(user)}
-              >
-                {getDisplayName(user)}
-              </ComboboxOption>
-            );
-          })}
-        </Combobox>
-      </Flex>
-    </Field>
+    <Field.Root
+      name={ASSIGNEE_ATTRIBUTE_NAME}
+      id={ASSIGNEE_ATTRIBUTE_NAME}
+      error={
+        ((isError &&
+          canRead &&
+          formatMessage({
+            id: 'content-manager.reviewWorkflows.assignee.error',
+            defaultMessage: 'An error occurred while fetching users',
+          })) ||
+          (error && formatAPIError(error))) ??
+        undefined
+      }
+    >
+      <Field.Label>
+        {formatMessage({
+          id: 'content-manager.reviewWorkflows.assignee.label',
+          defaultMessage: 'Assignee',
+        })}
+      </Field.Label>
+      <Combobox
+        clearLabel={formatMessage({
+          id: 'content-manager.reviewWorkflows.assignee.clear',
+          defaultMessage: 'Clear assignee',
+        })}
+        disabled={(!isLoadingPermissions && !isLoading && users.length === 0) || !id}
+        value={currentAssignee ? currentAssignee.id.toString() : null}
+        onChange={handleChange}
+        onClear={() => handleChange(null)}
+        placeholder={formatMessage({
+          id: 'content-manager.reviewWorkflows.assignee.placeholder',
+          defaultMessage: 'Select…',
+        })}
+        loading={isLoading || isLoadingPermissions || isMutating}
+      >
+        {users.map((user) => {
+          return (
+            <ComboboxOption
+              key={user.id}
+              value={user.id.toString()}
+              textValue={getDisplayName(user)}
+            >
+              {getDisplayName(user)}
+            </ComboboxOption>
+          );
+        })}
+      </Combobox>
+      <Field.Error />
+    </Field.Root>
   );
 };
 

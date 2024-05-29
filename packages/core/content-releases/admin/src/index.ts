@@ -1,19 +1,14 @@
 import { PaperPlane } from '@strapi/icons';
 
 import { AddToReleaseAction } from './components/AddToReleaseAction';
-import { ReleaseAction } from './components/ReleaseAction';
 import { Panel as ReleasesPanel } from './components/ReleasesPanel';
 // import { addColumnToTableHook } from './components/ReleaseListCell';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
-import { releaseApi } from './services/release';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
-import type {
-  BulkActionComponent,
-  DocumentActionComponent,
-} from '@strapi/content-manager/strapi-admin';
+import type { DocumentActionComponent } from '@strapi/content-manager/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 // eslint-disable-next-line import/no-default-export
@@ -26,6 +21,7 @@ const admin: Plugin.Config.AdminInput = {
      * @type {string}
      */
     app.createHook('ContentReleases/pages/ReleaseDetails/add-locale-in-releases');
+
     if (window.strapi.features.isEnabled('cms-content-releases')) {
       app.addMenuLink({
         to: `plugins/${pluginId}`,
@@ -36,17 +32,7 @@ const admin: Plugin.Config.AdminInput = {
         },
         Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
         permissions: PERMISSIONS.main,
-      });
-
-      /**
-       * For some reason every middleware you pass has to a function
-       * that returns the actual middleware. It's annoying but no one knows why....
-       */
-      // @ts-expect-error – this API needs to be typed better.
-      app.addMiddlewares([() => releaseApi.middleware]);
-
-      app.addReducers({
-        [releaseApi.reducerPath]: releaseApi.reducer,
+        position: 2,
       });
 
       // Insert the releases container into the CM's sidebar on the Edit View
@@ -70,14 +56,13 @@ const admin: Plugin.Config.AdminInput = {
         });
       }
 
-      // @ts-expect-error – plugins are not typed on the StrapiApp, fix this.
-      app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
-        // We want to add this action to just before the delete action all the time
-        const deleteActionIndex = actions.findIndex((action) => action.name === 'DeleteAction');
+      // app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
+      //   // We want to add this action to just before the delete action all the time
+      //   const deleteActionIndex = actions.findIndex((action) => action.type === 'delete');
 
-        actions.splice(deleteActionIndex, 0, ReleaseAction);
-        return actions;
-      });
+      //   actions.splice(deleteActionIndex, 0, ReleaseAction);
+      //   return actions;
+      // });
       // Hook that adds a column into the CM's LV table
       // app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     } else if (
@@ -97,6 +82,7 @@ const admin: Plugin.Config.AdminInput = {
           return { default: PurchaseContentReleases };
         },
         lockIcon: true,
+        position: 2,
       });
     }
   },

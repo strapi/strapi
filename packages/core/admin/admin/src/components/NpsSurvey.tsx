@@ -9,14 +9,12 @@ import {
   Textarea,
   Portal,
   Field,
-  FieldLabel,
-  FieldInput,
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import styled, { useTheme } from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { useAppInfo } from '../features/AppInfo';
@@ -24,7 +22,7 @@ import { useAuth } from '../features/Auth';
 import { useNotification } from '../features/Notifications';
 import { usePersistentState } from '../hooks/usePersistentState';
 
-const FieldWrapper = styled(Field)`
+const FieldWrapper = styled(Field.Root)`
   height: 3.2rem;
   width: 3.2rem;
 
@@ -132,7 +130,6 @@ const checkIfShouldShowSurvey = (settings: NpsSurveySettings) => {
 };
 
 const NpsSurvey = () => {
-  const theme = useTheme();
   const { formatMessage } = useIntl();
   const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
   const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
@@ -268,7 +265,7 @@ const NpsSurvey = () => {
               bottom={0}
               left="50%"
               transform="translateX(-50%)"
-              zIndex={theme.zIndices[2]}
+              zIndex="popover"
               width="50%"
             >
               {isFeedbackResponse ? (
@@ -279,10 +276,10 @@ const NpsSurvey = () => {
                   })}
                 </Typography>
               ) : (
-                <Box as="fieldset" width="100%">
+                <Box tag="fieldset" width="100%" borderWidth={0}>
                   <Flex justifyContent="space-between" width="100%">
                     <Box marginLeft="auto" marginRight="auto">
-                      <Typography fontWeight="semiBold" as="legend">
+                      <Typography fontWeight="semiBold" tag="legend">
                         {formatMessage({
                           id: 'app.components.NpsSurvey.banner-title',
                           defaultMessage:
@@ -292,12 +289,14 @@ const NpsSurvey = () => {
                     </Box>
                     <IconButton
                       onClick={handleDismiss}
-                      aria-label={formatMessage({
+                      withTooltip={false}
+                      label={formatMessage({
                         id: 'app.components.NpsSurvey.dismiss-survey-label',
                         defaultMessage: 'Dismiss survey',
                       })}
-                      icon={<Cross />}
-                    />
+                    >
+                      <Cross />
+                    </IconButton>
                   </Flex>
                   <Flex gap={2} marginTop={2} marginBottom={2} justifyContent="center">
                     <Typography variant="pi" textColor="neutral600">
@@ -310,6 +309,7 @@ const NpsSurvey = () => {
                       return (
                         <FieldWrapper
                           key={number}
+                          name="npsSurveyRating"
                           className={values.npsSurveyRating === number ? 'selected' : undefined} // "selected" class added when child radio button is checked
                           hasRadius
                           background="primary100"
@@ -318,12 +318,10 @@ const NpsSurvey = () => {
                           position="relative"
                           cursor="pointer"
                         >
-                          <FieldLabel htmlFor={`nps-survey-rating-${number}-input`}>
+                          <Field.Label>
                             <VisuallyHidden>
-                              <FieldInput
+                              <Field.Input
                                 type="radio"
-                                id={`nps-survey-rating-${number}-input`}
-                                name="npsSurveyRating"
                                 checked={values.npsSurveyRating === number}
                                 onChange={(e) =>
                                   setFieldValue('npsSurveyRating', parseInt(e.target.value, 10))
@@ -332,7 +330,7 @@ const NpsSurvey = () => {
                               />
                             </VisuallyHidden>
                             {number}
-                          </FieldLabel>
+                          </Field.Label>
                         </FieldWrapper>
                       );
                     })}
@@ -346,21 +344,20 @@ const NpsSurvey = () => {
                   {values.npsSurveyRating !== null && (
                     <Flex direction="column">
                       <Box marginTop={2}>
-                        <FieldLabel htmlFor="npsSurveyFeedback" fontWeight="semiBold" fontSize={2}>
+                        <Field.Label fontWeight="semiBold" fontSize={2}>
                           {formatMessage({
                             id: 'app.components.NpsSurvey.feedback-question',
                             defaultMessage: 'Do you have any suggestion for improvements?',
                           })}
-                        </FieldLabel>
+                        </Field.Label>
                       </Box>
                       <Box width="62%" marginTop={3} marginBottom={4}>
                         <Textarea
                           id="npsSurveyFeedback" // formik element attribute "id" should be same as the values key to work
                           width="100%"
                           onChange={handleChange}
-                        >
-                          {values.npsSurveyFeedback}
-                        </Textarea>
+                          value={values.npsSurveyFeedback}
+                        />
                       </Box>
                       <Button marginBottom={2} type="submit" loading={isSubmitting}>
                         {formatMessage({

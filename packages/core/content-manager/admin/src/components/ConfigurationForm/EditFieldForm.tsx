@@ -131,7 +131,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
         <ModalHeader>
           <Flex gap={3}>
             <FieldTypeIcon type={attribute.type} />
-            <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
+            <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={id}>
               {formatMessage(
                 {
                   id: 'content-manager.containers.edit-settings.modal-form.label',

@@ -25,7 +25,7 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
   return (
     <>
       <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+        <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
           {formatMessage({
             id: getTrad('header.actions.add-assets'),
             defaultMessage: 'Add new assets',

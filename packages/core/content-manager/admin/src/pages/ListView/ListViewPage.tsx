@@ -12,22 +12,16 @@ import {
   useAPIErrorHandler,
   useQueryParams,
   useRBAC,
+  Layouts,
+  useTable,
 } from '@strapi/admin/strapi-admin';
-import {
-  ActionLayout,
-  Button,
-  ContentLayout,
-  HeaderLayout,
-  Flex,
-  Typography,
-  ButtonProps,
-} from '@strapi/design-system';
+import { Button, Flex, Typography, ButtonProps } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { useNavigate, Link as ReactRouterLink, useParams } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { InjectionZone } from '../../components/InjectionZone';
 import { HOOKS } from '../../constants/hooks';
@@ -46,6 +40,7 @@ import { getTranslation } from '../../utils/translations';
 import { getDisplayName } from '../../utils/users';
 import { DocumentStatus } from '../EditView/components/DocumentStatus';
 
+import { BulkActionsRenderer } from './components/BulkActions/Actions';
 import { Filters } from './components/Filters';
 import { TableActions } from './components/TableActions';
 import { CellContent } from './components/TableCells/CellContent';
@@ -196,7 +191,7 @@ const ListViewPage = () => {
   return (
     <Page.Main>
       <Page.Title>{`${contentTypeTitle}`}</Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         primaryAction={canCreate ? <CreateButton /> : null}
         subtitle={formatMessage(
           {
@@ -209,7 +204,7 @@ const ListViewPage = () => {
         title={contentTypeTitle}
         navigationAction={<BackButton />}
       />
-      <ActionLayout
+      <Layouts.Action
         endActions={
           <>
             <InjectionZone area="listView.actions" />
@@ -242,10 +237,10 @@ const ListViewPage = () => {
           </>
         }
       />
-      <ContentLayout>
+      <Layouts.Content>
         <Flex gap={4} direction="column" alignItems="stretch">
           <Table.Root rows={results} headers={tableHeaders} isLoading={isLoading}>
-            <Table.ActionBar />
+            <TableActionsBar />
             <Table.Content>
               <Table.Head>
                 <Table.HeaderCheckboxCell />
@@ -324,7 +319,7 @@ const ListViewPage = () => {
             <Pagination.Links />
           </Pagination.Root>
         </Flex>
-      </ContentLayout>
+      </Layouts.Content>
     </Page.Main>
   );
 };
@@ -333,6 +328,30 @@ const ActionsCell = styled(Table.Cell)`
   display: flex;
   justify-content: flex-end;
 `;
+
+/* -------------------------------------------------------------------------------------------------
+ * TableActionsBar
+ * -----------------------------------------------------------------------------------------------*/
+
+const TableActionsBar = () => {
+  const selectRow = useTable('TableActionsBar', (state) => state.selectRow);
+  const [{ query }] = useQueryParams<{ plugins: { i18n: { locale: string } } }>();
+  const locale = query?.plugins?.i18n?.locale;
+  const prevLocale = usePrev(locale);
+
+  // TODO: find a better way to reset the selected rows when the locale changes across all the app
+  React.useEffect(() => {
+    if (prevLocale !== locale) {
+      selectRow([]);
+    }
+  }, [selectRow, prevLocale, locale]);
+
+  return (
+    <Table.ActionBar>
+      <BulkActionsRenderer />
+    </Table.ActionBar>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * CreateButton
@@ -348,13 +367,12 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
   return (
     <Button
       variant={variant}
-      forwardedAs={ReactRouterLink}
+      tag={ReactRouterLink}
       onClick={() => {
         trackUsage('willCreateEntry', { status: 'draft' });
       }}
       startIcon={<Plus />}
       style={{ textDecoration: 'none' }}
-      // @ts-expect-error – DS inference does not work with as or forwardedAs
       to={{
         pathname: 'create',
         search: stringify({ plugins: query.plugins }),

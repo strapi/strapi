@@ -34,7 +34,7 @@ export const Breadcrumbs = ({ breadcrumbs, onChangeFolder, currentFolderId, ...p
           return (
             <CrumbLink
               key={`breadcrumb-${crumb?.id ?? 'root'}`}
-              as={onChangeFolder ? 'button' : NavLink}
+              tag={onChangeFolder ? 'button' : NavLink}
               type={onChangeFolder && 'button'}
               to={onChangeFolder ? undefined : crumb.href}
               onClick={onChangeFolder && (() => onChangeFolder(crumb.id, crumb.path))}

@@ -1,11 +1,7 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
+import { adminApi } from '@strapi/admin/strapi-admin';
 
-import { axiosBaseQuery, type UnknownApiError } from '../utils/api';
-
-const contentManagerApi = createApi({
-  reducerPath: 'contentManagerApi',
-  baseQuery: axiosBaseQuery(),
-  tagTypes: [
+const contentManagerApi = adminApi.enhanceEndpoints({
+  addTagTypes: [
     'ComponentConfiguration',
     'ContentTypesConfiguration',
     'ContentTypeSettings',
@@ -14,7 +10,6 @@ const contentManagerApi = createApi({
     'HistoryVersion',
     'Relations',
   ],
-  endpoints: () => ({}),
 });
 
-export { contentManagerApi, type UnknownApiError };
+export { contentManagerApi };

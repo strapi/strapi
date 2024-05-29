@@ -1,6 +1,7 @@
+import { Layout } from '@strapi/icons';
+
 import pluginPkg from '../../package.json';
 
-import { PluginIcon } from './components/PluginIcon';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { reducers } from './reducers';
@@ -15,13 +16,14 @@ export default {
     app.addReducers(reducers);
     app.addMenuLink({
       to: `plugins/${pluginId}`,
-      icon: PluginIcon,
+      icon: Layout,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Content Types Builder',
       },
       permissions: PERMISSIONS.main,
       Component: () => import('./pages/App'),
+      position: 5,
     });
 
     app.registerPlugin({

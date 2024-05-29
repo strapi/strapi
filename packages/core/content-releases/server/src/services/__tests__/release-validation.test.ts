@@ -93,7 +93,7 @@ describe('Release Validation service', () => {
                   {
                     contentType: 'api::category.category',
                     entry: {
-                      id: 1,
+                      documentId: '1',
                     },
                   },
                 ],
@@ -107,7 +107,7 @@ describe('Release Validation service', () => {
 
       const mockReleaseAction: CreateReleaseAction.Request['body'] = {
         entry: {
-          id: 1,
+          documentId: '1',
           contentType: 'api::category.category',
         },
         type: 'publish',
@@ -116,7 +116,7 @@ describe('Release Validation service', () => {
       expect(() =>
         releaseValidationService.validateUniqueEntry(1, mockReleaseAction)
       ).rejects.toThrow(
-        'Entry with id 1 and contentType api::category.category already exists in release with id 1'
+        'Entry with documentId 1  and contentType api::category.category already exists in release with id 1'
       );
     });
   });

@@ -1,11 +1,5 @@
-import {
-  Box,
-  Layout,
-  Main,
-  HeaderLayout,
-  EmptyStateLayout,
-  LinkButton,
-} from '@strapi/design-system';
+import { Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Main, EmptyStateLayout, LinkButton } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
@@ -14,9 +8,9 @@ const PurchaseContentReleases = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({
             id: 'content-releases.pages.Releases.title',
             defaultMessage: 'Releases',
@@ -51,7 +45,7 @@ const PurchaseContentReleases = () => {
           />
         </Box>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

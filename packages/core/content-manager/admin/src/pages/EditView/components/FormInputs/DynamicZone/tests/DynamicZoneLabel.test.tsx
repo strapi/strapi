@@ -1,27 +1,19 @@
-import { lightTheme, ThemeProvider, Tooltip } from '@strapi/design-system';
 import { Earth } from '@strapi/icons';
-import { render as renderRTL } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { render as renderRTL } from '@tests/utils';
 
 import { DynamicZoneLabel, DynamicZoneLabelProps } from '../DynamicZoneLabel';
 
 const LabelAction = () => {
   return (
-    <Tooltip description="i18n">
-      <button aria-label="i18n" type="button">
-        <Earth aria-hidden />
-      </button>
-    </Tooltip>
+    <button aria-label="i18n" type="button">
+      <Earth aria-hidden />
+    </button>
   );
 };
 
 describe('DynamicZoneLabel', () => {
   const Component = (props?: Partial<DynamicZoneLabelProps>) => (
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider locale="en" messages={{}} defaultLocale="en">
-        <DynamicZoneLabel label="dynamic zone" name="test" {...props} />
-      </IntlProvider>
-    </ThemeProvider>
+    <DynamicZoneLabel label="dynamic zone" name="test" {...props} />
   );
 
   const render = (props?: Partial<DynamicZoneLabelProps>) => renderRTL(<Component {...props} />);

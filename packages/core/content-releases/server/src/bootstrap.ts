@@ -16,10 +16,10 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       async afterDelete(event) {
         try {
-          const { model, result } = event;
+          const model = strapi.getModel(event.model.uid as any);
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-            const { id } = result;
+            const id = event.result.id;
 
             const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
               where: {
@@ -52,10 +52,10 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
        * so we need to fetch them before deleting the entries to save the ids on our state
        */
       async beforeDeleteMany(event) {
-        const { model, params } = event;
+        const model = strapi.getModel(event.model.uid as any);
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-          const { where } = params;
+          const { where } = event.params;
           const entriesToDelete = await strapi.db
             .query(model.uid)
             .findMany({ select: ['id'], where });
@@ -106,9 +106,10 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       async afterUpdate(event) {
         try {
-          const { model, result } = event;
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-          if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+          const model = strapi.getModel(event.model.uid as any);
+          if (model.options?.draftAndPublish) {
+            const result = event.result;
+
             const isEntryValid = await getEntryValidStatus(model.uid as UID.ContentType, result, {
               strapi,
             });

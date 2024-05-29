@@ -19,7 +19,7 @@ import {
 } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetDefinition } from '../../constants';
 import { useAssets } from '../../hooks/useAssets';

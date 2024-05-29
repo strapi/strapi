@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -55,7 +55,7 @@ describe('<FilterList />', () => {
     ];
 
     const { container } = render(
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <IntlProvider locale="en" messages={messages} defaultLocale="en">
           <FilterList
             appliedFilters={filters}
@@ -90,7 +90,7 @@ describe('<FilterList />', () => {
             onRemoveFilter={jest.fn()}
           />
         </IntlProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     );
 
     expect(container).toMatchSnapshot();

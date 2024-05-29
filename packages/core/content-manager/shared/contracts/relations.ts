@@ -7,7 +7,7 @@ export interface RelationResult {
   documentId: Modules.Documents.ID;
   id: number;
   status?: Modules.Documents.Params.PublicationStatus.Kind;
-  locale?: Modules.Documents.Params.Locale;
+  locale?: Modules.Documents.Params.Locale.StringNotation;
   [key: string]: any;
 }
 
@@ -43,7 +43,7 @@ export declare namespace FindAvailable {
     body: {};
     query: Partial<Pick<Pagination, 'pageSize' | 'page'>> & {
       id?: Data.ID;
-      locale?: Modules.Documents.Params.Locale;
+      locale?: Modules.Documents.Params.Locale.StringNotation;
       _filter?: string;
       _q?: string;
       idsToOmit?: Modules.Documents.ID[];

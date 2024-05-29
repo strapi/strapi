@@ -1,3 +1,4 @@
+import { Accordion } from '@strapi/design-system';
 import { render as renderRTL } from '@tests/utils';
 
 import { ComponentCategory, ComponentCategoryProps } from '../ComponentCategory';
@@ -5,18 +6,14 @@ import { ComponentCategory, ComponentCategoryProps } from '../ComponentCategory'
 describe('ComponentCategory', () => {
   const render = (props?: Partial<ComponentCategoryProps>) => ({
     ...renderRTL(
-      <ComponentCategory
-        onAddComponent={jest.fn()}
-        onToggle={jest.fn()}
-        category="testing"
-        {...props}
-      />
+      <Accordion.Root>
+        <ComponentCategory onAddComponent={jest.fn()} category="testing" {...props} />
+      </Accordion.Root>
     ),
   });
 
-  it('should render my array of components when passed and the accordion is open', () => {
-    const { getByRole } = render({
-      isOpen: true,
+  it('should render my array of components when passed and the accordion is open', async () => {
+    const { user, getByRole } = render({
       components: [
         {
           uid: 'test.test',
@@ -25,6 +22,8 @@ describe('ComponentCategory', () => {
         },
       ],
     });
+
+    await user.click(getByRole('button', { name: /testing/ }));
 
     expect(getByRole('button', { name: /myComponent/ })).toBeInTheDocument();
   });
@@ -37,21 +36,9 @@ describe('ComponentCategory', () => {
     expect(getByText(/myCategory/)).toBeInTheDocument();
   });
 
-  it('should call the onToggle callback when the accordion trigger is pressed', async () => {
-    const onToggle = jest.fn();
-    const { getByRole, user } = render({
-      onToggle,
-    });
-
-    await user.click(getByRole('button', { name: /testing/ }));
-
-    expect(onToggle).toHaveBeenCalledWith('testing');
-  });
-
   it('should call onAddComponent with the componentUid when a ComponentCard is clicked', async () => {
     const onAddComponent = jest.fn();
     const { getByRole, user } = render({
-      isOpen: true,
       onAddComponent,
       components: [
         {
@@ -61,6 +48,8 @@ describe('ComponentCategory', () => {
         },
       ],
     });
+
+    await user.click(getByRole('button', { name: /testing/ }));
 
     await user.click(getByRole('button', { name: /myComponent/ }));
 
