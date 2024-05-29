@@ -1,4 +1,4 @@
-import { setCreatorFields, errors } from '@strapi/utils';
+import { setCreatorFields, errors, async } from '@strapi/utils';
 
 import type { Core, Modules, Struct, Internal, UID } from '@strapi/types';
 
@@ -364,17 +364,25 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       // For each contentType on the release, we create a custom populate object for nested relations
       const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
       const contentTypesUids = await getContentTypesUidsOnRelease(releaseId);
-      const morphPopulate = await contentTypesUids.reduce(async (acc, contentTypeUid) => {
-        const populate = await populateBuilderService('api::restaurant.restaurant')
-          .populateDeep(Infinity)
-          .build();
+      const reducer = async.reduce(contentTypesUids);
+      const morphPopulate = await reducer(
+        async (
+          acc: Record<UID.ContentType, { populate: any }>,
+          contentTypeUid: UID.ContentType
+        ) => {
+          // @ts-expect-error - Core.Service type is not a function
+          const populate = await populateBuilderService('api::restaurant.restaurant')
+            .populateDeep(Infinity)
+            .build();
 
-        acc[contentTypeUid] = {
-          populate,
-        };
+          acc[contentTypeUid] = {
+            populate,
+          };
 
-        return acc;
-      }, {});
+          return acc;
+        },
+        {} as Record<UID.ContentType, { populate: any }>
+      );
 
       return strapi.db.query(RELEASE_ACTION_MODEL_UID).findPage({
         ...dbQuery,
