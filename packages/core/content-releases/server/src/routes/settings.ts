@@ -8,12 +8,12 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          // {
-          //   name: 'admin::hasPermissions',
-          //   config: {
-          // actions: ['plugin::content-releases.settings-read'],
-          //   },
-          // },
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.settings.read'],
+            },
+          },
         ],
       },
     },
@@ -25,12 +25,12 @@ export default {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          // {
-          //   name: 'admin::hasPermissions',
-          //   config: {
-          // actions: ['plugin::content-releases.settings-update'],
-          //   },
-          // },
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.settings.update'],
+            },
+          },
         ],
       },
     },
