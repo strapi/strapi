@@ -337,18 +337,7 @@ const filterValidRelationalAttributes = (attributes: Record<string, any>) => {
     return attribute.owner || (!attribute.mappedBy && !attribute.morphBy);
   };
 
-  const isComponentLike = (attribute: any) => {
-    return (
-      /**
-       * probably can remove attribute.component & attribute.components
-       * to be checked
-       *  */
-      attribute.component ||
-      attribute.components ||
-      attribute.joinTable?.name.includes('components') ||
-      attribute.joinTable?.name.includes('cmps')
-    );
-  };
+  const isComponentLike = (attribute: any) => attribute.joinTable?.name.endsWith('_cmps');
 
   return Object.entries(attributes)
     .filter(([, attribute]) => {
