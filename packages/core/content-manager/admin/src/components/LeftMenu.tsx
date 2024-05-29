@@ -97,10 +97,6 @@ const LeftMenu = () => {
     defaultMessage: 'Content',
   });
 
-  /**
-   * @description
-   * Removes i18n from the plugins search param if the schema does not have i18n enabled
-   */
   const getPluginsParamsForLink = (link: ContentManagerLink) => {
     const schema = schemas.find((schema) => schema.uid === link.uid);
     const isI18nEnabled = Boolean((schema?.pluginOptions?.i18n as any)?.localized);
