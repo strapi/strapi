@@ -4,6 +4,7 @@
 
 import { errors } from '@strapi/utils';
 import type { Model, Database } from '@strapi/database';
+import type { Modules } from '@strapi/types';
 
 const { ValidationError } = errors;
 
@@ -33,31 +34,9 @@ const webhookModel: Model = {
   },
 };
 
-interface DBInput {
-  name: string;
-  url: string;
-  headers: Record<string, string>;
-  events: string[];
-  enabled: boolean;
-}
-
-interface DBOutput {
-  id: string;
-  name: string;
-  url: string;
-  headers: Record<string, string>;
-  events: string[];
-  enabled: boolean;
-}
-
-export interface Webhook {
-  id: string;
-  name: string;
-  url: string;
-  headers: Record<string, string>;
-  events: string[];
-  isEnabled: boolean;
-}
+type Webhook = Modules.WebhookStore.Webhook;
+type DBOutput = Omit<Webhook, 'id' | 'isEnabled'> & { id: string | number; enabled: boolean };
+type DBInput = Omit<DBOutput, 'id'>;
 
 const toDBObject = (data: Webhook): DBInput => {
   return {
@@ -71,7 +50,7 @@ const toDBObject = (data: Webhook): DBInput => {
 
 const fromDBObject = (row: DBOutput): Webhook => {
   return {
-    id: row.id,
+    id: typeof row.id === 'number' ? row.id.toString() : row.id,
     name: row.name,
     url: row.url,
     headers: row.headers,
