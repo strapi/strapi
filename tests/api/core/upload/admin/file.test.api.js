@@ -152,7 +152,7 @@ describe('Upload', () => {
       res.body.results.forEach((file) => expect(file.folder).toBeDefined());
     });
 
-    test.only(`Using custom conditions don't trigger validation errors for dynamically added fields`, async () => {
+    test(`Using custom conditions don't trigger validation errors for dynamically added fields`, async () => {
       const res = await u1Req({ method: 'GET', url: '/upload/files' });
 
       // The request succeed, no validation error
