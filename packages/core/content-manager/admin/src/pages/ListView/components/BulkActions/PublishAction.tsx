@@ -333,15 +333,16 @@ const SelectedEntriesModalContent = ({
   const { publishMany: bulkPublishAction } = useDocumentActions();
   const [, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
 
-  const selectedEntries = useTable('publishAction', (state) => state.selectedRows);
+  const selectedRows = useTable('publishAction', (state) => state.selectedRows);
 
-  const entriesToPublish = selectedEntries.reduce((acc, entry) => {
-    if (!validationErrors[entry.documentId]) {
-      acc.push(entry.documentId);
-    }
+  // Filter selected entries from the updated modal table rows
+  const selectedEntries = rows.filter((entry) =>
+    selectedRows.some((selectedEntry) => selectedEntry.documentId === entry.documentId)
+  );
 
-    return acc;
-  }, []);
+  const entriesToPublish = selectedEntries
+    .filter((entry) => !validationErrors[entry.documentId])
+    .map((entry) => entry.documentId);
 
   const selectedEntriesWithErrorsCount = selectedEntries.filter(
     ({ documentId }) => validationErrors[documentId]
@@ -433,6 +434,7 @@ const SelectedEntriesModalContent = ({
               disabled={
                 selectedEntries.length === 0 ||
                 selectedEntries.length === selectedEntriesWithErrorsCount ||
+                selectedEntriesPublished === selectedEntries.length ||
                 isLoading
               }
               loading={isSubmittingForm}
