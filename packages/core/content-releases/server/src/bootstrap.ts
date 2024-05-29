@@ -106,9 +106,10 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       async afterUpdate(event) {
         try {
-          const { model, result } = event;
-          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-          if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+          const model = strapi.getModel(event.model.uid as any);
+          if (model.options?.draftAndPublish) {
+            const result = event.result;
+
             const isEntryValid = await getEntryValidStatus(model.uid as UID.ContentType, result, {
               strapi,
             });
