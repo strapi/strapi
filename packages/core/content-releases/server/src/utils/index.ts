@@ -1,9 +1,19 @@
 import type { UID, Data, Core } from '@strapi/types';
+import type { SettingsService } from '../services/settings';
 
-export const getService = (
-  name: 'release' | 'release-validation' | 'scheduling' | 'release-action' | 'event-manager',
+type Services = {
+  release: any;
+  'release-validation': any;
+  scheduling: any;
+  'release-action': any;
+  'event-manager': any;
+  settings: SettingsService;
+};
+
+export const getService = <TName extends keyof Services>(
+  name: TName,
   { strapi }: { strapi: Core.Strapi }
-) => {
+): Services[TName] => {
   return strapi.plugin('content-releases').service(name);
 };
 

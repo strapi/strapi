@@ -17,6 +17,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       async afterDelete(event) {
         try {
           const model = strapi.getModel(event.model.uid as any);
+          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
             const id = event.result.id;
 
@@ -52,6 +53,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
        */
       async beforeDeleteMany(event) {
         const model = strapi.getModel(event.model.uid as any);
+        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
           const { where } = event.params;
           const entriesToDelete = await strapi.db

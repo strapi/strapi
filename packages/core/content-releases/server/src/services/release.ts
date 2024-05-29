@@ -370,6 +370,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           acc: Record<UID.ContentType, { populate: any }>,
           contentTypeUid: UID.ContentType
         ) => {
+          // @ts-expect-error - Core.Service type is not a function
           const populate = await populateBuilderService('api::restaurant.restaurant')
             .populateDeep(Infinity)
             .build();
