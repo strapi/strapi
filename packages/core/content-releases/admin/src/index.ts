@@ -21,6 +21,7 @@ const admin: Plugin.Config.AdminInput = {
      * @type {string}
      */
     app.createHook('ContentReleases/pages/ReleaseDetails/add-locale-in-releases');
+
     if (window.strapi.features.isEnabled('cms-content-releases')) {
       app.addMenuLink({
         to: `plugins/${pluginId}`,

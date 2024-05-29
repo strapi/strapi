@@ -527,19 +527,19 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
 
   // TODO: Migrated displayedHeader to v5
-  const { hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } = runHookWaterfall(
-    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
-    {
-      displayedHeaders: {
-        label: formatMessage({
-          id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-          defaultMessage: 'locale',
-        }),
-        name: 'locale',
-      },
+  const { displayedHeaders, hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } =
+    runHookWaterfall('ContentReleases/pages/ReleaseDetails/add-locale-in-releases', {
+      displayedHeaders: [
+        {
+          label: {
+            id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+            defaultMessage: 'name',
+          },
+          name: 'name',
+        },
+      ],
       hasI18nEnabled: false,
-    }
-  );
+    });
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -661,35 +661,28 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     defaultMessage: 'Group by',
   });
   const headers = [
-    // ...displayedHeaders,
+    ...displayedHeaders,
     {
-      label: formatMessage({
-        id: 'content-releases.page.ReleaseDetails.table.header.label.name',
-        defaultMessage: 'name',
-      }),
-      name: 'name',
-    },
-    {
-      label: formatMessage({
+      label: {
         id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
         defaultMessage: 'content-type',
-      }),
+      },
       name: 'content-type',
     },
     {
-      label: formatMessage({
+      label: {
         id: 'content-releases.page.ReleaseDetails.table.header.label.action',
         defaultMessage: 'action',
-      }),
+      },
       name: 'action',
     },
     ...(!release.releasedAt
       ? [
           {
-            label: formatMessage({
+            label: {
               id: 'content-releases.page.ReleaseDetails.table.header.label.status',
               defaultMessage: 'status',
-            }),
+            },
             name: 'status',
           },
         ]
@@ -740,8 +733,8 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             >
               <Table.Content>
                 <Table.Head>
-                  {headers.map((header) => (
-                    <Table.HeaderCell key={header.name} {...header} />
+                  {headers.map(({ label, name }) => (
+                    <Table.HeaderCell key={name} label={formatMessage(label)} name={name} />
                   ))}
                 </Table.Head>
                 <Table.Loading />
