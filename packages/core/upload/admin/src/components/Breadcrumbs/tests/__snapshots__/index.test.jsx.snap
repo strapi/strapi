@@ -1,7 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
-.c4 {
+.c3 {
+  cursor: pointer;
+}
+
+.c5 {
   padding-inline-end: 4px;
   padding-inline-start: 4px;
 }
@@ -28,44 +32,20 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 }
 
 .c0 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
 }
 
 .c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-inline-box;
-  display: -webkit-inline-flex;
-  display: -ms-inline-flexbox;
   display: inline-flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
 }
 
 .c8 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
 }
@@ -80,7 +60,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
-  color: #ffffff;
+  color: currentcolor;
 }
 
 .c14 {
@@ -92,7 +72,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 
 .c15 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -112,9 +91,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 }
 
 .c9:after {
-  -webkit-transition-property: all;
   transition-property: all;
-  -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
   border-radius: 8px;
   content: '';
@@ -141,22 +118,21 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c1:first-child {
+.c1>*:first-child {
   margin-left: calc(-1*8px);
 }
 
-.c3 {
+.c4 {
   border-radius: 4px;
   color: #666687;
   font-size: 1.2rem;
   line-height: 1.43;
   padding: 4px 8px;
-  -webkit-text-decoration: none;
   text-decoration: none;
 }
 
-.c3:hover,
-.c3:focus {
+.c4 :hover,
+.c4 :focus {
   background-color: #dcdce4;
   color: #4a4a6a;
 }
@@ -165,6 +141,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   height: 3.2rem;
   border: 1px solid transparent;
   background: transparent;
+  color: #32324d;
 }
 
 .c10 svg {
@@ -174,29 +151,13 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 .c10[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c10[aria-disabled='true'] .c5 {
   color: #666687;
-}
-
-.c10[aria-disabled='true'] svg > g,
-.c10[aria-disabled='true'] svg path {
-  fill: #666687;
 }
 
 .c10[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c10[aria-disabled='true']:active .c5 {
   color: #666687;
-}
-
-.c10[aria-disabled='true']:active svg > g,
-.c10[aria-disabled='true']:active svg path {
-  fill: #666687;
 }
 
 .c10:hover {
@@ -204,16 +165,10 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
 }
 
 .c10:active {
-  border: 1px solid undefined;
-  background: undefined;
+  border: 1px solid;
 }
 
-.c10 .c5 {
-  color: #32324d;
-}
-
-.c10 svg > g,
-.c10 svg path {
+.c10 svg {
   fill: #8e8ea9;
 }
 
@@ -222,8 +177,8 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
   height: unset;
 }
 
-.c11:hover,
-.c11:focus {
+.c11 :hover,
+.c11 :focus {
   background-color: #dcdce4;
 }
 
@@ -240,17 +195,19 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
       >
         <a
           aria-current="page"
-          class="c3 active"
+          aria-disabled="false"
+          class="c3 c4 active"
           href="/"
+          target="_self"
         >
           Media Library
         </a>
         <div
           aria-hidden="true"
-          class="c4"
+          class="c5"
         >
           <span
-            class="c5 c6"
+            class="c6"
           >
             /
           </span>
@@ -264,28 +221,24 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
           aria-expanded="false"
           aria-haspopup="menu"
           aria-label="Get more ascendants folders"
-          class="c7 c8 c9 c10 c11 sc-hmdomO c10"
+          class="c7 c8 c9 c10 c11"
           data-state="closed"
           id="radix-:r1:"
           label="..."
           type="button"
         >
           <span
-            class="c5 c12"
+            class="c12"
           >
-            <span
-              class="c5 c12"
-            >
-              ...
-            </span>
+            ...
           </span>
         </button>
         <div
           aria-hidden="true"
-          class="c4"
+          class="c5"
         >
           <span
-            class="c5 c6"
+            class="c6"
           >
             /
           </span>
@@ -296,17 +249,19 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
       >
         <a
           aria-current="page"
-          class="c3 active"
+          aria-disabled="false"
+          class="c3 c4 active"
           href="/"
+          target="_self"
         >
           parent folder
         </a>
         <div
           aria-hidden="true"
-          class="c4"
+          class="c5"
         >
           <span
-            class="c5 c6"
+            class="c6"
           >
             /
           </span>
@@ -320,7 +275,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
         >
           <span
             aria-current="true"
-            class="c5 c14"
+            class="c14"
           >
             current folder
           </span>
@@ -328,7 +283,7 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
       </li>
     </ol>
   </nav>
-  <div
+  <span
     class="c15"
   >
     <p
@@ -349,6 +304,6 @@ exports[`Media Library | Breadcrumbs should render and match snapshot 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

@@ -7,24 +7,22 @@ import {
   TextButton,
   VisuallyHidden,
   Accordion,
-  AccordionContent as DSAccordionContent,
-  AccordionToggle,
   IconButton,
-  Typography,
-  KeyboardNavigable,
   useComposedRefs,
   GridItem,
   Grid,
+  BoxComponent,
 } from '@strapi/design-system';
 import { Plus, Drag, Trash } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../../../../constants/dragAndDrop';
 import { useDoc } from '../../../../../hooks/useDocument';
 import { useDragAndDrop, type UseDragAndDropOptions } from '../../../../../hooks/useDragAndDrop';
+import { usePrev } from '../../../../../hooks/usePrev';
 import { getIn } from '../../../../../utils/objects';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
@@ -63,7 +61,7 @@ const RepeatableComponent = ({
   const removeFieldRow = useForm('RepeatableComponent', (state) => state.removeFieldRow);
   const { max = Infinity } = attribute;
 
-  const [collapseToOpen, setCollapseToOpen] = React.useState<number | null>(null);
+  const [collapseToOpen, setCollapseToOpen] = React.useState<string>('');
   const [liveText, setLiveText] = React.useState('');
 
   /**
@@ -91,14 +89,25 @@ const RepeatableComponent = ({
     return undefined;
   }, [search, name, value]);
 
+  const prevValue = usePrev(value);
+
   React.useEffect(() => {
-    if (typeof componentTmpKeyWithFocussedField === 'number') {
+    /**
+     * When we add a new item to the array, we want to open the collapse.
+     */
+    if (prevValue && prevValue.length < value.length) {
+      setCollapseToOpen(value[value.length - 1].__temp_key__);
+    }
+  }, [value, prevValue]);
+
+  React.useEffect(() => {
+    if (typeof componentTmpKeyWithFocussedField === 'string') {
       setCollapseToOpen(componentTmpKeyWithFocussedField);
     }
   }, [componentTmpKeyWithFocussedField]);
 
   const toggleCollapses = () => {
-    setCollapseToOpen(null);
+    setCollapseToOpen('');
   };
 
   const handleClick = () => {
@@ -136,12 +145,8 @@ const RepeatableComponent = ({
     moveFieldRow(name, currentIndex, newIndex);
   };
 
-  const handleToggle = (key: number) => () => {
-    if (collapseToOpen === key) {
-      setCollapseToOpen(null);
-    } else {
-      setCollapseToOpen(key);
-    }
+  const handleValueChange = (key: string) => {
+    setCollapseToOpen(key);
   };
 
   const getItemPos = (index: number) => `${index + 1} of ${value.length}`;
@@ -207,196 +212,111 @@ const RepeatableComponent = ({
         })}
       </VisuallyHidden>
       <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>
-      <AccordionGroup error={error}>
-        <AccordionContent aria-describedby={ariaDescriptionId}>
-          {value.map(({ __temp_key__: key, id }, index) => {
-            const nameWithIndex = `${name}.${index}`;
-            return (
-              <ComponentProvider
-                key={key}
-                // id is always a number in a component
-                id={id as number}
-                uid={attribute.component}
-                level={level + 1}
-                type="repeatable"
+      <AccordionRoot
+        $error={error}
+        value={collapseToOpen}
+        onValueChange={handleValueChange}
+        aria-describedby={ariaDescriptionId}
+      >
+        {value.map(({ __temp_key__: key, id }, index) => {
+          const nameWithIndex = `${name}.${index}`;
+          return (
+            <ComponentProvider
+              key={key}
+              // id is always a number in a component
+              id={id as number}
+              uid={attribute.component}
+              level={level + 1}
+              type="repeatable"
+            >
+              <Component
+                disabled={disabled}
+                name={nameWithIndex}
+                attribute={attribute}
+                index={index}
+                mainField={mainField}
+                onMoveItem={handleMoveComponentField}
+                onDeleteComponent={() => {
+                  removeFieldRow(name, index);
+                  toggleCollapses();
+                }}
+                toggleCollapses={toggleCollapses}
+                onCancel={handleCancel}
+                onDropItem={handleDropItem}
+                onGrabItem={handleGrabItem}
+                __temp_key__={key}
               >
-                <Component
-                  disabled={disabled}
-                  name={nameWithIndex}
-                  attribute={attribute}
-                  index={index}
-                  isOpen={collapseToOpen === key}
-                  mainField={mainField}
-                  onMoveItem={handleMoveComponentField}
-                  onClickToggle={handleToggle(key)}
-                  onDeleteComponent={() => {
-                    removeFieldRow(name, index);
-                    toggleCollapses();
-                  }}
-                  toggleCollapses={toggleCollapses}
-                  onCancel={handleCancel}
-                  onDropItem={handleDropItem}
-                  onGrabItem={handleGrabItem}
-                >
-                  {layout.map((row, index) => {
-                    return (
-                      <Grid gap={4} key={index}>
-                        {row.map(({ size, ...field }) => {
-                          /**
-                           * Layouts are built from schemas so they don't understand the complete
-                           * schema tree, for components we append the parent name to the field name
-                           * because this is the structure for the data & permissions also understand
-                           * the nesting involved.
-                           */
-                          const completeFieldName = `${nameWithIndex}.${field.name}`;
+                {layout.map((row, index) => {
+                  return (
+                    <Grid gap={4} key={index}>
+                      {row.map(({ size, ...field }) => {
+                        /**
+                         * Layouts are built from schemas so they don't understand the complete
+                         * schema tree, for components we append the parent name to the field name
+                         * because this is the structure for the data & permissions also understand
+                         * the nesting involved.
+                         */
+                        const completeFieldName = `${nameWithIndex}.${field.name}`;
 
-                          return (
-                            <GridItem col={size} key={completeFieldName} s={12} xs={12}>
-                              {children({ ...field, name: completeFieldName })}
-                            </GridItem>
-                          );
-                        })}
-                      </Grid>
-                    );
-                  })}
-                </Component>
-              </ComponentProvider>
-            );
+                        return (
+                          <GridItem col={size} key={completeFieldName} s={12} xs={12}>
+                            {children({ ...field, name: completeFieldName })}
+                          </GridItem>
+                        );
+                      })}
+                    </Grid>
+                  );
+                })}
+              </Component>
+            </ComponentProvider>
+          );
+        })}
+        <TextButtonCustom disabled={disabled} onClick={handleClick} startIcon={<Plus />}>
+          {formatMessage({
+            id: getTranslation('containers.EditView.add.new-entry'),
+            defaultMessage: 'Add an entry',
           })}
-        </AccordionContent>
-        <AccordionFooter>
-          <Flex justifyContent="center" height="48px" background="neutral0">
-            <TextButtonCustom disabled={disabled} onClick={handleClick} startIcon={<Plus />}>
-              {formatMessage({
-                id: getTranslation('containers.EditView.add.new-entry'),
-                defaultMessage: 'Add an entry',
-              })}
-            </TextButtonCustom>
-          </Flex>
-        </AccordionFooter>
-      </AccordionGroup>
+        </TextButtonCustom>
+      </AccordionRoot>
     </Box>
   );
 };
 
+const AccordionRoot = styled(Accordion.Root)<{ $error?: string }>`
+  border: 1px solid
+    ${({ theme, $error }) => ($error ? theme.colors.danger600 : theme.colors.neutral200)};
+`;
+
 const TextButtonCustom = styled(TextButton)`
-  height: 100%;
   width: 100%;
-  border-radius: 0 0 4px 4px;
   display: flex;
   justify-content: center;
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral200};
+  padding-inline: ${(props) => props.theme.spaces[6]};
+  padding-block: ${(props) => props.theme.spaces[3]};
+
+  &:not([disabled]) {
+    cursor: pointer;
+
+    &:hover {
+      background-color: ${(props) => props.theme.colors.primary100};
+    }
+  }
+
   span {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 1.4rem;
+    line-height: 2.4rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition: background-color 120ms ${(props) => props.theme.easings.easeOutQuad};
   }
 `;
-
-/* -------------------------------------------------------------------------------------------------
- * Accordion
- * -----------------------------------------------------------------------------------------------*/
-
-const AccordionFooter = styled(Box)`
-  overflow: hidden;
-  border-bottom: 1px solid ${({ theme }) => theme.colors.neutral200};
-  border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
-  border-left: 1px solid ${({ theme }) => theme.colors.neutral200};
-  border-radius: 0 0 ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius};
-`;
-
-const AccordionContent = styled(Box)`
-  border-bottom: none;
-
-  /* add the borders and make sure the top is transparent to avoid jumping with the hover effect  */
-  & > div > div {
-    border: 1px solid ${({ theme }) => theme.colors.neutral200};
-    border-top-color: transparent;
-  }
-
-  /* the top accordion _does_ need a border though */
-  & > div:first-child > div {
-    border-top: 1px solid ${({ theme }) => theme.colors.neutral200};
-  }
-
-  /* Reset all the border-radius' */
-  & > div > div,
-  & > div > div > div {
-    border-radius: unset;
-  }
-
-  /* Give the border radius back to the first accordion */
-  & > div:first-child > div,
-  & > div:first-child > div > div {
-    border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;
-  }
-
-  & > div > div[data-strapi-expanded='true'] {
-    border: 1px solid ${({ theme }) => theme.colors.primary600};
-  }
-`;
-
-interface AccordionGroupProps {
-  children: React.ReactNode;
-  error?: string;
-}
-
-const AccordionGroup = ({ children, error }: AccordionGroupProps) => {
-  return (
-    <KeyboardNavigable attributeName="data-strapi-accordion-toggle">
-      {children}
-      {error && (
-        <Box paddingTop={1}>
-          <Typography variant="pi" textColor="danger600">
-            {error}
-          </Typography>
-        </Box>
-      )}
-    </KeyboardNavigable>
-  );
-};
 
 /* -------------------------------------------------------------------------------------------------
  * Field
  * -----------------------------------------------------------------------------------------------*/
-
-const CustomIconButton = styled(IconButton)<{ expanded?: boolean }>`
-  background-color: transparent;
-
-  svg {
-    path {
-      fill: ${({ theme, expanded }) =>
-        expanded ? theme.colors.primary600 : theme.colors.neutral600};
-    }
-  }
-
-  &:hover {
-    svg {
-      path {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-    }
-  }
-`;
-
-const ActionsFlex = styled(Flex)<{ expanded?: boolean }>`
-  & .drag-handle {
-    background: unset;
-
-    svg {
-      path {
-        fill: ${({ theme, expanded }) => (expanded ? theme.colors.primary600 : undefined)};
-      }
-    }
-
-    &:hover {
-      svg {
-        path {
-          /* keeps the hover style of the accordion */
-          fill: ${({ theme }) => theme.colors.primary600};
-        }
-      }
-    }
-  }
-`;
 
 interface ComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel' | 'onMoveItem'>,
@@ -404,27 +324,25 @@ interface ComponentProps
   attribute: Schema.Attribute.Component<`${string}.${string}`, boolean>;
   disabled?: boolean;
   index: number;
-  isOpen?: boolean;
   name: string;
-  onClickToggle: () => void;
   onDeleteComponent?: React.MouseEventHandler<HTMLButtonElement>;
   toggleCollapses: () => void;
   children: React.ReactNode;
+  __temp_key__: string;
 }
 
 const Component = ({
   disabled,
   index,
-  isOpen,
   name,
   mainField = {
     name: 'id',
     type: 'integer',
   },
   children,
-  onClickToggle,
   onDeleteComponent,
   toggleCollapses,
+  __temp_key__,
   ...dragProps
 }: ComponentProps) => {
   const { formatMessage } = useIntl();
@@ -463,52 +381,46 @@ const Component = ({
   }, [dragPreviewRef, index]);
 
   const composedAccordionRefs = useComposedRefs<HTMLButtonElement>(accordionRef, dragRef);
-  const composedBoxRefs = useComposedRefs(boxRef, dropRef);
+  const composedBoxRefs = useComposedRefs<HTMLDivElement>(
+    boxRef as React.RefObject<HTMLDivElement>,
+    dropRef
+  );
 
   return (
-    <Box ref={(ref) => composedBoxRefs(ref!)}>
+    <>
       {isDragging ? (
         <Preview />
       ) : (
-        <Accordion expanded={isOpen} onToggle={onClickToggle} id={name} size="S">
-          <AccordionToggle
-            action={
-              disabled ? null : (
-                <ActionsFlex gap={0} expanded={isOpen}>
-                  <CustomIconButton
-                    expanded={isOpen}
-                    borderWidth={0}
-                    onClick={onDeleteComponent}
-                    label={formatMessage({
-                      id: getTranslation('containers.Edit.delete'),
-                      defaultMessage: 'Delete',
-                    })}
-                    icon={<Trash />}
-                  />
-                  <IconButton
-                    className="drag-handle"
-                    ref={composedAccordionRefs}
-                    forwardedAs="div"
-                    role="button"
-                    borderWidth={0}
-                    tabIndex={0}
-                    onClick={(e) => e.stopPropagation()}
-                    data-handler-id={handlerId}
-                    label={formatMessage({
-                      id: getTranslation('components.DragHandle-label'),
-                      defaultMessage: 'Drag',
-                    })}
-                    onKeyDown={handleKeyDown}
-                  >
-                    <Drag />
-                  </IconButton>
-                </ActionsFlex>
-              )
-            }
-            title={displayValue}
-            togglePosition="left"
-          />
-          <DSAccordionContent>
+        <Accordion.Item ref={composedBoxRefs} value={__temp_key__}>
+          <Accordion.Header>
+            <Accordion.Trigger>{displayValue}</Accordion.Trigger>
+            <Accordion.Actions>
+              <IconButton
+                borderWidth={0}
+                onClick={onDeleteComponent}
+                label={formatMessage({
+                  id: getTranslation('containers.Edit.delete'),
+                  defaultMessage: 'Delete',
+                })}
+              >
+                <Trash />
+              </IconButton>
+              <IconButton
+                ref={composedAccordionRefs}
+                borderWidth={0}
+                onClick={(e) => e.stopPropagation()}
+                data-handler-id={handlerId}
+                label={formatMessage({
+                  id: getTranslation('components.DragHandle-label'),
+                  defaultMessage: 'Drag',
+                })}
+                onKeyDown={handleKeyDown}
+              >
+                <Drag />
+              </IconButton>
+            </Accordion.Actions>
+          </Accordion.Header>
+          <Accordion.Content>
             <Flex
               direction="column"
               alignItems="stretch"
@@ -518,18 +430,18 @@ const Component = ({
             >
               {children}
             </Flex>
-          </DSAccordionContent>
-        </Accordion>
+          </Accordion.Content>
+        </Accordion.Item>
       )}
-    </Box>
+    </>
   );
 };
 
 const Preview = () => {
-  return <StyledSpan as="span" padding={6} background="primary100" />;
+  return <StyledSpan tag="span" padding={6} background="primary100" />;
 };
 
-const StyledSpan = styled(Box)`
+const StyledSpan = styled<BoxComponent<'span'>>(Box)`
   display: block;
   outline: 1px dashed ${({ theme }) => theme.colors.primary500};
   outline-offset: -1px;

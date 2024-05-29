@@ -3,7 +3,8 @@ import strapiUtils from '@strapi/utils';
 import { UID, Schema, Modules } from '@strapi/types';
 import { getService } from '../../utils';
 
-const { isVisibleAttribute } = strapiUtils.contentTypes;
+const { isVisibleAttribute, isScalarAttribute, getDoesAttributeRequireValidation } =
+  strapiUtils.contentTypes;
 const { isAnyToMany } = strapiUtils.relations;
 const { PUBLISHED_AT_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 
@@ -174,6 +175,58 @@ const getDeepPopulate = (
 };
 
 /**
+ * Deeply populate a model based on UID. Only populating fields that require validation.
+ * @param uid - Unique identifier of the model
+ * @param options - Options to apply while populating
+ * @param level - Current level of nested call
+ */
+const getValidatableFieldsPopulate = (
+  uid: UID.Schema,
+  {
+    initialPopulate = {} as any,
+    countMany = false,
+    countOne = false,
+    maxLevel = Infinity,
+  }: PopulateOptions = {},
+  level = 1
+) => {
+  if (level > maxLevel) {
+    return {};
+  }
+
+  const model = strapi.getModel(uid);
+
+  return Object.entries(model.attributes).reduce((populateAcc, [attributeName, attribute]) => {
+    if (!getDoesAttributeRequireValidation(attribute)) {
+      // If the attribute does not require validation, skip it
+      return populateAcc;
+    }
+
+    if (isScalarAttribute(attribute)) {
+      return merge(populateAcc, {
+        [attributeName]: true,
+      });
+    }
+
+    return merge(
+      populateAcc,
+      getPopulateFor(
+        attributeName,
+        model,
+        {
+          // @ts-expect-error - improve types
+          initialPopulate: initialPopulate?.[attributeName],
+          countMany,
+          countOne,
+          maxLevel,
+        },
+        level
+      )
+    );
+  }, {});
+};
+
+/**
  * getDeepPopulateDraftCount works recursively on the attributes of a model
  * creating a populated object to count all the unpublished relations within the model
  * These relations can be direct to this content type or contained within components/dynamic zones
@@ -187,7 +240,7 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
   let hasRelations = false;
 
   const populate = Object.keys(model.attributes).reduce((populateAcc: any, attributeName) => {
-    const attribute: any = model.attributes[attributeName];
+    const attribute: Schema.Attribute.AnyAttribute = model.attributes[attributeName];
 
     switch (attribute.type) {
       case 'relation': {
@@ -205,24 +258,29 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
           attribute.component
         );
         if (childHasRelations) {
-          populateAcc[attributeName] = { populate };
+          populateAcc[attributeName] = {
+            populate,
+          };
           hasRelations = true;
         }
         break;
       }
       case 'dynamiczone': {
-        const dzPopulate = (attribute.components || []).reduce((acc: any, componentUID: any) => {
-          const { populate, hasRelations: childHasRelations } =
+        const dzPopulateFragment = attribute.components?.reduce((acc, componentUID) => {
+          const { populate: componentPopulate, hasRelations: componentHasRelations } =
             getDeepPopulateDraftCount(componentUID);
-          if (childHasRelations) {
+
+          if (componentHasRelations) {
             hasRelations = true;
-            return merge(acc, populate);
+
+            return { ...acc, [componentUID]: { populate: componentPopulate } };
           }
+
           return acc;
         }, {});
 
-        if (!isEmpty(dzPopulate)) {
-          populateAcc[attributeName] = { populate: dzPopulate };
+        if (!isEmpty(dzPopulateFragment)) {
+          populateAcc[attributeName] = { on: dzPopulateFragment };
         }
         break;
       }
@@ -274,4 +332,10 @@ const buildDeepPopulate = (uid: UID.CollectionType) => {
   return getService('populate-builder')(uid).populateDeep(Infinity).countRelations().build();
 };
 
-export { getDeepPopulate, getDeepPopulateDraftCount, getQueryPopulate, buildDeepPopulate };
+export {
+  getDeepPopulate,
+  getDeepPopulateDraftCount,
+  getQueryPopulate,
+  buildDeepPopulate,
+  getValidatableFieldsPopulate,
+};

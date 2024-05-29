@@ -27,8 +27,8 @@ describe('Pagination service', () => {
       const paginationInfo = getPaginationInfo({ pagination });
 
       expect(paginationInfo).toEqual({
-        page: 1,
-        pageSize: defaultLimit,
+        start: 0,
+        limit: defaultLimit,
       });
     });
 
@@ -38,8 +38,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: pagination.pageSize,
+          start: 0,
+          limit: pagination.pageSize,
         });
       });
 
@@ -48,8 +48,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: maxLimit,
+          start: 0,
+          limit: maxLimit,
         });
       });
 
@@ -58,8 +58,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: 1,
+          start: 0,
+          limit: 1,
         });
       });
 
@@ -68,8 +68,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: 1,
+          start: 0,
+          limit: 1,
         });
       });
 
@@ -78,8 +78,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: 1,
+          start: 0,
+          limit: 1,
         });
       });
     });
@@ -161,8 +161,8 @@ describe('Pagination service', () => {
       const paginationInfo = getPaginationInfo({ pagination });
 
       expect(paginationInfo).toEqual({
-        page: 1,
-        pageSize: defaultLimit,
+        start: 0,
+        limit: defaultLimit,
       });
     });
 
@@ -172,8 +172,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: pagination.pageSize,
+          start: 0,
+          limit: pagination.pageSize,
         });
       });
 
@@ -182,8 +182,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: pagination.pageSize,
+          start: 0,
+          limit: pagination.pageSize,
         });
       });
 
@@ -192,8 +192,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: 1,
+          start: 0,
+          limit: 1,
         });
       });
 
@@ -202,8 +202,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: 1,
+          start: 0,
+          limit: 1,
         });
       });
 
@@ -212,8 +212,8 @@ describe('Pagination service', () => {
         const paginationInfo = getPaginationInfo({ pagination });
 
         expect(paginationInfo).toEqual({
-          page: 1,
-          pageSize: 1,
+          start: 0,
+          limit: 1,
         });
       });
     });

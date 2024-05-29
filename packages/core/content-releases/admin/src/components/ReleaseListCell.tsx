@@ -4,7 +4,7 @@
 // import { Link } from '@strapi/design-system';
 // import { Modules, UID } from '@strapi/types';
 // import { useIntl } from 'react-intl';
-// import styled from 'styled-components';
+// import { styled } from 'styled-components';
 
 // import { useGetMappedEntriesInReleasesQuery } from '../services/release';
 // import { useTypedSelector } from '../store/hooks';
@@ -148,7 +148,7 @@
 //                   {releases.map(
 //                     // @ts-expect-error fix when migrating to v5
 //                     ({ id, name }) => (
-//                     <Box key={id} padding={3} as="li">
+//                     <Box key={id} padding={3} tag="li">
 //                       <Link href={`/admin/plugins/content-releases/${id}`} isExternal={false}>
 //                         {name}
 //                       </Link>

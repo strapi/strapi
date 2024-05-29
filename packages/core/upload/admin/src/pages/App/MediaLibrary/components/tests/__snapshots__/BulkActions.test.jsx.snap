@@ -5,7 +5,7 @@ exports[`BulkActions renders 1`] = `
   padding-block-end: 20px;
 }
 
-.c4 {
+.c3 {
   background: #4945ff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -18,36 +18,27 @@ exports[`BulkActions renders 1`] = `
 }
 
 .c1 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
 }
 
-.c3 {
+.c2 {
   font-size: 1.6rem;
   line-height: 1.5;
   color: #666687;
 }
 
-.c7 {
+.c6 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
-  color: #ffffff;
+  color: currentcolor;
 }
 
-.c9 {
+.c8 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -57,19 +48,17 @@ exports[`BulkActions renders 1`] = `
   width: 1px;
 }
 
-.c5 {
+.c4 {
   position: relative;
   outline: none;
 }
 
-.c5[aria-disabled='true'] {
+.c4[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c5:after {
-  -webkit-transition-property: all;
+.c4:after {
   transition-property: all;
-  -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
   border-radius: 8px;
   content: '';
@@ -81,11 +70,11 @@ exports[`BulkActions renders 1`] = `
   border: 2px solid transparent;
 }
 
-.c5:focus-visible {
+.c4:focus-visible {
   outline: none;
 }
 
-.c5:focus-visible:after {
+.c4:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -96,134 +85,70 @@ exports[`BulkActions renders 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c6 {
+.c5 {
   height: 3.2rem;
   border: 1px solid #f5c0b8;
   background: #fcecea;
-}
-
-.c6 svg {
-  height: 1.2rem;
-}
-
-.c6[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c6[aria-disabled='true'] .c2 {
-  color: #666687;
-}
-
-.c6[aria-disabled='true'] svg > g,
-.c6[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c6[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c6[aria-disabled='true']:active .c2 {
-  color: #666687;
-}
-
-.c6[aria-disabled='true']:active svg > g,
-.c6[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c6:hover {
-  background-color: #ffffff;
-}
-
-.c6:active {
-  background-color: #ffffff;
-  border: 1px solid #d02b20;
-}
-
-.c6:active .c2 {
-  color: #d02b20;
-}
-
-.c6:active svg > g,
-.c6:active svg path {
-  fill: #d02b20;
-}
-
-.c6 .c2 {
   color: #b72b1a;
 }
 
-.c6 svg > g,
-.c6 svg path {
-  fill: #b72b1a;
-}
-
-.c8 {
-  height: 3.2rem;
-  border: 1px solid #d9d8ff;
-  background: #f0f0ff;
-}
-
-.c8 svg {
+.c5 svg {
   height: 1.2rem;
 }
 
-.c8[aria-disabled='true'] {
+.c5[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c8[aria-disabled='true'] .c2 {
   color: #666687;
 }
 
-.c8[aria-disabled='true'] svg > g,
-.c8[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c8[aria-disabled='true']:active {
+.c5[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c8[aria-disabled='true']:active .c2 {
   color: #666687;
 }
 
-.c8[aria-disabled='true']:active svg > g,
-.c8[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c8:hover {
+.c5:hover {
   background-color: #ffffff;
 }
 
-.c8:active {
+.c5:active {
   background-color: #ffffff;
-  border: 1px solid #4945ff;
+  border: 1px solid #d02b20;
+  color: #d02b20;
 }
 
-.c8:active .c2 {
-  color: #4945ff;
-}
-
-.c8:active svg > g,
-.c8:active svg path {
-  fill: #4945ff;
-}
-
-.c8 .c2 {
+.c7 {
+  height: 3.2rem;
+  border: 1px solid #d9d8ff;
+  background: #f0f0ff;
   color: #271fe0;
 }
 
-.c8 svg > g,
-.c8 svg path {
-  fill: #271fe0;
+.c7 svg {
+  height: 1.2rem;
+}
+
+.c7[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+}
+
+.c7[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+}
+
+.c7:hover {
+  background-color: #ffffff;
+}
+
+.c7:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+  color: #4945ff;
 }
 
 <div>
@@ -231,13 +156,13 @@ exports[`BulkActions renders 1`] = `
     class="c0 c1"
   >
     <span
-      class="c2 c3"
+      class="c2"
     >
       0 folders - 0 assets selected
     </span>
     <button
       aria-disabled="false"
-      class="c4 c1 c5 c6"
+      class="c3 c1 c4 c5"
       type="button"
     >
       <div
@@ -246,9 +171,9 @@ exports[`BulkActions renders 1`] = `
       >
         <svg
           fill="currentColor"
-          height="1.6rem"
+          height="16"
           viewBox="0 0 32 32"
-          width="1.6rem"
+          width="16"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -257,14 +182,14 @@ exports[`BulkActions renders 1`] = `
         </svg>
       </div>
       <span
-        class="c2 c7"
+        class="c6"
       >
         Delete
       </span>
     </button>
     <button
       aria-disabled="false"
-      class="c4 c1 c5 c8"
+      class="c3 c1 c4 c7"
       type="button"
     >
       <div
@@ -273,9 +198,9 @@ exports[`BulkActions renders 1`] = `
       >
         <svg
           fill="currentColor"
-          height="1.6rem"
+          height="16"
           viewBox="0 0 32 32"
-          width="1.6rem"
+          width="16"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -284,14 +209,14 @@ exports[`BulkActions renders 1`] = `
         </svg>
       </div>
       <span
-        class="c2 c7"
+        class="c6"
       >
         Move
       </span>
     </button>
   </div>
-  <div
-    class="c9"
+  <span
+    class="c8"
   >
     <p
       aria-live="polite"
@@ -311,6 +236,6 @@ exports[`BulkActions renders 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

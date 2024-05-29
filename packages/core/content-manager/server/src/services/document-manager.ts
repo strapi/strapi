@@ -1,6 +1,6 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, errors } from '@strapi/utils';
+import { contentTypes, errors, pagination } from '@strapi/utils';
 import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
@@ -35,6 +35,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       opts: {
         populate?: Modules.Documents.Params.Pick<any, 'populate'>;
         locale?: string | string[] | '*';
+        isPublished?: boolean;
       }
     ) {
       // Will look for a specific locale by default
@@ -53,6 +54,11 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         where.locale = opts.locale;
       }
 
+      // Published is passed, so we filter on it, otherwise we don't filter
+      if (typeof opts.isPublished === 'boolean') {
+        where.publishedAt = { $notNull: opts.isPublished };
+      }
+
       return strapi.db.query(uid).findMany({ populate: opts.populate, where });
     },
 
@@ -62,23 +68,18 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async findPage(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
-      // Pagination
-      const page = Number(opts?.page) || 1;
-      const pageSize = Number(opts?.pageSize) || 10;
+      const params = pagination.withDefaultPagination(opts || {}, {
+        maxLimit: 1000,
+      });
 
       const [documents, total = 0] = await Promise.all([
-        strapi.documents(uid).findMany(opts),
-        strapi.documents(uid).count(opts),
+        strapi.documents(uid).findMany(params),
+        strapi.documents(uid).count(params),
       ]);
 
       return {
         results: documents,
-        pagination: {
-          page,
-          pageSize,
-          pageCount: Math.ceil(total! / pageSize),
-          total,
-        },
+        pagination: pagination.transformPagedPaginationInfo(params, total),
       };
     },
 
@@ -155,7 +156,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     async deleteMany(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
-      opts: DocServiceParams<'findMany'>
+      opts: DocServiceParams<'findMany'> & { locale?: string } = {}
     ) {
       const deletedEntries = await strapi.db.transaction(async () => {
         return Promise.all(documentIds.map(async (id) => this.delete(id, uid, opts)));
@@ -175,20 +176,18 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       return strapi
         .documents(uid)
         .publish({ ...params, documentId: id })
-        .then((result) => result?.entries.at(0));
+        .then((result) => result?.entries);
     },
 
-    async publishMany(
-      documentIds: Modules.Documents.ID[],
-      uid: UID.ContentType,
-      opts: Omit<DocServiceParams<'publish'>, 'documentId'> = {} as any
-    ) {
-      const publishedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(documentIds.map((id) => this.publish(id, uid, opts)));
-      });
+    async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
+      return strapi.db.transaction(async () => {
+        const results = await Promise.all(
+          documentIds.map((documentId) => this.publish(documentId, uid, { locale }))
+        );
 
-      // Return the number of published entities
-      return { count: publishedEntries.length };
+        const publishedEntitiesCount = results.flat().filter(Boolean).length;
+        return publishedEntitiesCount;
+      });
     },
 
     async unpublishMany(
@@ -197,11 +196,20 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
       opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
     ) {
       const unpublishedEntries = await strapi.db.transaction(async () => {
-        return Promise.all(documentIds.map((id) => this.unpublish(id, uid, opts)));
+        return Promise.all(
+          documentIds.map((id) =>
+            strapi
+              .documents(uid)
+              .unpublish({ ...opts, documentId: id })
+              .then((result) => result?.entries)
+          )
+        );
       });
 
+      const unpublishedEntitiesCount = unpublishedEntries.flat().filter(Boolean).length;
+
       // Return the number of unpublished entities
-      return { count: unpublishedEntries.length };
+      return { count: unpublishedEntitiesCount };
     },
 
     async unpublish(
@@ -244,13 +252,14 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
           `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
         );
       }
+
       return sumDraftCounts(document, uid);
     },
 
     async countManyEntriesDraftRelations(
       documentIds: Modules.Documents.ID[],
       uid: UID.CollectionType,
-      locale: string
+      locale: string | string[]
     ) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
@@ -258,15 +267,20 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
         return 0;
       }
 
-      const documents = await strapi.documents(uid).findMany({
+      let localeFilter = {};
+      if (locale) {
+        localeFilter = Array.isArray(locale) ? { locale: { $in: locale } } : { locale };
+      }
+
+      const entities = await strapi.db.query(uid).findMany({
         populate,
-        filters: {
-          documentId: documentIds,
+        where: {
+          documentId: { $in: documentIds },
+          ...localeFilter,
         },
-        locale,
       });
 
-      const totalNumberDraftRelations: number = documents!.reduce(
+      const totalNumberDraftRelations: number = entities!.reduce(
         (count: number, entity: Document) => sumDraftCounts(entity, uid) + count,
         0
       );

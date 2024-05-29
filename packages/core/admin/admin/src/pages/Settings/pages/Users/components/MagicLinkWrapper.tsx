@@ -35,7 +35,9 @@ const MagicLinkWrapper = ({ children, target }: MagicLinkWrapperProps) => {
   return (
     <ContentBox
       endAction={
-        <IconButton label={copyLabel} noBorder icon={<Duplicate />} onClick={handleClick} />
+        <IconButton label={copyLabel} borderWidth={0} onClick={handleClick}>
+          <Duplicate />
+        </IconButton>
       }
       title={target}
       titleEllipsis

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -64,13 +64,13 @@ const setup = (props) => {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <IntlProvider locale="en">
           <MemoryRouter>
             <Header {...withDefaults} />
           </MemoryRouter>
         </IntlProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>
   );
 };

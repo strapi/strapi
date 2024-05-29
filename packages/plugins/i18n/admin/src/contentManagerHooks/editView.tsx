@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Flex, VisuallyHidden } from '@strapi/design-system';
 import { Earth, EarthStriked } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTranslation } from '../utils/getTranslation';
 
@@ -98,8 +98,8 @@ const LabelAction = ({ title, icon }: LabelActionProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Span as="span">
-      <VisuallyHidden as="span">{`(${formatMessage(title)})`}</VisuallyHidden>
+    <Span tag="span">
+      <VisuallyHidden tag="span">{`(${formatMessage(title)})`}</VisuallyHidden>
       {React.cloneElement(icon as React.ReactElement, {
         'aria-hidden': true,
         focusable: false, // See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable

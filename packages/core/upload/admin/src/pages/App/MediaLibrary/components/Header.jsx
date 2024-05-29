@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { Button, Flex, HeaderLayout, Link } from '@strapi/design-system';
+import { useQueryParams, Layouts } from '@strapi/admin/strapi-admin';
+import { Button, Flex, Link } from '@strapi/design-system';
 import { ArrowLeft, Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { stringify } from 'qs';
@@ -29,7 +29,7 @@ export const Header = ({
   };
 
   return (
-    <HeaderLayout
+    <Layouts.Header
       title={formatMessage({
         id: getTrad('plugin.name'),
         defaultMessage: `Media Library`,
@@ -38,7 +38,7 @@ export const Header = ({
         breadcrumbs &&
         folder && (
           <Breadcrumbs
-            as="nav"
+            tag="nav"
             label={formatMessage({
               id: getTrad('header.breadcrumbs.nav.label'),
               defaultMessage: 'Folders navigation',

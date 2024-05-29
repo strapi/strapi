@@ -7,10 +7,10 @@ import {
   useField,
   Form,
 } from '@strapi/admin/strapi-admin';
-import { Alert, Box, FieldLabel, Flex, Link, Tooltip } from '@strapi/design-system';
+import { Alert, Box, Field, Flex, Link, Tooltip } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -78,11 +78,15 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
       }
     : field.value;
 
-  if (!formattedFieldValue || formattedFieldValue.results.length === 0) {
+  if (
+    !formattedFieldValue ||
+    (formattedFieldValue.results.length === 0 && formattedFieldValue.meta.missingCount === 0)
+  ) {
     return (
       <>
-        <FieldLabel>{props.label}</FieldLabel>
+        <Field.Label>{props.label}</Field.Label>
         <Box marginTop={1}>
+          {/* @ts-expect-error – we dont need closeLabel */}
           <StyledAlert variant="default">
             {formatMessage({
               id: 'content-manager.history.content.no-relations',
@@ -98,7 +102,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
 
   return (
     <Box>
-      <FieldLabel>{props.label}</FieldLabel>
+      <Field.Label>{props.label}</Field.Label>
       {results.length > 0 && (
         <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
           {results.map((relationData) => {
@@ -120,7 +124,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
               >
                 <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                   <Tooltip description={label}>
-                    <LinkEllipsis forwardedAs={NavLink} to={href}>
+                    <LinkEllipsis tag={NavLink} to={href}>
                       {label}
                     </LinkEllipsis>
                   </Tooltip>
@@ -132,6 +136,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
         </Flex>
       )}
       {meta.missingCount > 0 && (
+        /* @ts-expect-error – we dont need closeLabel */
         <StyledAlert
           marginTop={1}
           variant="warning"
@@ -153,16 +158,6 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
             { number: meta.missingCount }
           )}
         </StyledAlert>
-      )}
-      {results.length === 0 && meta.missingCount === 0 && (
-        <Box marginTop={1}>
-          <StyledAlert variant="default">
-            {formatMessage({
-              id: 'content-manager.history.content.no-relations',
-              defaultMessage: 'No relations.',
-            })}
-          </StyledAlert>
-        </Box>
       )}
     </Box>
   );
@@ -292,7 +287,7 @@ const VersionInputRenderer = ({
   if (Object.keys(addedAttributes).includes(props.name)) {
     return (
       <Flex direction="column" alignItems="flex-start" gap={1}>
-        <FieldLabel>{props.label}</FieldLabel>
+        <Field.Label>{props.label}</Field.Label>
         <StyledAlert
           width="100%"
           closeLabel="Close"

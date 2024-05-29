@@ -1,7 +1,6 @@
 import { useRBAC } from '@strapi/admin/strapi-admin';
 import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content-manager/strapi-admin';
 import { Box, Flex, Typography } from '@strapi/design-system';
-import { UID } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { useParams } from 'react-router-dom';
 
@@ -11,31 +10,24 @@ import { getTimezoneOffset } from '../utils/time';
 
 import { ReleaseActionMenu } from './ReleaseActionMenu';
 
-import type { PanelComponent } from '@strapi/content-manager/strapi-admin';
+import type { PanelComponent, PanelComponentProps } from '@strapi/content-manager/strapi-admin';
 
-const Panel: PanelComponent = () => {
-  const {
-    slug: contentTypeUid = '',
-    id,
-    locale,
-  } = useParams<{
-    slug: UID.ContentType;
-    id: string;
+const Panel: PanelComponent = ({ model, documentId, collectionType }: PanelComponentProps) => {
+  const { locale } = useParams<{
     locale: string;
   }>();
 
   const {
     edit: { options },
-  } = useDocumentLayout(contentTypeUid);
+  } = useDocumentLayout(model);
   const { formatMessage, formatDate, formatTime } = useIntl();
-  const { collectionType } = useParams<{ collectionType: string }>();
 
   const { allowedActions } = useRBAC(PERMISSIONS);
   const { canRead, canDeleteAction } = allowedActions;
 
   const response = useGetReleasesForEntryQuery({
-    contentTypeUid: contentTypeUid,
-    documentId: id,
+    contentTypeUid: model,
+    documentId,
     locale,
     hasEntryAttached: true,
   });
@@ -57,7 +49,7 @@ const Panel: PanelComponent = () => {
     return null;
   }
 
-  if (collectionType === 'collection-types' && (!id || id === 'create')) {
+  if (collectionType === 'collection-types' && (!documentId || documentId === 'create')) {
     return null;
   }
 

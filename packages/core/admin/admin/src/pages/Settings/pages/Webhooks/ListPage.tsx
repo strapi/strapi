@@ -2,15 +2,11 @@ import * as React from 'react';
 
 import {
   useNotifyAT,
-  ActionLayout,
   BaseCheckbox,
   Button,
-  ContentLayout,
   EmptyStateLayout,
   Flex,
-  HeaderLayout,
   IconButton,
-  Layout,
   Switch,
   Table,
   Tbody,
@@ -30,6 +26,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 
 import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
@@ -153,7 +150,7 @@ const ListPage = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -163,7 +160,7 @@ const ListPage = () => {
         )}
       </Page.Title>
       <Page.Main aria-busy={isLoading}>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
           subtitle={formatMessage({
             id: 'Settings.webhooks.list.description',
@@ -172,14 +169,7 @@ const ListPage = () => {
           primaryAction={
             canCreate &&
             !isLoading && (
-              <LinkButton
-                as={NavLink}
-                startIcon={<Plus />}
-                variant="default"
-                // @ts-expect-error – this is an issue with the DS where as props are not inferred
-                to="create"
-                size="S"
-              >
+              <LinkButton tag={NavLink} startIcon={<Plus />} variant="default" to="create" size="S">
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
                   defaultMessage: 'Create new webhook',
@@ -189,7 +179,7 @@ const ListPage = () => {
           }
         />
         {webhooksToDeleteLength > 0 && canDelete && (
-          <ActionLayout
+          <Layouts.Action
             startActions={
               <>
                 <Typography variant="epsilon" textColor="neutral600">
@@ -217,7 +207,7 @@ const ListPage = () => {
             }
           />
         )}
-        <ContentLayout>
+        <Layouts.Content>
           {numberOfWebhooks > 0 ? (
             <Table
               colCount={5}
@@ -352,9 +342,10 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.update',
                               defaultMessage: 'Update',
                             })}
-                            icon={<Pencil />}
-                            noBorder
-                          />
+                            borderWidth={0}
+                          >
+                            <Pencil />
+                          </IconButton>
                         )}
                         {canDelete && (
                           <IconButton
@@ -367,9 +358,10 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.delete',
                               defaultMessage: 'Delete webhook',
                             })}
-                            icon={<Trash />}
-                            noBorder
-                          />
+                            borderWidth={0}
+                          >
+                            <Trash />
+                          </IconButton>
                         )}
                       </Flex>
                     </Td>
@@ -386,8 +378,7 @@ const ListPage = () => {
               })}
               action={
                 canCreate ? (
-                  // @ts-expect-error – this is an issue with the DS where as props are not inferred
-                  <LinkButton variant="secondary" startIcon={<Plus />} as={NavLink} to="create">
+                  <LinkButton variant="secondary" startIcon={<Plus />} tag={NavLink} to="create">
                     {formatMessage({
                       id: 'Settings.webhooks.list.button.add',
                       defaultMessage: 'Create new webhook',
@@ -397,14 +388,14 @@ const ListPage = () => {
               }
             />
           )}
-        </ContentLayout>
+        </Layouts.Content>
       </Page.Main>
       <ConfirmDialog
         isOpen={showModal}
-        onClose={() => setShowModal((prev) => !prev)}
+        onClose={() => setShowModal(false)}
         onConfirm={confirmDelete}
       />
-    </Layout>
+    </Layouts.Root>
   );
 };
 

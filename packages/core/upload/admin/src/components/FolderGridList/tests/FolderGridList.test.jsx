@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
@@ -11,9 +11,9 @@ const ComponentFixture = () => {
   return (
     <MemoryRouter>
       <IntlProvider locale="en" messages={{}}>
-        <ThemeProvider theme={lightTheme}>
+        <DesignSystemProvider>
           <FolderGridList title="Folder grid list title">Folder grid list children</FolderGridList>
-        </ThemeProvider>
+        </DesignSystemProvider>
       </IntlProvider>
     </MemoryRouter>
   );

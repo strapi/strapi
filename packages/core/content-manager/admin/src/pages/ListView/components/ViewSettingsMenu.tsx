@@ -10,12 +10,13 @@ import {
   Typography,
   useCollator,
   LinkButton,
+  FlexComponent,
 } from '@strapi/design-system';
 import { Cog, ListPlus } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
@@ -43,14 +44,15 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
   return (
     <>
       <IconButton
-        icon={<Cog />}
         label={formatMessage({
           id: 'components.ViewSettings.tooltip',
           defaultMessage: 'View Settings',
         })}
         ref={cogButtonRef}
         onClick={handleToggle}
-      />
+      >
+        <Cog />
+      </IconButton>
       {isVisible && (
         <Popover
           placement="bottom-end"
@@ -65,8 +67,7 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
                 size="S"
                 startIcon={<ListPlus />}
                 variant="secondary"
-                as={NavLink}
-                // @ts-expect-error – inference from the as prop does not work in the DS.
+                tag={NavLink}
                 to={{
                   pathname: 'configurations/list',
                   search: query.plugins
@@ -134,9 +135,9 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
   };
 
   return (
-    <Flex as="fieldset" direction="column" alignItems="stretch" gap={3}>
+    <Flex tag="fieldset" direction="column" alignItems="stretch" gap={3} borderWidth={0}>
       <Flex justifyContent="space-between">
-        <Typography as="legend" variant="pi" fontWeight="bold">
+        <Typography tag="legend" variant="pi" fontWeight="bold">
           {formatMessage({
             id: 'containers.list.displayedFields',
             defaultMessage: 'Displayed fields',
@@ -159,7 +160,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
             <ChackboxWrapper
               wrap="wrap"
               gap={2}
-              as="label"
+              tag="label"
               background={isActive ? 'primary100' : 'transparent'}
               hasRadius
               padding={2}
@@ -179,7 +180,7 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
   );
 };
 
-const ChackboxWrapper = styled(Flex)`
+const ChackboxWrapper = styled<FlexComponent<'label'>>(Flex)`
   :hover {
     background-color: ${(props) => props.theme.colors.primary100};
   }

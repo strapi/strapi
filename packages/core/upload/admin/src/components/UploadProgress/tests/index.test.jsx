@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -34,11 +34,11 @@ const renderCompo = (props) => {
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
           <UploadProgress onCancel={jest.fn()} error={undefined} {...props} />
         </IntlProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>,
     { container: target }
   );
@@ -68,45 +68,21 @@ describe('<UploadProgress />', () => {
       }
 
       .c1 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
         flex-direction: row;
       }
 
       .c4 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
         flex-direction: column;
         gap: 8px;
       }
 
       .c8 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
         flex-direction: row;
         gap: 8px;
       }
@@ -114,6 +90,7 @@ describe('<UploadProgress />', () => {
       .c9 {
         font-size: 1.2rem;
         line-height: 1.33;
+        color: inherit;
       }
 
       .c6:before {
@@ -135,8 +112,6 @@ describe('<UploadProgress />', () => {
       .c7 {
         border: none;
         background: none;
-        width: -webkit-min-content;
-        width: -moz-min-content;
         width: min-content;
         color: #666687;
       }
@@ -168,7 +143,6 @@ describe('<UploadProgress />', () => {
             aria-valuenow="0"
             class="c5 c6"
             role="progressbar"
-            value="0"
           />
           <button
             class="c7"
@@ -185,9 +159,9 @@ describe('<UploadProgress />', () => {
               <svg
                 aria-hidden="true"
                 fill="currentColor"
-                height="1.6rem"
+                height="16"
                 viewBox="0 0 32 32"
-                width="1.6rem"
+                width="16"
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <path
@@ -212,16 +186,8 @@ describe('<UploadProgress />', () => {
       }
 
       .c1 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
         align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
         flex-direction: row;
       }
 
@@ -237,13 +203,14 @@ describe('<UploadProgress />', () => {
 
       <div
         class="c0 c1 c2"
+        error="Error: Something went wrong"
       >
         <svg
           aria-label="Something went wrong"
           fill="currentColor"
-          height="1.6rem"
+          height="16"
           viewBox="0 0 32 32"
-          width="1.6rem"
+          width="16"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path

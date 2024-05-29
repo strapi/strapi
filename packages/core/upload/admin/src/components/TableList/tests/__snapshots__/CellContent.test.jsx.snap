@@ -4,12 +4,11 @@ exports[`TableList | CellContent should render "-" by default when no recognized
 .c0 {
   font-size: 1.4rem;
   line-height: 1.43;
-  color: #32324d;
+  color: currentcolor;
 }
 
 .c1 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -26,7 +25,7 @@ exports[`TableList | CellContent should render "-" by default when no recognized
   >
     -
   </span>
-  <div
+  <span
     class="c1"
   >
     <p
@@ -47,7 +46,7 @@ exports[`TableList | CellContent should render "-" by default when no recognized
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -55,12 +54,11 @@ exports[`TableList | CellContent should render date cell type 1`] = `
 .c0 {
   font-size: 1.4rem;
   line-height: 1.43;
-  color: #32324d;
+  color: currentcolor;
 }
 
 .c1 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -76,7 +74,7 @@ exports[`TableList | CellContent should render date cell type 1`] = `
   >
     Friday, November 18, 2022
   </span>
-  <div
+  <span
     class="c1"
   >
     <p
@@ -97,7 +95,7 @@ exports[`TableList | CellContent should render date cell type 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -105,12 +103,11 @@ exports[`TableList | CellContent should render extension cell type when element 
 .c0 {
   font-size: 1.4rem;
   line-height: 1.43;
-  color: #32324d;
+  color: currentcolor;
 }
 
 .c1 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -126,7 +123,7 @@ exports[`TableList | CellContent should render extension cell type when element 
   >
     PDF
   </span>
-  <div
+  <span
     class="c1"
   >
     <p
@@ -147,7 +144,7 @@ exports[`TableList | CellContent should render extension cell type when element 
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -155,12 +152,11 @@ exports[`TableList | CellContent should render extension cell type with "-" when
 .c0 {
   font-size: 1.4rem;
   line-height: 1.43;
-  color: #32324d;
+  color: currentcolor;
 }
 
 .c1 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -177,7 +173,7 @@ exports[`TableList | CellContent should render extension cell type with "-" when
   >
     -
   </span>
-  <div
+  <span
     class="c1"
   >
     <p
@@ -198,7 +194,7 @@ exports[`TableList | CellContent should render extension cell type with "-" when
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -211,20 +207,9 @@ exports[`TableList | CellContent should render image cell type when element type
 }
 
 .c1 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
 }
 
@@ -238,7 +223,6 @@ exports[`TableList | CellContent should render image cell type when element type
 
 .c4 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -262,7 +246,7 @@ exports[`TableList | CellContent should render image cell type when element type
       pdf
     </span>
   </div>
-  <div
+  <span
     class="c4"
   >
     <p
@@ -283,7 +267,7 @@ exports[`TableList | CellContent should render image cell type when element type
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -296,7 +280,6 @@ exports[`TableList | CellContent should render image cell type when element type
 
 .c2 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -327,7 +310,7 @@ exports[`TableList | CellContent should render image cell type when element type
       />
     </div>
   </span>
-  <div
+  <span
     class="c2"
   >
     <p
@@ -348,7 +331,7 @@ exports[`TableList | CellContent should render image cell type when element type
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -361,20 +344,9 @@ exports[`TableList | CellContent should render image cell type when element type
 }
 
 .c1 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
 }
 
@@ -388,7 +360,6 @@ exports[`TableList | CellContent should render image cell type when element type
 
 .c4 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -422,7 +393,7 @@ exports[`TableList | CellContent should render image cell type when element type
       </svg>
     </span>
   </div>
-  <div
+  <span
     class="c4"
   >
     <p
@@ -443,7 +414,7 @@ exports[`TableList | CellContent should render image cell type when element type
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -451,12 +422,11 @@ exports[`TableList | CellContent should render size cell type when element type 
 .c0 {
   font-size: 1.4rem;
   line-height: 1.43;
-  color: #32324d;
+  color: currentcolor;
 }
 
 .c1 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -472,7 +442,7 @@ exports[`TableList | CellContent should render size cell type when element type 
   >
     21KB
   </span>
-  <div
+  <span
     class="c1"
   >
     <p
@@ -493,7 +463,7 @@ exports[`TableList | CellContent should render size cell type when element type 
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -501,12 +471,11 @@ exports[`TableList | CellContent should render size cell type with "-" when elem
 .c0 {
   font-size: 1.4rem;
   line-height: 1.43;
-  color: #32324d;
+  color: currentcolor;
 }
 
 .c1 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -523,7 +492,7 @@ exports[`TableList | CellContent should render size cell type with "-" when elem
   >
     -
   </span>
-  <div
+  <span
     class="c1"
   >
     <p
@@ -544,7 +513,7 @@ exports[`TableList | CellContent should render size cell type with "-" when elem
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;
 
@@ -552,12 +521,11 @@ exports[`TableList | CellContent should render text cell type 1`] = `
 .c0 {
   font-size: 1.4rem;
   line-height: 1.43;
-  color: #32324d;
+  color: currentcolor;
 }
 
 .c1 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -573,7 +541,7 @@ exports[`TableList | CellContent should render text cell type 1`] = `
   >
     some text
   </span>
-  <div
+  <span
     class="c1"
   >
     <p
@@ -594,6 +562,6 @@ exports[`TableList | CellContent should render text cell type 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

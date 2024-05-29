@@ -1,6 +1,6 @@
-import { Flex, IconButton, Typography } from '@strapi/design-system';
+import { Flex, FlexComponent, IconButton, Typography } from '@strapi/design-system';
 import { CaretDown, Drag, Trash } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface ComponentDragPreviewProps {
   displayedValue: string;
@@ -37,11 +37,11 @@ const ComponentDragPreview = ({ displayedValue }: ComponentDragPreviewProps) => 
       </ToggleButton>
 
       <Flex gap={2}>
-        <IconButton aria-label="" borderWidth={0}>
+        <IconButton withTooltip={false} label="" borderWidth={0}>
           <Trash />
         </IconButton>
 
-        <IconButton aria-label="" borderWidth={0}>
+        <IconButton withTooltip={false} label="" borderWidth={0}>
           <Drag />
         </IconButton>
       </Flex>
@@ -49,7 +49,7 @@ const ComponentDragPreview = ({ displayedValue }: ComponentDragPreviewProps) => 
   );
 };
 
-const DropdownIconWrapper = styled(Flex)`
+const DropdownIconWrapper = styled<FlexComponent>(Flex)`
   border-radius: 50%;
 
   svg {

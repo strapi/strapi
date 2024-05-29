@@ -1,10 +1,7 @@
 import * as React from 'react';
 
 import {
-  ActionLayout,
   Button,
-  ContentLayout,
-  HeaderLayout,
   Table,
   Tbody,
   TFooter,
@@ -15,12 +12,12 @@ import {
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Duplicate, Pencil, Plus, Trash } from '@strapi/icons';
-import { AxiosError } from 'axios';
 import { produce } from 'immer';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { SearchInput } from '../../../../components/SearchInput';
 import { useTypedSelector } from '../../../../core/store/hooks';
@@ -31,6 +28,7 @@ import { useFetchClient } from '../../../../hooks/useFetchClient';
 import { useQueryParams } from '../../../../hooks/useQueryParams';
 import { useRBAC } from '../../../../hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../selectors';
+import { isFetchError } from '../../../../utils/getFetchClient';
 
 import { RoleRow, RoleRowProps } from './components/RoleRow';
 
@@ -74,7 +72,7 @@ const ListPage = () => {
         type: 'RESET_DATA_TO_DELETE',
       });
     } catch (error) {
-      if (error instanceof AxiosError) {
+      if (isFetchError(error)) {
         toggleNotification({
           type: 'danger',
           message: formatAPIError(error),
@@ -130,7 +128,7 @@ const ListPage = () => {
           }
         )}
       </Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         primaryAction={
           canCreate ? (
             <Button onClick={handleNewRoleClick} startIcon={<Plus />} size="S">
@@ -149,10 +147,9 @@ const ListPage = () => {
           id: 'Settings.roles.list.description',
           defaultMessage: 'List of roles',
         })}
-        as="h2"
       />
       {canRead && (
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <SearchInput
               label={formatMessage(
@@ -169,7 +166,7 @@ const ListPage = () => {
         />
       )}
       {canRead && (
-        <ContentLayout>
+        <Layouts.Content>
           <Table
             colCount={colCount}
             rowCount={rowCount}
@@ -237,19 +234,19 @@ const ListPage = () => {
                             id: 'app.utils.duplicate',
                             defaultMessage: 'Duplicate',
                           }),
-                          icon: <Duplicate />,
+                          children: <Duplicate />,
                         } satisfies RoleRowProps['icons'][number]),
                       canUpdate &&
                         ({
                           onClick: () => navigate(role.id.toString()),
                           label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
-                          icon: <Pencil />,
+                          children: <Pencil />,
                         } satisfies RoleRowProps['icons'][number]),
                       canDelete &&
                         ({
                           onClick: handleClickDelete(role),
                           label: formatMessage({ id: 'global.delete', defaultMessage: 'Delete' }),
-                          icon: <Trash />,
+                          children: <Trash />,
                         } satisfies RoleRowProps['icons'][number]),
                     ].filter(Boolean) as RoleRowProps['icons']
                   }
@@ -259,7 +256,7 @@ const ListPage = () => {
               ))}
             </Tbody>
           </Table>
-        </ContentLayout>
+        </Layouts.Content>
       )}
       <ConfirmDialog
         isOpen={isWarningDeleteAllOpened}

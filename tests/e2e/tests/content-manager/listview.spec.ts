@@ -19,14 +19,73 @@ test.describe('List View', () => {
     await expect(page.getByRole('link', { name: /Create new entry/ }).first()).toBeVisible();
   });
 
-  test.skip('A user should be able to perform bulk actions on entries', async ({ page }) => {
+  // Should be enabled once bulk publish is in action
+  test('A user should be able to perform bulk actions on entries', async ({ page }) => {
+    await test.step('bulk publish', async () => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      // Select all entries to publish
+      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+      const items = page.getByRole('gridcell', { name: 'draft' });
+      expect(items).toHaveCount(2);
+      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
+      await checkbox.check();
+      const publishButton = page.getByRole('button', { name: 'Publish' });
+      await publishButton.click();
+
+      // Wait for the selected entries modal to appear
+      await page.waitForSelector(
+        'text=0 entries already published. 2 entries ready to publish. 0 entries waiting for action'
+      );
+
+      const entry1 = page
+        .getByLabel('Publish entries')
+        .getByRole('row', { name: 'West Ham post match analysis' })
+        .getByLabel('Select');
+      const entry2 = page
+        .getByLabel('Publish entries')
+        .getByRole('row', { name: 'Why I prefer football over soccer' })
+        .getByLabel('Select');
+
+      await expect(entry1).toBeChecked();
+      await expect(entry2).toBeChecked();
+
+      const selectAll = page
+        .getByLabel('Publish entries')
+        .getByRole('checkbox', { name: 'Select all entries' });
+      await selectAll.uncheck();
+
+      await page.waitForSelector(
+        'text=0 entries already published. 0 entries ready to publish. 0 entries waiting for action'
+      );
+
+      // Check if the publish button is disabled
+      const publishModalButton = page
+        .getByLabel('Publish entries')
+        .getByRole('button', { name: 'Publish' });
+      expect(await publishModalButton.isDisabled()).toBeTruthy();
+
+      // Select all entries to publish
+      await selectAll.check();
+      await publishModalButton.click();
+
+      // Wait for the confirmation dialog to appear
+      await page.waitForSelector('text=Are you sure you want to publish these entries?');
+
+      const confirmPublishButton = page
+        .getByLabel('Confirmation')
+        .getByRole('button', { name: 'Publish' });
+      await confirmPublishButton.click();
+
+      await expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
+    });
+
     await test.step('bulk unpublish', async () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
 
       await expect(page).toHaveTitle('Article | Strapi');
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      const publishedItems = page.getByRole('gridcell', { name: 'published' });
-      expect(publishedItems).toHaveCount(2);
+      const items = page.getByRole('gridcell', { name: 'publish' });
+      expect(items).toHaveCount(2);
       const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
 
       // Select all entries to unpublish
@@ -42,60 +101,6 @@ test.describe('List View', () => {
       await unpublishButton.click();
 
       await expect(page.getByRole('gridcell', { name: 'draft' })).toHaveCount(2);
-    });
-
-    await test.step('bulk publish', async () => {
-      // Select all entries to publish
-      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
-      await checkbox.check();
-      const publish = page.getByRole('button', { name: 'Publish' });
-      await publish.click();
-
-      // Wait for the selected entries modal to appear
-      await page.waitForSelector(
-        'text=0 entries already published. 2 entries ready to publish. 0 entries waiting for action'
-      );
-      // All entries should be selected
-      const checkboxEntry1 = page
-        .getByLabel('Publish entries')
-        .getByRole('checkbox', { name: 'Select 1' });
-      const checkboxEntry2 = page
-        .getByLabel('Publish entries')
-        .getByRole('checkbox', { name: 'Select 2' });
-      await expect(checkboxEntry1).toBeChecked();
-      await expect(checkboxEntry2).toBeChecked();
-
-      await checkboxEntry1.uncheck();
-      await checkboxEntry2.uncheck();
-
-      await page.waitForSelector(
-        'text=0 entries already published. 0 entries ready to publish. 0 entries waiting for action'
-      );
-
-      const publishButton = page
-        .getByLabel('Publish entries')
-        .getByRole('button', { name: 'Publish' });
-      expect(await publishButton.isDisabled()).toBeTruthy();
-
-      // Select all entries to publish
-      await checkboxEntry1.check();
-      await checkboxEntry2.check();
-
-      const publishModalButton = page
-        .getByLabel('Publish entries')
-        .getByRole('button', { name: 'Publish' });
-      await publishModalButton.click();
-
-      // Wait for the confirmation dialog to appear
-      await page.waitForSelector('text=Are you sure you want to publish these entries?');
-
-      const confirmPublishButton = page
-        .getByLabel('Confirmation')
-        .getByRole('button', { name: 'Publish' });
-      await confirmPublishButton.click();
-
-      await expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
     });
 
     await test.step('bulk delete', async () => {

@@ -3,7 +3,7 @@ import React from 'react';
 import { Avatar, Box, Initials } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetType } from '../../constants';
 import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';

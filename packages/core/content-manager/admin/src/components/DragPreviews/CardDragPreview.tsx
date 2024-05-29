@@ -1,6 +1,6 @@
-import { Flex, Typography } from '@strapi/design-system';
+import { Flex, FlexComponent, Typography } from '@strapi/design-system';
 import { Cross, Drag, Pencil } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface CardDragPreviewProps {
   label: string;
@@ -15,7 +15,7 @@ const CardDragPreview = ({ label, isSibling = false }: CardDragPreviewProps) => 
       gap={3}
       hasRadius
       justifyContent="space-between"
-      isSibling={isSibling}
+      $isSibling={isSibling}
       max-height={`3.2rem`}
       maxWidth="min-content"
     >
@@ -24,13 +24,14 @@ const CardDragPreview = ({ label, isSibling = false }: CardDragPreviewProps) => 
           <Drag />
         </DragButton>
 
-        <TypographyMaxWidth
+        <Typography
           textColor={isSibling ? undefined : 'primary600'}
           fontWeight="bold"
           ellipsis
+          maxWidth="7.2rem"
         >
           {label}
-        </TypographyMaxWidth>
+        </Typography>
       </Flex>
 
       <Flex>
@@ -46,7 +47,7 @@ const CardDragPreview = ({ label, isSibling = false }: CardDragPreviewProps) => 
   );
 };
 
-const ActionBox = styled(Flex)`
+const ActionBox = styled<FlexComponent>(Flex)`
   height: ${({ theme }) => theme.spaces[7]};
 
   &:last-child {
@@ -63,22 +64,18 @@ const DragButton = styled(ActionBox)`
   }
 `;
 
-const FieldContainer = styled(Flex)<{ isSibling: boolean }>`
+const FieldContainer = styled<FlexComponent>(Flex)<{ $isSibling: boolean }>`
   border: 1px solid
-    ${({ theme, isSibling }) => (isSibling ? theme.colors.neutral150 : theme.colors.primary200)};
+    ${({ theme, $isSibling }) => ($isSibling ? theme.colors.neutral150 : theme.colors.primary200)};
 
   svg {
     width: 1rem;
     height: 1rem;
 
     path {
-      fill: ${({ theme, isSibling }) => (isSibling ? undefined : theme.colors.primary600)};
+      fill: ${({ theme, $isSibling }) => ($isSibling ? undefined : theme.colors.primary600)};
     }
   }
-`;
-
-const TypographyMaxWidth = styled(Typography)`
-  max-width: 7.2rem;
 `;
 
 export { CardDragPreview };

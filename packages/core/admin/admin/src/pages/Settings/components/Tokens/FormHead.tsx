@@ -1,14 +1,15 @@
 import * as React from 'react';
 
-import { Button, Flex, HeaderLayout } from '@strapi/design-system';
+import { Button, Flex } from '@strapi/design-system';
 import { Check, ArrowClockwise } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
 import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { BackButton } from '../../../../features/BackButton';
 import { useNotification } from '../../../../features/Notifications';
 import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
-import { useRegenerateTokenMutation } from '../../../../services/api';
+import { useRegenerateTokenMutation } from '../../../../services/transferTokens';
 
 import type { Data } from '@strapi/types';
 
@@ -139,7 +140,7 @@ export const FormHead = <TToken extends Token | null>({
   };
 
   return (
-    <HeaderLayout
+    <Layouts.Header
       title={token?.name || formatMessage(title)}
       primaryAction={
         canEditInputs ? (

@@ -10,8 +10,8 @@ export const Pagination = ({ children, label, activePage, pageCount }) => {
 
   return (
     <PaginationContext.Provider value={paginationValue}>
-      <Box as="nav" aria-label={label}>
-        <Flex as="ul" gap={1}>
+      <Box tag="nav" aria-label={label}>
+        <Flex tag="ul" gap={1}>
           {children}
         </Flex>
       </Box>

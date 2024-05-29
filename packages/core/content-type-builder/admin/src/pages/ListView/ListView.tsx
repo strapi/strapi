@@ -1,5 +1,5 @@
-import { BackButton, useTracking } from '@strapi/admin/strapi-admin';
-import { Box, Button, ContentLayout, Flex, HeaderLayout } from '@strapi/design-system';
+import { BackButton, useTracking, Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Button, Flex } from '@strapi/design-system';
 import { Check, Pencil, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import has from 'lodash/has';
@@ -117,7 +117,7 @@ const ListView = () => {
 
   return (
     <>
-      <HeaderLayout
+      <Layouts.Header
         id="title"
         primaryAction={
           isInDevelopmentMode && (
@@ -170,7 +170,7 @@ const ListView = () => {
         })}
         navigationAction={<BackButton />}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={4}>
           <Flex justifyContent="flex-end">
             <Flex gap={2}>
@@ -195,7 +195,7 @@ const ListView = () => {
             />
           </Box>
         </Flex>
-      </ContentLayout>
+      </Layouts.Content>
     </>
   );
 };

@@ -2,9 +2,9 @@ import React from 'react';
 
 import {
   Button,
-  FieldLabel,
   Flex,
   Grid,
+  Field,
   GridItem,
   Loader,
   ModalBody,
@@ -87,7 +87,7 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
         {({ values, errors, setFieldValue }) => (
           <Form noValidate>
             <ModalHeader>
-              <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+              <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
                 {formatMessage({
                   id: getTrad('modal.folder.move.title'),
                   defaultMessage: 'Move elements to',
@@ -98,13 +98,13 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
             <ModalBody>
               <Grid gap={4}>
                 <GridItem xs={12} col={12}>
-                  <Flex direction="column" alignItems="stretch" gap={1}>
-                    <FieldLabel htmlFor="folder-destination">
+                  <Field.Root id="folder-destination">
+                    <Field.Label>
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
                       })}
-                    </FieldLabel>
+                    </Field.Label>
 
                     <SelectTree
                       options={folderStructure}
@@ -120,16 +120,11 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
                     />
 
                     {errors.destination && (
-                      <Typography
-                        variant="pi"
-                        as="p"
-                        id="folder-destination-error"
-                        textColor="danger600"
-                      >
+                      <Typography variant="pi" tag="p" textColor="danger600">
                         {errors.destination}
                       </Typography>
                     )}
-                  </Flex>
+                  </Field.Root>
                 </GridItem>
               </Grid>
             </ModalBody>

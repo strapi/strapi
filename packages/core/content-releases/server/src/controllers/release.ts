@@ -18,6 +18,11 @@ import { getService, getEntryId } from '../utils';
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
 const releaseController = {
+  /**
+   * Find releases based on documents attached or not to the release.
+   * If `hasEntryAttached` is true, it will return all releases that have the entry attached.
+   * If `hasEntryAttached` is false, it will return all releases that don't have the entry attached.
+   */
   async findByDocumentAttached(ctx: Koa.Context) {
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
