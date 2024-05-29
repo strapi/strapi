@@ -5,12 +5,12 @@ import {
   EmptyStateLayout,
   type EmptyStateLayoutProps,
   Flex,
-  Icon,
   Loader,
   Main,
   MainProps,
 } from '@strapi/design-system';
-import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
+import { WarningCircle } from '@strapi/icons';
+import { EmptyPermissions, EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { useAuth, Permission } from '../features/Auth';
@@ -76,7 +76,7 @@ const Error = (props: ErrorProps) => {
     <PageMain height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
         <EmptyStateLayout
-          icon={<Icon as={ExclamationMarkCircle} width="10rem" />}
+          icon={<WarningCircle width="16rem" />}
           content={formatMessage({
             id: 'anErrorOccurred',
             defaultMessage: 'Woops! Something went wrong. Please, try again.',
@@ -108,7 +108,7 @@ const NoPermissions = (props: NoPermissionsProps) => {
       <Flex alignItems="center" height="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
-            icon={<EmptyPermissions width="10rem" />}
+            icon={<EmptyPermissions width="16rem" />}
             content={formatMessage({
               id: 'app.components.EmptyStateLayout.content-permissions',
               defaultMessage: "You don't have the permissions to access that content",
@@ -141,7 +141,7 @@ const NoData = (props: NoDataProps) => {
       <Flex alignItems="center" height="100%" width="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
-            icon={<EmptyDocuments width="10rem" />}
+            icon={<EmptyDocuments width="16rem" />}
             content={formatMessage({
               id: 'app.components.EmptyStateLayout.content-document',
               defaultMessage: 'No content found',
@@ -233,7 +233,11 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
     return <NoPermissions />;
   }
 
-  return typeof children === 'function' ? children({ permissions: matchingPermissions }) : children;
+  return (
+    <>
+      {typeof children === 'function' ? children({ permissions: matchingPermissions }) : children}
+    </>
+  );
 };
 
 /* -------------------------------------------------------------------------------------------------

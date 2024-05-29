@@ -1,8 +1,7 @@
 import * as React from 'react';
 
 import { useForm } from '@strapi/admin/strapi-admin';
-import { Box, Flex, VisuallyHidden, Typography } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system/v2';
+import { Box, Flex, VisuallyHidden, Typography, Menu } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -88,7 +87,7 @@ const SortDisplayedFields = () => {
 
   return (
     <Flex alignItems="stretch" direction="column" gap={4}>
-      <Typography variant="delta" as="h2">
+      <Typography variant="delta" tag="h2">
         {formatMessage({
           id: getTranslation('containers.SettingPage.view'),
           defaultMessage: 'View',
@@ -123,7 +122,7 @@ const SortDisplayedFields = () => {
             disabled={nonDisplayedFields.length === 0}
             variant="tertiary"
           >
-            <VisuallyHidden as="span">
+            <VisuallyHidden tag="span">
               {formatMessage({
                 id: getTranslation('components.FieldSelect.label'),
                 defaultMessage: 'Add a field',

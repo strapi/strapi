@@ -1,14 +1,15 @@
 import * as React from 'react';
 
 import { useQueryParams } from '@strapi/admin/strapi-admin';
-import { useCollator, useFilter } from '@strapi/design-system';
 import {
+  useCollator,
+  useFilter,
   SubNav,
   SubNavHeader,
   SubNavLink,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/v2';
+} from '@strapi/design-system';
 import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -92,7 +93,7 @@ const LeftMenu = () => {
   });
 
   return (
-    <SubNav ariaLabel={label}>
+    <SubNav aria-label={label}>
       <SubNavHeader
         label={label}
         searchable
@@ -115,9 +116,8 @@ const LeftMenu = () => {
               {section.links.map((link) => {
                 return (
                   <SubNavLink
-                    as={NavLink}
+                    tag={NavLink}
                     key={link.uid}
-                    // @ts-expect-error – DS inference does not work with the `as` prop.
                     to={{
                       pathname: link.to,
                       /**

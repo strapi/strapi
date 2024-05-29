@@ -1,10 +1,4 @@
 /* eslint-disable check-file/filename-naming-convention */
-/**
- * This file can be removed when the content-manager is moved back to it's own plugin,
- * we would just add the APIs that plugin and continue to alias their methods on the
- * main StrapiApp class.
- */
-
 import { INJECTION_ZONES } from './components/InjectionZone';
 import { PLUGIN_ID } from './constants/plugin';
 import { HistoryAction } from './history/components/HistoryAction';
@@ -67,9 +61,9 @@ interface ListViewContext {
    */
   collectionType: string;
   /**
-   * TODO: add comment
+   * The current selected documents in the table
    */
-  documentIds: string[];
+  documents: Document[];
   /**
    * The current content-type's model.
    */
@@ -112,7 +106,7 @@ interface BulkActionComponentProps extends ListViewContext {}
 
 interface BulkActionComponent
   extends DescriptionComponent<BulkActionComponentProps, BulkActionDescription> {
-  actionType?: 'delete' | 'publish' | 'unpublish';
+  type?: 'delete' | 'publish' | 'unpublish';
 }
 
 /* -------------------------------------------------------------------------------------------------

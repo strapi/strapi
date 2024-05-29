@@ -1,5 +1,4 @@
-import { Box, Button, Flex, Typography } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { Box, Button, Flex, Typography, LinkButton } from '@strapi/design-system';
 import { ArrowRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -22,8 +21,7 @@ const GuidedTourHomepage = () => {
     content: (
       <LinkButton
         onClick={() => trackUsage(val.home.trackingEvent)}
-        as={NavLink}
-        // @ts-expect-error - types are not inferred correctly through the as prop.
+        tag={NavLink}
         to={val.home.cta.target}
         endIcon={<ArrowRight />}
       >
@@ -53,7 +51,7 @@ const GuidedTourHomepage = () => {
       background="neutral0"
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
-        <Typography variant="beta" as="h2">
+        <Typography variant="beta" tag="h2">
           {formatMessage({
             id: 'app.components.GuidedTour.title',
             defaultMessage: '3 steps to get started',
@@ -65,17 +63,17 @@ const GuidedTourHomepage = () => {
             return (
               <Box key={section.key}>
                 <Flex>
-                  <Box minWidth={`${30 / 16}rem`} marginRight={5}>
+                  <Box minWidth={`3rem`} marginRight={5}>
                     <Number state={state}>{index + 1}</Number>
                   </Box>
-                  <Typography variant="delta" as="h3">
+                  <Typography variant="delta" tag="h3">
                     {formatMessage(section.title)}
                   </Typography>
                 </Flex>
                 <Flex alignItems="flex-start">
                   <Flex
                     justifyContent="center"
-                    minWidth={`${30 / 16}rem`}
+                    minWidth={`3rem`}
                     marginBottom={3}
                     marginTop={3}
                     marginRight={5}

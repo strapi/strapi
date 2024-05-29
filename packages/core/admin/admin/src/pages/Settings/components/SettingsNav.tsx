@@ -1,15 +1,14 @@
-import { Icon } from '@strapi/design-system';
 import {
   SubNav,
   SubNavHeader,
   SubNavLink,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/v2';
+} from '@strapi/design-system';
 import { Lock } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
@@ -19,7 +18,7 @@ import { SettingsMenu } from '../../../hooks/useSettingsMenu';
  * to do this hack to work a lock at the end. It's a bit hacky.
  */
 
-const CustomIcon = styled(Icon)`
+const CustomIcon = styled(Lock)`
   right: 15px;
   position: absolute;
 `;
@@ -61,7 +60,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
   };
 
   return (
-    <SubNav ariaLabel={label}>
+    <SubNav aria-label={label}>
       <SubNavHeader label={label} />
       <SubNavSections>
         {sections.map((section) => (
@@ -69,17 +68,14 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
             {section.links.map((link) => {
               return (
                 <SubNavLink
-                  as={NavLink}
+                  tag={NavLink}
                   withBullet={link.hasNotification}
-                  // @ts-expect-error – this is an issue with the DS where as props are not inferred
                   to={link.to}
                   onClick={handleClickOnLink(link.to)}
                   key={link.id}
                 >
                   {formatMessage(link.intlLabel)}
-                  {link?.lockIcon && (
-                    <CustomIcon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
-                  )}
+                  {link?.lockIcon && <CustomIcon width="1.5rem" height="1.5rem" />}
                 </SubNavLink>
               );
             })}

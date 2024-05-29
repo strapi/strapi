@@ -1,9 +1,18 @@
 import * as React from 'react';
 
-import { BaseButton, Box, Flex, FocusTrap, Portal, Typography } from '@strapi/design-system';
+import {
+  BaseButton,
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  FocusTrap,
+  Portal,
+  Typography,
+} from '@strapi/design-system';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PreviewWysiwyg } from './PreviewWysiwyg';
 
@@ -63,7 +72,7 @@ const EditorLayout = ({
                 </BoxWithBorder>
                 <Flex alignItems="start" direction="column" flex={1} height="100%" width="100%">
                   <Flex
-                    height={`${48 / 16}rem`}
+                    height="4.8rem"
                     background="neutral100"
                     justifyContent="flex-end"
                     shrink={0}
@@ -104,14 +113,14 @@ const EditorLayout = ({
   );
 };
 
-const ExpandWrapper = styled(Flex)`
+const ExpandWrapper = styled<FlexComponent>(Flex)`
   background: ${({ theme }) =>
     `${theme.colors.neutral800}${Math.floor(0.2 * 255)
       .toString(16)
       .padStart(2, '0')}`};
 `;
 
-const BoxWithBorder = styled(Box)`
+const BoxWithBorder = styled<BoxComponent>(Box)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
@@ -125,8 +134,8 @@ const ExpandButton = styled(BaseButton)`
 
     path {
       fill: ${({ theme }) => theme.colors.neutral700};
-      width: ${12 / 16}rem;
-      height: ${12 / 16}rem;
+      width: 1.2rem;
+      height: 1.2rem;
     }
   }
 `;

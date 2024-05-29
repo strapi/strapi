@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Icon, IconButton, Searchbar, SearchForm } from '@strapi/design-system';
+import { IconButton, Searchbar, SearchForm } from '@strapi/design-system';
 import { Search as SearchIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -71,7 +71,6 @@ const SearchInput = ({
           value={value}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onClear={handleClear}
-          size="S"
           placeholder={placeholder}
         >
           {label}
@@ -84,10 +83,11 @@ const SearchInput = ({
     <IconButton
       ref={iconButtonRef}
       disabled={disabled}
-      icon={<Icon as={SearchIcon} color="neutral800" />}
       label={formatMessage({ id: 'global.search', defaultMessage: 'Search' })}
       onClick={handleToggle}
-    />
+    >
+      <SearchIcon fill="neutral800" />
+    </IconButton>
   );
 };
 

@@ -15,7 +15,7 @@ import {
   Typography,
   DialogFooterProps,
 } from '@strapi/design-system';
-import { Check, ExclamationMarkCircle } from '@strapi/icons';
+import { Check, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useDoc } from '../../../../hooks/useDocument';
@@ -47,7 +47,7 @@ const ConfirmBulkActionDialog = ({
       })}
       isOpen={isOpen}
     >
-      <DialogBody icon={<ExclamationMarkCircle />}>
+      <DialogBody icon={<WarningCircle />}>
         <Flex direction="column" alignItems="stretch" gap={2}>
           {dialogBody}
         </Flex>
@@ -109,7 +109,7 @@ const ConfirmDialogPublishAll = ({
   } = useGetManyDraftRelationCountQuery(
     {
       model,
-      documentIds: selectedEntries.map((id) => id.toString()),
+      documentIds: selectedEntries.map((entry) => entry.documentId),
       locale: query?.plugins?.i18n?.locale,
     },
     {

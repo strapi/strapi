@@ -38,6 +38,35 @@ const data = {
   categories: [],
 };
 
+const createCategory = async (name, locale = 'en') => {
+  const res = await rq({
+    method: 'POST',
+    url: '/content-manager/collection-types/api::category.category',
+    body: {
+      name,
+      locale,
+    },
+  });
+
+  return res.body.data;
+};
+
+const addLocaleToDocument = async (documentId, locale, name) => {
+  const res = await rq({
+    method: 'PUT',
+    url: `/content-manager/collection-types/api::category.category/${documentId}`,
+    qs: {
+      locale,
+    },
+    body: {
+      name,
+      locale,
+    },
+  });
+
+  return res.body.data;
+};
+
 describe('i18n - Content API', () => {
   const builder = createTestBuilder();
 
@@ -202,38 +231,60 @@ describe('i18n - Content API', () => {
     });
   });
 
-  // V5: Fix bulk actions
-  describe.skip('Bulk Delete', () => {
-    test('default locale', async () => {
+  describe('Bulk Delete', () => {
+    test('if locale is not provided, should delete only the default locale', async () => {
+      const enCategory = await createCategory('Category');
+      await addLocaleToDocument(enCategory.documentId, 'es-AR', 'Categoria 1');
+
       const res = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::category.category/actions/bulkDelete',
         body: {
-          ids: [data.categories[0].id],
+          documentIds: [enCategory.documentId],
         },
       });
 
-      const { statusCode, body } = res;
-
-      expect(statusCode).toBe(200);
-      expect(body.data).toMatchObject({ count: 1 });
-      data.categories.shift();
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({ count: 1 });
     });
 
-    test('non-default locale', async () => {
+    test('if locale is provided, should delete the document in the specified locale', async () => {
+      const enCategory = await createCategory('Category 2');
+      await addLocaleToDocument(enCategory.documentId, 'es-AR', 'Categoria 2');
+
       const res = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::category.category/actions/bulkDelete',
+        qs: {
+          locale: 'es-AR',
+        },
         body: {
-          ids: [data.categories[0].id],
+          documentIds: [enCategory.documentId],
         },
       });
 
-      const { statusCode, body } = res;
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({ count: 1 });
+    });
 
-      expect(statusCode).toBe(200);
-      expect(body.data).toMatchObject({ count: 1 });
-      data.categories.shift();
+    test('if one document doesnt exist in the specified locale, should ignore it', async () => {
+      const category1 = await createCategory('Category 3');
+      await addLocaleToDocument(category1.documentId, 'es-AR', 'Categoria 3');
+      const category2 = await createCategory('Category 4');
+
+      const res = await rq({
+        method: 'POST',
+        url: '/content-manager/collection-types/api::category.category/actions/bulkDelete',
+        qs: {
+          locale: 'es-AR',
+        },
+        body: {
+          documentIds: [category1.documentId, category2.documentId],
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject({ count: 1 });
     });
   });
 });

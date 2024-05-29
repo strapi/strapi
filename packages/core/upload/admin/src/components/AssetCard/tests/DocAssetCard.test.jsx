@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 
 import en from '../../../translations/en.json';
@@ -18,7 +18,7 @@ jest.mock('react-intl', () => ({
 describe('DocAssetCard', () => {
   it('snapshots the component', () => {
     const { container } = renderTL(
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <DocAssetCard
           name="hello.png"
           extension="png"
@@ -27,13 +27,119 @@ describe('DocAssetCard', () => {
           onEdit={jest.fn()}
           size="S"
         />
-      </ThemeProvider>
+      </DesignSystemProvider>
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c17 {
+      .c0 {
+        background: #ffffff;
+        border-radius: 4px;
+        border-style: solid;
+        border-width: 1px;
+        border-color: #eaeaef;
+        box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+        height: 100%;
+      }
+
+      .c2 {
+        position: relative;
+      }
+
+      .c11 {
+        background: #ffffff;
+        padding-block: 8px;
+        padding-inline: 8px;
+        border-radius: 4px;
+        border-color: #dcdce4;
+        border: 1px solid #dcdce4;
+        cursor: pointer;
+      }
+
+      .c15 {
+        width: 100%;
+        height: 8.8rem;
+      }
+
+      .c18 {
+        padding-block-start: 8px;
+        padding-inline-end: 12px;
+        padding-block-end: 8px;
+        padding-inline-start: 12px;
+      }
+
+      .c21 {
+        padding-block-start: 4px;
+      }
+
+      .c25 {
+        padding-block-start: 4px;
+        flex-grow: 1;
+      }
+
+      .c28 {
+        background: #eaeaef;
+        padding-inline-end: 8px;
+        padding-inline-start: 8px;
+        min-width: 20px;
+      }
+
+      .c3 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .c5 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+      }
+
+      .c19 {
+        align-items: flex-start;
+        display: flex;
+        flex-direction: row;
+      }
+
+      .c26 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+      }
+
+      .c29 {
+        align-items: center;
+        display: inline-flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+
+      .c22 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        font-weight: 600;
+        color: #32324d;
+      }
+
+      .c23 {
+        font-size: 1.2rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c32 {
+        font-weight: 600;
+        font-size: 1.1rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+        line-height: 1rem;
+        color: #666687;
+      }
+
+      .c14 {
         border: 0;
-        -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
         height: 1px;
         margin: -1px;
@@ -43,181 +149,22 @@ describe('DocAssetCard', () => {
         width: 1px;
       }
 
-      .c25 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        font-weight: 600;
-        color: #32324d;
-      }
-
-      .c26 {
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c34 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-        color: #666687;
-      }
-
-      .c0 {
-        background: #ffffff;
-        border-radius: 4px;
-        border-style: solid;
-        border-width: 1px;
-        border-color: #eaeaef;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        height: 100%;
-      }
-
-      .c2 {
-        position: relative;
-      }
-
-      .c5 {
-        position: start;
-      }
-
-      .c10 {
-        position: end;
-      }
-
-      .c14 {
-        background: #ffffff;
-        padding: 8px;
-        border-radius: 4px;
-        border-color: #dcdce4;
-        border: 1px solid #dcdce4;
-        cursor: pointer;
-      }
-
-      .c18 {
-        width: 100%;
-        height: 5.5rem;
-      }
-
-      .c21 {
-        padding-top: 8px;
-        padding-right: 12px;
-        padding-bottom: 8px;
-        padding-left: 12px;
-      }
-
-      .c24 {
-        padding-top: 4px;
-      }
-
-      .c28 {
-        padding-top: 4px;
-        -webkit-box-flex: 1;
-        -webkit-flex-grow: 1;
-        -ms-flex-positive: 1;
-        flex-grow: 1;
-      }
-
       .c30 {
-        background: #eaeaef;
-        padding-right: 8px;
-        padding-left: 8px;
-        min-width: 20px;
-      }
-
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
-      .c6 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c22 {
-        -webkit-align-items: flex-start;
-        -webkit-box-align: flex-start;
-        -ms-flex-align: flex-start;
-        align-items: flex-start;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-      }
-
-      .c31 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: center;
-        -webkit-justify-content: center;
-        -ms-flex-pack: center;
-        justify-content: center;
-      }
-
-      .c32 {
         border-radius: 4px;
-        height: 1.5rem;
+        padding-block: 0.7rem;
       }
 
-      .c15 {
+      .c12 {
         position: relative;
         outline: none;
       }
 
-      .c15 > svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c15 > svg > g,
-      .c15 > svg path {
-        fill: #ffffff;
-      }
-
-      .c15[aria-disabled='true'] {
+      .c12[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c15:after {
-        -webkit-transition-property: all;
+      .c12:after {
         transition-property: all;
-        -webkit-transition-duration: 0.2s;
         transition-duration: 0.2s;
         border-radius: 8px;
         content: '';
@@ -229,11 +176,11 @@ describe('DocAssetCard', () => {
         border: 2px solid transparent;
       }
 
-      .c15:focus-visible {
+      .c12:focus-visible {
         outline: none;
       }
 
-      .c15:focus-visible:after {
+      .c12:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -244,51 +191,49 @@ describe('DocAssetCard', () => {
         border: 2px solid #4945ff;
       }
 
-      .c9 {
-        height: 18px;
-        min-width: 18px;
+      .c7 {
+        min-width: 1.8rem;
+        height: 1.8rem;
         margin: 0;
+        appearance: none;
         border-radius: 4px;
         border: 1px solid #c0c0cf;
-        -webkit-appearance: none;
         background-color: #ffffff;
         cursor: pointer;
       }
 
-      .c9:checked {
+      .c7:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c9:checked:after {
+      .c7:checked:after {
         content: '';
         display: block;
         position: relative;
         background: url("data:image/svg+xml,%3csvg%20width='10'%20height='8'%20viewBox='0%200%2010%208'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M8.55323%200.396973C8.63135%200.316355%208.76051%200.315811%208.83931%200.395768L9.86256%201.43407C9.93893%201.51157%209.93935%201.6359%209.86349%201.7139L4.06401%207.67724C3.9859%207.75755%203.85707%207.75805%203.77834%207.67834L0.13866%203.99333C0.0617798%203.91549%200.0617102%203.79032%200.138504%203.7124L1.16213%202.67372C1.24038%202.59432%201.36843%202.59422%201.4468%202.67348L3.92174%205.17647L8.55323%200.396973Z'%20fill='white'%20/%3e%3c/svg%3e") no-repeat no-repeat center center;
-        width: 10px;
-        height: 10px;
+        width: 1rem;
+        height: 1rem;
         left: 50%;
         top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c9:checked:disabled:after {
+      .c7:checked:disabled:after {
         background: url("data:image/svg+xml,%3csvg%20width='10'%20height='8'%20viewBox='0%200%2010%208'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M8.55323%200.396973C8.63135%200.316355%208.76051%200.315811%208.83931%200.395768L9.86256%201.43407C9.93893%201.51157%209.93935%201.6359%209.86349%201.7139L4.06401%207.67724C3.9859%207.75755%203.85707%207.75805%203.77834%207.67834L0.13866%203.99333C0.0617798%203.91549%200.0617102%203.79032%200.138504%203.7124L1.16213%202.67372C1.24038%202.59432%201.36843%202.59422%201.4468%202.67348L3.92174%205.17647L8.55323%200.396973Z'%20fill='%238E8EA9'%20/%3e%3c/svg%3e") no-repeat no-repeat center center;
       }
 
-      .c9:disabled {
+      .c7:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c9:indeterminate {
+      .c7:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c9:indeterminate:after {
+      .c7:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -298,53 +243,40 @@ describe('DocAssetCard', () => {
         background-color: #ffffff;
         left: 50%;
         top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c9:indeterminate:disabled {
+      .c7:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c9:indeterminate:disabled:after {
+      .c7:indeterminate:disabled:after {
         background-color: #8e8ea9;
       }
 
-      .c7 > * {
-        margin-left: 0;
-        margin-right: 0;
-      }
-
-      .c7 > * + * {
-        margin-left: 8px;
-      }
-
-      .c8 {
+      .c6 {
         position: absolute;
         top: 12px;
         left: 12px;
       }
 
-      .c12 {
+      .c8 {
         position: absolute;
         top: 12px;
         right: 12px;
       }
 
-      .c29 {
+      .c27 {
         margin-left: auto;
-        -webkit-flex-shrink: 0;
-        -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c33 {
+      .c31 {
         margin-left: 4px;
       }
 
-      .c23 {
+      .c20 {
         word-break: break-all;
       }
 
@@ -352,37 +284,31 @@ describe('DocAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c16 {
+      .c13 {
         border-color: #dcdce4;
-        height: 2rem;
-        width: 2rem;
+        height: 3.2rem;
+        width: 3.2rem;
+        color: #8e8ea9;
       }
 
-      .c16 svg g,
-      .c16 svg path {
-        fill: #8e8ea9;
+      .c13:hover,
+      .c13:focus {
+        color: #666687;
       }
 
-      .c16:hover svg g,
-      .c16:focus svg g,
-      .c16:hover svg path,
-      .c16:focus svg path {
-        fill: #666687;
+      .c13[aria-disabled='true'] {
+        color: #666687;
       }
 
-      .c16[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c27 {
+      .c24 {
         text-transform: uppercase;
       }
 
-      .c13 {
+      .c10 {
         opacity: 0;
       }
 
-      .c13:focus-within {
+      .c10:focus-within {
         opacity: 1;
       }
 
@@ -390,17 +316,17 @@ describe('DocAssetCard', () => {
         cursor: pointer;
       }
 
-      .c1:hover .c11 {
+      .c1:hover .c9 {
         opacity: 1;
       }
 
-      .c20 svg {
-        font-size: 3rem;
+      .c17 svg {
+        font-size: 4.8rem;
       }
 
-      .c19 {
+      .c16 {
         border-radius: 4px 4px 0 0;
-        background: linear-gradient(180deg,#ffffff 0%,#f6f6f9 121.48%);
+        background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
       }
 
       <div>
@@ -415,118 +341,105 @@ describe('DocAssetCard', () => {
           >
             <div>
               <div
-                class="c5 c6 c7 c8"
+                class="c5 c6"
               >
-                <div
-                  class=""
-                >
-                  <input
-                    aria-labelledby=":r0:-title"
-                    class="c9"
-                    type="checkbox"
-                  />
-                </div>
+                <input
+                  aria-labelledby=":r0:-title"
+                  class="c7"
+                  type="checkbox"
+                />
               </div>
             </div>
             <div
-              class="c10 c6 c7 c11 c12 c13"
+              class="c5 c8 c9 c10"
             >
-              <span>
-                <button
-                  aria-disabled="false"
-                  aria-labelledby=":r1:"
-                  class="c14 c3 c15 c16"
-                  tabindex="0"
-                  type="button"
-                >
-                  <span
-                    class="c17"
-                  >
-                    Edit
-                  </span>
-                  <svg
-                    aria-hidden="true"
-                    fill="none"
-                    focusable="false"
-                    height="1rem"
-                    viewBox="0 0 24 24"
-                    width="1rem"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      clip-rule="evenodd"
-                      d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 0 1 1.887 0l3.118 3.118ZM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0Z"
-                      fill="#212134"
-                      fill-rule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </span>
-            </div>
-            <div
-              class="c18 c3 c19"
-            >
-              <span
-                class="c20"
+              <button
+                aria-disabled="false"
+                class="c11 c3 c12 c13"
+                data-state="closed"
+                type="button"
               >
                 <svg
-                  aria-label="hello.png"
-                  fill="none"
-                  height="1rem"
-                  viewBox="0 0 24 33"
-                  width="1rem"
+                  aria-hidden="true"
+                  fill="currentColor"
+                  focusable="false"
+                  height="16"
+                  viewBox="0 0 32 32"
+                  width="16"
                   xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
-                    clip-rule="evenodd"
-                    d="m16.39.749 6.915 7.377A2.59 2.59 0 0 1 24 9.877v19.638c0 1.381-1.042 2.493-2.337 2.493H2.337C1.042 32.008 0 30.896 0 29.515V2.5C0 1.827.253 1.22.695.75 1.137.277 1.705.008 2.337.008h12.41c.6 0 1.2.27 1.643.74Zm.473 7.983h5.116L15.82 2.197V7.62c0 .607.474 1.112 1.042 1.112ZM2.337 30.559h19.326c.537 0 .98-.471.98-1.044V10.18h-5.78c-1.326 0-2.4-1.145-2.4-2.56V1.456H2.337a.949.949 0 0 0-.695.303c-.19.203-.284.472-.284.741v27.015c0 .573.442 1.044.979 1.044Zm3.358-5.248h12.442c.379 0 .695.326.726.718 0 .392-.316.718-.694.718H5.695c-.38 0-.695-.326-.695-.718 0-.392.316-.718.695-.718Zm12.442-5.287H5.695c-.38 0-.695.327-.695.718 0 .392.316.718.695.718h12.474c.378 0 .694-.326.694-.718 0-.391-.347-.718-.726-.718ZM5.695 14.738h12.442c.379 0 .726.326.726.718 0 .391-.316.718-.694.718H5.695c-.38 0-.695-.327-.695-.718 0-.392.316-.718.695-.718Z"
-                    fill="#C0C0CF"
-                    fill-rule="evenodd"
+                    d="m28.414 9.171-5.585-5.586a2 2 0 0 0-2.829 0L4.586 19A1.98 1.98 0 0 0 4 20.414V26a2 2 0 0 0 2 2h5.586A1.98 1.98 0 0 0 13 27.414L28.414 12a2 2 0 0 0 0-2.829M24 13.585 18.414 8l3-3L27 10.585z"
+                  />
+                </svg>
+                <span
+                  class="c14"
+                >
+                  Edit
+                </span>
+              </button>
+            </div>
+            <div
+              class="c15 c3 c16"
+            >
+              <span
+                class="c17"
+              >
+                <svg
+                  aria-label="hello.png"
+                  fill="currentColor"
+                  height="16"
+                  viewBox="0 0 32 32"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="m26.708 10.293-7-7A1 1 0 0 0 19 3H7a2 2 0 0 0-2 2v22a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V11a1 1 0 0 0-.293-.707M19 11V5.5l5.5 5.5z"
                   />
                 </svg>
               </span>
             </div>
           </div>
           <div
-            class="c21"
+            class="c18"
           >
             <div
-              class="c22"
+              class="c19"
             >
               <div
-                class="c23"
+                class="c20"
               >
                 <div
-                  class="c24"
+                  class="c21"
                 >
                   <h2
-                    class="c25"
+                    class="c22"
                     id=":r0:-title"
                   >
                     hello.png
                   </h2>
                 </div>
                 <div
-                  class="c26"
+                  class="c23"
                 >
                   <span
-                    class="c27"
+                    class="c24"
                   >
                     png
                   </span>
                 </div>
               </div>
               <div
-                class="c28 c6"
+                class="c25 c26"
               >
                 <div
-                  class="c29"
+                  class="c27"
                 >
                   <div
-                    class="c30 c31 c32 c33"
+                    class="c28 c29 c30 c31"
                   >
                     <span
-                      class="c34"
+                      class="c32"
                     >
                       Doc
                     </span>
@@ -536,8 +449,8 @@ describe('DocAssetCard', () => {
             </div>
           </div>
         </article>
-        <div
-          class="c17"
+        <span
+          class="c14"
         >
           <p
             aria-live="polite"
@@ -557,7 +470,7 @@ describe('DocAssetCard', () => {
             id="live-region-alert"
             role="alert"
           />
-        </div>
+        </span>
       </div>
     `);
   });

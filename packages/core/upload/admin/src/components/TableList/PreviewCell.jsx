@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { Avatar, Box, Icon, Initials } from '@strapi/design-system';
+import { Avatar, Box, Initials } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetType } from '../../constants';
 import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
@@ -28,7 +28,7 @@ export const PreviewCell = ({ type, content }) => {
   if (type === 'folder') {
     return (
       <Initials background="secondary100" textColor="secondary600">
-        <Icon color="secondary500" width={`${16 / 16}rem`} height={`${16 / 16}rem`} as={Folder} />
+        <Folder fill="secondary500" width="1.6rem" height="1.6rem" />
       </Initials>
     );
   }

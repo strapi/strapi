@@ -1,14 +1,15 @@
 import { Fragment } from 'react';
 
-import { Box, Icon, TextButton } from '@strapi/design-system';
 import {
+  Box,
+  TextButton,
   SubNav,
   SubNavHeader,
   SubNavLink,
   SubNavLinkSection,
   SubNavSection,
   SubNavSections,
-} from '@strapi/design-system/v2';
+} from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -24,7 +25,7 @@ export const ContentTypeBuilderNav = () => {
 
   return (
     <SubNav
-      ariaLabel={formatMessage({
+      aria-label={formatMessage({
         id: `${getTrad('plugin.name')}`,
         defaultMessage: 'Content-Types Builder',
       })}
@@ -60,8 +61,7 @@ export const ContentTypeBuilderNav = () => {
                     <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
                       {link.links.map((subLink: any) => (
                         <SubNavLink
-                          as={NavLink}
-                          // @ts-expect-error verify if "to" is needed
+                          tag={NavLink}
                           to={subLink.to}
                           active={subLink.active}
                           key={subLink.name}
@@ -77,8 +77,7 @@ export const ContentTypeBuilderNav = () => {
                 }
 
                 return (
-                  // @ts-expect-error verify if "to" is needed
-                  <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
+                  <SubNavLink tag={NavLink} to={link.to} active={link.active} key={link.name}>
                     {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
                   </SubNavLink>
                 );
@@ -88,7 +87,7 @@ export const ContentTypeBuilderNav = () => {
               <Box paddingLeft={7}>
                 <TextButton
                   onClick={section.customLink.onClick}
-                  startIcon={<Icon as={Plus} width={`${8 / 16}rem`} height={`${8 / 16}rem`} />}
+                  startIcon={<Plus width="0.8rem" height="0.8rem" />}
                   marginTop={2}
                 >
                   {formatMessage({

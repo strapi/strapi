@@ -1,10 +1,17 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography, useComposedRefs } from '@strapi/design-system';
+import {
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  Typography,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { Cross, Drag, Pencil } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
 import { ItemTypes } from '../../../constants/dragAndDrop';
@@ -65,7 +72,7 @@ const DraggableCard = ({
     }
   }, [isDraggingSibling]);
 
-  const composedRefs = useComposedRefs<HTMLSpanElement>(dragRef, objectRef);
+  const composedRefs = useComposedRefs(dragRef, objectRef);
 
   return (
     <FieldWrapper ref={dropRef}>
@@ -82,7 +89,7 @@ const DraggableCard = ({
         >
           <Flex gap={3}>
             <DragButton
-              as="span"
+              tag="span"
               aria-label={formatMessage(
                 {
                   id: getTranslation('components.DraggableCard.move.field'),
@@ -91,6 +98,7 @@ const DraggableCard = ({
                 { item: label }
               )}
               onClick={(e) => e.stopPropagation()}
+              // @ts-expect-error – TODO: fix this TS error
               ref={composedRefs}
             >
               <Drag />
@@ -112,7 +120,7 @@ const DraggableCard = ({
               )}
               type="button"
             >
-              <Pencil />
+              <Pencil width="1.2rem" height="1.2rem" />
             </ActionButton>
             <ActionButton
               onClick={onRemoveField}
@@ -126,7 +134,7 @@ const DraggableCard = ({
               )}
               type="button"
             >
-              <Cross />
+              <Cross width="1.2rem" height="1.2rem" />
             </ActionButton>
           </Flex>
         </FieldContainer>
@@ -146,6 +154,11 @@ const ActionButton = styled.button`
   display: flex;
   align-items: center;
   height: ${({ theme }) => theme.spaces[7]};
+  color: ${({ theme }) => theme.colors.neutral600};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.neutral700};
+  }
 
   &:last-child {
     padding: 0 ${({ theme }) => theme.spaces[3]};
@@ -156,28 +169,14 @@ const DragButton = styled(ActionButton)`
   padding: 0 ${({ theme }) => theme.spaces[3]};
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
   cursor: all-scroll;
-
-  svg {
-    width: ${12 / 16}rem;
-    height: ${12 / 16}rem;
-  }
 `;
 
-const FieldContainer = styled(Flex)`
-  max-height: ${32 / 16}rem;
+const FieldContainer = styled<FlexComponent>(Flex)`
+  max-height: 3.2rem;
   cursor: pointer;
-
-  svg {
-    width: ${10 / 16}rem;
-    height: ${10 / 16}rem;
-
-    path {
-      fill: ${({ theme }) => theme.colors.neutral600};
-    }
-  }
 `;
 
-const FieldWrapper = styled(Box)`
+const FieldWrapper = styled<BoxComponent>(Box)`
   &:last-child {
     padding-right: ${({ theme }) => theme.spaces[3]};
   }

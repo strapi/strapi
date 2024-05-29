@@ -58,9 +58,10 @@ const EditLocale = (props: EditLocaleProps) => {
             name: props.name,
           }
         )}
-        icon={<Pencil />}
         borderWidth={0}
-      />
+      >
+        <Pencil />
+      </IconButton>
       {visible ? <EditModal {...props} onClose={() => setVisible(false)} /> : null}
     </>
   );
@@ -149,7 +150,7 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
         validationSchema={LOCALE_SCHEMA}
       >
         <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" as="h2" id={titleId}>
+          <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={titleId}>
             {formatMessage({
               id: getTranslation('Settings.list.actions.edit'),
               defaultMessage: 'Edit a locale',
@@ -165,7 +166,7 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
             variant="simple"
           >
             <Flex justifyContent="space-between">
-              <Typography as="h2" variant="beta">
+              <Typography tag="h2" variant="beta">
                 {formatMessage({
                   id: getTranslation('Settings.locales.modal.title'),
                   defaultMessage: 'Configuration',

@@ -1,14 +1,14 @@
 import * as React from 'react';
 
 import { Code } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';
 
-const CodeBlock = styled.pre.attrs({ role: 'code' })`
+const CodeBlock = styled.pre`
   border-radius: ${({ theme }) => theme.borderRadius};
   background-color: ${({ theme }) => theme.colors.neutral100};
   max-width: 100%;

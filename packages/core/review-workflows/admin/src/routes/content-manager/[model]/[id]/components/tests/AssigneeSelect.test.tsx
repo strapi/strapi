@@ -1,11 +1,11 @@
-import { unstable_useDocument } from '@strapi/plugin-content-manager/strapi-admin';
+import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
 import { render as renderRTL, waitFor, server } from '@tests/utils';
 import { rest } from 'msw';
 import { Route, Routes } from 'react-router-dom';
 
 import { AssigneeSelect } from '../AssigneeSelect';
 
-jest.mock('@strapi/plugin-content-manager/strapi-admin', () => ({
+jest.mock('@strapi/content-manager/strapi-admin', () => ({
   unstable_useDocument: jest.fn().mockReturnValue({
     document: {
       documentId: '12345',
@@ -40,6 +40,7 @@ describe('AssigneeSelect', () => {
     await waitFor(() => expect(queryByText('John Doe')).not.toBeInTheDocument());
 
     await user.click(getByRole('combobox'));
+    await waitFor(() => expect(queryByText('Loading content...')).not.toBeInTheDocument());
 
     await findByText('John Doe');
   });
@@ -118,10 +119,8 @@ describe('AssigneeSelect', () => {
           return res.once(
             ctx.status(500),
             ctx.json({
-              data: {
-                error: {
-                  message: 'Server side error message',
-                },
+              error: {
+                message: 'Server side error message',
               },
             })
           );
@@ -129,12 +128,13 @@ describe('AssigneeSelect', () => {
       )
     );
 
-    const { getByRole, getByText, user, findByText } = render();
+    const { getByRole, getByText, queryByText, user, findByText } = render();
 
     await user.click(getByRole('combobox'));
+    await waitFor(() => expect(queryByText('Loading content...')).not.toBeInTheDocument());
     await user.click(getByText('John Doe'));
 
-    await findByText('There was an unknown error response from the API');
+    await findByText('Server side error message');
 
     console.error = origConsoleError;
   });

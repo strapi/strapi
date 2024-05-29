@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Typography } from '@strapi/design-system';
+import { Typography, TypographyComponent } from '@strapi/design-system';
 import {
   HeadingFive,
   HeadingFour,
@@ -10,39 +10,39 @@ import {
   HeadingTwo,
 } from '@strapi/icons';
 import { Editor } from 'slate';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
 import { type Block } from '../utils/types';
 
-const H1 = styled(Typography).attrs({ as: 'h1' })`
-  font-size: ${42 / 16}rem;
+const H1 = styled<TypographyComponent<'h1'>>(Typography).attrs({ tag: 'h1' })`
+  font-size: 4.2rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-const H2 = styled(Typography).attrs({ as: 'h2' })`
-  font-size: ${35 / 16}rem;
+const H2 = styled<TypographyComponent<'h2'>>(Typography).attrs({ tag: 'h2' })`
+  font-size: 3.5rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-const H3 = styled(Typography).attrs({ as: 'h3' })`
-  font-size: ${29 / 16}rem;
+const H3 = styled<TypographyComponent<'h3'>>(Typography).attrs({ tag: 'h3' })`
+  font-size: 2.9rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-const H4 = styled(Typography).attrs({ as: 'h4' })`
-  font-size: ${24 / 16}rem;
+const H4 = styled<TypographyComponent<'h4'>>(Typography).attrs({ tag: 'h4' })`
+  font-size: 2.4rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-const H5 = styled(Typography).attrs({ as: 'h5' })`
-  font-size: ${20 / 16}rem;
+const H5 = styled<TypographyComponent<'h5'>>(Typography).attrs({ tag: 'h5' })`
+  font-size: 2rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 
-const H6 = styled(Typography).attrs({ as: 'h6' })`
-  font-size: 1rem;
+const H6 = styled<TypographyComponent<'h6'>>(Typography).attrs({ tag: 'h6' })`
+  font-size: 1.6rem;
   line-height: ${({ theme }) => theme.lineHeights[1]};
 `;
 

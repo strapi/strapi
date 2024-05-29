@@ -14,7 +14,7 @@ export function useContentTypes(): {
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
 
-  const { data = [], isLoading, error } = useGetContentTypesQuery();
+  const { data, isLoading, error } = useGetContentTypesQuery();
 
   React.useEffect(() => {
     if (error) {
@@ -25,25 +25,9 @@ export function useContentTypes(): {
     }
   }, [error, formatAPIError, toggleNotification]);
 
-  // the return value needs to be memoized, because intantiating
-  // an empty array as default value would lead to an unstable return
-  // value, which later on triggers infinite loops if used in the
-  // dependency arrays of other hooks
-  const collectionTypes = React.useMemo(() => {
-    return data.filter(
-      (contentType) => contentType.kind === 'collectionType' && contentType.isDisplayed
-    );
-  }, [data]);
-
-  const singleTypes = React.useMemo(() => {
-    return data.filter(
-      (contentType) => contentType.kind !== 'collectionType' && contentType.isDisplayed
-    );
-  }, [data]);
-
   return {
     isLoading,
-    collectionTypes,
-    singleTypes,
+    collectionTypes: data?.collectionType ?? [],
+    singleTypes: data?.singleType ?? [],
   };
 }

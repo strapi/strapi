@@ -1,14 +1,17 @@
 /* eslint-disable import/export */
 import * as React from 'react';
 
-import { Flex, SingleSelectOption, SingleSelect, Typography } from '@strapi/design-system';
 import {
+  Flex,
+  SingleSelectOption,
+  SingleSelect,
+  Typography,
   Dots,
   NextLink,
   PageLink,
   Pagination as PaginationImpl,
   PreviousLink,
-} from '@strapi/design-system/v2';
+} from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
@@ -164,7 +167,7 @@ const PageSize = ({ options = ['10', '20', '50', '100'] }: Pagination.PageSizePr
           </SingleSelectOption>
         ))}
       </SingleSelect>
-      <Typography textColor="neutral600" as="span">
+      <Typography textColor="neutral600" tag="span">
         {formatMessage({
           id: 'components.PageFooter.select',
           defaultMessage: 'Entries per page',
@@ -268,11 +271,7 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
 
   return (
     <PaginationImpl activePage={activePage} pageCount={pageCount}>
-      <PreviousLink
-        as={Link}
-        // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
-        to={{ search: stringify({ ...query, page: activePage - 1 }) }}
-      >
+      <PreviousLink tag={Link} to={{ search: stringify({ ...query, page: activePage - 1 }) }}>
         {formatMessage({
           id: 'components.pagination.go-to-previous',
           defaultMessage: 'Go to previous page',
@@ -282,11 +281,9 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
         if (typeof item === 'number') {
           return (
             <PageLink
-              as={Link}
-              active={item === activePage}
+              tag={Link}
               key={item}
               number={item}
-              // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
               to={{ search: stringify({ ...query, page: item }) }}
             >
               {formatMessage(
@@ -300,11 +297,7 @@ const Links = ({ boundaryCount = 1, siblingCount = 1 }: Pagination.LinksProps) =
         return <Dots key={item} />;
       })}
 
-      <NextLink
-        as={Link}
-        // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
-        to={{ search: stringify({ ...query, page: activePage + 1 }) }}
-      >
+      <NextLink tag={Link} to={{ search: stringify({ ...query, page: activePage + 1 }) }}>
         {formatMessage({
           id: 'components.pagination.go-to-next',
           defaultMessage: 'Go to next page',

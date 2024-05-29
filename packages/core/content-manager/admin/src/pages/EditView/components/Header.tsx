@@ -8,11 +8,11 @@ import {
   useStrapiApp,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import { Flex, Icon, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
-import { Cog, ExclamationMarkCircle, Pencil, Trash } from '@strapi/icons';
+import { Flex, SingleSelect, SingleSelectOption, Typography } from '@strapi/design-system';
+import { ListPlus, Pencil, Trash, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { RelativeTime } from '../../../components/RelativeTime';
 import {
@@ -66,7 +66,7 @@ const Header = ({ isCreating, status, title: documentTitle = 'Untitled' }: Heade
         gap="80px"
         alignItems="flex-start"
       >
-        <Typography variant="alpha" as="h1">
+        <Typography variant="alpha" tag="h1">
           {title}
         </Typography>
         <HeaderToolbar />
@@ -298,20 +298,24 @@ const Information = ({ activeTab }: InformationProps) => {
       borderColor="neutral150"
       direction="column"
       marginTop={2}
-      marginLeft="-4px"
-      marginRight="-4px"
-      as="dl"
+      tag="dl"
       padding={5}
       gap={3}
       alignItems="flex-start"
-      width="100%"
+      /**
+       * The menu content has a padding of 4px, but we want our divider (the border top applied) to
+       * be flush with the menu content. So we need to adjust the margin & width to account for the padding.
+       */
+      marginLeft="-0.4rem"
+      marginRight="-0.4rem"
+      width="calc(100% + 8px)"
     >
       {information.map((info) => (
         <Flex gap={1} direction="column" alignItems="flex-start" key={info.label}>
-          <Typography as="dt" variant="pi" fontWeight="bold">
+          <Typography tag="dt" variant="pi" fontWeight="bold">
             {info.label}
           </Typography>
-          <Typography as="dd" variant="pi" textColor="neutral600">
+          <Typography tag="dd" variant="pi" textColor="neutral600">
             {info.value}
           </Typography>
         </Flex>
@@ -372,7 +376,7 @@ const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model
       id: 'app.links.configure-view',
       defaultMessage: 'Configure the view',
     }),
-    icon: <StyledCog />,
+    icon: <ListPlus />,
     onClick: () => {
       navigate(`../${collectionType}/${model}/configurations/edit`);
     },
@@ -381,16 +385,6 @@ const ConfigureTheViewAction: DocumentActionComponent = ({ collectionType, model
 };
 
 ConfigureTheViewAction.type = 'configure-the-view';
-
-/**
- * Because the icon system is completely broken, we have to do
- * this to remove the fill from the cog.
- */
-const StyledCog = styled(Cog)`
-  path {
-    fill: currentColor;
-  }
-`;
 
 const EditTheModelAction: DocumentActionComponent = ({ model }) => {
   const navigate = useNavigate();
@@ -401,7 +395,7 @@ const EditTheModelAction: DocumentActionComponent = ({ model }) => {
       id: 'content-manager.link-to-ctb',
       defaultMessage: 'Edit the model',
     }),
-    icon: <StyledPencil />,
+    icon: <Pencil />,
     onClick: () => {
       navigate(`/plugins/content-type-builder/content-types/${model}`);
     },
@@ -410,16 +404,6 @@ const EditTheModelAction: DocumentActionComponent = ({ model }) => {
 };
 
 EditTheModelAction.type = 'edit-the-model';
-
-/**
- * Because the icon system is completely broken, we have to do
- * this to remove the fill from the cog.
- */
-const StyledPencil = styled(Pencil)`
-  path {
-    fill: currentColor;
-  }
-`;
 
 const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionType, document }) => {
   const navigate = useNavigate();
@@ -436,7 +420,7 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
       id: 'content-manager.actions.delete.label',
       defaultMessage: 'Delete document',
     }),
-    icon: <StyledTrash />,
+    icon: <Trash />,
     dialog: {
       type: 'dialog',
       title: formatMessage({
@@ -445,8 +429,8 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
       }),
       content: (
         <Flex direction="column" gap={2}>
-          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
-          <Typography as="p" variant="omega" textAlign="center">
+          <WarningCircle width="24px" height="24px" fill="danger600" />
+          <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.delete.dialog.body',
               defaultMessage: 'Are you sure?',
@@ -505,16 +489,6 @@ const DeleteAction: DocumentActionComponent = ({ documentId, model, collectionTy
 };
 
 DeleteAction.type = 'delete';
-
-/**
- * Because the icon system is completely broken, we have to do
- * this to remove the fill from the cog.
- */
-const StyledTrash = styled(Trash)`
-  path {
-    fill: currentColor;
-  }
-`;
 
 const DEFAULT_HEADER_ACTIONS = [EditTheModelAction, ConfigureTheViewAction, DeleteAction];
 

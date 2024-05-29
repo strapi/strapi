@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { InputProps, useField } from '@strapi/admin/strapi-admin';
-import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
+import { Field, Flex, IconButton } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -10,7 +10,7 @@ import { EditFieldLayout } from '../../../../../hooks/useDocumentLayout';
 import { getTranslation } from '../../../../../utils/translations';
 import { transformDocument } from '../../../utils/data';
 import { createDefaultForm } from '../../../utils/forms';
-import { InputRendererProps } from '../../InputRenderer';
+import { type InputRendererProps } from '../../InputRenderer';
 
 import { Initializer } from './Initializer';
 import { NonRepeatableComponent } from './NonRepeatable';
@@ -20,7 +20,12 @@ interface ComponentInputProps
   extends Omit<Extract<EditFieldLayout, { type: 'component' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {
   labelAction?: React.ReactNode;
-  renderInput?: (props: InputRendererProps) => React.ReactNode;
+  children: (props: InputRendererProps) => React.ReactNode;
+  /**
+   * We need layout to come from the props, and not via a hook, because Content History needs
+   * a way to modify the normal component layout to add hidden fields.
+   */
+  layout: EditFieldLayout[][];
 }
 
 const ComponentInput = ({
@@ -48,24 +53,14 @@ const ComponentInput = ({
   };
 
   return (
-    <Box>
+    <Field.Root error={field.error} required={required}>
       <Flex justifyContent="space-between">
-        <Flex paddingBottom={1}>
-          <Typography
-            textColor="neutral800"
-            htmlFor={name}
-            variant="pi"
-            fontWeight="bold"
-            as="label"
-          >
-            {label}
-            {attribute.repeatable && (
-              <>&nbsp;({Array.isArray(field.value) ? field.value.length : 0})</>
-            )}
-            {required && <Typography textColor="danger600">*</Typography>}
-          </Typography>
-          {labelAction && <Box paddingLeft={1}>{labelAction}</Box>}
-        </Flex>
+        <Field.Label action={labelAction}>
+          {label}
+          {attribute.repeatable && (
+            <>&nbsp;({Array.isArray(field.value) ? field.value.length : 0})</>
+          )}
+        </Field.Label>
 
         {showResetComponent && (
           <IconButton
@@ -73,43 +68,38 @@ const ComponentInput = ({
               id: getTranslation('components.reset-entry'),
               defaultMessage: 'Reset Entry',
             })}
-            icon={<Trash />}
             borderWidth={0}
             onClick={() => {
               field.onChange(name, null);
             }}
-          />
+          >
+            <Trash />
+          </IconButton>
         )}
       </Flex>
-      <Flex direction="column" alignItems="stretch" gap={1}>
-        {/**
-         * if the field isn't repeatable then we display a button to start the field
-         * TODO: should this just live in the `NonRepeatableComponent`?
-         */}
-        {!attribute.repeatable && !field.value && (
-          <Initializer disabled={disabled} name={name} onClick={handleInitialisationClick} />
-        )}
-        {!attribute.repeatable && field.value ? (
-          <NonRepeatableComponent
-            attribute={attribute}
-            name={name}
-            disabled={disabled}
-            {...props}
-          />
-        ) : null}
-        {attribute.repeatable && (
-          <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props} />
-        )}
-      </Flex>
-    </Box>
+      {/**
+       * if the field isn't repeatable then we display a button to start the field
+       * TODO: should this just live in the `NonRepeatableComponent`?
+       */}
+      {!attribute.repeatable && !field.value && (
+        <Initializer disabled={disabled} name={name} onClick={handleInitialisationClick} />
+      )}
+      {!attribute.repeatable && field.value ? (
+        <NonRepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>
+          {props.children}
+        </NonRepeatableComponent>
+      ) : null}
+      {attribute.repeatable && (
+        <RepeatableComponent attribute={attribute} name={name} disabled={disabled} {...props}>
+          {props.children}
+        </RepeatableComponent>
+      )}
+      <Field.Error />
+    </Field.Root>
   );
 };
 
-// const LabelAction = styled(Box)`
-//   svg path {
-//     fill: ${({ theme }) => theme.colors.neutral500};
-//   }
-// `;
+const MemoizedComponentInput = React.memo(ComponentInput);
 
-export { ComponentInput };
+export { MemoizedComponentInput as ComponentInput };
 export type { ComponentInputProps };

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { within } from '@testing-library/dom';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
@@ -44,13 +44,13 @@ const setup = (
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <MemoryRouter>
           <IntlProvider locale="en">
             <BulkMoveButton {...props} />
           </IntlProvider>
         </MemoryRouter>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>
   );
 };

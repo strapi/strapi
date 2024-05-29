@@ -108,6 +108,8 @@ packages/generators/app/files/public/
 schema.graphql
 dist
 .nx
+.tsbuildinfo
+.eslintcache
 
 ############################
 # Example app
@@ -126,8 +128,9 @@ front-workspace.code-workspace
 .yarnrc
 
 ############################
-# Yarn
+# Package managers
 ############################
+
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -135,6 +138,9 @@ front-workspace.code-workspace
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+yarn-error.log
+pnpm-debug.log
+npm-debug.log
 
 ############################
 # Playwright

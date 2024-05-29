@@ -1,9 +1,49 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddStage should render a list of stages 1`] = `
-.c9 {
+.c0 {
+  margin-inline-start: -250px;
+  position: fixed;
+  left: 50%;
+  top: 4.6rem;
+  z-index: 10;
+  width: 50rem;
+}
+
+.c2 {
+  background: #ffffff;
+  padding-block-start: 12px;
+  padding-inline-end: 16px;
+  padding-block-end: 12px;
+  padding-inline-start: 16px;
+  border-color: #eaeaef;
+  border: 1px solid #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+}
+
+.c1 {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.c5 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c4 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
+}
+
+.c6 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,108 +53,17 @@ exports[`AddStage should render a list of stages 1`] = `
   width: 1px;
 }
 
-.c0 {
-  margin-left: -250px;
-  position: fixed;
-  left: 50%;
-  top: 2.875rem;
-  z-index: 10;
-  width: 31.25rem;
-}
-
-.c1 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.c8 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
+.c3 {
+  border-radius: 26px;
   color: #8e8ea9;
 }
 
-.c2 {
-  background: #ffffff;
-  padding-top: 12px;
-  padding-right: 16px;
-  padding-bottom: 12px;
-  padding-left: 16px;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-}
-
-.c4 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c6 > circle {
-  fill: #eaeaef;
-}
-
-.c6 > path {
-  fill: #666687;
-}
-
-.c3 {
-  border-radius: 26px;
-}
-
-.c3 svg {
-  height: 24px;
-  width: 24px;
-}
-
-.c3 svg > path {
-  fill: #666687;
-}
-
 .c3:hover {
-  color: #4945ff !important;
-}
-
-.c3:hover .c7 {
-  color: #4945ff !important;
-}
-
-.c3:hover .c5 > circle {
-  fill: #4945ff;
-}
-
-.c3:hover .c5 > path {
-  fill: #f6f6f9;
-}
-
-.c3:active .c7 {
   color: #4945ff;
 }
 
-.c3:active .c5 > circle {
-  fill: #4945ff;
-}
-
-.c3:active .c5 > path {
-  fill: #f6f6f9;
+.c3:active {
+  color: #4945ff;
 }
 
 <div>
@@ -124,38 +73,30 @@ exports[`AddStage should render a list of stages 1`] = `
   <button
     class="c2 c3"
   >
-    <div
+    <span
       class="c4"
     >
-      <svg
-        aria-hidden="true"
-        class="c5 c6"
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <circle
-          cx="12"
-          cy="12"
-          fill="#212134"
-          r="12"
-        />
-        <path
-          d="M17 12.569c0 .124-.1.224-.225.224h-3.981v3.982c0 .124-.101.225-.226.225h-1.136a.225.225 0 0 1-.226-.225v-3.981H7.226A.225.225 0 0 1 7 12.567v-1.136c0-.125.1-.226.225-.226h3.982V7.226c0-.124.1-.225.224-.225h1.138c.124 0 .224.1.224.225v3.982h3.982c.124 0 .225.1.225.224v1.138Z"
-          fill="#F6F6F9"
-        />
-      </svg>
       <span
-        class="c7 c8"
+        class="c5"
       >
+        <svg
+          aria-hidden="true"
+          fill="currentColor"
+          height="2.4rem"
+          viewBox="0 0 32 32"
+          width="2.4rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M16 3a13 13 0 1 0 13 13A13.016 13.016 0 0 0 16 3m5 14h-4v4a1 1 0 0 1-2 0v-4h-4a1 1 0 0 1 0-2h4v-4a1 1 0 0 1 2 0v4h4a1 1 0 0 1 0 2"
+          />
+        </svg>
         Add stage
       </span>
-    </div>
+    </span>
   </button>
-  <div
-    class="c9"
+  <span
+    class="c6"
   >
     <p
       aria-live="polite"
@@ -175,6 +116,6 @@ exports[`AddStage should render a list of stages 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

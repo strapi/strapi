@@ -4,12 +4,11 @@ import * as React from 'react';
 
 import { Page, useTracking, ConfirmDialog, useRBAC, Table } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Flex, IconButton, TFooter, Typography } from '@strapi/design-system';
-import { Link, LinkButton } from '@strapi/design-system/v2';
+import { Flex, IconButton, TFooter, Typography, Link, LinkButton } from '@strapi/design-system';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { LimitsModal } from '../../components/LimitsModal';
 import { CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME } from '../../constants';
@@ -138,8 +137,7 @@ export const ReviewWorkflowsListView = () => {
             <LinkButton
               startIcon={<Plus />}
               size="S"
-              as={NavLink}
-              // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
+              tag={NavLink}
               to="create"
               onClick={handleCreateClick}
             >
@@ -191,7 +189,7 @@ export const ReviewWorkflowsListView = () => {
                   }}
                   key={workflow.id}
                 >
-                  <Table.Cell width={`${250 / 16}rem`}>
+                  <Table.Cell width="25rem">
                     <Typography textColor="neutral800" fontWeight="bold" ellipsis>
                       {workflow.name}
                     </Typography>
@@ -216,7 +214,6 @@ export const ReviewWorkflowsListView = () => {
                     <Flex alignItems="center" justifyContent="end">
                       {canRead || canUpdate ? (
                         <ActionLink
-                          // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
                           to={`${workflow.id}`}
                           aria-label={formatMessage(
                             {
@@ -231,20 +228,22 @@ export const ReviewWorkflowsListView = () => {
                       ) : null}
                       {workflows.length > 1 && canDelete ? (
                         <IconButton
-                          aria-label={formatMessage(
+                          withTooltip={false}
+                          label={formatMessage(
                             {
                               id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
                               defaultMessage: 'Delete {name}',
                             },
                             { name: 'Default workflow' }
                           )}
-                          icon={<Trash />}
                           borderWidth={0}
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteWorkflow(String(workflow.id));
                           }}
-                        />
+                        >
+                          <Trash />
+                        </IconButton>
                       ) : null}
                     </Flex>
                   </Table.Cell>
@@ -288,27 +287,22 @@ export const ReviewWorkflowsListView = () => {
 
 const ActionLink = styled(Link)`
   align-items: center;
-  height: ${32 / 16}rem;
   display: flex;
   justify-content: center;
   padding: ${({ theme }) => `${theme.spaces[2]}}`};
-  width: ${32 / 16}rem;
+  & > span {
+    line-height: 1rem;
+    font-size: 1rem;
+  }
 
-  svg {
-    height: ${12 / 16}rem;
-    width: ${12 / 16}rem;
-
-    path {
-      fill: ${({ theme }) => theme.colors.neutral500};
-    }
+  & svg > path {
+    fill: ${({ theme }) => theme.colors.neutral500};
   }
 
   &:hover,
   &:focus {
-    svg {
-      path {
-        fill: ${({ theme }) => theme.colors.neutral800};
-      }
+    svg > path {
+      fill: ${({ theme }) => theme.colors.neutral800};
     }
   }
 `;

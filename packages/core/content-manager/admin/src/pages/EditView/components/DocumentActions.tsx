@@ -15,19 +15,18 @@ import {
   DialogFooter,
   DialogProps,
   Flex,
-  Icon,
   ModalBody,
   ModalHeader,
   ModalLayout,
   Radio,
   Typography,
   VisuallyHidden,
+  Menu,
 } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system/v2';
-import { CrossCircle, ExclamationMarkCircle, More } from '@strapi/icons';
+import { CrossCircle, More, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
-import styled, { DefaultTheme } from 'styled-components';
+import { styled, DefaultTheme } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
@@ -89,7 +88,7 @@ interface NotificationOptions {
 interface ModalOptions {
   type: 'modal';
   title: string;
-  content: React.ReactNode;
+  content: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
   footer: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
   onClose?: () => void;
 }
@@ -276,7 +275,7 @@ const DocumentActionsMenu = ({
         variant={variant}
       >
         <More aria-hidden focusable={false} />
-        <VisuallyHidden as="span">
+        <VisuallyHidden tag="span">
           {label ||
             formatMessage({
               id: 'content-manager.containers.edit.panels.default.more-actions',
@@ -295,7 +294,7 @@ const DocumentActionsMenu = ({
               key={action.id}
             >
               <Flex justifyContent="space-between" gap={4}>
-                <Flex color={convertActionVariantToColor(action.variant)} gap={2} as="span">
+                <Flex color={convertActionVariantToColor(action.variant)} gap={2} tag="span">
                   {action.icon}
                   {action.label}
                 </Flex>
@@ -439,7 +438,7 @@ const DocumentActionModal = ({
   title,
   onClose,
   footer: Footer,
-  content,
+  content: Content,
   onModalClose,
 }: DocumentActionModalProps) => {
   const id = React.useId();
@@ -459,11 +458,13 @@ const DocumentActionModal = ({
   return (
     <ModalLayout borderRadius="4px" overflow="hidden" onClose={handleClose} labelledBy={id}>
       <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
+        <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={id}>
           {title}
         </Typography>
       </ModalHeader>
-      <ModalBody>{content}</ModalBody>
+      <ModalBody>
+        {typeof Content === 'function' ? <Content onClose={handleClose} /> : Content}
+      </ModalBody>
       <Box
         paddingTop={4}
         paddingBottom={4}
@@ -828,8 +829,8 @@ const UnpublishAction: DocumentActionComponent = ({
           content: (
             <Flex alignItems="flex-start" direction="column" gap={6}>
               <Flex width="100%" direction="column" gap={2}>
-                <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
-                <Typography as="p" variant="omega" textAlign="center">
+                <WarningCircle width="24px" height="24px" fill="danger600" />
+                <Typography tag="p" variant="omega" textAlign="center">
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.body',
                     defaultMessage: 'Are you sure?',
@@ -840,10 +841,11 @@ const UnpublishAction: DocumentActionComponent = ({
                 onChange={handleChange}
                 direction="column"
                 alignItems="flex-start"
-                as="fieldset"
+                tag="fieldset"
+                borderWidth={0}
                 gap={3}
               >
-                <VisuallyHidden as="legend"></VisuallyHidden>
+                <VisuallyHidden tag="legend"></VisuallyHidden>
                 <Radio
                   checked={shouldKeepDraft}
                   value={UNPUBLISH_DRAFT_OPTIONS.KEEP}
@@ -937,8 +939,8 @@ const DiscardAction: DocumentActionComponent = ({
       }),
       content: (
         <Flex direction="column" gap={2}>
-          <Icon as={ExclamationMarkCircle} width="24px" height="24px" color="danger600" />
-          <Typography as="p" variant="omega" textAlign="center">
+          <WarningCircle width="24px" height="24px" fill="danger600" />
+          <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.discard.dialog.body',
               defaultMessage: 'Are you sure?',

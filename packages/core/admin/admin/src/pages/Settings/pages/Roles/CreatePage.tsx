@@ -3,11 +3,10 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  ContentLayout,
+  Field,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
   Main,
   Textarea,
   TextInput,
@@ -17,9 +16,10 @@ import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
@@ -191,7 +191,7 @@ const CreatePage = () => {
         {({ values, errors, handleReset, handleChange, isSubmitting }) => (
           <Form>
             <>
-              <HeaderLayout
+              <Layouts.Header
                 primaryAction={
                   <Flex gap={2}>
                     <Button
@@ -225,7 +225,7 @@ const CreatePage = () => {
                 })}
                 navigationAction={<BackButton />}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                     <Flex direction="column" alignItems="stretch" gap={4}>
@@ -261,30 +261,34 @@ const CreatePage = () => {
                       </Flex>
                       <Grid gap={4}>
                         <GridItem col={6}>
-                          <TextInput
+                          <Field.Root
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
-                            label={formatMessage({
-                              id: 'global.name',
-                              defaultMessage: 'Name',
-                            })}
-                            onChange={handleChange}
                             required
-                            value={values.name}
-                          />
+                          >
+                            <Field.Label>
+                              {formatMessage({
+                                id: 'global.name',
+                                defaultMessage: 'Name',
+                              })}
+                            </Field.Label>
+                            <TextInput onChange={handleChange} value={values.name} />
+                            <Field.Error />
+                          </Field.Root>
                         </GridItem>
                         <GridItem col={6}>
-                          <Textarea
-                            label={formatMessage({
-                              id: 'global.description',
-                              defaultMessage: 'Description',
-                            })}
-                            id="description"
+                          <Field.Root
+                            name="description"
                             error={errors.description && formatMessage({ id: errors.description })}
-                            onChange={handleChange}
                           >
-                            {values.description}
-                          </Textarea>
+                            <Field.Label>
+                              {formatMessage({
+                                id: 'global.description',
+                                defaultMessage: 'Description',
+                              })}
+                            </Field.Label>
+                            <Textarea onChange={handleChange} value={values.description} />
+                          </Field.Root>
                         </GridItem>
                       </Grid>
                     </Flex>
@@ -298,7 +302,7 @@ const CreatePage = () => {
                     />
                   </Box>
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </>
           </Form>
         )}
@@ -313,7 +317,7 @@ const UsersRoleNumber = styled.div`
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
   color: ${({ theme }) => theme.colors.primary600};
   border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${12 / 16}rem;
+  font-size: 1.2rem;
   font-weight: bold;
 `;
 

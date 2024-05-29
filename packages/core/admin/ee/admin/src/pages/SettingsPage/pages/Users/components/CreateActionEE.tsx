@@ -1,5 +1,5 @@
-import { Button, Flex, Icon, Tooltip } from '@strapi/design-system';
-import { Envelop, ExclamationMarkCircle } from '@strapi/icons';
+import { Button, Flex, Tooltip } from '@strapi/design-system';
+import { Mail, WarningCircle } from '@strapi/icons';
 import isNil from 'lodash/isNil';
 import { useIntl } from 'react-intl';
 
@@ -21,24 +21,19 @@ export const CreateActionEE = ({ onClick }: CreateActionCEProps) => {
     <Flex gap={2}>
       {!isNil(permittedSeats) && shouldStopCreate && (
         <Tooltip
-          description={formatMessage({
+          label={formatMessage({
             id: 'Settings.application.admin-seats.at-limit-tooltip',
             defaultMessage: 'At limit: add seats to invite more users',
           })}
-          position="left"
+          side="left"
         >
-          <Icon
-            width={`${14 / 16}rem`}
-            height={`${14 / 16}rem`}
-            color="danger500"
-            as={ExclamationMarkCircle}
-          />
+          <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
         </Tooltip>
       )}
       <Button
         data-testid="create-user-button"
         onClick={onClick}
-        startIcon={<Envelop />}
+        startIcon={<Mail />}
         size="S"
         disabled={shouldStopCreate}
       >

@@ -11,7 +11,7 @@ import {
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { CarretDown, CarretUp } from '@strapi/icons';
+import { CaretDown, CaretUp } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -79,9 +79,9 @@ export const TableList = ({
                     <IconButton
                       label={sortLabel}
                       onClick={() => handleClickSort(isSorted, name)}
-                      noBorder
+                      borderWidth={0}
                     >
-                      {isUp ? <CarretUp /> : <CarretDown />}
+                      {isUp ? <CaretUp /> : <CaretDown />}
                     </IconButton>
                   )
                 }
@@ -91,7 +91,7 @@ export const TableList = ({
                   {isSortable ? (
                     <Typography
                       onClick={() => handleClickSort(isSorted, name)}
-                      as={isSorted ? 'span' : 'button'}
+                      tag={isSorted ? 'span' : 'button'}
                       label={!isSorted ? sortLabel : ''}
                       textColor="neutral600"
                       variant="sigma"

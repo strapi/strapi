@@ -4,7 +4,7 @@
  *
  */
 import { Box, Flex, ModalHeader, Typography } from '@strapi/design-system';
-import { Breadcrumbs, Crumb, Link } from '@strapi/design-system/v2';
+import { Breadcrumbs, Crumb, Link } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -88,7 +88,7 @@ export const FormModalHeader = ({
             <AttributeIcon type={icon} />
           </Box>
           <Box paddingLeft={3}>
-            <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+            <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
               {formatMessage({ id: headerId }, { name: displayName })}
             </Typography>
           </Box>

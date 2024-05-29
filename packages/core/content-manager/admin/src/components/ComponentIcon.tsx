@@ -1,14 +1,23 @@
-import { Flex, Icon } from '@strapi/design-system';
+import * as React from 'react';
+
+import { Flex, FlexProps } from '@strapi/design-system';
 import * as Icons from '@strapi/icons';
+import * as Symbols from '@strapi/icons/symbols';
 
 import type { Struct } from '@strapi/types';
 
-interface ComponentIconProps {
+interface ComponentIconProps extends FlexProps {
   showBackground?: boolean;
   icon?: Struct.ContentTypeSchemaInfo['icon'];
 }
 
-const ComponentIcon = ({ showBackground = true, icon = 'cube' }: ComponentIconProps) => {
+const ComponentIcon = ({
+  showBackground = true,
+  icon = 'dashboard',
+  ...props
+}: ComponentIconProps) => {
+  const Icon = COMPONENT_ICONS[icon as keyof typeof COMPONENT_ICONS] || COMPONENT_ICONS.dashboard;
+
   return (
     <Flex
       alignItems="center"
@@ -18,30 +27,27 @@ const ComponentIcon = ({ showBackground = true, icon = 'cube' }: ComponentIconPr
       width={8}
       color="neutral600"
       borderRadius={showBackground ? '50%' : 0}
+      {...props}
     >
-      <Icon
-        as={COMPONENT_ICONS[icon as keyof typeof COMPONENT_ICONS] || COMPONENT_ICONS.cube}
-        height={5}
-        width={5}
-      />
+      <Icon height="2rem" width="2rem" />
     </Flex>
   );
 };
 
-const COMPONENT_ICONS = {
+const COMPONENT_ICONS: Record<string, React.ComponentType<any>> = {
   alien: Icons.Alien,
-  apps: Icons.Apps,
+  apps: Icons.GridNine,
   archive: Icons.Archive,
   arrowDown: Icons.ArrowDown,
   arrowLeft: Icons.ArrowLeft,
   arrowRight: Icons.ArrowRight,
   arrowUp: Icons.ArrowUp,
-  attachment: Icons.Attachment,
+  attachment: Icons.Paperclip,
   bell: Icons.Bell,
   bold: Icons.Bold,
   book: Icons.Book,
   briefcase: Icons.Briefcase,
-  brush: Icons.Brush,
+  brush: Icons.PaintBrush,
   bulletList: Icons.BulletList,
   calendar: Icons.Calendar,
   car: Icons.Car,
@@ -56,21 +62,20 @@ const COMPONENT_ICONS = {
   cog: Icons.Cog,
   collapse: Icons.Collapse,
   command: Icons.Command,
-  connector: Icons.Connector,
+  connector: Icons.Faders,
   crop: Icons.Crop,
   crown: Icons.Crown,
-  cube: Icons.Cube,
-  cup: Icons.Cup,
+  cup: Icons.Coffee,
   cursor: Icons.Cursor,
-  dashboard: Icons.Dashboard,
+  dashboard: Icons.SquaresFour,
   database: Icons.Database,
   discuss: Icons.Discuss,
-  doctor: Icons.Doctor,
+  doctor: Icons.Stethoscope,
   earth: Icons.Earth,
   emotionHappy: Icons.EmotionHappy,
   emotionUnhappy: Icons.EmotionUnhappy,
-  envelop: Icons.Envelop,
-  exit: Icons.Exit,
+  envelop: Icons.Mail,
+  exit: Icons.SignOut,
   expand: Icons.Expand,
   eye: Icons.Eye,
   feather: Icons.Feather,
@@ -79,20 +84,20 @@ const COMPONENT_ICONS = {
   filePdf: Icons.FilePdf,
   filter: Icons.Filter,
   folder: Icons.Folder,
-  gate: Icons.Gate,
+  gate: Icons.CastleTurret,
   gift: Icons.Gift,
   globe: Icons.Globe,
-  grid: Icons.Grid,
+  grid: Icons.GridFour,
   handHeart: Icons.HandHeart,
   hashtag: Icons.Hashtag,
-  headphone: Icons.Headphone,
+  headphone: Icons.Headphones,
   heart: Icons.Heart,
   house: Icons.House,
   information: Icons.Information,
   italic: Icons.Italic,
   key: Icons.Key,
-  landscape: Icons.Landscape,
-  layer: Icons.Layer,
+  landscape: Icons.Images,
+  layer: Icons.ListPlus,
   layout: Icons.Layout,
   lightbulb: Icons.Lightbulb,
   link: Icons.Link,
@@ -101,43 +106,42 @@ const COMPONENT_ICONS = {
   manyToMany: Icons.ManyToMany,
   manyToOne: Icons.ManyToOne,
   manyWays: Icons.ManyWays,
-  medium: Icons.Medium,
+  medium: Symbols.Medium,
   message: Icons.Message,
   microphone: Icons.Microphone,
   monitor: Icons.Monitor,
   moon: Icons.Moon,
-  music: Icons.Music,
+  music: Icons.MusicNotes,
   oneToMany: Icons.OneToMany,
   oneToOne: Icons.OneToOne,
   oneWay: Icons.OneWay,
-  paint: Icons.Paint,
+  paint: Icons.PaintBrush,
   paintBrush: Icons.PaintBrush,
   paperPlane: Icons.PaperPlane,
   pencil: Icons.Pencil,
   phone: Icons.Phone,
-  picture: Icons.Picture,
+  picture: Icons.Image,
   pin: Icons.Pin,
   pinMap: Icons.PinMap,
   plane: Icons.Plane,
   play: Icons.Play,
   plus: Icons.Plus,
   priceTag: Icons.PriceTag,
-  puzzle: Icons.Puzzle,
+  puzzle: Icons.PuzzlePiece,
   question: Icons.Question,
-  quote: Icons.Quote,
-  refresh: Icons.Refresh,
-  repeat: Icons.Repeat,
+  quote: Icons.Quotes,
+  refresh: Icons.ArrowClockwise,
   restaurant: Icons.Restaurant,
   rocket: Icons.Rocket,
-  rotate: Icons.Rotate,
+  rotate: Icons.ArrowsCounterClockwise,
   scissors: Icons.Scissors,
   search: Icons.Search,
-  seed: Icons.Seed,
+  seed: Icons.Plant,
   server: Icons.Server,
   shield: Icons.Shield,
   shirt: Icons.Shirt,
   shoppingCart: Icons.ShoppingCart,
-  slideshow: Icons.Slideshow,
+  slideshow: Icons.PresentationChart,
   stack: Icons.Stack,
   star: Icons.Star,
   store: Icons.Store,
@@ -147,7 +151,7 @@ const COMPONENT_ICONS = {
   thumbDown: Icons.ThumbDown,
   thumbUp: Icons.ThumbUp,
   train: Icons.Train,
-  twitter: Icons.Twitter,
+  twitter: Symbols.X,
   typhoon: Icons.Typhoon,
   underline: Icons.Underline,
   user: Icons.User,
@@ -155,8 +159,8 @@ const COMPONENT_ICONS = {
   volumeUp: Icons.VolumeUp,
   walk: Icons.Walk,
   wheelchair: Icons.Wheelchair,
-  write: Icons.Write,
+  write: Icons.Feather,
 };
 
-export { ComponentIcon };
+export { ComponentIcon, COMPONENT_ICONS };
 export type { ComponentIconProps };

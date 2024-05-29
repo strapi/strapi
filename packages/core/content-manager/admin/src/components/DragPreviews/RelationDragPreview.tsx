@@ -1,4 +1,4 @@
-import { Box, Flex, Icon, IconButton, Typography } from '@strapi/design-system';
+import { Box, Flex, IconButton, Typography } from '@strapi/design-system';
 import { Cross, Drag } from '@strapi/icons';
 
 import { DocumentStatus } from '../../pages/EditView/components/DocumentStatus';
@@ -31,9 +31,10 @@ const RelationDragPreview = ({ status, displayedValue, width }: RelationDragPrev
         background="neutral0"
         borderColor="neutral200"
         justifyContent="space-between"
+        gap={4}
       >
         <FlexWrapper gap={1}>
-          <IconButton aria-label="" borderWidth={0}>
+          <IconButton withTooltip={false} label="" borderWidth={0}>
             <Drag />
           </IconButton>
           <Flex width="100%" minWidth={0} justifyContent="space-between">
@@ -47,11 +48,9 @@ const RelationDragPreview = ({ status, displayedValue, width }: RelationDragPrev
             {status ? <DocumentStatus status={status} /> : null}
           </Flex>
         </FlexWrapper>
-        <Box paddingLeft={4}>
-          <DisconnectButton type="button">
-            <Icon width="12px" as={Cross} />
-          </DisconnectButton>
-        </Box>
+        <DisconnectButton type="button">
+          <Cross width="12px" />
+        </DisconnectButton>
       </Flex>
     </Box>
   );

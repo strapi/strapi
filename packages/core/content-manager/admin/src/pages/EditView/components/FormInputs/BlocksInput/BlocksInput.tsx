@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useField, type InputProps } from '@strapi/admin/strapi-admin';
-import { Field, FieldError, FieldHint, FieldLabel, Flex } from '@strapi/design-system';
+import { Field, Flex } from '@strapi/design-system';
 
 import { BlocksEditor } from './BlocksEditor';
 
@@ -18,9 +18,9 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
     const field = useField(name);
 
     return (
-      <Field id={id} name={name} hint={hint} error={field.error} required={required}>
+      <Field.Root id={id} name={name} hint={hint} error={field.error} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <FieldLabel action={labelAction}>{label}</FieldLabel>
+          <Field.Label action={labelAction}>{label}</Field.Label>
           <BlocksEditor
             name={name}
             error={field.error}
@@ -30,12 +30,14 @@ const BlocksInput = React.forwardRef<{ focus: () => void }, BlocksInputProps>(
             ariaLabelId={id}
             {...editorProps}
           />
-          <FieldHint />
-          <FieldError />
+          <Field.Hint />
+          <Field.Error />
         </Flex>
-      </Field>
+      </Field.Root>
     );
   }
 );
 
-export { BlocksInput };
+const MemoizedBlocksInput = React.memo(BlocksInput);
+
+export { MemoizedBlocksInput as BlocksInput };

@@ -1,4 +1,4 @@
-import { Box, Flex, Icon, Typography } from '@strapi/design-system';
+import { Box, Flex, Typography } from '@strapi/design-system';
 import { ChevronRight } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -54,24 +54,22 @@ const AutoCloneFailureModalBody = ({ prohibitedFields }: AutoCloneFailureModalBo
             padding={6}
             key={fieldPath.join()}
           >
-            <Flex direction="row" as="ol">
+            <Flex direction="row" tag="ol">
               {fieldPath.map((pathSegment, index) => (
-                <Typography fontWeight="semiBold" as="li" key={index}>
+                <Typography fontWeight="semiBold" tag="li" key={index}>
                   {pathSegment}
                   {index !== fieldPath.length - 1 && (
-                    <Icon
-                      as={ChevronRight}
-                      color="neutral500"
-                      height={2}
-                      width={2}
-                      marginLeft={2}
-                      marginRight={2}
+                    <ChevronRight
+                      fill="neutral500"
+                      height="0.8rem"
+                      width="0.8rem"
+                      style={{ margin: '0 0.8rem' }}
                     />
                   )}
                 </Typography>
               ))}
             </Flex>
-            <Typography as="p" textColor="neutral600">
+            <Typography tag="p" textColor="neutral600">
               {formatMessage({
                 id: getTranslation(`containers.list.autoCloneModal.error.${reason}`),
                 defaultMessage: getDefaultErrorMessage(reason),

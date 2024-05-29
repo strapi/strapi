@@ -1,7 +1,6 @@
-import { Badge, Tooltip, Typography } from '@strapi/design-system';
-import { Menu } from '@strapi/design-system/v2';
+import { Badge, Tooltip, Typography, Menu } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { CellContentProps } from './CellContent';
 import { CellValue } from './CellValue';
@@ -23,16 +22,12 @@ const SingleComponent = ({ content, mainField }: SingleComponentProps) => {
 
   return (
     <Tooltip label={content[mainField.name]}>
-      <SingleComponentTypography textColor="neutral800" ellipsis>
+      <Typography maxWidth="25rem" textColor="neutral800" ellipsis>
         <CellValue type={mainField.type} value={content[mainField.name]} />
-      </SingleComponentTypography>
+      </Typography>
     </Tooltip>
   );
 };
-
-const SingleComponentTypography = styled(Typography)`
-  max-width: 250px;
-`;
 
 /* -------------------------------------------------------------------------------------------------
  * RepeatableComponent
@@ -64,9 +59,9 @@ const RepeatableComponent = ({ content, mainField }: RepeatableComponentProps) =
       <Menu.Content>
         {content.map((item) => (
           <Menu.Item key={item.id} disabled>
-            <RepeatableComponentTypography ellipsis>
+            <Typography maxWidth="50rem" ellipsis>
               <CellValue type={mainField.type} value={item[mainField.name]} />
-            </RepeatableComponentTypography>
+            </Typography>
           </Menu.Item>
         ))}
       </Menu.Content>
@@ -74,17 +69,13 @@ const RepeatableComponent = ({ content, mainField }: RepeatableComponentProps) =
   );
 };
 
-const RepeatableComponentTypography = styled(Typography)`
-  max-width: 500px;
-`;
-
 /**
  * TODO: this needs to be solved in the Design-System
  */
 const MenuTrigger = styled(Menu.Trigger)`
   svg {
-    width: ${6 / 16}rem;
-    height: ${4 / 16}rem;
+    width: 0.6rem;
+    height: 0.4rem;
   }
 `;
 

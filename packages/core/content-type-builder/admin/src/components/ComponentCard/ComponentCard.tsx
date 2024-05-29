@@ -1,7 +1,7 @@
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import get from 'lodash/get';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useDataManager } from '../../hooks/useDataManager';
 
@@ -20,11 +20,11 @@ const CloseButton = styled(Box)`
   position: absolute;
   display: none;
   top: 5px;
-  right: ${8 / 16}rem;
+  right: 0.8rem;
 
   svg {
-    width: ${10 / 16}rem;
-    height: ${10 / 16}rem;
+    width: 1rem;
+    height: 1rem;
 
     path {
       fill: ${({ theme }) => theme.colors.primary600};
@@ -33,8 +33,8 @@ const CloseButton = styled(Box)`
 `;
 
 const ComponentBox = styled(Flex)`
-  width: ${140 / 16}rem;
-  height: ${80 / 16}rem;
+  width: 14rem;
+  height: 8rem;
   position: relative;
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   background: ${({ theme }) => theme.colors.neutral100};
@@ -46,13 +46,10 @@ const ComponentBox = styled(Flex)`
   &:hover {
     border: 1px solid ${({ theme }) => theme.colors.primary200};
     background: ${({ theme }) => theme.colors.primary100};
+    color: ${({ theme }) => theme.colors.primary600};
 
     ${CloseButton} {
       display: block;
-    }
-
-    ${Typography} {
-      color: ${({ theme }) => theme.colors.primary600};
     }
 
     /* > ComponentIcon */
@@ -114,7 +111,7 @@ export const ComponentCard = ({
       </Box>
 
       {isInDevelopmentMode && (
-        <CloseButton as="button" onClick={onClose}>
+        <CloseButton tag="button" onClick={onClose}>
           <Cross />
         </CloseButton>
       )}

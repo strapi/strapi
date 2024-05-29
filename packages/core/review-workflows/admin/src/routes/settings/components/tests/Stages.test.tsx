@@ -95,11 +95,11 @@ describe('Stages', () => {
 
     await user.click(screen.getByRole('button', { name: 'stage-1' }));
 
-    expect(screen.getByRole('textbox', { name: 'Stage name *' })).toHaveAttribute(
+    expect(screen.getByRole('textbox', { name: 'Stage name' })).toHaveAttribute(
       'name',
       'stages.0.name'
     );
-    expect(screen.getByRole('textbox', { name: 'Stage name *' })).toHaveValue('stage-1');
+    expect(screen.getByRole('textbox', { name: 'Stage name' })).toHaveValue('stage-1');
 
     // Color combobox
     await waitFor(() =>
@@ -120,12 +120,13 @@ describe('Stages', () => {
     const { user } = setup({ canDelete: false });
 
     await user.click(screen.getByRole('button', { name: 'stage-1' }));
-
-    expect(
-      screen.queryByRole('button', {
-        name: /delete stage/i,
-      })
-    ).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('button', {
+          name: /delete stage/i,
+        })
+      ).not.toBeInTheDocument()
+    );
   });
 
   it('should not render delete drag button if canUpdate=false', async () => {
@@ -191,7 +192,7 @@ describe('Stages', () => {
     await user.click(screen.getByRole('button', { name: 'stage-1' }));
 
     // Name
-    expect(screen.getByRole('textbox')).toBeDisabled();
+    await waitFor(() => expect(screen.getByRole('textbox')).toBeDisabled());
 
     // Color
     expect(screen.getByRole('combobox', { name: /color/i })).toHaveAttribute('data-disabled');

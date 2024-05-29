@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Breadcrumbs as BaseBreadcrumbs, Crumb, CrumbLink } from '@strapi/design-system/v2';
+import { Breadcrumbs as BaseBreadcrumbs, Crumb, CrumbLink } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
@@ -34,7 +34,7 @@ export const Breadcrumbs = ({ breadcrumbs, onChangeFolder, currentFolderId, ...p
           return (
             <CrumbLink
               key={`breadcrumb-${crumb?.id ?? 'root'}`}
-              as={onChangeFolder ? 'button' : NavLink}
+              tag={onChangeFolder ? 'button' : NavLink}
               type={onChangeFolder && 'button'}
               to={onChangeFolder ? undefined : crumb.href}
               onClick={onChangeFolder && (() => onChangeFolder(crumb.id, crumb.path))}

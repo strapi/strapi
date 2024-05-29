@@ -4,10 +4,10 @@
  *
  */
 
-import { Box, GridLayout, Flex, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import { Box, Flex, Typography, Link } from '@strapi/design-system';
+import { Layouts } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { CloudBox } from '../components/Cloud';
 import { GithubBox } from '../components/Github';
@@ -23,7 +23,7 @@ const LogoContainer = styled(Box)`
   right: 0;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
@@ -33,7 +33,7 @@ const RightSideCloudContainer = styled(Box)`
   right: 0;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
@@ -43,7 +43,7 @@ const LeftSideCloudContainer = styled(Box)`
   left: 220px;
 
   img {
-    width: ${150 / 16}rem;
+    width: 15rem;
   }
 `;
 
@@ -65,7 +65,7 @@ const HomePage = () => {
       <Box paddingLeft={10} paddingRight={10} paddingBottom={8} paddingTop={10}>
         <Flex justifyContent="space-between" alignItems="center" direction="column">
           <Flex minWidth={0}>
-            <Typography as="h1" variant="alpha">
+            <Typography tag="h1" variant="alpha">
               {formatMessage({
                 id: getTrad('Homepage.title'),
                 defaultMessage: 'Fully-managed Cloud Hosting for your Strapi Project',
@@ -74,7 +74,7 @@ const HomePage = () => {
           </Flex>
         </Flex>
         <Flex alignItems="center" direction="column">
-          <Typography variant="epsilon" textColor="neutral600" as="p">
+          <Typography variant="epsilon" textColor="neutral600" tag="p">
             {formatMessage({
               id: getTrad('Homepage.subTitle'),
               defaultMessage:
@@ -84,13 +84,13 @@ const HomePage = () => {
         </Flex>
       </Box>
       <Box padding={10}>
-        <GridLayout>
+        <Layouts.Grid size="M">
           <GithubBox />
           <CloudBox />
-        </GridLayout>
+        </Layouts.Grid>
         <Box padding={6} borderRadius={8} hasRadius background="neutral0" borderColor="neutral200">
           <Box paddingBottom={2}>
-            <Typography variant="delta" fontWeight="bold" textColor="neutral1000" as="p">
+            <Typography variant="delta" fontWeight="bold" textColor="neutral1000" tag="p">
               {formatMessage({
                 id: getTrad('Homepage.textBox.label.versioned'),
                 defaultMessage: 'Try Strapi Cloud for Free!',
@@ -98,7 +98,7 @@ const HomePage = () => {
             </Typography>
           </Box>
 
-          <Typography variant="epsilon" textColor="neutral1000" as="p">
+          <Typography variant="epsilon" textColor="neutral1000" tag="p">
             {formatMessage({
               id: getTrad('Homepage.textBox.text.versioned'),
               defaultMessage:

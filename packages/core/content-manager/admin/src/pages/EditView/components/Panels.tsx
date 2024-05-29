@@ -136,7 +136,7 @@ const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
   return (
     <Flex
       ref={ref}
-      as="aside"
+      tag="aside"
       aria-labelledby="additional-information"
       background="neutral0"
       borderColor="neutral150"
@@ -151,7 +151,7 @@ const Panel = React.forwardRef<any, PanelProps>(({ children, title }, ref) => {
       justifyContent="stretch"
       alignItems="flex-start"
     >
-      <Typography as="h2" variant="sigma" textTransform="uppercase">
+      <Typography tag="h2" variant="sigma" textTransform="uppercase">
         {title}
       </Typography>
       {children}

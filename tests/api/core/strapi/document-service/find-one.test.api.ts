@@ -1,4 +1,5 @@
 import type { Core } from '@strapi/types';
+import { errors } from '@strapi/utils';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
 import resources from './resources/index';
@@ -38,6 +39,22 @@ describe('Document Service', () => {
       expect(article).toMatchObject(articleDb);
     });
 
+    it('unable to findOne on multiple locales', async () => {
+      const articleDb = await findArticleDb({ title: 'Article1-Draft-EN' });
+
+      await expect(
+        strapi.documents(ARTICLE_UID).findOne({
+          documentId: articleDb.documentId,
+          // @ts-expect-error locale should be a string
+          locale: ['en', 'fr'],
+        })
+      ).rejects.toThrowError(
+        new errors.ValidationError(
+          `Invalid locale param en,fr provided. Document locales must be strings.`
+        )
+      );
+    });
+
     it('find one published document', async () => {
       const articleDb = await findArticleDb({ title: 'Article2-Published-EN' });
 
@@ -68,7 +85,5 @@ describe('Document Service', () => {
 
       expect(author).toMatchObject(authorDb);
     });
-
-    it.todo('ignores pagination parameters');
   });
 });

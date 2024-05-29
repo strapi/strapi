@@ -5,12 +5,13 @@
  *
  */
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { ArrowRight, EmptyPictures } from '@strapi/icons';
+import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { ArrowRight } from '@strapi/icons';
+import { EmptyPictures } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
+import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
 
 export const InternalErrorPage = () => {
@@ -18,18 +19,17 @@ export const InternalErrorPage = () => {
 
   return (
     <Page.Main labelledBy="title">
-      <HeaderLayout
+      <Layouts.Header
         id="title"
         title={formatMessage({
           id: 'content-manager.pageNotFound',
           defaultMessage: 'Page not found',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <EmptyStateLayout
           action={
-            // @ts-expect-error We need to accept the props of the component passed in the `as` prop
-            <LinkButton forwardedAs={Link} variant="secondary" endIcon={<ArrowRight />} to="/">
+            <LinkButton tag={Link} variant="secondary" endIcon={<ArrowRight />} to="/">
               {formatMessage({
                 id: 'app.components.NotFoundPage.back',
                 defaultMessage: 'Back to homepage',
@@ -41,10 +41,10 @@ export const InternalErrorPage = () => {
             defaultMessage: 'An error occured',
           })}
           hasRadius
-          icon={<EmptyPictures width="10rem" />}
+          icon={<EmptyPictures width="16rem" />}
           shadow="tableShadow"
         />
-      </ContentLayout>
+      </Layouts.Content>
     </Page.Main>
   );
 };

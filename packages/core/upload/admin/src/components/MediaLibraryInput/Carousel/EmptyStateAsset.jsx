@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-import { Flex, Icon, Typography } from '@strapi/design-system';
-import { PicturePlus } from '@strapi/icons';
+import { Flex, Typography } from '@strapi/design-system';
+import { PlusCircle as PicturePlus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetSource } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
@@ -63,7 +63,7 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       alignItems="center"
       height="100%"
       width="100%"
-      as="button"
+      tag="button"
       type="button"
       disabled={disabled}
       onClick={onClick}
@@ -71,22 +71,21 @@ export const EmptyStateAsset = ({ disabled, onClick, onDropAsset }) => {
       onDragLeave={handleDragLeave}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      gap={3}
       style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
     >
-      <Icon
-        as={PicturePlus}
+      <PicturePlus
         aria-hidden
-        width="30px"
-        height="24px"
-        color={disabled ? 'neutral400' : 'primary600'}
-        marginBottom={3}
+        width="3.2rem"
+        height="3.2rem"
+        fill={disabled ? 'neutral400' : 'primary600'}
       />
       <TextAlignTypography
         variant="pi"
         fontWeight="bold"
         textColor="neutral600"
         style={{ textAlign: 'center' }}
-        as="span"
+        tag="span"
       >
         {formatMessage({
           id: getTrad('mediaLibraryInput.placeholder'),

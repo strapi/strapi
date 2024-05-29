@@ -135,7 +135,6 @@ export default {
     const projectId = strapi.config.get('uuid', null);
     const nodeVersion = process.version;
     const communityEdition = !strapi.EE;
-    // @ts-expect-error replace use of exists
     const useYarn: boolean = await exists(path.join(process.cwd(), 'yarn.lock'));
 
     return {
@@ -155,12 +154,26 @@ export default {
   async plugins(ctx: Context) {
     const enabledPlugins = strapi.config.get('enabledPlugins') as any;
 
-    const plugins = Object.entries(enabledPlugins).map(([key, plugin]: any) => ({
-      name: plugin.info.name || key,
-      displayName: plugin.info.displayName || plugin.info.name || key,
-      description: plugin.info.description || '',
-      packageName: plugin.info.packageName,
-    }));
+    // List of core plugins that are always enabled,
+    // and so it's not necessary to display them in the plugins list
+    const CORE_PLUGINS = [
+      'content-manager',
+      'content-type-builder',
+      'email',
+      'upload',
+      'i18n',
+      'content-releases',
+      'review-workflows',
+    ];
+
+    const plugins = Object.entries(enabledPlugins)
+      .filter(([key]: any) => !CORE_PLUGINS.includes(key))
+      .map(([key, plugin]: any) => ({
+        name: plugin.info.name || key,
+        displayName: plugin.info.displayName || plugin.info.name || key,
+        description: plugin.info.description || '',
+        packageName: plugin.info.packageName,
+      }));
 
     ctx.send({ plugins }) satisfies Plugins.Response;
   },

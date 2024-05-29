@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { NotificationsProvider, useNotification } from '@strapi/admin/strapi-admin';
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { server } from '@tests/utils';
 import { rest } from 'msw';
@@ -44,13 +44,13 @@ const client = new QueryClient({
 function ComponentFixture({ children }) {
   return (
     <QueryClientProvider client={client}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <NotificationsProvider>
           <IntlProvider locale="en" messages={{}}>
             {children}
           </IntlProvider>
         </NotificationsProvider>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>
   );
 }
@@ -131,7 +131,7 @@ describe('useRemoveAsset', () => {
 
     await waitFor(() =>
       expect(toggleNotification).toHaveBeenCalledWith(
-        expect.objectContaining({ type: 'danger', message: 'Request failed with status code 500' })
+        expect.objectContaining({ type: 'danger', message: 'Unexpected end of JSON input' })
       )
     );
 

@@ -1,13 +1,13 @@
-import { Box, ButtonProps, Flex, Typography } from '@strapi/design-system';
+import { Box, BoxComponent, ButtonProps, Flex, Typography } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 export const AddStage = ({ children, ...props }: ButtonProps) => {
   return (
     <StyledButton
-      as="button"
+      tag="button"
       background="neutral0"
-      border="neutral150"
+      borderColor="neutral150"
       paddingBottom={3}
       paddingLeft={4}
       paddingRight={4}
@@ -15,66 +15,25 @@ export const AddStage = ({ children, ...props }: ButtonProps) => {
       shadow="filterShadow"
       {...props}
     >
-      <Flex gap={2}>
-        <StyledAddIcon aria-hidden />
-
-        <Typography variant="pi" fontWeight="bold" textColor="neutral500">
+      <Typography variant="pi" fontWeight="bold">
+        <Flex tag="span" gap={2}>
+          <PlusCircle width="2.4rem" height="2.4rem" aria-hidden />
           {children}
-        </Typography>
-      </Flex>
+        </Flex>
+      </Typography>
     </StyledButton>
   );
 };
 
-const StyledAddIcon = styled(PlusCircle)`
-  > circle {
-    fill: ${({ theme }) => theme.colors.neutral150};
-  }
-  > path {
-    fill: ${({ theme }) => theme.colors.neutral600};
-  }
-`;
-
-const StyledButton = styled(Box)`
+const StyledButton = styled<BoxComponent<'button'>>(Box)`
   border-radius: 26px;
-
-  svg {
-    height: ${({ theme }) => theme.spaces[6]};
-    width: ${({ theme }) => theme.spaces[6]};
-
-    > path {
-      fill: ${({ theme }) => theme.colors.neutral600};
-    }
-  }
+  color: ${({ theme }) => theme.colors.neutral500};
 
   &:hover {
-    color: ${({ theme }) => theme.colors.primary600} !important;
-    ${Typography} {
-      color: ${({ theme }) => theme.colors.primary600} !important;
-    }
-
-    ${StyledAddIcon} {
-      > circle {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-      > path {
-        fill: ${({ theme }) => theme.colors.neutral100};
-      }
-    }
+    color: ${({ theme }) => theme.colors.primary600};
   }
 
   &:active {
-    ${Typography} {
-      color: ${({ theme }) => theme.colors.primary600};
-    }
-
-    ${StyledAddIcon} {
-      > circle {
-        fill: ${({ theme }) => theme.colors.primary600};
-      }
-      > path {
-        fill: ${({ theme }) => theme.colors.neutral100};
-      }
-    }
+    color: ${({ theme }) => theme.colors.primary600};
   }
 `;

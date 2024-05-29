@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, Typography, useCollator } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
+import { Box, Flex, IconButton, Typography, useCollator, Link } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
@@ -78,12 +77,12 @@ const Table = ({
         <TableImpl.Body>
           {sortedTokens.map((token) => (
             <TableImpl.Row key={token.id} onClick={handleRowClick(token.id)}>
-              <TableImpl.Cell maxWidth={`${250 / 16}rem`}>
+              <TableImpl.Cell maxWidth="25rem">
                 <Typography textColor="neutral800" fontWeight="bold" ellipsis>
                   {token.name}
                 </Typography>
               </TableImpl.Cell>
-              <TableImpl.Cell maxWidth={`${250 / 16}rem`}>
+              <TableImpl.Cell maxWidth="25rem">
                 <Typography textColor="neutral800" ellipsis>
                   {token.description}
                 </Typography>
@@ -167,7 +166,7 @@ const DefaultButton = ({
 
   return (
     <LinkStyled
-      forwardedAs={NavLink}
+      tag={NavLink}
       to={tokenId.toString()}
       title={formatMessage(MESSAGES_MAP[buttonType], { target: tokenName })}
     >
@@ -224,8 +223,9 @@ const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps
         )}
         name="delete"
         borderWidth={0}
-        icon={<Trash />}
-      />
+      >
+        <Trash />
+      </IconButton>
       <ConfirmDialog
         onClose={() => setShowConfirmDialog(false)}
         onConfirm={handleClickDelete}

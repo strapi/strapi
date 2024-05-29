@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "5.0.0-beta.5",
+  "version": "5.0.0-beta.8",
   "description": "Strapi maintained Custom Fields",
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "strapi plugin:build --force",
+    "build": "strapi-plugin build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -50,23 +50,23 @@
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "watch": "strapi plugin:watch"
+    "watch": "strapi-plugin watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.18.0",
-    "@strapi/icons": "1.18.0",
+    "@strapi/design-system": "2.0.0-beta.4",
+    "@strapi/icons": "2.0.0-beta.4",
     "react-colorful": "5.6.1",
     "react-intl": "6.6.2"
   },
   "devDependencies": {
-    "@strapi/strapi": "5.0.0-beta.5",
-    "@testing-library/react": "14.0.0",
-    "@testing-library/user-event": "14.4.3",
-    "@types/styled-components": "5.1.34",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "@strapi/sdk-plugin": "^5.0.0",
+    "@strapi/strapi": "5.0.0-beta.8",
+    "@testing-library/react": "15.0.7",
+    "@testing-library/user-event": "14.5.2",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",
-    "styled-components": "5.3.11",
+    "styled-components": "6.1.8",
     "typescript": "5.3.2"
   },
   "peerDependencies": {
@@ -74,7 +74,7 @@
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",
     "react-router-dom": "^6.0.0",
-    "styled-components": "^5.2.1"
+    "styled-components": "^6.0.0"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

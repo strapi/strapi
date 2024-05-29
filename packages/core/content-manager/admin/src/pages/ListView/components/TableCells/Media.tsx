@@ -1,7 +1,14 @@
 import * as React from 'react';
 
-import { Avatar, AvatarGroup, Flex, Tooltip, Typography } from '@strapi/design-system';
-import styled from 'styled-components';
+import {
+  Avatar,
+  AvatarGroup,
+  Flex,
+  Tooltip,
+  Typography,
+  TypographyComponent,
+} from '@strapi/design-system';
+import { styled } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/urls';
 
@@ -52,7 +59,7 @@ const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSi
 const FileWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <Flex
-      as="span"
+      tag="span"
       position="relative"
       borderRadius="50%"
       width="26px"
@@ -70,9 +77,9 @@ const FileWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const FileTypography = styled(Typography)`
-  font-size: 0.6rem;
-  line-height: 0.6rem;
+const FileTypography = styled<TypographyComponent>(Typography)`
+  font-size: 0.9rem;
+  line-height: 0.9rem;
 `;
 
 /* -------------------------------------------------------------------------------------------------

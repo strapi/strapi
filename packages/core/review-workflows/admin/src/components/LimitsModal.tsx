@@ -1,10 +1,17 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, ModalLayout, ModalBody, Typography } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import {
+  Box,
+  Flex,
+  IconButton,
+  ModalLayout,
+  ModalBody,
+  Typography,
+  LinkButton,
+} from '@strapi/design-system';
 import { Cross } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import balloonImageSrc from '../assets/balloon.png';
 
@@ -85,13 +92,15 @@ const Root: React.FC<React.PropsWithChildren<LimitsModalProps>> = ({
 
             <Box display="flex" position="absolute" right={0} top={0}>
               <IconButton
-                icon={<Cross />}
-                aria-label={formatMessage({
+                withTooltip={false}
+                label={formatMessage({
                   id: 'global.close',
                   defaultMessage: 'Close',
                 })}
                 onClick={onClose}
-              />
+              >
+                <Cross />
+              </IconButton>
             </Box>
           </Flex>
         </Flex>

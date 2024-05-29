@@ -10,6 +10,9 @@ import type { Schema, UID } from '@strapi/types';
  * traverseData
  * -----------------------------------------------------------------------------------------------*/
 
+// Make only attributes required since it's the only one Content History has
+type PartialSchema = Partial<Schema.Schema> & Pick<Schema.Schema, 'attributes'>;
+
 type Predicate = <TAttribute extends Schema.Attribute.AnyAttribute>(
   attribute: TAttribute,
   value: Schema.Attribute.Value<TAttribute>
@@ -35,7 +38,7 @@ const BLOCK_LIST_ATTRIBUTE_KEYS = ['__component', '__temp_key__'];
  */
 const traverseData =
   (predicate: Predicate, transform: Transform) =>
-  (schema: Schema.Schema, components: ComponentsDictionary = {}) =>
+  (schema: PartialSchema, components: ComponentsDictionary = {}) =>
   (data: AnyData = {}) => {
     const traverse = (datum: AnyData, attributes: Schema.Schema['attributes']) => {
       return Object.entries(datum).reduce<AnyData>((acc, [key, value]) => {
@@ -122,7 +125,7 @@ const prepareRelations = traverseData(
 /**
  * @internal
  * @description Adds a `__temp_key__` to each component and dynamiczone item. This gives us
- * a stable identifier regardless of it's ids etc. that we can then use for drag and drop.
+ * a stable identifier regardless of its ids etc. that we can then use for drag and drop.
  */
 const prepareTempKeys = traverseData(
   (attribute) =>
@@ -150,7 +153,7 @@ const prepareTempKeys = traverseData(
  * @description Fields that don't exist in the schema like createdAt etc. are only on the first level (not nested),
  * as such we don't need to traverse the components to remove them.
  */
-const removeFieldsThatDontExistOnSchema = (schema: Schema.Schema) => (data: AnyData) => {
+const removeFieldsThatDontExistOnSchema = (schema: PartialSchema) => (data: AnyData) => {
   const schemaKeys = Object.keys(schema.attributes);
   const dataKeys = Object.keys(data);
 
@@ -194,7 +197,7 @@ const removeNullValues = (data: AnyData) => {
  * form to ensure the data is correctly prepared from their default state e.g. relations are set to an empty array.
  */
 const transformDocument =
-  (schema: Schema.Schema, components: ComponentsDictionary = {}) =>
+  (schema: PartialSchema, components: ComponentsDictionary = {}) =>
   (document: AnyData) => {
     const transformations = pipe(
       removeFieldsThatDontExistOnSchema(schema),
@@ -207,4 +210,10 @@ const transformDocument =
     return transformations(document);
   };
 
-export { removeProhibitedFields, prepareRelations, transformDocument };
+export {
+  removeProhibitedFields,
+  prepareRelations,
+  prepareTempKeys,
+  removeFieldsThatDontExistOnSchema,
+  transformDocument,
+};

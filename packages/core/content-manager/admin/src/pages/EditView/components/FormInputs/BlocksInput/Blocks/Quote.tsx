@@ -1,7 +1,5 @@
-import * as React from 'react';
-
-import { Quote } from '@strapi/icons';
-import styled from 'styled-components';
+import { Quotes } from '@strapi/icons';
+import { styled } from 'styled-components';
 
 import { type BlocksStore } from '../BlocksEditor';
 import { baseHandleConvert } from '../utils/conversions';
@@ -24,7 +22,7 @@ const quoteBlocks: Pick<BlocksStore, 'quote'> = {
         <Blockquote {...props.attributes}>{props.children}</Blockquote>
       </div>
     ),
-    icon: Quote,
+    icon: Quotes,
     label: {
       id: 'components.Blocks.blocks.quote',
       defaultMessage: 'Quote',

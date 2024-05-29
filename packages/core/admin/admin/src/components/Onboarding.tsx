@@ -5,15 +5,16 @@ import {
   Button,
   Divider,
   Flex,
-  Icon,
+  FlexComponent,
   PopoverPrimitives,
   Portal,
   Typography,
+  TypographyComponent,
   VisuallyHidden,
 } from '@strapi/design-system';
 import { Cross, Message, Play, Question, Book, PaperPlane } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import onboardingPreview from '../assets/images/onboarding-preview.png';
 import { useAppInfo } from '../features/AppInfo';
@@ -39,8 +40,10 @@ const Onboarding = () => {
     },
   ];
 
+  const Icon = isOpen ? Cross : Question;
+
   return (
-    <Box as="aside" position="fixed" bottom={2} right={2}>
+    <Box tag="aside" position="fixed" bottom={2} right={2}>
       <HelperButton
         aria-label={formatMessage(
           isOpen
@@ -56,7 +59,7 @@ const Onboarding = () => {
         onClick={handlePopoverVisibility}
         ref={triggerRef}
       >
-        <Icon as={isOpen ? Cross : Question} color="buttonNeutral0" />
+        <Icon fill="buttonNeutral0" />
       </HelperButton>
 
       {isOpen && (
@@ -82,7 +85,7 @@ const Onboarding = () => {
                 })}
               </TypographyLineHeight>
               <TextLink
-                as="a"
+                tag="a"
                 href={WATCH_MORE.href}
                 target="_blank"
                 rel="noreferrer noopener"
@@ -95,7 +98,7 @@ const Onboarding = () => {
             <Divider />
             {VIDEO_LINKS.map(({ href, duration, label }, index) => (
               <VideoLinkWrapper
-                as="a"
+                tag="a"
                 href={href}
                 target="_blank"
                 rel="noreferrer noopener"
@@ -107,9 +110,9 @@ const Onboarding = () => {
                 paddingRight={11}
               >
                 <Box paddingRight={5}>
-                  <Typography textColor="neutral200" variant="alpha">
+                  <Number textColor="neutral200" variant="alpha">
                     {index + 1}
-                  </Typography>
+                  </Number>
                 </Box>
                 <Box position="relative">
                   <Preview src={onboardingPreview} alt="" />
@@ -123,11 +126,11 @@ const Onboarding = () => {
                     width={6}
                     height={6}
                   >
-                    <Icon as={Play} color="buttonNeutral0" width={3} height={3} />
+                    <Play fill="buttonNeutral0" width="1.2rem" height="1.2rem" />
                   </IconWrapper>
                 </Box>
                 <Flex direction="column" alignItems="start" paddingLeft={4}>
-                  <Typography fontWeight="bold">{formatMessage(label)}</Typography>
+                  <Label fontWeight="bold">{formatMessage(label)}</Label>
                   <VisuallyHidden>:</VisuallyHidden>
                   <Typography textColor="neutral600" variant="pi">
                     {duration}
@@ -143,11 +146,11 @@ const Onboarding = () => {
               paddingTop={2}
               paddingBottom={5}
             >
-              {docLinks.map(({ label, href, icon }) => (
+              {docLinks.map(({ label, href, icon: Icon }) => (
                 <Flex gap={3} key={href}>
-                  <Icon as={icon} color="primary600" />
+                  <Icon fill="primary600" />
                   <TextLink
-                    as="a"
+                    tag="a"
                     href={href}
                     target="_blank"
                     rel="noreferrer noopener"
@@ -174,11 +177,15 @@ const HelperButton = styled(Button)`
   height: 100%;
 `;
 
-const IconWrapper = styled(Flex)`
+const IconWrapper = styled<FlexComponent>(Flex)`
   transform: translate(-50%, -50%);
 `;
 
-const VideoLinkWrapper = styled(Flex)`
+const Number = styled<TypographyComponent>(Typography)``;
+
+const Label = styled<TypographyComponent>(Typography)``;
+
+const VideoLinkWrapper = styled<FlexComponent<'a'>>(Flex)`
   text-decoration: none;
 
   :focus-visible {
@@ -189,12 +196,12 @@ const VideoLinkWrapper = styled(Flex)`
     background: ${({ theme }) => theme.colors.primary100};
 
     /* Hover style for the number displayed */
-    ${Typography}:first-child {
+    ${Number} {
       color: ${({ theme }) => theme.colors.primary500};
     }
 
     /* Hover style for the label */
-    ${Typography}:nth-child(1) {
+    ${Label} {
       color: ${({ theme }) => theme.colors.primary600};
     }
   }
@@ -208,13 +215,14 @@ const Preview = styled.img`
   border-radius: ${({ theme }) => theme.borderRadius};
 `;
 
-const TypographyLineHeight = styled(Typography)`
+const TypographyLineHeight = styled<TypographyComponent>(Typography)`
   /* line height of label and watch more to 1 so they can be better aligned visually */
   line-height: 1;
 `;
 
-const TextLink = styled(TypographyLineHeight)`
+const TextLink = styled<TypographyComponent<'a'>>(Typography)`
   text-decoration: none;
+  line-height: 1;
 
   :hover {
     text-decoration: underline;

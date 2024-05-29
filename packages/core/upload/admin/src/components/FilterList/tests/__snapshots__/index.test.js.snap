@@ -1,9 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<FilterList /> renders and matches the snapshot 1`] = `
+.c0 {
+  padding-block: 4px;
+  padding-inline: 4px;
+}
+
+.c1 {
+  background: #f0f0ff;
+  color: #4945ff;
+  padding-inline-end: 12px;
+  padding-inline-start: 12px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #d9d8ff;
+  height: 3.2rem;
+}
+
+.c2 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c4 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: currentcolor;
+}
+
 .c6 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,50 +43,12 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c4 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
+.c3>svg {
+  height: 0.8rem;
+  width: 0.8rem;
 }
 
-.c0 {
-  padding: 4px;
-}
-
-.c1 {
-  background: #f0f0ff;
-  color: #4945ff;
-  padding-right: 12px;
-  padding-left: 12px;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #d9d8ff;
-  height: 2rem;
-}
-
-.c2 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c3 > svg {
-  height: 0.5rem;
-  width: 0.5rem;
-}
-
-.c3 > svg path {
+.c3>svg path {
   fill: #4945ff;
 }
 
@@ -80,15 +72,14 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
         type is image
       </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
@@ -106,15 +97,14 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
         type is not image
       </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
@@ -132,15 +122,14 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
         createdAt is Thursday, October 7, 2021
       </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
@@ -158,15 +147,14 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
         type is video
       </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
@@ -184,15 +172,14 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
         type is file
       </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
@@ -210,20 +197,19 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
         type is not file
       </span>
       <svg
-        fill="none"
-        height="1rem"
-        viewBox="0 0 24 24"
-        width="1rem"
+        fill="currentColor"
+        height="16"
+        viewBox="0 0 32 32"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
-          d="M24 2.417 21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417Z"
-          fill="#212134"
+          d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
         />
       </svg>
     </button>
   </div>
-  <div
+  <span
     class="c6"
   >
     <p
@@ -244,6 +230,6 @@ exports[`<FilterList /> renders and matches the snapshot 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

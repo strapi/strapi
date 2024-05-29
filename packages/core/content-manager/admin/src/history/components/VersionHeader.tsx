@@ -5,10 +5,10 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
-import { BaseHeaderLayout, Button, Typography, Flex } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { ArrowLeft, ExclamationMarkCircle } from '@strapi/icons';
+import { Button, Typography, Flex, Link } from '@strapi/design-system';
+import { ArrowLeft, WarningCircle } from '@strapi/icons';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
@@ -108,7 +108,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
 
   return (
     <>
-      <BaseHeaderLayout
+      <Layouts.BaseHeader
         id={headerId}
         title={formatDate(new Date(version.createdAt), {
           year: 'numeric',
@@ -134,12 +134,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           </Typography>
         }
         navigationAction={
-          <Link
-            startIcon={<ArrowLeft />}
-            as={NavLink}
-            // @ts-expect-error - types are not inferred correctly through the as prop.
-            to={getNextNavigation()}
-          >
+          <Link startIcon={<ArrowLeft />} tag={NavLink} to={getNextNavigation()} isExternal={false}>
             {formatMessage({
               id: 'global.back',
               defaultMessage: 'Back',
@@ -165,7 +160,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
         isOpen={isConfirmDialogOpen}
         onClose={() => setIsConfirmDialogOpen(false)}
         onConfirm={handleRestore}
-        icon={<ExclamationMarkCircle />}
+        icon={<WarningCircle />}
         endAction={
           <Button variant="secondary" onClick={handleRestore} loading={isLoading}>
             {formatMessage({

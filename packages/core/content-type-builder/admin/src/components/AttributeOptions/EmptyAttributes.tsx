@@ -1,10 +1,10 @@
-import { Box, Flex, Icon, Typography } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { EmptyDocuments, Plus } from '@strapi/icons';
+import { Box, Flex, Typography, LinkButton } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import * as qs from 'qs';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../../utils';
 
@@ -40,17 +40,17 @@ export const EmptyAttributes = () => {
       <EmptyCardGrid />
       <Box position="absolute" top={6} width="100%">
         <Flex alignItems="center" justifyContent="center" direction="column">
-          <Icon as={EmptyDocuments} color="" width="160px" height="88px" />
+          <EmptyDocuments width="160px" height="88px" />
           <Box paddingTop={6} paddingBottom={4}>
             <Box textAlign="center">
-              <Typography variant="delta" as="p" textColor="neutral600">
+              <Typography variant="delta" tag="p" textColor="neutral600">
                 {formatMessage({
                   id: getTrad('modalForm.empty.heading'),
                   defaultMessage: 'Nothing in here yet.',
                 })}
               </Typography>
               <Box paddingTop={4}>
-                <Typography variant="delta" as="p" textColor="neutral600">
+                <Typography variant="delta" tag="p" textColor="neutral600">
                   {formatMessage({
                     id: getTrad('modalForm.empty.sub-heading'),
                     defaultMessage:
@@ -61,8 +61,7 @@ export const EmptyAttributes = () => {
             </Box>
           </Box>
           <LinkButton
-            forwardedAs={Link}
-            // @ts-expect-error We need to accept the props of the component passed in the `as` prop
+            tag={Link}
             to={`/marketplace?${qs.stringify({ categories: ['Custom fields'] })}`}
             variant="secondary"
             startIcon={<Plus />}

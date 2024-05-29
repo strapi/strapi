@@ -1,7 +1,7 @@
 import type * as Schema from '../../../schema';
 
 import type * as UID from '../../../uid';
-import type { Constants, Guard, If, And, DoesNotExtends, IsNotNever } from '../../../utils';
+import type { Constants, Guard, If, And, DoesNotExtends, IsNotNever, XOR } from '../../../utils';
 
 import type { Params } from '..';
 
@@ -60,7 +60,7 @@ type GetPopulatableKeysWithoutTarget<TSchemaUID extends UID.Schema> = Exclude<
  * Fragment populate notation for polymorphic attributes
  */
 export type Fragment<TMaybeTargets extends UID.Schema> = {
-  on?: { [TKey in TMaybeTargets]: boolean | NestedParams<TKey> };
+  on?: { [TKey in TMaybeTargets]?: boolean | NestedParams<TKey> };
 };
 
 type PopulateClause<
@@ -108,20 +108,16 @@ export type ObjectNotation<TSchemaUID extends UID.Schema> = [
                     Schema.Attribute.MorphTargets<Schema.AttributeByName<TSchemaUID, TKey>>,
                     UID.Schema
                   >
-                >
-              // TODO: V5: Remove root-level nested params for morph data structures and only allow fragments
-              | NestedParams<UID.Schema>;
+                >;
           }
         >,
       // Loose fallback when registries are not extended
-      | { [key: string]: boolean | NestedParams<UID.Schema> }
-      | {
-          [key: string]:
-            | boolean
-            | Fragment<UID.Schema>
-            // TODO: V5: Remove root-level nested params for morph data structures and only allow fragments
-            | NestedParams<UID.Schema>;
-        }
+      {
+        [key: string]:
+          | boolean
+          // We can't have both populate fragments and nested params, hence the xor
+          | XOR<NestedParams<UID.Schema>, Fragment<UID.Schema>>;
+      }
     >
   : never;
 

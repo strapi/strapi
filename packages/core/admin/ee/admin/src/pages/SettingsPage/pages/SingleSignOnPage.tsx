@@ -1,23 +1,25 @@
 import {
   Button,
-  ContentLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
-  Layout,
   MultiSelect,
   MultiSelectOption,
-  Option,
-  Select,
-  ToggleInput,
   Typography,
+  Field,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
-import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
+import {
+  Form,
+  FormHelpers,
+  InputProps,
+  useField,
+} from '../../../../../../admin/src/components/Form';
+import { InputRenderer } from '../../../../../../admin/src/components/FormInputs/Renderer';
+import { Layouts } from '../../../../../../admin/src/components/Layouts/Layout';
 import { Page } from '../../../../../../admin/src/components/PageHelpers';
 import { useTypedSelector } from '../../../../../../admin/src/core/store/hooks';
 import { useNotification } from '../../../../../../admin/src/features/Notifications';
@@ -32,17 +34,17 @@ import { isBaseQueryError } from '../../../../../../admin/src/utils/baseQuery';
 import { translatedErrors } from '../../../../../../admin/src/utils/translatedErrors';
 import { ProvidersOptions } from '../../../../../../shared/contracts/admin';
 
-const schema = yup.object().shape({
-  autoRegister: yup.bool().required(translatedErrors.required.id),
+const SCHEMA = yup.object().shape({
+  autoRegister: yup.bool().required(translatedErrors.required),
   defaultRole: yup.mixed().when('autoRegister', (value, initSchema) => {
-    return value ? initSchema.required(translatedErrors.required.id) : initSchema.nullable();
+    return value ? initSchema.required(translatedErrors.required) : initSchema.nullable();
   }),
   ssoLockedRoles: yup
     .array()
     .nullable()
     .of(
       yup.mixed().when('ssoLockedRoles', (value, initSchema) => {
-        return value ? initSchema.required(translatedErrors.required.id) : initSchema.nullable();
+        return value ? initSchema.required(translatedErrors.required) : initSchema.nullable();
       })
     ),
 });
@@ -75,14 +77,14 @@ export const SingleSignOnPage = () => {
 
   const handleSubmit = async (
     body: ProvidersOptions.Request['body'],
-    formik: FormikHelpers<ProvidersOptions.Request['body']>
+    helpers: FormHelpers<ProvidersOptions.Request['body']>
   ) => {
     try {
       const res = await updateProviderOptions(body);
 
       if ('error' in res) {
         if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
-          formik.setErrors(formatValidationErrors(res.error));
+          helpers.setErrors(formatValidationErrors(res.error));
         } else {
           toggleNotification({
             type: 'danger',
@@ -111,7 +113,7 @@ export const SingleSignOnPage = () => {
   const isLoadingData = isLoadingRoles || isLoadingPermissions || isLoadingProviderOptions;
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>
         {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
@@ -121,8 +123,11 @@ export const SingleSignOnPage = () => {
         )}
       </Page.Title>
       <Page.Main aria-busy={isSubmittingForm || isLoadingData} tabIndex={-1}>
-        <Formik
+        <Form
+          method="PUT"
           onSubmit={handleSubmit}
+          validationSchema={SCHEMA}
+          disabled={!canUpdate}
           initialValues={
             data || {
               autoRegister: false,
@@ -130,16 +135,13 @@ export const SingleSignOnPage = () => {
               ssoLockedRoles: null,
             }
           }
-          validationSchema={schema}
-          validateOnChange={false}
-          enableReinitialize
         >
-          {({ handleChange, isSubmitting, values, setFieldValue, dirty, errors }) => (
-            <Form>
-              <HeaderLayout
+          {({ modified, isSubmitting }) => (
+            <>
+              <Layouts.Header
                 primaryAction={
                   <Button
-                    disabled={!dirty}
+                    disabled={!modified}
                     loading={isSubmitting}
                     startIcon={<Check />}
                     type="submit"
@@ -160,7 +162,7 @@ export const SingleSignOnPage = () => {
                   defaultMessage: 'Configure the settings for the Single Sign-On feature.',
                 })}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 {isSubmitting || isLoadingData ? (
                   <Page.Loading />
                 ) : (
@@ -173,127 +175,125 @@ export const SingleSignOnPage = () => {
                     shadow="filterShadow"
                     hasRadius
                   >
-                    <Typography variant="delta" as="h2">
+                    <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: 'global.settings',
                         defaultMessage: 'Settings',
                       })}
                     </Typography>
                     <Grid gap={4}>
-                      <GridItem col={6} s={12}>
-                        <ToggleInput
-                          disabled={!canUpdate}
-                          checked={values.autoRegister}
-                          hint={formatMessage({
+                      {[
+                        {
+                          hint: formatMessage({
                             id: 'Settings.sso.form.registration.description',
                             defaultMessage: 'Create new user on SSO login if no account exists',
-                          })}
-                          label={formatMessage({
+                          }),
+                          label: formatMessage({
                             id: 'Settings.sso.form.registration.label',
                             defaultMessage: 'Auto-registration',
-                          })}
-                          name="autoRegister"
-                          offLabel={formatMessage({
-                            id: 'app.components.ToggleCheckbox.off-label',
-                            defaultMessage: 'Off',
-                          })}
-                          onLabel={formatMessage({
-                            id: 'app.components.ToggleCheckbox.on-label',
-                            defaultMessage: 'On',
-                          })}
-                          onChange={handleChange}
-                        />
-                      </GridItem>
-                      <GridItem col={6} s={12}>
-                        <Select
-                          disabled={!canUpdate}
-                          hint={formatMessage({
+                          }),
+                          name: 'autoRegister',
+                          size: 6,
+                          type: 'boolean' as const,
+                        },
+                        {
+                          hint: formatMessage({
                             id: 'Settings.sso.form.defaultRole.description',
                             defaultMessage:
                               'It will attach the new authenticated user to the selected role',
-                          })}
-                          error={
-                            errors.defaultRole
-                              ? formatMessage({
-                                  id: errors.defaultRole,
-                                  defaultMessage: errors.defaultRole,
-                                })
-                              : ''
-                          }
-                          label={formatMessage({
+                          }),
+                          label: formatMessage({
                             id: 'Settings.sso.form.defaultRole.label',
                             defaultMessage: 'Default role',
-                          })}
-                          name="defaultRole"
-                          onChange={(value) =>
-                            handleChange({ target: { name: 'defaultRole', value } })
-                          }
-                          placeholder={formatMessage({
+                          }),
+                          name: 'defaultRole',
+                          options: roles.map(({ id, name }) => ({
+                            label: name,
+                            value: id.toString(),
+                          })),
+                          placeholder: formatMessage({
                             id: 'components.InputSelect.option.placeholder',
                             defaultMessage: 'Choose here',
-                          })}
-                          value={values.defaultRole}
-                        >
-                          {roles.map(({ id, name }) => (
-                            <Option key={id} value={id.toString()}>
-                              {name}
-                            </Option>
-                          ))}
-                        </Select>
-                      </GridItem>
-                      <GridItem col={6} s={12}>
-                        <MultiSelect
-                          disabled={!canUpdate}
-                          hint={formatMessage({
+                          }),
+                          size: 6,
+                          type: 'enumeration' as const,
+                        },
+                        {
+                          hint: formatMessage({
                             id: 'Settings.sso.form.localAuthenticationLock.description',
                             defaultMessage:
                               'Select the roles for which you want to disable the local authentication',
-                          })}
-                          error={
-                            errors.ssoLockedRoles
-                              ? formatMessage({
-                                  id: errors.ssoLockedRoles,
-                                  defaultMessage: errors.ssoLockedRoles,
-                                })
-                              : ''
-                          }
-                          label={formatMessage({
+                          }),
+                          label: formatMessage({
                             id: 'Settings.sso.form.localAuthenticationLock.label',
                             defaultMessage: 'Local authentication lock-out',
-                          })}
-                          name="ssoLockedRoles"
-                          onChange={(value) =>
-                            handleChange({
-                              target: {
-                                value,
-                                name: 'ssoLockedRoles',
-                              },
-                            })
-                          }
-                          placeholder={formatMessage({
+                          }),
+                          name: 'ssoLockedRoles',
+                          options: roles.map(({ id, name }) => ({
+                            label: name,
+                            value: id.toString(),
+                          })),
+                          placeholder: formatMessage({
                             id: 'components.InputSelect.option.placeholder',
                             defaultMessage: 'Choose here',
-                          })}
-                          onClear={() => setFieldValue('ssoLockedRoles', [])}
-                          value={values.ssoLockedRoles || []}
-                          withTags
-                        >
-                          {roles.map(({ id, name }) => (
-                            <MultiSelectOption key={id} value={id.toString()}>
-                              {name}
-                            </MultiSelectOption>
-                          ))}
-                        </MultiSelect>
-                      </GridItem>
+                          }),
+                          size: 6,
+                          type: 'multi' as const,
+                        },
+                      ].map(({ size, ...field }) => (
+                        <GridItem key={field.name} col={size}>
+                          <FormInputRenderer {...field} />
+                        </GridItem>
+                      ))}
                     </Grid>
                   </Flex>
                 )}
-              </ContentLayout>
-            </Form>
+              </Layouts.Content>
+            </>
           )}
-        </Formik>
+        </Form>
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
+  );
+};
+
+type FormInputProps = InputProps | MultiSelectInputProps;
+
+const FormInputRenderer = (props: FormInputProps) => {
+  switch (props.type) {
+    case 'multi':
+      return <MultiSelectInput {...props} />;
+    default:
+      return <InputRenderer {...props} />;
+  }
+};
+
+type MultiSelectInputProps = Omit<Extract<InputProps, { type: 'enumeration' }>, 'type'> & {
+  type: 'multi';
+};
+
+const MultiSelectInput = ({ hint, label, name, options, ...props }: MultiSelectInputProps) => {
+  const field = useField(name);
+
+  return (
+    <Field.Root name={name} hint={hint} error={field.error}>
+      <Field.Label>{label}</Field.Label>
+      <MultiSelect
+        onChange={(value) => field.onChange('ssoLockedRoles', value)}
+        onClear={() => field.onChange('ssoLockedRoles', [])}
+        value={field.value ?? []}
+        withTags
+        {...props}
+      >
+        {options.map(({ label, value }) => (
+          <MultiSelectOption key={value} value={value}>
+            {label}
+          </MultiSelectOption>
+        ))}
+      </MultiSelect>
+      <Field.Hint />
+      <Field.Error />
+    </Field.Root>
   );
 };
 

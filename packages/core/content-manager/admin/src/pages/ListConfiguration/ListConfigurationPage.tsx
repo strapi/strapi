@@ -7,8 +7,9 @@ import {
   useTracking,
   useAPIErrorHandler,
   Page,
+  Layouts,
 } from '@strapi/admin/strapi-admin';
-import { ContentLayout, Divider, Flex, Layout, Main } from '@strapi/design-system';
+import { Divider, Flex, Main } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Navigate } from 'react-router-dom';
 
@@ -119,7 +120,7 @@ const ListConfiguration = () => {
   }
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Title>{`Configure ${list.settings.displayName} List View`}</Page.Title>
       <Main>
         <Form initialValues={initialValues} onSubmit={handleSubmit} method="PUT">
@@ -128,7 +129,7 @@ const ListConfiguration = () => {
             model={model}
             name={list.settings.displayName ?? ''}
           />
-          <ContentLayout>
+          <Layouts.Content>
             <Flex
               alignItems="stretch"
               background="neutral0"
@@ -145,10 +146,10 @@ const ListConfiguration = () => {
               <Divider />
               <SortDisplayedFields />
             </Flex>
-          </ContentLayout>
+          </Layouts.Content>
         </Form>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

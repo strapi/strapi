@@ -7,7 +7,7 @@ import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor } from 'slate';
 import { withHistory } from 'slate-history';
 import { type RenderElementProps, Slate, withReact, ReactEditor, useSlate } from 'slate-react';
-import styled, { type CSSProperties } from 'styled-components';
+import { styled, type CSSProperties } from 'styled-components';
 
 import { getTranslation } from '../../../../../utils/translations';
 
@@ -116,8 +116,8 @@ const EditorDivider = styled(Divider)`
 
 const ExpandIconButton = styled(IconButton)`
   position: absolute;
-  bottom: ${12 / 16}rem;
-  right: ${12 / 16}rem;
+  bottom: 1.2rem;
+  right: 1.2rem;
 `;
 
 /**

@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { Clock, Refresh } from '@strapi/icons';
+import { Box, Flex, Typography, Link } from '@strapi/design-system';
+import { Clock, ArrowClockwise } from '@strapi/icons';
 import { createPortal } from 'react-dom';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import styled, { keyframes } from 'styled-components';
+import { styled, keyframes } from 'styled-components';
 
 /**
  * TODO: realistically a lot of this logic is isolated to the `core/admin` package.
@@ -136,21 +135,21 @@ const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) =>
     ? createPortal(
         <Overlay id="autoReloadOverlayBlocker" direction="column" alignItems="center" gap={6}>
           <Flex direction="column" alignItems="center" gap={2}>
-            <Typography as="h1" variant="alpha">
+            <Typography tag="h1" variant="alpha">
               {formatMessage(title)}
             </Typography>
-            <Typography as="h2" textColor="neutral600" fontSize={4} fontWeight="regular">
+            <Typography tag="h2" textColor="neutral600" fontSize={4} fontWeight="regular">
               {formatMessage(description)}
             </Typography>
           </Flex>
           {displayedIcon === 'reload' && (
             <IconBox padding={6} background="primary100" borderColor="primary200">
-              <LoaderReload width={`${36 / 16}rem`} height={`${36 / 16}rem`} />
+              <LoaderReload width="3.6rem" height="3.6rem" />
             </IconBox>
           )}
           {displayedIcon === 'time' && (
             <IconBox padding={6} background="primary100" borderColor="primary200">
-              <Clock width={`${40 / 16}rem`} height={`${40 / 16}rem`} />
+              <Clock width="4rem" height="4rem" />
             </IconBox>
           )}
           <Box marginTop={2}>
@@ -177,7 +176,7 @@ const rotation = keyframes`
     }
   `;
 
-const LoaderReload = styled(Refresh)`
+const LoaderReload = styled(ArrowClockwise)`
   animation: ${rotation} 1s infinite linear;
 `;
 
@@ -189,7 +188,7 @@ const Overlay = styled(Flex)`
   left: 0;
   /* TODO: set this up in the theme for consistence z-index values */
   z-index: 1140;
-  padding-top: ${160 / 16}rem;
+  padding-top: 16rem;
 
   & > * {
     position: relative;

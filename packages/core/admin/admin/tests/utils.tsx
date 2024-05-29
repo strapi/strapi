@@ -89,10 +89,10 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
     },
   });
 
-  const store = configureStore(
-    // @ts-expect-error – we've not filled up the entire initial state.
-    storeConfig ?? defaultTestStoreConfig
-  );
+  const store = configureStore({
+    ...defaultTestStoreConfig,
+    ...storeConfig,
+  });
 
   const allPermissions =
     typeof permissions === 'function'
@@ -224,7 +224,10 @@ const render = (
       ),
       ...restOptions,
     }),
-    user: userEvent.setup(userEventOptions),
+    user: userEvent.setup({
+      skipHover: true,
+      ...userEventOptions,
+    }),
   };
 };
 
