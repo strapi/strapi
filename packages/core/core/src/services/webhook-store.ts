@@ -35,12 +35,7 @@ const webhookModel: Model = {
 };
 
 type Webhook = Modules.WebhookStore.Webhook;
-
-interface DBOutput extends Omit<Webhook, 'id' | 'isEnabled'> {
-  id: string | number;
-  enabled: boolean;
-}
-
+type DBOutput = Omit<Webhook, 'id' | 'isEnabled'> & { id: string | number; enabled: boolean };
 type DBInput = Omit<DBOutput, 'id'>;
 
 const toDBObject = (data: Webhook): DBInput => {
