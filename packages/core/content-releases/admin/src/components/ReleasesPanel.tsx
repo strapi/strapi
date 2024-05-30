@@ -53,6 +53,10 @@ const Panel: PanelComponent = ({ model, documentId, collectionType }: PanelCompo
     return null;
   }
 
+  if (releases && releases.length === 0) {
+    return null;
+  }
+
   return {
     title: formatMessage({
       id: 'content-releases.plugin.name',
