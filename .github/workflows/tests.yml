@@ -289,7 +289,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
-        image: bitnami/mysql:latest
+        image: mysql:latest
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
@@ -444,7 +444,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     services:
       mysql:
-        image: bitnami/mysql:latest
+        image: mysql:latest
         env:
           MYSQL_ROOT_PASSWORD: strapi
           MYSQL_USER: strapi
