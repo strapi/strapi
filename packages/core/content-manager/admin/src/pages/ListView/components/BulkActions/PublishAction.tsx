@@ -19,7 +19,7 @@ import {
   Loader,
   TypographyComponent,
 } from '@strapi/design-system';
-import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
+import { Pencil, CrossCircle, CheckCircle, ArrowsCounterClockwise } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -80,13 +80,10 @@ const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessag
 
 interface EntryValidationTextProps {
   validationErrors?: FormErrors;
-  isPublished?: boolean;
+  status: string;
 }
 
-const EntryValidationText = ({
-  validationErrors,
-  isPublished = false,
-}: EntryValidationTextProps) => {
+const EntryValidationText = ({ validationErrors, status }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
 
   if (validationErrors) {
@@ -106,7 +103,7 @@ const EntryValidationText = ({
     );
   }
 
-  if (isPublished) {
+  if (status === 'published') {
     return (
       <Flex gap={2}>
         <CheckCircle fill="success600" />
@@ -114,6 +111,20 @@ const EntryValidationText = ({
           {formatMessage({
             id: 'content-manager.bulk-publish.already-published',
             defaultMessage: 'Already Published',
+          })}
+        </Typography>
+      </Flex>
+    );
+  }
+
+  if (status === 'modified') {
+    return (
+      <Flex gap={2}>
+        <ArrowsCounterClockwise fill="alternative600" />
+        <Typography>
+          {formatMessage({
+            id: 'content-manager.bulk-publish.modified',
+            defaultMessage: 'Ready to publish changes',
           })}
         </Typography>
       </Flex>
@@ -208,7 +219,7 @@ const SelectedEntriesTableContent = ({
               ) : (
                 <EntryValidationText
                   validationErrors={validationErrors[row.documentId]}
-                  isPublished={row.status === 'published'}
+                  status={row.status}
                 />
               )}
             </Table.Cell>
