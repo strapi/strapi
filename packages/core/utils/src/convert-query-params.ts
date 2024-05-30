@@ -386,7 +386,7 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
           );
         }
 
-        let newSubPopulate = {};
+        const newSubPopulate = {};
 
         // { on: { ... } }
         if (hasPopulateFragmentDefined(subPopulate)) {
