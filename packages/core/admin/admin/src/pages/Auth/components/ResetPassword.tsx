@@ -69,7 +69,7 @@ const ResetPassword = () => {
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const setToken = useAuth('ResetPassword', (state) => state.setToken);
+  const { setToken } = useAuth('ResetPassword', (auth) => auth);
 
   const [resetPassword, { error }] = useResetPasswordMutation();
 

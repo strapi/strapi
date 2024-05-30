@@ -1,5 +1,5 @@
 /**
- * DO NOT REMOVE. This export is whats used to render the admin panel at all.
+ * DO NOT REMOVE. This export is what's used to render the admin panel at all.
  * Without it === no admin panel.
  */
 export * from './render';
@@ -68,6 +68,7 @@ export { translatedErrors } from './utils/translatedErrors';
 export * from './utils/getFetchClient';
 export * from './utils/baseQuery';
 export * from './services/api';
+export type { CMAdminConfiguration } from './types/adminConfiguration';
 
 /**
  * Components

@@ -42,7 +42,7 @@ const Login = ({ children }: LoginProps) => {
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const navigate = useNavigate();
 
-  const login = useAuth('Login', (state) => state.login);
+  const { login } = useAuth('Login', (auth) => auth);
 
   const handleLogin = async (body: Parameters<typeof login>[0]) => {
     setApiError(undefined);
