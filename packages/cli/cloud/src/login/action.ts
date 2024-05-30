@@ -21,14 +21,19 @@ export default async (ctx: CLIContext) => {
   if (existingToken) {
     const isTokenValid = await tokenService.isTokenValid(existingToken);
     if (isTokenValid) {
-      const userInfo = await cloudApiService.getUserInfo();
-      const { email } = userInfo.data.data;
-      if (email) {
-        logger.log(`You are already logged into your account (${email}).`);
-      } else {
-        logger.log('You are already logged in.');
+      try {
+        const userInfo = await cloudApiService.getUserInfo();
+        const { email } = userInfo.data.data;
+        if (email) {
+          logger.log(`You are already logged into your account (${email}).`);
+        } else {
+          logger.log('You are already logged in.');
+        }
+        return;
+      } catch (e) {
+        logger.debug('Failed to fetch user info', e);
+        // If the token is invalid and request failed, we should proceed with the login process
       }
-      return;
     }
   }
 
