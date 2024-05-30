@@ -11,16 +11,16 @@ import {
   Field,
   VisuallyHidden,
 } from '@strapi/design-system';
-import {Cross} from '@strapi/icons';
-import {Formik, Form} from 'formik';
-import {useIntl} from 'react-intl';
-import {styled} from 'styled-components';
+import { Cross } from '@strapi/icons';
+import { Formik, Form } from 'formik';
+import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
-import {useAppInfo} from '../features/AppInfo';
-import {useAuth} from '../features/Auth';
-import {useNotification} from '../features/Notifications';
-import {usePersistentState} from '../hooks/usePersistentState';
+import { useAppInfo } from '../features/AppInfo';
+import { useAuth } from '../features/Auth';
+import { useNotification } from '../features/Notifications';
+import { usePersistentState } from '../hooks/usePersistentState';
 
 const FieldWrapper = styled(Field.Root)`
   height: 3.2rem;
@@ -39,21 +39,21 @@ const FieldWrapper = styled(Field.Root)`
   > label {
     color: inherit;
     cursor: pointer;
-    padding: ${({theme}) => theme.spaces[2]};
+    padding: ${({ theme }) => theme.spaces[2]};
     text-align: center;
     vertical-align: middle;
   }
 
   &:hover,
   &:focus-within {
-    background-color: ${({theme}) => theme.colors.neutral0};
+    background-color: ${({ theme }) => theme.colors.neutral0};
   }
 
   &:active,
   &.selected {
-    color: ${({theme}) => theme.colors.primary700};
-    background-color: ${({theme}) => theme.colors.neutral0};
-    border-color: ${({theme}) => theme.colors.primary700};
+    color: ${({ theme }) => theme.colors.primary700};
+    background-color: ${({ theme }) => theme.colors.neutral0};
+    border-color: ${({ theme }) => theme.colors.primary700};
   }
 `;
 
@@ -67,7 +67,7 @@ const delays = {
 const ratingArray = [...Array(11).keys()];
 
 const checkIfShouldShowSurvey = (settings: NpsSurveySettings) => {
-  const {enabled, lastResponseDate, firstDismissalDate, lastDismissalDate} = settings;
+  const { enabled, lastResponseDate, firstDismissalDate, lastDismissalDate } = settings;
 
   // This function goes through all the cases where we'd want to not show the survey:
   // 1. If the survey is disabled by strapi, abort mission, don't bother checking the other settings.
@@ -130,10 +130,10 @@ const checkIfShouldShowSurvey = (settings: NpsSurveySettings) => {
 };
 
 const NpsSurvey = () => {
-  const {formatMessage} = useIntl();
-  const {npsSurveySettings, setNpsSurveySettings} = useNpsSurveySettings();
+  const { formatMessage } = useIntl();
+  const { npsSurveySettings, setNpsSurveySettings } = useNpsSurveySettings();
   const [isFeedbackResponse, setIsFeedbackResponse] = React.useState(false);
-  const {toggleNotification} = useNotification();
+  const { toggleNotification } = useNotification();
   const currentEnvironment = useAppInfo('NpsSurvey', (state) => state.currentEnvironment);
   const strapiVersion = useAppInfo('NpsSurvey', (state) => state.strapiVersion);
 
@@ -164,7 +164,7 @@ const NpsSurvey = () => {
     };
   }, []);
 
-  const {user} = useAuth('NpsSurvey', auth => auth);
+  const { user } = useAuth('NpsSurvey', (auth) => auth);
 
   if (!displaySurvey) {
     return null;
@@ -175,9 +175,9 @@ const NpsSurvey = () => {
   }
 
   const handleSubmitResponse = async ({
-                                        npsSurveyRating,
-                                        npsSurveyFeedback,
-                                      }: {
+    npsSurveyRating,
+    npsSurveyFeedback,
+  }: {
     npsSurveyRating: NpsSurveyMutationBody['rating'];
     npsSurveyFeedback: NpsSurveyMutationBody['comment'];
   }) => {
@@ -216,7 +216,7 @@ const NpsSurvey = () => {
     } catch (err) {
       toggleNotification({
         type: 'danger',
-        message: formatMessage({id: 'notification.error', defaultMessage: 'An error occurred'}),
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
     }
   };
@@ -245,14 +245,14 @@ const NpsSurvey = () => {
   return (
     <Portal>
       <Formik
-        initialValues={{npsSurveyFeedback: '', npsSurveyRating: null}}
+        initialValues={{ npsSurveyFeedback: '', npsSurveyRating: null }}
         onSubmit={handleSubmitResponse}
         validationSchema={yup.object({
           npsSurveyFeedback: yup.string(),
           npsSurveyRating: yup.number().required(),
         })}
       >
-        {({values, handleChange, setFieldValue, isSubmitting}) => (
+        {({ values, handleChange, setFieldValue, isSubmitting }) => (
           <Form name="npsSurveyForm">
             <Flex
               hasRadius
@@ -295,7 +295,7 @@ const NpsSurvey = () => {
                         defaultMessage: 'Dismiss survey',
                       })}
                     >
-                      <Cross/>
+                      <Cross />
                     </IconButton>
                   </Flex>
                   <Flex gap={2} marginTop={2} marginBottom={2} justifyContent="center">
@@ -402,7 +402,7 @@ function useNpsSurveySettings() {
   /**
    * TODO: should this just be an array so we can alias the `usePersistentState` hook?
    */
-  return {npsSurveySettings, setNpsSurveySettings};
+  return { npsSurveySettings, setNpsSurveySettings };
 }
 
-export {NpsSurvey, useNpsSurveySettings};
+export { NpsSurvey, useNpsSurveySettings };

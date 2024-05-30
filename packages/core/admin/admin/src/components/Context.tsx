@@ -15,14 +15,14 @@ function createContext<ContextValueType extends object | null>(
   const Context = ContextSelector.createContext<ContextValueType | undefined>(defaultContext);
 
   const Provider = (props: ContextValueType & { children: React.ReactNode }) => {
-    const {children, ...context} = props;
+    const { children, ...context } = props;
     // Only re-memoize when prop values change
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const value = React.useMemo(() => context, Object.values(context)) as ContextValueType;
     return <Context.Provider value={value}>{children}</Context.Provider>;
   };
 
-  const useContext = <Selected, >(
+  const useContext = <Selected,>(
     consumerName: string,
     selector: (value: ContextValueType) => Selected
   ): Selected =>
@@ -37,4 +37,4 @@ function createContext<ContextValueType extends object | null>(
   return [Provider, useContext] as const;
 }
 
-export {createContext};
+export { createContext };

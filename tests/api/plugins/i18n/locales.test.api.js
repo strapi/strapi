@@ -1,10 +1,10 @@
 'use strict';
 
-const {omit} = require('lodash/fp');
+const { omit } = require('lodash/fp');
 
-const {createTestBuilder} = require('api-tests/builder');
-const {createStrapiInstance} = require('api-tests/strapi');
-const {createAuthRequest} = require('api-tests/request');
+const { createTestBuilder } = require('api-tests/builder');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createAuthRequest } = require('api-tests/request');
 
 const data = {
   locales: [],
@@ -42,16 +42,16 @@ describe('CRUD locales', () => {
     await builder.addContentType(productModel).build();
 
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({strapi});
+    rq = await createAuthRequest({ strapi });
 
     localeService = strapi.plugin('i18n').service('locales');
   });
 
   afterAll(async () => {
-    await localeService.setDefaultLocale({code: 'en'});
+    await localeService.setDefaultLocale({ code: 'en' });
 
     // Delete all locales that have been created
-    await strapi.db.query('plugin::i18n.locale').deleteMany({code: {$ne: 'en'}});
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ code: { $ne: 'en' } });
 
     await strapi.destroy();
     await builder.cleanup();
@@ -179,7 +179,7 @@ describe('CRUD locales', () => {
       let res = await rq({
         url: '/i18n/locales',
         method: 'POST',
-        body: {code: 'bas', name: 'random', isDefault: true},
+        body: { code: 'bas', name: 'random', isDefault: true },
       });
 
       expect(res.statusCode).toBe(200);
@@ -189,7 +189,7 @@ describe('CRUD locales', () => {
       res = await rq({
         url: '/i18n/locales',
         method: 'POST',
-        body: {code: 'en-US', name: 'random', isDefault: true},
+        body: { code: 'en-US', name: 'random', isDefault: true },
       });
       expect(res.statusCode).toBe(200);
       expect(res.body.isDefault).toBe(true);
@@ -313,7 +313,7 @@ describe('CRUD locales', () => {
       let res = await rq({
         url: `/i18n/locales/${data.locales[0].id}`,
         method: 'PUT',
-        body: {isDefault: true},
+        body: { isDefault: true },
       });
 
       expect(res.statusCode).toBe(200);
@@ -322,7 +322,7 @@ describe('CRUD locales', () => {
       res = await rq({
         url: `/i18n/locales/${data.locales[1].id}`,
         method: 'PUT',
-        body: {isDefault: true},
+        body: { isDefault: true },
       });
       expect(res.statusCode).toBe(200);
       expect(res.body.isDefault).toBe(true);
@@ -341,7 +341,7 @@ describe('CRUD locales', () => {
       let res = await rq({
         url: `/i18n/locales/${data.locales[0].id}`,
         method: 'PUT',
-        body: {isDefault: true},
+        body: { isDefault: true },
       });
 
       expect(res.statusCode).toBe(200);
@@ -350,7 +350,7 @@ describe('CRUD locales', () => {
       res = await rq({
         url: `/i18n/locales/${data.locales[0].id}`,
         method: 'PUT',
-        body: {isDefault: false},
+        body: { isDefault: false },
       });
       expect(res.statusCode).toBe(200);
       expect(res.body.isDefault).toBe(true);
@@ -362,7 +362,7 @@ describe('CRUD locales', () => {
       let res = await rq({
         url: `/i18n/locales/${data.locales[0].id}`,
         method: 'PUT',
-        body: {isDefault: true},
+        body: { isDefault: true },
       });
 
       expect(res.statusCode).toBe(200);
@@ -399,29 +399,29 @@ describe('CRUD locales', () => {
 
     test('Delete a locale and entities in this locale', async () => {
       const {
-        body: {data: frenchProduct},
+        body: { data: frenchProduct },
       } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
-        qs: {locale: 'fr-FR'},
-        body: {name: 'product name'},
+        qs: { locale: 'fr-FR' },
+        body: { name: 'product name' },
       });
 
       await rq({
         url: `/content-manager/collection-types/api::product.product/${frenchProduct.documentId}`,
         method: 'PUT',
-        body: {name: 'product name'},
+        body: { name: 'product name' },
         qs: {
           locale: 'en',
         },
       });
 
       const {
-        body: {results: createdProducts},
+        body: { results: createdProducts },
       } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'GET',
-        qs: {locale: 'fr-FR'},
+        qs: { locale: 'fr-FR' },
       });
 
       expect(createdProducts).toHaveLength(1);
@@ -433,20 +433,20 @@ describe('CRUD locales', () => {
       });
 
       const {
-        body: {results: frenchProducts},
+        body: { results: frenchProducts },
       } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'GET',
-        qs: {locale: 'fr-FR'},
+        qs: { locale: 'fr-FR' },
       });
       expect(frenchProducts).toHaveLength(0);
 
       const {
-        body: {results: englishProducts},
+        body: { results: englishProducts },
       } = await rq({
         url: '/content-manager/collection-types/api::product.product',
         method: 'GET',
-        qs: {locale: 'en'},
+        qs: { locale: 'en' },
       });
       expect(englishProducts).toHaveLength(1);
 

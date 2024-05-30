@@ -1,4 +1,4 @@
-import type {File as FormidableFile} from 'formidable';
+import type { File as FormidableFile } from 'formidable';
 
 export type InputFile = FormidableFile & {
   path?: string;

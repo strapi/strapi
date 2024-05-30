@@ -2,9 +2,9 @@
 
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
 const _ = require('lodash');
-const {createStrapiInstance} = require('api-tests/strapi');
-const {createTestBuilder} = require('api-tests/builder');
-const {createContentAPIRequest, transformToRESTResource} = require('api-tests/request');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createTestBuilder } = require('api-tests/builder');
+const { createContentAPIRequest, transformToRESTResource } = require('api-tests/request');
 
 const builder = createTestBuilder();
 const data = {
@@ -52,8 +52,8 @@ const collector = {
 };
 
 const fixtures = {
-  card: [{name: 'Hugo LLORIS'}, {name: 'Samuel UMTITI'}, {name: 'Lucas HERNANDEZ'}],
-  collector: ({card}) => [
+  card: [{ name: 'Hugo LLORIS' }, { name: 'Samuel UMTITI' }, { name: 'Lucas HERNANDEZ' }],
+  collector: ({ card }) => [
     {
       name: 'Bernard',
       age: 25,
@@ -89,7 +89,7 @@ describe('Deep Filtering API', () => {
       .build();
 
     strapi = await createStrapiInstance();
-    rq = await createContentAPIRequest({strapi});
+    rq = await createContentAPIRequest({ strapi });
 
     Object.assign(
       data,
@@ -111,7 +111,7 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            filters: {cards: {name: data.card[0].name}},
+            filters: { cards: { name: data.card[0].name } },
           },
         });
         expect(Array.isArray(res.body.data)).toBe(true);
@@ -129,7 +129,7 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            filters: {cards: {name: data.card[1].name}},
+            filters: { cards: { name: data.card[1].name } },
           },
         });
 
@@ -277,7 +277,7 @@ describe('Deep Filtering API', () => {
         expect(res.body.meta.pagination).toMatchObject({
           ...pagination,
           pageCount: 0,
-          total: 0
+          total: 0,
         });
         expect(Array.isArray(res.body.data)).toBe(true);
         expect(res.body.data.length).toBe(0);
@@ -290,7 +290,7 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            filters: {collector_friends: {name: data.collector[0].name}},
+            filters: { collector_friends: { name: data.collector[0].name } },
           },
         });
         expect(res.body.meta.pagination).toMatchObject({

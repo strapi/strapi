@@ -1,34 +1,34 @@
 import * as React from 'react';
 
-import {Box, Button, Flex, Grid, GridItem, Typography, Link} from '@strapi/design-system';
+import { Box, Button, Flex, Grid, GridItem, Typography, Link } from '@strapi/design-system';
 import omit from 'lodash/omit';
-import {useIntl} from 'react-intl';
-import {NavLink, Navigate, useNavigate, useMatch, useLocation} from 'react-router-dom';
-import {styled} from 'styled-components';
+import { useIntl } from 'react-intl';
+import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
-import {ValidationError} from 'yup';
+import { ValidationError } from 'yup';
 
 import {
   Register as RegisterUser,
   RegisterAdmin,
 } from '../../../../../shared/contracts/authentication';
-import {Form, FormHelpers} from '../../../components/Form';
-import {InputRenderer} from '../../../components/FormInputs/Renderer';
-import {useGuidedTour} from '../../../components/GuidedTour/Provider';
-import {useNpsSurveySettings} from '../../../components/NpsSurvey';
-import {Logo} from '../../../components/UnauthenticatedLogo';
-import {useAuth} from '../../../features/Auth';
-import {useNotification} from '../../../features/Notifications';
-import {useTracking} from '../../../features/Tracking';
-import {useAPIErrorHandler} from '../../../hooks/useAPIErrorHandler';
-import {LayoutContent, UnauthenticatedLayout} from '../../../layouts/UnauthenticatedLayout';
+import { Form, FormHelpers } from '../../../components/Form';
+import { InputRenderer } from '../../../components/FormInputs/Renderer';
+import { useGuidedTour } from '../../../components/GuidedTour/Provider';
+import { useNpsSurveySettings } from '../../../components/NpsSurvey';
+import { Logo } from '../../../components/UnauthenticatedLogo';
+import { useAuth } from '../../../features/Auth';
+import { useNotification } from '../../../features/Notifications';
+import { useTracking } from '../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
+import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
 import {
   useGetRegistrationInfoQuery,
   useRegisterAdminMutation,
   useRegisterUserMutation,
 } from '../../../services/auth';
-import {isBaseQueryError} from '../../../utils/baseQuery';
-import {translatedErrors} from '../../../utils/translatedErrors';
+import { isBaseQueryError } from '../../../utils/baseQuery';
+import { translatedErrors } from '../../../utils/translatedErrors';
 
 const REGISTER_USER_SCHEMA = yup.object().shape({
   firstname: yup.string().trim().required(translatedErrors.required),
@@ -38,7 +38,7 @@ const REGISTER_USER_SCHEMA = yup.object().shape({
     .min(8, {
       id: translatedErrors.minLength.id,
       defaultMessage: 'Password must be at least 8 characters',
-      values: {min: 8},
+      values: { min: 8 },
     })
     .matches(/[a-z]/, {
       message: {
@@ -89,7 +89,7 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
     .min(8, {
       id: translatedErrors.minLength.id,
       defaultMessage: 'Password must be at least 8 characters',
-      values: {min: 8},
+      values: { min: 8 },
     })
     .matches(/[a-z]/, {
       message: {
@@ -154,26 +154,26 @@ interface RegisterFormValues {
   news: boolean;
 }
 
-const Register = ({hasAdmin}: RegisterProps) => {
-  const {toggleNotification} = useNotification();
+const Register = ({ hasAdmin }: RegisterProps) => {
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
   const [submitCount, setSubmitCount] = React.useState(0);
   const [apiError, setApiError] = React.useState<string>();
-  const {trackUsage} = useTracking();
-  const {formatMessage} = useIntl();
+  const { trackUsage } = useTracking();
+  const { formatMessage } = useIntl();
   const setSkipped = useGuidedTour('Register', (state) => state.setSkipped);
-  const {search: searchString} = useLocation();
+  const { search: searchString } = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const match = useMatch('/auth/:authType');
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
-  const {setNpsSurveySettings} = useNpsSurveySettings();
+  const { setNpsSurveySettings } = useNpsSurveySettings();
 
   const registrationToken = query.get('registrationToken');
 
-  const {data: userInfo, error} = useGetRegistrationInfoQuery(registrationToken as string, {
+  const { data: userInfo, error } = useGetRegistrationInfoQuery(registrationToken as string, {
     skip: !registrationToken,
   });
 
@@ -192,10 +192,10 @@ const Register = ({hasAdmin}: RegisterProps) => {
 
   const [registerAdmin] = useRegisterAdminMutation();
   const [registerUser] = useRegisterUserMutation();
-  const {setToken} = useAuth('Register', auth => auth);
+  const { setToken } = useAuth('Register', (auth) => auth);
 
   const handleRegisterAdmin = async (
-    {news, ...body}: RegisterAdmin.Request['body'] & { news: boolean },
+    { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },
     setFormErrors: FormHelpers<RegisterFormValues>['setErrors']
   ) => {
     const res = await registerAdmin(body);
@@ -203,10 +203,10 @@ const Register = ({hasAdmin}: RegisterProps) => {
     if ('data' in res) {
       setToken(res.data.token);
 
-      const {roles} = res.data.user;
+      const { roles } = res.data.user;
 
       if (roles) {
-        const isUserSuperAdmin = roles.find(({code}) => code === 'strapi-super-admin');
+        const isUserSuperAdmin = roles.find(({ code }) => code === 'strapi-super-admin');
 
         if (isUserSuperAdmin) {
           localStorage.setItem('GUIDED_TOUR_SKIPPED', JSON.stringify(false));
@@ -217,7 +217,7 @@ const Register = ({hasAdmin}: RegisterProps) => {
 
       if (news) {
         // Only enable EE survey if user accepted the newsletter
-        setNpsSurveySettings((s) => ({...s, enabled: true}));
+        setNpsSurveySettings((s) => ({ ...s, enabled: true }));
 
         navigate({
           pathname: '/usecase',
@@ -241,7 +241,7 @@ const Register = ({hasAdmin}: RegisterProps) => {
   };
 
   const handleRegisterUser = async (
-    {news, ...body}: RegisterUser.Request['body'] & { news: boolean },
+    { news, ...body }: RegisterUser.Request['body'] & { news: boolean },
     setFormErrors: FormHelpers<RegisterFormValues>['setErrors']
   ) => {
     const res = await registerUser(body);
@@ -251,7 +251,7 @@ const Register = ({hasAdmin}: RegisterProps) => {
 
       if (news) {
         // Only enable EE survey if user accepted the newsletter
-        setNpsSurveySettings((s) => ({...s, enabled: true}));
+        setNpsSurveySettings((s) => ({ ...s, enabled: true }));
 
         navigate({
           pathname: '/usecase',
@@ -278,7 +278,7 @@ const Register = ({hasAdmin}: RegisterProps) => {
     !match ||
     (match.params.authType !== 'register' && match.params.authType !== 'register-admin')
   ) {
-    return <Navigate to="/"/>;
+    return <Navigate to="/" />;
   }
 
   const isAdminRegistration = match.params.authType === 'register-admin';
@@ -289,7 +289,7 @@ const Register = ({hasAdmin}: RegisterProps) => {
     <UnauthenticatedLayout>
       <LayoutContent>
         <Flex direction="column" alignItems="center" gap={3}>
-          <Logo/>
+          <Logo />
 
           <Typography tag="h1" variant="alpha" textAlign="center">
             {formatMessage({
@@ -327,10 +327,10 @@ const Register = ({hasAdmin}: RegisterProps) => {
             const normalizedData = normalizeData(data);
 
             try {
-              await schema.validate(normalizedData, {abortEarly: false});
+              await schema.validate(normalizedData, { abortEarly: false });
 
               if (submitCount > 0 && isAdminRegistration) {
-                trackUsage('didSubmitWithErrorsFirstAdmin', {count: submitCount.toString()});
+                trackUsage('didSubmitWithErrorsFirstAdmin', { count: submitCount.toString() });
               }
 
               if (normalizedData.registrationToken) {
@@ -356,7 +356,7 @@ const Register = ({hasAdmin}: RegisterProps) => {
             } catch (err) {
               if (err instanceof ValidationError) {
                 helpers.setErrors(
-                  err.inner.reduce<Record<string, string>>((acc, {message, path}) => {
+                  err.inner.reduce<Record<string, string>>((acc, { message, path }) => {
                     if (path && typeof message === 'object') {
                       acc[path] = formatMessage(message);
                     }
@@ -456,7 +456,7 @@ const Register = ({hasAdmin}: RegisterProps) => {
                   size: 12,
                   type: 'checkbox' as const,
                 },
-              ].map(({size, ...field}) => (
+              ].map(({ size, ...field }) => (
                 <GridItem key={field.name} col={size}>
                   <InputRenderer {...field} />
                 </GridItem>
@@ -538,8 +538,8 @@ function normalizeData(data: RegisterFormValues) {
 }
 
 const A = styled.a`
-  color: ${({theme}) => theme.colors.primary600};
+  color: ${({ theme }) => theme.colors.primary600};
 `;
 
-export {Register};
-export type {RegisterProps};
+export { Register };
+export type { RegisterProps };

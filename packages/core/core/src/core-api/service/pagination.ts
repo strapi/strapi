@@ -1,6 +1,6 @@
-import {omit, has, toNumber, isNil} from 'lodash/fp';
+import { omit, has, toNumber, isNil } from 'lodash/fp';
 
-import {errors, pagination} from '@strapi/utils';
+import { errors, pagination } from '@strapi/utils';
 
 interface BasePaginationParams {
   withCount?: boolean | 't' | '1' | 'true' | 'f' | '0' | 'false' | 0 | 1;
@@ -20,13 +20,13 @@ export type PaginationParams = PagedPagination | OffsetPagination;
 
 type PaginationInfo =
   | {
-  page: number;
-  pageSize: number;
-}
+      page: number;
+      pageSize: number;
+    }
   | {
-  start: number;
-  limit: number;
-};
+      start: number;
+      limit: number;
+    };
 
 /**
  * Default limit values from config
@@ -71,14 +71,14 @@ const shouldCount = (params: { pagination?: PaginationParams }) => {
 };
 
 const getPaginationInfo = (params: { pagination?: PaginationParams }): PaginationInfo => {
-  const {defaultLimit, maxLimit} = getLimitConfigDefaults();
+  const { defaultLimit, maxLimit } = getLimitConfigDefaults();
 
-  const {start, limit} = pagination.withDefaultPagination(params.pagination || {}, {
-    defaults: {offset: {limit: defaultLimit}, page: {pageSize: defaultLimit}},
+  const { start, limit } = pagination.withDefaultPagination(params.pagination || {}, {
+    defaults: { offset: { limit: defaultLimit }, page: { pageSize: defaultLimit } },
     maxLimit: maxLimit || -1,
   });
 
-  return {start, limit};
+  return { start, limit };
 };
 
 const transformPaginationResponse = (
@@ -100,4 +100,4 @@ const transformPaginationResponse = (
   return paginationResponse;
 };
 
-export {isPagedPagination, shouldCount, getPaginationInfo, transformPaginationResponse};
+export { isPagedPagination, shouldCount, getPaginationInfo, transformPaginationResponse };

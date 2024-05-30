@@ -4,12 +4,12 @@ const fs = require('fs');
 const path = require('path');
 
 // Helpers.
-const {createTestBuilder} = require('api-tests/builder');
-const {createStrapiInstance} = require('api-tests/strapi');
-const {createContentAPIRequest} = require('api-tests/request');
+const { createTestBuilder } = require('api-tests/builder');
+const { createStrapiInstance } = require('api-tests/strapi');
+const { createContentAPIRequest } = require('api-tests/request');
 
 const builder = createTestBuilder();
-const data = {dogs: []};
+const data = { dogs: [] };
 let strapi;
 let rq;
 
@@ -65,7 +65,7 @@ describe('Upload plugin', () => {
       .addContentType(todoListModel)
       .build();
     strapi = await createStrapiInstance();
-    rq = createContentAPIRequest({strapi});
+    rq = createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -103,7 +103,7 @@ describe('Upload plugin', () => {
     });
 
     test('Rejects when no files are provided', async () => {
-      const res = await rq({method: 'POST', url: '/upload', formData: {}});
+      const res = await rq({ method: 'POST', url: '/upload', formData: {} });
       expect(res.statusCode).toBe(400);
     });
 
@@ -152,7 +152,7 @@ describe('Upload plugin', () => {
 
   describe('Read', () => {
     test('Get files', async () => {
-      const getRes = await rq({method: 'GET', url: '/upload/files'});
+      const getRes = await rq({ method: 'GET', url: '/upload/files' });
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toEqual(
@@ -196,10 +196,10 @@ describe('Upload plugin', () => {
         })
       );
 
-      await strapi.db.query('api::dog.dog').delete({where: {id: dogEntity.id}});
+      await strapi.db.query('api::dog.dog').delete({ where: { id: dogEntity.id } });
       await strapi.db
         .query('plugin::upload.file')
-        .delete({where: {id: dogEntity.profilePicture.id}});
+        .delete({ where: { id: dogEntity.profilePicture.id } });
     });
   });
 
@@ -259,7 +259,7 @@ describe('Upload plugin', () => {
         url: '/dogs',
         qs: {
           filters: {
-            profilePicture: {$notNull: true},
+            profilePicture: { $notNull: true },
           },
         },
       });
@@ -271,7 +271,7 @@ describe('Upload plugin', () => {
         url: '/dogs',
         qs: {
           filters: {
-            profilePicture: {$notNull: false},
+            profilePicture: { $notNull: false },
           },
         },
       });
@@ -287,7 +287,7 @@ describe('Upload plugin', () => {
         url: '/dogs',
         qs: {
           filters: {
-            profilePicture: {$null: true},
+            profilePicture: { $null: true },
           },
         },
       });
@@ -299,7 +299,7 @@ describe('Upload plugin', () => {
         url: '/dogs',
         qs: {
           filters: {
-            profilePicture: {$null: false},
+            profilePicture: { $null: false },
           },
         },
       });
@@ -343,7 +343,7 @@ describe('Upload plugin', () => {
         url: '/dogs',
         qs: {
           filters: {
-            profilePicture: {ext: '.jpg'},
+            profilePicture: { ext: '.jpg' },
           },
         },
       });
@@ -355,7 +355,7 @@ describe('Upload plugin', () => {
         url: '/dogs',
         qs: {
           filters: {
-            profilePicture: {ext: '.pdf'},
+            profilePicture: { ext: '.pdf' },
           },
         },
       });

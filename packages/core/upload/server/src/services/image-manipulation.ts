@@ -1,18 +1,18 @@
 import fs from 'fs';
-import {join} from 'path';
+import { join } from 'path';
 import sharp from 'sharp';
-import {file as fileUtils} from '@strapi/utils';
+import { file as fileUtils } from '@strapi/utils';
 
-import {getService} from '../utils';
+import { getService } from '../utils';
 
-import type {UploadableFile} from '../types';
+import type { UploadableFile } from '../types';
 
 type Dimensions = {
   width: number | null;
   height: number | null;
 };
 
-const {bytesToKbytes} = fileUtils;
+const { bytesToKbytes } = fileUtils;
 
 const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
@@ -46,9 +46,9 @@ const getMetadata = (file: UploadableFile): Promise<sharp.Metadata> => {
 };
 
 const getDimensions = async (file: UploadableFile): Promise<Dimensions> => {
-  const {width = null, height = null} = await getMetadata(file);
+  const { width = null, height = null } = await getMetadata(file);
 
-  return {width, height};
+  return { width, height };
 };
 
 const THUMBNAIL_RESIZE_OPTIONS = {
@@ -83,7 +83,7 @@ const resizeFileTo = async (
     newInfo = await sharp(file.filepath).resize(options).toFile(filePath);
   }
 
-  const {width, height, size} = newInfo ?? {};
+  const { width, height, size } = newInfo ?? {};
 
   const newFile: UploadableFile = {
     name,
@@ -126,10 +126,10 @@ const generateThumbnail = async (file: UploadableFile) => {
  *
  */
 const optimize = async (file: UploadableFile) => {
-  const {sizeOptimization = false, autoOrientation = false} =
-  (await getService('upload').getSettings()) ?? {};
+  const { sizeOptimization = false, autoOrientation = false } =
+    (await getService('upload').getSettings()) ?? {};
 
-  const {format, size} = await getMetadata(file);
+  const { format, size } = await getMetadata(file);
 
   if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
     let transformer;
@@ -139,7 +139,7 @@ const optimize = async (file: UploadableFile) => {
       transformer = sharp(file.filepath);
     }
     // reduce image quality
-    transformer[format]({quality: sizeOptimization ? 80 : 100});
+    transformer[format]({ quality: sizeOptimization ? 80 : 100 });
     // rotate image based on EXIF data
     if (autoOrientation) {
       transformer.rotate();
@@ -159,9 +159,9 @@ const optimize = async (file: UploadableFile) => {
       newInfo = await transformer.toFile(filePath);
     }
 
-    const {width: newWidth, height: newHeight, size: newSize} = newInfo ?? {};
+    const { width: newWidth, height: newHeight, size: newSize } = newInfo ?? {};
 
-    const newFile = {...file};
+    const newFile = { ...file };
 
     newFile.getStream = () => fs.createReadStream(filePath);
     newFile.filepath = filePath;
@@ -192,7 +192,7 @@ const getBreakpoints = () =>
   strapi.config.get<Record<string, number>>('plugin::upload.breakpoints', DEFAULT_BREAKPOINTS);
 
 const generateResponsiveFormats = async (file: UploadableFile) => {
-  const {responsiveDimensions = false} = (await getService('upload').getSettings()) ?? {};
+  const { responsiveDimensions = false } = (await getService('upload').getSettings()) ?? {};
 
   if (!responsiveDimensions) return [];
 
@@ -204,7 +204,7 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
       const breakpoint = breakpoints[key];
 
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
-        return generateBreakpoint(key, {file, breakpoint});
+        return generateBreakpoint(key, { file, breakpoint });
       }
 
       return undefined;
@@ -214,7 +214,7 @@ const generateResponsiveFormats = async (file: UploadableFile) => {
 
 const generateBreakpoint = async (
   key: string,
-  {file, breakpoint}: { file: UploadableFile; breakpoint: number }
+  { file, breakpoint }: { file: UploadableFile; breakpoint: number }
 ) => {
   const newFile = await resizeFileTo(
     file,
@@ -234,7 +234,7 @@ const generateBreakpoint = async (
   };
 };
 
-const breakpointSmallerThan = (breakpoint: number, {width, height}: Dimensions) => {
+const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions) => {
   return breakpoint < (width ?? 0) || breakpoint < (height ?? 0);
 };
 
