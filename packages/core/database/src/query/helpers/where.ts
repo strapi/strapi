@@ -97,6 +97,11 @@ const processRelationWhere = (where: unknown, ctx: WhereCtx) => {
 
   if (operatorKeys.length === 1) {
     const operator = operatorKeys[0];
+
+    if (isOperatorOfType('group', operator)) {
+      return processWhere(where, ctx);
+    }
+
     return { [idAlias]: { [operator]: processNested(where[operator], ctx) } };
   }
 

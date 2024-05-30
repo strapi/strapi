@@ -56,7 +56,7 @@ test.describe('List view', () => {
     await expect(page.getByRole('gridcell', { name: 'Available in' })).not.toBeVisible();
   });
 
-  test('As a user I want to be able to navigate to the locale of a document and when I go back to my list-view i expect to still be showing that locale, not the default.', async ({
+  test('As a user I want to be able to navigate from one localized content-type to another and persist the last selected locale', async ({
     page,
   }) => {
     /**
@@ -93,22 +93,30 @@ test.describe('List view', () => {
     expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
 
     /**
-     * Go to a different content-type that doesn't have i18n enabled and check the query persists
+     * Go to another localized content-type and assert the locale is still Spanish
+     */
+    await page.getByRole('link', { name: 'Article' }).click();
+    await page.waitForURL(
+      /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/
+    );
+    expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
+
+    /**
+     * Go to another non-localized content-type and assert i18n is not in the search params
      */
     await page.getByRole('link', { name: 'Author' }).click();
     await page.waitForURL(/\/admin\/content-manager\/collection-types\/api::author.author(\?.*)?/);
     await expect(page.getByRole('heading', { name: 'Author' })).toBeVisible();
-    expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
+    expect(new URL(page.url()).searchParams.has('plugins[i18n][locale]')).toEqual(false);
 
     /**
-     * Go back to the products list-view and assert that the locale is still es
-     * even though the current content-type does not have i18n enabled
+     * Go back to a localized content-type and assert the locale is the default locale
      */
     await page.getByRole('link', { name: 'Products' }).click();
     await page.waitForURL(
       /\/admin\/content-manager\/collection-types\/api::product.product(\?.*)?/
     );
     await expect(page.getByRole('heading', { name: 'Products' })).toBeVisible();
-    expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('es');
+    expect(new URL(page.url()).searchParams.get('plugins[i18n][locale]')).toEqual('en');
   });
 });

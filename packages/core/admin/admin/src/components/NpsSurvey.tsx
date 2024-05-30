@@ -164,7 +164,7 @@ const NpsSurvey = () => {
     };
   }, []);
 
-  const user = useAuth('NpsSurvey', (state) => state.user);
+  const { user } = useAuth('NpsSurvey', (auth) => auth);
 
   if (!displaySurvey) {
     return null;
