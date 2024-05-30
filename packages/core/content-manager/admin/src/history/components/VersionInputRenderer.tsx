@@ -84,7 +84,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
   ) {
     return (
       <>
-        <Field.Label>{props.label}</Field.Label>
+        <Field.Label action={props.labelAction}>{props.label}</Field.Label>
         <Box marginTop={1}>
           {/* @ts-expect-error – we dont need closeLabel */}
           <StyledAlert variant="default">
