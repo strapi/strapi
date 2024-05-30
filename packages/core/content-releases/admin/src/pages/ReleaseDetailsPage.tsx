@@ -60,13 +60,12 @@ import { getTimezoneOffset } from '../utils/time';
 
 import { getBadgeProps } from './ReleasesPage';
 
-import type { Struct, Internal } from '@strapi/types';
-
 import type {
   ReleaseAction,
   ReleaseActionGroupBy,
   ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
+import type { Struct, Internal } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
