@@ -385,7 +385,7 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const showUnpublishButton =
     hasDraftAndPublishEnabled &&
     hasPublishPermission &&
-    documents.some((entry) => entry.status === 'published');
+    documents.some((entry) => entry.status === 'published' || entry.status === 'modified');
 
   if (!showUnpublishButton) return null;
 
