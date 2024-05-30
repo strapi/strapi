@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import fs from 'fs';
 import fse from 'fs-extra';
 import _ from 'lodash';
-import { extension } from 'mime-types';
+import {extension} from 'mime-types';
 import {
   sanitize,
   strings,
@@ -13,14 +13,14 @@ import {
   file as fileUtils,
 } from '@strapi/utils';
 
-import type { Core, UID } from '@strapi/types';
+import type {Core, UID} from '@strapi/types';
 
-import { FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from '../constants';
-import { getService } from '../utils';
+import {FILE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS} from '../constants';
+import {getService} from '../utils';
 
-import type { Config, File, InputFile, UploadableFile, FileInfo } from '../types';
-import type { ViewConfiguration } from '../controllers/validation/admin/configureView';
-import type { Settings } from '../controllers/validation/admin/settings';
+import type {Config, File, InputFile, UploadableFile, FileInfo} from '../types';
+import type {ViewConfiguration} from '../controllers/validation/admin/configureView';
+import type {Settings} from '../controllers/validation/admin/settings';
 
 type User = {
   id: string | number;
@@ -40,17 +40,17 @@ type Metas = {
   tmpWorkingDirectory?: string;
 };
 
-const { UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
-const { MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE } = ALLOWED_WEBHOOK_EVENTS;
+const {UPDATED_BY_ATTRIBUTE, CREATED_BY_ATTRIBUTE} = contentTypesUtils.constants;
+const {MEDIA_CREATE, MEDIA_UPDATE, MEDIA_DELETE} = ALLOWED_WEBHOOK_EVENTS;
 
-const { ApplicationError, NotFoundError } = errors;
-const { bytesToKbytes } = fileUtils;
+const {ApplicationError, NotFoundError} = errors;
+const {bytesToKbytes} = fileUtils;
 
-export default ({ strapi }: { strapi: Core.Strapi }) => {
+export default ({strapi}: { strapi: Core.Strapi }) => {
   const randomSuffix = () => crypto.randomBytes(5).toString('hex');
 
   const generateFileName = (name: string) => {
-    const baseName = strings.nameToSlug(name, { separator: '_', lowercase: false });
+    const baseName = strings.nameToSlug(name, {separator: '_', lowercase: false});
 
     return `${baseName}_${randomSuffix()}`;
   };
@@ -118,11 +118,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       data
     );
 
-    strapi.eventHub.emit(event, { media: sanitizedData });
+    strapi.eventHub.emit(event, {media: sanitizedData});
   }
 
   async function formatFileInfo(
-    { filename, type, size }: { filename: string; type: string; size: number },
+    {filename, type, size}: { filename: string; type: string; size: number },
     fileInfo: Partial<FileInfo> = {},
     metas: {
       refId?: ID;
@@ -163,14 +163,14 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       sizeInBytes: size,
     };
 
-    const { refId, ref, field } = metas;
+    const {refId, ref, field} = metas;
 
     if (refId && ref && field) {
       entity.related = [
         {
           id: refId,
           __type: ref,
-          __pivot: { field },
+          __pivot: {field},
         },
       ];
     }
@@ -204,9 +204,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
     )) as UploadableFile;
 
+    currentFile.filepath = file.filepath;
     currentFile.getStream = () => fs.createReadStream(file.filepath);
 
-    const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi
+    const {optimize, isImage, isFaultyImage, isOptimizableImage} = strapi
       .plugin('upload')
       .service('image-manipulation');
 
@@ -232,21 +233,21 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     },
     opts?: CommonOptions
   ) {
-    const { user } = opts ?? {};
+    const {user} = opts ?? {};
     // create temporary folder to store files for stream manipulation
     const tmpWorkingDirectory = await createAndAssignTmpWorkingDirectoryToFiles(files);
 
     let uploadedFiles: any[] = [];
 
     try {
-      const { fileInfo, ...metas } = data;
+      const {fileInfo, ...metas} = data;
 
       const fileArray = Array.isArray(files) ? files : [files];
       const fileInfoArray = Array.isArray(fileInfo) ? fileInfo : [fileInfo];
 
       const doUpload = async (file: InputFile, fileInfo: FileInfo) => {
         const fileData = await enhanceAndValidateFile(file, fileInfo, metas);
-        return uploadFileAndPersist(fileData, { user });
+        return uploadFileAndPersist(fileData, {user});
       };
 
       uploadedFiles = await Promise.all(
@@ -267,11 +268,11 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * @param {*} fileData
    */
   async function uploadImage(fileData: UploadableFile) {
-    const { getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage } =
+    const {getDimensions, generateThumbnail, generateResponsiveFormats, isResizableImage} =
       getService('image-manipulation');
 
     // Store width and height of the original image
-    const { width, height } = await getDimensions(fileData);
+    const {width, height} = await getDimensions(fileData);
 
     // Make sure this is assigned before calling any upload
     // That way it can mutate the width and height
@@ -288,7 +289,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     // Generate thumbnail and responsive formats
     const uploadResponsiveFormat = async (format: { key: string; file: UploadableFile }) => {
-      const { key, file } = format;
+      const {key, file} = format;
       await getService('provider').upload(file);
       _.set(fileData, ['formats', key], file);
     };
@@ -323,10 +324,10 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
    * and responsive formats (if enabled).
    */
   async function uploadFileAndPersist(fileData: UploadableFile, opts?: CommonOptions) {
-    const { user } = opts ?? {};
+    const {user} = opts ?? {};
 
     const config = strapi.config.get<Config>('plugin::upload');
-    const { isImage } = getService('image-manipulation');
+    const {isImage} = getService('image-manipulation');
 
     await getService('provider').checkFileSize(fileData);
 
@@ -339,15 +340,15 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     _.set(fileData, 'provider', config.provider);
 
     // Persist file(s)
-    return add(fileData, { user });
+    return add(fileData, {user});
   }
 
   async function updateFileInfo(
     id: ID,
-    { name, alternativeText, caption, folder }: FileInfo,
+    {name, alternativeText, caption, folder}: FileInfo,
     opts?: CommonOptions
   ) {
-    const { user } = opts ?? {};
+    const {user} = opts ?? {};
 
     const dbFile = await findOne(id);
 
@@ -366,19 +367,19 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       folderPath: _.isUndefined(folder) ? dbFile.path : await fileService.getFolderPath(folder),
     };
 
-    return update(id, newInfos, { user });
+    return update(id, newInfos, {user});
   }
 
   async function replace(
     id: ID,
-    { data, file }: { data: { fileInfo: FileInfo }; file: InputFile },
+    {data, file}: { data: { fileInfo: FileInfo }; file: InputFile },
     opts?: CommonOptions
   ) {
-    const { user } = opts ?? {};
+    const {user} = opts ?? {};
 
     const config = strapi.config.get<Config>('plugin::upload');
 
-    const { isImage } = getService('image-manipulation');
+    const {isImage} = getService('image-manipulation');
 
     const dbFile = await findOne(id);
     if (!dbFile) {
@@ -391,7 +392,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     let fileData: UploadableFile;
 
     try {
-      const { fileInfo } = data;
+      const {fileInfo} = data;
       fileData = await enhanceAndValidateFile(file, fileInfo);
 
       // keep a constant hash and extension so the file url doesn't change when the file is replaced
@@ -428,13 +429,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       await fse.remove(tmpWorkingDirectory);
     }
 
-    return update(id, fileData, { user });
+    return update(id, fileData, {user});
   }
 
   async function update(id: ID, values: Partial<File>, opts?: CommonOptions) {
-    const { user } = opts ?? {};
+    const {user} = opts ?? {};
 
-    const fileValues = { ...values };
+    const fileValues = {...values};
     if (user) {
       Object.assign(fileValues, {
         [UPDATED_BY_ATTRIBUTE]: user.id,
@@ -443,7 +444,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     sendMediaMetrics(fileValues);
 
-    const res = await strapi.db.query(FILE_MODEL_UID).update({ where: { id }, data: fileValues });
+    const res = await strapi.db.query(FILE_MODEL_UID).update({where: {id}, data: fileValues});
 
     await emitEvent(MEDIA_UPDATE, res);
 
@@ -451,9 +452,9 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   async function add(values: any, opts?: CommonOptions) {
-    const { user } = opts ?? {};
+    const {user} = opts ?? {};
 
-    const fileValues = { ...values };
+    const fileValues = {...values};
     if (user) {
       Object.assign(fileValues, {
         [UPDATED_BY_ATTRIBUTE]: user.id,
@@ -463,7 +464,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
 
     sendMediaMetrics(fileValues);
 
-    const res = await strapi.db.query(FILE_MODEL_UID).create({ data: fileValues });
+    const res = await strapi.db.query(FILE_MODEL_UID).create({data: fileValues});
 
     await emitEvent(MEDIA_CREATE, res);
 
@@ -476,7 +477,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     });
 
     return strapi.db.query(FILE_MODEL_UID).findOne({
-      where: { id },
+      where: {id},
       ...query,
     });
   }
@@ -512,16 +513,16 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
     }
 
     const media = await strapi.db.query(FILE_MODEL_UID).findOne({
-      where: { id: file.id },
+      where: {id: file.id},
     });
 
     await emitEvent(MEDIA_DELETE, media);
 
-    return strapi.db.query(FILE_MODEL_UID).delete({ where: { id: file.id } });
+    return strapi.db.query(FILE_MODEL_UID).delete({where: {id: file.id}});
   }
 
   async function getSettings() {
-    const res = await strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).get({});
+    const res = await strapi.store!({type: 'plugin', name: 'upload', key: 'settings'}).get({});
 
     return res as Settings | null;
   }
@@ -533,7 +534,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.telemetry.send('didDisableResponsiveDimensions');
     }
 
-    return strapi.store!({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
+    return strapi.store!({type: 'plugin', name: 'upload', key: 'settings'}).set({value});
   }
 
   async function getConfiguration() {
@@ -547,7 +548,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
   }
 
   function setConfiguration(value: ViewConfiguration) {
-    return strapi.store!({ type: 'plugin', name: 'upload', key: 'view_configuration' }).set({
+    return strapi.store!({type: 'plugin', name: 'upload', key: 'view_configuration'}).set({
       value,
     });
   }

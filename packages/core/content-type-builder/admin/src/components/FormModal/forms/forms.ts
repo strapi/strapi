@@ -1,4 +1,4 @@
-import { getTrad } from '../../../utils/getTrad';
+import { getTrad } from '../../../utils';
 import { commonBaseForm } from '../attributes/commonBaseForm';
 import { attributesForm } from '../attributes/form';
 import { nameField } from '../attributes/nameField';
@@ -56,7 +56,7 @@ export const forms = {
       ctbFormsAPI,
     }: SchemaParams) {
       const usedAttributeNames = getUsedAttributeNames(schemaAttributes, schemaData);
-      const x = attributeTypes[attributeType];
+
       let attributeShape;
       if (attributeType === 'relation') {
         attributeShape = attributeTypes[attributeType](
@@ -298,10 +298,9 @@ export const forms = {
       const takenCollectionNames = isEditing
         ? collectionNames.filter((collectionName) => {
             const { schema } = contentTypes[ctUid];
-            const currentPluralName = schema.pluralName;
             const currentCollectionName = schema.collectionName;
 
-            return collectionName !== currentPluralName || collectionName !== currentCollectionName;
+            return collectionName !== currentCollectionName;
           })
         : collectionNames;
 

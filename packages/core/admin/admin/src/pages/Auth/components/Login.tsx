@@ -1,23 +1,23 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
+import {Box, Button, Flex, Main, Typography, Link} from '@strapi/design-system';
 import camelCase from 'lodash/camelCase';
-import { useIntl } from 'react-intl';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {useIntl} from 'react-intl';
+import {NavLink, useLocation, useNavigate} from 'react-router-dom';
 import * as yup from 'yup';
 
-import { Form } from '../../../components/Form';
-import { InputRenderer } from '../../../components/FormInputs/Renderer';
-import { Logo } from '../../../components/UnauthenticatedLogo';
-import { useAuth } from '../../../features/Auth';
+import {Form} from '../../../components/Form';
+import {InputRenderer} from '../../../components/FormInputs/Renderer';
+import {Logo} from '../../../components/UnauthenticatedLogo';
+import {useAuth} from '../../../features/Auth';
 import {
   UnauthenticatedLayout,
   Column,
   LayoutContent,
 } from '../../../layouts/UnauthenticatedLayout';
-import { translatedErrors } from '../../../utils/translatedErrors';
+import {translatedErrors} from '../../../utils/translatedErrors';
 
-import type { Login } from '../../../../../shared/contracts/authentication';
+import type {Login} from '../../../../../shared/contracts/authentication';
 
 interface LoginProps {
   children?: React.ReactNode;
@@ -35,14 +35,14 @@ const LOGIN_SCHEMA = yup.object().shape({
   rememberMe: yup.bool().nullable(),
 });
 
-const Login = ({ children }: LoginProps) => {
+const Login = ({children}: LoginProps) => {
   const [apiError, setApiError] = React.useState<string>();
-  const { formatMessage } = useIntl();
-  const { search: searchString } = useLocation();
+  const {formatMessage} = useIntl();
+  const {search: searchString} = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const navigate = useNavigate();
 
-  const login = useAuth('Login', (state) => state.login);
+  const {login} = useAuth('Login', (auth) => auth);
 
   const handleLogin = async (body: Parameters<typeof login>[0]) => {
     setApiError(undefined);
@@ -71,7 +71,7 @@ const Login = ({ children }: LoginProps) => {
       <Main>
         <LayoutContent>
           <Column>
-            <Logo />
+            <Logo/>
             <Box paddingTop={6} paddingBottom={1}>
               <Typography variant="alpha" tag="h1">
                 {formatMessage({
@@ -109,7 +109,7 @@ const Login = ({ children }: LoginProps) => {
             <Flex direction="column" alignItems="stretch" gap={6}>
               {[
                 {
-                  label: formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' }),
+                  label: formatMessage({id: 'Auth.form.email.label', defaultMessage: 'Email'}),
                   name: 'email',
                   placeholder: formatMessage({
                     id: 'Auth.form.email.placeholder',
@@ -139,7 +139,7 @@ const Login = ({ children }: LoginProps) => {
                 <InputRenderer key={field.name} {...field} />
               ))}
               <Button fullWidth type="submit">
-                {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
+                {formatMessage({id: 'Auth.form.button.login', defaultMessage: 'Login'})}
               </Button>
             </Flex>
           </Form>
@@ -160,5 +160,5 @@ const Login = ({ children }: LoginProps) => {
   );
 };
 
-export { Login };
-export type { LoginProps };
+export {Login};
+export type {LoginProps};

@@ -15,11 +15,11 @@ import {
 } from 'lodash/fp';
 
 import traverseFactory from './factory';
-import { Attribute } from '../types';
-import { isMorphToRelationalAttribute } from '../content-types';
+import {Attribute} from '../types';
+import {isMorphToRelationalAttribute} from '../content-types';
 
 const isKeyword = (keyword: string) => {
-  return ({ key, attribute }: { key: string; attribute: Attribute }) => {
+  return ({key, attribute}: { key: string; attribute: Attribute }) => {
     return !attribute && keyword === key;
   };
 };
@@ -31,7 +31,7 @@ const isObj = (value: unknown): value is Record<string, unknown> => isObject(val
 
 const populate = traverseFactory()
   // Array of strings ['foo', 'foo.bar'] => map(recurse), then filter out empty items
-  .intercept(isStringArray, async (visitor, options, populate, { recurse }) => {
+  .intercept(isStringArray, async (visitor, options, populate, {recurse}) => {
     const visitedPopulate = await Promise.all(
       populate.map((nestedPopulate) => recurse(visitor, options, nestedPopulate))
     );
@@ -114,13 +114,13 @@ const populate = traverseFactory()
 
     remove(key, data) {
       // eslint-disable-next-line no-unused-vars
-      const { [key]: ignored, ...rest } = data;
+      const {[key]: ignored, ...rest} = data;
 
       return rest;
     },
 
     set(key, value, data) {
-      return { ...data, [key]: value };
+      return {...data, [key]: value};
     },
 
     keys(data) {
@@ -131,19 +131,19 @@ const populate = traverseFactory()
       return data[key];
     },
   }))
-  .ignore(({ key, attribute }) => {
+  .ignore(({key, attribute}) => {
     return ['sort', 'filters', 'fields'].includes(key) && !attribute;
   })
   .on(
     // Handle recursion on populate."populate"
     isKeyword('populate'),
-    async ({ key, visitor, path, value, schema, getModel }, { set, recurse }) => {
-      const newValue = await recurse(visitor, { schema, path, getModel }, value);
+    async ({key, visitor, path, value, schema, getModel}, {set, recurse}) => {
+      const newValue = await recurse(visitor, {schema, path, getModel}, value);
 
       set(key, newValue);
     }
   )
-  .on(isKeyword('on'), async ({ key, visitor, path, value, getModel }, { set, recurse }) => {
+  .on(isKeyword('on'), async ({key, visitor, path, value, getModel}, {set, recurse}) => {
     const newOn: Record<string, unknown> = {};
 
     if (!isObj(value)) {
@@ -152,16 +152,16 @@ const populate = traverseFactory()
 
     for (const [uid, subPopulate] of Object.entries(value)) {
       const model = getModel(uid);
-      const newPath = { ...path, raw: `${path.raw}[${uid}]` };
+      const newPath = {...path, raw: `${path.raw}[${uid}]`};
 
-      newOn[uid] = await recurse(visitor, { schema: model, path: newPath, getModel }, subPopulate);
+      newOn[uid] = await recurse(visitor, {schema: model, path: newPath, getModel}, subPopulate);
     }
 
     set(key, newOn);
   })
   // Handle populate on relation
   .onRelation(
-    async ({ key, value, attribute, visitor, path, schema, getModel }, { set, recurse }) => {
+    async ({key, value, attribute, visitor, path, schema, getModel}, {set, recurse}) => {
       if (isNil(value)) {
         return;
       }
@@ -173,9 +173,9 @@ const populate = traverseFactory()
         }
 
         // If there is a populate fragment defined, traverse it
-        const newValue = await recurse(visitor, { schema, path, getModel }, { on: value?.on });
+        const newValue = await recurse(visitor, {schema, path, getModel}, {on: value?.on});
 
-        set(key, { on: newValue });
+        set(key, newValue);
 
         return;
       }
@@ -183,13 +183,13 @@ const populate = traverseFactory()
       const targetSchemaUID = attribute.target;
       const targetSchema = getModel(targetSchemaUID!);
 
-      const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
+      const newValue = await recurse(visitor, {schema: targetSchema, path, getModel}, value);
 
       set(key, newValue);
     }
   )
   // Handle populate on media
-  .onMedia(async ({ key, path, visitor, value, getModel }, { recurse, set }) => {
+  .onMedia(async ({key, path, visitor, value, getModel}, {recurse, set}) => {
     if (isNil(value)) {
       return;
     }
@@ -197,31 +197,31 @@ const populate = traverseFactory()
     const targetSchemaUID = 'plugin::upload.file';
     const targetSchema = getModel(targetSchemaUID);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
+    const newValue = await recurse(visitor, {schema: targetSchema, path, getModel}, value);
 
     set(key, newValue);
   })
   // Handle populate on components
-  .onComponent(async ({ key, value, visitor, path, attribute, getModel }, { recurse, set }) => {
+  .onComponent(async ({key, value, visitor, path, attribute, getModel}, {recurse, set}) => {
     if (isNil(value)) {
       return;
     }
 
     const targetSchema = getModel(attribute.component);
 
-    const newValue = await recurse(visitor, { schema: targetSchema, path, getModel }, value);
+    const newValue = await recurse(visitor, {schema: targetSchema, path, getModel}, value);
 
     set(key, newValue);
   })
   // Handle populate on dynamic zones
-  .onDynamicZone(async ({ key, value, schema, visitor, path, getModel }, { set, recurse }) => {
+  .onDynamicZone(async ({key, value, schema, visitor, path, getModel}, {set, recurse}) => {
     if (isNil(value) || !isObject(value)) {
       return;
     }
 
     // Handle fragment syntax
     if ('on' in value && value.on) {
-      const newOn = await recurse(visitor, { schema, path, getModel }, { on: value.on });
+      const newOn = await recurse(visitor, {schema, path, getModel}, {on: value.on});
 
       set(key, newOn);
     }

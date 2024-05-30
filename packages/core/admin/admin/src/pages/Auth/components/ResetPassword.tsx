@@ -1,24 +1,24 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
-import { useIntl } from 'react-intl';
-import { NavLink, useNavigate, Navigate, useLocation } from 'react-router-dom';
+import {Box, Button, Flex, Main, Typography, Link} from '@strapi/design-system';
+import {useIntl} from 'react-intl';
+import {NavLink, useNavigate, Navigate, useLocation} from 'react-router-dom';
 import * as yup from 'yup';
 
-import { ResetPassword } from '../../../../../shared/contracts/authentication';
-import { Form } from '../../../components/Form';
-import { InputRenderer } from '../../../components/FormInputs/Renderer';
-import { Logo } from '../../../components/UnauthenticatedLogo';
-import { useAuth } from '../../../features/Auth';
-import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
+import {ResetPassword} from '../../../../../shared/contracts/authentication';
+import {Form} from '../../../components/Form';
+import {InputRenderer} from '../../../components/FormInputs/Renderer';
+import {Logo} from '../../../components/UnauthenticatedLogo';
+import {useAuth} from '../../../features/Auth';
+import {useAPIErrorHandler} from '../../../hooks/useAPIErrorHandler';
 import {
   Column,
   LayoutContent,
   UnauthenticatedLayout,
 } from '../../../layouts/UnauthenticatedLayout';
-import { useResetPasswordMutation } from '../../../services/auth';
-import { isBaseQueryError } from '../../../utils/baseQuery';
-import { translatedErrors } from '../../../utils/translatedErrors';
+import {useResetPasswordMutation} from '../../../services/auth';
+import {isBaseQueryError} from '../../../utils/baseQuery';
+import {translatedErrors} from '../../../utils/translatedErrors';
 
 const RESET_PASSWORD_SCHEMA = yup.object().shape({
   password: yup
@@ -26,7 +26,7 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
     .min(8, {
       id: translatedErrors.minLength.id,
       defaultMessage: 'Password must be at least 8 characters',
-      values: { min: 8 },
+      values: {min: 8},
     })
     .matches(/[a-z]/, {
       message: {
@@ -63,15 +63,15 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
 });
 
 const ResetPassword = () => {
-  const { formatMessage } = useIntl();
+  const {formatMessage} = useIntl();
   const navigate = useNavigate();
-  const { search: searchString } = useLocation();
+  const {search: searchString} = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
-  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
+  const {_unstableFormatAPIError: formatAPIError} = useAPIErrorHandler();
 
-  const setToken = useAuth('ResetPassword', (state) => state.setToken);
+  const {setToken} = useAuth('ResetPassword', auth => auth);
 
-  const [resetPassword, { error }] = useResetPasswordMutation();
+  const [resetPassword, {error}] = useResetPasswordMutation();
 
   const handleSubmit = async (body: ResetPassword.Request['body']) => {
     const res = await resetPassword(body);
@@ -86,7 +86,7 @@ const ResetPassword = () => {
    * then they should just be redirected back to the login page.
    */
   if (!query.get('code')) {
-    return <Navigate to="/auth/login" />;
+    return <Navigate to="/auth/login"/>;
   }
 
   return (
@@ -94,7 +94,7 @@ const ResetPassword = () => {
       <Main>
         <LayoutContent>
           <Column>
-            <Logo />
+            <Logo/>
             <Box paddingTop={6} paddingBottom={7}>
               <Typography tag="h1" variant="alpha">
                 {formatMessage({
@@ -108,9 +108,9 @@ const ResetPassword = () => {
                 {isBaseQueryError(error)
                   ? formatAPIError(error)
                   : formatMessage({
-                      id: 'notification.error',
-                      defaultMessage: 'An error occurred',
-                    })}
+                    id: 'notification.error',
+                    defaultMessage: 'An error occurred',
+                  })}
               </Typography>
             ) : null}
           </Column>
@@ -122,7 +122,7 @@ const ResetPassword = () => {
             }}
             onSubmit={(values) => {
               // We know query.code is defined because we check for it above.
-              handleSubmit({ password: values.password, resetPasswordToken: query.get('code')! });
+              handleSubmit({password: values.password, resetPasswordToken: query.get('code')!});
             }}
             validationSchema={RESET_PASSWORD_SCHEMA}
           >
@@ -166,7 +166,7 @@ const ResetPassword = () => {
         <Flex justifyContent="center">
           <Box paddingTop={4}>
             <Link tag={NavLink} to="/auth/login">
-              {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
+              {formatMessage({id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?'})}
             </Link>
           </Box>
         </Flex>
@@ -175,4 +175,4 @@ const ResetPassword = () => {
   );
 };
 
-export { ResetPassword };
+export {ResetPassword};
