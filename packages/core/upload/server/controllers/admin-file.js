@@ -24,6 +24,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    // validate the incoming user query params
     await pm.validateQuery(ctx.query);
 
     const query = await pipeAsync(
