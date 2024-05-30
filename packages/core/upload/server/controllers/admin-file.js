@@ -30,7 +30,7 @@ module.exports = {
     const query = await pipeAsync(
       // Start by sanitizing the incoming query
       (q) => pm.sanitizeQuery(q),
-      // Add the default query
+      // Add the default query which should not be validated or sanitized
       (q) => merge(defaultQuery, q),
       // Add the dynamic filters based on permissions' conditions
       (q) => pm.addPermissionsQueryTo(q)
