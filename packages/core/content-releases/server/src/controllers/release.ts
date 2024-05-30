@@ -37,14 +37,10 @@ const releaseController = {
     const { contentTypeUid, documentId, hasEntryAttached, locale } = query;
     const entryId = await getEntryId({ contentTypeUid, documentId, locale }, { strapi });
 
-    if (!entryId) {
-      throw new errors.NotFoundError('Entry not found');
-    }
+    const isEntryAttached =
+      typeof hasEntryAttached === 'string' ? Boolean(JSON.parse(hasEntryAttached)) : false;
 
-    const isEntryAttachedBoolean =
-      typeof hasEntryAttached === 'string' ? JSON.parse(hasEntryAttached) : false;
-
-    if (isEntryAttachedBoolean) {
+    if (isEntryAttached) {
       const releases = await releaseService.findMany({
         where: {
           actions: {

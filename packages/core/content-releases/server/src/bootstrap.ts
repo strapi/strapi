@@ -16,7 +16,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       async afterDelete(event) {
         try {
-          const model = strapi.getModel(event.model.uid as any);
+          const model = strapi.getModel(event.model.uid as UID.Schema);
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
             const id = event.result.id;
@@ -52,7 +52,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
        * so we need to fetch them before deleting the entries to save the ids on our state
        */
       async beforeDeleteMany(event) {
-        const model = strapi.getModel(event.model.uid as any);
+        const model = strapi.getModel(event.model.uid as UID.Schema);
         // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
         if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
           const { where } = event.params;
@@ -106,7 +106,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
       async afterUpdate(event) {
         try {
-          const model = strapi.getModel(event.model.uid as any);
+          const model = strapi.getModel(event.model.uid as UID.Schema);
           if (model.options?.draftAndPublish) {
             const result = event.result;
 

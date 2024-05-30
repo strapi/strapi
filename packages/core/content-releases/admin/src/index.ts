@@ -1,6 +1,6 @@
 import { PaperPlane } from '@strapi/icons';
 
-import { AddToReleaseAction } from './components/AddToReleaseAction';
+import { ReleaseActionModalForm } from './components/ReleaseActionModal';
 import { Panel as ReleasesPanel } from './components/ReleasesPanel';
 // import { addColumnToTableHook } from './components/ReleaseListCell';
 import { PERMISSIONS } from './constants';
@@ -51,7 +51,7 @@ const admin: Plugin.Config.AdminInput = {
       ) {
         contentManagerPluginApis.addDocumentAction((actions: DocumentActionComponent[]) => {
           const indexOfDeleteAction = actions.findIndex((action) => action.type === 'unpublish');
-          actions.splice(indexOfDeleteAction, 0, AddToReleaseAction);
+          actions.splice(indexOfDeleteAction, 0, ReleaseActionModalForm);
           return actions;
         });
       }

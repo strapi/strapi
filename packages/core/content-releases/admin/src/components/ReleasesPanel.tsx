@@ -60,7 +60,7 @@ const Panel: PanelComponent = ({ model, documentId, collectionType }: PanelCompo
     }),
     content: (
       <Flex direction="column" alignItems="stretch" gap={3} width="100%">
-        {releases?.map((release: any) => (
+        {releases?.map((release) => (
           <Flex
             key={release.id}
             direction="column"

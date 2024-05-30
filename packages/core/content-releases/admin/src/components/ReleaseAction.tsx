@@ -30,7 +30,7 @@ import {
   INITIAL_VALUES,
   RELEASE_ACTION_FORM_SCHEMA,
   NoReleases,
-} from './AddToReleaseAction';
+} from './ReleaseActionModal';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
 import type { BulkActionComponent } from '@strapi/content-manager/strapi-admin';

@@ -22,7 +22,7 @@ import { EmptyDocuments } from '@strapi/icons/symbols';
 import { isAxiosError } from 'axios';
 import { useFormik } from 'formik';
 import { useIntl } from 'react-intl';
-import { Link as ReactRouterLink, useParams } from 'react-router-dom';
+import { Link as ReactRouterLink } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { CreateReleaseAction } from '../../../shared/contracts/release-actions';
@@ -111,7 +111,7 @@ const AddActionToReleaseModal = ({
   const releases = response.data?.data;
 
   if (releases?.length === 0) {
-    <NoReleases />;
+    return <NoReleases />;
   }
 
   return (
@@ -134,7 +134,7 @@ const AddActionToReleaseModal = ({
             onChange={(value) => onInputChange('releaseId', value)}
             value={values.releaseId}
           >
-            {releases?.map((release: any) => (
+            {releases?.map((release) => (
               <SingleSelectOption key={release.id} value={release.id}>
                 {release.name}
               </SingleSelectOption>
@@ -158,10 +158,10 @@ const AddActionToReleaseModal = ({
 };
 
 /* -------------------------------------------------------------------------------------------------
- * AddToReleaseAction
+ * ReleaseActionModalForm
  * -----------------------------------------------------------------------------------------------*/
 
-const AddToReleaseAction: DocumentActionComponent = ({
+const ReleaseActionModalForm: DocumentActionComponent = ({
   documentId,
   model,
   collectionType,
@@ -296,4 +296,4 @@ const AddToReleaseAction: DocumentActionComponent = ({
   };
 };
 
-export { AddToReleaseAction };
+export { ReleaseActionModalForm };

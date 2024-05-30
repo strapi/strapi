@@ -133,8 +133,11 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
     }
   );
 
-  // Validate needs to make a init query, so we need to wait for it to be ready
-  const errors = !isLoading ? validate(entry) ?? {} : {};
+  if (isLoading) {
+    return null;
+  }
+
+  const errors = validate(entry) ?? {};
 
   if (Object.keys(errors).length > 0) {
     const validationErrorsMessages = Object.entries(errors)

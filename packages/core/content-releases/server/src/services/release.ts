@@ -318,10 +318,6 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         { strapi }
       );
 
-      if (!entryId) {
-        throw new errors.NotFoundError(`No entry found for documentId ${entry.documentId}`);
-      }
-
       const populatedEntry = await getPopulatedEntry(entry.contentType, entryId, { strapi });
       const isEntryValid = await getEntryValidStatus(entry.contentType, populatedEntry, { strapi });
 

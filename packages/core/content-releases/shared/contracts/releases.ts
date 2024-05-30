@@ -68,7 +68,7 @@ export declare namespace GetReleasesByDocumentAttached {
   }
 
   export interface Response {
-    data: ReleaseDataResponse[];
+    data: ReleaseForContentTypeEntryDataResponse[];
     error?: errors.ApplicationError;
   }
 }
