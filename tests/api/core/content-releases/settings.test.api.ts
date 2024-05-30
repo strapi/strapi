@@ -4,7 +4,7 @@ import type { Core } from '@strapi/types';
 import { createTestBuilder } from 'api-tests/builder';
 import { createStrapiInstance } from 'api-tests/strapi';
 import { createAuthRequest } from 'api-tests/request';
-import { createUtils } from 'api-tests/utils';
+import { createUtils, describeOnCondition } from 'api-tests/utils';
 
 import type { Settings } from '../../../../packages/core/content-releases/shared/contracts/settings';
 
@@ -14,6 +14,8 @@ let rq: any;
 let rqUnauth: any;
 let rqReader: any;
 let rqEditor: any;
+
+const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
 const getSettings = async (request = rq) => {
   return request({
@@ -59,7 +61,7 @@ const createUserRequest = async (params: { user; role; permissions }, utils) => 
   return createAuthRequest({ strapi, userInfo: createdUser });
 };
 
-describe('Content releases settings', () => {
+describeOnCondition(edition === 'EE')('Content releases settings', () => {
   beforeAll(async () => {
     await builder.build();
     strapi = await createStrapiInstance();
@@ -85,7 +87,14 @@ describe('Content releases settings', () => {
       {
         user: { firstname: 'Alice', lastname: 'Foo', email: 'alice.foo@test.com' },
         role: { name: 'reader' },
-        permissions: [{ action: 'plugin::content-releases.settings.read' }],
+        permissions: [
+          {
+            action: 'plugin::content-releases.settings.read',
+            subject: null,
+            conditions: [],
+            properties: {},
+          },
+        ],
       },
       utils
     );
