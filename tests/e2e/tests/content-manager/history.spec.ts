@@ -145,7 +145,6 @@ describeOnCondition(edition === 'EE')('History', () => {
        */
       await page.getByRole('button', { name: 'Publish' }).click();
       // Go to the history page
-      // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(ARTICLE_HISTORY_URL);
       // Publish also creates a new draft so we expect the count to increase by 2
@@ -280,6 +279,35 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Assert the new field is present
       await expect(page.getByText('titleRename')).toBeVisible();
       await page.getByRole('status').getByText('New field');
+    });
+
+    test('A user should be able to restore a history version', async ({ page }) => {
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: /Create new entry/, exact: true }).click();
+      await page.waitForURL(ARTICLE_CREATE_URL);
+
+      const titleInput = await page.getByRole('textbox', { name: 'title' });
+      // Create an initial entry to also create an initial version
+      await titleInput.fill('Being from Kansas');
+      await page.getByRole('button', { name: 'Save' }).click();
+      await page.waitForURL(ARTICLE_EDIT_URL);
+      // Update to create another version
+      await titleInput.fill('Being from Florida');
+      await page.getByRole('button', { name: 'Publish' }).click();
+
+      await goToHistoryPage(page);
+      await page.waitForURL(ARTICLE_HISTORY_URL);
+
+      // Select the original version and restore it
+      const versionCards = await page.getByRole('listitem', { name: 'Version card' });
+      await versionCards.last().click();
+      await expect(titleInput).toHaveValue('Being from Kansas');
+      await page.getByRole('button', { name: 'Restore' }).click();
+      const confirmationDialog = await page.getByRole('dialog', { name: 'Confirmation' });
+      await expect(confirmationDialog).toBeVisible();
+      await confirmationDialog.getByRole('button', { name: 'Restore' }).click();
+      await page.waitForURL(ARTICLE_EDIT_URL);
+      await expect(titleInput).toHaveValue('Being from Kansas');
     });
   });
 
