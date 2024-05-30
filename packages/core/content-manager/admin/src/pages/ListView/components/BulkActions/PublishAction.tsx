@@ -72,6 +72,16 @@ const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessag
       } else {
         messages.push(...formatErrorMessages(value, currentKey, formatMessage));
       }
+    } else {
+      messages.push(
+        formatMessage(
+          {
+            id: `${value}.withField`,
+            defaultMessage: value,
+          },
+          { field: currentKey }
+        )
+      );
     }
   });
 
