@@ -3,7 +3,6 @@ import { Feather } from '@strapi/icons';
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
 import { reducer } from './modules/reducers';
-import { contentManagerApi } from './services/api';
 import { prefixPluginTranslations } from './utils/translations';
 
 // eslint-disable-next-line import/no-default-export
