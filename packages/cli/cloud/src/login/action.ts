@@ -1,6 +1,8 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
+import chalk from 'chalk';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
 import type { CloudCliConfig, CLIContext } from '../types';
+import { apiConfig } from '../config/api';
 
 const openModule = import('open');
 
@@ -29,6 +31,10 @@ export default async (ctx: CLIContext) => {
         } else {
           logger.log('You are already logged in.');
         }
+        logger.log(
+          'To access your dashboard, please copy and paste the following URL into your web browser:'
+        );
+        logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
         return;
       } catch (e) {
         logger.debug('Failed to fetch user info', e);
@@ -165,6 +171,10 @@ export default async (ctx: CLIContext) => {
     }
     spinner.succeed('Authentication successful!');
     logger.log('You are now logged into Strapi Cloud.');
+    logger.log(
+      'To access your dashboard, please copy and paste the following URL into your web browser:'
+    );
+    logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
     try {
       await cloudApiService.track('didLogin', { loginMethod: 'cli' });
     } catch (e) {

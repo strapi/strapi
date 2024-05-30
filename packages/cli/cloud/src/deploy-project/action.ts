@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import chalk from 'chalk';
 import { AxiosError } from 'axios';
 import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
@@ -161,6 +162,15 @@ export default async (ctx: CLIContext) => {
   try {
     notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig);
     await buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig);
+
+    ctx.logger.log(
+      'To view the logs in the dashboard, please copy and paste the following URL into your web browser:'
+    );
+    ctx.logger.log(
+      chalk.underline(
+        `${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments/${buildId}`
+      )
+    );
   } catch (e: Error | unknown) {
     if (e instanceof Error) {
       ctx.logger.error(e.message);
