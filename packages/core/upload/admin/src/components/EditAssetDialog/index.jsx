@@ -12,11 +12,8 @@ import {
   Field,
   Flex,
   Grid,
-  GridItem,
   Loader,
-  ModalBody,
-  ModalFooter,
-  ModalLayout,
+  Modal,
   TextInput,
   VisuallyHidden,
 } from '@strapi/design-system';
@@ -179,8 +176,8 @@ export const EditAssetDialog = ({
         <ModalLayout onClose={() => handleClose(values)} labelledBy="title">
           <DialogHeader />
           <ModalBody>
-            <Grid gap={4}>
-              <GridItem xs={12} col={6}>
+            <Grid.Root gap={4}>
+              <Grid.Item xs={12} col={6}>
                 <PreviewBox
                   asset={asset}
                   canUpdate={canUpdate}
@@ -193,8 +190,8 @@ export const EditAssetDialog = ({
                   replacementFile={replacementFile}
                   trackedLocation={trackedLocation}
                 />
-              </GridItem>
-              <GridItem xs={12} col={6}>
+              </Grid.Item>
+              <Grid.Item xs={12} col={6}>
                 <Form noValidate>
                   <Flex direction="column" alignItems="stretch" gap={3}>
                     <ContextInfo
@@ -330,8 +327,8 @@ export const EditAssetDialog = ({
                     </button>
                   </VisuallyHidden>
                 </Form>
-              </GridItem>
-            </Grid>
+              </Grid.Item>
+            </Grid.Root>
           </ModalBody>
           <ModalFooter
             startActions={

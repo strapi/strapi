@@ -1,4 +1,4 @@
-import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Flex, Grid, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useApiTokenPermissions } from '../apiTokenPermissions';
@@ -13,8 +13,8 @@ export const Permissions = ({ ...props }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Grid gap={0} shadow="filterShadow" hasRadius background="neutral0">
-      <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
+    <Grid.Root gap={0} shadow="filterShadow" hasRadius background="neutral0">
+      <Grid.Item col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
         <Flex direction="column" alignItems="stretch" gap={2}>
           <Typography variant="delta" tag="h2">
             {formatMessage({
@@ -30,8 +30,8 @@ export const Permissions = ({ ...props }) => {
           </Typography>
         </Flex>
         {data?.permissions && <ContentTypesSection section={data?.permissions} {...props} />}
-      </GridItem>
+      </Grid.Item>
       <ActionBoundRoutes />
-    </Grid>
+    </Grid.Root>
   );
 };

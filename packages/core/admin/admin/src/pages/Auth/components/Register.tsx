@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Typography, Link } from '@strapi/design-system';
+import { Box, Button, Flex, Grid, Typography, Link } from '@strapi/design-system';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
@@ -369,7 +369,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
           }}
         >
           <Flex direction="column" alignItems="stretch" gap={6} marginTop={7}>
-            <Grid gap={4}>
+            <Grid.Root gap={4}>
               {[
                 {
                   label: formatMessage({
@@ -457,11 +457,11 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                   type: 'checkbox' as const,
                 },
               ].map(({ size, ...field }) => (
-                <GridItem key={field.name} col={size}>
+                <Grid.Item key={field.name} col={size}>
                   <InputRenderer {...field} />
-                </GridItem>
+                </Grid.Item>
               ))}
-            </Grid>
+            </Grid.Root>
             <Button fullWidth size="L" type="submit">
               {formatMessage({
                 id: 'Auth.form.button.register',

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Avatar, Box, Initials } from '@strapi/design-system';
+import { Avatar, Box } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { styled } from 'styled-components';

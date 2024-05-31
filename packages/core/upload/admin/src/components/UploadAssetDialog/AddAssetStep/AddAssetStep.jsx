@@ -1,16 +1,6 @@
 import React from 'react';
 
-import {
-  Box,
-  Divider,
-  ModalHeader,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Divider, Modal, Tabs, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 

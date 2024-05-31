@@ -1,20 +1,7 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useStrapiApp, useTracking, useNotification } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  ModalBody,
-  ModalFooter,
-  ModalLayout,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from '@strapi/design-system';
+import { Box, Button, Divider, Flex, Modal, Tabs } from '@strapi/design-system';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';

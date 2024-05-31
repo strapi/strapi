@@ -21,12 +21,7 @@ import {
   EmptyStateLayout,
   Flex,
   Grid,
-  GridItem,
   Main,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
   Tabs,
   Typography,
   Link,
@@ -119,9 +114,9 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
   }
 
   return (
-    <Grid gap={4}>
+    <Grid.Root gap={4}>
       {releases.map(({ id, name, scheduledAt, status }) => (
-        <GridItem col={3} s={6} xs={12} key={id}>
+        <Grid.Item col={3} s={6} xs={12} key={id}>
           <LinkCard tag={NavLink} to={`${id}`} isExternal={false}>
             <Flex
               direction="column"
@@ -153,9 +148,9 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               <Badge {...getBadgeProps(status)}>{status}</Badge>
             </Flex>
           </LinkCard>
-        </GridItem>
+        </Grid.Item>
       ))}
-    </Grid>
+    </Grid.Root>
   );
 };
 

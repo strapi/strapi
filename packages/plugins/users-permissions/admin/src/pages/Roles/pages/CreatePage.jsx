@@ -4,7 +4,6 @@ import {
   Button,
   Flex,
   Grid,
-  GridItem,
   Main,
   Textarea,
   TextInput,
@@ -125,8 +124,8 @@ export const CreatePage = () => {
                     })}
                   </Typography>
 
-                  <Grid gap={4}>
-                    <GridItem col={6}>
+                  <Grid.Root gap={4}>
+                    <Grid.Item col={6}>
                       <Field.Root
                         name="name"
                         error={
@@ -145,8 +144,8 @@ export const CreatePage = () => {
                         <TextInput value={values.name || ''} onChange={handleChange} />
                         <Field.Error />
                       </Field.Root>
-                    </GridItem>
-                    <GridItem col={6}>
+                    </Grid.Item>
+                    <Grid.Item col={6}>
                       <Field.Root
                         name="description"
                         error={
@@ -168,8 +167,8 @@ export const CreatePage = () => {
                         <Textarea value={values.description || ''} onChange={handleChange} />
                         <Field.Error />
                       </Field.Root>
-                    </GridItem>
-                  </Grid>
+                    </Grid.Item>
+                  </Grid.Root>
                 </Flex>
 
                 {!isLoadingPlugins && (

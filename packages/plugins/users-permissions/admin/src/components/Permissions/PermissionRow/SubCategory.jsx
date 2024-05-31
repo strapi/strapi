@@ -1,14 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 
-import {
-  Box,
-  Checkbox,
-  Flex,
-  Typography,
-  Grid,
-  GridItem,
-  VisuallyHidden,
-} from '@strapi/design-system';
+import { Box, Checkbox, Flex, Typography, Grid, VisuallyHidden } from '@strapi/design-system';
 import { Cog as CogIcon } from '@strapi/icons';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
@@ -82,12 +74,12 @@ const SubCategory = ({ subCategory }) => {
         </Box>
       </Flex>
       <Flex paddingTop={6} paddingBottom={6}>
-        <Grid gap={2} style={{ flex: 1 }}>
+        <Grid.Root gap={2} style={{ flex: 1 }}>
           {subCategory.actions.map((action) => {
             const name = `${action.name}.enabled`;
 
             return (
-              <GridItem col={6} key={action.name}>
+              <Grid.Item col={6} key={action.name}>
                 <CheckboxWrapper isActive={isActionSelected(action.name)} padding={2} hasRadius>
                   <Checkbox
                     value={get(modifiedData, name, false)}
@@ -115,10 +107,10 @@ const SubCategory = ({ subCategory }) => {
                     <CogIcon />
                   </button>
                 </CheckboxWrapper>
-              </GridItem>
+              </Grid.Item>
             );
           })}
-        </Grid>
+        </Grid.Root>
       </Flex>
     </Box>
   );

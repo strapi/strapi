@@ -9,11 +9,10 @@ import {
   Layouts,
 } from '@strapi/admin/strapi-admin';
 import {
-  BaseCheckbox,
+  Checkbox,
   Box,
   Divider,
   Flex,
-  GridItem,
   IconButton,
   Typography,
   VisuallyHidden,
@@ -291,7 +290,7 @@ export const MediaLibrary = () => {
                   }
                   onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
                 >
-                  {isGridView ? <List /> : <Grid />}
+                  {isGridView ? <List /> : <Grid.Root />}
                 </IconButton>
               </ActionContainer>
               <SearchInput
@@ -376,7 +375,7 @@ export const MediaLibrary = () => {
                     });
 
                     return (
-                      <GridItem col={3} key={`folder-${folder.id}`}>
+                      <Grid.Item col={3} key={`folder-${folder.id}`}>
                         <FolderCard
                           ref={
                             folderToEdit && folder.id === folderToEdit.id
@@ -437,7 +436,7 @@ export const MediaLibrary = () => {
                             </FolderCardBodyAction>
                           </FolderCardBody>
                         </FolderCard>
-                      </GridItem>
+                      </Grid.Item>
                     );
                   })}
                 </FolderGridList>

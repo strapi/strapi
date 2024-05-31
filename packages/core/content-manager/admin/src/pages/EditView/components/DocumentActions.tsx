@@ -11,13 +11,8 @@ import {
   Box,
   Button,
   Dialog,
-  DialogBody,
-  DialogFooter,
-  DialogProps,
   Flex,
-  ModalBody,
-  ModalHeader,
-  ModalLayout,
+  Modal,
   Radio,
   Typography,
   VisuallyHidden,
@@ -367,10 +362,10 @@ const convertActionVariantToColor = (
  * DocumentActionConfirmDialog
  * -----------------------------------------------------------------------------------------------*/
 
-interface DocumentActionConfirmDialogProps
-  extends DialogOptions,
-    Pick<DialogProps, 'onClose' | 'isOpen'>,
-    Pick<Action, 'variant'> {}
+interface DocumentActionConfirmDialogProps extends DialogOptions, Pick<Action, 'variant'> {
+  onClose: () => void;
+  isOpen: Dialog.Props['open'];
+}
 
 const DocumentActionConfirmDialog = ({
   onClose,
@@ -400,27 +395,28 @@ const DocumentActionConfirmDialog = ({
   };
 
   return (
-    <Dialog isOpen={isOpen} title={title} onClose={handleClose}>
-      <DialogBody>{content}</DialogBody>
-      <DialogFooter
-        startAction={
-          <Button onClick={handleClose} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
-        }
-        endAction={
+    <Dialog.Root open={isOpen} onOpenChange={handleClose}>
+      <Dialog.Content>
+        <Dialog.Header>{title}</Dialog.Header>
+        <Dialog.Body>{content}</Dialog.Body>
+        <Dialog.Footer>
+          <Dialog.Cancel>
+            <Button variant="tertiary">
+              {formatMessage({
+                id: 'app.components.Button.cancel',
+                defaultMessage: 'Cancel',
+              })}
+            </Button>
+          </Dialog.Cancel>
           <Button onClick={handleConfirm} variant={variant}>
             {formatMessage({
               id: 'app.components.Button.confirm',
               defaultMessage: 'Confirm',
             })}
           </Button>
-        }
-      />
-    </Dialog>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 };
 

@@ -8,17 +8,7 @@ import {
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import {
-  Grid,
-  GridItem,
-  Main,
-  SetSelectedTabIndexHandler,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from '@strapi/design-system';
+import { Grid, Main, Tabs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -202,8 +192,8 @@ const EditViewPage = () => {
                   </StatusTab>
                 </Tabs>
               ) : null}
-              <Grid paddingTop={8} gap={4}>
-                <GridItem col={9} s={12}>
+              <Grid.Root paddingTop={8} gap={4}>
+                <Grid.Item col={9} s={12}>
                   <TabPanels>
                     <TabPanel>
                       <FormLayout layout={layout} />
@@ -212,11 +202,11 @@ const EditViewPage = () => {
                       <FormLayout layout={layout} />
                     </TabPanel>
                   </TabPanels>
-                </GridItem>
-                <GridItem col={3} s={12}>
+                </Grid.Item>
+                <Grid.Item col={3} s={12}>
                   <Panels />
-                </GridItem>
-              </Grid>
+                </Grid.Item>
+              </Grid.Root>
             </TabGroup>
             <Blocker
               // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284

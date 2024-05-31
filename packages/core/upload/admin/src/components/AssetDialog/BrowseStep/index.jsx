@@ -1,12 +1,11 @@
 import React from 'react';
 
 import {
-  BaseCheckbox,
+  Checkbox,
   Box,
   Button,
   Divider,
   Flex,
-  GridItem,
   IconButton,
   Typography,
   VisuallyHidden,
@@ -169,7 +168,7 @@ export const BrowseStep = ({
                     }
                     onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
                   >
-                    {isGridView ? <List /> : <Grid />}
+                    {isGridView ? <List /> : <Grid.Root />}
                   </IconButton>
                 </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
@@ -270,7 +269,7 @@ export const BrowseStep = ({
             >
               {folders.map((folder) => {
                 return (
-                  <GridItem col={3} key={`folder-${folder.id}`}>
+                  <Grid.Item col={3} key={`folder-${folder.id}`}>
                     <FolderCard
                       ariaLabel={folder.name}
                       id={`folder-${folder.id}`}
@@ -323,7 +322,7 @@ export const BrowseStep = ({
                         </FolderCardBodyAction>
                       </FolderCardBody>
                     </FolderCard>
-                  </GridItem>
+                  </Grid.Item>
                 );
               })}
             </FolderGridList>

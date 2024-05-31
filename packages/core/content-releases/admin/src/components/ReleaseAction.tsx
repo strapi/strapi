@@ -13,8 +13,7 @@ import {
   Flex,
   SingleSelect,
   SingleSelectOption,
-  ModalBody,
-  ModalFooter,
+  Modal,
   Field,
 } from '@strapi/design-system';
 import { UID } from '@strapi/types';

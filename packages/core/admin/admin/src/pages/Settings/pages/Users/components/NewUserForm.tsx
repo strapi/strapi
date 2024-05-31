@@ -5,11 +5,7 @@ import {
   Button,
   Flex,
   Grid,
-  GridItem,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
+  Modal,
   Typography,
   Breadcrumbs,
   Crumb,
@@ -146,100 +142,102 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
   }
 
   return (
-    <ModalLayout onClose={onToggle} labelledBy="title">
-      <ModalHeader>
-        {/**
-         * TODO: this is not semantically correct and should be amended.
-         */}
-        <Breadcrumbs label={headerTitle}>
-          <Crumb isCurrent>{headerTitle}</Crumb>
-        </Breadcrumbs>
-      </ModalHeader>
-      <Form
-        method={currentStep === 'create' ? 'POST' : 'PUT'}
-        initialValues={initialValues ?? {}}
-        onSubmit={handleSubmit}
-        validationSchema={FORM_SCHEMA}
-      >
-        {({ isSubmitting }) => {
-          return (
-            <>
-              <ModalBody>
-                <Flex direction="column" alignItems="stretch" gap={6}>
-                  {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
-                  <Box>
-                    <Typography variant="beta" tag="h2">
-                      {formatMessage({
-                        id: 'app.components.Users.ModalCreateBody.block-title.details',
-                        defaultMessage: 'User details',
-                      })}
-                    </Typography>
-                    <Box paddingTop={4}>
-                      <Flex direction="column" alignItems="stretch" gap={1}>
-                        <Grid gap={5}>
-                          {FORM_LAYOUT.map((row) => {
+    <Modal.Root defaultOpen onOpenChange={onToggle}>
+      <Modal.Content>
+        <Modal.Header>
+          {/**
+           * TODO: this is not semantically correct and should be amended.
+           */}
+          <Breadcrumbs label={headerTitle}>
+            <Crumb isCurrent>{headerTitle}</Crumb>
+          </Breadcrumbs>
+        </Modal.Header>
+        <Form
+          method={currentStep === 'create' ? 'POST' : 'PUT'}
+          initialValues={initialValues ?? {}}
+          onSubmit={handleSubmit}
+          validationSchema={FORM_SCHEMA}
+        >
+          {({ isSubmitting }) => {
+            return (
+              <>
+                <Modal.Body>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
+                    {currentStep !== 'create' && (
+                      <MagicLink registrationToken={registrationToken} />
+                    )}
+                    <Box>
+                      <Typography variant="beta" tag="h2">
+                        {formatMessage({
+                          id: 'app.components.Users.ModalCreateBody.block-title.details',
+                          defaultMessage: 'User details',
+                        })}
+                      </Typography>
+                      <Box paddingTop={4}>
+                        <Flex direction="column" alignItems="stretch" gap={1}>
+                          <Grid.Root gap={5}>
+                            {FORM_LAYOUT.map((row) => {
+                              return row.map(({ size, ...field }) => {
+                                return (
+                                  <Grid.Item key={field.name} col={size}>
+                                    <InputRenderer
+                                      {...field}
+                                      disabled={isDisabled}
+                                      label={formatMessage(field.label)}
+                                      placeholder={formatMessage(field.placeholder)}
+                                    />
+                                  </Grid.Item>
+                                );
+                              });
+                            })}
+                          </Grid.Root>
+                        </Flex>
+                      </Box>
+                    </Box>
+                    <Box>
+                      <Typography variant="beta" tag="h2">
+                        {formatMessage({
+                          id: 'global.roles',
+                          defaultMessage: "User's role",
+                        })}
+                      </Typography>
+                      <Box paddingTop={4}>
+                        <Grid.Root gap={5}>
+                          <Grid.Item col={6} xs={12}>
+                            <SelectRoles disabled={isDisabled} />
+                          </Grid.Item>
+                          {roleLayout.map((row) => {
                             return row.map(({ size, ...field }) => {
                               return (
-                                <GridItem key={field.name} col={size}>
+                                <Grid.Item key={field.name} col={size}>
                                   <InputRenderer
                                     {...field}
                                     disabled={isDisabled}
                                     label={formatMessage(field.label)}
-                                    placeholder={formatMessage(field.placeholder)}
+                                    placeholder={
+                                      field.placeholder
+                                        ? formatMessage(field.placeholder)
+                                        : undefined
+                                    }
+                                    hint={field.hint ? formatMessage(field.hint) : undefined}
                                   />
-                                </GridItem>
+                                </Grid.Item>
                               );
                             });
                           })}
-                        </Grid>
-                      </Flex>
+                        </Grid.Root>
+                      </Box>
                     </Box>
-                  </Box>
-                  <Box>
-                    <Typography variant="beta" tag="h2">
-                      {formatMessage({
-                        id: 'global.roles',
-                        defaultMessage: "User's role",
-                      })}
-                    </Typography>
-                    <Box paddingTop={4}>
-                      <Grid gap={5}>
-                        <GridItem col={6} xs={12}>
-                          <SelectRoles disabled={isDisabled} />
-                        </GridItem>
-                        {roleLayout.map((row) => {
-                          return row.map(({ size, ...field }) => {
-                            return (
-                              <GridItem key={field.name} col={size}>
-                                <InputRenderer
-                                  {...field}
-                                  disabled={isDisabled}
-                                  label={formatMessage(field.label)}
-                                  placeholder={
-                                    field.placeholder ? formatMessage(field.placeholder) : undefined
-                                  }
-                                  hint={field.hint ? formatMessage(field.hint) : undefined}
-                                />
-                              </GridItem>
-                            );
-                          });
-                        })}
-                      </Grid>
-                    </Box>
-                  </Box>
-                </Flex>
-              </ModalBody>
-              <ModalFooter
-                startActions={
+                  </Flex>
+                </Modal.Body>
+                <Modal.Footer>
                   <Button variant="tertiary" onClick={onToggle} type="button">
                     {formatMessage({
                       id: 'app.components.Button.cancel',
                       defaultMessage: 'Cancel',
                     })}
                   </Button>
-                }
-                endActions={
-                  currentStep === 'create' ? (
+                  {currentStep === 'create' ? (
                     <Button type="submit" loading={isSubmitting}>
                       {formatMessage(buttonSubmitLabel)}
                     </Button>
@@ -247,14 +245,14 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                     <Button type="button" loading={isSubmitting} onClick={onToggle}>
                       {formatMessage(buttonSubmitLabel)}
                     </Button>
-                  )
-                }
-              />
-            </>
-          );
-        }}
-      </Form>
-    </ModalLayout>
+                  )}
+                </Modal.Footer>
+              </>
+            );
+          }}
+        </Form>
+      </Modal.Content>
+    </Modal.Root>
   );
 };
 

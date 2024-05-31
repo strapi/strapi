@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ModalHeader, Typography } from '@strapi/design-system';
+import { Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 export const DialogHeader = () => {

@@ -15,7 +15,6 @@ import {
   MultiSelectOption,
   Accordion,
   Grid,
-  GridItem,
   IconButton,
   MultiSelect,
   MultiSelectGroup,
@@ -330,7 +329,7 @@ const Stage = ({
               </Accordion.Actions>
             </Accordion.Header>
             <Accordion.Content>
-              <Grid gap={4} padding={6}>
+              <Grid.Root gap={4} padding={6}>
                 {[
                   {
                     disabled: !canUpdate,
@@ -370,11 +369,11 @@ const Stage = ({
                     type: 'permissions' as const,
                   },
                 ].map(({ size, ...field }) => (
-                  <GridItem key={field.name} col={size}>
+                  <Grid.Item key={field.name} col={size}>
                     <InputRenderer {...field} />
-                  </GridItem>
+                  </Grid.Item>
                 ))}
-              </Grid>
+              </Grid.Root>
             </Accordion.Content>
           </Accordion.Item>
         </AccordionRoot>

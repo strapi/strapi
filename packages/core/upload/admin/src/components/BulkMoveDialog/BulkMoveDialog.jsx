@@ -1,18 +1,6 @@
 import React from 'react';
 
-import {
-  Button,
-  Flex,
-  Grid,
-  Field,
-  GridItem,
-  Loader,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Button, Flex, Grid, Field, Loader, Modal, Typography } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
@@ -96,8 +84,8 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
             </ModalHeader>
 
             <ModalBody>
-              <Grid gap={4}>
-                <GridItem xs={12} col={12}>
+              <Grid.Root gap={4}>
+                <Grid.Item xs={12} col={12}>
                   <Field.Root id="folder-destination">
                     <Field.Label>
                       {formatMessage({
@@ -125,8 +113,8 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
                       </Typography>
                     )}
                   </Field.Root>
-                </GridItem>
-              </Grid>
+                </Grid.Item>
+              </Grid.Root>
             </ModalBody>
 
             <ModalFooter

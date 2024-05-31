@@ -6,7 +6,6 @@ import {
   Field,
   Flex,
   Grid,
-  GridItem,
   Main,
   Textarea,
   TextInput,
@@ -259,8 +258,8 @@ const CreatePage = () => {
                           )}
                         </UsersRoleNumber>
                       </Flex>
-                      <Grid gap={4}>
-                        <GridItem col={6}>
+                      <Grid.Root gap={4}>
+                        <Grid.Item col={6}>
                           <Field.Root
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
@@ -275,8 +274,8 @@ const CreatePage = () => {
                             <TextInput onChange={handleChange} value={values.name} />
                             <Field.Error />
                           </Field.Root>
-                        </GridItem>
-                        <GridItem col={6}>
+                        </Grid.Item>
+                        <Grid.Item col={6}>
                           <Field.Root
                             name="description"
                             error={errors.description && formatMessage({ id: errors.description })}
@@ -289,8 +288,8 @@ const CreatePage = () => {
                             </Field.Label>
                             <Textarea onChange={handleChange} value={values.description} />
                           </Field.Root>
-                        </GridItem>
-                      </Grid>
+                        </Grid.Item>
+                      </Grid.Root>
                     </Flex>
                   </Box>
                   <Box shadow="filterShadow" hasRadius>

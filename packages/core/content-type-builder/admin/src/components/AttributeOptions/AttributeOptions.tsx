@@ -4,18 +4,7 @@
  *
  */
 
-import {
-  Box,
-  Divider,
-  Flex,
-  ModalBody,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Divider, Flex, Modal, Tabs, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';

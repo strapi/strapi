@@ -6,11 +6,8 @@ import {
   Field,
   Flex,
   Grid,
-  GridItem,
   Loader,
-  ModalBody,
-  ModalFooter,
-  ModalLayout,
+  Modal,
   TextInput,
   Typography,
 } from '@strapi/design-system';
@@ -159,9 +156,9 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
             <EditFolderModalHeader isEditing={isEditing} />
 
             <ModalBody>
-              <Grid gap={4}>
+              <Grid.Root gap={4}>
                 {isEditing && (
-                  <GridItem xs={12} col={12}>
+                  <Grid.Item xs={12} col={12}>
                     <ContextInfo
                       blocks={[
                         {
@@ -190,10 +187,10 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                         },
                       ]}
                     />
-                  </GridItem>
+                  </Grid.Item>
                 )}
 
-                <GridItem xs={12} col={6}>
+                <Grid.Item xs={12} col={6}>
                   <Field.Root name="name" error={errors.name}>
                     <Field.Label>
                       {formatMessage({
@@ -208,9 +205,9 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                     />
                     <Field.Error />
                   </Field.Root>
-                </GridItem>
+                </Grid.Item>
 
-                <GridItem xs={12} col={6}>
+                <Grid.Item xs={12} col={6}>
                   <Field.Root id="folder-parent">
                     <Field.Label>
                       {formatMessage({
@@ -245,8 +242,8 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                       </Typography>
                     )}
                   </Field.Root>
-                </GridItem>
-              </Grid>
+                </Grid.Item>
+              </Grid.Root>
             </ModalBody>
 
             <ModalFooter

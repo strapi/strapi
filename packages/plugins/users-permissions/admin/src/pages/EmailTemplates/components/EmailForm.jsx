@@ -1,16 +1,6 @@
 import React from 'react';
 
-import {
-  Button,
-  Grid,
-  GridItem,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  Breadcrumbs,
-  Crumb,
-} from '@strapi/design-system';
+import { Button, Grid, Modal, Breadcrumbs, Crumb } from '@strapi/design-system';
 import { Form, InputRenderer } from '@strapi/strapi/admin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -55,7 +45,7 @@ const EmailForm = ({ template, onToggle, onSubmit }) => {
           return (
             <>
               <ModalBody>
-                <Grid gap={5}>
+                <Grid.Root gap={5}>
                   {[
                     {
                       label: formatMessage({
@@ -103,11 +93,11 @@ const EmailForm = ({ template, onToggle, onSubmit }) => {
                       type: 'text',
                     },
                   ].map(({ size, ...field }) => (
-                    <GridItem key={field.name} col={size}>
+                    <Grid.Item key={field.name} col={size}>
                       <InputRenderer {...field} />
-                    </GridItem>
+                    </Grid.Item>
                   ))}
-                </Grid>
+                </Grid.Root>
               </ModalBody>
               <ModalFooter
                 startActions={

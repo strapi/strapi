@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, TextInput } from '@strapi/design-system';
+import { Box, Button, Flex, Grid, TextInput } from '@strapi/design-system';
 import { Check, Play as Publish } from '@strapi/icons';
 import { IntlShape, useIntl } from 'react-intl';
 import * as yup from 'yup';
@@ -140,7 +140,7 @@ const WebhookForm = ({
               )}
               <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
                 <Flex direction="column" alignItems="stretch" gap={6}>
-                  <Grid gap={6}>
+                  <Grid.Root gap={6}>
                     {[
                       {
                         label: formatMessage({
@@ -163,11 +163,11 @@ const WebhookForm = ({
                         type: 'string' as const,
                       },
                     ].map(({ size, ...field }) => (
-                      <GridItem key={field.name} col={size}>
+                      <Grid.Item key={field.name} col={size}>
                         <InputRenderer {...field} />
-                      </GridItem>
+                      </Grid.Item>
                     ))}
-                  </Grid>
+                  </Grid.Root>
                   <HeadersInput />
                   <EventTable />
                 </Flex>

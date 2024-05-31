@@ -35,7 +35,7 @@ const ComponentCategory = ({
         </Accordion.Trigger>
       </Accordion.Header>
       <Accordion.Content>
-        <Grid paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
+        <Grid.Root paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           {components.map(({ uid, displayName, icon }) => (
             <ComponentBox
               key={uid}
@@ -58,7 +58,7 @@ const ComponentCategory = ({
               </Flex>
             </ComponentBox>
           ))}
-        </Grid>
+        </Grid.Root>
       </Accordion.Content>
     </Accordion.Item>
   );

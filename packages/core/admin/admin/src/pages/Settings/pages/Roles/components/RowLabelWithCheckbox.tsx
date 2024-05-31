@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { BaseCheckbox, Box, Flex, Typography } from '@strapi/design-system';
+import { Checkbox, Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { capitalise } from '../../../../../utils/strings';
@@ -39,7 +39,7 @@ const RowLabelWithCheckbox = ({
   return (
     <Flex alignItems="center" paddingLeft={6} width={firstRowWidth} shrink={0}>
       <Box paddingRight={2}>
-        <BaseCheckbox
+        <Checkbox
           name={checkboxName}
           aria-label={formatMessage(
             {
@@ -50,16 +50,15 @@ const RowLabelWithCheckbox = ({
           )}
           disabled={isFormDisabled}
           // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-          onValueChange={(value) =>
+          onCheckedChange={(value) =>
             onChange({
               target: {
                 name: checkboxName,
-                value,
+                value: !!value,
               },
             })
           }
-          indeterminate={someChecked}
-          value={value}
+          checked={someChecked ? 'indeterminate' : value}
         />
       </Box>
       <CollapseLabel

@@ -1,18 +1,7 @@
 import { useId } from 'react';
 
 import { Form, useField, InputRenderer, useNotification } from '@strapi/admin/strapi-admin';
-import {
-  Button,
-  Flex,
-  FlexComponent,
-  Grid,
-  GridItem,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Button, Flex, FlexComponent, Grid, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
@@ -91,7 +80,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
           </HeaderContainer>
         </ModalHeader>
         <ModalBody>
-          <Grid gap={4}>
+          <Grid.Root gap={4}>
             {[
               {
                 name: 'label',
@@ -122,11 +111,11 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                   (field.name === 'sortable' && shouldDisplaySortToggle)
               )
               .map(({ size, ...field }) => (
-                <GridItem key={field.name} s={12} col={size}>
+                <Grid.Item key={field.name} s={12} col={size}>
                   <InputRenderer {...field} />
-                </GridItem>
+                </Grid.Item>
               ))}
-          </Grid>
+          </Grid.Root>
         </ModalBody>
         <ModalFooter
           startActions={

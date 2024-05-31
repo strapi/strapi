@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { BaseCheckbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
+import { Checkbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
 import { Eye, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';

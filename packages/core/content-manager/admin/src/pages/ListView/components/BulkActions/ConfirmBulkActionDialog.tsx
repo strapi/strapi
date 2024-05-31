@@ -6,15 +6,7 @@ import {
   useAPIErrorHandler,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import {
-  Button,
-  Flex,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Typography,
-  DialogFooterProps,
-} from '@strapi/design-system';
+import { Button, Flex, Dialog, Typography } from '@strapi/design-system';
 import { Check, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 

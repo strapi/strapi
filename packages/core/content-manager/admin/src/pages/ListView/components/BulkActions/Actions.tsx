@@ -8,18 +8,7 @@ import {
   useTable,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  DialogProps,
-  Flex,
-  ModalHeader,
-  ModalLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Button, Dialog, Modal, Flex, Typography } from '@strapi/design-system';
 import { Check, WarningCircle, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 

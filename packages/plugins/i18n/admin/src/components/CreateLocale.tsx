@@ -19,17 +19,9 @@ import {
   Field,
   Flex,
   Grid,
-  GridItem,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
+  Modal,
   SingleSelect,
   SingleSelectOption,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
   Tabs,
   Typography,
 } from '@strapi/design-system';
@@ -314,13 +306,13 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   }));
 
   return (
-    <Grid gap={4}>
+    <Grid.Root gap={4}>
       {translatedForm.map(({ size, ...field }) => (
-        <GridItem key={field.name} col={size}>
+        <Grid.Item key={field.name} col={size}>
           <FormRenderer {...field} />
-        </GridItem>
+        </Grid.Item>
       ))}
-    </Grid>
+    </Grid.Root>
   );
 };
 
@@ -357,13 +349,13 @@ const AdvancedForm = ({ isDefaultLocale }: AdvancedFormProps) => {
   })) satisfies InputProps[];
 
   return (
-    <Grid gap={4}>
+    <Grid.Root gap={4}>
       {form.map(({ size, ...field }) => (
-        <GridItem key={field.name} col={size}>
+        <Grid.Item key={field.name} col={size}>
           <FormRenderer {...field} />
-        </GridItem>
+        </Grid.Item>
       ))}
-    </Grid>
+    </Grid.Root>
   );
 };
 

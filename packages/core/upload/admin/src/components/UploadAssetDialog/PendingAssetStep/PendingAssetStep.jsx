@@ -1,17 +1,7 @@
 import React, { useRef, useState } from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
-import {
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  KeyboardNavigable,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  Typography,
-} from '@strapi/design-system';
+import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -126,13 +116,13 @@ export const PendingAssetStep = ({
             </Button>
           </Flex>
           <KeyboardNavigable tagName="article">
-            <Grid gap={4}>
+            <Grid.Root gap={4}>
               {assets.map((asset) => {
                 const assetKey = asset.url;
 
                 if (uploadStatus === Status.Uploading || uploadStatus === Status.Intermediate) {
                   return (
-                    <GridItem col={4} key={assetKey}>
+                    <Grid.Item col={4} key={assetKey}>
                       <UploadingAssetCard
                         // Props used to store the newly uploaded files
                         addUploadedFiles={addUploadedFiles}
@@ -143,12 +133,12 @@ export const PendingAssetStep = ({
                         size="S"
                         folderId={folderId}
                       />
-                    </GridItem>
+                    </Grid.Item>
                   );
                 }
 
                 return (
-                  <GridItem col={4} key={assetKey}>
+                  <Grid.Item col={4} key={assetKey}>
                     <AssetCard
                       asset={asset}
                       size="S"
@@ -158,10 +148,10 @@ export const PendingAssetStep = ({
                       onEdit={onEditAsset}
                       onRemove={onRemoveAsset}
                     />
-                  </GridItem>
+                  </Grid.Item>
                 );
               })}
-            </Grid>
+            </Grid.Root>
           </KeyboardNavigable>
         </Flex>
       </ModalBody>

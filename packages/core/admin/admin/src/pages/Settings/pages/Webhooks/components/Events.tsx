@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  BaseCheckbox,
   Checkbox,
   Flex,
   RawTable as Table,
@@ -13,6 +12,7 @@ import {
   Typography,
   VisuallyHidden,
   Field,
+  CheckboxProps,
 } from '@strapi/design-system';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -255,7 +255,7 @@ const EventsRow = ({
   const hasSomeCheckboxSelected = inputValue.length > 0;
   const areAllCheckboxesSelected = inputValue.length === enabledCheckboxes.length;
 
-  const onChangeAll: React.ChangeEventHandler<HTMLInputElement> = ({ target: { name } }) => {
+  const onChangeAll: CheckboxProps['onCheckedChange'] = () => {
     const valueToSet = !areAllCheckboxesSelected;
 
     handleSelectAll(name, valueToSet);
@@ -267,14 +267,17 @@ const EventsRow = ({
     <Tr>
       <Td>
         <Checkbox
-          indeterminate={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
           aria-label={formatMessage({
             id: 'global.select-all-entries',
             defaultMessage: 'Select all entries',
           })}
           name={name}
-          onChange={onChangeAll}
-          value={areAllCheckboxesSelected}
+          checked={
+            hasSomeCheckboxSelected && !areAllCheckboxesSelected
+              ? 'indeterminate'
+              : areAllCheckboxesSelected
+          }
+          onCheckedChange={onChangeAll}
         >
           {removeHyphensAndTitleCase(name)}
         </Checkbox>
@@ -283,12 +286,12 @@ const EventsRow = ({
       {events.map((event) => {
         return (
           <Td key={event} textAlign="center">
-            <BaseCheckbox
+            <Checkbox
               disabled={disabledEvents.includes(event)}
               aria-label={event}
               name={event}
-              value={inputValue.includes(event)}
-              onValueChange={(value) => handleSelect(event, value)}
+              checked={inputValue.includes(event)}
+              onCheckedChange={(value) => handleSelect(event, !!value)}
             />
           </Td>
         );

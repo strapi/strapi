@@ -6,17 +6,7 @@
 
 import React from 'react';
 
-import {
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-} from '@strapi/design-system';
-import { Breadcrumbs, Crumb } from '@strapi/design-system';
+import { Button, Flex, Grid, Modal, Breadcrumbs, Crumb } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -61,11 +51,11 @@ const FormModal = ({
             <Form>
               <ModalBody>
                 <Flex direction="column" alignItems="stretch" gap={1}>
-                  <Grid gap={5}>
+                  <Grid.Root gap={5}>
                     {layout.form.map((row) => {
                       return row.map((input) => {
                         return (
-                          <GridItem key={input.name} col={input.size} xs={12}>
+                          <Grid.Item key={input.name} col={input.size} xs={12}>
                             <Input
                               {...input}
                               error={errors[input.name]}
@@ -73,11 +63,11 @@ const FormModal = ({
                               value={values[input.name]}
                               providerToEditName={providerToEditName}
                             />
-                          </GridItem>
+                          </Grid.Item>
                         );
                       });
                     })}
-                  </Grid>
+                  </Grid.Root>
                 </Flex>
               </ModalBody>
               <ModalFooter

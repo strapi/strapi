@@ -7,17 +7,7 @@ import {
   InputProps,
   useField,
 } from '@strapi/admin/strapi-admin';
-import {
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Button, Flex, Grid, Modal, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
@@ -143,7 +133,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
           </Flex>
         </ModalHeader>
         <ModalBody>
-          <Grid gap={4}>
+          <Grid.Root gap={4}>
             {[
               {
                 name: 'label',
@@ -215,11 +205,11 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
             ]
               .filter(filterFieldsBasedOnAttributeType(attribute.type))
               .map(({ size, ...field }) => (
-                <GridItem key={field.name} col={size}>
+                <Grid.Item key={field.name} col={size}>
                   <InputRenderer {...field} />
-                </GridItem>
+                </Grid.Item>
               ))}
-          </Grid>
+          </Grid.Root>
         </ModalBody>
         <ModalFooter
           startActions={

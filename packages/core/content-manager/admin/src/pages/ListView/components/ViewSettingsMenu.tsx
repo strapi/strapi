@@ -5,7 +5,7 @@ import {
   Flex,
   IconButton,
   Popover,
-  BaseCheckbox,
+  Checkbox,
   TextButton,
   Typography,
   useCollator,

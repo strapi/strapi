@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-  BaseCheckbox,
+  Checkbox,
   IconButton,
   Table,
   Th,
