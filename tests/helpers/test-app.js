@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { rimraf } = require('rimraf');
 const execa = require('execa');
-const generateNew = require('../../packages/generators/app/dist/generate-new');
+const createProject = require('../../packages/generators/app/dist/create-project');
 
 /**
  * Deletes a test app
@@ -27,25 +27,21 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
     database,
     rootPath: path.resolve(appPath),
     name: path.basename(appPath),
+    packageManager: 'yarn',
     // disable quickstart run app after creation
     runApp: false,
     // use package version as strapiVersion (all packages have the same version);
     strapiVersion: pkg.version,
-    debug: false,
-    quick: false,
+    isQuickstart: false,
     uuid: undefined,
     deviceId: null,
-    // use yarn if available and --use-npm isn't true
-    useYarn: true,
     installDependencies: false,
-    devDependencies: {
+    dependencies: {
       '@strapi/strapi': pkg.version,
       '@strapi/plugin-users-permissions': pkg.version,
       '@strapi/plugin-graphql': pkg.version,
       '@strapi/plugin-documentation': pkg.version,
       '@strapi/plugin-cloud': pkg.version,
-    },
-    dependencies: {
       react: '18.2.0',
       'react-dom': '18.2.0',
       'react-router-dom': '^6.0.0',
@@ -54,7 +50,7 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
     template: template ? path.resolve(template) : template,
   };
 
-  await generateNew(scope);
+  await createProject(scope);
   if (link) {
     await linkPackages(scope);
   }
