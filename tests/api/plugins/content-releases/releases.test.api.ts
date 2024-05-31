@@ -50,10 +50,8 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
       method: 'POST',
       url: `/content-releases/${releaseId}/actions`,
       body: {
-        entry: {
-          id: entryId,
-          contentType,
-        },
+        entryDocumentId: entryId,
+        contentType,
         type,
       },
     });

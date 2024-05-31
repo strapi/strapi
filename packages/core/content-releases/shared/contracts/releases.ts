@@ -60,8 +60,8 @@ export declare namespace GetReleasesByDocumentAttached {
       userAbility: {};
     };
     query: {
-      contentTypeUid: string;
-      documentId: ReleaseAction['entry']['documentId'];
+      contentType: string;
+      entryDocumentId: ReleaseAction['entry']['entryDocumentId'];
       locale?: string;
       hasEntryAttached?: boolean;
     };

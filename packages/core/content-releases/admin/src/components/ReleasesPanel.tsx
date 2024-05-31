@@ -1,8 +1,7 @@
-import { useRBAC } from '@strapi/admin/strapi-admin';
+import { useRBAC, useQueryParams } from '@strapi/admin/strapi-admin';
 import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content-manager/strapi-admin';
 import { Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { useParams } from 'react-router-dom';
 
 import { PERMISSIONS } from '../constants';
 import { useGetReleasesForEntryQuery } from '../services/release';
@@ -13,9 +12,8 @@ import { ReleaseActionMenu } from './ReleaseActionMenu';
 import type { PanelComponent, PanelComponentProps } from '@strapi/content-manager/strapi-admin';
 
 const Panel: PanelComponent = ({ model, documentId, collectionType }: PanelComponentProps) => {
-  const { locale } = useParams<{
-    locale: string;
-  }>();
+  const [{ query }] = useQueryParams<{ plugins: { i18n: { locale: string } } }>();
+  const locale = query.plugins?.i18n?.locale;
 
   const {
     edit: { options },
@@ -26,8 +24,8 @@ const Panel: PanelComponent = ({ model, documentId, collectionType }: PanelCompo
   const { canRead, canDeleteAction } = allowedActions;
 
   const response = useGetReleasesForEntryQuery({
-    contentTypeUid: model,
-    documentId,
+    contentType: model,
+    entryDocumentId: documentId,
     locale,
     hasEntryAttached: true,
   });

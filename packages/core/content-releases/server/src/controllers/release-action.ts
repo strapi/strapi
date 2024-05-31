@@ -23,8 +23,8 @@ const releaseActionController = {
 
     await validateReleaseAction(releaseActionArgs);
 
-    const releaseService = getService('release', { strapi });
-    const releaseAction = await releaseService.createAction(releaseId, releaseActionArgs);
+    const releaseActionService = getService('release-action', { strapi });
+    const releaseAction = await releaseActionService.create(releaseId, releaseActionArgs);
 
     ctx.created({
       data: releaseAction,
@@ -32,45 +32,37 @@ const releaseActionController = {
   },
 
   async createMany(ctx: Koa.Context) {
-    const releaseId: CreateManyReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
-    const releaseActionsArgs = ctx.request.body as CreateManyReleaseActions.Request['body'];
-
-    await Promise.all(
-      releaseActionsArgs.map((releaseActionArgs) => validateReleaseAction(releaseActionArgs))
-    );
-
-    const releaseService = getService('release', { strapi });
-
-    const releaseActions = await strapi.db.transaction(async () => {
-      const releaseActions = await Promise.all(
-        releaseActionsArgs.map(async (releaseActionArgs) => {
-          try {
-            const action = await releaseService.createAction(releaseId, releaseActionArgs);
-
-            return action;
-          } catch (error) {
-            // If the entry is already in the release, we don't want to throw an error, so we catch and ignore it
-            if (error instanceof AlreadyOnReleaseError) {
-              return null;
-            }
-
-            throw error;
-          }
-        })
-      );
-
-      return releaseActions;
-    });
-
-    const newReleaseActions = releaseActions.filter((action) => action !== null);
-
-    ctx.created({
-      data: newReleaseActions,
-      meta: {
-        entriesAlreadyInRelease: releaseActions.length - newReleaseActions.length,
-        totalEntries: releaseActions.length,
-      },
-    });
+    // const releaseId: CreateManyReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
+    // const releaseActionsArgs = ctx.request.body as CreateManyReleaseActions.Request['body'];
+    // await Promise.all(
+    //   releaseActionsArgs.map((releaseActionArgs) => validateReleaseAction(releaseActionArgs))
+    // );
+    // const releaseActionService = getService('release-action', { strapi });
+    // const releaseActions = await strapi.db.transaction(async () => {
+    //   const releaseActions = await Promise.all(
+    //     releaseActionsArgs.map(async (releaseActionArgs) => {
+    //       try {
+    //         const action = await releaseActionService.create(releaseId, releaseActionArgs);
+    //         return action;
+    //       } catch (error) {
+    //         // If the entry is already in the release, we don't want to throw an error, so we catch and ignore it
+    //         if (error instanceof AlreadyOnReleaseError) {
+    //           return null;
+    //         }
+    //         throw error;
+    //       }
+    //     })
+    //   );
+    //   return releaseActions;
+    // });
+    // const newReleaseActions = releaseActions.filter((action) => action !== null);
+    // ctx.created({
+    //   data: newReleaseActions,
+    //   meta: {
+    //     entriesAlreadyInRelease: releaseActions.length - newReleaseActions.length,
+    //     totalEntries: releaseActions.length,
+    //   },
+    // });
   },
 
   async findMany(ctx: Koa.Context) {
@@ -90,8 +82,8 @@ const releaseActionController = {
     query.sort = query.groupBy === 'action' ? 'type' : query.groupBy;
     delete query.groupBy;
 
-    const releaseService = getService('release', { strapi });
-    const { results, pagination } = await releaseService.findActions(releaseId, {
+    const releaseActionService = getService('release-action', { strapi });
+    const { results, pagination } = await releaseActionService.findPage(releaseId, {
       ...query,
     });
 
@@ -126,9 +118,11 @@ const releaseActionController = {
       entry: await contentTypeOutputSanitizers[action.contentType](action.entry),
     }));
 
-    const groupedData = await releaseService.groupActions(sanitizedResults, query.sort);
+    const groupedData = await releaseActionService.groupActions(sanitizedResults, query.sort);
 
-    const contentTypes = releaseService.getContentTypeModelsFromActions(results);
+    const contentTypes = releaseActionService.getContentTypeModelsFromActions(results);
+
+    const releaseService = getService('release', { strapi });
     const components = await releaseService.getAllComponents();
 
     ctx.body = {
@@ -148,9 +142,9 @@ const releaseActionController = {
 
     await validateReleaseActionUpdateSchema(releaseActionUpdateArgs);
 
-    const releaseService = getService('release', { strapi });
+    const releaseActionService = getService('release-action', { strapi });
 
-    const updatedAction = await releaseService.updateAction(
+    const updatedAction = await releaseActionService.update(
       actionId,
       releaseId,
       releaseActionUpdateArgs
@@ -165,9 +159,9 @@ const releaseActionController = {
     const actionId: DeleteReleaseAction.Request['params']['actionId'] = ctx.params.actionId;
     const releaseId: DeleteReleaseAction.Request['params']['releaseId'] = ctx.params.releaseId;
 
-    const releaseService = getService('release', { strapi });
+    const releaseActionService = getService('release-action', { strapi });
 
-    const deletedReleaseAction = await releaseService.deleteAction(actionId, releaseId);
+    const deletedReleaseAction = await releaseActionService.delete(actionId, releaseId);
 
     ctx.body = {
       data: deletedReleaseAction,

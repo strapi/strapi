@@ -36,6 +36,8 @@ import type {
   DocumentActionProps,
 } from '@strapi/content-manager/strapi-admin';
 
+import type { UID } from '@strapi/types';
+
 /* -------------------------------------------------------------------------------------------------
  * AddActionToReleaseModal
  * -----------------------------------------------------------------------------------------------*/
@@ -55,7 +57,7 @@ export const INITIAL_VALUES = {
 } satisfies FormValues;
 
 interface AddActionToReleaseModalProps {
-  contentTypeUid: string;
+  contentType: string;
   documentId?: string;
   onInputChange: (field: keyof FormValues, value: string | number) => void;
   values: FormValues;
@@ -91,7 +93,7 @@ export const NoReleases = () => {
 };
 
 const AddActionToReleaseModal = ({
-  contentTypeUid,
+  contentType,
   documentId,
   onInputChange,
   values,
@@ -102,8 +104,8 @@ const AddActionToReleaseModal = ({
 
   // Get all 'pending' releases that do not have the entry attached
   const response = useGetReleasesForEntryQuery({
-    contentTypeUid,
-    documentId,
+    contentType,
+    entryDocumentId: documentId,
     hasEntryAttached: false,
     locale,
   });
@@ -207,13 +209,13 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
         throw new Error('Document id is required');
       }
 
-      const releaseActionEntry = {
-        contentType: model,
-        documentId,
-        locale,
-      };
       const response = await createReleaseAction({
-        body: { type: values.type, entry: releaseActionEntry },
+        body: {
+          type: values.type,
+          contentType: model as UID.ContentType,
+          entryDocumentId: documentId,
+          locale,
+        },
         params: { releaseId: values.releaseId },
       });
 
@@ -264,7 +266,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
       }),
       content: (
         <AddActionToReleaseModal
-          contentTypeUid={model}
+          contentType={model}
           documentId={documentId}
           onInputChange={formik.setFieldValue}
           values={formik.values}
