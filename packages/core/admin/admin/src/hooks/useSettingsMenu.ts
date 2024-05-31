@@ -33,7 +33,7 @@ interface SettingsMenuLinkWithPermissions extends SettingsMenuLink {
 }
 
 interface StrapiAppSettingsLink extends IStrapiAppSettingLink {
-  lockIcon?: never;
+  locked?: never;
   hasNotification?: never;
 }
 

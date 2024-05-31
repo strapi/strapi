@@ -76,7 +76,7 @@ const admin: Plugin.Config.AdminInput = {
           const { PurchaseContentReleases } = await import('./pages/PurchaseContentReleases');
           return PurchaseContentReleases;
         },
-        lockIcon: true,
+        locked: true,
       });
     }
   },

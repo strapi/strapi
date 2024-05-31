@@ -124,8 +124,8 @@ export const HOOKS = {
 };
 
 export interface SettingsMenuLink
-  extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'lockIcon'> {
-  lockIcon?: boolean;
+  extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'locked'> {
+  locked?: boolean;
 }
 
 export type SettingsMenu = {
@@ -164,7 +164,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
             to: '/settings/purchase-single-sign-on',
             id: 'sso-purchase-page',
-            lockIcon: true,
+            locked: true,
           },
         ]
       : []),
@@ -179,7 +179,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             },
             to: '/settings/purchase-review-workflows',
             id: 'review-workflows-purchase-page',
-            lockIcon: true,
+            locked: true,
           },
         ]
       : []),
@@ -204,7 +204,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
             to: '/settings/purchase-audit-logs',
             id: 'auditLogs-purchase-page',
-            lockIcon: true,
+            locked: true,
           },
         ]
       : []),
