@@ -81,9 +81,12 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                   key={link.id}
                 >
                   {formatMessage(link.intlLabel)}
-                  {link?.locked && (
-                    <CustomIcon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lightning} />
-                  )}
+                  {
+                    // TODO: to replace with another name in v5
+                    link?.lockIcon && (
+                      <CustomIcon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lightning} />
+                    )
+                  }
                 </SubNavLink>
               );
             })}

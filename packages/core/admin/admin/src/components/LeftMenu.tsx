@@ -159,7 +159,8 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     onClick={() => handleClickOnLink(link.to)}
                     // @ts-expect-error: badgeContent in the DS accept only strings
                     badgeContent={
-                      link?.locked ? (
+                      // TODO: to replace with another name in v5
+                      link?.lockIcon ? (
                         <BadgeIcon
                           width={`${15 / 16}rem`}
                           height={`${15 / 16}rem`}
