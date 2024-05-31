@@ -1,11 +1,9 @@
+import * as globalAgent from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
 import { Logger, createLogger } from '@strapi/logger';
 import { Database } from '@strapi/database';
-
-import * as globalAgent from 'global-agent';
-// import { HttpProxyAgent, HttpsProxyAgent } from 'https-proxy-agent';
 
 import type { Core, Modules, UID, Schema } from '@strapi/types';
 
