@@ -45,15 +45,17 @@ describeOnCondition(edition === 'EE')('Content Releases API', () => {
     });
   };
 
-  const createReleaseAction = async (releaseId, { contentType, entryId, type }) => {
+  const createReleaseAction = async (
+    releaseId,
+    { contentType, entryId, type, entryType = 'collection-types' }
+  ) => {
     return rq({
       method: 'POST',
       url: `/content-releases/${releaseId}/actions`,
       body: {
-        entry: {
-          id: entryId,
-          contentType,
-        },
+        entryDocumentId: entryId,
+        contentType,
+        entryType,
         type,
       },
     });

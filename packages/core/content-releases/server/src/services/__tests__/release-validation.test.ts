@@ -16,14 +16,14 @@ const baseStrapiMock = {
 };
 
 describe('Release Validation service', () => {
-  describe('validateEntryContentType', () => {
+  describe('validateEntryData', () => {
     it('throws an error if the content type does not exist', () => {
       // @ts-expect-error Ignore missing properties
       const releaseValidationService = createReleaseValidationService({ strapi: baseStrapiMock });
 
-      expect(() => releaseValidationService.validateEntryContentType('api::plop.plop')).toThrow(
-        'No content type found for uid api::plop.plop'
-      );
+      expect(() =>
+        releaseValidationService.validateEntryData('api::plop.plop', 'collection-types', '1')
+      ).toThrow('No content type found for uid api::plop.plop');
     });
 
     it('throws an error if the content type does not have draftAndPublish enabled', () => {
@@ -37,10 +37,31 @@ describe('Release Validation service', () => {
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
       expect(() =>
-        releaseValidationService.validateEntryContentType('api::category.category')
+        releaseValidationService.validateEntryData(
+          'api::category.category',
+          'collection-types',
+          '1'
+        )
       ).toThrow(
         'Content type with uid api::category.category does not have draftAndPublish enabled'
       );
+    });
+
+    it('throws an error if the entryType is collection-types and the entryDocumentId is missing', () => {
+      const strapiMock = {
+        ...baseStrapiMock,
+        contentType: jest.fn().mockReturnValue({
+          options: {
+            draftAndPublish: true,
+          },
+        }),
+      };
+      // @ts-expect-error Ignore missing properties
+      const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
+
+      expect(() =>
+        releaseValidationService.validateEntryData('api::category.category', 'collection-types', '')
+      ).toThrow('Document id is required for collection type');
     });
   });
 
@@ -65,10 +86,9 @@ describe('Release Validation service', () => {
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
       const mockReleaseAction: CreateReleaseAction.Request['body'] = {
-        entry: {
-          id: 1,
-          contentType: 'api::category.category',
-        },
+        entryDocumentId: '1',
+        entryType: 'collection-types',
+        contentType: 'api::category.category',
         type: 'publish',
       };
 
@@ -92,9 +112,7 @@ describe('Release Validation service', () => {
                 actions: [
                   {
                     contentType: 'api::category.category',
-                    entry: {
-                      documentId: '1',
-                    },
+                    entryDocumentId: '1',
                   },
                 ],
               }),
@@ -106,10 +124,9 @@ describe('Release Validation service', () => {
       const releaseValidationService = createReleaseValidationService({ strapi: strapiMock });
 
       const mockReleaseAction: CreateReleaseAction.Request['body'] = {
-        entry: {
-          documentId: '1',
-          contentType: 'api::category.category',
-        },
+        entryType: 'collection-types',
+        entryDocumentId: '1',
+        contentType: 'api::category.category',
         type: 'publish',
       };
 

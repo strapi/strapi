@@ -24,14 +24,17 @@ export default {
       enum: ['publish', 'unpublish'],
       required: true,
     },
-    entry: {
-      type: 'relation',
-      relation: 'morphToOne',
-      configurable: false,
-    },
     contentType: {
       type: 'string',
       required: true,
+    },
+    entryType: {
+      type: 'enumeration',
+      enum: ['single-types', 'collection-types'],
+      required: true,
+    },
+    entryDocumentId: {
+      type: 'string',
     },
     locale: {
       type: 'string',

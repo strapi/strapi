@@ -1,15 +1,11 @@
 import { yup, validateYupSchema } from '@strapi/utils';
 
 const RELEASE_ACTION_SCHEMA = yup.object().shape({
-  entry: yup
-    .object()
-    .shape({
-      documentId: yup.strapiID(),
-      contentType: yup.string().required(),
-      locale: yup.string(),
-    })
-    .required(),
+  contentType: yup.string().required(),
+  documentId: yup.strapiID(),
+  locale: yup.string(),
   type: yup.string().oneOf(['publish', 'unpublish']).required(),
+  entryType: yup.string().oneOf(['single-types', 'collection-types']).required(),
 });
 
 const RELEASE_ACTION_UPDATE_SCHEMA = yup.object().shape({
