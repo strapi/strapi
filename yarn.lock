@@ -8045,9 +8045,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/design-system@npm:1.19.0-typescript.0":
-  version: 1.19.0-typescript.0
-  resolution: "@strapi/design-system@npm:1.19.0-typescript.0"
+"@strapi/design-system@npm:1.20.0-typescript.0":
+  version: 1.20.0-typescript.0
+  resolution: "@strapi/design-system@npm:1.20.0-typescript.0"
   dependencies:
     "@codemirror/lang-json": "npm:^6.0.1"
     "@floating-ui/react-dom": "npm:^2.0.8"
@@ -8056,19 +8056,19 @@ __metadata:
     "@radix-ui/react-dismissable-layer": "npm:^1.0.5"
     "@radix-ui/react-dropdown-menu": "npm:^2.0.6"
     "@radix-ui/react-focus-scope": "npm:1.0.4"
-    "@strapi/ui-primitives": "npm:1.19.0-typescript.0"
+    "@strapi/ui-primitives": "npm:^1.20.0-typescript.0"
     "@uiw/react-codemirror": "npm:^4.21.25"
     aria-hidden: "npm:^1.2.4"
     compute-scroll-into-view: "npm:^3.1.0"
     prop-types: "npm:^15.8.1"
     react-remove-scroll: "npm:^2.5.9"
   peerDependencies:
-    "@strapi/icons": 1.19.0-typescript.0
+    "@strapi/icons": 1.20.0-typescript.0
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
     react-router-dom: ^5.2.0
     styled-components: ^5.2.1
-  checksum: faa85c3056eb6260ecca9dccc6418a94942b7d4ef8996885920fd5525460a0b1bf4ace16979dcd504c637f43205d316fdb22634deaea5667cb2df3901952dcd4
+  checksum: 801f9890157d125f94ed763e88b0d25425a592ff7687293a0871c789cc5e2f0f377cdbbdbd803f47201a9f978603f4ce421ce7e596cb1df5f49e39871a4ed872
   languageName: node
   linkType: hard
 
@@ -8911,9 +8911,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@strapi/ui-primitives@npm:1.19.0-typescript.0":
-  version: 1.19.0-typescript.0
-  resolution: "@strapi/ui-primitives@npm:1.19.0-typescript.0"
+"@strapi/ui-primitives@npm:^1.20.0-typescript.0":
+  version: 1.20.0-typescript.0
+  resolution: "@strapi/ui-primitives@npm:1.20.0-typescript.0"
   dependencies:
     "@radix-ui/number": "npm:^1.0.1"
     "@radix-ui/primitive": "npm:^1.0.1"
@@ -8939,7 +8939,7 @@ __metadata:
   peerDependencies:
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
-  checksum: a9759061fe6ddef65321bad1db85ac9a4af876abaeaa18c79baa5d37e6ac9aabd2266318b6fddc74d297544e116b1ecbed3066813b7677ecc75207efd214c3d8
+  checksum: 932ee56d06a14a6add34714c4c5ae48dc0b66401461fa3c39c196032bcd80550ca35895cfb2c78f4b6511d0b4e074b865ac8bbe0e7ef44dc1b6f80c8bee1655a
   languageName: node
   linkType: hard
 
