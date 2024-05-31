@@ -45,9 +45,9 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/design-system": "1.18.0",
+    "@strapi/design-system": "1.19.0",
     "@strapi/helper-plugin": "4.24.4",
-    "@strapi/icons": "1.18.0",
+    "@strapi/icons": "1.19.0",
     "@strapi/utils": "4.24.4",
     "bcryptjs": "2.4.3",
     "cheerio": "^1.0.0-rc.12",
