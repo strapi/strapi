@@ -223,32 +223,36 @@ type VersionInputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
  * to adapt the wording for the history page.
  */
 const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) => {
-  if (!labelAction || typeof labelAction !== 'object' || !('props' in labelAction)) {
+  if (!React.isValidElement(labelAction)) {
     return labelAction;
   }
 
-  const customLabelAction =
-    typeof labelAction === 'object' && labelAction != null && 'props' in labelAction
-      ? { ...labelAction, props: { ...labelAction.props } }
-      : labelAction;
-  const labelActionTitleId =
-    labelAction && typeof labelAction === 'object' && labelAction.props.title.id;
+  const labelActionTitleId = labelAction.props.title.id;
 
   if (labelActionTitleId === 'i18n.Field.localized') {
-    customLabelAction.props.title = {
-      id: 'history.content.localized',
-      defaultMessage:
-        'This value is specific to this locale. If you restore this version, the content will not replaced for other locales.',
-    };
-  } else if (labelActionTitleId === 'i18n.Field.not-localized') {
-    customLabelAction.props.title = {
-      id: 'history.content.not-localized',
-      defaultMessage:
-        'This value is common to all locales. If you restore this version and save the changes, the content will be replaced for all locales.',
-    };
+    return React.cloneElement(labelAction, {
+      ...labelAction.props,
+      title: {
+        id: 'history.content.localized',
+        defaultMessage:
+          'This value is specific to this locale. If you restore this version, the content will not replaced for other locales.',
+      },
+    });
   }
 
-  return customLabelAction;
+  if (labelActionTitleId === 'i18n.Field.not-localized') {
+    return React.cloneElement(labelAction, {
+      ...labelAction.props,
+      title: {
+        id: 'history.content.not-localized',
+        defaultMessage:
+          'This value is common to all locales. If you restore this version and save the changes, the content will be replaced for all locales.',
+      },
+    });
+  }
+
+  // Label action is unrelated to i18n, don't touch it.
+  return labelAction;
 };
 
 /**
