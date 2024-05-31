@@ -176,7 +176,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       await expect(titleInput).toHaveValue('Being from Kansas City');
       // The second in the list is the published version
       await expect(previousVersion.getByText('Published')).toBeVisible();
-      previousVersion.click();
+      await previousVersion.click();
       await expect(titleInput).toHaveValue('Being from Kansas City');
 
       // Go back to the entry
