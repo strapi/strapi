@@ -15,12 +15,13 @@ interface MutateEditViewArgs {
 }
 
 const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs => {
+  // If i18n isn't explicitly enabled on the content type, then no field can be localized
   if (
-    'i18n' in layout.options &&
-    typeof layout.options.i18n === 'object' &&
-    layout.options.i18n !== null &&
-    'localized' in layout.options.i18n &&
-    !layout.options.i18n.localized
+    !('i18n' in layout.options) ||
+    (typeof layout.options.i18n === 'object' &&
+      layout.options.i18n !== null &&
+      'localized' in layout.options.i18n &&
+      !layout.options.i18n.localized)
   ) {
     return { layout };
   }
