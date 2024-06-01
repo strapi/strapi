@@ -57,7 +57,9 @@ const DynamicComponent = ({
   dynamicComponentsByCategory = {},
   onAddComponent,
 }: DynamicComponentProps) => {
-  const [isOpen, setIsOpen] = React.useState(!fieldSchema?.collapse ?? true);
+  const [isOpen, setIsOpen] = React.useState(
+    fieldSchema?.collapse !== undefined ? !fieldSchema.collapse : true
+  );
   const { formatMessage } = useIntl();
   const { getComponentLayout } = useContentTypeLayout();
   const { modifiedData } = useCMEditViewDataManager();
