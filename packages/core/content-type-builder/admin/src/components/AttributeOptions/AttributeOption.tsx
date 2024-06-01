@@ -62,7 +62,6 @@ export const AttributeOption = ({ type = 'text' }: AttributeOptionProps) => {
                 id: getTrad(`attribute.${type}.description`),
                 defaultMessage: 'A type for modeling data',
               })}
-              TESTT1
             </Typography>
           </Flex>
         </Box>
