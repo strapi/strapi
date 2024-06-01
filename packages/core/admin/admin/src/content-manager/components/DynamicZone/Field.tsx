@@ -18,7 +18,7 @@ import type { Attribute } from '@strapi/types';
 
 interface DynamicZoneProps extends Pick<EditLayoutRow, 'metadatas'> {
   name: string;
-  fieldSchema?: Attribute.DynamicZone & { collapse: boolean };
+  fieldSchema?: Attribute.DynamicZone;
   labelAction?: React.ReactNode;
 }
 
