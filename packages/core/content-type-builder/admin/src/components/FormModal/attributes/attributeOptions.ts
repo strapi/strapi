@@ -90,4 +90,16 @@ export const attributeOptions = {
         "You won't be able to create an entry if there is an existing entry with identical content",
     },
   },
+  collapse: {
+    name: 'collapse',
+    type: 'checkbox',
+    intlLabel: {
+      id: getTrad('form.attribute.item.collapseField'),
+      defaultMessage: 'Collapse Dynamic Components',
+    },
+    description: {
+      id: getTrad('form.attribute.item.collapseField.description'),
+      defaultMessage: 'This will collapse the dynamic components by default',
+    },
+  },
 };

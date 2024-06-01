@@ -1,0 +1,12 @@
+{
+  "collectionName": "components_blog_ls",
+  "info": {
+    "displayName": "L"
+  },
+  "options": {},
+  "attributes": {
+    "Title": {
+      "type": "string"
+    }
+  }
+}

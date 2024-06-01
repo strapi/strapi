@@ -18,7 +18,7 @@ import type { Attribute } from '@strapi/types';
 
 interface DynamicZoneProps extends Pick<EditLayoutRow, 'metadatas'> {
   name: string;
-  fieldSchema?: Attribute.DynamicZone;
+  fieldSchema?: Attribute.DynamicZone & { collapse: boolean };
   labelAction?: React.ReactNode;
 }
 
@@ -260,6 +260,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }: DynamicZoneP
             {dynamicDisplayedComponents.map(({ componentUid, id }, index) => (
               <DynamicComponent
                 componentUid={componentUid}
+                fieldSchema={fieldSchema}
                 formErrors={formErrors}
                 key={`${componentUid}-${id}`}
                 index={index}

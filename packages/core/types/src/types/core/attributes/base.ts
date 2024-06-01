@@ -52,6 +52,10 @@ export interface RequiredOption {
   required?: boolean;
 }
 
+export interface CollapseOption {
+  collapse?: boolean;
+}
+
 export interface PrivateOption {
   private?: boolean;
 }

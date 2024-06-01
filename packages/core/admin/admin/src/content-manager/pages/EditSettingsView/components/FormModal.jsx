@@ -59,6 +59,7 @@ const FormModal = ({ onToggle, onMetaChange, onSizeChange, onSubmit, type, custo
                 },
                 { fieldName: upperFirst(selectedField) }
               )}
+              NAMEEE
             </Typography>
           </HeaderContainer>
         </ModalHeader>

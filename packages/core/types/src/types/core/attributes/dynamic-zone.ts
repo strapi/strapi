@@ -14,7 +14,8 @@ export type DynamicZone<TComponentsUID extends Common.UID.Component[] = Common.U
     Attribute.MinMaxOption &
     Attribute.RequiredOption &
     Attribute.WritableOption &
-    Attribute.VisibleOption;
+    Attribute.VisibleOption &
+    Attribute.CollapseOption;
 
 type DynamicZoneValue<TComponentsUID extends Common.UID.Component[]> = Array<
   // Extract tuple values to a component uid union type
