@@ -106,6 +106,8 @@
   "form.attribute.item.text.regex.description": "The text of the regular expression",
   "form.attribute.item.uniqueField": "Unique field",
   "form.attribute.item.uniqueField.description": "You won't be able to create an entry if there is an existing entry with identical content",
+  "form.attribute.item.collapseField": "Collapse Dynamic Components",
+  "form.attribute.item.collapseField.description": "This will collapse the dynamic components by default",
   "form.attribute.media.allowed-types": "Select allowed types of media",
   "form.attribute.media.allowed-types.option-files": "Files",
   "form.attribute.media.allowed-types.option-images": "Images",
