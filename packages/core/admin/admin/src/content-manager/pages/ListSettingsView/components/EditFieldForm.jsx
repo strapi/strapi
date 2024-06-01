@@ -62,7 +62,6 @@ export const EditFieldForm = ({
                 },
                 { fieldName: upperFirst(fieldToEdit) }
               )}
-              LENGTHHH
             </Typography>
           </HeaderContainer>
         </ModalHeader>
