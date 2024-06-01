@@ -101,7 +101,7 @@ export default ({ strapi }: Context) => {
     const findQueryName = getFindQueryName(contentType);
     const responseCollectionTypeName = getEntityResponseCollectionName(contentType);
 
-    t.field(findQueryName, {
+    t.nonNull.field(findQueryName, {
       type: responseCollectionTypeName,
 
       args: getContentTypeArgs(contentType),

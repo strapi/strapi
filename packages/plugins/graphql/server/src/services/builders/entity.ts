@@ -24,12 +24,12 @@ export default ({ strapi }: Context) => {
 
         definition(t) {
           // Keep the ID attribute at the top level
-          t.id('id', { resolve: prop('id') });
+          t.nonNull.id('id', { resolve: prop('id') });
 
           if (!isEmpty(attributes)) {
             // Keep the fetched object into a dedicated `attributes` field
             // TODO: [v4] precise why we keep the ID
-            t.field('attributes', {
+            t.nonNull.field('attributes', {
               type: typeName,
               resolve: identity,
             });
