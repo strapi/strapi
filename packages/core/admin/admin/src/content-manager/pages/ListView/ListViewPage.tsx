@@ -347,11 +347,10 @@ const ListViewPage = ({
     async () => {
       dispatch(getData());
 
+      const queryString = stringify(params, { encode: true, encodeValuesOnly: true });
       const { data } = await get<Contracts.CollectionTypes.Find.Response>(
-        `/content-manager/collection-types/${slug}`,
-        { params }
+        `/content-manager/collection-types/${slug}?${queryString}`
       );
-
       return data;
     },
     {
@@ -388,7 +387,7 @@ const ListViewPage = ({
           push({
             pathname,
             state: { from: pathname },
-            search: stringify(query),
+            search: stringify(query, { encode: true, encodeValuesOnly: true }),
           });
 
           return;

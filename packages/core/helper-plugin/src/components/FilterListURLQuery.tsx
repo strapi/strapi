@@ -52,7 +52,7 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
 
           if (typeof filterObj === 'object' && filterObj !== null) {
             const operator = Object.keys(filterObj)[0] as keyof typeof filterObj;
-            const value = filterObj[operator] ?? '';
+            const value = decodeURIComponent(filterObj[operator] ?? '');
 
             return (
               <AttributeTag
@@ -71,7 +71,7 @@ export const FilterListURLQuery = ({ filtersSchema = [] }: FilterListURLQueryPro
         } else {
           const filterObj = filter[attributeName];
           const operator = Object.keys(filterObj)[0] as keyof typeof filterObj;
-          const value = filterObj[operator];
+          const value = decodeURIComponent(filterObj[operator] as string);
 
           if (typeof value === 'string' || value === null) {
             return (
