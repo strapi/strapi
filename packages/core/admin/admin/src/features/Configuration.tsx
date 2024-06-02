@@ -75,7 +75,7 @@ const ConfigurationProvider = ({
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const token = useAuth('ConfigurationProvider', (state) => state.token);
+  const { token } = useAuth('ConfigurationProvider');
 
   const { data, isSuccess } = useProjectSettingsQuery(undefined, {
     skip: !token,

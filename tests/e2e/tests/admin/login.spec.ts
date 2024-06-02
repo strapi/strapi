@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { toggleRateLimiting } from '../../utils/rate-limit';
-import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD } from '../../constants';
+import { ADMIN_EMAIL_ADDRESS, ADMIN_PASSWORD, TITLE_HOME, TITLE_LOGIN } from '../../constants';
 import { login } from '../../utils/login';
 
 test.describe('Login', () => {
@@ -17,23 +17,23 @@ test.describe('Login', () => {
     }) => {
       // Test without making user authentication persistent
       await login({ page });
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle(TITLE_HOME);
 
       await page.close();
 
       page = await context.newPage();
       await page.goto('/admin');
-      await expect(page).toHaveTitle('Strapi Admin');
+      await expect(page).toHaveTitle(TITLE_LOGIN);
 
       // Test with making user authentication persistent
       await login({ page, rememberMe: true });
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle(TITLE_HOME);
 
       await page.close();
 
       page = await context.newPage();
       await page.goto('/admin');
-      await expect(page).toHaveTitle('Homepage');
+      await expect(page).toHaveTitle(TITLE_HOME);
     });
   });
 
