@@ -38,6 +38,9 @@ declare module '@strapi/types' {
       'article.comp': ArticleComp;
       'article.dz-comp': ArticleDzComp;
       'article.dz-other-comp': ArticleDzOtherComp;
+      // TODO add types for these components
+      'article.components_all_unique': any;
+      'article.components_unique_top_level': any;
     }
   }
 }

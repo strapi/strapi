@@ -16,7 +16,7 @@ const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUti
 const { ValidationError } = strapiUtils.errors;
 
 type Entity = {
-  id: ID;
+  id: number;
   [key: string]: unknown;
 } | null;
 
@@ -24,7 +24,28 @@ type ID = { id: string | number };
 
 type RelationSource = string | number | ID;
 
-interface ValidatorMeta<TAttribute = Schema.Attribute.AnyAttribute> {
+export type ComponentContext = {
+  parentContent: {
+    // The model of the parent content type that contains the current component.
+    model: Struct.Schema;
+    // The numeric id of the parent entity that contains the component.
+    id?: number;
+    // The options passed to the entity validator. From which we can extract
+    // entity dimensions such as locale and publication state.
+    options?: ValidatorContext;
+  };
+  // The path to the component within the parent content type schema.
+  pathToComponent: string[];
+  // If working with a repeatable component this contains the
+  // full data of the repeatable component in the current entity.
+  repeatableData: Entity[];
+};
+
+interface WithComponentContext {
+  componentContext?: ComponentContext;
+}
+
+interface ValidatorMeta<TAttribute = Schema.Attribute.AnyAttribute> extends WithComponentContext {
   attr: TAttribute;
   updatedAttribute: { name: string; value: any };
 }
@@ -34,14 +55,14 @@ interface ValidatorContext {
   locale?: string | null;
 }
 
-interface AttributeValidatorMetas {
+interface AttributeValidatorMetas extends WithComponentContext {
   attr: Schema.Attribute.AnyAttribute;
   updatedAttribute: { name: string; value: unknown };
   model: Struct.Schema;
   entity?: Entity;
 }
 
-interface ModelValidatorMetas {
+interface ModelValidatorMetas extends WithComponentContext {
   model: Struct.Schema;
   data: Record<string, unknown>;
   entity?: Entity;
@@ -128,7 +149,11 @@ const preventCast = (validator: strapiUtils.yup.AnySchema) =>
 const createComponentValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
-    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Component<UID.Component, boolean>>,
+    {
+      attr,
+      updatedAttribute,
+      componentContext,
+    }: ValidatorMeta<Schema.Attribute.Component<UID.Component, boolean>>,
     { isDraft }: ValidatorContext
   ) => {
     const model = strapi.getModel(attr.component);
@@ -143,7 +168,10 @@ const createComponentValidator =
         .array()
         .of(
           yup.lazy((item) =>
-            createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }).notNull()
+            createModelValidator(createOrUpdate)(
+              { componentContext, model, data: item },
+              { isDraft }
+            ).notNull()
           ) as any
         );
 
@@ -157,9 +185,12 @@ const createComponentValidator =
       return validator;
     }
 
-    // FIXME: v4 was broken
     let validator = createModelValidator(createOrUpdate)(
-      { model, data: updatedAttribute.value },
+      {
+        model,
+        data: updatedAttribute.value,
+        componentContext,
+      },
       { isDraft }
     );
 
@@ -173,7 +204,7 @@ const createComponentValidator =
 
 const createDzValidator =
   (createOrUpdate: CreateOrUpdate) =>
-  ({ attr, updatedAttribute }: ValidatorMeta, { isDraft }: ValidatorContext) => {
+  ({ attr, updatedAttribute, componentContext }: ValidatorMeta, { isDraft }: ValidatorContext) => {
     let validator;
 
     validator = yup.array().of(
@@ -187,7 +218,12 @@ const createDzValidator =
           .notNull();
 
         return model
-          ? schema.concat(createModelValidator(createOrUpdate)({ model, data: item }, { isDraft }))
+          ? schema.concat(
+              createModelValidator(createOrUpdate)(
+                { model, data: item, componentContext },
+                { isDraft }
+              )
+            )
           : schema;
       }) as any // FIXME: yup v1
     );
@@ -254,8 +290,37 @@ const createAttributeValidator =
       validator = createScalarAttributeValidator(createOrUpdate)(metas, options);
     } else {
       if (metas.attr.type === 'component') {
+        // Build the path to the component within the parent content type schema.
+        const pathToComponent = [
+          ...(metas?.componentContext?.pathToComponent ?? []),
+          metas.updatedAttribute.name,
+        ];
+
+        // If working with a repeatable component, determine the repeatable data
+        // based on the component's path.
+
+        // In order to validate the repeatable within this entity we need
+        // access to the full repeatable data. In case we are validating a
+        // nested component within a repeatable.
+        // Hence why we set this up when the path to the component is only one level deep.
+        const repeatableData = (
+          metas.attr.repeatable && pathToComponent.length === 1
+            ? metas.updatedAttribute.value
+            : metas.componentContext?.repeatableData
+        ) as Entity[];
+
+        const newComponentContext = {
+          ...(metas?.componentContext ?? {}),
+          pathToComponent,
+          repeatableData,
+        };
+
         validator = createComponentValidator(createOrUpdate)(
-          { attr: metas.attr, updatedAttribute: metas.updatedAttribute },
+          {
+            componentContext: newComponentContext as ComponentContext,
+            attr: metas.attr,
+            updatedAttribute: metas.updatedAttribute,
+          },
           options
         );
       } else if (metas.attr.type === 'dynamiczone') {
@@ -280,7 +345,7 @@ const createAttributeValidator =
 
 const createModelValidator =
   (createOrUpdate: CreateOrUpdate) =>
-  ({ model, data, entity }: ModelValidatorMetas, options: ValidatorContext) => {
+  ({ componentContext, model, data, entity }: ModelValidatorMetas, options: ValidatorContext) => {
     const writableAttributes = model ? getWritableAttributes(model as any) : [];
 
     const schema = writableAttributes.reduce(
@@ -290,6 +355,7 @@ const createModelValidator =
           updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
           model,
           entity,
+          componentContext,
         };
 
         const validator = createAttributeValidator(createOrUpdate)(metas, options);
@@ -323,23 +389,43 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
     }
 
     const validator = createModelValidator(createOrUpdate)(
-      { model, data, entity },
+      {
+        model,
+        data,
+        entity,
+        componentContext: {
+          // Set up the initial component context.
+          // Keeping track of parent content type context in which a component will be used.
+          // This is necessary to validate component field constraints such as uniqueness.
+          parentContent: {
+            id: entity?.id,
+            model,
+            options,
+          },
+          pathToComponent: [],
+          repeatableData: [],
+        },
+      },
       {
         isDraft: options?.isDraft ?? false,
         locale: options?.locale ?? null,
       }
     )
-      .test('relations-test', 'check that all relations exist', async function (data) {
-        try {
-          await checkRelationsExist(buildRelationsStore({ uid: model.uid, data }));
-        } catch (e) {
-          return this.createError({
-            path: this.path,
-            message: (e instanceof ValidationError && e.message) || 'Invalid relations',
-          });
+      .test(
+        'relations-test',
+        'check that all relations exist',
+        async function relationsValidation(data) {
+          try {
+            await checkRelationsExist(buildRelationsStore({ uid: model.uid, data }));
+          } catch (e) {
+            return this.createError({
+              path: this.path,
+              message: (e instanceof ValidationError && e.message) || 'Invalid relations',
+            });
+          }
+          return true;
         }
-        return true;
-      })
+      )
       .required();
 
     return validateYupSchema(validator, {
