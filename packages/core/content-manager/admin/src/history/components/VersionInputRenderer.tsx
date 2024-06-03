@@ -227,6 +227,7 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
     return labelAction;
   }
 
+	// TODO: find a better way to do this rather than access internals
   const labelActionTitleId = labelAction.props.title.id;
 
   if (labelActionTitleId === 'i18n.Field.localized') {
