@@ -65,7 +65,7 @@ const readGitignore = (folderPath: string): string[] => {
   if (!fs.existsSync(gitignorePath)) return [];
   const gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
   return gitignoreContent
-    .split('\n')
+    .split(/\r?\n/)
     .filter((line) => Boolean(line.trim()) && !line.startsWith('#'));
 };
 
