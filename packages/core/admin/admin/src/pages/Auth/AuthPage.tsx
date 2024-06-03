@@ -35,7 +35,7 @@ const AuthPage = () => {
     }
   );
 
-  const token = useAuth('AuthPage', (state) => state.token);
+  const { token } = useAuth('AuthPage', (auth) => auth);
 
   if (!authType || !forms) {
     return <Navigate to="/" />;

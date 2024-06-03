@@ -31,7 +31,7 @@ const sendUpdateProjectInformation = async (strapi: Core.Strapi) => {
     const numberOfPublishedContentReleases = await strapi
       .db!.query('plugin::content-releases.release')
       .count({
-        where: { $not: { releasedAt: null } },
+        filters: { releasedAt: { $notNull: true } },
       });
 
     groupProperties = assign(groupProperties, {

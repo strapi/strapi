@@ -1,14 +1,11 @@
 import { PaperPlane } from '@strapi/icons';
 
 import { CMReleasesContainer } from './components/CMReleasesContainer';
-import { ReleaseAction } from './components/ReleaseAction';
-// import { addColumnToTableHook } from './components/ReleaseListCell';
 import { PERMISSIONS } from './constants';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 import type { StrapiApp } from '@strapi/admin/strapi-admin';
-import type { BulkActionComponent } from '@strapi/content-manager/strapi-admin';
 import type { Plugin } from '@strapi/types';
 
 // eslint-disable-next-line import/no-default-export

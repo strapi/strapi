@@ -204,6 +204,7 @@ export default ({ strapi }: { strapi: Core.Strapi }) => {
       }
     )) as UploadableFile;
 
+    currentFile.filepath = file.filepath;
     currentFile.getStream = () => fs.createReadStream(file.filepath);
 
     const { optimize, isImage, isFaultyImage, isOptimizableImage } = strapi

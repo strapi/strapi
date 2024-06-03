@@ -65,7 +65,7 @@ import type {
   ReleaseActionGroupBy,
   ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
-import type { Schema } from '@strapi/types';
+import type { Struct, Internal } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -115,8 +115,8 @@ const TypographyMaxWidth = styled(Typography)`
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
-  schema?: Schema.ContentType;
-  components: { [key: Schema.Component['uid']]: Schema.Component };
+  schema?: Struct.ContentTypeSchema;
+  components: { [key: Internal.UID.Component]: Struct.ComponentSchema };
   entry: ReleaseActionEntry;
 }
 
@@ -693,6 +693,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         ]
       : []),
   ];
+
   const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
 
   return (

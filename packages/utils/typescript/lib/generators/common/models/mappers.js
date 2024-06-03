@@ -87,8 +87,26 @@ module.exports = {
   blocks() {
     return [withAttributeNamespace('Blocks')];
   },
-  media() {
-    return [withAttributeNamespace('Media')];
+  media({ attribute }) {
+    const { allowedTypes, multiple } = attribute;
+
+    const params = [];
+
+    const typesParam = allowedTypes
+      ? factory.createUnionTypeNode(
+          allowedTypes.map((allowedType) => factory.createStringLiteral(allowedType))
+        )
+      : factory.createKeywordTypeNode(ts.SyntaxKind.UndefinedKeyword);
+
+    if (allowedTypes || multiple) {
+      params.push(typesParam);
+    }
+
+    if (multiple) {
+      params.push(factory.createTrue());
+    }
+
+    return [withAttributeNamespace('Media'), params];
   },
   relation({ attribute }) {
     const { relation, target } = attribute;

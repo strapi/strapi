@@ -63,6 +63,7 @@
   "components.SettingsViewWrapper.pluginHeader.description.list-settings": "Define the settings of the list view.",
   "components.SettingsViewWrapper.pluginHeader.title": "Configure the view — {name}",
   "bulk-publish.already-published": "Already Published",
+  "bulk-publish.modified": "Ready to publish changes",
   "components.TableDelete.delete": "Delete all",
   "components.TableDelete.deleteSelected": "Delete selected",
   "components.TableDelete.label": "{number, plural, one {# entry} other {# entries}} selected",

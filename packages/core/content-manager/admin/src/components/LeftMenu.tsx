@@ -14,17 +14,22 @@ import { parse, stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
+import { useContentTypeSchema } from '../hooks/useContentTypeSchema';
 import { useTypedSelector } from '../modules/hooks';
 import { getTranslation } from '../utils/translations';
+
+import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 
 const LeftMenu = () => {
   const [search, setSearch] = React.useState('');
   const [{ query }] = useQueryParams<{ plugins?: object }>();
   const { formatMessage, locale } = useIntl();
+
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager'].app.collectionTypeLinks
   );
   const singleTypeLinks = useTypedSelector((state) => state['content-manager'].app.singleTypeLinks);
+  const { schemas } = useContentTypeSchema();
 
   const { startsWith } = useFilter(locale, {
     sensitivity: 'base',
@@ -92,6 +97,27 @@ const LeftMenu = () => {
     defaultMessage: 'Content',
   });
 
+  const getPluginsParamsForLink = (link: ContentManagerLink) => {
+    const schema = schemas.find((schema) => schema.uid === link.uid);
+    const isI18nEnabled = Boolean((schema?.pluginOptions?.i18n as any)?.localized);
+
+    // The search params have the i18n plugin
+    if (query.plugins && 'i18n' in query.plugins) {
+      // Prepare removal of i18n from the plugins search params
+      const { i18n, ...restPlugins } = query.plugins;
+
+      // i18n is not enabled, remove it from the plugins search params
+      if (!isI18nEnabled) {
+        return restPlugins;
+      }
+
+      // i18n is enabled, put the plugins search params back together
+      return { i18n, ...restPlugins };
+    }
+
+    return query.plugins;
+  };
+
   return (
     <SubNav aria-label={label}>
       <SubNavHeader
@@ -120,17 +146,9 @@ const LeftMenu = () => {
                     key={link.uid}
                     to={{
                       pathname: link.to,
-                      /**
-                       * We re-add the plugins query to the params available in the menu,
-                       * this means once you've changed the locale in the app, you continue
-                       * to see the same locale when changing content-type.
-                       *
-                       * NOTE: if you go to a content-type that does not have i18n enabled,
-                       * we return the default documents anyway.
-                       */
                       search: stringify({
                         ...parse(link.search ?? ''),
-                        plugins: query.plugins,
+                        plugins: getPluginsParamsForLink(link),
                       }),
                     }}
                   >
