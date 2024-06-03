@@ -227,7 +227,7 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
     return labelAction;
   }
 
-	// TODO: find a better way to do this rather than access internals
+  // TODO: find a better way to do this rather than access internals
   const labelActionTitleId = labelAction.props.title.id;
 
   if (labelActionTitleId === 'i18n.Field.localized') {
@@ -236,7 +236,7 @@ const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) =
       title: {
         id: 'history.content.localized',
         defaultMessage:
-          'This value is specific to this locale. If you restore this version, the content will not replaced for other locales.',
+          'This value is specific to this locale. If you restore this version, the content will not be replaced for other locales.',
       },
     });
   }
