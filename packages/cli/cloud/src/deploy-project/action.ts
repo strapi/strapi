@@ -170,12 +170,10 @@ export default async (ctx: CLIContext) => {
     await buildLogsService(`${apiConfig.apiBaseUrl}/v1/logs/${buildId}`, token, cliConfig);
 
     ctx.logger.log(
-      'To view the logs in the dashboard, please copy and paste the following URL into your web browser:'
+      'Visit the following URL for deployment logs. Your deployment will be available here shortly.'
     );
     ctx.logger.log(
-      chalk.underline(
-        `${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments/${buildId}`
-      )
+      chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments`)
     );
   } catch (e: Error | unknown) {
     if (e instanceof Error) {
