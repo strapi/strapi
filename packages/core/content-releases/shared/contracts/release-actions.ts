@@ -4,6 +4,8 @@ import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
 
+type ReleaseActionEntryType = 'single-types' | 'collection-types';
+
 export type ReleaseActionEntry = Modules.Documents.AnyDocument & {
   // Entity attributes
   [key: string]: Schema.Attribute.AnyAttribute;
