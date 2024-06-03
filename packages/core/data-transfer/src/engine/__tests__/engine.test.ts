@@ -1,5 +1,5 @@
 import { posix, win32 } from 'path';
-import { cloneDeep } from 'lodash/fp';
+import { cloneDeep, get, set } from 'lodash/fp';
 import { Readable, Writable } from 'stream-chain';
 import type { Struct } from '@strapi/types';
 import { createTransferEngine, TRANSFER_STAGES } from '..';
@@ -12,6 +12,7 @@ import type {
   ILink,
   ISourceProvider,
   ITransferEngineOptions,
+  MaybePromise,
   TransferFilterPreset,
 } from '../../../types';
 import {
@@ -19,6 +20,7 @@ import {
   providerStages,
   sourceStages,
 } from '../../__tests__/test-utils';
+import { TransferEngineValidationError } from '../errors';
 
 const getMockSourceStream = (data: Iterable<unknown>) => Readable.from(data);
 
@@ -265,25 +267,28 @@ const getSchemasMockSourceStream = (
   data: Array<Struct.Schema> = [
     {
       uid: 'api::foo.foo',
+      kind: 'collectionType',
       modelName: 'foo',
       globalId: 'foo',
-      info: { displayName: 'foo' },
+      info: { displayName: 'foo', singularName: 'foo', pluralName: 'foos' },
       modelType: 'contentType',
       attributes: { foo: { type: 'string' } },
     },
     {
       uid: 'api::bar.bar',
+      kind: 'collectionType',
       modelName: 'bar',
       globalId: 'bar',
-      info: { displayName: 'bar' },
+      info: { displayName: 'bar', singularName: 'bar', pluralName: 'bars' },
       modelType: 'contentType',
       attributes: { bar: { type: 'integer' } },
     },
     {
       uid: 'api::homepage.homepage',
+      kind: 'collectionType',
       modelName: 'homepage',
       globalId: 'homepage',
-      info: { displayName: 'Homepage' },
+      info: { displayName: 'Homepage', singularName: 'homepage', pluralName: 'homepages' },
       modelType: 'contentType',
       attributes: {
         action: { type: 'string' },
@@ -291,9 +296,10 @@ const getSchemasMockSourceStream = (
     },
     {
       uid: 'api::permission.permission',
+      kind: 'collectionType',
       modelName: 'permission',
       globalId: 'permission',
-      info: { displayName: 'Permission' },
+      info: { displayName: 'Permission', singularName: 'permission', pluralName: 'permissions' },
       modelType: 'contentType',
       attributes: {
         action: { type: 'string' },
@@ -769,6 +775,7 @@ describe('Transfer engine', () => {
           schemaStrategy: 'exact',
           exclude: [],
         } as unknown as ITransferEngineOptions;
+
         test('source with source schema missing in destination fails', async () => {
           const source = createSource();
           source.getSchemas = jest.fn().mockResolvedValue({ ...schemas, foo: { foo: 'bar' } });
@@ -779,6 +786,7 @@ describe('Transfer engine', () => {
             })()
           ).rejects.toThrow();
         });
+
         test('source with destination schema missing in source fails', async () => {
           const destination = createDestination();
           destination.getSchemas = jest.fn().mockResolvedValue({ ...schemas, foo: { foo: 'bar' } });
@@ -789,6 +797,7 @@ describe('Transfer engine', () => {
             })()
           ).rejects.toThrow();
         });
+
         test('differing nested field fails', async () => {
           const destination = createDestination();
           const fakeSchema = cloneDeep(schemas);
@@ -804,6 +813,67 @@ describe('Transfer engine', () => {
               await engine.transfer();
             })()
           ).rejects.toThrow();
+        });
+      });
+
+      describe('strict', () => {
+        const engineOptions = {
+          versionStrategy: 'exact',
+          schemaStrategy: 'strict',
+          exclude: [],
+        } as unknown as ITransferEngineOptions;
+
+        test.each([
+          ['private', (v: boolean) => !v],
+          ['required', (v: boolean) => !v],
+          ['configurable', (v: boolean) => v],
+          ['default', (v: unknown) => () => null],
+        ])(
+          `Don't throw on ignorable attribute's properties: %s`,
+          (attributeName, transformValue) => {
+            const destination = createDestination();
+            const fakeSchemas = cloneDeep(schemas);
+
+            const path = `attributes.createdAt.${attributeName}`;
+            const oldValue = get(path, fakeSchemas['api::homepage.homepage']);
+
+            fakeSchemas['api::homepage.homepage'] = set(
+              path,
+              transformValue(oldValue),
+              fakeSchemas['api::homepage.homepage']
+            );
+
+            destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);
+            const engine = createTransferEngine(completeSource, destination, engineOptions);
+
+            expect(
+              (async () => {
+                await engine.transfer();
+              })()
+            ).resolves.not.toThrow();
+          }
+        );
+
+        test(`Throws on regular attributes' properties`, () => {
+          const destination = createDestination();
+          const fakeSchemas = set(
+            '["api::homepage.homepage"].attributes.createdAt.type',
+            'string',
+            cloneDeep(schemas)
+          );
+
+          destination.getSchemas = jest.fn().mockResolvedValue(fakeSchemas);
+          const engine = createTransferEngine(completeSource, destination, engineOptions);
+
+          expect(
+            (async () => {
+              await engine.transfer();
+            })()
+          ).rejects.toThrow(
+            new TransferEngineValidationError(`Invalid schema changes detected during integrity checks (using the strict strategy). Please find a summary of the changes below:
+- api::homepage.homepage:
+  - Schema value changed at "attributes.createdAt.type": "datetime" (string) => "string" (string)`)
+          );
         });
       });
     });
