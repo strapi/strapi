@@ -1,8 +1,10 @@
 /* eslint-disable no-continue */
-import type { UID } from '@strapi/types';
+import type { UID, Modules, Utils } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { async, contentTypes } from '@strapi/utils';
 
+type DiscardDraftParams<TSchemaUID extends UID.ContentType> =
+  Modules.Documents.ServiceParams<TSchemaUID>['discardDraft'];
 type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
 
@@ -57,16 +59,31 @@ const migrateUp = async (trx: Knex, db: Database) => {
 
     const uid = meta.uid as UID.ContentType;
     const model = strapi.getModel(uid);
+
     const hasDP = contentTypes.hasDraftAndPublish(model);
+    const isLocalized = strapi
+      .plugin('i18n')
+      .service('content-types')
+      .isLocalizedContentType(model);
+
     if (!hasDP) {
       continue;
     }
 
-    const discardDraft = async (entry: DocumentVersion) =>
+    const discardDraft = async (entry: DocumentVersion) => {
+      const params: DiscardDraftParams<typeof uid> = { documentId: entry.documentId };
+
+      // Only add the locale param if the model is localized
+      // ref. https://github.com/strapi/strapi/issues/20225
+      if (isLocalized) {
+        params.locale = entry.locale;
+      }
+
       strapi
         .documents(uid)
-        // Discard draft by referencing the documentId and locale
-        .discardDraft({ documentId: entry.documentId, locale: entry.locale });
+        // Discard draft by referencing the documentId (and locale if the model is localized)
+        .discardDraft(params);
+    };
 
     /**
      * Load a batch of entries (batched to prevent loading millions of rows at once ),
