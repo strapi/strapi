@@ -30,6 +30,7 @@ import {
   EmptyStateLayout,
   LinkButton,
   Menu,
+  Dialog,
 } from '@strapi/design-system';
 import { CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -952,31 +953,28 @@ const ReleaseDetailsPage = () => {
       toggleWarningSubmit={toggleWarningSubmit}
     >
       <ReleaseDetailsBody releaseId={releaseId} />
-      {releaseModalShown && (
-        <ReleaseModal
-          handleClose={toggleEditReleaseModal}
-          handleSubmit={handleEditRelease}
-          isLoading={isLoadingDetails || isSubmittingForm}
-          initialValues={{
-            name: title || '',
-            scheduledAt,
-            date,
-            time,
-            isScheduled: Boolean(scheduledAt),
-            timezone,
-          }}
-        />
-      )}
-      <ConfirmDialog
-        isOpen={showWarningSubmit}
-        onClose={toggleWarningSubmit}
-        onConfirm={handleDeleteRelease}
-      >
-        {formatMessage({
-          id: 'content-releases.dialog.confirmation-message',
-          defaultMessage: 'Are you sure you want to delete this release?',
-        })}
-      </ConfirmDialog>
+      <ReleaseModal
+        open={releaseModalShown}
+        handleClose={toggleEditReleaseModal}
+        handleSubmit={handleEditRelease}
+        isLoading={isLoadingDetails || isSubmittingForm}
+        initialValues={{
+          name: title || '',
+          scheduledAt,
+          date,
+          time,
+          isScheduled: Boolean(scheduledAt),
+          timezone,
+        }}
+      />
+      <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
+        <ConfirmDialog onConfirm={handleDeleteRelease}>
+          {formatMessage({
+            id: 'content-releases.dialog.confirmation-message',
+            defaultMessage: 'Are you sure you want to delete this release?',
+          })}
+        </ConfirmDialog>
+      </Dialog.Root>
     </ReleaseDetailsLayout>
   );
 };
