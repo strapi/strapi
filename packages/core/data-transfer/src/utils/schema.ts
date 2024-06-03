@@ -25,3 +25,7 @@ const VALID_SCHEMA_PROPERTIES = [
 export const mapSchemasValues = (schemas: Utils.String.Dict<Struct.Schema>) => {
   return mapValues(pick(VALID_SCHEMA_PROPERTIES), schemas) as Utils.String.Dict<Struct.Schema>;
 };
+
+export const schemasToValidJSON = (schemas: Utils.String.Dict<Struct.Schema>) => {
+  return JSON.parse(JSON.stringify(schemas));
+};
