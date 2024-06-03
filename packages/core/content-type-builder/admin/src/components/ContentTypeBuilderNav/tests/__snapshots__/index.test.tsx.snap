@@ -443,8 +443,10 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
         <div
           class="c11"
         >
-          <hr
+          <div
             class="c12 c13 c14"
+            data-orientation="horizontal"
+            role="separator"
           />
         </div>
       </div>

@@ -41,14 +41,14 @@ export const CheckboxWithNumberField = ({
       <Checkbox
         id={name}
         name={name}
-        onValueChange={(value: any) => {
+        onCheckedChange={(value) => {
           const initValue = type === 'text' ? '0' : 0;
           const nextValue = value ? initValue : null;
 
           onChange({ target: { name, value: nextValue } });
           setShowInput((prev) => !prev);
         }}
-        value={showInput}
+        checked={showInput}
       >
         {label}
       </Checkbox>

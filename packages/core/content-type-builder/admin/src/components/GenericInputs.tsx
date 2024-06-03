@@ -256,10 +256,10 @@ const GenericInput = ({
         return (
           <Checkbox
             disabled={disabled}
-            onValueChange={(value) => {
+            onCheckedChange={(value) => {
               onChange({ target: { name, value } });
             }}
-            value={Boolean(value)}
+            checked={Boolean(value)}
           >
             {label}
           </Checkbox>
