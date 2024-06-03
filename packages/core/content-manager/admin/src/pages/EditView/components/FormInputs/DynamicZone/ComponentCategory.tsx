@@ -35,7 +35,7 @@ const ComponentCategory = ({
         </Accordion.Trigger>
       </Accordion.Header>
       <Accordion.Content>
-        <Grid.Root paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
+        <Grid paddingTop={4} paddingBottom={4} paddingLeft={3} paddingRight={3}>
           {components.map(({ uid, displayName, icon }) => (
             <ComponentBox
               key={uid}
@@ -58,7 +58,7 @@ const ComponentCategory = ({
               </Flex>
             </ComponentBox>
           ))}
-        </Grid.Root>
+        </Grid>
       </Accordion.Content>
     </Accordion.Item>
   );
@@ -75,7 +75,7 @@ const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
   cursor: pointer;
 
   @media (prefers-reduced-motion: no-preference) {
-    transition: color 120ms ${(props) => props.theme.easings.easeOutQuad};
+    transition: color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
   }
 
   &:focus,

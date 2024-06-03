@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import {
   useNotification,
   InputRenderer,
@@ -7,7 +5,7 @@ import {
   InputProps,
   useField,
 } from '@strapi/admin/strapi-admin';
-import { Button, Flex, Grid, Modal, Typography } from '@strapi/design-system';
+import { Button, Flex, Grid, Modal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
@@ -45,7 +43,6 @@ interface EditFieldFormProps {
 
 const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   const { formatMessage } = useIntl();
-  const id = React.useId();
   const { toggleNotification } = useNotification();
 
   const { value, onChange } =
@@ -108,7 +105,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   }
 
   return (
-    <ModalLayout onClose={onClose} labelledBy={id}>
+    <Modal.Content>
       <Form
         method="PUT"
         initialValues={value}
@@ -118,10 +115,10 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
           onClose();
         }}
       >
-        <ModalHeader>
+        <Modal.Header>
           <Flex gap={3}>
             <FieldTypeIcon type={attribute.type} />
-            <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={id}>
+            <Modal.Title>
               {formatMessage(
                 {
                   id: 'content-manager.containers.edit-settings.modal-form.label',
@@ -129,10 +126,10 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                 },
                 { fieldName: capitalise(value.name) }
               )}
-            </Typography>
+            </Modal.Title>
           </Flex>
-        </ModalHeader>
-        <ModalBody>
+        </Modal.Header>
+        <Modal.Body>
           <Grid.Root gap={4}>
             {[
               {
@@ -210,21 +207,19 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                 </Grid.Item>
               ))}
           </Grid.Root>
-        </ModalBody>
-        <ModalFooter
-          startActions={
-            <Button onClick={onClose} variant="tertiary">
+        </Modal.Body>
+        <Modal.Footer>
+          <Modal.Close>
+            <Button variant="tertiary">
               {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
             </Button>
-          }
-          endActions={
-            <Button type="submit">
-              {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
-            </Button>
-          }
-        />
+          </Modal.Close>
+          <Button type="submit">
+            {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
+          </Button>
+        </Modal.Footer>
       </Form>
-    </ModalLayout>
+    </Modal.Content>
   );
 };
 

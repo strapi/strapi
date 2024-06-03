@@ -17,6 +17,7 @@ import {
   Typography,
   VisuallyHidden,
   Menu,
+  ButtonProps,
 } from '@strapi/design-system';
 import { CrossCircle, More, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -55,7 +56,7 @@ interface DocumentActionDescription {
   /**
    * @default 'secondary'
    */
-  variant?: 'default' | 'secondary' | 'danger' | 'success';
+  variant?: ButtonProps['variant'];
 }
 
 interface DialogOptions {
@@ -84,7 +85,7 @@ interface ModalOptions {
   type: 'modal';
   title: string;
   content: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
-  footer: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
+  footer?: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
   onClose?: () => void;
 }
 
@@ -437,12 +438,6 @@ const DocumentActionModal = ({
   content: Content,
   onModalClose,
 }: DocumentActionModalProps) => {
-  const id = React.useId();
-
-  if (!isOpen) {
-    return null;
-  }
-
   const handleClose = () => {
     if (onClose) {
       onClose();
@@ -452,28 +447,19 @@ const DocumentActionModal = ({
   };
 
   return (
-    <ModalLayout borderRadius="4px" overflow="hidden" onClose={handleClose} labelledBy={id}>
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={id}>
-          {title}
-        </Typography>
-      </ModalHeader>
-      <ModalBody>
-        {typeof Content === 'function' ? <Content onClose={handleClose} /> : Content}
-      </ModalBody>
-      <Box
-        paddingTop={4}
-        paddingBottom={4}
-        paddingLeft={5}
-        paddingRight={5}
-        borderWidth="1px 0 0 0"
-        borderStyle="solid"
-        borderColor="neutral150"
-        background="neutral100"
-      >
+    <Modal.Root open={isOpen} onOpenChange={handleClose}>
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        {typeof Content === 'function' ? (
+          <Content onClose={handleClose} />
+        ) : (
+          <Modal.Body>{Content}</Modal.Body>
+        )}
         {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
-      </Box>
-    </ModalLayout>
+      </Modal.Content>
+    </Modal.Root>
   );
 };
 
@@ -762,11 +748,8 @@ const UnpublishAction: DocumentActionComponent = ({
 
   const isDocumentModified = document?.status === 'modified';
 
-  const handleChange: React.FormEventHandler<HTMLFieldSetElement> &
-    React.FormEventHandler<HTMLDivElement> = (e) => {
-    if ('value' in e.target) {
-      setShouldKeepDraft(e.target.value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
-    }
+  const handleChange = (value: string) => {
+    setShouldKeepDraft(value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
   };
 
   if (!schema?.options?.draftAndPublish) {
@@ -833,36 +816,28 @@ const UnpublishAction: DocumentActionComponent = ({
                   })}
                 </Typography>
               </Flex>
-              <Flex
-                onChange={handleChange}
-                direction="column"
-                alignItems="flex-start"
-                tag="fieldset"
-                borderWidth={0}
-                gap={3}
+              <Radio.Group
+                defaultValue={UNPUBLISH_DRAFT_OPTIONS.KEEP}
+                name="discard-options"
+                aria-label={formatMessage({
+                  id: 'content-manager.actions.unpublish.dialog.radio-label',
+                  defaultMessage: 'Choose an option to unpublish the document.',
+                })}
+                onValueChange={handleChange}
               >
-                <VisuallyHidden tag="legend"></VisuallyHidden>
-                <Radio
-                  checked={shouldKeepDraft}
-                  value={UNPUBLISH_DRAFT_OPTIONS.KEEP}
-                  name="discard-options"
-                >
+                <Radio.Item checked={shouldKeepDraft} value={UNPUBLISH_DRAFT_OPTIONS.KEEP}>
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.option.keep-draft',
                     defaultMessage: 'Keep draft',
                   })}
-                </Radio>
-                <Radio
-                  checked={!shouldKeepDraft}
-                  value={UNPUBLISH_DRAFT_OPTIONS.DISCARD}
-                  name="discard-options"
-                >
+                </Radio.Item>
+                <Radio.Item checked={!shouldKeepDraft} value={UNPUBLISH_DRAFT_OPTIONS.DISCARD}>
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.option.replace-draft',
                     defaultMessage: 'Replace draft',
                   })}
-                </Radio>
-              </Flex>
+                </Radio.Item>
+              </Radio.Group>
             </Flex>
           ),
           onConfirm: async () => {
@@ -970,5 +945,5 @@ const StyledCrossCircle = styled(CrossCircle)`
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
-export { DocumentActions, DocumentActionsMenu, DEFAULT_ACTIONS };
+export { DocumentActions, DocumentActionsMenu, DocumentActionButton, DEFAULT_ACTIONS };
 export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };

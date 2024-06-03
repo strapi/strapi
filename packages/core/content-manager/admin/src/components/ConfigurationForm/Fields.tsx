@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { useField, useForm } from '@strapi/admin/strapi-admin';
 import {
+  Modal,
   Box,
   Flex,
   Grid,
@@ -354,7 +355,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
   }
 
   return (
-    <>
+    <Modal.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
       <Flex
         borderColor="neutral150"
         background="neutral100"
@@ -495,10 +496,10 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
           ) : null}
         </Flex>
       </Flex>
-      {isModalOpen && value.name !== TEMP_FIELD_NAME && (
+      {value.name !== TEMP_FIELD_NAME && (
         <EditFieldForm attribute={attribute} name={name} onClose={() => setIsModalOpen(false)} />
       )}
-    </>
+    </Modal.Root>
   );
 };
 

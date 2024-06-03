@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, GridItem } from '@strapi/design-system';
+import { Box, Flex, Grid } from '@strapi/design-system';
 
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 

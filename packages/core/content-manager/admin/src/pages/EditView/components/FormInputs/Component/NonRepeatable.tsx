@@ -1,5 +1,5 @@
 import { useField } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Grid, GridItem } from '@strapi/design-system';
+import { Box, Flex, Grid } from '@strapi/design-system';
 
 import { ComponentProvider, useComponent } from '../ComponentContext';
 

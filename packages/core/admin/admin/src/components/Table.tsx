@@ -291,7 +291,7 @@ const HeaderCheckboxCell = () => {
         })}
         disabled={rows.length === 0}
         checked={isIndeterminate ? 'indeterminate' : areAllEntriesSelected}
-        onChange={handleSelectAll}
+        onCheckedChange={handleSelectAll}
       />
     </Th>
   );
@@ -414,7 +414,7 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
         )}
         disabled={rows.length === 0}
         checked={isChecked}
-        onChange={handleSelectRow}
+        onCheckedChange={handleSelectRow}
       />
     </Cell>
   );

@@ -256,7 +256,7 @@ const Collapse = ({
           )}
         </Flex>
       </Wrapper>
-      <Box transform="translateY(10px)" right="9px" position="absolute">
+      <Box bottom="10px" right="9px" position="absolute">
         <Modal.Root>
           <Modal.Trigger>
             <ConditionsButton hasConditions={doesConditionButtonHasConditions} />
@@ -370,11 +370,14 @@ const Wrapper = styled<FlexComponent>(Flex)`
 const BoxWrapper = styled.div<{ $isActive: boolean }>`
   display: inline-flex;
   min-width: 100%;
+  position: relative;
 
   ${ConditionsButton} {
     display: none;
   }
+
   ${({ $isActive, theme }) => $isActive && activeRowStyle(theme, $isActive)}
+
   &:hover {
     ${({ theme, $isActive }) => activeRowStyle(theme, $isActive)}
   }

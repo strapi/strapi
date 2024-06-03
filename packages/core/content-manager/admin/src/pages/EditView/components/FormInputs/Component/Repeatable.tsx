@@ -309,7 +309,7 @@ const TextButtonCustom = styled(TextButton)`
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    transition: background-color 120ms ${(props) => props.theme.easings.easeOutQuad};
+    transition: background-color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
   }
 `;
 
