@@ -58,7 +58,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
          */
         if (
           context.action === 'update' &&
-          strapi.requestContext.get().request.url.endsWith('/actions/publish')
+          strapi.requestContext.get()?.request.url.endsWith('/actions/publish')
         ) {
           return next();
         }
