@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-color-picker",
-  "version": "5.0.0-beta.7",
+  "version": "5.0.0-beta.8",
   "description": "Strapi maintained Custom Fields",
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
     "strapi-server.js"
   ],
   "scripts": {
-    "build": "strapi plugin:build --force",
+    "build": "strapi-plugin build",
     "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "test:front": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js",
@@ -50,7 +50,7 @@
     "test:front:watch": "run -T cross-env IS_EE=true jest --config ./jest.config.front.js --watchAll",
     "test:front:watch:ce": "run -T cross-env IS_EE=false jest --config ./jest.config.front.js --watchAll",
     "test:ts:front": "run -T tsc -p admin/tsconfig.json",
-    "watch": "strapi plugin:watch"
+    "watch": "strapi-plugin watch"
   },
   "dependencies": {
     "@strapi/design-system": "2.0.0-beta.4",
@@ -59,7 +59,8 @@
     "react-intl": "6.6.2"
   },
   "devDependencies": {
-    "@strapi/strapi": "5.0.0-beta.7",
+    "@strapi/sdk-plugin": "^5.0.0",
+    "@strapi/strapi": "5.0.0-beta.8",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
     "react": "18.3.1",

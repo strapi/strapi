@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import {
-  useTracking,
   useStrapiApp,
   useNotification,
   NotificationConfig,
@@ -29,6 +28,8 @@ import { useDoc } from '../../../../hooks/useDocument';
 import { useDocumentActions } from '../../../../hooks/useDocumentActions';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
+
+import { PublishAction } from './PublishAction';
 
 import type { BulkActionComponent, ContentManagerPlugin } from '../../../../content-manager';
 
@@ -384,7 +385,7 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
   const showUnpublishButton =
     hasDraftAndPublishEnabled &&
     hasPublishPermission &&
-    documents.some((entry) => entry.status === 'published');
+    documents.some((entry) => entry.status === 'published' || entry.status === 'modified');
 
   if (!showUnpublishButton) return null;
 
@@ -440,7 +441,7 @@ const Emphasis = (chunks: React.ReactNode) => (
   </Typography>
 );
 
-const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [UnpublishAction, DeleteAction];
+const DEFAULT_BULK_ACTIONS: BulkActionComponent[] = [PublishAction, UnpublishAction, DeleteAction];
 
 export { DEFAULT_BULK_ACTIONS, BulkActionsRenderer, Emphasis };
 export type { BulkActionDescription };

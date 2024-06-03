@@ -24,7 +24,7 @@ const AuthResponse = () => {
     });
   }, [navigate, formatMessage]);
 
-  const setToken = useAuth('AuthResponse', (state) => state.setToken);
+  const { setToken } = useAuth('AuthResponse', (auth) => auth);
 
   React.useEffect(() => {
     if (match?.params.authResponse === 'error') {

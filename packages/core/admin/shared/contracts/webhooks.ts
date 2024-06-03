@@ -26,7 +26,7 @@ export declare namespace GetWebhook {
   }
 
   export interface Params {
-    id: string;
+    id: Modules.WebhookStore.Webhook['id'];
   }
 
   export interface Response {
@@ -60,7 +60,7 @@ export declare namespace UpdateWebhook {
   }
 
   export interface Params {
-    id: string;
+    id: Modules.WebhookStore.Webhook['id'];
   }
 
   export interface Response {
@@ -79,7 +79,7 @@ export declare namespace DeleteWebhook {
   }
 
   export interface Params {
-    id: string;
+    id: Modules.WebhookStore.Webhook['id'];
   }
 
   export interface Response {
@@ -94,7 +94,7 @@ export declare namespace DeleteWebhook {
 export declare namespace DeleteWebhooks {
   export interface Request {
     body: {
-      ids: string[];
+      ids: Modules.WebhookStore.Webhook['id'][];
     };
     query: {};
   }
@@ -115,7 +115,7 @@ export declare namespace TriggerWebhook {
   }
 
   export interface Params {
-    id: string;
+    id: Modules.WebhookStore.Webhook['id'];
   }
 
   export interface Response {

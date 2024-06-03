@@ -36,9 +36,9 @@ import type {
   Discard,
   FindOne,
   Publish,
+  BulkPublish,
   Update,
   Unpublish,
-  BulkPublish,
   BulkUnpublish,
 } from '../../../shared/contracts/collection-types';
 
@@ -289,12 +289,13 @@ const useDocumentActions: UseDocumentActions = () => {
 
   const [discardDocument] = useDiscardDocumentMutation();
   const discard: IUseDocumentActs['discard'] = React.useCallback(
-    async ({ collectionType, model, documentId }) => {
+    async ({ collectionType, model, documentId, params }) => {
       try {
         const res = await discardDocument({
           collectionType,
           model,
           documentId,
+          params,
         });
 
         if ('error' in res) {

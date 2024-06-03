@@ -13,7 +13,6 @@ import {
   isObject,
   cloneDeep,
   get,
-  mergeAll,
   isArray,
   isString,
 } from 'lodash/fp';
@@ -329,10 +328,18 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     throw new InvalidPopulateError();
   };
 
-  const hasFragmentPopulateDefined = (
+  const hasPopulateFragmentDefined = (
     populate: PopulateObjectParams
   ): populate is PopulateObjectParams & Required<Pick<PopulateObjectParams, 'on'>> => {
     return typeof populate === 'object' && 'on' in populate && !isNil(populate.on);
+  };
+
+  const hasCountDefined = (
+    populate: PopulateObjectParams
+  ): populate is PopulateObjectParams & { count: boolean } => {
+    return (
+      typeof populate === 'object' && 'count' in populate && typeof populate.count === 'boolean'
+    );
   };
 
   const convertPopulateObject = (populate: PopulateAttributesParams, schema?: Model) => {
@@ -341,10 +348,21 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
     }
 
     const { attributes } = schema;
-
     return Object.entries(populate).reduce((acc, [key, subPopulate]) => {
+      // Try converting strings to regular booleans if possible
+      if (_.isString(subPopulate)) {
+        try {
+          const subPopulateAsBoolean = parseType({ type: 'boolean', value: subPopulate });
+          // Only true is accepted as a boolean populate value
+          return subPopulateAsBoolean === true ? { ...acc, [key]: true } : acc;
+        } catch {
+          // ignore
+        }
+      }
+
       if (_.isBoolean(subPopulate)) {
-        return { ...acc, [key]: subPopulate };
+        // Only true is accepted as a boolean populate value
+        return subPopulate === true ? { ...acc, [key]: true } : acc;
       }
 
       const attribute = attributes[key];
@@ -354,13 +372,26 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
       }
 
       // Allow adding an 'on' strategy to populate queries for morphTo relations and dynamic zones
-      const isAllowedAttributeForFragmentPopulate =
+      const isMorphLikeRelationalAttribute =
         isDynamicZoneAttribute(attribute) || isMorphToRelationalAttribute(attribute);
 
-      if (isAllowedAttributeForFragmentPopulate && hasFragmentPopulateDefined(subPopulate)) {
-        return {
-          ...acc,
-          [key]: {
+      if (isMorphLikeRelationalAttribute) {
+        const hasInvalidProperties = Object.keys(subPopulate).some(
+          (key) => !['on', 'count'].includes(key)
+        );
+
+        if (hasInvalidProperties) {
+          throw new Error(
+            `Invalid nested populate for ${schema.info?.singularName}.${key} (${schema.uid}). Expected a fragment ("on") or "count" but found ${JSON.stringify(subPopulate)}`
+          );
+        }
+
+        const newSubPopulate = {};
+
+        // { on: { ... } }
+        if (hasPopulateFragmentDefined(subPopulate)) {
+          // transform the fragment and assign it to the new sub-populate object
+          Object.assign(newSubPopulate, {
             on: Object.entries(subPopulate.on).reduce(
               (acc, [type, typeSubPopulate]) => ({
                 ...acc,
@@ -368,31 +399,20 @@ const createTransformer = ({ getModel }: TransformerOptions) => {
               }),
               {}
             ),
-          },
-        };
-      }
-
-      // TODO: This is a query's populate fallback for DynamicZone and is kept for legacy purpose.
-      //       Removing it could break existing user queries but it should be removed in V5.
-      if (isDynamicZoneAttribute(attribute)) {
-        const populates = attribute.components
-          .map((uid) => getModel(uid))
-          .map((schema) => convertNestedPopulate(subPopulate, schema))
-          .map((populate) => (populate === true ? {} : populate)) // cast boolean to empty object to avoid merging issues
-          .filter((populate) => populate !== false);
-
-        if (isEmpty(populates)) {
-          return acc;
+          });
         }
 
-        return {
-          ...acc,
-          [key]: mergeAll(populates),
-        };
+        // { count: true | false }
+        if (hasCountDefined(subPopulate)) {
+          Object.assign(newSubPopulate, { count: subPopulate.count });
+        }
+
+        return { ...acc, [key]: newSubPopulate };
       }
 
-      if (isMorphToRelationalAttribute(attribute)) {
-        return { ...acc, [key]: convertNestedPopulate(subPopulate, undefined) };
+      // Edge case when trying to use the fragment ('on') on a non-morph like attribute
+      if (!isMorphLikeRelationalAttribute && hasPopulateFragmentDefined(subPopulate)) {
+        throw new Error(`Using fragments is not permitted to populate "${key}" in "${schema.uid}"`);
       }
 
       // NOTE: Retrieve the target schema UID.
