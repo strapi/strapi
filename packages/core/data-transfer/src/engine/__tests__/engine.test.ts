@@ -12,7 +12,6 @@ import type {
   ILink,
   ISourceProvider,
   ITransferEngineOptions,
-  MaybePromise,
   TransferFilterPreset,
 } from '../../../types';
 import {
@@ -827,7 +826,7 @@ describe('Transfer engine', () => {
           ['private', (v: boolean) => !v],
           ['required', (v: boolean) => !v],
           ['configurable', (v: boolean) => v],
-          ['default', (v: unknown) => () => null],
+          ['default', () => () => null],
         ])(
           `Don't throw on ignorable attribute's properties: %s`,
           (attributeName, transformValue) => {
