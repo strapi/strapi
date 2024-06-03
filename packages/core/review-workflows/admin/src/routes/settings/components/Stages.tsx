@@ -26,6 +26,7 @@ import {
   Menu,
   MenuItem,
   Field,
+  Dialog,
 } from '@strapi/design-system';
 import { Duplicate, Drag, More, EyeStriked } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
@@ -229,7 +230,8 @@ const Stage = ({
       type: DRAG_DROP_TYPES.STAGE,
     });
 
-  const composedRef = useComposedRefs(stageRef, dropRef);
+  // @ts-expect-error – the stageRef is incorrectly typed.
+  const composedRef = useComposedRefs<HTMLDivElement>(stageRef, dropRef);
 
   React.useEffect(() => {
     dragPreviewRef(getEmptyImage(), { captureDraggingState: false });
@@ -614,49 +616,49 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
             <Field.Error />
           </Field.Root>
         </PermissionWrapper>
+        <Dialog.Root open={isApplyAllConfirmationOpen} onOpenChange={setIsApplyAllConfirmationOpen}>
+          <Dialog.Trigger>
+            <IconButton
+              disabled={disabled}
+              label={formatMessage({
+                id: 'Settings.review-workflows.stage.permissions.apply.label',
+                defaultMessage: 'Apply to all stages',
+              })}
+              size="L"
+              variant="secondary"
+            >
+              <Duplicate />
+            </IconButton>
+          </Dialog.Trigger>
+          <ConfirmDialog
+            onConfirm={() => {
+              onFormValueChange(
+                'stages',
+                allStages.map((stage) => ({
+                  ...stage,
+                  permissions: value,
+                }))
+              );
 
-        <IconButton
-          disabled={disabled}
-          label={formatMessage({
-            id: 'Settings.review-workflows.stage.permissions.apply.label',
-            defaultMessage: 'Apply to all stages',
-          })}
-          size="L"
-          variant="secondary"
-          onClick={() => setIsApplyAllConfirmationOpen(true)}
-        >
-          <Duplicate />
-        </IconButton>
+              setIsApplyAllConfirmationOpen(false);
+              toggleNotification({
+                type: 'success',
+                message: formatMessage({
+                  id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy.success',
+                  defaultMessage: 'Applied roles to all other stages of the workflow',
+                }),
+              });
+            }}
+            variant="default"
+          >
+            {formatMessage({
+              id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy',
+              defaultMessage:
+                'Roles that can change that stage will be applied to all the other stages.',
+            })}
+          </ConfirmDialog>
+        </Dialog.Root>
       </Flex>
-      <ConfirmDialog
-        isOpen={isApplyAllConfirmationOpen}
-        onClose={() => setIsApplyAllConfirmationOpen(false)}
-        onConfirm={() => {
-          onFormValueChange(
-            'stages',
-            allStages.map((stage) => ({
-              ...stage,
-              permissions: value,
-            }))
-          );
-
-          setIsApplyAllConfirmationOpen(false);
-          toggleNotification({
-            type: 'success',
-            message: formatMessage({
-              id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy.success',
-              defaultMessage: 'Applied roles to all other stages of the workflow',
-            }),
-          });
-        }}
-        variant="default"
-      >
-        {formatMessage({
-          id: 'Settings.review-workflows.page.edit.confirm.stages.permissions.copy',
-          defaultMessage:
-            'Roles that can change that stage will be applied to all the other stages.',
-        })}
-      </ConfirmDialog>
     </>
   );
 };
