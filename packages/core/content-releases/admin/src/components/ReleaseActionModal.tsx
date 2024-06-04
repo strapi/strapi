@@ -35,7 +35,6 @@ import type {
   DocumentActionComponent,
   DocumentActionProps,
 } from '@strapi/content-manager/strapi-admin';
-
 import type { UID } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------

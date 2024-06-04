@@ -10,7 +10,7 @@ import type {
   Release,
   DeleteRelease,
   GetReleases,
-  MapEntriesToReleases,
+  // MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -153,8 +153,8 @@ const releaseController = {
     ctx.body = { data };
   },
 
+  /* @TODO: Migrate to new api 
   async mapEntriesToReleases(ctx: Koa.Context) {
-    /* @TODO: Migrate to new api 
     const { contentTypeUid, entriesIds } = ctx.query;
 
     if (!contentTypeUid || !entriesIds) {
@@ -188,8 +188,8 @@ const releaseController = {
     ctx.body = {
       data: mappedEntriesInReleases,
     };
-    */
   },
+  */
 
   async create(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;

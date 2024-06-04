@@ -11,7 +11,6 @@ import type {
   GetRelease,
   Release,
   DeleteRelease,
-  GetReleasesByDocumentAttached,
 } from '../../../shared/contracts/releases';
 import type { ReleaseAction } from '../../../shared/contracts/release-actions';
 import type { UserInfo } from '../../../shared/types';
