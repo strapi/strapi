@@ -321,9 +321,9 @@ export const transformContentTypesToModels = (
     if (contentType.modelType === 'contentType') {
       model.indexes = [
         {
-          name: identifiers.getUniqueIndexName([contentType.collectionName, 'document_id']),
+          name: identifiers.getIndexName([contentType.collectionName, 'documents']),
           // Filter attributes that are not in the schema
-          columns: ['document_id', 'locale', 'published_at'].filter((n) => model.attributes[n]),
+          columns: ['documentId', 'locale', 'publishedAt'].filter((n) => model.attributes[n]),
         },
       ];
     }
