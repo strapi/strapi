@@ -17,9 +17,24 @@ function assertCloudError(e: unknown): asserts e is CloudError {
 }
 
 export async function handleCloudProject(projectName: string): Promise<void> {
+  const logger = cloudServices.createLogger({
+    silent: false,
+    debug: process.argv.includes('--debug'),
+    timestamp: false,
+  });
   let cloudApiService = await cloudServices.cloudApiFactory();
-  const { data: config } = await cloudApiService.config();
-  console.log(parseToChalk(config.projectCreation.introText));
+  const defaultErrorMessage =
+    'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.';
+
+  try {
+    const { data: config } = await cloudApiService.config();
+    logger.log(parseToChalk(config.projectCreation.introText));
+  } catch (e: unknown) {
+    logger.debug(e);
+    logger.error(
+      'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.'
+    );
+  }
   const { userChoice } = await inquirer.prompt<{ userChoice: string }>([
     {
       type: 'list',
@@ -30,11 +45,6 @@ export async function handleCloudProject(projectName: string): Promise<void> {
   ]);
 
   if (userChoice !== 'Skip') {
-    const logger = cloudServices.createLogger({
-      silent: false,
-      debug: process.argv.includes('--debug'),
-      timestamp: false,
-    });
     const cliContext = {
       logger,
       cwd: process.cwd(),
@@ -85,8 +95,6 @@ export async function handleCloudProject(projectName: string): Promise<void> {
       } catch (e) {
         /* empty */
       }
-      const defaultErrorMessage =
-        'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.';
       if (projectCreationSpinner.isSpinning) {
         projectCreationSpinner.fail(defaultErrorMessage);
       } else {
