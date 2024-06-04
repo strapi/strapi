@@ -37,10 +37,11 @@ export const BulkActions = ({ selected, onSuccess, currentFolder }) => {
 
 BulkActions.defaultProps = {
   currentFolder: undefined,
+  selected: [],
 };
 
 BulkActions.propTypes = {
   onSuccess: PropTypes.func.isRequired,
   currentFolder: FolderDefinition,
-  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition).isRequired,
+  selected: PropTypes.arrayOf(AssetDefinition, FolderDefinition),
 };

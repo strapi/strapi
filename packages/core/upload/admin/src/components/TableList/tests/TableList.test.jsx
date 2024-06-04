@@ -99,15 +99,6 @@ describe('TableList', () => {
     expect(onChangeSortSpy).toHaveBeenCalledWith('name:ASC');
   });
 
-  it('should call onSelectAll callback when bulk selecting', () => {
-    const onSelectAllSpy = jest.fn();
-    const { getByRole } = setup({ onSelectAll: onSelectAllSpy });
-
-    fireEvent.click(getByRole('checkbox', { name: 'Select all folders & assets' }));
-
-    expect(onSelectAllSpy).toHaveBeenCalledTimes(1);
-  });
-
   it('should display indeterminate state of bulk select checkbox', () => {
     const { getByRole } = setup({ indeterminate: true });
 

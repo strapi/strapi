@@ -9,8 +9,9 @@ import {
   IconButton,
   Typography,
   VisuallyHidden,
+  Grid,
 } from '@strapi/design-system';
-import { GridFour as Grid, List, Pencil, Plus } from '@strapi/icons';
+import { GridFour as GridIcon, List, Pencil, Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -132,14 +133,17 @@ export const BrowseStep = ({
                     borderColor="neutral200"
                     height="3.2rem"
                   >
-                    <BaseCheckbox
+                    <Checkbox
                       aria-label={formatMessage({
                         id: getTrad('bulk.select.label'),
                         defaultMessage: 'Select all assets',
                       })}
-                      indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
-                      value={areAllAssetSelected}
-                      onChange={onSelectAllAsset}
+                      checked={
+                        !areAllAssetSelected && hasSomeAssetSelected
+                          ? 'indeterminate'
+                          : areAllAssetSelected
+                      }
+                      onCheckedChange={onSelectAllAsset}
                     />
                   </Flex>
                 )}
@@ -168,7 +172,7 @@ export const BrowseStep = ({
                     }
                     onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
                   >
-                    {isGridView ? <List /> : <Grid.Root />}
+                    {isGridView ? <List /> : <GridIcon />}
                   </IconButton>
                 </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />

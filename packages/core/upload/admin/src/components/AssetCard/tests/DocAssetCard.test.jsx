@@ -191,70 +191,6 @@ describe('DocAssetCard', () => {
         border: 2px solid #4945ff;
       }
 
-      .c7 {
-        min-width: 1.8rem;
-        height: 1.8rem;
-        margin: 0;
-        appearance: none;
-        border-radius: 4px;
-        border: 1px solid #c0c0cf;
-        background-color: #ffffff;
-        cursor: pointer;
-      }
-
-      .c7:checked {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c7:checked:after {
-        content: '';
-        display: block;
-        position: relative;
-        background: url("data:image/svg+xml,%3csvg%20width='10'%20height='8'%20viewBox='0%200%2010%208'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M8.55323%200.396973C8.63135%200.316355%208.76051%200.315811%208.83931%200.395768L9.86256%201.43407C9.93893%201.51157%209.93935%201.6359%209.86349%201.7139L4.06401%207.67724C3.9859%207.75755%203.85707%207.75805%203.77834%207.67834L0.13866%203.99333C0.0617798%203.91549%200.0617102%203.79032%200.138504%203.7124L1.16213%202.67372C1.24038%202.59432%201.36843%202.59422%201.4468%202.67348L3.92174%205.17647L8.55323%200.396973Z'%20fill='white'%20/%3e%3c/svg%3e") no-repeat no-repeat center center;
-        width: 1rem;
-        height: 1rem;
-        left: 50%;
-        top: 50%;
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c7:checked:disabled:after {
-        background: url("data:image/svg+xml,%3csvg%20width='10'%20height='8'%20viewBox='0%200%2010%208'%20fill='none'%20xmlns='http://www.w3.org/2000/svg'%3e%3cpath%20d='M8.55323%200.396973C8.63135%200.316355%208.76051%200.315811%208.83931%200.395768L9.86256%201.43407C9.93893%201.51157%209.93935%201.6359%209.86349%201.7139L4.06401%207.67724C3.9859%207.75755%203.85707%207.75805%203.77834%207.67834L0.13866%203.99333C0.0617798%203.91549%200.0617102%203.79032%200.138504%203.7124L1.16213%202.67372C1.24038%202.59432%201.36843%202.59422%201.4468%202.67348L3.92174%205.17647L8.55323%200.396973Z'%20fill='%238E8EA9'%20/%3e%3c/svg%3e") no-repeat no-repeat center center;
-      }
-
-      .c7:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c7:indeterminate {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c7:indeterminate:after {
-        content: '';
-        display: block;
-        position: relative;
-        color: white;
-        height: 2px;
-        width: 10px;
-        background-color: #ffffff;
-        left: 50%;
-        top: 50%;
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c7:indeterminate:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c7:indeterminate:disabled:after {
-        background-color: #8e8ea9;
-      }
-
       .c6 {
         position: absolute;
         top: 12px;
@@ -274,6 +210,42 @@ describe('DocAssetCard', () => {
 
       .c31 {
         margin-left: 4px;
+      }
+
+      .c7 {
+        background: #ffffff;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 4px;
+        border: 1px solid #c0c0cf;
+        position: relative;
+        z-index: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 0 0 2rem;
+      }
+
+      .c7[data-state='checked'],
+      .c7[data-state='indeterminate'] {
+        border: 1px solid #4945ff;
+        background-color: #4945ff;
+      }
+
+      .c7[data-disabled] {
+        background-color: #dcdce4;
+      }
+
+      .c7::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 100%;
+        height: 100%;
+        min-width: 44px;
+        min-height: 44px;
       }
 
       .c20 {
@@ -329,6 +301,12 @@ describe('DocAssetCard', () => {
         background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
       }
 
+      @media (prefers-reduced-motion: no-preference) {
+        .c7 {
+          transition: border-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+      }
+
       <div>
         <article
           aria-labelledby=":r0:-title"
@@ -343,10 +321,14 @@ describe('DocAssetCard', () => {
               <div
                 class="c5 c6"
               >
-                <input
+                <button
+                  aria-checked="false"
                   aria-labelledby=":r0:-title"
                   class="c7"
-                  type="checkbox"
+                  data-state="unchecked"
+                  role="checkbox"
+                  type="button"
+                  value="on"
                 />
               </div>
             </div>

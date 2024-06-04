@@ -68,21 +68,17 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
             </Field.Root>
           </Box>
 
-          <ModalFooter
-            startActions={
-              <Button onClick={onClose} variant="tertiary">
-                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
-              </Button>
-            }
-            endActions={
-              <Button type="submit" loading={loading}>
-                {formatMessage({
-                  id: getTrad('button.next'),
-                  defaultMessage: 'Next',
-                })}
-              </Button>
-            }
-          />
+          <Modal.Footer>
+            <Button onClick={onClose} variant="tertiary">
+              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
+            </Button>
+            <Button type="submit" loading={loading}>
+              {formatMessage({
+                id: getTrad('button.next'),
+                defaultMessage: 'Next',
+              })}
+            </Button>
+          </Modal.Footer>
         </Form>
       )}
     </Formik>

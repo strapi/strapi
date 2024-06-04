@@ -8,20 +8,16 @@ export const DialogFooter = ({ onClose, onValidate }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <ModalFooter
-      startActions={
-        <Button onClick={onClose} variant="tertiary">
-          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+    <Modal.Footer>
+      <Button onClick={onClose} variant="tertiary">
+        {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+      </Button>
+      {onValidate && (
+        <Button onClick={onValidate}>
+          {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
         </Button>
-      }
-      endActions={
-        onValidate && (
-          <Button onClick={onValidate}>
-            {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
-          </Button>
-        )
-      }
-    />
+      )}
+    </Modal.Footer>
   );
 };
 

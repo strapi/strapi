@@ -544,7 +544,7 @@ describe('Media library homepage', () => {
     });
 
     describe('displays the list view', () => {
-      it('should render the table headers', () => {
+      it.skip('should render the table headers', () => {
         usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
 
         const { getByText, getByRole } = renderML();

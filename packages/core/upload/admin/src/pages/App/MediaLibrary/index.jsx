@@ -16,8 +16,9 @@ import {
   IconButton,
   Typography,
   VisuallyHidden,
+  Grid,
 } from '@strapi/design-system';
-import { Cog, GridFour as Grid, List, Pencil } from '@strapi/icons';
+import { Cog, GridFour as GridIcon, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
@@ -156,8 +157,8 @@ export const MediaLibrary = () => {
     setShowEditFolderDialog((prev) => !prev);
   };
 
-  const handleBulkSelect = (event, elements) => {
-    if (event.target.checked) {
+  const handleBulkSelect = (checked, elements) => {
+    if (checked) {
       trackUsage('didSelectAllMediaLibraryElements');
     }
 
@@ -236,17 +237,18 @@ export const MediaLibrary = () => {
                   hasRadius
                   borderColor="neutral200"
                 >
-                  <BaseCheckbox
+                  <Checkbox
                     aria-label={formatMessage({
                       id: getTrad('bulk.select.label'),
                       defaultMessage: 'Select all folders & assets',
                     })}
-                    indeterminate={indeterminateBulkSelect}
-                    value={
-                      (assetCount > 0 || folderCount > 0) &&
-                      selected.length === assetCount + folderCount
+                    checked={
+                      indeterminateBulkSelect
+                        ? 'indeterminate'
+                        : (assetCount > 0 || folderCount > 0) &&
+                          selected.length === assetCount + folderCount
                     }
-                    onChange={(e) => handleBulkSelect(e, [...assets, ...folders])}
+                    onCheckedChange={(e) => handleBulkSelect(e, [...assets, ...folders])}
                   />
                 </BoxWithHeight>
               )}
@@ -290,7 +292,7 @@ export const MediaLibrary = () => {
                   }
                   onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
                 >
-                  {isGridView ? <List /> : <Grid.Root />}
+                  {isGridView ? <List /> : <GridIcon />}
                 </IconButton>
               </ActionContainer>
               <SearchInput
@@ -389,8 +391,8 @@ export const MediaLibrary = () => {
                             selectOne && folder.isSelectable ? (
                               <FolderCardCheckbox
                                 data-testid={`folder-checkbox-${folder.id}`}
-                                value={isSelected}
-                                onChange={() => selectOne(folder)}
+                                checked={isSelected}
+                                onCheckedChange={() => selectOne(folder)}
                               />
                             ) : null
                           }
@@ -409,7 +411,11 @@ export const MediaLibrary = () => {
                           <FolderCardBody>
                             <FolderCardBodyAction to={url}>
                               <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
-                                <TypographyMaxWidth fontWeight="semiBold" ellipsis>
+                                <TypographyMaxWidth
+                                  fontWeight="semiBold"
+                                  textColor="neutral800"
+                                  ellipsis
+                                >
                                   {folder.name}
                                   <VisuallyHidden>:</VisuallyHidden>
                                 </TypographyMaxWidth>
@@ -480,41 +486,35 @@ export const MediaLibrary = () => {
           </Pagination.Root>
         </Layouts.Content>
       </Page.Main>
+      <UploadAssetDialog
+        open={showUploadAssetDialog}
+        onClose={toggleUploadAssetDialog}
+        trackedLocation="upload"
+        folderId={query?.folder}
+      />
+      <EditFolderDialog
+        open={showEditFolderDialog}
+        onClose={handleEditFolderClose}
+        folder={folderToEdit}
+        parentFolderId={query?.folder}
+        location="upload"
+      />
+      <EditAssetDialog
+        onClose={(editedAsset) => {
+          // The asset has been deleted
+          if (editedAsset === null) {
+            handleAssetDeleted(1);
+          }
 
-      {showUploadAssetDialog && (
-        <UploadAssetDialog
-          onClose={toggleUploadAssetDialog}
-          trackedLocation="upload"
-          folderId={query?.folder}
-        />
-      )}
-
-      {showEditFolderDialog && (
-        <EditFolderDialog
-          onClose={handleEditFolderClose}
-          folder={folderToEdit}
-          parentFolderId={query?.folder}
-          location="upload"
-        />
-      )}
-
-      {assetToEdit && (
-        <EditAssetDialog
-          onClose={(editedAsset) => {
-            // The asset has been deleted
-            if (editedAsset === null) {
-              handleAssetDeleted(1);
-            }
-
-            setAssetToEdit(undefined);
-          }}
-          asset={assetToEdit}
-          canUpdate={canUpdate}
-          canCopyLink={canCopyLink}
-          canDownload={canDownload}
-          trackedLocation="upload"
-        />
-      )}
+          setAssetToEdit(undefined);
+        }}
+        open={!!assetToEdit}
+        asset={assetToEdit}
+        canUpdate={canUpdate}
+        canCopyLink={canCopyLink}
+        canDownload={canDownload}
+        trackedLocation="upload"
+      />
     </Layouts.Root>
   );
 };

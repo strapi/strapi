@@ -48,7 +48,7 @@ const fileInfoSchema = yup.object({
   folder: yup.number(),
 });
 
-export const EditAssetDialog = ({
+export const EditAssetContent = ({
   onClose,
   asset,
   canUpdate,
@@ -144,7 +144,7 @@ export const EditAssetDialog = ({
 
   if (folderStructureIsLoading) {
     return (
-      <ModalLayout onClose={() => handleClose()} labelledBy="title">
+      <>
         <DialogHeader />
         <LoadingBody minHeight="60vh" justifyContent="center" paddingTop={4} paddingBottom={4}>
           <Loader>
@@ -154,14 +154,12 @@ export const EditAssetDialog = ({
             })}
           </Loader>
         </LoadingBody>
-        <ModalFooter
-          startActions={
-            <Button onClick={() => handleClose()} variant="tertiary">
-              {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-            </Button>
-          }
-        />
-      </ModalLayout>
+        <Modal.Footer>
+          <Button onClick={() => handleClose()} variant="tertiary">
+            {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+          </Button>
+        </Modal.Footer>
+      </>
     );
   }
 
@@ -173,9 +171,9 @@ export const EditAssetDialog = ({
       initialValues={initialFormData}
     >
       {({ values, errors, handleChange, setFieldValue }) => (
-        <ModalLayout onClose={() => handleClose(values)} labelledBy="title">
+        <>
           <DialogHeader />
-          <ModalBody>
+          <Modal.Body>
             <Grid.Root gap={4}>
               <Grid.Item xs={12} col={6}>
                 <PreviewBox
@@ -329,47 +327,75 @@ export const EditAssetDialog = ({
                 </Form>
               </Grid.Item>
             </Grid.Root>
-          </ModalBody>
-          <ModalFooter
-            startActions={
-              <Button onClick={() => handleClose(values)} variant="tertiary">
-                {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
-              </Button>
-            }
-            endActions={
-              <>
-                <ReplaceMediaButton
-                  onSelectMedia={setReplacementFile}
-                  acceptedMime={asset.mime}
-                  disabled={formDisabled}
-                  trackedLocation={trackedLocation}
-                />
+          </Modal.Body>
+          <Modal.Footer>
+            <Button onClick={() => handleClose(values)} variant="tertiary">
+              {formatMessage({ id: 'global.cancel', defaultMessage: 'Cancel' })}
+            </Button>
+            <Flex gap={2}>
+              <ReplaceMediaButton
+                onSelectMedia={setReplacementFile}
+                acceptedMime={asset.mime}
+                disabled={formDisabled}
+                trackedLocation={trackedLocation}
+              />
 
-                <Button
-                  onClick={() => submitButtonRef.current.click()}
-                  loading={isLoading}
-                  disabled={formDisabled}
-                >
-                  {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
-                </Button>
-              </>
-            }
-          />
-        </ModalLayout>
+              <Button
+                onClick={() => submitButtonRef.current.click()}
+                loading={isLoading}
+                disabled={formDisabled}
+              >
+                {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
+              </Button>
+            </Flex>
+          </Modal.Footer>
+        </>
       )}
     </Formik>
   );
 };
 
-EditAssetDialog.defaultProps = {
+EditAssetContent.defaultProps = {
+  asset: {},
   trackedLocation: undefined,
+  canUpdate: false,
+  canCopyLink: false,
+  canDownload: false,
+};
+
+EditAssetContent.propTypes = {
+  asset: AssetDefinition,
+  canUpdate: PropTypes.bool,
+  canCopyLink: PropTypes.bool,
+  canDownload: PropTypes.bool,
+  onClose: PropTypes.func.isRequired,
+  trackedLocation: PropTypes.string,
+};
+
+export const EditAssetDialog = ({ open, onClose, ...restProps }) => {
+  return (
+    <Modal.Root open={open} onOpenChange={onClose}>
+      <Modal.Content>
+        <EditAssetContent onClose={onClose} {...restProps} />
+      </Modal.Content>
+    </Modal.Root>
+  );
+};
+
+EditAssetDialog.defaultProps = {
+  asset: {},
+  trackedLocation: undefined,
+  canUpdate: false,
+  canCopyLink: false,
+  canDownload: false,
 };
 
 EditAssetDialog.propTypes = {
-  asset: AssetDefinition.isRequired,
-  canUpdate: PropTypes.bool.isRequired,
-  canCopyLink: PropTypes.bool.isRequired,
-  canDownload: PropTypes.bool.isRequired,
+  asset: AssetDefinition,
+  canUpdate: PropTypes.bool,
+  canCopyLink: PropTypes.bool,
+  canDownload: PropTypes.bool,
+  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,
 };

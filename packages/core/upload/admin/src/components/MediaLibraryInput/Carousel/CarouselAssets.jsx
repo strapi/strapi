@@ -100,28 +100,26 @@ export const CarouselAssets = forwardRef(
             ))
           )}
         </CarouselInput>
+        <EditAssetDialog
+          open={isEditingAsset}
+          onClose={(editedAsset) => {
+            setIsEditingAsset(false);
 
-        {isEditingAsset && (
-          <EditAssetDialog
-            onClose={(editedAsset) => {
-              setIsEditingAsset(false);
+            // The asset has been deleted
+            if (editedAsset === null) {
+              onDeleteAssetFromMediaLibrary();
+            }
 
-              // The asset has been deleted
-              if (editedAsset === null) {
-                onDeleteAssetFromMediaLibrary();
-              }
-
-              if (editedAsset) {
-                onEditAsset(editedAsset);
-              }
-            }}
-            asset={currentAsset}
-            canUpdate
-            canCopyLink
-            canDownload
-            trackedLocation={trackedLocation}
-          />
-        )}
+            if (editedAsset) {
+              onEditAsset(editedAsset);
+            }
+          }}
+          asset={currentAsset}
+          canUpdate
+          canCopyLink
+          canDownload
+          trackedLocation={trackedLocation}
+        />
       </>
     );
   }

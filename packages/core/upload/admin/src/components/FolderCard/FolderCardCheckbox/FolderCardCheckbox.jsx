@@ -9,7 +9,7 @@ export const FolderCardCheckbox = (props) => {
 
   return (
     <Box position="relative" zIndex={2}>
-      <BaseCheckbox aria-labelledby={`${id}-title`} {...props} />
+      <Checkbox aria-labelledby={`${id}-title`} {...props} />
     </Box>
   );
 };

@@ -21,7 +21,7 @@ import { useIntl } from 'react-intl';
 import FilterValueInput from './FilterValueInput';
 import getFilterList from './utils/getFilterList';
 
-const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }) => {
+const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle }) => {
   const { formatMessage } = useIntl();
 
   const [modifiedData, setModifiedData] = useState({
@@ -196,9 +196,9 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
   const appliedFilter = displayedFilters.find((filter) => filter.name === modifiedData.name);
 
   return (
-    <Popover onDismiss={onToggle} source={source} padding={3} spacing={4}>
+    <Popover.Content sideOffset={4}>
       <form onSubmit={handleSubmit}>
-        <Flex direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
+        <Flex padding={3} direction="column" alignItems="stretch" gap={1} style={{ minWidth: 184 }}>
           <Box>
             <SingleSelect
               aria-label={formatMessage({
@@ -254,7 +254,7 @@ const FilterPopover = ({ displayedFilters, filters, onSubmit, onToggle, source }
           </Box>
         </Flex>
       </form>
-    </Popover>
+    </Popover.Content>
   );
 };
 
@@ -269,7 +269,6 @@ FilterPopover.propTypes = {
   filters: PropTypes.array.isRequired,
   onSubmit: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
-  source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
 };
 
 export default FilterPopover;

@@ -156,16 +156,14 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
         </label>
       </Box>
 
-      <ModalFooter
-        startActions={
-          <Button onClick={onClose} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'cancel',
-            })}
-          </Button>
-        }
-      />
+      <Modal.Footer>
+        <Button onClick={onClose} variant="tertiary">
+          {formatMessage({
+            id: 'app.components.Button.cancel',
+            defaultMessage: 'cancel',
+          })}
+        </Button>
+      </Modal.Footer>
     </form>
   );
 };

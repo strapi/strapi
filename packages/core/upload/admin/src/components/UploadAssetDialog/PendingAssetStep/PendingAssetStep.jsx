@@ -78,16 +78,16 @@ export const PendingAssetStep = ({
 
   return (
     <form onSubmit={handleSubmit}>
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
+      <Modal.Header>
+        <Modal.Title>
           {formatMessage({
             id: getTrad('header.actions.add-assets'),
             defaultMessage: 'Add new assets',
           })}
-        </Typography>
-      </ModalHeader>
+        </Modal.Title>
+      </Modal.Header>
 
-      <ModalBody>
+      <Modal.Body>
         <Flex direction="column" alignItems="stretch" gap={7}>
           <Flex justifyContent="space-between">
             <Flex direction="column" alignItems="stretch" gap={0}>
@@ -154,27 +154,22 @@ export const PendingAssetStep = ({
             </Grid.Root>
           </KeyboardNavigable>
         </Flex>
-      </ModalBody>
-
-      <ModalFooter
-        startActions={
-          <Button onClick={onClose} variant="tertiary">
-            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
-          </Button>
-        }
-        endActions={
-          <Button type="submit" loading={uploadStatus === Status.Uploading}>
-            {formatMessage(
-              {
-                id: getTrad('modal.upload-list.footer.button'),
-                defaultMessage:
-                  'Upload {number, plural, one {# asset} other {# assets}} to the library',
-              },
-              { number: assets.length }
-            )}
-          </Button>
-        }
-      />
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={onClose} variant="tertiary">
+          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
+        </Button>
+        <Button type="submit" loading={uploadStatus === Status.Uploading}>
+          {formatMessage(
+            {
+              id: getTrad('modal.upload-list.footer.button'),
+              defaultMessage:
+                'Upload {number, plural, one {# asset} other {# assets}} to the library',
+            },
+            { number: assets.length }
+          )}
+        </Button>
+      </Modal.Footer>
     </form>
   );
 };
