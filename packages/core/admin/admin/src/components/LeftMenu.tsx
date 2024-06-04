@@ -57,7 +57,7 @@ const NavLinkWrapper = styled(Box)`
 `;
 
 const BadgeIcon = styled(Icon)`
-  && {
+  & {
     path {
       fill: ${({ theme }) => theme.colors.warning500};
     }
