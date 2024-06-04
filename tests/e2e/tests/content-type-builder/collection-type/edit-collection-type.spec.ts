@@ -36,7 +36,7 @@ test.describe('Edit collection type', () => {
   });
 
   test('Can toggle internationalization', async ({ page }) => {
-    await page.getByRole('button', { name: 'Edit' }).click();
+    await page.getByRole('button', { name: 'Edit' }).first().click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Internationalization').click();
     await page.getByRole('button', { name: 'Finish' }).click();
@@ -47,10 +47,10 @@ test.describe('Edit collection type', () => {
   });
 
   test('Can toggle draft&publish', async ({ page }) => {
-    await page.getByRole('button', { name: 'Edit' }).click();
+    await page.getByRole('button', { name: 'Edit' }).first().click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
-    await page.getByRole('button', { name: 'Yes, disable' }).click();
+    await page.getByRole('button', { name: 'Confirm' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
 
     await waitForRestart(page);
