@@ -148,15 +148,12 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(ARTICLE_HISTORY_URL);
-      // Publish also creates a new draft so we expect the count to increase by 2
-      await expect(versionCards).toHaveCount(4);
+      await expect(versionCards).toHaveCount(3);
       // Assert the current version is the most recent published version
       await expect(titleInput).toHaveValue('Being from Kansas City');
       // The current version is the most recent draft
-      await expect(currentVersion.getByText('Draft')).toBeVisible();
+      await expect(currentVersion.getByText('Published')).toBeVisible();
       await expect(titleInput).toHaveValue('Being from Kansas City');
-      // The second in the list is the published version
-      await expect(previousVersion.getByText('Published')).toBeVisible();
       previousVersion.click();
       await expect(titleInput).toHaveValue('Being from Kansas City');
 
@@ -172,7 +169,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(ARTICLE_HISTORY_URL);
-      await expect(versionCards).toHaveCount(5);
+      await expect(versionCards).toHaveCount(4);
       // Assert the current version is the modified version
       await expect(currentVersion.getByText('Modified')).toBeVisible();
       await expect(titleInput).toHaveValue('Being from Kansas City, Missouri');
@@ -364,14 +361,13 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL('**/content-manager/single-types/api::homepage.homepage/history**');
-      // Publish also creates a new draft so we expect the count to increase by 2
-      await expect(versionCards).toHaveCount(4);
-      // The current version is the most recent draft
-      await expect(currentVersion.getByText('Draft')).toBeVisible();
+      await expect(versionCards).toHaveCount(3);
+      // The current version is the most recent published
+      await expect(currentVersion.getByText('Published')).toBeVisible();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
-      // The second in the list is the published version
+      // The second in the list is the draft version
       await previousVersion.click();
-      await expect(previousVersion.getByText('Published')).toBeVisible();
+      await expect(previousVersion.getByText('Draft')).toBeVisible();
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond');
 
       // Go back to the entry
@@ -385,7 +381,7 @@ describeOnCondition(edition === 'EE')('History', () => {
       // Go to the history page
       await goToHistoryPage(page);
       await page.waitForURL(HISTORY_URL);
-      await expect(versionCards).toHaveCount(5);
+      await expect(versionCards).toHaveCount(4);
       // Assert the current version is the most recent published version
       await expect(titleInput).toHaveValue('Welcome to AFC Richmond!');
       await expect(currentVersion.getByText('Modified')).toBeVisible();

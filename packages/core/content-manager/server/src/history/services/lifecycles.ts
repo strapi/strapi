@@ -50,6 +50,19 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           return next();
         }
 
+        /**
+         * When a document is published, the draft version of the document is also updated.
+         * It creates confusion for users because they see two history versions each publish action.
+         * To avoid this, we silence the update action during a publish request,
+         * so that they only see the published version of the document in the history.
+         */
+        if (
+          context.action === 'update' &&
+          strapi.requestContext.get()?.request.url.endsWith('/actions/publish')
+        ) {
+          return next();
+        }
+
         const contentTypeUid = context.contentType.uid;
         // Ignore content types not created by the user
         if (!contentTypeUid.startsWith('api::')) {
