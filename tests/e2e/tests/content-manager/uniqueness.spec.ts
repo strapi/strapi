@@ -2,12 +2,16 @@ import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { findAndClose } from '../../utils/shared';
+import { is } from 'core-js/core/object';
 
 type Field = {
   name: string;
   value: string;
   newValue?: string;
   role?: string;
+  component?: {
+    isSingle: boolean;
+  };
 };
 
 test.describe('Uniqueness', () => {
@@ -28,6 +32,48 @@ test.describe('Uniqueness', () => {
     { name: 'uniqueEmail', value: 'test@testing.com', newValue: 'editor@testing.com' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
     { name: 'UID', value: 'unique', newValue: 'unique-1' },
+    {
+      name: 'ComponentTextShort',
+      value: 'unique',
+      newValue: 'unique-1',
+      component: {
+        isSingle: true,
+      },
+    },
+    {
+      name: 'ComponentTextLong',
+      value:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehe.',
+      newValue:
+        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      component: {
+        isSingle: true,
+      },
+    },
+    {
+      name: 'ComponentNumberInteger',
+      value: '10',
+      newValue: '20',
+      component: {
+        isSingle: true,
+      },
+    },
+    {
+      name: 'ComponentNumberFloat',
+      value: '3.14',
+      newValue: '3.1415926535897',
+      component: {
+        isSingle: true,
+      },
+    },
+    {
+      name: 'ComponentEmail',
+      value: 'test@strapi.io',
+      newValue: 'test+update@strapi.io',
+      component: {
+        isSingle: true,
+      },
+    },
   ] as const satisfies Array<Field>;
 
   const clickSave = async (page) => {
@@ -46,17 +92,35 @@ test.describe('Uniqueness', () => {
    * We are testing that uniqueness is enforced for these fields across all entries of a content type in the same locale.
    */
   FIELDS_TO_TEST.forEach((field) => {
-    test(`A user should not be able to duplicate the ${field.name} document field value in the same content type and locale. Validation should not happen across locales`, async ({
+    test(`A user should not be able to duplicate the ${field.name} document field value in the same content type and dimensions (locale + publication state).`, async ({
       page,
     }) => {
       await page.getByRole('link', { name: 'Create new entry' }).first().click();
 
       await page.waitForURL(CREATE_URL);
 
+      const extraComponentNavigation = async () => {
+        if ('component' in field) {
+          const isSingle = field.component.isSingle;
+
+          // This opens up the component UI so we can access the field we are
+          // testing against
+
+          // TODO check best way using playwright selectors
+          if (isSingle) {
+            await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
+            await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
+          }
+        }
+      };
+
       /**
        * Now we're in the edit view. The content within each entry will be valid from the previous test run.
        */
+
       const fieldRole = 'role' in field ? field.role : 'textbox';
+
+      await extraComponentNavigation();
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
@@ -72,6 +136,7 @@ test.describe('Uniqueness', () => {
 
       await page.waitForURL(CREATE_URL);
 
+      await extraComponentNavigation();
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
@@ -103,6 +168,7 @@ test.describe('Uniqueness', () => {
 
       await page.waitForURL(EDIT_URL);
 
+      await extraComponentNavigation();
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
