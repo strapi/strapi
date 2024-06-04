@@ -10,7 +10,6 @@ export default async (ctx: CLIContext) => {
   const { logger } = ctx;
   const tokenService = await tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
-  logger.debug('Existing token:', existingToken);
   const cloudApiService = await cloudApiFactory(existingToken || undefined);
 
   const trackFailedLogin = async () => {
