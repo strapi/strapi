@@ -168,12 +168,6 @@ const expectedModels = [
     uid: 'api::countries.countries',
     singularName: 'country',
     tableName: 'countries',
-    indexes: [
-      {
-        columns: ['documentId'],
-        name: 'countries_documents_index',
-      },
-    ],
     attributes: {
       id: { type: 'increments' },
       documentId: { type: 'string' },
@@ -236,6 +230,12 @@ const expectedModels = [
         },
       },
     },
+    indexes: [
+      {
+        name: 'countries_documents_index',
+        columns: ['document_id'],
+      },
+    ],
   },
   {
     uid: 'api::categories.categories',
@@ -248,8 +248,8 @@ const expectedModels = [
     },
     indexes: [
       {
-        columns: ['documentId'],
         name: 'categories_documents_index',
+        columns: ['document_id'],
       },
     ],
   },
