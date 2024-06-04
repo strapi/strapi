@@ -1,9 +1,9 @@
 import { Form } from '@strapi/admin/strapi-admin';
+import { Modal } from '@strapi/design-system';
 import { fireEvent, render as renderRTL, screen } from '@tests/utils';
 
 import { EditFieldForm, EditFieldFormProps } from '../EditFieldForm';
 import { ConfigurationFormData } from '../Form';
-import { Modal } from '@strapi/design-system';
 
 const ALL_ATTRIBUTES = [
   'string',
