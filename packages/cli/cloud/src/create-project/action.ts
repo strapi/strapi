@@ -10,6 +10,7 @@ async function handleError(ctx: CLIContext, error: Error) {
 
   logger.debug(error);
   if (error instanceof AxiosError) {
+    const errorMessage = typeof error.response?.data === 'string' ? error.response.data : null;
     switch (error.response?.status) {
       case 401:
         logger.error('Your session has expired. Please log in again.');
@@ -17,12 +18,12 @@ async function handleError(ctx: CLIContext, error: Error) {
         return;
       case 403:
         logger.error(
-          error.response.data ||
+          errorMessage ||
             'You do not have permission to create a project. Please contact support for assistance.'
         );
         return;
       case 400:
-        logger.error('Invalid input. Please check your inputs and try again.');
+        logger.error(errorMessage || 'Invalid input. Please check your inputs and try again.');
         return;
       case 503:
         logger.error(
@@ -30,6 +31,10 @@ async function handleError(ctx: CLIContext, error: Error) {
         );
         return;
       default:
+        if (errorMessage) {
+          logger.error(errorMessage);
+          return;
+        }
         break;
     }
   }
