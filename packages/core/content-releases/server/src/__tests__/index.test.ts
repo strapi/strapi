@@ -59,6 +59,15 @@ describe('register', () => {
         },
       },
     },
+    db: {
+      migrations: {
+        providers: {
+          internal: {
+            register: jest.fn(),
+          },
+        },
+      },
+    },
   };
 
   beforeEach(() => {
