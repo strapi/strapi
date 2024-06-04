@@ -24,6 +24,7 @@ import {
   SingleSelectOption,
   Tabs,
   Typography,
+  useId,
 } from '@strapi/design-system';
 import { Check, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -45,21 +46,23 @@ const CreateLocale = ({ disabled, variant = 'default' }: CreateLocaleProps) => {
   const [visible, setVisible] = React.useState(false);
 
   return (
-    <>
-      <Button
-        variant={variant}
-        disabled={disabled}
-        startIcon={<Plus />}
-        onClick={() => setVisible(true)}
-        size="S"
-      >
-        {formatMessage({
-          id: getTranslation('Settings.list.actions.add'),
-          defaultMessage: 'Add new locale',
-        })}
-      </Button>
-      {visible ? <CreateModal onClose={() => setVisible(false)} /> : null}
-    </>
+    <Modal.Root open={visible} onOpenChange={setVisible}>
+      <Modal.Trigger>
+        <Button
+          variant={variant}
+          disabled={disabled}
+          startIcon={<Plus />}
+          onClick={() => setVisible(true)}
+          size="S"
+        >
+          {formatMessage({
+            id: getTranslation('Settings.list.actions.add'),
+            defaultMessage: 'Add new locale',
+          })}
+        </Button>
+      </Modal.Trigger>
+      <CreateModal onClose={() => setVisible(false)} />
+    </Modal.Root>
   );
 };
 
@@ -98,6 +101,7 @@ type ModalCreateProps = {
 };
 
 const CreateModal = ({ onClose }: ModalCreateProps) => {
+  const titleId = useId();
   const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -142,79 +146,69 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
     }
   };
 
-  const titleId = React.useId();
-
   return (
-    <ModalLayout onClose={onClose} labelledBy={titleId}>
+    <Modal.Content>
       <Form
         method="POST"
         initialValues={initialFormValues}
         validationSchema={LOCALE_SCHEMA}
         onSubmit={handleSubmit}
       >
-        <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={titleId}>
+        <Modal.Header>
+          <Modal.Title>
             {formatMessage({
               id: getTranslation('Settings.list.actions.add'),
               defaultMessage: 'Add new locale',
             })}
-          </Typography>
-        </ModalHeader>
-        <ModalBody>
-          <TabGroup
-            label={formatMessage({
-              id: getTranslation('Settings.locales.modal.title'),
-              defaultMessage: 'Configurations',
-            })}
-            variant="simple"
-          >
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Tabs.Root variant="simple" defaultValue="basic">
             <Flex justifyContent="space-between">
-              <Typography tag="h2" variant="beta">
+              <Typography tag="h2" variant="beta" id={titleId}>
                 {formatMessage({
                   id: getTranslation('Settings.locales.modal.title'),
                   defaultMessage: 'Configuration',
                 })}
               </Typography>
-              <Tabs>
-                <Tab>
+              <Tabs.List aria-labelledby={titleId}>
+                <Tabs.Trigger value="basic">
                   {formatMessage({
                     id: getTranslation('Settings.locales.modal.base'),
                     defaultMessage: 'Basic settings',
                   })}
-                </Tab>
-                <Tab>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="advanced">
                   {formatMessage({
                     id: getTranslation('Settings.locales.modal.advanced'),
                     defaultMessage: 'Advanced settings',
                   })}
-                </Tab>
-              </Tabs>
+                </Tabs.Trigger>
+              </Tabs.List>
             </Flex>
 
             <Divider />
 
             <Box paddingTop={7} paddingBottom={7}>
-              <TabPanels>
-                <TabPanel>
-                  <BaseForm />
-                </TabPanel>
-                <TabPanel>
-                  <AdvancedForm />
-                </TabPanel>
-              </TabPanels>
+              <Tabs.Content value="basic">
+                <BaseForm />
+              </Tabs.Content>
+              <Tabs.Content value="advanced">
+                <AdvancedForm />
+              </Tabs.Content>
             </Box>
-          </TabGroup>
-        </ModalBody>
-        <ModalFooter
-          startActions={
-            <Button variant="tertiary" onClick={onClose}>
+          </Tabs.Root>
+        </Modal.Body>
+        <Modal.Footer>
+          <Modal.Close>
+            <Button variant="tertiary">
               {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
             </Button>
-          }
-          endActions={<SubmitButton />}
-        />
+          </Modal.Close>
+          <SubmitButton />
+        </Modal.Footer>
       </Form>
-    </ModalLayout>
+    </Modal.Content>
   );
 };
 
