@@ -65,9 +65,16 @@ async function upload(
     const fileStats = await fse.stat(tarFilePath);
 
     if (fileStats.size > maxProjectFileSize) {
-      return ctx.logger.log(
+      ctx.logger.log(
         'Unable to proceed: Your project is too big to be transferred, please use a git repo instead.'
       );
+      try {
+        await fse.remove(tarFilePath);
+      } catch (e: any) {
+        ctx.logger.log('Unable to remove file: ', tarFilePath);
+        ctx.logger.debug(e);
+      }
+      return;
     }
 
     ctx.logger.info('🚀 Uploading project...');
@@ -164,6 +171,10 @@ export default async (ctx: CLIContext) => {
   }
 
   const buildId = await upload(ctx, project, token, maxSize);
+
+  if (!buildId) {
+    return;
+  }
 
   try {
     notificationService(`${apiConfig.apiBaseUrl}/notifications`, token, cliConfig);
