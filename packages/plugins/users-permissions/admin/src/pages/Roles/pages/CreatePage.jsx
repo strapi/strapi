@@ -2,26 +2,18 @@ import * as React from 'react';
 
 import {
   Button,
-  ContentLayout,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
   Main,
   Textarea,
   TextInput,
   Typography,
+  Field,
 } from '@strapi/design-system';
-import {
-  useFetchClient,
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-} from '@strapi/helper-plugin';
 import { Check } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import { Page, useTracking, useNotification, useFetchClient, Layouts } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation } from 'react-query';
 import { useNavigate } from 'react-router-dom';
@@ -34,9 +26,8 @@ import { usePlugins } from '../hooks/usePlugins';
 
 export const CreatePage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
   const { trackUsage } = useTracking();
   const permissionsRef = React.useRef();
@@ -44,11 +35,11 @@ export const CreatePage = () => {
   const mutation = useMutation((body) => post(`/users-permissions/roles`, body), {
     onError() {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     },
 
@@ -57,10 +48,10 @@ export const CreatePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTrad('Settings.roles.created'),
           defaultMessage: 'Role created',
-        },
+        }),
       });
 
       // Forcing redirecting since we don't have the id in the response
@@ -69,26 +60,22 @@ export const CreatePage = () => {
   });
 
   const handleCreateRoleSubmit = async (data) => {
-    lockApp();
-
     // TODO: refactor. Child -> parent component communication is evil;
     // We should either move the provider one level up or move the state
     // straight into redux.
     const permissions = permissionsRef.current.getPermissions();
 
     await mutation.mutate({ ...data, ...permissions, users: [] });
-
-    unlockApp();
   };
 
   return (
     <Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           { name: 'Roles' }
         )}
-      />
+      </Page.Title>
       <Formik
         enableReinitialize
         initialValues={{ name: '', description: '' }}
@@ -97,7 +84,7 @@ export const CreatePage = () => {
       >
         {({ handleSubmit, values, handleChange, errors }) => (
           <Form noValidate onSubmit={handleSubmit}>
-            <HeaderLayout
+            <Layouts.Header
               primaryAction={
                 !isLoadingPlugins && (
                   <Button type="submit" loading={mutation.isLoading} startIcon={<Check />}>
@@ -117,7 +104,7 @@ export const CreatePage = () => {
                 defaultMessage: 'Define the rights given to the role',
               })}
             />
-            <ContentLayout>
+            <Layouts.Content>
               <Flex
                 background="neutral0"
                 direction="column"
@@ -131,7 +118,7 @@ export const CreatePage = () => {
                 shadow="filterShadow"
               >
                 <Flex direction="column" alignItems="stretch">
-                  <Typography variant="delta" as="h2">
+                  <Typography variant="delta" tag="h2">
                     {formatMessage({
                       id: getTrad('EditPage.form.roles'),
                       defaultMessage: 'Role details',
@@ -140,31 +127,28 @@ export const CreatePage = () => {
 
                   <Grid gap={4}>
                     <GridItem col={6}>
-                      <TextInput
+                      <Field.Root
                         name="name"
-                        value={values.name || ''}
-                        onChange={handleChange}
-                        label={formatMessage({
-                          id: 'global.name',
-                          defaultMessage: 'Name',
-                        })}
                         error={
                           errors?.name
                             ? formatMessage({ id: errors.name, defaultMessage: 'Name is required' })
                             : false
                         }
                         required
-                      />
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'global.name',
+                            defaultMessage: 'Name',
+                          })}
+                        </Field.Label>
+                        <TextInput value={values.name || ''} onChange={handleChange} />
+                        <Field.Error />
+                      </Field.Root>
                     </GridItem>
                     <GridItem col={6}>
-                      <Textarea
-                        id="description"
-                        value={values.description || ''}
-                        onChange={handleChange}
-                        label={formatMessage({
-                          id: 'global.description',
-                          defaultMessage: 'Description',
-                        })}
+                      <Field.Root
+                        name="description"
                         error={
                           errors?.description
                             ? formatMessage({
@@ -174,7 +158,16 @@ export const CreatePage = () => {
                             : false
                         }
                         required
-                      />
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'global.description',
+                            defaultMessage: 'Description',
+                          })}
+                        </Field.Label>
+                        <Textarea value={values.description || ''} onChange={handleChange} />
+                        <Field.Error />
+                      </Field.Root>
                     </GridItem>
                   </Grid>
                 </Flex>
@@ -187,7 +180,7 @@ export const CreatePage = () => {
                   />
                 )}
               </Flex>
-            </ContentLayout>
+            </Layouts.Content>
           </Form>
         )}
       </Formik>

@@ -1,10 +1,9 @@
-import path from 'node:path';
 import fse from 'fs-extra';
 import { Umzug } from 'umzug';
 
 import { createStorage } from './storage';
 import { wrapTransaction } from './common';
-import type { MigrationProvider, MigrationResolver } from './common';
+import type { MigrationResolver, UserMigrationProvider } from './common';
 import type { Database } from '..';
 
 // TODO: check multiple commands in one sql statement
@@ -38,8 +37,8 @@ const migrationResolver: MigrationResolver = ({ name, path, context }) => {
   };
 };
 
-export const createUserMigrationProvider = (db: Database): MigrationProvider => {
-  const dir = path.join(strapi.dirs.app.root, 'database/migrations');
+export const createUserMigrationProvider = (db: Database): UserMigrationProvider => {
+  const dir = db.config.settings.migrations.dir;
 
   fse.ensureDirSync(dir);
 

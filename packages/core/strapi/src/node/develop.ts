@@ -4,7 +4,7 @@ import chokidar from 'chokidar';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import cluster from 'node:cluster';
-import { strapiFactory } from '@strapi/core';
+import { createStrapi } from '@strapi/core';
 
 import type { CLIContext } from '../cli/types';
 import { checkRequiredDependencies } from './core/dependencies';
@@ -166,7 +166,7 @@ const develop = async ({
     timer.start('loadStrapi');
     const loadStrapiSpinner = logger.spinner(`Loading Strapi`).start();
 
-    const strapi = strapiFactory({
+    const strapi = createStrapi({
       appDir: cwd,
       distDir: tsconfig?.config.options.outDir ?? '',
       autoReload: true,
@@ -274,6 +274,11 @@ const develop = async ({
           '**/plugins.json',
           '**/build',
           '**/build/**',
+          '**/log',
+          '**/log/**',
+          '**/logs',
+          '**/logs/**',
+          '**/*.log',
           '**/index.html',
           '**/public',
           '**/public/**',
@@ -285,6 +290,7 @@ const develop = async ({
           '**/*.d.ts',
           '**/.yalc/**',
           '**/yalc.lock',
+          // TODO v6: watch only src folder by default, and flip this to watchIncludeFiles
           ...strapiInstance.config.get('admin.watchIgnoreFiles', []),
         ],
       })

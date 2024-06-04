@@ -1,4 +1,6 @@
-import { Common, Utils } from '../../..';
+import type * as UID from '../../../uid';
+import { Extends, MatchAllIntersect } from '../../../utils';
+
 import type { GetPluginParams } from '..';
 
 // Params
@@ -10,16 +12,12 @@ import type * as Populate from './populate';
 import type * as PublicationStatus from './status';
 import type * as Data from './data';
 import type * as Search from './search';
+import type * as Locale from './locale';
 
 // Utils
 import type * as Attribute from './attributes';
 
-export type Locale = string;
-
-export type Pick<
-  TSchemaUID extends Common.UID.Schema,
-  TKind extends Kind
-> = Utils.Expression.MatchAllIntersect<
+export type Pick<TSchemaUID extends UID.Schema, TKind extends Kind> = MatchAllIntersect<
   [
     // Sort
     [HasMember<TKind, 'sort'>, { sort?: Sort.Any<TSchemaUID> }],
@@ -44,7 +42,9 @@ export type Pick<
     // Publication Status
     [HasMember<TKind, 'status'>, PublicationStatus.Param],
     // Locale
-    [HasMember<TKind, 'locale'>, { locale?: Locale }], // TODO: also allow arrays ?
+    [HasMember<TKind, 'locale'>, { locale?: Locale.Any }],
+    [HasMember<TKind, 'locale:string'>, { locale?: Locale.StringNotation }],
+    [HasMember<TKind, 'locale:array'>, { locale?: Locale.ArrayNotation }],
     // Plugin
     [HasMember<TKind, 'plugin'>, GetPluginParams<TSchemaUID>],
     // Data
@@ -53,7 +53,7 @@ export type Pick<
     // Search
     [HasMember<TKind, '_q'>, { _q?: Search.Q }],
     // Look Up - For internal use only
-    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }]
+    [HasMember<TKind, 'lookup'>, { lookup?: Record<string, unknown> }],
   ]
 >;
 
@@ -75,14 +75,26 @@ export type Kind =
   | 'pagination:page'
   | 'status'
   | 'locale'
+  | 'locale:string'
+  | 'locale:array'
   | 'plugin'
   | 'data'
   | 'data:partial'
   | '_q'
   | 'lookup';
 
-type HasMember<TValue extends Kind, TTest extends Kind> = Utils.Expression.Extends<TTest, TValue>;
+type HasMember<TValue extends Kind, TTest extends Kind> = Extends<TTest, TValue>;
 
-export type All = Pick<Common.UID.Schema, Kind>;
+export type All = Pick<UID.Schema, Kind>;
 
-export type { Sort, Pagination, Fields, Filters, Populate, Data, Attribute, PublicationStatus };
+export type {
+  Sort,
+  Pagination,
+  Fields,
+  Filters,
+  Populate,
+  Data,
+  Attribute,
+  PublicationStatus,
+  Locale,
+};

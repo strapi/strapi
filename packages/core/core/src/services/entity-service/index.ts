@@ -5,16 +5,13 @@ import {
   contentTypes as contentTypesUtils,
   errors,
   relations as relationUtils,
-  convertQueryParams,
 } from '@strapi/utils';
 import type { Database } from '@strapi/database';
-import type { Strapi, EntityService, Utils } from '@strapi/types';
-
-const { transformParamsToQuery } = convertQueryParams;
+import type { Core, Modules, Utils } from '@strapi/types';
 
 type Decoratable<T> = T & {
   decorate(
-    decorator: (old: EntityService.EntityService) => EntityService.EntityService & {
+    decorator: (old: Modules.EntityService.EntityService) => Modules.EntityService.EntityService & {
       [key: string]: unknown;
     }
   ): void;
@@ -26,7 +23,9 @@ const transformLoadParamsToQuery = (
   params: Record<string, unknown>,
   pagination = {}
 ) => {
-  const query = transformParamsToQuery(uid, { populate: { [field]: params } as any }) as any;
+  const query = strapi
+    .get('query-params')
+    .transform(uid, { populate: { [field]: params } as any }) as any;
 
   const res = {
     ...query.populate[field],
@@ -47,9 +46,9 @@ const createDefaultImplementation = ({
   strapi,
   db,
 }: {
-  strapi: Strapi;
+  strapi: Core.Strapi;
   db: Database;
-}): EntityService.EntityService => ({
+}): Modules.EntityService.EntityService => ({
   async wrapParams(options: any = {}) {
     return options;
   },
@@ -75,7 +74,7 @@ const createDefaultImplementation = ({
   async findPage(uid, opts) {
     const wrappedParams = await this.wrapParams(opts, { uid, action: 'findPage' });
 
-    const query = transformParamsToQuery(uid, wrappedParams);
+    const query = strapi.get('query-params').transform(uid, wrappedParams);
 
     const entities = await db.query(uid).findPage(query);
     return this.wrapResult(entities, { uid, action: 'findMany' });
@@ -90,7 +89,10 @@ const createDefaultImplementation = ({
       return this.wrapResult(null, { uid, action: 'findOne' });
     }
 
-    const entity = await strapi.documents!(uid).findOne(res.documentId, wrappedParams);
+    const entity = await strapi.documents!(uid).findOne({
+      ...wrappedParams,
+      documentId: res.documentId,
+    });
     return this.wrapResult(entity, { uid, action: 'findOne' });
   },
 
@@ -102,7 +104,7 @@ const createDefaultImplementation = ({
 
   async create(uid, params) {
     const wrappedParams = await this.wrapParams<
-      EntityService.Params.Pick<typeof uid, 'data' | 'fields' | 'populate'>
+      Modules.EntityService.Params.Pick<typeof uid, 'data' | 'fields' | 'populate'>
     >(params, { uid, action: 'create' });
     const { data } = wrappedParams;
 
@@ -122,7 +124,7 @@ const createDefaultImplementation = ({
 
   async update(uid, entityId, opts) {
     const wrappedParams = await this.wrapParams<
-      EntityService.Params.Pick<typeof uid, 'data:partial' | 'fields' | 'populate'>
+      Modules.EntityService.Params.Pick<typeof uid, 'data:partial' | 'fields' | 'populate'>
     >(opts, {
       uid,
       action: 'update',
@@ -135,9 +137,10 @@ const createDefaultImplementation = ({
 
     const shouldPublish = !contentTypesUtils.isDraft(entityToUpdate, strapi.getModel(uid));
 
-    const entity = strapi.documents!(uid).update(entityToUpdate.documentId, {
+    const entity = strapi.documents!(uid).update({
       ...(wrappedParams as any),
       status: shouldPublish ? 'published' : 'draft',
+      documentId: entityToUpdate.documentId,
     });
 
     return this.wrapResult(entity, { uid, action: 'update' });
@@ -152,7 +155,10 @@ const createDefaultImplementation = ({
       return this.wrapResult(null, { uid, action: 'delete' });
     }
 
-    await strapi.documents!(uid).delete(entityToDelete.documentId, wrappedParams);
+    await strapi.documents!(uid).delete({
+      ...wrappedParams,
+      documentId: entityToDelete.documentId,
+    });
 
     return this.wrapResult(entityToDelete, { uid, action: 'delete' });
   },
@@ -193,9 +199,9 @@ const createDefaultImplementation = ({
 });
 
 export default (ctx: {
-  strapi: Strapi;
+  strapi: Core.Strapi;
   db: Database;
-}): Decoratable<EntityService.EntityService> => {
+}): Decoratable<Modules.EntityService.EntityService> => {
   const implementation = createDefaultImplementation(ctx);
 
   const service = {
@@ -216,11 +222,11 @@ export default (ctx: {
   Object.keys(service.implementation).forEach((key) => delegator.method(key));
 
   // wrap methods to handle Database Errors
-  service.decorate((oldService: EntityService.EntityService) => {
+  service.decorate((oldService: Modules.EntityService.EntityService) => {
     const newService = _.mapValues(
       oldService,
-      (method, methodName: keyof EntityService.EntityService) =>
-        async function (this: EntityService.EntityService, ...args: []) {
+      (method, methodName: keyof Modules.EntityService.EntityService) =>
+        async function (this: Modules.EntityService.EntityService, ...args: []) {
           try {
             return await (oldService[methodName] as Utils.Function.AnyPromise).call(this, ...args);
           } catch (error) {
@@ -243,5 +249,5 @@ export default (ctx: {
     return newService;
   });
 
-  return service as unknown as Decoratable<EntityService.EntityService>;
+  return service as unknown as Decoratable<Modules.EntityService.EntityService>;
 };

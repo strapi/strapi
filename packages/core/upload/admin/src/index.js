@@ -1,13 +1,13 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
+import { Images } from '@strapi/icons';
 
 import pluginPkg from '../../package.json';
 
 import { MediaLibraryDialog } from './components/MediaLibraryDialog';
 import { MediaLibraryInput } from './components/MediaLibraryInput';
-import PluginIcon from './components/PluginIcon';
 import { PERMISSIONS } from './constants';
 import pluginId from './pluginId';
 import getTrad from './utils/getTrad';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 const name = pluginPkg.strapi.name;
 
@@ -15,13 +15,14 @@ export default {
   register(app) {
     app.addMenuLink({
       to: `plugins/${pluginId}`,
-      icon: PluginIcon,
+      icon: Images,
       intlLabel: {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'Media Library',
       },
       permissions: PERMISSIONS.main,
       Component: () => import('./pages/App'),
+      position: 4,
     });
 
     app.addSettingsLink('global', {

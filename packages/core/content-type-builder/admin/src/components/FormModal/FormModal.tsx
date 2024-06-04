@@ -1,5 +1,6 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { useStrapiApp, useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
@@ -14,13 +15,6 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import {
-  getYupInnerErrors,
-  useCustomFields,
-  useNotification,
-  useStrapiApp,
-  useTracking,
-} from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
@@ -35,6 +29,7 @@ import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
 import { getTrad, isAllowedContentTypesForRelations } from '../../utils';
 import { findAttribute } from '../../utils/findAttribute';
+import { getYupInnerErrors } from '../../utils/getYupInnerErrors';
 // New compos
 import { AllowedTypesSelect } from '../AllowedTypesSelect';
 import { IconByType } from '../AttributeIcon';
@@ -81,7 +76,7 @@ import { getFormInputNames } from './utils/getFormInputNames';
 
 import type { CustomFieldAttributeParams } from '../../contexts/DataManagerContext';
 import type { AttributeType } from '../../types';
-import type { Common } from '@strapi/types';
+import type { Internal } from '@strapi/types';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
@@ -105,18 +100,19 @@ export const FormModal = () => {
     targetUid,
     showBackLink,
   } = useFormModalNavigation();
-  const customField = useCustomFields().get(customFieldUid);
+  const getPlugin = useStrapiApp('FormModal', (state) => state.getPlugin);
+  const getCustomField = useStrapiApp('FormModal', (state) => state.customFields.get);
+  const customField = getCustomField(customFieldUid);
 
   const tabGroupRef = useRef<any>();
 
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const reducerState = useSelector((state) => formModalSelector(state), shallowEqual);
   const navigate = useNavigate();
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const { getPlugin } = useStrapiApp();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI: any = ctbPlugin?.apis.forms;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
@@ -368,7 +364,7 @@ export const FormModal = () => {
       // This is happening when the user click on the link from the left menu
     } else if (isCreatingComponent) {
       schema = forms.component.schema(
-        Object.keys(components) as Common.UID.Component[],
+        Object.keys(components) as Internal.UID.Component[],
         modifiedData.category || '',
         reservedNames,
         actionType === 'edit',
@@ -393,7 +389,7 @@ export const FormModal = () => {
       // The data is set in the componentToCreate key
     } else if (isComponentAttribute && isCreatingComponentFromAView && isInFirstComponentStep) {
       schema = forms.component.schema(
-        Object.keys(components) as Common.UID.Component[],
+        Object.keys(components) as Internal.UID.Component[],
         get(modifiedData, 'componentToCreate.category', ''),
         reservedNames,
         actionType === 'edit',
@@ -448,7 +444,7 @@ export const FormModal = () => {
       // eslint-disable-next-line no-lonely-if
       if (isInFirstComponentStep && isCreatingComponentFromAView) {
         schema = forms.component.schema(
-          Object.keys(components) as Common.UID.Component[],
+          Object.keys(components) as Internal.UID.Component[],
           get(modifiedData, 'componentToCreate.category', ''),
           reservedNames,
           actionType === 'edit',
@@ -548,8 +544,8 @@ export const FormModal = () => {
             submitData(modifiedData);
           } else {
             toggleNotification({
-              type: 'warning',
-              message: { id: 'notification.contentType.relations.conflict' },
+              type: 'danger',
+              message: formatMessage({ id: 'notification.contentType.relations.conflict' }),
             });
           }
 
@@ -575,7 +571,7 @@ export const FormModal = () => {
             targetUid: componentUid,
           });
         } else {
-          updateSchema(modifiedData, modalType, targetUid);
+          updateSchema(modifiedData, modalType, targetUid as Internal.UID.Component);
 
           // Close the modal
           onCloseModal();

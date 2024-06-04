@@ -3,35 +3,29 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  ContentLayout,
+  Field,
   Flex,
   Grid,
   GridItem,
-  HeaderLayout,
   Main,
   Textarea,
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import {
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-  translatedErrors,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
-import { ArrowLeft } from '@strapi/icons';
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate, useMatch } from 'react-router-dom';
-import styled from 'styled-components';
+import { useNavigate, useMatch } from 'react-router-dom';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { BackButton } from '../../../../features/BackButton';
+import { useNotification } from '../../../../features/Notifications';
+import { useTracking } from '../../../../features/Tracking';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {
   useCreateRoleMutation,
   useGetRolePermissionLayoutQuery,
@@ -39,6 +33,7 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 
@@ -47,8 +42,8 @@ import { Permissions, PermissionsAPI } from './components/Permissions';
  * -----------------------------------------------------------------------------------------------*/
 
 const CREATE_SCHEMA = yup.object().shape({
-  name: yup.string().required(translatedErrors.required),
-  description: yup.string().required(translatedErrors.required),
+  name: yup.string().required(translatedErrors.required.id),
+  description: yup.string().required(translatedErrors.required.id),
 });
 
 /**
@@ -65,8 +60,7 @@ interface CreateRoleFormValues {
  */
 const CreatePage = () => {
   const match = useMatch('/settings/roles/duplicate/:id');
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
   const permissionsRef = React.useRef<PermissionsAPI>(null);
@@ -109,9 +103,6 @@ const CreatePage = () => {
     formik: FormikHelpers<CreateRoleFormValues>
   ) => {
     try {
-      // @ts-expect-error – fixed in V5
-      lockApp();
-
       if (id) {
         trackUsage('willDuplicateRole');
       } else {
@@ -125,7 +116,7 @@ const CreatePage = () => {
           formik.setErrors(formatValidationErrors(res.error));
         } else {
           toggleNotification({
-            type: 'warning',
+            type: 'danger',
             message: formatAPIError(res.error),
           });
         }
@@ -146,7 +137,7 @@ const CreatePage = () => {
             formik.setErrors(formatValidationErrors(updateRes.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(updateRes.error),
             });
           }
@@ -157,18 +148,15 @@ const CreatePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'Settings.roles.created', defaultMessage: 'created' },
+        message: formatMessage({ id: 'Settings.roles.created', defaultMessage: 'created' }),
       });
 
       navigate(res.data.id.toString(), { replace: true });
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
-    } finally {
-      // @ts-expect-error – fixed in V5
-      unlockApp();
     }
   };
 
@@ -178,14 +166,14 @@ const CreatePage = () => {
 
   return (
     <Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Roles',
           }
         )}
-      />
+      </Page.Title>
       <Formik
         initialValues={
           {
@@ -203,7 +191,7 @@ const CreatePage = () => {
         {({ values, errors, handleReset, handleChange, isSubmitting }) => (
           <Form>
             <>
-              <HeaderLayout
+              <Layouts.Header
                 primaryAction={
                   <Flex gap={2}>
                     <Button
@@ -235,17 +223,9 @@ const CreatePage = () => {
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
-                navigationAction={
-                  // @ts-expect-error – the props from the component passed as `as` are not correctly inferred.
-                  <Link as={NavLink} startIcon={<ArrowLeft />} to="/settings/roles">
-                    {formatMessage({
-                      id: 'global.back',
-                      defaultMessage: 'Back',
-                    })}
-                  </Link>
-                }
+                navigationAction={<BackButton />}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                     <Flex direction="column" alignItems="stretch" gap={4}>
@@ -281,30 +261,34 @@ const CreatePage = () => {
                       </Flex>
                       <Grid gap={4}>
                         <GridItem col={6}>
-                          <TextInput
+                          <Field.Root
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
-                            label={formatMessage({
-                              id: 'global.name',
-                              defaultMessage: 'Name',
-                            })}
-                            onChange={handleChange}
                             required
-                            value={values.name}
-                          />
+                          >
+                            <Field.Label>
+                              {formatMessage({
+                                id: 'global.name',
+                                defaultMessage: 'Name',
+                              })}
+                            </Field.Label>
+                            <TextInput onChange={handleChange} value={values.name} />
+                            <Field.Error />
+                          </Field.Root>
                         </GridItem>
                         <GridItem col={6}>
-                          <Textarea
-                            label={formatMessage({
-                              id: 'global.description',
-                              defaultMessage: 'Description',
-                            })}
-                            id="description"
+                          <Field.Root
+                            name="description"
                             error={errors.description && formatMessage({ id: errors.description })}
-                            onChange={handleChange}
                           >
-                            {values.description}
-                          </Textarea>
+                            <Field.Label>
+                              {formatMessage({
+                                id: 'global.description',
+                                defaultMessage: 'Description',
+                              })}
+                            </Field.Label>
+                            <Textarea onChange={handleChange} value={values.description} />
+                          </Field.Root>
                         </GridItem>
                       </Grid>
                     </Flex>
@@ -318,7 +302,7 @@ const CreatePage = () => {
                     />
                   </Box>
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </>
           </Form>
         )}
@@ -333,7 +317,7 @@ const UsersRoleNumber = styled.div`
   padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
   color: ${({ theme }) => theme.colors.primary600};
   border-radius: ${({ theme }) => theme.borderRadius};
-  font-size: ${12 / 16}rem;
+  font-size: 1.2rem;
   font-weight: bold;
 `;
 

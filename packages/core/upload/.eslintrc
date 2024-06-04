@@ -9,8 +9,8 @@
       }
     },
     {
-      "files": ["**/*"],
-      "excludedFiles": ["admin/**/*"],
+      "files": ["**"],
+      "excludedFiles": ["admin/**/*", "server/**/*"],
       "extends": ["custom/back"]
     }
   ]

@@ -1,6 +1,6 @@
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-export const destroyOnSignal = (strapi: Strapi) => {
+export const destroyOnSignal = (strapi: Core.Strapi) => {
   let signalReceived = false;
 
   // For unknown reasons, we receive signals 2 times.

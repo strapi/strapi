@@ -1,40 +1,25 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  HeaderLayout,
-  Main,
-  useNotifyAT,
-  Grid,
-  GridItem,
-  Typography,
-} from '@strapi/design-system';
-import {
-  translatedErrors,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-  useAPIErrorHandler,
-} from '@strapi/helper-plugin';
+import { Box, Button, Flex, useNotifyAT, Grid, GridItem, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { Form, FormHelpers } from '../components/Form';
 import { InputRenderer } from '../components/FormInputs/Renderer';
+import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
+import { useNotification } from '../features/Notifications';
+import { useTracking } from '../features/Tracking';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { AppState, setAppTheme } from '../reducer';
 import { useIsSSOLockedQuery, useUpdateMeMutation } from '../services/auth';
 import { isBaseQueryError } from '../utils/baseQuery';
-import { getFullName } from '../utils/getFullName';
+import { translatedErrors } from '../utils/translatedErrors';
+import { getDisplayName } from '../utils/users';
 
 import { COMMON_USER_SCHEMA } from './Settings/pages/Users/utils/validation';
 
@@ -48,7 +33,7 @@ const PROFILE_VALIDTION_SCHEMA = yup.object().shape({
     .when(['password', 'confirmPassword'], (password, confirmPassword, passSchema) => {
       return password || confirmPassword
         ? passSchema.required({
-            id: translatedErrors.required,
+            id: translatedErrors.required.id,
             defaultMessage: 'This field is required',
           })
         : passSchema;
@@ -64,8 +49,7 @@ const ProfilePage = () => {
   const localeNames = useTypedSelector((state) => state.admin_app.language.localeNames);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const currentTheme = useTypedSelector((state) => state.admin_app.theme.currentTheme);
   const dispatch = useTypedDispatch();
@@ -73,8 +57,6 @@ const ProfilePage = () => {
     _unstableFormatValidationErrors: formatValidationErrors,
     _unstableFormatAPIError: formatApiError,
   } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const user = useAuth('ProfilePage', (state) => state.user);
 
@@ -88,8 +70,8 @@ const ProfilePage = () => {
       );
     } else {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
       });
     }
   }, [formatMessage, notifyStatus, toggleNotification, user]);
@@ -107,11 +89,11 @@ const ProfilePage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'Settings.permissions.users.sso.provider.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'Settings.permissions.users.sso.provider.error' }),
       });
     }
-  }, [error, toggleNotification]);
+  }, [error, formatMessage, toggleNotification]);
 
   type UpdateUsersMeBody = UpdateMe.Request['body'] & {
     confirmPassword: string;
@@ -122,9 +104,6 @@ const ProfilePage = () => {
     body: UpdateUsersMeBody,
     { setErrors }: FormHelpers<UpdateUsersMeBody>
   ) => {
-    // @ts-expect-error – we're going to implement a context assertion to avoid this
-    lockApp();
-
     const { confirmPassword: _confirmPassword, currentTheme, ...bodyRest } = body;
     let dataToSend = bodyRest;
 
@@ -148,31 +127,25 @@ const ProfilePage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+        message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
       });
     }
 
     if ('error' in res) {
-      if (
-        isBaseQueryError(res.error) &&
-        (res.error.name === 'ValidationError' || res.error.message === 'ValidationError')
-      ) {
-        // @ts-expect-error – We get a BadRequest error here instead of a ValidationError if the currentPassword is wrong.
+      if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
         setErrors(formatValidationErrors(res.error));
       } else if (isBaseQueryError(res.error)) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatApiError(res.error),
         });
       } else {
         toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
+          type: 'danger',
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
         });
       }
     }
-
-    unlockApp?.();
   };
 
   if (isLoading) {
@@ -193,13 +166,13 @@ const ProfilePage = () => {
   };
 
   return (
-    <Main aria-busy={isSubmittingForm}>
-      <Helmet
-        title={formatMessage({
-          id: 'Settings.profile.form.section.helmet.title',
+    <Page.Main aria-busy={isSubmittingForm}>
+      <Page.Title>
+        {formatMessage({
+          id: 'Settings.profile.form.section.head.title',
           defaultMessage: 'User profile',
         })}
-      />
+      </Page.Title>
       <Form
         method="PUT"
         onSubmit={handleSubmit}
@@ -208,8 +181,8 @@ const ProfilePage = () => {
       >
         {({ isSubmitting, modified }) => (
           <>
-            <HeaderLayout
-              title={username || getFullName(firstname ?? '', lastname)}
+            <Layouts.Header
+              title={getDisplayName(user)}
               primaryAction={
                 <Button
                   startIcon={<Check />}
@@ -222,18 +195,18 @@ const ProfilePage = () => {
               }
             />
             <Box paddingBottom={10}>
-              <ContentLayout>
+              <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   <UserInfoSection />
                   {!hasLockedRole && <PasswordSection />}
                   <PreferencesSection localeNames={localeNames} />
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </Box>
           </>
         )}
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 
@@ -255,7 +228,7 @@ const PasswordSection = () => {
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.change-password',
             defaultMessage: 'Change password',
@@ -333,7 +306,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <Typography variant="delta" as="h2">
+          <Typography variant="delta" tag="h2">
             {formatMessage({
               id: 'Settings.profile.form.section.experience.title',
               defaultMessage: 'Experience',
@@ -349,7 +322,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
               {
                 here: (
                   <Box
-                    as="a"
+                    tag="a"
                     color="primary600"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -458,7 +431,7 @@ const UserInfoSection = () => {
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.profile',
             defaultMessage: 'Profile',

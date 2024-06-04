@@ -23,6 +23,14 @@ window.ResizeObserver = ResizeObserver;
  * requestIdleCallback
  * -----------------------------------------------------------------------------------------------*/
 
+type SetTimeout = typeof window.setTimeout;
+
+window.setImmediate =
+  window.setImmediate ||
+  ((fn: Parameters<SetTimeout>[0], ...args: any[]) => window.setTimeout(fn, 0, ...args));
+
+window.clearImmediate = window.clearImmediate || window.clearTimeout;
+
 // @ts-expect-error – mocking for testing
 window.requestIdleCallback = setImmediate;
 // @ts-expect-error – mocking for testing
@@ -59,6 +67,8 @@ window.console = {
       /React does not recognize the .* prop on a DOM element/.test(message) ||
       /Unknown event handler property/.test(message)
     ) {
+      // do nothing
+    } else if (/Support for defaultProps will be removed/gi.test(message)) {
       // do nothing
     } else {
       throw new Error(message);

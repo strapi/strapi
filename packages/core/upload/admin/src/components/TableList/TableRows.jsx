@@ -1,7 +1,6 @@
 import React from 'react';
 
 import { BaseCheckbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
-import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import { Eye, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -40,12 +39,7 @@ export const TableRows = ({
         );
 
         return (
-          <Tr
-            key={id}
-            {...onRowClick({
-              fn: () => handleRowClickFn(element, contentType, id, path),
-            })}
-          >
+          <Tr key={id} onClick={() => handleRowClickFn(element, contentType, id, path)}>
             <Td onClick={(e) => e.stopPropagation()}>
               <BaseCheckbox
                 aria-label={formatMessage(
@@ -74,18 +68,18 @@ export const TableRows = ({
               );
             })}
 
-            <Td {...stopPropagation}>
+            <Td onClick={(e) => e.stopPropagation()}>
               <Flex justifyContent="flex-end">
                 {contentType === 'folder' && (
                   <IconButton
-                    as={folderURL ? Link : undefined}
+                    tag={folderURL ? Link : undefined}
                     label={formatMessage({
                       id: getTrad('list.folders.link-label'),
                       defaultMessage: 'Access folder',
                     })}
                     to={folderURL}
                     onClick={() => !folderURL && onChangeFolder(id)}
-                    noBorder
+                    borderWidth={0}
                   >
                     <Eye />
                   </IconButton>
@@ -98,7 +92,7 @@ export const TableRows = ({
                   onClick={() =>
                     contentType === 'asset' ? onEditAsset(element) : onEditFolder(element)
                   }
-                  noBorder
+                  borderWidth={0}
                 >
                   <Pencil />
                 </IconButton>

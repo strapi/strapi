@@ -1,10 +1,9 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-import { configureStore } from '@reduxjs/toolkit';
+import { ConfigureStoreOptions, configureStore } from '@reduxjs/toolkit';
 import { fixtures } from '@strapi/admin-test-utils';
 import { darkTheme, lightTheme } from '@strapi/design-system';
-import { NotificationsProvider, Permission, RBACContext } from '@strapi/helper-plugin';
 import {
   fireEvent,
   renderHook as renderHookRTL,
@@ -26,13 +25,13 @@ import { Provider } from 'react-redux';
 import { MemoryRouterProps, RouterProvider, createMemoryRouter } from 'react-router-dom';
 
 import { LanguageProvider } from '../src/components/LanguageProvider';
-import { RBACReducer } from '../src/components/RBACProvider';
 import { Theme } from '../src/components/Theme';
-import { reducer as cmAppReducer } from '../src/content-manager/layout';
-import { reducer as contentManagerReducer } from '../src/content-manager/modules/reducers';
-import { contentManagerApi } from '../src/content-manager/services/api';
-import { AuthProvider } from '../src/features/Auth';
+import { RBAC } from '../src/core/apis/rbac';
+import { AppInfoProvider } from '../src/features/AppInfo';
+import { AuthProvider, type Permission } from '../src/features/Auth';
 import { _internalConfigurationContextProvider as ConfigurationContextProvider } from '../src/features/Configuration';
+import { NotificationsProvider } from '../src/features/Notifications';
+import { StrapiAppProvider } from '../src/features/StrapiApp';
 import { reducer as appReducer } from '../src/reducer';
 import { adminApi } from '../src/services/api';
 
@@ -48,9 +47,40 @@ setLogger({
 interface ProvidersProps {
   children: React.ReactNode;
   initialEntries?: MemoryRouterProps['initialEntries'];
+  storeConfig?: Partial<ConfigureStoreOptions>;
+  permissions?: Permission[] | ((defaultPermissions: Permission[]) => Permission[] | undefined);
 }
 
-const Providers = ({ children, initialEntries }: ProvidersProps) => {
+const defaultTestStoreConfig = {
+  preloadedState: initialState,
+  reducer: {
+    [adminApi.reducerPath]: adminApi.reducer,
+    admin_app: appReducer,
+  },
+  // @ts-expect-error – this fails.
+  middleware: (getDefaultMiddleware) => [
+    ...getDefaultMiddleware({
+      // Disable timing checks for test env
+      immutableCheck: false,
+      serializableCheck: false,
+    }),
+    adminApi.middleware,
+  ],
+};
+
+const DEFAULT_PERMISSIONS = [
+  ...fixtures.permissions.allPermissions,
+  {
+    id: 314,
+    action: 'admin::users.read',
+    subject: null,
+    properties: {},
+    conditions: [],
+    actionParameters: {},
+  },
+];
+
+const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: ProvidersProps) => {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
@@ -60,80 +90,98 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
   });
 
   const store = configureStore({
-    // @ts-expect-error – we've not filled up the entire initial state.
-    preloadedState: initialState,
-    reducer: {
-      [adminApi.reducerPath]: adminApi.reducer,
-      admin_app: appReducer,
-      rbacProvider: RBACReducer,
-      'content-manager_app': cmAppReducer,
-      [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-      'content-manager': contentManagerReducer,
-    },
-    // @ts-expect-error – this fails.
-    middleware: (getDefaultMiddleware) => [
-      ...getDefaultMiddleware({
-        // Disable timing checks for test env
-        immutableCheck: false,
-        serializableCheck: false,
-      }),
-      adminApi.middleware,
-      contentManagerApi.middleware,
-    ],
+    ...defaultTestStoreConfig,
+    ...storeConfig,
   });
+
+  const allPermissions =
+    typeof permissions === 'function'
+      ? permissions(DEFAULT_PERMISSIONS)
+      : [...DEFAULT_PERMISSIONS, ...permissions];
 
   const router = createMemoryRouter(
     [
       {
         path: '/*',
         element: (
-          <Provider store={store}>
-            <AuthProvider>
-              <QueryClientProvider client={queryClient}>
-                <DndProvider backend={HTML5Backend}>
-                  <LanguageProvider messages={{}}>
-                    <Theme
-                      themes={{
-                        dark: darkTheme,
-                        light: lightTheme,
-                      }}
-                    >
-                      <NotificationsProvider>
-                        <RBACContext.Provider
-                          value={{
-                            refetchPermissions: jest.fn(),
-                            allPermissions: [
-                              ...fixtures.permissions.allPermissions,
-                              {
-                                id: 314,
-                                action: 'admin::users.read',
-                                subject: null,
-                                properties: {},
-                                conditions: [],
-                                actionParameters: {},
-                              },
-                            ] as Permission[],
-                          }}
-                        >
+          <StrapiAppProvider
+            components={{}}
+            rbac={new RBAC()}
+            customFields={{
+              customFields: {},
+              get: jest.fn().mockReturnValue({
+                name: 'color',
+                pluginId: 'mycustomfields',
+                type: 'text',
+                icon: jest.fn(),
+                intlLabel: {
+                  id: 'mycustomfields.color.label',
+                  defaultMessage: 'Color',
+                },
+                intlDescription: {
+                  id: 'mycustomfields.color.description',
+                  defaultMessage: 'Select any color',
+                },
+                components: {
+                  Input: jest.fn().mockResolvedValue({ default: jest.fn() }),
+                },
+              }),
+              getAll: jest.fn(),
+              register: jest.fn(),
+            }}
+            fields={{}}
+            menu={[]}
+            getAdminInjectedComponents={jest.fn()}
+            getPlugin={jest.fn()}
+            plugins={{}}
+            runHookParallel={jest.fn()}
+            runHookWaterfall={jest.fn().mockImplementation((_name, initialValue) => initialValue)}
+            runHookSeries={jest.fn()}
+            settings={{}}
+          >
+            <Provider store={store}>
+              <AuthProvider _defaultPermissions={allPermissions}>
+                <QueryClientProvider client={queryClient}>
+                  <DndProvider backend={HTML5Backend}>
+                    <LanguageProvider messages={{}}>
+                      <Theme
+                        themes={{
+                          dark: darkTheme,
+                          light: lightTheme,
+                        }}
+                      >
+                        <NotificationsProvider>
                           <ConfigurationContextProvider
                             showReleaseNotification={false}
                             showTutorials={false}
                             logos={{
-                              auth: { default: '' },
-                              menu: { default: '' },
+                              auth: { default: 'default' },
+                              menu: { default: 'default' },
                             }}
                             updateProjectSettings={jest.fn()}
                           >
-                            {children}
+                            <AppInfoProvider
+                              autoReload
+                              useYarn
+                              dependencies={{
+                                '@strapi/plugin-documentation': '4.2.0',
+                                '@strapi/provider-upload-cloudinary': '4.2.0',
+                              }}
+                              strapiVersion="4.1.0"
+                              communityEdition
+                              shouldUpdateStrapi={false}
+                            >
+                              {children}
+                            </AppInfoProvider>
                           </ConfigurationContextProvider>
-                        </RBACContext.Provider>
-                      </NotificationsProvider>
-                    </Theme>
-                  </LanguageProvider>
-                </DndProvider>
-              </QueryClientProvider>
-            </AuthProvider>
-          </Provider>
+                        </NotificationsProvider>
+                      </Theme>
+                    </LanguageProvider>
+                  </DndProvider>
+                </QueryClientProvider>
+              </AuthProvider>
+            </Provider>
+          </StrapiAppProvider>
         ),
       },
     ],
@@ -153,43 +201,62 @@ export interface RenderOptions {
   renderOptions?: RTLRenderOptions;
   userEventOptions?: Parameters<typeof userEvent.setup>[0];
   initialEntries?: MemoryRouterProps['initialEntries'];
+  providerOptions?: Pick<ProvidersProps, 'storeConfig' | 'permissions'>;
 }
 
+/**
+ * @alpha
+ * @description A custom render function that wraps the component with the necessary providers,
+ * for use of testing components within the Strapi Admin.
+ */
 const render = (
   ui: React.ReactElement,
-  { renderOptions, userEventOptions, initialEntries }: RenderOptions = {}
+  { renderOptions, userEventOptions, initialEntries, providerOptions }: RenderOptions = {}
 ): RenderResult & { user: ReturnType<typeof userEvent.setup> } => {
   const { wrapper: Wrapper = fallbackWrapper, ...restOptions } = renderOptions ?? {};
 
   return {
     ...renderRTL(ui, {
       wrapper: ({ children }) => (
-        <Providers initialEntries={initialEntries}>
+        <Providers initialEntries={initialEntries} {...providerOptions}>
           <Wrapper>{children}</Wrapper>
         </Providers>
       ),
       ...restOptions,
     }),
-    user: userEvent.setup(userEventOptions),
+    user: userEvent.setup({
+      skipHover: true,
+      ...userEventOptions,
+    }),
   };
 };
 
+/**
+ * @alpha
+ * @description A custom render-hook function that wraps the component with the necessary providers,
+ * for use of testing hooks within the Strapi Admin.
+ */
 const renderHook = <
   Result,
   Props,
   Q extends Queries,
   Container extends Element | DocumentFragment = HTMLElement,
-  BaseElement extends Element | DocumentFragment = Container
+  BaseElement extends Element | DocumentFragment = Container,
 >(
   hook: (initialProps: Props) => Result,
   options?: RenderHookOptions<Props, Q, Container, BaseElement> &
-    Pick<RenderOptions, 'initialEntries'>
+    Pick<RenderOptions, 'initialEntries' | 'providerOptions'>
 ): RenderHookResult<Result, Props> => {
-  const { wrapper: Wrapper = fallbackWrapper, initialEntries, ...restOptions } = options ?? {};
+  const {
+    wrapper: Wrapper = fallbackWrapper,
+    initialEntries,
+    providerOptions,
+    ...restOptions
+  } = options ?? {};
 
   return renderHookRTL(hook, {
     wrapper: ({ children }) => (
-      <Providers initialEntries={initialEntries}>
+      <Providers initialEntries={initialEntries} {...providerOptions}>
         <Wrapper>{children}</Wrapper>
       </Providers>
     ),
@@ -197,4 +264,4 @@ const renderHook = <
   });
 };
 
-export { render, renderHook, waitFor, server, act, screen, fireEvent };
+export { render, renderHook, waitFor, server, act, screen, fireEvent, defaultTestStoreConfig };

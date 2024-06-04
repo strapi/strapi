@@ -1,9 +1,10 @@
 import { IconButton } from '@strapi/design-system';
-import { useClipboard, useNotification } from '@strapi/helper-plugin';
 import { Duplicate } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { ContentBox } from '../../../../../components/ContentBox';
+import { useNotification } from '../../../../../features/Notifications';
+import { useClipboard } from '../../../../../hooks/useClipboard';
 
 interface MagicLinkWrapperProps {
   children: string;
@@ -11,7 +12,7 @@ interface MagicLinkWrapperProps {
 }
 
 const MagicLinkWrapper = ({ children, target }: MagicLinkWrapperProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { copy } = useClipboard();
 
@@ -24,14 +25,19 @@ const MagicLinkWrapper = ({ children, target }: MagicLinkWrapperProps) => {
     const didCopy = await copy(target);
 
     if (didCopy) {
-      toggleNotification({ type: 'info', message: { id: 'notification.link-copied' } });
+      toggleNotification({
+        type: 'info',
+        message: formatMessage({ id: 'notification.link-copied' }),
+      });
     }
   };
 
   return (
     <ContentBox
       endAction={
-        <IconButton label={copyLabel} noBorder icon={<Duplicate />} onClick={handleClick} />
+        <IconButton label={copyLabel} borderWidth={0} onClick={handleClick}>
+          <Duplicate />
+        </IconButton>
       }
       title={target}
       titleEllipsis

@@ -2,8 +2,8 @@ import os from 'node:os';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
-import { strapiFactory } from '@strapi/core';
-import { Strapi, FeaturesService } from '@strapi/types';
+import { createStrapi } from '@strapi/core';
+import { Core, Modules } from '@strapi/types';
 
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
@@ -28,7 +28,7 @@ interface BuildContext<TOptions = unknown> extends BaseContext {
   /**
    * Features object with future flags
    */
-  features?: FeaturesService['config'];
+  features?: Modules.Features.FeaturesService['config'];
   /**
    * The build options
    */
@@ -41,7 +41,7 @@ interface BuildContext<TOptions = unknown> extends BaseContext {
 }
 
 interface CreateBuildContextArgs<TOptions = unknown> extends CLIContext {
-  strapi?: Strapi;
+  strapi?: Core.Strapi;
   options?: TOptions;
 }
 
@@ -66,7 +66,7 @@ const createBuildContext = async <TOptions extends BaseOptions>({
    */
   const strapiInstance =
     strapi ??
-    strapiFactory({
+    createStrapi({
       // Directories
       appDir: cwd,
       distDir: tsconfig?.config.options.outDir ?? '',

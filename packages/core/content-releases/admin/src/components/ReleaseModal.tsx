@@ -15,9 +15,10 @@ import {
   TimePicker,
   Combobox,
   ComboboxOption,
+  Field,
 } from '@strapi/design-system';
-import { formatISO, parse } from 'date-fns';
-import { zonedTimeToUtc } from 'date-fns-tz';
+import { formatISO } from 'date-fns';
+import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { Formik, Form, useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
@@ -28,7 +29,7 @@ import { getTimezoneOffset } from '../utils/time';
 
 export interface FormValues {
   name: string;
-  date: Date | null;
+  date?: string;
   time: string;
   timezone: string | null;
   isScheduled?: boolean;
@@ -51,7 +52,6 @@ export const ReleaseModal = ({
   const { formatMessage } = useIntl();
   const { pathname } = useLocation();
   const isCreatingRelease = pathname === `/plugins/${pluginId}`;
-  const IsSchedulingEnabled = window.strapi.future.isEnabled('contentReleasesScheduling');
   // Set default first timezone from the list if no system timezone detected
   const { timezoneList, systemTimezone = { value: 'UTC+00:00-Africa/Abidjan ' } } = getTimezones(
     initialValues.scheduledAt ? new Date(initialValues.scheduledAt) : new Date()
@@ -63,9 +63,8 @@ export const ReleaseModal = ({
   const getScheduledTimestamp = (values: FormValues) => {
     const { date, time, timezone } = values;
     if (!date || !time || !timezone) return null;
-    const formattedDate = parse(time, 'HH:mm', new Date(date));
-    const timezoneWithoutOffset = timezone.split('_')[1];
-    return zonedTimeToUtc(formattedDate, timezoneWithoutOffset);
+    const timezoneWithoutOffset = timezone.split('&')[1];
+    return zonedTimeToUtc(`${date} ${time}`, timezoneWithoutOffset);
   };
 
   /**
@@ -73,7 +72,7 @@ export const ReleaseModal = ({
    */
   const getTimezoneWithOffset = () => {
     const currentTimezone = timezoneList.find(
-      (timezone) => timezone.value.split('_')[1] === initialValues.timezone
+      (timezone) => timezone.value.split('&')[1] === initialValues.timezone
     );
     return currentTimezone?.value || systemTimezone.value;
   };
@@ -96,7 +95,7 @@ export const ReleaseModal = ({
         onSubmit={(values) => {
           handleSubmit({
             ...values,
-            timezone: values.timezone ? values.timezone.split('_')[1] : null,
+            timezone: values.timezone ? values.timezone.split('&')[1] : null,
             scheduledAt: values.isScheduled ? getScheduledTimestamp(values) : null,
           });
         }}
@@ -107,68 +106,66 @@ export const ReleaseModal = ({
         validationSchema={RELEASE_SCHEMA}
         validateOnChange={false}
       >
-        {({ values, errors, handleChange, setFieldValue }) => (
-          <Form>
-            <ModalBody>
-              <Flex direction="column" alignItems="stretch" gap={6}>
-                <TextInput
-                  label={formatMessage({
-                    id: 'content-releases.modal.form.input.label.release-name',
-                    defaultMessage: 'Name',
-                  })}
-                  name="name"
-                  value={values.name}
-                  error={errors.name}
-                  onChange={handleChange}
-                  required
-                />
-                {/* Remove future flag check after Scheduling Beta release */}
-                {IsSchedulingEnabled && (
-                  <>
-                    <Box width="max-content">
-                      <Checkbox
-                        name="isScheduled"
-                        value={values.isScheduled}
-                        onChange={(event) => {
-                          setFieldValue('isScheduled', event.target.checked);
-                          if (!event.target.checked) {
-                            // Clear scheduling info from a release on unchecking schedule release, which reset scheduling info in DB
-                            setFieldValue('date', null);
-                            setFieldValue('time', '');
-                            setFieldValue('timezone', null);
-                          } else {
-                            // On ticking back schedule release date, time and timezone should be restored to the initial state
-                            setFieldValue('date', initialValues.date);
-                            setFieldValue('time', initialValues.time);
-                            setFieldValue(
-                              'timezone',
-                              initialValues.timezone ?? systemTimezone?.value
-                            );
-                          }
-                        }}
+        {({ values, errors, handleChange, setFieldValue }) => {
+          return (
+            <Form>
+              <ModalBody>
+                <Flex direction="column" alignItems="stretch" gap={6}>
+                  <Field.Root name="name" error={errors.name} required>
+                    <Field.Label>
+                      {formatMessage({
+                        id: 'content-releases.modal.form.input.label.release-name',
+                        defaultMessage: 'Name',
+                      })}
+                    </Field.Label>
+                    <TextInput value={values.name} onChange={handleChange} />
+                    <Field.Error />
+                  </Field.Root>
+                  <Box width="max-content">
+                    <Checkbox
+                      name="isScheduled"
+                      value={values.isScheduled}
+                      onChange={(event) => {
+                        setFieldValue('isScheduled', event.target.checked);
+                        if (!event.target.checked) {
+                          // Clear scheduling info from a release on unchecking schedule release, which reset scheduling info in DB
+                          setFieldValue('date', null);
+                          setFieldValue('time', '');
+                          setFieldValue('timezone', null);
+                        } else {
+                          // On ticking back schedule release date, time and timezone should be restored to the initial state
+                          setFieldValue('date', initialValues.date);
+                          setFieldValue('time', initialValues.time);
+                          setFieldValue(
+                            'timezone',
+                            initialValues.timezone ?? systemTimezone?.value
+                          );
+                        }
+                      }}
+                    >
+                      <Typography
+                        textColor={values.isScheduled ? 'primary600' : 'neutral800'}
+                        fontWeight={values.isScheduled ? 'semiBold' : 'regular'}
                       >
-                        <Typography
-                          textColor={values.isScheduled ? 'primary600' : 'neutral800'}
-                          fontWeight={values.isScheduled ? 'semiBold' : 'regular'}
-                        >
-                          {formatMessage({
-                            id: 'modal.form.input.label.schedule-release',
-                            defaultMessage: 'Schedule release',
-                          })}
-                        </Typography>
-                      </Checkbox>
-                    </Box>
-                    {values.isScheduled && (
-                      <>
-                        <Flex gap={4} alignItems="start">
-                          <Box width="100%">
-                            <DatePicker
-                              label={formatMessage({
+                        {formatMessage({
+                          id: 'modal.form.input.label.schedule-release',
+                          defaultMessage: 'Schedule release',
+                        })}
+                      </Typography>
+                    </Checkbox>
+                  </Box>
+                  {values.isScheduled && (
+                    <>
+                      <Flex gap={4} alignItems="start">
+                        <Box width="100%">
+                          <Field.Root name="date" error={errors.date} required>
+                            <Field.Label>
+                              {formatMessage({
                                 id: 'content-releases.modal.form.input.label.date',
                                 defaultMessage: 'Date',
                               })}
-                              name="date"
-                              error={errors.date}
+                            </Field.Label>
+                            <DatePicker
                               onChange={(date) => {
                                 const isoFormatDate = date
                                   ? formatISO(date, { representation: 'date' })
@@ -182,18 +179,21 @@ export const ReleaseModal = ({
                               onClear={() => {
                                 setFieldValue('date', null);
                               }}
-                              selectedDate={values.date || undefined}
-                              required
+                              value={values.date ? new Date(values.date) : new Date()}
+                              minDate={utcToZonedTime(new Date(), values.timezone.split('&')[1])}
                             />
-                          </Box>
-                          <Box width="100%">
-                            <TimePicker
-                              label={formatMessage({
+                            <Field.Error />
+                          </Field.Root>
+                        </Box>
+                        <Box width="100%">
+                          <Field.Root name="time" error={errors.time} required>
+                            <Field.Label>
+                              {formatMessage({
                                 id: 'content-releases.modal.form.input.label.time',
                                 defaultMessage: 'Time',
                               })}
-                              name="time"
-                              error={errors.time}
+                            </Field.Label>
+                            <TimePicker
                               onChange={(time) => {
                                 setFieldValue('time', time);
                               }}
@@ -205,37 +205,37 @@ export const ReleaseModal = ({
                                 setFieldValue('time', '');
                               }}
                               value={values.time || undefined}
-                              required
                             />
-                          </Box>
-                        </Flex>
-                        <TimezoneComponent timezoneOptions={timezoneList} />
-                      </>
-                    )}
-                  </>
-                )}
-              </Flex>
-            </ModalBody>
-            <ModalFooter
-              startActions={
-                <Button onClick={handleClose} variant="tertiary" name="cancel">
-                  {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-                </Button>
-              }
-              endActions={
-                <Button name="submit" loading={isLoading} type="submit">
-                  {formatMessage(
-                    {
-                      id: 'content-releases.modal.form.button.submit',
-                      defaultMessage: '{isCreatingRelease, select, true {Continue} other {Save}}',
-                    },
-                    { isCreatingRelease: isCreatingRelease }
+                            <Field.Error />
+                          </Field.Root>
+                        </Box>
+                      </Flex>
+                      <TimezoneComponent timezoneOptions={timezoneList} />
+                    </>
                   )}
-                </Button>
-              }
-            />
-          </Form>
-        )}
+                </Flex>
+              </ModalBody>
+              <ModalFooter
+                startActions={
+                  <Button onClick={handleClose} variant="tertiary" name="cancel">
+                    {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+                  </Button>
+                }
+                endActions={
+                  <Button name="submit" loading={isLoading} type="submit">
+                    {formatMessage(
+                      {
+                        id: 'content-releases.modal.form.button.submit',
+                        defaultMessage: '{isCreatingRelease, select, true {Continue} other {Save}}',
+                      },
+                      { isCreatingRelease: isCreatingRelease }
+                    )}
+                  </Button>
+                }
+              />
+            </Form>
+          );
+        }}
       </Formik>
     </ModalLayout>
   );
@@ -255,12 +255,12 @@ const getTimezones = (selectedDate: Date) => {
     // a four digit string e.g. +05:00 or -08:00
     const utcOffset = getTimezoneOffset(timezone, selectedDate);
 
-    // Offset and timezone are concatenated with '_', so to split and save the required timezone in DB
-    return { offset: utcOffset, value: `${utcOffset}_${timezone}` } satisfies ITimezoneOption;
+    // Offset and timezone are concatenated with '&', so to split and save the required timezone in DB
+    return { offset: utcOffset, value: `${utcOffset}&${timezone}` } satisfies ITimezoneOption;
   });
 
   const systemTimezone = timezoneList.find(
-    (timezone) => timezone.value.split('_')[1] === Intl.DateTimeFormat().resolvedOptions().timeZone
+    (timezone) => timezone.value.split('&')[1] === Intl.DateTimeFormat().resolvedOptions().timeZone
   );
 
   return { timezoneList, systemTimezone };
@@ -279,7 +279,7 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
 
       const updatedTimezone =
         values.timezone &&
-        timezoneList.find((tz) => tz.value.split('_')[1] === values.timezone!.split('_')[1]);
+        timezoneList.find((tz) => tz.value.split('&')[1] === values.timezone!.split('&')[1]);
       if (updatedTimezone) {
         setFieldValue('timezone', updatedTimezone!.value);
       }
@@ -287,31 +287,34 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
   }, [setFieldValue, values.date, values.timezone]);
 
   return (
-    <Combobox
-      label={formatMessage({
-        id: 'content-releases.modal.form.input.label.timezone',
-        defaultMessage: 'Timezone',
-      })}
-      name="timezone"
-      value={values.timezone || undefined}
-      textValue={values.timezone ? values.timezone.replace('_', ' ') : undefined} // textValue is required to show the updated DST timezone
-      onChange={(timezone) => {
-        setFieldValue('timezone', timezone);
-      }}
-      onTextValueChange={(timezone) => {
-        setFieldValue('timezone', timezone);
-      }}
-      onClear={() => {
-        setFieldValue('timezone', '');
-      }}
-      error={errors.timezone}
-      required
-    >
-      {timezoneList.map((timezone) => (
-        <ComboboxOption key={timezone.value} value={timezone.value}>
-          {timezone.value.replace('_', ' ')}
-        </ComboboxOption>
-      ))}
-    </Combobox>
+    <Field.Root name="timezone" error={errors.timezone} required>
+      <Field.Label>
+        {formatMessage({
+          id: 'content-releases.modal.form.input.label.timezone',
+          defaultMessage: 'Timezone',
+        })}
+      </Field.Label>
+      <Combobox
+        autocomplete={{ type: 'list', filter: 'contains' }}
+        value={values.timezone || undefined}
+        textValue={values.timezone ? values.timezone.replace(/&/, ' ') : undefined} // textValue is required to show the updated DST timezone
+        onChange={(timezone) => {
+          setFieldValue('timezone', timezone);
+        }}
+        onTextValueChange={(timezone) => {
+          setFieldValue('timezone', timezone);
+        }}
+        onClear={() => {
+          setFieldValue('timezone', '');
+        }}
+      >
+        {timezoneList.map((timezone) => (
+          <ComboboxOption key={timezone.value} value={timezone.value}>
+            {timezone.value.replace(/&/, ' ')}
+          </ComboboxOption>
+        ))}
+      </Combobox>
+      <Field.Error />
+    </Field.Root>
   );
 };

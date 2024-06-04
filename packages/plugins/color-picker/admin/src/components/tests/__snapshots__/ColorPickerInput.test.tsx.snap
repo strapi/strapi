@@ -1,9 +1,48 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
+.c1 {
+  display: flex;
+}
+
+.c3 {
+  background: #ffffff;
+  padding-block: 8px;
+  padding-inline: 8px;
+  border-radius: 4px;
+  border-color: #dcdce4;
+  border: 1px solid #dcdce4;
+  cursor: pointer;
+}
+
+.c0 {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.c4 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+}
+
+.c2 {
+  font-size: 1.2rem;
+  line-height: 1.33;
+  font-weight: 600;
+  color: #32324d;
+}
+
+.c8 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  color: #666687;
+}
+
 .c9 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -13,70 +52,9 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c1 {
-  font-size: 0.75rem;
-  line-height: 1.33;
-  font-weight: 600;
-  color: #32324d;
-}
-
-.c8 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  color: #666687;
-}
-
-.c3 {
-  background: #ffffff;
-  padding: 8px;
-  border-radius: 4px;
-  border-color: #dcdce4;
-  border: 1px solid #dcdce4;
-  cursor: pointer;
-}
-
-.c0 {
-  -webkit-align-items: stretch;
-  -webkit-box-align: stretch;
-  -ms-flex-align: stretch;
-  align-items: stretch;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.c4 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
 .c5 {
   position: relative;
   outline: none;
-}
-
-.c5 > svg {
-  height: 12px;
-  width: 12px;
-}
-
-.c5 > svg > g,
-.c5 > svg path {
-  fill: #ffffff;
 }
 
 .c5[aria-disabled='true'] {
@@ -84,9 +62,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
 }
 
 .c5:after {
-  -webkit-transition-property: all;
   transition-property: all;
-  -webkit-transition-duration: 0.2s;
   transition-duration: 0.2s;
   border-radius: 8px;
   content: '';
@@ -113,38 +89,18 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c2 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
 .c7 {
   border-radius: 50%;
   width: 20px;
   height: 20px;
   margin-right: 10px;
   background-color: #000000;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .c6 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
   justify-content: space-between;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
 }
 
@@ -153,7 +109,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   height: 8px;
 }
 
-.c6 svg > path {
+.c6 svg>path {
   fill: #8e8ea9;
   justify-self: flex-end;
 }
@@ -164,14 +120,16 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
     novalidate=""
   >
     <div
-      class=""
+      class="c0"
     >
       <div
         class="c0"
       >
         <label
+          alignitems="center"
           class="c1 c2"
           for="color"
+          id="color-label"
         >
           color-picker
         </label>
@@ -200,24 +158,21 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
           </div>
           <svg
             aria-hidden="true"
-            fill="none"
-            height="1rem"
-            viewBox="0 0 14 8"
-            width="1rem"
+            fill="currentColor"
+            height="16"
+            viewBox="0 0 32 32"
+            width="16"
             xmlns="http://www.w3.org/2000/svg"
           >
             <path
-              clip-rule="evenodd"
-              d="M14 .889a.86.86 0 0 1-.26.625L7.615 7.736A.834.834 0 0 1 7 8a.834.834 0 0 1-.615-.264L.26 1.514A.861.861 0 0 1 0 .889c0-.24.087-.45.26-.625A.834.834 0 0 1 .875 0h12.25c.237 0 .442.088.615.264a.86.86 0 0 1 .26.625Z"
-              fill="#32324D"
-              fill-rule="evenodd"
+              d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
             />
           </svg>
         </button>
       </div>
     </div>
   </form>
-  <div
+  <span
     class="c9"
   >
     <p
@@ -238,6 +193,6 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

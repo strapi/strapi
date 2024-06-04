@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -8,7 +8,7 @@ import { EmptyOrNoPermissions } from '../EmptyOrNoPermissions';
 
 const setup = (props) =>
   render(
-    <ThemeProvider theme={lightTheme}>
+    <DesignSystemProvider>
       <IntlProvider locale="en" messages={{}}>
         <EmptyOrNoPermissions
           onActionClick={() => {}}
@@ -18,7 +18,7 @@ const setup = (props) =>
           {...props}
         />
       </IntlProvider>
-    </ThemeProvider>
+    </DesignSystemProvider>
   );
 
 describe('EmptyOrNoPermissions', () => {

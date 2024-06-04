@@ -1,19 +1,25 @@
 import { errors } from '@strapi/utils';
-import { Schema, Common, Documents } from '@strapi/types';
+import type { Modules, Struct, UID } from '@strapi/types';
 
-type PaginatedDocuments = Documents.PaginatedResult<Common.UID.Schema>;
-type PaginationQuery = Documents.Params.Pagination.PageNotation;
-type SortQuery = Documents.Params.Sort.StringNotation<Common.UID.Schema> & string;
+type PaginatedDocuments = Modules.Documents.PaginatedResult<UID.Schema>;
+type PaginationQuery = Modules.Documents.Params.Pagination.PageNotation;
+type SortQuery = Modules.Documents.Params.Sort.StringNotation<UID.Schema> & string;
 
 // Admin document response follows the same format as the document service
-type Document = Documents.Document<any>;
+type Document = Modules.Documents.Document<any>;
 type AT_FIELDS = 'updatedAt' | 'createdAt' | 'publishedAt';
 type BY_FIELDS = 'createdBy' | 'updatedBy' | 'publishedBy';
+
+export type AvailableLocaleDocument = Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>;
+export type AvailableStatusDocument = Pick<
+  Document,
+  'id' | 'documentId' | 'locale' | BY_FIELDS | AT_FIELDS
+>;
 export type DocumentMetadata = {
   // All status of the returned locale
-  availableStatus: Pick<Document, 'id' | BY_FIELDS | AT_FIELDS>[];
+  availableStatus: AvailableStatusDocument[];
   // Available locales within the same status of the returned document
-  availableLocales: Pick<Document, 'id' | 'locale' | AT_FIELDS | 'status'>[];
+  availableLocales: AvailableLocaleDocument[];
 };
 
 /**
@@ -51,7 +57,7 @@ export declare namespace FindOne {
 
   export interface Params {
     model: string;
-    documentId: Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -66,7 +72,7 @@ export declare namespace FindOne {
  */
 export declare namespace Create {
   export interface Request {
-    body: Schema.Attributes;
+    body: Struct.SchemaAttributes;
     query: {};
   }
 
@@ -94,7 +100,7 @@ export declare namespace AutoClone {
 
   export interface Params {
     model: string;
-    sourceId: Documents.ID;
+    sourceId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -113,7 +119,7 @@ export declare namespace AutoClone {
  */
 export declare namespace Clone {
   export interface Request {
-    body: Schema.Attributes;
+    body: Struct.SchemaAttributes;
     query: {
       locale?: string | null;
     };
@@ -121,7 +127,7 @@ export declare namespace Clone {
 
   export interface Params {
     model: string;
-    sourceId: Documents.ID;
+    sourceId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -132,7 +138,7 @@ export declare namespace Clone {
 }
 
 /**
- * POST /collection-types/:model/:id
+ * PUT /collection-types/:model/:id
  */
 export declare namespace Update {
   export interface Request {
@@ -144,7 +150,7 @@ export declare namespace Update {
 
   export interface Params {
     model: string;
-    documentId: Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -167,7 +173,7 @@ export declare namespace Delete {
 
   export interface Params {
     model: string;
-    documentId: Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -212,7 +218,7 @@ export declare namespace Publish {
 
   export interface Params {
     model: string;
-    documentId: Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -241,7 +247,7 @@ export declare namespace Unpublish {
 
   export interface Params {
     model: string;
-    documentId: Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -264,7 +270,7 @@ export declare namespace Discard {
 
   export interface Params {
     model: string;
-    documentId: Documents.ID;
+    documentId: Modules.Documents.ID;
   }
 
   export interface Response {
@@ -280,9 +286,11 @@ export declare namespace Discard {
 export declare namespace BulkDelete {
   export interface Request {
     body: {
-      documentIds: Documents.ID[];
+      documentIds: Modules.Documents.ID[];
     };
-    query: {};
+    query: {
+      locale?: string;
+    };
   }
 
   export interface Params {
@@ -303,9 +311,13 @@ export declare namespace BulkDelete {
 export declare namespace BulkPublish {
   export interface Request {
     body: {
-      documentIds: Documents.ID[];
+      documentIds: Modules.Documents.ID[];
     };
-    query: {};
+    query: {
+      // If not provided, the default locale will be used
+      // Otherwise specify the locales to publish of the documents
+      locale?: string | string[] | null;
+    };
   }
 
   export interface Params {
@@ -313,7 +325,9 @@ export declare namespace BulkPublish {
   }
 
   export interface Response {
-    count: number;
+    data: {
+      count: number;
+    };
     error?: errors.ApplicationError | errors.YupValidationError;
   }
 }
@@ -324,7 +338,7 @@ export declare namespace BulkPublish {
 export declare namespace BulkUnpublish {
   export interface Request {
     body: {
-      documentIds: Documents.ID[];
+      documentIds: Modules.Documents.ID[];
     };
     query: {};
   }
@@ -348,6 +362,7 @@ export declare namespace CountDraftRelations {
   export interface Request {
     body: {};
     query: {
+      // Count the draft relations of one entity, locale + documentId
       locale?: string | null;
     };
   }
@@ -369,8 +384,10 @@ export declare namespace CountManyEntriesDraftRelations {
   export interface Request {
     body: {};
     query: {
-      documentIds?: Documents.ID[];
-      locale?: string;
+      // We can use this endpoint to count the draft relations across multiple
+      // entities (documents + locales).
+      documentIds?: Modules.Documents.ID[];
+      locale?: string | string[] | null;
     };
   }
 

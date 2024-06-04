@@ -1,11 +1,11 @@
 import chalk from 'chalk';
 import Table from 'cli-table3';
 import { Command, Option } from 'commander';
-import { configs, createLogger } from '@strapi/logger';
-import { strapiFactory } from '@strapi/core';
+import { configs, createLogger, type winston } from '@strapi/logger';
+import { createStrapi, compileStrapi } from '@strapi/core';
 import ora from 'ora';
 import { merge } from 'lodash/fp';
-import type { LoadedStrapi, Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 import { engine as engineDataTransfer, strapi as strapiDataTransfer } from '@strapi/data-transfer';
 
 import { readableBytes, exitWith } from './helpers';
@@ -125,7 +125,7 @@ const abortTransfer = async ({
   strapi,
 }: {
   engine: engineDataTransfer.TransferEngine;
-  strapi: LoadedStrapi;
+  strapi: Core.Strapi;
 }) => {
   try {
     await engine.abortTransfer();
@@ -149,12 +149,10 @@ const setSignalHandler = async (
   });
 };
 
-const createStrapiInstance = async (
-  opts: { logLevel?: string } = {}
-): Promise<Strapi & Required<Strapi>> => {
+const createStrapiInstance = async (opts: { logLevel?: string } = {}): Promise<Core.Strapi> => {
   try {
-    const appContext = await strapiFactory.compile();
-    const app = strapiFactory({ ...opts, ...appContext });
+    const appContext = await compileStrapi();
+    const app = createStrapi({ ...opts, ...appContext });
 
     app.log.level = opts.logLevel || 'error';
     return await app.load();
@@ -211,14 +209,23 @@ const errorColors = {
   silly: chalk.yellow,
 } as const;
 
-const formatDiagnostic =
-  (
-    operation: string
-  ): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] =>
-  ({ details, kind }) => {
-    const logger = createLogger(
-      configs.createOutputFileConfiguration(`${operation}_error_log_${Date.now()}.log`)
-    );
+const formatDiagnostic = (
+  operation: string
+): Parameters<engineDataTransfer.TransferEngine['diagnostics']['onDiagnostic']>[0] => {
+  // Create log file for all incoming diagnostics
+  let logger: undefined | winston.Logger;
+  const getLogger = () => {
+    if (!logger) {
+      logger = createLogger(
+        configs.createOutputFileConfiguration(`${operation}_${Date.now()}.log`, { level: 'info' })
+      );
+    }
+    return logger;
+  };
+
+  // We don't want to write a log file until there is something to be logged
+
+  return ({ details, kind }) => {
     try {
       if (kind === 'error') {
         const { message, severity = 'fatal' } = details;
@@ -226,24 +233,25 @@ const formatDiagnostic =
         const colorizeError = errorColors[severity];
         const errorMessage = colorizeError(`[${severity.toUpperCase()}] ${message}`);
 
-        logger.error(errorMessage);
+        getLogger().error(errorMessage);
       }
       if (kind === 'info') {
         const { message, params } = details;
 
         const msg = `${message}\n${params ? JSON.stringify(params, null, 2) : ''}`;
 
-        logger.info(msg);
+        getLogger().info(msg);
       }
       if (kind === 'warning') {
         const { origin, message } = details;
 
-        logger.warn(`(${origin ?? 'transfer'}) ${message}`);
+        getLogger().warn(`(${origin ?? 'transfer'}) ${message}`);
       }
     } catch (err) {
-      logger.error(err);
+      getLogger().error(err);
     }
   };
+};
 
 type Loaders = {
   [key in engineDataTransfer.TransferStage]: ora.Ora;
@@ -328,7 +336,7 @@ const getDiffHandler = (
   ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
-      await abortTransfer({ engine, strapi: strapi as LoadedStrapi });
+      await abortTransfer({ engine, strapi: strapi as Core.Strapi });
       exitWith(1, exitMessageText(action, true));
     });
 
@@ -342,8 +350,8 @@ const getDiffHandler = (
 
         // Catch known features
         if (
-          uid === 'admin::workflow' ||
-          uid === 'admin::workflow-stage' ||
+          uid === 'plugin::review-workflows.workflow' ||
+          uid === 'plugin::review-workflows.workflow-stage' ||
           endPath?.startsWith('strapi_stage') ||
           endPath?.startsWith('strapi_assignee')
         ) {
@@ -385,7 +393,7 @@ const getDiffHandler = (
     );
 
     // reset handler back to normal
-    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as LoadedStrapi }));
+    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Core.Strapi }));
 
     if (confirmed) {
       context.ignoredDiffs = merge(context.diffs, context.ignoredDiffs);
@@ -411,7 +419,7 @@ const getAssetsBackupHandler = (
   ) => {
     // if we abort here, we need to actually exit the process because of conflict with inquirer prompt
     setSignalHandler(async () => {
-      await abortTransfer({ engine, strapi: strapi as LoadedStrapi });
+      await abortTransfer({ engine, strapi: strapi as Core.Strapi });
       exitWith(1, exitMessageText(action, true));
     });
 
@@ -430,7 +438,7 @@ const getAssetsBackupHandler = (
     }
 
     // reset handler back to normal
-    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as LoadedStrapi }));
+    setSignalHandler(() => abortTransfer({ engine, strapi: strapi as Core.Strapi }));
     return next(context);
   };
 };

@@ -1,13 +1,13 @@
 import { intersection, prop } from 'lodash/fp';
 import { relations } from '@strapi/utils';
-import { LoadedStrapi as Strapi, Schema } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import type { Configuration } from '../../../shared/contracts/content-types';
 
 const { getRelationalFields } = relations;
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const sendDidConfigureListView = async (
-    contentType: Schema.ContentType,
+    contentType: Struct.ContentTypeSchema,
     configuration: Configuration
   ) => {
     const displayedFields = prop('length', configuration.layouts.list);

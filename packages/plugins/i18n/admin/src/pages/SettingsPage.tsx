@@ -1,14 +1,14 @@
 import * as React from 'react';
 
-import { ContentLayout, EmptyStateLayout, HeaderLayout, Main } from '@strapi/design-system';
 import {
+  Page,
   useAPIErrorHandler,
-  useFocusWhenNavigate,
   useNotification,
   useRBAC,
-} from '@strapi/helper-plugin';
-import { EmptyDocuments } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+  Layouts,
+} from '@strapi/admin/strapi-admin';
+import { EmptyStateLayout } from '@strapi/design-system';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { CreateLocale } from '../components/CreateLocale';
@@ -18,9 +18,8 @@ import { useGetLocalesQuery } from '../services/locales';
 import { getTranslation } from '../utils/getTranslation';
 
 const SettingsPage = () => {
-  useFocusWhenNavigate();
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { data: locales, isLoading: isLoadingLocales, error } = useGetLocalesQuery();
   const {
@@ -31,7 +30,7 @@ const SettingsPage = () => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -48,8 +47,8 @@ const SettingsPage = () => {
   }
 
   return (
-    <Main tabIndex={-1}>
-      <HeaderLayout
+    <Page.Main tabIndex={-1}>
+      <Layouts.Header
         primaryAction={<CreateLocale disabled={!canCreate} />}
         title={formatMessage({
           id: getTranslation('plugin.name'),
@@ -60,7 +59,7 @@ const SettingsPage = () => {
           defaultMessage: 'Configure the settings',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         {locales.length > 0 ? (
           <LocaleTable locales={locales} canDelete={canDelete} canUpdate={canUpdate} />
         ) : (
@@ -73,8 +72,8 @@ const SettingsPage = () => {
             action={<CreateLocale disabled={!canCreate} variant="secondary" />}
           />
         )}
-      </ContentLayout>
-    </Main>
+      </Layouts.Content>
+    </Page.Main>
   );
 };
 

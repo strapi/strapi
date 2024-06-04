@@ -1,40 +1,31 @@
-import { Common } from '@strapi/types';
-import { errors } from '@strapi/utils';
+import { UID } from '@strapi/types';
 import { LongHandDocument } from './types';
 
-export const isLocalizedContentType = (uid: Common.UID.Schema) => {
+export const isLocalizedContentType = (uid: UID.Schema) => {
   const model = strapi.getModel(uid);
   return strapi.plugin('i18n').service('content-types').isLocalizedContentType(model);
 };
 
 export const getDefaultLocale = () => {
-  // TODO: Fix this
-  // return strapi.plugin('i18n').service('locales').getDefaultLocale();
-  return 'en';
+  return strapi.plugin('i18n').service('locales').getDefaultLocale();
 };
 
 export const getRelationTargetLocale = (
   relation: LongHandDocument,
   opts: {
-    targetUid: Common.UID.Schema;
-    sourceUid: Common.UID.Schema;
+    targetUid: UID.Schema;
+    sourceUid: UID.Schema;
     sourceLocale?: string | null;
   }
 ) => {
-  const defaultLocale = getDefaultLocale();
-  const targetLocale = relation.locale || opts.sourceLocale || defaultLocale;
+  const targetLocale = relation.locale || opts.sourceLocale;
 
   const isTargetLocalized = isLocalizedContentType(opts.targetUid);
   const isSourceLocalized = isLocalizedContentType(opts.sourceUid);
 
-  // Locale validations
+  // Both source and target locales should match
   if (isSourceLocalized && isTargetLocalized) {
-    // Check the targetLocale matches
-    if (targetLocale !== opts.sourceLocale) {
-      throw new errors.ValidationError(
-        `Relation locale does not match the source locale ${JSON.stringify(relation)}`
-      );
-    }
+    return opts.sourceLocale;
   }
 
   if (isTargetLocalized) {

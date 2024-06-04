@@ -1,10 +1,9 @@
-import { Flex, GridItem, Icon, Tooltip, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { pxToRem, useRBAC } from '@strapi/helper-plugin';
-import { ExclamationMarkCircle, ExternalLink } from '@strapi/icons';
+import { Flex, GridItem, Tooltip, Typography, Link } from '@strapi/design-system';
+import { ExternalLink, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
 
+import { useRBAC } from '../../../../../../../../admin/src/hooks/useRBAC';
 import { selectAdminPermissions } from '../../../../../../../../admin/src/selectors';
 import { useLicenseLimits } from '../../../../../hooks/useLicenseLimits';
 
@@ -53,7 +52,7 @@ export const AdminSeatInfoEE = () => {
       </Typography>
       <Flex gap={2}>
         <Flex>
-          <Typography as="p">
+          <Typography tag="p">
             {formatMessage(
               {
                 id: 'Settings.application.ee.admin-seats.count',
@@ -77,17 +76,12 @@ export const AdminSeatInfoEE = () => {
         </Flex>
         {licenseLimitStatus === 'OVER_LIMIT' && (
           <Tooltip
-            description={formatMessage({
+            label={formatMessage({
               id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
               defaultMessage: 'At limit: add seats to invite more users',
             })}
           >
-            <Icon
-              width={pxToRem(14)}
-              height={pxToRem(14)}
-              color="danger500"
-              as={ExclamationMarkCircle}
-            />
+            <WarningCircle width="1.4rem" height="1.4rem" fill="danger500" />
           </Tooltip>
         )}
       </Flex>

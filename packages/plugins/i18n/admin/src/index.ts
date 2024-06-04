@@ -1,9 +1,12 @@
-import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import * as yup from 'yup';
 
 import { CheckboxConfirmation } from './components/CheckboxConfirmation';
-import { DeleteLocaleAction, LocalePickerAction } from './components/CMHeaderActions';
+import {
+  BulkLocalePublishAction,
+  DeleteLocaleAction,
+  LocalePickerAction,
+} from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
   PublishModalAdditionalInfo,
@@ -12,30 +15,30 @@ import {
 import { Initializer } from './components/Initializer';
 import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
+import { mutateEditViewHook } from './contentManagerHooks/editView';
 import { addColumnToTableHook } from './contentManagerHooks/listView';
+import { addLocaleToReleasesHook } from './contentReleasesHooks/releaseDetailsView';
 import { extendCTBAttributeInitialDataMiddleware } from './middlewares/extendCTBAttributeInitialData';
 import { extendCTBInitialDataMiddleware } from './middlewares/extendCTBInitialData';
-import { localePermissionMiddleware } from './middlewares/localePermission';
+import { localeMiddleware } from './middlewares/rbac-middleware';
 import { pluginId } from './pluginId';
 import { i18nApi } from './services/api';
 import { LOCALIZED_FIELDS } from './utils/fields';
 import { getTranslation } from './utils/getTranslation';
+import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
-import type { DocumentActionComponent } from '@strapi/strapi/admin';
+import type { DocumentActionComponent } from '@strapi/content-manager/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {
-    app.addMiddlewares([
-      extendCTBAttributeInitialDataMiddleware,
-      extendCTBInitialDataMiddleware,
-      localePermissionMiddleware,
-    ]);
+    app.addMiddlewares([extendCTBAttributeInitialDataMiddleware, extendCTBInitialDataMiddleware]);
     app.addMiddlewares([() => i18nApi.middleware]);
     app.addReducers({
       [i18nApi.reducerPath]: i18nApi.reducer,
     });
+    app.addRBACMiddleware([localeMiddleware]);
     app.registerPlugin({
       id: pluginId,
       initializer: Initializer,
@@ -46,6 +49,12 @@ export default {
   bootstrap(app: any) {
     // // Hook that adds a column into the CM's LV table
     app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
+    app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewHook);
+    // Hooks that checks if the locale is present in the release
+    app.registerHook(
+      'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
+      addLocaleToReleasesHook
+    );
 
     // Add the settings link
     app.addSettingsLink('global', {
@@ -69,24 +78,31 @@ export default {
       return actions;
     });
 
-    app.injectContentManagerComponent('listView', 'actions', {
+    contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
+      // When enabled the bulk locale publish action should be the first action
+      // in 'More Document Actions' and therefore the third action in the array
+      actions.splice(2, 0, BulkLocalePublishAction);
+      return actions;
+    });
+
+    contentManager.injectComponent('listView', 'actions', {
       name: 'i18n-locale-filter',
       Component: LocalePicker,
     });
 
-    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
-      name: 'i18n-delete-bullets-in-modal',
-      Component: DeleteModalAdditionalInfo,
-    });
-
-    app.injectContentManagerComponent('listView', 'publishModalAdditionalInfos', {
+    contentManager.injectComponent('listView', 'publishModalAdditionalInfos', {
       name: 'i18n-publish-bullets-in-modal',
       Component: PublishModalAdditionalInfo,
     });
 
-    app.injectContentManagerComponent('listView', 'unpublishModalAdditionalInfos', {
+    contentManager.injectComponent('listView', 'unpublishModalAdditionalInfos', {
       name: 'i18n-unpublish-bullets-in-modal',
       Component: UnpublishModalAdditionalInfo,
+    });
+
+    contentManager.injectComponent('listView', 'deleteModalAdditionalInfos', {
+      name: 'i18n-delete-bullets-in-modal',
+      Component: DeleteModalAdditionalInfo,
     });
 
     const ctbPlugin = app.getPlugin('content-type-builder');

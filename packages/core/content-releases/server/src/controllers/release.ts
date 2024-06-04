@@ -11,6 +11,7 @@ import type {
   DeleteRelease,
   GetContentTypeEntryReleases,
   GetReleases,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -19,7 +20,7 @@ type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
 const releaseController = {
   async findMany(ctx: Koa.Context) {
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: RELEASE_MODEL_UID,
     });
@@ -62,7 +63,7 @@ const releaseController = {
         };
       });
 
-      const pendingReleasesCount = await strapi.query(RELEASE_MODEL_UID).count({
+      const pendingReleasesCount = await strapi.db.query(RELEASE_MODEL_UID).count({
         where: {
           releasedAt: null,
         },
@@ -89,7 +90,7 @@ const releaseController = {
     const sanitizedRelease = {
       ...release,
       createdBy: release.createdBy
-        ? strapi.admin.services.user.sanitizeUser(release.createdBy)
+        ? strapi.service('admin::user').sanitizeUser(release.createdBy)
         : null,
     };
 
@@ -106,6 +107,42 @@ const releaseController = {
     ctx.body = { data };
   },
 
+  async mapEntriesToReleases(ctx: Koa.Context) {
+    const { contentTypeUid, entriesIds } = ctx.query;
+
+    if (!contentTypeUid || !entriesIds) {
+      throw new errors.ValidationError('Missing required query parameters');
+    }
+
+    const releaseService = getService('release', { strapi });
+
+    const releasesWithActions = await releaseService.findManyWithContentTypeEntryAttached(
+      contentTypeUid,
+      entriesIds
+    );
+
+    const mappedEntriesInReleases = releasesWithActions.reduce(
+      // TODO: Fix for v5 removed mappedEntriedToRelease
+      (acc: MapEntriesToReleases.Response['data'], release: Release) => {
+        release.actions.forEach((action) => {
+          if (!acc[action.entry.id]) {
+            acc[action.entry.id] = [{ id: release.id, name: release.name }];
+          } else {
+            acc[action.entry.id].push({ id: release.id, name: release.name });
+          }
+        });
+
+        return acc;
+      },
+      // TODO: Fix for v5 removed mappedEntriedToRelease
+      {} as MapEntriesToReleases.Response['data']
+    );
+
+    ctx.body = {
+      data: mappedEntriesInReleases,
+    };
+  },
+
   async create(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
     const releaseArgs = ctx.request.body as CreateRelease.Request['body'];
@@ -115,14 +152,14 @@ const releaseController = {
     const releaseService = getService('release', { strapi });
     const release = await releaseService.create(releaseArgs, { user });
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: RELEASE_MODEL_UID,
     });
 
-    ctx.body = {
+    ctx.created({
       data: await permissionsManager.sanitizeOutput(release),
-    };
+    });
   },
 
   async update(ctx: Koa.Context) {
@@ -135,7 +172,7 @@ const releaseController = {
     const releaseService = getService('release', { strapi });
     const release = await releaseService.update(id, releaseArgs, { user });
 
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: RELEASE_MODEL_UID,
     });

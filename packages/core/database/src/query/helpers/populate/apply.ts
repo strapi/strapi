@@ -6,6 +6,11 @@ import type { Database } from '../../..';
 import type { Meta } from '../../../metadata';
 import { ID, RelationalAttribute, Relation } from '../../../types';
 
+// We must select the join column id, however whatever it is named will overwrite an attribute of the same name
+// Therefore, we will prefix with something unlikely to conflict with a user attribute
+// TODO: ...and completely restrict the strapi_ prefix for an attribute name in the future
+const joinColPrefix = '__strapi' as const;
+
 type Context = {
   db: Database;
   qb: QueryBuilder;
@@ -87,6 +92,8 @@ const XtoOne = async (
 
     const alias = qb.getAlias();
     const joinColAlias = `${alias}.${joinColumnName}`;
+    const joinColRenameAs = `${joinColPrefix}${joinColumnName}`;
+    const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
     const referencedValues = _.uniq(
       results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
@@ -115,10 +122,13 @@ const XtoOne = async (
         .groupBy(joinColAlias)
         .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
-      const map = rows.reduce((map, row) => {
-        map[row[joinColumnName]] = { count: Number(row.count) };
-        return map;
-      }, {} as Record<string, { count: number }>);
+      const map = rows.reduce(
+        (map, row) => {
+          map[row[joinColumnName]] = { count: Number(row.count) };
+          return map;
+        },
+        {} as Record<string, { count: number }>
+      );
 
       results.forEach((result) => {
         result[attributeName] = map[result[referencedColumnName] as string] || { count: 0 };
@@ -146,11 +156,11 @@ const XtoOne = async (
         on: joinTable.on,
         orderBy: joinTable.orderBy,
       })
-      .addSelect(joinColAlias)
+      .addSelect(joinColSelect)
       .where({ [joinColAlias]: referencedValues })
       .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row>(joinColumnName)(rows);
+    const map = _.groupBy<Row>(joinColRenameAs)(rows);
 
     results.forEach((result) => {
       result[attributeName] = fromTargetRow(_.first(map[result[referencedColumnName] as string]));
@@ -203,6 +213,8 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
 
     const alias = qb.getAlias();
     const joinColAlias = `${alias}.${joinColumnName}`;
+    const joinColRenameAs = `${joinColPrefix}${joinColumnName}`;
+    const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
 
     const referencedValues = _.uniq(
       results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
@@ -226,15 +238,18 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
           rootTable: qb.alias,
           on: joinTable.on,
         })
-        .select([joinColAlias, qb.raw('count(*) AS count')])
+        .select([joinColSelect, qb.raw('count(*) AS count')])
         .where({ [joinColAlias]: referencedValues })
         .groupBy(joinColAlias)
         .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
-      const map = rows.reduce((map, row) => {
-        map[row[joinColumnName]] = { count: Number(row.count) };
-        return map;
-      }, {} as Record<string, { count: number }>);
+      const map = rows.reduce(
+        (map, row) => {
+          map[row[joinColRenameAs]] = { count: Number(row.count) };
+          return map;
+        },
+        {} as Record<string, { count: number }>
+      );
 
       results.forEach((result) => {
         result[attributeName] = map[result[referencedColumnName] as string] || { count: 0 };
@@ -261,11 +276,11 @@ const oneToMany = async (input: InputWithTarget<Relation.OneToMany>, ctx: Contex
         on: joinTable.on,
         orderBy: _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy),
       })
-      .addSelect(joinColAlias)
+      .addSelect(joinColSelect)
       .where({ [joinColAlias]: referencedValues })
       .execute<Row[]>({ mapResults: false });
 
-    const map = _.groupBy<Row>(joinColumnName)(rows);
+    const map = _.groupBy<Row>(joinColRenameAs)(rows);
 
     results.forEach((r) => {
       r[attributeName] = fromTargetRow(map[r[referencedColumnName] as string] || []);
@@ -287,6 +302,9 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
 
   const alias = populateQb.getAlias();
   const joinColAlias = `${alias}.${joinColumnName}`;
+  const joinColRenameAs = `${joinColPrefix}${joinColumnName}`;
+  const joinColSelect = `${joinColAlias} as ${joinColRenameAs}`;
+
   const referencedValues = _.uniq(
     results.map((r) => r[referencedColumnName]).filter((value) => !_.isNil(value))
   );
@@ -314,10 +332,13 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
       .groupBy(joinColAlias)
       .execute<Array<{ count: number } & { [key: string]: string }>>({ mapResults: false });
 
-    const map = rows.reduce((map, row) => {
-      map[row[joinColumnName]] = { count: Number(row.count) };
-      return map;
-    }, {} as Record<string, { count: number }>);
+    const map = rows.reduce(
+      (map, row) => {
+        map[row[joinColumnName]] = { count: Number(row.count) };
+        return map;
+      },
+      {} as Record<string, { count: number }>
+    );
 
     results.forEach((result) => {
       result[attributeName] = map[result[referencedColumnName] as string] || { count: 0 };
@@ -344,11 +365,11 @@ const manyToMany = async (input: InputWithTarget<Relation.ManyToMany>, ctx: Cont
       on: joinTable.on,
       orderBy: _.mapValues((v) => populateValue.ordering || v, joinTable.orderBy),
     })
-    .addSelect(joinColAlias)
+    .addSelect(joinColSelect)
     .where({ [joinColAlias]: referencedValues })
     .execute<Row[]>({ mapResults: false });
 
-  const map = _.groupBy<Row>(joinColumnName)(rows);
+  const map = _.groupBy<Row>(joinColRenameAs)(rows);
 
   results.forEach((result) => {
     result[attributeName] = fromTargetRow(map[result[referencedColumnName] as string] || []);

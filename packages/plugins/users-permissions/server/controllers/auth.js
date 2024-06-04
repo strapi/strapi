@@ -22,14 +22,13 @@ const {
   validateChangePasswordBody,
 } = require('./validation/auth');
 
-const { sanitize } = utils;
 const { ApplicationError, ValidationError, ForbiddenError } = utils.errors;
 
 const sanitizeUser = (user, ctx) => {
   const { auth } = ctx.state;
   const userSchema = strapi.getModel('plugin::users-permissions.user');
 
-  return sanitize.contentAPI.output(user, userSchema, { auth });
+  return strapi.contentAPI.sanitize.output(user, userSchema, { auth });
 };
 
 module.exports = {
@@ -52,7 +51,7 @@ module.exports = {
       const { identifier } = params;
 
       // Check if the user exists.
-      const user = await strapi.query('plugin::users-permissions.user').findOne({
+      const user = await strapi.db.query('plugin::users-permissions.user').findOne({
         where: {
           provider,
           $or: [{ email: identifier.toLowerCase() }, { username: identifier }],
@@ -148,7 +147,7 @@ module.exports = {
       throw new ValidationError('Passwords do not match');
     }
 
-    const user = await strapi
+    const user = await strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { resetPasswordToken: code } });
 
@@ -197,10 +196,28 @@ module.exports = {
     }
 
     // Ability to pass OAuth callback dynamically
-    grantConfig[provider].callback =
-      _.get(ctx, 'query.callback') ||
-      _.get(ctx, 'session.grant.dynamic.callback') ||
-      grantConfig[provider].callback;
+    const queryCustomCallback = _.get(ctx, 'query.callback');
+    const dynamicSessionCallback = _.get(ctx, 'session.grant.dynamic.callback');
+
+    const customCallback = queryCustomCallback ?? dynamicSessionCallback;
+
+    // The custom callback is validated to make sure it's not redirecting to an unwanted actor.
+    if (customCallback !== undefined) {
+      try {
+        // We're extracting the callback validator from the plugin config since it can be user-customized
+        const { validate: validateCallback } = strapi
+          .plugin('users-permissions')
+          .config('callback');
+
+        await validateCallback(customCallback, grantConfig[provider]);
+
+        grantConfig[provider].callback = customCallback;
+      } catch (e) {
+        throw new ValidationError('Invalid callback URL provided', { callback: customCallback });
+      }
+    }
+
+    // Build a valid redirect URI for the current provider
     grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
 
     return grant(grantConfig)(ctx, next);
@@ -215,7 +232,7 @@ module.exports = {
     const advancedSettings = await pluginStore.get({ key: 'advanced' });
 
     // Find the user by email.
-    const user = await strapi
+    const user = await strapi.db
       .query('plugin::users-permissions.user')
       .findOne({ where: { email: email.toLowerCase() } });
 
@@ -300,7 +317,7 @@ module.exports = {
 
     await validateRegisterBody(params);
 
-    const role = await strapi
+    const role = await strapi.db
       .query('plugin::users-permissions.role')
       .findOne({ where: { type: settings.default_role } });
 
@@ -319,7 +336,7 @@ module.exports = {
       ],
     };
 
-    const conflictingUserCount = await strapi.query('plugin::users-permissions.user').count({
+    const conflictingUserCount = await strapi.db.query('plugin::users-permissions.user').count({
       where: { ...identifierFilter, provider },
     });
 
@@ -328,7 +345,7 @@ module.exports = {
     }
 
     if (settings.unique_email) {
-      const conflictingUserCount = await strapi.query('plugin::users-permissions.user').count({
+      const conflictingUserCount = await strapi.db.query('plugin::users-permissions.user').count({
         where: { ...identifierFilter },
       });
 
@@ -398,7 +415,7 @@ module.exports = {
   async sendEmailConfirmation(ctx) {
     const { email } = await validateSendEmailConfirmationBody(ctx.request.body);
 
-    const user = await strapi.query('plugin::users-permissions.user').findOne({
+    const user = await strapi.db.query('plugin::users-permissions.user').findOne({
       where: { email: email.toLowerCase() },
     });
 

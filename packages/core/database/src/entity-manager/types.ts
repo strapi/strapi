@@ -38,14 +38,12 @@ export interface Repository {
   createMany(params: Params): Promise<CountResult & { ids: ID[] }>;
   update(params: Params): Promise<any>;
   updateMany(params: Params): Promise<CountResult>;
-  clone(id: ID, params: Params): Promise<any>;
   delete(params: Params): Promise<any>;
   deleteMany(params?: Params): Promise<CountResult>;
   count(params?: Params): Promise<number>;
   attachRelations(id: ID, data: Data): Promise<any>;
   updateRelations(id: ID, data: Data): Promise<any>;
   deleteRelations(id: ID): Promise<any>;
-  cloneRelations(targetId: ID, sourceId: ID, params: Params): Promise<any>;
   populate(entity: Entity, populate: Params['populate']): Promise<any>;
   load(entity: any, field: string | string[], populate?: Params['populate']): Promise<any>;
   loadPages<TField extends string>(
@@ -71,7 +69,6 @@ export interface EntityManager {
   updateMany(uid: string, params: Params): Promise<CountResult>;
   delete(uid: string, params: Params): Promise<any>;
   deleteMany(uid: string, params: Params): Promise<CountResult>;
-  clone(uid: string, cloneId: ID, params: Params): Promise<any>;
   populate(uid: string, entity: Entity, populate: Params['populate']): Promise<Entity>;
   load(
     uid: string,
@@ -92,16 +89,6 @@ export interface EntityManager {
     options?: { transaction?: Knex.Transaction }
   ): Promise<any>;
   deleteRelations(uid: string, id: ID, options?: { transaction?: Knex.Transaction }): Promise<void>;
-  cloneRelations(
-    uid: string,
-    targetId: ID,
-    sourceId: ID,
-    data: any,
-    options?: {
-      cloneAttrs?: string[];
-      transaction?: Knex.Transaction;
-    }
-  ): Promise<any>;
   createQueryBuilder(uid: string): QueryBuilder;
   getRepository(uid: string): Repository;
 }

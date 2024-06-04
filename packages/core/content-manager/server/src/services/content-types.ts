@@ -1,7 +1,7 @@
 import { isNil, mapValues } from 'lodash/fp';
 import { contentTypes as contentTypesUtils } from '@strapi/utils';
 
-import { LoadedStrapi as Strapi, UID, Schema } from '@strapi/types';
+import type { UID, Struct, Core } from '@strapi/types';
 
 import type { ConfigurationUpdate } from './configuration';
 
@@ -19,7 +19,7 @@ const configurationService = createConfigurationService({
   },
 });
 
-const service = ({ strapi }: { strapi: Strapi }) => ({
+const service = ({ strapi }: { strapi: Core.Strapi }) => ({
   findAllContentTypes() {
     const { toContentManagerModel } = getService('data-mapper');
 
@@ -42,7 +42,7 @@ const service = ({ strapi }: { strapi: Strapi }) => ({
     );
   },
 
-  findContentTypesByKind(kind: { kind: Schema.ContentTypeKind | undefined }) {
+  findContentTypesByKind(kind: { kind: Struct.ContentTypeKind | undefined }) {
     if (!kind) {
       return this.findAllContentTypes();
     }
@@ -51,7 +51,7 @@ const service = ({ strapi }: { strapi: Strapi }) => ({
     return this.findAllContentTypes().filter(contentTypesUtils.isKind(kind));
   },
 
-  async findConfiguration(contentType: Schema.ContentType) {
+  async findConfiguration(contentType: Struct.ContentTypeSchema) {
     const configuration = await configurationService.getConfiguration(contentType.uid);
 
     return {
@@ -61,7 +61,7 @@ const service = ({ strapi }: { strapi: Strapi }) => ({
   },
 
   async updateConfiguration(
-    contentType: Schema.ContentType,
+    contentType: Struct.ContentTypeSchema,
     newConfiguration: ConfigurationUpdate
   ) {
     await configurationService.setConfiguration(contentType.uid, newConfiguration);
@@ -69,7 +69,7 @@ const service = ({ strapi }: { strapi: Strapi }) => ({
     return this.findConfiguration(contentType);
   },
 
-  findComponentsConfigurations(contentType: Schema.ContentType) {
+  findComponentsConfigurations(contentType: Struct.ContentTypeSchema) {
     // delegate to componentService
     return getService('components').findComponentsConfigurations(contentType);
   },

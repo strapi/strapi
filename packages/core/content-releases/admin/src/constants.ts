@@ -1,4 +1,4 @@
-import { Permission as StrapiPermission } from '@strapi/helper-plugin';
+import type { Permission as StrapiPermission } from '@strapi/admin/strapi-admin';
 
 export const PERMISSIONS = {
   main: [

@@ -1,24 +1,19 @@
 import * as React from 'react';
 
-import { Box, Button, ContentLayout, Flex, HeaderLayout, Main } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import {
-  useAPIErrorHandler,
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-  translatedErrors,
-} from '@strapi/helper-plugin';
-import { ArrowLeft } from '@strapi/icons';
+import { Box, Button, Flex, Main } from '@strapi/design-system';
 import { Formik, FormikHelpers } from 'formik';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { NavLink, Navigate, useMatch } from 'react-router-dom';
+import { Navigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { BackButton } from '../../../../features/BackButton';
+import { useNotification } from '../../../../features/Notifications';
+import { useTracking } from '../../../../features/Tracking';
 import { useAdminRoles } from '../../../../hooks/useAdminRoles';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import {
   useGetRolePermissionLayoutQuery,
   useGetRolePermissionsQuery,
@@ -26,12 +21,13 @@ import {
   useUpdateRolePermissionsMutation,
 } from '../../../../services/users';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
+import { translatedErrors } from '../../../../utils/translatedErrors';
 
 import { Permissions, PermissionsAPI } from './components/Permissions';
 import { RoleForm } from './components/RoleForm';
 
 const EDIT_ROLE_SCHEMA = yup.object().shape({
-  name: yup.string().required(translatedErrors.required),
+  name: yup.string().required(translatedErrors.required.id),
   description: yup.string().optional(),
 });
 
@@ -44,12 +40,11 @@ interface EditRoleFormValues {
 }
 
 const EditPage = () => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const match = useMatch('/settings/roles/:id');
   const id = match?.params.id;
   const permissionsRef = React.useRef<PermissionsAPI>(null);
-  const { lockApp, unlockApp } = useOverlayBlocker();
   const { trackUsage } = useTracking();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -100,9 +95,6 @@ const EditPage = () => {
     formik: FormikHelpers<EditRoleFormValues>
   ) => {
     try {
-      // @ts-expect-error – This will be fixed in V5
-      lockApp();
-
       const { permissionsToSend, didUpdateConditions } =
         permissionsRef.current?.getPermissions() ?? {};
 
@@ -116,7 +108,7 @@ const EditPage = () => {
           formik.setErrors(formatValidationErrors(res.error));
         } else {
           toggleNotification({
-            type: 'warning',
+            type: 'danger',
             message: formatAPIError(res.error),
           });
         }
@@ -135,7 +127,7 @@ const EditPage = () => {
             formik.setErrors(formatValidationErrors(updateRes.error));
           } else {
             toggleNotification({
-              type: 'warning',
+              type: 'danger',
               message: formatAPIError(updateRes.error),
             });
           }
@@ -154,16 +146,13 @@ const EditPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.success.saved' },
+        message: formatMessage({ id: 'notification.success.saved' }),
       });
     } catch (error) {
       toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
       });
-    } finally {
-      // @ts-expect-error – This will be fixed in V5
-      unlockApp();
     }
   };
 
@@ -175,14 +164,14 @@ const EditPage = () => {
 
   return (
     <Main>
-      <Helmet
-        title={formatMessage(
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Roles',
           }
         )}
-      />
+      </Page.Title>
       <Formik
         enableReinitialize
         initialValues={
@@ -197,7 +186,7 @@ const EditPage = () => {
       >
         {({ handleSubmit, values, errors, handleChange, handleBlur, isSubmitting }) => (
           <form onSubmit={handleSubmit}>
-            <HeaderLayout
+            <Layouts.Header
               primaryAction={
                 <Flex gap={2}>
                   <Button
@@ -221,17 +210,9 @@ const EditPage = () => {
                 id: 'Settings.roles.create.description',
                 defaultMessage: 'Define the rights given to the role',
               })}
-              navigationAction={
-                // @ts-expect-error – the props from the component passed as `as` are not correctly inferred.
-                <Link as={NavLink} startIcon={<ArrowLeft />} to="/settings/roles">
-                  {formatMessage({
-                    id: 'global.back',
-                    defaultMessage: 'Back',
-                  })}
-                </Link>
-              }
+              navigationAction={<BackButton />}
             />
-            <ContentLayout>
+            <Layouts.Content>
               <Flex direction="column" alignItems="stretch" gap={6}>
                 <RoleForm
                   disabled={isFormDisabled}
@@ -250,7 +231,7 @@ const EditPage = () => {
                   />
                 </Box>
               </Flex>
-            </ContentLayout>
+            </Layouts.Content>
           </form>
         )}
       </Formik>

@@ -1,6 +1,13 @@
 import * as React from 'react';
 
 import {
+  useNotification,
+  useAPIErrorHandler,
+  Form,
+  FormHelpers,
+  useAuth,
+} from '@strapi/admin/strapi-admin';
+import {
   Box,
   Button,
   Divider,
@@ -18,12 +25,10 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { Form, FormHelpers } from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 
-import { UpdateLocale, Locale } from '../../../shared/contracts/locales';
+import { Locale, UpdateLocale } from '../../../shared/contracts/locales';
 import { useUpdateLocaleMutation } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';
@@ -53,9 +58,10 @@ const EditLocale = (props: EditLocaleProps) => {
             name: props.name,
           }
         )}
-        icon={<Pencil />}
         borderWidth={0}
-      />
+      >
+        <Pencil />
+      </IconButton>
       {visible ? <EditModal {...props} onClose={() => setVisible(false)} /> : null}
     </>
   );
@@ -76,12 +82,12 @@ type FormValues = UpdateLocale.Request['body'] & { code: string };
  * @description Exported to be used when someone clicks on a table row.
  */
 const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
-  const { refetchPermissions } = useRBACProvider();
+  const refetchPermissions = useAuth('EditModal', (state) => state.refetchPermissions);
   const { formatMessage } = useIntl();
   const titleId = React.useId();
 
@@ -104,7 +110,7 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
         if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         } else {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
         }
 
         return;
@@ -112,21 +118,21 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTranslation('Settings.locales.modal.edit.success'),
           defaultMessage: 'Updated locale',
-        },
+        }),
       });
 
       refetchPermissions();
       onClose();
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred, please try again',
-        },
+        }),
       });
     }
   };
@@ -144,7 +150,7 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
         validationSchema={LOCALE_SCHEMA}
       >
         <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" as="h2" id={titleId}>
+          <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={titleId}>
             {formatMessage({
               id: getTranslation('Settings.list.actions.edit'),
               defaultMessage: 'Edit a locale',
@@ -160,7 +166,7 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
             variant="simple"
           >
             <Flex justifyContent="space-between">
-              <Typography as="h2" variant="beta">
+              <Typography tag="h2" variant="beta">
                 {formatMessage({
                   id: getTranslation('Settings.locales.modal.title'),
                   defaultMessage: 'Configuration',

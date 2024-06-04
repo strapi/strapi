@@ -1,13 +1,12 @@
-import { Box, Button, ContentLayout, Flex, HeaderLayout } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { useTracking } from '@strapi/helper-plugin';
-import { ArrowLeft, Check, Pencil, Plus } from '@strapi/icons';
+import { BackButton, useTracking, Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Button, Flex } from '@strapi/design-system';
+import { Check, Pencil, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import has from 'lodash/has';
 import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { unstable_usePrompt as usePrompt, useMatch, NavLink } from 'react-router-dom';
+import { unstable_usePrompt as usePrompt, useMatch } from 'react-router-dom';
 
 import { List } from '../../components/List';
 import { ListRow } from '../../components/ListRow';
@@ -118,7 +117,7 @@ const ListView = () => {
 
   return (
     <>
-      <HeaderLayout
+      <Layouts.Header
         id="title"
         primaryAction={
           isInDevelopmentMode && (
@@ -140,7 +139,7 @@ const ListView = () => {
               )}
               <Button
                 startIcon={<Check />}
-                onClick={() => submitData()}
+                onClick={async () => await submitData()}
                 type="submit"
                 disabled={isEqual(modifiedData, initialData)}
               >
@@ -169,17 +168,9 @@ const ListView = () => {
           id: getTrad('listView.headerLayout.description'),
           defaultMessage: 'Build the data architecture of your content',
         })}
-        navigationAction={
-          // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
-          <Link startIcon={<ArrowLeft />} as={NavLink} to="/plugins/content-type-builder/">
-            {formatMessage({
-              id: 'global.back',
-              defaultMessage: 'Back',
-            })}
-          </Link>
-        }
+        navigationAction={<BackButton />}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={4}>
           <Flex justifyContent="flex-end">
             <Flex gap={2}>
@@ -204,7 +195,7 @@ const ListView = () => {
             />
           </Box>
         </Flex>
-      </ContentLayout>
+      </Layouts.Content>
     </>
   );
 };

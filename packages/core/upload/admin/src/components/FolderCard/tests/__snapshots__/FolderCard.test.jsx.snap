@@ -1,37 +1,19 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FolderCard has all required ids set when rendering a start action 1`] = `
-.c19 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c13 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
-}
-
 .c0 {
   position: relative;
 }
 
 .c2 {
   background: #ffffff;
-  padding: 12px;
+  padding-block: 12px;
+  padding-inline: 12px;
   border-radius: 4px;
   border-style: solid;
   border-width: 1px;
   border-color: #eaeaef;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
   cursor: pointer;
 }
 
@@ -43,10 +25,10 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 .c6 {
   background: #eaf5ff;
   color: #66b7f1;
-  padding-top: 8px;
-  padding-right: 12px;
-  padding-bottom: 8px;
-  padding-left: 12px;
+  padding-block-start: 8px;
+  padding-inline-end: 12px;
+  padding-block-end: 8px;
+  padding-inline-start: 12px;
   border-radius: 4px;
 }
 
@@ -57,7 +39,8 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c11 {
-  padding: 4px;
+  padding-block: 4px;
+  padding-inline: 4px;
   max-width: 100%;
 }
 
@@ -65,47 +48,35 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   right: 16px;
 }
 
+.c13 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: currentcolor;
+}
+
 .c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
   gap: 8px;
 }
 
 .c9 {
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
   align-items: flex-start;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
   flex-direction: column;
 }
 
-.c16 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
+.c17 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
 }
 
 .c5 {
@@ -133,8 +104,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   height: 10px;
   left: 50%;
   top: 50%;
-  -webkit-transform: translateX(-50%) translateY(-50%);
-  -ms-transform: translateX(-50%) translateY(-50%);
   transform: translateX(-50%) translateY(-50%);
 }
 
@@ -162,8 +131,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   background-color: #ffffff;
   left: 50%;
   top: 50%;
-  -webkit-transform: translateX(-50%) translateY(-50%);
-  -ms-transform: translateX(-50%) translateY(-50%);
   transform: translateX(-50%) translateY(-50%);
 }
 
@@ -176,16 +143,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
   background-color: #8e8ea9;
 }
 
-.c17 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c17 > * + * {
-  margin-left: 8px;
-}
-
-.c18 {
+.c16 {
   position: absolute;
   top: 12px;
 }
@@ -201,7 +159,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 
 .c1:hover,
 .c1:focus {
-  -webkit-text-decoration: none;
   text-decoration: none;
 }
 
@@ -214,9 +171,6 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
 }
 
 .c10 {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
@@ -235,6 +189,7 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       aria-label="Folder 1"
       class="c1"
       tabindex="-1"
+      tag="button"
       type="button"
     />
     <div
@@ -258,22 +213,20 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
       >
         <svg
           class="c7"
-          fill="none"
-          height="1.5rem"
-          viewBox="0 0 24 24"
-          width="1.5rem"
+          fill="currentColor"
+          height="2.4rem"
+          viewBox="0 0 32 32"
+          width="2.4rem"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
-            fill="#212134"
+            d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
           />
         </svg>
       </div>
       <h2
         class="c8 c9 c10"
         id="folder-3-title"
-        overflow="hidden"
       >
         <button
           class="c11 c12"
@@ -294,250 +247,12 @@ exports[`FolderCard has all required ids set when rendering a start action 1`] =
         class="c14"
       >
         <div
-          class="c15 c16 c17 c18"
+          class="c15 c3 c16"
         />
       </div>
     </div>
   </div>
-  <div
-    class="c19"
-  >
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-log"
-      role="log"
-    />
-    <p
-      aria-live="polite"
-      aria-relevant="all"
-      id="live-region-status"
-      role="status"
-    />
-    <p
-      aria-live="assertive"
-      aria-relevant="all"
-      id="live-region-alert"
-      role="alert"
-    />
-  </div>
-</div>
-`;
-
-exports[`FolderCard renders and matches the snapshot 1`] = `
-.c17 {
-  border: 0;
-  -webkit-clip: rect(0 0 0 0);
-  clip: rect(0 0 0 0);
-  height: 1px;
-  margin: -1px;
-  overflow: hidden;
-  padding: 0;
-  position: absolute;
-  width: 1px;
-}
-
-.c11 {
-  font-size: 0.875rem;
-  line-height: 1.43;
-  font-weight: 500;
-  color: #32324d;
-}
-
-.c0 {
-  position: relative;
-}
-
-.c2 {
-  background: #ffffff;
-  padding: 12px;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: 1px;
-  border-color: #eaeaef;
-  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-  cursor: pointer;
-}
-
-.c4 {
-  background: #eaf5ff;
-  color: #66b7f1;
-  padding-top: 8px;
-  padding-right: 12px;
-  padding-bottom: 8px;
-  padding-left: 12px;
-  border-radius: 4px;
-}
-
-.c6 {
-  position: relative;
-  overflow: hidden;
-  max-width: 100%;
-}
-
-.c9 {
-  padding: 4px;
-  max-width: 100%;
-}
-
-.c13 {
-  right: 16px;
-}
-
-.c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  gap: 8px;
-}
-
-.c7 {
-  -webkit-align-items: flex-start;
-  -webkit-box-align: flex-start;
-  -ms-flex-align: flex-start;
-  align-items: flex-start;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c14 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
-  flex-direction: row;
-}
-
-.c15 > * {
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.c15 > * + * {
-  margin-left: 8px;
-}
-
-.c16 {
-  position: absolute;
-  top: 12px;
-}
-
-.c1 {
-  height: 100%;
-  left: 0;
-  position: absolute;
-  opacity: 0;
-  top: 0;
-  width: 100%;
-}
-
-.c1:hover,
-.c1:focus {
-  -webkit-text-decoration: none;
-  text-decoration: none;
-}
-
-.c5 path {
-  fill: currentColor;
-}
-
-.c12 {
-  display: none;
-}
-
-.c8 {
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-
-.c10:focus {
-  outline: 2px solid #4945ff;
-  outline-offset: -2px;
-}
-
-<div>
-  <div
-    class="c0 "
-    tabindex="0"
-  >
-    <button
-      aria-hidden="true"
-      aria-label="Folder 1"
-      class="c1"
-      tabindex="-1"
-      type="button"
-    />
-    <div
-      class="c2 c3"
-    >
-      <div
-        class="c4"
-      >
-        <svg
-          class="c5"
-          fill="none"
-          height="1.5rem"
-          viewBox="0 0 24 24"
-          width="1.5rem"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M12.414 5H21a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h7.414l2 2Z"
-            fill="#212134"
-          />
-        </svg>
-      </div>
-      <h2
-        class="c6 c7 c8"
-        id="folder-1-title"
-        overflow="hidden"
-      >
-        <button
-          class="c9 c10"
-          type="button"
-        >
-          <div
-            class="c7"
-          >
-            <span
-              class="c11"
-            >
-              Pictures
-            </span>
-          </div>
-        </button>
-      </h2>
-      <div
-        class="c12"
-      >
-        <div
-          class="c13 c14 c15 c16"
-        />
-      </div>
-    </div>
-  </div>
-  <div
+  <span
     class="c17"
   >
     <p
@@ -558,6 +273,201 @@ exports[`FolderCard renders and matches the snapshot 1`] = `
       id="live-region-alert"
       role="alert"
     />
+  </span>
+</div>
+`;
+
+exports[`FolderCard renders and matches the snapshot 1`] = `
+.c0 {
+  position: relative;
+}
+
+.c2 {
+  background: #ffffff;
+  padding-block: 12px;
+  padding-inline: 12px;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: #eaeaef;
+  box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
+  cursor: pointer;
+}
+
+.c4 {
+  background: #eaf5ff;
+  color: #66b7f1;
+  padding-block-start: 8px;
+  padding-inline-end: 12px;
+  padding-block-end: 8px;
+  padding-inline-start: 12px;
+  border-radius: 4px;
+}
+
+.c6 {
+  position: relative;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.c9 {
+  padding-block: 4px;
+  padding-inline: 4px;
+  max-width: 100%;
+}
+
+.c13 {
+  right: 16px;
+}
+
+.c11 {
+  font-size: 1.4rem;
+  line-height: 1.43;
+  font-weight: 500;
+  color: currentcolor;
+}
+
+.c3 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.c7 {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+}
+
+.c15 {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}
+
+.c14 {
+  position: absolute;
+  top: 12px;
+}
+
+.c1 {
+  height: 100%;
+  left: 0;
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  width: 100%;
+}
+
+.c1:hover,
+.c1:focus {
+  text-decoration: none;
+}
+
+.c5 path {
+  fill: currentColor;
+}
+
+.c12 {
+  display: none;
+}
+
+.c8 {
+  user-select: none;
+}
+
+.c10:focus {
+  outline: 2px solid #4945ff;
+  outline-offset: -2px;
+}
+
+<div>
+  <div
+    class="c0 "
+    tabindex="0"
+  >
+    <button
+      aria-hidden="true"
+      aria-label="Folder 1"
+      class="c1"
+      tabindex="-1"
+      tag="button"
+      type="button"
+    />
+    <div
+      class="c2 c3"
+    >
+      <div
+        class="c4"
+      >
+        <svg
+          class="c5"
+          fill="currentColor"
+          height="2.4rem"
+          viewBox="0 0 32 32"
+          width="2.4rem"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
+          />
+        </svg>
+      </div>
+      <h2
+        class="c6 c7 c8"
+        id="folder-1-title"
+      >
+        <button
+          class="c9 c10"
+          type="button"
+        >
+          <div
+            class="c7"
+          >
+            <span
+              class="c11"
+            >
+              Pictures
+            </span>
+          </div>
+        </button>
+      </h2>
+      <div
+        class="c12"
+      >
+        <div
+          class="c13 c3 c14"
+        />
+      </div>
+    </div>
   </div>
+  <span
+    class="c15"
+  >
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-log"
+      role="log"
+    />
+    <p
+      aria-live="polite"
+      aria-relevant="all"
+      id="live-region-status"
+      role="status"
+    />
+    <p
+      aria-live="assertive"
+      aria-relevant="all"
+      id="live-region-alert"
+      role="alert"
+    />
+  </span>
 </div>
 `;

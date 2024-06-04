@@ -1,4 +1,4 @@
-import { useFetchClient } from '@strapi/helper-plugin';
+import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';

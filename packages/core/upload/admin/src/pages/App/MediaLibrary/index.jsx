@@ -1,33 +1,28 @@
 import React, { useRef, useState } from 'react';
 
-import { Page, SearchInput, Pagination } from '@strapi/admin/strapi-admin';
 import {
-  ActionLayout,
+  Page,
+  SearchInput,
+  Pagination,
+  useTracking,
+  useQueryParams,
+  Layouts,
+} from '@strapi/admin/strapi-admin';
+import {
   BaseCheckbox,
   Box,
-  ContentLayout,
   Divider,
   Flex,
   GridItem,
   IconButton,
-  Layout,
-  Main,
   Typography,
   VisuallyHidden,
 } from '@strapi/design-system';
-import {
-  CheckPermissions,
-  useFocusWhenNavigate,
-  usePersistentState,
-  useQueryParams,
-  useSelectionState,
-  useTracking,
-} from '@strapi/helper-plugin';
-import { Cog, Grid, List, Pencil } from '@strapi/icons';
+import { Cog, GridFour as Grid, List, Pencil } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetGridList } from '../../../components/AssetGridList';
 import { EditAssetDialog } from '../../../components/EditAssetDialog';
@@ -42,11 +37,13 @@ import { FolderGridList } from '../../../components/FolderGridList';
 import SortPicker from '../../../components/SortPicker';
 import { TableList } from '../../../components/TableList';
 import { UploadAssetDialog } from '../../../components/UploadAssetDialog/UploadAssetDialog';
-import { localStorageKeys, PERMISSIONS, viewOptions } from '../../../constants';
+import { localStorageKeys, viewOptions } from '../../../constants';
 import { useAssets } from '../../../hooks/useAssets';
 import { useFolder } from '../../../hooks/useFolder';
 import { useFolders } from '../../../hooks/useFolders';
 import { useMediaLibraryPermissions } from '../../../hooks/useMediaLibraryPermissions';
+import { usePersistentState } from '../../../hooks/usePersistentState';
+import { useSelectionState } from '../../../hooks/useSelectionState';
 import { containsAssetFilter, getBreadcrumbDataML, getFolderURL, getTrad } from '../../../utils';
 
 import { BulkActions } from './components/BulkActions';
@@ -55,7 +52,7 @@ import { Filters } from './components/Filters';
 import { Header } from './components/Header';
 
 const BoxWithHeight = styled(Box)`
-  height: ${32 / 16}rem;
+  height: 3.2rem;
   display: flex;
   align-items: center;
 `;
@@ -80,6 +77,7 @@ export const MediaLibrary = () => {
     canUpdate,
     canCopyLink,
     canDownload,
+    canConfigureView,
     isLoading: permissionsLoading,
   } = useMediaLibraryPermissions();
   const currentFolderToEditRef = useRef();
@@ -208,8 +206,6 @@ export const MediaLibrary = () => {
     handleAssetDeleted(selected.length);
   };
 
-  useFocusWhenNavigate();
-
   if (isLoading) {
     return <Page.Loading />;
   }
@@ -219,8 +215,8 @@ export const MediaLibrary = () => {
   }
 
   return (
-    <Layout>
-      <Main aria-busy={isLoading}>
+    <Layouts.Root>
+      <Page.Main>
         <Header
           breadcrumbs={
             !isCurrentFolderLoading && getBreadcrumbDataML(currentFolder, { pathname, query })
@@ -230,7 +226,7 @@ export const MediaLibrary = () => {
           onToggleUploadAssetDialog={toggleUploadAssetDialog}
           folder={currentFolder}
         />
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <>
               {canUpdate && isGridView && (assetCount > 0 || folderCount > 0) && (
@@ -263,25 +259,25 @@ export const MediaLibrary = () => {
           }
           endActions={
             <>
-              <CheckPermissions permissions={PERMISSIONS.configureView}>
+              {canConfigureView ? (
                 <ActionContainer paddingTop={1} paddingBottom={1}>
                   <IconButton
-                    forwardedAs={ReactRouterLink}
+                    tag={ReactRouterLink}
                     to={{
                       pathname: `${pathname}/configuration`,
                       search: stringify(query, { encode: false }),
                     }}
-                    icon={<Cog />}
                     label={formatMessage({
                       id: 'app.links.configure-view',
                       defaultMessage: 'Configure the view',
                     })}
-                  />
+                  >
+                    <Cog />
+                  </IconButton>
                 </ActionContainer>
-              </CheckPermissions>
+              ) : null}
               <ActionContainer paddingTop={1} paddingBottom={1}>
                 <IconButton
-                  icon={isGridView ? <List /> : <Grid />}
                   label={
                     isGridView
                       ? formatMessage({
@@ -294,7 +290,9 @@ export const MediaLibrary = () => {
                         })
                   }
                   onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
-                />
+                >
+                  {isGridView ? <List /> : <Grid />}
+                </IconButton>
               </ActionContainer>
               <SearchInput
                 label={formatMessage({
@@ -308,7 +306,7 @@ export const MediaLibrary = () => {
           }
         />
 
-        <ContentLayout>
+        <Layouts.Content>
           {selected.length > 0 && (
             <BulkActions
               currentFolder={currentFolder}
@@ -399,25 +397,26 @@ export const MediaLibrary = () => {
                           }
                           cardActions={
                             <IconButton
-                              icon={<Pencil />}
                               aria-label={formatMessage({
                                 id: getTrad('list.folder.edit'),
                                 defaultMessage: 'Edit folder',
                               })}
                               onClick={() => handleEditFolder(folder)}
-                            />
+                            >
+                              <Pencil />
+                            </IconButton>
                           }
                         >
                           <FolderCardBody>
                             <FolderCardBodyAction to={url}>
-                              <Flex as="h2" direction="column" alignItems="start" maxWidth="100%">
+                              <Flex tag="h2" direction="column" alignItems="start" maxWidth="100%">
                                 <TypographyMaxWidth fontWeight="semiBold" ellipsis>
                                   {folder.name}
                                   <VisuallyHidden>:</VisuallyHidden>
                                 </TypographyMaxWidth>
 
                                 <TypographyMaxWidth
-                                  as="span"
+                                  tag="span"
                                   textColor="neutral600"
                                   variant="pi"
                                   ellipsis
@@ -480,8 +479,8 @@ export const MediaLibrary = () => {
             <Pagination.PageSize />
             <Pagination.Links />
           </Pagination.Root>
-        </ContentLayout>
-      </Main>
+        </Layouts.Content>
+      </Page.Main>
 
       {showUploadAssetDialog && (
         <UploadAssetDialog
@@ -517,6 +516,6 @@ export const MediaLibrary = () => {
           trackedLocation="upload"
         />
       )}
-    </Layout>
+    </Layouts.Root>
   );
 };

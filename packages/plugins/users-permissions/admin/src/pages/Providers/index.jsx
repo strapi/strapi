@@ -1,11 +1,8 @@
 import * as React from 'react';
 
+import { useTracking, Layouts } from '@strapi/admin/strapi-admin';
 import {
-  ContentLayout,
-  HeaderLayout,
   IconButton,
-  Layout,
-  Main,
   Table,
   Tbody,
   Td,
@@ -16,21 +13,15 @@ import {
   VisuallyHidden,
   useCollator,
 } from '@strapi/design-system';
-import {
-  onRowClick,
-  stopPropagation,
-  useAPIErrorHandler,
-  useFetchClient,
-  useFocusWhenNavigate,
-  useNotification,
-  useOverlayBlocker,
-  useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
 import { Pencil } from '@strapi/icons';
-import { Page } from '@strapi/strapi/admin';
+import {
+  Page,
+  useAPIErrorHandler,
+  useNotification,
+  useFetchClient,
+  useRBAC,
+} from '@strapi/strapi/admin';
 import upperFirst from 'lodash/upperFirst';
-import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -46,15 +37,12 @@ export const ProvidersPage = () => {
   const { trackUsage } = useTracking();
   const [isOpen, setIsOpen] = React.useState(false);
   const [providerToEditName, setProviderToEditName] = React.useState(null);
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
   const formatter = useCollator(locale, {
     sensitivity: 'base',
   });
-
-  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingPermissions,
@@ -79,21 +67,18 @@ export const ProvidersPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('notification.success.submit') },
+        message: formatMessage({ id: getTrad('notification.success.submit') }),
       });
 
       trackUsage('didEditAuthenticationProvider');
 
       handleToggleModal();
-      unlockApp();
     },
     onError(error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
-
-      unlockApp();
     },
     refetchActive: false,
   });
@@ -149,8 +134,6 @@ export const ProvidersPage = () => {
   };
 
   const handleSubmit = async (values) => {
-    lockApp();
-
     trackUsage('willEditAuthenticationProvider');
 
     submitMutation.mutate({ providers: { ...data, [providerToEditName]: values } });
@@ -161,9 +144,9 @@ export const ProvidersPage = () => {
   }
 
   return (
-    <Layout>
-      <Helmet
-        title={formatMessage(
+    <Layouts.Root>
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -172,15 +155,15 @@ export const ProvidersPage = () => {
             }),
           }
         )}
-      />
-      <Main>
-        <HeaderLayout
+      </Page.Title>
+      <Page.Main>
+        <Layouts.Header
           title={formatMessage({
             id: getTrad('HeaderNav.link.providers'),
             defaultMessage: 'Providers',
           })}
         />
-        <ContentLayout>
+        <Layouts.Content>
           <Table colCount={3} rowCount={providers.length + 1}>
             <Thead>
               <Tr>
@@ -210,10 +193,7 @@ export const ProvidersPage = () => {
               {providers.map((provider) => (
                 <Tr
                   key={provider.name}
-                  {...onRowClick({
-                    fn: () => handleClickEdit(provider),
-                    condition: canUpdate,
-                  })}
+                  onClick={() => (canUpdate ? handleClickEdit(provider) : undefined)}
                 >
                   <Td width="45%">
                     <Typography fontWeight="semiBold" textColor="neutral800">
@@ -236,22 +216,23 @@ export const ProvidersPage = () => {
                           })}
                     </Typography>
                   </Td>
-                  <Td {...stopPropagation}>
+                  <Td onClick={(e) => e.stopPropagation()}>
                     {canUpdate && (
                       <IconButton
                         onClick={() => handleClickEdit(provider)}
-                        noBorder
-                        icon={<Pencil />}
+                        borderWidth={0}
                         label="Edit"
-                      />
+                      >
+                        <Pencil />
+                      </IconButton>
                     )}
                   </Td>
                 </Tr>
               ))}
             </Tbody>
           </Table>
-        </ContentLayout>
-      </Main>
+        </Layouts.Content>
+      </Page.Main>
       <FormModal
         initialData={data[providerToEditName]}
         isOpen={isOpen}
@@ -268,7 +249,7 @@ export const ProvidersPage = () => {
         onSubmit={handleSubmit}
         providerToEditName={providerToEditName}
       />
-    </Layout>
+    </Layouts.Root>
   );
 };
 

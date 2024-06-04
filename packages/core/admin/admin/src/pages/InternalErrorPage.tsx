@@ -5,35 +5,31 @@
  *
  */
 
-import {
-  ContentLayout,
-  EmptyStateLayout,
-  HeaderLayout,
-  LinkButton,
-  Main,
-} from '@strapi/design-system';
-import { useFocusWhenNavigate } from '@strapi/helper-plugin';
-import { ArrowRight, EmptyPictures } from '@strapi/icons';
+import { EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { ArrowRight } from '@strapi/icons';
+import { EmptyPictures } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
+import { Link } from 'react-router-dom';
+
+import { Layouts } from '../components/Layouts/Layout';
+import { Page } from '../components/PageHelpers';
 
 export const InternalErrorPage = () => {
   const { formatMessage } = useIntl();
 
-  useFocusWhenNavigate();
-
   return (
-    <Main labelledBy="title">
-      <HeaderLayout
+    <Page.Main labelledBy="title">
+      <Layouts.Header
         id="title"
         title={formatMessage({
           id: 'content-manager.pageNotFound',
           defaultMessage: 'Page not found',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <EmptyStateLayout
           action={
-            <LinkButton variant="secondary" endIcon={<ArrowRight />} to="/">
+            <LinkButton tag={Link} variant="secondary" endIcon={<ArrowRight />} to="/">
               {formatMessage({
                 id: 'app.components.NotFoundPage.back',
                 defaultMessage: 'Back to homepage',
@@ -45,10 +41,10 @@ export const InternalErrorPage = () => {
             defaultMessage: 'An error occured',
           })}
           hasRadius
-          icon={<EmptyPictures width="10rem" />}
+          icon={<EmptyPictures width="16rem" />}
           shadow="tableShadow"
         />
-      </ContentLayout>
-    </Main>
+      </Layouts.Content>
+    </Page.Main>
   );
 };

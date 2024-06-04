@@ -1,11 +1,6 @@
 import React, { useState } from 'react';
 
 import {
-  ActionLayout,
-  ContentLayout,
-  HeaderLayout,
-  Layout,
-  Main,
   Table,
   Th,
   Thead,
@@ -17,19 +12,20 @@ import {
   useCollator,
   useFilter,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
+import { LinkButton } from '@strapi/design-system';
+import { Plus } from '@strapi/icons';
 import {
-  CheckPermissions,
   ConfirmDialog,
-  useFocusWhenNavigate,
+  useTracking,
+  Page,
+  SearchInput,
+  BackButton,
   useNotification,
   useQueryParams,
+  useFetchClient,
   useRBAC,
-  useTracking,
-} from '@strapi/helper-plugin';
-import { Plus } from '@strapi/icons';
-import { Page, SearchInput } from '@strapi/strapi/admin';
-import { Helmet } from 'react-helmet';
+  Layouts,
+} from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 import { NavLink } from 'react-router-dom';
@@ -38,23 +34,21 @@ import { PERMISSIONS } from '../../../../constants';
 import { getTrad } from '../../../../utils';
 
 import TableBody from './components/TableBody';
-import { deleteData, fetchData } from './utils/api';
 
 export const RolesListPage = () => {
   const { trackUsage } = useTracking();
   const { formatMessage, locale } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const [{ query }] = useQueryParams();
   const _q = query?._q || '';
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
-  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [roleToDelete, setRoleToDelete] = useState();
-  useFocusWhenNavigate();
+  const { del, get } = useFetchClient();
 
   const {
     isLoading: isLoadingForPermissions,
-    allowedActions: { canRead, canDelete },
+    allowedActions: { canRead, canDelete, canCreate, canUpdate },
   } = useRBAC({
     create: PERMISSIONS.createRole,
     read: PERMISSIONS.readRoles,
@@ -67,7 +61,7 @@ export const RolesListPage = () => {
     data: { roles },
     isFetching,
     refetch,
-  } = useQuery('get-roles', () => fetchData(toggleNotification, notifyStatus), {
+  } = useQuery('get-roles', () => fetchData(toggleNotification, formatMessage, notifyStatus), {
     initialData: {},
     enabled: canRead,
   });
@@ -89,6 +83,33 @@ export const RolesListPage = () => {
     setShowConfirmDelete(!showConfirmDelete);
   };
 
+  const deleteData = async (id, formatMessage, toggleNotification) => {
+    try {
+      await del(`/users-permissions/roles/${id}`);
+    } catch (error) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
+      });
+    }
+  };
+
+  const fetchData = async (toggleNotification, formatMessage, notifyStatus) => {
+    try {
+      const { data } = await get('/users-permissions/roles');
+      notifyStatus('The roles have loaded successfully');
+
+      return data;
+    } catch (err) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+
+      throw new Error(err);
+    }
+  };
+
   const emptyLayout = {
     roles: {
       id: getTrad('Roles.empty'),
@@ -105,17 +126,15 @@ export const RolesListPage = () => {
     defaultMessage: 'Roles',
   });
 
-  const deleteMutation = useMutation((id) => deleteData(id, toggleNotification), {
+  const deleteMutation = useMutation((id) => deleteData(id, formatMessage, toggleNotification), {
     async onSuccess() {
       await refetch();
     },
   });
 
   const handleConfirmDelete = async () => {
-    setIsConfirmButtonLoading(true);
     await deleteMutation.mutateAsync(roleToDelete);
     setShowConfirmDelete(!showConfirmDelete);
-    setIsConfirmButtonLoading(false);
   };
 
   const sortedRoles = (roles || [])
@@ -134,15 +153,15 @@ export const RolesListPage = () => {
   }
 
   return (
-    <Layout>
-      <Helmet
-        title={formatMessage(
+    <Layouts.Root>
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           { name: pageTitle }
         )}
-      />
-      <Main aria-busy={isLoading}>
-        <HeaderLayout
+      </Page.Title>
+      <Page.Main>
+        <Layouts.Header
           title={formatMessage({
             id: 'global.roles',
             defaultMessage: 'Roles',
@@ -152,10 +171,10 @@ export const RolesListPage = () => {
             defaultMessage: 'List of roles',
           })}
           primaryAction={
-            <CheckPermissions permissions={PERMISSIONS.createRole}>
+            canCreate ? (
               <LinkButton
                 to="new"
-                as={NavLink}
+                tag={NavLink}
                 onClick={() => trackUsage('willCreateRole')}
                 startIcon={<Plus />}
                 size="S"
@@ -165,11 +184,12 @@ export const RolesListPage = () => {
                   defaultMessage: 'Add new role',
                 })}
               </LinkButton>
-            </CheckPermissions>
+            ) : null
           }
+          navigationAction={<BackButton />}
         />
 
-        <ActionLayout
+        <Layouts.Action
           startActions={
             <SearchInput
               label={formatMessage({
@@ -180,7 +200,7 @@ export const RolesListPage = () => {
           }
         />
 
-        <ContentLayout>
+        <Layouts.Content>
           {!canRead && <Page.NoPermissions />}
           {canRead && sortedRoles && sortedRoles?.length ? (
             <Table colCount={colCount} rowCount={rowCount}>
@@ -220,6 +240,7 @@ export const RolesListPage = () => {
               <TableBody
                 sortedRoles={sortedRoles}
                 canDelete={canDelete}
+                canUpdate={canUpdate}
                 permissions={PERMISSIONS}
                 setRoleToDelete={setRoleToDelete}
                 onDelete={[showConfirmDelete, setShowConfirmDelete]}
@@ -228,15 +249,14 @@ export const RolesListPage = () => {
           ) : (
             <EmptyStateLayout content={formatMessage(emptyLayout[emptyContent])} />
           )}
-        </ContentLayout>
+        </Layouts.Content>
         <ConfirmDialog
-          isConfirmButtonLoading={isConfirmButtonLoading}
           onConfirm={handleConfirmDelete}
-          onToggleDialog={handleShowConfirmDelete}
+          onClose={handleShowConfirmDelete}
           isOpen={showConfirmDelete}
         />
-      </Main>
-    </Layout>
+      </Page.Main>
+    </Layouts.Root>
   );
 };
 

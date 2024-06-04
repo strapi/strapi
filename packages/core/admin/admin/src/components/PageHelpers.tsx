@@ -5,16 +5,29 @@ import {
   EmptyStateLayout,
   type EmptyStateLayoutProps,
   Flex,
-  Icon,
   Loader,
   Main,
+  MainProps,
 } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification, useRBACProvider } from '@strapi/helper-plugin';
-import { EmptyPermissions, ExclamationMarkCircle, EmptyDocuments } from '@strapi/icons';
+import { WarningCircle } from '@strapi/icons';
+import { EmptyPermissions, EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
-import { Permission } from '../../../shared/contracts/shared';
+import { useAuth, Permission } from '../features/Auth';
+import { useNotification } from '../features/Notifications';
+import { useAPIErrorHandler } from '../hooks/useAPIErrorHandler';
 import { useCheckPermissionsQuery } from '../services/auth';
+
+/* -------------------------------------------------------------------------------------------------
+ * Main
+ * -----------------------------------------------------------------------------------------------*/
+interface PageMainProps extends MainProps {
+  children: React.ReactNode;
+}
+
+const PageMain = ({ children, ...restProps }: PageMainProps) => {
+  return <Main {...restProps}>{children}</Main>;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Loading
@@ -33,11 +46,11 @@ interface LoadingProps {
  */
 const Loading = ({ children = 'Loading content.' }: LoadingProps) => {
   return (
-    <Main height="100vh" aria-busy={true}>
+    <PageMain height="100vh" aria-busy={true}>
       <Flex alignItems="center" height="100%" justifyContent="center">
         <Loader>{children}</Loader>
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -45,6 +58,11 @@ const Loading = ({ children = 'Loading content.' }: LoadingProps) => {
  * Error
  * -----------------------------------------------------------------------------------------------*/
 interface ErrorProps extends Partial<EmptyStateLayoutProps> {}
+
+/**
+ * TODO: should we start passing our errors here so they're persisted on the screen?
+ * This could follow something similar to how the global app error works...?
+ */
 
 /**
  * @public
@@ -55,10 +73,10 @@ const Error = (props: ErrorProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <PageMain height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
         <EmptyStateLayout
-          icon={<Icon as={ExclamationMarkCircle} width="10rem" />}
+          icon={<WarningCircle width="16rem" />}
           content={formatMessage({
             id: 'anErrorOccurred',
             defaultMessage: 'Woops! Something went wrong. Please, try again.',
@@ -66,7 +84,7 @@ const Error = (props: ErrorProps) => {
           {...props}
         />
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -86,11 +104,11 @@ const NoPermissions = (props: NoPermissionsProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <PageMain height="100%">
       <Flex alignItems="center" height="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
-            icon={<EmptyPermissions width="10rem" />}
+            icon={<EmptyPermissions width="16rem" />}
             content={formatMessage({
               id: 'app.components.EmptyStateLayout.content-permissions',
               defaultMessage: "You don't have the permissions to access that content",
@@ -99,7 +117,7 @@ const NoPermissions = (props: NoPermissionsProps) => {
           />
         </Box>
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -119,11 +137,11 @@ const NoData = (props: NoDataProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Main height="100%">
+    <PageMain height="100%">
       <Flex alignItems="center" height="100%" width="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
-            icon={<EmptyDocuments width="10rem" />}
+            icon={<EmptyDocuments width="16rem" />}
             content={formatMessage({
               id: 'app.components.EmptyStateLayout.content-document',
               defaultMessage: 'No content found',
@@ -132,7 +150,7 @@ const NoData = (props: NoDataProps) => {
           />
         </Box>
       </Flex>
-    </Main>
+    </PageMain>
   );
 };
 
@@ -160,11 +178,11 @@ export interface ProtectProps {
  * the loading component and should the check fail it will render the error component with a notification.
  */
 const Protect = ({ permissions = [], children }: ProtectProps) => {
-  const { allPermissions } = useRBACProvider();
-  const toggleNotification = useNotification();
+  const userPermissions = useAuth('Protect', (state) => state.permissions);
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const matchingPermissions = allPermissions.filter(
+  const matchingPermissions = userPermissions.filter(
     (permission) =>
       permissions.findIndex(
         (perm) => perm.action === permission.action && perm.subject === permission.subject
@@ -175,11 +193,7 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
     (perm) => Array.isArray(perm.conditions) && perm.conditions.length > 0
   );
 
-  const {
-    isLoading,
-    error,
-    data = [],
-  } = useCheckPermissionsQuery(
+  const { isLoading, error, data } = useCheckPermissionsQuery(
     {
       permissions: matchingPermissions.map((perm) => ({
         action: perm.action,
@@ -194,7 +208,7 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
@@ -208,14 +222,42 @@ const Protect = ({ permissions = [], children }: ProtectProps) => {
     return <Error />;
   }
 
-  const canAccess = shouldCheckConditions ? !data.includes(false) : matchingPermissions.length > 0;
+  const { data: permissionsData } = data || {};
+
+  const canAccess =
+    shouldCheckConditions && permissionsData
+      ? !permissionsData.includes(false)
+      : matchingPermissions.length > 0;
 
   if (!canAccess) {
     return <NoPermissions />;
   }
 
-  // @ts-expect-error this error comes from the fact we have permissions defined in the helper-plugin & admin, this will be resolved soon.
-  return typeof children === 'function' ? children({ permissions: matchingPermissions }) : children;
+  return (
+    <>
+      {typeof children === 'function' ? children({ permissions: matchingPermissions }) : children}
+    </>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * Title
+ * -----------------------------------------------------------------------------------------------*/
+export interface TitleProps {
+  children: string;
+}
+
+/**
+ * @public
+ * @description This component takes the children (must be a string) and sets
+ * it as the title of the html.
+ */
+const Title = ({ children: title }: TitleProps) => {
+  React.useEffect(() => {
+    document.title = `${title} | Strapi`;
+  }, [title]);
+
+  return null;
 };
 
 const Page = {
@@ -224,7 +266,9 @@ const Page = {
   NoPermissions,
   Protect,
   NoData,
+  Main: PageMain,
+  Title,
 };
 
 export { Page };
-export type { ErrorProps, LoadingProps, NoPermissionsProps };
+export type { ErrorProps, LoadingProps, NoPermissionsProps, PageMainProps as MainProps };

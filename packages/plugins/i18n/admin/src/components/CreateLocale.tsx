@@ -1,10 +1,22 @@
 import * as React from 'react';
 
 import {
+  Form,
+  type InputProps,
+  InputRenderer,
+  useField,
+  type FormHelpers,
+  useForm,
+  useAPIErrorHandler,
+  useNotification,
+  useAuth,
+} from '@strapi/admin/strapi-admin';
+import {
   Box,
   Button,
   ButtonProps,
   Divider,
+  Field,
   Flex,
   Grid,
   GridItem,
@@ -21,25 +33,12 @@ import {
   Tabs,
   Typography,
 } from '@strapi/design-system';
-import { useAPIErrorHandler, useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import { Check, Plus } from '@strapi/icons';
-import {
-  Form,
-  type InputProps,
-  InputRenderer,
-  useField,
-  type FormHelpers,
-  useForm,
-} from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { CreateLocale } from '../../../shared/contracts/locales';
-import {
-  useCreateLocaleMutation,
-  useGetDefaultLocalesQuery,
-  useGetLocalesQuery,
-} from '../services/locales';
+import { useCreateLocaleMutation, useGetDefaultLocalesQuery } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';
 
@@ -107,14 +106,14 @@ type ModalCreateProps = {
 };
 
 const CreateModal = ({ onClose }: ModalCreateProps) => {
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
   const [createLocale] = useCreateLocaleMutation();
   const { formatMessage } = useIntl();
-  const { refetchPermissions } = useRBACProvider();
+  const refetchPermissions = useAuth('CreateModal', (state) => state.refetchPermissions);
 
   const handleSubmit = async (values: FormValues, helpers: FormHelpers<FormValues>) => {
     try {
@@ -124,7 +123,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
         if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         } else {
-          toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
         }
 
         return;
@@ -132,21 +131,21 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTranslation('Settings.locales.modal.create.success'),
           defaultMessage: 'Created locale',
-        },
+        }),
       });
 
       refetchPermissions();
       onClose();
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred, please try again',
-        },
+        }),
       });
     }
   };
@@ -162,7 +161,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
         onSubmit={handleSubmit}
       >
         <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" as="h2" id={titleId}>
+          <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={titleId}>
             {formatMessage({
               id: getTranslation('Settings.list.actions.add'),
               defaultMessage: 'Add new locale',
@@ -178,7 +177,7 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
             variant="simple"
           >
             <Flex justifyContent="space-between">
-              <Typography as="h2" variant="beta">
+              <Typography tag="h2" variant="beta">
                 {formatMessage({
                   id: getTranslation('Settings.locales.modal.title'),
                   defaultMessage: 'Configuration',
@@ -253,22 +252,21 @@ interface BaseFormProps {
 
 const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { data: defaultLocales = [], error } = useGetDefaultLocalesQuery();
-  const { data: locales = [] } = useGetLocalesQuery();
+  const { data: defaultLocales, error } = useGetDefaultLocalesQuery();
 
   React.useEffect(() => {
     if (error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
     }
   }, [error, formatAPIError, toggleNotification]);
 
-  if (!Array.isArray(defaultLocales) || !Array.isArray(locales)) {
+  if (!Array.isArray(defaultLocales)) {
     return null;
   }
 
@@ -412,25 +410,24 @@ const EnumerationInput = ({
   };
 
   return (
-    <SingleSelect
-      disabled={disabled}
-      error={error}
-      hint={hint}
-      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-      label={label}
-      name={name}
-      // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
-      onChange={handleChange}
-      placeholder={placeholder}
-      required={required}
-      value={value}
-    >
-      {options.map((option) => (
-        <SingleSelectOption value={option.value} key={option.value}>
-          {option.label}
-        </SingleSelectOption>
-      ))}
-    </SingleSelect>
+    <Field.Root error={error} hint={hint} name={name} required={required}>
+      <Field.Label>{label}</Field.Label>
+      <SingleSelect
+        disabled={disabled}
+        // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
+        onChange={handleChange}
+        placeholder={placeholder}
+        value={value}
+      >
+        {options.map((option) => (
+          <SingleSelectOption value={option.value} key={option.value}>
+            {option.label}
+          </SingleSelectOption>
+        ))}
+      </SingleSelect>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
   );
 };
 

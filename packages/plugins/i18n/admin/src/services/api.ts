@@ -1,12 +1,7 @@
-import { createApi } from '@reduxjs/toolkit/query/react';
+import { adminApi } from '@strapi/admin/strapi-admin';
 
-import { axiosBaseQuery, type UnknownApiError } from '../utils/baseQuery';
-
-const i18nApi = createApi({
-  reducerPath: 'i18nApi',
-  baseQuery: axiosBaseQuery(),
-  tagTypes: ['Locale'],
-  endpoints: () => ({}),
+const i18nApi = adminApi.enhanceEndpoints({
+  addTagTypes: ['Locale'],
 });
 
-export { i18nApi, type UnknownApiError };
+export { i18nApi };

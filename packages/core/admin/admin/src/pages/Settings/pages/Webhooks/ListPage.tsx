@@ -2,16 +2,11 @@ import * as React from 'react';
 
 import {
   useNotifyAT,
-  ActionLayout,
   BaseCheckbox,
   Button,
-  ContentLayout,
   EmptyStateLayout,
   Flex,
-  HeaderLayout,
   IconButton,
-  Layout,
-  Main,
   Switch,
   Table,
   Tbody,
@@ -22,23 +17,21 @@ import {
   Tr,
   Typography,
   VisuallyHidden,
+  LinkButton,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import {
-  ConfirmDialog,
-  useAPIErrorHandler,
-  useFocusWhenNavigate,
-  useNotification,
-  useRBAC,
-} from '@strapi/helper-plugin';
-import { EmptyDocuments, Pencil, Plus, Trash } from '@strapi/icons';
-import { Helmet } from 'react-helmet';
+import { Pencil, Plus, Trash } from '@strapi/icons';
+import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
 
 import { UpdateWebhook } from '../../../../../../shared/contracts/webhooks';
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
+import { useNotification } from '../../../../features/Notifications';
+import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
+import { useRBAC } from '../../../../hooks/useRBAC';
 
 import { useWebhooks } from './hooks/useWebhooks';
 
@@ -48,13 +41,11 @@ import { useWebhooks } from './hooks/useWebhooks';
 
 const ListPage = () => {
   const [showModal, setShowModal] = React.useState(false);
-  const [isDeleting, setIsDeleting] = React.useState(false);
   const [webhooksToDelete, setWebhooksToDelete] = React.useState<string[]>([]);
   const permissions = useTypedSelector((state) => state.admin_app.permissions.settings?.webhooks);
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-  const toggleNotification = useNotification();
-  useFocusWhenNavigate();
+  const { toggleNotification } = useNotification();
   const navigate = useNavigate();
 
   const {
@@ -74,7 +65,7 @@ const ListPage = () => {
   React.useEffect(() => {
     if (webhooksError) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(webhooksError),
       });
 
@@ -96,31 +87,30 @@ const ListPage = () => {
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
       }
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     }
   };
 
   const confirmDelete = async () => {
     try {
-      setIsDeleting(true);
       const res = await deleteManyWebhooks({
         ids: webhooksToDelete,
       });
 
       if ('error' in res) {
         toggleNotification({
-          type: 'warning',
+          type: 'danger',
           message: formatAPIError(res.error),
         });
 
@@ -130,14 +120,13 @@ const ListPage = () => {
       setWebhooksToDelete([]);
     } catch {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred',
-        },
+        }),
       });
     } finally {
-      setIsDeleting(false);
       setShowModal(false);
     }
   };
@@ -161,17 +150,17 @@ const ListPage = () => {
   }
 
   return (
-    <Layout>
-      <Helmet
-        title={formatMessage(
+    <Layouts.Root>
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: 'Webhooks',
           }
         )}
-      />
-      <Main aria-busy={isLoading}>
-        <HeaderLayout
+      </Page.Title>
+      <Page.Main aria-busy={isLoading}>
+        <Layouts.Header
           title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
           subtitle={formatMessage({
             id: 'Settings.webhooks.list.description',
@@ -180,14 +169,7 @@ const ListPage = () => {
           primaryAction={
             canCreate &&
             !isLoading && (
-              <LinkButton
-                as={NavLink}
-                startIcon={<Plus />}
-                variant="default"
-                // @ts-expect-error – this is an issue with the DS where as props are not inferred
-                to="create"
-                size="S"
-              >
+              <LinkButton tag={NavLink} startIcon={<Plus />} variant="default" to="create" size="S">
                 {formatMessage({
                   id: 'Settings.webhooks.list.button.add',
                   defaultMessage: 'Create new webhook',
@@ -197,7 +179,7 @@ const ListPage = () => {
           }
         />
         {webhooksToDeleteLength > 0 && canDelete && (
-          <ActionLayout
+          <Layouts.Action
             startActions={
               <>
                 <Typography variant="epsilon" textColor="neutral600">
@@ -225,7 +207,7 @@ const ListPage = () => {
             }
           />
         )}
-        <ContentLayout>
+        <Layouts.Content>
           {numberOfWebhooks > 0 ? (
             <Table
               colCount={5}
@@ -360,9 +342,10 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.update',
                               defaultMessage: 'Update',
                             })}
-                            icon={<Pencil />}
-                            noBorder
-                          />
+                            borderWidth={0}
+                          >
+                            <Pencil />
+                          </IconButton>
                         )}
                         {canDelete && (
                           <IconButton
@@ -375,9 +358,10 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.delete',
                               defaultMessage: 'Delete webhook',
                             })}
-                            icon={<Trash />}
-                            noBorder
-                          />
+                            borderWidth={0}
+                          >
+                            <Trash />
+                          </IconButton>
                         )}
                       </Flex>
                     </Td>
@@ -394,8 +378,7 @@ const ListPage = () => {
               })}
               action={
                 canCreate ? (
-                  // @ts-expect-error – this is an issue with the DS where as props are not inferred
-                  <LinkButton variant="secondary" startIcon={<Plus />} as={NavLink} to="create">
+                  <LinkButton variant="secondary" startIcon={<Plus />} tag={NavLink} to="create">
                     {formatMessage({
                       id: 'Settings.webhooks.list.button.add',
                       defaultMessage: 'Create new webhook',
@@ -405,15 +388,14 @@ const ListPage = () => {
               }
             />
           )}
-        </ContentLayout>
-      </Main>
+        </Layouts.Content>
+      </Page.Main>
       <ConfirmDialog
         isOpen={showModal}
-        onToggleDialog={() => setShowModal((prev) => !prev)}
+        onClose={() => setShowModal(false)}
         onConfirm={confirmDelete}
-        isConfirmButtonLoading={isDeleting}
       />
-    </Layout>
+    </Layouts.Root>
   );
 };
 

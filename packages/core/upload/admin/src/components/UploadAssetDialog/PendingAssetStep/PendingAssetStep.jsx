@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import {
   Button,
   Flex,
@@ -11,7 +12,6 @@ import {
   ModalHeader,
   Typography,
 } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -89,7 +89,7 @@ export const PendingAssetStep = ({
   return (
     <form onSubmit={handleSubmit}>
       <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+        <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
           {formatMessage({
             id: getTrad('header.actions.add-assets'),
             defaultMessage: 'Add new assets',

@@ -1,8 +1,9 @@
-import { HeaderLayout } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { useTracking } from '@strapi/helper-plugin';
+import { LinkButton } from '@strapi/design-system';
 import { Upload } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+
+import { Layouts } from '../../../components/Layouts/Layout';
+import { useTracking } from '../../../features/Tracking';
 
 import type { NpmPackageType } from '../MarketplacePage';
 
@@ -18,7 +19,7 @@ const PageHeader = ({ isOnline, npmPackageType = 'plugin' }: PageHeaderProps) =>
   const tracking = npmPackageType === 'provider' ? 'didSubmitProvider' : 'didSubmitPlugin';
 
   return (
-    <HeaderLayout
+    <Layouts.Header
       title={formatMessage({
         id: 'global.marketplace',
         defaultMessage: 'Marketplace',

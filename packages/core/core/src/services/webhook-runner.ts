@@ -6,10 +6,12 @@ import createdDebugger from 'debug';
 import _ from 'lodash';
 import type { Logger } from '@strapi/logger';
 
+import type { Modules } from '@strapi/types';
 import WorkerQueue from './worker-queue';
-import type { Webhook } from './webhook-store';
 import type { EventHub } from './event-hub';
 import type { Fetch } from '../utils/fetch';
+
+type Webhook = Modules.WebhookStore.Webhook;
 
 interface Config {
   defaultHeaders: Record<string, string>;
@@ -102,7 +104,7 @@ class WebhookRunner {
     const activeWebhooks = webhooks.filter((webhook) => webhook.isEnabled === true);
 
     for (const webhook of activeWebhooks) {
-      await this.run(webhook, event, info).catch((error) => {
+      await this.run(webhook, event, info).catch((error: unknown) => {
         this.logger.error('Error running webhook');
         this.logger.error(error);
       });

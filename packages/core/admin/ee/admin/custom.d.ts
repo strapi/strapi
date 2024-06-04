@@ -1,26 +1,10 @@
 import { type StrapiTheme } from '@strapi/design-system';
-import { type BaseEditor } from 'slate';
-import { type HistoryEditor } from 'slate-history';
-import { type ReactEditor } from 'slate-react';
 
-import { type LinkEditor } from '../../admin/src/content-manager/pages/EditView/components/FormInputs/BlocksInput/plugins/withLinks';
-
-import type { FeaturesConfig, Attribute } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 declare module 'styled-components' {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface DefaultTheme extends StrapiTheme {}
-}
-
-declare module 'slate' {
-  interface CustomTypes {
-    Editor: Omit<BaseEditor & ReactEditor & HistoryEditor & LinkEditor, 'children'> & {
-      children: Attribute.BlocksValue;
-    };
-    Element: Attribute.BlocksNode;
-    Descendant: Attribute.BlocksInlineNode | Text;
-    Text: Attribute.BlocksTextNode;
-  }
 }
 
 declare global {
@@ -29,7 +13,7 @@ declare global {
       backendURL: string;
       isEE: boolean;
       future: {
-        isEnabled: (name: keyof NonNullable<FeaturesConfig['future']>) => boolean;
+        isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => boolean;
       };
       features: {
         SSO: 'sso';

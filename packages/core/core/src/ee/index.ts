@@ -1,6 +1,6 @@
 import { pick, isEqual } from 'lodash/fp';
 import type { Logger } from '@strapi/logger';
-import type { Strapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { readLicense, verifyLicense, fetchLicense, LicenseCheckError } from './license';
 import { shiftCronExpression } from '../utils/cron';
@@ -11,7 +11,7 @@ interface EE {
   enabled: boolean;
   licenseInfo: {
     licenseKey?: string;
-    features?: Array<{ name: string } | string>;
+    features?: Array<{ name: string; [key: string]: any } | string>;
     expireAt?: string;
     seats?: number;
     type?: string;
@@ -90,7 +90,7 @@ const init = (licenseDir: string, logger?: Logger) => {
  *
  * Store the result in database to avoid unecessary requests, and will fallback to that in case of a network failure.
  */
-const onlineUpdate = async ({ strapi }: { strapi: Strapi }) => {
+const onlineUpdate = async ({ strapi }: { strapi: Core.Strapi }) => {
   const { get, commit, rollback } = (await strapi.db?.transaction()) as any;
   const transaction = get();
 
@@ -165,7 +165,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Strapi }) => {
 
     if (shouldContactRegistry) {
       result.license = license ?? null;
-      const query = strapi.db!.queryBuilder('strapi::core-store').transacting(transaction);
+      const query = strapi.db.queryBuilder('strapi::core-store').transacting(transaction);
 
       if (!storedInfo) {
         query.insert({ key: 'ee_information', value: JSON.stringify(result) });
@@ -197,7 +197,7 @@ const validateInfo = () => {
   enable();
 };
 
-const checkLicense = async ({ strapi }: { strapi: Strapi }) => {
+const checkLicense = async ({ strapi }: { strapi: Core.Strapi }) => {
   const shouldStayOffline =
     ee.licenseInfo.type === 'gold' &&
     // This env variable support is temporarily used to ease the migration between online vs offline

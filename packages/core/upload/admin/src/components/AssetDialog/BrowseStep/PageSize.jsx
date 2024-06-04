@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { Box, Flex, Option, Select, Typography } from '@strapi/design-system';
+import { Box, Flex, SingleSelectOption, SingleSelect, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -19,7 +19,7 @@ const PageSize = ({ onChangePageSize, pageSize }) => {
 
   return (
     <Flex>
-      <Select
+      <SingleSelect
         size="S"
         aria-label={formatMessage({
           id: 'components.PageFooter.select',
@@ -28,13 +28,13 @@ const PageSize = ({ onChangePageSize, pageSize }) => {
         onChange={handleChange}
         value={pageSize.toString()}
       >
-        <Option value="10">10</Option>
-        <Option value="20">20</Option>
-        <Option value="50">50</Option>
-        <Option value="100">100</Option>
-      </Select>
+        <SingleSelectOption value="10">10</SingleSelectOption>
+        <SingleSelectOption value="20">20</SingleSelectOption>
+        <SingleSelectOption value="50">50</SingleSelectOption>
+        <SingleSelectOption value="100">100</SingleSelectOption>
+      </SingleSelect>
       <Box paddingLeft={2}>
-        <Typography textColor="neutral600" as="label" htmlFor="page-size">
+        <Typography textColor="neutral600" tag="label" htmlFor="page-size">
           {formatMessage({
             id: 'components.PageFooter.select',
             defaultMessage: 'Entries per page',

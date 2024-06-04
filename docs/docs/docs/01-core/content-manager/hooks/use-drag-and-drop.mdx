@@ -53,11 +53,11 @@ const MyComponent = ({ onMoveItem }) => {
       ) : (
         <Flex ref={composedRefs} data-handler-id={handlerId}>
           <IconButton
-            forwardedAs="div"
+            tag="div"
             role="button"
             tabIndex={0}
             aria-label="Drag"
-            noBorder
+            borderWidth={0}
             onKeyDown={handleKeyDown}
           >
             <Drag />
@@ -99,11 +99,11 @@ const MyComponent = ({ onDropItem }) => {
       {isOverDropTarget && <Placeholder direction={direction} />}
       <Flex ref={composedRefs} data-handler-id={handlerId}>
         <IconButton
-          forwardedAs="div"
+          tag="div"
           role="button"
           tabIndex={0}
           aria-label="Drag"
-          noBorder
+          borderWidth={0}
           onKeyDown={handleKeyDown}
         >
           <Drag />
@@ -153,11 +153,11 @@ const MyComponent = ({ onMoveItem }) => {
       ) : (
         <Flex ref={composedRefs} data-handler-id={handlerId}>
           <IconButton
-            forwardedAs="div"
+            tag="div"
             role="button"
             tabIndex={0}
             aria-label="Drag"
-            noBorder
+            borderWidth={0}
             onKeyDown={handleKeyDown}
           >
             <Drag />
@@ -208,7 +208,7 @@ type UseDragAndDropReturn = [
   objectRef: React.RefObject<HTMLElement>,
   dropRef: ConnectDropTarget,
   dragRef: ConnectDragSource,
-  dragPreviewRef: ConnectDragPreview
+  dragPreviewRef: ConnectDragPreview,
 ];
 
 type UseDragAndDrop = (active: boolean, options: UseDragAndDropOptions) => UseDragAndDropReturn;
@@ -252,11 +252,11 @@ You might notice in the [basic usage](#basic-usage) section this piece of code:
 
 ```jsx
 <IconButton
-  forwardedAs="div"
+  tag="div"
   role="button"
   tabIndex={0}
   aria-label="Drag"
-  noBorder
+  borderWidth={0}
   onKeyDown={handleKeyDown}
 >
   <Drag />

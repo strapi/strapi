@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { Box, CardAsset, CardTimer } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { formatDuration } from '../../utils';
 
@@ -15,7 +15,7 @@ const VideoPreviewWrapper = styled(Box)`
     display: block;
     pointer-events: none;
     max-width: 100%;
-    max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
+    max-height: ${({ size }) => (size === 'M' ? 16.4 : 8.8)}rem;
   }
 `;
 

@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 
+import { useTracking } from '@strapi/admin/strapi-admin';
 import { IconButton, Searchbar, SearchForm } from '@strapi/design-system';
-import { useTracking } from '@strapi/helper-plugin';
 import { Search } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -66,7 +66,11 @@ const SearchAsset = ({ onChangeSearch, queryValue }) => {
     );
   }
 
-  return <IconButton icon={<Search />} label="Search" onClick={handleToggle} />;
+  return (
+    <IconButton label="Search" onClick={handleToggle}>
+      <Search />
+    </IconButton>
+  );
 };
 
 SearchAsset.defaultProps = {

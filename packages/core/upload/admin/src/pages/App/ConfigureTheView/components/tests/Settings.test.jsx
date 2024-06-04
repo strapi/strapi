@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { TrackingProvider } from '@strapi/helper-plugin';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -18,11 +17,9 @@ const render = ({ pageSize = testPageSize, sort = testSort, onChange = jest.fn()
   ...renderRTL(<Settings sort={sort} pageSize={pageSize} onChange={onChange} />, {
     wrapper: ({ children }) => (
       <IntlProvider locale="en" messages={{}}>
-        <TrackingProvider>
-          <ThemeProvider theme={lightTheme}>
-            <MemoryRouter>{children}</MemoryRouter>
-          </ThemeProvider>
-        </TrackingProvider>
+        <DesignSystemProvider>
+          <MemoryRouter>{children}</MemoryRouter>
+        </DesignSystemProvider>
       </IntlProvider>
     ),
   }),

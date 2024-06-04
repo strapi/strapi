@@ -1,20 +1,28 @@
 import { RenderAdminArgs, renderAdmin } from '@strapi/admin/strapi-admin';
-import contentTypeBuilder from '@strapi/plugin-content-type-builder/strapi-admin';
-import email from '@strapi/plugin-email/strapi-admin';
+import contentTypeBuilder from '@strapi/content-type-builder/strapi-admin';
+import contentManager from '@strapi/content-manager/strapi-admin';
+import email from '@strapi/email/strapi-admin';
 // @ts-expect-error – No types, yet.
-import upload from '@strapi/plugin-upload/strapi-admin';
+import upload from '@strapi/upload/strapi-admin';
+import i18n from '@strapi/i18n/strapi-admin';
 import contentReleases from '@strapi/content-releases/strapi-admin';
+import reviewWorkflows from '@strapi/review-workflows/strapi-admin';
 
 const render = (mountNode: HTMLElement | null, { plugins, ...restArgs }: RenderAdminArgs) => {
   return renderAdmin(mountNode, {
     ...restArgs,
     plugins: {
+      // @ts-expect-error – TODO: fix this
+      'content-manager': contentManager,
       'content-type-builder': contentTypeBuilder,
       // @ts-expect-error – TODO: fix this
       email,
       upload,
       // @ts-expect-error – TODO: fix this, the "types" folder has it wrong.
       contentReleases,
+      i18n,
+      // @ts-expect-error – TODO: fix this, the "types" folder has it wrong.
+      reviewWorkflows,
       ...plugins,
     },
   });

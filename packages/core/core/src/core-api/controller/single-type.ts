@@ -1,9 +1,9 @@
 import { isObject } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { Schema, CoreApi, Utils, Common } from '@strapi/types';
+import type { Struct, Core, Utils, UID } from '@strapi/types';
 
 interface Options {
-  contentType: Schema.SingleType;
+  contentType: Struct.SingleTypeSchema;
 }
 
 /**
@@ -11,8 +11,8 @@ interface Options {
  */
 const createSingleTypeController = ({
   contentType,
-}: Options): Utils.PartialWithThis<CoreApi.Controller.SingleType> => {
-  const uid = contentType.uid as Common.UID.Service;
+}: Options): Utils.PartialWithThis<Core.CoreAPI.Controller.SingleType> => {
+  const uid = contentType.uid as UID.Service;
 
   // TODO: transform into a class
   return {
@@ -40,6 +40,8 @@ const createSingleTypeController = ({
       if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
       }
+
+      await this.validateInput(body.data, ctx);
 
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
+import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
 import { IconButton } from '@strapi/design-system';
-import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/helper-plugin';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -18,36 +18,36 @@ interface DeleteLocaleProps extends Locale {}
 
 const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const [visible, setVisible] = React.useState(false);
 
-  const [deleteLocale, { isLoading }] = useDeleteLocaleMutation();
+  const [deleteLocale] = useDeleteLocaleMutation();
   const handleConfirm = async () => {
     try {
       const res = await deleteLocale(id);
 
       if ('error' in res) {
-        toggleNotification({ type: 'warning', message: formatAPIError(res.error) });
+        toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
 
         return;
       }
 
       toggleNotification({
         type: 'success',
-        message: {
+        message: formatMessage({
           id: getTranslation('Settings.locales.modal.delete.success'),
           defaultMessage: 'Deleted locale',
-        },
+        }),
       });
     } catch (err) {
       toggleNotification({
-        type: 'warning',
-        message: {
+        type: 'danger',
+        message: formatMessage({
           id: 'notification.error',
           defaultMessage: 'An error occurred, please try again',
-        },
+        }),
       });
     }
   };
@@ -65,15 +65,11 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
             name,
           }
         )}
-        icon={<Trash />}
         borderWidth={0}
-      />
-      <ConfirmDialog
-        isConfirmButtonLoading={isLoading}
-        onConfirm={handleConfirm}
-        onToggleDialog={() => setVisible(false)}
-        isOpen={visible}
-      />
+      >
+        <Trash />
+      </IconButton>
+      <ConfirmDialog onConfirm={handleConfirm} onClose={() => setVisible(false)} isOpen={visible} />
     </>
   );
 };

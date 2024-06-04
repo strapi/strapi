@@ -14,6 +14,15 @@ const historyVersionRouter: Plugin.LoadedPlugin['routes'][string] = {
         policies: ['admin::isAuthenticatedAdmin'],
       },
     },
+    {
+      method: 'PUT',
+      info,
+      path: '/history-versions/:versionId/restore',
+      handler: 'history-version.restoreVersion',
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
+    },
   ],
 };
 

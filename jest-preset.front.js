@@ -30,15 +30,11 @@ module.exports = {
   setupFiles: ['@strapi/admin-test-utils/setup'],
   setupFilesAfterEnv: ['@strapi/admin-test-utils/after-env'],
   testEnvironment: '@strapi/admin-test-utils/environment',
+  prettierPath: require.resolve('prettier-2'),
   transform: {
     '^.+\\.js(x)?$': [
       '@swc/jest',
       {
-        env: {
-          coreJs: '3.33.0',
-          mode: 'usage',
-        },
-
         jsc: {
           parser: {
             jsx: true,

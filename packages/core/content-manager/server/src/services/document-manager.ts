@@ -1,65 +1,42 @@
 import { omit, pipe } from 'lodash/fp';
 
-import { contentTypes, sanitize, errors } from '@strapi/utils';
-import type { LoadedStrapi as Strapi, Common, Documents } from '@strapi/types';
+import { contentTypes, errors, pagination } from '@strapi/utils';
+import type { Core, Modules, UID } from '@strapi/types';
 
 import { buildDeepPopulate, getDeepPopulate, getDeepPopulateDraftCount } from './utils/populate';
 import { sumDraftCounts } from './utils/draft';
-import { ALLOWED_WEBHOOK_EVENTS } from '../constants';
 
-type DocService = Documents.ServiceInstance;
-type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>;
-export type Document = Documents.Result<Common.UID.ContentType>;
+type DocService = Modules.Documents.ServiceInstance;
+type DocServiceParams<TAction extends keyof DocService> = Parameters<DocService[TAction]>[0];
+export type Document = Modules.Documents.Result<UID.ContentType>;
 
 const { ApplicationError } = errors;
-const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = ALLOWED_WEBHOOK_EVENTS;
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypes.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 const omitIdField = omit('id');
 
-const emitEvent = async (uid: Common.UID.ContentType, event: string, document: Document) => {
-  const modelDef = strapi.getModel(uid);
-  const sanitizedDocument = await sanitize.sanitizers.defaultSanitizeOutput(modelDef, document);
-
-  strapi.eventHub.emit(event, {
-    model: modelDef.modelName,
-    entry: sanitizedDocument,
-  });
-};
-
-const documentManager = ({ strapi }: { strapi: Strapi }) => {
-  const mapDocument = (uid: Common.UID.CollectionType, document: any): any => {
-    if (!document) return document;
-
-    if (Array.isArray(document)) {
-      return document.map((doc: Document) => mapDocument(uid, doc));
-    }
-
-    // document.id = document.documentId;
-
-    return document;
-  };
-
+const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
   return {
     async findOne(
       id: string,
-      uid: Common.UID.CollectionType,
-      opts: DocServiceParams<'findOne'>[1] = {}
+      uid: UID.CollectionType,
+      opts: Omit<DocServiceParams<'findOne'>, 'documentId'> = {}
     ) {
-      return strapi
-        .documents(uid)
-        .findOne(id, opts)
-        .then((doc) => mapDocument(uid, doc));
+      return strapi.documents(uid).findOne({ ...opts, documentId: id });
     },
 
     /**
      * Find multiple (or all) locales for a document
      */
     async findLocales(
-      id: string | undefined,
-      uid: Common.UID.CollectionType,
-      opts: { populate?: Documents.Params.Pick<any, 'populate'>; locale?: string | string[] | '*' }
+      id: string | string[] | undefined,
+      uid: UID.CollectionType,
+      opts: {
+        populate?: Modules.Documents.Params.Pick<any, 'populate'>;
+        locale?: string | string[] | '*';
+        isPublished?: boolean;
+      }
     ) {
       // Will look for a specific locale by default
       const where: any = {};
@@ -77,73 +54,58 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
         where.locale = opts.locale;
       }
 
+      // Published is passed, so we filter on it, otherwise we don't filter
+      if (typeof opts.isPublished === 'boolean') {
+        where.publishedAt = { $notNull: opts.isPublished };
+      }
+
       return strapi.db.query(uid).findMany({ populate: opts.populate, where });
     },
 
-    async findMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
+    async findMany(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
       const params = { ...opts, populate: getDeepPopulate(uid) } as typeof opts;
-      return strapi
-        .documents(uid)
-        .findMany(params)
-        .then((doc) => mapDocument(uid, doc));
+      return strapi.documents(uid).findMany(params);
     },
 
-    async findPage(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
-      // Pagination
-      const page = Number(opts?.page) || 1;
-      const pageSize = Number(opts?.pageSize) || 10;
+    async findPage(opts: DocServiceParams<'findMany'>, uid: UID.CollectionType) {
+      const params = pagination.withDefaultPagination(opts || {}, {
+        maxLimit: 1000,
+      });
 
       const [documents, total = 0] = await Promise.all([
-        strapi.documents(uid).findMany(opts),
-        strapi.documents(uid).count(opts),
+        strapi.documents(uid).findMany(params),
+        strapi.documents(uid).count(params),
       ]);
 
       return {
-        results: mapDocument(uid, documents),
-        pagination: {
-          page,
-          pageSize,
-          pageCount: Math.ceil(total! / pageSize),
-          total,
-        },
+        results: documents,
+        pagination: pagination.transformPagedPaginationInfo(params, total),
       };
     },
 
-    async create(uid: Common.UID.CollectionType, opts: DocServiceParams<'create'>[0] = {} as any) {
+    async create(uid: UID.CollectionType, opts: DocServiceParams<'create'> = {} as any) {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, status: 'draft' as const, populate };
 
-      const document = await strapi.documents(uid).create(params);
-
-      // if (isWebhooksPopulateRelationsEnabled()) {
-      //   return getDeepRelationsCount(document, uid);
-      // }
-
-      return mapDocument(uid, document);
+      return strapi.documents(uid).create(params);
     },
 
     async update(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
-      opts: DocServiceParams<'update'>[1] = {} as any
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
+      opts: Omit<DocServiceParams<'update'>, 'documentId'> = {} as any
     ) {
       const publishData = pipe(omitPublishedAtField, omitIdField)(opts.data || {});
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
       const params = { ...opts, data: publishData, populate, status: 'draft' };
 
-      const updatedDocument = await strapi.documents(uid).update(id, params);
-
-      // if (isWebhooksPopulateRelationsEnabled()) {
-      //   return getDeepRelationsCount(updatedDocument, uid);
-      // }
-
-      return mapDocument(uid, updatedDocument);
+      return strapi.documents(uid).update({ ...params, documentId: id });
     },
 
     async clone(
-      id: Documents.ID,
-      body: Partial<Documents.Params.Data.Input<Common.UID.CollectionType>>,
-      uid: Common.UID.CollectionType
+      id: Modules.Documents.ID,
+      body: Partial<Modules.Documents.Params.Data.Input<UID.CollectionType>>,
+      uid: UID.CollectionType
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = {
@@ -154,220 +116,150 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
         populate,
       };
 
-      const result = await strapi.documents(uid).clone(id, params);
-
-      const clonedEntity = result?.versions.at(0);
-      // If relations were populated, relations count will be returned instead of the array of relations.
-      // if (clonedEntity && isWebhooksPopulateRelationsEnabled()) {
-      //   return getDeepRelationsCount(clonedEntity, uid);
-      // }
-
-      return mapDocument(uid, clonedEntity);
+      return strapi
+        .documents(uid)
+        .clone({ ...params, documentId: id })
+        .then((result) => result?.entries.at(0));
     },
 
     /**
      *  Check if a document exists
      */
-    async exists(uid: Common.UID.CollectionType, id?: string) {
+    async exists(uid: UID.CollectionType, id?: string) {
       // Collection type
       if (id) {
-        const count = await strapi.query(uid).count({ where: { documentId: id } });
+        const count = await strapi.db.query(uid).count({ where: { documentId: id } });
         return count > 0;
       }
 
       // Single type
-      const count = await strapi.query(uid).count();
+      const count = await strapi.db.query(uid).count();
       return count > 0;
     },
 
     async delete(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
-      opts: DocServiceParams<'delete'>[1] = {} as any
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
+      opts: Omit<DocServiceParams<'delete'>, 'documentId'> = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
 
-      await strapi.documents(uid).delete(id, { ...opts, populate });
-
-      // If relations were populated, relations count will be returned instead of the array of relations.
-      // if (deletedDocument && isWebhooksPopulateRelationsEnabled()) {
-      //   return getDeepRelationsCount(deletedEntity, uid);
-      // }
-
+      await strapi.documents(uid).delete({
+        ...opts,
+        documentId: id,
+        populate,
+      });
       return {};
     },
 
     // FIXME: handle relations
-    async deleteMany(opts: DocServiceParams<'findMany'>[0], uid: Common.UID.CollectionType) {
-      const docs = await strapi.documents(uid).findMany(opts);
+    async deleteMany(
+      documentIds: Modules.Documents.ID[],
+      uid: UID.CollectionType,
+      opts: DocServiceParams<'findMany'> & { locale?: string } = {}
+    ) {
+      const deletedEntries = await strapi.db.transaction(async () => {
+        return Promise.all(documentIds.map(async (id) => this.delete(id, uid, opts)));
+      });
 
-      for (const doc of docs) {
-        await strapi.documents!(uid).delete(doc.documentId);
-      }
-
-      return { count: docs.length };
+      return { count: deletedEntries.length };
     },
 
     async publish(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
-      opts: DocServiceParams<'publish'>[1] = {} as any
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
+      opts: Omit<DocServiceParams<'publish'>, 'documentId'> = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = { ...opts, populate };
 
-      const { versions: publishedDocuments } = await strapi.documents(uid).publish(id, params);
-
-      // TODO: What if we publish many versions at once?
-      const publishedDocument = publishedDocuments.at(0);
-
-      // If relations were populated, relations count will be returned instead of the array of relations.
-      // if (publishedDocument && isWebhooksPopulateRelationsEnabled()) {
-      //   return getDeepRelationsCount(publishedDocument, uid);
-      // }
-
-      return mapDocument(uid, publishedDocument);
+      return strapi
+        .documents(uid)
+        .publish({ ...params, documentId: id })
+        .then((result) => result?.entries);
     },
 
-    async publishMany(entities: Document[], uid: Common.UID.ContentType) {
-      if (!entities.length) {
-        return null;
-      }
+    async publishMany(uid: UID.ContentType, documentIds: string[], locale?: string | string[]) {
+      return strapi.db.transaction(async () => {
+        const results = await Promise.all(
+          documentIds.map((documentId) => this.publish(documentId, uid, { locale }))
+        );
 
-      // Validate entities before publishing, throw if invalid
-      await Promise.all(
-        entities.map((document: Document) => {
-          return strapi.entityValidator.validateEntityCreation(
-            strapi.getModel(uid),
-            document,
-            undefined,
-            // @ts-expect-error - FIXME: entity here is unnecessary
-            document
-          );
-        })
-      );
-
-      // Only publish entities without a published_at date
-      const entitiesToPublish = entities
-        .filter((doc: Document) => !doc[PUBLISHED_AT_ATTRIBUTE])
-        .map((doc: Document) => doc.id);
-
-      const filters = { id: { $in: entitiesToPublish } };
-      const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
-      const populate = await buildDeepPopulate(uid);
-
-      // Everything is valid, publish
-      const publishedEntitiesCount = await strapi.db.query(uid).updateMany({
-        where: filters,
-        data,
+        const publishedEntitiesCount = results.flat().filter(Boolean).length;
+        return publishedEntitiesCount;
       });
-      // Get the updated entities since updateMany only returns the count
-      const publishedEntities = await strapi.db.query(uid).findMany({
-        where: filters,
-        populate,
-      });
-      // Emit the publish event for all updated entities
-      await Promise.all(
-        publishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_PUBLISH, doc))
-      );
-
-      // Return the number of published entities
-      return publishedEntitiesCount;
     },
 
-    async unpublishMany(documents: Document[], uid: Common.UID.CollectionType) {
-      if (!documents.length) {
-        return null;
-      }
-
-      // Only unpublish entities with a published_at date
-      const entitiesToUnpublish = documents
-        .filter((doc: Document) => doc[PUBLISHED_AT_ATTRIBUTE])
-        .map((doc: Document) => doc.id);
-
-      const filters = { id: { $in: entitiesToUnpublish } };
-      const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
-      const populate = await buildDeepPopulate(uid);
-
-      // No need to validate, unpublish
-      const unpublishedEntitiesCount = await strapi.query(uid).updateMany({
-        where: filters,
-        data,
+    async unpublishMany(
+      documentIds: Modules.Documents.ID[],
+      uid: UID.CollectionType,
+      opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
+    ) {
+      const unpublishedEntries = await strapi.db.transaction(async () => {
+        return Promise.all(
+          documentIds.map((id) =>
+            strapi
+              .documents(uid)
+              .unpublish({ ...opts, documentId: id })
+              .then((result) => result?.entries)
+          )
+        );
       });
 
-      // Get the updated entities since updateMany only returns the count
-      const unpublishedEntities = await strapi.db.query(uid).findMany({
-        where: filters,
-        populate,
-      });
-
-      // Emit the unpublish event for all updated entities
-      await Promise.all(
-        unpublishedEntities!.map((doc: Document) => emitEvent(uid, ENTRY_UNPUBLISH, doc))
-      );
+      const unpublishedEntitiesCount = unpublishedEntries.flat().filter(Boolean).length;
 
       // Return the number of unpublished entities
-      return unpublishedEntitiesCount;
+      return { count: unpublishedEntitiesCount };
     },
 
     async unpublish(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
-      opts: DocServiceParams<'unpublish'>[1] = {} as any
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
+      opts: Omit<DocServiceParams<'unpublish'>, 'documentId'> = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = { ...opts, populate };
 
-      await strapi.documents(uid).unpublish(id, params);
-
-      // If relations were populated, relations count will be returned instead of the array of relations.
-      // if (unpublishedDocument && isWebhooksPopulateRelationsEnabled()) {
-      //   return getDeepRelationsCount(mappedEntity, uid);
-      // }
-
-      return {};
+      return strapi
+        .documents(uid)
+        .unpublish({ ...params, documentId: id })
+        .then((result) => result?.entries.at(0));
     },
 
     async discardDraft(
-      id: Documents.ID,
-      uid: Common.UID.CollectionType,
-      opts: DocServiceParams<'discardDraft'>[1] = {} as any
+      id: Modules.Documents.ID,
+      uid: UID.CollectionType,
+      opts: Omit<DocServiceParams<'discardDraft'>, 'documentId'> = {} as any
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = { ...opts, populate };
 
-      const { versions: discardedDocuments } = await strapi.documents(uid).discardDraft(id, params);
-
-      // We only discard one document at a time
-      const discardedDocument = discardedDocuments.at(0);
-
-      // If relations were populated, relations count will be returned instead of the array of relations.
-      // if (discardedDocument && isWebhooksPopulateRelationsEnabled()) {
-      //   return getDeepRelationsCount(discardedDocument, uid);
-      // }
-
-      return mapDocument(uid, discardedDocument);
+      return strapi
+        .documents(uid)
+        .discardDraft({ ...params, documentId: id })
+        .then((result) => result?.entries.at(0));
     },
 
-    async countDraftRelations(id: string, uid: Common.UID.ContentType, locale: string) {
+    async countDraftRelations(id: string, uid: UID.ContentType, locale: string) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
       if (!hasRelations) {
         return 0;
       }
-      const document = await strapi.documents(uid).findOne(id, { populate, locale });
+      const document = await strapi.documents(uid).findOne({ documentId: id, populate, locale });
       if (!document) {
         throw new ApplicationError(
           `Unable to count draft relations, document with id ${id} and locale ${locale} not found`
         );
       }
+
       return sumDraftCounts(document, uid);
     },
 
     async countManyEntriesDraftRelations(
-      ids: number[],
-      uid: Common.UID.CollectionType,
-      locale: string
+      documentIds: Modules.Documents.ID[],
+      uid: UID.CollectionType,
+      locale: string | string[]
     ) {
       const { populate, hasRelations } = getDeepPopulateDraftCount(uid);
 
@@ -375,11 +267,16 @@ const documentManager = ({ strapi }: { strapi: Strapi }) => {
         return 0;
       }
 
+      let localeFilter = {};
+      if (locale) {
+        localeFilter = Array.isArray(locale) ? { locale: { $in: locale } } : { locale };
+      }
+
       const entities = await strapi.db.query(uid).findMany({
         populate,
         where: {
-          id: { $in: ids },
-          ...(locale ? { locale } : {}),
+          documentId: { $in: documentIds },
+          ...localeFilter,
         },
       });
 

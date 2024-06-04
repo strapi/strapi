@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 
+import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import {
   Button,
-  FieldLabel,
+  Field,
   Flex,
   Grid,
   GridItem,
@@ -13,7 +14,6 @@ import {
   TextInput,
   Typography,
 } from '@strapi/design-system';
-import { getAPIInnerErrors, useNotification, useTracking } from '@strapi/helper-plugin';
 import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
@@ -25,7 +25,7 @@ import { useBulkRemove } from '../../hooks/useBulkRemove';
 import { useEditFolder } from '../../hooks/useEditFolder';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { useMediaLibraryPermissions } from '../../hooks/useMediaLibraryPermissions';
-import { findRecursiveFolderByValue, getTrad } from '../../utils';
+import { findRecursiveFolderByValue, getTrad, getAPIInnerErrors } from '../../utils';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 
@@ -52,7 +52,7 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
   const { trackUsage } = useTracking();
   const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();
   const { remove } = useBulkRemove();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const isLoading = isLoadingPermissions || folderStructureIsLoading;
   const isEditing = !!folder;
   const formDisabled = (folder && !canUpdate) || (!folder && !canCreate);
@@ -194,27 +194,30 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                 )}
 
                 <GridItem xs={12} col={6}>
-                  <TextInput
-                    label={formatMessage({
-                      id: getTrad('form.input.label.folder-name'),
-                      defaultMessage: 'Name',
-                    })}
-                    name="name"
-                    value={values.name}
-                    error={errors.name}
-                    onChange={handleChange}
-                    disabled={formDisabled}
-                  />
+                  <Field.Root name="name" error={errors.name}>
+                    <Field.Label>
+                      {formatMessage({
+                        id: getTrad('form.input.label.folder-name'),
+                        defaultMessage: 'Name',
+                      })}
+                    </Field.Label>
+                    <TextInput
+                      value={values.name}
+                      onChange={handleChange}
+                      disabled={formDisabled}
+                    />
+                    <Field.Error />
+                  </Field.Root>
                 </GridItem>
 
                 <GridItem xs={12} col={6}>
-                  <Flex direction="column" alignItems="stretch" gap={1}>
-                    <FieldLabel htmlFor="folder-parent">
+                  <Field.Root id="folder-parent">
+                    <Field.Label>
                       {formatMessage({
                         id: getTrad('form.input.label.folder-location'),
                         defaultMessage: 'Location',
                       })}
-                    </FieldLabel>
+                    </Field.Label>
 
                     <SelectTree
                       options={folderStructure}
@@ -234,14 +237,14 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                     {errors.parent && (
                       <Typography
                         variant="pi"
-                        as="p"
+                        tag="p"
                         id="folder-parent-error"
                         textColor="danger600"
                       >
                         {errors.parent}
                       </Typography>
                     )}
-                  </Flex>
+                  </Field.Root>
                 </GridItem>
               </Grid>
             </ModalBody>

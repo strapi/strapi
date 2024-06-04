@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderRTL } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
@@ -10,11 +10,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { Breadcrumbs } from '../index';
 
 jest.mock('../../../hooks/useFolderStructure');
-
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useQueryParams: jest.fn().mockReturnValue([{ query: { folder: 22 } }]),
-}));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -39,13 +34,13 @@ const defaultBreadcrumbs = [
 const setup = (props) => ({
   user: userEvent.setup(),
   ...renderRTL(
-    <Breadcrumbs breadcrumbs={defaultBreadcrumbs} label="Navigation" as="nav" {...props} />,
+    <Breadcrumbs breadcrumbs={defaultBreadcrumbs} label="Navigation" tag="nav" {...props} />,
     {
       wrapper: ({ children }) => (
         <QueryClientProvider client={queryClient}>
           <MemoryRouter>
             <IntlProvider locale="en" messages={{}}>
-              <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>
+              <DesignSystemProvider>{children}</DesignSystemProvider>
             </IntlProvider>
           </MemoryRouter>
         </QueryClientProvider>

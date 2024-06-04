@@ -8,12 +8,11 @@ import tar from 'tar';
 import { isEmpty, keyBy } from 'lodash/fp';
 import { chain } from 'stream-chain';
 import { parser } from 'stream-json/jsonl/Parser';
-import type { Schema } from '@strapi/types';
+import type { Struct } from '@strapi/types';
 
 import type { IAsset, IMetadata, ISourceProvider, ProviderType, IFile } from '../../../../types';
 
-import { createDecryptionCipher } from '../../../utils/encryption';
-import { collect } from '../../../utils/stream';
+import * as utils from '../../../utils';
 import { ProviderInitializationError, ProviderTransferError } from '../../../errors/providers';
 import { isFilePathInDirname, isPathEquivalent, unknownPathToPosix } from './utils';
 
@@ -108,13 +107,19 @@ class LocalFileSourceProvider implements ISourceProvider {
   }
 
   async getSchemas() {
-    const schemas = await collect<Schema.Schema>(this.createSchemasReadStream());
+    const schemaCollection = await utils.stream.collect<Struct.Schema>(
+      this.createSchemasReadStream()
+    );
 
-    if (isEmpty(schemas)) {
+    if (isEmpty(schemaCollection)) {
       throw new ProviderInitializationError('Could not load schemas from Strapi data file.');
     }
 
-    return keyBy('uid', schemas);
+    // Group schema by UID
+    const schemas = keyBy('uid', schemaCollection);
+
+    // Transform to valid JSON
+    return utils.schema.schemasToValidJSON(schemas);
   }
 
   createEntitiesReadStream(): Readable {
@@ -191,7 +196,7 @@ class LocalFileSourceProvider implements ISourceProvider {
     }
 
     if (encryption.enabled && encryption.key) {
-      streams.push(createDecryptionCipher(encryption.key));
+      streams.push(utils.encryption.createDecryptionCipher(encryption.key));
     }
 
     if (compression.enabled) {

@@ -4,7 +4,7 @@ import type { StrapiCommand } from '../types';
 import { build as nodeBuild, BuildOptions } from '../../node/build';
 import { handleUnexpectedError } from '../../node/core/errors';
 
-interface BuildCLIOptions extends BuildOptions {}
+type BuildCLIOptions = BuildOptions;
 
 const action = async (options: BuildCLIOptions) => {
   try {

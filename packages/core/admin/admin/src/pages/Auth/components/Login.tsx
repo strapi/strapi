@@ -1,11 +1,9 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system/v2';
-import { translatedErrors, useQuery } from '@strapi/helper-plugin';
+import { Box, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
 import camelCase from 'lodash/camelCase';
 import { useIntl } from 'react-intl';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { Form } from '../../../components/Form';
@@ -17,6 +15,7 @@ import {
   Column,
   LayoutContent,
 } from '../../../layouts/UnauthenticatedLayout';
+import { translatedErrors } from '../../../utils/translatedErrors';
 
 import type { Login } from '../../../../../shared/contracts/authentication';
 
@@ -28,27 +27,22 @@ const LOGIN_SCHEMA = yup.object().shape({
   email: yup
     .string()
     .email({
-      id: translatedErrors.email,
+      id: translatedErrors.email.id,
       defaultMessage: 'Not a valid email',
     })
-    .required({
-      id: translatedErrors.required,
-      defaultMessage: 'This value is required.',
-    }),
-  password: yup.string().required({
-    id: translatedErrors.required,
-    defaultMessage: 'This value is required.',
-  }),
+    .required(translatedErrors.required),
+  password: yup.string().required(translatedErrors.required),
   rememberMe: yup.bool().nullable(),
 });
 
 const Login = ({ children }: LoginProps) => {
   const [apiError, setApiError] = React.useState<string>();
   const { formatMessage } = useIntl();
-  const query = useQuery();
+  const { search: searchString } = useLocation();
+  const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const navigate = useNavigate();
 
-  const login = useAuth('Login', (state) => state.login);
+  const { login } = useAuth('Login', (auth) => auth);
 
   const handleLogin = async (body: Parameters<typeof login>[0]) => {
     setApiError(undefined);
@@ -79,7 +73,7 @@ const Login = ({ children }: LoginProps) => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={1}>
-              <Typography variant="alpha" as="h1">
+              <Typography variant="alpha" tag="h1">
                 {formatMessage({
                   id: 'Auth.form.welcome.title',
                   defaultMessage: 'Welcome!',
@@ -153,8 +147,7 @@ const Login = ({ children }: LoginProps) => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            {/* @ts-expect-error – error with inferring the props from the as component */}
-            <Link as={NavLink} to="/auth/forgot-password">
+            <Link isExternal={false} tag={NavLink} to="/auth/forgot-password">
               {formatMessage({
                 id: 'Auth.link.forgot-password',
                 defaultMessage: 'Forgot your password?',

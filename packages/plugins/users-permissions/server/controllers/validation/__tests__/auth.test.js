@@ -4,6 +4,11 @@ const errors = require('@strapi/utils');
 const auth = require('../../auth');
 
 const mockStrapi = {
+  contentAPI: {
+    sanitize: {
+      output: jest.fn((input) => input),
+    },
+  },
   store: jest.fn(() => {
     return {
       get: jest.fn(() => {
@@ -20,18 +25,20 @@ const mockStrapi = {
       };
     }),
   },
-  query: jest.fn(() => {
-    return {
-      findOne: jest.fn(() => {
-        return {
-          role: 1,
-        };
-      }),
-      count: jest.fn(() => {
-        return 0;
-      }),
-    };
-  }),
+  db: {
+    query: jest.fn(() => {
+      return {
+        findOne: jest.fn(() => {
+          return {
+            role: 1,
+          };
+        }),
+        count: jest.fn(() => {
+          return 0;
+        }),
+      };
+    }),
+  },
   plugins: {
     'users-permissions': {
       controllers: {},

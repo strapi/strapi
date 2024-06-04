@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { Box } from '@strapi/design-system';
-import { Cross, CarretDown } from '@strapi/icons';
+import { Cross, CaretDown } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import ReactSelect, { components } from 'react-select';
-import styled, { useTheme } from 'styled-components';
+import { styled, useTheme } from 'styled-components';
 
 import Option from './Option';
 import flattenTree from './utils/flattenTree';
@@ -112,8 +112,8 @@ const IconBox = styled(Box)`
   z-index: 1;
 
   svg {
-    height: ${11 / 16}rem;
-    width: ${11 / 16}rem;
+    height: 1.1rem;
+    width: 1.1rem;
   }
 
   svg path {
@@ -126,7 +126,7 @@ const ClearIndicator = (props) => {
 
   return (
     <Component {...props}>
-      <IconBox as="button" type="button">
+      <IconBox tag="button" type="button">
         <Cross />
       </IconBox>
     </Component>
@@ -139,7 +139,7 @@ const CarretBox = styled(IconBox)`
   border: none;
 
   svg {
-    width: ${9 / 16}rem;
+    width: 0.9rem;
   }
 `;
 
@@ -147,7 +147,7 @@ const DropdownIndicator = ({ innerProps }) => {
   return (
     // @ts-expect-error – issue with the ref attached to `innerProps`
     <CarretBox paddingRight={3} {...innerProps}>
-      <CarretDown />
+      <CaretDown />
     </CarretBox>
   );
 };

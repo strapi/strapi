@@ -1,7 +1,7 @@
 import { entries, mapValues, omit } from 'lodash/fp';
 import { idArg, nonNull } from 'nexus';
 import { pagination } from '@strapi/utils';
-import type { Strapi, Schema } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 
 const { withDefaultPagination } = pagination;
 
@@ -10,12 +10,12 @@ type ContentTypeArgsOptions = {
   isNested?: boolean;
 };
 
-export default ({ strapi }: { strapi: Strapi }) => {
+export default ({ strapi }: { strapi: Core.Strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
 
   return {
     getContentTypeArgs(
-      contentType: Schema.Any,
+      contentType: Struct.Schema,
       { multiple = true, isNested = false }: ContentTypeArgsOptions = {}
     ) {
       const { naming } = getService('utils');
@@ -73,7 +73,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
     /**
      * Filter an object entries and keep only those whose value is a unique scalar attribute
      */
-    getUniqueScalarAttributes(attributes: Schema.Attributes) {
+    getUniqueScalarAttributes(attributes: Struct.SchemaAttributes) {
       const { isStrapiScalar } = getService('utils').attributes;
 
       const uniqueAttributes = entries(attributes).filter(
@@ -88,7 +88,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
      * @param {object} attributes - The attributes object to transform
      * @return {Object<string, string>}
      */
-    scalarAttributesToFiltersMap(attributes: Schema.Attributes) {
+    scalarAttributesToFiltersMap(attributes: Struct.SchemaAttributes) {
       return mapValues((attribute) => {
         const { mappers, naming } = getService('utils');
 
@@ -106,7 +106,7 @@ export default ({ strapi }: { strapi: Strapi }) => {
       {
         contentType,
         usePagination = false,
-      }: { contentType: Schema.ContentType; usePagination?: boolean }
+      }: { contentType: Struct.ContentTypeSchema; usePagination?: boolean }
     ) {
       const { mappers } = getService('utils');
       const { config } = strapi.plugin('graphql');

@@ -1,11 +1,11 @@
 import { policy as policyUtils, errors } from '@strapi/utils';
-import { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
-const resolvePolicies = (route: Common.Route) => {
+const createPolicicesMiddleware = (route: Core.Route, strapi: Core.Strapi) => {
   const policiesConfig = route?.config?.policies ?? [];
-  const resolvedPolicies = policyUtils.resolve(policiesConfig, route.info);
+  const resolvedPolicies = strapi.get('policies').resolve(policiesConfig, route.info);
 
-  const policiesMiddleware: Common.MiddlewareHandler = async (ctx, next) => {
+  const policiesMiddleware: Core.MiddlewareHandler = async (ctx, next) => {
     const context = policyUtils.createPolicyContext('koa', ctx);
 
     for (const { handler, config } of resolvedPolicies) {
@@ -19,7 +19,7 @@ const resolvePolicies = (route: Common.Route) => {
     await next();
   };
 
-  return [policiesMiddleware];
+  return policiesMiddleware;
 };
 
-export { resolvePolicies };
+export { createPolicicesMiddleware };

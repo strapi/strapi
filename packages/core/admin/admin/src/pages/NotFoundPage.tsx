@@ -4,34 +4,31 @@
  * This is the page we show when the user visits a url that doesn't have a route
  *
  */
-import {
-  ContentLayout,
-  EmptyStateLayout,
-  HeaderLayout,
-  LinkButton,
-  Main,
-} from '@strapi/design-system';
-import { useFocusWhenNavigate } from '@strapi/helper-plugin';
-import { ArrowRight, EmptyPictures } from '@strapi/icons';
+import { LinkButton, EmptyStateLayout } from '@strapi/design-system';
+import { ArrowRight } from '@strapi/icons';
+import { EmptyPictures } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
+import { Link } from 'react-router-dom';
+
+import { Layouts } from '../components/Layouts/Layout';
+import { Page } from '../components/PageHelpers';
 
 export const NotFoundPage = () => {
   const { formatMessage } = useIntl();
-  useFocusWhenNavigate();
 
   return (
-    <Main labelledBy="title">
-      <HeaderLayout
+    <Page.Main labelledBy="title">
+      <Layouts.Header
         id="title"
         title={formatMessage({
           id: 'content-manager.pageNotFound',
           defaultMessage: 'Page not found',
         })}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <EmptyStateLayout
           action={
-            <LinkButton variant="secondary" endIcon={<ArrowRight />} to="/">
+            <LinkButton tag={Link} variant="secondary" endIcon={<ArrowRight />} to="/">
               {formatMessage({
                 id: 'app.components.NotFoundPage.back',
                 defaultMessage: 'Back to homepage',
@@ -43,10 +40,10 @@ export const NotFoundPage = () => {
             defaultMessage: "Oops! We can't seem to find the page you're looging for...",
           })}
           hasRadius
-          icon={<EmptyPictures width="10rem" />}
+          icon={<EmptyPictures width="16rem" />}
           shadow="tableShadow"
         />
-      </ContentLayout>
-    </Main>
+      </Layouts.Content>
+    </Page.Main>
   );
 };

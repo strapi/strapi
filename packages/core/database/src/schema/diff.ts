@@ -70,7 +70,7 @@ export default (db: Database) => {
    * @param {Object} index - newly generate index info
    */
   const diffIndexes = (oldIndex: Index, index: Index): IndexDiff => {
-    const changes = [];
+    const changes: string[] = [];
 
     if (!_.isEqual(oldIndex.columns, index.columns)) {
       changes.push('columns');
@@ -95,7 +95,7 @@ export default (db: Database) => {
    * @param {Object} foreignKey - newly generate foreignKey info
    */
   const diffForeignKeys = (oldForeignKey: ForeignKey, foreignKey: ForeignKey): ForeignKeyDiff => {
-    const changes = [];
+    const changes: string[] = [];
 
     if (_.difference(oldForeignKey.columns, foreignKey.columns).length > 0) {
       changes.push('columns');
@@ -160,7 +160,7 @@ export default (db: Database) => {
    * @param {Object} column - newly generate column info
    */
   const diffColumns = (oldColumn: Column, column: Column): ColumnDiff => {
-    const changes = [];
+    const changes: string[] = [];
 
     const isIgnoredType = ['increments'].includes(column.type);
     const oldType = oldColumn.type;
@@ -350,7 +350,7 @@ export default (db: Database) => {
     const addedTables: Table[] = [];
     const updatedTables: TableDiff['diff'][] = [];
     const unchangedTables: Table[] = [];
-    const removedTables = [];
+    const removedTables: Table[] = [];
 
     for (const destTable of destSchema.tables) {
       const srcTable = helpers.findTable(srcSchema, destTable.name);

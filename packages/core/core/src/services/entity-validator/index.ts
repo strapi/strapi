@@ -6,7 +6,7 @@
 import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
-import { EntityValidator, Common, Schema, Attribute, Shared, EntityService } from '@strapi/types';
+import { Modules, UID, Struct, Schema } from '@strapi/types';
 import validators from './validators';
 
 type CreateOrUpdate = 'creation' | 'update';
@@ -24,7 +24,7 @@ type ID = { id: string | number };
 
 type RelationSource = string | number | ID;
 
-interface ValidatorMeta<TAttribute = Attribute.Any> {
+interface ValidatorMeta<TAttribute = Schema.Attribute.AnyAttribute> {
   attr: TAttribute;
   updatedAttribute: { name: string; value: any };
 }
@@ -35,14 +35,14 @@ interface ValidatorContext {
 }
 
 interface AttributeValidatorMetas {
-  attr: Attribute.Any;
+  attr: Schema.Attribute.AnyAttribute;
   updatedAttribute: { name: string; value: unknown };
-  model: Schema.ContentType | Schema.Component;
+  model: Struct.Schema;
   entity?: Entity;
 }
 
 interface ModelValidatorMetas {
-  model: Schema.ContentType | Schema.Component;
+  model: Struct.Schema;
   data: Record<string, unknown>;
   entity?: Entity;
 }
@@ -53,10 +53,13 @@ const addMinMax = <
   T extends {
     min(value: number): T;
     max(value: number): T;
-  }
+  },
 >(
   validator: T,
-  { attr, updatedAttribute }: ValidatorMeta<Attribute.Any & Attribute.MinMaxOption<string | number>>
+  {
+    attr,
+    updatedAttribute,
+  }: ValidatorMeta<Schema.Attribute.AnyAttribute & Schema.Attribute.MinMaxOption<string | number>>
 ): T => {
   let nextValidator: T = validator;
 
@@ -76,7 +79,9 @@ const addMinMax = <
 const addRequiredValidation = (createOrUpdate: CreateOrUpdate) => {
   return <T extends strapiUtils.yup.AnySchema>(
     validator: T,
-    { attr: { required } }: ValidatorMeta<Partial<Attribute.Any & Attribute.RequiredOption>>
+    {
+      attr: { required },
+    }: ValidatorMeta<Partial<Schema.Attribute.AnyAttribute & Schema.Attribute.RequiredOption>>
   ): T => {
     let nextValidator = validator;
 
@@ -96,7 +101,7 @@ const addRequiredValidation = (createOrUpdate: CreateOrUpdate) => {
 const addDefault = (createOrUpdate: CreateOrUpdate) => {
   return (
     validator: strapiUtils.yup.BaseSchema,
-    { attr }: ValidatorMeta<Attribute.Any & Attribute.DefaultOption<unknown>>
+    { attr }: ValidatorMeta<Schema.Attribute.AnyAttribute & Schema.Attribute.DefaultOption<unknown>>
   ) => {
     let nextValidator = validator;
 
@@ -123,7 +128,7 @@ const preventCast = (validator: strapiUtils.yup.AnySchema) =>
 const createComponentValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
-    { attr, updatedAttribute }: ValidatorMeta<Attribute.Component<Common.UID.Component, boolean>>,
+    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Component<UID.Component, boolean>>,
     { isDraft }: ValidatorContext
   ) => {
     const model = strapi.getModel(attr.component);
@@ -200,7 +205,7 @@ const createDzValidator =
 const createRelationValidator =
   (createOrUpdate: CreateOrUpdate) =>
   (
-    { attr, updatedAttribute }: ValidatorMeta<Attribute.Relation>,
+    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Relation>,
     { isDraft }: ValidatorContext
   ) => {
     let validator;
@@ -278,30 +283,33 @@ const createModelValidator =
   ({ model, data, entity }: ModelValidatorMetas, options: ValidatorContext) => {
     const writableAttributes = model ? getWritableAttributes(model as any) : [];
 
-    const schema = writableAttributes.reduce((validators, attributeName) => {
-      const metas = {
-        attr: model.attributes[attributeName],
-        updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
-        model,
-        entity,
-      };
+    const schema = writableAttributes.reduce(
+      (validators, attributeName) => {
+        const metas = {
+          attr: model.attributes[attributeName],
+          updatedAttribute: { name: attributeName, value: prop(attributeName, data) },
+          model,
+          entity,
+        };
 
-      const validator = createAttributeValidator(createOrUpdate)(metas, options);
+        const validator = createAttributeValidator(createOrUpdate)(metas, options);
 
-      validators[attributeName] = validator;
+        validators[attributeName] = validator;
 
-      return validators;
-    }, {} as Record<string, strapiUtils.yup.BaseSchema>);
+        return validators;
+      },
+      {} as Record<string, strapiUtils.yup.BaseSchema>
+    );
 
     return yup.object().shape(schema);
   };
 
 const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
   return async <
-    TUID extends Common.UID.ContentType,
-    TData extends EntityService.Params.Data.Input<TUID>
+    TUID extends UID.ContentType,
+    TData extends Modules.EntityService.Params.Data.Input<TUID>,
   >(
-    model: Shared.ContentTypes[TUID],
+    model: Schema.ContentType<TUID>,
     data: TData | Partial<TData> | undefined,
     options?: ValidatorContext,
     entity?: Entity
@@ -344,7 +352,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
 /**
  * Builds an object containing all the media and relations being associated with an entity
  */
-const buildRelationsStore = <TUID extends Common.UID.ContentType | Common.UID.Component>({
+const buildRelationsStore = <TUID extends UID.Schema>({
   uid,
   data,
 }: {
@@ -361,105 +369,108 @@ const buildRelationsStore = <TUID extends Common.UID.ContentType | Common.UID.Co
 
   const currentModel = strapi.getModel(uid);
 
-  return Object.keys(currentModel.attributes).reduce((result, attributeName: string) => {
-    const attribute = currentModel.attributes[attributeName];
-    const value = data[attributeName];
+  return Object.keys(currentModel.attributes).reduce(
+    (result, attributeName: string) => {
+      const attribute = currentModel.attributes[attributeName];
+      const value = data[attributeName];
 
-    if (isNil(value)) {
-      return result;
-    }
+      if (isNil(value)) {
+        return result;
+      }
 
-    switch (attribute.type) {
-      case 'relation':
-      case 'media': {
-        if (
-          attribute.type === 'relation' &&
-          (attribute.relation === 'morphToMany' || attribute.relation === 'morphToOne')
-        ) {
-          // TODO: handle polymorphic relations
+      switch (attribute.type) {
+        case 'relation':
+        case 'media': {
+          if (
+            attribute.type === 'relation' &&
+            (attribute.relation === 'morphToMany' || attribute.relation === 'morphToOne')
+          ) {
+            // TODO: handle polymorphic relations
+            break;
+          }
+
+          const target =
+            // eslint-disable-next-line no-nested-ternary
+            attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
+          // As there are multiple formats supported for associating relations
+          // with an entity, the value here can be an: array, object or number.
+          let source: RelationSource[];
+          if (Array.isArray(value)) {
+            source = value;
+          } else if (isObject(value)) {
+            if ('connect' in value && !isNil(value.connect)) {
+              source = value.connect as RelationSource[];
+            } else if ('set' in value && !isNil(value.set)) {
+              source = value.set as RelationSource[];
+            } else {
+              source = [];
+            }
+          } else {
+            source = castArray(value as RelationSource);
+          }
+          const idArray = source.map((v) => ({
+            id: typeof v === 'object' ? v.id : v,
+          }));
+
+          // Update the relationStore to keep track of all associations being made
+          // with relations and media.
+          result[target] = result[target] || [];
+          result[target].push(...idArray);
           break;
         }
+        case 'component': {
+          return castArray(value).reduce((relationsStore, componentValue) => {
+            if (!attribute.component) {
+              throw new ValidationError(
+                `Cannot build relations store from component, component identifier is undefined`
+              );
+            }
 
-        const target =
-          // eslint-disable-next-line no-nested-ternary
-          attribute.type === 'media' ? 'plugin::upload.file' : attribute.target;
-        // As there are multiple formats supported for associating relations
-        // with an entity, the value here can be an: array, object or number.
-        let source: RelationSource[];
-        if (Array.isArray(value)) {
-          source = value;
-        } else if (isObject(value)) {
-          if ('connect' in value && !isNil(value.connect)) {
-            source = value.connect as RelationSource[];
-          } else if ('set' in value && !isNil(value.set)) {
-            source = value.set as RelationSource[];
-          } else {
-            source = [];
-          }
-        } else {
-          source = castArray(value as RelationSource);
+            return mergeWith(
+              relationsStore,
+              buildRelationsStore({
+                uid: attribute.component,
+                data: componentValue as Record<string, unknown>,
+              }),
+              (objValue, srcValue) => {
+                if (isArray(objValue)) {
+                  return objValue.concat(srcValue);
+                }
+              }
+            );
+          }, result) as Record<string, ID[]>;
         }
-        const idArray = source.map((v) => ({
-          id: typeof v === 'object' ? v.id : v,
-        }));
-
-        // Update the relationStore to keep track of all associations being made
-        // with relations and media.
-        result[target] = result[target] || [];
-        result[target].push(...idArray);
-        break;
-      }
-      case 'component': {
-        return castArray(value).reduce((relationsStore, componentValue) => {
-          if (!attribute.component) {
-            throw new ValidationError(
-              `Cannot build relations store from component, component identifier is undefined`
-            );
-          }
-
-          return mergeWith(
-            relationsStore,
-            buildRelationsStore({
-              uid: attribute.component,
-              data: componentValue as Record<string, unknown>,
-            }),
-            (objValue, srcValue) => {
-              if (isArray(objValue)) {
-                return objValue.concat(srcValue);
-              }
+        case 'dynamiczone': {
+          return castArray(value).reduce((relationsStore, dzValue) => {
+            const value = dzValue as Record<string, unknown>;
+            if (!value.__component) {
+              throw new ValidationError(
+                `Cannot build relations store from dynamiczone, component identifier is undefined`
+              );
             }
-          );
-        }, result) as Record<string, ID[]>;
-      }
-      case 'dynamiczone': {
-        return castArray(value).reduce((relationsStore, dzValue) => {
-          const value = dzValue as Record<string, unknown>;
-          if (!value.__component) {
-            throw new ValidationError(
-              `Cannot build relations store from dynamiczone, component identifier is undefined`
-            );
-          }
 
-          return mergeWith(
-            relationsStore,
-            buildRelationsStore({
-              uid: value.__component as Common.UID.Component,
-              data: value,
-            }),
-            (objValue, srcValue) => {
-              if (isArray(objValue)) {
-                return objValue.concat(srcValue);
+            return mergeWith(
+              relationsStore,
+              buildRelationsStore({
+                uid: value.__component as UID.Component,
+                data: value,
+              }),
+              (objValue, srcValue) => {
+                if (isArray(objValue)) {
+                  return objValue.concat(srcValue);
+                }
               }
-            }
-          );
-        }, result) as Record<string, ID[]>;
+            );
+          }, result) as Record<string, ID[]>;
+        }
+        default:
+          break;
       }
-      default:
-        break;
-    }
 
-    return result;
-  }, {} as Record<string, ID[]>);
+      return result;
+    },
+    {} as Record<string, ID[]>
+  );
 };
 
 /**
@@ -467,12 +478,12 @@ const buildRelationsStore = <TUID extends Common.UID.ContentType | Common.UID.Co
  * mentioned exists
  */
 const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) => {
-  const promises = [];
+  const promises: Promise<void>[] = [];
 
   for (const [key, value] of Object.entries(relationsStore)) {
     const evaluate = async () => {
       const uniqueValues = uniqBy(value, `id`);
-      const count = await strapi.query(key as Common.UID.Schema).count({
+      const count = await strapi.db.query(key as UID.Schema).count({
         where: {
           id: {
             $in: uniqueValues.map((v) => v.id),
@@ -494,7 +505,7 @@ const checkRelationsExist = async (relationsStore: Record<string, ID[]> = {}) =>
   return Promise.all(promises);
 };
 
-const entityValidator: EntityValidator = {
+const entityValidator: Modules.EntityValidator.EntityValidator = {
   validateEntityCreation: createValidateEntity('creation'),
   validateEntityUpdate: createValidateEntity('update'),
 };

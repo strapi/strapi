@@ -1,12 +1,12 @@
 import type { Knex } from 'knex';
 import { clone, isNil } from 'lodash/fp';
-import type { LoadedStrapi } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 import { ILink } from '../../../types';
 
 // TODO: Remove any types when we'll have types for DB metadata
 
-export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) => {
+export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => {
   const query = () => {
     const { connection } = strapi.db;
 
@@ -225,6 +225,14 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
 
       const payload = {};
 
+      /**
+       * This _should_ only happen for attributes that are added dynamically e.g. review-workflow stages
+       * and a user is importing EE data into a CE project.
+       */
+      if (!attribute) {
+        return;
+      }
+
       if (attribute.type !== 'relation') {
         throw new Error(`Attribute ${left.field} is not a relation`);
       }
@@ -324,14 +332,12 @@ export const createLinkQuery = (strapi: LoadedStrapi, trx?: Knex.Transaction) =>
   return query;
 };
 
-const filterValidRelationalAttributes = (attributes: Record<string, any>) => {
+export const filterValidRelationalAttributes = (attributes: Record<string, any>) => {
   const isOwner = (attribute: any) => {
     return attribute.owner || (!attribute.mappedBy && !attribute.morphBy);
   };
 
-  const isComponentLike = (attribute: any) => {
-    return attribute.component || attribute.components;
-  };
+  const isComponentLike = (attribute: any) => attribute.joinTable?.name.endsWith('_cmps');
 
   return Object.entries(attributes)
     .filter(([, attribute]) => {

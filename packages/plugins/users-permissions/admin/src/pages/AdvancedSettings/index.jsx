@@ -1,28 +1,17 @@
 import React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Main,
-  Typography,
-  useNotifyAT,
-} from '@strapi/design-system';
+import { Box, Button, Flex, Grid, GridItem, Typography, useNotifyAT } from '@strapi/design-system';
+import { Check } from '@strapi/icons';
 import {
   useAPIErrorHandler,
-  useFetchClient,
-  useFocusWhenNavigate,
+  Page,
+  Form,
+  InputRenderer,
   useNotification,
-  useOverlayBlocker,
+  useFetchClient,
   useRBAC,
-} from '@strapi/helper-plugin';
-import { Check } from '@strapi/icons';
-import { Page, Form, InputRenderer } from '@strapi/strapi/admin';
-import { Helmet } from 'react-helmet';
+  Layouts,
+} from '@strapi/strapi/admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 
@@ -40,14 +29,11 @@ const ProtectedAdvancedSettingsPage = () => (
 
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
-  const toggleNotification = useNotification();
-  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { toggleNotification } = useNotification();
   const { notifyStatus } = useNotifyAT();
   const queryClient = useQueryClient();
   const { get, put } = useFetchClient();
   const { formatAPIError } = useAPIErrorHandler();
-
-  useFocusWhenNavigate();
 
   const {
     isLoading: isLoadingForPermissions,
@@ -72,8 +58,11 @@ const AdvancedSettingsPage = () => {
       },
       onError() {
         toggleNotification({
-          type: 'warning',
-          message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
+          type: 'danger',
+          message: formatMessage({
+            id: getTrad('notification.error'),
+            defaultMessage: 'An error occured',
+          }),
         });
       },
     }
@@ -87,18 +76,17 @@ const AdvancedSettingsPage = () => {
 
       toggleNotification({
         type: 'success',
-        message: { id: getTrad('notification.success.saved'), defaultMessage: 'Saved' },
+        message: formatMessage({
+          id: getTrad('notification.success.saved'),
+          defaultMessage: 'Saved',
+        }),
       });
-
-      unlockApp();
     },
     onError(error) {
       toggleNotification({
-        type: 'warning',
+        type: 'danger',
         message: formatAPIError(error),
       });
-
-      unlockApp();
     },
     refetchActive: true,
   });
@@ -106,8 +94,6 @@ const AdvancedSettingsPage = () => {
   const { isLoading: isSubmittingForm } = submitMutation;
 
   const handleSubmit = async (body) => {
-    lockApp();
-
     submitMutation.mutate({
       ...body,
       email_confirmation_redirection: body.email_confirmation
@@ -121,9 +107,9 @@ const AdvancedSettingsPage = () => {
   }
 
   return (
-    <Main aria-busy={isSubmittingForm}>
-      <Helmet
-        title={formatMessage(
+    <Page.Main aria-busy={isSubmittingForm}>
+      <Page.Title>
+        {formatMessage(
           { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
           {
             name: formatMessage({
@@ -132,12 +118,12 @@ const AdvancedSettingsPage = () => {
             }),
           }
         )}
-      />
+      </Page.Title>
       <Form onSubmit={handleSubmit} initialValues={data.settings} validationSchema={schema}>
         {({ values, isSubmitting, modified }) => {
           return (
             <>
-              <HeaderLayout
+              <Layouts.Header
                 title={formatMessage({
                   id: getTrad('HeaderNav.link.advancedSettings'),
                   defaultMessage: 'Advanced Settings',
@@ -154,7 +140,7 @@ const AdvancedSettingsPage = () => {
                   </Button>
                 }
               />
-              <ContentLayout>
+              <Layouts.Content>
                 <Box
                   background="neutral0"
                   hasRadius
@@ -165,7 +151,7 @@ const AdvancedSettingsPage = () => {
                   paddingRight={7}
                 >
                   <Flex direction="column" alignItems="stretch" gap={4}>
-                    <Typography variant="delta" as="h2">
+                    <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: 'global.settings',
                         defaultMessage: 'Settings',
@@ -211,12 +197,12 @@ const AdvancedSettingsPage = () => {
                     </Grid>
                   </Flex>
                 </Box>
-              </ContentLayout>
+              </Layouts.Content>
             </>
           );
         }}
       </Form>
-    </Main>
+    </Page.Main>
   );
 };
 

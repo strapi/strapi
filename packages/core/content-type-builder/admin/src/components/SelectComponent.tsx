@@ -1,4 +1,4 @@
-import { Option, Select } from '@strapi/design-system';
+import { SingleSelectOption, SingleSelect, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useDataManager } from '../hooks/useDataManager';
@@ -88,24 +88,24 @@ export const SelectComponent = ({
   }
 
   return (
-    <Select
-      disabled={isCreatingComponentWhileAddingAField || !isCreating}
-      error={errorMessage}
-      label={label}
-      id={name}
-      name={name}
-      onChange={(value: any) => {
-        onChange({ target: { name, value, type: 'select-category' } });
-      }}
-      value={value || ''}
-    >
-      {options.map((option) => {
-        return (
-          <Option key={option.uid} value={option.uid}>
-            {`${option.categoryName} - ${option.label}`}
-          </Option>
-        );
-      })}
-    </Select>
+    <Field.Root error={errorMessage} name={name}>
+      <Field.Label>{label}</Field.Label>
+      <SingleSelect
+        disabled={isCreatingComponentWhileAddingAField || !isCreating}
+        onChange={(value: any) => {
+          onChange({ target: { name, value, type: 'select-category' } });
+        }}
+        value={value || ''}
+      >
+        {options.map((option) => {
+          return (
+            <SingleSelectOption key={option.uid} value={option.uid}>
+              {`${option.categoryName} - ${option.label}`}
+            </SingleSelectOption>
+          );
+        })}
+      </SingleSelect>
+      <Field.Error />
+    </Field.Root>
   );
 };

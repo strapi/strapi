@@ -4,10 +4,13 @@ import path from 'path';
 import _ from 'lodash';
 import { omit } from 'lodash/fp';
 import dotenv from 'dotenv';
-import type { Config } from '@strapi/types';
-import { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } from './urls';
+import type { Core } from '@strapi/types';
 
+import { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } from './urls';
 import loadConfigDir from './config-loader';
+import { getDirs } from './get-dirs';
+
+import type { StrapiOptions } from '../Strapi';
 
 dotenv.config({ path: process.env.ENV_PATH });
 
@@ -36,18 +39,17 @@ const defaultConfig = {
         enabled: true,
       },
     },
-  } satisfies Partial<Config.Server>,
-  admin: {} satisfies Partial<Config.Admin>,
+  } satisfies Partial<Core.Config.Server>,
+  admin: {} satisfies Partial<Core.Config.Admin>,
   api: {
     rest: {
       prefix: '/api',
     },
-  } satisfies Partial<Config.Api>,
+  } satisfies Partial<Core.Config.Api>,
 };
 
-export default (dirs: { app: string; dist: string }, initialConfig: any = {}) => {
-  const { app: appDir, dist: distDir } = dirs;
-  const { autoReload = false, serveAdminPanel = true } = initialConfig;
+export const loadConfiguration = (opts: StrapiOptions) => {
+  const { appDir, distDir, autoReload = false, serveAdminPanel = true } = opts;
 
   const pkgJSON = require(path.resolve(appDir, 'package.json'));
 
@@ -83,6 +85,7 @@ export default (dirs: { app: string; dist: string }, initialConfig: any = {}) =>
   _.set(config, 'admin.url', adminUrl);
   _.set(config, 'admin.path', adminPath);
   _.set(config, 'admin.absoluteUrl', getAbsoluteAdminUrl(config));
+  _.set(config, 'dirs', getDirs(opts, config));
 
   return config;
 };

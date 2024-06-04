@@ -1,6 +1,10 @@
 import { traverseQueryPopulate } from '../traverse';
 
 describe('traverseQueryPopulate', () => {
+  global.strapi = {
+    getModel() {},
+  } as any;
+
   test('should not modify wildcard', async () => {
     const strapi = {
       getModel: jest.fn((uid) => {
@@ -45,6 +49,7 @@ describe('traverseQueryPopulate', () => {
           },
         },
       },
+      getModel() {},
     })('*');
 
     expect(query).toEqual('*');
@@ -94,6 +99,7 @@ describe('traverseQueryPopulate', () => {
           },
         },
       },
+      getModel() {},
     })('address');
 
     expect(query).toEqual('address');

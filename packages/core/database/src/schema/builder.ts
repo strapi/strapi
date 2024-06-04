@@ -248,34 +248,48 @@ const createHelpers = (db: Database) => {
     await schemaBuilder.alterTable(table.name, (tableBuilder) => {
       // Delete indexes / fks / columns
 
-      for (const removedIndex of table.indexes.removed) {
-        debug(`Dropping index ${removedIndex.name}`);
-        dropIndex(tableBuilder, removedIndex);
-      }
-
-      for (const updateddIndex of table.indexes.updated) {
-        debug(`Dropping updated index ${updateddIndex.name}`);
-        dropIndex(tableBuilder, updateddIndex.object);
-      }
-
+      // Drop foreign keys first to avoid foreign key errors in the following steps
       for (const removedForeignKey of table.foreignKeys.removed) {
-        debug(`Dropping foreign key ${removedForeignKey.name}`);
+        debug(`Dropping foreign key ${removedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, removedForeignKey);
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
-        debug(`Dropping updated foreign key ${updatedForeignKey.name}`);
+        debug(`Dropping updated foreign key ${updatedForeignKey.name} on ${table.name}`);
         dropForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
       for (const removedColumn of table.columns.removed) {
-        debug(`Dropping column ${removedColumn.name}`);
+        debug(`Dropping column ${removedColumn.name} on ${table.name}`);
         dropColumn(tableBuilder, removedColumn);
+      }
+
+      // for mysql only, dropForeignKey also removes the index, so don't drop it twice
+      const isMySQL = db.config.connection.client === 'mysql';
+      const ignoreForeignKeyNames = isMySQL
+        ? [
+            ...table.foreignKeys.removed.map((fk) => fk.name),
+            ...table.foreignKeys.updated.map((fk) => fk.name),
+          ]
+        : [];
+
+      for (const removedIndex of table.indexes.removed) {
+        if (!ignoreForeignKeyNames.includes(removedIndex.name)) {
+          debug(`Dropping index ${removedIndex.name} on ${table.name}`);
+          dropIndex(tableBuilder, removedIndex);
+        }
+      }
+
+      for (const updatedIndex of table.indexes.updated) {
+        if (!ignoreForeignKeyNames.includes(updatedIndex.name)) {
+          debug(`Dropping updated index ${updatedIndex.name} on ${table.name}`);
+          dropIndex(tableBuilder, updatedIndex.object);
+        }
       }
 
       // Update existing columns / foreign keys / indexes
       for (const updatedColumn of table.columns.updated) {
-        debug(`Updating column ${updatedColumn.name}`);
+        debug(`Updating column ${updatedColumn.name} on ${table.name}`);
 
         const { object } = updatedColumn;
 
@@ -287,17 +301,17 @@ const createHelpers = (db: Database) => {
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
-        debug(`Recreating updated foreign key ${updatedForeignKey.name}`);
+        debug(`Recreating updated foreign key ${updatedForeignKey.name} on ${table.name}`);
         createForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
       for (const updatedIndex of table.indexes.updated) {
-        debug(`Recreating updated index ${updatedIndex.name}`);
+        debug(`Recreating updated index ${updatedIndex.name} on ${table.name}`);
         createIndex(tableBuilder, updatedIndex.object);
       }
 
       for (const addedColumn of table.columns.added) {
-        debug(`Creating column ${addedColumn.name}`);
+        debug(`Creating column ${addedColumn.name} on ${table.name}`);
 
         if (addedColumn.type === 'increments' && !db.dialect.canAddIncrements()) {
           tableBuilder.integer(addedColumn.name).unsigned();
@@ -308,12 +322,12 @@ const createHelpers = (db: Database) => {
       }
 
       for (const addedForeignKey of table.foreignKeys.added) {
-        debug(`Creating foreign keys ${addedForeignKey.name}`);
+        debug(`Creating foreign keys ${addedForeignKey.name} on ${table.name}`);
         createForeignKey(tableBuilder, addedForeignKey);
       }
 
       for (const addedIndex of table.indexes.added) {
-        debug(`Creating index ${addedIndex.name}`);
+        debug(`Creating index ${addedIndex.name} on ${table.name}`);
         createIndex(tableBuilder, addedIndex);
       }
     });

@@ -1,6 +1,6 @@
 import koaCors from '@koa/cors';
 
-import type { Common } from '@strapi/types';
+import type { Core } from '@strapi/types';
 
 export type Config = {
   enabled?: boolean;
@@ -22,7 +22,7 @@ const defaults: Config = {
   keepHeadersOnError: false,
 };
 
-export const cors: Common.MiddlewareFactory<Config> = (config) => {
+export const cors: Core.MiddlewareFactory<Config> = (config) => {
   const { origin, expose, maxAge, credentials, methods, headers, keepHeadersOnError } = {
     ...defaults,
     ...config,
@@ -38,6 +38,10 @@ export const cors: Common.MiddlewareFactory<Config> = (config) => {
 
   return koaCors({
     async origin(ctx) {
+      if (!ctx.get('Origin')) {
+        return '*';
+      }
+
       let originList: string | string[];
 
       if (typeof origin === 'function') {
@@ -46,17 +50,11 @@ export const cors: Common.MiddlewareFactory<Config> = (config) => {
         originList = origin;
       }
 
-      const whitelist = Array.isArray(originList) ? originList : originList.split(/\s*,\s*/);
-
-      const requestOrigin = ctx.headers.origin ?? '';
-      if (whitelist.includes('*')) {
-        return credentials ? requestOrigin : '*';
+      if (Array.isArray(originList)) {
+        return originList.includes(ctx.get('Origin')) ? ctx.get('Origin') : '';
       }
 
-      if (!whitelist.includes(requestOrigin)) {
-        return ctx.throw(`${requestOrigin} is not a valid origin`);
-      }
-      return requestOrigin;
+      return originList;
     },
     exposeHeaders: expose,
     maxAge,

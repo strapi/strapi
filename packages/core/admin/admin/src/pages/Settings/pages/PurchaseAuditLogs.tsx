@@ -1,15 +1,17 @@
-import { Box, Layout, Main, HeaderLayout, EmptyStateLayout } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system/v2';
-import { ExternalLink, EmptyPermissions } from '@strapi/icons';
+import { Box, Main, EmptyStateLayout, LinkButton } from '@strapi/design-system';
+import { ExternalLink } from '@strapi/icons';
+import { EmptyPermissions } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
+
+import { Layouts } from '../../../components/Layouts/Layout';
 
 const PurchaseAuditLogs = () => {
   const { formatMessage } = useIntl();
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Main>
-        <HeaderLayout
+        <Layouts.Header
           title={formatMessage({ id: 'global.auditLogs', defaultMessage: 'Audit Logs' })}
           subtitle={formatMessage({
             id: 'Settings.permissions.auditLogs.listview.header.subtitle',
@@ -18,11 +20,11 @@ const PurchaseAuditLogs = () => {
         />
         <Box paddingLeft={10} paddingRight={10}>
           <EmptyStateLayout
-            icon={<EmptyPermissions width="10rem" />}
+            icon={<EmptyPermissions width="16rem" />}
             content={formatMessage({
               id: 'Settings.permissions.auditLogs.not-available',
               defaultMessage:
-                'Audit Logs is only available as part of the Enterprise Edition. Upgrade to get a searchable and filterable display of all activities.',
+                'Audit Logs is only available as part of a paid plan. Upgrade to get a searchable and filterable display of all activities.',
             })}
             action={
               <LinkButton
@@ -41,7 +43,7 @@ const PurchaseAuditLogs = () => {
           />
         </Box>
       </Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

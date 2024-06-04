@@ -10,7 +10,7 @@ import {
   Checkbox,
   DatePicker,
   DateTimePicker,
-  Icon,
+  Field,
   JSONInput,
   NumberInput,
   SingleSelect,
@@ -18,14 +18,14 @@ import {
   Textarea,
   TextInput,
   TimePicker,
-  ToggleInput,
+  Toggle,
 } from '@strapi/design-system';
 import { Eye, EyeStriked } from '@strapi/icons';
 import formatISO from 'date-fns/formatISO';
 import isEqual from 'lodash/isEqual';
 import { type MessageDescriptor, type PrimitiveType, useIntl } from 'react-intl';
 
-import type { Attribute } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 interface TranslationMessage extends MessageDescriptor {
   values?: Record<string, PrimitiveType>;
@@ -41,14 +41,15 @@ interface InputOption {
   value: string;
 }
 
-interface CustomInputProps<TAttribute extends Attribute.Any>
+interface CustomInputProps<TAttribute extends Schema.Attribute.AnyAttribute>
   extends Omit<GenericInputProps<TAttribute>, 'customInputs'> {
   ref?: React.Ref<HTMLElement>;
   hint?: string | React.JSX.Element | (string | React.JSX.Element)[];
 }
-const pxToRem = (px: number) => `${px / 16}rem`;
 
-interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
+interface GenericInputProps<
+  TAttribute extends Schema.Attribute.AnyAttribute = Schema.Attribute.AnyAttribute,
+> {
   attribute?: TAttribute;
   autoComplete?: string;
   customInputs?: Record<string, React.ComponentType<CustomInputProps<TAttribute>>>;
@@ -62,7 +63,7 @@ interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
     payload: {
       target: {
         name: string;
-        value: Attribute.GetValue<TAttribute>;
+        value: Schema.Attribute.Value<TAttribute>;
         type?: string;
       };
     },
@@ -74,7 +75,7 @@ interface GenericInputProps<TAttribute extends Attribute.Any = Attribute.Any> {
   step?: number;
   type: string;
   // TODO: The value depends on the input type, too complicated to handle all cases here
-  value?: Attribute.GetValue<TAttribute>;
+  value?: Schema.Attribute.Value<TAttribute>;
   isNullable?: boolean;
 }
 
@@ -101,7 +102,10 @@ const GenericInput = ({
   const { formatMessage } = useIntl();
 
   // TODO: Workaround to get the field hint values if they exist on the type
-  const getFieldHintValue = (attribute?: Attribute.Any, key?: keyof FieldSchema) => {
+  const getFieldHintValue = (
+    attribute?: Schema.Attribute.AnyAttribute,
+    key?: keyof FieldSchema
+  ) => {
     if (!attribute) return;
 
     if (key === 'minLength' && key in attribute) {
@@ -209,339 +213,243 @@ const GenericInput = ({
       )
     : '';
 
-  switch (type) {
-    case 'json': {
-      return (
-        <JSONInput
-          label={label}
-          labelAction={labelAction}
-          value={value}
-          error={errorMessage}
-          disabled={disabled}
-          hint={hint}
-          required={required}
-          onChange={(json) => {
-            // Default to null when the field is not required and there is no input value
-            const value =
-              attribute && 'required' in attribute && !attribute?.required && !json.length
-                ? null
-                : json;
-            onChange({ target: { name, value } }, false);
-          }}
-          minHeight={pxToRem(252)}
-          maxHeight={pxToRem(504)}
-        />
-      );
-    }
-    case 'bool': {
-      return (
-        <ToggleInput
-          checked={defaultValue === null ? null : defaultValue || false}
-          disabled={disabled}
-          hint={hint}
-          label={label}
-          error={errorMessage}
-          labelAction={labelAction}
-          name={name}
-          offLabel={formatMessage({
-            id: 'app.components.ToggleCheckbox.off-label',
-            defaultMessage: 'False',
-          })}
-          onLabel={formatMessage({
-            id: 'app.components.ToggleCheckbox.on-label',
-            defaultMessage: 'True',
-          })}
-          onChange={(e) => {
-            onChange({ target: { name, value: e.target.checked } });
-          }}
-          required={required}
-          onClear={() => {
-            onChange({ target: { name, value: null } });
-          }}
-          clearLabel={
-            isNullable
-              ? formatMessage({
-                  id: 'app.components.ToggleCheckbox.clear-label',
-                  defaultMessage: 'Clear',
-                })
-              : undefined
-          }
-        />
-      );
-    }
-    case 'checkbox': {
-      return (
-        <Checkbox
-          disabled={disabled}
-          error={errorMessage}
-          hint={hint}
-          id={name}
-          name={name}
-          onValueChange={(value) => {
-            onChange({ target: { name, value } });
-          }}
-          required={required}
-          value={Boolean(value)}
-        >
-          {label}
-        </Checkbox>
-      );
-    }
-    case 'datetime': {
-      return (
-        <DateTimePicker
-          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-          disabled={disabled}
-          error={errorMessage}
-          label={label}
-          labelAction={labelAction}
-          id={name}
-          hint={hint}
-          name={name}
-          onChange={(date) => {
-            // check if date is not null or undefined
-            const formattedDate = date ? date.toISOString() : null;
-
-            onChange({ target: { name, value: formattedDate, type } });
-          }}
-          onClear={() => onChange({ target: { name, value: null, type } })}
-          placeholder={formattedPlaceholder}
-          required={required}
-          value={value}
-        />
-      );
-    }
-    case 'date': {
-      return (
-        <DatePicker
-          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-          disabled={disabled}
-          error={errorMessage}
-          label={label}
-          id={name}
-          hint={hint}
-          name={name}
-          onChange={(date) => {
-            onChange({
-              target: {
-                name,
-                value: date ? formatISO(date, { representation: 'date' }) : null,
-                type,
-              },
-            });
-          }}
-          onClear={() => onChange({ target: { name, value: null, type } })}
-          placeholder={formattedPlaceholder}
-          required={required}
-          selectedDate={value}
-        />
-      );
-    }
-    case 'number': {
-      return (
-        <NumberInput
-          disabled={disabled}
-          error={errorMessage}
-          label={label}
-          labelAction={labelAction}
-          id={name}
-          hint={hint}
-          name={name}
-          onValueChange={(value) => {
-            onChange({ target: { name, value, type } });
-          }}
-          placeholder={formattedPlaceholder}
-          required={required}
-          step={step}
-          value={value}
-        />
-      );
-    }
-    case 'email': {
-      return (
-        <TextInput
-          autoComplete={autoComplete}
-          disabled={disabled}
-          error={errorMessage}
-          label={label}
-          labelAction={labelAction}
-          id={name}
-          hint={hint}
-          name={name}
-          onChange={(e) => {
-            onChange({ target: { name, value: e.target.value, type } });
-          }}
-          placeholder={formattedPlaceholder}
-          required={required}
-          type="email"
-          value={valueWithEmptyStringFallback}
-        />
-      );
-    }
-    case 'timestamp':
-    case 'text':
-    case 'string': {
-      return (
-        <TextInput
-          autoComplete={autoComplete}
-          disabled={disabled}
-          error={errorMessage}
-          label={label}
-          labelAction={labelAction}
-          id={name}
-          hint={hint}
-          name={name}
-          onChange={(e) => {
-            onChange({ target: { name, value: e.target.value, type } });
-          }}
-          placeholder={formattedPlaceholder}
-          required={required}
-          type="text"
-          value={valueWithEmptyStringFallback}
-        />
-      );
-    }
-    case 'password': {
-      return (
-        <TextInput
-          autoComplete={autoComplete}
-          disabled={disabled}
-          error={errorMessage}
-          endAction={
-            <button
-              aria-label={formatMessage({
-                id: 'Auth.form.password.show-password',
-                defaultMessage: 'Show password',
-              })}
-              onClick={() => {
-                setShowPassword((prev) => !prev);
-              }}
-              style={{
-                border: 'none',
-                padding: 0,
-                background: 'transparent',
-              }}
-              type="button"
-            >
-              {showPassword ? (
-                <Icon as={Eye} color="neutral500" />
-              ) : (
-                <Icon as={EyeStriked} color="neutral500" />
-              )}
-            </button>
-          }
-          label={label}
-          labelAction={labelAction}
-          id={name}
-          hint={hint}
-          name={name}
-          onChange={(e) => {
-            onChange({ target: { name, value: e.target.value, type } });
-          }}
-          placeholder={formattedPlaceholder}
-          required={required}
-          type={showPassword ? 'text' : 'password'}
-          value={valueWithEmptyStringFallback}
-        />
-      );
-    }
-    case 'select': {
-      return (
-        <SingleSelect
-          disabled={disabled}
-          error={errorMessage}
-          label={label}
-          labelAction={labelAction}
-          id={name}
-          hint={hint}
-          name={name}
-          onChange={(value) => {
-            onChange({ target: { name, value, type: 'select' } });
-          }}
-          placeholder={formattedPlaceholder}
-          required={required}
-          value={value}
-        >
-          {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
-            return (
-              <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
-                {formatMessage(intlLabel)}
-              </SingleSelectOption>
-            );
-          })}
-        </SingleSelect>
-      );
-    }
-    case 'textarea': {
-      return (
-        <Textarea
-          disabled={disabled}
-          error={errorMessage}
-          label={label}
-          labelAction={labelAction}
-          id={name}
-          hint={hint}
-          name={name}
-          onChange={(event) => onChange({ target: { name, value: event.target.value, type } })}
-          required={required}
-          placeholder={formattedPlaceholder}
-          value={valueWithEmptyStringFallback}
-        />
-      );
-    }
-    case 'time': {
-      let time = value;
-
-      // The backend send a value which has the following format: '00:45:00.000'
-      // or the time picker only supports hours & minutes so we need to mutate the value
-      if (typeof value === 'string' && value.split(':').length > 2) {
-        const [hour, minute] = value.split(':');
-        time = `${hour}:${minute}`;
+  const getComponent = () => {
+    switch (type) {
+      case 'json': {
+        return (
+          <JSONInput
+            value={value}
+            disabled={disabled}
+            onChange={(json) => {
+              // Default to null when the field is not required and there is no input value
+              const value =
+                attribute && 'required' in attribute && !attribute?.required && !json.length
+                  ? null
+                  : json;
+              onChange({ target: { name, value } }, false);
+            }}
+            minHeight="25.2rem"
+            maxHeight="50.4rem"
+          />
+        );
       }
+      case 'bool': {
+        return (
+          <Toggle
+            checked={defaultValue === null ? null : defaultValue || false}
+            disabled={disabled}
+            offLabel={formatMessage({
+              id: 'app.components.ToggleCheckbox.off-label',
+              defaultMessage: 'False',
+            })}
+            onLabel={formatMessage({
+              id: 'app.components.ToggleCheckbox.on-label',
+              defaultMessage: 'True',
+            })}
+            onChange={(e) => {
+              onChange({ target: { name, value: e.target.checked } });
+            }}
+          />
+        );
+      }
+      case 'checkbox': {
+        return (
+          <Checkbox
+            disabled={disabled}
+            onValueChange={(value) => {
+              onChange({ target: { name, value } });
+            }}
+            value={Boolean(value)}
+          >
+            {label}
+          </Checkbox>
+        );
+      }
+      case 'datetime': {
+        return (
+          <DateTimePicker
+            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+            disabled={disabled}
+            onChange={(date) => {
+              // check if date is not null or undefined
+              const formattedDate = date ? date.toISOString() : null;
 
-      return (
-        <TimePicker
-          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-          disabled={disabled}
-          error={errorMessage}
-          label={label}
-          labelAction={labelAction}
-          id={name}
-          hint={hint}
-          name={name}
-          onChange={(time) => {
-            onChange({ target: { name, value: `${time}`, type } });
-          }}
-          onClear={() => {
-            onChange({ target: { name, value: null, type } });
-          }}
-          required={required}
-          value={time}
-        />
-      );
+              onChange({ target: { name, value: formattedDate, type } });
+            }}
+            onClear={() => onChange({ target: { name, value: null, type } })}
+            placeholder={formattedPlaceholder}
+            value={value}
+          />
+        );
+      }
+      case 'date': {
+        return (
+          <DatePicker
+            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+            disabled={disabled}
+            onChange={(date) => {
+              onChange({
+                target: {
+                  name,
+                  value: date ? formatISO(date, { representation: 'date' }) : null,
+                  type,
+                },
+              });
+            }}
+            onClear={() => onChange({ target: { name, value: null, type } })}
+            placeholder={formattedPlaceholder}
+            value={value}
+          />
+        );
+      }
+      case 'number': {
+        return (
+          <NumberInput
+            disabled={disabled}
+            onValueChange={(value) => {
+              onChange({ target: { name, value, type } });
+            }}
+            placeholder={formattedPlaceholder}
+            step={step}
+            value={value}
+          />
+        );
+      }
+      case 'email': {
+        return (
+          <TextInput
+            autoComplete={autoComplete}
+            disabled={disabled}
+            onChange={(e) => {
+              onChange({ target: { name, value: e.target.value, type } });
+            }}
+            placeholder={formattedPlaceholder}
+            type="email"
+            value={valueWithEmptyStringFallback}
+          />
+        );
+      }
+      case 'timestamp':
+      case 'text':
+      case 'string': {
+        return (
+          <TextInput
+            autoComplete={autoComplete}
+            disabled={disabled}
+            onChange={(e) => {
+              onChange({ target: { name, value: e.target.value, type } });
+            }}
+            placeholder={formattedPlaceholder}
+            type="text"
+            value={valueWithEmptyStringFallback}
+          />
+        );
+      }
+      case 'password': {
+        return (
+          <TextInput
+            autoComplete={autoComplete}
+            disabled={disabled}
+            endAction={
+              <button
+                aria-label={formatMessage({
+                  id: 'Auth.form.password.show-password',
+                  defaultMessage: 'Show password',
+                })}
+                onClick={() => {
+                  setShowPassword((prev) => !prev);
+                }}
+                style={{
+                  border: 'none',
+                  padding: 0,
+                  background: 'transparent',
+                }}
+                type="button"
+              >
+                {showPassword ? <Eye fill="neutral500" /> : <EyeStriked fill="neutral500" />}
+              </button>
+            }
+            onChange={(e) => {
+              onChange({ target: { name, value: e.target.value, type } });
+            }}
+            placeholder={formattedPlaceholder}
+            type={showPassword ? 'text' : 'password'}
+            value={valueWithEmptyStringFallback}
+          />
+        );
+      }
+      case 'select': {
+        return (
+          <SingleSelect
+            disabled={disabled}
+            onChange={(value) => {
+              onChange({ target: { name, value, type: 'select' } });
+            }}
+            placeholder={formattedPlaceholder}
+            value={value}
+          >
+            {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
+              return (
+                <SingleSelectOption key={key} value={value} disabled={disabled} hidden={hidden}>
+                  {formatMessage(intlLabel)}
+                </SingleSelectOption>
+              );
+            })}
+          </SingleSelect>
+        );
+      }
+      case 'textarea': {
+        return (
+          <Textarea
+            disabled={disabled}
+            onChange={(event) => onChange({ target: { name, value: event.target.value, type } })}
+            placeholder={formattedPlaceholder}
+            value={valueWithEmptyStringFallback}
+          />
+        );
+      }
+      case 'time': {
+        let time = value;
+
+        // The backend send a value which has the following format: '00:45:00.000'
+        // or the time picker only supports hours & minutes so we need to mutate the value
+        if (typeof value === 'string' && value.split(':').length > 2) {
+          const [hour, minute] = value.split(':');
+          time = `${hour}:${minute}`;
+        }
+
+        return (
+          <TimePicker
+            clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+            disabled={disabled}
+            onChange={(time) => {
+              onChange({ target: { name, value: `${time}`, type } });
+            }}
+            onClear={() => {
+              onChange({ target: { name, value: null, type } });
+            }}
+            value={time}
+          />
+        );
+      }
+      default: {
+        /**
+         * If there's no component for the given type, we return a disabled text input
+         * showing a "Not supported" title to illustrate the issue.
+         */
+        return <TextInput disabled placeholder="Not supported" type="text" value="" />;
+      }
     }
-    default: {
-      /**
-       * If there's no component for the given type, we return a disabled text input
-       * showing a "Not supported" title to illustrate the issue.
-       */
-      return (
-        <TextInput
-          disabled
-          error={errorMessage}
-          label={label}
-          labelAction={labelAction}
-          id={name}
-          hint={hint}
-          name={name}
-          placeholder="Not supported"
-          required={required}
-          type="text"
-          value=""
-        />
-      );
-    }
-  }
+  };
+
+  return (
+    <Field.Root error={errorMessage} name={name} hint={hint} required={required}>
+      <Field.Label action={labelAction}>{label}</Field.Label>
+      {getComponent()}
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
+  );
 };
 
 type FieldSchema = {

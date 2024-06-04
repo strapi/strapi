@@ -1,5 +1,4 @@
-import type { Strapi } from '@strapi/strapi';
-
+import type { Schema, Core } from '@strapi/types';
 import { getService } from './utils';
 
 const registerModelsHooks = () => {
@@ -14,9 +13,51 @@ const registerModelsHooks = () => {
       await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
     },
   });
+
+  strapi.documents.use(async (context, next) => {
+    const schema: Schema.ContentType = context.contentType;
+
+    if (!['create', 'update', 'discardDraft', 'publish'].includes(context.action)) {
+      return next();
+    }
+
+    if (!getService('content-types').isLocalizedContentType(schema)) {
+      return next();
+    }
+
+    // Build a populate array for all non localized fields within the schema
+    const { getNestedPopulateOfNonLocalizedAttributes } = getService('content-types');
+
+    const attributesToPopulate = getNestedPopulateOfNonLocalizedAttributes(schema.uid);
+
+    // Get the result of the document service action
+    const result = (await next()) as any;
+
+    // We may not have received a result with everything populated that we need
+    // Use the id and populate built from non localized fields to get the full
+    // result
+    let resultID;
+    if (Array.isArray(result?.entries)) {
+      resultID = result.entries[0].id;
+    } else if (result?.id) {
+      resultID = result.id;
+    } else {
+      return result;
+    }
+
+    if (attributesToPopulate.length > 0) {
+      const populatedResult = await strapi.db
+        .query(schema.uid)
+        .findOne({ where: { id: resultID }, populate: attributesToPopulate });
+
+      await getService('localizations').syncNonLocalizedAttributes(populatedResult, schema);
+    }
+
+    return result;
+  });
 };
 
-export default async ({ strapi }: { strapi: Strapi }) => {
+export default async ({ strapi }: { strapi: Core.Strapi }) => {
   const { sendDidInitializeEvent } = getService('metrics');
   const { decorator } = getService('entity-service-decorator');
   const { initDefaultLocale } = getService('locales');

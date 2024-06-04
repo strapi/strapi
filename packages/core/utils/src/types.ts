@@ -5,8 +5,12 @@ type ID = number | string;
 
 export type Data = {
   id?: ID;
+  __component?: string;
+  __type?: string;
   [key: string]: string | number | ID | boolean | null | undefined | Date | Data | Data[];
 };
+
+export type Config = Record<string, unknown>;
 
 export interface Attribute {
   type: string;

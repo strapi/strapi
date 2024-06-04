@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -16,7 +16,7 @@ const messages = {};
 
 const makeApp = (name, type, value) => (
   <IntlProvider locale="en" messages={messages} textComponent="span">
-    <ThemeProvider theme={lightTheme}>
+    <DesignSystemProvider>
       <Input
         intlLabel={{ id: 'enabled', defaultMessage: 'Enabled' }}
         name={name}
@@ -25,7 +25,7 @@ const makeApp = (name, type, value) => (
         type={type}
         value={value}
       />
-    </ThemeProvider>
+    </DesignSystemProvider>
   </IntlProvider>
 );
 
@@ -37,158 +37,105 @@ describe('<Input />', () => {
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c1 {
-        font-size: 0.75rem;
+        display: flex;
+      }
+
+      .c3 {
+        padding-block-start: 8px;
+        padding-inline-end: 12px;
+        padding-block-end: 8px;
+        padding-inline-start: 12px;
+      }
+
+      .c0 {
+        align-items: stretch;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .c4 {
+        align-items: center;
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: space-between;
+      }
+
+      .c2 {
+        font-size: 1.2rem;
         line-height: 1.33;
         font-weight: 600;
         color: #32324d;
       }
 
-      .c0 {
-        -webkit-align-items: stretch;
-        -webkit-box-align: stretch;
-        -ms-flex-align: stretch;
-        align-items: stretch;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .c3 {
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-      }
-
-      .c2 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c5 {
+      .c6 {
         border: none;
         border-radius: 4px;
-        padding-bottom: 0.65625rem;
-        padding-left: 16px;
-        padding-right: 16px;
-        padding-top: 0.65625rem;
         color: #32324d;
         font-weight: 400;
-        font-size: 0.875rem;
+        font-size: 1.4rem;
+        line-height: 2.2rem;
         display: block;
         width: 100%;
         background: inherit;
       }
 
-      .c5::-webkit-input-placeholder {
+      .c6 ::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c5::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c5:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c5::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c5[aria-disabled='true'] {
+      .c6[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c5:focus {
+      .c6:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c4 {
+      .c5 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
         outline: none;
         box-shadow: 0;
-        -webkit-transition-property: border-color,box-shadow,fill;
         transition-property: border-color,box-shadow,fill;
-        -webkit-transition-duration: 0.2s;
         transition-duration: 0.2s;
       }
 
-      .c4:focus-within {
+      .c5:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
 
-      <div>
-        <div
-          class=""
+      <div
+        class="c0"
+      >
+        <label
+          alignitems="center"
+          class="c1 c2"
+          for=":r0:"
+          id=":r0:-label"
         >
-          <div
-            class="c0"
-          >
-            <label
-              class="c1 c2"
-              for=":r0:"
-            >
-              Enabled
-            </label>
-            <div
-              class="c3 c4"
-            >
-              <input
-                aria-disabled="false"
-                aria-invalid="false"
-                aria-label="test"
-                aria-required="false"
-                class="c5"
-                id=":r0:"
-                name="test"
-                placeholder=""
-                type="text"
-                value="test"
-              />
-            </div>
-          </div>
+          Enabled
+        </label>
+        <div
+          class="c3 c4 c5"
+        >
+          <input
+            aria-disabled="false"
+            class="c6"
+            id=":r0:"
+            name="test"
+            placeholder=""
+            type="text"
+            value="test"
+          />
         </div>
       </div>
     `);
-  });
-
-  it('should set the value correctly when the input\'s name is "noName"', () => {
-    const { getByLabelText } = render(makeApp('noName', 'text', 'test'));
-
-    expect(getByLabelText('noName').value).toBe(
-      `${window.strapi.backendURL}/api/connect/email/callback`
-    );
   });
 
   it('should display the toggleCheckbox correctly', () => {

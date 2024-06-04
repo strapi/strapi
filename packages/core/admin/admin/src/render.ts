@@ -1,10 +1,11 @@
 /* eslint-disable no-undef */
-import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
+import { getFetchClient } from './utils/getFetchClient';
+import { createAbsoluteUrl } from './utils/urls';
 
-import type { FeaturesConfig, FeaturesService } from '@strapi/types';
+import type { Modules } from '@strapi/types';
 
 interface RenderAdminArgs {
   customisations: {
@@ -12,7 +13,7 @@ interface RenderAdminArgs {
     config?: StrapiAppConstructorArgs['config'];
   };
   plugins: StrapiAppConstructorArgs['appPlugins'];
-  features?: FeaturesService['config'];
+  features?: Modules.Features.FeaturesService['config'];
 }
 
 const renderAdmin = async (
@@ -30,11 +31,11 @@ const renderAdmin = async (
      *
      * To ensure that the backendURL is always set, we use the window.location.origin as a fallback.
      */
-    backendURL: process.env.STRAPI_ADMIN_BACKEND_URL || window.location.origin,
+    backendURL: createAbsoluteUrl(process.env.STRAPI_ADMIN_BACKEND_URL),
     isEE: false,
-    telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
+    telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true',
     future: {
-      isEnabled: (name: keyof NonNullable<FeaturesConfig['future']>) => {
+      isEnabled: (name: keyof NonNullable<Modules.Features.FeaturesConfig['future']>) => {
         return features?.future?.[name] === true;
       },
     },

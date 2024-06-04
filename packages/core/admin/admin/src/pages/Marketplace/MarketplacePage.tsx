@@ -2,11 +2,7 @@ import * as React from 'react';
 
 import {
   Box,
-  ContentLayout,
   Flex,
-  Icon,
-  Layout,
-  Main,
   Searchbar,
   Tab,
   TabGroup,
@@ -14,22 +10,20 @@ import {
   TabPanels,
   Tabs,
 } from '@strapi/design-system';
-import {
-  useAppInfo,
-  useFocusWhenNavigate,
-  useNotification,
-  useQueryParams,
-  useTracking,
-} from '@strapi/helper-plugin';
-import { ExternalLink, GlassesSquare } from '@strapi/icons';
-import { Helmet } from 'react-helmet';
+import { ExternalLink } from '@strapi/icons';
+import { GlassesSquare } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { ContentBox } from '../../components/ContentBox';
+import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { Pagination } from '../../components/Pagination';
 import { useTypedSelector } from '../../core/store/hooks';
+import { useAppInfo } from '../../features/AppInfo';
+import { useNotification } from '../../features/Notifications';
+import { useTracking } from '../../features/Tracking';
 import { useDebounce } from '../../hooks/useDebounce';
+import { useQueryParams } from '../../hooks/useQueryParams';
 
 import { NpmPackagesFilters } from './components/NpmPackagesFilters';
 import { NpmPackagesGrid } from './components/NpmPackagesGrid';
@@ -60,11 +54,16 @@ const MarketplacePage = () => {
   const tabRef = React.useRef<any>(null);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const toggleNotification = useNotification();
+  const { toggleNotification } = useNotification();
   const [{ query }, setQuery] = useQueryParams<MarketplacePageQuery>();
   const debouncedSearch = useDebounce(query?.search, 500) || '';
 
-  const { autoReload: isInDevelopmentMode, dependencies, useYarn, strapiVersion } = useAppInfo();
+  const {
+    autoReload: isInDevelopmentMode,
+    dependencies,
+    useYarn,
+    strapiVersion,
+  } = useAppInfo('MarketplacePage', (state) => state);
   const isOnline = useNavigatorOnline();
 
   const npmPackageType = query?.npmPackageType || 'plugin';
@@ -74,8 +73,6 @@ const MarketplacePage = () => {
     provider: npmPackageType === 'provider' ? { ...query } : {},
   });
 
-  useFocusWhenNavigate();
-
   React.useEffect(() => {
     trackUsage('didGoToMarketplace');
   }, [trackUsage]);
@@ -84,13 +81,13 @@ const MarketplacePage = () => {
     if (!isInDevelopmentMode) {
       toggleNotification({
         type: 'info',
-        message: {
+        message: formatMessage({
           id: 'admin.pages.MarketPlacePage.production',
           defaultMessage: 'Manage plugins from the development environment',
-        },
+        }),
       });
     }
-  }, [toggleNotification, isInDevelopmentMode]);
+  }, [toggleNotification, isInDevelopmentMode, formatMessage]);
 
   const {
     pluginsResponse,
@@ -165,16 +162,16 @@ const MarketplacePage = () => {
   const installedPackageNames = Object.keys(dependencies ?? {});
 
   return (
-    <Layout>
-      <Main>
-        <Helmet
-          title={formatMessage({
-            id: 'admin.pages.MarketPlacePage.helmet',
+    <Layouts.Root>
+      <Page.Main>
+        <Page.Title>
+          {formatMessage({
+            id: 'admin.pages.MarketPlacePage.head',
             defaultMessage: 'Marketplace - Plugins',
           })}
-        />
+        </Page.Title>
         <PageHeader isOnline={isOnline} npmPackageType={npmPackageType} />
-        <ContentLayout>
+        <Layouts.Content>
           <TabGroup
             label={formatMessage({
               id: 'admin.pages.MarketPlacePage.tab-group.label',
@@ -293,14 +290,19 @@ const MarketplacePage = () => {
                 icon={<GlassesSquare />}
                 iconBackground="alternative100"
                 endAction={
-                  <Icon as={ExternalLink} color="neutral600" width={3} height={3} marginLeft={2} />
+                  <ExternalLink
+                    fill="neutral600"
+                    width="1.2rem"
+                    height="1.2rem"
+                    style={{ marginLeft: '0.8rem' }}
+                  />
                 }
               />
             </a>
           </Box>
-        </ContentLayout>
-      </Main>
-    </Layout>
+        </Layouts.Content>
+      </Page.Main>
+    </Layouts.Root>
   );
 };
 

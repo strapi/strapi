@@ -5,5 +5,5 @@ import scheduling from './scheduling';
 export const services = {
   release,
   'release-validation': releaseValidation,
-  ...(strapi.features.future.isEnabled('contentReleasesScheduling') ? { scheduling } : {}),
+  scheduling,
 };

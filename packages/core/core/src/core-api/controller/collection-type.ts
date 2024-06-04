@@ -1,10 +1,10 @@
 import { isObject } from 'lodash/fp';
 import { errors } from '@strapi/utils';
-import type { CoreApi, Schema, Utils, Common } from '@strapi/types';
+import type { Core, Struct, Utils, UID } from '@strapi/types';
 import type Koa from 'koa';
 
 interface Options {
-  contentType: Schema.CollectionType;
+  contentType: Struct.CollectionTypeSchema;
 }
 
 /**
@@ -13,8 +13,8 @@ interface Options {
  */
 const createCollectionTypeController = ({
   contentType,
-}: Options): Utils.PartialWithThis<CoreApi.Controller.CollectionType> => {
-  const uid = contentType.uid as Common.UID.Service;
+}: Options): Utils.PartialWithThis<Core.CoreAPI.Controller.CollectionType> => {
+  const uid = contentType.uid as UID.Service;
 
   // TODO: transform into a class
   return {
@@ -57,6 +57,8 @@ const createCollectionTypeController = ({
         throw new errors.ValidationError('Missing "data" payload in the request body');
       }
 
+      await this.validateInput(body.data, ctx);
+
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 
       const entity = await strapi.service(uid).create({
@@ -66,6 +68,7 @@ const createCollectionTypeController = ({
 
       const sanitizedEntity = await this.sanitizeOutput(entity, ctx);
 
+      ctx.status = 201;
       return this.transformResponse(sanitizedEntity);
     },
 
@@ -82,6 +85,8 @@ const createCollectionTypeController = ({
       if (!isObject(body.data)) {
         throw new errors.ValidationError('Missing "data" payload in the request body');
       }
+
+      await this.validateInput(body.data, ctx);
 
       const sanitizedInputData = await this.sanitizeInput(body.data, ctx);
 

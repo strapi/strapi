@@ -46,7 +46,7 @@ The Strapi core team will review your pull request and either merge it, request 
 
 ## Contribution Prerequisites
 
-- You have [Node.js](https://nodejs.org/en/) at version >= v18 and <= v20 and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
+- You have [Node.js](https://nodejs.org/en/) at version `>= v18 and <= v20` and [Yarn](https://yarnpkg.com/en/) at v1.2.0+ installed.
 - You are familiar with [Git](https://git-scm.com).
 
 **Before submitting your pull request** make sure the following requirements are fulfilled:
@@ -101,7 +101,7 @@ Start the administration panel server for development:
 
 ```bash
 cd ./packages/core/admin
-yarn develop
+yarn watch
 ```
 
 The administration panel should now be available at http://localhost:4000/admin. Make sure the example application (step 4) is still running.
@@ -220,7 +220,7 @@ Before submitting an issue you need to make sure:
 
 - You are experiencing a technical issue with Strapi.
 - You have already searched for related [issues](https://github.com/strapi/strapi/issues) and found none open (if you found a related _closed_ issue, please link to it from your post).
-- You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
+- You are not asking a question about how to use Strapi or about whether Strapi has a certain feature. For general help using Strapi, you may:
   - Refer to the [official Strapi documentation](https://docs.strapi.io).
   - Ask a member of the community in the [Strapi Discord Community](https://discord.strapi.io/).
   - Ask a question on the [Strapi community forum](https://forum.strapi.io).

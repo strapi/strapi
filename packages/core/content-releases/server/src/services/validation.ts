@@ -1,10 +1,17 @@
 import { errors } from '@strapi/utils';
-import { LoadedStrapi } from '@strapi/types';
+import { Core } from '@strapi/types';
 import type { Release, CreateRelease, UpdateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
 
-const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) => ({
+export class AlreadyOnReleaseError extends errors.ApplicationError<'AlreadyOnReleaseError'> {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AlreadyOnReleaseError';
+  }
+}
+
+const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => ({
   async validateUniqueEntry(
     releaseId: CreateReleaseAction.Request['params']['releaseId'],
     releaseActionArgs: CreateReleaseAction.Request['body']
@@ -31,7 +38,7 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
     );
 
     if (isEntryInRelease) {
-      throw new errors.ValidationError(
+      throw new AlreadyOnReleaseError(
         `Entry with id ${releaseActionArgs.entry.id} and contentType ${releaseActionArgs.entry.contentType} already exists in release with id ${releaseId}`
       );
     }
@@ -44,11 +51,19 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
     if (!contentType) {
       throw new errors.NotFoundError(`No content type found for uid ${contentTypeUid}`);
     }
+
+    if (!contentType.options?.draftAndPublish) {
+      throw new errors.ValidationError(
+        `Content type with uid ${contentTypeUid} does not have draftAndPublish enabled`
+      );
+    }
   },
   async validatePendingReleasesLimit() {
     // Use the maximum releases option if it exists, otherwise default to 3
+    const featureCfg = strapi.ee.features.get('cms-content-releases');
+
     const maximumPendingReleases =
-      strapi.ee.features.get('cms-content-releases')?.options?.maximumReleases || 3;
+      (typeof featureCfg === 'object' && featureCfg?.options?.maximumReleases) || 3;
 
     const [, pendingReleasesCount] = await strapi.db.query(RELEASE_MODEL_UID).findWithCount({
       filters: {

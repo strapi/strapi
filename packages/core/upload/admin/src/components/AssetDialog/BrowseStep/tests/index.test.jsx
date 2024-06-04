@@ -1,7 +1,7 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
-import { NotificationsProvider, usePersistentState } from '@strapi/helper-plugin';
+import { NotificationsProvider } from '@strapi/admin/strapi-admin';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -10,11 +10,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { BrowseStep } from '..';
 import { viewOptions } from '../../../../constants';
 import { useFolder } from '../../../../hooks/useFolder';
+import { usePersistentState } from '../../../../hooks/usePersistentState';
 
 jest.mock('../../../../hooks/useFolder');
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
+jest.mock('../../../../hooks/usePersistentState', () => ({
   usePersistentState: jest.fn().mockReturnValue([0, jest.fn()]),
 }));
 
@@ -80,7 +80,7 @@ const client = new QueryClient({
 const ComponentFixture = (props) => {
   return (
     <QueryClientProvider client={client}>
-      <ThemeProvider theme={lightTheme}>
+      <DesignSystemProvider>
         <MemoryRouter>
           <IntlProvider messages={{}} locale="en">
             <NotificationsProvider toggleNotification={() => {}}>
@@ -108,7 +108,7 @@ const ComponentFixture = (props) => {
             </NotificationsProvider>
           </IntlProvider>
         </MemoryRouter>
-      </ThemeProvider>
+      </DesignSystemProvider>
     </QueryClientProvider>
   );
 };

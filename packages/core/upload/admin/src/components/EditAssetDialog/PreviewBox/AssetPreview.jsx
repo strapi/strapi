@@ -2,12 +2,12 @@
 import React, { forwardRef } from 'react';
 
 import { Flex } from '@strapi/design-system';
-import { usePersistentState } from '@strapi/helper-plugin';
 import { File, FilePdf } from '@strapi/icons';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetType } from '../../../constants';
+import { usePersistentState } from '../../../hooks/usePersistentState';
 
 const CardAsset = styled(Flex)`
   border-radius: ${({ theme }) => theme.borderRadius} ${({ theme }) => theme.borderRadius} 0 0;

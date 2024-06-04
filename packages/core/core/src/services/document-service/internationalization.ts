@@ -1,15 +1,16 @@
-import type { Schema, Documents } from '@strapi/types';
+import type { Struct, Modules } from '@strapi/types';
+import { errors } from '@strapi/utils';
 import { curry, assoc } from 'lodash/fp';
 
 type Transform = (
-  contentType: Schema.SingleType | Schema.CollectionType,
-  params: Documents.Params.All
-) => Documents.Params.All;
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
+  params: Modules.Documents.Params.All
+) => Modules.Documents.Params.All;
 
 type AsyncTransform = (
-  contentType: Schema.SingleType | Schema.CollectionType,
-  params: Documents.Params.All
-) => Promise<Documents.Params.All>;
+  contentType: Struct.SingleTypeSchema | Struct.CollectionTypeSchema,
+  params: Modules.Documents.Params.All
+) => Promise<Modules.Documents.Params.All>;
 
 const getDefaultLocale = async (): Promise<string> => {
   return strapi.plugin('i18n').service('locales').getDefaultLocale();
@@ -21,7 +22,6 @@ const defaultLocale: AsyncTransform = async (contentType, params) => {
   }
 
   if (!params.locale) {
-    // TODO: Load default locale from db in i18n
     return assoc('locale', await getDefaultLocale(), params);
   }
 
@@ -32,15 +32,23 @@ const defaultLocale: AsyncTransform = async (contentType, params) => {
  * Add locale lookup query to the params
  */
 const localeToLookup: Transform = (contentType, params) => {
-  if (!strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)) {
+  if (
+    !params.locale ||
+    !strapi.plugin('i18n').service('content-types').isLocalizedContentType(contentType)
+  ) {
     return params;
   }
 
-  if (params.locale) {
-    return assoc(['lookup', 'locale'], params.locale, params);
+  if (typeof params.locale !== 'string') {
+    // localeToLookup accepts locales of '*'. This is because the document
+    // service functions that use this transform work with the '*' locale
+    // to return all locales.
+    throw new errors.ValidationError(
+      `Invalid locale param ${String(params.locale)} provided. Document locales must be strings.`
+    );
   }
 
-  return params;
+  return assoc(['lookup', 'locale'], params.locale, params);
 };
 
 /**
@@ -71,7 +79,14 @@ const localeToData: Transform = (contentType, params) => {
   }
 
   if (params.locale) {
-    return assoc(['data', 'locale'], params.locale, params);
+    const isValidLocale = typeof params.locale === 'string' && params.locale !== '*';
+    if (isValidLocale) {
+      return assoc(['data', 'locale'], params.locale, params);
+    }
+
+    throw new errors.ValidationError(
+      `Invalid locale param ${params.locale} provided. Document locales must be strings.`
+    );
   }
 
   return params;

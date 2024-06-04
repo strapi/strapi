@@ -1,10 +1,10 @@
-import type { Schema, CoreApi } from '@strapi/types';
+import type { Struct, Core } from '@strapi/types';
 import { CoreService } from './core-service';
 
-export class SingleTypeService extends CoreService implements CoreApi.Service.SingleType {
-  private contentType: Schema.SingleType;
+export class SingleTypeService extends CoreService implements Core.CoreAPI.Service.SingleType {
+  private contentType: Struct.SingleTypeSchema;
 
-  constructor(contentType: Schema.SingleType) {
+  constructor(contentType: Struct.SingleTypeSchema) {
     super();
 
     this.contentType = contentType;
@@ -31,7 +31,10 @@ export class SingleTypeService extends CoreService implements CoreApi.Service.Si
     const documentId = await this.getDocumentId();
 
     if (documentId) {
-      return strapi.documents(uid).update(documentId, this.getFetchParams(params));
+      return strapi.documents(uid).update({
+        ...this.getFetchParams(params),
+        documentId,
+      });
     }
 
     return strapi.documents(uid).create(this.getFetchParams(params));
@@ -43,11 +46,18 @@ export class SingleTypeService extends CoreService implements CoreApi.Service.Si
     const documentId = await this.getDocumentId();
     if (!documentId) return { deletedEntries: 0 };
 
-    return strapi.documents(uid).delete(documentId, this.getFetchParams(params));
+    const { entries } = await strapi.documents(uid).delete({
+      ...this.getFetchParams(params),
+      documentId,
+    });
+
+    return { deletedEntries: entries.length };
   }
 }
 
-const createSingleTypeService = (contentType: Schema.SingleType): CoreApi.Service.SingleType => {
+const createSingleTypeService = (
+  contentType: Struct.SingleTypeSchema
+): Core.CoreAPI.Service.SingleType => {
   return new SingleTypeService(contentType);
 };
 

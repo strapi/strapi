@@ -1,4 +1,3 @@
-import { LoadedStrapi } from '@strapi/types';
 import { PRODUCT_UID, SHOP_UID, models } from './utils';
 import { transformParamsDocumentId } from '../id-transform';
 
@@ -21,13 +20,18 @@ describe('Transform relational data', () => {
               return true;
             },
           },
+          locales: {
+            getDefaultLocale() {
+              return 'en';
+            },
+          },
         },
       },
     },
     db: {
       query: jest.fn((uid) => ({ findMany: findManyQueries[uid] })),
     },
-  } as unknown as LoadedStrapi;
+  } as any;
 
   beforeEach(() => {
     findShops.mockReturnValue([
@@ -74,8 +78,8 @@ describe('Transform relational data', () => {
 
       expect(data).toMatchObject({
         name: 'test',
-        products: [{ id: 'product-1-en-published' }, { id: 'product-2-en-draft' }],
-        product: { id: 'product-1-en-draft' },
+        products: { set: [{ id: 'product-1-en-published' }, { id: 'product-2-en-draft' }] },
+        product: { set: [{ id: 'product-1-en-draft' }] },
       });
     });
 
@@ -99,12 +103,14 @@ describe('Transform relational data', () => {
       // If published version is not available, it should connect to the draft version
       expect(data).toMatchObject({
         name: 'test',
-        products: [
-          { id: 'product-1-en-draft' },
-          { id: 'product-1-en-published' },
-          { id: 'product-2-en-draft' },
-        ],
-        product: [{ id: 'product-1-en-draft' }, { id: 'product-1-en-published' }],
+        products: {
+          set: [
+            { id: 'product-1-en-draft' },
+            { id: 'product-1-en-published' },
+            { id: 'product-2-en-draft' },
+          ],
+        },
+        product: { set: [{ id: 'product-1-en-draft' }, { id: 'product-1-en-published' }] },
       });
     });
 

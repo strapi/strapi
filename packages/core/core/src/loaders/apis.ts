@@ -3,7 +3,7 @@ import fse, { existsSync } from 'fs-extra';
 import _ from 'lodash';
 import { strings, importDefault } from '@strapi/utils';
 import { isEmpty } from 'lodash/fp';
-import type { Strapi, Common, Schema } from '@strapi/types';
+import type { Core, Struct } from '@strapi/types';
 import { getGlobalId, type ContentTypeDefinition } from '../domain/content-type';
 
 interface API {
@@ -11,12 +11,12 @@ interface API {
   destroy: () => void | Promise<void>;
   register: () => void | Promise<void>;
   config: Record<string, unknown>;
-  routes: Record<string, Common.Router>;
-  controllers: Record<string, Common.Controller>;
-  services: Record<string, Common.Service>;
-  policies: Record<string, Common.Policy>;
-  middlewares: Record<string, Common.Middleware>;
-  contentTypes: Record<string, { schema: Schema.ContentType }>;
+  routes: Record<string, Core.Router>;
+  controllers: Record<string, Core.Controller>;
+  services: Record<string, Core.Service>;
+  policies: Record<string, Core.Policy>;
+  middlewares: Record<string, Core.Middleware>;
+  contentTypes: Record<string, { schema: Struct.ContentTypeSchema }>;
 }
 
 interface APIs {
@@ -35,7 +35,7 @@ const normalizeName = (name: string) => (strings.isKebabCase(name) ? name : _.ke
 const isDirectory = (fd: fse.Dirent) => fd.isDirectory();
 const isDotFile = (fd: fse.Dirent) => fd.name.startsWith('.');
 
-export default async function loadAPIs(strapi: Strapi) {
+export default async function loadAPIs(strapi: Core.Strapi) {
   if (!existsSync(strapi.dirs.dist.api)) {
     return;
   }
@@ -51,6 +51,7 @@ export default async function loadAPIs(strapi: Strapi) {
     const apiName = normalizeName(apiFD.name);
     const api = await loadAPI(apiName, join(strapi.dirs.dist.api, apiFD.name));
 
+    // @ts-expect-error TODO verify that it's a valid api, not missing bootstrap, register, and destroy
     apis[apiName] = api;
   }
 
@@ -85,7 +86,7 @@ const validateContentTypesUnicity = (apis: APIs) => {
 };
 
 const loadAPI = async (apiName: string, dir: string) => {
-  const [index, config, routes, controllers, services, policies, middlewares, contentTypes] =
+  const [index, config, routes, controllers, services, policies, middlewares, contentTypes] = (
     await Promise.all([
       loadIndex(dir),
       loadDir(join(dir, 'config')),
@@ -95,7 +96,8 @@ const loadAPI = async (apiName: string, dir: string) => {
       loadDir(join(dir, 'policies')),
       loadDir(join(dir, 'middlewares')),
       loadContentTypes(apiName, join(dir, 'content-types')),
-    ]);
+    ])
+  ).map((result) => result?.result);
 
   return {
     ...(index || {}),
@@ -115,6 +117,7 @@ const loadIndex = async (dir: string) => {
   }
 };
 
+// because this is async and its contents are dynamic, we must return it within an object to avoid a property called `then` being interpreted as a Promise
 const loadContentTypes = async (apiName: string, dir: string) => {
   if (!(await fse.pathExists(dir))) {
     return;
@@ -130,7 +133,7 @@ const loadContentTypes = async (apiName: string, dir: string) => {
     }
 
     const contentTypeName = normalizeName(fd.name);
-    const loadedContentType = await loadDir(join(dir, fd.name));
+    const loadedContentType = (await loadDir(join(dir, fd.name)))?.result;
 
     if (isEmpty(loadedContentType) || isEmpty(loadedContentType.schema)) {
       throw new Error(`Could not load content type found at ${dir}`);
@@ -150,9 +153,10 @@ const loadContentTypes = async (apiName: string, dir: string) => {
     contentTypes[normalizeName(contentTypeName)] = contentType;
   }
 
-  return contentTypes;
+  return { result: contentTypes };
 };
 
+// because this is async and its contents are dynamic, we must return it within an object to avoid a property called `then` being interpreted as a Promise
 const loadDir = async (dir: string) => {
   if (!(await fse.pathExists(dir))) {
     return;
@@ -168,21 +172,22 @@ const loadDir = async (dir: string) => {
 
     const key = basename(fd.name, extname(fd.name));
 
-    root[normalizeName(key)] = await loadFile(join(dir, fd.name));
+    root[normalizeName(key)] = (await loadFile(join(dir, fd.name))).result;
   }
 
-  return root;
+  return { result: root };
 };
 
-const loadFile = (file: string) => {
+// because this is async and its contents are dynamic, we must return it as an array to avoid a property called `then` being interpreted as a Promise
+const loadFile = async (file: string): Promise<{ result: unknown }> => {
   const ext = extname(file);
 
   switch (ext) {
     case '.js':
-      return importDefault(file);
+      return { result: importDefault(file) };
     case '.json':
-      return fse.readJSON(file);
+      return { result: await fse.readJSON(file) };
     default:
-      return {};
+      return { result: {} };
   }
 };

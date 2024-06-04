@@ -1,5 +1,5 @@
-import type { Schema, Common } from '@strapi/types';
-import { async } from '@strapi/utils';
+import type { Schema, UID } from '@strapi/types';
+import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
 import isEqual from 'lodash/isEqual';
 
 import { difference, keys } from 'lodash';
@@ -11,6 +11,35 @@ import { ReleaseAction } from '../../../shared/contracts/release-actions';
 interface Input {
   oldContentTypes: Record<string, Schema.ContentType>;
   contentTypes: Record<string, Schema.ContentType>;
+}
+
+export async function deleteActionsOnDisableDraftAndPublish({
+  oldContentTypes,
+  contentTypes,
+}: Input) {
+  if (!oldContentTypes) {
+    return;
+  }
+
+  for (const uid in contentTypes) {
+    if (!oldContentTypes[uid]) {
+      continue;
+    }
+
+    const oldContentType = oldContentTypes[uid];
+    const contentType = contentTypes[uid];
+
+    if (
+      contentTypesUtils.hasDraftAndPublish(oldContentType) &&
+      !contentTypesUtils.hasDraftAndPublish(contentType)
+    ) {
+      await strapi.db
+        ?.queryBuilder(RELEASE_ACTION_MODEL_UID)
+        .delete()
+        .where({ contentType: uid })
+        .execute();
+    }
+  }
 }
 
 export async function deleteActionsOnDeleteContentType({ oldContentTypes, contentTypes }: Input) {
@@ -96,11 +125,13 @@ export async function migrateIsValidAndStatusReleases() {
 
 export async function revalidateChangedContentTypes({ oldContentTypes, contentTypes }: Input) {
   if (oldContentTypes !== undefined && contentTypes !== undefined) {
-    const contentTypesWithDraftAndPublish = Object.keys(oldContentTypes);
+    const contentTypesWithDraftAndPublish = Object.keys(oldContentTypes).filter(
+      (uid) => oldContentTypes[uid]?.options?.draftAndPublish
+    );
     const releasesAffected = new Set();
 
     async
-      .map(contentTypesWithDraftAndPublish, async (contentTypeUID: Common.UID.ContentType) => {
+      .map(contentTypesWithDraftAndPublish, async (contentTypeUID: UID.ContentType) => {
         const oldContentType = oldContentTypes[contentTypeUID];
         const contentType = contentTypes[contentTypeUID];
 
@@ -117,7 +148,7 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
           });
 
           await async.map(actions, async (action: ReleaseAction) => {
-            if (action.entry) {
+            if (action.entry && action.release) {
               const populatedEntry = await getPopulatedEntry(contentTypeUID, action.entry.id, {
                 strapi,
               });
@@ -148,5 +179,74 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
           return getService('release', { strapi }).updateReleaseStatus(releaseId);
         });
       });
+  }
+}
+
+export async function disableContentTypeLocalized({ oldContentTypes, contentTypes }: Input) {
+  if (!oldContentTypes) {
+    return;
+  }
+
+  const i18nPlugin = strapi.plugin('i18n');
+  if (!i18nPlugin) {
+    return;
+  }
+
+  for (const uid in contentTypes) {
+    if (!oldContentTypes[uid]) {
+      continue;
+    }
+
+    const oldContentType = oldContentTypes[uid];
+    const contentType = contentTypes[uid];
+
+    const { isLocalizedContentType } = i18nPlugin.service('content-types');
+
+    // if i18N is disabled remove non default locales before sync
+    if (isLocalizedContentType(oldContentType) && !isLocalizedContentType(contentType)) {
+      await strapi.db
+        .queryBuilder(RELEASE_ACTION_MODEL_UID)
+        .update({
+          locale: null,
+        })
+        .where({ contentType: uid })
+        .execute();
+    }
+  }
+}
+
+export async function enableContentTypeLocalized({ oldContentTypes, contentTypes }: Input) {
+  if (!oldContentTypes) {
+    return;
+  }
+
+  const i18nPlugin = strapi.plugin('i18n');
+  if (!i18nPlugin) {
+    return;
+  }
+
+  for (const uid in contentTypes) {
+    if (!oldContentTypes[uid]) {
+      continue;
+    }
+
+    const oldContentType = oldContentTypes[uid];
+    const contentType = contentTypes[uid];
+
+    const { isLocalizedContentType } = i18nPlugin.service('content-types');
+    const { getDefaultLocale } = i18nPlugin.service('locales');
+
+    // if i18N is enabled remove non default locales before sync
+    if (!isLocalizedContentType(oldContentType) && isLocalizedContentType(contentType)) {
+      const defaultLocale = await getDefaultLocale();
+
+      await strapi.db
+        .queryBuilder(RELEASE_ACTION_MODEL_UID)
+        .update({
+          locale: defaultLocale,
+        })
+        .where({ contentType: uid })
+        .execute();
+    }
   }
 }

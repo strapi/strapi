@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 
 import { PreviewCell } from '../PreviewCell';
@@ -27,9 +27,9 @@ const ComponentFixture = (props) => {
   };
 
   return (
-    <ThemeProvider theme={lightTheme}>
+    <DesignSystemProvider>
       <PreviewCell {...PROPS_FIXTURE} {...customProps} />
-    </ThemeProvider>
+    </DesignSystemProvider>
   );
 };
 
