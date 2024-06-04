@@ -63,11 +63,10 @@ const SubCategory = ({ subCategory }) => {
         <Box paddingLeft={4}>
           <Checkbox
             name={subCategory.name}
-            value={hasAllActionsSelected}
-            onValueChange={(value) =>
+            checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
+            onCheckedChange={(value) =>
               handleChangeSelectAll({ target: { name: subCategory.name, value } })
             }
-            indeterminate={hasSomeActionsSelected}
           >
             {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
           </Checkbox>
@@ -82,9 +81,9 @@ const SubCategory = ({ subCategory }) => {
               <Grid.Item col={6} key={action.name}>
                 <CheckboxWrapper isActive={isActionSelected(action.name)} padding={2} hasRadius>
                   <Checkbox
-                    value={get(modifiedData, name, false)}
+                    checked={get(modifiedData, name, false)}
                     name={name}
-                    onValueChange={(value) => onChange({ target: { name, value } })}
+                    onCheckedChange={(value) => onChange({ target: { name, value } })}
                   >
                     {action.label}
                   </Checkbox>

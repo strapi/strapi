@@ -100,7 +100,7 @@ describe('<Input />', () => {
         border-radius: 4px;
         background: #ffffff;
         outline: none;
-        box-shadow: 0;
+        box-shadow: none;
         transition-property: border-color,box-shadow,fill;
         transition-duration: 0.2s;
       }
@@ -114,7 +114,6 @@ describe('<Input />', () => {
         class="c0"
       >
         <label
-          alignitems="center"
           class="c1 c2"
           for=":r0:"
           id=":r0:-label"

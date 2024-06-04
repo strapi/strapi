@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Flex, Typography } from '@strapi/design-system';
+import { Flex, Grid, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import without from 'lodash/without';
