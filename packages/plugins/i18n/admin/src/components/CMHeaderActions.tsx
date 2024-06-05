@@ -266,7 +266,8 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
   const [selectedRows, setSelectedRows] = React.useState<any[]>([]);
-  const [isConfirmationOpen, setIsConfirmationOpen] = React.useState<boolean>(false);
+  const [isDraftRelationConfirmationOpen, setIsDraftRelationConfirmationOpen] =
+    React.useState<boolean>(false);
 
   const { publishMany: publishManyAction } = useDocumentActions();
   const {
@@ -412,7 +413,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
 
   const handleAction = async () => {
     if (draftRelationsCount > 0) {
-      setIsConfirmationOpen(true);
+      setIsDraftRelationConfirmationOpen(true);
     } else {
       await publish();
     }
@@ -424,7 +425,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     console.warn(['I18N'], 'Bulk locale unpublish modal not implemented');
   }
 
-  if (isConfirmationOpen) {
+  if (isDraftRelationConfirmationOpen) {
     return {
       label: formatMessage({
         id: 'app.components.ConfirmDialog.title',
@@ -433,12 +434,12 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
       variant: 'danger',
       dialog: {
         onCancel: () => {
-          setIsConfirmationOpen(false);
+          setIsDraftRelationConfirmationOpen(false);
         },
         onConfirm: async () => {
           await publish();
 
-          setIsConfirmationOpen(false);
+          setIsDraftRelationConfirmationOpen(false);
         },
         type: 'dialog',
         title: formatMessage({
@@ -450,9 +451,15 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
             <WarningCircle width="2.4rem" height="2.4rem" fill="danger600" />
             <Typography textAlign="center">
               {formatMessage({
-                id: 'content-manager.actions.discard.dialog.body',
+                id: getTranslation('CMEditViewBulkLocale.draft-relation-warning'),
                 defaultMessage:
-                  'Are you sure you want to discard the changes? This action is irreversible.',
+                  'Some locales are related to draft entries. Publishing them could leave broken links in your app.',
+              })}
+            </Typography>
+            <Typography textAlign="center">
+              {formatMessage({
+                id: getTranslation('CMEditViewBulkLocale.continue-confirmation'),
+                defaultMessage: 'Are you sure you want to continue?',
               })}
             </Typography>
           </Flex>
