@@ -28,6 +28,7 @@ command
   .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
+  .option('--skip-cloud', 'Skip cloud login and project creation')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')
@@ -50,7 +51,10 @@ async function generateApp(projectName: string, options: Partial<NewOptions>) {
     console.error('Please specify the <directory> of your project when using --quickstart');
     process.exit(1);
   }
-  await handleCloudProject(projectName);
+
+  if (!options.skipCloud) {
+    await handleCloudProject(projectName);
+  }
 
   return generateNewApp(projectName, options).then(() => {
     if (process.platform === 'win32') {

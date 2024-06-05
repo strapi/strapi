@@ -25,6 +25,7 @@ export interface NewOptions {
   run: boolean;
   debug: boolean;
   quickstart: boolean;
+  skipCloud: boolean;
   template: string;
   starter: string;
   typescript: boolean;
