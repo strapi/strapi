@@ -49,10 +49,11 @@ export async function handleCloudProject(projectName: string): Promise<void> {
       logger,
       cwd: process.cwd(),
     };
-    const tokenService = await cloudServices.tokenServiceFactory(cliContext);
     const projectCreationSpinner = logger.spinner('Creating project on Strapi Cloud');
 
     try {
+      const tokenService = await cloudServices.tokenServiceFactory(cliContext);
+
       await cloudCli.login.action(cliContext);
       logger.debug('Retrieving token');
       const token = await tokenService.retrieveToken();
