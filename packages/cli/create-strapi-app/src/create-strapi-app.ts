@@ -16,7 +16,7 @@ command
   .version(packageJson.version)
   .arguments('[directory]')
   .usage('[directory] [options]')
-  .option('--quick, --quickstart', 'Quickstart app creation')
+  .option('--quickstart', 'Quickstart app creation (deprecated)')
 
   // setup options
   .option('--ts, --typescript', 'Initialize the project with TypeScript (default)')
