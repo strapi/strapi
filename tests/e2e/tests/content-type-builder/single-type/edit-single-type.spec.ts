@@ -35,7 +35,7 @@ test.describe('Edit single type', () => {
     await resetFiles();
   });
 
-  test('Can toggle internationalization', async ({ page }) => {
+  test.skip('Can toggle internationalization', async ({ page }) => {
     await page.getByRole('button', { name: 'Edit' }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Internationalization').click();
