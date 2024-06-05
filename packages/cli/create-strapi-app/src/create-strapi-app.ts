@@ -46,7 +46,10 @@ command
   })
   .parse(process.argv);
 
-async function generateApp(projectName: string, options: Partial<NewOptions>) {
+async function generateApp(
+  projectName: string,
+  options: Partial<NewOptions> & { skipCloud?: boolean | undefined }
+) {
   if (!projectName) {
     console.error('Please specify the <directory> of your project when using --quickstart');
     process.exit(1);

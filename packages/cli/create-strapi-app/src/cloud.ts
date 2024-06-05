@@ -53,8 +53,11 @@ export async function handleCloudProject(projectName: string): Promise<void> {
 
     try {
       const tokenService = await cloudServices.tokenServiceFactory(cliContext);
-
       await cloudCli.login.action(cliContext);
+      const loginSuccess = await cloudCli.login.action(cliContext);
+      if (!loginSuccess) {
+        return;
+      }
       logger.debug('Retrieving token');
       const token = await tokenService.retrieveToken();
 

@@ -142,7 +142,7 @@ export default async (ctx: CLIContext) => {
             );
             logger.debug(e);
             spinnerFail();
-            return;
+            return false;
           }
         }
       } catch (e: any) {
@@ -152,7 +152,7 @@ export default async (ctx: CLIContext) => {
           );
           spinnerFail();
           await trackFailedLogin();
-          return;
+          return false;
         }
         if (
           e.response?.data.error &&
@@ -183,4 +183,5 @@ export default async (ctx: CLIContext) => {
   };
 
   await authenticate();
+  return isAuthenticated;
 };
