@@ -10,14 +10,9 @@ import { baseHandleConvert } from '../utils/conversions';
 import { pressEnterTwiceToExit } from '../utils/enterKey';
 import { type Block } from '../utils/types';
 
-interface Syntax {
-  value: string;
-  label: string;
-}
-
-const syntaxes: Syntax[] = [
+const languages: { value: string; label: string }[] = [
   {
-    value: 'assembly',
+    value: 'asm',
     label: 'Assembly',
   },
   {
@@ -109,6 +104,10 @@ const syntaxes: Syntax[] = [
     label: 'JavaScript',
   },
   {
+    value: 'jsx',
+    label: 'JavaScript (React)',
+  },
+  {
     value: 'json',
     label: 'JSON',
   },
@@ -141,7 +140,7 @@ const syntaxes: Syntax[] = [
     label: 'Makefile',
   },
   {
-    value: 'objective-c',
+    value: 'objectivec',
     label: 'Objective-C',
   },
   {
@@ -209,6 +208,10 @@ const syntaxes: Syntax[] = [
     label: 'TypeScript',
   },
   {
+    value: 'tsx',
+    label: 'TypeScript (React)',
+  },
+  {
     value: 'vbnet',
     label: 'VB.NET',
   },
@@ -244,16 +247,16 @@ const CodeEditor = (props: RenderElementProps) => {
   const editorIsFocused = useFocused();
   const imageIsSelected = useSelected();
   const [isSelectOpen, setIsSelectOpen] = React.useState(false);
-  const shouldDisplaySyntaxSelect = (editorIsFocused && imageIsSelected) || isSelectOpen;
+  const shouldDisplayLanguageSelect = (editorIsFocused && imageIsSelected) || isSelectOpen;
 
-  const [syntax, setSyntax] = React.useState('plaintext');
+  const [language, setSyntax] = React.useState('plaintext');
 
   return (
     <Box position="relative" width="100%">
       <CodeBlock {...props.attributes}>
         <code>{props.children}</code>
       </CodeBlock>
-      {shouldDisplaySyntaxSelect && (
+      {shouldDisplayLanguageSelect && (
         <Box
           position="absolute"
           background="neutral0"
@@ -269,7 +272,7 @@ const CodeEditor = (props: RenderElementProps) => {
         >
           <SingleSelect
             onChange={(open) => setSyntax(open.toString())}
-            value={syntax}
+            value={language}
             onOpenChange={(open) => {
               setIsSelectOpen(open);
 
@@ -280,7 +283,7 @@ const CodeEditor = (props: RenderElementProps) => {
             }}
             onCloseAutoFocus={(e) => e.preventDefault()}
           >
-            {syntaxes.map(({ value, label }) => (
+            {languages.map(({ value, label }) => (
               <SingleSelectOption value={value} key={value}>
                 {label}
               </SingleSelectOption>
