@@ -425,9 +425,8 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
 
   const getAllNestedComponents = () => {
     const appNestedCompo = retrieveNestedComponents(components);
-    const editingDataNestedCompos = retrieveNestedComponents(modifiedData.components || {});
 
-    return makeUnique([...editingDataNestedCompos, ...appNestedCompo]);
+    return appNestedCompo;
   };
 
   const removeComponentFromDynamicZone = (dzName: string, componentToRemoveIndex: number) => {
