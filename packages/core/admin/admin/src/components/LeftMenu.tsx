@@ -12,7 +12,7 @@ import {
   NavUser,
 } from '@strapi/design-system/v2';
 import { useAppInfo, usePersistentState, useTracking } from '@strapi/helper-plugin';
-import { Exit, Write, Lock } from '@strapi/icons';
+import { Exit, Write, Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -53,6 +53,14 @@ const NavLinkWrapper = styled(Box)`
   div:nth-child(2) {
     /* remove badge background color */
     background: transparent;
+  }
+`;
+
+const BadgeIcon = styled(Icon)`
+  & {
+    path {
+      fill: ${({ theme }) => theme.colors.warning500};
+    }
   }
 `;
 
@@ -151,8 +159,13 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     onClick={() => handleClickOnLink(link.to)}
                     // @ts-expect-error: badgeContent in the DS accept only strings
                     badgeContent={
+                      // TODO: to replace with another name in v5
                       link?.lockIcon ? (
-                        <Icon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
+                        <BadgeIcon
+                          width={`${15 / 16}rem`}
+                          height={`${15 / 16}rem`}
+                          as={Lightning}
+                        />
                       ) : undefined
                     }
                   >
