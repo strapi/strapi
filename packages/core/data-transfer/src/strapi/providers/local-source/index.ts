@@ -85,10 +85,10 @@ class LocalStrapiSourceProvider implements ISourceProvider {
   getSchemas(): Record<string, Struct.Schema> {
     assertValidStrapi(this.strapi, 'Not able to get Schemas');
 
-    const schemas = {
+    const schemas = utils.schema.schemasToValidJSON({
       ...this.strapi.contentTypes,
       ...this.strapi.components,
-    };
+    });
 
     return utils.schema.mapSchemasValues(schemas);
   }
