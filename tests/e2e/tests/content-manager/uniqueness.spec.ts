@@ -1,8 +1,7 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { findAndClose } from '../../utils/shared';
-import { is } from 'core-js/core/object';
 
 type Field = {
   name: string;
@@ -26,55 +25,90 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST = [
+  const SCALAR_FIELDS_TO_TEST = [
     { name: 'uniqueString', value: 'unique', newValue: 'unique-1' },
     { name: 'uniqueNumber', value: '10', newValue: '20' },
-    { name: 'uniqueEmail', value: 'test@testing.com', newValue: 'editor@testing.com' },
+    { name: 'uniqueEmail', value: 'test@strapi.io', newValue: 'test+update@strapi.io' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
     { name: 'UID', value: 'unique', newValue: 'unique-1' },
+  ];
+
+  const SINGLE_COMPONENT_FIELDS_TO_TEST = [
     {
       name: 'ComponentTextShort',
       value: 'unique',
       newValue: 'unique-1',
-      component: {
-        isSingle: true,
-      },
+      component: { isSingle: true },
     },
     {
       name: 'ComponentTextLong',
-      value:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehe.',
-      newValue:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-      component: {
-        isSingle: true,
-      },
+      value: 'unique',
+      newValue: 'unique-1',
+      component: { isSingle: true },
     },
     {
       name: 'ComponentNumberInteger',
       value: '10',
       newValue: '20',
-      component: {
-        isSingle: true,
-      },
+      component: { isSingle: true },
     },
     {
       name: 'ComponentNumberFloat',
       value: '3.14',
       newValue: '3.1415926535897',
-      component: {
-        isSingle: true,
-      },
+      component: { isSingle: true },
     },
     {
       name: 'ComponentEmail',
       value: 'test@strapi.io',
       newValue: 'test+update@strapi.io',
-      component: {
-        isSingle: true,
-      },
+      component: { isSingle: true },
     },
+  ];
+
+  const REPEATABLE_COMPONENT_FIELDS_TO_TEST = [
+    {
+      name: 'ComponentTextShort',
+      value: 'unique',
+      newValue: 'unique-2',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentTextLong',
+      value: 'unique',
+      newValue: 'unique-2',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentNumberInteger',
+      value: '10',
+      newValue: '20',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentNumberFloat',
+      value: '3.14',
+      newValue: '3.1415926535897',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentEmail',
+      value: 'test@strapi.io',
+      newValue: 'test+update@strapi.io',
+      component: { isSingle: false },
+    },
+  ];
+
+  const FIELDS_TO_TEST = [
+    ...SCALAR_FIELDS_TO_TEST,
+    ...SINGLE_COMPONENT_FIELDS_TO_TEST,
+    ...REPEATABLE_COMPONENT_FIELDS_TO_TEST,
   ] as const satisfies Array<Field>;
+
+  const CREATE_URL =
+    /\/admin\/content-manager\/collection-types\/api::unique.unique\/create(\?.*)?/;
+  const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
+  const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
 
   const clickSave = async (page) => {
     await page.getByRole('button', { name: 'Save' }).isEnabled();
@@ -82,37 +116,48 @@ test.describe('Uniqueness', () => {
     await page.getByRole('button', { name: 'Save' }).click();
   };
 
-  const CREATE_URL =
-    /\/admin\/content-manager\/collection-types\/api::unique.unique\/create(\?.*)?/;
-  const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
-  const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
+  const extraComponentNavigation = async (field: Field, page: Page) => {
+    if ('component' in field) {
+      const isSingle = field.component.isSingle;
+
+      // This opens up the component UI so we can access the field we are
+      // testing against
+
+      if (isSingle) {
+        await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
+        await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
+      } else {
+        await page.getByRole('button', { name: 'No entry yet. Click on the' }).nth(1).click();
+        await page
+          .getByLabel('', { exact: true })
+          .getByRole('button', { name: 'No entry yet. Click on the' })
+          .click();
+      }
+    }
+  };
 
   /**
    * @note the unique content type is set up with every type of document level unique field.
    * We are testing that uniqueness is enforced for these fields across all entries of a content type in the same locale.
    */
   FIELDS_TO_TEST.forEach((field) => {
-    test(`A user should not be able to duplicate the ${field.name} document field value in the same content type and dimensions (locale + publication state).`, async ({
+    const isComponent = 'component' in field;
+    const isSingleComponentField = isComponent && field.component.isSingle;
+    const isRepeatableComponentField = isComponent && !field.component.isSingle;
+
+    let fieldDescription = 'scalar field';
+    if (isComponent) {
+      fieldDescription = isSingleComponentField
+        ? 'single component field'
+        : 'repeatable component field';
+    }
+
+    test(`A user should not be able to duplicate the ${field.name} ${fieldDescription} value in the same content type and dimensions (locale + publication state).`, async ({
       page,
     }) => {
       await page.getByRole('link', { name: 'Create new entry' }).first().click();
 
       await page.waitForURL(CREATE_URL);
-
-      const extraComponentNavigation = async () => {
-        if ('component' in field) {
-          const isSingle = field.component.isSingle;
-
-          // This opens up the component UI so we can access the field we are
-          // testing against
-
-          // TODO check best way using playwright selectors
-          if (isSingle) {
-            await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
-            await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
-          }
-        }
-      };
 
       /**
        * Now we're in the edit view. The content within each entry will be valid from the previous test run.
@@ -120,8 +165,13 @@ test.describe('Uniqueness', () => {
 
       const fieldRole = 'role' in field ? field.role : 'textbox';
 
-      await extraComponentNavigation();
+      await extraComponentNavigation(field, page);
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+
+      if (isRepeatableComponentField) {
+        // TODO add step to add the same value to this entity and verify that
+        // the validation fails
+      }
 
       await clickSave(page);
       await findAndClose(page, 'Saved document');
@@ -136,7 +186,7 @@ test.describe('Uniqueness', () => {
 
       await page.waitForURL(CREATE_URL);
 
-      await extraComponentNavigation();
+      await extraComponentNavigation(field, page);
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
@@ -168,7 +218,7 @@ test.describe('Uniqueness', () => {
 
       await page.waitForURL(EDIT_URL);
 
-      await extraComponentNavigation();
+      await extraComponentNavigation(field, page);
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);

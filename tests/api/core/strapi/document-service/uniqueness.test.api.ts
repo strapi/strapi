@@ -84,16 +84,16 @@ describe('Document Service', () => {
     const uniqueDateTime = '12:00:00';
 
     const testValues = {
-      TextShort: uniqueTextShort,
-      TextLong: uniqueTextLong,
-      NumberInteger: uniqueNumberInteger,
-      NumberDecimal: uniqueNumberDecimal,
-      NumberBigInteger: uniqueNumberBigInteger,
-      NumberFloat: uniqueNumberFloat,
-      Email: uniqueEmail,
-      DateDate: uniqueDateDate,
-      DateDateTime: uniqueDateDateTime,
-      DateTime: uniqueDateTime,
+      ComponentTextShort: uniqueTextShort,
+      ComponentTextLong: uniqueTextLong,
+      ComponentNumberInteger: uniqueNumberInteger,
+      ComponentNumberDecimal: uniqueNumberDecimal,
+      ComponentNumberBigInteger: uniqueNumberBigInteger,
+      ComponentNumberFloat: uniqueNumberFloat,
+      ComponentEmail: uniqueEmail,
+      ComponentDateDate: uniqueDateDate,
+      ComponentDateDateTime: uniqueDateDateTime,
+      ComponentDateTime: uniqueDateTime,
     };
 
     const otherLocale = 'fr';

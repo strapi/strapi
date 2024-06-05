@@ -6,7 +6,7 @@ module.exports = {
   singularName: 'compo_unique_all',
   category: 'article',
   attributes: {
-    TextShort: {
+    ComponentTextShort: {
       pluginOptions: {
         i18n: {
           localized: true,
@@ -15,7 +15,7 @@ module.exports = {
       type: 'string',
       unique: true,
     },
-    TextLong: {
+    ComponentTextLong: {
       pluginOptions: {
         i18n: {
           localized: true,
@@ -24,7 +24,7 @@ module.exports = {
       type: 'text',
       unique: true,
     },
-    NumberInteger: {
+    ComponentNumberInteger: {
       pluginOptions: {
         i18n: {
           localized: true,
@@ -33,7 +33,7 @@ module.exports = {
       type: 'integer',
       unique: true,
     },
-    NumberBigInteger: {
+    ComponentNumberBigInteger: {
       pluginOptions: {
         i18n: {
           localized: true,
@@ -42,7 +42,7 @@ module.exports = {
       type: 'biginteger',
       unique: true,
     },
-    NumberDecimal: {
+    ComponentNumberDecimal: {
       pluginOptions: {
         i18n: {
           localized: true,
@@ -51,7 +51,7 @@ module.exports = {
       type: 'decimal',
       unique: true,
     },
-    NumberFloat: {
+    ComponentNumberFloat: {
       pluginOptions: {
         i18n: {
           localized: true,
@@ -60,7 +60,7 @@ module.exports = {
       type: 'float',
       unique: true,
     },
-    Email: {
+    ComponentEmail: {
       pluginOptions: {
         i18n: {
           localized: true,
@@ -69,7 +69,7 @@ module.exports = {
       type: 'email',
       unique: true,
     },
-    DateDate: {
+    ComponentDateDate: {
       pluginOptions: {
         i18n: {
           localized: true,
@@ -78,7 +78,7 @@ module.exports = {
       type: 'date',
       unique: true,
     },
-    DateDateTime: {
+    ComponentDateDateTime: {
       pluginOptions: {
         i18n: {
           localized: true,
@@ -87,7 +87,7 @@ module.exports = {
       type: 'datetime',
       unique: true,
     },
-    DateTime: {
+    ComponentDateTime: {
       pluginOptions: {
         i18n: {
           localized: true,
