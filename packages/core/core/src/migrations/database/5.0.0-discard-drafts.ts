@@ -18,21 +18,29 @@ export async function* getBatchToDiscard({
   db,
   trx,
   uid,
+  isLocalized,
   batchSize = 1000,
 }: {
   db: Database;
   trx: Knex;
   uid: string;
+  isLocalized: boolean;
   batchSize?: number;
 }) {
   let offset = 0;
   let hasMore = true;
 
+  const fields = ['id', 'documentId'];
+
+  if (isLocalized) {
+    fields.push('locale');
+  }
+
   while (hasMore) {
     // Look for the published entries to discard
     const batch: DocumentVersion[] = await db
       .queryBuilder(uid)
-      .select(['id', 'documentId', 'locale'])
+      .select(fields)
       .where({ publishedAt: { $ne: null } })
       .limit(batchSize)
       .offset(offset)
@@ -74,7 +82,6 @@ const migrateUp = async (trx: Knex, db: Database) => {
       const params: DiscardDraftParams<typeof uid> = { documentId: entry.documentId };
 
       // Only add the locale param if the model is localized
-      // ref. https://github.com/strapi/strapi/issues/20225
       if (isLocalized) {
         params.locale = entry.locale;
       }
@@ -89,7 +96,7 @@ const migrateUp = async (trx: Knex, db: Database) => {
      * Load a batch of entries (batched to prevent loading millions of rows at once ),
      * and discard them using the document service.
      */
-    for await (const batch of getBatchToDiscard({ db, trx, uid: meta.uid })) {
+    for await (const batch of getBatchToDiscard({ db, trx, uid: meta.uid, isLocalized })) {
       await async.map(batch, discardDraft, { concurrency: 10 });
     }
   }
