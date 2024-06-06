@@ -1,12 +1,4 @@
 {
-<<<<<<< HEAD
   "version": "5.0.0-beta.9",
   "npmClient": "yarn"
-=======
-  "version": "4.24.5",
-  "packages": ["packages/*", "examples/*"],
-  "npmClient": "yarn",
-  "useWorkspaces": true,
-  "useNx": true
->>>>>>> 8b561475428ed29d8c7ca70ec2e96f051220ebaf
 }
