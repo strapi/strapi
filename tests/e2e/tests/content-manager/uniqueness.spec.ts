@@ -7,7 +7,7 @@ type Field = {
   name: string;
   value: string;
   newValue?: string;
-  role?: string;
+  role?: 'combobox' | 'textbox';
   component?: {
     isSingle: boolean;
   };
@@ -25,7 +25,7 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const SCALAR_FIELDS_TO_TEST = [
+  const SCALAR_FIELDS_TO_TEST: Field[] = [
     { name: 'uniqueString', value: 'unique', newValue: 'unique-1' },
     { name: 'uniqueNumber', value: '10', newValue: '20' },
     { name: 'uniqueEmail', value: 'test@strapi.io', newValue: 'test+update@strapi.io' },
@@ -33,7 +33,7 @@ test.describe('Uniqueness', () => {
     { name: 'UID', value: 'unique', newValue: 'unique-1' },
   ];
 
-  const SINGLE_COMPONENT_FIELDS_TO_TEST = [
+  const SINGLE_COMPONENT_FIELDS_TO_TEST: Field[] = [
     {
       name: 'ComponentTextShort',
       value: 'unique',
@@ -66,7 +66,7 @@ test.describe('Uniqueness', () => {
     },
   ];
 
-  const REPEATABLE_COMPONENT_FIELDS_TO_TEST = [
+  const REPEATABLE_COMPONENT_FIELDS_TO_TEST: Field[] = [
     {
       name: 'ComponentTextShort',
       value: 'unique',
@@ -169,8 +169,21 @@ test.describe('Uniqueness', () => {
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       if (isRepeatableComponentField) {
-        // TODO add step to add the same value to this entity and verify that
-        // the validation fails
+        // Add another entry to the repeatable component in this entry that
+        // shares the same value as the first entry. This should trigger a
+        // validation error
+
+        await page.getByRole('button', { name: 'Add an entry' }).click();
+        await page
+          .getByRole('region')
+          .getByRole('button', { name: 'No entry yet. Click on the' })
+          .click();
+        await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+
+        await clickSave(page);
+
+        await expect(page.getByText('Warning:2 errors occurred')).toBeVisible();
+        await page.getByRole('button', { name: 'Delete' }).nth(1).click();
       }
 
       await clickSave(page);
