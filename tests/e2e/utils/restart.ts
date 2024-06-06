@@ -12,8 +12,8 @@ const isModalVisible = async (page: Page) => {
 export const waitForRestart = async (page, timeout = 60000) => {
   const initialWaitForModal = 5000; // Time to wait for the modal to initially appear
   let elapsedTime = 0;
-  const checkInterval = 1000; // Check every 1 second
-  const reloadTimeout = 15000; // 15 seconds before trying to reload
+  const checkInterval = 1000; // polling time
+  const reloadTimeout = 30000; // wait in ms before trying to reload
 
   // Initially wait for the modal to become visible
   try {
