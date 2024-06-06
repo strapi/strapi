@@ -12,6 +12,7 @@ test.describe('Edit collection type', () => {
   test.beforeEach(async ({ page }) => {
     await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
+    await page.reload({ waitUntil: 'networkidle'});
     await page.goto('/admin');
 
     await login({ page });
@@ -29,8 +30,8 @@ test.describe('Edit collection type', () => {
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
 
-  // TODO: each test should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
-  // to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
+  // TODO: each other test  should have a beforeAll that does this, maybe combine all the setup into one util to simplify it
+  //       to keep other suites that don't modify files from needing to reset files, clean up after ourselves at the end
   test.afterAll(async () => {
     await resetFiles();
   });
