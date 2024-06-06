@@ -27,6 +27,9 @@ test.describe('Edit collection type', () => {
       name: ctName,
     });
 
+    // For some reason on the CI we have to skip the tour a second time; maybe it handles storage differently?
+    await skipCtbTour(page);
+
     await navToHeader(page, ['Content-Type Builder', ctName], ctName);
   });
 
