@@ -26,8 +26,8 @@ export async function tokenServiceFactory({ logger }: { logger: CLIContext['logg
 
     try {
       await saveLocalConfig(appConfig);
-    } catch (error: Error | unknown) {
-      logger.debug(error);
+    } catch (e: Error | unknown) {
+      logger.debug(e);
       logger.error('There was a problem saving your token. Please try again.');
     }
   }
@@ -49,10 +49,10 @@ export async function tokenServiceFactory({ logger }: { logger: CLIContext['logg
     });
 
     // Get the Key from the JWKS using the token header's Key ID (kid)
-    const getKey = (header: JwtHeader, callback: (err: Error | null, key?: string) => void) => {
-      client.getSigningKey(header.kid, (err: Error | null, key?: SigningKey) => {
-        if (err) {
-          callback(err);
+    const getKey = (header: JwtHeader, callback: (e: Error | null, key?: string) => void) => {
+      client.getSigningKey(header.kid, (e: Error | null, key?: SigningKey) => {
+        if (e) {
+          callback(e);
         } else if (key) {
           const publicKey = 'publicKey' in key ? key.publicKey : key.rsaPublicKey;
           callback(null, publicKey);
@@ -96,8 +96,8 @@ export async function tokenServiceFactory({ logger }: { logger: CLIContext['logg
         return true;
       }
       return false;
-    } catch (error) {
-      logger.debug(error);
+    } catch (e) {
+      logger.debug(e);
       return false;
     }
   }
@@ -112,11 +112,12 @@ export async function tokenServiceFactory({ logger }: { logger: CLIContext['logg
 
     try {
       await saveLocalConfig(appConfig);
-    } catch (error: Error | unknown) {
-      logger.debug(error);
+    } catch (e: Error | unknown) {
+      logger.debug(e);
       logger.error(
         'There was an issue removing your login information. Please try logging out again.'
       );
+      throw e;
     }
   }
 
