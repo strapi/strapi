@@ -211,6 +211,13 @@ export interface ContentTypeSchema extends BaseSchema {
    * @internal
    */
   indexes?: unknown[];
+
+  /**
+   * Optional attribute to indicate the foreignKeys to be created on the database for this content type.
+   *
+   * @internal
+   */
+  foreignKeys?: unknown[];
 }
 
 /**
