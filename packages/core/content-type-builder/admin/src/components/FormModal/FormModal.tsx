@@ -87,7 +87,7 @@ export const FormModal = () => {
     targetUid,
     showBackLink,
   } = useFormModalNavigation();
-  const [activeTab, setActiveTab] = useState('base');
+  const [activeTab, setActiveTab] = useState('basic');
   const getPlugin = useStrapiApp('FormModal', (state) => state.getPlugin);
   const getCustomField = useStrapiApp('FormModal', (state) => state.customFields.get);
   const customField = getCustomField(customFieldUid);
@@ -1016,7 +1016,7 @@ export const FormModal = () => {
                   sendAdvancedTabEvent(value);
                 }}
                 hasError={
-                  doesBaseFormHasError ? 'base' : doesAdvancedFormHasError ? 'advanced' : undefined
+                  doesBaseFormHasError ? 'basic' : doesAdvancedFormHasError ? 'advanced' : undefined
                 }
               >
                 <Flex justifyContent="space-between">
@@ -1046,7 +1046,7 @@ export const FormModal = () => {
                   </Tabs.List>
                 </Flex>
                 <Divider marginBottom={6} />
-                <Tabs.Content value="base">
+                <Tabs.Content value="basic">
                   <Flex direction="column" alignItems="stretch" gap={6}>
                     <TabForm
                       form={baseForm}
@@ -1071,6 +1071,9 @@ export const FormModal = () => {
               </Tabs.Root>
             </Modal.Body>
             <Modal.Footer>
+              <Button variant="tertiary" onClick={handleClosed}>
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+              </Button>
               {/* TODO: refactor this component. Nuf said. */}
               <FormModalEndActions
                 deleteCategory={deleteCategory}
@@ -1106,9 +1109,6 @@ export const FormModal = () => {
                 onSubmitEditDz={handleSubmit}
                 onClickFinish={handleClickFinish}
               />
-              <Button variant="tertiary" onClick={handleClosed}>
-                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-              </Button>
             </Modal.Footer>
           </form>
         )}

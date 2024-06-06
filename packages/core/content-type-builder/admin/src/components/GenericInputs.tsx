@@ -444,7 +444,7 @@ const GenericInput = ({
 
   return (
     <Field.Root error={errorMessage} name={name} hint={hint} required={required}>
-      <Field.Label action={labelAction}>{label}</Field.Label>
+      {type !== 'checkbox' ? <Field.Label action={labelAction}>{label}</Field.Label> : null}
       {getComponent()}
       <Field.Error />
       <Field.Hint />

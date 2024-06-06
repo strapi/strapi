@@ -21,6 +21,8 @@ import { SettingsMenu } from '../../../hooks/useSettingsMenu';
 const CustomIcon = styled(Lock)`
   right: 15px;
   position: absolute;
+  bottom: 50%;
+  transform: translateY(50%);
 `;
 
 interface SettingsNavProps {
@@ -73,6 +75,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                   to={link.to}
                   onClick={handleClickOnLink(link.to)}
                   key={link.id}
+                  position="relative"
                 >
                   {formatMessage(link.intlLabel)}
                   {link?.lockIcon && <CustomIcon width="1.5rem" height="1.5rem" />}

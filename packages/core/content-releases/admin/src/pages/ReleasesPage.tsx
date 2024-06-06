@@ -131,7 +131,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               gap={4}
             >
               <Flex direction="column" alignItems="start" gap={1}>
-                <Typography tag="h3" variant="delta" fontWeight="bold">
+                <Typography textColor="neutral800" tag="h3" variant="delta" fontWeight="bold">
                   {name}
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">
