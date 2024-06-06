@@ -1,6 +1,6 @@
-import { getChildrenMaxDepth } from '../getMaxDepth';
+import { getChildrenMaxDepth, type ComponentWithChildren } from '../getMaxDepth';
 
-const components = [
+const components: Array<ComponentWithChildren> = [
   {
     component: 'basic.parent-compo',
     childComponents: [

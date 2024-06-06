@@ -9,7 +9,7 @@ type ChildComponent = {
   min?: number;
 };
 
-type Component = {
+export type ComponentWithChildren = {
   component: Internal.UID.Component;
   childComponents: ChildComponent[];
 };
@@ -27,7 +27,7 @@ const findComponent = <T extends { component: Internal.UID.Component }>(
  */
 export const getChildrenMaxDepth = (
   componentUid: Internal.UID.Component,
-  components: Array<Component>,
+  components: Array<ComponentWithChildren>,
   currentDepth = 0
 ) => {
   const component = findComponent(componentUid, components);
