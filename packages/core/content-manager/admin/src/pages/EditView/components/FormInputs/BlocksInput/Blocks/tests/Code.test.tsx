@@ -1,5 +1,7 @@
 /* eslint-disable testing-library/no-node-access */
-import { render, screen } from '@testing-library/react';
+import { act } from 'react';
+
+import { render, screen } from '@tests/utils';
 import { createEditor, Transforms, Editor } from 'slate';
 
 import { codeBlocks } from '../Code';
@@ -21,7 +23,9 @@ describe('Code', () => {
         },
       }),
       {
-        wrapper: Wrapper,
+        renderOptions: {
+          wrapper: Wrapper,
+        },
       }
     );
 
@@ -118,6 +122,7 @@ describe('Code', () => {
     expect(baseEditor.children).toEqual([
       {
         type: 'code',
+        language: 'plaintext',
         children: [
           {
             type: 'text',
@@ -126,5 +131,48 @@ describe('Code', () => {
         ],
       },
     ]);
+  });
+
+  it.skip('changes the language of a code block', async () => {
+    const baseEditor = createEditor();
+    baseEditor.children = [
+      {
+        type: 'code',
+        language: 'plaintext',
+        children: [
+          {
+            type: 'text',
+            text: `let leet = 'code'`,
+          },
+        ],
+      },
+    ];
+
+    const { user } = render(
+      codeBlocks.code.renderElement({
+        children: `let leet = 'code'`,
+        element: baseEditor.children[0],
+        attributes: {
+          'data-slate-node': 'element',
+          ref: null,
+        },
+      }),
+      {
+        renderOptions: {
+          wrapper: ({ children }) => <Wrapper baseEditor={baseEditor}>{children}</Wrapper>,
+        },
+      }
+    );
+
+    await act(async () => {
+      Transforms.select(baseEditor, {
+        anchor: { path: [0, 0], offset: 0 },
+        focus: { path: [0, 0], offset: 0 },
+      });
+    });
+
+    await user.click(screen.getByText('let leet'));
+
+    expect(screen.getByRole('combobox')).toBeInTheDocument();
   });
 });

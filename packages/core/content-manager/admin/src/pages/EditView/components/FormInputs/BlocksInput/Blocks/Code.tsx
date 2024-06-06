@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { Code } from '@strapi/icons';
+import { Editor, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
 
@@ -249,8 +250,6 @@ const CodeEditor = (props: RenderElementProps) => {
   const [isSelectOpen, setIsSelectOpen] = React.useState(false);
   const shouldDisplayLanguageSelect = (editorIsFocused && imageIsSelected) || isSelectOpen;
 
-  const [language, setSyntax] = React.useState('plaintext');
-
   return (
     <Box position="relative" width="100%">
       <CodeBlock {...props.attributes}>
@@ -271,8 +270,14 @@ const CodeEditor = (props: RenderElementProps) => {
           hasRadius
         >
           <SingleSelect
-            onChange={(open) => setSyntax(open.toString())}
-            value={language}
+            onChange={(open) => {
+              Transforms.setNodes(
+                editor,
+                { language: open.toString() },
+                { match: (node) => !Editor.isEditor(node) && node.type === 'code' }
+              );
+            }}
+            value={(props.element.type === 'code' && props.element.language) || 'plaintext'}
             onOpenChange={(open) => {
               setIsSelectOpen(open);
 
@@ -306,7 +311,7 @@ const codeBlocks: Pick<BlocksStore, 'code'> = {
     matchNode: (node) => node.type === 'code',
     isInBlocksSelector: true,
     handleConvert(editor) {
-      baseHandleConvert<Block<'code'>>(editor, { type: 'code' });
+      baseHandleConvert<Block<'code'>>(editor, { type: 'code', language: 'plaintext' });
     },
     handleEnterKey(editor) {
       pressEnterTwiceToExit(editor);
