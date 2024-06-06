@@ -2,7 +2,7 @@
 import type { Core, Data, UID } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
-import { getEntryValidStatus, getService } from './utils';
+import { isEntryValid, getService } from './utils';
 
 export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
@@ -110,7 +110,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           if (model.options?.draftAndPublish) {
             const result = event.result;
 
-            const isEntryValid = await getEntryValidStatus(model.uid as UID.ContentType, result, {
+            const entryStatus = await isEntryValid(model.uid as UID.ContentType, result, {
               strapi,
             });
 
@@ -120,7 +120,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
                 target_id: result.id,
               },
               data: {
-                isEntryValid,
+                isEntryValid: entryStatus,
               },
             });
 

@@ -36,10 +36,10 @@ export const getDraftEntryValidStatus = async (
 
   const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
 
-  return getEntryValidStatus(contentType, entry, { strapi });
+  return isEntryValid(contentType, entry, { strapi });
 };
 
-export const getEntryValidStatus = async (
+export const isEntryValid = async (
   contentTypeUid: string,
   entry: any,
   { strapi }: { strapi: Core.Strapi }

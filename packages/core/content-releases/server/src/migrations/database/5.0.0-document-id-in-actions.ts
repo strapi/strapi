@@ -1,3 +1,5 @@
+import { async } from '@strapi/utils';
+
 import type { Migration } from '@strapi/database';
 
 /**
@@ -11,20 +13,34 @@ export const addEntryDocumentToReleaseActions: Migration = {
   async up(trx, db) {
     const hasPolymorphicColumn = await trx.schema.hasColumn('strapi_release_actions', 'target_id');
 
+    // If user has PolymorphicColumn means that is coming from v4
     if (hasPolymorphicColumn) {
+      // First time coming from v4 user doesn't have entryDocumentId
+      // but we double check to avoid errors
+      const hasEntryDocumentIdColumn = await trx.schema.hasColumn(
+        'strapi_release_actions',
+        'entry_document_id'
+      );
+
+      if (!hasEntryDocumentIdColumn) {
+        await trx.schema.alterTable('strapi_release_actions', (table) => {
+          table.string('entry_document_id');
+        });
+      }
+
       const releaseActions = await trx.select('*').from('strapi_release_actions');
 
-      for (const releaseAction of releaseActions) {
-        const { target_type, target_id } = releaseAction;
+      async.map(releaseActions, async (action: any) => {
+        const { target_type, target_id } = action;
 
         const entry = await db.query(target_type).findOne({ where: { id: target_id } });
 
         if (entry) {
           await trx('strapi_release_actions')
             .update({ entry_document_id: entry.documentId })
-            .where('id', releaseAction.id);
+            .where('id', action.id);
         }
-      }
+      });
     }
   },
   async down() {

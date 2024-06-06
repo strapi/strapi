@@ -226,10 +226,6 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
         throw new errors.NotFoundError(`No release found for id ${releaseId}`);
       }
 
-      if (release.releasedAt) {
-        throw new errors.ValidationError('Release already published');
-      }
-
       // Only delete the release and its actions is you in fact can delete all the actions and the release
       // Otherwise, if the transaction fails it throws an error
       await strapi.db.transaction(async () => {
