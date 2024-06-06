@@ -323,7 +323,9 @@ export const transformContentTypesToModels = (
         {
           name: identifiers.getIndexName([contentType.collectionName, 'documents']),
           // Filter attributes that are not in the schema
-          columns: ['documentId', 'locale', 'publishedAt'].filter((n) => model.attributes[n]).map( _.snakeCase),
+          columns: ['documentId', 'locale', 'publishedAt']
+            .filter((n) => model.attributes[n])
+            .map((name) => identifiers.getColumnName(_.snakeCase(name))),
         },
       ];
     }
