@@ -82,7 +82,7 @@ export const DraftAndPublishToggle = ({
         <Field.Hint />
       </Field.Root>
 
-      <ConfirmDialog isOpen={showWarning} onClose={handleToggle} onConfirm={handleConfirm}>
+      <ConfirmDialog onClose={() => {}} isOpen={showWarning} onConfirm={handleConfirm}>
         {formatMessage({
           id: getTrad('popUpWarning.draft-publish.message'),
           defaultMessage: 'If you disable the draft & publish, your drafts will be deleted.',
