@@ -34,7 +34,7 @@ export const skipCtbTour = async (page: Page) => {
   const modalSelector = 'role=button[name="Skip the tour"]';
 
   try {
-    await page.waitForSelector(modalSelector, { timeout: 5000 });
+    await page.waitForSelector(modalSelector, { timeout: 1000 });
     const modal = page.locator(modalSelector);
     if (await modal.isVisible()) {
       await modal.click();

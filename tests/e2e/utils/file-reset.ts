@@ -36,24 +36,19 @@ export const pollHealthCheck = async (interval = 1000, timeout = 30000) => {
 export const resetFiles = async () => {
   if (process.env.TEST_APP_PATH) {
     console.log('Restoring filesystem');
-    try {
-      await execa('git', [...gitUser, 'reset', '--hard'], {
-        stdio: 'inherit',
-        cwd: process.env.TEST_APP_PATH,
-      });
-      await execa('git', [...gitUser, 'clean', '-fd'], {
-        stdio: 'inherit',
-        cwd: process.env.TEST_APP_PATH,
-      });
-    } catch (error) {
-      console.error('Error restoring filesystem:', error);
-      throw error;
-    }
+    await execa('git', [...gitUser, 'reset', '--hard'], {
+      stdio: 'inherit',
+      cwd: process.env.TEST_APP_PATH,
+    });
+    const dryRun = await execa('git', [...gitUser, 'clean', '-fd'], {
+      stdio: 'inherit',
+      cwd: process.env.TEST_APP_PATH,
+    });
   }
 
   // wait for server to restart after modifying files
   console.log('Waiting for Strapi to restart...');
   // TODO: this is both a waste of time and flaky. We need to find a way to access playwright server output and watch for the "up" log to appear
-  await delay(6); // give it time to detect file changes and begin its restart
+  await delay(3); // give it time to detect file changes and begin its restart
   await pollHealthCheck(); // give it time to come back up
 };

@@ -12,7 +12,6 @@ test.describe('Edit collection type', () => {
   test.beforeEach(async ({ page }) => {
     await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
-    await page.reload({ waitUntil: 'networkidle' });
     await page.goto('/admin');
 
     await login({ page });
