@@ -1,8 +1,11 @@
 import { SingleSelectOption, SingleSelect, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
+import { MAX_COMPONENT_DEPTH } from '../constants';
 import { useDataManager } from '../hooks/useDataManager';
+import { getChildrenMaxDepth, getComponentDepth } from '../utils/getMaxDepth';
 
+import type { Internal } from '@strapi/types';
 interface Option {
   uid: string;
   label: string;
@@ -22,7 +25,7 @@ interface SelectComponentProps {
   isCreatingComponentWhileAddingAField: boolean;
   name: string;
   onChange: (value: any) => void;
-  targetUid: string;
+  targetUid: Internal.UID.Schema;
   value: string;
   forTarget: string;
 }
@@ -44,8 +47,11 @@ export const SelectComponent = ({
   const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const label = formatMessage(intlLabel);
 
-  const { componentsGroupedByCategory, componentsThatHaveOtherComponentInTheirAttributes } =
-    useDataManager();
+  const {
+    componentsGroupedByCategory,
+    componentsThatHaveOtherComponentInTheirAttributes,
+    nestedComponents,
+  } = useDataManager();
 
   const isTargetAComponent = ['component', 'components'].includes(forTarget);
 
@@ -66,8 +72,11 @@ export const SelectComponent = ({
   );
 
   if (isAddingAComponentToAnotherComponent) {
-    options = options.filter((option) => {
-      return !componentsThatHaveOtherComponentInTheirAttributes.includes(option.uid);
+    options = options.filter(({ uid }: any) => {
+      const maxDepth = getChildrenMaxDepth(uid, componentsThatHaveOtherComponentInTheirAttributes);
+      const componentDepth = getComponentDepth(targetUid, nestedComponents);
+      const totalDepth = maxDepth + componentDepth;
+      return totalDepth <= MAX_COMPONENT_DEPTH;
     });
   }
 

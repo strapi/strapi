@@ -1,4 +1,5 @@
 import { MAX_COMPONENT_DEPTH } from '../../../constants';
+import { getComponentDepth } from '../../../utils/getMaxDepth';
 
 import type { IconByType } from '../../AttributeIcon';
 import type { NestedComponent } from '../../DataManagerProvider/utils/retrieveNestedComponents';
@@ -36,7 +37,7 @@ export const getAttributesToDisplay = (
 
   // this will only run when adding attributes to components
   if (dataTarget) {
-    const componentDepth = getComponentMaxDepth(targetUid, nestedComponents);
+    const componentDepth = getComponentDepth(targetUid, nestedComponents);
     const isNestedInAnotherComponent = componentDepth >= MAX_COMPONENT_DEPTH;
     const canAddComponentInAnotherComponent =
       !isPickingAttributeForAContentType && !isNestedInAnotherComponent;
@@ -46,39 +47,4 @@ export const getAttributesToDisplay = (
   }
 
   return [defaultAttributes];
-};
-
-const findComponent = (component: Internal.UID.Schema, components: Array<NestedComponent>) => {
-  return components.find((c) => c.component === component);
-};
-
-const getComponentMaxDepth = (
-  component: Internal.UID.Schema,
-  components: Array<NestedComponent>
-) => {
-  const dfs = (currentComponent: NestedComponent, currentLevel: number): Array<number> => {
-    const levels = [];
-    levels.push(currentLevel);
-
-    if (!currentComponent.parentCompoUid) {
-      return levels;
-    }
-
-    for (const parentUid of currentComponent.parentCompoUid) {
-      const parentComponent = findComponent(parentUid, components);
-      if (parentComponent) {
-        levels.push(...dfs(parentComponent, currentLevel + 1));
-      }
-    }
-
-    return levels;
-  };
-
-  const nestedCompo = findComponent(component, components);
-  // return depth 0 if component is not nested
-  if (!nestedCompo) {
-    return 0;
-  }
-  const compoDepth = Math.max(...dfs(nestedCompo, 1));
-  return compoDepth;
 };

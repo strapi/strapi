@@ -3,16 +3,15 @@ import get from 'lodash/get';
 import { makeUnique } from '../../../utils/makeUnique';
 
 import type { Component, AttributeType, Components } from '../../../types';
-import type { Internal } from '@strapi/types';
 
 const retrieveComponentsThatHaveComponents = (allComponents: Components) => {
   const componentsThatHaveNestedComponents = Object.keys(allComponents).reduce(
-    (acc: Internal.UID.Component[], current) => {
+    (acc: any, current) => {
       const currentComponent = get(allComponents, [current]);
-      const uid = currentComponent.uid;
 
-      if (doesComponentHaveAComponentField(currentComponent)) {
-        acc.push(uid);
+      const compoWithChildren = getComponentWithChildComponents(currentComponent);
+      if (compoWithChildren.childComponents.length > 0) {
+        acc.push(compoWithChildren);
       }
 
       return acc;
@@ -23,14 +22,16 @@ const retrieveComponentsThatHaveComponents = (allComponents: Components) => {
   return makeUnique(componentsThatHaveNestedComponents);
 };
 
-const doesComponentHaveAComponentField = (component: Component) => {
+const getComponentWithChildComponents = (component: Component) => {
   const attributes = get(component, ['schema', 'attributes'], []) as AttributeType[];
+  return {
+    component: component.uid,
+    childComponents: attributes.filter((attribute) => {
+      const { type } = attribute;
 
-  return attributes.some((attribute) => {
-    const { type } = attribute;
-
-    return type === 'component';
-  });
+      return type === 'component';
+    }),
+  };
 };
 
-export { doesComponentHaveAComponentField, retrieveComponentsThatHaveComponents };
+export { getComponentWithChildComponents, retrieveComponentsThatHaveComponents };
