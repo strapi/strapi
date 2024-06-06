@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { useTracking, useQueryParams } from '@strapi/admin/strapi-admin';
 import { Button, Popover } from '@strapi/design-system';

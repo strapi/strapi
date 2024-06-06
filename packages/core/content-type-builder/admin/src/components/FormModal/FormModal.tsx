@@ -1,4 +1,4 @@
-import { SyntheticEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import * as React from 'react';
 
 import { useStrapiApp, useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import { Button, Divider, Flex, Modal, Tabs } from '@strapi/design-system';
@@ -87,12 +87,12 @@ export const FormModal = () => {
     targetUid,
     showBackLink,
   } = useFormModalNavigation();
-  const [activeTab, setActiveTab] = useState('basic');
+  const [activeTab, setActiveTab] = React.useState('basic');
   const getPlugin = useStrapiApp('FormModal', (state) => state.getPlugin);
   const getCustomField = useStrapiApp('FormModal', (state) => state.customFields.get);
   const customField = getCustomField(customFieldUid);
 
-  const formModalSelector = useMemo(makeSelectFormModal, []);
+  const formModalSelector = React.useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
   const { toggleNotification } = useNotification();
   const reducerState = useSelector((state) => formModalSelector(state), shallowEqual);
@@ -136,7 +136,7 @@ export const FormModal = () => {
   const pathToSchema =
     forTarget === 'contentType' || forTarget === 'component' ? [forTarget] : [forTarget, targetUid];
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isOpen) {
       const collectionTypesForRelation = sortedContentTypesList.filter(
         isAllowedContentTypesForRelations
@@ -447,7 +447,7 @@ export const FormModal = () => {
     await schema.validate(dataToValidate, { abortEarly: false });
   };
 
-  const handleChange = useCallback(
+  const handleChange = React.useCallback(
     ({
       target: { name, value, type, ...rest },
     }: {
@@ -501,7 +501,7 @@ export const FormModal = () => {
     [dispatch, formErrors]
   );
 
-  const handleSubmit = async (e: SyntheticEvent, shouldContinue = isCreating) => {
+  const handleSubmit = async (e: React.SyntheticEvent, shouldContinue = isCreating) => {
     e.preventDefault();
 
     try {

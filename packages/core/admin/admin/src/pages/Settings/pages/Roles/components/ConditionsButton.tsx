@@ -1,4 +1,4 @@
-import { forwardRef } from 'react';
+import * as React from 'react';
 
 import { Box, BoxComponent, Button, ButtonProps } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
@@ -9,7 +9,7 @@ interface ConditionsButtonProps extends Pick<ButtonProps, 'className' | 'onClick
   hasConditions?: boolean;
 }
 
-const ConditionsButtonImpl = forwardRef<HTMLButtonElement, ConditionsButtonProps>(
+const ConditionsButtonImpl = React.forwardRef<HTMLButtonElement, ConditionsButtonProps>(
   ({ onClick, className, hasConditions = false, variant = 'tertiary' }, ref) => {
     const { formatMessage } = useIntl();
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { Button, Popover } from '@strapi/design-system';
 import { Filter } from '@strapi/icons';
