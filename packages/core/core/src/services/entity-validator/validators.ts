@@ -268,8 +268,7 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       queryWhere = scalarAttributeWhere;
     }
 
-    // The validation should pass if there is no other record found from the
-    // query.
+    // The validation should pass if there is no other record found from the query
     // TODO query not working for dynamic zones (type === relation)
     return !(await strapi.db.query(queryUid).findOne({ where: queryWhere }));
   });

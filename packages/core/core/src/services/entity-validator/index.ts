@@ -15,11 +15,6 @@ const { yup, validateYupSchema } = strapiUtils;
 const { isMediaAttribute, isScalarAttribute, getWritableAttributes } = strapiUtils.contentTypes;
 const { ValidationError } = strapiUtils.errors;
 
-type Entity = {
-  id: number;
-  [key: string]: unknown;
-} | null;
-
 type ID = { id: string | number };
 
 type RelationSource = string | number | ID;
@@ -38,7 +33,7 @@ export type ComponentContext = {
   pathToComponent: string[];
   // If working with a repeatable component this contains the
   // full data of the repeatable component in the current entity.
-  repeatableData: Entity[];
+  repeatableData: Modules.EntityValidator.Entity[];
 };
 
 interface WithComponentContext {
@@ -59,13 +54,13 @@ interface AttributeValidatorMetas extends WithComponentContext {
   attr: Schema.Attribute.AnyAttribute;
   updatedAttribute: { name: string; value: unknown };
   model: Struct.Schema;
-  entity?: Entity;
+  entity?: Modules.EntityValidator.Entity;
 }
 
 interface ModelValidatorMetas extends WithComponentContext {
   model: Struct.Schema;
   data: Record<string, unknown>;
-  entity?: Entity;
+  entity?: Modules.EntityValidator.Entity;
 }
 
 const isInteger = (value: unknown): value is number => Number.isInteger(value);
@@ -307,7 +302,7 @@ const createAttributeValidator =
           metas.attr.repeatable && pathToComponent.length === 1
             ? metas.updatedAttribute.value
             : metas.componentContext?.repeatableData
-        ) as Entity[];
+        ) as Modules.EntityValidator.Entity[];
 
         const newComponentContext = {
           ...(metas?.componentContext ?? {}),
@@ -378,7 +373,7 @@ const createValidateEntity = (createOrUpdate: CreateOrUpdate) => {
     model: Schema.ContentType<TUID>,
     data: TData | Partial<TData> | undefined,
     options?: ValidatorContext,
-    entity?: Entity
+    entity?: Modules.EntityValidator.Entity
   ): Promise<TData> => {
     if (!isObject(data)) {
       const { displayName } = model.info;

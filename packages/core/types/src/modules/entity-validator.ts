@@ -3,7 +3,7 @@ import type * as UID from '../uid';
 
 import type * as EntityService from './entity-service';
 
-type Entity = {
+export type Entity = {
   id: number;
   [key: string]: unknown;
 } | null;

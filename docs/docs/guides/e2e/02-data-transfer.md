@@ -41,8 +41,10 @@ Once that's completed, you should be able to run your Strapi instance as usual:
 yarn develop
 ```
 
-> **Tip** If you can't run the test-app because it is not present in the monorepo dependencies you can fix this by making the following change to the root
-> monorepo `package.json` file and running `yarn install` at both the root of the monorepo and the test-app you are running.
+> **Tip!**
+> If you can't run the test-app because it is not present in the monorepo dependencies you can fix this by making the following change to the root monorepo `package.json` file and running `yarn install` at both the root of the monorepo and the test-app you are running.
+>
+> **This change should not be committed**.
 
 ```
   "workspaces": [
