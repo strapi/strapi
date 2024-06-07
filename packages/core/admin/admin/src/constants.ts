@@ -125,7 +125,6 @@ export const HOOKS = {
 
 export interface SettingsMenuLink
   extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'lockIcon'> {
-  // TODO: to replace with another name in v5
   lockIcon?: boolean; // TODO: to replace with another name in v5
 }
 
