@@ -1,28 +1,13 @@
-import { Scope } from '../../../types';
+import { join } from 'path';
+import { kebabCase } from 'lodash';
+import fse from 'fs-extra';
+
 import engines from './engines';
+import type { Scope } from '../../../types';
 
-type OptsScope = Pick<
-  Scope,
-  'strapiDependencies' | 'additionalsDependencies' | 'strapiVersion' | 'uuid' | 'packageJsonStrapi'
->;
-
-interface Opts extends OptsScope {
-  projectName: string;
-}
-
-export default (opts: Opts) => {
-  const {
-    strapiDependencies,
-    additionalsDependencies,
-    strapiVersion,
-    projectName,
-    uuid,
-    packageJsonStrapi,
-  } = opts;
-
-  // Finally, return the JSON.
-  return {
-    name: projectName,
+export default async (scope: Scope) => {
+  const pkg = {
+    name: kebabCase(scope.name),
     private: true,
     version: '0.1.0',
     description: 'A Strapi application',
@@ -32,22 +17,21 @@ export default (opts: Opts) => {
       build: 'strapi build',
       strapi: 'strapi',
     },
-    devDependencies: {},
-    dependencies: {
-      ...strapiDependencies.reduce<Record<string, string>>((acc, key) => {
-        acc[key] = strapiVersion;
-        return acc;
-      }, {}),
-      ...additionalsDependencies,
-    },
+    devDependencies: scope.devDependencies,
+    dependencies: scope.dependencies,
     author: {
       name: 'A Strapi developer',
     },
     strapi: {
-      uuid,
-      ...packageJsonStrapi,
+      ...scope.packageJsonStrapi,
+      uuid: scope.uuid,
     },
     engines,
     license: 'MIT',
   };
+
+  // copy templates
+  await fse.writeJSON(join(scope.rootPath, 'package.json'), pkg, {
+    spaces: 2,
+  });
 };

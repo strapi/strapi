@@ -1,8 +1,8 @@
 import type { Question } from 'inquirer';
-import type { Scope } from '../types';
+import type { DBClient } from './types';
 
 interface QuestionFactory {
-  (options: { scope: Scope; client: 'postgres' | 'mysql' | 'sqlite' }): Question;
+  (options: { client: DBClient }): Question;
 }
 
 const DEFAULT_PORTS = {
@@ -11,11 +11,11 @@ const DEFAULT_PORTS = {
   sqlite: undefined,
 };
 
-const database: QuestionFactory = ({ scope }) => ({
+const database: QuestionFactory = () => ({
   type: 'input',
   name: 'database',
   message: 'Database name:',
-  default: scope.name,
+  default: 'strapi',
   validate(value: string) {
     if (value.includes('.')) {
       return `The database name can't contain a "."`;
