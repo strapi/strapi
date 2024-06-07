@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import { Button, Dialog } from '@strapi/design-system';
