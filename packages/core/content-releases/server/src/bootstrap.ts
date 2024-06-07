@@ -116,8 +116,9 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
 
             await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
               where: {
-                target_type: model.uid,
-                target_id: result.id,
+                contentType: model.uid,
+                documentId: result.documentId ?? null,
+                locale: result.locale ?? null,
               },
               data: {
                 isEntryValid: entryStatus,
@@ -127,8 +128,9 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
             const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
               where: {
                 actions: {
-                  target_type: model.uid,
-                  target_id: result.id,
+                  contentType: model.uid,
+                  documentId: result.documentId ?? null,
+                  locale: result.locale ?? null,
                 },
               },
             });
