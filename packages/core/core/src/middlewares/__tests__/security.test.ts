@@ -45,6 +45,7 @@ describe('Security middleware', () => {
         });
       }
     );
+
     it('includes required default CSP directives in GET /admin response', async () => {
       await agent.get('/admin').expect((req) => {
         const csp = parseCspHeader(req.header['content-security-policy']);
@@ -52,6 +53,7 @@ describe('Security middleware', () => {
         expect(csp['connect-src']).toContain('ws:');
       });
     });
+
     it('includes required default CSP directives in GET /documentation response', async () => {
       await agent.get('/documentation').expect((req) => {
         const csp = parseCspHeader(req.header['content-security-policy']);
