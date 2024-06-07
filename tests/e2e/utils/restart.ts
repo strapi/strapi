@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Page, BrowserContext, expect } from '@playwright/test';
 
 // Function to check modal visibility
 const isModalVisible = async (page: Page) => {
@@ -9,7 +9,10 @@ const isModalVisible = async (page: Page) => {
  * Wait for a restart modal to appear, but instead of failing if it doesn't, attempt to
  * refresh the page and see if it comes back up
  */
-export const waitForRestart = async (page, timeout = 60000) => {
+export const waitForRestart = async (
+  { page, context }: { page: Page; context: BrowserContext },
+  timeout = 60000
+) => {
   const initialWaitForModal = 5000; // Time to wait for the modal to initially appear
   let elapsedTime = 0;
   const checkInterval = 1000; // Check every 1 second
@@ -37,8 +40,11 @@ export const waitForRestart = async (page, timeout = 60000) => {
   // If modal is still visible after reloadTimeout, reload the page and wait again
   if (modalVisible) {
     console.log("Restart overlay didn't disappear after 15 seconds. Reloading page...");
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    // Optionally, wait again for the modal to disappear after reloading
+    if (page.isClosed()) {
+      page = await context.newPage();
+    } else {
+      await page.reload({ waitUntil: 'domcontentloaded' });
+    }
   }
 
   // Final check to ensure the modal has disappeared

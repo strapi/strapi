@@ -49,7 +49,7 @@ test.describe('Create collection type', () => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
 
-    await waitForRestart(page);
+    await waitForRestart({ page, context });
 
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });

@@ -27,7 +27,7 @@ test.describe('Create collection type', () => {
     await resetFiles();
   });
 
-  test('Can create a collection type', async ({ page }) => {
+  test('Can create a collection type', async ({ page, context }) => {
     await page.getByRole('button', { name: 'Create new collection type' }).click();
 
     await expect(page.getByRole('heading', { name: 'Create a collection type' })).toBeVisible();
@@ -49,7 +49,7 @@ test.describe('Create collection type', () => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
 
-    await waitForRestart(page);
+    await waitForRestart({ page, context });
 
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });

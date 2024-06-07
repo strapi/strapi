@@ -1,4 +1,4 @@
-import { test, Page, expect } from '@playwright/test';
+import { test, type Page, expect, type BrowserContext } from '@playwright/test';
 import { waitForRestart } from './restart';
 import pluralize from 'pluralize';
 import { kebabCase } from 'lodash/fp';
@@ -72,7 +72,10 @@ type ContentTypeData = {
   singularId?: string;
 };
 
-export const createSingleType = async (page, data) => {
+export const createSingleType = async (
+  { page, context }: { page: Page; context: BrowserContext },
+  data
+) => {
   const { name, singularId, pluralId } = data;
 
   await page.getByRole('button', { name: 'Create new single type' }).click();
@@ -103,12 +106,15 @@ export const createSingleType = async (page, data) => {
   await page.getByRole('button', { name: 'Finish' }).click();
   await page.getByRole('button', { name: 'Save' }).click();
 
-  await waitForRestart(page);
+  await waitForRestart({ page, context });
 
   await expect(page.getByRole('heading', { name })).toBeVisible();
 };
 
-export const createCollectionType = async (page, data) => {
+export const createCollectionType = async (
+  { page, context }: { page: Page; context: BrowserContext },
+  data
+) => {
   const { name, singularId, pluralId } = data;
 
   await page.getByRole('button', { name: 'Create new collection type' }).click();
@@ -139,7 +145,7 @@ export const createCollectionType = async (page, data) => {
   await page.getByRole('button', { name: 'Finish' }).click();
   await page.getByRole('button', { name: 'Save' }).click();
 
-  await waitForRestart(page);
+  await waitForRestart({ page, context });
 
   await expect(page.getByRole('heading', { name })).toBeVisible();
 };

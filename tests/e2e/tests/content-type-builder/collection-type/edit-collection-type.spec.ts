@@ -9,7 +9,7 @@ test.describe('Edit collection type', () => {
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
     await resetFiles();
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -22,9 +22,12 @@ test.describe('Edit collection type', () => {
 
     // TODO: create a "saveFileState" mechanism to be used so we don't have to do a full server restart before each test
     // create a collection type to be used
-    await createCollectionType(page, {
-      name: ctName,
-    });
+    await createCollectionType(
+      { page, context },
+      {
+        name: ctName,
+      }
+    );
 
     // For some reason on the CI we have to skip the tour a second time; maybe it handles storage differently?
     await skipCtbTour(page);
@@ -38,30 +41,30 @@ test.describe('Edit collection type', () => {
     await resetFiles();
   });
 
-  test('Can toggle internationalization', async ({ page }) => {
+  test('Can toggle internationalization', async ({ page, context }) => {
     await page.getByRole('button', { name: 'Edit' }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Internationalization').click();
     await page.getByRole('button', { name: 'Finish' }).click();
 
-    await waitForRestart(page);
+    await waitForRestart({ page, context });
 
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
 
-  test('Can toggle draft&publish', async ({ page }) => {
+  test('Can toggle draft&publish', async ({ page, context }) => {
     await page.getByRole('button', { name: 'Edit' }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
     await page.getByRole('button', { name: 'Yes, disable' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
 
-    await waitForRestart(page);
+    await waitForRestart({ page, context });
 
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
 
-  test('Can add a field with default value', async ({ page }) => {
+  test('Can add a field with default value', async ({ page, context }) => {
     await page.getByRole('button', { name: 'Add another field', exact: true }).click();
     await page
       .getByRole('button', { name: 'Text Small or long text like title or description' })
@@ -72,7 +75,7 @@ test.describe('Edit collection type', () => {
     await page.getByRole('button', { name: 'Finish' }).click();
     await page.getByRole('button', { name: 'Save' }).click();
 
-    await waitForRestart(page);
+    await waitForRestart({ page, context });
 
     await expect(page.getByRole('heading', { name: 'Secret Document' })).toBeVisible();
   });
