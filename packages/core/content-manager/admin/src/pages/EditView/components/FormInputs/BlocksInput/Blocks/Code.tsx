@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Box, SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import { Code } from '@strapi/icons';
+import { useIntl } from 'react-intl';
 import { Editor, Transforms } from 'slate';
 import { useSelected, type RenderElementProps, useFocused, ReactEditor } from 'slate-react';
 import { styled } from 'styled-components';
@@ -154,7 +155,7 @@ const languages: { value: string; label: string }[] = [
   },
   {
     value: 'plaintext',
-    label: 'Plain Text',
+    label: 'Plain text',
   },
   {
     value: 'powershell',
@@ -247,6 +248,7 @@ const CodeEditor = (props: RenderElementProps) => {
   const { editor } = useBlocksEditorContext('ImageDialog');
   const editorIsFocused = useFocused();
   const imageIsSelected = useSelected();
+  const { formatMessage } = useIntl();
   const [isSelectOpen, setIsSelectOpen] = React.useState(false);
   const shouldDisplayLanguageSelect = (editorIsFocused && imageIsSelected) || isSelectOpen;
 
@@ -287,6 +289,10 @@ const CodeEditor = (props: RenderElementProps) => {
               }
             }}
             onCloseAutoFocus={(e) => e.preventDefault()}
+            aria-label={formatMessage({
+              id: 'components.Blocks.blocks.code.languageLabel',
+              defaultMessage: 'Select a language',
+            })}
           >
             {languages.map(({ value, label }) => (
               <SingleSelectOption value={value} key={value}>
