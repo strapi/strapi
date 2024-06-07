@@ -40,13 +40,6 @@ describe('<Input />', () => {
         display: flex;
       }
 
-      .c3 {
-        padding-block-start: 8px;
-        padding-inline-end: 12px;
-        padding-block-end: 8px;
-        padding-inline-start: 12px;
-      }
-
       .c0 {
         align-items: stretch;
         display: flex;
@@ -54,7 +47,7 @@ describe('<Input />', () => {
         gap: 4px;
       }
 
-      .c4 {
+      .c3 {
         align-items: center;
         display: flex;
         flex-direction: row;
@@ -69,7 +62,7 @@ describe('<Input />', () => {
         color: #32324d;
       }
 
-      .c6 {
+      .c5 {
         border: none;
         border-radius: 4px;
         color: #32324d;
@@ -79,23 +72,26 @@ describe('<Input />', () => {
         display: block;
         width: 100%;
         background: inherit;
+        padding-inline-start: 16px;
+        padding-inline-end: 16px;
+        padding-block: 8px;
       }
 
-      .c6 ::placeholder {
+      .c5 ::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c6[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         color: inherit;
       }
 
-      .c6:focus {
+      .c5:focus {
         outline: none;
         box-shadow: none;
       }
 
-      .c5 {
+      .c4 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -105,7 +101,7 @@ describe('<Input />', () => {
         transition-duration: 0.2s;
       }
 
-      .c5:focus-within {
+      .c4:focus-within {
         border: 1px solid #4945ff;
         box-shadow: #4945ff 0px 0px 0px 2px;
       }
@@ -121,11 +117,11 @@ describe('<Input />', () => {
           Enabled
         </label>
         <div
-          class="c3 c4 c5"
+          class="c3 c4"
         >
           <input
             aria-disabled="false"
-            class="c6"
+            class="c5"
             id=":r0:"
             name="test"
             placeholder=""

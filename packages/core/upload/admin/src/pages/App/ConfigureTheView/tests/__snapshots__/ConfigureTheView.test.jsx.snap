@@ -58,10 +58,6 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c26 {
   background: #ffffff;
-  padding-block-start: 8px;
-  padding-inline-end: 12px;
-  padding-block-end: 8px;
-  padding-inline-start: 12px;
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -297,6 +293,9 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
 
 .c28 {
   border: 1px solid #dcdce4;
+  padding-block: 8px;
+  padding-inline-start: 16px;
+  padding-inline-end: 12px;
   outline: none;
   box-shadow: none;
   transition-property: border-color,box-shadow,fill;
@@ -407,8 +406,7 @@ exports[`Upload - Configure initial render renders and matches the snapshot 1`] 
                   class="c6 c7"
                   href="/plugins/upload"
                   id="go-back"
-                  rel="noreferrer noopener"
-                  target="_blank"
+                  target="_self"
                 >
                   <svg
                     fill="currentColor"

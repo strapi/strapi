@@ -58,18 +58,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c33 {
-  padding-block-start: 8px;
-  padding-inline-end: 12px;
-  padding-block-end: 8px;
-  padding-inline-start: 12px;
-}
-
-.c38 {
+.c37 {
   padding-inline-end: 12px;
 }
 
-.c42 {
+.c41 {
   background: #4945ff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -130,7 +123,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   gap: 4px;
 }
 
-.c34 {
+.c33 {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -138,7 +131,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c43 {
+.c42 {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -173,13 +166,13 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c37 {
+.c36 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c45 {
+.c44 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
@@ -234,42 +227,73 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c44 {
+.c43 {
   height: 3.2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
 }
 
-.c44 svg {
+.c43 svg {
   height: 1.2rem;
 }
 
-.c44[aria-disabled='true'] {
+.c43[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c44[aria-disabled='true']:active {
+.c43[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c44:hover {
+.c43:hover {
   background-color: #f6f6f9;
 }
 
-.c44:active {
+.c43:active {
   background-color: #eaeaef;
 }
 
-.c46 {
+.c45 {
   height: 3.2rem;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
   color: #271fe0;
+}
+
+.c45 svg {
+  height: 1.2rem;
+}
+
+.c45[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+}
+
+.c45[aria-disabled='true']:active {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+}
+
+.c45:hover {
+  background-color: #ffffff;
+}
+
+.c45:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+  color: #4945ff;
+}
+
+.c46 {
+  height: 3.2rem;
+  color: #ffffff;
 }
 
 .c46 svg {
@@ -289,47 +313,16 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 .c46:hover {
-  background-color: #ffffff;
-}
-
-.c46:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-  color: #4945ff;
-}
-
-.c47 {
-  height: 3.2rem;
-  color: #ffffff;
-}
-
-.c47 svg {
-  height: 1.2rem;
-}
-
-.c47[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c47[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c47:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c47:active {
+.c46:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c36 {
+.c35 {
   border: none;
   border-radius: 4px;
   color: #32324d;
@@ -339,23 +332,26 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   display: block;
   width: 100%;
   background: inherit;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  padding-block: 8px;
 }
 
-.c36 ::placeholder {
+.c35 ::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c36[aria-disabled='true'] {
+.c35[aria-disabled='true'] {
   color: inherit;
 }
 
-.c36:focus {
+.c35:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c35 {
+.c34 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -365,7 +361,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c35:focus-within {
+.c34:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
@@ -406,7 +402,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c15 {
   min-width: 100%;
-  padding-inline-end: 4px;
+  padding-inline: 4px;
 }
 
 .c3 {
@@ -452,34 +448,34 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
   display: block!important;
 }
 
-.c41 {
+.c40 {
   border-top: solid 1px #eaeaef;
   flex: 1;
 }
 
-.c39 {
+.c38 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c39 svg {
+.c38 svg {
   height: 1.1rem;
   width: 1.1rem;
 }
 
-.c39 svg path {
+.c38 svg path {
   fill: #666687;
 }
 
-.c40 {
+.c39 {
   display: flex;
   background: none;
   border: none;
 }
 
-.c40 svg {
+.c39 svg {
   width: 0.9rem;
 }
 
@@ -511,19 +507,19 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c44 {
+  .c43 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c45 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .c46 {
-    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .c47 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -916,11 +912,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                       File name
                     </label>
                     <div
-                      class="c33 c34 c35"
+                      class="c33 c34"
                     >
                       <input
                         aria-disabled="false"
-                        class="c36"
+                        class="c35"
                         id=":ra:"
                         name="name"
                         value="Screenshot 2.png"
@@ -938,19 +934,19 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                       Alternative text
                     </label>
                     <div
-                      class="c33 c34 c35"
+                      class="c33 c34"
                     >
                       <input
                         aria-describedby=":rb:-hint"
                         aria-disabled="false"
-                        class="c36"
+                        class="c35"
                         id=":rb:"
                         name="alternativeText"
                         value=""
                       />
                     </div>
                     <p
-                      class="c37"
+                      class="c36"
                       id=":rb:-hint"
                     >
                       This text will be displayed if the asset can’t be shown.
@@ -967,11 +963,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                       Caption
                     </label>
                     <div
-                      class="c33 c34 c35"
+                      class="c33 c34"
                     >
                       <input
                         aria-disabled="false"
-                        class="c36"
+                        class="c35"
                         id=":rc:"
                         name="caption"
                       />
@@ -1035,7 +1031,7 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
                           >
                             <div
                               aria-hidden="true"
-                              class="c38 c39 c40"
+                              class="c37 c38 c39"
                             >
                               <svg
                                 fill="currentColor"
@@ -1077,29 +1073,29 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
       </div>
     </div>
     <footer
-      class="c5 c6 c41"
+      class="c5 c6 c40"
     >
       <button
         aria-disabled="false"
-        class="c42 c43 c11 c44"
+        class="c41 c42 c11 c43"
         type="button"
       >
         <span
-          class="c45"
+          class="c44"
         >
           Cancel
         </span>
       </button>
       <div
-        class="c43"
+        class="c42"
       >
         <button
           aria-disabled="false"
-          class="c42 c43 c11 c46"
+          class="c41 c42 c11 c45"
           type="button"
         >
           <span
-            class="c45"
+            class="c44"
           >
             Replace media
           </span>
@@ -1117,11 +1113,11 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
         </span>
         <button
           aria-disabled="false"
-          class="c42 c43 c11 c47"
+          class="c41 c42 c11 c46"
           type="button"
         >
           <span
-            class="c45"
+            class="c44"
           >
             Finish
           </span>

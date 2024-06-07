@@ -108,7 +108,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 
 .c2 {
   min-width: 100%;
-  padding-inline-end: 4px;
+  padding-inline: 4px;
 }
 
 .c1 {

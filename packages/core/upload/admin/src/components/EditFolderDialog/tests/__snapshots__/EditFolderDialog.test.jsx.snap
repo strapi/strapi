@@ -32,18 +32,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c21 {
-  padding-block-start: 8px;
-  padding-inline-end: 12px;
-  padding-block-end: 8px;
-  padding-inline-start: 12px;
-}
-
-.c25 {
+.c24 {
   padding-inline-end: 12px;
 }
 
-.c29 {
+.c28 {
   background: #4945ff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -83,7 +76,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   gap: 4px;
 }
 
-.c22 {
+.c21 {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -91,7 +84,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   justify-content: space-between;
 }
 
-.c30 {
+.c29 {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -112,7 +105,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   color: #32324d;
 }
 
-.c32 {
+.c31 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
@@ -167,69 +160,69 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c31 {
+.c30 {
   height: 3.2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
 }
 
-.c31 svg {
+.c30 svg {
   height: 1.2rem;
 }
 
-.c31[aria-disabled='true'] {
+.c30[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c31[aria-disabled='true']:active {
+.c30[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c31:hover {
+.c30:hover {
   background-color: #f6f6f9;
 }
 
-.c31:active {
+.c30:active {
   background-color: #eaeaef;
 }
 
-.c33 {
+.c32 {
   height: 3.2rem;
   color: #ffffff;
 }
 
-.c33 svg {
+.c32 svg {
   height: 1.2rem;
 }
 
-.c33[aria-disabled='true'] {
+.c32[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c33[aria-disabled='true']:active {
+.c32[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c33:hover {
+.c32:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c33:active {
+.c32:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c24 {
+.c23 {
   border: none;
   border-radius: 4px;
   color: #32324d;
@@ -239,23 +232,26 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   display: block;
   width: 100%;
   background: inherit;
+  padding-inline-start: 16px;
+  padding-inline-end: 16px;
+  padding-block: 8px;
 }
 
-.c24 ::placeholder {
+.c23 ::placeholder {
   color: #8e8ea9;
   opacity: 1;
 }
 
-.c24[aria-disabled='true'] {
+.c23[aria-disabled='true'] {
   color: inherit;
 }
 
-.c24:focus {
+.c23:focus {
   outline: none;
   box-shadow: none;
 }
 
-.c23 {
+.c22 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
@@ -265,7 +261,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   transition-duration: 0.2s;
 }
 
-.c23:focus-within {
+.c22:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
@@ -306,7 +302,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
 
 .c15 {
   min-width: 100%;
-  padding-inline-end: 4px;
+  padding-inline: 4px;
 }
 
 .c3 {
@@ -352,45 +348,45 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
   display: block!important;
 }
 
-.c28 {
+.c27 {
   border-top: solid 1px #eaeaef;
   flex: 1;
 }
 
-.c26 {
+.c25 {
   background: transparent;
   border: none;
   position: relative;
   z-index: 1;
 }
 
-.c26 svg {
+.c25 svg {
   height: 1.1rem;
   width: 1.1rem;
 }
 
-.c26 svg path {
+.c25 svg path {
   fill: #666687;
 }
 
-.c27 {
+.c26 {
   display: flex;
   background: none;
   border: none;
 }
 
-.c27 svg {
+.c26 svg {
   width: 0.9rem;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c31 {
+  .c30 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c33 {
+  .c32 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -555,11 +551,11 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                     Name
                   </label>
                   <div
-                    class="c21 c22 c23"
+                    class="c21 c22"
                   >
                     <input
                       aria-disabled="false"
-                      class="c24"
+                      class="c23"
                       id=":r3:"
                       name="name"
                       value=""
@@ -625,7 +621,7 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
                       >
                         <div
                           aria-hidden="true"
-                          class="c25 c26 c27"
+                          class="c24 c25 c26"
                         >
                           <svg
                             fill="currentColor"
@@ -654,31 +650,31 @@ exports[`EditFolderDialog renders and matches the snapshot 1`] = `
         </div>
       </div>
       <footer
-        class="c5 c6 c28"
+        class="c5 c6 c27"
       >
         <button
           aria-disabled="false"
-          class="c29 c30 c11 c31"
+          class="c28 c29 c11 c30"
           name="cancel"
           type="button"
         >
           <span
-            class="c32"
+            class="c31"
           >
             Cancel
           </span>
         </button>
         <div
-          class="c30"
+          class="c29"
         >
           <button
             aria-disabled="false"
-            class="c29 c30 c11 c33"
+            class="c28 c29 c11 c32"
             name="submit"
             type="submit"
           >
             <span
-              class="c32"
+              class="c31"
             >
               Create
             </span>

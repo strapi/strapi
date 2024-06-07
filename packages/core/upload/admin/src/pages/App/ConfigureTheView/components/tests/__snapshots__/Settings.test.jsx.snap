@@ -17,10 +17,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c6 {
   background: #ffffff;
-  padding-block-start: 8px;
-  padding-inline-end: 12px;
-  padding-block-end: 8px;
-  padding-inline-start: 12px;
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -89,6 +85,9 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c8 {
   border: 1px solid #dcdce4;
+  padding-block: 8px;
+  padding-inline-start: 16px;
+  padding-inline-end: 12px;
   outline: none;
   box-shadow: none;
   transition-property: border-color,box-shadow,fill;

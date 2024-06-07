@@ -320,16 +320,15 @@ const ListPage = () => {
                             id: 'global.disabled',
                             defaultMessage: 'Disabled',
                           })}
-                          label={`${webhook.name} ${formatMessage({
+                          aria-label={`${webhook.name} ${formatMessage({
                             id: 'Settings.webhooks.list.th.status',
                             defaultMessage: 'Status',
                           })}`}
-                          selected={webhook.isEnabled}
-                          onChange={(e) => {
-                            e.stopPropagation();
+                          checked={webhook.isEnabled}
+                          onCheckedChange={(enabled) => {
                             enableWebhook({
                               ...webhook,
-                              isEnabled: !webhook.isEnabled,
+                              isEnabled: enabled,
                             });
                           }}
                           visibleLabels

@@ -264,8 +264,7 @@ exports[`Header renders 1`] = `
         <a
           aria-disabled="false"
           class="c2 c3"
-          rel="noreferrer noopener"
-          target="_blank"
+          target="_self"
           to="/?folder=2&folderPath=/1"
         >
           <svg
