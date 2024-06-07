@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
-import type { Schema, Struct } from '@strapi/types';
+import type { Schema, Struct, Modules } from '@strapi/types';
 import blocksValidator from './blocks-validator';
 
 import type { ComponentContext } from '.';
@@ -9,7 +9,7 @@ interface ValidatorMetas<TAttribute extends Schema.Attribute.AnyAttribute> {
   attr: TAttribute;
   model: Struct.ContentTypeSchema;
   updatedAttribute: { name: string; value: unknown };
-  entity: Record<string, unknown> | null;
+  entity: Modules.EntityValidator.Entity;
   componentContext: ComponentContext;
 }
 
