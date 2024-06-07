@@ -27,7 +27,7 @@ test.describe('Create collection type', () => {
     await resetFiles();
   });
 
-  test('Can create a single type', async ({ page }) => {
+  test('Can create a single type', async ({ page, context }) => {
     await page.getByRole('button', { name: 'Create new single type' }).click();
 
     await expect(page.getByRole('heading', { name: 'Create a single type' })).toBeVisible();
