@@ -49,6 +49,7 @@
   },
   "files": [
     "./dist",
+    "ee/LICENSE",
     "strapi-server.js",
     "index.js",
     "index.d.ts"
