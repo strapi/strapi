@@ -55,17 +55,15 @@ export const DraftAndPublishToggle = ({
       )
     : '';
 
-  const handleToggle = () => setShowWarning((prev) => !prev);
-
   const handleConfirm = () => {
     onChange({ target: { name, value: false } });
 
-    handleToggle();
+    setShowWarning(false);
   };
 
   const handleChange = ({ target: { checked } }: { target: { checked: boolean } }) => {
     if (!checked && !isCreating) {
-      handleToggle();
+      setShowWarning(true);
 
       return;
     }
@@ -82,7 +80,13 @@ export const DraftAndPublishToggle = ({
         <Field.Hint />
       </Field.Root>
 
-      <ConfirmDialog onClose={() => {}} isOpen={showWarning} onConfirm={handleConfirm}>
+      <ConfirmDialog
+        onClose={() => {
+          setShowWarning(false);
+        }}
+        isOpen={showWarning}
+        onConfirm={handleConfirm}
+      >
         {formatMessage({
           id: getTrad('popUpWarning.draft-publish.message'),
           defaultMessage: 'If you disable the draft & publish, your drafts will be deleted.',
