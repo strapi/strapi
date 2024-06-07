@@ -25,10 +25,17 @@ export default {
       return ctx.forbidden();
     }
 
-    const pmQuery = pm.addPermissionsQueryTo(merge(defaultQuery, ctx.query));
+    // validate the incoming user query params
+    await pm.validateQuery(ctx.query);
 
-    await pm.validateQuery(pmQuery);
-    const query = await pm.sanitizeQuery(pmQuery);
+    const query = await async.pipe(
+      // Start by sanitizing the incoming query
+      (q) => pm.sanitizeQuery(q),
+      // Add the default query which should not be validated or sanitized
+      (q) => merge(defaultQuery, q),
+      // Add the dynamic filters based on permissions' conditions
+      (q) => pm.addPermissionsQueryTo(q)
+    )(ctx.query);
 
     const { results: files, pagination } = await getService('upload').findPage(query);
 
