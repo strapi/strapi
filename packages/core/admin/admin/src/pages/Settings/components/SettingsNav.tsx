@@ -13,16 +13,17 @@ import { styled } from 'styled-components';
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
 
-/**
- * TODO: refactor the SubNav entirely, we shouldn't have
- * to do this hack to work a lock at the end. It's a bit hacky.
- */
-
 const CustomIcon = styled(Lock)`
   right: 15px;
   position: absolute;
   bottom: 50%;
   transform: translateY(50%);
+`;
+
+const Link = styled(SubNavLink)`
+  &.active ${CustomIcon} {
+    right: 13px;
+  }
 `;
 
 interface SettingsNavProps {
@@ -69,7 +70,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
             {section.links.map((link) => {
               return (
-                <SubNavLink
+                <Link
                   tag={NavLink}
                   withBullet={link.hasNotification}
                   to={link.to}
@@ -79,7 +80,7 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                 >
                   {formatMessage(link.intlLabel)}
                   {link?.lockIcon && <CustomIcon width="1.5rem" height="1.5rem" />}
-                </SubNavLink>
+                </Link>
               );
             })}
           </SubNavSection>

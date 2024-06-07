@@ -96,6 +96,7 @@ const Row = ({
     <Accordion.Item value={name}>
       <Accordion.Header variant={variant}>
         <Accordion.Trigger
+          caretPosition="right"
           description={`${formatMessage(
             { id: 'Settings.permissions.category', defaultMessage: categoryName },
             { category: categoryName }

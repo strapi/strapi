@@ -244,7 +244,7 @@ const Stage = ({
   const id = React.useId();
 
   return (
-    <Box ref={composedRef}>
+    <Box ref={composedRef} shadow="tableShadow">
       {liveText && <VisuallyHidden aria-live="assertive">{liveText}</VisuallyHidden>}
 
       {isDragging ? (

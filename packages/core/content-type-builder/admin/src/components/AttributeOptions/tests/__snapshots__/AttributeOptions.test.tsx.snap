@@ -185,6 +185,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
 }
 
 .c17:hover {
+  cursor: pointer;
   background: #f0f0ff;
   border: 1px solid #d9d8ff;
 }

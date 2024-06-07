@@ -157,29 +157,29 @@ const MarketplacePage = () => {
         <PageHeader isOnline={isOnline} npmPackageType={npmPackageType} />
         <Layouts.Content>
           <Tabs.Root variant="simple" onValueChange={handleTabChange} value={npmPackageType}>
-            <Tabs.List
-              aria-label={formatMessage({
-                id: 'admin.pages.MarketPlacePage.tab-group.label',
-                defaultMessage: 'Plugins and Providers for Strapi',
-              })}
-            >
-              <Tabs.Trigger value={PLUGIN}>
-                {formatMessage({
-                  id: 'admin.pages.MarketPlacePage.plugins',
-                  defaultMessage: 'Plugins',
-                })}{' '}
-                {pluginsResponse ? `(${pluginsResponse.meta.pagination.total})` : '...'}
-              </Tabs.Trigger>
-              <Tabs.Trigger value={PROVIDER}>
-                {formatMessage({
-                  id: 'admin.pages.MarketPlacePage.providers',
-                  defaultMessage: 'Providers',
-                })}{' '}
-                {providersResponse ? `(${providersResponse.meta.pagination.total})` : '...'}
-              </Tabs.Trigger>
-            </Tabs.List>
-
             <Flex justifyContent="space-between" paddingBottom={4}>
+              <Tabs.List
+                aria-label={formatMessage({
+                  id: 'admin.pages.MarketPlacePage.tab-group.label',
+                  defaultMessage: 'Plugins and Providers for Strapi',
+                })}
+              >
+                <Tabs.Trigger value={PLUGIN}>
+                  {formatMessage({
+                    id: 'admin.pages.MarketPlacePage.plugins',
+                    defaultMessage: 'Plugins',
+                  })}{' '}
+                  {pluginsResponse ? `(${pluginsResponse.meta.pagination.total})` : '...'}
+                </Tabs.Trigger>
+                <Tabs.Trigger value={PROVIDER}>
+                  {formatMessage({
+                    id: 'admin.pages.MarketPlacePage.providers',
+                    defaultMessage: 'Providers',
+                  })}{' '}
+                  {providersResponse ? `(${providersResponse.meta.pagination.total})` : '...'}
+                </Tabs.Trigger>
+              </Tabs.List>
+
               <Box width="25%">
                 <Searchbar
                   name="searchbar"

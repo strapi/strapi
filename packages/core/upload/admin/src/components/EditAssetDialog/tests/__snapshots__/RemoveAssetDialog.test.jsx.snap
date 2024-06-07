@@ -170,9 +170,9 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 
 .c19 {
   height: 3.2rem;
-  border: 1px solid #d02b20;
-  background: #d02b20;
-  color: #ffffff;
+  border: 1px solid #f5c0b8;
+  background: #fcecea;
+  color: #b72b1a;
 }
 
 .c19 svg {
@@ -192,13 +192,13 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 }
 
 .c19:hover {
-  border: 1px solid #ee5e52;
-  background: #ee5e52;
+  background-color: #ffffff;
 }
 
 .c19:active {
+  background-color: #ffffff;
   border: 1px solid #d02b20;
-  background: #d02b20;
+  color: #d02b20;
 }
 
 .c3 {

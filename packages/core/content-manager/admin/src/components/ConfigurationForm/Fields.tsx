@@ -508,7 +508,10 @@ const DragButton = styled<IconButtonComponent<'span'>>(IconButton)`
   align-self: stretch;
   display: flex;
   align-items: center;
-  padding: 0 ${({ theme }) => theme.spaces[3]};
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  border-radius: 0px;
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
   cursor: all-scroll;
 

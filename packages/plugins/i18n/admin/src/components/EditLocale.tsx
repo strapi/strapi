@@ -146,10 +146,15 @@ const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalP
         >
           <Modal.Header>
             <Modal.Title>
-              {formatMessage({
-                id: getTranslation('Settings.list.actions.edit'),
-                defaultMessage: 'Edit a locale',
-              })}
+              {formatMessage(
+                {
+                  id: getTranslation('Settings.list.actions.edit'),
+                  defaultMessage: 'Edit a locale',
+                },
+                {
+                  name,
+                }
+              )}
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>

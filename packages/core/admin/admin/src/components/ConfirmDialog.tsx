@@ -51,7 +51,7 @@ const ConfirmDialog = ({
   children,
   icon = <WarningCircle width="24px" height="24px" fill="danger600" />,
   onConfirm,
-  variant = 'danger',
+  variant = 'danger-light',
   startAction,
   endAction,
   title,

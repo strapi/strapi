@@ -291,7 +291,9 @@ const DocumentActionsMenu = ({
             >
               <Flex justifyContent="space-between" gap={4}>
                 <Flex color={convertActionVariantToColor(action.variant)} gap={2} tag="span">
-                  {action.icon}
+                  <Box tag="span" color={convertActionVariantToIconColor(action.variant)}>
+                    {action.icon}
+                  </Box>
                   {action.label}
                 </Flex>
                 {/* TODO: remove this in 5.1 release */}
@@ -352,6 +354,21 @@ const convertActionVariantToColor = (
       return 'danger600';
     case 'secondary':
       return undefined;
+    case 'success':
+      return 'success600';
+    default:
+      return 'primary600';
+  }
+};
+
+const convertActionVariantToIconColor = (
+  variant: DocumentActionDescription['variant'] = 'secondary'
+): keyof DefaultTheme['colors'] | undefined => {
+  switch (variant) {
+    case 'danger':
+      return 'danger600';
+    case 'secondary':
+      return 'neutral500';
     case 'success':
       return 'success600';
     default:
