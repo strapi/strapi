@@ -17,6 +17,7 @@ command
   .arguments('[directory]')
   .usage('[directory] [options]')
   .option('--quickstart', 'Quickstart app creation (deprecated)')
+  .option('--no-run', 'Do not start the application after it is created.')
 
   // setup options
   .option('--ts, --typescript', 'Initialize the project with TypeScript (default)')
@@ -81,7 +82,7 @@ async function createStrapiApp(directory: string | undefined, options: Options) 
     appOptions.packageManager = detectPackageManager();
   }
 
-  if (options.quickstart === true) {
+  if (options.quickstart === true && options.run !== false) {
     appOptions.runApp = true;
   }
 

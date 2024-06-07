@@ -3,6 +3,7 @@ export interface Options {
   usePnpm?: boolean;
   useYarn?: boolean;
   quickstart?: boolean;
+  run?: boolean;
   dbclient?: DBClient;
   dbhost?: string;
   dbport?: string;
