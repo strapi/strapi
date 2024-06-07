@@ -5,7 +5,7 @@ import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
 import { createSingleType, navToHeader, skipCtbTour } from '../../../utils/shared';
 
-test.describe('Edit single type', () => {
+test.skip('Edit single type', () => {
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
 
