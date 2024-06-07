@@ -40,10 +40,10 @@ export const waitForRestart = async (
   // If modal is still visible after reloadTimeout, reload the page and wait again
   if (modalVisible) {
     console.log("Restart overlay didn't disappear after 15 seconds. Reloading page...");
-    if (page.isClosed()) {
-      page = await context.newPage();
-    } else {
+    try {
       await page.reload({ waitUntil: 'domcontentloaded' });
+    } catch (e) {
+      page = await context.newPage();
     }
   }
 
