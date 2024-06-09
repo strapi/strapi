@@ -77,7 +77,10 @@ export const UseCasePage = () => {
   const [role, setRole] = React.useState<string | number | null>(null);
   const [otherRole, setOtherRole] = React.useState('');
 
-  const { firstname, email } = useAuth('UseCasePage', (state) => state.user) ?? {};
+  const { user } = useAuth('UseCasePage');
+  const firstname = user?.firstname;
+  const email = user?.email;
+
   const { hasAdmin } = parse(location?.search, { ignoreQueryPrefix: true });
   const isOther = role === 'other';
 

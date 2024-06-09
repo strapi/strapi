@@ -72,7 +72,7 @@
     "test:unit:watch": "run test:unit --watch"
   },
   "resolutions": {
-    "@strapi/design-system": "1.19.0-typescript.0",
+    "@strapi/design-system": "1.20.0-typescript.0",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
