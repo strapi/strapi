@@ -72,7 +72,7 @@ test.describe('List View', () => {
       await page.waitForSelector('text=Are you sure you want to publish these entries?');
 
       const confirmPublishButton = page
-        .getByLabel('Confirmation')
+        .getByLabel('Confirm')
         .getByRole('button', { name: 'Publish' });
       await confirmPublishButton.click();
 
@@ -96,7 +96,7 @@ test.describe('List View', () => {
       // Wait for the confirmation dialog to appear
       await page.waitForSelector('text=Are you sure you want to unpublish these entries?');
       const unpublishButton = page
-        .getByLabel('Confirmation')
+        .getByLabel('Confirm')
         .getByRole('button', { name: 'Unpublish' });
       await unpublishButton.click();
 
@@ -114,7 +114,7 @@ test.describe('List View', () => {
       // Wait for the selected entries modal to appear
       await page.waitForSelector('text=Are you sure you want to delete these entries?');
       const confirmDeleteButton = page
-        .getByLabel('Confirmation')
+        .getByLabel('Confirm')
         .getByRole('button', { name: 'Confirm' });
       await confirmDeleteButton.click();
 

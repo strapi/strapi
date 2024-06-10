@@ -236,7 +236,7 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
 
       await page.getByRole('menuitem', { name: 'Discard changes' }).click();
-      await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Confirm' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
 
       await findAndClose(page, 'Changes discarded');
@@ -301,7 +301,7 @@ test.describe('Edit View', () => {
 
       await page.getByRole('button', { name: 'More actions' }).click();
       await page.getByRole('menuitem', { name: 'Delete document' }).click();
-      await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Confirm' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
 
       await findAndClose(page, 'Deleted Document');
@@ -527,7 +527,7 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
 
       await page.getByRole('menuitem', { name: 'Discard changes' }).click();
-      await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
+      await expect(page.getByRole('dialog', { name: 'Confirm' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
 
       await findAndClose(page, 'Changes discarded');
