@@ -3,8 +3,12 @@ import { login } from '../../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
-import { createCollectionType, navToHeader, skipCtbTour } from '../../../utils/shared';
-import { describeOnCondition } from 'api-tests/utils';
+import {
+  createCollectionType,
+  describeOnCondition,
+  navToHeader,
+  skipCtbTour,
+} from '../../../utils/shared';
 
 // TODO: fix the test so that it doesn't fail on CI
 describeOnCondition(!process.env.CI)('Edit collection type', () => {
