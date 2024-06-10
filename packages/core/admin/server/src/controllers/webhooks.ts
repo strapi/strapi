@@ -137,7 +137,20 @@ export default {
 
     const webhook = await strapi.webhookStore.findWebhook(id);
 
-    const response = await strapi.webhookRunner.run(webhook as Webhook, 'trigger-test', {});
+    const response = await strapi.webhookRunner
+      .run(webhook as Webhook, 'trigger-test', {})
+      .then((res: { statusCode: number; message: string }) => {
+        // Mask the response to avoid leaking sensitive information
+        if (+res.statusCode > 300) {
+          strapi.log.error(`Failed to manually trigger webhook: \n${JSON.stringify(res, null, 2)}`);
+          return {
+            statusCode: 500,
+            message: 'Webhook URL request failed',
+          };
+        }
+
+        return res;
+      });
 
     ctx.body = { data: response } satisfies TriggerWebhook.Response;
   },
