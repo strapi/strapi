@@ -234,7 +234,7 @@ const ReleasesPage = () => {
       pageSize: response?.currentData?.meta?.pagination?.pageSize || 16,
       filters: {
         releasedAt: {
-          $notNull: tabValue === 'pending',
+          $notNull: tabValue !== 'pending',
         },
       },
     });

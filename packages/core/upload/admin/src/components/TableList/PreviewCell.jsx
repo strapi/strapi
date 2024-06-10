@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Avatar, Box } from '@strapi/design-system';
+import { Avatar, Box, Flex } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
@@ -27,9 +27,15 @@ const VideoPreviewWrapper = styled(Box)`
 export const PreviewCell = ({ type, content }) => {
   if (type === 'folder') {
     return (
-      <Box background="secondary100" width="3.2rem" height="3.2rem">
+      <Flex
+        justifyContent="center"
+        background="secondary100"
+        width="3.2rem"
+        height="3.2rem"
+        borderRadius="50%"
+      >
         <Folder fill="secondary500" width="1.6rem" height="1.6rem" />
-      </Box>
+      </Flex>
     );
   }
 
