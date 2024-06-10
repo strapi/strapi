@@ -5,7 +5,6 @@ import {
   Button,
   Flex,
   Grid,
-  GridItem,
   TextInput,
   Toggle,
   Typography,
@@ -111,8 +110,8 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                       defaultMessage: 'Settings',
                     })}
                   </Typography>
-                  <Grid gap={4}>
-                    <GridItem col={6} s={12}>
+                  <Grid.Root gap={4}>
+                    <Grid.Item col={6} s={12}>
                       <Field.Root
                         name="restrictedAccess"
                         hint={formatMessage({
@@ -142,9 +141,9 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                         />
                         <Field.Hint />
                       </Field.Root>
-                    </GridItem>
+                    </Grid.Item>
                     {values.restrictedAccess && (
-                      <GridItem col={6} s={12}>
+                      <Grid.Item col={6} s={12}>
                         <Field.Root
                           name="password"
                           error={
@@ -191,9 +190,9 @@ export const SettingsForm = ({ data, onSubmit }: SettingsFormProps) => {
                           />
                           <Field.Error />
                         </Field.Root>
-                      </GridItem>
+                      </Grid.Item>
                     )}
-                  </Grid>
+                  </Grid.Root>
                 </Flex>
               </Box>
             </Layouts.Content>

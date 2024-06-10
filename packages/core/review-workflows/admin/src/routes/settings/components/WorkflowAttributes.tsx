@@ -2,7 +2,6 @@ import { InputRenderer, useField, useForm } from '@strapi/admin/strapi-admin';
 import {
   Field,
   Grid,
-  GridItem,
   MultiSelect,
   MultiSelectGroup,
   MultiSelectOption,
@@ -26,8 +25,8 @@ const WorkflowAttributes = ({ canUpdate = true }: WorkflowAttributesProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Grid background="neutral0" hasRadius gap={4} padding={6} shadow="tableShadow">
-      <GridItem col={6}>
+    <Grid.Root background="neutral0" hasRadius gap={4} padding={6} shadow="tableShadow">
+      <Grid.Item col={6}>
         <InputRenderer
           disabled={!canUpdate}
           label={formatMessage({
@@ -38,11 +37,11 @@ const WorkflowAttributes = ({ canUpdate = true }: WorkflowAttributesProps) => {
           required
           type="string"
         />
-      </GridItem>
-      <GridItem col={6}>
+      </Grid.Item>
+      <Grid.Item col={6}>
         <ContentTypesSelector disabled={!canUpdate} />
-      </GridItem>
-    </Grid>
+      </Grid.Item>
+    </Grid.Root>
   );
 };
 

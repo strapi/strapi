@@ -265,7 +265,7 @@ const NpsSurvey = () => {
               bottom={0}
               left="50%"
               transform="translateX(-50%)"
-              zIndex="popover"
+              zIndex="200"
               width="50%"
             >
               {isFeedbackResponse ? (

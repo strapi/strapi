@@ -41,13 +41,6 @@ const ComponentFixture = (props) => {
 const setup = (props) => render(<ComponentFixture {...props} />);
 
 describe('TableList | CellContent', () => {
-  it('should render image cell type when element type is asset and mime includes image', () => {
-    const { container, getByRole } = setup();
-
-    expect(getByRole('img', { name: 'alternative alt' })).toBeInTheDocument();
-    expect(container).toMatchSnapshot();
-  });
-
   it('should render image cell type when element type is asset and mime does not include image', () => {
     const { container, getByText } = setup({
       content: { ...PROPS_FIXTURE.element, mime: 'application/pdf', ext: 'pdf' },

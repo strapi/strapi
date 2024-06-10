@@ -167,13 +167,14 @@ const WysiwygNav = ({
             <Underline />
           </CustomIconButton>
         </MainButtons>
-
-        <MoreButton ref={buttonMoreRef} onClick={handleTogglePopover} label="More">
-          <More />
-        </MoreButton>
-        {visiblePopover && (
-          <Popover onDismiss={handleTogglePopover} centered source={buttonMoreRef} spacing={4}>
-            <Flex>
+        <Popover.Root>
+          <Popover.Trigger>
+            <MoreButton label="More">
+              <More />
+            </MoreButton>
+          </Popover.Trigger>
+          <Popover.Content sideOffset={12}>
+            <Flex padding={2}>
               <IconButtonGroupMargin>
                 <CustomIconButton
                   onClick={() => onActionClick('Strikethrough', editorRef, handleTogglePopover)}
@@ -231,8 +232,8 @@ const WysiwygNav = ({
                 </CustomIconButton>
               </IconButtonGroup>
             </Flex>
-          </Popover>
-        )}
+          </Popover.Content>
+        </Popover.Root>
       </Flex>
 
       {onTogglePreviewMode && (

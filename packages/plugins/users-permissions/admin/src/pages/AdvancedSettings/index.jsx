@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Typography, useNotifyAT } from '@strapi/design-system';
+import { Box, Button, Flex, Grid, Typography, useNotifyAT } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import {
   useAPIErrorHandler,
@@ -157,7 +157,7 @@ const AdvancedSettingsPage = () => {
                         defaultMessage: 'Settings',
                       })}
                     </Typography>
-                    <Grid gap={6}>
+                    <Grid.Root gap={6}>
                       {[
                         {
                           label: {
@@ -179,7 +179,7 @@ const AdvancedSettingsPage = () => {
                         },
                         ...layout,
                       ].map(({ size, ...field }) => (
-                        <GridItem key={field.name} col={size}>
+                        <Grid.Item key={field.name} col={size}>
                           <InputRenderer
                             {...field}
                             disabled={
@@ -192,9 +192,9 @@ const AdvancedSettingsPage = () => {
                               field.placeholder ? formatMessage(field.placeholder) : undefined
                             }
                           />
-                        </GridItem>
+                        </Grid.Item>
                       ))}
-                    </Grid>
+                    </Grid.Root>
                   </Flex>
                 </Box>
               </Layouts.Content>

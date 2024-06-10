@@ -21,12 +21,7 @@ import {
   EmptyStateLayout,
   Flex,
   Grid,
-  GridItem,
   Main,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
   Tabs,
   Typography,
   Link,
@@ -119,9 +114,9 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
   }
 
   return (
-    <Grid gap={4}>
+    <Grid.Root gap={4}>
       {releases.map(({ id, name, scheduledAt, status }) => (
-        <GridItem col={3} s={6} xs={12} key={id}>
+        <Grid.Item col={3} s={6} xs={12} key={id}>
           <LinkCard tag={NavLink} to={`${id}`} isExternal={false}>
             <Flex
               direction="column"
@@ -136,7 +131,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               gap={4}
             >
               <Flex direction="column" alignItems="start" gap={1}>
-                <Typography tag="h3" variant="delta" fontWeight="bold">
+                <Typography textColor="neutral800" tag="h3" variant="delta" fontWeight="bold">
                   {name}
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">
@@ -153,9 +148,9 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
               <Badge {...getBadgeProps(status)}>{status}</Badge>
             </Flex>
           </LinkCard>
-        </GridItem>
+        </Grid.Item>
       ))}
-    </Grid>
+    </Grid.Root>
   );
 };
 
@@ -182,7 +177,6 @@ const INITIAL_FORM_VALUES = {
 } satisfies FormValues;
 
 const ReleasesPage = () => {
-  const tabRef = React.useRef<any>(null);
   const location = useLocation();
   const [releaseModalShown, setReleaseModalShown] = React.useState(false);
   const { toggleNotification } = useNotification();
@@ -203,7 +197,6 @@ const ReleasesPage = () => {
 
   const { isLoading, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
-  const activeTabIndex = ['pending', 'done'].indexOf(activeTab);
 
   // Check if we have some errors and show a notification to the user to explain the error
   React.useEffect(() => {
@@ -223,14 +216,6 @@ const ReleasesPage = () => {
     }
   }, [formatMessage, location?.state?.errors, navigate, toggleNotification]);
 
-  // TODO: Replace this solution with v2 of the Design System
-  // Check if the active tab index changes and call the handler of the ref to update the tab group component
-  React.useEffect(() => {
-    if (tabRef.current) {
-      tabRef.current._handlers.setSelectedTabIndex(activeTabIndex);
-    }
-  }, [activeTabIndex]);
-
   const toggleAddReleaseModal = () => {
     setReleaseModalShown((prev) => !prev);
   };
@@ -242,14 +227,14 @@ const ReleasesPage = () => {
   const totalPendingReleases = (isSuccess && response.currentData?.meta?.pendingReleasesCount) || 0;
   const hasReachedMaximumPendingReleases = totalPendingReleases >= maximumReleases;
 
-  const handleTabChange = (index: number) => {
+  const handleTabChange = (tabValue: string) => {
     setQuery({
       ...query,
       page: 1,
       pageSize: response?.currentData?.meta?.pagination?.pageSize || 16,
       filters: {
         releasedAt: {
-          $notNull: index === 0 ? false : true,
+          $notNull: tabValue !== 'pending',
         },
       },
     });
@@ -344,19 +329,15 @@ const ReleasesPage = () => {
               })}
             </StyledAlert>
           )}
-          <TabGroup
-            label={formatMessage({
-              id: 'content-releases.pages.Releases.tab-group.label',
-              defaultMessage: 'Releases list',
-            })}
-            variant="simple"
-            initialSelectedTabIndex={activeTabIndex}
-            onTabChange={handleTabChange}
-            ref={tabRef}
-          >
+          <Tabs.Root variant="simple" onValueChange={handleTabChange} value={activeTab}>
             <Box paddingBottom={8}>
-              <Tabs>
-                <Tab>
+              <Tabs.List
+                aria-label={formatMessage({
+                  id: 'content-releases.pages.Releases.tab-group.label',
+                  defaultMessage: 'Releases list',
+                })}
+              >
+                <Tabs.Trigger value="pending">
                   {formatMessage(
                     {
                       id: 'content-releases.pages.Releases.tab.pending',
@@ -366,35 +347,33 @@ const ReleasesPage = () => {
                       count: totalPendingReleases,
                     }
                   )}
-                </Tab>
-                <Tab>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="done">
                   {formatMessage({
                     id: 'content-releases.pages.Releases.tab.done',
                     defaultMessage: 'Done',
                   })}
-                </Tab>
-              </Tabs>
+                </Tabs.Trigger>
+              </Tabs.List>
               <Divider />
             </Box>
-            <TabPanels>
-              {/* Pending releases */}
-              <TabPanel>
-                <ReleasesGrid
-                  sectionTitle="pending"
-                  releases={response?.currentData?.data}
-                  isError={isError}
-                />
-              </TabPanel>
-              {/* Done releases */}
-              <TabPanel>
-                <ReleasesGrid
-                  sectionTitle="done"
-                  releases={response?.currentData?.data}
-                  isError={isError}
-                />
-              </TabPanel>
-            </TabPanels>
-          </TabGroup>
+            {/* Pending releases */}
+            <Tabs.Content value="pending">
+              <ReleasesGrid
+                sectionTitle="pending"
+                releases={response?.currentData?.data}
+                isError={isError}
+              />
+            </Tabs.Content>
+            {/* Done releases */}
+            <Tabs.Content value="done">
+              <ReleasesGrid
+                sectionTitle="done"
+                releases={response?.currentData?.data}
+                isError={isError}
+              />
+            </Tabs.Content>
+          </Tabs.Root>
           <Pagination.Root
             {...response?.currentData?.meta?.pagination}
             defaultPageSize={response?.currentData?.meta?.pagination?.pageSize}
@@ -404,14 +383,13 @@ const ReleasesPage = () => {
           </Pagination.Root>
         </>
       </Layouts.Content>
-      {releaseModalShown && (
-        <ReleaseModal
-          handleClose={toggleAddReleaseModal}
-          handleSubmit={handleAddRelease}
-          isLoading={isSubmittingForm}
-          initialValues={INITIAL_FORM_VALUES}
-        />
-      )}
+      <ReleaseModal
+        open={releaseModalShown}
+        handleClose={toggleAddReleaseModal}
+        handleSubmit={handleAddRelease}
+        isLoading={isSubmittingForm}
+        initialValues={INITIAL_FORM_VALUES}
+      />
     </Main>
   );
 };

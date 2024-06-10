@@ -22,20 +22,20 @@ describe('DeleteLocale', () => {
     expect(screen.getByRole('button', { name: 'Delete English locale' })).toBeInTheDocument();
   });
 
-  it('should render a confirmation dialog when the icon button is clicked', async () => {
+  it('should render a confirmation alertdialog when the icon button is clicked', async () => {
     const { user } = render(<DeleteLocale {...LOCALE} />);
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Delete English locale' }));
 
-    expect(screen.getByRole('dialog', { name: 'Confirmation' })).toBeInTheDocument();
+    expect(screen.getByRole('alertdialog', { name: 'Confirmation' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Confirm' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Cancel' }));
 
-    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 
   it('should allow you to delete a locale', async () => {

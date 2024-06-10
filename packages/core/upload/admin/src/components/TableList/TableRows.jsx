@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { BaseCheckbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
+import { Checkbox, Flex, IconButton, Tbody, Td, Tr } from '@strapi/design-system';
 import { Eye, Pencil } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -41,7 +41,7 @@ export const TableRows = ({
         return (
           <Tr key={id} onClick={() => handleRowClickFn(element, contentType, id, path)}>
             <Td onClick={(e) => e.stopPropagation()}>
-              <BaseCheckbox
+              <Checkbox
                 aria-label={formatMessage(
                   {
                     id: contentType === 'asset' ? 'list-assets-select' : 'list.folder.select',
@@ -51,7 +51,7 @@ export const TableRows = ({
                   { name }
                 )}
                 disabled={!isSelectable}
-                onValueChange={() => onSelectOne(element)}
+                onCheckedChange={() => onSelectOne(element)}
                 checked={isSelected}
               />
             </Td>

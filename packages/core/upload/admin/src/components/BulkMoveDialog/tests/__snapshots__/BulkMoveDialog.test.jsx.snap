@@ -6,33 +6,19 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   position: fixed;
   left: 50%;
   top: 4.6rem;
-  z-index: 10;
+  z-index: 700;
   width: 50rem;
 }
 
-.c3 {
-  padding-inline-end: 40px;
-  padding-inline-start: 40px;
-  position: fixed;
-  z-index: 310;
-}
-
-.c6 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33, 33, 52, 0.1);
-  width: 83rem;
-}
-
-.c7 {
+.c5 {
   background: #f6f6f9;
-  padding-block-start: 16px;
+  padding-block: 16px;
+  padding-inline: 16px;
   padding-inline-end: 20px;
-  padding-block-end: 16px;
   padding-inline-start: 20px;
 }
 
-.c11 {
+.c9 {
   background: #ffffff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -40,11 +26,6 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border-color: #dcdce4;
   border: 1px solid #dcdce4;
   cursor: pointer;
-}
-
-.c14 {
-  padding-block: 32px;
-  padding-inline: 32px;
 }
 
 .c19 {
@@ -55,7 +36,7 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   padding-inline-end: 12px;
 }
 
-.c26 {
+.c25 {
   background: #4945ff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -74,18 +55,18 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   gap: 8px;
 }
 
-.c4 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-}
-
-.c9 {
+.c6 {
   align-items: center;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+}
+
+.c10 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
 }
 
 .c18 {
@@ -95,18 +76,18 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   gap: 4px;
 }
 
-.c25 {
+.c26 {
   align-items: center;
   display: flex;
   flex-direction: row;
   gap: 8px;
 }
 
-.c10 {
+.c8 {
   font-size: 1.4rem;
   line-height: 1.43;
   font-weight: 600;
-  color: #32324d;
+  color: currentcolor;
 }
 
 .c20 {
@@ -134,16 +115,16 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   width: 1px;
 }
 
-.c12 {
+.c11 {
   position: relative;
   outline: none;
 }
 
-.c12[aria-disabled='true'] {
+.c11[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c12:after {
+.c11:after {
   transition-property: all;
   transition-duration: 0.2s;
   border-radius: 8px;
@@ -156,11 +137,11 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   border: 2px solid transparent;
 }
 
-.c12:focus-visible {
+.c11:focus-visible {
   outline: none;
 }
 
-.c12:focus-visible:after {
+.c11:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -244,40 +225,80 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   max-width: 100%;
 }
 
-.c13 {
+.c12 {
   border-color: #dcdce4;
   height: 3.2rem;
   width: 3.2rem;
   color: #8e8ea9;
 }
 
-.c13:hover,
-.c13:focus {
+.c12:hover,
+.c12:focus {
   color: #666687;
 }
 
-.c13[aria-disabled='true'] {
+.c12[aria-disabled='true'] {
   color: #666687;
 }
 
-.c5 {
-  background: #32324d1F;
-  inset: 0;
-}
-
-.c8 {
-  border-radius: 4px 4px 0 0;
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c24 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
+.c13 {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
 }
 
 .c15 {
-  overflow: auto;
-  max-height: 60vh;
+  min-width: 100%;
+  padding-inline: 4px;
+}
+
+.c3 {
+  background-color: #32324d;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  opacity: 0.2;
+}
+
+.c4 {
+  max-width: 83rem;
+  max-height: 80vh;
+  height: min-content;
+  width: 60%;
+  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 15px rgba(33, 33, 52, 0.1);
+  z-index: 310;
+}
+
+.c7 {
+  border-bottom: solid 1px #eaeaef;
+}
+
+.c14 {
+  padding-inline: 40px;
+}
+
+.c14>div {
+  padding-block: 40px;
+}
+
+.c14>div>div {
+  display: block!important;
+}
+
+.c24 {
+  border-top: solid 1px #eaeaef;
+  flex: 1;
 }
 
 .c22 {
@@ -306,6 +327,18 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   width: 0.9rem;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .c27 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c29 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
 @media (max-width: 1100px) {
   .c17 {
     grid-column: span;
@@ -318,12 +351,42 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
   }
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .c3 {
+    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c4[data-state='open'] {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(.4,0,.2,1);
+    animation-name: iWCnzW;
+  }
+
+  .c4[data-state='closed'] {
+    animation-duration: 120ms;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-name: jgufbq;
+  }
+}
+
 <body
-  class="lock-body-scroll"
+  data-scroll-locked="1"
+  style="pointer-events: none;"
 >
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
   <div>
     <div
+      aria-hidden="true"
       class="c0 c1"
+      data-aria-hidden="true"
     />
     <span
       class="c2"
@@ -349,196 +412,200 @@ exports[`BulkMoveDialog renders and matches the snapshot 1`] = `
     </span>
   </div>
   <div
-    class=""
+    aria-hidden="true"
+    class="c3"
+    data-aria-hidden="true"
+    data-state="open"
+    style="pointer-events: auto;"
+  />
+  <div
+    aria-describedby="radix-:r2:"
+    aria-labelledby="radix-:r1:"
+    class="c4"
+    data-state="open"
+    id="radix-:r0:"
+    role="dialog"
+    style="pointer-events: auto;"
+    tabindex="-1"
   >
-    <div
-      class="c3 c4 c5"
+    <form
+      action="#"
+      novalidate=""
     >
-      <div>
-        <div>
-          <div
-            aria-labelledby="title"
-            aria-modal="true"
-            class="c6"
-            role="dialog"
+      <header
+        class="c5 c6 c7"
+      >
+        <h2
+          class="c8"
+          id="radix-:r1:"
+        >
+          Move elements to
+        </h2>
+        <button
+          aria-disabled="false"
+          class="c9 c10 c11 c12"
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            fill="currentColor"
+            focusable="false"
+            height="16"
+            viewBox="0 0 32 32"
+            width="16"
+            xmlns="http://www.w3.org/2000/svg"
           >
-            <form
-              action="#"
-              novalidate=""
+            <path
+              d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
+            />
+          </svg>
+          <span
+            class="c2"
+          >
+            Close modal
+          </span>
+        </button>
+      </header>
+      <div
+        class="c13 c14"
+        dir="ltr"
+        style="position: relative; --radix-scroll-area-corner-width: 0px; --radix-scroll-area-corner-height: 0px;"
+      >
+        <style>
+          [data-radix-scroll-area-viewport]{scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch;}[data-radix-scroll-area-viewport]::-webkit-scrollbar{display:none}
+        </style>
+        <div
+          class="c15"
+          data-radix-scroll-area-viewport=""
+          style="overflow-x: scroll; overflow-y: scroll;"
+        >
+          <div
+            style="min-width: 100%; display: table;"
+          >
+            <div
+              class="c16"
             >
               <div
-                class="c7 c8"
+                class="c17"
               >
                 <div
-                  class="c9"
+                  class="c18"
                 >
-                  <h2
-                    class="c10"
-                    id="title"
+                  <label
+                    class="c19 c20"
+                    for="folder-destination"
+                    id="folder-destination-label"
                   >
-                    Move elements to
-                  </h2>
-                  <button
-                    aria-disabled="false"
-                    class="c11 c4 c12 c13"
-                    type="button"
-                  >
-                    <svg
-                      aria-hidden="true"
-                      fill="currentColor"
-                      focusable="false"
-                      height="16"
-                      viewBox="0 0 32 32"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M26.061 23.939a1.503 1.503 0 0 1-2.125 2.125L16 18.125l-7.939 7.936a1.503 1.503 0 1 1-2.125-2.125L13.875 16 5.939 8.061a1.503 1.503 0 1 1 2.125-2.125L16 13.875l7.939-7.94a1.502 1.502 0 1 1 2.125 2.125L18.125 16z"
-                      />
-                    </svg>
-                    <span
-                      class="c2"
-                    >
-                      Close the modal
-                    </span>
-                  </button>
-                </div>
-              </div>
-              <div
-                class="c14 c15"
-              >
-                <div
-                  class="c16"
-                >
+                    Location
+                  </label>
                   <div
-                    class="c17"
+                    class=" css-1iyvlxg-container"
                   >
+                    <span
+                      class="css-1f43avz-a11yText-A11yText"
+                      id="react-select-2-live-region"
+                    />
+                    <span
+                      aria-atomic="false"
+                      aria-live="polite"
+                      aria-relevant="additions text"
+                      class="css-1f43avz-a11yText-A11yText"
+                      role="log"
+                    />
                     <div
-                      class="c18"
+                      class=" css-oe0cnm-control"
                     >
-                      <label
-                        alignitems="center"
-                        class="c19 c20"
-                        for="folder-destination"
-                        id="folder-destination-label"
-                      >
-                        Location
-                      </label>
                       <div
-                        class=" css-1iyvlxg-container"
+                        class=" css-onz4xi-ValueContainer"
                       >
-                        <span
-                          class="css-1f43avz-a11yText-A11yText"
-                          id="react-select-2-live-region"
-                        />
-                        <span
-                          aria-atomic="false"
-                          aria-live="polite"
-                          aria-relevant="additions text"
-                          class="css-1f43avz-a11yText-A11yText"
-                          role="log"
-                        />
                         <div
-                          class=" css-oe0cnm-control"
+                          class=" css-1ryi7up-singleValue"
                         >
-                          <div
-                            class=" css-onz4xi-ValueContainer"
-                          >
-                            <div
-                              class=" css-1ryi7up-singleValue"
-                            >
-                              Media Library
-                            </div>
-                            <input
-                              aria-activedescendant=""
-                              aria-autocomplete="list"
-                              aria-expanded="false"
-                              aria-haspopup="true"
-                              aria-invalid="false"
-                              aria-readonly="true"
-                              class="css-mohuvp-dummyInput-DummyInput"
-                              id="folder-destination"
-                              inputmode="none"
-                              role="combobox"
-                              tabindex="0"
-                              value=""
-                            />
-                          </div>
-                          <div
-                            class=" css-1hm8yhz-IndicatorsContainer"
-                          >
-                            <div
-                              aria-hidden="true"
-                              class="c21 c22 c23"
-                            >
-                              <svg
-                                fill="currentColor"
-                                height="16"
-                                viewBox="0 0 32 32"
-                                width="16"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
-                                />
-                              </svg>
-                            </div>
-                          </div>
+                          Media Library
                         </div>
                         <input
-                          name="destination"
-                          type="hidden"
+                          aria-activedescendant=""
+                          aria-autocomplete="list"
+                          aria-expanded="false"
+                          aria-haspopup="true"
+                          aria-invalid="false"
+                          aria-readonly="true"
+                          class="css-mohuvp-dummyInput-DummyInput"
+                          id="folder-destination"
+                          inputmode="none"
+                          role="combobox"
+                          tabindex="0"
                           value=""
                         />
                       </div>
+                      <div
+                        class=" css-1hm8yhz-IndicatorsContainer"
+                      >
+                        <div
+                          aria-hidden="true"
+                          class="c21 c22 c23"
+                        >
+                          <svg
+                            fill="currentColor"
+                            height="16"
+                            viewBox="0 0 32 32"
+                            width="16"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              d="m26.708 12.708-10 10a1 1 0 0 1-1.415 0l-10-10A1 1 0 0 1 6 11h20a1 1 0 0 1 .707 1.707"
+                            />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
+                    <input
+                      name="destination"
+                      type="hidden"
+                      value=""
+                    />
                   </div>
                 </div>
               </div>
-              <div
-                class="c7 c24"
-              >
-                <div
-                  class="c9"
-                >
-                  <div
-                    class="c25"
-                  >
-                    <button
-                      aria-disabled="false"
-                      class="c26 c25 c12 c27"
-                      name="cancel"
-                      type="button"
-                    >
-                      <span
-                        class="c28"
-                      >
-                        Cancel
-                      </span>
-                    </button>
-                  </div>
-                  <div
-                    class="c25"
-                  >
-                    <button
-                      aria-disabled="false"
-                      class="c26 c25 c12 c29"
-                      type="submit"
-                    >
-                      <span
-                        class="c28"
-                      >
-                        Move
-                      </span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </form>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+      <footer
+        class="c5 c6 c24"
+      >
+        <button
+          aria-disabled="false"
+          class="c25 c26 c11 c27"
+          name="cancel"
+          type="button"
+        >
+          <span
+            class="c28"
+          >
+            Cancel
+          </span>
+        </button>
+        <button
+          aria-disabled="false"
+          class="c25 c26 c11 c29"
+          type="submit"
+        >
+          <span
+            class="c28"
+          >
+            Move
+          </span>
+        </button>
+      </footer>
+    </form>
   </div>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
 </body>
 `;

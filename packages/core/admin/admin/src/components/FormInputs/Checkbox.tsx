@@ -7,19 +7,19 @@ import { useField } from '../Form';
 
 import { InputProps } from './types';
 
-const CheckboxInput = forwardRef<HTMLInputElement, InputProps>(
-  ({ name, required, label, hint, ...props }, ref) => {
+const CheckboxInput = forwardRef<HTMLButtonElement, InputProps>(
+  ({ name, required, label, hint, type: _type, ...props }, ref) => {
     const field = useField<boolean>(name);
-    const fieldRef = useFocusInputField<HTMLInputElement>(name);
+    const fieldRef = useFocusInputField<HTMLButtonElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
 
     return (
       <Field.Root error={field.error} name={name} hint={hint} required={required}>
         <Checkbox
-          onValueChange={(checked) => field.onChange(name, checked)}
+          onCheckedChange={(checked) => field.onChange(name, !!checked)}
           ref={composedRefs}
-          value={field.value}
+          checked={field.value}
           {...props}
         >
           {label || props['aria-label']}

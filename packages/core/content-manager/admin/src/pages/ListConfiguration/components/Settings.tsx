@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { useForm, InputRenderer, type InputProps } from '@strapi/admin/strapi-admin';
-import { Flex, Grid, GridItem, Typography, useCollator } from '@strapi/design-system';
+import { Flex, Grid, Typography, useCollator } from '@strapi/design-system';
 import { type MessageDescriptor, useIntl } from 'react-intl';
 
 import { useDoc } from '../../../hooks/useDocument';
@@ -111,16 +111,16 @@ const Settings = () => {
           defaultMessage: 'Settings',
         })}
       </Typography>
-      <Grid key="bottom" gap={4}>
+      <Grid.Root key="bottom" gap={4}>
         {formLayout.map((row) =>
           row.map(({ size, ...field }) => (
-            <GridItem key={field.name} s={12} col={size}>
+            <Grid.Item key={field.name} s={12} col={size}>
               {/* @ts-expect-error – issue with EnumerationProps conflicting with InputProps */}
               <InputRenderer {...field} />
-            </GridItem>
+            </Grid.Item>
           ))
         )}
-      </Grid>
+      </Grid.Root>
     </Flex>
   );
 };

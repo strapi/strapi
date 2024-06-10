@@ -9,8 +9,6 @@ import { styled } from 'styled-components';
 // NAV BUTTONS
 export const CustomIconButton = styled<IconButtonComponent>(IconButton)`
   padding: ${({ theme }) => theme.spaces[2]};
-  /* Trick to prevent the outline from overflowing because of the general outline-offset */
-  outline-offset: -2px !important;
 
   svg {
     width: 1.8rem;

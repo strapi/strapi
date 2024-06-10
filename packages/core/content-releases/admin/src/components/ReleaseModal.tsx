@@ -2,10 +2,7 @@ import * as React from 'react';
 
 import {
   Button,
-  ModalBody,
-  ModalFooter,
-  ModalLayout,
-  ModalHeader,
+  Modal,
   TextInput,
   Typography,
   Checkbox,
@@ -41,10 +38,12 @@ interface ReleaseModalProps {
   handleSubmit: (values: FormValues) => void;
   isLoading?: boolean;
   initialValues: FormValues;
+  open?: boolean;
 }
 
 export const ReleaseModal = ({
   handleClose,
+  open,
   handleSubmit,
   initialValues,
   isLoading = false,
@@ -78,150 +77,150 @@ export const ReleaseModal = ({
   };
 
   return (
-    <ModalLayout onClose={handleClose} labelledBy="title">
-      <ModalHeader>
-        <Typography id="title" fontWeight="bold" textColor="neutral800">
-          {formatMessage(
-            {
-              id: 'content-releases.modal.title',
-              defaultMessage:
-                '{isCreatingRelease, select, true {New release} other {Edit release}}',
-            },
-            { isCreatingRelease: isCreatingRelease }
-          )}
-        </Typography>
-      </ModalHeader>
-      <Formik
-        onSubmit={(values) => {
-          handleSubmit({
-            ...values,
-            timezone: values.timezone ? values.timezone.split('&')[1] : null,
-            scheduledAt: values.isScheduled ? getScheduledTimestamp(values) : null,
-          });
-        }}
-        initialValues={{
-          ...initialValues,
-          timezone: initialValues.timezone ? getTimezoneWithOffset() : systemTimezone.value,
-        }}
-        validationSchema={RELEASE_SCHEMA}
-        validateOnChange={false}
-      >
-        {({ values, errors, handleChange, setFieldValue }) => {
-          return (
-            <Form>
-              <ModalBody>
-                <Flex direction="column" alignItems="stretch" gap={6}>
-                  <Field.Root name="name" error={errors.name} required>
-                    <Field.Label>
-                      {formatMessage({
-                        id: 'content-releases.modal.form.input.label.release-name',
-                        defaultMessage: 'Name',
-                      })}
-                    </Field.Label>
-                    <TextInput value={values.name} onChange={handleChange} />
-                    <Field.Error />
-                  </Field.Root>
-                  <Box width="max-content">
-                    <Checkbox
-                      name="isScheduled"
-                      value={values.isScheduled}
-                      onChange={(event) => {
-                        setFieldValue('isScheduled', event.target.checked);
-                        if (!event.target.checked) {
-                          // Clear scheduling info from a release on unchecking schedule release, which reset scheduling info in DB
-                          setFieldValue('date', null);
-                          setFieldValue('time', '');
-                          setFieldValue('timezone', null);
-                        } else {
-                          // On ticking back schedule release date, time and timezone should be restored to the initial state
-                          setFieldValue('date', initialValues.date);
-                          setFieldValue('time', initialValues.time);
-                          setFieldValue(
-                            'timezone',
-                            initialValues.timezone ?? systemTimezone?.value
-                          );
-                        }
-                      }}
-                    >
-                      <Typography
-                        textColor={values.isScheduled ? 'primary600' : 'neutral800'}
-                        fontWeight={values.isScheduled ? 'semiBold' : 'regular'}
-                      >
+    <Modal.Root open={open} onOpenChange={handleClose}>
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>
+            {formatMessage(
+              {
+                id: 'content-releases.modal.title',
+                defaultMessage:
+                  '{isCreatingRelease, select, true {New release} other {Edit release}}',
+              },
+              { isCreatingRelease: isCreatingRelease }
+            )}
+          </Modal.Title>
+        </Modal.Header>
+        <Formik
+          onSubmit={(values) => {
+            handleSubmit({
+              ...values,
+              timezone: values.timezone ? values.timezone.split('&')[1] : null,
+              scheduledAt: values.isScheduled ? getScheduledTimestamp(values) : null,
+            });
+          }}
+          initialValues={{
+            ...initialValues,
+            timezone: initialValues.timezone ? getTimezoneWithOffset() : systemTimezone.value,
+          }}
+          validationSchema={RELEASE_SCHEMA}
+          validateOnChange={false}
+        >
+          {({ values, errors, handleChange, setFieldValue }) => {
+            return (
+              <Form>
+                <Modal.Body>
+                  <Flex direction="column" alignItems="stretch" gap={6}>
+                    <Field.Root name="name" error={errors.name} required>
+                      <Field.Label>
                         {formatMessage({
-                          id: 'modal.form.input.label.schedule-release',
-                          defaultMessage: 'Schedule release',
+                          id: 'content-releases.modal.form.input.label.release-name',
+                          defaultMessage: 'Name',
                         })}
-                      </Typography>
-                    </Checkbox>
-                  </Box>
-                  {values.isScheduled && (
-                    <>
-                      <Flex gap={4} alignItems="start">
-                        <Box width="100%">
-                          <Field.Root name="date" error={errors.date} required>
-                            <Field.Label>
-                              {formatMessage({
-                                id: 'content-releases.modal.form.input.label.date',
-                                defaultMessage: 'Date',
-                              })}
-                            </Field.Label>
-                            <DatePicker
-                              onChange={(date) => {
-                                const isoFormatDate = date
-                                  ? formatISO(date, { representation: 'date' })
-                                  : null;
-                                setFieldValue('date', isoFormatDate);
-                              }}
-                              clearLabel={formatMessage({
-                                id: 'content-releases.modal.form.input.clearLabel',
-                                defaultMessage: 'Clear',
-                              })}
-                              onClear={() => {
-                                setFieldValue('date', null);
-                              }}
-                              value={values.date ? new Date(values.date) : new Date()}
-                              minDate={utcToZonedTime(new Date(), values.timezone.split('&')[1])}
-                            />
-                            <Field.Error />
-                          </Field.Root>
-                        </Box>
-                        <Box width="100%">
-                          <Field.Root name="time" error={errors.time} required>
-                            <Field.Label>
-                              {formatMessage({
-                                id: 'content-releases.modal.form.input.label.time',
-                                defaultMessage: 'Time',
-                              })}
-                            </Field.Label>
-                            <TimePicker
-                              onChange={(time) => {
-                                setFieldValue('time', time);
-                              }}
-                              clearLabel={formatMessage({
-                                id: 'content-releases.modal.form.input.clearLabel',
-                                defaultMessage: 'Clear',
-                              })}
-                              onClear={() => {
-                                setFieldValue('time', '');
-                              }}
-                              value={values.time || undefined}
-                            />
-                            <Field.Error />
-                          </Field.Root>
-                        </Box>
-                      </Flex>
-                      <TimezoneComponent timezoneOptions={timezoneList} />
-                    </>
-                  )}
-                </Flex>
-              </ModalBody>
-              <ModalFooter
-                startActions={
-                  <Button onClick={handleClose} variant="tertiary" name="cancel">
-                    {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-                  </Button>
-                }
-                endActions={
+                      </Field.Label>
+                      <TextInput value={values.name} onChange={handleChange} />
+                      <Field.Error />
+                    </Field.Root>
+                    <Box width="max-content">
+                      <Checkbox
+                        name="isScheduled"
+                        checked={values.isScheduled}
+                        onCheckedChange={(checked) => {
+                          setFieldValue('isScheduled', checked);
+                          if (!checked) {
+                            // Clear scheduling info from a release on unchecking schedule release, which reset scheduling info in DB
+                            setFieldValue('date', null);
+                            setFieldValue('time', '');
+                            setFieldValue('timezone', null);
+                          } else {
+                            // On ticking back schedule release date, time and timezone should be restored to the initial state
+                            setFieldValue('date', initialValues.date);
+                            setFieldValue('time', initialValues.time);
+                            setFieldValue(
+                              'timezone',
+                              initialValues.timezone ?? systemTimezone?.value
+                            );
+                          }
+                        }}
+                      >
+                        <Typography
+                          textColor={values.isScheduled ? 'primary600' : 'neutral800'}
+                          fontWeight={values.isScheduled ? 'semiBold' : 'regular'}
+                        >
+                          {formatMessage({
+                            id: 'modal.form.input.label.schedule-release',
+                            defaultMessage: 'Schedule release',
+                          })}
+                        </Typography>
+                      </Checkbox>
+                    </Box>
+                    {values.isScheduled && (
+                      <>
+                        <Flex gap={4} alignItems="start">
+                          <Box width="100%">
+                            <Field.Root name="date" error={errors.date} required>
+                              <Field.Label>
+                                {formatMessage({
+                                  id: 'content-releases.modal.form.input.label.date',
+                                  defaultMessage: 'Date',
+                                })}
+                              </Field.Label>
+                              <DatePicker
+                                onChange={(date) => {
+                                  const isoFormatDate = date
+                                    ? formatISO(date, { representation: 'date' })
+                                    : null;
+                                  setFieldValue('date', isoFormatDate);
+                                }}
+                                clearLabel={formatMessage({
+                                  id: 'content-releases.modal.form.input.clearLabel',
+                                  defaultMessage: 'Clear',
+                                })}
+                                onClear={() => {
+                                  setFieldValue('date', null);
+                                }}
+                                value={values.date ? new Date(values.date) : new Date()}
+                                minDate={utcToZonedTime(new Date(), values.timezone.split('&')[1])}
+                              />
+                              <Field.Error />
+                            </Field.Root>
+                          </Box>
+                          <Box width="100%">
+                            <Field.Root name="time" error={errors.time} required>
+                              <Field.Label>
+                                {formatMessage({
+                                  id: 'content-releases.modal.form.input.label.time',
+                                  defaultMessage: 'Time',
+                                })}
+                              </Field.Label>
+                              <TimePicker
+                                onChange={(time) => {
+                                  setFieldValue('time', time);
+                                }}
+                                clearLabel={formatMessage({
+                                  id: 'content-releases.modal.form.input.clearLabel',
+                                  defaultMessage: 'Clear',
+                                })}
+                                onClear={() => {
+                                  setFieldValue('time', '');
+                                }}
+                                value={values.time || undefined}
+                              />
+                              <Field.Error />
+                            </Field.Root>
+                          </Box>
+                        </Flex>
+                        <TimezoneComponent timezoneOptions={timezoneList} />
+                      </>
+                    )}
+                  </Flex>
+                </Modal.Body>
+                <Modal.Footer>
+                  <Modal.Close>
+                    <Button variant="tertiary" name="cancel">
+                      {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+                    </Button>
+                  </Modal.Close>
                   <Button name="submit" loading={isLoading} type="submit">
                     {formatMessage(
                       {
@@ -231,13 +230,13 @@ export const ReleaseModal = ({
                       { isCreatingRelease: isCreatingRelease }
                     )}
                   </Button>
-                }
-              />
-            </Form>
-          );
-        }}
-      </Formik>
-    </ModalLayout>
+                </Modal.Footer>
+              </Form>
+            );
+          }}
+        </Formik>
+      </Modal.Content>
+    </Modal.Root>
   );
 };
 

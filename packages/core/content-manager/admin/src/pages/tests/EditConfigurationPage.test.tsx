@@ -49,7 +49,7 @@ describe('EditConfigurationPage', () => {
   });
 
   it('should add field and set it to disabled once all fields are showing', async () => {
-    const { user, findByRole, getByRole, findByText } = render(
+    const { user, findByRole, findByText } = render(
       <Routes>
         <Route
           path="/content-manager/:collectionType/:slug/configuration/edit"
