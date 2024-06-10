@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Link, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, Grid, Link, Typography } from '@strapi/design-system';
 import { Check, ExternalLink } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
@@ -151,8 +151,8 @@ const ApplicationInfoPage = () => {
                   })}
                 </Typography>
 
-                <Grid gap={5} tag="dl">
-                  <GridItem col={6} s={12}>
+                <Grid.Root gap={5} tag="dl">
+                  <Grid.Item col={6} s={12}>
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.strapiVersion',
@@ -173,8 +173,8 @@ const ApplicationInfoPage = () => {
                         </Link>
                       )}
                     </Flex>
-                  </GridItem>
-                  <GridItem col={6} s={12}>
+                  </Grid.Item>
+                  <Grid.Item col={6} s={12}>
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.edition-title',
@@ -199,9 +199,9 @@ const ApplicationInfoPage = () => {
                         })}
                       </Link>
                     </Flex>
-                  </GridItem>
+                  </Grid.Item>
 
-                  <GridItem col={6} s={12}>
+                  <Grid.Item col={6} s={12}>
                     <Typography variant="sigma" textColor="neutral600" tag="dt">
                       {formatMessage({
                         id: 'Settings.application.node-version',
@@ -209,9 +209,9 @@ const ApplicationInfoPage = () => {
                       })}
                     </Typography>
                     <Typography tag="dd">{nodeVersion}</Typography>
-                  </GridItem>
+                  </Grid.Item>
                   <AdminSeatInfo />
-                </Grid>
+                </Grid.Root>
               </Flex>
               {canRead && (
                 <Box
@@ -239,8 +239,8 @@ const ApplicationInfoPage = () => {
                       { dimension: DIMENSION, size: SIZE }
                     )}
                   </Typography>
-                  <Grid paddingTop={4} gap={4}>
-                    <GridItem col={6} s={12}>
+                  <Grid.Root paddingTop={4} gap={4}>
+                    <Grid.Item col={6} s={12}>
                       <LogoInput
                         canUpdate={canUpdate}
                         customLogo={logos.menu.custom}
@@ -255,8 +255,8 @@ const ApplicationInfoPage = () => {
                         })}
                         onChangeLogo={handleChangeLogo('menu')}
                       />
-                    </GridItem>
-                    <GridItem col={6} s={12}>
+                    </Grid.Item>
+                    <Grid.Item col={6} s={12}>
                       <LogoInput
                         canUpdate={canUpdate}
                         customLogo={logos.auth.custom}
@@ -271,8 +271,8 @@ const ApplicationInfoPage = () => {
                         })}
                         onChangeLogo={handleChangeLogo('auth')}
                       />
-                    </GridItem>
-                  </Grid>
+                    </Grid.Item>
+                  </Grid.Root>
                 </Box>
               )}
             </Flex>

@@ -13,17 +13,10 @@ import {
   Divider,
   Flex,
   IconButton,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  ModalLayoutProps,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
+  Modal,
   Tabs,
   Typography,
+  useId,
 } from '@strapi/design-system';
 import { Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -39,7 +32,7 @@ import { AdvancedForm, BaseForm, LOCALE_SCHEMA, SubmitButton } from './CreateLoc
  * EditLocale
  * -----------------------------------------------------------------------------------------------*/
 
-interface EditLocaleProps extends Omit<EditModalProps, 'onClose'> {}
+interface EditLocaleProps extends Omit<EditModalProps, 'open' | 'onOpenChange'> {}
 
 const EditLocale = (props: EditLocaleProps) => {
   const { formatMessage } = useIntl();
@@ -62,7 +55,7 @@ const EditLocale = (props: EditLocaleProps) => {
       >
         <Pencil />
       </IconButton>
-      {visible ? <EditModal {...props} onClose={() => setVisible(false)} /> : null}
+      <EditModal {...props} open={visible} onOpenChange={setVisible} />
     </>
   );
 };
@@ -71,9 +64,10 @@ const EditLocale = (props: EditLocaleProps) => {
  * EditModal
  * -----------------------------------------------------------------------------------------------*/
 
-interface EditModalProps
-  extends Pick<ModalLayoutProps, 'onClose'>,
-    Pick<Locale, 'id' | 'isDefault' | 'name' | 'code'> {}
+interface EditModalProps extends Pick<Locale, 'id' | 'isDefault' | 'name' | 'code'> {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
 
 type FormValues = UpdateLocale.Request['body'] & { code: string };
 
@@ -81,7 +75,7 @@ type FormValues = UpdateLocale.Request['body'] & { code: string };
  * @internal
  * @description Exported to be used when someone clicks on a table row.
  */
-const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
+const EditModal = ({ id, code, isDefault, name, open, onOpenChange }: EditModalProps) => {
   const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -89,7 +83,7 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
   } = useAPIErrorHandler();
   const refetchPermissions = useAuth('EditModal', (state) => state.refetchPermissions);
   const { formatMessage } = useIntl();
-  const titleId = React.useId();
+  const titleId = useId();
 
   const [updateLocale] = useUpdateLocaleMutation();
   const handleSubmit = async (
@@ -125,7 +119,7 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
       });
 
       refetchPermissions();
-      onClose();
+      onOpenChange(false);
     } catch (err) {
       toggleNotification({
         type: 'danger',
@@ -138,80 +132,77 @@ const EditModal = ({ id, code, isDefault, name, onClose }: EditModalProps) => {
   };
 
   return (
-    <ModalLayout onClose={onClose} labelledBy={titleId}>
-      <Form
-        method="PUT"
-        onSubmit={handleSubmit}
-        initialValues={{
-          code,
-          name,
-          isDefault,
-        }}
-        validationSchema={LOCALE_SCHEMA}
-      >
-        <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={titleId}>
-            {formatMessage({
-              id: getTranslation('Settings.list.actions.edit'),
-              defaultMessage: 'Edit a locale',
-            })}
-          </Typography>
-        </ModalHeader>
-        <ModalBody>
-          <TabGroup
-            label={formatMessage({
-              id: getTranslation('Settings.locales.modal.title'),
-              defaultMessage: 'Configurations',
-            })}
-            variant="simple"
-          >
-            <Flex justifyContent="space-between">
-              <Typography tag="h2" variant="beta">
-                {formatMessage({
-                  id: getTranslation('Settings.locales.modal.title'),
-                  defaultMessage: 'Configuration',
-                })}
-              </Typography>
-              <Tabs>
-                <Tab>
+    <Modal.Root open={open} onOpenChange={onOpenChange}>
+      <Modal.Content>
+        <Form
+          method="PUT"
+          onSubmit={handleSubmit}
+          initialValues={{
+            code,
+            name,
+            isDefault,
+          }}
+          validationSchema={LOCALE_SCHEMA}
+        >
+          <Modal.Header>
+            <Modal.Title>
+              {formatMessage(
+                {
+                  id: getTranslation('Settings.list.actions.edit'),
+                  defaultMessage: 'Edit a locale',
+                },
+                {
+                  name,
+                }
+              )}
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Tabs.Root variant="simple" defaultValue="basic">
+              <Flex justifyContent="space-between">
+                <Typography tag="h2" variant="beta" id={titleId}>
                   {formatMessage({
-                    id: getTranslation('Settings.locales.modal.base'),
-                    defaultMessage: 'Basic settings',
+                    id: getTranslation('Settings.locales.modal.title'),
+                    defaultMessage: 'Configuration',
                   })}
-                </Tab>
-                <Tab>
-                  {formatMessage({
-                    id: getTranslation('Settings.locales.modal.advanced'),
-                    defaultMessage: 'Advanced settings',
-                  })}
-                </Tab>
-              </Tabs>
-            </Flex>
-
-            <Divider />
-
-            <Box paddingTop={7} paddingBottom={7}>
-              <TabPanels>
-                <TabPanel>
+                </Typography>
+                <Tabs.List aria-labelledby={titleId}>
+                  <Tabs.Trigger value="basic">
+                    {formatMessage({
+                      id: getTranslation('Settings.locales.modal.base'),
+                      defaultMessage: 'Basic settings',
+                    })}
+                  </Tabs.Trigger>
+                  <Tabs.Trigger value="advanced">
+                    {formatMessage({
+                      id: getTranslation('Settings.locales.modal.advanced'),
+                      defaultMessage: 'Advanced settings',
+                    })}
+                  </Tabs.Trigger>
+                </Tabs.List>
+              </Flex>
+              <Divider />
+              <Box paddingTop={7} paddingBottom={7}>
+                <Tabs.Content value="basic">
                   <BaseForm mode="edit" />
-                </TabPanel>
-                <TabPanel>
+                </Tabs.Content>
+                <Tabs.Content value="advanced">
                   <AdvancedForm isDefaultLocale={isDefault} />
-                </TabPanel>
-              </TabPanels>
-            </Box>
-          </TabGroup>
-        </ModalBody>
-        <ModalFooter
-          startActions={
-            <Button variant="tertiary" onClick={onClose}>
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
-          }
-          endActions={<SubmitButton />}
-        />
-      </Form>
-    </ModalLayout>
+                </Tabs.Content>
+              </Box>
+            </Tabs.Root>
+          </Modal.Body>
+          <Modal.Footer>
+            <Modal.Close>
+              <Button variant="tertiary">
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+              </Button>
+            </Modal.Close>
+            <SubmitButton />
+          </Modal.Footer>
+        </Form>
+      </Modal.Content>
+    </Modal.Root>
   );
 };
 

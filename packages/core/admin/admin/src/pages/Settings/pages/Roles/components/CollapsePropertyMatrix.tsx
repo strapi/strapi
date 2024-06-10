@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
+import * as React from 'react';
 
 import {
-  BaseCheckbox,
+  Checkbox,
   Box,
   BoxComponent,
   Flex,
@@ -54,7 +54,7 @@ const CollapsePropertyMatrix = ({
   pathToData,
   propertyName,
 }: CollapsePropertyMatrixProps) => {
-  const propertyActions = useMemo(
+  const propertyActions = React.useMemo(
     () =>
       availableActions.map((action) => {
         const isActionRelatedToCurrentProperty =
@@ -128,7 +128,7 @@ const ActionRow = ({
 
   const isActive = rowToOpen === name;
 
-  const recursiveChildren = useMemo(() => {
+  const recursiveChildren = React.useMemo(() => {
     if (!Array.isArray(childrenForm)) {
       return [];
     }
@@ -156,7 +156,7 @@ const ActionRow = ({
     onChangeCollectionTypeLeftActionRowCheckbox(pathToData, propertyName, name, value);
   };
 
-  const { hasAllActionsSelected, hasSomeActionsSelected } = useMemo(() => {
+  const { hasAllActionsSelected, hasSomeActionsSelected } = React.useMemo(() => {
     return getRowLabelCheckboxState(propertyActions, modifiedData, pathToData, propertyName, name);
   }, [propertyActions, modifiedData, pathToData, propertyName, name]);
 
@@ -207,7 +207,7 @@ const ActionRow = ({
                     justifyContent="center"
                     alignItems="center"
                   >
-                    <BaseCheckbox
+                    <Checkbox
                       disabled={isFormDisabled}
                       name={checkboxName.join('..')}
                       aria-label={formatMessage(
@@ -217,12 +217,11 @@ const ActionRow = ({
                         },
                         { label: `${name} ${label}` }
                       )}
-                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={(value) => {
+                      onCheckedChange={(value) => {
                         onChangeSimpleCheckbox({
                           target: {
                             name: checkboxName.join('..'),
-                            value,
+                            value: !!value,
                           },
                         });
                       }}
@@ -244,15 +243,14 @@ const ActionRow = ({
                   justifyContent="center"
                   alignItems="center"
                 >
-                  <BaseCheckbox
+                  <Checkbox
                     disabled={isFormDisabled}
                     name={checkboxName.join('..')}
-                    // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                    onValueChange={(value) => {
+                    onCheckedChange={(value) => {
                       onChangeParentCheckbox({
                         target: {
                           name: checkboxName.join('..'),
-                          value,
+                          value: !!value,
                         },
                       });
                     }}
@@ -263,8 +261,7 @@ const ActionRow = ({
                       },
                       { label: `${name} ${label}` }
                     )}
-                    value={hasAllActionsSelected}
-                    indeterminate={hasSomeActionsSelected}
+                    checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
                   />
                 </Flex>
               );
@@ -384,7 +381,7 @@ const SubActionRow = ({
     });
   };
 
-  const displayedRecursiveChildren = useMemo(() => {
+  const displayedRecursiveChildren = React.useMemo(() => {
     if (!rowToOpen) {
       return null;
     }
@@ -470,7 +467,7 @@ const SubActionRow = ({
                             justifyContent="center"
                             alignItems="center"
                           >
-                            <BaseCheckbox
+                            <Checkbox
                               disabled={isFormDisabled}
                               name={checkboxName.join('..')}
                               aria-label={formatMessage(
@@ -480,12 +477,11 @@ const SubActionRow = ({
                                 },
                                 { label: `${parentName} ${label} ${propertyLabel}` }
                               )}
-                              // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                              onValueChange={(value) => {
+                              onCheckedChange={(value) => {
                                 onChangeSimpleCheckbox({
                                   target: {
                                     name: checkboxName.join('..'),
-                                    value,
+                                    value: !!value,
                                   },
                                 });
                               }}
@@ -506,7 +502,7 @@ const SubActionRow = ({
                           justifyContent="center"
                           alignItems="center"
                         >
-                          <BaseCheckbox
+                          <Checkbox
                             key={propertyLabel}
                             disabled={isFormDisabled}
                             name={checkboxName.join('..')}
@@ -518,16 +514,17 @@ const SubActionRow = ({
                               { label: `${parentName} ${label} ${propertyLabel}` }
                             )}
                             // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                            onValueChange={(value) => {
+                            onCheckedChange={(value) => {
                               onChangeParentCheckbox({
                                 target: {
                                   name: checkboxName.join('..'),
-                                  value,
+                                  value: !!value,
                                 },
                               });
                             }}
-                            value={hasAllActionsSelected}
-                            indeterminate={hasSomeActionsSelected}
+                            checked={
+                              hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected
+                            }
                           />
                         </Flex>
                       );

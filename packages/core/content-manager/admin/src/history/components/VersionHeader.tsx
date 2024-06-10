@@ -7,7 +7,7 @@ import {
   useRBAC,
   Layouts,
 } from '@strapi/admin/strapi-admin';
-import { Button, Typography, Flex, Link } from '@strapi/design-system';
+import { Button, Typography, Flex, Link, Dialog } from '@strapi/design-system';
 import { ArrowLeft, WarningCircle } from '@strapi/icons';
 import { UID } from '@strapi/types';
 import { stringify } from 'qs';
@@ -107,7 +107,7 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
   };
 
   return (
-    <>
+    <Dialog.Root open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
       <Layouts.BaseHeader
         id={headerId}
         title={formatDate(new Date(version.createdAt), {
@@ -143,24 +143,23 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
         }
         sticky={false}
         primaryAction={
-          <Button
-            disabled={!allowedActions.canUpdate || isCurrentVersion}
-            onClick={() => {
-              setIsConfirmDialogOpen(true);
-            }}
-          >
-            {formatMessage({
-              id: 'content-manager.history.restore.confirm.button',
-              defaultMessage: 'Restore',
-            })}
-          </Button>
+          <Dialog.Trigger>
+            <Button
+              disabled={!allowedActions.canUpdate || isCurrentVersion}
+              onClick={() => {
+                setIsConfirmDialogOpen(true);
+              }}
+            >
+              {formatMessage({
+                id: 'content-manager.history.restore.confirm.button',
+                defaultMessage: 'Restore',
+              })}
+            </Button>
+          </Dialog.Trigger>
         }
       />
       <ConfirmDialog
-        isOpen={isConfirmDialogOpen}
-        onClose={() => setIsConfirmDialogOpen(false)}
         onConfirm={handleRestore}
-        icon={<WarningCircle />}
         endAction={
           <Button variant="secondary" onClick={handleRestore} loading={isLoading}>
             {formatMessage({
@@ -177,6 +176,9 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           gap={2}
           textAlign="center"
         >
+          <Flex justifyContent="center">
+            <WarningCircle width="24px" height="24px" fill="danger600" />
+          </Flex>
           <Typography>
             {formatMessage({
               id: 'content-manager.history.restore.confirm.title',
@@ -197,6 +199,6 @@ export const VersionHeader = ({ headerId }: VersionHeaderProps) => {
           </Typography>
         </Flex>
       </ConfirmDialog>
-    </>
+    </Dialog.Root>
   );
 };

@@ -41,7 +41,7 @@ function ComponentFixture(props) {
       <IntlProvider locale="en" messages={{}}>
         <DesignSystemProvider>
           <NotificationsProvider toggleNotification={() => {}}>
-            <EditFolderDialog onClose={() => {}} {...nextProps} />
+            <EditFolderDialog open onClose={() => {}} {...nextProps} />
           </NotificationsProvider>
         </DesignSystemProvider>
       </IntlProvider>

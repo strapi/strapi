@@ -1,4 +1,4 @@
-import { Box, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Grid, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
 import { useIntl } from 'react-intl';
 
@@ -39,7 +39,7 @@ export const TabForm = ({
                 </Typography>
               </Box>
             )}
-            <Grid gap={4}>
+            <Grid.Root gap={4}>
               {section.items.map((input: any, i: number) => {
                 const key = `${sectionIndex}.${i}`;
                 /**
@@ -77,14 +77,14 @@ export const TabForm = ({
 
                 if (input.type === 'pushRight') {
                   return (
-                    <GridItem col={input.size || 6} key={input.name || key}>
+                    <Grid.Item col={input.size || 6} key={input.name || key}>
                       <div />
-                    </GridItem>
+                    </Grid.Item>
                   );
                 }
 
                 return (
-                  <GridItem col={input.size || 6} key={input.name || key}>
+                  <Grid.Item col={input.size || 6} key={input.name || key}>
                     <GenericInput
                       {...input}
                       {...genericInputProps}
@@ -92,10 +92,10 @@ export const TabForm = ({
                       onChange={onChange}
                       value={value}
                     />
-                  </GridItem>
+                  </Grid.Item>
                 );
               })}
-            </Grid>
+            </Grid.Root>
           </Box>
         );
       })}

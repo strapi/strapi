@@ -134,13 +134,12 @@ const EmailTemplatesPage = () => {
       />
       <Layouts.Content>
         <EmailTable onEditClick={handleEditClick} canUpdate={canUpdate} />
-        {isModalOpen && (
-          <EmailForm
-            template={data[templateToEdit]}
-            onToggle={handleToggle}
-            onSubmit={handleSubmit}
-          />
-        )}
+        <EmailForm
+          template={data[templateToEdit]}
+          onToggle={handleToggle}
+          open={isModalOpen}
+          onSubmit={handleSubmit}
+        />
       </Layouts.Content>
     </Page.Main>
   );

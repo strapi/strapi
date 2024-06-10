@@ -14,7 +14,7 @@ export const FolderGridList = ({ title, children }) => {
         </Box>
       )}
 
-      <Grid gap={4}>{children}</Grid>
+      <Grid.Root gap={4}>{children}</Grid.Root>
     </KeyboardNavigable>
   );
 };

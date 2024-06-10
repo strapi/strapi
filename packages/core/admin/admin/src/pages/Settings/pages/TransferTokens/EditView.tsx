@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, Typography } from '@strapi/design-system';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
@@ -378,24 +378,24 @@ const FormTransferTokenContainer = ({
             defaultMessage: 'Details',
           })}
         </Typography>
-        <Grid gap={5}>
-          <GridItem key="name" col={6} xs={12}>
+        <Grid.Root gap={5}>
+          <Grid.Item key="name" col={6} xs={12}>
             <TokenName
               error={errors['name']}
               value={values['name']}
               canEditInputs={canEditInputs}
               onChange={onChange}
             />
-          </GridItem>
-          <GridItem key="description" col={6} xs={12}>
+          </Grid.Item>
+          <Grid.Item key="description" col={6} xs={12}>
             <TokenDescription
               error={errors['description']}
               value={values['description']}
               canEditInputs={canEditInputs}
               onChange={onChange}
             />
-          </GridItem>
-          <GridItem key="lifespan" col={6} xs={12}>
+          </Grid.Item>
+          <Grid.Item key="lifespan" col={6} xs={12}>
             <LifeSpanInput
               isCreating={isCreating}
               error={errors['lifespan']}
@@ -403,8 +403,8 @@ const FormTransferTokenContainer = ({
               onChange={onChange}
               token={transferToken}
             />
-          </GridItem>
-          <GridItem key="permissions" col={6} xs={12}>
+          </Grid.Item>
+          <Grid.Item key="permissions" col={6} xs={12}>
             <TokenTypeSelect
               name="permissions"
               value={values['permissions']}
@@ -420,8 +420,8 @@ const FormTransferTokenContainer = ({
               options={typeOptions}
               canEditInputs={canEditInputs}
             />
-          </GridItem>
-        </Grid>
+          </Grid.Item>
+        </Grid.Root>
       </Flex>
     </Box>
   );

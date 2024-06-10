@@ -12,7 +12,7 @@ import {
   FormHelpers,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Button, Flex, Typography } from '@strapi/design-system';
+import { Button, Dialog, Flex, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { useIntl } from 'react-intl';
@@ -397,55 +397,56 @@ const EditPage = () => {
                 />
               </Flex>
             </Layout.Root>
-            <ConfirmDialog
-              isOpen={Object.keys(savePrompts).length > 0}
-              onClose={handleConfirmClose}
-              onConfirm={handleConfirmDeleteDialog(values, { setErrors })}
+            <Dialog.Root
+              open={Object.keys(savePrompts).length > 0}
+              onOpenChange={handleConfirmClose}
             >
-              <Flex direction="column" gap={5}>
-                {savePrompts.hasDeletedServerStages && (
+              <ConfirmDialog onConfirm={handleConfirmDeleteDialog(values, { setErrors })}>
+                <Flex direction="column" gap={5}>
+                  {savePrompts.hasDeletedServerStages && (
+                    <Typography textAlign="center" variant="omega">
+                      {formatMessage({
+                        id: 'review-workflows.page.delete.confirm.stages.body',
+                        defaultMessage:
+                          'All entries assigned to deleted stages will be moved to the previous stage.',
+                      })}
+                    </Typography>
+                  )}
+
+                  {savePrompts.hasReassignedContentTypes && (
+                    <Typography textAlign="center" variant="omega">
+                      {formatMessage(
+                        {
+                          id: 'review-workflows.page.delete.confirm.contentType.body',
+                          defaultMessage:
+                            '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to {count, plural, one {another workflow} other {other workflows}}. If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the {count, plural, one {another workflow} other {other workflows}} and all corresponding information will be removed.',
+                        },
+                        {
+                          count:
+                            contentTypesFromOtherWorkflows?.filter((contentType) =>
+                              currentWorkflow?.contentTypes?.includes(contentType)
+                            ).length ?? 0,
+                        }
+                      )}
+                    </Typography>
+                  )}
+
                   <Typography textAlign="center" variant="omega">
                     {formatMessage({
-                      id: 'review-workflows.page.delete.confirm.stages.body',
-                      defaultMessage:
-                        'All entries assigned to deleted stages will be moved to the previous stage.',
+                      id: 'review-workflows.page.delete.confirm.confirm',
+                      defaultMessage: 'Are you sure you want to save?',
                     })}
                   </Typography>
-                )}
-
-                {savePrompts.hasReassignedContentTypes && (
-                  <Typography textAlign="center" variant="omega">
-                    {formatMessage(
-                      {
-                        id: 'review-workflows.page.delete.confirm.contentType.body',
-                        defaultMessage:
-                          '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to {count, plural, one {another workflow} other {other workflows}}. If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the {count, plural, one {another workflow} other {other workflows}} and all corresponding information will be removed.',
-                      },
-                      {
-                        count:
-                          contentTypesFromOtherWorkflows?.filter((contentType) =>
-                            currentWorkflow?.contentTypes?.includes(contentType)
-                          ).length ?? 0,
-                      }
-                    )}
-                  </Typography>
-                )}
-
-                <Typography textAlign="center" variant="omega">
-                  {formatMessage({
-                    id: 'review-workflows.page.delete.confirm.confirm',
-                    defaultMessage: 'Are you sure you want to save?',
-                  })}
-                </Typography>
-              </Flex>
-            </ConfirmDialog>
+                </Flex>
+              </ConfirmDialog>
+            </Dialog.Root>
           </>
         )}
       </Form>
 
       <LimitsModal.Root
-        isOpen={showLimitModal === 'workflow'}
-        onClose={() => setShowLimitModal(null)}
+        open={showLimitModal === 'workflow'}
+        onOpenChange={() => setShowLimitModal(null)}
       >
         <LimitsModal.Title>
           {formatMessage({
@@ -462,7 +463,10 @@ const EditPage = () => {
         </LimitsModal.Body>
       </LimitsModal.Root>
 
-      <LimitsModal.Root isOpen={showLimitModal === 'stage'} onClose={() => setShowLimitModal(null)}>
+      <LimitsModal.Root
+        open={showLimitModal === 'stage'}
+        onOpenChange={() => setShowLimitModal(null)}
+      >
         <LimitsModal.Title>
           {formatMessage({
             id: 'review-workflows.edit.page.stages.limit.title',

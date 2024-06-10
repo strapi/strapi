@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Flex, GridItem, Typography } from '@strapi/design-system';
+import { Flex, Grid, Typography } from '@strapi/design-system';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
 import without from 'lodash/without';
@@ -22,7 +22,7 @@ const Policies = () => {
     : controllerRoutes.filter((o) => o.handler.endsWith(pathResolved));
 
   return (
-    <GridItem
+    <Grid.Item
       col={5}
       background="neutral150"
       paddingTop={6}
@@ -55,7 +55,7 @@ const Policies = () => {
           </Typography>
         </Flex>
       )}
-    </GridItem>
+    </Grid.Item>
   );
 };
 

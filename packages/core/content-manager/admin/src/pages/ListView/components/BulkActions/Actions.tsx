@@ -2,25 +2,12 @@ import * as React from 'react';
 
 import {
   useStrapiApp,
-  useNotification,
-  NotificationConfig,
   DescriptionComponentRenderer,
   useTable,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  Button,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  DialogProps,
-  Flex,
-  ModalHeader,
-  ModalLayout,
-  Typography,
-} from '@strapi/design-system';
-import { Check, WarningCircle, Trash } from '@strapi/icons';
+import { Box, ButtonProps, Flex, Typography } from '@strapi/design-system';
+import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { useDocumentRBAC } from '../../../../features/DocumentRBAC';
@@ -28,6 +15,12 @@ import { useDoc } from '../../../../hooks/useDocument';
 import { useDocumentActions } from '../../../../hooks/useDocumentActions';
 import { buildValidParams } from '../../../../utils/api';
 import { getTranslation } from '../../../../utils/translations';
+import {
+  DialogOptions,
+  DocumentActionButton,
+  ModalOptions,
+  NotificationOptions,
+} from '../../../EditView/components/DocumentActions';
 
 import { PublishAction } from './PublishAction';
 
@@ -46,36 +39,7 @@ interface BulkActionDescription {
   /**
    * @default 'secondary'
    */
-  variant?: 'default' | 'secondary' | 'tertiary' | 'danger-light' | 'success';
-}
-
-interface DialogOptions {
-  type: 'dialog';
-  title: string;
-  content?: React.ReactNode;
-  onConfirm?: () => void | Promise<void>;
-  onCancel?: () => void | Promise<void>;
-}
-
-interface NotificationOptions {
-  type: 'notification';
-  title: string;
-  link?: {
-    label: string;
-    url: string;
-    target?: string;
-  };
-  content?: string;
-  onClose?: () => void;
-  status?: NotificationConfig['type'];
-  timeout?: number;
-}
-
-interface ModalOptions {
-  type: 'modal';
-  title: string;
-  content: React.ComponentType<{ onClose: () => void }>;
-  onClose?: () => void;
+  variant?: ButtonProps['variant'];
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -100,196 +64,9 @@ const BulkActionsRenderer = () => {
           plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
         ).getBulkActions()}
       >
-        {(actions) => actions.map((action) => <BulkActionAction key={action.id} {...action} />)}
+        {(actions) => actions.map((action) => <DocumentActionButton key={action.id} {...action} />)}
       </DescriptionComponentRenderer>
     </Flex>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * BulkActionAction
- * -----------------------------------------------------------------------------------------------*/
-
-interface Action extends BulkActionDescription {
-  id: string;
-}
-
-const BulkActionAction = (action: Action) => {
-  const [dialogId, setDialogId] = React.useState<string | null>(null);
-  const { toggleNotification } = useNotification();
-
-  const handleClick = (action: Action) => (e: React.MouseEvent) => {
-    const { onClick, dialog, id } = action;
-
-    if (onClick) {
-      onClick(e);
-    }
-
-    if (dialog) {
-      switch (dialog.type) {
-        case 'notification':
-          toggleNotification({
-            title: dialog.title,
-            message: dialog.content,
-            type: dialog.status,
-            timeout: dialog.timeout,
-            onClose: dialog.onClose,
-          });
-          break;
-        case 'dialog':
-        case 'modal': {
-          e.preventDefault();
-          setDialogId(id);
-        }
-      }
-    }
-  };
-
-  const handleClose = () => {
-    setDialogId(null);
-    if (action.dialog?.type === 'modal' && action.dialog?.onClose) {
-      action.dialog.onClose();
-    }
-  };
-
-  return (
-    <>
-      <Button
-        disabled={action.disabled}
-        startIcon={action.icon}
-        variant={action.variant}
-        onClick={handleClick(action)}
-      >
-        {action.label}
-      </Button>
-      {action.dialog?.type === 'dialog' ? (
-        <BulkActionConfirmDialog
-          {...action.dialog}
-          variant={action.variant}
-          isOpen={dialogId === action.id}
-          onClose={handleClose}
-        />
-      ) : null}
-      {action.dialog?.type === 'modal' ? (
-        <BulkActionModal
-          {...action.dialog}
-          onModalClose={handleClose}
-          isOpen={dialogId === action.id}
-        />
-      ) : null}
-    </>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * BulkActionConfirmDialog
- * -----------------------------------------------------------------------------------------------*/
-
-interface BulkActionConfirmDialogProps
-  extends DialogOptions,
-    Pick<DialogProps, 'onClose' | 'isOpen'>,
-    Pick<Action, 'variant'> {
-  confirmButton?: string;
-}
-
-const BulkActionConfirmDialog = ({
-  onClose,
-  onCancel,
-  onConfirm,
-  title,
-  content,
-  confirmButton,
-  isOpen,
-  variant = 'secondary',
-}: BulkActionConfirmDialogProps) => {
-  const { formatMessage } = useIntl();
-
-  const handleClose = async () => {
-    if (onCancel) {
-      await onCancel();
-    }
-
-    onClose();
-  };
-
-  const handleConfirm = async () => {
-    if (onConfirm) {
-      await onConfirm();
-    }
-
-    onClose();
-  };
-
-  return (
-    <Dialog isOpen={isOpen} title={title} onClose={handleClose}>
-      <DialogBody icon={<WarningCircle />}>{content}</DialogBody>
-      <DialogFooter
-        startAction={
-          <Button onClick={handleClose} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
-        }
-        endAction={
-          <Button
-            onClick={handleConfirm}
-            variant={variant === 'danger-light' ? variant : 'secondary'}
-            startIcon={variant === 'danger-light' ? <Trash /> : <Check />}
-          >
-            {confirmButton
-              ? confirmButton
-              : formatMessage({
-                  id: 'app.components.Button.confirm',
-                  defaultMessage: 'Confirm',
-                })}
-          </Button>
-        }
-      />
-    </Dialog>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * BulkActionModal
- * -----------------------------------------------------------------------------------------------*/
-
-interface BulkActionModalProps extends ModalOptions {
-  onModalClose: () => void;
-  isOpen?: boolean;
-}
-
-const BulkActionModal = ({
-  isOpen,
-  title,
-  onClose,
-  content: Content,
-  onModalClose,
-}: BulkActionModalProps) => {
-  const id = React.useId();
-
-  if (!isOpen) {
-    return null;
-  }
-
-  const handleClose = () => {
-    if (onClose) {
-      onClose();
-    }
-
-    onModalClose();
-  };
-
-  return (
-    <ModalLayout borderRadius="4px" overflow="hidden" onClose={handleClose} labelledBy={id}>
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={id}>
-          {title}
-        </Typography>
-      </ModalHeader>
-      <Content onClose={handleClose} />
-    </ModalLayout>
   );
 };
 
@@ -332,6 +109,9 @@ const DeleteAction: BulkActionComponent = ({ documents, model }) => {
       }),
       content: (
         <Flex direction="column" alignItems="stretch" gap={2}>
+          <Flex justifyContent="center">
+            <WarningCircle width="24px" height="24px" fill="danger600" />
+          </Flex>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
               id: 'popUpWarning.bodyMessage.contentType.delete.all',
@@ -400,6 +180,9 @@ const UnpublishAction: BulkActionComponent = ({ documents, model }) => {
       }),
       content: (
         <Flex direction="column" alignItems="stretch" gap={2}>
+          <Flex justifyContent="center">
+            <WarningCircle width="24px" height="24px" fill="danger600" />
+          </Flex>
           <Typography id="confirm-description" textAlign="center">
             {formatMessage({
               id: 'popUpWarning.bodyMessage.contentType.unpublish.all',

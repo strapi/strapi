@@ -21,9 +21,11 @@ const IconWrapper = styled<BoxComponent<'button'>>(Box)<{ $isSelected: boolean }
     ${({ theme, $isSelected }) => theme.colors[$isSelected ? 'primary700' : 'neutral200']};
   border-radius: ${({ theme }) => theme.borderRadius};
   z-index: 1;
+  flex: 0 0 2.4rem;
   svg {
     width: 2.4rem;
-    height: 100%;
+    height: 2.4rem;
+    max-width: unset;
     path {
       fill: ${({ theme, $isSelected }) => theme.colors[$isSelected ? 'primary700' : 'neutral500']};
     }

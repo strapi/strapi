@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Flex } from '@strapi/design-system';
+import { Button, Dialog, Flex } from '@strapi/design-system';
 import { Check, ArrowClockwise } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 
@@ -63,24 +63,24 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
   };
 
   return (
-    <>
-      <Button
-        startIcon={<ArrowClockwise />}
-        type="button"
-        size="S"
-        variant="tertiary"
-        onClick={() => setShowConfirmDialog(true)}
-        name="regenerate"
-      >
-        {formatMessage({
-          id: 'Settings.tokens.regenerate',
-          defaultMessage: 'Regenerate',
-        })}
-      </Button>
+    <Dialog.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <Dialog.Trigger>
+        <Button
+          startIcon={<ArrowClockwise />}
+          type="button"
+          size="S"
+          variant="tertiary"
+          onClick={() => setShowConfirmDialog(true)}
+          name="regenerate"
+        >
+          {formatMessage({
+            id: 'Settings.tokens.regenerate',
+            defaultMessage: 'Regenerate',
+          })}
+        </Button>
+      </Dialog.Trigger>
 
       <ConfirmDialog
-        isOpen={showConfirmDialog}
-        onClose={() => setShowConfirmDialog(false)}
         title={formatMessage({
           id: 'Settings.tokens.RegenerateDialog.title',
           defaultMessage: 'Regenerate token',
@@ -103,7 +103,7 @@ const Regenerate = ({ onRegenerate, url }: RegenerateProps) => {
           defaultMessage: 'Are you sure you want to regenerate this token?',
         })}
       </ConfirmDialog>
-    </>
+    </Dialog.Root>
   );
 };
 
