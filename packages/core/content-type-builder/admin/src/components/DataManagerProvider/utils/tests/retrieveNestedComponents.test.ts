@@ -1,8 +1,10 @@
 import { retrieveNestedComponents } from '../retrieveNestedComponents';
 
+import type { Components } from '../../../../types';
+
 describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | retrieveNestedComponents', () => {
   it('should return an array of nested components', () => {
-    const components = {
+    const components: Components = {
       'default.closingperiod': {
         uid: 'default.closingperiod',
         category: 'default',
@@ -52,7 +54,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | retr
     const expected = [
       {
         component: 'default.dish',
-        parentCompoUid: ['default.closingperiod'],
+        uidsOfAllParents: ['default.closingperiod'],
       },
     ];
 
@@ -60,7 +62,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | retr
   });
 
   it('should return both parents', () => {
-    const components = {
+    const components: Components = {
       'default.closingperiod': {
         uid: 'default.closingperiod',
         category: 'default',
@@ -123,7 +125,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | retr
     const expected = [
       {
         component: 'default.dish',
-        parentCompoUid: ['default.closingperiod', 'default.openingperiod'],
+        uidsOfAllParents: ['default.closingperiod', 'default.openingperiod'],
       },
     ];
 

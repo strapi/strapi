@@ -85,12 +85,7 @@ describe('retrieveComponentsThatHaveComponents', () => {
         component: 'blog.slider',
         childComponents: [
           {
-            name: 'slide',
             component: 'default.slide',
-            type: 'component',
-            repeatable: true,
-            min: 1,
-            max: 5,
           },
         ],
       });
@@ -111,12 +106,7 @@ describe('retrieveComponentsThatHaveComponents', () => {
           component: 'blog.slider',
           childComponents: [
             {
-              name: 'slide',
               component: 'default.slide',
-              type: 'component',
-              repeatable: true,
-              min: 1,
-              max: 5,
             },
           ],
         },

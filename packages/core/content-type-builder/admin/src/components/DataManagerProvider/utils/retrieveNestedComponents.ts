@@ -1,14 +1,19 @@
+import type { Components, AttributeType } from '../../../types';
 import type { Internal } from '@strapi/types';
 
 export type NestedComponent = {
   component: Internal.UID.Component;
-  parentCompoUid?: Internal.UID.Component[];
+  uidsOfAllParents?: Internal.UID.Component[];
+  parentCompoUid?: Internal.UID.Component;
 };
 
-export const retrieveNestedComponents = (appComponents: any): NestedComponent[] => {
-  const nestedComponents = Object.keys(appComponents).reduce((acc: any, current: any) => {
+export const retrieveNestedComponents = (appComponents: Components): NestedComponent[] => {
+  const nestedComponents = Object.keys(appComponents).reduce((acc: NestedComponent[], current) => {
     const componentAttributes = appComponents?.[current]?.schema?.attributes ?? [];
-    const currentComponentNestedCompos = getComponentsFromComponent(componentAttributes, current);
+    const currentComponentNestedCompos = getComponentsFromComponent(
+      componentAttributes,
+      current as Internal.UID.Component
+    );
     return [...acc, ...currentComponentNestedCompos];
   }, []);
 
@@ -16,10 +21,10 @@ export const retrieveNestedComponents = (appComponents: any): NestedComponent[] 
 };
 
 const getComponentsFromComponent = (
-  componentAttributes: any,
+  componentAttributes: AttributeType[],
   parentCompoUid: Internal.UID.Component
 ) => {
-  return componentAttributes.reduce((acc: any, current: any) => {
+  return componentAttributes.reduce((acc: NestedComponent[], current) => {
     const { type, component } = current;
     if (type === 'component') {
       acc.push({
@@ -32,7 +37,7 @@ const getComponentsFromComponent = (
   }, []);
 };
 
-// merge components different parents if they exist
+// merge duplicate components
 const mergeComponents = (originalComponents: NestedComponent[]): NestedComponent[] => {
   const componentMap = new Map();
   // Populate the map with component and its parents
@@ -47,7 +52,7 @@ const mergeComponents = (originalComponents: NestedComponent[]): NestedComponent
   const transformedComponents: NestedComponent[] = Array.from(componentMap.entries()).map(
     ([component, parentCompoUidSet]) => ({
       component,
-      parentCompoUid: Array.from(parentCompoUidSet),
+      uidsOfAllParents: Array.from(parentCompoUidSet),
     })
   );
 
