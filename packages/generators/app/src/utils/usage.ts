@@ -1,7 +1,6 @@
 import os from 'os';
 import _ from 'lodash';
-import * as sentry from '@sentry/node';
-import { Scope, StderrError, isStderrError } from '../types';
+import { Scope, StderrError } from '../types';
 
 type TrackError = Error | string | StderrError;
 
@@ -10,43 +9,6 @@ function addPackageJsonStrapiMetadata(metadata: Record<string, unknown>, scope: 
   const { packageJsonStrapi = {} } = scope;
 
   return _.defaults(metadata, packageJsonStrapi);
-}
-
-export async function captureException(error: Error) {
-  try {
-    sentry.captureException(error);
-    await sentry.flush();
-  } catch (err) {
-    /** ignore errors */
-    return Promise.resolve();
-  }
-}
-
-async function captureError(message: string) {
-  try {
-    sentry.captureMessage(message, 'error');
-    await sentry.flush();
-  } catch (err) {
-    /** ignore errors */
-    return Promise.resolve();
-  }
-}
-
-export function captureStderr(name: string, error: unknown) {
-  if (isStderrError(error) && error.stderr.trim() !== '') {
-    error.stderr
-      .trim()
-      .split('\n')
-      .forEach((line) => {
-        sentry.addBreadcrumb({
-          category: 'stderr',
-          message: line,
-          level: 'error',
-        });
-      });
-  }
-
-  return captureError(name);
 }
 
 const getProperties = (scope: Scope, error?: TrackError) => {
@@ -63,11 +25,11 @@ const getProperties = (scope: Scope, error?: TrackError) => {
   const groupProperties = {
     version: scope.strapiVersion,
     docker: scope.docker,
-    useYarn: scope.useYarn,
+    // useYarn: scope.useYarn,
     useTypescriptOnServer: scope.useTypescript,
     useTypescriptOnAdmin: scope.useTypescript,
     isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',
-    noRun: (scope.runQuickstartApp !== true).toString(),
+    noRun: (scope.runApp !== true).toString(),
     projectId: scope.uuid,
   };
 

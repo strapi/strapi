@@ -1,11 +1,20 @@
 export default () => ({
-  extends: '@strapi/typescript-utils/tsconfigs/server',
-
   compilerOptions: {
+    module: 'CommonJS',
+    moduleResolution: 'Node',
+    lib: ['ES2020'],
+    target: 'ES2019',
+    strict: false,
+    skipLibCheck: true,
+    forceConsistentCasingInFileNames: true,
+    incremental: true,
+    esModuleInterop: true,
+    resolveJsonModule: true,
+    noEmitOnError: true,
+    noImplicitThis: true,
     outDir: 'dist',
     rootDir: '.',
   },
-
   include: [
     // Include root files
     './',

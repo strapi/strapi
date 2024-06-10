@@ -1,55 +1,57 @@
+export type PackageManager = 'npm' | 'yarn' | 'pnpm';
+
 export interface Scope {
   name?: string;
   rootPath: string;
   template?: string;
   strapiVersion: string;
-  strapiDependencies: Array<string>;
   installDependencies?: boolean;
-  additionalsDependencies: Record<string, string>;
+  devDependencies: Record<string, string>;
+  dependencies: Record<string, string>;
   docker: boolean;
-  useYarn: boolean;
-  useTypescript: boolean;
-  runQuickstartApp: boolean;
-  quick?: boolean;
+  packageManager: PackageManager;
+  runApp: boolean;
+  isQuickstart?: boolean;
   uuid?: string;
   deviceId?: string;
-  dbforce?: boolean;
-  database?: DatabaseInfo;
-  debug?: boolean;
+  database: DatabaseInfo;
   tmpPath: string;
   packageJsonStrapi: Record<string, unknown>;
+  useTypescript: boolean;
 }
 
-export interface NewOptions {
-  useNpm: boolean;
-  run: boolean;
-  debug: boolean;
-  quickstart: boolean;
-  template: string;
-  starter: string;
-  typescript: boolean;
-  dbforce: boolean;
-  dbssl: string;
-  dbclient: string;
-  dbhost: string;
-  dbport: string;
-  dbname: string;
-  dbusername: string;
-  dbpassword: string;
-  dbfile: string;
-}
+export interface Options {
+  directory: string;
 
-export interface Configuration {
-  client: string;
-  connection: DatabaseInfo;
-  dependencies: Record<string, string>;
+  packageManager: PackageManager;
+
+  runApp?: boolean;
+  template?: string;
+  starter?: string;
+
+  isQuickstart?: boolean;
+
+  useTypescript: boolean;
+
+  database: {
+    client: ClientName;
+    connection?: {
+      host?: string;
+      port?: string;
+      database?: string;
+      username?: string;
+      password?: string;
+      filename?: string;
+      ssl?: boolean;
+    };
+  };
 }
 
 export type ClientName = 'mysql' | 'postgres' | 'sqlite';
 
 export interface DatabaseInfo {
-  client?: string;
-  connection: {
+  client: ClientName;
+  connection?: {
     host?: string;
     port?: string;
     database?: string;
@@ -58,7 +60,6 @@ export interface DatabaseInfo {
     filename?: string;
     ssl?: boolean;
   };
-  useNullAsDefault?: boolean;
 }
 
 export interface PackageInfo {

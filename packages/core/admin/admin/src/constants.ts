@@ -125,7 +125,7 @@ export const HOOKS = {
 
 export interface SettingsMenuLink
   extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'lockIcon'> {
-  lockIcon?: boolean;
+  lockIcon?: boolean; // TODO: to replace with another name in v5
 }
 
 export type SettingsMenu = {
@@ -164,7 +164,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
             to: '/settings/purchase-single-sign-on',
             id: 'sso-purchase-page',
-            lockIcon: true,
+            lockIcon: true, // TODO: to replace with another name in v5
           },
         ]
       : []),
@@ -189,7 +189,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
             to: '/settings/purchase-audit-logs',
             id: 'auditLogs-purchase-page',
-            lockIcon: true,
+            lockIcon: true, // TODO: to replace with another name in v5
           },
         ]
       : []),
