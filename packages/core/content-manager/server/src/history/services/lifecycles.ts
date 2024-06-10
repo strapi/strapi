@@ -19,8 +19,6 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
     isInitialized: false,
   };
 
-  const query = strapi.db.query(HISTORY_VERSION_UID);
-  const historyService = getService(strapi, 'history');
   const serviceUtils = createServiceUtils({ strapi });
 
   return {
@@ -124,7 +122,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         // Prevent creating a history version for an action that wasn't actually executed
         await strapi.db.transaction(async ({ onCommit }) => {
           onCommit(() => {
-            historyService.createVersion({
+            getService(strapi, 'history').createVersion({
               contentType: contentTypeUid,
               data: omit(FIELDS_TO_IGNORE, document) as Modules.Documents.AnyDocument,
               schema: omit(FIELDS_TO_IGNORE, attributesSchema),
@@ -144,7 +142,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         const retentionDaysInMilliseconds = serviceUtils.getRetentionDays() * 24 * 60 * 60 * 1000;
         const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
 
-        query.deleteMany({
+        strapi.db.query(HISTORY_VERSION_UID).deleteMany({
           where: {
             created_at: {
               $lt: expirationDate.toISOString(),

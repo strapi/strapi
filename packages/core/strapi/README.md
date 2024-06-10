@@ -59,18 +59,18 @@ Install Strapi with this **Quickstart** command to create a Strapi project insta
 - (Use **yarn** to install the Strapi project (recommended). [Install yarn with these docs](https://yarnpkg.com/lang/en/docs/install/).)
 
 ```bash
-yarn create strapi-app my-project --quickstart
+yarn create strapi
 ```
 
 **or**
 
-- (Use npm/npx to install the Strapi project.)
+- (Using npx to install the Strapi project.)
 
 ```bash
-npx create-strapi-app my-project --quickstart
+npx create-strapi@latest
 ```
 
-This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload). The **Quickstart** command installs Strapi using a **SQLite** database which is used for prototyping in development.
+This command generates a brand new project with the default features (authentication, permissions, content management, content type builder & file upload).
 
 Enjoy 🎉
 
