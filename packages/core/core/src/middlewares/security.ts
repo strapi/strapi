@@ -1,4 +1,4 @@
-import { defaultsDeep, merge } from 'lodash/fp';
+import { defaultsDeep, mergeWith } from 'lodash/fp';
 import helmet, { KoaHelmet } from 'koa-helmet';
 
 import type { Core } from '@strapi/types';
@@ -27,6 +27,14 @@ const defaults: Config = {
   frameguard: {
     action: 'sameorigin',
   },
+};
+
+const mergeConfig = (existingConfig: Config, newConfig: Config) => {
+  return mergeWith(
+    (obj, src) => (Array.isArray(obj) && Array.isArray(src) ? obj.concat(src) : undefined),
+    existingConfig,
+    newConfig
+  );
 };
 
 export const security: Core.MiddlewareFactory<Config> =
@@ -63,7 +71,7 @@ export const security: Core.MiddlewareFactory<Config> =
 
     // TODO: we shouldn't combine playground exceptions with documentation for all routes, we should first check the path and then return exceptions specific to that
     if (ctx.method === 'GET' && specialPaths.some((str) => ctx.path.startsWith(str))) {
-      helmetConfig = merge(helmetConfig, {
+      helmetConfig = mergeConfig(helmetConfig, {
         crossOriginEmbedderPolicy: false, // TODO: only use this for graphql playground
         contentSecurityPolicy: {
           directives,
@@ -80,11 +88,11 @@ export const security: Core.MiddlewareFactory<Config> =
      * that are part of the admin route.
      */
     if (
-      process.env.NODE_ENV === 'development' &&
+      ['development', 'test'].includes(process.env.NODE_ENV ?? '') &&
       ctx.method === 'GET' &&
       ['/admin'].some((str) => ctx.path.startsWith(str))
     ) {
-      helmetConfig = merge(helmetConfig, {
+      helmetConfig = mergeConfig(helmetConfig, {
         contentSecurityPolicy: {
           directives: {
             'script-src': ["'self'", "'unsafe-inline'"],
