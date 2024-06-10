@@ -4,6 +4,7 @@ import { async } from '@strapi/utils';
 import {
   validateReleaseAction,
   validateReleaseActionUpdateSchema,
+  validateFindManyActionsParams,
 } from './validation/release-action';
 import type {
   CreateReleaseAction,
@@ -73,16 +74,19 @@ const releaseActionController = {
       ability: ctx.state.userAbility,
       model: RELEASE_ACTION_MODEL_UID,
     });
-    const query = await permissionsManager.sanitizeQuery(ctx.query);
 
-    if (query.groupBy) {
-      if (!['action', 'contentType', 'locale'].includes(query.groupBy)) {
+    await validateFindManyActionsParams(ctx.query);
+
+    if (ctx.query.groupBy) {
+      if (!['action', 'contentType', 'locale'].includes(ctx.query.groupBy as string)) {
         ctx.badRequest('Invalid groupBy parameter');
       }
     }
 
-    query.sort = query.groupBy === 'action' ? 'type' : query.groupBy;
-    delete query.groupBy;
+    ctx.query.sort = ctx.query.groupBy === 'action' ? 'type' : ctx.query.groupBy;
+    delete ctx.query.groupBy;
+
+    const query = await permissionsManager.sanitizeQuery(ctx.query);
 
     const releaseActionService = getService('release-action', { strapi });
     const { results, pagination } = await releaseActionService.findPage(releaseId, {

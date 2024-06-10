@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
-import { validateRelease } from './validation/release';
+import { validateRelease, validatefindByDocumentAttachedParams } from './validation/release';
 import type {
   CreateRelease,
   UpdateRelease,
@@ -31,6 +31,9 @@ const releaseController = {
     await permissionsManager.validateQuery(ctx.query);
     const releaseService = getService('release', { strapi });
     const query = await permissionsManager.sanitizeQuery(ctx.query);
+
+    await validatefindByDocumentAttachedParams(query);
+
     const { contentType, entryDocumentId, hasEntryAttached, locale } = query;
     const isEntryAttached =
       typeof hasEntryAttached === 'string' ? Boolean(JSON.parse(hasEntryAttached)) : false;
