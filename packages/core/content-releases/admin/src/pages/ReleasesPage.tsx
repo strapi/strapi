@@ -33,7 +33,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useTracking,
-  RelativeTime,
+  RelativeTime as BaseRelativeTime,
 } from '@strapi/helper-plugin';
 import { EmptyDocuments, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -63,8 +63,11 @@ const LinkCard = styled(Link)`
   display: block;
 `;
 
-const CapitalizeRelativeTime = styled(RelativeTime)`
-  text-transform: capitalize;
+const RelativeTime = styled(BaseRelativeTime)`
+  display: inline-block;
+  &::first-letter {
+    text-transform: uppercase;
+  }
 `;
 
 const getBadgeProps = (status: Release['status']) => {
@@ -141,7 +144,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
                 </Typography>
                 <Typography variant="pi" textColor="neutral600">
                   {scheduledAt ? (
-                    <CapitalizeRelativeTime timestamp={new Date(scheduledAt)} />
+                    <RelativeTime timestamp={new Date(scheduledAt)} />
                   ) : (
                     formatMessage({
                       id: 'content-releases.pages.Releases.not-scheduled',

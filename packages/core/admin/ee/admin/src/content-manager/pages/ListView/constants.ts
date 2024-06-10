@@ -66,10 +66,7 @@ export const REVIEW_WORKFLOW_FILTERS = [
       type: 'relation',
       mainField: {
         name: 'name',
-
-        schema: {
-          type: 'string',
-        },
+        type: 'string',
       },
     },
 
@@ -90,10 +87,7 @@ export const REVIEW_WORKFLOW_FILTERS = [
       type: 'relation',
       mainField: {
         name: 'id',
-
-        schema: {
-          type: 'integer',
-        },
+        type: 'integer',
       },
     },
 
