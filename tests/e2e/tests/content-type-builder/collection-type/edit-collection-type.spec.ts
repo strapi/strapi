@@ -4,8 +4,10 @@ import { resetDatabaseAndImportDataFromPath } from '../../../utils/dts-import';
 import { waitForRestart } from '../../../utils/restart';
 import { resetFiles } from '../../../utils/file-reset';
 import { createCollectionType, navToHeader, skipCtbTour } from '../../../utils/shared';
+import { describeOnCondition } from 'api-tests/utils';
 
-test.skip('Edit collection type', () => {
+// TODO: fix the test so that it doesn't fail on CI
+describeOnCondition(!process.env.CI)('Edit collection type', () => {
   // use a name with a capital and a space to ensure we also test the kebab-casing conversion for api ids
   const ctName = 'Secret Document';
 
