@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { Core, Data, UID } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { isEntryValid, getService } from './utils';
@@ -19,21 +19,23 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           const model = strapi.getModel(event.model.uid as UID.Schema);
           // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-            const id = event.result.id;
+            const { documentId, locale } = event.result;
 
             const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
               where: {
                 actions: {
-                  target_type: model.uid,
-                  target_id: id,
+                  contentType: model.uid,
+                  entryDocumentId: documentId ?? null,
+                  locale: locale ?? null,
                 },
               },
             });
 
             await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
               where: {
-                target_type: model.uid,
-                target_id: id,
+                contentType: model.uid,
+                entryDocumentId: documentId ?? null,
+                locale: locale ?? null,
               },
             });
 
@@ -48,46 +50,31 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
         }
       },
       /**
-       * deleteMany hook doesn't return the deleted entries ids
-       * so we need to fetch them before deleting the entries to save the ids on our state
-       */
-      async beforeDeleteMany(event) {
-        const model = strapi.getModel(event.model.uid as UID.Schema);
-        // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
-        if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
-          const { where } = event.params;
-          const entriesToDelete = await strapi.db
-            .query(model.uid)
-            .findMany({ select: ['id'], where });
-          event.state.entriesToDelete = entriesToDelete;
-        }
-      },
-      /**
        * We delete the release actions related to deleted entries
        * We make this only after deleteMany is succesfully executed to avoid errors
        */
       async afterDeleteMany(event) {
         try {
-          const { model, state } = event;
-          const entriesToDelete = state.entriesToDelete;
-          if (entriesToDelete) {
+          const model = strapi.getModel(event.model.uid as UID.Schema);
+          // @ts-expect-error TODO: lifecycles types looks like are not 100% finished
+          if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
+            const { where } = event.params;
+
             const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
               where: {
                 actions: {
-                  target_type: model.uid,
-                  target_id: {
-                    $in: (entriesToDelete as Array<{ id: Data.ID }>).map((entry) => entry.id),
-                  },
+                  contentType: model.uid,
+                  locale: where.locale ?? null,
+                  ...(where.documentId && { entryDocumentId: where.documentId }),
                 },
               },
             });
 
             await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
               where: {
-                target_type: model.uid,
-                target_id: {
-                  $in: (entriesToDelete as Array<{ id: Data.ID }>).map((entry) => entry.id),
-                },
+                contentType: model.uid,
+                locale: where.locale ?? null,
+                ...(where.documentId && { entryDocumentId: where.documentId }),
               },
             });
 
