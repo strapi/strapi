@@ -1,6 +1,7 @@
 export default {
   type: 'admin',
   routes: [
+    /*
     {
       method: 'GET',
       path: '/mapEntriesToReleases',
@@ -17,6 +18,7 @@ export default {
         ],
       },
     },
+    */
     {
       method: 'GET',
       path: '/getByDocumentAttached',

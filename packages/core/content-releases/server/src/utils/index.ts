@@ -1,16 +1,23 @@
 import type { UID, Data, Core } from '@strapi/types';
-import { errors } from '@strapi/utils';
 
 import type { SettingsService } from '../services/settings';
+import type { ReleaseService } from '../services/release';
+import type { ReleaseActionService } from '../services/release-action';
 
 type Services = {
-  release: any;
+  release: ReleaseService;
   'release-validation': any;
   scheduling: any;
-  'release-action': any;
+  'release-action': ReleaseActionService;
   'event-manager': any;
   settings: SettingsService;
 };
+
+interface Action {
+  contentType: UID.ContentType;
+  documentId?: Data.DocumentID;
+  locale?: string;
+}
 
 export const getService = <TName extends keyof Services>(
   name: TName,
@@ -19,26 +26,22 @@ export const getService = <TName extends keyof Services>(
   return strapi.plugin('content-releases').service(name);
 };
 
-export const getPopulatedEntry = async (
-  contentTypeUid: string,
-  entryId: Data.ID,
+export const getDraftEntryValidStatus = async (
+  { contentType, documentId, locale }: Action,
   { strapi }: { strapi: Core.Strapi }
 ) => {
   const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
   // @ts-expect-error - populateBuilderService should be a function but is returning service
-  const populate = await populateBuilderService(contentTypeUid).populateDeep(Infinity).build();
+  const populate = await populateBuilderService(contentType).populateDeep(Infinity).build();
 
-  const entry = await strapi.db.query(contentTypeUid).findOne({
-    where: { id: entryId },
-    populate,
-  });
+  const entry = await getEntry({ contentType, documentId, locale, populate }, { strapi });
 
-  return entry;
+  return isEntryValid(contentType, entry, { strapi });
 };
 
-export const getEntryValidStatus = async (
+export const isEntryValid = async (
   contentTypeUid: string,
-  entry: { id: Data.ID; [key: string]: any },
+  entry: any,
   { strapi }: { strapi: Core.Strapi }
 ) => {
   try {
@@ -57,32 +60,19 @@ export const getEntryValidStatus = async (
   }
 };
 
-/**
- * Temporal function to get the entryId from documentId with locale
- * This is needed because some services still need the entryId to work
- */
-export const getEntryId = async (
+export const getEntry = async (
   {
-    contentTypeUid,
+    contentType,
     documentId,
     locale,
-  }: { contentTypeUid: UID.ContentType; documentId?: string; locale?: string },
+    populate,
+    status = 'draft',
+  }: Action & { status?: 'draft' | 'published'; populate: any },
   { strapi }: { strapi: Core.Strapi }
 ) => {
-  let document;
-
   if (documentId) {
-    document = await strapi.documents(contentTypeUid).findOne({ documentId, locale });
-  } else {
-    // documentId is not defined in singleTypes, so we want to get the first document
-    document = await strapi.documents(contentTypeUid).findFirst({ locale });
+    return strapi.documents(contentType).findOne({ documentId, locale, populate, status });
   }
 
-  if (!document) {
-    throw new errors.NotFoundError(
-      `Entry not found on Content Releases for contentTypeUid ${contentTypeUid} and documentId ${documentId}`
-    );
-  }
-
-  return document.id;
+  return strapi.documents(contentType).findFirst({ locale, populate, status });
 };

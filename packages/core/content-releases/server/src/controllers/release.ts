@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
-import { validateRelease } from './validation/release';
+import { validateRelease, validatefindByDocumentAttachedParams } from './validation/release';
 import type {
   CreateRelease,
   UpdateRelease,
@@ -10,10 +10,10 @@ import type {
   Release,
   DeleteRelease,
   GetReleases,
-  MapEntriesToReleases,
+  // MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
-import { getService, getEntryId } from '../utils';
+import { getService } from '../utils';
 
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
@@ -28,50 +28,41 @@ const releaseController = {
       ability: ctx.state.userAbility,
       model: RELEASE_MODEL_UID,
     });
-
     await permissionsManager.validateQuery(ctx.query);
-
     const releaseService = getService('release', { strapi });
-
     const query = await permissionsManager.sanitizeQuery(ctx.query);
-    const { contentTypeUid, documentId, hasEntryAttached, locale } = query;
-    const entryId = await getEntryId({ contentTypeUid, documentId, locale }, { strapi });
 
+    await validatefindByDocumentAttachedParams(query);
+
+    const { contentType, entryDocumentId, hasEntryAttached, locale } = query;
     const isEntryAttached =
       typeof hasEntryAttached === 'string' ? Boolean(JSON.parse(hasEntryAttached)) : false;
 
     if (isEntryAttached) {
       const releases = await releaseService.findMany({
         where: {
+          releasedAt: null,
           actions: {
-            target_type: contentTypeUid,
-            target_id: entryId,
-          },
-          releasedAt: {
-            $null: true,
+            contentType,
+            entryDocumentId: entryDocumentId ?? null,
+            locale: locale ?? null,
           },
         },
         populate: {
           actions: {
             fields: ['type'],
-            where: {
-              target_type: contentTypeUid,
-              target_id: entryId,
-            },
           },
         },
       });
-
       ctx.body = { data: releases };
     } else {
       const relatedReleases = await releaseService.findMany({
         where: {
-          releasedAt: {
-            $null: true,
-          },
+          releasedAt: null,
           actions: {
-            target_type: contentTypeUid,
-            target_id: entryId,
+            contentType,
+            entryDocumentId: entryDocumentId ?? null,
+            locale: locale ?? null,
           },
         },
       });
@@ -88,12 +79,9 @@ const releaseController = {
               actions: null,
             },
           ],
-          releasedAt: {
-            $null: true,
-          },
+          releasedAt: null,
         },
       });
-
       ctx.body = { data: releases };
     }
   },
@@ -137,12 +125,13 @@ const releaseController = {
     const id: GetRelease.Request['params']['id'] = ctx.params.id;
 
     const releaseService = getService('release', { strapi });
+    const releaseActionService = getService('release-action', { strapi });
     const release = await releaseService.findOne(id, { populate: ['createdBy'] });
     if (!release) {
       throw new errors.NotFoundError(`Release not found for id: ${id}`);
     }
 
-    const count = await releaseService.countActions({
+    const count = await releaseActionService.countActions({
       filters: {
         release: id,
       },
@@ -167,6 +156,7 @@ const releaseController = {
     ctx.body = { data };
   },
 
+  /* @TODO: Migrate to new api 
   async mapEntriesToReleases(ctx: Koa.Context) {
     const { contentTypeUid, entriesIds } = ctx.query;
 
@@ -176,7 +166,7 @@ const releaseController = {
 
     const releaseService = getService('release', { strapi });
 
-    const releasesWithActions = await releaseService.findManyWithContentTypeEntryAttached(
+    const releasesWithActions = await releaseService.findMany(
       contentTypeUid,
       entriesIds
     );
@@ -202,6 +192,7 @@ const releaseController = {
       data: mappedEntriesInReleases,
     };
   },
+  */
 
   async create(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;
@@ -254,20 +245,20 @@ const releaseController = {
   },
 
   async publish(ctx: Koa.Context) {
-    const user: PublishRelease.Request['state']['user'] = ctx.state.user;
     const id: PublishRelease.Request['params']['id'] = ctx.params.id;
 
     const releaseService = getService('release', { strapi });
-    const release = await releaseService.publish(id, { user });
+    const releaseActionService = getService('release-action', { strapi });
+    const release = await releaseService.publish(id);
 
     const [countPublishActions, countUnpublishActions] = await Promise.all([
-      releaseService.countActions({
+      releaseActionService.countActions({
         filters: {
           release: id,
           type: 'publish',
         },
       }),
-      releaseService.countActions({
+      releaseActionService.countActions({
         filters: {
           release: id,
           type: 'unpublish',

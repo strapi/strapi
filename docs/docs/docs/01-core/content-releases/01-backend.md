@@ -26,7 +26,9 @@ packages/core/content-releases/server/src/content-types/release/schema.ts
 
 ### Release Action
 
-Th `Release Action` content type is associated with any entry from any content-type that has draft and publish enabled. It is responsible for storing the action to perform for an associated entry. It is saved in the database as `strapi_release_actions`. The schema can be found in:
+Th `Release Action` content type is associated with any entry from any content-type that has draft and publish enabled. It is responsible for storing the action to perform for an associated entry. It is saved in the database as `strapi_release_actions`. In v4, we used built-in polymorphic relations, but for v5, we stored `contentType`, `locale`, and `entryDocumentId` in the Release Action schema to create a "manual" relationship between actions and entries. This approach allows us to link a release action to a document ID instead of a specific entry ID, as the entry ID may change over time and is not reliable.
+
+The schema can be found in:
 
 ```
 packages/core/content-releases/server/src/content-types/release-action/schema.ts
@@ -59,12 +61,13 @@ packages/core/content-releases/server/src/routes/release.ts
 **Get all releases with/without an entry**:
 
 - method: `GET`
-- endpoint: `/content-releases/`
+- endpoint: `/content-releases/getByDocumentAttached`
 - params:
   ```ts
   {
     contentTypeUid: string;
-    entryId: number;
+    locale?: string;
+    documentId?: string;
     hasEntryAttached?: boolean;
   }
   ```
@@ -116,12 +119,10 @@ packages/core/content-releases/server/src/routes/release.ts
 
   ```ts
   {
-    entry: {
-      id: number,
-      contentType: string,
-      locale: string,
-    }
-    type: 'publish' | 'unpublish'
+    type: 'publish' | 'unpublish',
+    contentType: string;
+    locale?: string;
+    entryDocumentId?: string;
   }
   ```
 
@@ -171,10 +172,18 @@ Handles requests to interact with the Release Action content type
 
 ### Release
 
-Interacts with the database for Release and Release Action CRUD operations
+Interacts with the database for Release CRUD operations
 
 ```
 packages/core/content-releases/server/src/services/release.ts
+```
+
+### Release Actions
+
+Interacts with the database for Release Actions CRUD operations
+
+```
+packages/core/content-releases/server/src/services/release-action.ts
 ```
 
 ### Release Validation

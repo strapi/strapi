@@ -4,6 +4,8 @@ import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
 
+type ReleaseActionEntryType = 'single-types' | 'collection-types';
+
 export type ReleaseActionEntry = Modules.Documents.AnyDocument & {
   // Entity attributes
   [key: string]: Schema.Attribute.AnyAttribute;
@@ -15,6 +17,7 @@ export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
   contentType: UID.ContentType;
+  entryDocumentId: ReleaseActionEntry['documentId'];
   locale?: string;
   release: Release;
   isEntryValid: boolean;
@@ -45,11 +48,9 @@ export declare namespace CreateReleaseAction {
     };
     body: {
       type: ReleaseAction['type'];
-      entry: {
-        documentId?: ReleaseActionEntry['documentId'];
-        locale?: ReleaseActionEntry['locale'];
-        contentType: string;
-      };
+      contentType: UID.ContentType;
+      entryDocumentId?: ReleaseActionEntry['documentId'];
+      locale?: ReleaseActionEntry['locale'];
     };
   }
 

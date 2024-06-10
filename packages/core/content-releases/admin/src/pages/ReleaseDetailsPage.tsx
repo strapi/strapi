@@ -139,7 +139,7 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
 
   const errors = validate(entry) ?? {};
 
-  if (Object.keys(errors).length > 0) {
+  if (action === 'publish' && Object.keys(errors).length > 0) {
     const validationErrorsMessages = Object.entries(errors)
       .map(([key, value]) =>
         formatMessage(

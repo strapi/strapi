@@ -10,10 +10,13 @@ import {
   disableContentTypeLocalized,
   enableContentTypeLocalized,
 } from './migrations';
+import { addEntryDocumentToReleaseActions } from './migrations/database/5.0.0-document-id-in-actions';
 
 export const register = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
     await strapi.service('admin::permission').actionProvider.registerMany(ACTIONS);
+
+    strapi.db.migrations.providers.internal.register(addEntryDocumentToReleaseActions);
 
     strapi
       .hook('strapi::content-types.beforeSync')

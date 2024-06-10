@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual';
 
 import { difference, keys } from 'lodash';
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
-import { getPopulatedEntry, getEntryValidStatus, getService } from '../utils';
+import { getDraftEntryValidStatus, getService } from '../utils';
 import { Release } from '../../../shared/contracts/releases';
 import { ReleaseAction } from '../../../shared/contracts/release-actions';
 
@@ -80,22 +80,23 @@ export async function migrateIsValidAndStatusReleases() {
       // We need to check the Action is related to a valid entry because we can't assume this is gonna be always the case
       // example: users could make changes directly to their database, or data could be lost
       if (action.entry) {
-        const populatedEntry = await getPopulatedEntry(action.contentType, action.entry.id, {
-          strapi,
+        const isEntryValid = getDraftEntryValidStatus(
+          {
+            contentType: action.contentType,
+            documentId: action.entryDocumentId,
+            locale: action.locale,
+          },
+          { strapi }
+        );
+
+        await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+          where: {
+            id: action.id,
+          },
+          data: {
+            isEntryValid,
+          },
         });
-
-        if (populatedEntry) {
-          const isEntryValid = getEntryValidStatus(action.contentType, populatedEntry, { strapi });
-
-          await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-            where: {
-              id: action.id,
-            },
-            data: {
-              isEntryValid,
-            },
-          });
-        }
       }
     }
 
@@ -148,27 +149,26 @@ export async function revalidateChangedContentTypes({ oldContentTypes, contentTy
           });
 
           await async.map(actions, async (action: ReleaseAction) => {
-            if (action.entry && action.release) {
-              const populatedEntry = await getPopulatedEntry(contentTypeUID, action.entry.id, {
-                strapi,
+            if (action.entry && action.release && action.type === 'publish') {
+              const isEntryValid = await getDraftEntryValidStatus(
+                {
+                  contentType: contentTypeUID,
+                  documentId: action.entryDocumentId,
+                  locale: action.locale,
+                },
+                { strapi }
+              );
+
+              releasesAffected.add(action.release.id);
+
+              await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
+                where: {
+                  id: action.id,
+                },
+                data: {
+                  isEntryValid,
+                },
               });
-
-              if (populatedEntry) {
-                const isEntryValid = await getEntryValidStatus(contentTypeUID, populatedEntry, {
-                  strapi,
-                });
-
-                releasesAffected.add(action.release.id);
-
-                await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-                  where: {
-                    id: action.id,
-                  },
-                  data: {
-                    isEntryValid,
-                  },
-                });
-              }
             }
           });
         }

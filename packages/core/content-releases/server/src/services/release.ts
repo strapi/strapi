@@ -1,8 +1,6 @@
-import { setCreatorFields, errors, async } from '@strapi/utils';
+import { setCreatorFields, errors } from '@strapi/utils';
 
-import type { Core, Modules, Struct, Internal, UID } from '@strapi/types';
-
-import _ from 'lodash/fp';
+import type { Core, Struct, UID, Data } from '@strapi/types';
 
 import { ALLOWED_WEBHOOK_EVENTS, RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID } from '../constants';
 import type {
@@ -13,40 +11,10 @@ import type {
   GetRelease,
   Release,
   DeleteRelease,
-  GetReleasesByDocumentAttached,
 } from '../../../shared/contracts/releases';
-import type {
-  CreateReleaseAction,
-  GetReleaseActions,
-  ReleaseAction,
-  UpdateReleaseAction,
-  DeleteReleaseAction,
-  ReleaseActionGroupBy,
-} from '../../../shared/contracts/release-actions';
-import type { Entity, UserInfo } from '../../../shared/types';
-import { getService, getPopulatedEntry, getEntryValidStatus, getEntryId } from '../utils';
-
-export interface Locale extends Entity {
-  name: string;
-  code: string;
-}
-
-type LocaleDictionary = {
-  [key: Locale['code']]: Pick<Locale, 'name' | 'code'>;
-};
-
-const getGroupName = (queryValue: string) => {
-  switch (queryValue) {
-    case 'contentType':
-      return 'contentType.displayName';
-    case 'type':
-      return 'type';
-    case 'locale':
-      return _.getOr('No locale', 'locale.name');
-    default:
-      return 'contentType.displayName';
-  }
-};
+import type { ReleaseAction } from '../../../shared/contracts/release-actions';
+import type { UserInfo } from '../../../shared/types';
+import { getService } from '../utils';
 
 const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
   const dispatchWebhook = (
@@ -71,11 +39,6 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
           id: releaseId,
         },
       },
-      populate: {
-        entry: {
-          fields: ['documentId', 'locale'],
-        },
-      },
     })) as ReleaseAction[];
 
     if (actions.length === 0) {
@@ -87,8 +50,8 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
      */
     const formattedActions: {
       [key: UID.ContentType]: {
-        publish: { documentId: ReleaseAction['entry']['documentId']; locale?: string }[];
-        unpublish: { documentId: ReleaseAction['entry']['documentId']; locale?: string }[];
+        publish: { documentId: ReleaseAction['entryDocumentId']; locale?: string }[];
+        unpublish: { documentId: ReleaseAction['entryDocumentId']; locale?: string }[];
       };
     } = {};
 
@@ -103,68 +66,12 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       }
 
       formattedActions[contentTypeUid][action.type].push({
-        documentId: action.entry.documentId,
-        locale: action.entry.locale,
+        documentId: action.entryDocumentId,
+        locale: action.locale,
       });
     }
 
     return formattedActions;
-  };
-
-  const getLocalesDataForActions = async () => {
-    if (!strapi.plugin('i18n')) {
-      return {};
-    }
-
-    const allLocales: Locale[] = (await strapi.plugin('i18n').service('locales').find()) || [];
-    return allLocales.reduce<LocaleDictionary>((acc, locale) => {
-      acc[locale.code] = { name: locale.name, code: locale.code };
-
-      return acc;
-    }, {});
-  };
-
-  const getContentTypesDataForActions = async (
-    contentTypesUids: ReleaseAction['contentType'][]
-  ) => {
-    const contentManagerContentTypeService = strapi
-      .plugin('content-manager')
-      .service('content-types');
-
-    const contentTypesData: Record<
-      Internal.UID.ContentType,
-      { mainField: string; displayName: string }
-    > = {};
-    for (const contentTypeUid of contentTypesUids) {
-      const contentTypeConfig = await contentManagerContentTypeService.findConfiguration({
-        uid: contentTypeUid,
-      });
-
-      contentTypesData[contentTypeUid] = {
-        mainField: contentTypeConfig.settings.mainField,
-        displayName: strapi.getModel(contentTypeUid).info.displayName,
-      };
-    }
-
-    return contentTypesData;
-  };
-
-  const getContentTypesUidsOnRelease = async (releaseId: Release['id']) => {
-    const actions = (await strapi.db.query(RELEASE_ACTION_MODEL_UID).findMany({
-      where: {
-        release: {
-          id: releaseId,
-        },
-      },
-    })) as ReleaseAction[];
-
-    return actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
-      if (!acc.includes(action.contentType)) {
-        acc.push(action.contentType);
-      }
-
-      return acc;
-    }, []);
   };
 
   return {
@@ -224,7 +131,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       });
     },
 
-    findMany(query?: GetReleasesByDocumentAttached.Request['query']) {
+    findMany(query?: any) {
       const dbQuery = strapi.get('query-params').transform(RELEASE_MODEL_UID, query ?? {});
 
       return strapi.db.query(RELEASE_MODEL_UID).findMany({
@@ -233,7 +140,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
 
     async update(
-      id: number,
+      id: Data.ID,
       releaseData: UpdateRelease.Request['body'],
       { user }: { user: UserInfo }
     ) {
@@ -281,177 +188,6 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       strapi.telemetry.send('didUpdateContentRelease');
 
       return updatedRelease;
-    },
-
-    async createAction(
-      releaseId: CreateReleaseAction.Request['params']['releaseId'],
-      action: Pick<CreateReleaseAction.Request['body'], 'type' | 'entry'>
-    ) {
-      const { validateEntryContentType, validateUniqueEntry } = getService('release-validation', {
-        strapi,
-      });
-
-      await Promise.all([
-        validateEntryContentType(action.entry.contentType),
-        validateUniqueEntry(releaseId, action),
-      ]);
-
-      const release = await strapi.db
-        .query(RELEASE_MODEL_UID)
-        .findOne({ where: { id: releaseId } });
-
-      if (!release) {
-        throw new errors.NotFoundError(`No release found for id ${releaseId}`);
-      }
-
-      if (release.releasedAt) {
-        throw new errors.ValidationError('Release already published');
-      }
-
-      const { entry, type } = action;
-      const entryId = await getEntryId(
-        {
-          contentTypeUid: entry.contentType as UID.ContentType,
-          documentId: entry.documentId,
-          locale: entry.locale,
-        },
-        { strapi }
-      );
-
-      const populatedEntry = await getPopulatedEntry(entry.contentType, entryId, { strapi });
-      const isEntryValid = await getEntryValidStatus(entry.contentType, populatedEntry, { strapi });
-
-      const releaseAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).create({
-        data: {
-          type,
-          contentType: entry.contentType,
-          locale: entry.locale,
-          isEntryValid,
-          entry: {
-            id: entryId,
-            __type: entry.contentType,
-            __pivot: { field: 'entry' },
-          },
-          release: releaseId,
-        },
-        populate: { release: { select: ['id'] }, entry: { select: ['id'] } },
-      });
-
-      this.updateReleaseStatus(releaseId);
-
-      return releaseAction;
-    },
-
-    async findActions(
-      releaseId: GetReleaseActions.Request['params']['releaseId'],
-      query?: GetReleaseActions.Request['query']
-    ) {
-      const release = await strapi.db.query(RELEASE_MODEL_UID).findOne({
-        where: { id: releaseId },
-        select: ['id'],
-      });
-
-      if (!release) {
-        throw new errors.NotFoundError(`No release found for id ${releaseId}`);
-      }
-
-      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
-
-      // For each contentType on the release, we create a custom populate object for nested relations
-      const populateBuilderService = strapi.plugin('content-manager').service('populate-builder');
-      const contentTypesUids = await getContentTypesUidsOnRelease(releaseId);
-      const reducer = async.reduce(contentTypesUids);
-      const morphPopulate = await reducer(
-        async (
-          acc: Record<UID.ContentType, { populate: any }>,
-          contentTypeUid: UID.ContentType
-        ) => {
-          // @ts-expect-error - Core.Service type is not a function
-          const populate = await populateBuilderService('api::restaurant.restaurant')
-            .populateDeep(Infinity)
-            .build();
-
-          acc[contentTypeUid] = {
-            populate,
-          };
-
-          return acc;
-        },
-        {} as Record<UID.ContentType, { populate: any }>
-      );
-
-      return strapi.db.query(RELEASE_ACTION_MODEL_UID).findPage({
-        ...dbQuery,
-        populate: {
-          entry: {
-            on: morphPopulate,
-          },
-        },
-        where: {
-          release: releaseId,
-        },
-      });
-    },
-
-    async countActions(
-      query: Modules.EntityService.Params.Pick<typeof RELEASE_ACTION_MODEL_UID, 'filters'>
-    ) {
-      const dbQuery = strapi.get('query-params').transform(RELEASE_ACTION_MODEL_UID, query ?? {});
-
-      return strapi.db.query(RELEASE_ACTION_MODEL_UID).count(dbQuery);
-    },
-
-    async groupActions(actions: ReleaseAction[], groupBy: ReleaseActionGroupBy) {
-      const contentTypeUids = actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
-        if (!acc.includes(action.contentType)) {
-          acc.push(action.contentType);
-        }
-
-        return acc;
-      }, []);
-      const allReleaseContentTypesDictionary = await getContentTypesDataForActions(contentTypeUids);
-      const allLocalesDictionary = await getLocalesDataForActions();
-
-      const formattedData = actions.map((action: ReleaseAction) => {
-        const { mainField, displayName } = allReleaseContentTypesDictionary[action.contentType];
-
-        return {
-          ...action,
-          locale: action.locale ? allLocalesDictionary[action.locale] : null,
-          contentType: {
-            displayName,
-            mainFieldValue: action.entry[mainField],
-            uid: action.contentType,
-          },
-        };
-      });
-
-      const groupName = getGroupName(groupBy);
-      return _.groupBy(groupName)(formattedData);
-    },
-
-    getContentTypeModelsFromActions(actions: ReleaseAction[]) {
-      const contentTypeUids = actions.reduce<ReleaseAction['contentType'][]>((acc, action) => {
-        if (!acc.includes(action.contentType)) {
-          acc.push(action.contentType);
-        }
-
-        return acc;
-      }, []);
-
-      const contentTypeModelsMap = contentTypeUids.reduce(
-        (
-          acc: { [key: ReleaseAction['contentType']]: Struct.ContentTypeSchema },
-          contentTypeUid: ReleaseAction['contentType']
-        ) => {
-          acc[contentTypeUid] = strapi.getModel(contentTypeUid);
-
-          return acc;
-        },
-        {}
-      );
-
-      return contentTypeModelsMap;
     },
 
     async getAllComponents() {
@@ -623,68 +359,16 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
       return release;
     },
 
-    async updateAction(
-      actionId: UpdateReleaseAction.Request['params']['actionId'],
-      releaseId: UpdateReleaseAction.Request['params']['releaseId'],
-      update: UpdateReleaseAction.Request['body']
-    ) {
-      const updatedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).update({
-        where: {
-          id: actionId,
-          release: {
-            id: releaseId,
-            releasedAt: {
-              $null: true,
-            },
-          },
-        },
-        data: update,
-      });
-
-      if (!updatedAction) {
-        throw new errors.NotFoundError(
-          `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
-        );
-      }
-
-      return updatedAction;
-    },
-
-    async deleteAction(
-      actionId: DeleteReleaseAction.Request['params']['actionId'],
-      releaseId: DeleteReleaseAction.Request['params']['releaseId']
-    ) {
-      const deletedAction = await strapi.db.query(RELEASE_ACTION_MODEL_UID).delete({
-        where: {
-          id: actionId,
-          release: {
-            id: releaseId,
-            releasedAt: {
-              $null: true,
-            },
-          },
-        },
-      });
-
-      if (!deletedAction) {
-        throw new errors.NotFoundError(
-          `Action with id ${actionId} not found in release with id ${releaseId} or it is already published`
-        );
-      }
-
-      this.updateReleaseStatus(releaseId);
-
-      return deletedAction;
-    },
-
     async updateReleaseStatus(releaseId: Release['id']) {
+      const releaseActionService = getService('release-action', { strapi });
+
       const [totalActions, invalidActions] = await Promise.all([
-        this.countActions({
+        releaseActionService.countActions({
           filters: {
             release: releaseId,
           },
         }),
-        this.countActions({
+        releaseActionService.countActions({
           filters: {
             release: releaseId,
             isEntryValid: false,
@@ -725,5 +409,7 @@ const createReleaseService = ({ strapi }: { strapi: Core.Strapi }) => {
     },
   };
 };
+
+export type ReleaseService = ReturnType<typeof createReleaseService>;
 
 export default createReleaseService;
