@@ -669,12 +669,48 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 
   const handleChange = useForm('useField', (state) => state.onChange);
 
-  const error = useForm('useField', (state) => getIn(state.errors, path));
+  const convertErrorFormat = (stateErrors: FormErrors<FormValues>) => {
+    const nestedErrors: Record<string, any> = {};
+
+    Object.entries(stateErrors).forEach(([key, value]) => {
+      let current = nestedErrors;
+
+      const pathParts = key.split('.');
+      pathParts.forEach((part, index) => {
+        const isLastPart = index === pathParts.length - 1;
+
+        if (isLastPart) {
+          if (typeof value === 'string') {
+            // If the value is a translation message object or a string, it should be nested as is
+            current[part] = value;
+          } else if (isErrorMessageDescriptor(value)) {
+            // If the value is a plain object, it should be converted to a string message
+            current[part] = formatMessage(value);
+          } else {
+            // If the value is not an object, it may be an array or a message
+            setIn(current, part, value);
+          }
+        } else {
+          // Ensure nested structure exists
+          if (!current[part]) {
+            const isArray = !isNaN(Number(pathParts[index + 1]));
+            current[part] = isArray ? [] : {};
+          }
+
+          current = current[part];
+        }
+      });
+    });
+
+    return nestedErrors;
+  };
+
+  const error = useForm('useField', (state) => getIn(convertErrorFormat(state.errors), path));
 
   return {
     initialValue,
     /**
-     * Errors can be a string, or a MesaageDescriptor, so we need to handle both cases.
+     * Errors can be a string, or a MessageDescriptor, so we need to handle both cases.
      * If it's anything else, we don't return it.
      */
     error: isErrorMessageDescriptor(error)
@@ -693,9 +729,13 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
   };
 };
 
-const isErrorMessageDescriptor = (object?: string | object): object is TranslationMessage => {
+const isErrorMessageDescriptor = (object?: object): object is TranslationMessage => {
   return (
-    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
+    typeof object === 'object' &&
+    object !== null &&
+    !Array.isArray(object) &&
+    'id' in object &&
+    'defaultMessage' in object
   );
 };
 

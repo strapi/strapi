@@ -183,6 +183,7 @@ test.describe('Uniqueness', () => {
         await clickSave(page);
 
         await expect(page.getByText('Warning:2 errors occurred')).toBeVisible();
+        await expect(page.getByText('This attribute must be unique')).toBeVisible();
         await page.getByRole('button', { name: 'Delete' }).nth(1).click();
       }
 
