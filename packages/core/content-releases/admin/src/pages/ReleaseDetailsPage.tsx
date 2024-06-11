@@ -32,7 +32,14 @@ import {
   Menu,
   Dialog,
 } from '@strapi/design-system';
-import { CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import {
+  CheckCircle,
+  More,
+  Pencil,
+  Trash,
+  CrossCircle,
+  ArrowsCounterClockwise,
+} from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
@@ -119,9 +126,10 @@ interface EntryValidationTextProps {
   schema?: Struct.ContentTypeSchema;
   components: { [key: Internal.UID.Component]: Struct.ComponentSchema };
   entry: ReleaseActionEntry;
+  status: ReleaseAction['status'];
 }
 
-const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps) => {
+const EntryValidationText = ({ action, schema, entry, status }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
 
   const { validate, isLoading } = unstable_useDocument(
@@ -140,50 +148,76 @@ const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps
 
   const errors = validate(entry) ?? {};
 
-  if (action === 'publish' && Object.keys(errors).length > 0) {
-    const validationErrorsMessages = Object.entries(errors)
-      .map(([key, value]) =>
-        formatMessage(
-          // @ts-expect-error – TODO: fix this will better checks
-          { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
-          { field: key }
+  if (action === 'publish') {
+    if (Object.keys(errors).length > 0) {
+      const validationErrorsMessages = Object.entries(errors)
+        .map(([key, value]) =>
+          formatMessage(
+            // @ts-expect-error – TODO: fix this will better checks
+            { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+            { field: key }
+          )
         )
-      )
-      .join(' ');
+        .join(' ');
 
-    return (
-      <Flex gap={2}>
-        <CrossCircle fill="danger600" />
-        <Tooltip description={validationErrorsMessages}>
-          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
-            {validationErrorsMessages}
-          </TypographyMaxWidth>
-        </Tooltip>
-      </Flex>
-    );
-  }
+      return (
+        <Flex gap={2}>
+          <CrossCircle fill="danger600" />
+          <Tooltip description={validationErrorsMessages}>
+            <TypographyMaxWidth
+              textColor="danger600"
+              variant="omega"
+              fontWeight="semiBold"
+              ellipsis
+            >
+              {validationErrorsMessages}
+            </TypographyMaxWidth>
+          </Tooltip>
+        </Flex>
+      );
+    }
 
-  if (action == 'publish') {
-    return (
-      <Flex gap={2}>
-        <CheckCircle fill="success600" />
-        {entry.publishedAt ? (
-          <Typography textColor="success600" fontWeight="bold">
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
-              defaultMessage: 'Already published',
-            })}
-          </Typography>
-        ) : (
+    if (status === 'draft') {
+      return (
+        <Flex gap={2}>
+          <CheckCircle fill="success600" />
           <Typography>
             {formatMessage({
               id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
               defaultMessage: 'Ready to publish',
             })}
           </Typography>
-        )}
-      </Flex>
-    );
+        </Flex>
+      );
+    }
+
+    if (status === 'modified') {
+      return (
+        <Flex gap={2}>
+          <ArrowsCounterClockwise fill="alternative600" />
+          <Typography>
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.modified',
+              defaultMessage: 'Ready to publish changes',
+            })}
+          </Typography>
+        </Flex>
+      );
+    }
+
+    if (status === 'published') {
+      return (
+        <Flex gap={2}>
+          <CheckCircle fill="success600" />
+          <Typography>
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
+              defaultMessage: 'Already published',
+            })}
+          </Typography>
+        </Flex>
+      );
+    }
   }
 
   return (
@@ -745,7 +779,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                 <Table.Loading />
                 <Table.Body>
                   {releaseActions[key].map(
-                    ({ id, contentType, locale, type, entry }, actionIndex) => (
+                    ({ id, contentType, locale, type, entry, status }, actionIndex) => (
                       <Tr key={id}>
                         <Td width="25%" maxWidth="200px">
                           <Typography ellipsis>{`${
@@ -795,6 +829,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                                 schema={contentTypes?.[contentType.uid]}
                                 components={components}
                                 entry={entry}
+                                status={status}
                               />
                             </Td>
                             <Td>

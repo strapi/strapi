@@ -76,3 +76,29 @@ export const getEntry = async (
 
   return strapi.documents(contentType).findFirst({ locale, populate, status });
 };
+
+export const getEntryStatus = async (contentType: UID.ContentType, entry: Data.ContentType) => {
+  if (entry.publishedAt) {
+    return 'published';
+  }
+
+  const publishedEntry = await strapi.documents(contentType).findOne({
+    documentId: entry.documentId,
+    locale: entry.locale,
+    status: 'published',
+    fields: ['updatedAt'],
+  });
+
+  if (!publishedEntry) {
+    return 'draft';
+  }
+
+  const entryUpdatedAt = new Date(entry.updatedAt).getTime();
+  const publishedEntryUpdatedAt = new Date(publishedEntry.updatedAt).getTime();
+
+  if (entryUpdatedAt > publishedEntryUpdatedAt) {
+    return 'modified';
+  }
+
+  return 'published';
+};

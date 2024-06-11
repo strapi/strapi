@@ -16,6 +16,7 @@ import {
   EmptyStateLayout,
   LinkButton,
   Field,
+  Modal,
 } from '@strapi/design-system';
 import { Cursor } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -272,7 +273,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
         />
       ),
       footer: ({ onClose }) => (
-        <Flex justifyContent="space-between">
+        <Modal.Footer>
           <Button onClick={onClose} variant="tertiary" name="cancel">
             {formatMessage({
               id: 'content-releases.content-manager-edit-view.add-to-release.cancel-button',
@@ -291,7 +292,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
               defaultMessage: 'Continue',
             })}
           </Button>
-        </Flex>
+        </Modal.Footer>
       ),
     },
   };

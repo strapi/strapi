@@ -121,7 +121,9 @@ const releaseActionController = {
      */
     const sanitizedResults = await async.map(results, async (action: any) => ({
       ...action,
-      entry: await contentTypeOutputSanitizers[action.contentType](action.entry),
+      entry: action.entry
+        ? await contentTypeOutputSanitizers[action.contentType](action.entry)
+        : {},
     }));
 
     const groupedData = await releaseActionService.groupActions(sanitizedResults, query.sort);

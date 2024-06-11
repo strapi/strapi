@@ -21,6 +21,7 @@ export interface ReleaseAction extends Entity {
   locale?: string;
   release: Release;
   isEntryValid: boolean;
+  status: 'draft' | 'published' | 'modified';
 }
 
 export interface FormattedReleaseAction extends Entity {
@@ -36,6 +37,7 @@ export interface FormattedReleaseAction extends Entity {
     code: string;
   };
   release: Release;
+  status: 'draft' | 'published' | 'modified';
 }
 
 /**

@@ -15,7 +15,7 @@ import type {
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import type { Entity } from '../../../shared/types';
-import { getService, getDraftEntryValidStatus, getEntry } from '../utils';
+import { getService, getDraftEntryValidStatus, getEntry, getEntryStatus } from '../utils';
 
 const getGroupName = (queryValue: string) => {
   switch (queryValue) {
@@ -166,18 +166,21 @@ const createReleaseActionService = ({ strapi }: { strapi: Core.Strapi }) => {
           .populateDeep(Infinity)
           .build();
 
+        const entry = await getEntry(
+          {
+            contentType: action.contentType,
+            documentId: action.entryDocumentId,
+            locale: action.locale,
+            populate,
+            status: action.type === 'publish' ? 'draft' : 'published',
+          },
+          { strapi }
+        );
+
         return {
           ...action,
-          entry: await getEntry(
-            {
-              contentType: action.contentType,
-              documentId: action.entryDocumentId,
-              locale: action.locale,
-              populate,
-              status: action.type === 'publish' ? 'draft' : 'published',
-            },
-            { strapi }
-          ),
+          entry,
+          status: entry ? await getEntryStatus(action.contentType, entry) : null,
         };
       });
 
