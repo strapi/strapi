@@ -230,12 +230,7 @@ const Root = ({ children }: RootProps) => {
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release
     allowedActions.canDeleteAction || allowedActions.canUpdate ? (
       <Menu.Root>
-        {/*
-          TODO Fix in the DS
-          - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
-          - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
-         */}
-        <Menu.Trigger paddingLeft={2} paddingRight={2}>
+        <Menu.Trigger variant="tertiary" endIcon={null} paddingLeft={2} paddingRight={2}>
           <AccessibleIcon
             label={formatMessage({
               id: 'content-releases.content-manager-edit-view.release-action-menu',
@@ -245,10 +240,6 @@ const Root = ({ children }: RootProps) => {
             <More />
           </AccessibleIcon>
         </Menu.Trigger>
-        {/*
-          TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
-          Refactor this once fixed in the DS
-         */}
         <Menu.Content top={1} popoverPlacement="bottom-end">
           {children}
         </Menu.Content>
