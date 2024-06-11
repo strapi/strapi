@@ -19,7 +19,7 @@ import {
   Thead,
   Tr,
   RawTrProps,
-  BaseCheckbox,
+  Checkbox,
   Loader,
   Table as DSTable,
   EmptyStateLayout,
@@ -284,15 +284,14 @@ const HeaderCheckboxCell = () => {
 
   return (
     <Th>
-      <BaseCheckbox
+      <Checkbox
         aria-label={formatMessage({
           id: 'global.select-all-entries',
           defaultMessage: 'Select all entries',
         })}
         disabled={rows.length === 0}
-        checked={areAllEntriesSelected}
-        indeterminate={isIndeterminate}
-        onChange={handleSelectAll}
+        checked={isIndeterminate ? 'indeterminate' : areAllEntriesSelected}
+        onCheckedChange={handleSelectAll}
       />
     </Th>
   );
@@ -385,7 +384,9 @@ const Row = (props: Table.RowProps) => {
 /* -------------------------------------------------------------------------------------------------
  * Cell
  * -----------------------------------------------------------------------------------------------*/
-const Cell = Td;
+const Cell = (props: Table.CellProps) => {
+  return <Td {...props} />;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Row
@@ -405,7 +406,7 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
 
   return (
     <Cell {...props} onClick={(e) => e.stopPropagation()}>
-      <BaseCheckbox
+      <Checkbox
         aria-label={formatMessage(
           {
             id: 'app.component.table.select.one-entry',
@@ -415,7 +416,7 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
         )}
         disabled={rows.length === 0}
         checked={isChecked}
-        onChange={handleSelectRow}
+        onCheckedChange={handleSelectRow}
       />
     </Cell>
   );

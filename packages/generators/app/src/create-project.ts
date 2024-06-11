@@ -3,35 +3,36 @@ import { join } from 'path';
 import fse from 'fs-extra';
 import chalk from 'chalk';
 import execa from 'execa';
-import ora from 'ora';
-import _ from 'lodash';
 
 import stopProcess from './utils/stop-process';
-import { trackUsage, captureStderr } from './utils/usage';
+import { trackUsage } from './utils/usage';
 import mergeTemplate from './utils/merge-template.js';
 import tryGitInit from './utils/git';
 
-import packageJSON from './resources/json/common/package.json';
+import createPackageJSON from './resources/json/common/package.json';
 import jsconfig from './resources/json/js/jsconfig.json';
 import adminTsconfig from './resources/json/ts/tsconfig-admin.json';
 import serverTsconfig from './resources/json/ts/tsconfig-server.json';
 import { createDatabaseConfig, generateDbEnvVariables } from './resources/templates/database';
 import createEnvFile from './resources/templates/env';
-import { Configuration, Scope, isStderrError } from './types';
+import { Scope, isStderrError } from './types';
 
-export default async function createProject(
-  scope: Scope,
-  { client, connection, dependencies }: Configuration
-) {
-  console.log(`Creating a new Strapi application at ${chalk.green(scope.rootPath)}.`);
-  console.log('Creating files.');
+const resources = join(__dirname, 'resources');
+
+export default async function createProject(scope: Scope) {
+  console.log(`Creating a new Strapi application at ${chalk.green(scope.rootPath)}.\n`);
 
   const { rootPath, useTypescript } = scope;
-  const resources = join(__dirname, 'resources');
 
-  const language = useTypescript ? 'ts' : 'js';
+  if (!scope.isQuickstart) {
+    await trackUsage({ event: 'didChooseCustomDatabase', scope });
+  } else {
+    await trackUsage({ event: 'didChooseQuickstart', scope });
+  }
 
   try {
+    const language = useTypescript ? 'ts' : 'js';
+
     // copy files
     await fse.copy(join(resources, 'files', language), rootPath);
 
@@ -53,64 +54,36 @@ export default async function createProject(
     // Copy common dot files
     copyDotFilesFromSubDirectory('common');
 
-    // Copy JS dot files
-    // For now we only support javascript and typescript, so if we're not using
-    // typescript, then we can assume we're using javascript. We'll need to change
-    // this behavior when we'll abstract the supported languages even more.
-    if (!useTypescript) {
-      copyDotFilesFromSubDirectory('js');
-    }
-
     await trackUsage({ event: 'didCopyProjectFiles', scope });
 
-    // copy templates
-    await fse.writeJSON(
-      join(rootPath, 'package.json'),
-      packageJSON({
-        strapiDependencies: scope.strapiDependencies,
-        additionalsDependencies: dependencies,
-        strapiVersion: scope.strapiVersion,
-        projectName: _.kebabCase(scope.name),
-        uuid: scope.uuid,
-        packageJsonStrapi: scope.packageJsonStrapi,
-      }),
-      {
-        spaces: 2,
-      }
-    );
+    await createPackageJSON(scope);
 
     await trackUsage({ event: 'didWritePackageJSON', scope });
 
     if (useTypescript) {
-      const filesMap = {
-        'tsconfig-admin.json.js': 'src/admin',
-        'tsconfig-server.json.js': '.',
-      };
+      const tsConfigs = [
+        {
+          path: 'src/admin/tsconfig.json',
+          content: adminTsconfig(),
+        },
+        {
+          path: 'tsconfig.json',
+          content: serverTsconfig(),
+        },
+      ];
 
-      for (const [fileName, path] of Object.entries(filesMap)) {
-        const destPath = join(rootPath, path, 'tsconfig.json');
-
-        if (fileName === 'tsconfig-admin.json.js') {
-          await fse.writeJSON(destPath, adminTsconfig(), { spaces: 2 });
-        }
-        if (fileName === 'tsconfig-server.json.js') {
-          await fse.writeJSON(destPath, serverTsconfig(), { spaces: 2 });
-        }
+      for (const { path, content } of tsConfigs) {
+        await fse.writeJSON(join(rootPath, path), content, { spaces: 2 });
       }
     } else {
-      const filesMap = { 'jsconfig.json.js': '.' };
-
-      for (const [, path] of Object.entries(filesMap)) {
-        const destPath = join(rootPath, path, 'jsconfig.json');
-        await fse.writeJSON(destPath, jsconfig(), { spaces: 2 });
-      }
+      await fse.writeJSON(join(rootPath, 'jsconfig.json'), jsconfig(), { spaces: 2 });
     }
 
     // ensure node_modules is created
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
     // create config/database
-    await fse.appendFile(join(rootPath, '.env'), generateDbEnvVariables({ client, connection }));
+    await fse.appendFile(join(rootPath, '.env'), generateDbEnvVariables(scope));
     await fse.writeFile(
       join(rootPath, `config/database.${language}`),
       createDatabaseConfig({ useTypescript })
@@ -138,44 +111,25 @@ export default async function createProject(
 
   await trackUsage({ event: 'willInstallProjectDependencies', scope });
 
-  const installPrefix = chalk.yellow('Installing dependencies:');
-  const loader = ora(installPrefix).start();
-
-  const logInstall = (chunk = '') => {
-    loader.text = `${installPrefix} ${chunk.toString().split('\n').join(' ')}`;
-  };
+  console.log(`Installing dependencies with ${chalk.bold(scope.packageManager)}\n`);
 
   try {
     if (scope.installDependencies !== false) {
-      const runner = runInstall(scope);
-
-      runner.stdout?.on('data', logInstall);
-      runner.stderr?.on('data', logInstall);
-
-      await runner;
+      await runInstall(scope);
     }
 
-    loader.stop();
     console.log(`Dependencies installed ${chalk.green('successfully')}.`);
 
     await trackUsage({ event: 'didInstallProjectDependencies', scope });
   } catch (error) {
     const stderr = isStderrError(error) ? error.stderr : '';
 
-    loader.stop();
     await trackUsage({
       event: 'didNotInstallProjectDependencies',
       scope,
       error: stderr.slice(-1024),
     });
 
-    console.error(`${chalk.red('Error')} while installing dependencies:`);
-    console.error(stderr);
-
-    await captureStderr('didNotInstallProjectDependencies', error);
-
-    console.log(chalk.black.bgWhite(' Keep trying!'));
-    console.log();
     console.log(
       chalk.bold(
         'Oh, it seems that you encountered errors while installing dependencies in your project.'
@@ -183,12 +137,10 @@ export default async function createProject(
     );
     console.log(`Don't give up, your project was created correctly.`);
     console.log(
-      `Fix the issues mentioned in the installation errors and try to run the following command:`
+      `Fix the issues mentioned in the installation errors and try to run the following command`
     );
     console.log();
-    console.log(
-      `cd ${chalk.green(rootPath)} && ${chalk.cyan(scope.useYarn ? 'yarn' : 'npm')} install`
-    );
+    console.log(`cd ${chalk.green(rootPath)} && ${chalk.cyan(scope.packageManager)} install`);
     console.log();
 
     stopProcess();
@@ -205,7 +157,7 @@ export default async function createProject(
   console.log();
   console.log(`Your application was created at ${chalk.green(rootPath)}.\n`);
 
-  const cmd = chalk.cyan(scope.useYarn ? 'yarn' : 'npm run');
+  const cmd = chalk.cyan(`${scope.packageManager} run`);
 
   console.log('Available commands in your project:');
   console.log();
@@ -228,19 +180,54 @@ export default async function createProject(
   console.log(`  ${chalk.cyan('cd')} ${rootPath}`);
   console.log(`  ${cmd} develop`);
   console.log();
+
+  if (scope.runApp !== true) return;
+
+  console.log(`Running your Strapi application.`);
+
+  try {
+    await trackUsage({ event: 'willStartServer', scope });
+
+    await execa('npm', ['run', 'develop'], {
+      stdio: 'inherit',
+      cwd: scope.rootPath,
+      env: {
+        FORCE_COLOR: '1',
+      },
+    });
+  } catch (error) {
+    if (typeof error === 'string' || error instanceof Error) {
+      await trackUsage({
+        event: 'didNotStartServer',
+        scope,
+        error,
+      });
+    }
+    process.exit(1);
+  }
 }
 
-const installArguments = ['install', '--production', '--no-optional'];
-function runInstall({ rootPath, useYarn }: Scope) {
-  if (useYarn) {
-    // Increase timeout for slow internet connections.
-    installArguments.push('--network-timeout 1000000');
+const installArguments = ['install'];
 
-    return execa('yarnpkg', installArguments, {
-      cwd: rootPath,
-      stdin: 'ignore',
-    });
+const installArgumentsMap = {
+  npm: ['--legacy-peer-deps'],
+  yarn: ['--network-timeout 1000000'],
+  pnpm: [],
+};
+
+function runInstall({ rootPath, packageManager }: Scope) {
+  const options: execa.Options = {
+    cwd: rootPath,
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      NODE_ENV: 'development',
+    },
+  };
+
+  if (packageManager in installArgumentsMap) {
+    installArguments.push(...(installArgumentsMap[packageManager] ?? []));
   }
 
-  return execa('npm', installArguments, { cwd: rootPath, stdin: 'ignore' });
+  return execa(packageManager, installArguments, options);
 }

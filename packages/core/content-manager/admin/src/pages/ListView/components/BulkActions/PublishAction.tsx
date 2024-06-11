@@ -11,8 +11,7 @@ import {
   Box,
   Button,
   Typography,
-  ModalBody,
-  ModalFooter,
+  Modal,
   IconButton,
   Flex,
   Tooltip,
@@ -425,7 +424,7 @@ const SelectedEntriesModalContent = ({
 
   return (
     <>
-      <ModalBody>
+      <Modal.Body>
         <Typography>{getFormattedCountMessage()}</Typography>
         <Box marginTop={5}>
           <SelectedEntriesTableContent
@@ -435,36 +434,32 @@ const SelectedEntriesModalContent = ({
             validationErrors={validationErrors}
           />
         </Box>
-      </ModalBody>
-      <ModalFooter
-        startActions={
-          <Button onClick={toggleModal} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={toggleModal} variant="tertiary">
+          {formatMessage({
+            id: 'app.components.Button.cancel',
+            defaultMessage: 'Cancel',
+          })}
+        </Button>
+        <Flex gap={2}>
+          <Button onClick={refetch} variant="tertiary" loading={isFetching}>
+            {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
           </Button>
-        }
-        endActions={
-          <Flex gap={2}>
-            <Button onClick={refetch} variant="tertiary" loading={isFetching}>
-              {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
-            </Button>
-            <Button
-              onClick={toggleDialog}
-              disabled={
-                selectedEntries.length === 0 ||
-                selectedEntries.length === selectedEntriesWithErrorsCount ||
-                selectedEntriesPublished === selectedEntries.length ||
-                isLoading
-              }
-              loading={isSubmittingForm}
-            >
-              {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
-            </Button>
-          </Flex>
-        }
-      />
+          <Button
+            onClick={toggleDialog}
+            disabled={
+              selectedEntries.length === 0 ||
+              selectedEntries.length === selectedEntriesWithErrorsCount ||
+              selectedEntriesPublished === selectedEntries.length ||
+              isLoading
+            }
+            loading={isSubmittingForm}
+          >
+            {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+          </Button>
+        </Flex>
+      </Modal.Footer>
       <ConfirmDialogPublishAll
         isOpen={isDialogOpen}
         onToggleDialog={toggleDialog}

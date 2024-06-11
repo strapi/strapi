@@ -1,32 +1,34 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import commander from 'commander';
-import { checkInstallPath, generateNewApp } from '@strapi/generate-new';
-import promptUser from './utils/prompt-user';
-import type { Program } from './types';
+import { generateNewApp, type Options as GenerateNewAppOptions } from '@strapi/generate-new';
+
+import * as prompts from './prompts';
+import type { Options } from './types';
+import { detectPackageManager } from './package-manager';
+import * as database from './database';
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
 const command = new commander.Command(packageJson.name);
 
-const databaseOptions: Array<keyof Program> = [
-  'dbclient',
-  'dbhost',
-  'dbport',
-  'dbname',
-  'dbusername',
-  'dbpassword',
-  'dbssl',
-  'dbfile',
-];
-
 command
   .version(packageJson.version)
   .arguments('[directory]')
-  .option('--no-run', 'Do not start the application after it is created')
-  .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
-  .option('--debug', 'Display database connection error')
-  .option('--quickstart', 'Quickstart app creation')
+  .usage('[directory] [options]')
+  .option('--quickstart', 'Quickstart app creation (deprecated)')
+  .option('--no-run', 'Do not start the application after it is created.')
+
+  // setup options
+  .option('--ts, --typescript', 'Initialize the project with TypeScript (default)')
+  .option('--js, --javascript', 'Initialize the project with Javascript')
+
+  // Package manager options
+  .option('--use-npm', 'Use npm as the project package manager')
+  .option('--use-yarn', 'Use yarn as the project package manager')
+  .option('--use-pnpm', 'Use pnpm as the project package manager')
+
+  // Database options
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')
@@ -35,76 +37,92 @@ command
   .option('--dbpassword <dbpassword>', 'Database password')
   .option('--dbssl <dbssl>', 'Database SSL')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
-  .option('--dbforce', 'Overwrite database content if any')
+
+  // templates
   .option('--template <templateurl>', 'Specify a Strapi template')
-  .option('--ts, --typescript', 'Use TypeScript to generate the project')
   .description('create a new application')
-  .action((directory, programArgs) => {
-    initProject(directory, programArgs);
+  .action((directory, options) => {
+    createStrapiApp(directory, options);
   })
   .parse(process.argv);
 
-function generateApp(projectName: string, options: unknown) {
-  if (!projectName) {
+async function createStrapiApp(directory: string | undefined, options: Options) {
+  validateOptions(options);
+
+  if (options.quickstart && !directory) {
     console.error('Please specify the <directory> of your project when using --quickstart');
     process.exit(1);
   }
 
-  return generateNewApp(projectName, options).then(() => {
-    if (process.platform === 'win32') {
-      process.exit(0);
-    }
-  });
-}
+  const appDirectory = directory || (await prompts.directory());
 
-async function initProject(projectName: string, programArgs: Program) {
-  if (projectName) {
-    await checkInstallPath(resolve(projectName));
+  const appOptions = {
+    directory: appDirectory,
+    useTypescript: true,
+    packageManager: 'npm',
+    template: options.template,
+    isQuickstart: options.quickstart,
+  } as GenerateNewAppOptions;
+
+  if (options.javascript === true) {
+    appOptions.useTypescript = false;
+  } else if (options.typescript === true) {
+    appOptions.useTypescript = true;
+  } else {
+    appOptions.useTypescript = options.quickstart ? true : await prompts.typescript();
   }
 
+  if (options.useNpm === true) {
+    appOptions.packageManager = 'npm';
+  } else if (options.usePnpm === true) {
+    appOptions.packageManager = 'pnpm';
+  } else if (options.useYarn === true) {
+    appOptions.packageManager = 'yarn';
+  } else {
+    appOptions.packageManager = detectPackageManager();
+  }
+
+  if (options.quickstart === true && options.run !== false) {
+    appOptions.runApp = true;
+  }
+
+  appOptions.database = await database.getDatabaseInfos(options);
+
+  return generateNewApp(appOptions)
+    .then(() => {
+      if (process.platform === 'win32') {
+        process.exit(0);
+      }
+    })
+    .catch((error) => {
+      console.error(`Error: ${error.message}`);
+      process.exit(1);
+    });
+}
+
+async function validateOptions(options: Options) {
   const programFlags = command
     .createHelp()
     .visibleOptions(command)
     .reduce<Array<string | undefined>>((acc, { short, long }) => [...acc, short, long], [])
     .filter(Boolean);
 
-  if (programArgs.template && programFlags.includes(programArgs.template)) {
-    console.error(`${programArgs.template} is not a valid template`);
+  if (options.template && programFlags.includes(options.template)) {
+    console.error(`${options.template} is not a valid template`);
     process.exit(1);
   }
 
-  const hasDatabaseOptions = databaseOptions.some((opt) => programArgs[opt]);
+  if (options.javascript === true && options.typescript === true) {
+    console.error('You cannot use both --typescript (--ts) and --javascript (--js) flags together');
+    process.exit(1);
+  }
 
-  if (programArgs.quickstart && hasDatabaseOptions) {
+  if ([options.useNpm, options.usePnpm, options.useYarn].filter(Boolean).length > 1) {
     console.error(
-      `The quickstart option is incompatible with the following options: ${databaseOptions.join(
-        ', '
-      )}`
+      'You cannot specify multiple package managers at the same time (--use-npm, --use-pnpm, --use-yarn)'
     );
     process.exit(1);
   }
 
-  if (hasDatabaseOptions) {
-    programArgs.quickstart = false; // Will disable the quickstart question because != 'undefined'
-  }
-
-  if (programArgs.quickstart) {
-    return generateApp(projectName, programArgs);
-  }
-
-  const prompt = await promptUser(projectName, programArgs, hasDatabaseOptions);
-  const directory = prompt.directory || projectName;
-  await checkInstallPath(resolve(directory));
-
-  const options = {
-    template: programArgs.template,
-    quickstart: prompt.quick || programArgs.quickstart,
-  };
-
-  const generateStrapiAppOptions = {
-    ...programArgs,
-    ...options,
-  };
-
-  return generateApp(directory, generateStrapiAppOptions);
+  database.validateOptions(options);
 }

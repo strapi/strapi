@@ -51,9 +51,9 @@ exports[`FromComputerForm snapshots the component 1`] = `
 
 .c17 {
   background: #f6f6f9;
-  padding-block-start: 16px;
+  padding-block: 16px;
+  padding-inline: 16px;
   padding-inline-end: 20px;
-  padding-block-end: 16px;
   padding-inline-start: 20px;
 }
 
@@ -77,7 +77,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   gap: 8px;
 }
 
-.c19 {
+.c18 {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -208,9 +208,9 @@ exports[`FromComputerForm snapshots the component 1`] = `
   background-color: #eaeaef;
 }
 
-.c18 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
+.c19 {
+  border-top: solid 1px #eaeaef;
+  flex: 1;
 }
 
 .c5 {
@@ -232,6 +232,18 @@ exports[`FromComputerForm snapshots the component 1`] = `
 .c10 {
   opacity: 0;
   cursor: pointer;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c15 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c20 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 }
 
 <div>
@@ -302,32 +314,21 @@ exports[`FromComputerForm snapshots the component 1`] = `
         </div>
       </label>
     </div>
-    <div
-      class="c17 c18"
+    <footer
+      class="c17 c18 c19"
     >
-      <div
-        class="c19"
+      <button
+        aria-disabled="false"
+        class="c12 c13 c14 c20"
+        type="button"
       >
-        <div
-          class="c13"
+        <span
+          class="c16"
         >
-          <button
-            aria-disabled="false"
-            class="c12 c13 c14 c20"
-            type="button"
-          >
-            <span
-              class="c16"
-            >
-              cancel
-            </span>
-          </button>
-        </div>
-        <div
-          class="c13"
-        />
-      </div>
-    </div>
+          cancel
+        </span>
+      </button>
+    </footer>
   </form>
   <span
     class="c21"

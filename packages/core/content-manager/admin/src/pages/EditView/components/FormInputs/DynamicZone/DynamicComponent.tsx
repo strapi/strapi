@@ -6,7 +6,6 @@ import {
   Box,
   Flex,
   Grid,
-  GridItem,
   IconButton,
   VisuallyHidden,
   useComposedRefs,
@@ -221,17 +220,17 @@ const DynamicComponent = ({
                 <AccordionContentRadius background="neutral0">
                   <Box paddingLeft={6} paddingRight={6} paddingTop={6} paddingBottom={6}>
                     {components[componentUid]?.layout?.map((row, rowInd) => (
-                      <Grid gap={4} key={rowInd}>
+                      <Grid.Root gap={4} key={rowInd}>
                         {row.map(({ size, ...field }) => {
                           const fieldName = `${name}.${index}.${field.name}`;
 
                           return (
-                            <GridItem col={size} key={fieldName} s={12} xs={12}>
+                            <Grid.Item col={size} key={fieldName} s={12} xs={12}>
                               <InputRenderer {...field} name={fieldName} />
-                            </GridItem>
+                            </Grid.Item>
                           );
                         })}
-                      </Grid>
+                      </Grid.Root>
                     ))}
                   </Box>
                 </AccordionContentRadius>

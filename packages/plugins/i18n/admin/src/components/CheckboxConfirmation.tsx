@@ -1,15 +1,6 @@
 import * as React from 'react';
 
-import {
-  Button,
-  Checkbox,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Field,
-  Flex,
-  Typography,
-} from '@strapi/design-system';
+import { Button, Checkbox, Dialog, Field, Flex, Typography } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -58,10 +49,7 @@ const CheckboxConfirmation = ({
 
   const handleConfirm = () => {
     onChange({ target: { name, value: false, type: 'checkbox' } });
-    setIsOpen(false);
   };
-
-  const handleToggle = () => setIsOpen((prev) => !prev);
 
   const label = intlLabel.id
     ? formatMessage(
@@ -78,57 +66,61 @@ const CheckboxConfirmation = ({
     : '';
 
   return (
-    <>
+    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
       <Field.Root hint={hint} name={name}>
-        <Checkbox onValueChange={handleChange} value={value} type="checkbox">
+        <Checkbox onCheckedChange={handleChange} checked={value}>
           {label}
         </Checkbox>
         <Field.Hint />
       </Field.Root>
-      {isOpen && (
-        <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
-          <DialogBody icon={<WarningCircle />}>
-            <Flex direction="column" alignItems="stretch" gap={2}>
-              <Flex justifyContent="center">
-                <TextAlignTypography id="confirm-description">
-                  {formatMessage({
-                    id: getTranslation('CheckboxConfirmation.Modal.content'),
-                    defaultMessage:
-                      'Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).',
-                  })}
-                </TextAlignTypography>
-              </Flex>
-              <Flex justifyContent="center">
-                <Typography fontWeight="semiBold" id="confirm-description">
-                  {formatMessage({
-                    id: getTranslation('CheckboxConfirmation.Modal.body'),
-                    defaultMessage: 'Do you want to disable it?',
-                  })}
-                </Typography>
-              </Flex>
+      <Dialog.Content>
+        <Dialog.Header>
+          {formatMessage({
+            id: getTranslation('CheckboxConfirmation.Modal.title'),
+            defaultMessage: 'Disable localization',
+          })}
+        </Dialog.Header>
+        <Dialog.Body icon={<WarningCircle />}>
+          <Flex direction="column" alignItems="stretch" gap={2}>
+            <Flex justifyContent="center">
+              <TextAlignTypography>
+                {formatMessage({
+                  id: getTranslation('CheckboxConfirmation.Modal.content'),
+                  defaultMessage:
+                    'Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).',
+                })}
+              </TextAlignTypography>
             </Flex>
-          </DialogBody>
-          <DialogFooter
-            startAction={
-              <Button onClick={handleToggle} variant="tertiary">
+            <Flex justifyContent="center">
+              <Typography fontWeight="semiBold">
                 {formatMessage({
-                  id: 'components.popUpWarning.button.cancel',
-                  defaultMessage: 'No, cancel',
+                  id: getTranslation('CheckboxConfirmation.Modal.body'),
+                  defaultMessage: 'Do you want to disable it?',
                 })}
-              </Button>
-            }
-            endAction={
-              <Button variant="danger-light" onClick={handleConfirm}>
-                {formatMessage({
-                  id: getTranslation('CheckboxConfirmation.Modal.button-confirm'),
-                  defaultMessage: 'Yes, disable',
-                })}
-              </Button>
-            }
-          />
-        </Dialog>
-      )}
-    </>
+              </Typography>
+            </Flex>
+          </Flex>
+        </Dialog.Body>
+        <Dialog.Footer>
+          <Dialog.Cancel>
+            <Button variant="tertiary">
+              {formatMessage({
+                id: 'components.popUpWarning.button.cancel',
+                defaultMessage: 'No, cancel',
+              })}
+            </Button>
+          </Dialog.Cancel>
+          <Dialog.Action>
+            <Button variant="danger-light" onClick={handleConfirm}>
+              {formatMessage({
+                id: getTranslation('CheckboxConfirmation.Modal.button-confirm'),
+                defaultMessage: 'Yes, disable',
+              })}
+            </Button>
+          </Dialog.Action>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 };
 

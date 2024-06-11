@@ -5,6 +5,7 @@ import {
   BoxComponent,
   Flex,
   FlexComponent,
+  Modal,
   Typography,
   useComposedRefs,
 } from '@strapi/design-system';
@@ -105,23 +106,33 @@ const DraggableCard = ({
             </DragButton>
             <Typography fontWeight="bold">{label}</Typography>
           </Flex>
-          <Flex paddingLeft={3}>
-            <ActionButton
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsModalOpen(true);
-              }}
-              aria-label={formatMessage(
-                {
-                  id: getTranslation('components.DraggableCard.edit.field'),
-                  defaultMessage: 'Edit {item}',
-                },
-                { item: label }
-              )}
-              type="button"
-            >
-              <Pencil width="1.2rem" height="1.2rem" />
-            </ActionButton>
+          <Flex paddingLeft={3} onClick={(e) => e.stopPropagation()}>
+            <Modal.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <Modal.Trigger>
+                <ActionButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  aria-label={formatMessage(
+                    {
+                      id: getTranslation('components.DraggableCard.edit.field'),
+                      defaultMessage: 'Edit {item}',
+                    },
+                    { item: label }
+                  )}
+                  type="button"
+                >
+                  <Pencil width="1.2rem" height="1.2rem" />
+                </ActionButton>
+              </Modal.Trigger>
+              <EditFieldForm
+                attribute={attribute}
+                name={`layout.${index}`}
+                onClose={() => {
+                  setIsModalOpen(false);
+                }}
+              />
+            </Modal.Root>
             <ActionButton
               onClick={onRemoveField}
               data-testid={`delete-${name}`}
@@ -138,13 +149,6 @@ const DraggableCard = ({
             </ActionButton>
           </Flex>
         </FieldContainer>
-      )}
-      {isModalOpen && (
-        <EditFieldForm
-          attribute={attribute}
-          name={`layout.${index}`}
-          onClose={() => setIsModalOpen(false)}
-        />
       )}
     </FieldWrapper>
   );

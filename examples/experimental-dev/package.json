@@ -1,6 +1,6 @@
 {
   "name": "experimental-dev",
-  "version": "5.0.0-beta.8",
+  "version": "5.0.0-beta.9",
   "private": true,
   "description": "A Strapi application",
   "license": "MIT",
@@ -14,8 +14,8 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "@strapi/plugin-users-permissions": "5.0.0-beta.8",
-    "@strapi/strapi": "5.0.0-beta.8",
+    "@strapi/plugin-users-permissions": "5.0.0-beta.9",
+    "@strapi/strapi": "5.0.0-beta.9",
     "better-sqlite3": "9.4.3",
     "react": "rc",
     "react-dom": "rc",

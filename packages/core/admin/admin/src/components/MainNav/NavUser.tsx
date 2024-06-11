@@ -1,6 +1,6 @@
-import React from 'react';
+import * as React from 'react';
 
-import { Initials, Flex, Menu, ButtonProps, VisuallyHidden } from '@strapi/design-system';
+import { Flex, Menu, ButtonProps, VisuallyHidden, Avatar } from '@strapi/design-system';
 import { SignOut } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
@@ -25,9 +25,11 @@ const MenuContent = styled(Menu.Content)`
 `;
 
 const MenuItem = styled(Menu.Item)`
-  span {
+  & > span {
     width: 100%;
     display: flex;
+    align-items: center;
+    gap: ${({ theme }) => theme.spaces[3]};
     justify-content: space-between;
   }
 `;
@@ -47,10 +49,10 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
     <Flex justifyContent="center" {...props}>
       <Menu.Root>
         <MenuTrigger endIcon={null} fullWidth justifyContent="center">
-          <Initials>{initials}</Initials>
+          <Avatar.Item delayMs={0} fallback={initials} />
           <VisuallyHidden tag="span">{children}</VisuallyHidden>
         </MenuTrigger>
-        <MenuContent popoverPlacement="top" zIndex={3} width="15rem">
+        <MenuContent popoverPlacement="top-center" zIndex={3}>
           <MenuItem onSelect={handleProfile}>
             {formatMessage({
               id: 'global.profile',

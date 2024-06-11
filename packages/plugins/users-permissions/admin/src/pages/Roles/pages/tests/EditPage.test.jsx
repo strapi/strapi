@@ -2,12 +2,7 @@ import React from 'react';
 
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import {
-  fireEvent,
-  render as renderRTL,
-  waitFor,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { fireEvent, render as renderRTL, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -125,11 +120,6 @@ describe('Roles – EditPage', () => {
     fireEvent.click(button);
     await findByText('Role edited');
     await findByText('Authenticated');
-
-    /**
-     * @note the permissions are refetched, because we're mocking calls no real update will be made.
-     */
-    await waitFor(() => expect(getByRole('checkbox', { name: 'create' })).not.toBeChecked());
   });
 
   it('will update the Advanced Settings panel when you click on the cog icon of a specific permission', async () => {

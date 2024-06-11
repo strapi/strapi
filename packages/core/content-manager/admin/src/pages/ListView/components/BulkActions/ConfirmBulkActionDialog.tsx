@@ -6,15 +6,7 @@ import {
   useAPIErrorHandler,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import {
-  Button,
-  Flex,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Typography,
-  DialogFooterProps,
-} from '@strapi/design-system';
+import { Button, Flex, Dialog, Typography } from '@strapi/design-system';
 import { Check, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -24,7 +16,8 @@ import { getTranslation } from '../../../../utils/translations';
 
 import { Emphasis } from './Actions';
 
-interface ConfirmBulkActionDialogProps extends Pick<DialogFooterProps, 'endAction'> {
+interface ConfirmBulkActionDialogProps {
+  endAction: React.ReactNode;
   onToggleDialog: () => void;
   isOpen?: boolean;
   dialogBody: React.ReactNode;
@@ -39,31 +32,35 @@ const ConfirmBulkActionDialog = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Dialog
-      onClose={onToggleDialog}
-      title={formatMessage({
-        id: 'app.components.ConfirmDialog.title',
-        defaultMessage: 'Confirmation',
-      })}
-      isOpen={isOpen}
-    >
-      <DialogBody icon={<WarningCircle />}>
-        <Flex direction="column" alignItems="stretch" gap={2}>
-          {dialogBody}
-        </Flex>
-      </DialogBody>
-      <DialogFooter
-        startAction={
-          <Button onClick={onToggleDialog} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
-        }
-        endAction={endAction}
-      />
-    </Dialog>
+    <Dialog.Root onOpenChange={onToggleDialog} open={isOpen}>
+      <Dialog.Content>
+        <Dialog.Header>
+          {formatMessage({
+            id: 'app.components.ConfirmDialog.title',
+            defaultMessage: 'Confirmation',
+          })}
+        </Dialog.Header>
+        <Dialog.Body>
+          <Flex direction="column" alignItems="stretch" gap={2}>
+            <Flex justifyContent="center">
+              <WarningCircle width="24px" height="24px" fill="danger600" />
+            </Flex>
+            {dialogBody}
+          </Flex>
+        </Dialog.Body>
+        <Dialog.Footer>
+          <Dialog.Cancel>
+            <Button fullWidth onClick={onToggleDialog} variant="tertiary">
+              {formatMessage({
+                id: 'app.components.Button.cancel',
+                defaultMessage: 'Cancel',
+              })}
+            </Button>
+          </Dialog.Cancel>
+          {endAction}
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 };
 

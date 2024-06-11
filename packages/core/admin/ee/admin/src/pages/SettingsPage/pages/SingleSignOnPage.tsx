@@ -2,7 +2,6 @@ import {
   Button,
   Flex,
   Grid,
-  GridItem,
   MultiSelect,
   MultiSelectOption,
   Typography,
@@ -181,7 +180,7 @@ export const SingleSignOnPage = () => {
                         defaultMessage: 'Settings',
                       })}
                     </Typography>
-                    <Grid gap={4}>
+                    <Grid.Root gap={4}>
                       {[
                         {
                           hint: formatMessage({
@@ -241,11 +240,11 @@ export const SingleSignOnPage = () => {
                           type: 'multi' as const,
                         },
                       ].map(({ size, ...field }) => (
-                        <GridItem key={field.name} col={size}>
+                        <Grid.Item key={field.name} col={size}>
                           <FormInputRenderer {...field} />
-                        </GridItem>
+                        </Grid.Item>
                       ))}
-                    </Grid>
+                    </Grid.Root>
                   </Flex>
                 )}
               </Layouts.Content>

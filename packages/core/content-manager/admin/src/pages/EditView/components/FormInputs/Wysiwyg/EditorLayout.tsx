@@ -57,7 +57,7 @@ const EditorLayout = ({
             justifyContent="center"
             onClick={onCollapse}
           >
-            <Box
+            <Box<'div'>
               background="neutral0"
               hasRadius
               shadow="popupShadow"

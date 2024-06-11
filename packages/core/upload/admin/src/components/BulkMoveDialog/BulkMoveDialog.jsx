@@ -1,18 +1,6 @@
 import React from 'react';
 
-import {
-  Button,
-  Flex,
-  Grid,
-  Field,
-  GridItem,
-  Loader,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Button, Flex, Grid, Field, Loader, Modal, Typography } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import isEmpty from 'lodash/isEmpty';
 import PropTypes from 'prop-types';
@@ -53,14 +41,10 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
     }
   };
 
-  const handleClose = () => {
-    onClose();
-  };
-
   if (isLoading) {
     return (
-      <ModalLayout onClose={handleClose} labelledBy="title">
-        <ModalBody>
+      <Modal.Content>
+        <Modal.Body>
           <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
             <Loader>
               {formatMessage({
@@ -69,8 +53,8 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
               })}
             </Loader>
           </Flex>
-        </ModalBody>
-      </ModalLayout>
+        </Modal.Body>
+      </Modal.Content>
     );
   }
 
@@ -82,22 +66,22 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
   };
 
   return (
-    <ModalLayout onClose={handleClose} labelledBy="title">
+    <Modal.Content>
       <Formik validateOnChange={false} onSubmit={handleSubmit} initialValues={initialFormData}>
         {({ values, errors, setFieldValue }) => (
           <Form noValidate>
-            <ModalHeader>
-              <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
+            <Modal.Header>
+              <Modal.Title>
                 {formatMessage({
                   id: getTrad('modal.folder.move.title'),
                   defaultMessage: 'Move elements to',
                 })}
-              </Typography>
-            </ModalHeader>
+              </Modal.Title>
+            </Modal.Header>
 
-            <ModalBody>
-              <Grid gap={4}>
-                <GridItem xs={12} col={12}>
+            <Modal.Body>
+              <Grid.Root gap={4}>
+                <Grid.Item xs={12} col={12}>
                   <Field.Root id="folder-destination">
                     <Field.Label>
                       {formatMessage({
@@ -125,35 +109,34 @@ export const BulkMoveDialog = ({ onClose, selected, currentFolder }) => {
                       </Typography>
                     )}
                   </Field.Root>
-                </GridItem>
-              </Grid>
-            </ModalBody>
+                </Grid.Item>
+              </Grid.Root>
+            </Modal.Body>
 
-            <ModalFooter
-              startActions={
-                <Button onClick={handleClose} variant="tertiary" name="cancel">
+            <Modal.Footer>
+              <Modal.Close>
+                <Button variant="tertiary" name="cancel">
                   {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
                 </Button>
-              }
-              endActions={
-                <Button type="submit" loading={isLoading}>
-                  {formatMessage({ id: 'modal.folder.move.submit', defaultMessage: 'Move' })}
-                </Button>
-              }
-            />
+              </Modal.Close>
+              <Button type="submit" loading={isLoading}>
+                {formatMessage({ id: 'modal.folder.move.submit', defaultMessage: 'Move' })}
+              </Button>
+            </Modal.Footer>
           </Form>
         )}
       </Formik>
-    </ModalLayout>
+    </Modal.Content>
   );
 };
 
 BulkMoveDialog.defaultProps = {
   currentFolder: undefined,
+  selected: [],
 };
 
 BulkMoveDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   currentFolder: FolderDefinition,
-  selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition).isRequired,
+  selected: PropTypes.arrayOf(FolderDefinition, AssetDefinition),
 };

@@ -11,8 +11,9 @@ import {
   EmptyStateLayout,
   useCollator,
   useFilter,
+  LinkButton,
+  Dialog,
 } from '@strapi/design-system';
-import { LinkButton } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import {
   ConfirmDialog,
@@ -250,11 +251,9 @@ export const RolesListPage = () => {
             <EmptyStateLayout content={formatMessage(emptyLayout[emptyContent])} />
           )}
         </Layouts.Content>
-        <ConfirmDialog
-          onConfirm={handleConfirmDelete}
-          onClose={handleShowConfirmDelete}
-          isOpen={showConfirmDelete}
-        />
+        <Dialog.Root open={showConfirmDelete} onOpenChange={handleShowConfirmDelete}>
+          <ConfirmDialog onConfirm={handleConfirmDelete} />
+        </Dialog.Root>
       </Page.Main>
     </Layouts.Root>
   );

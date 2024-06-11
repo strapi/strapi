@@ -8,17 +8,7 @@ import {
   useNotification,
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
-import {
-  Grid,
-  GridItem,
-  Main,
-  SetSelectedTabIndexHandler,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from '@strapi/design-system';
+import { Grid, Main, Tabs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { useLocation, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -50,14 +40,11 @@ const EditViewPage = () => {
       query: { status },
     },
     setQuery,
-  ] = useQueryParams<{ status: 'draft' | 'published' }>();
+  ] = useQueryParams<{ status: 'draft' | 'published' }>({
+    status: 'draft',
+  });
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const tabApi = React.useRef<{
-    _handlers: {
-      setSelectedTabIndex: SetSelectedTabIndexHandler;
-    };
-  }>(null);
 
   const {
     document,
@@ -141,11 +128,9 @@ const EditViewPage = () => {
     return <Page.Error />;
   }
 
-  const handleTabChange = (index: number) => {
-    if (index === 0) {
-      setQuery({ status: 'draft' }, 'push', true);
-    } else {
-      setQuery({ status: 'published' }, 'push', true);
+  const handleTabChange = (status: string) => {
+    if (status === 'published' || status === 'draft') {
+      setQuery({ status }, 'push', true);
     }
   };
 
@@ -173,51 +158,47 @@ const EditViewPage = () => {
               status={hasDraftAndPublished ? getDocumentStatus(document, meta) : undefined}
               title={documentTitle}
             />
-            <TabGroup
-              ref={tabApi}
-              variant="simple"
-              label={formatMessage({
-                id: getTranslation('containers.edit.tabs.label'),
-                defaultMessage: 'Document status',
-              })}
-              selectedTabIndex={hasDraftAndPublished && status === 'published' ? 1 : 0}
-              onTabChange={(index) => {
-                // TODO: remove this hack when the tabs in the DS are implemented well and we can actually use callbacks.
-                handleTabChange(index);
-              }}
-            >
-              {hasDraftAndPublished ? (
-                <Tabs>
-                  <StatusTab>
-                    {formatMessage({
-                      id: getTranslation('containers.edit.tabs.draft'),
-                      defaultMessage: 'draft',
-                    })}
-                  </StatusTab>
-                  <StatusTab disabled={!meta || meta.availableStatus.length === 0}>
-                    {formatMessage({
-                      id: getTranslation('containers.edit.tabs.published'),
-                      defaultMessage: 'published',
-                    })}
-                  </StatusTab>
-                </Tabs>
-              ) : null}
-              <Grid paddingTop={8} gap={4}>
-                <GridItem col={9} s={12}>
-                  <TabPanels>
-                    <TabPanel>
-                      <FormLayout layout={layout} />
-                    </TabPanel>
-                    <TabPanel>
-                      <FormLayout layout={layout} />
-                    </TabPanel>
-                  </TabPanels>
-                </GridItem>
-                <GridItem col={3} s={12}>
+            <Tabs.Root variant="simple" value={status} onValueChange={handleTabChange}>
+              <Tabs.List
+                aria-label={formatMessage({
+                  id: getTranslation('containers.edit.tabs.label'),
+                  defaultMessage: 'Document status',
+                })}
+              >
+                {hasDraftAndPublished ? (
+                  <>
+                    <StatusTab value="draft">
+                      {formatMessage({
+                        id: getTranslation('containers.edit.tabs.draft'),
+                        defaultMessage: 'draft',
+                      })}
+                    </StatusTab>
+                    <StatusTab
+                      disabled={!meta || meta.availableStatus.length === 0}
+                      value="published"
+                    >
+                      {formatMessage({
+                        id: getTranslation('containers.edit.tabs.published'),
+                        defaultMessage: 'published',
+                      })}
+                    </StatusTab>
+                  </>
+                ) : null}
+              </Tabs.List>
+              <Grid.Root paddingTop={8} gap={4}>
+                <Grid.Item col={9} s={12}>
+                  <Tabs.Content value="draft">
+                    <FormLayout layout={layout} />
+                  </Tabs.Content>
+                  <Tabs.Content value="published">
+                    <FormLayout layout={layout} />
+                  </Tabs.Content>
+                </Grid.Item>
+                <Grid.Item col={3} s={12}>
                   <Panels />
-                </GridItem>
-              </Grid>
-            </TabGroup>
+                </Grid.Item>
+              </Grid.Root>
+            </Tabs.Root>
             <Blocker
               // We reset the form to the published version to avoid errors like – https://strapi-inc.atlassian.net/browse/CONTENT-2284
               onProceed={resetForm}
@@ -229,7 +210,7 @@ const EditViewPage = () => {
   );
 };
 
-const StatusTab = styled(Tab)`
+const StatusTab = styled(Tabs.Trigger)`
   text-transform: uppercase;
 `;
 

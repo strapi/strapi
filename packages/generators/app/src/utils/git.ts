@@ -27,8 +27,15 @@ export default async function tryGitInit(rootDir: string) {
 
     await execa('git', ['init'], { stdio: 'ignore', cwd: rootDir });
 
+    await execa('git', ['add', '.'], { stdio: 'ignore', cwd: rootDir });
+    await execa('git', ['commit', '-m', 'Initial commit from Strapi'], {
+      stdio: 'ignore',
+      cwd: rootDir,
+    });
+
     return true;
-  } catch (_) {
+  } catch (e) {
+    console.error('Error while trying to initialize git:', e);
     return false;
   }
 }

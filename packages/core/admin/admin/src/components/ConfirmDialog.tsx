@@ -1,30 +1,18 @@
 import * as React from 'react';
 
-import {
-  Button,
-  ButtonProps,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Flex,
-  Typography,
-  DialogBodyProps,
-  DialogProps,
-  DialogFooterProps,
-} from '@strapi/design-system';
+import { Button, ButtonProps, Dialog } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 /* -------------------------------------------------------------------------------------------------
  * ConfirmDialog
  * -----------------------------------------------------------------------------------------------*/
-interface ConfirmDialogProps
-  extends Omit<DialogProps, 'title'>,
-    Partial<Pick<DialogProps, 'title'>>,
-    Pick<ButtonProps, 'variant'>,
-    Partial<DialogFooterProps>,
-    Pick<DialogBodyProps, 'icon'> {
+interface ConfirmDialogProps extends Pick<ButtonProps, 'variant'>, Pick<Dialog.BodyProps, 'icon'> {
   onConfirm?: () => Promise<void> | void;
+  children?: React.ReactNode;
+  endAction?: React.ReactNode;
+  startAction?: React.ReactNode;
+  title?: React.ReactNode;
 }
 
 /**
@@ -37,32 +25,36 @@ interface ConfirmDialogProps
  * custom component as the children prop.
  * @example
  * ```tsx
+ * import { Dialog } from '@strapi/design-system';
+ *
  * const DeleteAction = ({ id }) => {
  *  const [isOpen, setIsOpen] = React.useState(false);
  *
  *  const [delete] = useDeleteMutation()
  *  const handleConfirm = async () => {
  *    await delete(id)
+ *    setIsOpen(false)
  *  }
  *
  *  return (
- *    <>
- *      <Button onClick={() => setIsOpen(true)}>Delete</Button>
- *      <ConfirmDialog onConfirm={handleConfirm} onClose={() => setIsOpen(false)} isOpen={isOpen} />
- *    </>
+ *    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+ *      <Dialog.Trigger>
+ *        <Button>Delete</Button>
+ *      </Dialog.Trigger>
+ *      <ConfirmDialog onConfirm={handleConfirm} />
+ *    </Dialog.Root>
  *  )
  * }
  * ```
  */
 const ConfirmDialog = ({
   children,
-  icon = <WarningCircle />,
-  onClose,
+  icon = <WarningCircle width="24px" height="24px" fill="danger600" />,
   onConfirm,
-  variant = 'danger',
+  variant = 'danger-light',
   startAction,
   endAction,
-  ...props
+  title,
 }: ConfirmDialogProps) => {
   const { formatMessage } = useIntl();
   const [isConfirming, setIsConfirming] = React.useState(false);
@@ -82,64 +74,44 @@ const ConfirmDialog = ({
     try {
       setIsConfirming(true);
       await onConfirm();
-      onClose();
     } finally {
       setIsConfirming(false);
     }
   };
 
   return (
-    <Dialog
-      title={formatMessage({
-        id: 'app.components.ConfirmDialog.title',
-        defaultMessage: 'Confirmation',
-      })}
-      onClose={onClose}
-      {...props}
-    >
-      <DialogBody icon={icon}>
-        {typeof content === 'string' ? <DefaultBodyWrapper>{content}</DefaultBodyWrapper> : content}
-      </DialogBody>
-      <DialogFooter
-        startAction={
-          startAction || (
-            <Button onClick={onClose} variant="tertiary">
+    <Dialog.Content>
+      <Dialog.Header>
+        {title ||
+          formatMessage({
+            id: 'app.components.ConfirmDialog.title',
+            defaultMessage: 'Confirmation',
+          })}
+      </Dialog.Header>
+      <Dialog.Body icon={icon}>{content}</Dialog.Body>
+      <Dialog.Footer>
+        {startAction || (
+          <Dialog.Cancel>
+            <Button fullWidth variant="tertiary">
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
               })}
             </Button>
-          )
-        }
-        endAction={
-          endAction || (
-            <Button onClick={handleConfirm} variant={variant} loading={isConfirming}>
+          </Dialog.Cancel>
+        )}
+        {endAction || (
+          <Dialog.Action>
+            <Button fullWidth onClick={handleConfirm} variant={variant} loading={isConfirming}>
               {formatMessage({
                 id: 'app.components.Button.confirm',
                 defaultMessage: 'Confirm',
               })}
             </Button>
-          )
-        }
-      />
-    </Dialog>
-  );
-};
-
-/* -------------------------------------------------------------------------------------------------
- * DefaultBodyWrapper
- * -----------------------------------------------------------------------------------------------*/
-interface DefaultBodyWrapperProps {
-  children: React.ReactNode;
-}
-
-const DefaultBodyWrapper = ({ children }: DefaultBodyWrapperProps) => {
-  return (
-    <Flex direction="column" alignItems="stretch" gap={2}>
-      <Flex justifyContent="center">
-        <Typography variant="omega">{children}</Typography>
-      </Flex>
-    </Flex>
+          </Dialog.Action>
+        )}
+      </Dialog.Footer>
+    </Dialog.Content>
   );
 };
 

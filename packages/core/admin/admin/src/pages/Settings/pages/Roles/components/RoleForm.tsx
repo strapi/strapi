@@ -4,7 +4,6 @@ import {
   Field,
   Flex,
   Grid,
-  GridItem,
   Textarea,
   TextInput,
   Typography,
@@ -62,8 +61,8 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
             )}
           </Button>
         </Flex>
-        <Grid gap={4}>
-          <GridItem col={6}>
+        <Grid.Root gap={4}>
+          <Grid.Item col={6}>
             <Field.Root
               name="name"
               error={errors.name && formatMessage({ id: errors.name })}
@@ -83,8 +82,8 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
               />
               <Field.Error />
             </Field.Root>
-          </GridItem>
-          <GridItem col={6}>
+          </Grid.Item>
+          <Grid.Item col={6}>
             <Field.Root
               name="description"
               error={errors.name && formatMessage({ id: errors.name })}
@@ -103,8 +102,8 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
               />
               <Field.Error />
             </Field.Root>
-          </GridItem>
-        </Grid>
+          </Grid.Item>
+        </Grid.Root>
       </Flex>
     </Box>
   );

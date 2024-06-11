@@ -24,11 +24,11 @@ describe('Edit Locale', () => {
     await user.click(screen.getByRole('button', { name: 'Edit English locale' }));
 
     expect(screen.getByRole('heading', { name: 'Configuration' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
 
-    expect(screen.getByRole('tablist', { name: 'Configurations' })).toBeInTheDocument();
+    expect(screen.getByRole('tablist', { name: 'Configuration' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Basic settings' })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: 'Advanced settings' })).toBeInTheDocument();
     expect(screen.getByRole('tabpanel', { name: 'Basic settings' })).toBeInTheDocument();

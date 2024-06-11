@@ -104,7 +104,14 @@ const renderCompo = () =>
       <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
           <NotificationsProvider>
-            <EditAssetDialog asset={asset} onClose={jest.fn()} canUpdate canCopyLink canDownload />
+            <EditAssetDialog
+              open
+              asset={asset}
+              onClose={jest.fn()}
+              canUpdate
+              canCopyLink
+              canDownload
+            />
           </NotificationsProvider>
         </IntlProvider>
       </DesignSystemProvider>

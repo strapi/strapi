@@ -3,41 +3,37 @@ import { readFileSync } from 'node:fs';
 import os from 'node:os';
 import readline from 'node:readline';
 import crypto from 'crypto';
-import * as sentry from '@sentry/node';
-import hasYarn from './utils/has-yarn';
-import checkRequirements from './utils/check-requirements';
-import { trackError, captureException } from './utils/usage';
-import parseDatabaseArguments from './utils/parse-db-arguments';
-import generateNew from './generate-new';
-import machineID from './utils/machine-id';
-import type { Scope, NewOptions } from './types';
 
-export { default as checkInstallPath } from './utils/check-install-path';
+import checkRequirements from './utils/check-requirements';
+import { trackError, trackUsage } from './utils/usage';
+import machineID from './utils/machine-id';
+import type { Scope, Options } from './types';
+
+import checkInstallPath from './utils/check-install-path';
+import createProject from './create-project';
+import { addDatabaseDependencies } from './utils/database';
+
+export type { Options };
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
-export const generateNewApp = (projectDirectory: string, options: Partial<NewOptions>) => {
-  sentry.init({
-    dsn: 'https://841d2b2c9b4d4b43a4cde92794cb705a@sentry.io/1762059',
-  });
-
+export const generateNewApp = async (options: Options) => {
   checkRequirements();
 
-  const rootPath = resolve(projectDirectory);
+  const rootPath = await checkInstallPath(options.directory);
 
   const tmpPath = join(os.tmpdir(), `strapi${crypto.randomBytes(6).toString('hex')}`);
-
-  const useNpm = options.useNpm !== undefined;
 
   const scope: Scope = {
     rootPath,
     name: basename(rootPath),
-    // disable quickstart run app after creation
-    runQuickstartApp: options.run !== false,
+    useTypescript: options.useTypescript,
+    packageManager: options.packageManager,
+    database: options.database,
+    runApp: options.runApp ?? false,
+    isQuickstart: options.isQuickstart,
     // use pacakge version as strapiVersion (all packages have the same version);
     strapiVersion: packageJson.version,
-    debug: options.debug !== undefined,
-    quick: options.quickstart,
     template: options.template,
     packageJsonStrapi: {
       template: options.template,
@@ -47,50 +43,50 @@ export const generateNewApp = (projectDirectory: string, options: Partial<NewOpt
     docker: process.env.DOCKER === 'true',
     deviceId: machineID(),
     tmpPath,
-    // use yarn if available and --use-npm isn't true
-    useYarn: !useNpm && hasYarn(),
     installDependencies: true,
-    strapiDependencies: [
-      '@strapi/strapi',
-      '@strapi/plugin-users-permissions',
-      '@strapi/plugin-cloud',
-    ],
-    additionalsDependencies: {
+    devDependencies: {},
+    dependencies: {
+      '@strapi/strapi': packageJson.version,
+      '@strapi/plugin-users-permissions': packageJson.version,
+      '@strapi/plugin-cloud': packageJson.version,
+      // third party
       react: '^18.0.0',
       'react-dom': '^18.0.0',
       'react-router-dom': '^6.0.0',
       'styled-components': '^6.0.0',
     },
-    useTypescript: Boolean(options.typescript),
   };
 
-  sentry.configureScope(function configureScope(sentryScope) {
-    const tags = {
-      os: os.type(),
-      osPlatform: os.platform(),
-      osArch: os.arch(),
-      osRelease: os.release(),
-      version: scope.strapiVersion,
-      nodeVersion: process.versions.node,
-      docker: scope.docker,
+  if (scope.useTypescript) {
+    scope.devDependencies = {
+      ...scope.devDependencies,
+      typescript: '^5',
+      '@types/node': '^20',
+      '@types/react': '^18',
+      '@types/react-dom': '^18',
     };
+  }
 
-    (Object.keys(tags) as Array<keyof typeof tags>).forEach((tag) => {
-      sentryScope.setTag(tag, tags[tag]);
-    });
-  });
+  addDatabaseDependencies(scope);
 
-  parseDatabaseArguments({ scope, args: options });
   initCancelCatcher();
 
-  return generateNew(scope).catch((error) => {
-    console.error(error);
-    return captureException(error).then(() => {
-      return trackError({ scope, error }).then(() => {
-        process.exit(1);
-      });
+  try {
+    await trackUsage({ event: 'willCreateProject', scope });
+
+    // create a project with full list of questions
+    return await createProject(scope);
+  } catch (error) {
+    if (!(error instanceof Error)) {
+      throw error;
+    }
+
+    console.log(`\n${error.message}\n`);
+
+    return trackError({ scope, error }).then(() => {
+      process.exit(1);
     });
-  });
+  }
 };
 
 function initCancelCatcher() {

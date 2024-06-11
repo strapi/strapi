@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { type Element, type Path, Editor, Transforms } from 'slate';
 
 /**

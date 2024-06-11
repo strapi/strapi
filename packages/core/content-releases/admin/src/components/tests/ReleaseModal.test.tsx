@@ -21,6 +21,7 @@ describe('ReleaseModal', () => {
     const handleCloseMocked = jest.fn();
     const { user } = render(
       <ReleaseModal
+        open
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
         initialValues={{ name: '', time: '', timezone: '', scheduledAt: null }}
@@ -41,6 +42,7 @@ describe('ReleaseModal', () => {
   it('should show scheduled fields when selecting schedule release', async () => {
     render(
       <ReleaseModal
+        open
         handleClose={jest.fn()}
         handleSubmit={jest.fn()}
         initialValues={{ name: 'title', time: '', timezone: '', scheduledAt: null }}

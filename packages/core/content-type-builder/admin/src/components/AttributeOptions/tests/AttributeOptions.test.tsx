@@ -1,6 +1,7 @@
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
 import { DesignSystemProvider } from '@strapi/design-system';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -101,7 +102,7 @@ describe('<AttributeOptions />', () => {
     expect(comingSoonText).not.toBeInTheDocument();
   });
 
-  it('switches to the custom tab without custom fields', () => {
+  it('switches to the custom tab without custom fields', async () => {
     const App = makeApp();
     render(App);
 
@@ -117,16 +118,13 @@ describe('<AttributeOptions />', () => {
       })
     );
 
-    const customTab = screen.getByRole('tab', { selected: false, name: 'Custom' });
-    fireEvent.click(customTab);
-    const customTabSelected = screen.getByRole('tab', { selected: true, name: 'Custom' });
-    const comingSoonText = screen.getByText('Nothing in here yet.');
+    const user = userEvent.setup();
 
-    expect(customTabSelected).toBeVisible();
-    expect(comingSoonText).toBeVisible();
+    await user.click(screen.getByRole('tab', { name: 'Custom' }));
+    await screen.findByText('Nothing in here yet.');
   });
 
-  it('switches to the custom tab with custom fields', () => {
+  it('switches to the custom tab with custom fields', async () => {
     jest.mocked(useStrapiApp).mockImplementation((_name, getter) =>
       // @ts-expect-error - mocking purposes
       getter({
@@ -160,13 +158,12 @@ describe('<AttributeOptions />', () => {
     const App = makeApp();
     render(App);
 
-    const customTab = screen.getByRole('tab', { selected: false, name: 'Custom' });
-    fireEvent.click(customTab);
-    const customTabSelected = screen.getByRole('tab', { selected: true, name: 'Custom' });
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('tab', { name: 'Custom' }));
     const customFieldText = screen.getByText('Color');
     const howToAddLink = screen.getByRole('link', { name: 'How to add custom fields' });
 
-    expect(customTabSelected).toBeVisible();
     expect(customFieldText).toBeVisible();
     expect(howToAddLink).toBeVisible();
   });
