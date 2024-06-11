@@ -207,21 +207,12 @@ class StrapiApp {
     links: UnloadedSettingsLink[]
   ) => this.router.addSettingsLink(section, links);
 
-  addSettingsLink(
-    section: Pick<StrapiAppSetting, 'id' | 'intlLabel'> & { links: UnloadedSettingsLink[] },
-    links?: never
-  ): void;
-  addSettingsLink(
+  addSettingsLink = (
     sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
     link: UnloadedSettingsLink
-  ): void;
-  addSettingsLink(
-    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
-    link: UnloadedSettingsLink[]
-  ): void;
-  addSettingsLink(sectionId: any, link: any) {
+  ) => {
     this.router.addSettingsLink(sectionId, link);
-  }
+  };
 
   async bootstrap(customBootstrap?: unknown) {
     Object.keys(this.appPlugins).forEach((plugin) => {
