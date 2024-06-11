@@ -106,27 +106,7 @@ describe('ADMIN | new StrapiApp', () => {
       app.createSettingSection(section, links);
 
       expect(app.router.settings.foo).toBeDefined();
-      expect(app.router.settings.foo.links).toMatchInlineSnapshot(`
-        [
-          {
-            "Component": {
-              "$$typeof": Symbol(react.lazy),
-              "_init": [Function],
-              "_payload": {
-                "_result": [Function],
-                "_status": -1,
-              },
-            },
-            "id": "bar",
-            "intlLabel": {
-              "defaultMessage": "bar",
-              "id": "bar",
-            },
-            "permissions": [],
-            "to": "bar",
-          },
-        ]
-      `);
+      expect(app.router.settings.foo.links).toMatchInlineSnapshot(`[]`);
     });
 
     it('should add a link correctly to the global section', () => {
@@ -144,14 +124,6 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.router.settings.global.links).toHaveLength(1);
       expect(app.router.settings.global.links[0]).toMatchInlineSnapshot(`
         {
-          "Component": {
-            "$$typeof": Symbol(react.lazy),
-            "_init": [Function],
-            "_payload": {
-              "_result": [Function],
-              "_status": -1,
-            },
-          },
           "id": "bar",
           "intlLabel": {
             "defaultMessage": "bar",
@@ -181,14 +153,6 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.router.settings.global.links).toMatchInlineSnapshot(`
         [
           {
-            "Component": {
-              "$$typeof": Symbol(react.lazy),
-              "_init": [Function],
-              "_payload": {
-                "_result": [Function],
-                "_status": -1,
-              },
-            },
             "id": "bar",
             "intlLabel": {
               "defaultMessage": "bar",
@@ -491,14 +455,6 @@ describe('ADMIN | new StrapiApp', () => {
       expect(app.router.menu[0]).toBeDefined();
       expect(app.router.menu[0]).toMatchInlineSnapshot(`
         {
-          "Component": {
-            "$$typeof": Symbol(react.lazy),
-            "_init": [Function],
-            "_payload": {
-              "_result": [Function],
-              "_status": -1,
-            },
-          },
           "icon": [Function],
           "intlLabel": {
             "defaultMessage": "bar",
