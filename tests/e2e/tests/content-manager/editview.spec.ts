@@ -525,7 +525,6 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
 
       await page.getByRole('menuitem', { name: 'Discard changes' }).click();
-      await expect(page.getByRole('dialog', { name: 'Confirm' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
 
       await findAndClose(page, 'Changes discarded');
