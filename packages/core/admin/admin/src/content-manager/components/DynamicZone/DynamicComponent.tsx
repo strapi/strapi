@@ -11,7 +11,7 @@ import {
 } from '@strapi/design-system';
 import { Menu, MenuItem } from '@strapi/design-system/v2';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
-import { Drag, More, Trash } from '@strapi/icons';
+import { Drag, More, Trash, Download } from '@strapi/icons';
 import get from 'lodash/get';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
@@ -29,7 +29,7 @@ import type { ComponentPickerProps } from './ComponentPicker';
 
 interface DynamicComponentProps
   extends Pick<UseDragAndDropOptions, 'onGrabItem' | 'onDropItem' | 'onCancel'>,
-    Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
+  Pick<ComponentPickerProps, 'dynamicComponentsByCategory'> {
   componentUid: string;
   formErrors?: Record<string, unknown>;
   index?: number;
@@ -53,6 +53,7 @@ const DynamicComponent = ({
   onCancel,
   dynamicComponentsByCategory = {},
   onAddComponent,
+  onImportComponentData,
 }: DynamicComponentProps) => {
   const [isOpen, setIsOpen] = React.useState(true);
   const { formatMessage } = useIntl();
@@ -151,6 +152,22 @@ const DynamicComponent = ({
       >
         <Drag />
       </IconButton>
+      <IconButton
+        forwardedAs="div"
+        role="button"
+        noBorder
+        tabIndex={0}
+        label={formatMessage(
+          {
+            id: getTranslation('components.DynamicZone.delete-label'),
+            defaultMessage: 'Delete {name}',
+          },
+          { name: friendlyName }
+        )}
+        onClick={onImportComponentData}
+      >
+        <Download />
+      </IconButton>
       <Menu.Root>
         <Menu.Trigger size="S" endIcon={null} paddingLeft={2} paddingRight={2}>
           <More aria-hidden focusable={false} />
@@ -215,6 +232,8 @@ const DynamicComponent = ({
 
   return (
     <ComponentContainer as="li" width="100%">
+
+
       <Flex justifyContent="center">
         <Rectangle background="neutral200" />
       </Flex>
@@ -258,12 +277,12 @@ const ActionsFlex = styled(Flex)`
   }
 `;
 
-const IconButtonCustom = styled(IconButton)<{ expanded?: boolean }>`
+const IconButtonCustom = styled(IconButton) <{ expanded?: boolean }>`
   background-color: transparent;
 
   svg path {
     fill: ${({ theme, expanded }) =>
-      expanded ? theme.colors.primary600 : theme.colors.neutral600};
+    expanded ? theme.colors.primary600 : theme.colors.neutral600};
   }
 `;
 

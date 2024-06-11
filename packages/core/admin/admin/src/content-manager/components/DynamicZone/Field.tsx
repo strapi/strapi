@@ -1,6 +1,16 @@
 import * as React from 'react';
 
-import { Box, Flex, VisuallyHidden } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  VisuallyHidden,
+  ModalLayout,
+  ModalBody,
+  ModalHeader,
+  ModalFooter,
+  Typography,
+  Button,
+} from '@strapi/design-system';
 import { NotAllowedInput, useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -12,6 +22,8 @@ import { AddComponentButton } from './AddComponentButton';
 import { ComponentPicker } from './ComponentPicker';
 import { DynamicComponent, DynamicComponentProps } from './DynamicComponent';
 import { DynamicZoneLabel } from './DynamicZoneLabel';
+import { ImportDataModal } from './ImportDataModal';
+
 
 import type { EditLayoutRow } from '../../utils/layouts';
 import type { Attribute } from '@strapi/types';
@@ -27,6 +39,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }: DynamicZoneP
   const { max = Infinity, min = -Infinity, components = [], required = false } = fieldSchema ?? {};
 
   const [addComponentIsOpen, setAddComponentIsOpen] = React.useState(false);
+  const [isVisible, setIsVisible] = React.useState(false);
   const [liveText, setLiveText] = React.useState('');
 
   const {
@@ -192,6 +205,16 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }: DynamicZoneP
     removeComponentFromDynamicZone?.(name, currentIndex);
   };
 
+  const handleImportComponentData = () => {
+    console.log('inside handleImportComponentData');
+    setIsVisible(true);
+  };
+
+  const handleModalSubmit = () => {
+    console.log('Data submitted');
+    // Change modifiedData
+  };
+
   const renderButtonLabel = () => {
     if (addComponentIsOpen) {
       return formatMessage({ id: 'app.utils.close-label', defaultMessage: 'Close' });
@@ -239,6 +262,14 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }: DynamicZoneP
 
   return (
     <Flex direction="column" alignItems="stretch" gap={6}>
+      {isVisible && (
+        <ImportDataModal
+          isVisible={isVisible}
+          onClose={() => setIsVisible(false)}
+          onSubmit={handleModalSubmit}
+        />
+      )}
+
       {dynamicDisplayedComponentsLength > 0 && (
         <Box>
           <DynamicZoneLabel
@@ -267,6 +298,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }: DynamicZoneP
                 name={name}
                 onMoveComponent={handleMoveComponent}
                 onRemoveComponentClick={handleRemoveComponent(name, index)}
+                onImportComponentData={handleImportComponentData} // Change this line
                 onCancel={handleCancel}
                 onDropItem={handleDropItem}
                 onGrabItem={handleGrabItem}
