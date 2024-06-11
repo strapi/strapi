@@ -460,7 +460,7 @@
   "app.components.GuidedTour.home.profile.title": "⚙️ Customize your experience",
   "app.components.GuidedTour.home.profile.cta.title": "Manage your profile",
   "app.components.GuidedTour.skip": "Skip the tour",
-  "app.components.GuidedTour.title": "{count} steps to get started",
+  "app.components.GuidedTour.title": " steps to get started",
   "app.components.HomePage.button.blog": "See more on the blog",
   "app.components.HomePage.community": "Join the community",
   "app.components.HomePage.community.content": "Discuss with team members, contributors and developers on different channels.",

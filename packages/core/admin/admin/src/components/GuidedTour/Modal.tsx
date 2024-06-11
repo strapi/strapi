@@ -196,7 +196,7 @@ const GuidedTourStepper = ({
           {stepCount}
           {formatMessage({
             id: 'app.components.GuidedTour.title',
-            defaultMessage: 'steps to get started',
+            defaultMessage: ' steps to get started',
           })}
         </Typography>
       </Flex>

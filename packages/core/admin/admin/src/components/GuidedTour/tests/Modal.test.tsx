@@ -7,6 +7,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useGuidedTour: jest.fn(() => ({
     isGuidedTourVisible: true,
+    userRole: 'super-admin',
     guidedTourState: {
       apiTokens: {
         create: false,
@@ -674,6 +675,7 @@ describe('<GuidedTourModal />', () => {
     // @ts-expect-error – mocking
     useGuidedTour.mockImplementation(() => ({
       isGuidedTourVisible: true,
+      userRole: 'super-admin',
       guidedTourState: {
         apiTokens: {
           create: false,
@@ -700,6 +702,7 @@ describe('<GuidedTourModal />', () => {
     // @ts-expect-error – mocking
     useGuidedTour.mockImplementation(() => ({
       isGuidedTourVisible: false,
+      userRole: 'super-admin',
       guidedTourState: {
         apiTokens: {
           create: false,

@@ -464,7 +464,7 @@ describe('GuidedTour Homepage', () => {
                 <h3
                   class="c2 c9"
                 >
-                  🧠 Build the content structure
+                  🧠 Create a first Collection Type
                 </h3>
               </div>
               <div
@@ -533,7 +533,7 @@ describe('GuidedTour Homepage', () => {
                 <h3
                   class="c2 c9"
                 >
-                  ⚡️ What would you like to share with the world?
+                  ⚡️ Create content
                 </h3>
               </div>
               <div
