@@ -16,7 +16,7 @@ test.describe('Blocks editor', () => {
     // Write some text into a blocks editor
     const code = 'const problems = 99';
     await page.goto('/admin/content-manager/single-types/api::homepage.homepage');
-    await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Back' })).toBeVisible();
     const textbox = page.getByRole('textbox').nth(1);
     await expect(textbox).toBeVisible();
     await textbox.click();
