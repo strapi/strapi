@@ -6,7 +6,7 @@ import { apiConfig } from '../config/api';
 
 const openModule = import('open');
 
-export default async (ctx: CLIContext) => {
+export default async (ctx: CLIContext): Promise<boolean> => {
   const { logger } = ctx;
   const tokenService = await tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
@@ -35,7 +35,7 @@ export default async (ctx: CLIContext) => {
           'To access your dashboard, please copy and paste the following URL into your web browser:'
         );
         logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
-        return;
+        return true;
       } catch (e) {
         logger.debug('Failed to fetch user info', e);
         // If the token is invalid and request failed, we should proceed with the login process
@@ -51,7 +51,7 @@ export default async (ctx: CLIContext) => {
   } catch (e: unknown) {
     logger.error('🥲 Oops! Something went wrong while logging you in. Please try again.');
     logger.debug(e);
-    return;
+    return false;
   }
 
   try {
@@ -161,7 +161,7 @@ export default async (ctx: CLIContext) => {
           logger.debug(e);
           spinnerFail();
           await trackFailedLogin();
-          return;
+          return false;
         }
         // Await interval before retrying
         await new Promise((resolve) => {
