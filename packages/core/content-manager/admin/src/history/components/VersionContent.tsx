@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Form, Layouts } from '@strapi/admin/strapi-admin';
-import { Box, Divider, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Divider, Flex, Grid, Typography } from '@strapi/design-system';
 import { Schema } from '@strapi/types';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
@@ -108,11 +108,11 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
     const [field] = row;
 
     return (
-      <Grid key={field.name} gap={4}>
-        <GridItem col={12} s={12} xs={12}>
+      <Grid.Root key={field.name} gap={4}>
+        <Grid.Item col={12} s={12} xs={12}>
           <VersionInputRenderer {...field} />
-        </GridItem>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     );
   }
 
@@ -129,15 +129,15 @@ const FormPanel = ({ panel }: { panel: EditFieldLayout[][] }) => {
     >
       <Flex direction="column" alignItems="stretch" gap={6}>
         {panel.map((row, gridRowIndex) => (
-          <Grid key={gridRowIndex} gap={4}>
+          <Grid.Root key={gridRowIndex} gap={4}>
             {row.map(({ size, ...field }) => {
               return (
-                <GridItem col={size} key={field.name} s={12} xs={12}>
+                <Grid.Item col={size} key={field.name} s={12} xs={12}>
                   <VersionInputRenderer {...field} />
-                </GridItem>
+                </Grid.Item>
               );
             })}
-          </Grid>
+          </Grid.Root>
         ))}
       </Flex>
     </Box>

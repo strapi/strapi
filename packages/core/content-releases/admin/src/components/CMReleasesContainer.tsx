@@ -13,13 +13,10 @@ import {
   Box,
   Button,
   Flex,
-  ModalBody,
-  ModalHeader,
-  ModalLayout,
+  Modal,
   SingleSelect,
   SingleSelectOption,
   Typography,
-  ModalFooter,
   EmptyStateLayout,
   LinkButton,
   Field,
@@ -61,10 +58,10 @@ export const INITIAL_VALUES = {
   releaseId: '',
 } satisfies FormValues;
 
-interface AddActionToReleaseModalProps {
-  handleClose: () => void;
+interface AddActionToReleaseModalProps extends Pick<Modal.Props, 'open'> {
   contentTypeUid: GetContentTypeEntryReleases.Request['query']['contentTypeUid'];
   entryId: GetContentTypeEntryReleases.Request['query']['entryId'];
+  onOpenChange: () => void;
 }
 
 export const NoReleases = () => {
@@ -96,11 +93,11 @@ export const NoReleases = () => {
 };
 
 const AddActionToReleaseModal = ({
-  handleClose,
+  open,
+  onOpenChange,
   contentTypeUid,
   entryId,
 }: AddActionToReleaseModalProps) => {
-  const releaseHeaderId = React.useId();
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
@@ -138,7 +135,7 @@ const AddActionToReleaseModal = ({
         }),
       });
 
-      handleClose();
+      onOpenChange();
       return;
     }
 
@@ -160,93 +157,92 @@ const AddActionToReleaseModal = ({
   };
 
   return (
-    <ModalLayout onClose={handleClose} labelledBy={releaseHeaderId}>
-      <ModalHeader>
-        <Typography id={releaseHeaderId} fontWeight="bold" textColor="neutral800">
-          {formatMessage({
-            id: 'content-releases.content-manager-edit-view.add-to-release',
-            defaultMessage: 'Add to release',
-          })}
-        </Typography>
-      </ModalHeader>
-      <Formik
-        onSubmit={handleSubmit}
-        validationSchema={RELEASE_ACTION_FORM_SCHEMA}
-        initialValues={INITIAL_VALUES}
-      >
-        {({ values, setFieldValue }) => {
-          return (
-            <Form>
-              {releases?.length === 0 ? (
-                <NoReleases />
-              ) : (
-                <ModalBody>
-                  <Flex direction="column" alignItems="stretch" gap={2}>
-                    <Box paddingBottom={6}>
-                      <Field.Root required>
-                        <Field.Label>
-                          {formatMessage({
-                            id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
-                            defaultMessage: 'Select a release',
-                          })}
-                        </Field.Label>
-                        <SingleSelect
-                          placeholder={formatMessage({
-                            id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
-                            defaultMessage: 'Select',
-                          })}
-                          onChange={(value) => setFieldValue('releaseId', value)}
-                          value={values.releaseId}
-                        >
-                          {releases?.map((release) => (
-                            <SingleSelectOption key={release.id} value={release.id}>
-                              {release.name}
-                            </SingleSelectOption>
-                          ))}
-                        </SingleSelect>
-                      </Field.Root>
-                    </Box>
-                    <Field.Label>
+    <Modal.Root open={open} onOpenChange={onOpenChange}>
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title fontWeight="bold">
+            {formatMessage({
+              id: 'content-releases.content-manager-edit-view.add-to-release',
+              defaultMessage: 'Add to release',
+            })}
+          </Modal.Title>
+        </Modal.Header>
+        <Formik
+          onSubmit={handleSubmit}
+          validationSchema={RELEASE_ACTION_FORM_SCHEMA}
+          initialValues={INITIAL_VALUES}
+        >
+          {({ values, setFieldValue }) => {
+            return (
+              <Form>
+                {releases?.length === 0 ? (
+                  <NoReleases />
+                ) : (
+                  <Modal.Body>
+                    <Flex direction="column" alignItems="stretch" gap={2}>
+                      <Box paddingBottom={6}>
+                        <Field.Root required>
+                          <Field.Label>
+                            {formatMessage({
+                              id: 'content-releases.content-manager-edit-view.add-to-release.select-label',
+                              defaultMessage: 'Select a release',
+                            })}
+                          </Field.Label>
+                          <SingleSelect
+                            placeholder={formatMessage({
+                              id: 'content-releases.content-manager-edit-view.add-to-release.select-placeholder',
+                              defaultMessage: 'Select',
+                            })}
+                            onChange={(value) => setFieldValue('releaseId', value)}
+                            value={values.releaseId}
+                          >
+                            {releases?.map((release) => (
+                              <SingleSelectOption key={release.id} value={release.id}>
+                                {release.name}
+                              </SingleSelectOption>
+                            ))}
+                          </SingleSelect>
+                        </Field.Root>
+                      </Box>
+                      <Field.Label>
+                        {formatMessage({
+                          id: 'content-releases.content-manager-edit-view.add-to-release.action-type-label',
+                          defaultMessage: 'What do you want to do with this entry?',
+                        })}
+                      </Field.Label>
+                      <ReleaseActionOptions
+                        selected={values.type}
+                        handleChange={(e) => setFieldValue('type', e.target.value)}
+                        name="type"
+                      />
+                    </Flex>
+                  </Modal.Body>
+                )}
+                <Modal.Footer>
+                  <Modal.Close>
+                    <Button variant="tertiary" name="cancel">
                       {formatMessage({
-                        id: 'content-releases.content-manager-edit-view.add-to-release.action-type-label',
-                        defaultMessage: 'What do you want to do with this entry?',
+                        id: 'content-releases.content-manager-edit-view.add-to-release.cancel-button',
+                        defaultMessage: 'Cancel',
                       })}
-                    </Field.Label>
-                    <ReleaseActionOptions
-                      selected={values.type}
-                      handleChange={(e) => setFieldValue('type', e.target.value)}
-                      name="type"
-                    />
-                  </Flex>
-                </ModalBody>
-              )}
-              <ModalFooter
-                startActions={
-                  <Button onClick={handleClose} variant="tertiary" name="cancel">
-                    {formatMessage({
-                      id: 'content-releases.content-manager-edit-view.add-to-release.cancel-button',
-                      defaultMessage: 'Cancel',
-                    })}
-                  </Button>
-                }
-                endActions={
-                  /**
-                   * TODO: Ideally we would use isValid from Formik to disable the button, however currently it always returns true
-                   * for yup.string().required(), even when the value is falsy (including empty string)
-                   */
+                    </Button>
+                  </Modal.Close>
+                  {/** TODO: Ideally we would use isValid from Formik to disable the button,
+                  however currently it always returns true * for yup.string().required(), even when
+                  the value is falsy (including empty string) */}
                   <Button type="submit" disabled={!values.releaseId} loading={isLoading}>
                     {formatMessage({
                       id: 'content-releases.content-manager-edit-view.add-to-release.continue-button',
                       defaultMessage: 'Continue',
                     })}
                   </Button>
-                }
-              />
-            </Form>
-          );
-        }}
-      </Formik>
-    </ModalLayout>
+                </Modal.Footer>
+              </Form>
+            );
+          }}
+        </Formik>
+      </Modal.Content>
+    </Modal.Root>
   );
 };
 
@@ -438,13 +434,12 @@ export const CMReleasesContainer = () => {
           </Button>
         ) : null}
       </Flex>
-      {isModalOpen && (
-        <AddActionToReleaseModal
-          handleClose={toggleModal}
-          contentTypeUid={contentTypeUid}
-          entryId={entryId}
-        />
-      )}
+      <AddActionToReleaseModal
+        open={isModalOpen}
+        onOpenChange={toggleModal}
+        contentTypeUid={contentTypeUid}
+        entryId={entryId}
+      />
     </Box>
   );
 };

@@ -115,6 +115,112 @@ describe('Filtering API', () => {
   });
 
   describe('Basic filters', () => {
+    describe('Filter $and', () => {
+      test('Should return an array with matching entities', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              $and: [
+                {
+                  name: 'Product 1',
+                },
+                {
+                  rank: 42,
+                },
+              ],
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual(expect.arrayContaining([data.product[0]]));
+      });
+
+      test('Should return an empty array when no match', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              $and: [
+                {
+                  name: 'Product 1',
+                },
+                {
+                  rank: 43,
+                },
+              ],
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([]);
+      });
+    });
+
+    describe('Fitler $or', () => {
+      test('Should return an array with matching entities', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              $or: [
+                {
+                  name: 'Product 1',
+                },
+                {
+                  rank: 82,
+                },
+              ],
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual(expect.arrayContaining([data.product[0], data.product[1]]));
+      });
+
+      test('Should return an empty array when no match', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              $or: [
+                {
+                  name: 'Product 99',
+                },
+                {
+                  rank: 43,
+                },
+              ],
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual([]);
+      });
+    });
+
+    describe('Filter $not', () => {
+      test('Should return an array with matching entities', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/products',
+          qs: {
+            filters: {
+              $not: {
+                name: 'Product 1',
+              },
+            },
+          },
+        });
+
+        expect(res.body.data).toEqual(expect.arrayContaining(data.product.slice(1)));
+      });
+    });
+
     describe('Filter equals', () => {
       test('Should be the default filter', async () => {
         const res = await rq({

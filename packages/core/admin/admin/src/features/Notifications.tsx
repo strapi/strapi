@@ -90,7 +90,7 @@ const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
         gap={2}
         top={`4.6rem`}
         width={`50rem`}
-        zIndex={10}
+        zIndex="notification"
       >
         {notifications.map((notification) => {
           return (

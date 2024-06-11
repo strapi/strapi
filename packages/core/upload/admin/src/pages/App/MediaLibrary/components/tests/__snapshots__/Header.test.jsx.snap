@@ -238,6 +238,18 @@ exports[`Header renders 1`] = `
   border: 2px solid #4945ff;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .c12 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c14 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
 <div>
   <div
     style="height: 0px;"
@@ -252,8 +264,7 @@ exports[`Header renders 1`] = `
         <a
           aria-disabled="false"
           class="c2 c3"
-          rel="noreferrer noopener"
-          target="_blank"
+          target="_self"
           to="/?folder=2&folderPath=/1"
         >
           <svg

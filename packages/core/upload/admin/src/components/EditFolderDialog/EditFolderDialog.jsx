@@ -6,11 +6,8 @@ import {
   Field,
   Flex,
   Grid,
-  GridItem,
   Loader,
-  ModalBody,
-  ModalFooter,
-  ModalLayout,
+  Modal,
   TextInput,
   Typography,
 } from '@strapi/design-system';
@@ -42,7 +39,7 @@ const folderSchema = yup.object({
     .nullable(true),
 });
 
-export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) => {
+export const EditFolderContent = ({ onClose, folder, location, parentFolderId }) => {
   const { data: folderStructure, isLoading: folderStructureIsLoading } = useFolderStructure({
     enabled: true,
   });
@@ -129,10 +126,9 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
 
   if (isLoading) {
     return (
-      <ModalLayout onClose={() => onClose()} labelledBy="title">
+      <>
         <EditFolderModalHeader isEditing={isEditing} />
-
-        <ModalBody>
+        <Modal.Body>
           <Flex justifyContent="center" paddingTop={4} paddingBottom={4}>
             <Loader>
               {formatMessage({
@@ -141,13 +137,13 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
               })}
             </Loader>
           </Flex>
-        </ModalBody>
-      </ModalLayout>
+        </Modal.Body>
+      </>
     );
   }
 
   return (
-    <ModalLayout onClose={() => onClose()} labelledBy="title">
+    <>
       <Formik
         validationSchema={folderSchema}
         validateOnChange={false}
@@ -157,11 +153,10 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
         {({ values, errors, handleChange, setFieldValue }) => (
           <Form noValidate>
             <EditFolderModalHeader isEditing={isEditing} />
-
-            <ModalBody>
-              <Grid gap={4}>
+            <Modal.Body>
+              <Grid.Root gap={4}>
                 {isEditing && (
-                  <GridItem xs={12} col={12}>
+                  <Grid.Item xs={12} col={12}>
                     <ContextInfo
                       blocks={[
                         {
@@ -190,10 +185,10 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                         },
                       ]}
                     />
-                  </GridItem>
+                  </Grid.Item>
                 )}
 
-                <GridItem xs={12} col={6}>
+                <Grid.Item xs={12} col={6}>
                   <Field.Root name="name" error={errors.name}>
                     <Field.Label>
                       {formatMessage({
@@ -208,9 +203,9 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                     />
                     <Field.Error />
                   </Field.Root>
-                </GridItem>
+                </Grid.Item>
 
-                <GridItem xs={12} col={6}>
+                <Grid.Item xs={12} col={6}>
                   <Field.Root id="folder-parent">
                     <Field.Label>
                       {formatMessage({
@@ -245,55 +240,75 @@ export const EditFolderDialog = ({ onClose, folder, location, parentFolderId }) 
                       </Typography>
                     )}
                   </Field.Root>
-                </GridItem>
-              </Grid>
-            </ModalBody>
-
-            <ModalFooter
-              startActions={
-                <Button onClick={() => onClose()} variant="tertiary" name="cancel">
-                  {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
-                </Button>
-              }
-              endActions={
-                <Flex gap={2}>
-                  {isEditing && canUpdate && (
-                    <Button
-                      type="button"
-                      variant="danger-light"
-                      onClick={() => setShowConfirmDialog(true)}
-                      name="delete"
-                      disabled={!canUpdate || isEditFolderLoading}
-                    >
-                      {formatMessage({
-                        id: getTrad('modal.folder.create.delete'),
-                        defaultMessage: 'Delete folder',
-                      })}
-                    </Button>
-                  )}
-
+                </Grid.Item>
+              </Grid.Root>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button onClick={() => onClose()} variant="tertiary" name="cancel">
+                {formatMessage({ id: 'cancel', defaultMessage: 'Cancel' })}
+              </Button>
+              <Flex gap={2}>
+                {isEditing && canUpdate && (
                   <Button
-                    name="submit"
-                    loading={isEditFolderLoading}
-                    disabled={formDisabled}
-                    type="submit"
+                    type="button"
+                    variant="danger-light"
+                    onClick={() => setShowConfirmDialog(true)}
+                    name="delete"
+                    disabled={!canUpdate || isEditFolderLoading}
                   >
-                    {formatMessage(
-                      isEditing
-                        ? { id: getTrad('modal.folder.edit.submit'), defaultMessage: 'Save' }
-                        : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
-                    )}
+                    {formatMessage({
+                      id: getTrad('modal.folder.create.delete'),
+                      defaultMessage: 'Delete folder',
+                    })}
                   </Button>
-                </Flex>
-              }
-            />
+                )}
+
+                <Button
+                  name="submit"
+                  loading={isEditFolderLoading}
+                  disabled={formDisabled}
+                  type="submit"
+                >
+                  {formatMessage(
+                    isEditing
+                      ? { id: getTrad('modal.folder.edit.submit'), defaultMessage: 'Save' }
+                      : { id: getTrad('modal.folder.create.submit'), defaultMessage: 'Create' }
+                  )}
+                </Button>
+              </Flex>
+            </Modal.Footer>
           </Form>
         )}
       </Formik>
-      {showConfirmDialog && (
-        <RemoveFolderDialog onClose={() => setShowConfirmDialog(false)} onConfirm={handleDelete} />
-      )}
-    </ModalLayout>
+      <RemoveFolderDialog
+        open={showConfirmDialog}
+        onClose={() => setShowConfirmDialog(false)}
+        onConfirm={handleDelete}
+      />
+    </>
+  );
+};
+
+EditFolderContent.defaultProps = {
+  folder: undefined,
+  location: undefined,
+  parentFolderId: null,
+};
+
+EditFolderContent.propTypes = {
+  folder: FolderDefinition,
+  location: PropTypes.string,
+  onClose: PropTypes.func.isRequired,
+  parentFolderId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+};
+
+export const EditFolderDialog = ({ open, onClose, ...restProps }) => {
+  return (
+    <Modal.Root open={open} onOpenChange={onClose}>
+      <Modal.Content>
+        <EditFolderContent {...restProps} onClose={onClose} />
+      </Modal.Content>
+    </Modal.Root>
   );
 };
 
@@ -306,6 +321,7 @@ EditFolderDialog.defaultProps = {
 EditFolderDialog.propTypes = {
   folder: FolderDefinition,
   location: PropTypes.string,
+  open: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   parentFolderId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
 };

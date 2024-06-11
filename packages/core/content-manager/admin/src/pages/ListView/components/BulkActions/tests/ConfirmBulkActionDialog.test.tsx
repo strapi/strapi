@@ -43,11 +43,11 @@ describe('ConfirmBulkActionDialog', () => {
   it('should toggle the dialog', () => {
     const { rerender, queryByRole, getByRole, getByTestId } = renderRTL(<Component />);
 
-    expect(queryByRole('dialog')).not.toBeInTheDocument();
+    expect(queryByRole('alertdialog')).not.toBeInTheDocument();
 
     rerender(<Component isOpen />);
 
-    expect(getByRole('dialog')).toBeInTheDocument();
+    expect(getByRole('alertdialog')).toBeInTheDocument();
     expect(getByTestId('dialog-body')).toBeInTheDocument();
     expect(getByTestId('end-action')).toBeInTheDocument();
   });
@@ -83,7 +83,7 @@ describe('ConfirmDialogPublishAll', () => {
   it('should show a default message if there are not draft relations', async () => {
     const { findByText, queryByText, findByRole } = render();
 
-    await findByRole('dialog');
+    await findByRole('alertdialog');
 
     expect(
       queryByText('not published yet and might lead to unexpected behavior')
@@ -109,9 +109,9 @@ describe('ConfirmDialogPublishAll', () => {
 
     const { getByRole, findByRole } = render();
 
-    await findByRole('dialog');
+    await findByRole('alertdialog');
 
-    within(getByRole('dialog')).getByText(/1 relation out of 2 entries is/i);
+    within(getByRole('alertdialog')).getByText(/1 relation out of 2 entries is/i);
   });
 
   it('should show the warning message with 2 draft relations and 2 entries', async () => {
@@ -131,9 +131,9 @@ describe('ConfirmDialogPublishAll', () => {
 
     const { getByRole, findByRole } = render();
 
-    await findByRole('dialog');
+    await findByRole('alertdialog');
 
-    within(getByRole('dialog')).getByText(/2 relations out of 2 entries are/i);
+    within(getByRole('alertdialog')).getByText(/2 relations out of 2 entries are/i);
   });
 
   it('should not show the Confirmation component if there is an error coming from the API', async () => {
@@ -186,7 +186,7 @@ describe('ConfirmDialogPublishAll', () => {
 
     const { getByRole, findByRole } = render();
 
-    await findByRole('dialog');
-    within(getByRole('dialog')).getByText(/2 relations out of 2 entries are/i);
+    await findByRole('alertdialog');
+    within(getByRole('alertdialog')).getByText(/2 relations out of 2 entries are/i);
   });
 });

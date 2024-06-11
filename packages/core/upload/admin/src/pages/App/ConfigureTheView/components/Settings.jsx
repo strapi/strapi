@@ -1,13 +1,6 @@
 import React from 'react';
 
-import {
-  Box,
-  Grid,
-  GridItem,
-  SingleSelectOption,
-  SingleSelect,
-  Field,
-} from '@strapi/design-system';
+import { Box, Grid, SingleSelectOption, SingleSelect, Field } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -27,8 +20,8 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
       paddingLeft={7}
       paddingRight={7}
     >
-      <Grid gap={4}>
-        <GridItem s={12} col={6}>
+      <Grid.Root gap={4}>
+        <Grid.Item s={12} col={6}>
           <Field.Root
             hint={formatMessage({
               id: getTrad('config.entries.note'),
@@ -54,8 +47,8 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
             </SingleSelect>
             <Field.Hint />
           </Field.Root>
-        </GridItem>
-        <GridItem s={12} col={6}>
+        </Grid.Item>
+        <Grid.Item s={12} col={6}>
           <Field.Root
             hint={formatMessage({
               id: getTrad('config.note'),
@@ -87,8 +80,8 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
             </SingleSelect>
             <Field.Hint />
           </Field.Root>
-        </GridItem>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     </Box>
   );
 };

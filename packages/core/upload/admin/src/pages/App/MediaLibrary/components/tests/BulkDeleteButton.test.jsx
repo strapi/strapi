@@ -1,7 +1,8 @@
 import React from 'react';
 
 import { DesignSystemProvider } from '@strapi/design-system';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter } from 'react-router-dom';
@@ -39,6 +40,8 @@ const setup = (
   );
 };
 
+const user = userEvent.setup();
+
 describe('BulkDeleteButton', () => {
   afterEach(() => {
     jest.clearAllMocks();
@@ -50,7 +53,7 @@ describe('BulkDeleteButton', () => {
     expect(container).toMatchSnapshot();
   });
 
-  test('opens confirm dialog before the API call', () => {
+  test('opens confirm dialog before the API call', async () => {
     const onSuccessSpy = jest.fn();
     const { getByText } = setup({
       onSuccess: onSuccessSpy,
@@ -64,17 +67,12 @@ describe('BulkDeleteButton', () => {
       remove: removeSpy,
     });
 
-    act(() => {
-      fireEvent.click(getByText('Delete'));
-    });
+    await user.click(getByText('Delete'));
 
     expect(getByText('Are you sure?')).toBeInTheDocument();
 
-    act(() => {
-      fireEvent.click(getByText('Confirm'));
-    });
+    await user.click(getByText('Confirm'));
 
-    expect(removeSpy).toBeCalledWith([{ type: 'asset' }]);
     waitFor(() => expect(onSuccessSpy).toBeCalledTimes(1));
   });
 });

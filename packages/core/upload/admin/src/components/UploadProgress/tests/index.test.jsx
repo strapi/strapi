@@ -59,14 +59,6 @@ describe('<UploadProgress />', () => {
         width: 100%;
       }
 
-      .c5 {
-        background: #666687;
-        border-radius: 4px;
-        position: relative;
-        width: 102px;
-        height: 8px;
-      }
-
       .c1 {
         align-items: center;
         display: flex;
@@ -93,14 +85,21 @@ describe('<UploadProgress />', () => {
         color: inherit;
       }
 
-      .c6:before {
+      .c5 {
+        position: relative;
+        overflow: hidden;
+        width: 10.2rem;
+        height: 0.8rem;
+        background-color: #666687;
+        border-radius: 4px;
+        transform: translateZ(0);
+      }
+
+      .c6 {
         background-color: #ffffff;
         border-radius: 4px;
-        bottom: 0;
-        content: '';
-        position: absolute;
-        top: 0;
-        width: 0%;
+        width: 100%;
+        height: 100%;
       }
 
       .c2 {
@@ -130,6 +129,12 @@ describe('<UploadProgress />', () => {
         fill: currentColor;
       }
 
+      @media (prefers-reduced-motion: no-preference) {
+        .c6 {
+          transition: transform 320ms cubic-bezier(.4,0,.2,1);
+        }
+      }
+
       <div
         class="c0 c1 c2"
       >
@@ -137,13 +142,20 @@ describe('<UploadProgress />', () => {
           class="c3 c4"
         >
           <div
-            aria-label="0/100%"
             aria-valuemax="100"
             aria-valuemin="0"
-            aria-valuenow="0"
-            class="c5 c6"
+            class="c5"
+            data-max="100"
+            data-state="indeterminate"
             role="progressbar"
-          />
+          >
+            <div
+              class="c6"
+              data-max="100"
+              data-state="indeterminate"
+              style="transform: translate3D(-100%, 0, 0);"
+            />
+          </div>
           <button
             class="c7"
             type="button"

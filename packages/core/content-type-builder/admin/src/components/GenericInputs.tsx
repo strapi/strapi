@@ -256,10 +256,10 @@ const GenericInput = ({
         return (
           <Checkbox
             disabled={disabled}
-            onValueChange={(value) => {
+            onCheckedChange={(value) => {
               onChange({ target: { name, value } });
             }}
-            value={Boolean(value)}
+            checked={Boolean(value)}
           >
             {label}
           </Checkbox>
@@ -444,7 +444,7 @@ const GenericInput = ({
 
   return (
     <Field.Root error={errorMessage} name={name} hint={hint} required={required}>
-      <Field.Label action={labelAction}>{label}</Field.Label>
+      {type !== 'checkbox' ? <Field.Label action={labelAction}>{label}</Field.Label> : null}
       {getComponent()}
       <Field.Error />
       <Field.Hint />

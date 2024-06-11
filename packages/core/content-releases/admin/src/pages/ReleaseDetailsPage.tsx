@@ -30,6 +30,7 @@ import {
   EmptyStateLayout,
   LinkButton,
   Menu,
+  Dialog,
 } from '@strapi/design-system';
 import { CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -65,7 +66,7 @@ import type {
   ReleaseActionGroupBy,
   ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
-import type { Schema } from '@strapi/types';
+import type { Struct, Internal } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -115,8 +116,8 @@ const TypographyMaxWidth = styled(Typography)`
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
-  schema?: Schema.ContentType;
-  components: { [key: Schema.Component['uid']]: Schema.Component };
+  schema?: Struct.ContentTypeSchema;
+  components: { [key: Internal.UID.Component]: Struct.ComponentSchema };
   entry: ReleaseActionEntry;
 }
 
@@ -693,6 +694,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
         ]
       : []),
   ];
+
   const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
 
   return (
@@ -951,31 +953,28 @@ const ReleaseDetailsPage = () => {
       toggleWarningSubmit={toggleWarningSubmit}
     >
       <ReleaseDetailsBody releaseId={releaseId} />
-      {releaseModalShown && (
-        <ReleaseModal
-          handleClose={toggleEditReleaseModal}
-          handleSubmit={handleEditRelease}
-          isLoading={isLoadingDetails || isSubmittingForm}
-          initialValues={{
-            name: title || '',
-            scheduledAt,
-            date,
-            time,
-            isScheduled: Boolean(scheduledAt),
-            timezone,
-          }}
-        />
-      )}
-      <ConfirmDialog
-        isOpen={showWarningSubmit}
-        onClose={toggleWarningSubmit}
-        onConfirm={handleDeleteRelease}
-      >
-        {formatMessage({
-          id: 'content-releases.dialog.confirmation-message',
-          defaultMessage: 'Are you sure you want to delete this release?',
-        })}
-      </ConfirmDialog>
+      <ReleaseModal
+        open={releaseModalShown}
+        handleClose={toggleEditReleaseModal}
+        handleSubmit={handleEditRelease}
+        isLoading={isLoadingDetails || isSubmittingForm}
+        initialValues={{
+          name: title || '',
+          scheduledAt,
+          date,
+          time,
+          isScheduled: Boolean(scheduledAt),
+          timezone,
+        }}
+      />
+      <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
+        <ConfirmDialog onConfirm={handleDeleteRelease}>
+          {formatMessage({
+            id: 'content-releases.dialog.confirmation-message',
+            defaultMessage: 'Are you sure you want to delete this release?',
+          })}
+        </ConfirmDialog>
+      </Dialog.Root>
     </ReleaseDetailsLayout>
   );
 };

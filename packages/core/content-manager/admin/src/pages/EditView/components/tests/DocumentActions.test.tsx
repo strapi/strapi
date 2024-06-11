@@ -165,7 +165,7 @@ describe('DocumentActions', () => {
     expect(onClick).toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole('button', { name: 'Close the modal' }));
+    await user.click(screen.getByRole('button', { name: 'Close modal' }));
 
     expect(onClose).toHaveBeenCalled();
   });
@@ -339,7 +339,7 @@ describe('DocumentActionsMenu', () => {
     expect(onClick).toHaveBeenCalled();
     expect(onClose).not.toHaveBeenCalled();
 
-    await user.click(screen.getByRole('button', { name: 'Close the modal' }));
+    await user.click(screen.getByRole('button', { name: 'Close modal' }));
 
     expect(onClose).toHaveBeenCalled();
   });

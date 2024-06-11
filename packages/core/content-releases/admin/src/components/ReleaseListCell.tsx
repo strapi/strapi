@@ -50,6 +50,7 @@
 //  * -----------------------------------------------------------------------------------------------*/
 
 // const useReleasesList = (entryId: string | number) => {
+//   TODO: fix Property 'uid' does not exist on type 'FormattedContentTypeLayout | null'
 //   const { uid: contentTypeUid } = useTypedSelector(
 //     (state) => state['content-manager_listView'].contentType
 //   );
@@ -81,7 +82,7 @@
 // //   displayedHeaders: ListLayoutRow[];
 // // }
 
-// const addColumnToTableHook = ({ displayedHeaders, layout }: any) => {
+// const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHookArgs) => {
 //   const { contentType } = layout;
 
 //   if (!contentType.options?.draftAndPublish) {

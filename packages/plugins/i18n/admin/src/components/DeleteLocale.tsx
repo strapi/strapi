@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { ConfirmDialog, useAPIErrorHandler, useNotification } from '@strapi/admin/strapi-admin';
-import { IconButton } from '@strapi/design-system';
+import { Dialog, IconButton } from '@strapi/design-system';
 import { Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -41,6 +41,8 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
           defaultMessage: 'Deleted locale',
         }),
       });
+
+      setVisible(false);
     } catch (err) {
       toggleNotification({
         type: 'danger',
@@ -53,24 +55,26 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
   };
 
   return (
-    <>
-      <IconButton
-        onClick={() => setVisible(true)}
-        label={formatMessage(
-          {
-            id: getTranslation('Settings.list.actions.delete'),
-            defaultMessage: 'Delete {name} locale',
-          },
-          {
-            name,
-          }
-        )}
-        borderWidth={0}
-      >
-        <Trash />
-      </IconButton>
-      <ConfirmDialog onConfirm={handleConfirm} onClose={() => setVisible(false)} isOpen={visible} />
-    </>
+    <Dialog.Root open={visible} onOpenChange={setVisible}>
+      <Dialog.Trigger>
+        <IconButton
+          onClick={() => setVisible(true)}
+          label={formatMessage(
+            {
+              id: getTranslation('Settings.list.actions.delete'),
+              defaultMessage: 'Delete {name} locale',
+            },
+            {
+              name,
+            }
+          )}
+          borderWidth={0}
+        >
+          <Trash />
+        </IconButton>
+      </Dialog.Trigger>
+      <ConfirmDialog onConfirm={handleConfirm} />
+    </Dialog.Root>
   );
 };
 

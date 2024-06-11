@@ -1,9 +1,16 @@
+import { resolve } from 'node:path';
 import chalk from 'chalk';
 import fse from 'fs-extra';
 import stopProcess from './stop-process';
 
 // Checks if the an empty directory exists at rootPath
-export default async (rootPath: string) => {
+export default async (directory: string): Promise<string> => {
+  if (!directory) {
+    stopProcess(`⛔️ Please provide a project name.`);
+  }
+
+  const rootPath = resolve(directory);
+
   if (await fse.pathExists(rootPath)) {
     const stat = await fse.stat(rootPath);
 
@@ -24,4 +31,6 @@ export default async (rootPath: string) => {
       );
     }
   }
+
+  return rootPath;
 };

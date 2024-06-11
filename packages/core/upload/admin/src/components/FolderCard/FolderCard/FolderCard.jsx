@@ -37,7 +37,7 @@ const Card = styled(Box)`
   &:hover,
   &:focus-within {
     ${CardActionDisplay} {
-      display: ${({ isCardActions }) => (isCardActions ? 'block' : '')};
+      display: ${({ $isCardActions }) => ($isCardActions ? 'block' : '')};
     }
   }
 `;
@@ -49,7 +49,7 @@ export const FolderCard = forwardRef(
 
     return (
       <FolderCardContext.Provider value={fodlerCtxValue}>
-        <Card position="relative" tabIndex={0} isCardActions={!!cardActions} ref={ref} {...props}>
+        <Card position="relative" tabIndex={0} $isCardActions={!!cardActions} ref={ref} {...props}>
           <FauxClickWrapper
             to={to || undefined}
             tag={to ? NavLink : 'button'}

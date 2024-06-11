@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { NotificationsProvider } from '@strapi/admin/strapi-admin';
-import { DesignSystemProvider } from '@strapi/design-system';
+import { DesignSystemProvider, Modal } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -25,7 +25,9 @@ function ComponentFixture(props) {
       <IntlProvider locale="en" messages={{}}>
         <DesignSystemProvider>
           <NotificationsProvider toggleNotification={() => {}}>
-            <BulkMoveDialog {...props} />
+            <Modal.Root open>
+              <BulkMoveDialog {...props} />
+            </Modal.Root>
           </NotificationsProvider>
         </DesignSystemProvider>
       </IntlProvider>

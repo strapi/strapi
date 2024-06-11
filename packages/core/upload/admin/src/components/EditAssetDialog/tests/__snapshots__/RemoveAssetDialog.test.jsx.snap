@@ -6,45 +6,28 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   position: fixed;
   left: 50%;
   top: 4.6rem;
-  z-index: 10;
+  z-index: 700;
   width: 50rem;
 }
 
-.c3 {
-  padding-block: 40px;
-  padding-inline: 40px;
-  position: fixed;
-  z-index: 320;
-}
-
 .c5 {
-  background: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0px 2px 15px rgba(33, 33, 52, 0.1);
-}
-
-.c7 {
   padding-block: 24px;
   padding-inline: 24px;
 }
 
-.c11 {
+.c8 {
   padding-block-start: 40px;
   padding-inline-end: 24px;
   padding-block-end: 40px;
   padding-inline-start: 24px;
 }
 
-.c12 {
-  padding-block-end: 8px;
-}
-
-.c15 {
+.c11 {
   padding-block: 16px;
   padding-inline: 16px;
 }
 
-.c18 {
+.c14 {
   background: #4945ff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -53,6 +36,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border-radius: 4px;
   border-color: #4945ff;
   border: 1px solid #4945ff;
+  width: 100%;
   cursor: pointer;
 }
 
@@ -63,34 +47,42 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   gap: 8px;
 }
 
-.c8 {
+.c9 {
   align-items: center;
   display: flex;
-  flex-direction: row;
-  justify-content: center;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.c17 {
+.c12 {
   align-items: center;
   display: flex;
   flex-direction: row;
   gap: 8px;
+  justify-content: space-between;
 }
 
-.c10 {
+.c15 {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: row;
+  gap: 8px;
+  justify-content: center;
+}
+
+.c6 {
+  font-size: 1.4rem;
   font-weight: 600;
-  font-size: 1.8rem;
-  line-height: 1.22;
   color: currentcolor;
 }
 
-.c14 {
+.c10 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: currentcolor;
 }
 
-.c21 {
+.c18 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
@@ -108,16 +100,16 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   width: 1px;
 }
 
-.c19 {
+.c16 {
   position: relative;
   outline: none;
 }
 
-.c19[aria-disabled='true'] {
+.c16[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c19:after {
+.c16:after {
   transition-property: all;
   transition-duration: 0.2s;
   border-radius: 8px;
@@ -130,11 +122,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c19:focus-visible {
+.c16:focus-visible {
   outline: none;
 }
 
-.c19:focus-visible:after {
+.c16:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -145,111 +137,155 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c20 {
+.c17 {
   height: 3.2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
 }
 
-.c20 svg {
+.c17 svg {
   height: 1.2rem;
 }
 
-.c20[aria-disabled='true'] {
+.c17[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c20[aria-disabled='true']:active {
+.c17[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c20:hover {
+.c17:hover {
   background-color: #f6f6f9;
 }
 
-.c20:active {
+.c17:active {
   background-color: #eaeaef;
 }
 
-.c22 {
+.c19 {
   height: 3.2rem;
-  border: 1px solid #d02b20;
-  background: #d02b20;
-  color: #ffffff;
+  border: 1px solid #f5c0b8;
+  background: #fcecea;
+  color: #b72b1a;
 }
 
-.c22 svg {
+.c19 svg {
   height: 1.2rem;
 }
 
-.c22[aria-disabled='true'] {
+.c19[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c22[aria-disabled='true']:active {
+.c19[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c22:hover {
-  border: 1px solid #ee5e52;
-  background: #ee5e52;
+.c19:hover {
+  background-color: #ffffff;
 }
 
-.c22:active {
+.c19:active {
+  background-color: #ffffff;
   border: 1px solid #d02b20;
-  background: #d02b20;
+  color: #d02b20;
+}
+
+.c3 {
+  background-color: #32324d;
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  opacity: 0.2;
 }
 
 .c4 {
-  inset: 0;
-  background: #32324d33;
-}
-
-.c6 {
-  max-width: 41.2rem;
-  margin: 0 auto;
-  overflow: hidden;
-  margin-top: 10%;
-}
-
-.c9 {
-  border-bottom: 1px solid #eaeaef;
-}
-
-.c13 svg {
-  width: 24px;
-  height: 24px;
-}
-
-.c13 svg path {
-  fill: #d02b20;
-}
-
-.c16 {
-  border-top: 1px solid #eaeaef;
-}
-
-.c16 button {
+  max-width: 42rem;
+  height: min-content;
   width: 100%;
-  display: inline-flex;
+  overflow: hidden;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 4px;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 15px rgba(33, 33, 52, 0.1);
+  z-index: 310;
+}
+
+.c7 {
+  display: flex;
   justify-content: center;
+  border-bottom: solid 1px #eaeaef;
+}
+
+.c13 {
+  border-top: solid 1px #eaeaef;
+  flex: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c17 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c19 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c3 {
+    animation: ececrQ 200ms cubic-bezier(.4,0,.2,1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c4[data-state='open'] {
+    animation-duration: 200ms;
+    animation-timing-function: cubic-bezier(.4,0,.2,1);
+    animation-name: iWCnzW;
+  }
+
+  .c4[data-state='closed'] {
+    animation-duration: 120ms;
+    animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    animation-name: jgufbq;
+  }
 }
 
 <body
-  class="lock-body-scroll"
+  data-scroll-locked="1"
+  style="pointer-events: none;"
 >
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
   <div>
     <div
+      aria-hidden="true"
       class="c0 c1"
+      data-aria-hidden="true"
     />
     <span
       class="c2"
@@ -275,104 +311,83 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
     </span>
   </div>
   <div
-    class=""
+    aria-hidden="true"
+    class="c3"
+    data-aria-hidden="true"
+    data-state="open"
+    style="pointer-events: auto;"
+  />
+  <div
+    aria-describedby="radix-:r2:"
+    aria-labelledby="radix-:r1:"
+    class="c4"
+    data-state="open"
+    id="radix-:r0:"
+    role="alertdialog"
+    style="pointer-events: auto;"
+    tabindex="-1"
   >
-    <div
-      class="c3 c4"
+    <h2
+      class="c5 c6 c7"
+      id="radix-:r1:"
+      justifycontent="center"
     >
-      <div>
-        <div>
-          <div
-            aria-labelledby=":r0:-label"
-            aria-modal="true"
-            class="c5 c6"
-            role="dialog"
-          >
-            <div
-              class="c7 c8 c9"
-            >
-              <h2
-                class="c10"
-                id=":r0:-label"
-                tag="span"
-              >
-                Confirmation
-              </h2>
-            </div>
-            <div
-              class=""
-            >
-              <div
-                class="c11"
-              >
-                <div
-                  class="c12 c13"
-                >
-                  <div
-                    class="c8"
-                  >
-                    <svg
-                      fill="currentColor"
-                      height="16"
-                      viewBox="0 0 32 32"
-                      width="16"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        d="M16 3a13 13 0 1 0 13 13A13.013 13.013 0 0 0 16 3m-1 7a1 1 0 0 1 2 0v7a1 1 0 0 1-2 0zm1 13a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <div
-                  class="c1"
-                >
-                  <div
-                    class="c8"
-                  >
-                    <span
-                      class="c14"
-                    >
-                      Are you sure?
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <div
-                class="c15 c16"
-              >
-                <div
-                  class="c17"
-                >
-                  <button
-                    aria-disabled="false"
-                    class="c18 c17 c19 c20"
-                    type="button"
-                  >
-                    <span
-                      class="c21"
-                    >
-                      Cancel
-                    </span>
-                  </button>
-                  <button
-                    aria-disabled="false"
-                    class="c18 c17 c19 c22"
-                    type="button"
-                  >
-                    <span
-                      class="c21"
-                    >
-                      Confirm
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      Confirmation
+    </h2>
+    <div
+      class="c8 c9"
+    >
+      <svg
+        fill="#d02b20"
+        height="24"
+        viewBox="0 0 32 32"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M16 3a13 13 0 1 0 13 13A13.013 13.013 0 0 0 16 3m-1 7a1 1 0 0 1 2 0v7a1 1 0 0 1-2 0zm1 13a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3"
+        />
+      </svg>
+      <p
+        class="c10"
+        id="radix-:r2:"
+      >
+        Are you sure?
+      </p>
     </div>
+    <footer
+      class="c11 c12 c13"
+    >
+      <button
+        aria-disabled="false"
+        class="c14 c15 c16 c17"
+        type="button"
+      >
+        <span
+          class="c18"
+        >
+          Cancel
+        </span>
+      </button>
+      <button
+        aria-disabled="false"
+        class="c14 c15 c16 c19"
+        type="button"
+      >
+        <span
+          class="c18"
+        >
+          Confirm
+        </span>
+      </button>
+    </footer>
   </div>
+  <span
+    aria-hidden="true"
+    data-aria-hidden="true"
+    data-radix-focus-guard=""
+    style="outline: none; opacity: 0; position: fixed; pointer-events: none;"
+    tabindex="0"
+  />
 </body>
 `;

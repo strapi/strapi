@@ -487,6 +487,29 @@ describeOnCondition(edition === 'EE')('History API', () => {
         )
       ).toBe(false);
     });
+
+    test('Creates a history version when cloning an entry', async () => {
+      // Find an entry and clone it
+      const { documentId: currentDocumentId, ...currentDocumentData } = await strapi
+        .documents(collectionTypeUid)
+        .findFirst();
+      const cloneRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${collectionTypeUid}/clone/${currentDocumentId}`,
+        body: currentDocumentData,
+      });
+
+      // Get the history of the cloned entry
+      const cloneHistoryVersions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions?contentType=${collectionTypeUid}&documentId=${cloneRes.body.data.documentId}&page=1`,
+      });
+
+      expect(cloneHistoryVersions.body.meta.pagination.total).toBe(1);
+      expect(cloneHistoryVersions.body.data[0].relatedDocumentId).toBe(
+        cloneRes.body.data.documentId
+      );
+    });
   });
 
   describe('Restore a history version', () => {

@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import {
   Button,
+  Dialog,
   Table,
   Tbody,
   TFooter,
@@ -258,11 +259,9 @@ const ListPage = () => {
           </Table>
         </Layouts.Content>
       )}
-      <ConfirmDialog
-        isOpen={isWarningDeleteAllOpened}
-        onConfirm={handleDeleteData}
-        onClose={handleToggleModal}
-      />
+      <Dialog.Root open={isWarningDeleteAllOpened} onOpenChange={handleToggleModal}>
+        <ConfirmDialog onConfirm={handleDeleteData} />
+      </Dialog.Root>
     </Page.Main>
   );
 };

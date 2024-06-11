@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, GridItem } from '@strapi/design-system';
+import { Box, Flex, Grid } from '@strapi/design-system';
 
 import { EditLayout } from '../../../hooks/useDocumentLayout';
 
@@ -14,11 +14,11 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
           const [row] = panel;
           const [field] = row;
           return (
-            <Grid key={field.name} gap={4}>
-              <GridItem col={12} s={12} xs={12}>
+            <Grid.Root key={field.name} gap={4}>
+              <Grid.Item col={12} s={12} xs={12}>
                 <InputRenderer {...field} />
-              </GridItem>
-            </Grid>
+              </Grid.Item>
+            </Grid.Root>
           );
         }
 
@@ -36,15 +36,15 @@ const FormLayout = ({ layout }: FormLayoutProps) => {
           >
             <Flex direction="column" alignItems="stretch" gap={6}>
               {panel.map((row, gridRowIndex) => (
-                <Grid key={gridRowIndex} gap={4}>
+                <Grid.Root key={gridRowIndex} gap={4}>
                   {row.map(({ size, ...field }) => {
                     return (
-                      <GridItem col={size} key={field.name} s={12} xs={12}>
+                      <Grid.Item col={size} key={field.name} s={12} xs={12}>
                         <InputRenderer {...field} />
-                      </GridItem>
+                      </Grid.Item>
                     );
                   })}
-                </Grid>
+                </Grid.Root>
               ))}
             </Flex>
           </Box>

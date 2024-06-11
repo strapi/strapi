@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import _ from 'lodash';
-import type { DatabaseInfo } from '../../types';
+import type { Scope } from '../../types';
 
 export const createDatabaseConfig = ({ useTypescript }: { useTypescript: boolean }) => {
   const language = useTypescript ? 'ts' : 'js';
@@ -13,21 +13,17 @@ export const createDatabaseConfig = ({ useTypescript }: { useTypescript: boolean
   return compile();
 };
 
-export const generateDbEnvVariables = ({
-  connection,
-  client,
-}: {
-  connection: DatabaseInfo;
-  client: string;
-}) => {
-  const tmpl = fs.readFileSync(path.join(__dirname, 'database-templates', `${client}.template`));
+export const generateDbEnvVariables = (scope: Scope) => {
+  const tmpl = fs.readFileSync(
+    path.join(__dirname, 'database-templates', `${scope.database.client}.template`)
+  );
   const compile = _.template(tmpl.toString());
 
   return compile({
-    client,
+    client: scope.database.client,
     connection: {
-      ...connection.connection,
-      ssl: connection.connection.ssl || false,
+      ...scope.database.connection,
+      ssl: scope.database.connection?.ssl || false,
     },
   });
 };

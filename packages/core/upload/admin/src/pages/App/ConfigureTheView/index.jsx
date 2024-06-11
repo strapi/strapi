@@ -7,7 +7,7 @@ import {
   Page,
   Layouts,
 } from '@strapi/admin/strapi-admin';
-import { Button, Link } from '@strapi/design-system';
+import { Button, Dialog, Link } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
@@ -103,17 +103,14 @@ const ConfigureTheView = ({ config }) => {
             />
           </Layouts.Content>
 
-          <ConfirmDialog
-            isOpen={showWarningSubmit}
-            onClose={toggleWarningSubmit}
-            onConfirm={handleConfirm}
-            variant="success-light"
-          >
-            {formatMessage({
-              id: getTrad('config.popUpWarning.warning.updateAllSettings'),
-              defaultMessage: 'This will modify all your settings',
-            })}
-          </ConfirmDialog>
+          <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
+            <ConfirmDialog onConfirm={handleConfirm} variant="success-light">
+              {formatMessage({
+                id: getTrad('config.popUpWarning.warning.updateAllSettings'),
+                defaultMessage: 'This will modify all your settings',
+              })}
+            </ConfirmDialog>
+          </Dialog.Root>
         </form>
       </Page.Main>
     </Layouts.Root>

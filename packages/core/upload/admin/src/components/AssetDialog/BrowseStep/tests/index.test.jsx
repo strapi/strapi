@@ -77,43 +77,45 @@ const client = new QueryClient({
   },
 });
 
-const ComponentFixture = (props) => {
-  return (
-    <QueryClientProvider client={client}>
-      <DesignSystemProvider>
-        <MemoryRouter>
-          <IntlProvider messages={{}} locale="en">
-            <NotificationsProvider toggleNotification={() => {}}>
-              <BrowseStep
-                assets={[]}
-                canCreate
-                canRead
-                folders={FIXTURE_FOLDERS}
-                onAddAsset={jest.fn()}
-                onChangeFilters={jest.fn()}
-                onChangePage={jest.fn()}
-                onChangePageSize={jest.fn()}
-                onChangeSearch={jest.fn()}
-                onChangeSort={jest.fn()}
-                onChangeFolder={jest.fn()}
-                onEditAsset={jest.fn()}
-                onEditFolder={jest.fn()}
-                onSelectAllAsset={jest.fn()}
-                onSelectAsset={jest.fn()}
-                pagination={{ pageCount: 1 }}
-                queryObject={{ page: 1, pageSize: 10, filters: { $and: [] } }}
-                selectedAssets={[]}
-                {...props}
-              />
-            </NotificationsProvider>
-          </IntlProvider>
-        </MemoryRouter>
-      </DesignSystemProvider>
-    </QueryClientProvider>
+const setup = (props) =>
+  render(
+    <BrowseStep
+      assets={[]}
+      canCreate
+      canRead
+      folders={FIXTURE_FOLDERS}
+      onAddAsset={jest.fn()}
+      onChangeFilters={jest.fn()}
+      onChangePage={jest.fn()}
+      onChangePageSize={jest.fn()}
+      onChangeSearch={jest.fn()}
+      onChangeSort={jest.fn()}
+      onChangeFolder={jest.fn()}
+      onEditAsset={jest.fn()}
+      onEditFolder={jest.fn()}
+      onSelectAllAsset={jest.fn()}
+      onSelectAsset={jest.fn()}
+      pagination={{ pageCount: 1 }}
+      queryObject={{ page: 1, pageSize: 10, filters: { $and: [] } }}
+      selectedAssets={[]}
+      {...props}
+    />,
+    {
+      wrapper: ({ children }) => (
+        <QueryClientProvider client={client}>
+          <DesignSystemProvider>
+            <MemoryRouter>
+              <IntlProvider messages={{}} locale="en">
+                <NotificationsProvider toggleNotification={() => {}}>
+                  {children}
+                </NotificationsProvider>
+              </IntlProvider>
+            </MemoryRouter>
+          </DesignSystemProvider>
+        </QueryClientProvider>
+      ),
+    }
   );
-};
-
-const setup = (props) => render(<ComponentFixture {...props} />);
 describe('BrowseStep', () => {
   afterEach(() => {
     jest.clearAllMocks();

@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-  BaseCheckbox,
+  Checkbox,
   IconButton,
   Table,
   Th,
@@ -50,16 +50,18 @@ export const TableList = ({
       <Thead>
         <Tr>
           <Th>
-            <BaseCheckbox
+            <Checkbox
               aria-label={formatMessage({
                 id: getTrad('bulk.select.label'),
                 defaultMessage: 'Select all folders & assets',
               })}
               disabled={shouldDisableBulkSelect}
-              indeterminate={indeterminate && !shouldDisableBulkSelect}
-              onChange={(e) => onSelectAll(e, rows)}
-              value={
-                (assetCount > 0 || folderCount > 0) && selected.length === assetCount + folderCount
+              onCheckedValue={(checked) => onSelectAll(checked, rows)}
+              checked={
+                indeterminate && !shouldDisableBulkSelect
+                  ? 'indeterminate'
+                  : (assetCount > 0 || folderCount > 0) &&
+                    selected.length === assetCount + folderCount
               }
             />
           </Th>

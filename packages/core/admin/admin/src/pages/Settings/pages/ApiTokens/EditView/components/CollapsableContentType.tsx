@@ -7,7 +7,6 @@ import {
   Checkbox,
   Flex,
   Grid,
-  GridItem,
   Typography,
 } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
@@ -96,9 +95,12 @@ export const CollapsableContentType = ({
                 <Border />
                 <Box paddingLeft={4}>
                   <Checkbox
-                    value={allActionsSelected}
-                    indeterminate={!allActionsSelected && someActionsSelected}
-                    onValueChange={() => {
+                    checked={
+                      !allActionsSelected && someActionsSelected
+                        ? 'indeterminate'
+                        : allActionsSelected
+                    }
+                    onCheckedChange={() => {
                       onChangeSelectAll({ target: { value: [...controller.actions] } });
                     }}
                     disabled={disabled}
@@ -107,20 +109,20 @@ export const CollapsableContentType = ({
                   </Checkbox>
                 </Box>
               </Flex>
-              <Grid gap={4} padding={4}>
+              <Grid.Root gap={4} padding={4}>
                 {controller?.actions &&
                   controller?.actions.map((action) => {
                     return (
-                      <GridItem col={6} key={action.actionId}>
+                      <Grid.Item col={6} key={action.actionId}>
                         <CheckboxWrapper
                           $isActive={isActionSelected(action.actionId)}
                           padding={2}
                           hasRadius
                         >
                           <Checkbox
-                            value={selectedActions.includes(action.actionId)}
+                            checked={selectedActions.includes(action.actionId)}
                             name={action.actionId}
-                            onValueChange={() => {
+                            onCheckedChange={() => {
                               onChange({ target: { value: action.actionId } });
                             }}
                             disabled={disabled}
@@ -138,10 +140,10 @@ export const CollapsableContentType = ({
                             <Cog />
                           </button>
                         </CheckboxWrapper>
-                      </GridItem>
+                      </Grid.Item>
                     );
                   })}
-              </Grid>
+              </Grid.Root>
             </Box>
           );
         })}
