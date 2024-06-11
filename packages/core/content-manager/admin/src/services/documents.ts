@@ -96,6 +96,8 @@ const documentApi = contentManagerApi.injectEndpoints({
       }),
       invalidatesTags: (_result, _error, { collectionType, model }) => [
         { type: 'Document', id: collectionType !== SINGLE_TYPES ? `${model}_LIST` : model },
+        { type: 'Release', id: 'LIST' },
+        { type: 'ReleaseAction', id: 'LIST' },
       ],
     }),
     deleteManyDocuments: builder.mutation<
@@ -110,7 +112,11 @@ const documentApi = contentManagerApi.injectEndpoints({
           params,
         },
       }),
-      invalidatesTags: (_res, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
+      invalidatesTags: (_res, _error, { model }) => [
+        { type: 'Document', id: `${model}_LIST` },
+        { type: 'Release', id: 'LIST' },
+        { type: 'ReleaseAction', id: 'LIST' },
+      ],
     }),
     discardDocument: builder.mutation<
       Discard.Response,
@@ -139,6 +145,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
+          { type: 'ReleaseAction', id: 'LIST' },
         ];
       },
     }),
