@@ -1,13 +1,13 @@
-import { getChildrenMaxDepth, type ComponentWithChildren } from '../getMaxDepth';
+import { getChildrenMaxDepth } from '../getMaxDepth';
+
+import type { ComponentWithChildren } from '../../components/DataManagerProvider/utils/retrieveComponentsThatHaveComponents';
 
 const components: Array<ComponentWithChildren> = [
   {
     component: 'basic.parent-compo',
     childComponents: [
       {
-        repeatable: false,
         component: 'basic.nested-compo1',
-        name: 'compofield',
       },
     ],
   },
@@ -15,9 +15,7 @@ const components: Array<ComponentWithChildren> = [
     component: 'basic.nested-compo5',
     childComponents: [
       {
-        repeatable: false,
         component: 'basic.nested-compo6',
-        name: 'again',
       },
     ],
   },
@@ -25,9 +23,7 @@ const components: Array<ComponentWithChildren> = [
     component: 'basic.nested-compo4',
     childComponents: [
       {
-        repeatable: false,
         component: 'basic.nested-compo5',
-        name: 'againsomecompo',
       },
     ],
   },
@@ -35,9 +31,7 @@ const components: Array<ComponentWithChildren> = [
     component: 'basic.nested-compo3',
     childComponents: [
       {
-        repeatable: false,
         component: 'basic.nested-compo4',
-        name: 'somecompo',
       },
     ],
   },
@@ -45,9 +39,7 @@ const components: Array<ComponentWithChildren> = [
     component: 'basic.nested-compo2',
     childComponents: [
       {
-        repeatable: true,
         component: 'basic.nested-compo3',
-        name: 'somecompo',
       },
     ],
   },
@@ -55,9 +47,7 @@ const components: Array<ComponentWithChildren> = [
     component: 'basic.nested-compo1',
     childComponents: [
       {
-        repeatable: false,
         component: 'basic.nested-compo2',
-        name: 'compofield',
       },
     ],
   },
@@ -65,9 +55,7 @@ const components: Array<ComponentWithChildren> = [
     component: 'basic.another-parent-compo',
     childComponents: [
       {
-        repeatable: false,
         component: 'basic.nested-compo6',
-        name: 'somecompo',
       },
     ],
   },
@@ -75,14 +63,10 @@ const components: Array<ComponentWithChildren> = [
     component: 'default.openingtimes',
     childComponents: [
       {
-        repeatable: true,
         component: 'default.dish',
-        name: 'dishrep',
       },
       {
-        repeatable: true,
         component: 'basic.nested-compo3',
-        name: 'somecompo',
       },
     ],
   },
@@ -91,10 +75,6 @@ const components: Array<ComponentWithChildren> = [
     childComponents: [
       {
         component: 'default.dish',
-        repeatable: true,
-        required: true,
-        min: 2,
-        name: 'dish',
       },
     ],
   },
