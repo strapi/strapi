@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, Typography } from '@strapi/design-system';
 import { FormikErrors } from 'formik';
 import { useIntl } from 'react-intl';
 
@@ -90,24 +90,24 @@ export const FormApiTokenContainer = ({
             defaultMessage: 'Details',
           })}
         </Typography>
-        <Grid gap={5}>
-          <GridItem key="name" col={6} xs={12}>
+        <Grid.Root gap={5}>
+          <Grid.Item key="name" col={6} xs={12}>
             <TokenName
               error={errors['name']}
               value={values['name']}
               canEditInputs={canEditInputs}
               onChange={onChange}
             />
-          </GridItem>
-          <GridItem key="description" col={6} xs={12}>
+          </Grid.Item>
+          <Grid.Item key="description" col={6} xs={12}>
             <TokenDescription
               error={errors['description']}
               value={values['description']}
               canEditInputs={canEditInputs}
               onChange={onChange}
             />
-          </GridItem>
-          <GridItem key="lifespan" col={6} xs={12}>
+          </Grid.Item>
+          <Grid.Item key="lifespan" col={6} xs={12}>
             <LifeSpanInput
               isCreating={isCreating}
               error={errors['lifespan']}
@@ -115,9 +115,9 @@ export const FormApiTokenContainer = ({
               onChange={onChange}
               token={apiToken}
             />
-          </GridItem>
+          </Grid.Item>
 
-          <GridItem key="type" col={6} xs={12}>
+          <Grid.Item key="type" col={6} xs={12}>
             <TokenTypeSelect
               value={values['type']}
               error={errors['type']}
@@ -135,8 +135,8 @@ export const FormApiTokenContainer = ({
               options={typeOptions}
               canEditInputs={canEditInputs}
             />
-          </GridItem>
-        </Grid>
+          </Grid.Item>
+        </Grid.Root>
       </Flex>
     </Box>
   );

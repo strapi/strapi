@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { Button } from '@strapi/design-system';
+import { Button, Modal } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -18,24 +18,18 @@ export const BulkMoveButton = ({ selected, onSuccess, currentFolder }) => {
   };
 
   return (
-    <>
-      <Button
-        variant="secondary"
-        size="S"
-        startIcon={<Folder />}
-        onClick={() => setShowConfirmDialog(true)}
-      >
-        {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
-      </Button>
-
-      {showConfirmDialog && (
-        <BulkMoveDialog
-          currentFolder={currentFolder}
-          onClose={handleConfirmMove}
-          selected={selected}
-        />
-      )}
-    </>
+    <Modal.Root open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <Modal.Trigger>
+        <Button variant="secondary" size="S" startIcon={<Folder />}>
+          {formatMessage({ id: 'global.move', defaultMessage: 'Move' })}
+        </Button>
+      </Modal.Trigger>
+      <BulkMoveDialog
+        currentFolder={currentFolder}
+        onClose={handleConfirmMove}
+        selected={selected}
+      />
+    </Modal.Root>
   );
 };
 

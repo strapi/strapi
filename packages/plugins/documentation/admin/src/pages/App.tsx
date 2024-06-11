@@ -13,6 +13,7 @@ import {
   Tr,
   Typography,
   EmptyStateLayout,
+  Dialog,
 } from '@strapi/design-system';
 import { Eye as Show, ArrowClockwise as Reload, Trash } from '@strapi/icons';
 import {
@@ -236,11 +237,9 @@ const App = () => {
             <EmptyStateLayout content="" icon={null} />
           )}
         </Layouts.Content>
-        <ConfirmDialog
-          onConfirm={handleConfirmDelete}
-          onClose={handleShowConfirmDelete}
-          isOpen={showConfirmDelete}
-        />
+        <Dialog.Root open={showConfirmDelete} onOpenChange={setShowConfirmDelete}>
+          <ConfirmDialog onConfirm={handleConfirmDelete} />
+        </Dialog.Root>
       </Page.Main>
     </Layouts.Root>
   );

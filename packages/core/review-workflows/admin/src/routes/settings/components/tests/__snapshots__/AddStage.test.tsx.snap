@@ -6,7 +6,7 @@ exports[`AddStage should render a list of stages 1`] = `
   position: fixed;
   left: 50%;
   top: 4.6rem;
-  z-index: 10;
+  z-index: 700;
   width: 50rem;
 }
 

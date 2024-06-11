@@ -74,7 +74,7 @@ describe('CMReleasesContainer', () => {
     const modalDialog = await screen.findByRole('dialog', { name: 'Add to release' });
     expect(modalDialog).toBeVisible();
 
-    const closeButton = await screen.findByRole('button', { name: 'Close the modal' });
+    const closeButton = await screen.findByRole('button', { name: 'Close modal' });
     await user.click(closeButton);
     expect(modalDialog).not.toBeVisible();
   });

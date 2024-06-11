@@ -21,7 +21,7 @@ describe('UploadAssetDialog', () => {
   describe('from computer', () => {
     it('closes the dialog when clicking on cancel on the add asset step', async () => {
       const onCloseSpy = jest.fn();
-      const { user, getByRole } = render(<UploadAssetDialog onClose={onCloseSpy} />);
+      const { user, getByRole } = render(<UploadAssetDialog open onClose={onCloseSpy} />);
 
       await user.click(getByRole('button', { name: 'cancel' }));
 
@@ -31,7 +31,7 @@ describe('UploadAssetDialog', () => {
     it('open confirm box when clicking on cancel on the pending asset step', async () => {
       const file = new File(['Some stuff'], 'test.png', { type: 'image/png' });
 
-      const { user, getByRole } = render(<UploadAssetDialog />);
+      const { user, getByRole } = render(<UploadAssetDialog open />);
 
       await user.upload(document.querySelector('[type="file"]'), file);
 
@@ -49,7 +49,7 @@ describe('UploadAssetDialog', () => {
       it(`shows ${number} valid ${mime} file`, async () => {
         const file = new File(['Some stuff'], `test.${ext}`, { type: mime });
 
-        const { user, getByText, getAllByText } = render(<UploadAssetDialog />);
+        const { user, getByText, getAllByText } = render(<UploadAssetDialog open />);
 
         await user.upload(document.querySelector('[type="file"]'), file);
 
@@ -67,7 +67,7 @@ describe('UploadAssetDialog', () => {
 
   describe('from url', () => {
     it('shows an error message when the asset does not exist', async () => {
-      const { user, getByRole } = render(<UploadAssetDialog />);
+      const { user, getByRole } = render(<UploadAssetDialog open />);
 
       await user.click(getByRole('tab', { name: 'From URL' }));
 
@@ -100,7 +100,7 @@ describe('UploadAssetDialog', () => {
      * which are hard to follow.
      */
     it.skip('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
-      const { user, getByText, getByRole } = render(<UploadAssetDialog />);
+      const { user, getByText, getByRole } = render(<UploadAssetDialog open />);
 
       await user.click(getByRole('tab', { name: 'From URL' }));
 

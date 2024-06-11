@@ -1,4 +1,4 @@
-import { Flex, GridItem, Tooltip, Typography, Link } from '@strapi/design-system';
+import { Flex, Tooltip, Typography, Link, Grid } from '@strapi/design-system';
 import { ExternalLink, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
@@ -43,7 +43,7 @@ export const AdminSeatInfoEE = () => {
   }
 
   return (
-    <GridItem col={6} s={12}>
+    <Grid.Item col={6} s={12}>
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: 'Settings.application.admin-seats',
@@ -99,6 +99,6 @@ export const AdminSeatInfoEE = () => {
           { isHostedOnStrapiCloud }
         )}
       </Link>
-    </GridItem>
+    </Grid.Item>
   );
 };

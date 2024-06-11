@@ -1,6 +1,6 @@
 import React, { forwardRef, memo, useImperativeHandle, useReducer } from 'react';
 
-import { Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Flex, Grid, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -61,8 +61,8 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
 
   return (
     <UsersPermissionsProvider value={providerValue}>
-      <Grid gap={0} shadow="filterShadow" hasRadius background="neutral0">
-        <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
+      <Grid.Root gap={0} shadow="filterShadow" hasRadius background="neutral0">
+        <Grid.Item col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
           <Flex direction="column" alignItems="stretch" gap={6}>
             <Flex direction="column" alignItems="stretch" gap={2}>
               <Typography variant="delta" tag="h2">
@@ -80,9 +80,9 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
             </Flex>
             <Permissions />
           </Flex>
-        </GridItem>
+        </Grid.Item>
         <Policies />
-      </Grid>
+      </Grid.Root>
     </UsersPermissionsProvider>
   );
 });

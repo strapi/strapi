@@ -81,7 +81,7 @@ export const AssetCardBase = ({
         {isSelectable && (
           // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
           <div onClick={handlePropagationClick}>
-            <CardCheckbox value={selected} onValueChange={onSelect} />
+            <CardCheckbox checked={selected} onCheckedChange={onSelect} />
           </div>
         )}
         {(onRemove || onEdit) && (

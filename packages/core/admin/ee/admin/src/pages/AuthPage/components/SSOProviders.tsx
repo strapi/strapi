@@ -1,4 +1,4 @@
-import { Flex, Grid, GridItem, Tooltip, Typography } from '@strapi/design-system';
+import { Flex, Grid, Tooltip, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -19,25 +19,25 @@ const SSOProviders = ({ providers, displayAllProviders }: SSOProvidersProps) => 
 
   if (displayAllProviders) {
     return (
-      <Grid gap={4}>
+      <Grid.Root gap={4}>
         {providers.map((provider) => (
-          <GridItem key={provider.uid} col={4}>
+          <Grid.Item key={provider.uid} col={4}>
             <SSOProviderButton provider={provider} />
-          </GridItem>
+          </Grid.Item>
         ))}
-      </Grid>
+      </Grid.Root>
     );
   }
 
   if (providers.length > 2 && !displayAllProviders) {
     return (
-      <Grid gap={4}>
+      <Grid.Root gap={4}>
         {providers.slice(0, 2).map((provider) => (
-          <GridItem key={provider.uid} col={4}>
+          <Grid.Item key={provider.uid} col={4}>
             <SSOProviderButton provider={provider} />
-          </GridItem>
+          </Grid.Item>
         ))}
-        <GridItem col={4}>
+        <Grid.Item col={4}>
           <Tooltip
             label={formatMessage({
               id: 'global.see-more',
@@ -47,8 +47,8 @@ const SSOProviders = ({ providers, displayAllProviders }: SSOProvidersProps) => 
               <span aria-hidden>•••</span>
             </SSOButton>
           </Tooltip>
-        </GridItem>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     );
   }
 

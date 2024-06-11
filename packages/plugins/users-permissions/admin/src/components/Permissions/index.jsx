@@ -22,6 +22,7 @@ const Permissions = () => {
           <Accordion.Item key={collapse.name} value={collapse.name}>
             <Accordion.Header variant={index % 2 === 0 ? 'secondary' : undefined}>
               <Accordion.Trigger
+                caretPosition="right"
                 description={formatMessage(
                   {
                     id: 'users-permissions.Plugin.permissions.plugins.description',

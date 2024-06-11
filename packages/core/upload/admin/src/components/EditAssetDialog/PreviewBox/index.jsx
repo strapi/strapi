@@ -237,15 +237,14 @@ export const PreviewBox = ({
         </ActionRow>
       </RelativeBox>
 
-      {showConfirmDialog && (
-        <RemoveAssetDialog
-          onClose={() => {
-            setShowConfirmDialog(false);
-            onDelete(null);
-          }}
-          asset={asset}
-        />
-      )}
+      <RemoveAssetDialog
+        open={showConfirmDialog}
+        onClose={() => {
+          setShowConfirmDialog(false);
+          onDelete(null);
+        }}
+        asset={asset}
+      />
     </>
   );
 };

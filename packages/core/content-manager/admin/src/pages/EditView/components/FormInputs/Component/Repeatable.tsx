@@ -9,7 +9,6 @@ import {
   Accordion,
   IconButton,
   useComposedRefs,
-  GridItem,
   Grid,
   BoxComponent,
 } from '@strapi/design-system';
@@ -248,7 +247,7 @@ const RepeatableComponent = ({
               >
                 {layout.map((row, index) => {
                   return (
-                    <Grid gap={4} key={index}>
+                    <Grid.Root gap={4} key={index}>
                       {row.map(({ size, ...field }) => {
                         /**
                          * Layouts are built from schemas so they don't understand the complete
@@ -259,12 +258,12 @@ const RepeatableComponent = ({
                         const completeFieldName = `${nameWithIndex}.${field.name}`;
 
                         return (
-                          <GridItem col={size} key={completeFieldName} s={12} xs={12}>
+                          <Grid.Item col={size} key={completeFieldName} s={12} xs={12}>
                             {children({ ...field, name: completeFieldName })}
-                          </GridItem>
+                          </Grid.Item>
                         );
                       })}
-                    </Grid>
+                    </Grid.Root>
                   );
                 })}
               </Component>
@@ -310,7 +309,7 @@ const TextButtonCustom = styled(TextButton)`
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    transition: background-color 120ms ${(props) => props.theme.easings.easeOutQuad};
+    transition: background-color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
   }
 `;
 
