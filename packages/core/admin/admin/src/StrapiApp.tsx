@@ -207,10 +207,21 @@ class StrapiApp {
     links: UnloadedSettingsLink[]
   ) => this.router.addSettingsLink(section, links);
 
-  addSettingsLink = (
-    sectionId: Parameters<typeof this.router.addSettingsLink>[0],
-    link: Parameters<typeof this.router.addSettingsLink>[1]
-  ) => this.router.addSettingsLink(sectionId, link);
+  addSettingsLink(
+    section: Pick<StrapiAppSetting, 'id' | 'intlLabel'> & { links: UnloadedSettingsLink[] },
+    links?: never
+  ): void;
+  addSettingsLink(
+    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
+    link: UnloadedSettingsLink
+  ): void;
+  addSettingsLink(
+    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
+    link: UnloadedSettingsLink[]
+  ): void;
+  addSettingsLink(sectionId: any, link: any) {
+    this.router.addSettingsLink(sectionId, link);
+  }
 
   async bootstrap(customBootstrap?: unknown) {
     Object.keys(this.appPlugins).forEach((plugin) => {
@@ -306,10 +317,14 @@ class StrapiApp {
 
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
 
-  async register() {
+  async register(customRegister?: unknown) {
     Object.keys(this.appPlugins).forEach((plugin) => {
       this.appPlugins[plugin].register(this);
     });
+
+    if (isFunction(customRegister)) {
+      customRegister(this);
+    }
   }
 
   async loadAdminTrads() {

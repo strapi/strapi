@@ -25,8 +25,9 @@ interface MenuItem {
   intlLabel: MessageDescriptor & { values?: Record<string, PrimitiveType> };
   permissions: Permission[];
   notificationsCount?: number;
-  Component: React.LazyExoticComponent<React.ComponentType>;
+  Component?: React.LazyExoticComponent<React.ComponentType>;
   exact?: boolean;
+  position?: number;
   licenseOnly?: boolean;
 }
 
@@ -35,7 +36,7 @@ interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCoun
 }
 
 interface UnloadedSettingsLink extends Omit<StrapiAppSettingLink, 'Component'> {
-  Component: () => Promise<{ default: React.ComponentType }>;
+  Component?: () => Promise<{ default: React.ComponentType }>;
 }
 
 interface StrapiAppSetting {
@@ -149,15 +150,16 @@ class Router {
       `[${link.intlLabel.defaultMessage}]: link.intlLabel.id & link.intlLabel.defaultMessage should be defined`
     );
     invariant(
-      link.Component && typeof link.Component === 'function',
+      !link.Component || (link.Component && typeof link.Component === 'function'),
       `[${link.intlLabel.defaultMessage}]: link.Component must be a function returning a Promise that returns a default component. Please use: \`Component: () => import(path)\` instead.`
     );
 
     if (
-      link.Component &&
-      typeof link.Component === 'function' &&
-      // @ts-expect-error – shh
-      link.Component[Symbol.toStringTag] === 'AsyncFunction'
+      !link.Component ||
+      (link.Component &&
+        typeof link.Component === 'function' &&
+        // @ts-expect-error – shh
+        link.Component[Symbol.toStringTag] === 'AsyncFunction')
     ) {
       console.warn(
         `
@@ -176,18 +178,20 @@ class Router {
 
     const { Component, ...restLink } = link;
 
-    this._routes.push({
-      path: `${link.to}/*`,
-      lazy: async () => {
-        const mod = await Component();
+    if (Component) {
+      this._routes.push({
+        path: `${link.to}/*`,
+        lazy: async () => {
+          const mod = await Component();
 
-        if ('default' in mod) {
-          return { Component: mod.default };
-        } else {
-          return { Component: mod };
-        }
-      },
-    });
+          if ('default' in mod) {
+            return { Component: mod.default };
+          } else {
+            return { Component: mod };
+          }
+        },
+      });
+    }
 
     this.menu.push(restLink);
   };
@@ -269,15 +273,16 @@ class Router {
     );
     invariant(link.to, `[${link.intlLabel.defaultMessage}]: link.to should be defined`);
     invariant(
-      link.Component && typeof link.Component === 'function',
+      !link.Component || (link.Component && typeof link.Component === 'function'),
       `[${link.intlLabel.defaultMessage}]: link.Component must be a function returning a Promise. Please use: \`Component: () => import(path)\` instead.`
     );
 
     if (
-      link.Component &&
-      typeof link.Component === 'function' &&
-      // @ts-expect-error – shh
-      link.Component[Symbol.toStringTag] === 'AsyncFunction'
+      !link.Component ||
+      (link.Component &&
+        typeof link.Component === 'function' &&
+        // @ts-expect-error – shh
+        link.Component[Symbol.toStringTag] === 'AsyncFunction')
     ) {
       console.warn(
         `
@@ -319,24 +324,69 @@ class Router {
       this._routes[settingsIndex].children = [];
     }
 
-    this._routes[settingsIndex].children!.push({
-      path: `${link.to}/*`,
-      lazy: async () => {
-        const mod = await Component();
+    if (Component) {
+      this._routes[settingsIndex].children!.push({
+        path: `${link.to}/*`,
+        lazy: async () => {
+          const mod = await Component();
 
-        if ('default' in mod) {
-          return { Component: mod.default };
-        } else {
-          return { Component: mod };
-        }
-      },
-    });
+          if ('default' in mod) {
+            return { Component: mod.default };
+          } else {
+            return { Component: mod };
+          }
+        },
+      });
+    }
 
     this._settings[sectionId].links.push(restLink);
   };
 
-  addRoute(route: RouteObject | RouteObject[] | Reducer<RouteObject>) {}
+  /**
+   * @alpha
+   * @description Adds a route or an array of routes to the router.
+   * Otherwise, pass a function that receives the current routes and
+   * returns the new routes in a reducer like fashion.
+   */
+  addRoute(route: RouteObject | RouteObject[] | Reducer<RouteObject>) {
+    if (Array.isArray(route)) {
+      this._routes = [...this._routes, ...route];
+    } else if (typeof route === 'object' && route !== null) {
+      this._routes.push(route);
+    } else if (typeof route === 'function') {
+      this._routes = route(this._routes);
+    } else {
+      throw new Error(
+        `Expected the \`route\` passed to \`addRoute\` to be an array or a function, but received ${getPrintableType(
+          route
+        )}`
+      );
+    }
+  }
 }
+
+/* -------------------------------------------------------------------------------------------------
+ * getPrintableType
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @internal
+ * @description Gets the human-friendly printable type name for the given value, for instance it will yield
+ * `array` instead of `object`, as the native `typeof` operator would do.
+ */
+const getPrintableType = (value: unknown): string => {
+  const nativeType = typeof value;
+
+  if (nativeType === 'object') {
+    if (value === null) return 'null';
+    if (Array.isArray(value)) return 'array';
+    if (value instanceof Object && value.constructor.name !== 'Object') {
+      return value.constructor.name;
+    }
+  }
+
+  return nativeType;
+};
 
 export { Router };
 export type { MenuItem, StrapiAppSettingLink, UnloadedSettingsLink, StrapiAppSetting, RouteObject };
