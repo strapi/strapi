@@ -59,7 +59,7 @@ export const RelationTargetPicker = ({
   return (
     <Menu.Root>
       <MenuTrigger>{`${displayName} ${plugin ? `(from: ${plugin})` : ''}`}</MenuTrigger>
-      <Menu.Content zIndex={5}>
+      <Menu.Content zIndex="popover">
         {allowedContentTypesForRelation.map(({ uid, title, restrictRelationsTo, plugin }) => (
           <Menu.Item key={uid} onSelect={handleSelect({ uid, plugin, title, restrictRelationsTo })}>
             {title}&nbsp;

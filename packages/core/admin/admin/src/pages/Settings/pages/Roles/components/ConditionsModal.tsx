@@ -4,11 +4,7 @@ import {
   Box,
   Button,
   Flex,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  ModalLayoutProps,
+  Modal,
   MultiSelectNested,
   MultiSelectNestedProps,
   Typography,
@@ -45,16 +41,12 @@ interface ConditionAction extends Pick<ActionRowProps, 'label'> {
 interface ConditionsModalProps extends Pick<ActionRowProps, 'isFormDisabled'> {
   actions?: Array<ConditionAction | HiddenCheckboxAction | VisibleCheckboxAction>;
   headerBreadCrumbs?: string[];
-  onClosed: ModalLayoutProps['onClose'];
-  onToggle: () => void;
 }
 
 const ConditionsModal = ({
   actions = [],
   headerBreadCrumbs = [],
   isFormDisabled,
-  onClosed,
-  onToggle,
 }: ConditionsModalProps) => {
   const { formatMessage } = useIntl();
   const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
@@ -106,12 +98,11 @@ const ConditionsModal = ({
     );
 
     onChangeConditions(conditionsWithoutCategory);
-    onToggle();
   };
 
   return (
-    <ModalLayout labelledBy="condition-modal-breadcrumbs" onClose={onClosed}>
-      <ModalHeader>
+    <Modal.Content>
+      <Modal.Header>
         <Breadcrumbs id="condition-modal-breadcrumbs" label={headerBreadCrumbs.join(', ')}>
           {headerBreadCrumbs.map((label, index, arr) => (
             <Crumb isCurrent={index === arr.length - 1} key={label}>
@@ -124,8 +115,8 @@ const ConditionsModal = ({
             </Crumb>
           ))}
         </Breadcrumbs>
-      </ModalHeader>
-      <ModalBody>
+      </Modal.Header>
+      <Modal.Body>
         {actionsToDisplay.length === 0 && (
           <Typography>
             {formatMessage({
@@ -153,23 +144,21 @@ const ConditionsModal = ({
             );
           })}
         </ul>
-      </ModalBody>
-      <ModalFooter
-        startActions={
-          <Button variant="tertiary" onClick={onToggle}>
+      </Modal.Body>
+      <Modal.Footer>
+        <Modal.Close>
+          <Button variant="tertiary">
             {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
           </Button>
-        }
-        endActions={
-          <Button onClick={handleSubmit}>
-            {formatMessage({
-              id: 'Settings.permissions.conditions.apply',
-              defaultMessage: 'Apply',
-            })}
-          </Button>
-        }
-      />
-    </ModalLayout>
+        </Modal.Close>
+        <Button onClick={handleSubmit}>
+          {formatMessage({
+            id: 'Settings.permissions.conditions.apply',
+            defaultMessage: 'Apply',
+          })}
+        </Button>
+      </Modal.Footer>
+    </Modal.Content>
   );
 };
 

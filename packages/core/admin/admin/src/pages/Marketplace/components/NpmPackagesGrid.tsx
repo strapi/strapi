@@ -1,4 +1,4 @@
-import { Box, BoxComponent, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, BoxComponent, Flex, Grid, Typography } from '@strapi/design-system';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -73,9 +73,9 @@ const NpmPackagesGrid = ({
   }
 
   return (
-    <Grid gap={4}>
+    <Grid.Root gap={4}>
       {npmPackages.map((npmPackage) => (
-        <GridItem col={4} s={6} xs={12} style={{ height: '100%' }} key={npmPackage.id}>
+        <Grid.Item col={4} s={6} xs={12} style={{ height: '100%' }} key={npmPackage.id}>
           <NpmPackageCard
             npmPackage={npmPackage}
             isInstalled={installedPackageNames.includes(npmPackage.attributes.npmPackageName)}
@@ -84,9 +84,9 @@ const NpmPackagesGrid = ({
             npmPackageType={npmPackageType}
             strapiAppVersion={strapiAppVersion}
           />
-        </GridItem>
+        </Grid.Item>
       ))}
-    </Grid>
+    </Grid.Root>
   );
 };
 

@@ -151,6 +151,18 @@ exports[`BulkActions renders 1`] = `
   color: #4945ff;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .c5 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c7 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
 <div>
   <div
     class="c0 c1"
@@ -161,8 +173,12 @@ exports[`BulkActions renders 1`] = `
       0 folders - 0 assets selected
     </span>
     <button
+      aria-controls="radix-:r0:"
       aria-disabled="false"
+      aria-expanded="false"
+      aria-haspopup="dialog"
       class="c3 c1 c4 c5"
+      data-state="closed"
       type="button"
     >
       <div
@@ -188,8 +204,12 @@ exports[`BulkActions renders 1`] = `
       </span>
     </button>
     <button
+      aria-controls="radix-:r3:"
       aria-disabled="false"
+      aria-expanded="false"
+      aria-haspopup="dialog"
       class="c3 c1 c4 c7"
+      data-state="closed"
       type="button"
     >
       <div

@@ -1,13 +1,6 @@
 import * as React from 'react';
 
-import {
-  Avatar,
-  AvatarGroup,
-  Flex,
-  Tooltip,
-  Typography,
-  TypographyComponent,
-} from '@strapi/design-system';
+import { Avatar, Flex, Tooltip, Typography, TypographyComponent } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/urls';
@@ -43,7 +36,14 @@ const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSi
     const thumbnail = formats?.thumbnail?.url;
     const mediaURL = prefixFileUrlWithBackendUrl(thumbnail) || fileURL;
 
-    return <Avatar src={mediaURL} alt={alternativeText || name} preview />;
+    return (
+      <Avatar.Item
+        src={mediaURL}
+        alt={alternativeText || name}
+        fallback={alternativeText || name}
+        preview
+      />
+    );
   }
 
   const fileExtension = getFileExtension(ext);
@@ -92,7 +92,7 @@ interface MediaMultipleProps {
 
 const MediaMultiple = ({ content }: MediaMultipleProps) => {
   return (
-    <AvatarGroup>
+    <Avatar.Group>
       {content.map((file, index) => {
         const key = `${file.id}${index}`;
 
@@ -108,7 +108,7 @@ const MediaMultiple = ({ content }: MediaMultipleProps) => {
 
         return <MediaSingle key={key} {...file} />;
       })}
-    </AvatarGroup>
+    </Avatar.Group>
   );
 };
 

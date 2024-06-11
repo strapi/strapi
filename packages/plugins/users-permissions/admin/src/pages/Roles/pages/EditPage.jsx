@@ -7,7 +7,6 @@ import {
   TextInput,
   Textarea,
   Typography,
-  GridItem,
   Grid,
   Field,
 } from '@strapi/design-system';
@@ -143,8 +142,8 @@ export const EditPage = () => {
                     })}
                   </Typography>
 
-                  <Grid gap={4}>
-                    <GridItem col={6}>
+                  <Grid.Root gap={4}>
+                    <Grid.Item col={6}>
                       <Field.Root
                         name="name"
                         error={
@@ -166,8 +165,8 @@ export const EditPage = () => {
                         <TextInput value={values.name || ''} onChange={handleChange} />
                         <Field.Error />
                       </Field.Root>
-                    </GridItem>
-                    <GridItem col={6}>
+                    </Grid.Item>
+                    <Grid.Item col={6}>
                       <Field.Root
                         name="description"
                         error={
@@ -189,8 +188,8 @@ export const EditPage = () => {
                         <Textarea value={values.description || ''} onChange={handleChange} />
                         <Field.Error />
                       </Field.Root>
-                    </GridItem>
-                  </Grid>
+                    </Grid.Item>
+                  </Grid.Root>
                 </Flex>
 
                 {!isLoadingPlugins && (

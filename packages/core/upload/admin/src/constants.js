@@ -26,20 +26,20 @@ const ParentFolderShape = {
 ParentFolderShape.parent = PropTypes.shape(ParentFolderShape);
 
 const FolderShape = {
-  id: PropTypes.number.isRequired,
+  id: PropTypes.number,
   children: PropTypes.shape({
     count: PropTypes.number.isRequired,
   }),
-  createdAt: PropTypes.string.isRequired,
+  createdAt: PropTypes.string,
   createdBy: PropTypes.shape(),
   files: PropTypes.shape({
     count: PropTypes.number.isRequired,
   }),
-  name: PropTypes.string.isRequired,
-  updatedAt: PropTypes.string.isRequired,
+  name: PropTypes.string,
+  updatedAt: PropTypes.string,
   updatedBy: PropTypes.shape(),
-  pathId: PropTypes.number.isRequired,
-  path: PropTypes.string.isRequired,
+  pathId: PropTypes.number,
+  path: PropTypes.string,
 };
 
 FolderShape.parent = PropTypes.shape(ParentFolderShape);

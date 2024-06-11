@@ -24,6 +24,7 @@ import type {
 } from '../../../shared/contracts/collection-types';
 
 const documentApi = contentManagerApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     autoCloneDocument: builder.mutation<Clone.Response, Clone.Params & { query?: string }>({
       query: ({ model, sourceId, query }) => ({

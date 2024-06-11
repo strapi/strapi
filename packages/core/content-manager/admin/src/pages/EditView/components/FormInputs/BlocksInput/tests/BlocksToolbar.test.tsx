@@ -607,6 +607,7 @@ describe('BlocksToolbar', () => {
       },
       {
         type: 'code',
+        language: 'plaintext',
         children: [
           {
             type: 'text',

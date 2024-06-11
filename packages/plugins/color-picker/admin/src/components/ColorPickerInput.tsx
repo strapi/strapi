@@ -5,7 +5,6 @@ import {
   Box,
   Field,
   Flex,
-  FocusTrap,
   Popover,
   Typography,
   useComposedRefs,
@@ -66,7 +65,7 @@ const ColorPickerToggle = styled(BaseButton)`
   }
 `;
 
-const ColorPickerPopover = styled(Popover)`
+const ColorPickerPopover = styled(Popover.Content)`
   padding: ${({ theme }) => theme.spaces[2]};
   min-height: 270px;
 `;
@@ -83,79 +82,65 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
     const { formatMessage } = useIntl();
     const color = value || '#000000';
 
-    const handleBlur: React.FocusEventHandler<HTMLDivElement> = (e) => {
-      e.preventDefault();
-
-      if (!e.currentTarget.contains(e.relatedTarget)) {
-        setShowColorPicker(false);
-      }
-    };
-
     const composedRefs = useComposedRefs(forwardedRef, colorPickerButtonRef);
 
     return (
       <Field.Root name={name} id={name} error={error} hint={hint} required={required}>
         <Flex direction="column" alignItems="stretch" gap={1}>
           <Field.Label action={labelAction}>{label}</Field.Label>
-          <ColorPickerToggle
-            ref={composedRefs}
-            aria-label={formatMessage({
-              id: getTrad('color-picker.toggle.aria-label'),
-              defaultMessage: 'Color picker toggle',
-            })}
-            aria-controls="color-picker-value"
-            aria-haspopup="dialog"
-            aria-expanded={showColorPicker}
-            aria-disabled={disabled}
-            disabled={disabled}
-            onClick={() => setShowColorPicker(!showColorPicker)}
-          >
-            <Flex>
-              <ColorPreview color={color} />
-              <Typography
-                style={{ textTransform: 'uppercase' }}
-                textColor={value ? undefined : 'neutral600'}
-                variant="omega"
+          <Popover.Root onOpenChange={setShowColorPicker}>
+            <Popover.Trigger>
+              <ColorPickerToggle
+                ref={composedRefs}
+                aria-label={formatMessage({
+                  id: getTrad('color-picker.toggle.aria-label'),
+                  defaultMessage: 'Color picker toggle',
+                })}
+                aria-controls="color-picker-value"
+                aria-haspopup="dialog"
+                aria-expanded={showColorPicker}
+                aria-disabled={disabled}
+                disabled={disabled}
               >
-                {color}
-              </Typography>
-            </Flex>
-            <CaretDown aria-hidden />
-          </ColorPickerToggle>
-          {showColorPicker && (
-            <ColorPickerPopover
-              onBlur={handleBlur}
-              role="dialog"
-              source={colorPickerButtonRef}
-              spacing={4}
-            >
-              <FocusTrap onEscape={() => setShowColorPicker(false)}>
-                <ColorPicker color={color} onChange={(hexValue) => onChange(name, hexValue)} />
-                <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
-                  <Box paddingRight={2}>
-                    <Typography variant="omega" tag="label" textColor="neutral600">
-                      {formatMessage({
-                        id: getTrad('color-picker.input.format'),
-                        defaultMessage: 'HEX',
-                      })}
-                    </Typography>
-                  </Box>
-                  <Field.Root>
-                    <Field.Input
-                      aria-label={formatMessage({
-                        id: getTrad('color-picker.input.aria-label'),
-                        defaultMessage: 'Color picker input',
-                      })}
-                      style={{ textTransform: 'uppercase' }}
-                      value={value}
-                      placeholder="#000000"
-                      onChange={onChange}
-                    />
-                  </Field.Root>
+                <Flex>
+                  <ColorPreview color={color} />
+                  <Typography
+                    style={{ textTransform: 'uppercase' }}
+                    textColor={value ? undefined : 'neutral600'}
+                    variant="omega"
+                  >
+                    {color}
+                  </Typography>
                 </Flex>
-              </FocusTrap>
+                <CaretDown aria-hidden />
+              </ColorPickerToggle>
+            </Popover.Trigger>
+            <ColorPickerPopover sideOffset={4}>
+              <ColorPicker color={color} onChange={(hexValue) => onChange(name, hexValue)} />
+              <Flex paddingTop={3} paddingLeft={4} justifyContent="flex-end">
+                <Box paddingRight={2}>
+                  <Typography variant="omega" tag="label" textColor="neutral600">
+                    {formatMessage({
+                      id: getTrad('color-picker.input.format'),
+                      defaultMessage: 'HEX',
+                    })}
+                  </Typography>
+                </Box>
+                <Field.Root>
+                  <Field.Input
+                    aria-label={formatMessage({
+                      id: getTrad('color-picker.input.aria-label'),
+                      defaultMessage: 'Color picker input',
+                    })}
+                    style={{ textTransform: 'uppercase' }}
+                    value={value}
+                    placeholder="#000000"
+                    onChange={onChange}
+                  />
+                </Field.Root>
+              </Flex>
             </ColorPickerPopover>
-          )}
+          </Popover.Root>
           <Field.Hint />
           <Field.Error />
         </Flex>

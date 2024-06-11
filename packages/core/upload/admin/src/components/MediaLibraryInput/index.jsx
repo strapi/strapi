@@ -179,38 +179,38 @@ export const MediaLibraryInput = forwardRef(
           trackedLocation="content-manager"
         />
 
-        {step === STEPS.AssetSelect && (
-          <AssetDialog
-            allowedTypes={fieldAllowedTypes}
-            initiallySelectedAssets={initiallySelectedAssets}
-            folderId={folderId}
-            onClose={() => {
-              setStep(undefined);
-              setFolderId(null);
-            }}
-            onValidate={handleValidation}
-            multiple={multiple}
-            onAddAsset={() => setStep(STEPS.AssetUpload)}
-            onAddFolder={() => setStep(STEPS.FolderCreate)}
-            onChangeFolder={(folder) => setFolderId(folder)}
-            trackedLocation="content-manager"
-          />
-        )}
+        <AssetDialog
+          allowedTypes={fieldAllowedTypes}
+          initiallySelectedAssets={initiallySelectedAssets}
+          folderId={folderId}
+          onClose={() => {
+            setStep(undefined);
+            setFolderId(null);
+          }}
+          open={step === STEPS.AssetSelect}
+          onValidate={handleValidation}
+          multiple={multiple}
+          onAddAsset={() => setStep(STEPS.AssetUpload)}
+          onAddFolder={() => setStep(STEPS.FolderCreate)}
+          onChangeFolder={(folder) => setFolderId(folder)}
+          trackedLocation="content-manager"
+        />
 
-        {step === STEPS.AssetUpload && (
-          <UploadAssetDialog
-            onClose={() => setStep(STEPS.AssetSelect)}
-            initialAssetsToAdd={droppedAssets}
-            addUploadedFiles={handleFilesUploadSucceeded}
-            trackedLocation="content-manager"
-            folderId={folderId}
-            validateAssetsTypes={validateAssetsTypes}
-          />
-        )}
+        <UploadAssetDialog
+          open={step === STEPS.AssetUpload}
+          onClose={() => setStep(STEPS.AssetSelect)}
+          initialAssetsToAdd={droppedAssets}
+          addUploadedFiles={handleFilesUploadSucceeded}
+          trackedLocation="content-manager"
+          folderId={folderId}
+          validateAssetsTypes={validateAssetsTypes}
+        />
 
-        {step === STEPS.FolderCreate && (
-          <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} parentFolderId={folderId} />
-        )}
+        <EditFolderDialog
+          open={step === STEPS.FolderCreate}
+          onClose={() => setStep(STEPS.AssetSelect)}
+          parentFolderId={folderId}
+        />
       </>
     );
   }

@@ -1,11 +1,12 @@
 import React from 'react';
 
 import { ConfirmDialog } from '@strapi/admin/strapi-admin';
+import { Dialog } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 
 import { useRemoveAsset } from '../../hooks/useRemoveAsset';
 
-export const RemoveAssetDialog = ({ onClose, asset }) => {
+export const RemoveAssetDialog = ({ open, onClose, asset }) => {
   // `null` means asset is deleted
   const { removeAsset } = useRemoveAsset(() => onClose(null));
 
@@ -13,11 +14,16 @@ export const RemoveAssetDialog = ({ onClose, asset }) => {
     await removeAsset(asset.id);
   };
 
-  return <ConfirmDialog isOpen onClose={onClose} onConfirm={handleConfirm} />;
+  return (
+    <Dialog.Root open={open} onOpenChange={onClose}>
+      <ConfirmDialog onConfirm={handleConfirm} />
+    </Dialog.Root>
+  );
 };
 
 RemoveAssetDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
   asset: PropTypes.shape({
     id: PropTypes.number,
     height: PropTypes.number,

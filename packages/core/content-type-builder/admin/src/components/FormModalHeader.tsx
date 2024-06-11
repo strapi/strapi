@@ -3,8 +3,7 @@
  * FormModalHeader
  *
  */
-import { Box, Flex, ModalHeader, Typography } from '@strapi/design-system';
-import { Breadcrumbs, Crumb, Link } from '@strapi/design-system';
+import { Box, Flex, Breadcrumbs, Crumb, Link, Modal } from '@strapi/design-system';
 import { ArrowLeft } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -82,18 +81,16 @@ export const FormModalHeader = ({
     }
 
     return (
-      <ModalHeader>
+      <Modal.Header>
         <Flex>
           <Box>
             <AttributeIcon type={icon} />
           </Box>
           <Box paddingLeft={3}>
-            <Typography fontWeight="bold" textColor="neutral800" tag="h2" id="title">
-              {formatMessage({ id: headerId }, { name: displayName })}
-            </Typography>
+            <Modal.Title>{formatMessage({ id: headerId }, { name: displayName })}</Modal.Title>
           </Box>
         </Flex>
-      </ModalHeader>
+      </Modal.Header>
     );
   }
 
@@ -128,7 +125,7 @@ export const FormModalHeader = ({
   }
 
   return (
-    <ModalHeader>
+    <Modal.Header>
       <Flex gap={3}>
         {showBackLink && (
           // This is a workaround and should use the LinkButton with a variant that currently doesn't exist
@@ -167,6 +164,6 @@ export const FormModalHeader = ({
           })}
         </Breadcrumbs>
       </Flex>
-    </ModalHeader>
+    </Modal.Header>
   );
 };

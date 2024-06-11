@@ -1,5 +1,5 @@
 import { useStrapiApp } from '@strapi/admin/strapi-admin';
-import { Flex, Grid, GridItem, KeyboardNavigable, Link } from '@strapi/design-system';
+import { Flex, Grid, KeyboardNavigable, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
@@ -25,13 +25,13 @@ export const CustomFieldsList = () => {
   return (
     <KeyboardNavigable tagName="button">
       <Flex direction="column" alignItems="stretch" gap={3}>
-        <Grid gap={3}>
+        <Grid.Root gap={3}>
           {sortedCustomFields.map(([uid, customField]) => (
-            <GridItem key={uid} col={6}>
+            <Grid.Item key={uid} col={6}>
               <CustomFieldOption key={uid} customFieldUid={uid} customField={customField} />
-            </GridItem>
+            </Grid.Item>
           ))}
-        </Grid>
+        </Grid.Root>
         <Link
           href="https://docs.strapi.io/developer-docs/latest/development/custom-fields.html"
           isExternal

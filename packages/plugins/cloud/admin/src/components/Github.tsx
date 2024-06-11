@@ -23,9 +23,14 @@ const CustomGithubButton = styled(LinkButton)`
   background-color: #000000;
   color: #ffffff;
   border: none;
-  :hover {
-    background-color: #32324d;
-    border: none;
+
+  & svg > path {
+    fill: ${({ theme }) => theme.colors.neutral0};
+  }
+
+  &:hover {
+    background-color: #32324d !important;
+    border: none !important;
   }
 `;
 

@@ -61,14 +61,14 @@ describe('ApplicationsInfosPage || LogoInput', () => {
       expect(getByRole('tab', { name: 'From computer' })).toBeInTheDocument();
       expect(getByRole('tabpanel', { name: 'From computer' })).toBeInTheDocument();
       expect(getByRole('button', { name: 'Browse files' })).toBeInTheDocument();
-      expect(getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
+      expect(getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
       expect(getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
       await user.click(getByRole('tab', { name: 'From url' }));
 
       expect(getByRole('tabpanel', { name: 'From url' })).toBeInTheDocument();
       expect(getByRole('textbox', { name: 'URL' })).toBeInTheDocument();
-      expect(getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
+      expect(getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
       expect(getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
     });
 
