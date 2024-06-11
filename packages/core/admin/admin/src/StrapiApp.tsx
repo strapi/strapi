@@ -63,7 +63,7 @@ interface MenuItem {
   notificationsCount?: number;
   Component: React.LazyExoticComponent<React.ComponentType>;
   exact?: boolean;
-  toBuy?: boolean;
+  licenseOnly?: boolean;
   position?: number;
 }
 
