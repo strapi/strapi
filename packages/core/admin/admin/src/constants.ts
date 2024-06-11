@@ -1,6 +1,6 @@
 import { PermissionMap } from './types/permissions';
 
-import type { StrapiAppSettingLink } from './StrapiApp';
+import type { StrapiAppSettingLink } from './core/apis/router';
 
 export const ADMIN_PERMISSIONS_CE = {
   contentManager: {

@@ -87,8 +87,8 @@ describe('ADMIN | new StrapiApp', () => {
     it('the settings should be defined', () => {
       const app = new StrapiApp();
 
-      expect(app.settings).toBeDefined();
-      expect(app.settings.global).toBeDefined();
+      expect(app.router.settings).toBeDefined();
+      expect(app.router.settings.global).toBeDefined();
     });
 
     it('should creates a new section', () => {
@@ -105,8 +105,8 @@ describe('ADMIN | new StrapiApp', () => {
       ];
       app.createSettingSection(section, links);
 
-      expect(app.settings.foo).toBeDefined();
-      expect(app.settings.foo.links).toMatchInlineSnapshot(`
+      expect(app.router.settings.foo).toBeDefined();
+      expect(app.router.settings.foo.links).toMatchInlineSnapshot(`
         [
           {
             "Component": {
@@ -141,8 +141,8 @@ describe('ADMIN | new StrapiApp', () => {
 
       app.addSettingsLink('global', link);
 
-      expect(app.settings.global.links).toHaveLength(1);
-      expect(app.settings.global.links[0]).toMatchInlineSnapshot(`
+      expect(app.router.settings.global.links).toHaveLength(1);
+      expect(app.router.settings.global.links[0]).toMatchInlineSnapshot(`
         {
           "Component": {
             "$$typeof": Symbol(react.lazy),
@@ -177,8 +177,8 @@ describe('ADMIN | new StrapiApp', () => {
 
       app.addSettingsLinks('global', links);
 
-      expect(app.settings.global.links).toHaveLength(1);
-      expect(app.settings.global.links).toMatchInlineSnapshot(`
+      expect(app.router.settings.global.links).toHaveLength(1);
+      expect(app.router.settings.global.links).toMatchInlineSnapshot(`
         [
           {
             "Component": {
@@ -472,8 +472,8 @@ describe('ADMIN | new StrapiApp', () => {
     it('the menu should be defined', () => {
       const app = new StrapiApp();
 
-      expect(app.menu).toBeDefined();
-      expect(Array.isArray(app.menu)).toBe(true);
+      expect(app.router.menu).toBeDefined();
+      expect(Array.isArray(app.router.menu)).toBe(true);
     });
 
     it('addMenuLink should add a link to the menu', () => {
@@ -488,8 +488,8 @@ describe('ADMIN | new StrapiApp', () => {
 
       app.addMenuLink(link);
 
-      expect(app.menu[0]).toBeDefined();
-      expect(app.menu[0]).toMatchInlineSnapshot(`
+      expect(app.router.menu[0]).toBeDefined();
+      expect(app.router.menu[0]).toMatchInlineSnapshot(`
         {
           "Component": {
             "$$typeof": Symbol(react.lazy),
