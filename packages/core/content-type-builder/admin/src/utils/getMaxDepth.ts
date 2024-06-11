@@ -1,18 +1,6 @@
+import type { ComponentWithChildren } from '../components/DataManagerProvider/utils/retrieveComponentsThatHaveComponents';
 import type { NestedComponent } from '../components/DataManagerProvider/utils/retrieveNestedComponents';
 import type { Internal } from '@strapi/types';
-
-type ChildComponent = {
-  repeatable: boolean;
-  component: Internal.UID.Component;
-  name?: string;
-  required?: boolean;
-  min?: number;
-};
-
-export type ComponentWithChildren = {
-  component: Internal.UID.Component;
-  childComponents: ChildComponent[];
-};
 
 const findComponent = <T extends { component: Internal.UID.Component }>(
   componentName: Internal.UID.Schema,
