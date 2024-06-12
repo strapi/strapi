@@ -5,6 +5,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  isFetchError,
 } from '@strapi/admin/strapi-admin';
 import { unstable_useDocumentLayout as useDocumentLayout } from '@strapi/content-manager/strapi-admin';
 import {
@@ -20,7 +21,6 @@ import {
 } from '@strapi/design-system';
 import { Cursor } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
-import { isAxiosError } from 'axios';
 import { useFormik } from 'formik';
 import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink } from 'react-router-dom';
@@ -182,7 +182,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
       await formik.handleSubmit(e);
       onClose();
     } catch (error) {
-      if (isAxiosError(error)) {
+      if (isFetchError(error)) {
         // Handle axios error
         toggleNotification({
           type: 'danger',
