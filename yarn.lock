@@ -7868,6 +7868,7 @@ __metadata:
     immer: "npm:9.0.19"
     inquirer: "npm:8.2.5"
     invariant: "npm:^2.2.4"
+    is-localhost-ip: "npm:2.0.0"
     js-cookie: "npm:2.2.1"
     jsonwebtoken: "npm:9.0.0"
     koa: "npm:2.13.4"
@@ -19806,6 +19807,13 @@ __metadata:
   version: 1.0.1
   resolution: "is-lambda@npm:1.0.1"
   checksum: 93a32f01940220532e5948538699ad610d5924ac86093fcee83022252b363eb0cc99ba53ab084a04e4fb62bf7b5731f55496257a4c38adf87af9c4d352c71c35
+  languageName: node
+  linkType: hard
+
+"is-localhost-ip@npm:2.0.0":
+  version: 2.0.0
+  resolution: "is-localhost-ip@npm:2.0.0"
+  checksum: ac4c4b0a546d3bd9f40b1545ecb20b968284b1a04531c54e6af18ce4cd596cbdfece3c3e468ce8c8b17fde5c27124057e55121e1c5889e84fcd70df604b5b71b
   languageName: node
   linkType: hard
 

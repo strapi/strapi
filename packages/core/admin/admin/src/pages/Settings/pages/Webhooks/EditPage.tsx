@@ -49,6 +49,12 @@ const EditPage = () => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
+
+  /**
+   * Prevents the notifications from showing up twice because the function identity
+   * coming from the helper plugin is not stable
+   */
+  const stableFormatAPIError = React.useRef(formatAPIError);
   const { isLoading: isLoadingForModels } = useContentTypes();
   const [isTriggering, setIsTriggering] = React.useState(false);
   const [triggerResponse, setTriggerResponse] = React.useState<TriggerWebhook.Response['data']>();
@@ -64,10 +70,10 @@ const EditPage = () => {
     if (error) {
       toggleNotification({
         type: 'warning',
-        message: formatAPIError(error),
+        message: stableFormatAPIError.current(error),
       });
     }
-  }, [error, toggleNotification, formatAPIError]);
+  }, [error, toggleNotification, stableFormatAPIError]);
 
   const handleTriggerWebhook = async () => {
     try {
