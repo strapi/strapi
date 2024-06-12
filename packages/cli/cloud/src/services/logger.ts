@@ -1,5 +1,7 @@
 import chalk from 'chalk';
-import ora, { Ora } from 'ora';
+import stringify from 'fast-safe-stringify';
+
+import ora from 'ora';
 import * as cliProgress from 'cli-progress';
 
 export interface LoggerOptions {
@@ -24,31 +26,9 @@ export interface Logger {
   ) => Pick<cliProgress.SingleBar, 'start' | 'stop' | 'update'>;
 }
 
-const silentSpinner = {
-  succeed() {
-    return this;
-  },
-  fail() {
-    return this;
-  },
-  start() {
-    return this;
-  },
-  text: '',
-  isSpinning: false,
-} as Ora;
-
-const silentProgressBar = {
-  start() {
-    return this;
-  },
-  stop() {
-    return this;
-  },
-  update() {
-    return this;
-  },
-} as unknown as cliProgress.SingleBar;
+const stringifyArg = (arg: unknown) => {
+  return typeof arg === 'object' ? stringify(arg) : arg;
+};
 
 const createLogger = (options: LoggerOptions = {}): Logger => {
   const { silent = false, debug = false, timestamp = true } = options;
@@ -64,14 +44,14 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
       return state.errors;
     },
 
-    debug(...args) {
+    async debug(...args) {
       if (silent || !debug) {
         return;
       }
 
       console.log(
         chalk.cyan(`[DEBUG]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...args.map(stringifyArg)
       );
     },
 
@@ -82,7 +62,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
       console.info(
         chalk.blue(`[INFO]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...args.map(stringifyArg)
       );
     },
 
@@ -91,7 +71,10 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
         return;
       }
 
-      console.info(chalk.blue(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`), ...args);
+      console.info(
+        chalk.blue(`${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
+        ...args.map(stringifyArg)
+      );
     },
 
     success(...args) {
@@ -101,7 +84,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
       console.info(
         chalk.green(`[SUCCESS]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...args.map(stringifyArg)
       );
     },
 
@@ -114,7 +97,7 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
       console.warn(
         chalk.yellow(`[WARN]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...args.map(stringifyArg)
       );
     },
 
@@ -127,13 +110,26 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
       console.error(
         chalk.red(`[ERROR]${timestamp ? `\t[${new Date().toISOString()}]` : ''}`),
-        ...args
+        ...args.map(stringifyArg)
       );
     },
 
+    // @ts-expect-error – returning a subpart of ora is fine because the types tell us what is what.
     spinner(text: string) {
       if (silent) {
-        return silentSpinner;
+        return {
+          succeed() {
+            return this;
+          },
+          fail() {
+            return this;
+          },
+          start() {
+            return this;
+          },
+          text: '',
+          isSpinning: false,
+        };
       }
 
       return ora(text);
@@ -141,7 +137,17 @@ const createLogger = (options: LoggerOptions = {}): Logger => {
 
     progressBar(totalSize: number, text: string) {
       if (silent) {
-        return silentProgressBar;
+        return {
+          start() {
+            return this;
+          },
+          stop() {
+            return this;
+          },
+          update() {
+            return this;
+          },
+        };
       }
 
       const progressBar = new cliProgress.SingleBar({
