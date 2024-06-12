@@ -54,7 +54,8 @@ const EditPage = () => {
    * Prevents the notifications from showing up twice because the function identity
    * coming from the helper plugin is not stable
    */
-  const stableFormatAPIError = React.useRef(formatAPIError);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableFormatAPIError = React.useCallback(formatAPIError, []);
   const { isLoading: isLoadingForModels } = useContentTypes();
   const [isTriggering, setIsTriggering] = React.useState(false);
   const [triggerResponse, setTriggerResponse] = React.useState<TriggerWebhook.Response['data']>();
@@ -70,7 +71,7 @@ const EditPage = () => {
     if (error) {
       toggleNotification({
         type: 'warning',
-        message: stableFormatAPIError.current(error),
+        message: stableFormatAPIError(error),
       });
     }
   }, [error, toggleNotification, stableFormatAPIError]);
