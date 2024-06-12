@@ -1,9 +1,32 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import type { Core, UID } from '@strapi/types';
+import type { Core, UID, Modules } from '@strapi/types';
 
 import { RELEASE_ACTION_MODEL_UID, RELEASE_MODEL_UID, ALLOWED_WEBHOOK_EVENTS } from './constants';
 import { getService } from './utils';
 import { deleteActionsOnDelete, updateActionsOnUpdate } from './middlewares/documents';
+
+interface DeleteManyParams {
+  contentType: UID.ContentType;
+  locale: string | null;
+  entryDocumentId?: Modules.Documents.ID;
+}
+
+const deleteReleasesActionsAndUpdateReleaseStatus = async (params: DeleteManyParams) => {
+  const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
+    where: {
+      actions: params,
+    },
+  });
+
+  await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
+    where: params,
+  });
+
+  // We update the status of each release after delete the actions
+  for (const release of releases) {
+    getService('release', { strapi }).updateReleaseStatus(release.id);
+  }
+};
 
 export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
   if (strapi.ee.features.isEnabled('cms-content-releases')) {
@@ -24,28 +47,11 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
           if (model.kind === 'collectionType' && model.options?.draftAndPublish) {
             const { where } = event.params;
 
-            const releases = await strapi.db.query(RELEASE_MODEL_UID).findMany({
-              where: {
-                actions: {
-                  contentType: model.uid,
-                  locale: where.locale ?? null,
-                  ...(where.documentId && { entryDocumentId: where.documentId }),
-                },
-              },
+            deleteReleasesActionsAndUpdateReleaseStatus({
+              contentType: model.uid,
+              locale: where.locale ?? null,
+              ...(where.documentId && { entryDocumentId: where.documentId }),
             });
-
-            await strapi.db.query(RELEASE_ACTION_MODEL_UID).deleteMany({
-              where: {
-                contentType: model.uid,
-                locale: where.locale ?? null,
-                ...(where.documentId && { entryDocumentId: where.documentId }),
-              },
-            });
-
-            // We update the status of each release after delete the actions
-            for (const release of releases) {
-              getService('release', { strapi }).updateReleaseStatus(release.id);
-            }
           }
         } catch (error) {
           // If an error happens we don't want to block the delete entry flow, but we log the error
@@ -56,6 +62,7 @@ export const bootstrap = async ({ strapi }: { strapi: Core.Strapi }) => {
       },
     });
 
+    // We register middleware to handle ReleaseActions when changes on documents are made
     strapi.documents.use(deleteActionsOnDelete);
     strapi.documents.use(updateActionsOnUpdate);
 

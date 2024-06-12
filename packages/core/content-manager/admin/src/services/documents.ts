@@ -145,6 +145,7 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           { type: 'Document', id: `${model}_LIST` },
           'Relations',
+          { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
         ];
       },
@@ -334,6 +335,8 @@ const documentApi = contentManagerApi.injectEndpoints({
             id: collectionType !== SINGLE_TYPES ? `${model}_${documentId}` : model,
           },
           'Relations',
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
         ];
       },
     }),

@@ -1,4 +1,5 @@
 import { Modules, UID } from '@strapi/types';
+import { contentTypes } from '@strapi/utils';
 import { RELEASE_MODEL_UID, RELEASE_ACTION_MODEL_UID } from '../constants';
 import { getService, isEntryValid } from '../utils';
 
@@ -63,7 +64,7 @@ const deleteActionsOnDelete: Middleware = async (ctx, next) => {
     return next();
   }
 
-  if (!ctx.contentType.options?.draftAndPublish) {
+  if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
     return next();
   }
 
@@ -96,7 +97,7 @@ const updateActionsOnUpdate: Middleware = async (ctx, next) => {
     return next();
   }
 
-  if (!ctx.contentType.options?.draftAndPublish) {
+  if (!contentTypes.hasDraftAndPublish(ctx.contentType)) {
     return next();
   }
 
