@@ -109,6 +109,7 @@
     "immer": "9.0.19",
     "inquirer": "8.2.5",
     "invariant": "^2.2.4",
+    "is-localhost-ip": "2.0.0",
     "js-cookie": "2.2.1",
     "jsonwebtoken": "9.0.0",
     "koa": "2.13.4",

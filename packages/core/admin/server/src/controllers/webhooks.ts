@@ -1,6 +1,7 @@
+import isLocalhostIp from 'is-localhost-ip';
 import type { Context } from 'koa';
-
 import _ from 'lodash';
+
 import { yup, validateYupSchema } from '@strapi/utils';
 import { Webhook } from '@strapi/types';
 
@@ -20,7 +21,24 @@ const urlRegex =
 const webhookValidator = yup
   .object({
     name: yup.string().required(),
-    url: yup.string().matches(urlRegex, 'url must be a valid URL').required(),
+    url: yup
+      .string()
+      .matches(urlRegex, 'url must be a valid URL')
+      .required()
+      .test(
+        'is-public-url',
+        "Url is not supported because it isn't reachable over the public internet",
+        async (url) => {
+          if (!url) {
+            return true;
+          }
+
+          const parsedUrl = new URL(url);
+
+          const isLocalUrl = await isLocalhostIp(parsedUrl.hostname);
+          return !isLocalUrl;
+        }
+      ),
     headers: yup.lazy((data) => {
       if (typeof data !== 'object') {
         return yup.object().required();
@@ -137,20 +155,7 @@ export default {
 
     const webhook = await strapi.webhookStore.findWebhook(id);
 
-    const response = await strapi.webhookRunner
-      .run(webhook as Webhook, 'trigger-test', {})
-      .then((res: { statusCode: number; message: string }) => {
-        // Mask the response to avoid leaking sensitive information
-        if (+res.statusCode > 300) {
-          strapi.log.error(`Failed to manually trigger webhook: \n${JSON.stringify(res, null, 2)}`);
-          return {
-            statusCode: 500,
-            message: 'Webhook URL request failed',
-          };
-        }
-
-        return res;
-      });
+    const response = await strapi.webhookRunner.run(webhook as Webhook, 'trigger-test', {});
 
     ctx.body = { data: response } satisfies TriggerWebhook.Response;
   },
