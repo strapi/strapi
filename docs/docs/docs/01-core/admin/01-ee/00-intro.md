@@ -34,6 +34,7 @@ Everytime a new EE feature is added in Strapi, in the settings menu, you should 
             },
             to: '/settings/purchase-new-ee-feature',
             id: 'new-ee-feature',
+            // TODO: to replace with another name in v5
             lockIcon: true,
           },
         ]
