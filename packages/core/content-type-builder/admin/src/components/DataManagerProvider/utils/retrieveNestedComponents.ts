@@ -10,7 +10,7 @@ export type NestedComponent = {
 export const retrieveNestedComponents = (appComponents: Components): NestedComponent[] => {
   const nestedComponents = Object.keys(appComponents).reduce((acc: NestedComponent[], current) => {
     const componentAttributes = appComponents?.[current]?.schema?.attributes ?? [];
-    const currentComponentNestedCompos = getComponentsFromComponent(
+    const currentComponentNestedCompos = getComponentsNestedWithinComponent(
       componentAttributes,
       current as Internal.UID.Component
     );
@@ -20,7 +20,7 @@ export const retrieveNestedComponents = (appComponents: Components): NestedCompo
   return mergeComponents(nestedComponents);
 };
 
-const getComponentsFromComponent = (
+const getComponentsNestedWithinComponent = (
   componentAttributes: AttributeType[],
   parentCompoUid: Internal.UID.Component
 ) => {
@@ -37,7 +37,7 @@ const getComponentsFromComponent = (
   }, []);
 };
 
-// merge duplicate components
+// Merge duplicate components
 const mergeComponents = (originalComponents: NestedComponent[]): NestedComponent[] => {
   const componentMap = new Map();
   // Populate the map with component and its parents

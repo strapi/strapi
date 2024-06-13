@@ -3,10 +3,10 @@ import type { NestedComponent } from '../components/DataManagerProvider/utils/re
 import type { Internal } from '@strapi/types';
 
 const findComponent = <T extends { component: Internal.UID.Component }>(
-  componentName: Internal.UID.Schema,
+  componentUid: Internal.UID.Schema,
   components: Array<T>
 ) => {
-  return components.find((c) => c.component === componentName);
+  return components.find((c) => c.component === componentUid);
 };
 
 /**
