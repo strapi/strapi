@@ -95,7 +95,7 @@ test.describe('List View', () => {
 
       // Wait for the confirmation dialog to appear
       await page.waitForSelector('text=Are you sure you want to unpublish these entries?');
-      const unpublishButton = page.getByLabel('Confirm').getByRole('button', { name: 'Unpublish' });
+      const unpublishButton = page.getByLabel('Confirm').getByRole('button', { name: 'Confirm' });
       await unpublishButton.click();
 
       await expect(page.getByRole('gridcell', { name: 'draft' })).toHaveCount(2);
