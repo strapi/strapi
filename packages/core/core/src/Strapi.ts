@@ -406,7 +406,7 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async bootstrap() {
-    await this.configureGlobalProxy();
+    this.configureGlobalProxy();
 
     const models = [
       ...utils.transformContentTypesToModels(
@@ -464,7 +464,7 @@ class Strapi extends Container implements Core.Strapi {
     return this;
   }
 
-  async configureGlobalProxy() {
+  configureGlobalProxy() {
     const globalProxy = this.config.get('server.proxy.global');
     const httpProxy = this.config.get('server.proxy.http') || globalProxy;
     const httpsProxy = this.config.get('server.proxy.https') || globalProxy;
