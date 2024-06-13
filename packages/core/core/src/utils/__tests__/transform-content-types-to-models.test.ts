@@ -230,6 +230,12 @@ const expectedModels = [
         },
       },
     },
+    indexes: [
+      {
+        name: 'countries_documents_index',
+        columns: ['document_id'],
+      },
+    ],
   },
   {
     uid: 'api::categories.categories',
@@ -240,6 +246,12 @@ const expectedModels = [
       documentId: { type: 'string' },
       name: { type: 'string' },
     },
+    indexes: [
+      {
+        name: 'categories_documents_index',
+        columns: ['document_id'],
+      },
+    ],
   },
   {
     uid: 'api::empty.empty',

@@ -41,12 +41,12 @@ const admin: Plugin.Config.AdminInput = {
           id: `${PLUGIN_ID}.plugin.name`,
           defaultMessage: 'Review Workflows',
         },
+        licenseOnly: true,
         permissions: [],
         async Component() {
           const { PurchaseReviewWorkflows } = await import('./routes/purchase-review-workflows');
           return { default: PurchaseReviewWorkflows };
         },
-        lockIcon: true,
       });
     }
   },
