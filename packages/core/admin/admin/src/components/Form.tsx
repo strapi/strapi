@@ -669,7 +669,7 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 
   const handleChange = useForm('useField', (state) => state.onChange);
 
-  const convertErrorFormat = (stateErrors: FormErrors<FormValues>) => {
+  const formatNestedErrorMessages = (stateErrors: FormErrors<FormValues>) => {
     const nestedErrors: Record<string, any> = {};
 
     Object.entries(stateErrors).forEach(([key, value]) => {
@@ -705,7 +705,9 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
     return nestedErrors;
   };
 
-  const error = useForm('useField', (state) => getIn(convertErrorFormat(state.errors), path));
+  const error = useForm('useField', (state) =>
+    getIn(formatNestedErrorMessages(state.errors), path)
+  );
 
   return {
     initialValue,
