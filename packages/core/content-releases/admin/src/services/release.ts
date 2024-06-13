@@ -325,14 +325,11 @@ const releaseApi = adminApi
           },
           providesTags: [{ type: 'EntriesInRelease' }],
         }),
-        getReleaseSettings: build.query<GetSettings.Response>({
+        getReleaseSettings: build.query<GetSettings.Response, GetSettings.Request | void>({
           query: () => '/content-releases/settings',
           providesTags: [{ type: 'ReleaseSettings' }],
         }),
-        updateReleaseSettings: build.mutation<
-          void,
-          UpdateSettings.Request['body']
-        >({
+        updateReleaseSettings: build.mutation<void, UpdateSettings.Request['body']>({
           query(data) {
             return {
               url: '/content-releases/settings',
