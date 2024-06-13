@@ -465,20 +465,24 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async configureGlobalProxy() {
-    const globalProxy = this.config.get('server.globalProxy');
+    const globalProxy = this.config.get('server.proxy.global');
+    const httpProxy = this.config.get('server.proxy.http') || globalProxy;
+    const httpsProxy = this.config.get('server.proxy.https') || globalProxy;
 
-    if (!globalProxy) {
+    if (!httpProxy && !httpsProxy) {
       return;
     }
 
-    this.log.info(`Using globalProxy for all requests: ${globalProxy}`);
-
     globalAgent.bootstrap();
 
-    if (globalProxy.startsWith('https:')) {
-      (global as any).GLOBAL_AGENT.HTTPS_PROXY = globalProxy;
-    } else if (globalProxy.startsWith('http:')) {
-      (global as any).GLOBAL_AGENT.HTTP_PROXY = globalProxy;
+    if (httpProxy) {
+      this.log.info(`Using HTTP proxy: ${httpProxy}`);
+      (global as any).GLOBAL_AGENT.HTTP_PROXY = httpProxy;
+    }
+
+    if (httpsProxy) {
+      this.log.info(`Using HTTPS proxy: ${httpsProxy}`);
+      (global as any).GLOBAL_AGENT.HTTPS_PROXY = httpsProxy;
     }
   }
 

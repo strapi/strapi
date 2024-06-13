@@ -14,12 +14,13 @@ export const createStrapiFetch = (strapi: Core.Strapi): Modules.Fetch.Fetch => {
     return fetch(url, fetchOptions);
   }
 
-  // The globalproxy we use for http and https does not affect fetch, so we do it again here
-  const globalProxy =
-    strapi.config.get<ConstructorParameters<typeof ProxyAgent>[0]>('server.globalProxy');
+  const proxy =
+    strapi.config.get<ConstructorParameters<typeof ProxyAgent>[0]>('server.proxy.fetch') ||
+    strapi.config.get<string>('server.proxy.global');
 
-  if (globalProxy) {
-    strapiFetch.dispatcher = new ProxyAgent(globalProxy);
+  if (proxy) {
+    strapi.log.info(`Using proxy for Fetch requests: ${proxy}`);
+    strapiFetch.dispatcher = new ProxyAgent(proxy);
   }
 
   return strapiFetch;
