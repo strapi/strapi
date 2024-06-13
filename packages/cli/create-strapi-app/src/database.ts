@@ -9,7 +9,9 @@ const VALID_CLIENTS = ['sqlite', 'mysql', 'postgres'] as const;
 
 const DEFAULT_CONFIG: DBConfig = {
   client: 'sqlite',
-  connection: {},
+  connection: {
+    filename: '.tmp/data.db',
+  },
 };
 
 async function dbPrompt() {

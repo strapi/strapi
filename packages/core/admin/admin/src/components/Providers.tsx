@@ -37,7 +37,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
       components={strapi.library.components}
       customFields={strapi.customFields}
       fields={strapi.library.fields}
-      menu={strapi.menu}
+      menu={strapi.router.menu}
       getAdminInjectedComponents={strapi.getAdminInjectedComponents}
       getPlugin={strapi.getPlugin}
       plugins={strapi.plugins}
@@ -45,7 +45,7 @@ const Providers = ({ children, strapi, store }: ProvidersProps) => {
       runHookParallel={strapi.runHookParallel}
       runHookWaterfall={(name, initialValue) => strapi.runHookWaterfall(name, initialValue, store)}
       runHookSeries={strapi.runHookSeries}
-      settings={strapi.settings}
+      settings={strapi.router.settings}
     >
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>

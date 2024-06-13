@@ -73,6 +73,7 @@
   "pages.ReleaseDetails.groupBy.aria-label": "Group by",
   "pages.ReleaseDetails.entry-validation.already-published": "Already published",
   "pages.ReleaseDetails.entry-validation.ready-to-publish": "Ready to publish",
+  "pages.ReleaseDetails.entry-validation.modified": "Ready to publish changes",
   "pages.ReleaseDetails.entry-validation.already-unpublished": "Already unpublished",
   "pages.ReleaseDetails.entry-validation.ready-to-unpublish": "Ready to unpublish",
   "pages.ReleaseDetails.groupBy.option.content-type": "Content-Types",

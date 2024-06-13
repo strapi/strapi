@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Divider, Flex, FlexComponent, useCollator } from '@strapi/design-system';
-import { Lock } from '@strapi/icons';
+import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -81,7 +81,9 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         {listLinks.length > 0
           ? listLinks.map((link) => {
               const LinkIcon = link.icon;
-              const badgeContentLock = link?.lockIcon ? <Lock /> : undefined;
+              const badgeContentLock = link?.licenseOnly ? (
+                <Lightning fill="warning500" />
+              ) : undefined;
 
               const badgeContentNumeric =
                 link.notificationsCount && link.notificationsCount > 0
