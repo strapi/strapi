@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "1.9.7",
+    "@strapi/database": "5.0.0-beta.10",
     "@strapi/design-system": "2.0.0-beta.6",
     "@strapi/icons": "2.0.0-beta.6",
     "@strapi/types": "workspace:*",

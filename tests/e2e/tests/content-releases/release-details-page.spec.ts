@@ -2,13 +2,15 @@ import { test, expect, type Page } from '@playwright/test';
 import { describeOnCondition } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
+import { findAndClose } from '../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const releaseName = 'Trent Crimm: The Independent';
 
 const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseName: string }) => {
   // Open the add to release dialog
-  await page.getByRole('button', { name: 'Add to release' }).click();
+  await page.getByRole('button', { name: 'More document actions' }).click();
+  await page.getByRole('menuitem', { name: 'Add to release' }).click();
   const addToReleaseDialog = await page.getByRole('dialog', { name: 'Add to release' });
   await expect(addToReleaseDialog).toBeVisible();
   await expect(
@@ -22,15 +24,10 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
   await expect(submitReleaseButton).toBeEnabled();
   await submitReleaseButton.click();
   // See the release the entry was added to
-  await expect(
-    page.getByRole('complementary', { name: 'Releases' }).getByText(releaseName)
-  ).toBeVisible();
+  await findAndClose(page, 'Entry added to release');
 };
 
-/**
- * Skip tests on v5 until Releases + Scheduling are migrated to v5
- */
-describeOnCondition(/*edition === 'EE'*/ false)('Release page', () => {
+describeOnCondition(edition === 'EE')('Release page', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');

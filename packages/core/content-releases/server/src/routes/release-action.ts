@@ -17,6 +17,7 @@ export default {
         ],
       },
     },
+    /*
     {
       method: 'POST',
       path: '/:releaseId/actions/bulk',
@@ -33,6 +34,7 @@ export default {
         ],
       },
     },
+    */
     {
       method: 'GET',
       path: '/:releaseId/actions',
