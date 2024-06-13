@@ -56,6 +56,20 @@ const admin: Plugin.Config.AdminInput = {
         });
       }
 
+      app.addSettingsLink('global', {
+        id: pluginId,
+        to: 'releases',
+        intlLabel: {
+          id: `${pluginId}.plugin.name`,
+          defaultMessage: 'Releases',
+        },
+        permissions: [],
+        async Component() {
+          const { SettingsPage } = await import('./pages/SettingsPage');
+          return { default: SettingsPage };
+        },
+      });
+
       // app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
       //   // We want to add this action to just before the delete action all the time
       //   const deleteActionIndex = actions.findIndex((action) => action.type === 'delete');
@@ -69,9 +83,9 @@ const admin: Plugin.Config.AdminInput = {
       !window.strapi.features.isEnabled('cms-content-releases') &&
       window.strapi?.flags?.promoteEE
     ) {
-      app.addMenuLink({
-        to: `/plugins/purchase-content-releases`,
-        icon: PaperPlane,
+      app.addSettingsLink('global', {
+        id: pluginId,
+        to: '/plugins/purchase-content-releases',
         intlLabel: {
           id: `${pluginId}.plugin.name`,
           defaultMessage: 'Releases',
@@ -82,7 +96,6 @@ const admin: Plugin.Config.AdminInput = {
           return { default: PurchaseContentReleases };
         },
         licenseOnly: true,
-        position: 2,
       });
     }
   },

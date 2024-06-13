@@ -1,6 +1,8 @@
 import { async } from '@strapi/utils';
 
-import type { Migration } from '@strapi/database';
+import type { Migration, Database } from '@strapi/database';
+
+type Knex = Parameters<Migration['up']>[0];
 
 /**
  * On v4, release actions are linked with entries using the built in Polymorphic relations.
@@ -10,7 +12,7 @@ import type { Migration } from '@strapi/database';
  */
 export const addEntryDocumentToReleaseActions: Migration = {
   name: 'content-releases::5.0.0-add-entry-document-id-to-release-actions',
-  async up(trx, db) {
+  async up(trx: Knex, db: Database) {
     const hasPolymorphicColumn = await trx.schema.hasColumn('strapi_release_actions', 'target_id');
 
     // If user has PolymorphicColumn means that is coming from v4
