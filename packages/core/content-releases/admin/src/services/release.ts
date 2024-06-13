@@ -48,6 +48,32 @@ type GetReleasesTabResponse = GetReleases.Response & {
 const releaseApi = adminApi
   .enhanceEndpoints({
     addTagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease'],
+    endpoints: {
+      updateDocument: {
+        invalidatesTags: [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ],
+      },
+      deleteDocument: {
+        invalidatesTags: [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ],
+      },
+      deleteManyDocuments: {
+        invalidatesTags: [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ],
+      },
+      discardDocument: {
+        invalidatesTags: [
+          { type: 'Release', id: 'LIST' },
+          { type: 'ReleaseAction', id: 'LIST' },
+        ],
+      },
+    },
   })
   .injectEndpoints({
     endpoints: (build) => {
