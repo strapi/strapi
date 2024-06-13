@@ -10,7 +10,7 @@ import {
 import { Flex, Typography, Menu, AccessibleIcon } from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { Link as NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
@@ -32,11 +32,11 @@ const StyledMenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger' }>`
   }
 
   svg {
-    fill: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}600`]};
+    color: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}500`]};
   }
 
-  a {
-    color: ${({ theme }) => theme.colors.neutral800};
+  span {
+    color: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}800`]};
   }
 
   span,
@@ -201,7 +201,7 @@ const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
     <StyledMenuItem tag={NavLink} isLink to={`/plugins/content-releases/${releaseId}`}>
       <Flex gap={2}>
         <Pencil width="1.6rem" height="1.6rem" />
-        <Typography variant="omega">
+        <Typography textColor="neutral800" variant="omega">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.edit-release',
             defaultMessage: 'Edit release',
