@@ -29,14 +29,13 @@ const webhookValidator = yup
         'is-public-url',
         "Url is not supported because it isn't reachable over the public internet",
         async (url) => {
-          if (!url) {
-            return true;
+          try {
+            const parsedUrl = new URL(url!);
+            const isLocalUrl = await isLocalhostIp(parsedUrl.hostname);
+            return !isLocalUrl;
+          } catch {
+            return false;
           }
-
-          const parsedUrl = new URL(url);
-
-          const isLocalUrl = await isLocalhostIp(parsedUrl.hostname);
-          return !isLocalUrl;
         }
       ),
     headers: yup.lazy((data) => {
