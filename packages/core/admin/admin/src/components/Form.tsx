@@ -820,7 +820,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   return null;
 };
 
-export { Form, Blocker, useField, useForm, getYupValidationErrors };
+export { Form, Blocker, useField, useForm, getYupValidationErrors, FormProvider };
 export type {
   FormErrors,
   FormHelpers,
