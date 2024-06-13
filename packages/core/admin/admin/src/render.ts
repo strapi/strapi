@@ -9,6 +9,7 @@ import type { Modules } from '@strapi/types';
 
 interface RenderAdminArgs {
   customisations: {
+    register?: (app: StrapiApp) => Promise<void> | void;
     bootstrap?: (app: StrapiApp) => Promise<void> | void;
     config?: StrapiAppConstructorArgs['config'];
   };
@@ -93,7 +94,7 @@ const renderAdmin = async (
     appPlugins: plugins,
   });
 
-  await app.register();
+  await app.register(customisations?.register);
   await app.bootstrap(customisations?.bootstrap);
   await app.loadTrads(customisations?.config?.translations);
 

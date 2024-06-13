@@ -4,6 +4,8 @@ import type { Entity } from '../types';
 
 import type { errors } from '@strapi/utils';
 
+type ReleaseActionEntryType = 'single-types' | 'collection-types';
+
 export type ReleaseActionEntry = Modules.Documents.AnyDocument & {
   // Entity attributes
   [key: string]: Schema.Attribute.AnyAttribute;
@@ -15,9 +17,11 @@ export interface ReleaseAction extends Entity {
   type: 'publish' | 'unpublish';
   entry: ReleaseActionEntry;
   contentType: UID.ContentType;
+  entryDocumentId: ReleaseActionEntry['documentId'];
   locale?: string;
   release: Release;
   isEntryValid: boolean;
+  status: 'draft' | 'published' | 'modified';
 }
 
 export interface FormattedReleaseAction extends Entity {
@@ -33,6 +37,7 @@ export interface FormattedReleaseAction extends Entity {
     code: string;
   };
   release: Release;
+  status: 'draft' | 'published' | 'modified';
 }
 
 /**
@@ -45,11 +50,9 @@ export declare namespace CreateReleaseAction {
     };
     body: {
       type: ReleaseAction['type'];
-      entry: {
-        id: ReleaseActionEntry['id'];
-        locale?: ReleaseActionEntry['locale'];
-        contentType: UID.ContentType;
-      };
+      contentType: UID.ContentType;
+      entryDocumentId?: ReleaseActionEntry['documentId'];
+      locale?: ReleaseActionEntry['locale'];
     };
   }
 
