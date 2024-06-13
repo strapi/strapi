@@ -138,6 +138,7 @@ const EntryValidationText = ({ action, schema, entry, status }: EntryValidationT
       model: schema?.uid ?? '',
     },
     {
+      // useDocument makes a request to get more data about the entry, but we only want to have the validation function so we skip the request
       skip: true,
     }
   );

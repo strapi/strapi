@@ -1,4 +1,4 @@
-import { errors } from '@strapi/utils';
+import { errors, contentTypes } from '@strapi/utils';
 import { Core, UID } from '@strapi/types';
 import type { Release, CreateRelease, UpdateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
@@ -56,7 +56,7 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
       throw new errors.NotFoundError(`No content type found for uid ${contentTypeUid}`);
     }
 
-    if (!contentType.options?.draftAndPublish) {
+    if (!contentTypes.hasDraftAndPublish(contentType)) {
       throw new errors.ValidationError(
         `Content type with uid ${contentTypeUid} does not have draftAndPublish enabled`
       );

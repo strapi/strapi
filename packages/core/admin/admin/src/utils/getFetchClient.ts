@@ -35,7 +35,7 @@ class FetchError extends Error {
   public name: string;
   public message: string;
   public response?: ErrorResponse;
-  public code?: number | string;
+  public code?: number;
   public status?: number;
 
   constructor(message: string, response?: ErrorResponse) {

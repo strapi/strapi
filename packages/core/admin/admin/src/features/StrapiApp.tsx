@@ -1,5 +1,6 @@
 import { createContext } from '../components/Context';
 import { RBAC } from '../core/apis/rbac';
+import { Router } from '../core/apis/router';
 
 import type { StrapiApp } from '../StrapiApp';
 
@@ -8,16 +9,15 @@ import type { StrapiApp } from '../StrapiApp';
  * -----------------------------------------------------------------------------------------------*/
 interface StrapiAppContextValue
   extends Pick<
-    StrapiApp,
-    | 'customFields'
-    | 'menu'
-    | 'getPlugin'
-    | 'getAdminInjectedComponents'
-    | 'plugins'
-    | 'runHookParallel'
-    | 'runHookSeries'
-    | 'settings'
-  > {
+      StrapiApp,
+      | 'customFields'
+      | 'getPlugin'
+      | 'getAdminInjectedComponents'
+      | 'plugins'
+      | 'runHookParallel'
+      | 'runHookSeries'
+    >,
+    Pick<Router, 'menu' | 'settings'> {
   components: StrapiApp['library']['components'];
   fields: StrapiApp['library']['fields'];
   rbac: RBAC;
