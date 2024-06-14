@@ -131,6 +131,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   onSubmit?: (values: TFormValues, helpers: FormHelpers<TFormValues>) => Promise<void> | void;
   // TODO: type the return value for a validation schema func from Yup.
   validationSchema?: Yup.AnySchema;
+  initialErrors?: FormErrors<TFormValues>;
 }
 
 /**
@@ -140,11 +141,11 @@ interface FormProps<TFormValues extends FormValues = FormValues>
  * use the generic useForm hook or the useField hook when providing the name of your field.
  */
 const Form = React.forwardRef<HTMLFormElement, FormProps>(
-  ({ disabled = false, method, onSubmit, ...props }, ref) => {
+  ({ disabled = false, method, onSubmit, initialErrors, ...props }, ref) => {
     const formRef = React.useRef<HTMLFormElement>(null!);
     const initialValues = React.useRef(props.initialValues ?? {});
     const [state, dispatch] = React.useReducer(reducer, {
-      errors: {},
+      errors: initialErrors ?? {},
       isSubmitting: false,
       values: props.initialValues ?? {},
     });
@@ -487,7 +488,7 @@ type FormErrors<TFormValues extends FormValues = FormValues> = {
       : string // this would let us support errors for the dynamic zone or repeatable component not the components within.
     : TFormValues[Key] extends object // is it a regular component?
       ? FormErrors<TFormValues[Key]> // handles nested components
-      : string; // otherwise its just a field.
+      : string | TranslationMessage; // otherwise its just a field or a translation message.
 };
 
 interface FormState<TFormValues extends FormValues = FormValues> {
@@ -820,7 +821,7 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   return null;
 };
 
-export { Form, Blocker, useField, useForm, getYupValidationErrors, FormProvider };
+export { Form, Blocker, useField, useForm, getYupValidationErrors };
 export type {
   FormErrors,
   FormHelpers,
