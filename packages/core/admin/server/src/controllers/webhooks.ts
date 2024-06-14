@@ -29,6 +29,10 @@ const webhookValidator = yup
         'is-public-url',
         "Url is not supported because it isn't reachable over the public internet",
         async (url) => {
+          if (process.env.NODE_ENV === 'development') {
+            return true;
+          }
+
           try {
             const parsedUrl = new URL(url!);
             const isLocalUrl = await isLocalhostIp(parsedUrl.hostname);
