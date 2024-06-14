@@ -29,7 +29,7 @@ const webhookValidator = yup
         'is-public-url',
         "Url is not supported because it isn't reachable over the public internet",
         async (url) => {
-          if (process.env.NODE_ENV === 'development') {
+          if (process.env.NODE_ENV !== 'production') {
             return true;
           }
 

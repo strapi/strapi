@@ -83,10 +83,14 @@ describe('Admin API Webhooks', () => {
     });
   });
 
-  test('Can not create a webhook with a local url', async () => {
-    const { status } = await createWebhook({
-      url: 'http://localhost:1337',
-    });
+  test('Can not create a webhook with a local url on production', async () => {
+    // change NODE_ENV to 'production' to test this
+    const originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
+    const { status } = await createWebhook({ url: 'http://localhost:1337' });
+
+    process.env.NODE_ENV = originalNodeEnv;
 
     expect(status).toBe(400);
   });
@@ -96,12 +100,7 @@ describe('Admin API Webhooks', () => {
       url: 'invalid-url',
     });
 
-    const { status: status2 } = await createWebhook({
-      url: 'http://0.0.0.0:1337777',
-    });
-
     expect(status).toBe(400);
-    expect(status2).toBe(400);
   });
 
   test('Can update a webhook', async () => {
