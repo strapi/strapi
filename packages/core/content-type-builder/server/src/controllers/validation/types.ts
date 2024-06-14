@@ -219,24 +219,8 @@ const getTypeShape = (
       return {
         required: validators.required,
         repeatable: yup.boolean(),
-        component: yup
-          .string()
-          .test({
-            name: 'Check max component nesting is 1 lvl',
-            test(compoUID: unknown) {
-              const targetCompo = strapi.components[compoUID as UID.Component];
-              if (!targetCompo) return true; // ignore this error as it will fail beforehand
-
-              if (modelType === modelTypes.COMPONENT && hasComponent(targetCompo)) {
-                return this.createError({
-                  path: this.path,
-                  message: `${targetCompo.modelName} already is a nested component. You cannot have more than one level of nesting inside your components.`,
-                });
-              }
-              return true;
-            },
-          })
-          .required(),
+        // TODO: Add correct server validation for nested components
+        component: yup.string().required(),
         min: yup.number(),
         max: yup.number(),
       };
