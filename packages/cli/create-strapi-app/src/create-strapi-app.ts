@@ -1,9 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import commander from 'commander';
-import { checkInstallPath, generateNewApp } from '@strapi/generate-new';
+import {
+  checkInstallPath,
+  checkRequirements,
+  generateNewApp,
+  type NewOptions,
+} from '@strapi/generate-new';
 import promptUser from './utils/prompt-user';
 import type { Program } from './types';
+import { handleCloudProject } from './cloud';
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
@@ -27,6 +33,7 @@ command
   .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
+  .option('--skip-cloud', 'Skip cloud login and project creation')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')
@@ -44,10 +51,18 @@ command
   })
   .parse(process.argv);
 
-function generateApp(projectName: string, options: unknown) {
+async function generateApp(
+  projectName: string,
+  options: Partial<NewOptions> & { skipCloud?: boolean | undefined }
+) {
   if (!projectName) {
     console.error('Please specify the <directory> of your project when using --quickstart');
     process.exit(1);
+  }
+
+  if (!options.skipCloud) {
+    checkRequirements();
+    await handleCloudProject(projectName);
   }
 
   return generateNewApp(projectName, options).then(() => {
@@ -106,5 +121,5 @@ async function initProject(projectName: string, programArgs: Program) {
     ...options,
   };
 
-  return generateApp(directory, generateStrapiAppOptions);
+  await generateApp(directory, generateStrapiAppOptions);
 }
