@@ -2,9 +2,8 @@ import _ from 'lodash';
 import { yup } from '@strapi/utils';
 
 import type { TestContext } from 'yup';
-import type { Schema, UID, Struct } from '@strapi/types';
+import type { Schema, Struct } from '@strapi/types';
 
-import { hasComponent } from '../../utils/attributes';
 import { modelTypes, VALID_UID_TARGETS } from '../../services/constants';
 import {
   validators,
@@ -47,10 +46,7 @@ export const getTypeValidator = (
   } as any);
 };
 
-const getTypeShape = (
-  attribute: Schema.Attribute.AnyAttribute,
-  { modelType, attributes }: any = {}
-) => {
+const getTypeShape = (attribute: Schema.Attribute.AnyAttribute, { attributes }: any = {}) => {
   switch (attribute.type) {
     /**
      * complex types
