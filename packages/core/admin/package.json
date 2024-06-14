@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "5.0.0-beta.9",
+  "version": "5.0.0-beta.10",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -75,15 +75,16 @@
   },
   "dependencies": {
     "@casl/ability": "6.5.0",
+    "@internationalized/date": "3.5.4",
     "@radix-ui/react-context": "1.0.1",
     "@radix-ui/react-toolbar": "1.0.4",
     "@reduxjs/toolkit": "1.9.7",
     "@strapi/design-system": "2.0.0-beta.6",
     "@strapi/icons": "2.0.0-beta.6",
-    "@strapi/permissions": "5.0.0-beta.9",
-    "@strapi/types": "5.0.0-beta.9",
-    "@strapi/typescript-utils": "5.0.0-beta.9",
-    "@strapi/utils": "5.0.0-beta.9",
+    "@strapi/permissions": "5.0.0-beta.10",
+    "@strapi/types": "5.0.0-beta.10",
+    "@strapi/typescript-utils": "5.0.0-beta.10",
+    "@strapi/utils": "5.0.0-beta.10",
     "@testing-library/dom": "10.1.0",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
@@ -136,8 +137,8 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@strapi/admin-test-utils": "5.0.0-beta.9",
-    "@strapi/data-transfer": "5.0.0-beta.9",
+    "@strapi/admin-test-utils": "5.0.0-beta.10",
+    "@strapi/data-transfer": "5.0.0-beta.10",
     "@strapi/pack-up": "5.0.0",
     "@types/codemirror5": "npm:@types/codemirror@^5.60.15",
     "@types/fs-extra": "11.0.4",

@@ -32,7 +32,14 @@ import {
   Menu,
   Dialog,
 } from '@strapi/design-system';
-import { CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import {
+  CheckCircle,
+  More,
+  Pencil,
+  Trash,
+  CrossCircle,
+  ArrowsCounterClockwise,
+} from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
@@ -119,66 +126,99 @@ interface EntryValidationTextProps {
   schema?: Struct.ContentTypeSchema;
   components: { [key: Internal.UID.Component]: Struct.ComponentSchema };
   entry: ReleaseActionEntry;
+  status: ReleaseAction['status'];
 }
 
-const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps) => {
+const EntryValidationText = ({ action, schema, entry, status }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validate } = unstable_useDocument(
+
+  const { validate, isLoading } = unstable_useDocument(
     {
       collectionType: schema?.kind ?? '',
       model: schema?.uid ?? '',
     },
     {
-      skip: !schema,
+      // useDocument makes a request to get more data about the entry, but we only want to have the validation function so we skip the request
+      skip: true,
     }
   );
 
-  const errors = validate(entry) ?? {};
-
-  if (Object.keys(errors).length > 0) {
-    const validationErrorsMessages = Object.entries(errors)
-      .map(([key, value]) =>
-        formatMessage(
-          // @ts-expect-error – TODO: fix this will better checks
-          { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
-          { field: key }
-        )
-      )
-      .join(' ');
-
-    return (
-      <Flex gap={2}>
-        <CrossCircle fill="danger600" />
-        <Tooltip description={validationErrorsMessages}>
-          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
-            {validationErrorsMessages}
-          </TypographyMaxWidth>
-        </Tooltip>
-      </Flex>
-    );
+  if (isLoading) {
+    return null;
   }
 
-  if (action == 'publish') {
-    return (
-      <Flex gap={2}>
-        <CheckCircle fill="success600" />
-        {entry.publishedAt ? (
-          <Typography textColor="success600" fontWeight="bold">
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
-              defaultMessage: 'Already published',
-            })}
-          </Typography>
-        ) : (
+  const errors = validate(entry) ?? {};
+
+  if (action === 'publish') {
+    if (Object.keys(errors).length > 0) {
+      const validationErrorsMessages = Object.entries(errors)
+        .map(([key, value]) =>
+          formatMessage(
+            // @ts-expect-error – TODO: fix this will better checks
+            { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+            { field: key }
+          )
+        )
+        .join(' ');
+
+      return (
+        <Flex gap={2}>
+          <CrossCircle fill="danger600" />
+          <Tooltip description={validationErrorsMessages}>
+            <TypographyMaxWidth
+              textColor="danger600"
+              variant="omega"
+              fontWeight="semiBold"
+              ellipsis
+            >
+              {validationErrorsMessages}
+            </TypographyMaxWidth>
+          </Tooltip>
+        </Flex>
+      );
+    }
+
+    if (status === 'draft') {
+      return (
+        <Flex gap={2}>
+          <CheckCircle fill="success600" />
           <Typography>
             {formatMessage({
               id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
               defaultMessage: 'Ready to publish',
             })}
           </Typography>
-        )}
-      </Flex>
-    );
+        </Flex>
+      );
+    }
+
+    if (status === 'modified') {
+      return (
+        <Flex gap={2}>
+          <ArrowsCounterClockwise fill="alternative600" />
+          <Typography>
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.modified',
+              defaultMessage: 'Ready to publish changes',
+            })}
+          </Typography>
+        </Flex>
+      );
+    }
+
+    if (status === 'published') {
+      return (
+        <Flex gap={2}>
+          <CheckCircle fill="success600" />
+          <Typography>
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
+              defaultMessage: 'Already published',
+            })}
+          </Typography>
+        </Flex>
+      );
+    }
   }
 
   return (
@@ -526,19 +566,19 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
 
   // TODO: Migrated displayedHeader to v5
-  const { hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } = runHookWaterfall(
-    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
-    {
-      displayedHeaders: {
-        label: formatMessage({
-          id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-          defaultMessage: 'locale',
-        }),
-        name: 'locale',
-      },
+  const { displayedHeaders, hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } =
+    runHookWaterfall('ContentReleases/pages/ReleaseDetails/add-locale-in-releases', {
+      displayedHeaders: [
+        {
+          label: {
+            id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+            defaultMessage: 'name',
+          },
+          name: 'name',
+        },
+      ],
       hasI18nEnabled: false,
-    }
-  );
+    });
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -660,35 +700,28 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     defaultMessage: 'Group by',
   });
   const headers = [
-    // ...displayedHeaders,
+    ...displayedHeaders,
     {
-      label: formatMessage({
-        id: 'content-releases.page.ReleaseDetails.table.header.label.name',
-        defaultMessage: 'name',
-      }),
-      name: 'name',
-    },
-    {
-      label: formatMessage({
+      label: {
         id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
         defaultMessage: 'content-type',
-      }),
+      },
       name: 'content-type',
     },
     {
-      label: formatMessage({
+      label: {
         id: 'content-releases.page.ReleaseDetails.table.header.label.action',
         defaultMessage: 'action',
-      }),
+      },
       name: 'action',
     },
     ...(!release.releasedAt
       ? [
           {
-            label: formatMessage({
+            label: {
               id: 'content-releases.page.ReleaseDetails.table.header.label.status',
               defaultMessage: 'status',
-            }),
+            },
             name: 'status',
           },
         ]
@@ -740,14 +773,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             >
               <Table.Content>
                 <Table.Head>
-                  {headers.map((header) => (
-                    <Table.HeaderCell key={header.name} {...header} />
+                  {headers.map(({ label, name }) => (
+                    <Table.HeaderCell key={name} label={formatMessage(label)} name={name} />
                   ))}
                 </Table.Head>
                 <Table.Loading />
                 <Table.Body>
                   {releaseActions[key].map(
-                    ({ id, contentType, locale, type, entry }, actionIndex) => (
+                    ({ id, contentType, locale, type, entry, status }, actionIndex) => (
                       <Tr key={id}>
                         <Td width="25%" maxWidth="200px">
                           <Typography ellipsis>{`${
@@ -797,6 +830,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                                 schema={contentTypes?.[contentType.uid]}
                                 components={components}
                                 entry={entry}
+                                status={status}
                               />
                             </Td>
                             <Td>
@@ -804,7 +838,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                                 <ReleaseActionMenu.Root>
                                   <ReleaseActionMenu.ReleaseActionEntryLinkItem
                                     contentTypeUid={contentType.uid}
-                                    entryId={entry.id}
+                                    documentId={entry.documentId}
                                     locale={locale?.code}
                                   />
                                   <ReleaseActionMenu.DeleteReleaseActionItem

@@ -49,9 +49,10 @@ export { useAdminUsers } from './services/users';
 /**
  * Types
  */
-export type { StrapiApp, MenuItem, InjectionZoneComponent } from './StrapiApp';
+export type { StrapiApp, InjectionZoneComponent } from './StrapiApp';
 export type { Store } from './core/store/configure';
 export type { Plugin, PluginConfig } from './core/apis/Plugin';
+export type { MenuItem, StrapiAppSetting, StrapiAppSettingLink } from './core/apis/router';
 export type {
   SanitizedAdminUser,
   AdminUser,

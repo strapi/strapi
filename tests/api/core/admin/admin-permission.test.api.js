@@ -548,6 +548,18 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               {
+                "action": "plugin::content-releases.settings.read",
+                "category": "content releases",
+                "displayName": "Read",
+                "subCategory": "options",
+              },
+              {
+                "action": "plugin::content-releases.settings.update",
+                "category": "content releases",
+                "displayName": "Edit",
+                "subCategory": "options",
+              },
+              {
                 "action": "plugin::documentation.settings.read",
                 "category": "documentation",
                 "displayName": "Access the documentation settings page",
