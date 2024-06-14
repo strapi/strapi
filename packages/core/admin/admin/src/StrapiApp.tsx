@@ -5,35 +5,25 @@ import invariant from 'invariant';
 import isFunction from 'lodash/isFunction';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
-import { Provider } from 'react-redux';
-import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { RouterProvider } from 'react-router-dom';
 import { DefaultTheme } from 'styled-components';
 
-import { ADMIN_PERMISSIONS_EE, getEERoutes as getBaseEERoutes } from '../../ee/admin/src/constants';
-import { getEERoutes as getSettingsEERoutes } from '../../ee/admin/src/pages/SettingsPage/constants';
+import { ADMIN_PERMISSIONS_EE } from '../../ee/admin/src/constants';
 
-import { App } from './App';
 import Logo from './assets/images/logo-strapi-2022.svg';
-import { ErrorElement } from './components/ErrorElement';
-import { LanguageProvider } from './components/LanguageProvider';
-import { Page } from './components/PageHelpers';
-import { Theme } from './components/Theme';
 import { ADMIN_PERMISSIONS_CE, HOOKS } from './constants';
 import { CustomFields } from './core/apis/CustomFields';
 import { Plugin, PluginConfig } from './core/apis/Plugin';
 import { RBAC, RBACMiddleware } from './core/apis/rbac';
+import { Router, StrapiAppSetting, UnloadedSettingsLink } from './core/apis/router';
 import { RootState, Store, configureStore } from './core/store/configure';
 import { getBasename } from './core/utils/basename';
 import { Handler, createHook } from './core/utils/createHook';
-import { AuthPage } from './pages/Auth/AuthPage';
-import { NotFoundPage } from './pages/NotFoundPage';
-import { ROUTES_CE } from './pages/Settings/constants';
 import { THEME_LOCAL_STORAGE_KEY, LANGUAGE_LOCAL_STORAGE_KEY, ThemeName } from './reducer';
+import { getInitialRoutes } from './router';
 import { languageNativeNames } from './translations/languageNativeNames';
 
-import type { Permission } from './features/Auth';
 import type { ReducersMapObject, Middleware } from '@reduxjs/toolkit';
-import type { MessageDescriptor, PrimitiveType } from 'react-intl';
 
 const {
   INJECT_COLUMN_IN_TABLE,
@@ -53,22 +43,6 @@ interface StrapiAppConstructorArgs extends Partial<Pick<StrapiApp, 'appPlugins'>
     translations?: Record<string, Record<string, string>>;
     tutorials?: boolean;
   };
-}
-
-interface MenuItem {
-  to: string;
-  icon: React.ElementType;
-  intlLabel: MessageDescriptor & { values?: Record<string, PrimitiveType> };
-  permissions: Permission[];
-  notificationsCount?: number;
-  Component: React.LazyExoticComponent<React.ComponentType>;
-  exact?: boolean;
-  lockIcon?: boolean;
-  position?: number;
-}
-
-interface StrapiAppSettingLink extends Omit<MenuItem, 'icon' | 'notificationCount'> {
-  id: string;
 }
 
 interface StrapiAppPlugin {
@@ -91,10 +65,6 @@ interface InjectionZoneComponent {
   slug: string;
 }
 
-interface UnloadedSettingsLink extends Omit<StrapiAppSettingLink, 'Component'> {
-  Component: () => Promise<{ default: React.ComponentType }>;
-}
-
 interface Component {
   name: string;
   Component: React.ComponentType;
@@ -110,14 +80,6 @@ interface Library {
   components: Record<Component['name'], Component['Component']>;
 }
 
-interface StrapiAppSetting {
-  id: string;
-  intlLabel: MessageDescriptor & {
-    values?: Record<string, PrimitiveType>;
-  };
-  links: StrapiAppSettingLink[];
-}
-
 class StrapiApp {
   appPlugins: Record<string, StrapiAppPlugin>;
   plugins: Record<string, Plugin> = {};
@@ -128,21 +90,6 @@ class StrapiApp {
   };
 
   translations: StrapiApp['configurations']['translations'] = {};
-
-  /**
-   * MENU API
-   */
-  menu: MenuItem[] = [];
-  settings: Record<string, StrapiAppSetting> = {
-    global: {
-      id: 'global',
-      intlLabel: {
-        id: 'Settings.global',
-        defaultMessage: 'Global Settings',
-      },
-      links: [],
-    },
-  };
 
   configurations = {
     authLogo: Logo,
@@ -159,12 +106,14 @@ class StrapiApp {
    * APIs
    */
   rbac = new RBAC();
+  router: Router;
   library: Library = {
     components: {},
     fields: {},
   };
   middlewares: Array<() => Middleware<object, RootState>> = [];
   reducers: ReducersMapObject = {};
+  store: Store | null = null;
   customFields = new CustomFields();
 
   constructor({ config, appPlugins }: StrapiAppConstructorArgs = {}) {
@@ -176,6 +125,8 @@ class StrapiApp {
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     this.createHook(MUTATE_SINGLE_TYPES_LINKS);
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
+
+    this.router = new Router(getInitialRoutes());
   }
 
   addComponents = (components: Component | Component[]) => {
@@ -210,62 +161,6 @@ class StrapiApp {
     }
   };
 
-  addMenuLink = (
-    link: Omit<MenuItem, 'Component'> & {
-      Component: () => Promise<{ default: React.ComponentType }>;
-    }
-  ) => {
-    invariant(link.to, `[${link.intlLabel.defaultMessage}]: link.to should be defined`);
-    invariant(
-      typeof link.to === 'string',
-      `[${
-        link.intlLabel.defaultMessage
-      }]: Expected link.to to be a string instead received ${typeof link.to}`
-    );
-    invariant(
-      link.intlLabel?.id && link.intlLabel?.defaultMessage,
-      `[${link.intlLabel.defaultMessage}]: link.intlLabel.id & link.intlLabel.defaultMessage should be defined`
-    );
-    invariant(
-      link.Component && typeof link.Component === 'function',
-      `[${link.intlLabel.defaultMessage}]: link.Component must be a function returning a Promise that returns a default component. Please use: \`Component: () => import(path)\` instead.`
-    );
-
-    if (
-      link.Component &&
-      typeof link.Component === 'function' &&
-      // @ts-expect-error – shh
-      link.Component[Symbol.toStringTag] === 'AsyncFunction'
-    ) {
-      console.warn(
-        `
-      [${link.intlLabel.defaultMessage}]: [deprecated] addMenuLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-      `.trim()
-      );
-    }
-
-    if (link.to.startsWith('/')) {
-      console.warn(
-        `[${link.intlLabel.defaultMessage}]: the \`to\` property of your menu link is an absolute path, it should be relative to the root of the application. This has been corrected for you but will be removed in a future version of Strapi.`
-      );
-
-      link.to = link.to.slice(1);
-    }
-
-    this.menu.push({
-      ...link,
-      Component: React.lazy(async () => {
-        const mod = await link.Component();
-
-        if ('default' in mod) {
-          return mod;
-        } else {
-          return { default: mod };
-        }
-      }),
-    });
-  };
-
   addMiddlewares = (middlewares: StrapiApp['middlewares']) => {
     middlewares.forEach((middleware) => {
       this.middlewares.push(middleware);
@@ -290,73 +185,33 @@ class StrapiApp {
     });
   };
 
-  addSettingsLink = (sectionId: keyof StrapiApp['settings'], link: UnloadedSettingsLink) => {
-    invariant(this.settings[sectionId], 'The section does not exist');
+  addMenuLink = (link: Parameters<typeof this.router.addMenuLink>[0]) =>
+    this.router.addMenuLink(link);
 
-    invariant(link.id, `[${link.intlLabel.defaultMessage}]: link.id should be defined`);
-    invariant(
-      link.intlLabel?.id && link.intlLabel?.defaultMessage,
-      `[${link.intlLabel.defaultMessage}]: link.intlLabel.id & link.intlLabel.defaultMessage`
-    );
-    invariant(link.to, `[${link.intlLabel.defaultMessage}]: link.to should be defined`);
-    invariant(
-      link.Component && typeof link.Component === 'function',
-      `[${link.intlLabel.defaultMessage}]: link.Component must be a function returning a Promise. Please use: \`Component: () => import(path)\` instead.`
-    );
-
-    if (
-      link.Component &&
-      typeof link.Component === 'function' &&
-      // @ts-expect-error – shh
-      link.Component[Symbol.toStringTag] === 'AsyncFunction'
-    ) {
-      console.warn(
-        `
-      [${link.intlLabel.defaultMessage}]: [deprecated] addSettingsLink() was called with an async Component from the plugin "${link.intlLabel.defaultMessage}". This will be removed in the future. Please use: \`Component: () => import(path)\` ensuring you return a default export instead.
-      `.trim()
-      );
-    }
-
-    if (link.to.startsWith('/')) {
-      console.warn(
-        `[${link.intlLabel.defaultMessage}]: the \`to\` property of your settings link is an absolute path. It should be relative to \`/settings\`. This has been corrected for you but will be removed in a future version of Strapi.`
-      );
-
-      link.to = link.to.slice(1);
-    }
-
-    if (link.to.split('/')[0] === 'settings') {
-      console.warn(
-        `[${link.intlLabel.defaultMessage}]: the \`to\` property of your settings link has \`settings\` as the first part of it's path. It should be relative to \`settings\` and therefore, not include it. This has been corrected for you but will be removed in a future version of Strapi.`
-      );
-
-      link.to = link.to.split('/').slice(1).join('/');
-    }
-
-    this.settings[sectionId].links.push({
-      ...link,
-      Component: React.lazy(async () => {
-        const mod = await link.Component();
-
-        if ('default' in mod) {
-          return mod;
-        } else {
-          return { default: mod };
-        }
-      }),
-    });
-  };
-
-  addSettingsLinks = (
-    sectionId: Parameters<typeof this.addSettingsLink>[0],
-    links: UnloadedSettingsLink[]
-  ) => {
-    invariant(this.settings[sectionId], 'The section does not exist');
+  /**
+   * @deprecated use `addSettingsLink` instead, it internally supports
+   * adding multiple links at once.
+   */
+  addSettingsLinks = (sectionId: string, links: UnloadedSettingsLink[]) => {
     invariant(Array.isArray(links), 'TypeError expected links to be an array');
 
-    links.forEach((link) => {
-      this.addSettingsLink(sectionId, link);
-    });
+    this.router.addSettingsLink(sectionId, links);
+  };
+
+  /**
+   * @deprecated use `addSettingsLink` instead, you can pass a section object to
+   * create the section and links at the same time.
+   */
+  createSettingSection = (
+    section: Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
+    links: UnloadedSettingsLink[]
+  ) => this.router.addSettingsLink(section, links);
+
+  addSettingsLink = (
+    sectionId: string | Pick<StrapiAppSetting, 'id' | 'intlLabel'>,
+    link: UnloadedSettingsLink
+  ) => {
+    this.router.addSettingsLink(sectionId, link);
   };
 
   async bootstrap(customBootstrap?: unknown) {
@@ -436,23 +291,6 @@ class StrapiApp {
     this.hooksDict[name] = createHook();
   };
 
-  createSettingSection = (section: StrapiAppSetting, links: UnloadedSettingsLink[]) => {
-    invariant(section.id, 'section.id should be defined');
-    invariant(
-      section.intlLabel?.id && section.intlLabel?.defaultMessage,
-      'section.intlLabel should be defined'
-    );
-
-    invariant(Array.isArray(links), 'TypeError expected links to be an array');
-    invariant(this.settings[section.id] === undefined, 'A similar section already exists');
-
-    this.settings[section.id] = { ...section, links: [] };
-
-    links.forEach((link) => {
-      this.addSettingsLink(section.id, link);
-    });
-  };
-
   getAdminInjectedComponents = (
     moduleName: string,
     containerName: string,
@@ -470,10 +308,14 @@ class StrapiApp {
 
   getPlugin = (pluginId: PluginConfig['id']) => this.plugins[pluginId];
 
-  async register() {
+  async register(customRegister?: unknown) {
     Object.keys(this.appPlugins).forEach((plugin) => {
       this.appPlugins[plugin].register(this);
     });
+
+    if (isFunction(customRegister)) {
+      customRegister(this);
+    }
   }
 
   async loadAdminTrads() {
@@ -585,7 +427,7 @@ class StrapiApp {
     const locale = (localStorage.getItem(LANGUAGE_LOCAL_STORAGE_KEY) ||
       'en') as keyof typeof localeNames;
 
-    const store = configureStore(
+    this.store = configureStore(
       {
         admin_app: {
           permissions: merge({}, ADMIN_PERMISSIONS_CE, ADMIN_PERMISSIONS_EE),
@@ -603,163 +445,13 @@ class StrapiApp {
       this.reducers
     ) as Store;
 
-    const settingsRoutes = [...getSettingsEERoutes(), ...ROUTES_CE].filter(
-      (route, index, refArray) => refArray.findIndex((obj) => obj.path === route.path) === index
-    );
-
-    const router = createBrowserRouter(
-      [
-        {
-          path: '/*',
-          errorElement: (
-            <Provider store={store}>
-              <LanguageProvider messages={this.configurations.translations}>
-                <Theme themes={this.configurations.themes}>
-                  <ErrorElement />
-                </Theme>
-              </LanguageProvider>
-            </Provider>
-          ),
-          element: <App strapi={this} store={store} />,
-          children: [
-            {
-              path: 'usecase',
-              lazy: async () => {
-                const { PrivateUseCasePage } = await import('./pages/UseCasePage');
-
-                return {
-                  Component: PrivateUseCasePage,
-                };
-              },
-            },
-            // this needs to go before auth/:authType because otherwise it won't match the route
-            ...getBaseEERoutes(),
-            {
-              path: 'auth/:authType',
-              element: <AuthPage />,
-            },
-            {
-              path: '/*',
-              lazy: async () => {
-                const { PrivateAdminLayout } = await import('./layouts/AuthenticatedLayout');
-
-                return {
-                  Component: PrivateAdminLayout,
-                };
-              },
-              children: [
-                {
-                  index: true,
-                  lazy: async () => {
-                    const { HomePage } = await import('./pages/HomePage');
-
-                    return {
-                      Component: HomePage,
-                    };
-                  },
-                },
-                {
-                  path: 'me',
-                  lazy: async () => {
-                    const { ProfilePage } = await import('./pages/ProfilePage');
-
-                    return {
-                      Component: ProfilePage,
-                    };
-                  },
-                },
-                {
-                  path: 'list-plugins',
-                  lazy: async () => {
-                    const { ProtectedInstalledPluginsPage } = await import(
-                      './pages/InstalledPluginsPage'
-                    );
-
-                    return {
-                      Component: ProtectedInstalledPluginsPage,
-                    };
-                  },
-                },
-                {
-                  path: 'marketplace',
-                  lazy: async () => {
-                    const { ProtectedMarketplacePage } = await import(
-                      './pages/Marketplace/MarketplacePage'
-                    );
-
-                    return {
-                      Component: ProtectedMarketplacePage,
-                    };
-                  },
-                },
-                {
-                  path: 'settings/*',
-                  lazy: async () => {
-                    const { Layout } = await import('./pages/Settings/Layout');
-
-                    return {
-                      Component: Layout,
-                    };
-                  },
-                  children: [
-                    {
-                      path: 'application-infos',
-                      lazy: async () => {
-                        const { ApplicationInfoPage } = await import(
-                          './pages/Settings/pages/ApplicationInfo/ApplicationInfoPage'
-                        );
-
-                        return {
-                          Component: ApplicationInfoPage,
-                        };
-                      },
-                    },
-                    ...Object.values(this.settings).flatMap(({ links }) =>
-                      links.map(({ to, Component }) => ({
-                        path: `${to}/*`,
-                        element: (
-                          <React.Suspense fallback={<Page.Loading />}>
-                            <Component />
-                          </React.Suspense>
-                        ),
-                      }))
-                    ),
-                    ...settingsRoutes,
-                  ],
-                },
-                ...this.menu.map(({ to, Component }) => ({
-                  path: `${to}/*`,
-                  element: (
-                    <React.Suspense fallback={<Page.Loading />}>
-                      <Component />
-                    </React.Suspense>
-                  ),
-                })),
-
-                {
-                  path: '*',
-                  element: <NotFoundPage />,
-                },
-              ],
-            },
-          ],
-        },
-      ],
-      {
-        basename: getBasename(),
-      }
-    );
+    const router = this.router.createRouter(this, {
+      basename: getBasename(),
+    });
 
     return <RouterProvider router={router} />;
   }
 }
 
 export { StrapiApp };
-export type {
-  StrapiAppPlugin,
-  StrapiAppSettingLink,
-  StrapiAppSetting,
-  MenuItem,
-  StrapiAppConstructorArgs,
-  InjectionZoneComponent,
-};
+export type { StrapiAppPlugin, StrapiAppConstructorArgs, InjectionZoneComponent };

@@ -1,5 +1,5 @@
-import { errors } from '@strapi/utils';
-import { Core } from '@strapi/types';
+import { errors, contentTypes } from '@strapi/utils';
+import { Core, UID } from '@strapi/types';
 import type { Release, CreateRelease, UpdateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
@@ -24,7 +24,9 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
       where: {
         id: releaseId,
       },
-      populate: { actions: { populate: { entry: { select: ['id'] } } } },
+      populate: {
+        actions: true,
+      },
     })) as Release | null;
 
     if (!release) {
@@ -33,29 +35,35 @@ const createReleaseValidationService = ({ strapi }: { strapi: Core.Strapi }) => 
 
     const isEntryInRelease = release.actions.some(
       (action) =>
-        Number(action.entry.id) === Number(releaseActionArgs.entry.id) &&
-        action.contentType === releaseActionArgs.entry.contentType
+        Number(action.entryDocumentId) === Number(releaseActionArgs.entryDocumentId) &&
+        action.contentType === releaseActionArgs.contentType &&
+        action.locale === releaseActionArgs.locale
     );
 
     if (isEntryInRelease) {
       throw new AlreadyOnReleaseError(
-        `Entry with id ${releaseActionArgs.entry.id} and contentType ${releaseActionArgs.entry.contentType} already exists in release with id ${releaseId}`
+        `Entry with documentId ${releaseActionArgs.entryDocumentId} ${releaseActionArgs.locale ? `(${releaseActionArgs.locale})` : ''} and contentType ${releaseActionArgs.contentType} already exists in release with id ${releaseId}`
       );
     }
   },
-  validateEntryContentType(
-    contentTypeUid: CreateReleaseAction.Request['body']['entry']['contentType']
+  validateEntryData(
+    contentTypeUid: CreateReleaseAction.Request['body']['contentType'],
+    entryDocumentId: CreateReleaseAction.Request['body']['entryDocumentId']
   ) {
-    const contentType = strapi.contentType(contentTypeUid);
+    const contentType = strapi.contentType(contentTypeUid as UID.ContentType);
 
     if (!contentType) {
       throw new errors.NotFoundError(`No content type found for uid ${contentTypeUid}`);
     }
 
-    if (!contentType.options?.draftAndPublish) {
+    if (!contentTypes.hasDraftAndPublish(contentType)) {
       throw new errors.ValidationError(
         `Content type with uid ${contentTypeUid} does not have draftAndPublish enabled`
       );
+    }
+
+    if (contentType.kind === 'collectionType' && !entryDocumentId) {
+      throw new errors.ValidationError('Document id is required for collection type');
     }
   },
   async validatePendingReleasesLimit() {

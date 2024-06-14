@@ -24,8 +24,12 @@ import { CreateManyReleaseActions } from '../../../shared/contracts/release-acti
 import { PERMISSIONS as releasePermissions } from '../constants';
 import { useCreateManyReleaseActionsMutation, useGetReleasesQuery } from '../services/release';
 
-import { type FormValues, INITIAL_VALUES, RELEASE_ACTION_FORM_SCHEMA } from './CMReleasesContainer';
-import { NoReleases } from './CMReleasesContainer';
+import {
+  type FormValues,
+  INITIAL_VALUES,
+  RELEASE_ACTION_FORM_SCHEMA,
+  NoReleases,
+} from './ReleaseActionModal';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
 import type { BulkActionComponent } from '@strapi/content-manager/strapi-admin';

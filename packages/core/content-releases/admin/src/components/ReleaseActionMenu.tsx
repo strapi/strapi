@@ -10,7 +10,7 @@ import {
 import { Flex, Typography, Menu, AccessibleIcon } from '@strapi/design-system';
 import { Cross, More, Pencil } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { Link as NavLink } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 import { DeleteReleaseAction, ReleaseAction } from '../../../shared/contracts/release-actions';
@@ -32,11 +32,11 @@ const StyledMenuItem = styled(Menu.Item)<{ $variant?: 'neutral' | 'danger' }>`
   }
 
   svg {
-    fill: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}600`]};
+    color: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}500`]};
   }
 
-  a {
-    color: ${({ theme }) => theme.colors.neutral800};
+  span {
+    color: ${({ theme, $variant = 'neutral' }) => theme.colors[`${$variant}800`]};
   }
 
   span,
@@ -121,13 +121,13 @@ const DeleteReleaseActionItem = ({ releaseId, actionId }: DeleteReleaseActionIte
  * -----------------------------------------------------------------------------------------------*/
 interface ReleaseActionEntryLinkItemProps {
   contentTypeUid: ReleaseAction['contentType'];
-  entryId: ReleaseAction['entry']['id'];
+  documentId: ReleaseAction['entry']['documentId'];
   locale: ReleaseAction['locale'];
 }
 
 const ReleaseActionEntryLinkItem = ({
   contentTypeUid,
-  entryId,
+  documentId,
   locale,
 }: ReleaseActionEntryLinkItemProps) => {
   const { formatMessage } = useIntl();
@@ -169,7 +169,7 @@ const ReleaseActionEntryLinkItem = ({
       tag={NavLink}
       isLink
       to={{
-        pathname: `/content-manager/collection-types/${contentTypeUid}/${entryId}`,
+        pathname: `/content-manager/collection-types/${contentTypeUid}/${documentId}`,
         search: locale && `?plugins[i18n][locale]=${locale}`,
       }}
     >
@@ -201,7 +201,7 @@ const EditReleaseItem = ({ releaseId }: EditReleaseItemProps) => {
     <StyledMenuItem tag={NavLink} isLink to={`/plugins/content-releases/${releaseId}`}>
       <Flex gap={2}>
         <Pencil width="1.6rem" height="1.6rem" />
-        <Typography variant="omega">
+        <Typography textColor="neutral800" variant="omega">
           {formatMessage({
             id: 'content-releases.content-manager-edit-view.edit-release',
             defaultMessage: 'Edit release',
@@ -230,12 +230,7 @@ const Root = ({ children }: RootProps) => {
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release
     allowedActions.canDeleteAction || allowedActions.canUpdate ? (
       <Menu.Root>
-        {/*
-          TODO Fix in the DS
-          - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
-          - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
-         */}
-        <Menu.Trigger paddingLeft={2} paddingRight={2}>
+        <Menu.Trigger variant="tertiary" endIcon={null} paddingLeft={2} paddingRight={2}>
           <AccessibleIcon
             label={formatMessage({
               id: 'content-releases.content-manager-edit-view.release-action-menu',
@@ -245,10 +240,6 @@ const Root = ({ children }: RootProps) => {
             <More />
           </AccessibleIcon>
         </Menu.Trigger>
-        {/*
-          TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
-          Refactor this once fixed in the DS
-         */}
         <Menu.Content top={1} popoverPlacement="bottom-end">
           {children}
         </Menu.Content>
