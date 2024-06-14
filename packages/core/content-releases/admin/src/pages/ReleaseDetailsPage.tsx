@@ -422,6 +422,7 @@ const ReleaseDetailsLayout = ({
                     defaultMessage: 'Release edit and delete menu',
                   })}
                   variant="tertiary"
+                  endIcon={null}
                 >
                   <More />
                 </Menu.Trigger>
