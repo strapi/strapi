@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import type { UID, Modules, Utils } from '@strapi/types';
+import type { UID, Modules } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { async, contentTypes } from '@strapi/utils';
 
