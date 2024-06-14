@@ -4,7 +4,6 @@ import {
   Box,
   Flex,
   Grid,
-  GridItem,
   TextButton,
   ComboboxOption,
   Combobox,
@@ -45,8 +44,8 @@ const HeadersInput = () => {
       <Box padding={8} background="neutral100" hasRadius>
         {value.map((_, index) => {
           return (
-            <Grid key={index} gap={4}>
-              <GridItem col={6}>
+            <Grid.Root key={index} gap={4}>
+              <Grid.Item col={6}>
                 <HeaderCombobox
                   name={`headers.${index}.key`}
                   aria-label={`row ${index + 1} key`}
@@ -55,8 +54,8 @@ const HeadersInput = () => {
                     defaultMessage: 'Key',
                   })}
                 />
-              </GridItem>
-              <GridItem col={6}>
+              </Grid.Item>
+              <Grid.Item col={6}>
                 <Flex alignItems="flex-end" gap={2}>
                   <Box style={{ flex: 1 }}>
                     <StringInput
@@ -92,8 +91,8 @@ const HeadersInput = () => {
                     </IconButton>
                   </Flex>
                 </Flex>
-              </GridItem>
-              <GridItem col={12}>
+              </Grid.Item>
+              <Grid.Item col={12}>
                 <TextButton
                   type="button"
                   onClick={() => {
@@ -106,8 +105,8 @@ const HeadersInput = () => {
                     defaultMessage: 'Create new header',
                   })}
                 </TextButton>
-              </GridItem>
-            </Grid>
+              </Grid.Item>
+            </Grid.Root>
           );
         })}
       </Box>

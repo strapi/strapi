@@ -1,10 +1,28 @@
 export default {
   type: 'admin',
   routes: [
+    /*
     {
       method: 'GET',
       path: '/mapEntriesToReleases',
       handler: 'release.mapEntriesToReleases',
+      config: {
+        policies: [
+          'admin::isAuthenticatedAdmin',
+          {
+            name: 'admin::hasPermissions',
+            config: {
+              actions: ['plugin::content-releases.read'],
+            },
+          },
+        ],
+      },
+    },
+    */
+    {
+      method: 'GET',
+      path: '/getByDocumentAttached',
+      handler: 'release.findByDocumentAttached',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
@@ -36,7 +54,7 @@ export default {
     {
       method: 'GET',
       path: '/',
-      handler: 'release.findMany',
+      handler: 'release.findPage',
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',

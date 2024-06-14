@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { Page, useGuidedTour, Layouts } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
-import { Navigate, Route, Routes, useLocation, useMatch } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useMatch } from 'react-router-dom';
 
 import { DragLayer, DragLayerProps } from './components/DragLayer';
 import { CardDragPreview } from './components/DragPreviews/CardDragPreview';
@@ -12,7 +12,6 @@ import { RelationDragPreview } from './components/DragPreviews/RelationDragPrevi
 import { LeftMenu } from './components/LeftMenu';
 import { ItemTypes } from './constants/dragAndDrop';
 import { useContentManagerInitData } from './hooks/useContentManagerInitData';
-import { routes } from './router';
 import { getTranslation } from './utils/translations';
 
 /* -------------------------------------------------------------------------------------------------
@@ -90,11 +89,7 @@ const Layout = () => {
       </Page.Title>
       <Layouts.Root sideNav={<LeftMenu />}>
         <DragLayer renderItem={renderDraglayerItem} />
-        <Routes>
-          {routes.map((route) => (
-            <Route key={route.path} {...route} />
-          ))}
-        </Routes>
+        <Outlet />
       </Layouts.Root>
     </>
   );

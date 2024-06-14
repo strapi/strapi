@@ -1,15 +1,6 @@
 import * as React from 'react';
 
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Flex,
-  Typography,
-  useCallbackRef,
-  useComposedRefs,
-} from '@strapi/design-system';
+import { Button, Dialog, useCallbackRef, useComposedRefs } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
@@ -735,41 +726,37 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   });
 
   if (blocker.state === 'blocked') {
-    const handleCancel = () => {
-      onCancel();
-      blocker.reset();
+    const handleCancel = (isOpen: boolean) => {
+      if (!isOpen) {
+        onCancel();
+        blocker.reset();
+      }
     };
 
     return (
-      <Dialog
-        isOpen
-        title={formatMessage({
-          id: 'app.components.ConfirmDialog.title',
-          defaultMessage: 'Confirmation',
-        })}
-        onClose={handleCancel}
-      >
-        <DialogBody>
-          <Flex direction="column" gap={2}>
-            <WarningCircle width="24px" height="24px" fill="danger600" />
-            <Typography tag="p" variant="omega" textAlign="center">
-              {formatMessage({
-                id: 'global.prompt.unsaved',
-                defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
-              })}
-            </Typography>
-          </Flex>
-        </DialogBody>
-        <DialogFooter
-          startAction={
-            <Button onClick={handleCancel} variant="tertiary">
-              {formatMessage({
-                id: 'app.components.Button.cancel',
-                defaultMessage: 'Cancel',
-              })}
-            </Button>
-          }
-          endAction={
+      <Dialog.Root open onOpenChange={handleCancel}>
+        <Dialog.Content>
+          <Dialog.Header>
+            {formatMessage({
+              id: 'app.components.ConfirmDialog.title',
+              defaultMessage: 'Confirmation',
+            })}
+          </Dialog.Header>
+          <Dialog.Body icon={<WarningCircle width="24px" height="24px" fill="danger600" />}>
+            {formatMessage({
+              id: 'global.prompt.unsaved',
+              defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+            })}
+          </Dialog.Body>
+          <Dialog.Footer>
+            <Dialog.Cancel>
+              <Button variant="tertiary">
+                {formatMessage({
+                  id: 'app.components.Button.cancel',
+                  defaultMessage: 'Cancel',
+                })}
+              </Button>
+            </Dialog.Cancel>
             <Button
               onClick={() => {
                 onProceed();
@@ -782,9 +769,9 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
                 defaultMessage: 'Confirm',
               })}
             </Button>
-          }
-        />
-      </Dialog>
+          </Dialog.Footer>
+        </Dialog.Content>
+      </Dialog.Root>
     );
   }
 

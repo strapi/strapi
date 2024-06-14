@@ -74,7 +74,7 @@ export const FormModalSubHeader = ({
       : { id: getTrad(`attribute.${attributeType}`) };
 
   return (
-    <Flex direction="column" alignItems="flex-start" paddingBottom={2} gap={1}>
+    <Flex direction="column" alignItems="flex-start" paddingBottom={1} gap={1}>
       <Typography tag="h2" variant="beta">
         {formatMessage(
           {

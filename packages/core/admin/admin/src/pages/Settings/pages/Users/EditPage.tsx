@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, Grid, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
 import { useIntl } from 'react-intl';
@@ -231,11 +231,11 @@ const EditPage = () => {
                           defaultMessage: 'Details',
                         })}
                       </Typography>
-                      <Grid gap={5}>
+                      <Grid.Root gap={5}>
                         {LAYOUT.map((row) =>
                           row.map(({ size, label, ...field }) => {
                             return (
-                              <GridItem key={field.name} col={size}>
+                              <Grid.Item key={field.name} col={size}>
                                 <InputRenderer
                                   {...field}
                                   disabled={!canUpdate}
@@ -246,11 +246,11 @@ const EditPage = () => {
                                       : undefined
                                   }
                                 />
-                              </GridItem>
+                              </Grid.Item>
                             );
                           })
                         )}
-                      </Grid>
+                      </Grid.Root>
                     </Flex>
                   </Box>
                   <Box
@@ -269,11 +269,11 @@ const EditPage = () => {
                           defaultMessage: "User's role",
                         })}
                       </Typography>
-                      <Grid gap={5}>
-                        <GridItem col={6} xs={12}>
+                      <Grid.Root gap={5}>
+                        <Grid.Item col={6} xs={12}>
                           <SelectRoles disabled={!canUpdate} />
-                        </GridItem>
-                      </Grid>
+                        </Grid.Item>
+                      </Grid.Root>
                     </Flex>
                   </Box>
                 </Flex>

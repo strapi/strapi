@@ -105,9 +105,11 @@ const LocaleTable = ({ locales = [], canDelete, canUpdate }: LocaleTableProps) =
                 </Flex>
               </Td>
             </Tr>
-            {editLocaleId === locale.id ? (
-              <EditModal {...locale} onClose={() => setEditLocaleId(undefined)} />
-            ) : null}
+            <EditModal
+              {...locale}
+              onOpenChange={() => setEditLocaleId(undefined)}
+              open={editLocaleId === locale.id}
+            />
           </React.Fragment>
         ))}
       </Tbody>

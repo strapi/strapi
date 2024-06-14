@@ -86,7 +86,7 @@ const SearchInput = ({
       label={formatMessage({ id: 'global.search', defaultMessage: 'Search' })}
       onClick={handleToggle}
     >
-      <SearchIcon fill="neutral800" />
+      <SearchIcon />
     </IconButton>
   );
 };

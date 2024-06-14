@@ -1,17 +1,17 @@
 import React from 'react';
 
 import {
-  BaseCheckbox,
+  Checkbox,
   Box,
   Button,
   Divider,
   Flex,
-  GridItem,
   IconButton,
   Typography,
   VisuallyHidden,
+  Grid,
 } from '@strapi/design-system';
-import { GridFour as Grid, List, Pencil, Plus } from '@strapi/icons';
+import { GridFour as GridIcon, List, Pencil, Plus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
@@ -133,14 +133,17 @@ export const BrowseStep = ({
                     borderColor="neutral200"
                     height="3.2rem"
                   >
-                    <BaseCheckbox
+                    <Checkbox
                       aria-label={formatMessage({
                         id: getTrad('bulk.select.label'),
                         defaultMessage: 'Select all assets',
                       })}
-                      indeterminate={!areAllAssetSelected && hasSomeAssetSelected}
-                      value={areAllAssetSelected}
-                      onChange={onSelectAllAsset}
+                      checked={
+                        !areAllAssetSelected && hasSomeAssetSelected
+                          ? 'indeterminate'
+                          : areAllAssetSelected
+                      }
+                      onCheckedChange={onSelectAllAsset}
                     />
                   </Flex>
                 )}
@@ -169,7 +172,7 @@ export const BrowseStep = ({
                     }
                     onClick={() => setView(isGridView ? viewOptions.LIST : viewOptions.GRID)}
                   >
-                    {isGridView ? <List /> : <Grid />}
+                    {isGridView ? <List /> : <GridIcon />}
                   </IconButton>
                 </ActionContainer>
                 <SearchAsset onChangeSearch={onChangeSearch} queryValue={queryObject._q || ''} />
@@ -270,7 +273,7 @@ export const BrowseStep = ({
             >
               {folders.map((folder) => {
                 return (
-                  <GridItem col={3} key={`folder-${folder.id}`}>
+                  <Grid.Item col={3} key={`folder-${folder.id}`}>
                     <FolderCard
                       ariaLabel={folder.name}
                       id={`folder-${folder.id}`}
@@ -323,7 +326,7 @@ export const BrowseStep = ({
                         </FolderCardBodyAction>
                       </FolderCardBody>
                     </FolderCard>
-                  </GridItem>
+                  </Grid.Item>
                 );
               })}
             </FolderGridList>

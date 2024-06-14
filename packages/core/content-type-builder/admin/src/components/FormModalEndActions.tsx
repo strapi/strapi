@@ -6,7 +6,7 @@
 
 import { SyntheticEvent } from 'react';
 
-import { Button } from '@strapi/design-system';
+import { Button, Flex } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
@@ -205,7 +205,7 @@ export const FormModalEndActions = ({
     }
 
     return (
-      <>
+      <Flex gap={2}>
         <Button
           variant="secondary"
           type="submit"
@@ -241,13 +241,13 @@ export const FormModalEndActions = ({
             defaultMessage: 'Finish',
           })}
         </Button>
-      </>
+      </Flex>
     );
   }
 
   if (isAttributeModal && !isComponentAttribute && !isDzAttribute) {
     return (
-      <>
+      <Flex gap={2}>
         <Button
           type={isEditingAttribute ? 'button' : 'submit'}
           variant="secondary"
@@ -278,13 +278,13 @@ export const FormModalEndActions = ({
             defaultMessage: 'Finish',
           })}
         </Button>
-      </>
+      </Flex>
     );
   }
 
   if (isContentTypeModal) {
     return (
-      <>
+      <Flex gap={2}>
         {!isCreatingContentType && (
           <>
             <Button
@@ -332,13 +332,13 @@ export const FormModalEndActions = ({
             })}
           </Button>
         )}
-      </>
+      </Flex>
     );
   }
 
   if (isComponentModal) {
     return (
-      <>
+      <Flex gap={2}>
         {!isCreatingComponent && (
           <>
             <Button
@@ -386,13 +386,13 @@ export const FormModalEndActions = ({
             })}
           </Button>
         )}
-      </>
+      </Flex>
     );
   }
 
   if (isEditingCategory) {
     return (
-      <>
+      <Flex gap={2}>
         <Button
           type="button"
           variant="danger"
@@ -422,13 +422,13 @@ export const FormModalEndActions = ({
             defaultMessage: 'finish',
           })}
         </Button>
-      </>
+      </Flex>
     );
   }
 
   if (isCustomFieldModal) {
     return (
-      <>
+      <Flex gap={2}>
         <Button
           type={isEditingAttribute ? 'button' : 'submit'}
           variant="secondary"
@@ -459,7 +459,7 @@ export const FormModalEndActions = ({
             defaultMessage: 'Finish',
           })}
         </Button>
-      </>
+      </Flex>
     );
   }
 

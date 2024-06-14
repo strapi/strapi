@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, useNotifyAT, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, useNotifyAT, Grid, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -269,13 +269,13 @@ const PasswordSection = () => {
             },
           ],
         ].map((row, index) => (
-          <Grid key={index} gap={5}>
+          <Grid.Root key={index} gap={5}>
             {row.map(({ size, ...field }) => (
-              <GridItem key={field.name} col={size}>
+              <Grid.Item key={field.name} col={size}>
                 <InputRenderer {...field} />
-              </GridItem>
+              </Grid.Item>
             ))}
-          </Grid>
+          </Grid.Root>
         ))}
       </Flex>
     </Box>
@@ -338,7 +338,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
             )}
           </Typography>
         </Flex>
-        <Grid gap={5}>
+        <Grid.Root gap={5}>
           {[
             {
               hint: formatMessage({
@@ -403,11 +403,11 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
               type: 'enumeration' as const,
             },
           ].map(({ size, ...field }) => (
-            <GridItem key={field.name} col={size}>
+            <Grid.Item key={field.name} col={size}>
               <InputRenderer {...field} />
-            </GridItem>
+            </Grid.Item>
           ))}
-        </Grid>
+        </Grid.Root>
       </Flex>
     </Box>
   );
@@ -437,7 +437,7 @@ const UserInfoSection = () => {
             defaultMessage: 'Profile',
           })}
         </Typography>
-        <Grid gap={5}>
+        <Grid.Root gap={5}>
           {[
             {
               label: formatMessage({
@@ -478,11 +478,11 @@ const UserInfoSection = () => {
               type: 'string' as const,
             },
           ].map(({ size, ...field }) => (
-            <GridItem key={field.name} col={size}>
+            <Grid.Item key={field.name} col={size}>
               <InputRenderer {...field} />
-            </GridItem>
+            </Grid.Item>
           ))}
-        </Grid>
+        </Grid.Root>
       </Flex>
     </Box>
   );

@@ -12,7 +12,10 @@ import { PermissionMap } from '../types/permissions';
 
 import { useEnterprise } from './useEnterprise';
 
-import type { StrapiAppSetting, StrapiAppSettingLink as IStrapiAppSettingLink } from '../StrapiApp';
+import type {
+  StrapiAppSetting,
+  StrapiAppSettingLink as IStrapiAppSettingLink,
+} from '../core/apis/router';
 
 const formatLinks = (menu: SettingsMenuSection[]): SettingsMenuSectionWithDisplayedLinks[] =>
   menu.map((menuSection) => {
@@ -30,7 +33,7 @@ interface SettingsMenuLinkWithPermissions extends SettingsMenuLink {
 }
 
 interface StrapiAppSettingsLink extends IStrapiAppSettingLink {
-  lockIcon?: never; // TODO: to replace with another name in v5
+  licenseOnly?: never;
   hasNotification?: never;
 }
 

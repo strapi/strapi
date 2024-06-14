@@ -1,14 +1,6 @@
 import React, { useCallback, useMemo } from 'react';
 
-import {
-  Box,
-  Checkbox,
-  Flex,
-  Typography,
-  Grid,
-  GridItem,
-  VisuallyHidden,
-} from '@strapi/design-system';
+import { Box, Checkbox, Flex, Typography, Grid, VisuallyHidden } from '@strapi/design-system';
 import { Cog as CogIcon } from '@strapi/icons';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
@@ -71,28 +63,27 @@ const SubCategory = ({ subCategory }) => {
         <Box paddingLeft={4}>
           <Checkbox
             name={subCategory.name}
-            value={hasAllActionsSelected}
-            onValueChange={(value) =>
+            checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
+            onCheckedChange={(value) =>
               handleChangeSelectAll({ target: { name: subCategory.name, value } })
             }
-            indeterminate={hasSomeActionsSelected}
           >
             {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
           </Checkbox>
         </Box>
       </Flex>
       <Flex paddingTop={6} paddingBottom={6}>
-        <Grid gap={2} style={{ flex: 1 }}>
+        <Grid.Root gap={2} style={{ flex: 1 }}>
           {subCategory.actions.map((action) => {
             const name = `${action.name}.enabled`;
 
             return (
-              <GridItem col={6} key={action.name}>
+              <Grid.Item col={6} key={action.name}>
                 <CheckboxWrapper isActive={isActionSelected(action.name)} padding={2} hasRadius>
                   <Checkbox
-                    value={get(modifiedData, name, false)}
+                    checked={get(modifiedData, name, false)}
                     name={name}
-                    onValueChange={(value) => onChange({ target: { name, value } })}
+                    onCheckedChange={(value) => onChange({ target: { name, value } })}
                   >
                     {action.label}
                   </Checkbox>
@@ -115,10 +106,10 @@ const SubCategory = ({ subCategory }) => {
                     <CogIcon />
                   </button>
                 </CheckboxWrapper>
-              </GridItem>
+              </Grid.Item>
             );
           })}
-        </Grid>
+        </Grid.Root>
       </Flex>
     </Box>
   );

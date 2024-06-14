@@ -7,6 +7,7 @@ export const OptionBoxWrapper = styled(Box)`
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   text-align: left;
   &:hover {
+    cursor: pointer;
     background: ${({ theme }) => theme.colors.primary100};
     border: 1px solid ${({ theme }) => theme.colors.primary200};
   }

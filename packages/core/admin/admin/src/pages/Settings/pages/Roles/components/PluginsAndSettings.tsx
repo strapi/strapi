@@ -7,7 +7,7 @@ import {
   Checkbox,
   Flex,
   Grid,
-  GridItem,
+  Modal,
   Typography,
 } from '@strapi/design-system';
 import get from 'lodash/get';
@@ -96,6 +96,7 @@ const Row = ({
     <Accordion.Item value={name}>
       <Accordion.Header variant={variant}>
         <Accordion.Trigger
+          caretPosition="right"
           description={`${formatMessage(
             { id: 'Settings.permissions.category', defaultMessage: categoryName },
             { category: categoryName }
@@ -141,7 +142,6 @@ const SubCategory = ({
   subCategoryName,
   pathToData,
 }: SubCategoryProps) => {
-  const [isModalOpen, setModalOpen] = React.useState(false);
   const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
     usePermissionsDataManager();
   const { formatMessage } = useIntl();
@@ -158,13 +158,6 @@ const SubCategory = ({
 
   const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
-  const handleToggleModalIsOpen = () => {
-    setModalOpen((s) => !s);
-  };
-
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
   // We need to format the actions so it matches the shape of the ConditionsModal actions props
   const formattedActions = React.useMemo(() => {
     return actions.map((action) => {
@@ -214,63 +207,59 @@ const SubCategory = ({
               name={pathToData.join('..')}
               disabled={isFormDisabled}
               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-              onValueChange={(value) => {
+              onCheckedChange={(value) => {
                 onChangeParentCheckbox({
                   target: {
                     name: pathToData.join('..'),
-                    value,
+                    value: !!value,
                   },
                 });
               }}
-              indeterminate={hasSomeActionsSelected}
-              value={hasAllActionsSelected}
+              checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
             >
               {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
             </Checkbox>
           </Box>
         </Flex>
         <Flex paddingTop={6} paddingBottom={6}>
-          <Grid gap={2} style={{ flex: 1 }}>
+          <Grid.Root gap={2} style={{ flex: 1 }}>
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
-                <GridItem col={3} key={action}>
+                <Grid.Item col={3} key={action}>
                   <CheckboxWrapper $disabled={isFormDisabled} $hasConditions={hasConditions}>
                     <Checkbox
                       name={checkboxName}
                       disabled={isFormDisabled}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={(value) => {
+                      onCheckedChange={(value) => {
                         onChangeSimpleCheckbox({
                           target: {
                             name: checkboxName,
-                            value,
+                            value: !!value,
                           },
                         });
                       }}
-                      value={value}
+                      checked={value}
                     >
                       {displayName}
                     </Checkbox>
                   </CheckboxWrapper>
-                </GridItem>
+                </Grid.Item>
               );
             })}
-          </Grid>
-          <ConditionsButton
-            hasConditions={doesButtonHasCondition}
-            onClick={handleToggleModalIsOpen}
-          />
+          </Grid.Root>
+          <Modal.Root>
+            <Modal.Trigger>
+              <ConditionsButton hasConditions={doesButtonHasCondition} />
+            </Modal.Trigger>
+            <ConditionsModal
+              headerBreadCrumbs={[categoryName, subCategoryName]}
+              actions={formattedActions}
+              isFormDisabled={isFormDisabled}
+            />
+          </Modal.Root>
         </Flex>
       </Box>
-      {isModalOpen && (
-        <ConditionsModal
-          headerBreadCrumbs={[categoryName, subCategoryName]}
-          actions={formattedActions}
-          isFormDisabled={isFormDisabled}
-          onClosed={handleModalClose}
-          onToggle={handleToggleModalIsOpen}
-        />
-      )}
     </>
   );
 };

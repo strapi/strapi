@@ -1,16 +1,7 @@
 import React, { useReducer } from 'react';
 
 import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
-import {
-  Box,
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  Toggle,
-  Typography,
-  Field,
-} from '@strapi/design-system';
+import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
@@ -136,8 +127,8 @@ export const SettingsPage = () => {
                       })}
                     </Typography>
                   </Flex>
-                  <Grid gap={6}>
-                    <GridItem col={6} s={12}>
+                  <Grid.Root gap={6}>
+                    <Grid.Item col={6} s={12}>
                       <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.responsiveDimensions.description'),
@@ -170,8 +161,8 @@ export const SettingsPage = () => {
                         />
                         <Field.Hint />
                       </Field.Root>
-                    </GridItem>
-                    <GridItem col={6} s={12}>
+                    </Grid.Item>
+                    <Grid.Item col={6} s={12}>
                       <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.sizeOptimization.description'),
@@ -204,8 +195,8 @@ export const SettingsPage = () => {
                         />
                         <Field.Hint />
                       </Field.Root>
-                    </GridItem>
-                    <GridItem col={6} s={12}>
+                    </Grid.Item>
+                    <Grid.Item col={6} s={12}>
                       <Field.Root
                         hint={formatMessage({
                           id: getTrad('settings.form.autoOrientation.description'),
@@ -238,8 +229,8 @@ export const SettingsPage = () => {
                         />
                         <Field.Hint />
                       </Field.Root>
-                    </GridItem>
-                  </Grid>
+                    </Grid.Item>
+                  </Grid.Root>
                 </Flex>
               </Box>
             </Flex>

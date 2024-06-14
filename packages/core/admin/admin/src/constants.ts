@@ -1,6 +1,6 @@
 import { PermissionMap } from './types/permissions';
 
-import type { StrapiAppSettingLink } from './StrapiApp';
+import type { StrapiAppSettingLink } from './core/apis/router';
 
 export const ADMIN_PERMISSIONS_CE = {
   contentManager: {
@@ -124,8 +124,8 @@ export const HOOKS = {
 };
 
 export interface SettingsMenuLink
-  extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'lockIcon'> {
-  lockIcon?: boolean; // TODO: to replace with another name in v5
+  extends Omit<StrapiAppSettingLink, 'Component' | 'permissions' | 'licenseOnly'> {
+  licenseOnly?: boolean;
 }
 
 export type SettingsMenu = {
@@ -164,7 +164,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
             to: '/settings/purchase-single-sign-on',
             id: 'sso-purchase-page',
-            lockIcon: true, // TODO: to replace with another name in v5
+            licenseOnly: true,
           },
         ]
       : []),
@@ -189,7 +189,7 @@ export const SETTINGS_LINKS_CE = (): SettingsMenu => ({
             intlLabel: { id: 'global.auditLogs', defaultMessage: 'Audit Logs' },
             to: '/settings/purchase-audit-logs',
             id: 'auditLogs-purchase-page',
-            lockIcon: true, // TODO: to replace with another name in v5
+            licenseOnly: true,
           },
         ]
       : []),

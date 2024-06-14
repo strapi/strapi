@@ -1,4 +1,4 @@
-import { Flex, GridItem, Typography } from '@strapi/design-system';
+import { Grid, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { useApiTokenPermissions } from '../apiTokenPermissions';
@@ -13,7 +13,7 @@ export const ActionBoundRoutes = () => {
   const actionSection = selectedAction?.split('.')[0];
 
   return (
-    <GridItem
+    <Grid.Item
       col={5}
       background="neutral150"
       paddingTop={6}
@@ -50,6 +50,6 @@ export const ActionBoundRoutes = () => {
           </Typography>
         </Flex>
       )}
-    </GridItem>
+    </Grid.Item>
   );
 };

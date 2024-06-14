@@ -6,7 +6,6 @@ import {
   Button,
   Flex,
   Grid,
-  GridItem,
   SingleSelectOption,
   SingleSelect,
   TextInput,
@@ -194,8 +193,8 @@ const SettingsPage = () => {
                     </Typography>
                   </Flex>
 
-                  <Grid gap={5}>
-                    <GridItem col={6} s={12}>
+                  <Grid.Root gap={5}>
+                    <Grid.Item col={6} s={12}>
                       <Field.Root name="shipper-email">
                         <Field.Label>
                           {formatMessage({
@@ -212,9 +211,9 @@ const SettingsPage = () => {
                           value={data.settings.defaultFrom}
                         />
                       </Field.Root>
-                    </GridItem>
+                    </Grid.Item>
 
-                    <GridItem col={6} s={12}>
+                    <Grid.Item col={6} s={12}>
                       <Field.Root name="response-email">
                         <Field.Label>
                           {formatMessage({
@@ -231,9 +230,9 @@ const SettingsPage = () => {
                           value={data.settings.defaultReplyTo}
                         />
                       </Field.Root>
-                    </GridItem>
+                    </Grid.Item>
 
-                    <GridItem col={6} s={12}>
+                    <Grid.Item col={6} s={12}>
                       <Field.Root name="email-provider">
                         <Field.Label>
                           {formatMessage({
@@ -247,8 +246,8 @@ const SettingsPage = () => {
                           </SingleSelectOption>
                         </SingleSelect>
                       </Field.Root>
-                    </GridItem>
-                  </Grid>
+                    </Grid.Item>
+                  </Grid.Root>
                 </Flex>
               </Box>
 
@@ -271,8 +270,8 @@ const SettingsPage = () => {
                   })}
                 </Typography>
 
-                <Grid gap={5}>
-                  <GridItem col={6} s={12}>
+                <Grid.Root gap={5}>
+                  <Grid.Item col={6} s={12}>
                     <Field.Root
                       name="test-address"
                       error={
@@ -298,8 +297,8 @@ const SettingsPage = () => {
                         })}
                       />
                     </Field.Root>
-                  </GridItem>
-                  <GridItem col={7} s={12}>
+                  </Grid.Item>
+                  <Grid.Item col={7} s={12}>
                     <Button
                       loading={mutation.isLoading}
                       disabled={!isTestAddressValid}
@@ -311,8 +310,8 @@ const SettingsPage = () => {
                         defaultMessage: 'Send test email',
                       })}
                     </Button>
-                  </GridItem>
-                </Grid>
+                  </Grid.Item>
+                </Grid.Root>
               </Flex>
             </Flex>
           </form>

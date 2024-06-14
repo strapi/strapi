@@ -6,15 +6,14 @@ import {
   Grid,
   JSONInput,
   Loader,
-  ModalBody,
-  ModalHeader,
-  ModalLayout,
+  Modal as DSModal,
   Typography,
   Breadcrumbs,
   Crumb,
   Field,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { useNotification } from '../../../../../../../../admin/src/features/Notifications';
 import { useAPIErrorHandler } from '../../../../../../../../admin/src/hooks/useAPIErrorHandler';
@@ -48,19 +47,21 @@ export const Modal = ({ handleClose, logId }: ModalProps) => {
   const formattedDate = data && 'date' in data ? formatTimeStamp(data.date) : '';
 
   return (
-    <ModalLayout onClose={handleClose} labelledBy="title">
-      <ModalHeader>
-        {/**
-         * TODO: this is not semantically correct and should be amended.
-         */}
-        <Breadcrumbs label={formattedDate} id="title">
-          <Crumb isCurrent>{formattedDate}</Crumb>
-        </Breadcrumbs>
-      </ModalHeader>
-      <ModalBody>
-        <ActionBody isLoading={isLoading} data={data as AuditLog} formattedDate={formattedDate} />
-      </ModalBody>
-    </ModalLayout>
+    <DSModal.Root defaultOpen onOpenChange={handleClose}>
+      <DSModal.Content>
+        <DSModal.Header>
+          {/**
+           * TODO: this is not semantically correct and should be amended.
+           */}
+          <Breadcrumbs label={formattedDate} id="title">
+            <Crumb isCurrent>{formattedDate}</Crumb>
+          </Breadcrumbs>
+        </DSModal.Header>
+        <DSModal.Body>
+          <ActionBody isLoading={isLoading} data={data as AuditLog} formattedDate={formattedDate} />
+        </DSModal.Body>
+      </DSModal.Content>
+    </DSModal.Root>
   );
 };
 
@@ -96,7 +97,7 @@ const ActionBody = ({ isLoading, data, formattedDate }: ActionBodyProps) => {
           })}
         </Typography>
       </Box>
-      <Grid
+      <Grid.Root
         gap={4}
         gridCols={2}
         paddingTop={4}
@@ -142,7 +143,7 @@ const ActionBody = ({ isLoading, data, formattedDate }: ActionBodyProps) => {
           })}
           actionName={user?.id.toString() || '-'}
         />
-      </Grid>
+      </Grid.Root>
       <Field.Root>
         <Field.Label>
           {formatMessage({
@@ -150,11 +151,16 @@ const ActionBody = ({ isLoading, data, formattedDate }: ActionBodyProps) => {
             defaultMessage: 'Payload',
           })}
         </Field.Label>
-        <JSONInput value={JSON.stringify(payload, null, 2)} disabled />
+        <Payload value={JSON.stringify(payload, null, 2)} disabled />
       </Field.Root>
     </>
   );
 };
+
+const Payload = styled(JSONInput)`
+  max-width: 100%;
+  overflow: scroll;
+`;
 
 interface ActionItemProps {
   actionLabel: string;

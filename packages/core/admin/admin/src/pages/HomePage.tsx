@@ -5,7 +5,6 @@ import {
   Button,
   Flex,
   Grid,
-  GridItem,
   Main,
   Typography,
   Link,
@@ -89,8 +88,8 @@ const HomePageCE = () => {
           <img alt="" aria-hidden src={cornerOrnamentPath} />
         </LogoContainer>
         <Box padding={10}>
-          <Grid>
-            <GridItem col={8} s={12}>
+          <Grid.Root>
+            <Grid.Item col={8} s={12}>
               <div>
                 <Box paddingLeft={6} paddingBottom={10}>
                   <Flex direction="column" alignItems="flex-start" gap={5}>
@@ -136,16 +135,16 @@ const HomePageCE = () => {
                   </Flex>
                 </Box>
               </div>
-            </GridItem>
-          </Grid>
-          <Grid gap={6}>
-            <GridItem col={8} s={12}>
+            </Grid.Item>
+          </Grid.Root>
+          <Grid.Root gap={6}>
+            <Grid.Item col={8} s={12}>
               {showGuidedTour ? <GuidedTourHomepage /> : <ContentBlocks />}
-            </GridItem>
-            <GridItem col={4} s={12}>
+            </Grid.Item>
+            <Grid.Item col={4} s={12}>
               <SocialLinks />
-            </GridItem>
-          </Grid>
+            </Grid.Item>
+          </Grid.Root>
         </Box>
       </Main>
     </Layouts.Root>
@@ -382,11 +381,11 @@ const SocialLinks = () => {
       <GridGap>
         {socialLinksExtended.map(({ icon, link, name }) => {
           return (
-            <GridItem col={6} s={12} key={name.id}>
+            <Grid.Item col={6} s={12} key={name.id}>
               <LinkCustom size="L" startIcon={icon} variant="tertiary" href={link} isExternal>
                 {formatMessage(name)}
               </LinkCustom>
-            </GridItem>
+            </Grid.Item>
           );
         })}
       </GridGap>
@@ -473,7 +472,7 @@ const LinkCustom = styled(LinkButton)`
   }
 `;
 
-const GridGap = styled(Grid)`
+const GridGap = styled(Grid.Root)`
   row-gap: ${({ theme }) => theme.spaces[2]};
   column-gap: ${({ theme }) => theme.spaces[4]};
 `;

@@ -75,7 +75,7 @@ const ComponentBox = styled<FlexComponent<'button'>>(Flex)`
   cursor: pointer;
 
   @media (prefers-reduced-motion: no-preference) {
-    transition: color 120ms ${(props) => props.theme.easings.easeOutQuad};
+    transition: color 120ms ${(props) => props.theme.motion.easings.easeOutQuad};
   }
 
   &:focus,

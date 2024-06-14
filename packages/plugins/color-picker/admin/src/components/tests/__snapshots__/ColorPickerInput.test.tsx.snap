@@ -126,7 +126,6 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
         class="c0"
       >
         <label
-          alignitems="center"
           class="c1 c2"
           for="color"
           id="color-label"
@@ -140,6 +139,7 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
           aria-haspopup="dialog"
           aria-label="Color picker toggle"
           class="c3 c4 c5 c6"
+          data-state="closed"
           type="button"
         >
           <div

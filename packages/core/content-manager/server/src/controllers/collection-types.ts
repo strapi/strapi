@@ -688,7 +688,7 @@ export default {
       return ctx.forbidden();
     }
 
-    const entities = await documentManager.findMany(
+    const documents = await documentManager.findMany(
       {
         filters: {
           documentId: ids,
@@ -698,7 +698,7 @@ export default {
       model
     );
 
-    if (!entities) {
+    if (!documents) {
       return ctx.notFound();
     }
 

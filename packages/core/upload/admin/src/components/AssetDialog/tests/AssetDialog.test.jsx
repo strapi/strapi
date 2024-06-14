@@ -41,7 +41,7 @@ const renderML = (
       <DesignSystemProvider>
         <MemoryRouter>
           <IntlProvider locale="en" messages={{}}>
-            <AssetDialog {...props} />
+            <AssetDialog open {...props} />
           </IntlProvider>
         </MemoryRouter>
       </DesignSystemProvider>
@@ -59,7 +59,6 @@ describe('AssetDialog', () => {
 
       renderML();
 
-      expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
       expect(screen.getByText('Content is loading.')).toBeInTheDocument();
     });
 
@@ -72,7 +71,6 @@ describe('AssetDialog', () => {
 
       renderML();
 
-      expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
       expect(screen.getByText('Content is loading.')).toBeInTheDocument();
     });
 
@@ -81,7 +79,6 @@ describe('AssetDialog', () => {
 
       renderML();
 
-      expect(screen.getByRole('dialog').getAttribute('aria-busy')).toBe('true');
       expect(screen.getByText('Content is loading.')).toBeInTheDocument();
     });
   });
