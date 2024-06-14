@@ -55,17 +55,15 @@ export const DraftAndPublishToggle = ({
       )
     : '';
 
-  const handleToggle = () => setShowWarning((prev) => !prev);
-
   const handleConfirm = () => {
     onChange({ target: { name, value: false } });
 
-    handleToggle();
+    setShowWarning(false);
   };
 
   const handleChange: CheckboxProps['onCheckedChange'] = (checked) => {
     if (!checked && !isCreating) {
-      handleToggle();
+      setShowWarning(true);
 
       return;
     }
@@ -82,7 +80,7 @@ export const DraftAndPublishToggle = ({
         <Field.Hint />
       </Field.Root>
 
-      <Dialog.Root open={showWarning} onOpenChange={handleToggle}>
+      <Dialog.Root open={showWarning} onOpenChange={(isOpen) => setShowWarning(isOpen)}>
         <ConfirmDialog onConfirm={handleConfirm}>
           {formatMessage({
             id: getTrad('popUpWarning.draft-publish.message'),
