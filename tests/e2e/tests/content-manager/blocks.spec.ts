@@ -12,7 +12,7 @@ test.describe('Blocks editor', () => {
     await login({ page });
   });
 
-  test.fixme('adds a code block and specifies the language', async ({ page }) => {
+  test('adds a code block and specifies the language', async ({ page }) => {
     // Write some text into a blocks editor
     const code = 'const problems = 99';
     await navToHeader(page, ['Content Manager', 'Homepage'], 'Untitled');
