@@ -248,7 +248,7 @@ interface ITimezoneOption {
   value: string;
 }
 
-const getTimezones = (selectedDate: Date) => {
+export const getTimezones = (selectedDate: Date) => {
   const timezoneList: ITimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
     // Timezone will be in the format GMT${OFFSET} where offset could be nothing,
     // a four digit string e.g. +05:00 or -08:00
