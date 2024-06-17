@@ -447,7 +447,31 @@ const createQueryBuilder = (
     },
 
     shouldUseDeepSort() {
-      return state.orderBy.some(({ column }) => column.indexOf('.') >= 0);
+      return (
+        state.orderBy
+          .filter(({ column }) => column.indexOf('.') >= 0)
+          .filter(({ column }) => {
+            const col = column.split('.');
+
+            for (let i = 0; i < col.length - 1; i++) {
+              const el = col[i];
+
+              // order by "rel"."xxx"
+              const isRelationAttribute = meta.attributes[el]?.type === 'relation';
+
+              // order by "t2"."xxx"
+              const isAliasedRelation = Object.values(state.joins)
+                .map((join) => join.alias)
+                .includes(el);
+
+              if (isRelationAttribute || isAliasedRelation) {
+                return true;
+              }
+            }
+
+            return false;
+          }).length > 0
+      );
     },
 
     processSelect() {
