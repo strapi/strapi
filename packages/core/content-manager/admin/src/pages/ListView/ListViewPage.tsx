@@ -97,7 +97,7 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const { data, error, isLoading } = useGetAllDocumentsQuery({
+  const { data, error, isLoading, isFetching } = useGetAllDocumentsQuery({
     model,
     params,
   });
@@ -170,7 +170,7 @@ const ListViewPage = () => {
     return formattedHeaders;
   }, [displayedHeaders, formatMessage, list, runHookWaterfall, schema?.options?.draftAndPublish]);
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return <Page.Loading />;
   }
 
