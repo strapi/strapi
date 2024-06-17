@@ -24,12 +24,12 @@ const shouldTrustProxy = (strapi: Core.Strapi) => {
   }
 
   const implicit =
-    strapi.config.get('server.proxy.global') ||
+    !!strapi.config.get('server.proxy.global') ||
     strapi.config.get('server.proxy.http') ||
     strapi.config.get('server.proxy.https') ||
     false;
 
-  return !!implicit;
+  return implicit;
 };
 
 const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
