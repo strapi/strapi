@@ -3,6 +3,8 @@ import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
 import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
 import { tokenServiceFactory, cloudApiFactory, local } from '../services';
+import { getProjectNameFromPackageJson } from './utils/get-project-name-from-pkg';
+import { applyDefaultName } from './utils/apply-default-name';
 
 async function handleError(ctx: CLIContext, error: Error) {
   const tokenService = await tokenServiceFactory(ctx);
@@ -53,7 +55,13 @@ export default async (ctx: CLIContext) => {
   }
   const cloudApi = await cloudApiFactory(token);
   const { data: config } = await cloudApi.config();
-  const { questions, defaults: defaultValues } = config.projectCreation;
+
+  // We retrieve the questions and default values from the config, and apply the default name immediately
+  const { newQuestions: questions, newDefaultValues: defaultValues } = applyDefaultName(
+    await getProjectNameFromPackageJson(ctx),
+    config.projectCreation.questions,
+    config.projectCreation.defaults
+  );
 
   const projectAnswersDefaulted = defaults(defaultValues);
   const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
