@@ -1,12 +1,11 @@
-import * as React from 'react';
-
 import {
   Form,
   Layouts,
   Page,
   useAPIErrorHandler,
-  useNotification,
   isFetchError,
+  useNotification,
+  useField,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -24,43 +23,43 @@ import { SETTINGS_SCHEMA } from '../../../shared/validation-schemas';
 import { getTimezones } from '../components/ReleaseModal';
 import { useGetReleaseSettingsQuery, useUpdateReleaseSettingsMutation } from '../services/release';
 
+import type { UpdateSettings } from '../../../shared/contracts/settings';
+
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
-  const { timezoneList, systemTimezone = { value: 'UTC+00:00-Africa/Abidjan ' } } = getTimezones(
-    new Date()
-  );
   const { data, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [updateReleaseSettings, { isLoading: isSubmittingForm }] =
     useUpdateReleaseSettingsMutation();
-  const [defaultTimezone, setDefaultTimezone] = React.useState<string>(systemTimezone.value);
-  React.useEffect(() => {
-    if (data?.data?.defaultTimezone) {
-      setDefaultTimezone(data.data.defaultTimezone);
-    }
-  }, [data]);
   const { toggleNotification } = useNotification();
   const { formatAPIError } = useAPIErrorHandler();
-  const handleSubmit = async () => {
-    const response = await updateReleaseSettings({
-      defaultTimezone,
-    });
-    if ('data' in response) {
-      // When the response returns an object with 'data', handle success
-      toggleNotification({
-        type: 'success',
-        message: formatMessage({
-          id: 'content-releases.pages.Settings.releases.setting.default-timezone-notification-success',
-          defaultMessage: 'Default timezone updated.',
-        }),
-      });
-    } else if (isFetchError(response.error)) {
-      // When the response returns an object with 'error', handle fetch error
-      toggleNotification({
-        type: 'danger',
-        message: formatAPIError(response.error),
-      });
-    } else {
-      // Otherwise, the response returns an object with 'error', handle a generic error
+  const { timezoneList } = getTimezones(new Date());
+  const handleSubmit = async (body: UpdateSettings.Request['body']) => {
+    const { defaultTimezone } = body;
+    const isBodyTimezoneValid = timezoneList.some((timezone) => timezone.value === defaultTimezone);
+    const newBody = !defaultTimezone || !isBodyTimezoneValid ? { defaultTimezone: null } : {...body};
+    try {
+      const response = await updateReleaseSettings(newBody);
+
+      if ('data' in response) {
+        toggleNotification({
+          type: 'success',
+          message: formatMessage({
+            id: 'content-releases.pages.Settings.releases.setting.default-timezone-notification-success',
+            defaultMessage: 'Default timezone updated.',
+          }),
+        });
+      } else if (isFetchError(response.error)) {
+         toggleNotification({
+            type: 'danger',
+            message: formatAPIError(response.error),
+          });
+      } else {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+        });
+      } 
+    } catch (error) {
       toggleNotification({
         type: 'danger',
         message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
@@ -85,23 +84,21 @@ export const SettingsPage = () => {
       <Page.Main aria-busy={isLoadingSettings} tabIndex={-1}>
         <Form
           method="PUT"
-          initialValues={{
-            defaultTimezone: data?.data?.defaultTimezone || systemTimezone.value,
-          }}
+          initialValues={
+            data?.data.defaultTimezone ? data.data : {
+              defaultTimezone: null,
+            }
+          }
           onSubmit={handleSubmit}
           validationSchema={SETTINGS_SCHEMA}
         >
-          {({ isSubmitting }: { isSubmitting: boolean }) => {
+          {({ modified, isSubmitting }: { modified: boolean; isSubmitting: boolean }) => {
             return (
               <>
                 <Layouts.Header
                   primaryAction={
                     <Button
-                      disabled={
-                        defaultTimezone === '' ||
-                        defaultTimezone === data?.data?.defaultTimezone ||
-                        isSubmittingForm
-                      }
+                      disabled={!modified || isSubmittingForm}
                       loading={isSubmitting}
                       startIcon={<Check />}
                       type="submit"
@@ -140,45 +137,7 @@ export const SettingsPage = () => {
                     </Typography>
                     <Grid.Root>
                       <Grid.Item col={6} s={12}>
-                        <Field.Root
-                          name="defaultTimezone"
-                          hint={formatMessage({
-                            id: 'content-releases.pages.Settings.releases.timezone.hint',
-                            defaultMessage:
-                              'The timezone of every release can still be changed individually. ',
-                          })}
-                        >
-                          <Field.Label>
-                            {formatMessage({
-                              id: 'content-releases.pages.Settings.releases.timezone.label',
-                              defaultMessage: 'Default timezone',
-                            })}
-                          </Field.Label>
-                          <Combobox
-                            autocomplete={{ type: 'list', filter: 'contains' }}
-                            value={defaultTimezone}
-                            textValue={
-                              defaultTimezone ? defaultTimezone.replace(/&/, ' ') : undefined
-                            } // textValue is required to show the updated DST timezone
-                            onChange={(timezone) => {
-                              setDefaultTimezone(timezone);
-                            }}
-                            onTextValueChange={(timezone) => {
-                              setDefaultTimezone(timezone);
-                            }}
-                            onClear={() => {
-                              setDefaultTimezone('');
-                            }}
-                          >
-                            {timezoneList.map((timezone) => (
-                              <ComboboxOption key={timezone.value} value={timezone.value}>
-                                {timezone.value.replace(/&/, ' ')}
-                              </ComboboxOption>
-                            ))}
-                          </Combobox>
-                          <Field.Hint />
-                          <Field.Error />
-                        </Field.Root>
+                        <TimezoneDropdown />
                       </Grid.Item>
                     </Grid.Root>
                   </Flex>
@@ -189,5 +148,43 @@ export const SettingsPage = () => {
         </Form>
       </Page.Main>
     </Layouts.Root>
+  );
+};
+
+const TimezoneDropdown = () => {
+  const { formatMessage } = useIntl();
+  const { timezoneList } = getTimezones(new Date());
+  const field = useField('defaultTimezone');
+  return (
+    <Field.Root
+      name='defaultTimezone'
+      hint={formatMessage({
+        id: 'content-releases.pages.Settings.releases.timezone.hint',
+        defaultMessage: 'The timezone of every release can still be changed individually. ',
+      })}
+      error={field.error}
+    >
+      <Field.Label>
+        {formatMessage({
+          id: 'content-releases.pages.Settings.releases.timezone.label',
+          defaultMessage: 'Default timezone',
+        })}
+      </Field.Label>
+      <Combobox
+        autocomplete={{ type: 'list', filter: 'contains' }}
+        onChange={(value) => field.onChange('defaultTimezone', value)}
+        onTextValueChange={(value) => field.onChange('defaultTimezone', value)}
+        onClear={() => field.onChange('defaultTimezone', '')}
+        value={field.value ?? ''}
+      >
+        {timezoneList.map((timezone) => (
+          <ComboboxOption key={timezone.value} value={timezone.value}>
+            {timezone.value.replace(/&/, ' ')}
+          </ComboboxOption>
+        ))}
+      </Combobox>
+      <Field.Hint />
+      <Field.Error />
+    </Field.Root>
   );
 };
