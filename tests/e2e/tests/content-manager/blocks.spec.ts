@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
-import { findAndClose } from '../../utils/shared';
+import { findAndClose, navToHeader } from '../../utils/shared';
 
 const EDIT_URL = /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
 
@@ -15,7 +15,7 @@ test.describe('Blocks editor', () => {
   test('adds a code block and specifies the language', async ({ page }) => {
     // Write some text into a blocks editor
     const code = 'const problems = 99';
-    await page.goto('/admin/content-manager/single-types/api::homepage.homepage');
+    await navToHeader(page, ['Content Manager', 'Homepage'], 'Untitled');
     await expect(page.getByRole('link', { name: 'Back' })).toBeVisible();
     const textbox = page.getByRole('textbox').nth(1);
     await expect(textbox).toBeVisible();

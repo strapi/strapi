@@ -25,11 +25,11 @@ test.describe('List View', () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
       // Select all entries to publish
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      const items = page.getByRole('gridcell', { name: 'draft' });
+      const items = page.getByRole('gridcell', { name: 'modified' });
       expect(items).toHaveCount(2);
       const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
       await checkbox.check();
-      const publishButton = page.getByRole('button', { name: 'Publish' });
+      const publishButton = page.getByRole('button', { name: 'Publish' }).first();
       await publishButton.click();
 
       // Wait for the selected entries modal to appear
@@ -84,7 +84,7 @@ test.describe('List View', () => {
 
       await expect(page).toHaveTitle('Article | Strapi');
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      const items = page.getByRole('gridcell', { name: 'publish' });
+      const items = page.getByRole('gridcell', { name: 'published' });
       expect(items).toHaveCount(2);
       const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
 
@@ -95,7 +95,7 @@ test.describe('List View', () => {
 
       // Wait for the confirmation dialog to appear
       await page.waitForSelector('text=Are you sure you want to unpublish these entries?');
-      const unpublishButton = page.getByLabel('Confirm').getByRole('button', { name: 'Confirm' });
+      const unpublishButton = page.getByLabel('Confirm').getByRole('button', { name: 'Unpublish' });
       await unpublishButton.click();
 
       await expect(page.getByRole('gridcell', { name: 'draft' })).toHaveCount(2);
