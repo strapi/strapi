@@ -184,23 +184,20 @@ const addUniqueValidator = <T extends yup.AnySchema>(
         // we first need to ensure that the repeatable in the current entity is
         // valid against itself.
 
+        const { name: updatedName, value: updatedValue } = updatedAttribute;
         // Construct the full path to the unique field within the component.
-        const pathToCheck = [
-          ...componentContext.pathToComponent.slice(1),
-          updatedAttribute.name,
-        ].join('.');
+        const pathToCheck = [...componentContext.pathToComponent.slice(1), updatedName].join('.');
 
         // Extract the values from the repeatable data using the constructed path
         const values = componentContext.repeatableData.map((item) => {
           return pathToCheck.split('.').reduce((acc, key) => acc[key], item as any);
         });
 
-        // Ensure all values are unique within this entity
-        const isCurrentEntityRepeatableUnique = values.every(
-          (currentValue, index, self) => self.indexOf(currentValue) === index
-        );
+        // Check if the value is repeated in the current entity
+        const isUpdatedAttributeRepeatedInThisEntity =
+          values.filter((value) => value === updatedValue).length > 1;
 
-        if (!isCurrentEntityRepeatableUnique) {
+        if (isUpdatedAttributeRepeatedInThisEntity) {
           return false;
         }
       }
