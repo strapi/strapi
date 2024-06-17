@@ -8047,7 +8047,7 @@ __metadata:
     lodash: "npm:4.17.21"
     semver: "npm:7.5.4"
     tsconfig: "npm:5.0.0-beta.10"
-    umzug: "npm:3.2.1"
+    umzug: "npm:3.8.1"
   languageName: unknown
   linkType: soft
 
@@ -15171,14 +15171,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"emittery@npm:^0.12.1":
-  version: 0.12.1
-  resolution: "emittery@npm:0.12.1"
-  checksum: 551c51ee63058a85fde333b644999fb033df17763e802fc9aea584b9aa0a67cdf5c555b517b76c04977bacdac1675d616c44c965582a2d04524fb2e7fc280895
-  languageName: node
-  linkType: hard
-
-"emittery@npm:^0.13.1":
+"emittery@npm:^0.13.0, emittery@npm:^0.13.1":
   version: 0.13.1
   resolution: "emittery@npm:0.13.1"
   checksum: fbe214171d878b924eedf1757badf58a5dce071cd1fa7f620fa841a0901a80d6da47ff05929d53163105e621ce11a71b9d8acb1148ffe1745e045145f6e69521
@@ -16898,6 +16891,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"fast-glob@npm:^3.3.2":
+  version: 3.3.2
+  resolution: "fast-glob@npm:3.3.2"
+  dependencies:
+    "@nodelib/fs.stat": "npm:^2.0.2"
+    "@nodelib/fs.walk": "npm:^1.2.3"
+    glob-parent: "npm:^5.1.2"
+    merge2: "npm:^1.3.0"
+    micromatch: "npm:^4.0.4"
+  checksum: 222512e9315a0efca1276af9adb2127f02105d7288fa746145bf45e2716383fb79eb983c89601a72a399a56b7c18d38ce70457c5466218c5f13fad957cee16df
+  languageName: node
+  linkType: hard
+
 "fast-json-stable-stringify@npm:2.x, fast-json-stable-stringify@npm:^2.0.0, fast-json-stable-stringify@npm:^2.1.0":
   version: 2.1.0
   resolution: "fast-json-stable-stringify@npm:2.1.0"
@@ -17462,16 +17468,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fs-jetpack@npm:^4.3.1":
-  version: 4.3.1
-  resolution: "fs-jetpack@npm:4.3.1"
-  dependencies:
-    minimatch: "npm:^3.0.2"
-    rimraf: "npm:^2.6.3"
-  checksum: cb6636a083011124e8ca33720035171d177874fffb508448573db9eebef0d9ec5c29d73665373aa619f7ee4b495b142ae888f07217ea6ce40ba2f752894fec63
-  languageName: node
-  linkType: hard
-
 "fs-minipass@npm:^2.0.0, fs-minipass@npm:^2.1.0":
   version: 2.1.0
   resolution: "fs-minipass@npm:2.1.0"
@@ -18021,7 +18017,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"glob@npm:^8.0.1, glob@npm:^8.0.3":
+"glob@npm:^8.0.1":
   version: 8.1.0
   resolution: "glob@npm:8.1.0"
   dependencies:
@@ -25007,10 +25003,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pony-cause@npm:^2.1.2":
-  version: 2.1.9
-  resolution: "pony-cause@npm:2.1.9"
-  checksum: 549c91027c3027a16022427041efe809a906a5c7bbf944370641095e3a88caa9e04deb0abc5d7ea1c907b32fa3f908e3329b19e12753c9d826405754ef41e79a
+"pony-cause@npm:^2.1.4":
+  version: 2.1.11
+  resolution: "pony-cause@npm:2.1.11"
+  checksum: ed7d0bb6e3e69f753080bf736b71f40e6ae4c13ec0c8c473ff73345345c088819966fdd68a62ad7482d464bf41176cf9421f5f63715d1a4532005eedc099db55
   languageName: node
   linkType: hard
 
@@ -26699,17 +26695,6 @@ __metadata:
   bin:
     rimraf: dist/esm/bin.mjs
   checksum: a612c7184f96258b7d1328c486b12ca7b60aa30e04229a08bbfa7e964486deb1e9a1b52d917809311bdc39a808a4055c0f950c0280fba194ba0a09e6f0d404f6
-  languageName: node
-  linkType: hard
-
-"rimraf@npm:^2.6.3":
-  version: 2.7.1
-  resolution: "rimraf@npm:2.7.1"
-  dependencies:
-    glob: "npm:^7.1.3"
-  bin:
-    rimraf: ./bin.js
-  checksum: 4586c296c736483e297da7cffd19475e4a3e41d07b1ae124aad5d687c79e4ffa716bdac8732ed1db942caf65271cee9dd39f8b639611de161a2753e2112ffe1d
   languageName: node
   linkType: hard
 
@@ -29398,7 +29383,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"type-fest@npm:^2.18.0, type-fest@npm:^2.19.0":
+"type-fest@npm:^2.19.0":
   version: 2.19.0
   resolution: "type-fest@npm:2.19.0"
   checksum: 7bf9e8fdf34f92c8bb364c0af14ca875fac7e0183f2985498b77be129dc1b3b1ad0a6b3281580f19e48c6105c037fb966ad9934520c69c6434d17fd0af4eed78
@@ -29409,6 +29394,13 @@ __metadata:
   version: 3.5.4
   resolution: "type-fest@npm:3.5.4"
   checksum: 08350d7dab4a3bd555736ba2c929c4a7386cbc7e2fd650319c8e3437e93d3288c4d9617db40438e520d09e22002f1e0e4887a96b344201e0fe036b08a7ec7e44
+  languageName: node
+  linkType: hard
+
+"type-fest@npm:^4.0.0":
+  version: 4.20.1
+  resolution: "type-fest@npm:4.20.1"
+  checksum: 52dc64fae094949008afb79f21b02eca0289c8dc41ed1cfff88f343230edb476fca4815e1b5d58acf5e07fdc7a1b098504473b5931ef418e6f38a3edb70fc1df
   languageName: node
   linkType: hard
 
@@ -29645,17 +29637,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"umzug@npm:3.2.1":
-  version: 3.2.1
-  resolution: "umzug@npm:3.2.1"
+"umzug@npm:3.8.1":
+  version: 3.8.1
+  resolution: "umzug@npm:3.8.1"
   dependencies:
     "@rushstack/ts-command-line": "npm:^4.12.2"
-    emittery: "npm:^0.12.1"
-    fs-jetpack: "npm:^4.3.1"
-    glob: "npm:^8.0.3"
-    pony-cause: "npm:^2.1.2"
-    type-fest: "npm:^2.18.0"
-  checksum: e8da9b1a6a176bf73ab75c7861e2d6f42b37c8e939c55071eff89031f6964a5fff04f1fb375080c0f6fcf8f8cd44fdd1a4005e8459ef9d4290293b4a126e9904
+    emittery: "npm:^0.13.0"
+    fast-glob: "npm:^3.3.2"
+    pony-cause: "npm:^2.1.4"
+    type-fest: "npm:^4.0.0"
+  checksum: 0c65e577bdfd795db4bfe7d72e3115e0aaee06b02eca59a57c7f732549fc8eef2b9d884488ba32f2317112bd57736026e14fabb95b901084700d92a6d4ffd6c4
   languageName: node
   linkType: hard
 

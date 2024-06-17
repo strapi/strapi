@@ -25,9 +25,15 @@ interface Settings {
   [key: string]: unknown;
 }
 
+export type Logger = Record<
+  'info' | 'warn' | 'error' | 'debug',
+  (message: string | Record<string, unknown>) => void
+>;
+
 export interface DatabaseConfig {
   connection: Knex.Config;
   settings: Settings;
+  logger?: Logger;
 }
 
 const afterCreate =
@@ -59,6 +65,8 @@ class Database {
 
   entityManager: EntityManager;
 
+  logger: Logger;
+
   constructor(config: DatabaseConfig) {
     this.config = {
       ...config,
@@ -84,6 +92,8 @@ class Database {
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
+
+    this.logger = config.logger ?? console;
   }
 
   async init({ models }: { models: Model[] }) {

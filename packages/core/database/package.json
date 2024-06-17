@@ -47,7 +47,7 @@
     "knex": "3.0.1",
     "lodash": "4.17.21",
     "semver": "7.5.4",
-    "umzug": "3.2.1"
+    "umzug": "3.8.1"
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",

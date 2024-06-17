@@ -243,8 +243,16 @@ class Strapi extends Container implements Core.Strapi {
 
   // TODO: split into more providers
   registerInternalServices() {
+    const config = createConfigProvider(this.internal_config, this);
+
+    const logger = createLogger({
+      level: 'http', // Strapi defaults to level 'http'
+      ...config.get('logger'), // DEPRECATED
+      ...config.get('server.logger.config'),
+    });
+
     // Instantiate the Strapi container
-    this.add('config', () => createConfigProvider(this.internal_config, this))
+    this.add('config', () => config)
       .add('query-params', createQueryParamService(this))
       .add('content-api', createContentAPI(this))
       .add('auth', createAuth())
@@ -252,13 +260,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('fs', () => createStrapiFs(this))
       .add('eventHub', () => createEventHub())
       .add('startupLogger', () => utils.createStartupLogger(this))
-      .add('logger', () => {
-        return createLogger({
-          level: 'http', // Strapi defaults to level 'http'
-          ...this.config.get('logger'), // DEPRECATED
-          ...this.config.get('server.logger.config'),
-        });
-      })
+      .add('logger', () => logger)
       .add('fetch', () => utils.createStrapiFetch(this))
       .add('features', () => createFeaturesService(this))
       .add('requestContext', requestContext)
@@ -271,6 +273,7 @@ class Strapi extends Container implements Core.Strapi {
         () =>
           new Database(
             _.merge(this.config.get('database'), {
+              logger,
               settings: {
                 migrations: {
                   dir: path.join(this.dirs.app.root, 'database/migrations'),
