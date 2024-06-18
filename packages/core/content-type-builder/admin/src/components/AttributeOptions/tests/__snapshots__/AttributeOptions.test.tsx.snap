@@ -62,7 +62,7 @@ exports[`<AttributeOptions /> renders and matches the snapshot 1`] = `
   font-size: 1.4rem;
   line-height: 1.43;
   font-weight: 600;
-  color: currentcolor;
+  color: #32324d;
 }
 
 .c23 {
