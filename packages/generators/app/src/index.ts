@@ -36,7 +36,8 @@ export const generateNewApp = async (options: Options) => {
     isQuickstart: options.isQuickstart,
     // use package version as strapiVersion (all packages have the same version);
     strapiVersion: packageJson.version,
-    template: options.template,
+    template: options.useExampleApp ? 'example' : options.template, // Force example template if useExampleApp option === true
+    useExampleApp: options.useExampleApp,
     packageJsonStrapi: {
       template: options.template,
     },

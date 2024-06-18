@@ -54,6 +54,8 @@ command
 async function createStrapiApp(directory: string | undefined, options: Options) {
   validateOptions(options);
 
+  let useExampleApp = false; // Default to false
+
   if (options.quickstart && !directory) {
     console.error('Please specify the <directory> of your project when using --quickstart');
     process.exit(1);
@@ -65,12 +67,18 @@ async function createStrapiApp(directory: string | undefined, options: Options) 
     await handleCloudLogin();
   }
 
+  // Only prompt the example app option if there is no template option
+  if (!options.template) {
+    useExampleApp = await prompts.example();
+  }
+
   const appOptions = {
     directory: appDirectory,
     useTypescript: true,
     packageManager: 'npm',
-    // template: options.template,
+    template: options.template,
     isQuickstart: options.quickstart,
+    useExampleApp,
   } as GenerateNewAppOptions;
 
   if (options.javascript === true) {
@@ -103,7 +111,7 @@ async function createStrapiApp(directory: string | undefined, options: Options) 
         process.exit(0);
       }
     })
-    .catch((error) => {
+    .catch((error: { message: any }) => {
       console.error(`Error: ${error.message}`);
       process.exit(1);
     });

@@ -28,7 +28,7 @@ const allowedTemplateContents = {
 // Merge template with new project being created
 export default async function mergeTemplate(scope: Scope, rootPath: string) {
   if (!scope.template) {
-    throw new Error('Missing template');
+    throw new Error('Missing template or example app option');
   }
 
   let templatePath;
@@ -38,11 +38,24 @@ export default async function mergeTemplate(scope: Scope, rootPath: string) {
     scope.template?.startsWith(filePrefix)
   );
 
+  // Force templatePath to point to the internal example template
+  if (scope.useExampleApp) {
+    templatePath = path.resolve(
+      __dirname,
+      '..',
+      'resources',
+      'templates',
+      'example-app',
+      scope.useTypescript ? 'ts' : 'js'
+    );
+  }
+
   if (isLocalTemplate) {
     // Template is a local directory
     console.log('Installing local template.');
     templatePath = path.resolve(rootPath, '..', scope.template);
-  } else {
+  } else if (scope.template && scope.template !== 'example') {
+    // Skipping this block for the example template
     // Template should be an npm package. Fetch template info
     templatePackageInfo = await getTemplatePackageInfo(scope.template);
     console.log(`Installing ${chalk.yellow(templatePackageInfo.name)} template.`);
@@ -52,13 +65,15 @@ export default async function mergeTemplate(scope: Scope, rootPath: string) {
     templatePath = await downloadNpmTemplate(templatePackageInfo, templateParentPath);
   }
 
-  // Make sure the downloaded template matches the required format
-  const templateConfig = await checkTemplateRootStructure(templatePath);
-  await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
+  if (templatePath) {
+    // Make sure the downloaded template matches the required format
+    const templateConfig = await checkTemplateRootStructure(templatePath);
+    await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
 
-  // Merge contents of the template in the project
-  await mergePackageJSON({ rootPath, templateConfig, templatePackageInfo });
-  await mergeFilesAndDirectories(rootPath, templatePath);
+    // Merge contents of the template in the project
+    await mergePackageJSON({ rootPath, templateConfig, templatePackageInfo });
+    await mergeFilesAndDirectories(rootPath, templatePath);
+  }
 
   // Delete the template directory if it was downloaded
   if (!isLocalTemplate && templateParentPath) {

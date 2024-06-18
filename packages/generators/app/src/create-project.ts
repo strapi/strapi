@@ -93,7 +93,8 @@ export default async function createProject(scope: Scope) {
 
     // merge template files if a template is specified
     const hasTemplate = Boolean(scope.template);
-    if (hasTemplate) {
+    const hasExampleApp = Boolean(scope.useExampleApp);
+    if (hasTemplate || hasExampleApp) {
       try {
         await mergeTemplate(scope, rootPath);
       } catch (error) {

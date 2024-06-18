@@ -38,7 +38,7 @@
   "scripts": {
     "build": "pack-up build && run copy-files",
     "clean": "run -T rimraf ./dist",
-    "copy-files": "copyfiles -u 1 -a 'src/resources/files/**/*' 'src/resources/dot-files/**/*' 'src/resources/**/*.template' dist",
+    "copy-files": "copyfiles -u 1 -a 'src/resources/files/**/*' 'src/resources/dot-files/**/*' 'src/resources/**/*.template' 'src/resources/templates/example-app/**/*' dist",
     "lint": "run -T eslint .",
     "test:ts": "run -T tsc --noEmit",
     "watch": "pack-up watch"

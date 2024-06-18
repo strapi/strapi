@@ -19,7 +19,7 @@ async function dbPrompt() {
     {
       type: 'confirm',
       name: 'useDefault',
-      message: 'Use the default database (sqlite) ?',
+      message: 'Do you want to use the default database (sqlite) ?',
       default: true,
     },
   ]);
