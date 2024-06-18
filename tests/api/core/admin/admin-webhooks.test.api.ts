@@ -89,10 +89,12 @@ describe('Admin API Webhooks', () => {
     process.env.NODE_ENV = 'production';
 
     const { status } = await createWebhook({ url: 'http://localhost:1337' });
+    const { status: statusInt } = await createWebhook({ url: '私の.家' });
 
     process.env.NODE_ENV = originalNodeEnv;
 
     expect(status).toBe(400);
+    expect(statusInt).toBe(400);
   });
 
   test('Can not create a webhook with an invalid url', async () => {
