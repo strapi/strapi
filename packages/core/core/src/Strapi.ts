@@ -400,7 +400,8 @@ class Strapi extends Container implements Core.Strapi {
       await provider.register?.(this);
     }
 
-    await this.runLifecyclesFunctions(utils.LIFECYCLES.REGISTER);
+    await this.runPluginsLifecycles(utils.LIFECYCLES.REGISTER);
+    await this.runUserLifecycles(utils.LIFECYCLES.REGISTER);
 
     // NOTE: Swap type customField for underlying data type
     utils.convertCustomFieldType(this);
@@ -458,11 +459,13 @@ class Strapi extends Container implements Core.Strapi {
 
     await this.contentAPI.permissions.registerActions();
 
-    await this.runLifecyclesFunctions(utils.LIFECYCLES.BOOTSTRAP);
+    await this.runPluginsLifecycles(utils.LIFECYCLES.BOOTSTRAP);
 
     for (const provider of providers) {
       await provider.bootstrap?.(this);
     }
+
+    await this.runUserLifecycles(utils.LIFECYCLES.BOOTSTRAP);
 
     return this;
   }
@@ -491,11 +494,13 @@ class Strapi extends Container implements Core.Strapi {
 
   async destroy() {
     this.log.info('Shutting down Strapi');
-    await this.runLifecyclesFunctions(utils.LIFECYCLES.DESTROY);
+    await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
 
     for (const provider of providers) {
       await provider.destroy?.(this);
     }
+
+    await this.runUserLifecycles(utils.LIFECYCLES.DESTROY);
 
     await this.server.destroy();
 
@@ -511,10 +516,12 @@ class Strapi extends Container implements Core.Strapi {
     this.log.info('Strapi has been shut down');
   }
 
-  async runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
+  async runPluginsLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
     // plugins
     await this.get('modules')[lifecycleName]();
+  }
 
+  async runUserLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
     // user
     const userLifecycleFunction = this.app && this.app[lifecycleName];
     if (isFunction(userLifecycleFunction)) {
