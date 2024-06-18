@@ -12,8 +12,12 @@ let strapi: Core.Strapi;
 let data;
 let rq;
 
-const cat = (letter) => {
+const cat = (letter: string) => {
   return data.category.find((c) => c.name.toLowerCase().endsWith(letter));
+};
+
+const article = (letter: string) => {
+  return data.article.find((a) => a.title.toLowerCase().endsWith(letter));
 };
 
 const schemas = {
@@ -113,12 +117,6 @@ const fixtures = {
   ],
   tag: [{ name: 'Tag A' }, { name: 'Tag B' }, { name: 'Tag C' }, { name: 'Tag D' }],
   articles(fixtures) {
-    const x = {
-      D: ['A', 'D'], // 3
-      A: ['B'], // 1
-      B: ['C', 'D'], // 4
-      C: ['D'], // 2
-    };
     return [
       {
         title: 'Article A',
@@ -148,6 +146,30 @@ const fixtures = {
   },
 };
 
+const BASIC_ARTICLE_FIELDS = {
+  documentId: expect.any(String),
+  locale: 'en',
+  publishedAt: expect.anything(),
+  updatedAt: expect.anything(),
+  createdAt: expect.anything(),
+};
+
+/**
+ * Article(A) -> Categories(B)
+ * Article(B) -> Categories(C, D)
+ * Article(C) -> Categories(D)
+ * Article(D) -> Categories(A, D)
+ *
+ * Category(A) -> Tags(B)
+ * Category(B) -> Tags(C)
+ * Category(C) -> Tags(A, D)
+ * Category(D) -> Tags(A)
+ *
+ * 1 - Article(A) -> Categories(B) -> Tags(C)
+ * 4 - Article(B) -> Categories(C, D) -> Tags(A, D)
+ * 2 - Article(C) -> Categories(D) -> Tags(A)
+ * 3 - Article(D) -> Categories(A, D) -> Tags(A, B)
+ */
 describe('Sort', () => {
   beforeAll(async () => {
     await builder
@@ -167,230 +189,215 @@ describe('Sort', () => {
     await builder.cleanup();
   });
 
-  test('by an attribute in a relation (all pages)', async () => {
-    const pageSize = 3;
+  test('Regular sort', async () => {
+    const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+      qs: { sort: 'title' },
+    });
 
-    const page1 = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBe(4);
+
+    expect(res.body.data).toMatchObject([
+      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS },
+      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS },
+      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS },
+      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS },
+    ]);
+  });
+
+  test('Deep Sort (1st level)', async () => {
+    const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+      qs: { sort: 'categories.name', populate: 'categories' },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBe(4);
+
+    expect(res.body.data).toMatchObject([
+      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
+      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS, categories: [cat('b')] },
+      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
+      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS, categories: [cat('d')] },
+    ]);
+  });
+
+  test('Deep Sort (2nd level)', async () => {
+    const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+      qs: { sort: 'categories.tags.name', populate: 'categories.tags' },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBe(4);
+
+    expect(res.body.data).toMatchObject([
+      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS, categories: [cat('d')] },
+      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
+      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
+      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS, categories: [cat('b')] },
+    ]);
+  });
+
+  test('Deep sort (2nd level) + Regular sort', async () => {
+    const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+      qs: { sort: ['categories.name:desc', 'title:asc'], populate: 'categories' },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBe(4);
+
+    expect(res.body.data).toMatchObject([
+      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
+      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS, categories: [cat('d')] },
+      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
+      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS, categories: [cat('b')] },
+    ]);
+  });
+
+  test('2 Deep Sort (2nd level + 1st level)', async () => {
+    const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+      qs: { sort: ['categories.tags.name', 'categories.name'], populate: 'categories.tags' },
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBe(4);
+
+    expect(res.body.data).toMatchObject([
+      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
+      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
+      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS, categories: [cat('d')] },
+      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS, categories: [cat('b')] },
+    ]);
+  });
+
+  test('Deep sort (2st level) + Pagination (start/limit)', async () => {
+    const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
       qs: {
-        sort: 'categories.name',
-        populate: 'categories',
-        pagination: {
-          pageSize,
-          page: 1,
-        },
+        sort: 'categories.tags.name',
+        pagination: { start: 1, limit: 2 },
+        populate: 'categories.tags',
       },
     });
 
+    expect(res.status).toBe(200);
+    expect(res.body.data.length).toBe(2);
+
+    expect(res.body.data).toMatchObject([
+      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
+      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
+    ]);
+  });
+
+  test('Deep sort (1st level) + Pagination (page/pageSize)', async () => {
+    const pageSize = 3;
+
+    const page1 = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+      qs: { sort: 'categories.name', populate: 'categories', pagination: { pageSize, page: 1 } },
+    });
+
     const page2 = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
-      qs: {
-        sort: 'categories.name',
-        populate: 'categories',
-        pagination: {
-          pageSize,
-          page: 2,
-        },
-      },
+      qs: { sort: 'categories.name', populate: 'categories', pagination: { pageSize, page: 2 } },
     });
 
     expect(page1.status).toBe(200);
     expect(page1.body.data.length).toBe(3);
+
     expect(page2.status).toBe(200);
     expect(page2.body.data.length).toBe(1);
 
-    const basicFields = {
-      documentId: expect.any(String),
-      locale: 'en',
-      publishedAt: expect.anything(),
-      updatedAt: expect.anything(),
-    };
-
-    // TODO: some dbs might not return categories data sorted by id, this should be arrayContaining+objectMatching
+    // Page 1
     expect(page1.body.data).toMatchObject([
-      {
-        id: 3,
-        ...basicFields,
-        title: 'Article D',
-        categories: [cat('a'), cat('d')],
-      },
-      {
-        id: 1,
-        ...basicFields,
-        title: 'Article A',
-        categories: [cat('b')],
-      },
-      {
-        id: 4,
-        ...basicFields,
-        title: 'Article B',
-        categories: [cat('c'), cat('d')],
-      },
-    ]);
-    expect(page2.body.data).toMatchObject([
-      {
-        id: 2,
-        ...basicFields,
-        title: 'Article C',
-        categories: [cat('d')],
-      },
+      { id: 3, ...BASIC_ARTICLE_FIELDS, title: 'Article D', categories: [cat('a'), cat('d')] },
+      { id: 1, ...BASIC_ARTICLE_FIELDS, title: 'Article A', categories: [cat('b')] },
+      { id: 4, ...BASIC_ARTICLE_FIELDS, title: 'Article B', categories: [cat('c'), cat('d')] },
     ]);
 
     expect(page1.body.meta).toMatchObject({
-      pagination: {
-        page: 1,
-        pageSize,
-        pageCount: 2,
-        total: 4,
-      },
+      pagination: { page: 1, pageSize, pageCount: 2, total: 4 },
     });
+
+    // Page 2
+    expect(page2.body.data).toMatchObject([
+      { id: 2, ...BASIC_ARTICLE_FIELDS, title: 'Article C', categories: [cat('d')] },
+    ]);
+
     expect(page2.body.meta).toMatchObject({
-      pagination: {
-        page: 2,
-        pageSize,
-        pageCount: 2,
-        total: 4,
-      },
+      pagination: { page: 2, pageSize, pageCount: 2, total: 4 },
     });
   });
 
-  test('by an attribute in a relation (all results in one page)', async () => {
-    const page = 1;
-    const pageSize = 100;
-
-    const { status, body } = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+  test('Deep sort (1st level) + Filters', async () => {
+    const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
       qs: {
-        sort: ['categories.name'],
-        populate: 'categories',
-        pagination: {
-          page,
-          pageSize,
-        },
+        sort: ['categories.name:ASC', 'title:DESC'],
+        filters: { title: { $ne: 'Article B' } },
       },
     });
 
-    expect(status).toBe(200);
-    expect(body.data.length).toBe(4);
-
-    const basicFields = {
-      documentId: expect.any(String),
-      publishedAt: expect.anything(),
-      updatedAt: expect.anything(),
-    };
-    // TODO: some dbs might not return categories data sorted by id, this should be arrayContaining+objectMatching
-    expect(body.data).toMatchObject([
-      {
-        id: 3,
-        ...basicFields,
-        title: 'Article D',
-        categories: [cat('a'), cat('d')],
-      },
-      {
-        id: 1,
-        ...basicFields,
-        title: 'Article A',
-        categories: [cat('b')],
-      },
-      {
-        id: 4,
-        ...basicFields,
-        title: 'Article B',
-        categories: [cat('c'), cat('d')],
-      },
-      {
-        id: 2,
-        ...basicFields,
-        title: 'Article C',
-        categories: [cat('d')],
-      },
+    expect(res.body.data).toMatchObject([
+      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS },
+      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS },
+      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS },
     ]);
-
-    expect(body.meta).toMatchObject({
-      pagination: {
-        page,
-        pageSize,
-        pageCount: 1,
-        total: 4,
-      },
-    });
   });
 
-  test.only('by a third level relation', async () => {
-    const page = 1;
-    const pageSize = 100;
-
-    const { status, body } = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
+  // This one will fail because we don't support deep sort with deep filter
+  // The where and orderBy will be applied to two different joins (instead of a single one), impacting the results
+  test.skip('Deep sort (1st level) + Deep filters (1st level)', async () => {
+    const res = await rq.get(`/${schemas.contentTypes.article.pluralName}`, {
       qs: {
-        sort: ['categories.tags.name', 'categories.name'],
-        populate: 'categories.tags',
-        pagination: {
-          page,
-          pageSize,
-        },
+        sort: ['categories.name:ASC', 'title:DESC'],
+        filters: { categories: { name: { $ne: 'Category C' } } },
       },
     });
 
-    expect(status).toBe(200);
-    expect(body.data.length).toBe(4);
-
-    const basicFields = {
-      documentId: expect.any(String),
-      publishedAt: expect.anything(),
-      updatedAt: expect.anything(),
-    };
-    // TODO: some dbs might not return categories data sorted by id, this should be arrayContaining+objectMatching
-    expect(body.data).toMatchObject([
-      {
-        id: 3,
-        ...basicFields,
-        title: 'Article D',
-        categories: [cat('a'), cat('d')],
-      },
-      {
-        id: 1,
-        ...basicFields,
-        title: 'Article A',
-        categories: [cat('b')],
-      },
-      {
-        id: 4,
-        ...basicFields,
-        title: 'Article B',
-        categories: [cat('c'), cat('d')],
-      },
-      {
-        id: 2,
-        ...basicFields,
-        title: 'Article C',
-        categories: [cat('d')],
-      },
+    expect(res.body.data).toMatchObject([
+      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS },
+      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS },
+      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS },
+      { id: 1, title: 'Article B', ...BASIC_ARTICLE_FIELDS },
     ]);
+  });
 
-    expect(body.meta).toMatchObject({
-      pagination: {
-        page,
-        pageSize,
-        pageCount: 1,
-        total: 4,
-      },
+  test('Update + Deep sort (1st level) should ignore the sort', async () => {
+    const articleToModify = article('a');
+
+    const res = await rq.put(
+      `/${schemas.contentTypes.article.pluralName}/${articleToModify.documentId}`,
+      {
+        body: { data: { primary: cat('d').id } },
+        qs: {
+          filter: { title: articleToModify.title },
+          sort: 'categories.name',
+          populate: 'categories',
+        },
+      }
+    );
+
+    expect(res.status).toBe(200);
+
+    expect(res.body.data).toMatchObject({
+      id: 1,
+      title: 'Article A',
+      ...BASIC_ARTICLE_FIELDS,
+      categories: [cat('b')],
     });
   });
 
-  test.todo('Update + deep sort');
+  test('Delete + Deep sort (1st level) should ignore the sort', async () => {
+    const articleToDelete = article('a');
 
-  test.todo('Delete + deep sort');
+    const res = await rq.delete(
+      `/${schemas.contentTypes.article.pluralName}/${articleToDelete.documentId}`,
+      {
+        qs: {
+          filter: { title: articleToDelete.title },
+          sort: 'categories.name',
+          populate: 'categories',
+        },
+      }
+    );
 
-  test('Foo', async () => {
-    const entry = await strapi.documents('api::article.article').findFirst({
-      sort: 'categories.name:desc',
-      populate: 'categories',
-    });
-
-    expect(entry).toMatchObject({
-      id: 2,
-      documentId: expect.any(String),
-      publishedAt: expect.anything(),
-      updatedAt: expect.anything(),
-      title: 'Article C',
-      categories: [cat('d')],
-    });
+    expect(res.status).toBe(204);
+    expect(res.body.data).toBeUndefined();
   });
 });
