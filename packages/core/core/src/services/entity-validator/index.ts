@@ -319,7 +319,22 @@ const createAttributeValidator =
           options
         );
       } else if (metas.attr.type === 'dynamiczone') {
-        validator = createDzValidator(createOrUpdate)(metas, options);
+        // TODO: fix! query layer fails when building a where for dynamic
+        // zones
+        const pathToComponent = [
+          ...(metas?.componentContext?.pathToComponent ?? []),
+          metas.updatedAttribute.name,
+        ];
+
+        const newComponentContext = {
+          ...(metas?.componentContext ?? {}),
+          pathToComponent,
+        };
+
+        validator = createDzValidator(createOrUpdate)(
+          { ...metas, componentContext: newComponentContext as ComponentContext },
+          options
+        );
       } else if (metas.attr.type === 'relation') {
         validator = createRelationValidator(createOrUpdate)(
           {
