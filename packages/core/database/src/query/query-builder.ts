@@ -484,7 +484,6 @@ const createQueryBuilder = (
       });
 
       if (this.shouldUseDistinct()) {
-        // todo (sort): see what to do with the joins order by columns
         const joinsOrderByColumns = state.joins.flatMap((join) => {
           return _.keys(join.orderBy).map((key) => this.aliasColumn(key, join.alias));
         });
