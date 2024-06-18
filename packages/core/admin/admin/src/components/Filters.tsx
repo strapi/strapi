@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Popover, Tag, useComposedRefs } from '@strapi/design-system';
+import { Box, Button, Flex, Popover, Tag } from '@strapi/design-system';
 import { Plus, Filter as FilterIcon, Cross } from '@strapi/icons';
 import { Schema } from '@strapi/types';
 import { useIntl } from 'react-intl';
@@ -12,6 +12,7 @@ import {
   IS_SENSITIVE_FILTERS,
   NUMERIC_FILTERS,
   STRING_PARSE_FILTERS,
+  FILTERS_WITH_NO_VALUE,
 } from '../constants/filters';
 import { useControllableState } from '../hooks/useControllableState';
 import { useQueryParams } from '../hooks/useQueryParams';
@@ -119,7 +120,9 @@ const PopoverImpl = () => {
   }
 
   const handleSubmit = (data: FilterFormData) => {
-    if (!data.value) {
+    const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : data.value;
+
+    if (!value) {
       return;
     }
 
@@ -130,12 +133,12 @@ const PopoverImpl = () => {
     /**
      * There will ALWAYS be an option because we use the options to create the form data.
      */
-    const filterType = options.find((filter) => filter.name === data.name)!.type;
+    const fieldOptions = options.find((filter) => filter.name === data.name)!;
 
     /**
      * If the filter is a relation, we need to nest the filter object,
-     * we always use ids to filter relations. But the nested object is
-     * the operator & value pair. This value _could_ look like:
+     * we filter based on the mainField of the relation, if there is no mainField, we use the id.
+     * At the end, we pass the operator & value. This value _could_ look like:
      * ```json
      * {
      *  "$eq": "1",
@@ -143,7 +146,7 @@ const PopoverImpl = () => {
      * ```
      */
     const operatorValuePairing = {
-      [data.filter]: data.value,
+      [data.filter]: value,
     };
 
     const newFilterQuery = {
@@ -152,9 +155,9 @@ const PopoverImpl = () => {
         ...(query.filters?.$and ?? []),
         {
           [data.name]:
-            filterType === 'relation'
+            fieldOptions.type === 'relation'
               ? {
-                  id: operatorValuePairing,
+                  [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
                 }
               : operatorValuePairing,
         },
@@ -266,7 +269,6 @@ const getFilterList = (filter?: Filters.Filter): FilterOption[] => {
   switch (type) {
     case 'email':
     case 'text':
-    case 'enumeration':
     case 'string': {
       return [
         ...BASE_FILTERS,
@@ -289,6 +291,10 @@ const getFilterList = (filter?: Filters.Filter): FilterOption[] => {
 
     case 'datetime': {
       return [...BASE_FILTERS, ...NUMERIC_FILTERS];
+    }
+
+    case 'enumeration': {
+      return BASE_FILTERS;
     }
 
     default:
