@@ -7835,6 +7835,7 @@ __metadata:
     "@types/markdown-it-footnote": "npm:3.0.3"
     "@types/passport-local": "npm:1.0.36"
     "@types/pluralize": "npm:0.0.32"
+    "@types/punycode": "npm:2.1.4"
     "@types/react-window": "npm:1.8.8"
     "@types/sanitize-html": "npm:2.11.0"
     "@types/webpack-bundle-analyzer": "npm:4.6.3"
@@ -7868,6 +7869,7 @@ __metadata:
     immer: "npm:9.0.19"
     inquirer: "npm:8.2.5"
     invariant: "npm:^2.2.4"
+    is-localhost-ip: "npm:2.0.0"
     js-cookie: "npm:2.2.1"
     jsonwebtoken: "npm:9.0.0"
     koa: "npm:2.13.4"
@@ -7897,6 +7899,7 @@ __metadata:
     pluralize: "npm:8.0.0"
     prettier: "npm:2.8.4"
     prop-types: "npm:^15.8.1"
+    punycode: "npm:2.3.1"
     qs: "npm:6.11.1"
     react: "npm:^18.2.0"
     react-dnd: "npm:16.0.1"
@@ -10377,6 +10380,13 @@ __metadata:
   version: 15.7.5
   resolution: "@types/prop-types@npm:15.7.5"
   checksum: 5b43b8b15415e1f298243165f1d44390403bb2bd42e662bca3b5b5633fdd39c938e91b7fce3a9483699db0f7a715d08cef220c121f723a634972fdf596aec980
+  languageName: node
+  linkType: hard
+
+"@types/punycode@npm:2.1.4":
+  version: 2.1.4
+  resolution: "@types/punycode@npm:2.1.4"
+  checksum: 16637bdd8e4f830243072668125f83b93b728085a05140ccc3e7801528d78c62cce5426b07d5cdc75e4f797e1644807c762777f651d1cd071ad0128835cdce5e
   languageName: node
   linkType: hard
 
@@ -19900,6 +19910,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"is-localhost-ip@npm:2.0.0":
+  version: 2.0.0
+  resolution: "is-localhost-ip@npm:2.0.0"
+  checksum: ac4c4b0a546d3bd9f40b1545ecb20b968284b1a04531c54e6af18ce4cd596cbdfece3c3e468ce8c8b17fde5c27124057e55121e1c5889e84fcd70df604b5b71b
+  languageName: node
+  linkType: hard
+
 "is-lower-case@npm:^1.1.0":
   version: 1.1.3
   resolution: "is-lower-case@npm:1.1.3"
@@ -26305,6 +26322,13 @@ __metadata:
     inherits: "npm:^2.0.3"
     pump: "npm:^2.0.0"
   checksum: 5d11a99f320dc2a052610399bac6d03db0a23bc23b23aa2a7d0adf879da3065a55134b975db66dc46bc79f54af3dd575d8119113a0a5b311a00580e1f053896b
+  languageName: node
+  linkType: hard
+
+"punycode@npm:2.3.1":
+  version: 2.3.1
+  resolution: "punycode@npm:2.3.1"
+  checksum: febdc4362bead22f9e2608ff0171713230b57aff9dddc1c273aa2a651fbd366f94b7d6a71d78342a7c0819906750351ca7f2edd26ea41b626d87d6a13d1bd059
   languageName: node
   linkType: hard
 
