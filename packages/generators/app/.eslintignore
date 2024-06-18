@@ -1,4 +1,5 @@
 node_modules/
 .eslintrc.js
 src/resources/files/
+src/resources/templates/example-app/
 dist/

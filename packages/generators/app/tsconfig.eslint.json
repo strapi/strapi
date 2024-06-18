@@ -4,5 +4,5 @@
     "noEmit": true
   },
   "include": ["src", "packup.config.ts"],
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules", "src/resources/templates/example-app"]
 }

@@ -3,5 +3,5 @@
   "compilerOptions": {
     "outDir": "dist"
   },
-  "exclude": ["**/__tests__/**", "src/resources/files"]
+  "exclude": ["**/__tests__/**", "src/resources/files", "src/resources/templates/example-app"]
 }

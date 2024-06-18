@@ -30,4 +30,19 @@ async function typescript() {
   return useTypescript;
 }
 
-export { directory, typescript };
+async function example() {
+  const { useExampleApp } = await inquirer.prompt<{
+    useExampleApp: boolean;
+  }>([
+    {
+      type: 'confirm',
+      name: 'useExampleApp',
+      message: 'Do you want to start with an example structure & data ?',
+      default: true,
+    },
+  ]);
+
+  return useExampleApp;
+}
+
+export { directory, typescript, example };

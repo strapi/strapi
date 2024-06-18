@@ -1,0 +1,32 @@
+{
+  "name": "@strapi/template-blog",
+  "version": "2.0.5",
+  "description": "Strapi blog template",
+  "keywords": [
+    "strapi",
+    "template",
+    "blog"
+  ],
+  "homepage": "https://github.com/strapi/starters-and-templates#readme",
+  "bugs": {
+    "url": "https://github.com/strapi/starters-and-templates/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/strapi/starters-and-templates.git"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "gitHead": "d6d5bd264d1df0a0f23b5234d84348f8d78882e3"
+}
