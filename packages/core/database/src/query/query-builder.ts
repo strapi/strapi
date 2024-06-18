@@ -453,7 +453,7 @@ const createQueryBuilder = (
           .filter(({ column }) => {
             const col = column.split('.');
 
-            for (let i = 0; i < col.length - 1; i++) {
+            for (let i = 0; i < col.length - 1; i += 1) {
               const el = col[i];
 
               // order by "rel"."xxx"
