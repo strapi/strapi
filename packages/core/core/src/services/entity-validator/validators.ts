@@ -1,15 +1,16 @@
 import _ from 'lodash';
-import strapiUtils from '@strapi/utils';
-import type { Schema, Struct } from '@strapi/types';
+import { yup } from '@strapi/utils';
+import type { Schema, Struct, Modules } from '@strapi/types';
 import blocksValidator from './blocks-validator';
 
-const { yup } = strapiUtils;
+import type { ComponentContext } from '.';
 
 interface ValidatorMetas<TAttribute extends Schema.Attribute.AnyAttribute> {
   attr: TAttribute;
   model: Struct.ContentTypeSchema;
   updatedAttribute: { name: string; value: unknown };
-  entity: Record<string, unknown> | null;
+  entity: Modules.EntityValidator.Entity;
+  componentContext: ComponentContext;
 }
 
 interface ValidatorOptions {
@@ -23,7 +24,7 @@ interface ValidatorOptions {
  * Adds minLength validator
  */
 const addMinLengthValidator = (
-  validator: strapiUtils.yup.StringSchema,
+  validator: yup.StringSchema,
   {
     attr,
   }: {
@@ -47,7 +48,7 @@ const addMinLengthValidator = (
  * @returns {StringSchema}
  */
 const addMaxLengthValidator = (
-  validator: strapiUtils.yup.StringSchema,
+  validator: yup.StringSchema,
   {
     attr,
   }: {
@@ -68,7 +69,7 @@ const addMaxLengthValidator = (
  * @returns {NumberSchema}
  */
 const addMinIntegerValidator = (
-  validator: strapiUtils.yup.NumberSchema,
+  validator: yup.NumberSchema,
   {
     attr,
   }: {
@@ -80,7 +81,7 @@ const addMinIntegerValidator = (
  * Adds max integer validator
  */
 const addMaxIntegerValidator = (
-  validator: strapiUtils.yup.NumberSchema,
+  validator: yup.NumberSchema,
   {
     attr,
   }: {
@@ -92,7 +93,7 @@ const addMaxIntegerValidator = (
  * Adds min float/decimal validator
  */
 const addMinFloatValidator = (
-  validator: strapiUtils.yup.NumberSchema,
+  validator: yup.NumberSchema,
   {
     attr,
   }: {
@@ -104,7 +105,7 @@ const addMinFloatValidator = (
  * Adds max float/decimal validator
  */
 const addMaxFloatValidator = (
-  validator: strapiUtils.yup.NumberSchema,
+  validator: yup.NumberSchema,
   {
     attr,
   }: {
@@ -116,7 +117,7 @@ const addMaxFloatValidator = (
  * Adds regex validator
  */
 const addStringRegexValidator = (
-  validator: strapiUtils.yup.StringSchema,
+  validator: yup.StringSchema,
   {
     attr,
   }: {
@@ -137,13 +138,14 @@ const addStringRegexValidator = (
 /**
  * Adds unique validator
  */
-const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
+const addUniqueValidator = <T extends yup.AnySchema>(
   validator: T,
   {
     attr,
     model,
     updatedAttribute,
     entity,
+    componentContext,
   }: ValidatorMetas<Schema.Attribute.AnyAttribute & Schema.Attribute.UniqueOption>,
   options: ValidatorOptions
 ): T => {
@@ -172,20 +174,100 @@ const addUniqueValidator = <T extends strapiUtils.yup.AnySchema>(
       return true;
     }
 
-    /**
-     * At this point we know that we are creating a new entry, publishing an entry or that the unique field value has changed
-     * We check if there is an entry of this content type in the same locale, publication state and with the same unique field value
-     */
-    const record = await strapi.db.query(model.uid).findOne({
-      where: {
-        locale: options.locale,
-        publishedAt: options.isDraft ? null : { $notNull: true },
-        [updatedAttribute.name]: value,
-        ...(entity?.id ? { id: { $ne: entity.id } } : {}),
-      },
-    });
+    let queryUid: string;
+    let queryWhere: Record<string, any> = {};
 
-    return !record;
+    if (componentContext) {
+      const hasRepeatableData = componentContext.repeatableData.length > 0;
+      if (hasRepeatableData) {
+        // If we are validating a unique field within a repeatable component,
+        // we first need to ensure that the repeatable in the current entity is
+        // valid against itself.
+
+        const { name: updatedName, value: updatedValue } = updatedAttribute;
+        // Construct the full path to the unique field within the component.
+        const pathToCheck = [...componentContext.pathToComponent.slice(1), updatedName].join('.');
+
+        // Extract the values from the repeatable data using the constructed path
+        const values = componentContext.repeatableData.map((item) => {
+          return pathToCheck.split('.').reduce((acc, key) => acc[key], item as any);
+        });
+
+        // Check if the value is repeated in the current entity
+        const isUpdatedAttributeRepeatedInThisEntity =
+          values.filter((value) => value === updatedValue).length > 1;
+
+        if (isUpdatedAttributeRepeatedInThisEntity) {
+          return false;
+        }
+      }
+
+      /**
+       * When `componentContext` is present it means we are dealing with a unique
+       * field within a component.
+       *
+       * The unique validation must consider the specific context of the
+       * component, which will always be contained within a parent content type
+       * and may also be nested within another component.
+       *
+       * We construct a query that takes into account the parent's model UID,
+       * dimensions (such as draft and publish state/locale) and excludes the current
+       * content type entity by its ID if provided.
+       */
+      const {
+        model: parentModel,
+        options: parentOptions,
+        id: excludeId,
+      } = componentContext.parentContent;
+      queryUid = parentModel.uid;
+
+      const whereConditions: Record<string, any> = {};
+      const isParentDraft = parentOptions && parentOptions.isDraft;
+
+      whereConditions.publishedAt = isParentDraft ? null : { $notNull: true };
+
+      if (parentOptions?.locale) {
+        whereConditions.locale = parentOptions.locale;
+      }
+
+      if (excludeId && !Number.isNaN(excludeId)) {
+        whereConditions.id = { $ne: excludeId };
+      }
+
+      queryWhere = {
+        ...componentContext.pathToComponent.reduceRight((acc, key) => ({ [key]: acc }), {
+          [updatedAttribute.name]: value,
+        }),
+
+        ...whereConditions,
+      };
+    } else {
+      /**
+       * Here we are validating a scalar unique field from the content type's schema.
+       * We construct a query to check if the value is unique
+       * considering dimensions (e.g. locale, publication state) and excluding the current entity by its ID if available.
+       */
+      queryUid = model.uid;
+      const scalarAttributeWhere: Record<string, any> = {
+        [updatedAttribute.name]: value,
+      };
+
+      scalarAttributeWhere.publishedAt = options.isDraft ? null : { $notNull: true };
+
+      if (options?.locale) {
+        scalarAttributeWhere.locale = options.locale;
+      }
+
+      if (entity?.id) {
+        scalarAttributeWhere.id = { $ne: entity.id };
+      }
+
+      queryWhere = scalarAttributeWhere;
+    }
+
+    // The validation should pass if there is no other record found from the query
+    // TODO query not working for dynamic zones (type === relation)
+    return !(await strapi.db.query(queryUid).findOne({ where: queryWhere }));
   });
 };
 

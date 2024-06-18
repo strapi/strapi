@@ -58,6 +58,26 @@
         }
       },
       "type": "uid"
+    },
+    "identifiers": {
+      "type": "component",
+      "repeatable": false,
+      "component": "unique.top-level",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "repeatableIdentifiers": {
+      "type": "component",
+      "repeatable": true,
+      "component": "unique.top-level",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

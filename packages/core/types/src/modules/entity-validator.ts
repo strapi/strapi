@@ -3,12 +3,10 @@ import type * as UID from '../uid';
 
 import type * as EntityService from './entity-service';
 
-type Entity = {
-  id: ID;
+export type Entity = {
+  id: number;
   [key: string]: unknown;
 } | null;
-
-type ID = { id: string | number };
 
 type Options = { isDraft?: boolean; locale?: string };
 

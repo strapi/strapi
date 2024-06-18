@@ -73,7 +73,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
       year: 'numeric',
     });
 
-    await page.getByRole('gridcell', { name: formattedDate }).click();
+    await page.getByLabel(formattedDate).click();
 
     await page
       .getByRole('combobox', {

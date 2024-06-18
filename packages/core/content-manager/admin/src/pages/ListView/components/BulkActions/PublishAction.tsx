@@ -69,7 +69,14 @@ const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessag
           )
         );
       } else {
-        messages.push(...formatErrorMessages(value, currentKey, formatMessage));
+        messages.push(
+          ...formatErrorMessages(
+            // @ts-expect-error TODO: check why value is not compatible with FormErrors
+            value,
+            currentKey,
+            formatMessage
+          )
+        );
       }
     } else {
       messages.push(

@@ -5,19 +5,19 @@ import { mockOptions } from './utils';
 
 describe('Time validator', () => {
   describe('unique', () => {
-    const fakeFindFirst = jest.fn();
+    const fakeFindOne = jest.fn();
 
     global.strapi = {
       db: {
         query: () => ({
-          findOne: fakeFindFirst,
+          findOne: fakeFindOne,
         }),
       },
     } as any;
 
     afterEach(() => {
       jest.clearAllMocks();
-      fakeFindFirst.mockReset();
+      fakeFindOne.mockReset();
     });
 
     const fakeModel: Schema.ContentType = {
@@ -38,7 +38,7 @@ describe('Time validator', () => {
     };
 
     test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.time(
@@ -54,11 +54,11 @@ describe('Time validator', () => {
 
       await validator('00:00:00.000Z');
 
-      expect(fakeFindFirst).not.toHaveBeenCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it does not validates the unique constraint if the attribute value is `null`', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators
@@ -75,11 +75,11 @@ describe('Time validator', () => {
       );
 
       await validator(null);
-      expect(fakeFindFirst).not.toHaveBeenCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it validates the unique constraint if there is no other record in the database', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.time(
@@ -98,7 +98,7 @@ describe('Time validator', () => {
 
     test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
       expect.assertions(1);
-      fakeFindFirst.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
+      fakeFindOne.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
         validators.time(
@@ -120,7 +120,7 @@ describe('Time validator', () => {
     });
 
     test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
-      fakeFindFirst.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
+      fakeFindOne.mockResolvedValueOnce({ attrTimeUnique: '00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
         validators.time(
@@ -140,7 +140,7 @@ describe('Time validator', () => {
     const valueToCheck = '00:00:00.000Z';
 
     test('it checks the database for records with the same value for the checked attribute', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.time(
@@ -156,7 +156,7 @@ describe('Time validator', () => {
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           locale: 'en',
           publishedAt: null,
@@ -166,7 +166,7 @@ describe('Time validator', () => {
     });
 
     test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.time(
@@ -182,7 +182,7 @@ describe('Time validator', () => {
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           attrTimeUnique: valueToCheck,
           id: {
