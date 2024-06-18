@@ -11,6 +11,9 @@ type OrderByCtx = Ctx & { alias?: string };
 type OrderBy = string | { [key: string]: 'asc' | 'desc' } | OrderBy[];
 type OrderByValue = { column: string; order?: 'asc' | 'desc' };
 
+const COL_STRAPI_ROW_NUMBER = '__strapi_row_number';
+const COL_STRAPI_ORDER_BY_PREFIX = '__strapi_order_by';
+
 export const processOrderBy = (orderBy: OrderBy, ctx: OrderByCtx): OrderByValue[] => {
   const { db, uid, qb, alias } = ctx;
   const meta = db.metadata.get(uid);
@@ -70,111 +73,122 @@ export const processOrderBy = (orderBy: OrderBy, ctx: OrderByCtx): OrderByValue[
 };
 
 export const getStrapiOrderColumnAlias = (column: string) => {
-  const prefix = '__strapi_order_by';
   const trimmedColumnName = column.replaceAll('.', '_');
 
-  return `${prefix}__${trimmedColumnName}`;
+  return `${COL_STRAPI_ORDER_BY_PREFIX}__${trimmedColumnName}`;
 };
 
-// Here we assume that all necessary joins are done in the original query (originalQuery), and every needed column is available with the right name.
+/**
+ * Wraps the original Knex query with deep sorting functionality.
+ *
+ * The function takes an original query and an OrderByCtx object as parameters and returns a new Knex query with deep sorting applied.
+ */
 export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: OrderByCtx) => {
-  const { db, qb, uid } = ctx;
   /**
    * Notes:
-   * - pagination (offset, limit, first) has to be done in the final query (the one wrapping the others), otherwise, some rows might go missing
-   * - filtering (where/search, ) has to be done in the deepest sub query possible to avoid processing invalid rows and corrupting the final results
-   * - todo (sort): what about groupBy? Is it compatible or not?
-   * - todo (sort): what about transactions (and other statements like forUpdate, onConflict, increments and decrements)?
-   * - <> should we clone the existing query or re-create a brand new one by copying the joins + where/search
-   *
-   * Flow: R (filtered unsorted data) -> T (partitioned/sorted data) --> Q (distinct, paginated, sorted data)
+   * - The generated query has the following flow: R (filtered unsorted data) -> T (partitioned/sorted data) --> Q (distinct, paginated, sorted data)
+   * - Pagination and selection are transferred from the original query to the outer one to avoid pruning rows too early
+   * - Filtering (where) has to be done in the deepest sub query possible to avoid processing invalid rows and corrupting the final results
+   * - We assume that all necessary joins are done in the original query (`originalQuery`), and every needed column is available with the right name and alias.
    */
+
+  const { db, qb, uid } = ctx;
 
   const { tableName } = db.metadata.get(uid);
 
+  // The orderBy is cloned to avoid unwanted mutations of the original object
   const orderBy = _.cloneDeep<OrderByValue[]>(qb.state.orderBy);
 
   // 0. Init a new Knex query instance (referenced as Q) using the DB connection
+  //    The connection reuse the original table name (aliased if needed)
   const qAlias = qb.getAlias();
   const aliasedTableName = qb.mustUseAlias() ? alias(qAlias, tableName) : tableName;
 
   const Q = db.getConnection(aliasedTableName);
 
-  // 1. Transform the original query into a sub-query (referenced as R)
+  // 1. Clone the original query to create the sub-query (referenced as R) and avoid any mutation on the initial object
   const R = originalQuery.clone();
   const rAlias = qb.getAlias();
 
-  // Clear unwanted statements from the initial query clone
+  // Clear unwanted statements from the sub-query 'R'
   // Note: `first()` is cleared through the combination of `R.clear('limit')` and calling `R.select(...)` again
-  R.clear('select')
-    // Those statements will be re-applied when duplicates are removed from the final selection
+  // Note: Those statements will be re-applied when duplicates are removed from the final selection
+  R
+    // Columns selection
+    .clear('select')
+    // Pagination and sorting
     .clear('order')
     .clear('limit')
     .clear('offset');
 
-  // Make sure we're only selecting needed fields from the sub query
+  // Override the initial select and return only the columns needed for the partitioning.
   R.select(
     // Always select the row id for future manipulation
     prefix(qb.alias, 'id'),
     // Select every column used in an order by clause, but alias it for future reference
     // i.e. if t2.name is present in an order by clause:
-    // Then, "t2.name" will become "t2.name as __strapi_order_by__t2_name"
+    //      Then, "t2.name" will become "t2.name as __strapi_order_by__t2_name"
     ...orderBy.map((o) => alias(getStrapiOrderColumnAlias(o.column), o.column))
   );
 
-  // 2. Create a sub-query to extract the partitions/metadata
+  // 2. Create a sub-query callback to extract and sort the partitions using row number
   const tAlias = qb.getAlias();
 
   const selectRowsAsNumberedPartitions = (T: knex.Knex.QueryBuilder) => {
-    const tOrderBy = orderBy
-      // Transform order by clause to their alias
-      .map((o) => ({
-        column: prefix(rAlias, getStrapiOrderColumnAlias(o.column)),
-        order: o.order,
-      }));
+    // Transform order by clause to their alias to reference them from R
+    const tOrderBy = orderBy.map((o) => ({
+      column: prefix(rAlias, getStrapiOrderColumnAlias(o.column)),
+      order: o.order,
+    }));
 
+    // T select must contain every column used for sorting
     const tOrderBySelect = tOrderBy.map<string>(_.prop('column'));
 
-    T.select(prefix(rAlias, 'id'), ...tOrderBySelect)
-      // The row number is used to assign an index to every row from every partition
-      .rowNumber('__strapi_row_number', function () {
-        // TODO: Try without the this
-        // Apply every order by
+    T.select(
+      // Always select R.id
+      prefix(rAlias, 'id'),
+      // Sort columns
+      ...tOrderBySelect
+    )
+      // The row number is used to assign an index to every row in every partition
+      .rowNumber(COL_STRAPI_ROW_NUMBER, function (subQuery) {
+        // Each row number is assigned using the sort columns depending on their partition
         for (const orderBy of tOrderBy) {
-          this.orderBy(orderBy.column, orderBy.order, 'last');
+          subQuery.orderBy(orderBy.column, orderBy.order, 'last');
         }
 
-        // Partition using the original ID
-        this.partitionBy(`${rAlias}.id`);
+        // And each partition/group is created based on R.id
+        subQuery.partitionBy(`${rAlias}.id`);
       })
       .from(R.as(rAlias))
       .as(tAlias);
   };
 
-  // 3. From Q, select the wanted data, then sort it using T
-  // todo (sort): make the select here work
-  const originalSelect = _.difference(
-    // Remove order by columns from the final select
-    qb.state.select,
-    qb.state.orderBy.map(_.prop('column'))
-  ).map(prefix(qAlias));
+  // 3. Create the final Q query, that select and sort the wanted data using T
 
-  // Since "where" and "search" are applied at the sub-query level (before partitioning)
+  const originalSelect = _.difference(
+    qb.state.select,
+    // Remove order by columns from the initial select
+    qb.state.orderBy.map(_.prop('column'))
+  )
+    // Alias everything in Q
+    .map(prefix(qAlias));
+
   Q.select(originalSelect)
-    // Note: Since we're applying the "where" statement directly on R (and not on Q), we're using
-    // an inner join instead of a left one
-    // This is because we want to exclude Q rows that weren't returned by R then T
+    // Join T to Q to access sorted data
+    // Notes:
+    // - Only select the first row for each partition
+    // - Since we're applying the "where" statement directly on R (and not on Q), we're using an inner join to avoid unwanted rows
     .innerJoin(selectRowsAsNumberedPartitions, function () {
       this
         // Only select rows that are returned by T
         .on(`${tAlias}.id`, `${qAlias}.id`)
         // By only selecting the rows number equal to 1, we make sure we don't have duplicate, and that
         // we're selecting rows in the correct order amongst the groups created by the "partition by"
-        .andOnVal(`${tAlias}.__strapi_row_number`, '=', 1);
+        .andOnVal(`${tAlias}.${COL_STRAPI_ROW_NUMBER}`, '=', 1);
     });
 
-  // Re-apply the pagination params
-  // todo (sort): Extract this to a dedicated method
+  // Re-apply pagination params
 
   if (qb.state.limit) {
     Q.limit(qb.state.limit);
@@ -188,7 +202,7 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
     Q.first();
   }
 
-  // Re-apply the sort thanks to T values
+  // Re-apply the sort using T values
   Q.orderBy([
     // Transform "order by" clause to their T alias and prefix them with T alias
     ...orderBy.map((o) => ({
