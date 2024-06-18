@@ -1,7 +1,7 @@
 import isLocalhostIp from 'is-localhost-ip';
 // Regular import references a deprecated node module,
 // See https://www.npmjs.com/package/punycode.js#installation
-import punycode from "punycode/";
+import punycode from 'punycode/';
 import type { Context } from 'koa';
 import _ from 'lodash';
 
