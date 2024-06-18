@@ -24,36 +24,35 @@ declare module 'knex' {
 }
 
 //  TODO: This is a short term solution, to not steal relations from the same document.
-const createDocumentSiblingsIDSubQuery =
-  (tableName: string, id: ID) => (query: Knex.QueryBuilder) => {
-    // Find if the model is a content type or something else (e.g. component)
-    // to only get the documentId if it's a content type
-    const models: Model[] = Array.from(strapi.db.metadata.values());
+const createDocumentSiblingsIDSubQuery = (tableName: string, id: ID, trx?: Knex.Transaction) => {
+  // Find if the model is a content type or something else (e.g. component)
+  // to only get the documentId if it's a content type
+  const models: Model[] = Array.from(strapi.db.metadata.values());
 
-    const isContentType = models.find((model) => {
-      return model.tableName === tableName && model.attributes.documentId;
-    });
+  const isContentType = models.find((model) => {
+    return model.tableName === tableName && model.attributes.documentId;
+  });
 
-    if (!isContentType) {
-      return [id];
-    }
+  if (!isContentType) {
+    return [id];
+  }
 
-    return (
-      query
-        .from(tableName)
-        // Get all child ids of the document id
-        .select('id')
-        .whereIn('document_id', (documentIDsubQuery) => {
-          return (
-            documentIDsubQuery
-              .from(tableName)
-              // get document id related to the current id
-              .select('document_id')
-              .where('id', id)
-          );
-        })
-    );
-  };
+  return function (query) {
+    query
+      .select('id')
+      .from(tableName)
+      // Get all child ids of the document id
+      .whereIn('document_id', (documentIDSubQuery) => {
+        documentIDSubQuery
+          .from(tableName)
+          // get document id related to the current id
+          .select('document_id')
+          .where('id', id)
+          .transacting(trx);
+      })
+      .transacting(trx);
+  } satisfies Knex.QueryCallback;
+};
 
 /**
  * If some relations currently exist for this oneToX relation, on the one side, this function removes them and update the inverse order if needed.
@@ -85,7 +84,10 @@ const deletePreviousOneToAnyRelations = async ({
     .delete()
     .from(joinTable.name)
     // Exclude the ids of the current document
-    .whereNotIn(joinColumn.name, createDocumentSiblingsIDSubQuery(joinColumn.referencedTable!, id))
+    .whereNotIn(
+      joinColumn.name,
+      createDocumentSiblingsIDSubQuery(joinColumn.referencedTable!, id, trx)
+    )
     // Include all the ids that are being connected
     .whereIn(inverseJoinColumn.name, relIdsToadd)
     .where(joinTable.on || {})
@@ -126,7 +128,7 @@ const deletePreviousAnyToOneRelations = async ({
       .where(joinColumn.name, id)
       .whereNotIn(
         inverseJoinColumn.name,
-        createDocumentSiblingsIDSubQuery(inverseJoinColumn.referencedTable!, relIdToadd)
+        createDocumentSiblingsIDSubQuery(inverseJoinColumn.referencedTable!, relIdToadd, trx)
       )
       .where(joinTable.on || {})
       .transacting(trx);
@@ -154,7 +156,7 @@ const deletePreviousAnyToOneRelations = async ({
       // Exclude the ids of the current document
       .whereNotIn(
         inverseJoinColumn.name,
-        createDocumentSiblingsIDSubQuery(inverseJoinColumn.referencedTable!, relIdToadd)
+        createDocumentSiblingsIDSubQuery(inverseJoinColumn.referencedTable!, relIdToadd, trx)
       )
       .where(joinTable.on || {})
       .transacting(trx);
