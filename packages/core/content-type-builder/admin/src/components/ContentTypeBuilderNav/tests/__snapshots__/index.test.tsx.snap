@@ -81,6 +81,7 @@ exports[`<ContentTypeBuilderNav /> renders and matches the snapshot 1`] = `
 .c36 {
   background: transparent;
   margin-block-start: 8px;
+  cursor: pointer;
 }
 
 .c40 {
