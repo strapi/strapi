@@ -44,8 +44,9 @@ const IconPick = ({ iconKey, name, onChange, isSelected, ariaLabel }: IconPickPr
 
   return (
     <Field.Root name={name} required={false}>
-      <Field.Label aria-label={ariaLabel}>
+      <Field.Label>
         <VisuallyHidden>
+          {ariaLabel}
           <Field.Input
             type="radio"
             checked={isSelected}
