@@ -623,7 +623,6 @@ const createQueryBuilder = (
         helpers.applyJoins(qb, state.joins);
       }
 
-      // todo (sort): move wrapping to execute
       if (this.shouldUseDeepSort()) {
         return helpers.wrapWithDeepSort(qb, { qb: this, db, uid });
       }
