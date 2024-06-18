@@ -131,6 +131,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   onSubmit?: (values: TFormValues, helpers: FormHelpers<TFormValues>) => Promise<void> | void;
   // TODO: type the return value for a validation schema func from Yup.
   validationSchema?: Yup.AnySchema;
+  initialErrors?: FormErrors<TFormValues>;
 }
 
 /**
@@ -140,11 +141,11 @@ interface FormProps<TFormValues extends FormValues = FormValues>
  * use the generic useForm hook or the useField hook when providing the name of your field.
  */
 const Form = React.forwardRef<HTMLFormElement, FormProps>(
-  ({ disabled = false, method, onSubmit, ...props }, ref) => {
+  ({ disabled = false, method, onSubmit, initialErrors, ...props }, ref) => {
     const formRef = React.useRef<HTMLFormElement>(null!);
     const initialValues = React.useRef(props.initialValues ?? {});
     const [state, dispatch] = React.useReducer(reducer, {
-      errors: {},
+      errors: initialErrors ?? {},
       isSubmitting: false,
       values: props.initialValues ?? {},
     });
@@ -487,7 +488,7 @@ type FormErrors<TFormValues extends FormValues = FormValues> = {
       : string // this would let us support errors for the dynamic zone or repeatable component not the components within.
     : TFormValues[Key] extends object // is it a regular component?
       ? FormErrors<TFormValues[Key]> // handles nested components
-      : string; // otherwise its just a field.
+      : string | TranslationMessage; // otherwise its just a field or a translation message.
 };
 
 interface FormState<TFormValues extends FormValues = FormValues> {
@@ -669,12 +670,50 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 
   const handleChange = useForm('useField', (state) => state.onChange);
 
-  const error = useForm('useField', (state) => getIn(state.errors, path));
+  const formatNestedErrorMessages = (stateErrors: FormErrors<FormValues>) => {
+    const nestedErrors: Record<string, any> = {};
+
+    Object.entries(stateErrors).forEach(([key, value]) => {
+      let current = nestedErrors;
+
+      const pathParts = key.split('.');
+      pathParts.forEach((part, index) => {
+        const isLastPart = index === pathParts.length - 1;
+
+        if (isLastPart) {
+          if (typeof value === 'string') {
+            // If the value is a translation message object or a string, it should be nested as is
+            current[part] = value;
+          } else if (isErrorMessageDescriptor(value)) {
+            // If the value is a plain object, it should be converted to a string message
+            current[part] = formatMessage(value);
+          } else {
+            // If the value is not an object, it may be an array or a message
+            setIn(current, part, value);
+          }
+        } else {
+          // Ensure nested structure exists
+          if (!current[part]) {
+            const isArray = !isNaN(Number(pathParts[index + 1]));
+            current[part] = isArray ? [] : {};
+          }
+
+          current = current[part];
+        }
+      });
+    });
+
+    return nestedErrors;
+  };
+
+  const error = useForm('useField', (state) =>
+    getIn(formatNestedErrorMessages(state.errors), path)
+  );
 
   return {
     initialValue,
     /**
-     * Errors can be a string, or a MesaageDescriptor, so we need to handle both cases.
+     * Errors can be a string, or a MessageDescriptor, so we need to handle both cases.
      * If it's anything else, we don't return it.
      */
     error: isErrorMessageDescriptor(error)
@@ -693,9 +732,13 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
   };
 };
 
-const isErrorMessageDescriptor = (object?: string | object): object is TranslationMessage => {
+const isErrorMessageDescriptor = (object?: object): object is TranslationMessage => {
   return (
-    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
+    typeof object === 'object' &&
+    object !== null &&
+    !Array.isArray(object) &&
+    'id' in object &&
+    'defaultMessage' in object
   );
 };
 

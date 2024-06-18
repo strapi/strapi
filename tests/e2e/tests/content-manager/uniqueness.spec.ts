@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { login } from '../../utils/login';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { findAndClose } from '../../utils/shared';
@@ -7,7 +7,10 @@ type Field = {
   name: string;
   value: string;
   newValue?: string;
-  role?: string;
+  role?: 'combobox' | 'textbox';
+  component?: {
+    isSingle: boolean;
+  };
 };
 
 test.describe('Uniqueness', () => {
@@ -22,13 +25,90 @@ test.describe('Uniqueness', () => {
     await page.getByRole('link', { name: 'Unique' }).click();
   });
 
-  const FIELDS_TO_TEST = [
+  const SCALAR_FIELDS_TO_TEST: Field[] = [
     { name: 'uniqueString', value: 'unique', newValue: 'unique-1' },
     { name: 'uniqueNumber', value: '10', newValue: '20' },
-    { name: 'uniqueEmail', value: 'test@testing.com', newValue: 'editor@testing.com' },
+    { name: 'uniqueEmail', value: 'test@strapi.io', newValue: 'test+update@strapi.io' },
     { name: 'uniqueDate', value: '01/01/2024', newValue: '02/01/2024', role: 'combobox' },
     { name: 'UID', value: 'unique', newValue: 'unique-1' },
+  ];
+
+  const SINGLE_COMPONENT_FIELDS_TO_TEST: Field[] = [
+    {
+      name: 'ComponentTextShort',
+      value: 'unique',
+      newValue: 'unique-1',
+      component: { isSingle: true },
+    },
+    {
+      name: 'ComponentTextLong',
+      value: 'unique',
+      newValue: 'unique-1',
+      component: { isSingle: true },
+    },
+    {
+      name: 'ComponentNumberInteger',
+      value: '10',
+      newValue: '20',
+      component: { isSingle: true },
+    },
+    {
+      name: 'ComponentNumberFloat',
+      value: '3.14',
+      newValue: '3.1415926535897',
+      component: { isSingle: true },
+    },
+    {
+      name: 'ComponentEmail',
+      value: 'test@strapi.io',
+      newValue: 'test+update@strapi.io',
+      component: { isSingle: true },
+    },
+  ];
+
+  const REPEATABLE_COMPONENT_FIELDS_TO_TEST: Field[] = [
+    {
+      name: 'ComponentTextShort',
+      value: 'unique',
+      newValue: 'unique-2',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentTextLong',
+      value: 'unique',
+      newValue: 'unique-2',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentNumberInteger',
+      value: '10',
+      newValue: '20',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentNumberFloat',
+      value: '3.14',
+      newValue: '3.1415926535897',
+      component: { isSingle: false },
+    },
+    {
+      name: 'ComponentEmail',
+      value: 'test@strapi.io',
+      newValue: 'test+update@strapi.io',
+      component: { isSingle: false },
+    },
+  ];
+
+  const FIELDS_TO_TEST = [
+    ...SCALAR_FIELDS_TO_TEST,
+    ...SINGLE_COMPONENT_FIELDS_TO_TEST,
+    ...REPEATABLE_COMPONENT_FIELDS_TO_TEST,
   ] as const satisfies Array<Field>;
+
+  const CREATE_URL =
+    /\/admin\/content-manager\/collection-types\/api::unique.unique\/create(\?.*)?/;
+  const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
+  const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
 
   const clickSave = async (page) => {
     await page.getByRole('button', { name: 'Save' }).isEnabled();
@@ -36,17 +116,43 @@ test.describe('Uniqueness', () => {
     await page.getByRole('button', { name: 'Save' }).click();
   };
 
-  const CREATE_URL =
-    /\/admin\/content-manager\/collection-types\/api::unique.unique\/create(\?.*)?/;
-  const LIST_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique(\?.*)?/;
-  const EDIT_URL = /\/admin\/content-manager\/collection-types\/api::unique.unique\/[^/]+(\?.*)?/;
+  const extraComponentNavigation = async (field: Field, page: Page) => {
+    if ('component' in field) {
+      const isSingle = field.component.isSingle;
+
+      // This opens up the component UI so we can access the field we are
+      // testing against
+
+      if (isSingle) {
+        await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
+        await page.getByRole('button', { name: 'No entry yet. Click on the' }).first().click();
+      } else {
+        await page.getByRole('button', { name: 'No entry yet. Click on the' }).nth(1).click();
+        await page
+          .getByLabel('', { exact: true })
+          .getByRole('button', { name: 'No entry yet. Click on the' })
+          .click();
+      }
+    }
+  };
 
   /**
    * @note the unique content type is set up with every type of document level unique field.
    * We are testing that uniqueness is enforced for these fields across all entries of a content type in the same locale.
    */
   FIELDS_TO_TEST.forEach((field) => {
-    test(`A user should not be able to duplicate the ${field.name} document field value in the same content type and locale. Validation should not happen across locales`, async ({
+    const isComponent = 'component' in field;
+    const isSingleComponentField = isComponent && field.component.isSingle;
+    const isRepeatableComponentField = isComponent && !field.component.isSingle;
+
+    let fieldDescription = 'scalar field';
+    if (isComponent) {
+      fieldDescription = isSingleComponentField
+        ? 'single component field'
+        : 'repeatable component field';
+    }
+
+    test(`A user should not be able to duplicate the ${field.name} ${fieldDescription} value in the same content type and dimensions (locale + publication state).`, async ({
       page,
     }) => {
       await page.getByRole('link', { name: 'Create new entry' }).first().click();
@@ -56,8 +162,30 @@ test.describe('Uniqueness', () => {
       /**
        * Now we're in the edit view. The content within each entry will be valid from the previous test run.
        */
+
       const fieldRole = 'role' in field ? field.role : 'textbox';
+
+      await extraComponentNavigation(field, page);
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+
+      if (isRepeatableComponentField) {
+        // Add another entry to the repeatable component in this entry that
+        // shares the same value as the first entry. This should trigger a
+        // validation error
+
+        await page.getByRole('button', { name: 'Add an entry' }).click();
+        await page
+          .getByRole('region')
+          .getByRole('button', { name: 'No entry yet. Click on the' })
+          .click();
+        await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
+
+        await clickSave(page);
+
+        await expect(page.getByText('Warning:2 errors occurred')).toBeVisible();
+        await expect(page.getByText('This attribute must be unique')).toBeVisible();
+        await page.getByRole('button', { name: 'Delete' }).nth(1).click();
+      }
 
       await clickSave(page);
       await findAndClose(page, 'Saved document');
@@ -72,6 +200,7 @@ test.describe('Uniqueness', () => {
 
       await page.waitForURL(CREATE_URL);
 
+      await extraComponentNavigation(field, page);
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);
@@ -103,6 +232,7 @@ test.describe('Uniqueness', () => {
 
       await page.waitForURL(EDIT_URL);
 
+      await extraComponentNavigation(field, page);
       await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
       await clickSave(page);

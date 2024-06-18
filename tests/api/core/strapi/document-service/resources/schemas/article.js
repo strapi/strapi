@@ -49,6 +49,29 @@ module.exports = {
         },
       },
     },
+    // article.compo-unique-top-level contains a nested component with every
+    // kind of unique field.
+    // These are used to test the validation of component unique fields in every case.
+    identifiers: {
+      type: 'component',
+      repeatable: false,
+      component: 'article.compo-unique-top-level',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    repeatableIdentifiers: {
+      type: 'component',
+      repeatable: true,
+      component: 'article.compo-unique-top-level',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
     categories: {
       type: 'relation',
       relation: 'manyToMany',

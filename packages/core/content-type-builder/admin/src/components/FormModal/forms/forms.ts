@@ -163,53 +163,7 @@ export const forms = {
     form: {
       advanced({ data, type, step, extensions, ...rest }: Base<'advanced'>) {
         try {
-          const isComponentTarget = ['component', 'components'].includes(rest?.forTarget);
-
-          let baseForm;
-          if (isComponentTarget) {
-            const isUniqueEnabled = data?.unique ?? false;
-
-            // TODO: V5. This is a temporary measure as the behaviour of component unique fields is currently broken and will be worked on later.
-            // We are disabling the unique field checkbox if it's not enabled and if it's enabled we are explaining that it's not working and will be disabled if they change the setting.
-            // Remove this when the behaviour of component unique fields is fixed.
-            baseForm = attributesForm.advanced[type](data, step).sections.map((section) => {
-              //@ts-expect-error temporary measure
-              const filteredItems = section.items.map((item) => {
-                if (item.name !== 'unique') {
-                  return item;
-                }
-
-                if (isUniqueEnabled) {
-                  return {
-                    ...item,
-                    description: {
-                      id: 'content-type-builder.form.attribute.item.uniqueField.v5.willBeDisabled',
-                      defaultMessage:
-                        "Currently unique fields don't work correctly in components. If you disable this feature, the field will be disabled until this is fixed.",
-                    },
-                  };
-                }
-
-                return {
-                  ...item,
-                  disabled: true,
-                  description: {
-                    id: 'content-type-builder.form.attribute.item.uniqueField.v5.disabled',
-                    defaultMessage:
-                      "Currently unique fields don't work correctly in components. This field has been disabled until it's fixed.",
-                  },
-                };
-              });
-
-              return {
-                //@ts-expect-error temporary measure
-                sectionTitle: section?.sectionTitle ?? null,
-                items: filteredItems,
-              };
-            });
-          } else {
-            baseForm = attributesForm.advanced[type](data, step).sections;
-          }
+          const baseForm = attributesForm.advanced[type](data, step).sections;
           const itemsToAdd = extensions.getAdvancedForm(['attribute', type], {
             data,
             type,
