@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { skipToken } from '@reduxjs/toolkit/query';
 import {
   useNotification,
   useQueryParams,
@@ -31,7 +32,6 @@ import { BulkLocaleActionModal } from './BulkLocaleActionModal';
 
 import type { Locale } from '../../../shared/contracts/locales';
 import type { I18nBaseQuery } from '../types';
-import { skipToken } from '@reduxjs/toolkit/query';
 
 /* -------------------------------------------------------------------------------------------------
  * LocalePickerAction

@@ -53,6 +53,10 @@ const extendInvalidatesTags = (
   endpoint: AnyEndpointDefinition,
   extraTags: string[] | { type: string; id: string }[]
 ) => {
+  if (!endpoint) {
+    return;
+  }
+
   const originalInvalidatesTags = endpoint.invalidatesTags;
 
   const newInvalidatesTags: AnyEndpointDefinition['invalidatesTags'] = (
