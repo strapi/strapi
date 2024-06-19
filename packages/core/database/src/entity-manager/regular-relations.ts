@@ -24,7 +24,7 @@ declare module 'knex' {
 }
 
 //  TODO: This is a short term solution, to not steal relations from the same document.
-const createDocumentSiblingsIDSubQuery = (tableName: string, id: ID, trx?: Knex.Transaction) => {
+const getDocumentSiblingIdsQuery = (tableName: string, id: ID) => {
   // Find if the model is a content type or something else (e.g. component)
   // to only get the documentId if it's a content type
   const models: Model[] = Array.from(strapi.db.metadata.values());
@@ -37,6 +37,8 @@ const createDocumentSiblingsIDSubQuery = (tableName: string, id: ID, trx?: Knex.
     return [id];
   }
 
+  // NOTE: SubQueries are wrapped in a function to not reuse the same connection,
+  // which causes infinite self references
   return function (query) {
     query
       .select('id')
@@ -47,10 +49,8 @@ const createDocumentSiblingsIDSubQuery = (tableName: string, id: ID, trx?: Knex.
           .from(tableName)
           // get document id related to the current id
           .select('document_id')
-          .where('id', id)
-          .transacting(trx);
-      })
-      .transacting(trx);
+          .where('id', id);
+      });
   } satisfies Knex.QueryCallback;
 };
 
@@ -84,10 +84,7 @@ const deletePreviousOneToAnyRelations = async ({
     .delete()
     .from(joinTable.name)
     // Exclude the ids of the current document
-    .whereNotIn(
-      joinColumn.name,
-      createDocumentSiblingsIDSubQuery(joinColumn.referencedTable!, id, trx)
-    )
+    .whereNotIn(joinColumn.name, getDocumentSiblingIdsQuery(joinColumn.referencedTable!, id))
     // Include all the ids that are being connected
     .whereIn(inverseJoinColumn.name, relIdsToadd)
     .where(joinTable.on || {})
@@ -128,7 +125,7 @@ const deletePreviousAnyToOneRelations = async ({
       .where(joinColumn.name, id)
       .whereNotIn(
         inverseJoinColumn.name,
-        createDocumentSiblingsIDSubQuery(inverseJoinColumn.referencedTable!, relIdToadd, trx)
+        getDocumentSiblingIdsQuery(inverseJoinColumn.referencedTable!, relIdToadd)
       )
       .where(joinTable.on || {})
       .transacting(trx);
@@ -156,7 +153,7 @@ const deletePreviousAnyToOneRelations = async ({
       // Exclude the ids of the current document
       .whereNotIn(
         inverseJoinColumn.name,
-        createDocumentSiblingsIDSubQuery(inverseJoinColumn.referencedTable!, relIdToadd, trx)
+        getDocumentSiblingIdsQuery(inverseJoinColumn.referencedTable!, relIdToadd)
       )
       .where(joinTable.on || {})
       .transacting(trx);
