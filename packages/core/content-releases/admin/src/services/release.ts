@@ -21,6 +21,7 @@ import type {
   PublishRelease,
   MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
+import type { EndpointDefinition } from '@reduxjs/toolkit/query';
 
 export interface GetReleasesQueryParams {
   page?: number;
@@ -45,33 +46,59 @@ type GetReleasesTabResponse = GetReleases.Response & {
   };
 };
 
+type AnyEndpointDefinition = EndpointDefinition<any, any, any, any>;
+
+// TODO: move this into the admin code & expose an improved version of enhanceEndpoints or a new function
+const extendInvalidatesTags = (
+  endpoint: AnyEndpointDefinition,
+  extraTags: string[] | { type: string; id: string }[]
+) => {
+  const originalInvalidatesTags = endpoint.invalidatesTags;
+
+  const newInvalidatesTags: AnyEndpointDefinition['invalidatesTags'] = (
+    result,
+    err,
+    args,
+    meta
+  ) => {
+    const originalTags =
+      typeof originalInvalidatesTags === 'function'
+        ? originalInvalidatesTags(result, err, args, meta)
+        : originalInvalidatesTags;
+
+    return [...(originalTags ?? []), ...extraTags];
+  };
+
+  Object.assign(endpoint, { invalidatesTags: newInvalidatesTags });
+};
+
 const releaseApi = adminApi
   .enhanceEndpoints({
     addTagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease'],
     endpoints: {
-      updateDocument: {
-        invalidatesTags: [
+      updateDocument(endpoint: AnyEndpointDefinition) {
+        extendInvalidatesTags(endpoint, [
           { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
-        ],
+        ]);
       },
-      deleteDocument: {
-        invalidatesTags: [
+      deleteDocument(endpoint: AnyEndpointDefinition) {
+        extendInvalidatesTags(endpoint, [
           { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
-        ],
+        ]);
       },
-      deleteManyDocuments: {
-        invalidatesTags: [
+      deleteManyDocuments(endpoint: AnyEndpointDefinition) {
+        extendInvalidatesTags(endpoint, [
           { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
-        ],
+        ]);
       },
-      discardDocument: {
-        invalidatesTags: [
+      discardDocument(endpoint: AnyEndpointDefinition) {
+        extendInvalidatesTags(endpoint, [
           { type: 'Release', id: 'LIST' },
           { type: 'ReleaseAction', id: 'LIST' },
-        ],
+        ]);
       },
     },
   })

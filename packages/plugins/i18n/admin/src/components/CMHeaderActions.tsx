@@ -31,6 +31,7 @@ import { BulkLocaleActionModal } from './BulkLocaleActionModal';
 
 import type { Locale } from '../../../shared/contracts/locales';
 import type { I18nBaseQuery } from '../types';
+import { skipToken } from '@reduxjs/toolkit/query';
 
 /* -------------------------------------------------------------------------------------------------
  * LocalePickerAction
@@ -275,16 +276,21 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     meta: documentMeta,
     schema,
     validate,
-  } = useDocument({
-    model,
-    collectionType,
-    documentId,
-    params: {
-      locale: baseLocale,
+  } = useDocument(
+    {
+      model,
+      collectionType,
+      documentId,
+      params: {
+        locale: baseLocale,
+      },
     },
-  });
+    {
+      skip: !hasI18n,
+    }
+  );
 
-  const { data: localesMetadata = [] } = useGetLocalesQuery();
+  const { data: localesMetadata = [] } = useGetLocalesQuery(hasI18n ? undefined : skipToken);
 
   const headers = [
     {
