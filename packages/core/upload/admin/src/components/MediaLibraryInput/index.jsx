@@ -20,7 +20,7 @@ const STEPS = {
 
 export const MediaLibraryInput = forwardRef(
   (
-    { attribute: { allowedTypes }, label, hint, disabled, labelAction, multiple, name, required },
+    { attribute: { allowedTypes, multiple }, label, hint, disabled, labelAction, name, required },
     forwardedRef
   ) => {
     const { formatMessage } = useIntl();
@@ -217,22 +217,24 @@ export const MediaLibraryInput = forwardRef(
 );
 
 MediaLibraryInput.defaultProps = {
-  attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'] },
+  attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'], multiple: false },
   disabled: false,
   hint: undefined,
   label: undefined,
   labelAction: undefined,
-  multiple: false,
   required: false,
 };
 
 MediaLibraryInput.propTypes = {
-  attribute: PropTypes.shape({ allowedTypes: PropTypes.arrayOf(PropTypes.string) }),
+  attribute: PropTypes.shape({
+    allowedTypes: PropTypes.arrayOf(PropTypes.string),
+    multiple: PropTypes.bool,
+  }),
   disabled: PropTypes.bool,
   hint: PropTypes.string,
   label: PropTypes.string,
   labelAction: PropTypes.node,
-  multiple: PropTypes.bool,
+
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
 };

@@ -107,7 +107,13 @@ const Root = React.forwardRef<HTMLDivElement, RootProps>(
     };
 
     return (
-      <Flex ref={forwardedRef} paddingTop={4} alignItems="flex-end" justifyContent="space-between">
+      <Flex
+        ref={forwardedRef}
+        paddingTop={4}
+        paddingBottom={4}
+        alignItems="flex-end"
+        justifyContent="space-between"
+      >
         <PaginationProvider
           currentQuery={query}
           page={query.page}

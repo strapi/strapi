@@ -5,19 +5,19 @@ import validators from '../validators';
 import { mockOptions } from './utils';
 
 describe('UID validator', () => {
-  const fakeFindFirst = jest.fn();
+  const fakeFindOne = jest.fn();
 
   global.strapi = {
     db: {
       query: () => ({
-        findOne: fakeFindFirst,
+        findOne: fakeFindOne,
       }),
     },
   } as any;
 
   afterEach(() => {
     jest.clearAllMocks();
-    fakeFindFirst.mockReset();
+    fakeFindOne.mockReset();
   });
 
   const fakeModel: Schema.ContentType = {
@@ -39,7 +39,7 @@ describe('UID validator', () => {
 
   describe('unique', () => {
     test('it validates the unique constraint if there is no other record in the database', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
@@ -54,11 +54,11 @@ describe('UID validator', () => {
       );
 
       expect(await validator('non-unique-uid')).toBe('non-unique-uid');
-      expect(fakeFindFirst).toHaveBeenCalled();
+      expect(fakeFindOne).toHaveBeenCalled();
     });
 
     test('it does not validates the unique constraint if the attribute value is `null`', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators
@@ -76,11 +76,11 @@ describe('UID validator', () => {
 
       await validator(null);
 
-      expect(fakeFindFirst).not.toHaveBeenCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test.only('it always validates the unique constraint even if the attribute is not set as unique', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
       const valueToCheck = 'non-unique-uid';
 
       const validator = strapiUtils.validateYupSchema(
@@ -96,7 +96,7 @@ describe('UID validator', () => {
       );
 
       expect(await validator(valueToCheck)).toBe(valueToCheck);
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           locale: 'en',
           publishedAt: null,
@@ -107,7 +107,7 @@ describe('UID validator', () => {
 
     test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
       expect.assertions(1);
-      fakeFindFirst.mockResolvedValueOnce({ attrUidUnique: 'unique-uid' });
+      fakeFindOne.mockResolvedValueOnce({ attrUidUnique: 'unique-uid' });
 
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
@@ -129,7 +129,7 @@ describe('UID validator', () => {
     });
 
     test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
-      fakeFindFirst.mockResolvedValueOnce({ attrUidUnique: 'unchanged-unique-uid' });
+      fakeFindOne.mockResolvedValueOnce({ attrUidUnique: 'unchanged-unique-uid' });
 
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
@@ -148,7 +148,7 @@ describe('UID validator', () => {
 
     const valueToCheck = 'unique-uid';
     test('it checks the database for records with the same value for the checked attribute', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
@@ -164,7 +164,7 @@ describe('UID validator', () => {
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           locale: 'en',
           publishedAt: null,
@@ -174,7 +174,7 @@ describe('UID validator', () => {
     });
 
     test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
@@ -190,7 +190,7 @@ describe('UID validator', () => {
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           locale: 'en',
           publishedAt: null,
@@ -203,7 +203,7 @@ describe('UID validator', () => {
   describe('regExp', () => {
     test('it fails to validate the uid if it does not fit the requried format', async () => {
       expect.assertions(1);
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.uid(
@@ -225,7 +225,7 @@ describe('UID validator', () => {
     });
 
     test('it validate the uid if it fit the required format', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
         validators.uid(

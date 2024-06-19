@@ -89,6 +89,7 @@ export const ContentTypeBuilderNav = () => {
                   onClick={section.customLink.onClick}
                   startIcon={<Plus width="0.8rem" height="0.8rem" />}
                   marginTop={2}
+                  cursor="pointer"
                 >
                   {formatMessage({
                     id: section.customLink.id,
