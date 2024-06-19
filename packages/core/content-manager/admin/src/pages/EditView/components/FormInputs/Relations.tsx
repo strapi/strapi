@@ -133,8 +133,7 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       {
         model,
         targetField,
-        // below we don't run the query if there is no id.
-        id: id!,
+        id,
         params: {
           ...params,
           pageSize: RELATIONS_TO_DISPLAY,
@@ -143,7 +142,6 @@ const RelationsField = React.forwardRef<HTMLDivElement, RelationsFieldProps>(
       },
       {
         refetchOnMountOrArgChange: true,
-        skip: !id,
         selectFromResult: (result) => {
           return {
             ...result,

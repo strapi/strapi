@@ -41,6 +41,9 @@ const relationsApi = contentManagerApi.injectEndpoints({
       }
     >({
       query: ({ model, id, targetField, params }) => {
+        if (id === undefined) {
+          return { url: '', method: 'GET', config: { params: {} } }; // Return a dummy URL to prevent the query
+        }
         return {
           url: `/content-manager/relations/${model}/${id}/${targetField}`,
           method: 'GET',
