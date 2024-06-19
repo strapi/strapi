@@ -86,7 +86,7 @@ export const getStrapiOrderColumnAlias = (column: string) => {
 export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: OrderByCtx) => {
   /**
    * Notes:
-   * - The generated query has the following flow: R (filtered unsorted data) -> T (partitioned/sorted data) --> Q (distinct, paginated, sorted data)
+   * - The generated query has the following flow: baseQuery (filtered unsorted data) -> T (partitioned/sorted data) --> resultQuery (distinct, paginated, sorted data)
    * - Pagination and selection are transferred from the original query to the outer one to avoid pruning rows too early
    * - Filtering (where) has to be done in the deepest sub query possible to avoid processing invalid rows and corrupting the final results
    * - We assume that all necessary joins are done in the original query (`originalQuery`), and every needed column is available with the right name and alias.
@@ -99,21 +99,21 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
   // The orderBy is cloned to avoid unwanted mutations of the original object
   const orderBy = _.cloneDeep<OrderByValue[]>(qb.state.orderBy);
 
-  // 0. Init a new Knex query instance (referenced as Q) using the DB connection
+  // 0. Init a new Knex query instance (referenced as resultQuery) using the DB connection
   //    The connection reuse the original table name (aliased if needed)
-  const qAlias = qb.getAlias();
-  const aliasedTableName = qb.mustUseAlias() ? alias(qAlias, tableName) : tableName;
+  const resultQueryAlias = qb.getAlias();
+  const aliasedTableName = qb.mustUseAlias() ? alias(resultQueryAlias, tableName) : tableName;
 
-  const Q = db.getConnection(aliasedTableName);
+  const resultQuery = db.getConnection(aliasedTableName);
 
-  // 1. Clone the original query to create the sub-query (referenced as R) and avoid any mutation on the initial object
-  const R = originalQuery.clone();
-  const rAlias = qb.getAlias();
+  // 1. Clone the original query to create the sub-query (referenced as baseQuery) and avoid any mutation on the initial object
+  const baseQuery = originalQuery.clone();
+  const baseQueryAlias = qb.getAlias();
 
-  // Clear unwanted statements from the sub-query 'R'
-  // Note: `first()` is cleared through the combination of `R.clear('limit')` and calling `R.select(...)` again
+  // Clear unwanted statements from the sub-query 'baseQuery'
+  // Note: `first()` is cleared through the combination of `baseQuery.clear('limit')` and calling `baseQuery.select(...)` again
   // Note: Those statements will be re-applied when duplicates are removed from the final selection
-  R
+  baseQuery
     // Columns selection
     .clear('select')
     // Pagination and sorting
@@ -122,98 +122,102 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
     .clear('offset');
 
   // Override the initial select and return only the columns needed for the partitioning.
-  R.select(
+  baseQuery.select(
     // Always select the row id for future manipulation
     prefix(qb.alias, 'id'),
     // Select every column used in an order by clause, but alias it for future reference
     // i.e. if t2.name is present in an order by clause:
     //      Then, "t2.name" will become "t2.name as __strapi_order_by__t2_name"
-    ...orderBy.map((o) => alias(getStrapiOrderColumnAlias(o.column), o.column))
+    ...orderBy.map((orderByClause) =>
+      alias(getStrapiOrderColumnAlias(orderByClause.column), orderByClause.column)
+    )
   );
 
   // 2. Create a sub-query callback to extract and sort the partitions using row number
-  const tAlias = qb.getAlias();
+  const partitionedQueryAlias = qb.getAlias();
 
-  const selectRowsAsNumberedPartitions = (T: knex.Knex.QueryBuilder) => {
-    // Transform order by clause to their alias to reference them from R
-    const tOrderBy = orderBy.map((o) => ({
-      column: prefix(rAlias, getStrapiOrderColumnAlias(o.column)),
-      order: o.order,
+  const selectRowsAsNumberedPartitions = (partitionedQuery: knex.Knex.QueryBuilder) => {
+    // Transform order by clause to their alias to reference them from baseQuery
+    const prefixedOrderBy = orderBy.map((orderByClause) => ({
+      column: prefix(baseQueryAlias, getStrapiOrderColumnAlias(orderByClause.column)),
+      order: orderByClause.order,
     }));
 
-    // T select must contain every column used for sorting
-    const tOrderBySelect = tOrderBy.map<string>(_.prop('column'));
+    // partitionedQuery select must contain every column used for sorting
+    const orderByColumns = prefixedOrderBy.map<string>(_.prop('column'));
 
-    T.select(
-      // Always select R.id
-      prefix(rAlias, 'id'),
-      // Sort columns
-      ...tOrderBySelect
-    )
+    partitionedQuery
+      .select(
+        // Always select baseQuery.id
+        prefix(baseQueryAlias, 'id'),
+        // Sort columns
+        ...orderByColumns
+      )
       // The row number is used to assign an index to every row in every partition
       .rowNumber(COL_STRAPI_ROW_NUMBER, function (subQuery) {
         // Each row number is assigned using the sort columns depending on their partition
-        for (const orderBy of tOrderBy) {
-          subQuery.orderBy(orderBy.column, orderBy.order, 'last');
+        for (const orderByClause of prefixedOrderBy) {
+          subQuery.orderBy(orderByClause.column, orderByClause.order, 'last');
         }
 
-        // And each partition/group is created based on R.id
-        subQuery.partitionBy(`${rAlias}.id`);
+        // And each partition/group is created based on baseQuery.id
+        subQuery.partitionBy(`${baseQueryAlias}.id`);
       })
-      .from(R.as(rAlias))
-      .as(tAlias);
+      .from(baseQuery.as(baseQueryAlias))
+      .as(partitionedQueryAlias);
   };
 
-  // 3. Create the final Q query, that select and sort the wanted data using T
+  // 3. Create the final resultQuery query, that select and sort the wanted data using T
 
   const originalSelect = _.difference(
     qb.state.select,
     // Remove order by columns from the initial select
     qb.state.orderBy.map(_.prop('column'))
   )
-    // Alias everything in Q
-    .map(prefix(qAlias));
+    // Alias everything in resultQuery
+    .map(prefix(resultQueryAlias));
 
-  Q.select(originalSelect)
-    // Join T to Q to access sorted data
+  resultQuery
+    .select(originalSelect)
+    // Join T to resultQuery to access sorted data
     // Notes:
     // - Only select the first row for each partition
-    // - Since we're applying the "where" statement directly on R (and not on Q), we're using an inner join to avoid unwanted rows
+    // - Since we're applying the "where" statement directly on baseQuery (and not on resultQuery), we're using an inner join to avoid unwanted rows
     .innerJoin(selectRowsAsNumberedPartitions, function () {
       this
         // Only select rows that are returned by T
-        .on(`${tAlias}.id`, `${qAlias}.id`)
+        .on(`${partitionedQueryAlias}.id`, `${resultQueryAlias}.id`)
         // By only selecting the rows number equal to 1, we make sure we don't have duplicate, and that
         // we're selecting rows in the correct order amongst the groups created by the "partition by"
-        .andOnVal(`${tAlias}.${COL_STRAPI_ROW_NUMBER}`, '=', 1);
+        .andOnVal(`${partitionedQueryAlias}.${COL_STRAPI_ROW_NUMBER}`, '=', 1);
     });
 
   // Re-apply pagination params
 
   if (qb.state.limit) {
-    Q.limit(qb.state.limit);
+    resultQuery.limit(qb.state.limit);
   }
 
   if (qb.state.offset) {
-    Q.offset(qb.state.offset);
+    resultQuery.offset(qb.state.offset);
   }
 
   if (qb.state.first) {
-    Q.first();
+    resultQuery.first();
   }
 
   // Re-apply the sort using T values
-  Q.orderBy([
+  resultQuery.orderBy([
     // Transform "order by" clause to their T alias and prefix them with T alias
-    ...orderBy.map((o) => ({
-      column: prefix(tAlias, getStrapiOrderColumnAlias(o.column)),
-      order: o.order,
+    ...orderBy.map((orderByClause) => ({
+      column: prefix(partitionedQueryAlias, getStrapiOrderColumnAlias(orderByClause.column)),
+      order: orderByClause.order,
     })),
     // Add T.id to the order by clause to get consistent results in case several rows have the exact same order
-    { column: `${tAlias}.id`, order: 'asc' },
+    { column: `${partitionedQueryAlias}.id`, order: 'asc' },
   ]);
 
-  return Q;
+  return resultQuery;
 };
 
 // Utils
