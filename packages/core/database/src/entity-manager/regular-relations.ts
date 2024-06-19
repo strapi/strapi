@@ -24,7 +24,7 @@ declare module 'knex' {
 }
 
 //  TODO: This is a short term solution, to not steal relations from the same document.
-const getDocumentSiblingIdsQuery = (con: Knex, tableName: string, id: ID) => {
+const getDocumentSiblingIdsQuery = (tableName: string, id: ID) => {
   // Find if the model is a content type or something else (e.g component)
   // to only get the documentId if it's a content type
   const models: Model[] = Array.from(strapi.db.metadata.values());
@@ -37,20 +37,17 @@ const getDocumentSiblingIdsQuery = (con: Knex, tableName: string, id: ID) => {
     return [id];
   }
 
-  return (
+  // NOTE: SubQueries are wrapped in a function to not reuse the same connection,
+  // which causes infinite self references
+  return (con: Knex) => {
     con
       .from(tableName)
       // Get all child ids of the document id
       .select('id')
-      .where(
-        'document_id',
-        con
-          .from(tableName)
-          // get document id related to the current id
-          .select('document_id')
-          .where('id', id)
-      )
-  );
+      .where('document_id', (con2: Knex) =>
+        con2.select('document_id').from(tableName).where('id', id)
+      );
+  };
 };
 
 /**
@@ -83,7 +80,11 @@ const deletePreviousOneToAnyRelations = async ({
     .delete()
     .from(joinTable.name)
     // Exclude the ids of the current document
-    .whereNotIn(joinColumn.name, getDocumentSiblingIdsQuery(con, joinColumn.referencedTable!, id))
+    .whereNotIn(
+      // @ts-expect-error - knex incorrectly expects a string array
+      joinColumn.name,
+      getDocumentSiblingIdsQuery(joinColumn.referencedTable!, id)
+    )
     // Include all of the ids that are being connected
     .whereIn(inverseJoinColumn.name, relIdsToadd)
     .where(joinTable.on || {})
@@ -123,8 +124,9 @@ const deletePreviousAnyToOneRelations = async ({
       .from(joinTable.name)
       .where(joinColumn.name, id)
       .whereNotIn(
+        // @ts-expect-error - knex incorrectly expects a string array
         inverseJoinColumn.name,
-        getDocumentSiblingIdsQuery(con, inverseJoinColumn.referencedTable!, relIdToadd)
+        getDocumentSiblingIdsQuery(inverseJoinColumn.referencedTable!, relIdToadd)
       )
       .where(joinTable.on || {})
       .transacting(trx);
@@ -151,8 +153,9 @@ const deletePreviousAnyToOneRelations = async ({
       .where(joinColumn.name, id)
       // Exclude the ids of the current document
       .whereNotIn(
+        // @ts-expect-error - knex incorrectly expects a string array
         inverseJoinColumn.name,
-        getDocumentSiblingIdsQuery(con, inverseJoinColumn.referencedTable!, relIdToadd)
+        getDocumentSiblingIdsQuery(inverseJoinColumn.referencedTable!, relIdToadd)
       )
       .where(joinTable.on || {})
       .transacting(trx);
