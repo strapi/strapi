@@ -158,6 +158,13 @@ export const transformAttribute = (
         },
       };
     }
+    case 'relation': {
+      if (attribute.required) {
+        throw new Error(
+          `Required relations are not supported, please remove it from ${contentType.collectionName} schema on the attribute ${name}`
+        );
+      }
+    }
     default: {
       return attribute;
     }

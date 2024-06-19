@@ -216,11 +216,6 @@ const createRelationValidator =
       validator = yup.mixed();
     }
 
-    validator = addRequiredValidation(createOrUpdate)(validator, {
-      attr: { required: !isDraft && attr.required },
-      updatedAttribute,
-    });
-
     return validator;
   };
 
