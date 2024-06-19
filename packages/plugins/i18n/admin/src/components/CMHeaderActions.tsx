@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { skipToken } from '@reduxjs/toolkit/query';
 import {
   useNotification,
   useQueryParams,
@@ -275,16 +276,21 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     meta: documentMeta,
     schema,
     validate,
-  } = useDocument({
-    model,
-    collectionType,
-    documentId,
-    params: {
-      locale: baseLocale,
+  } = useDocument(
+    {
+      model,
+      collectionType,
+      documentId,
+      params: {
+        locale: baseLocale,
+      },
     },
-  });
+    {
+      skip: !hasI18n,
+    }
+  );
 
-  const { data: localesMetadata = [] } = useGetLocalesQuery();
+  const { data: localesMetadata = [] } = useGetLocalesQuery(hasI18n ? undefined : skipToken);
 
   const headers = [
     {

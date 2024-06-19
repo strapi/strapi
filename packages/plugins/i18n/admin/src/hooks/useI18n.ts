@@ -43,6 +43,7 @@ const useI18n: UseI18n = () => {
     );
   }, [params.slug, userPermissions]);
 
+  // TODO: use specific hook to get schema only
   const { schema } = useDocument(
     {
       // We can non-null assert these because below we skip the query if they are not present
@@ -50,7 +51,7 @@ const useI18n: UseI18n = () => {
       model: params.slug!,
     },
     {
-      skip: !params.slug || !params.collectionType,
+      skip: true,
     }
   );
 
