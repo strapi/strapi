@@ -97,7 +97,7 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const { data, error, isLoading } = useGetAllDocumentsQuery({
+  const { data, error, isFetching } = useGetAllDocumentsQuery({
     model,
     params,
   });
@@ -170,7 +170,7 @@ const ListViewPage = () => {
     return formattedHeaders;
   }, [displayedHeaders, formatMessage, list, runHookWaterfall, schema?.options?.draftAndPublish]);
 
-  if (isLoading) {
+  if (isFetching) {
     return <Page.Loading />;
   }
 
@@ -239,7 +239,7 @@ const ListViewPage = () => {
       />
       <Layouts.Content>
         <Flex gap={4} direction="column" alignItems="stretch">
-          <Table.Root rows={results} headers={tableHeaders} isLoading={isLoading}>
+          <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
             <TableActionsBar />
             <Table.Content>
               <Table.Head>
