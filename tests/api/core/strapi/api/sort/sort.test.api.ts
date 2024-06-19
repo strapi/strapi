@@ -20,6 +20,20 @@ const article = (letter: string) => {
   return data.article.find((a) => a.title.toLowerCase().endsWith(letter));
 };
 
+const expectArticle = (letter: string) => {
+  const { id, title } = article(letter);
+
+  return {
+    id,
+    title,
+    locale: 'en',
+    documentId: expect.any(String),
+    publishedAt: expect.anything(),
+    updatedAt: expect.anything(),
+    createdAt: expect.anything(),
+  };
+};
+
 const schemas = {
   contentTypes: {
     tag: {
@@ -146,14 +160,6 @@ const fixtures = {
   },
 };
 
-const BASIC_ARTICLE_FIELDS = {
-  documentId: expect.any(String),
-  locale: 'en',
-  publishedAt: expect.anything(),
-  updatedAt: expect.anything(),
-  createdAt: expect.anything(),
-};
-
 /**
  * Article(A) -> Categories(B)
  * Article(B) -> Categories(C, D)
@@ -198,10 +204,10 @@ describe('Sort', () => {
     expect(res.body.data.length).toBe(4);
 
     expect(res.body.data).toMatchObject([
-      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS },
-      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS },
-      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS },
-      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS },
+      expectArticle('a'),
+      expectArticle('b'),
+      expectArticle('c'),
+      expectArticle('d'),
     ]);
   });
 
@@ -214,10 +220,10 @@ describe('Sort', () => {
     expect(res.body.data.length).toBe(4);
 
     expect(res.body.data).toMatchObject([
-      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
-      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS, categories: [cat('b')] },
-      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
-      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS, categories: [cat('d')] },
+      { ...expectArticle('d'), categories: [cat('a'), cat('d')] },
+      { ...expectArticle('a'), categories: [cat('b')] },
+      { ...expectArticle('b'), categories: [cat('c'), cat('d')] },
+      { ...expectArticle('c'), categories: [cat('d')] },
     ]);
   });
 
@@ -230,10 +236,10 @@ describe('Sort', () => {
     expect(res.body.data.length).toBe(4);
 
     expect(res.body.data).toMatchObject([
-      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS, categories: [cat('d')] },
-      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
-      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
-      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS, categories: [cat('b')] },
+      { ...expectArticle('c'), categories: [cat('d')] },
+      { ...expectArticle('d'), categories: [cat('a'), cat('d')] },
+      { ...expectArticle('b'), categories: [cat('c'), cat('d')] },
+      { ...expectArticle('a'), categories: [cat('b')] },
     ]);
   });
 
@@ -246,10 +252,10 @@ describe('Sort', () => {
     expect(res.body.data.length).toBe(4);
 
     expect(res.body.data).toMatchObject([
-      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
-      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS, categories: [cat('d')] },
-      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
-      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS, categories: [cat('b')] },
+      { ...expectArticle('b'), categories: [cat('c'), cat('d')] },
+      { ...expectArticle('c'), categories: [cat('d')] },
+      { ...expectArticle('d'), categories: [cat('a'), cat('d')] },
+      { ...expectArticle('a'), categories: [cat('b')] },
     ]);
   });
 
@@ -262,10 +268,10 @@ describe('Sort', () => {
     expect(res.body.data.length).toBe(4);
 
     expect(res.body.data).toMatchObject([
-      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
-      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
-      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS, categories: [cat('d')] },
-      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS, categories: [cat('b')] },
+      { ...expectArticle('d'), categories: [cat('a'), cat('d')] },
+      { ...expectArticle('b'), categories: [cat('c'), cat('d')] },
+      { ...expectArticle('c'), categories: [cat('d')] },
+      { ...expectArticle('a'), categories: [cat('b')] },
     ]);
   });
 
@@ -282,8 +288,8 @@ describe('Sort', () => {
     expect(res.body.data.length).toBe(2);
 
     expect(res.body.data).toMatchObject([
-      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS, categories: [cat('a'), cat('d')] },
-      { id: 4, title: 'Article B', ...BASIC_ARTICLE_FIELDS, categories: [cat('c'), cat('d')] },
+      { ...expectArticle('d'), categories: [cat('a'), cat('d')] },
+      { ...expectArticle('b'), categories: [cat('c'), cat('d')] },
     ]);
   });
 
@@ -306,9 +312,9 @@ describe('Sort', () => {
 
     // Page 1
     expect(page1.body.data).toMatchObject([
-      { id: 3, ...BASIC_ARTICLE_FIELDS, title: 'Article D', categories: [cat('a'), cat('d')] },
-      { id: 1, ...BASIC_ARTICLE_FIELDS, title: 'Article A', categories: [cat('b')] },
-      { id: 4, ...BASIC_ARTICLE_FIELDS, title: 'Article B', categories: [cat('c'), cat('d')] },
+      { ...expectArticle('d'), categories: [cat('a'), cat('d')] },
+      { ...expectArticle('a'), categories: [cat('b')] },
+      { ...expectArticle('b'), categories: [cat('c'), cat('d')] },
     ]);
 
     expect(page1.body.meta).toMatchObject({
@@ -316,9 +322,7 @@ describe('Sort', () => {
     });
 
     // Page 2
-    expect(page2.body.data).toMatchObject([
-      { id: 2, ...BASIC_ARTICLE_FIELDS, title: 'Article C', categories: [cat('d')] },
-    ]);
+    expect(page2.body.data).toMatchObject([{ ...expectArticle('c'), categories: [cat('d')] }]);
 
     expect(page2.body.meta).toMatchObject({
       pagination: { page: 2, pageSize, pageCount: 2, total: 4 },
@@ -334,9 +338,9 @@ describe('Sort', () => {
     });
 
     expect(res.body.data).toMatchObject([
-      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS },
-      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS },
-      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS },
+      { ...expectArticle('d') },
+      { ...expectArticle('a') },
+      { ...expectArticle('c') },
     ]);
   });
 
@@ -351,10 +355,10 @@ describe('Sort', () => {
     });
 
     expect(res.body.data).toMatchObject([
-      { id: 3, title: 'Article D', ...BASIC_ARTICLE_FIELDS },
-      { id: 1, title: 'Article A', ...BASIC_ARTICLE_FIELDS },
-      { id: 2, title: 'Article C', ...BASIC_ARTICLE_FIELDS },
-      { id: 1, title: 'Article B', ...BASIC_ARTICLE_FIELDS },
+      { ...expectArticle('d') },
+      { ...expectArticle('a') },
+      { ...expectArticle('c') },
+      { ...expectArticle('b') },
     ]);
   });
 
@@ -375,12 +379,7 @@ describe('Sort', () => {
 
     expect(res.status).toBe(200);
 
-    expect(res.body.data).toMatchObject({
-      id: 1,
-      title: 'Article A',
-      ...BASIC_ARTICLE_FIELDS,
-      categories: [cat('b')],
-    });
+    expect(res.body.data).toMatchObject({ ...expectArticle('a'), categories: [cat('b')] });
   });
 
   test('Delete + Deep sort (1st level) should ignore the sort', async () => {
