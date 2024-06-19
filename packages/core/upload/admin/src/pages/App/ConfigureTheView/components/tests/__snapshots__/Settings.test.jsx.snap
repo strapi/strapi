@@ -17,10 +17,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c6 {
   background: #ffffff;
-  padding-block-start: 8px;
-  padding-inline-end: 12px;
-  padding-block-end: 8px;
-  padding-inline-start: 12px;
   border-radius: 4px;
   position: relative;
   overflow: hidden;
@@ -89,8 +85,11 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c8 {
   border: 1px solid #dcdce4;
+  padding-block: 8px;
+  padding-inline-start: 16px;
+  padding-inline-end: 12px;
   outline: none;
-  box-shadow: 0;
+  box-shadow: none;
   transition-property: border-color,box-shadow,fill;
   transition-duration: 0.2s;
 }
@@ -135,6 +134,10 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   max-width: 100%;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+
+}
+
 @media (max-width: 1100px) {
   .c2 {
     grid-column: span 12;
@@ -161,7 +164,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
           class="c3"
         >
           <label
-            alignitems="center"
             class="c4 c5"
             for=":r0:"
             id=":r0:-label"
@@ -231,7 +233,6 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
           class="c3"
         >
           <label
-            alignitems="center"
             class="c4 c5"
             for=":r3:"
             id=":r3:-label"

@@ -13,8 +13,7 @@ import {
   Flex,
   SingleSelect,
   SingleSelectOption,
-  ModalBody,
-  ModalFooter,
+  Modal,
   Field,
 } from '@strapi/design-system';
 import { UID } from '@strapi/types';
@@ -25,8 +24,12 @@ import { CreateManyReleaseActions } from '../../../shared/contracts/release-acti
 import { PERMISSIONS as releasePermissions } from '../constants';
 import { useCreateManyReleaseActionsMutation, useGetReleasesQuery } from '../services/release';
 
-import { type FormValues, INITIAL_VALUES, RELEASE_ACTION_FORM_SCHEMA } from './CMReleasesContainer';
-import { NoReleases } from './CMReleasesContainer';
+import {
+  type FormValues,
+  INITIAL_VALUES,
+  RELEASE_ACTION_FORM_SCHEMA,
+  NoReleases,
+} from './ReleaseActionModal';
 import { ReleaseActionOptions } from './ReleaseActionOptions';
 
 import type { BulkActionComponent } from '@strapi/content-manager/strapi-admin';
@@ -170,7 +173,7 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
                 {releases?.length === 0 ? (
                   <NoReleases />
                 ) : (
-                  <ModalBody>
+                  <Modal.Body>
                     <Flex direction="column" alignItems="stretch" gap={2}>
                       <Box paddingBottom={6}>
                         <Field.Root required>
@@ -208,30 +211,25 @@ const ReleaseAction: BulkActionComponent = ({ documents, model }) => {
                         name="type"
                       />
                     </Flex>
-                  </ModalBody>
+                  </Modal.Body>
                 )}
-                <ModalFooter
-                  startActions={
-                    <Button onClick={onClose} variant="tertiary" name="cancel">
-                      {formatMessage({
-                        id: 'content-releases.content-manager-list-view.add-to-release.cancel-button',
-                        defaultMessage: 'Cancel',
-                      })}
-                    </Button>
-                  }
-                  endActions={
-                    /**
-                     * TODO: Ideally we would use isValid from Formik to disable the button, however currently it always returns true
-                     * for yup.string().required(), even when the value is falsy (including empty string)
-                     */
-                    <Button type="submit" disabled={!values.releaseId} loading={isLoading}>
-                      {formatMessage({
-                        id: 'content-releases.content-manager-list-view.add-to-release.continue-button',
-                        defaultMessage: 'Continue',
-                      })}
-                    </Button>
-                  }
-                />
+                <Modal.Footer>
+                  <Button onClick={onClose} variant="tertiary" name="cancel">
+                    {formatMessage({
+                      id: 'content-releases.content-manager-list-view.add-to-release.cancel-button',
+                      defaultMessage: 'Cancel',
+                    })}
+                  </Button>
+                  {/** * TODO: Ideally we would use isValid from Formik to disable the button,
+                  however currently it always returns true * for yup.string().required(), even when
+                  the value is falsy (including empty string) */}
+                  <Button type="submit" disabled={!values.releaseId} loading={isLoading}>
+                    {formatMessage({
+                      id: 'content-releases.content-manager-list-view.add-to-release.continue-button',
+                      defaultMessage: 'Continue',
+                    })}
+                  </Button>
+                </Modal.Footer>
               </Form>
             )}
           </Formik>

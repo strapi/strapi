@@ -1,4 +1,4 @@
-import { omit, has, toNumber } from 'lodash/fp';
+import { omit, has, toNumber, isNil } from 'lodash/fp';
 
 import { errors, pagination } from '@strapi/utils';
 
@@ -92,7 +92,7 @@ const transformPaginationResponse = (
 
   const paginationResponse = transform(paginationInfo, total!);
 
-  if (!total) {
+  if (isNil(total)) {
     // Ignore total and pageCount if `total` value is not available.
     return omit(['total', 'pageCount'], paginationResponse) as ReturnType<typeof transform>;
   }

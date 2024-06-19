@@ -5,7 +5,7 @@ import {
   SubNavSection,
   SubNavSections,
 } from '@strapi/design-system';
-import { Lock } from '@strapi/icons';
+import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -13,14 +13,21 @@ import { styled } from 'styled-components';
 import { useTracking } from '../../../features/Tracking';
 import { SettingsMenu } from '../../../hooks/useSettingsMenu';
 
-/**
- * TODO: refactor the SubNav entirely, we shouldn't have
- * to do this hack to work a lock at the end. It's a bit hacky.
- */
-
-const CustomIcon = styled(Lock)`
+const CustomIcon = styled(Lightning)`
   right: 15px;
   position: absolute;
+  bottom: 50%;
+  transform: translateY(50%);
+
+  path {
+    fill: ${({ theme }) => theme.colors.warning500};
+  }
+`;
+
+const Link = styled(SubNavLink)`
+  &.active ${CustomIcon} {
+    right: 13px;
+  }
 `;
 
 interface SettingsNavProps {
@@ -67,16 +74,17 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
             {section.links.map((link) => {
               return (
-                <SubNavLink
+                <Link
                   tag={NavLink}
                   withBullet={link.hasNotification}
                   to={link.to}
                   onClick={handleClickOnLink(link.to)}
                   key={link.id}
+                  position="relative"
                 >
                   {formatMessage(link.intlLabel)}
-                  {link?.lockIcon && <CustomIcon width="1.5rem" height="1.5rem" />}
-                </SubNavLink>
+                  {link?.licenseOnly && <CustomIcon width="1.5rem" height="1.5rem" />}
+                </Link>
               );
             })}
           </SubNavSection>

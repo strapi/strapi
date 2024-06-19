@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import {
   useNotifyAT,
-  BaseCheckbox,
+  Checkbox,
   Button,
   EmptyStateLayout,
   Flex,
@@ -18,6 +18,7 @@ import {
   Typography,
   VisuallyHidden,
   LinkButton,
+  Dialog,
 } from '@strapi/design-system';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
@@ -231,16 +232,17 @@ const ListPage = () => {
               <Thead>
                 <Tr>
                   <Th>
-                    <BaseCheckbox
+                    <Checkbox
                       aria-label={formatMessage({
                         id: 'global.select-all-entries',
                         defaultMessage: 'Select all entries',
                       })}
-                      indeterminate={
+                      checked={
                         webhooksToDeleteLength > 0 && webhooksToDeleteLength < numberOfWebhooks
+                          ? 'indeterminate'
+                          : webhooksToDeleteLength === numberOfWebhooks
                       }
-                      value={webhooksToDeleteLength === numberOfWebhooks}
-                      onValueChange={selectAllCheckbox}
+                      onCheckedChange={selectAllCheckbox}
                     />
                   </Th>
                   <Th width="20%">
@@ -289,13 +291,13 @@ const ListPage = () => {
                     style={{ cursor: canUpdate ? 'pointer' : 'default' }}
                   >
                     <Td onClick={(e) => e.stopPropagation()}>
-                      <BaseCheckbox
+                      <Checkbox
                         aria-label={`${formatMessage({
                           id: 'global.select',
                           defaultMessage: 'Select',
                         })} ${webhook.name}`}
-                        value={webhooksToDelete?.includes(webhook.id)}
-                        onValueChange={(selected) => selectOneCheckbox(selected, webhook.id)}
+                        checked={webhooksToDelete?.includes(webhook.id)}
+                        onCheckedChange={(selected) => selectOneCheckbox(!!selected, webhook.id)}
                         name="select"
                       />
                     </Td>
@@ -318,16 +320,15 @@ const ListPage = () => {
                             id: 'global.disabled',
                             defaultMessage: 'Disabled',
                           })}
-                          label={`${webhook.name} ${formatMessage({
+                          aria-label={`${webhook.name} ${formatMessage({
                             id: 'Settings.webhooks.list.th.status',
                             defaultMessage: 'Status',
                           })}`}
-                          selected={webhook.isEnabled}
-                          onChange={(e) => {
-                            e.stopPropagation();
+                          checked={webhook.isEnabled}
+                          onCheckedChange={(enabled) => {
                             enableWebhook({
                               ...webhook,
-                              isEnabled: !webhook.isEnabled,
+                              isEnabled: enabled,
                             });
                           }}
                           visibleLabels
@@ -390,11 +391,9 @@ const ListPage = () => {
           )}
         </Layouts.Content>
       </Page.Main>
-      <ConfirmDialog
-        isOpen={showModal}
-        onClose={() => setShowModal((prev) => !prev)}
-        onConfirm={confirmDelete}
-      />
+      <Dialog.Root open={showModal} onOpenChange={setShowModal}>
+        <ConfirmDialog onConfirm={confirmDelete} />
+      </Dialog.Root>
     </Layouts.Root>
   );
 };

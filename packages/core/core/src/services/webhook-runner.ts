@@ -6,10 +6,12 @@ import createdDebugger from 'debug';
 import _ from 'lodash';
 import type { Logger } from '@strapi/logger';
 
+import type { Modules } from '@strapi/types';
 import WorkerQueue from './worker-queue';
-import type { Webhook } from './webhook-store';
 import type { EventHub } from './event-hub';
 import type { Fetch } from '../utils/fetch';
+
+type Webhook = Modules.WebhookStore.Webhook;
 
 interface Config {
   defaultHeaders: Record<string, string>;

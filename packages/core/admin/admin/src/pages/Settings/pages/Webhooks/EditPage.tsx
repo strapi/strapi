@@ -116,7 +116,7 @@ const EditPage = () => {
           message: formatMessage({ id: 'Settings.webhooks.created' }),
         });
 
-        navigate(res.data.id, { replace: true });
+        navigate(`../webhooks/${res.data.id}`, { replace: true });
       } else {
         const res = await updateWebhook({ id: id!, ...cleanData(data) });
 

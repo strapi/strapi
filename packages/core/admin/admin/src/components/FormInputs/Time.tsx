@@ -23,7 +23,7 @@ const TimeInput = forwardRef<HTMLInputElement, InputProps>(
           ref={composedRefs}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onChange={(time) => {
-            field.onChange(name, time);
+            field.onChange(name, `${time}:00.000`);
           }}
           onClear={() => field.onChange(name, undefined)}
           value={field.value ?? ''}

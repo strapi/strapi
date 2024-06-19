@@ -7,7 +7,7 @@
 import { useState } from 'react';
 
 import { ConfirmDialog } from '@strapi/admin/strapi-admin';
-import { Checkbox, Field } from '@strapi/design-system';
+import { Checkbox, CheckboxProps, Dialog, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../utils';
@@ -55,39 +55,39 @@ export const DraftAndPublishToggle = ({
       )
     : '';
 
-  const handleToggle = () => setShowWarning((prev) => !prev);
-
   const handleConfirm = () => {
     onChange({ target: { name, value: false } });
 
-    handleToggle();
+    setShowWarning(false);
   };
 
-  const handleChange = ({ target: { checked } }: { target: { checked: boolean } }) => {
+  const handleChange: CheckboxProps['onCheckedChange'] = (checked) => {
     if (!checked && !isCreating) {
-      handleToggle();
+      setShowWarning(true);
 
       return;
     }
 
-    onChange({ target: { name, value: checked } });
+    onChange({ target: { name, value: !!checked } });
   };
 
   return (
     <>
       <Field.Root hint={hint} name={name}>
-        <Checkbox checked={value} disabled={disabled} onChange={handleChange}>
+        <Checkbox checked={value} disabled={disabled} onCheckedChange={handleChange}>
           {label}
         </Checkbox>
         <Field.Hint />
       </Field.Root>
 
-      <ConfirmDialog isOpen={showWarning} onClose={handleToggle} onConfirm={handleConfirm}>
-        {formatMessage({
-          id: getTrad('popUpWarning.draft-publish.message'),
-          defaultMessage: 'If you disable the draft & publish, your drafts will be deleted.',
-        })}
-      </ConfirmDialog>
+      <Dialog.Root open={showWarning} onOpenChange={(isOpen) => setShowWarning(isOpen)}>
+        <ConfirmDialog onConfirm={handleConfirm}>
+          {formatMessage({
+            id: getTrad('popUpWarning.draft-publish.message'),
+            defaultMessage: 'If you disable the draft & publish, your drafts will be deleted.',
+          })}
+        </ConfirmDialog>
+      </Dialog.Root>
     </>
   );
 };

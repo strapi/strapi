@@ -1,5 +1,3 @@
-import * as React from 'react';
-
 import { unstable_useDocument as useDocument } from '@strapi/content-manager/strapi-admin';
 import { Box, Flex, Popover, Typography, useCollator } from '@strapi/design-system';
 import { CaretDown } from '@strapi/icons';
@@ -32,13 +30,7 @@ const LocaleListCell = ({
   });
 
   const { locale: language } = useIntl();
-  const [visible, setVisible] = React.useState(false);
-  const buttonRef = React.useRef<HTMLButtonElement>(null);
   const { data: locales = [] } = useGetLocalesQuery();
-  const handleTogglePopover: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-    e.stopPropagation();
-    setVisible((prev) => !prev);
-  };
   const formatter = useCollator(language, {
     sensitivity: 'base',
   });
@@ -70,38 +62,35 @@ const LocaleListCell = ({
     .toSorted((a, b) => formatter.compare(a, b));
 
   return (
-    <Button type="button" onClick={handleTogglePopover} ref={buttonRef}>
-      <ActionWrapper
-        minWidth="100%"
-        alignItems="center"
-        justifyContent="center"
-        height="3.2rem"
-        width="3.2rem"
-      >
-        <Typography textColor="neutral800" ellipsis>
-          {localesForDocument.join(', ')}
-        </Typography>
-        <Flex>
-          <CaretDown />
-        </Flex>
-      </ActionWrapper>
-      {visible && (
-        <Popover
-          onDismiss={() => setVisible(false)}
-          source={buttonRef as React.MutableRefObject<HTMLElement>}
-          spacing={16}
-          centered
-        >
-          <ul>
-            {localesForDocument.map((name) => (
-              <Box key={name} padding={3} tag="li">
-                <Typography>{name}</Typography>
-              </Box>
-            ))}
-          </ul>
-        </Popover>
-      )}
-    </Button>
+    <Popover.Root>
+      <Popover.Trigger>
+        <Button type="button" onClick={(e) => e.stopPropagation()}>
+          <ActionWrapper
+            minWidth="100%"
+            alignItems="center"
+            justifyContent="center"
+            height="3.2rem"
+            width="3.2rem"
+          >
+            <Typography textColor="neutral800" ellipsis>
+              {localesForDocument.join(', ')}
+            </Typography>
+            <Flex>
+              <CaretDown />
+            </Flex>
+          </ActionWrapper>
+        </Button>
+      </Popover.Trigger>
+      <Popover.Content sideOffset={16}>
+        <ul>
+          {localesForDocument.map((name) => (
+            <Box key={name} padding={3} tag="li">
+              <Typography>{name}</Typography>
+            </Box>
+          ))}
+        </ul>
+      </Popover.Content>
+    </Popover.Root>
   );
 };
 

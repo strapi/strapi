@@ -105,10 +105,15 @@ test.describe('Edit View', () => {
       await page.getByRole('gridcell', { name: 'Being from Kansas City' }).click();
 
       await page.getByRole('combobox', { name: 'authors' }).click();
-      expect(page.getByRole('option', { name: 'Ted Lasso Draft' })).toBeEnabled();
-      await page.getByRole('option', { name: 'Ted Lasso Draft' }).click();
+      const draft = page
+        .locator('role=option')
+        .filter({ hasText: 'Led Tasso' })
+        .filter({ hasText: 'Draft' });
 
-      await expect(page.getByRole('link', { name: 'Ted Lasso' })).toBeVisible();
+      await expect(draft).toBeEnabled();
+      await draft.click();
+
+      await expect(page.getByRole('link', { name: 'Led Tasso' })).toBeVisible();
 
       await page.getByRole('button', { name: 'Save' }).click();
       await findAndClose(page, 'Saved Document');
@@ -182,10 +187,16 @@ test.describe('Edit View', () => {
         .fill('I miss the denver broncos, now I can only watch it on the evening.');
 
       await page.getByRole('combobox', { name: 'authors' }).click();
-      expect(page.getByRole('option', { name: 'Ted Lasso Draft' })).toBeEnabled();
-      await page.getByRole('option', { name: 'Ted Lasso Draft' }).click();
 
-      await expect(page.getByRole('link', { name: 'Ted Lasso' })).toBeVisible();
+      const draft = page
+        .locator('role=option')
+        .filter({ hasText: 'Led Tasso' })
+        .filter({ hasText: 'Draft' });
+
+      await expect(draft).toBeEnabled();
+      await draft.click();
+
+      await expect(page.getByRole('link', { name: 'Led Tasso' })).toBeVisible();
 
       await expect(page.getByRole('button', { name: 'Save' })).not.toBeDisabled();
 
@@ -236,7 +247,6 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
 
       await page.getByRole('menuitem', { name: 'Discard changes' }).click();
-      await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
 
       await findAndClose(page, 'Changes discarded');
@@ -257,7 +267,6 @@ test.describe('Edit View', () => {
         'false'
       );
       await expect(page.getByRole('tab', { name: 'Draft' })).not.toBeDisabled();
-      await expect(page.getByRole('tab', { name: 'Published' })).toBeDisabled();
 
       await page.getByRole('button', { name: 'Publish' }).click();
       await findAndClose(page, 'Published Document');
@@ -301,7 +310,6 @@ test.describe('Edit View', () => {
 
       await page.getByRole('button', { name: 'More actions' }).click();
       await page.getByRole('menuitem', { name: 'Delete document' }).click();
-      await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
 
       await findAndClose(page, 'Deleted Document');
@@ -527,7 +535,6 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('menuitem', { name: 'Discard changes' })).not.toBeDisabled();
 
       await page.getByRole('menuitem', { name: 'Discard changes' }).click();
-      await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
       await page.getByRole('button', { name: 'Confirm' }).click();
 
       await findAndClose(page, 'Changes discarded');

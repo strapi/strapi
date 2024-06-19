@@ -8,7 +8,7 @@ import {
   BackButton,
   Layouts,
 } from '@strapi/admin/strapi-admin';
-import { Button, Divider, Flex, Grid, GridItem, Main, Typography } from '@strapi/design-system';
+import { Button, Divider, Flex, Grid, Main, Typography } from '@strapi/design-system';
 import { generateNKeysBetween } from 'fractional-indexing';
 import pipe from 'lodash/fp/pipe';
 import { useIntl } from 'react-intl';
@@ -107,8 +107,8 @@ const ConfigurationForm = ({
                   defaultMessage: 'Settings',
                 })}
               </Typography>
-              <Grid>
-                <GridItem col={6} s={12}>
+              <Grid.Root>
+                <Grid.Item col={6} s={12}>
                   <InputRenderer
                     type="enumeration"
                     label={formatMessage({
@@ -144,27 +144,27 @@ const ConfigurationForm = ({
                       return acc;
                     }, [])}
                   />
-                </GridItem>
-                <GridItem paddingTop={6} paddingBottom={6} col={12} s={12}>
+                </Grid.Item>
+                <Grid.Item paddingTop={6} paddingBottom={6} col={12} s={12}>
                   <Divider />
-                </GridItem>
-                <GridItem col={12} s={12}>
+                </Grid.Item>
+                <Grid.Item col={12} s={12}>
                   <Typography variant="delta" tag="h3">
                     {formatMessage({
                       id: getTranslation('containers.SettingPage.view'),
                       defaultMessage: 'View',
                     })}
                   </Typography>
-                </GridItem>
-                <GridItem col={12} s={12}>
+                </Grid.Item>
+                <Grid.Item col={12} s={12}>
                   <Fields
                     attributes={attributes}
                     components={components}
                     fieldSizes={fieldSizes}
                     metadatas={metadatas}
                   />
-                </GridItem>
-              </Grid>
+                </Grid.Item>
+              </Grid.Root>
             </Flex>
           </Layouts.Content>
         </Form>

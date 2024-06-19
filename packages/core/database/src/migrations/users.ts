@@ -3,6 +3,8 @@ import { Umzug } from 'umzug';
 
 import { createStorage } from './storage';
 import { wrapTransaction } from './common';
+import { transformLogMessage } from './logger';
+
 import type { MigrationResolver, UserMigrationProvider } from './common';
 import type { Database } from '..';
 
@@ -46,7 +48,21 @@ export const createUserMigrationProvider = (db: Database): UserMigrationProvider
 
   const umzugProvider = new Umzug({
     storage: createStorage({ db, tableName: 'strapi_migrations' }),
-    logger: console,
+    logger: {
+      info(message) {
+        // NOTE: only log internal migration in debug mode
+        db.logger.info(transformLogMessage('info', message));
+      },
+      warn(message) {
+        db.logger.warn(transformLogMessage('warn', message));
+      },
+      error(message) {
+        db.logger.error(transformLogMessage('error', message));
+      },
+      debug(message) {
+        db.logger.debug(transformLogMessage('debug', message));
+      },
+    },
     context,
     migrations: {
       glob: ['*.{js,sql}', { cwd: dir }],

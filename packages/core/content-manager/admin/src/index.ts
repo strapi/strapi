@@ -3,7 +3,7 @@ import { Feather } from '@strapi/icons';
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
 import { reducer } from './modules/reducers';
-import { contentManagerApi } from './services/api';
+import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
 
 // eslint-disable-next-line import/no-default-export
@@ -23,8 +23,19 @@ export default {
         defaultMessage: 'Content Manager',
       },
       permissions: [],
-      Component: () => import('./layout').then((mod) => ({ default: mod.Layout })),
       position: 1,
+    });
+
+    app.router.addRoute({
+      path: 'content-manager/*',
+      lazy: async () => {
+        const { Layout } = await import('./layout');
+
+        return {
+          Component: Layout,
+        };
+      },
+      children: routes,
     });
 
     app.registerPlugin(cm.config);

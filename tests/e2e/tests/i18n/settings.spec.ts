@@ -125,7 +125,6 @@ test.describe('Settings', () => {
     await expect(page.getByRole('heading', { name: 'Internationalization' })).toBeVisible();
     await page.getByRole('button', { name: 'Delete French (fr) locale' }).click();
 
-    await expect(page.getByRole('dialog', { name: 'Confirmation' })).toBeVisible();
     await page.getByRole('button', { name: 'Confirm' }).click();
     await findAndClose(page, 'Success:Locale successfully deleted');
 

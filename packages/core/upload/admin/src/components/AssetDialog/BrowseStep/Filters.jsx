@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
-import { Button } from '@strapi/design-system';
+import { Button, Popover } from '@strapi/design-system';
 import { Filter } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -10,32 +10,22 @@ import FilterList from '../../FilterList';
 import FilterPopover from '../../FilterPopover';
 
 export const Filters = ({ appliedFilters, onChangeFilters }) => {
-  const buttonRef = useRef(null);
-  const [isVisible, setVisible] = useState(false);
+  const [open, setOpen] = React.useState(false);
   const { formatMessage } = useIntl();
 
-  const toggleFilter = () => setVisible((prev) => !prev);
-
   return (
-    <>
-      <Button
-        variant="tertiary"
-        ref={buttonRef}
-        startIcon={<Filter />}
-        onClick={toggleFilter}
-        size="S"
-      >
-        {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
-      </Button>
-      {isVisible && (
-        <FilterPopover
-          displayedFilters={displayedFilters}
-          filters={appliedFilters}
-          onSubmit={onChangeFilters}
-          onToggle={toggleFilter}
-          source={buttonRef}
-        />
-      )}
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger>
+        <Button variant="tertiary" startIcon={<Filter />} size="S">
+          {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
+        </Button>
+      </Popover.Trigger>
+      <FilterPopover
+        onToggle={setOpen}
+        displayedFilters={displayedFilters}
+        filters={appliedFilters}
+        onSubmit={onChangeFilters}
+      />
 
       {appliedFilters && (
         <FilterList
@@ -44,7 +34,7 @@ export const Filters = ({ appliedFilters, onChangeFilters }) => {
           onRemoveFilter={onChangeFilters}
         />
       )}
-    </>
+    </Popover.Root>
   );
 };
 

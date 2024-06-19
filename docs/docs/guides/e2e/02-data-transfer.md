@@ -41,6 +41,18 @@ Once that's completed, you should be able to run your Strapi instance as usual:
 yarn develop
 ```
 
+> **Tip!**
+> If you can't run the test-app because it is not present in the monorepo dependencies you can fix this by making the following change to the root monorepo `package.json` file and running `yarn install` at both the root of the monorepo and the test-app you are running.
+>
+> **This change should not be committed**.
+
+```
+  "workspaces": [
+    ...
+    "test-apps/e2e/*",
+  ]
+```
+
 If you change any of the content schemas (including adding new ones) be sure to [update the `app-template`](./01-app-template.md) otherwise DTS will fail to import the data for schemas that do not exist.
 
 ### Exporting a data packet

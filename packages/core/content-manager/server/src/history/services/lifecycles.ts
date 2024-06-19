@@ -19,8 +19,6 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
     isInitialized: false,
   };
 
-  const query = strapi.db.query(HISTORY_VERSION_UID);
-  const historyService = getService(strapi, 'history');
   const serviceUtils = createServiceUtils({ strapi });
 
   return {
@@ -38,13 +36,27 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
           return next();
         }
 
-        // NOTE: can do type narrowing with array includes
+        // NOTE: cannot do type narrowing with array includes
         if (
           context.action !== 'create' &&
           context.action !== 'update' &&
+          context.action !== 'clone' &&
           context.action !== 'publish' &&
           context.action !== 'unpublish' &&
           context.action !== 'discardDraft'
+        ) {
+          return next();
+        }
+
+        /**
+         * When a document is published, the draft version of the document is also updated.
+         * It creates confusion for users because they see two history versions each publish action.
+         * To avoid this, we silence the update action during a publish request,
+         * so that they only see the published version of the document in the history.
+         */
+        if (
+          context.action === 'update' &&
+          strapi.requestContext.get()?.request.url.endsWith('/actions/publish')
         ) {
           return next();
         }
@@ -57,10 +69,13 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
 
         const result = (await next()) as any;
 
-        const documentContext =
-          context.action === 'create'
-            ? { documentId: result.documentId, locale: context.params?.locale }
-            : { documentId: context.params.documentId, locale: context.params?.locale };
+        const documentContext = {
+          documentId:
+            context.action === 'create' || context.action === 'clone'
+              ? result.documentId
+              : context.params.documentId,
+          locale: context.params?.locale,
+        };
 
         const defaultLocale = await serviceUtils.getDefaultLocale();
         const locale = documentContext.locale || defaultLocale;
@@ -107,7 +122,7 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         // Prevent creating a history version for an action that wasn't actually executed
         await strapi.db.transaction(async ({ onCommit }) => {
           onCommit(() => {
-            historyService.createVersion({
+            getService(strapi, 'history').createVersion({
               contentType: contentTypeUid,
               data: omit(FIELDS_TO_IGNORE, document) as Modules.Documents.AnyDocument,
               schema: omit(FIELDS_TO_IGNORE, attributesSchema),
@@ -122,13 +137,12 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         return result;
       });
 
-      const retentionDays = serviceUtils.getRetentionDays();
       // Schedule a job to delete expired history versions every day at midnight
       state.deleteExpiredJob = scheduleJob('0 0 * * *', () => {
-        const retentionDaysInMilliseconds = retentionDays * 24 * 60 * 60 * 1000;
+        const retentionDaysInMilliseconds = serviceUtils.getRetentionDays() * 24 * 60 * 60 * 1000;
         const expirationDate = new Date(Date.now() - retentionDaysInMilliseconds);
 
-        query.deleteMany({
+        strapi.db.query(HISTORY_VERSION_UID).deleteMany({
           where: {
             created_at: {
               $lt: expirationDate.toISOString(),

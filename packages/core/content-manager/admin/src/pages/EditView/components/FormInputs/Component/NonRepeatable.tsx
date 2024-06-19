@@ -1,5 +1,5 @@
 import { useField } from '@strapi/admin/strapi-admin';
-import { Box, Flex, Grid, GridItem } from '@strapi/design-system';
+import { Box, Flex, Grid } from '@strapi/design-system';
 
 import { ComponentProvider, useComponent } from '../ComponentContext';
 
@@ -31,7 +31,7 @@ const NonRepeatableComponent = ({
         <Flex direction="column" alignItems="stretch" gap={6}>
           {layout.map((row, index) => {
             return (
-              <Grid gap={4} key={index}>
+              <Grid.Root gap={4} key={index}>
                 {row.map(({ size, ...field }) => {
                   /**
                    * Layouts are built from schemas so they don't understand the complete
@@ -42,12 +42,12 @@ const NonRepeatableComponent = ({
                   const completeFieldName = `${name}.${field.name}`;
 
                   return (
-                    <GridItem col={size} key={completeFieldName} s={12} xs={12}>
+                    <Grid.Item col={size} key={completeFieldName} s={12} xs={12}>
                       {children({ ...field, name: completeFieldName })}
-                    </GridItem>
+                    </Grid.Item>
                   );
                 })}
-              </Grid>
+              </Grid.Root>
             );
           })}
         </Flex>

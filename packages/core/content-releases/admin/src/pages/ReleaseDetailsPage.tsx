@@ -29,9 +29,18 @@ import {
   Tooltip,
   EmptyStateLayout,
   LinkButton,
-  Menu,
+  Dialog,
+  SimpleMenu,
+  MenuItem,
 } from '@strapi/design-system';
-import { CheckCircle, More, Pencil, Trash, CrossCircle } from '@strapi/icons';
+import {
+  CheckCircle,
+  More,
+  Pencil,
+  Trash,
+  CrossCircle,
+  ArrowsCounterClockwise,
+} from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import format from 'date-fns/format';
 import { utcToZonedTime } from 'date-fns-tz';
@@ -65,7 +74,7 @@ import type {
   ReleaseActionGroupBy,
   ReleaseActionEntry,
 } from '../../../shared/contracts/release-actions';
-import type { Schema } from '@strapi/types';
+import type { Struct, Internal } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsLayout
@@ -77,7 +86,7 @@ const ReleaseInfoWrapper = styled(Flex)`
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
-const StyledMenuItem = styled(Menu.Item)<{
+const StyledMenuItem = styled(MenuItem)<{
   disabled?: boolean;
   $variant?: 'neutral' | 'danger';
 }>`
@@ -115,69 +124,102 @@ const TypographyMaxWidth = styled(Typography)`
 
 interface EntryValidationTextProps {
   action: ReleaseAction['type'];
-  schema?: Schema.ContentType;
-  components: { [key: Schema.Component['uid']]: Schema.Component };
+  schema?: Struct.ContentTypeSchema;
+  components: { [key: Internal.UID.Component]: Struct.ComponentSchema };
   entry: ReleaseActionEntry;
+  status: ReleaseAction['status'];
 }
 
-const EntryValidationText = ({ action, schema, entry }: EntryValidationTextProps) => {
+const EntryValidationText = ({ action, schema, entry, status }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
-  const { validate } = unstable_useDocument(
+
+  const { validate, isLoading } = unstable_useDocument(
     {
       collectionType: schema?.kind ?? '',
       model: schema?.uid ?? '',
     },
     {
-      skip: !schema,
+      // useDocument makes a request to get more data about the entry, but we only want to have the validation function so we skip the request
+      skip: true,
     }
   );
 
-  const errors = validate(entry) ?? {};
-
-  if (Object.keys(errors).length > 0) {
-    const validationErrorsMessages = Object.entries(errors)
-      .map(([key, value]) =>
-        formatMessage(
-          // @ts-expect-error – TODO: fix this will better checks
-          { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
-          { field: key }
-        )
-      )
-      .join(' ');
-
-    return (
-      <Flex gap={2}>
-        <CrossCircle fill="danger600" />
-        <Tooltip description={validationErrorsMessages}>
-          <TypographyMaxWidth textColor="danger600" variant="omega" fontWeight="semiBold" ellipsis>
-            {validationErrorsMessages}
-          </TypographyMaxWidth>
-        </Tooltip>
-      </Flex>
-    );
+  if (isLoading) {
+    return null;
   }
 
-  if (action == 'publish') {
-    return (
-      <Flex gap={2}>
-        <CheckCircle fill="success600" />
-        {entry.publishedAt ? (
-          <Typography textColor="success600" fontWeight="bold">
-            {formatMessage({
-              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
-              defaultMessage: 'Already published',
-            })}
-          </Typography>
-        ) : (
+  const errors = validate(entry) ?? {};
+
+  if (action === 'publish') {
+    if (Object.keys(errors).length > 0) {
+      const validationErrorsMessages = Object.entries(errors)
+        .map(([key, value]) =>
+          formatMessage(
+            // @ts-expect-error – TODO: fix this will better checks
+            { id: `${value.id}.withField`, defaultMessage: value.defaultMessage },
+            { field: key }
+          )
+        )
+        .join(' ');
+
+      return (
+        <Flex gap={2}>
+          <CrossCircle fill="danger600" />
+          <Tooltip description={validationErrorsMessages}>
+            <TypographyMaxWidth
+              textColor="danger600"
+              variant="omega"
+              fontWeight="semiBold"
+              ellipsis
+            >
+              {validationErrorsMessages}
+            </TypographyMaxWidth>
+          </Tooltip>
+        </Flex>
+      );
+    }
+
+    if (status === 'draft') {
+      return (
+        <Flex gap={2}>
+          <CheckCircle fill="success600" />
           <Typography>
             {formatMessage({
               id: 'content-releases.pages.ReleaseDetails.entry-validation.ready-to-publish',
               defaultMessage: 'Ready to publish',
             })}
           </Typography>
-        )}
-      </Flex>
-    );
+        </Flex>
+      );
+    }
+
+    if (status === 'modified') {
+      return (
+        <Flex gap={2}>
+          <ArrowsCounterClockwise fill="alternative600" />
+          <Typography>
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.modified',
+              defaultMessage: 'Ready to publish changes',
+            })}
+          </Typography>
+        </Flex>
+      );
+    }
+
+    if (status === 'published') {
+      return (
+        <Flex gap={2}>
+          <CheckCircle fill="success600" />
+          <Typography>
+            {formatMessage({
+              id: 'content-releases.pages.ReleaseDetails.entry-validation.already-published',
+              defaultMessage: 'Already published',
+            })}
+          </Typography>
+        </Flex>
+      );
+    }
   }
 
   return (
@@ -367,89 +409,70 @@ const ReleaseDetailsLayout = ({
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
-              <Menu.Root>
-                {/*
-                  TODO Fix in the DS
-                  - tag={IconButton} has TS error:  Property 'icon' does not exist on type 'IntrinsicAttributes & TriggerProps & RefAttributes<HTMLButtonElement>'
-                  - The Icon doesn't actually show unless you hack it with some padding...and it's still a little strange
-                */}
-                <Menu.Trigger
-                  paddingLeft={2}
-                  paddingRight={2}
-                  aria-label={formatMessage({
-                    id: 'content-releases.header.actions.open-release-actions',
-                    defaultMessage: 'Release edit and delete menu',
-                  })}
-                  variant="tertiary"
-                >
-                  <More />
-                </Menu.Trigger>
-                {/*
-                  TODO: Using Menu instead of SimpleMenu mainly because there is no positioning provided from the DS,
-                  Refactor this once fixed in the DS
-                */}
-                <Menu.Content top={1} popoverPlacement="bottom-end" maxHeight={undefined}>
-                  <Flex
-                    alignItems="center"
-                    justifyContent="center"
-                    direction="column"
-                    padding={1}
-                    width="100%"
-                  >
-                    <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
-                      <Flex alignItems="center" gap={2} hasRadius width="100%">
-                        <PencilIcon />
-                        <Typography ellipsis>
-                          {formatMessage({
-                            id: 'content-releases.header.actions.edit',
-                            defaultMessage: 'Edit',
-                          })}
-                        </Typography>
-                      </Flex>
-                    </StyledMenuItem>
-                    <StyledMenuItem
-                      disabled={!canDelete}
-                      onSelect={toggleWarningSubmit}
-                      $variant="danger"
-                    >
-                      <Flex alignItems="center" gap={2} hasRadius width="100%">
-                        <TrashIcon />
-                        <Typography ellipsis textColor="danger600">
-                          {formatMessage({
-                            id: 'content-releases.header.actions.delete',
-                            defaultMessage: 'Delete',
-                          })}
-                        </Typography>
-                      </Flex>
-                    </StyledMenuItem>
-                  </Flex>
-                  <ReleaseInfoWrapper
-                    direction="column"
-                    justifyContent="center"
-                    alignItems="flex-start"
-                    gap={1}
-                    padding={5}
-                  >
-                    <Typography variant="pi" fontWeight="bold">
+              <SimpleMenu
+                label={<More />}
+                variant="tertiary"
+                endIcon={null}
+                paddingLeft={2}
+                paddingRight={2}
+                aria-label={formatMessage({
+                  id: 'content-releases.header.actions.open-release-actions',
+                  defaultMessage: 'Release edit and delete menu',
+                })}
+                popoverPlacement="bottom-end"
+              >
+                <StyledMenuItem disabled={!canUpdate} onSelect={toggleEditReleaseModal}>
+                  <Flex alignItems="center" gap={2} hasRadius width="100%">
+                    <PencilIcon />
+                    <Typography ellipsis>
                       {formatMessage({
-                        id: 'content-releases.header.actions.created',
-                        defaultMessage: 'Created',
+                        id: 'content-releases.header.actions.edit',
+                        defaultMessage: 'Edit',
                       })}
                     </Typography>
-                    <Typography variant="pi" color="neutral300">
-                      <RelativeTime timestamp={new Date(release.createdAt)} />
-                      {formatMessage(
-                        {
-                          id: 'content-releases.header.actions.created.description',
-                          defaultMessage:
-                            '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
-                        },
-                        { createdBy: getCreatedByUser(), hasCreatedByUser }
-                      )}
+                  </Flex>
+                </StyledMenuItem>
+                <StyledMenuItem
+                  disabled={!canDelete}
+                  onSelect={toggleWarningSubmit}
+                  $variant="danger"
+                >
+                  <Flex alignItems="center" gap={2} hasRadius width="100%">
+                    <TrashIcon />
+                    <Typography ellipsis textColor="danger600">
+                      {formatMessage({
+                        id: 'content-releases.header.actions.delete',
+                        defaultMessage: 'Delete',
+                      })}
                     </Typography>
-                  </ReleaseInfoWrapper>
-                </Menu.Content>
-              </Menu.Root>
+                  </Flex>
+                </StyledMenuItem>
+                <ReleaseInfoWrapper
+                  direction="column"
+                  justifyContent="center"
+                  alignItems="flex-start"
+                  gap={1}
+                  padding={5}
+                >
+                  <Typography variant="pi" fontWeight="bold">
+                    {formatMessage({
+                      id: 'content-releases.header.actions.created',
+                      defaultMessage: 'Created',
+                    })}
+                  </Typography>
+                  <Typography variant="pi" color="neutral300">
+                    <RelativeTime timestamp={new Date(release.createdAt)} />
+                    {formatMessage(
+                      {
+                        id: 'content-releases.header.actions.created.description',
+                        defaultMessage:
+                          '{hasCreatedByUser, select, true { by {createdBy}} other { by deleted user}}',
+                      },
+                      { createdBy: getCreatedByUser(), hasCreatedByUser }
+                    )}
+                  </Typography>
+                </ReleaseInfoWrapper>
+              </SimpleMenu>
               <Button size="S" variant="tertiary" onClick={handleRefresh}>
                 {formatMessage({
                   id: 'content-releases.header.actions.refresh',
@@ -525,19 +548,19 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
   const runHookWaterfall = useStrapiApp('ReleaseDetailsPage', (state) => state.runHookWaterfall);
 
   // TODO: Migrated displayedHeader to v5
-  const { hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } = runHookWaterfall(
-    'ContentReleases/pages/ReleaseDetails/add-locale-in-releases',
-    {
-      displayedHeaders: {
-        label: formatMessage({
-          id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-          defaultMessage: 'locale',
-        }),
-        name: 'locale',
-      },
+  const { displayedHeaders, hasI18nEnabled }: { displayedHeaders: any; hasI18nEnabled: boolean } =
+    runHookWaterfall('ContentReleases/pages/ReleaseDetails/add-locale-in-releases', {
+      displayedHeaders: [
+        {
+          label: {
+            id: 'content-releases.page.ReleaseDetails.table.header.label.name',
+            defaultMessage: 'name',
+          },
+          name: 'name',
+        },
+      ],
       hasI18nEnabled: false,
-    }
-  );
+    });
 
   const release = releaseData?.data;
   const selectedGroupBy = query?.groupBy || 'contentType';
@@ -659,40 +682,34 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
     defaultMessage: 'Group by',
   });
   const headers = [
-    // ...displayedHeaders,
+    ...displayedHeaders,
     {
-      label: formatMessage({
-        id: 'content-releases.page.ReleaseDetails.table.header.label.name',
-        defaultMessage: 'name',
-      }),
-      name: 'name',
-    },
-    {
-      label: formatMessage({
+      label: {
         id: 'content-releases.page.ReleaseDetails.table.header.label.content-type',
         defaultMessage: 'content-type',
-      }),
+      },
       name: 'content-type',
     },
     {
-      label: formatMessage({
+      label: {
         id: 'content-releases.page.ReleaseDetails.table.header.label.action',
         defaultMessage: 'action',
-      }),
+      },
       name: 'action',
     },
     ...(!release.releasedAt
       ? [
           {
-            label: formatMessage({
+            label: {
               id: 'content-releases.page.ReleaseDetails.table.header.label.status',
               defaultMessage: 'status',
-            }),
+            },
             name: 'status',
           },
         ]
       : []),
   ];
+
   const options = hasI18nEnabled ? GROUP_BY_OPTIONS : GROUP_BY_OPTIONS_NO_LOCALE;
 
   return (
@@ -738,14 +755,14 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
             >
               <Table.Content>
                 <Table.Head>
-                  {headers.map((header) => (
-                    <Table.HeaderCell key={header.name} {...header} />
+                  {headers.map(({ label, name }) => (
+                    <Table.HeaderCell key={name} label={formatMessage(label)} name={name} />
                   ))}
                 </Table.Head>
                 <Table.Loading />
                 <Table.Body>
                   {releaseActions[key].map(
-                    ({ id, contentType, locale, type, entry }, actionIndex) => (
+                    ({ id, contentType, locale, type, entry, status }, actionIndex) => (
                       <Tr key={id}>
                         <Td width="25%" maxWidth="200px">
                           <Typography ellipsis>{`${
@@ -795,6 +812,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                                 schema={contentTypes?.[contentType.uid]}
                                 components={components}
                                 entry={entry}
+                                status={status}
                               />
                             </Td>
                             <Td>
@@ -802,7 +820,7 @@ const ReleaseDetailsBody = ({ releaseId }: ReleaseDetailsBodyProps) => {
                                 <ReleaseActionMenu.Root>
                                   <ReleaseActionMenu.ReleaseActionEntryLinkItem
                                     contentTypeUid={contentType.uid}
-                                    entryId={entry.id}
+                                    documentId={entry.documentId}
                                     locale={locale?.code}
                                   />
                                   <ReleaseActionMenu.DeleteReleaseActionItem
@@ -951,31 +969,28 @@ const ReleaseDetailsPage = () => {
       toggleWarningSubmit={toggleWarningSubmit}
     >
       <ReleaseDetailsBody releaseId={releaseId} />
-      {releaseModalShown && (
-        <ReleaseModal
-          handleClose={toggleEditReleaseModal}
-          handleSubmit={handleEditRelease}
-          isLoading={isLoadingDetails || isSubmittingForm}
-          initialValues={{
-            name: title || '',
-            scheduledAt,
-            date,
-            time,
-            isScheduled: Boolean(scheduledAt),
-            timezone,
-          }}
-        />
-      )}
-      <ConfirmDialog
-        isOpen={showWarningSubmit}
-        onClose={toggleWarningSubmit}
-        onConfirm={handleDeleteRelease}
-      >
-        {formatMessage({
-          id: 'content-releases.dialog.confirmation-message',
-          defaultMessage: 'Are you sure you want to delete this release?',
-        })}
-      </ConfirmDialog>
+      <ReleaseModal
+        open={releaseModalShown}
+        handleClose={toggleEditReleaseModal}
+        handleSubmit={handleEditRelease}
+        isLoading={isLoadingDetails || isSubmittingForm}
+        initialValues={{
+          name: title || '',
+          scheduledAt,
+          date,
+          time,
+          isScheduled: Boolean(scheduledAt),
+          timezone,
+        }}
+      />
+      <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
+        <ConfirmDialog onConfirm={handleDeleteRelease}>
+          {formatMessage({
+            id: 'content-releases.dialog.confirmation-message',
+            defaultMessage: 'Are you sure you want to delete this release?',
+          })}
+        </ConfirmDialog>
+      </Dialog.Root>
     </ReleaseDetailsLayout>
   );
 };

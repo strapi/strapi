@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import { Box, BoxComponent, Button, ButtonProps } from '@strapi/design-system';
 import { Cog } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -7,25 +9,22 @@ interface ConditionsButtonProps extends Pick<ButtonProps, 'className' | 'onClick
   hasConditions?: boolean;
 }
 
-const ConditionsButtonImpl = ({
-  onClick,
-  className,
-  hasConditions = false,
-  variant = 'tertiary',
-}: ConditionsButtonProps) => {
-  const { formatMessage } = useIntl();
+const ConditionsButtonImpl = React.forwardRef<HTMLButtonElement, ConditionsButtonProps>(
+  ({ onClick, className, hasConditions = false, variant = 'tertiary' }, ref) => {
+    const { formatMessage } = useIntl();
 
-  return (
-    <ButtonContainer $hasConditions={hasConditions} className={className}>
-      <Button variant={variant} startIcon={<Cog />} onClick={onClick}>
-        {formatMessage({
-          id: 'global.settings',
-          defaultMessage: 'Settings',
-        })}
-      </Button>
-    </ButtonContainer>
-  );
-};
+    return (
+      <ButtonContainer $hasConditions={hasConditions} className={className}>
+        <Button variant={variant} startIcon={<Cog />} onClick={onClick} ref={ref}>
+          {formatMessage({
+            id: 'global.settings',
+            defaultMessage: 'Settings',
+          })}
+        </Button>
+      </ButtonContainer>
+    );
+  }
+);
 
 const ButtonContainer = styled<BoxComponent>(Box)<{ $hasConditions?: boolean }>`
   ${({ $hasConditions, theme }) =>

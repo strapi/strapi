@@ -12,7 +12,7 @@ type Dimensions = {
   height: number | null;
 };
 
-const { bytesToKbytes, writableDiscardStream } = fileUtils;
+const { bytesToKbytes } = fileUtils;
 
 const FORMATS_TO_RESIZE = ['jpeg', 'png', 'webp', 'tiff', 'gif'];
 const FORMATS_TO_PROCESS = ['jpeg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
@@ -33,15 +33,21 @@ const writeStreamToFile = (stream: NodeJS.ReadWriteStream, path: string) =>
     writeStream.on('error', reject);
   });
 
-const getMetadata = (file: UploadableFile): Promise<sharp.Metadata> =>
-  new Promise((resolve, reject) => {
-    const pipeline = sharp();
-    pipeline.metadata().then(resolve).catch(reject);
-    file.getStream().pipe(pipeline);
-  });
+const getMetadata = (file: UploadableFile): Promise<sharp.Metadata> => {
+  if (!file.filepath) {
+    return new Promise((resolve, reject) => {
+      const pipeline = sharp();
+      pipeline.metadata().then(resolve).catch(reject);
+      file.getStream().pipe(pipeline);
+    });
+  }
+
+  return sharp(file.filepath).metadata();
+};
 
 const getDimensions = async (file: UploadableFile): Promise<Dimensions> => {
   const { width = null, height = null } = await getMetadata(file);
+
   return { width, height };
 };
 
@@ -64,17 +70,30 @@ const resizeFileTo = async (
 ) => {
   const filePath = file.tmpWorkingDirectory ? join(file.tmpWorkingDirectory, hash) : hash;
 
-  await writeStreamToFile(file.getStream().pipe(sharp().resize(options)), filePath);
+  let newInfo;
+  if (!file.filepath) {
+    const transform = sharp()
+      .resize(options)
+      .on('info', (info) => {
+        newInfo = info;
+      });
+
+    await writeStreamToFile(file.getStream().pipe(transform), filePath);
+  } else {
+    newInfo = await sharp(file.filepath).resize(options).toFile(filePath);
+  }
+
+  const { width, height, size } = newInfo ?? {};
+
   const newFile: UploadableFile = {
     name,
     hash,
     ext: file.ext,
     mime: file.mime,
+    filepath: filePath,
     path: file.path || null,
     getStream: () => fs.createReadStream(filePath),
   };
-
-  const { width, height, size } = await getMetadata(newFile);
 
   Object.assign(newFile, {
     width,
@@ -91,11 +110,10 @@ const generateThumbnail = async (file: UploadableFile) => {
     file.height &&
     (file.width > THUMBNAIL_RESIZE_OPTIONS.width || file.height > THUMBNAIL_RESIZE_OPTIONS.height)
   ) {
-    const newFile = await resizeFileTo(file, THUMBNAIL_RESIZE_OPTIONS, {
+    return resizeFileTo(file, THUMBNAIL_RESIZE_OPTIONS, {
       name: `thumbnail_${file.name}`,
       hash: `thumbnail_${file.hash}`,
     });
-    return newFile;
   }
 
   return null;
@@ -111,13 +129,15 @@ const optimize = async (file: UploadableFile) => {
   const { sizeOptimization = false, autoOrientation = false } =
     (await getService('upload').getSettings()) ?? {};
 
-  const newFile = { ...file };
-
-  const { width, height, size, format } = await getMetadata(newFile);
+  const { format, size } = await getMetadata(file);
 
   if ((sizeOptimization || autoOrientation) && isOptimizableFormat(format)) {
-    const transformer = sharp();
-
+    let transformer;
+    if (!file.filepath) {
+      transformer = sharp();
+    } else {
+      transformer = sharp(file.filepath);
+    }
     // reduce image quality
     transformer[format]({ quality: sizeOptimization ? 80 : 100 });
     // rotate image based on EXIF data
@@ -128,24 +148,38 @@ const optimize = async (file: UploadableFile) => {
       ? join(file.tmpWorkingDirectory, `optimized-${file.hash}`)
       : `optimized-${file.hash}`;
 
-    await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    let newInfo;
+    if (!file.filepath) {
+      transformer.on('info', (info) => {
+        newInfo = info;
+      });
+
+      await writeStreamToFile(file.getStream().pipe(transformer), filePath);
+    } else {
+      newInfo = await transformer.toFile(filePath);
+    }
+
+    const { width: newWidth, height: newHeight, size: newSize } = newInfo ?? {};
+
+    const newFile = { ...file };
 
     newFile.getStream = () => fs.createReadStream(filePath);
+    newFile.filepath = filePath;
+
+    if (newSize && size && newSize > size) {
+      // Ignore optimization if output is bigger than original
+      return file;
+    }
+
+    return Object.assign(newFile, {
+      width: newWidth,
+      height: newHeight,
+      size: newSize ? bytesToKbytes(newSize) : 0,
+      sizeInBytes: newSize,
+    });
   }
 
-  const { width: newWidth, height: newHeight, size: newSize } = await getMetadata(newFile);
-
-  if (newSize && size && newSize > size) {
-    // Ignore optimization if output is bigger than original
-    return { ...file, width, height, size: bytesToKbytes(size), sizeInBytes: size };
-  }
-
-  return Object.assign(newFile, {
-    width: newWidth,
-    height: newHeight,
-    size: newSize ? bytesToKbytes(newSize) : 0,
-    sizeInBytes: newSize,
-  });
+  return file;
 };
 
 const DEFAULT_BREAKPOINTS = {
@@ -207,16 +241,22 @@ const breakpointSmallerThan = (breakpoint: number, { width, height }: Dimensions
 /**
  *  Applies a simple image transformation to see if the image is faulty/corrupted.
  */
-const isFaultyImage = (file: UploadableFile) =>
-  new Promise((resolve) => {
-    file
-      .getStream()
-      .pipe(sharp().rotate())
-      .on('error', () => resolve(true))
-      .pipe(writableDiscardStream())
-      .on('error', () => resolve(true))
-      .on('close', () => resolve(false));
-  });
+const isFaultyImage = async (file: UploadableFile) => {
+  if (!file.filepath) {
+    return new Promise((resolve, reject) => {
+      const pipeline = sharp();
+      pipeline.stats().then(resolve).catch(reject);
+      file.getStream().pipe(pipeline);
+    });
+  }
+
+  try {
+    await sharp(file.filepath).stats();
+    return false;
+  } catch (e) {
+    return true;
+  }
+};
 
 const isOptimizableImage = async (file: UploadableFile) => {
   let format;

@@ -240,8 +240,8 @@ export const StageSelect = () => {
       </Field.Root>
 
       <LimitsModal.Root
-        isOpen={showLimitModal === 'workflow'}
-        onClose={() => setShowLimitModal(null)}
+        open={showLimitModal === 'workflow'}
+        onOpenChange={() => setShowLimitModal(null)}
       >
         <LimitsModal.Title>
           {formatMessage({
@@ -258,7 +258,10 @@ export const StageSelect = () => {
         </LimitsModal.Body>
       </LimitsModal.Root>
 
-      <LimitsModal.Root isOpen={showLimitModal === 'stage'} onClose={() => setShowLimitModal(null)}>
+      <LimitsModal.Root
+        open={showLimitModal === 'stage'}
+        onOpenChange={() => setShowLimitModal(null)}
+      >
         <LimitsModal.Title>
           {formatMessage({
             id: 'content-manager.reviewWorkflows.stages.limit.title',

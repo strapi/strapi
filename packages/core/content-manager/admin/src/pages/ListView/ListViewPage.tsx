@@ -13,6 +13,7 @@ import {
   useQueryParams,
   useRBAC,
   Layouts,
+  useTable,
 } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Typography, ButtonProps } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
@@ -96,7 +97,7 @@ const ListViewPage = () => {
   });
 
   const params = React.useMemo(() => buildValidParams(query), [query]);
-  const { data, error, isLoading } = useGetAllDocumentsQuery({
+  const { data, error, isFetching } = useGetAllDocumentsQuery({
     model,
     params,
   });
@@ -169,7 +170,7 @@ const ListViewPage = () => {
     return formattedHeaders;
   }, [displayedHeaders, formatMessage, list, runHookWaterfall, schema?.options?.draftAndPublish]);
 
-  if (isLoading) {
+  if (isFetching) {
     return <Page.Loading />;
   }
 
@@ -238,10 +239,8 @@ const ListViewPage = () => {
       />
       <Layouts.Content>
         <Flex gap={4} direction="column" alignItems="stretch">
-          <Table.Root rows={results} headers={tableHeaders} isLoading={isLoading}>
-            <Table.ActionBar>
-              <BulkActionsRenderer />
-            </Table.ActionBar>
+          <Table.Root rows={results} headers={tableHeaders} isLoading={isFetching}>
+            <TableActionsBar />
             <Table.Content>
               <Table.Head>
                 <Table.HeaderCheckboxCell />
@@ -329,6 +328,30 @@ const ActionsCell = styled(Table.Cell)`
   display: flex;
   justify-content: flex-end;
 `;
+
+/* -------------------------------------------------------------------------------------------------
+ * TableActionsBar
+ * -----------------------------------------------------------------------------------------------*/
+
+const TableActionsBar = () => {
+  const selectRow = useTable('TableActionsBar', (state) => state.selectRow);
+  const [{ query }] = useQueryParams<{ plugins: { i18n: { locale: string } } }>();
+  const locale = query?.plugins?.i18n?.locale;
+  const prevLocale = usePrev(locale);
+
+  // TODO: find a better way to reset the selected rows when the locale changes across all the app
+  React.useEffect(() => {
+    if (prevLocale !== locale) {
+      selectRow([]);
+    }
+  }, [selectRow, prevLocale, locale]);
+
+  return (
+    <Table.ActionBar>
+      <BulkActionsRenderer />
+    </Table.ActionBar>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * CreateButton

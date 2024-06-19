@@ -11,15 +11,14 @@ import {
   Box,
   Button,
   Typography,
-  ModalBody,
-  ModalFooter,
+  Modal,
   IconButton,
   Flex,
   Tooltip,
   Loader,
   TypographyComponent,
 } from '@strapi/design-system';
-import { Pencil, CrossCircle, CheckCircle } from '@strapi/icons';
+import { Pencil, CrossCircle, CheckCircle, ArrowsCounterClockwise } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -70,8 +69,25 @@ const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessag
           )
         );
       } else {
-        messages.push(...formatErrorMessages(value, currentKey, formatMessage));
+        messages.push(
+          ...formatErrorMessages(
+            // @ts-expect-error TODO: check why value is not compatible with FormErrors
+            value,
+            currentKey,
+            formatMessage
+          )
+        );
       }
+    } else {
+      messages.push(
+        formatMessage(
+          {
+            id: `${value}.withField`,
+            defaultMessage: value,
+          },
+          { field: currentKey }
+        )
+      );
     }
   });
 
@@ -80,13 +96,10 @@ const formatErrorMessages = (errors: FormErrors, parentKey: string, formatMessag
 
 interface EntryValidationTextProps {
   validationErrors?: FormErrors;
-  isPublished?: boolean;
+  status: string;
 }
 
-const EntryValidationText = ({
-  validationErrors,
-  isPublished = false,
-}: EntryValidationTextProps) => {
+const EntryValidationText = ({ validationErrors, status }: EntryValidationTextProps) => {
   const { formatMessage } = useIntl();
 
   if (validationErrors) {
@@ -106,7 +119,7 @@ const EntryValidationText = ({
     );
   }
 
-  if (isPublished) {
+  if (status === 'published') {
     return (
       <Flex gap={2}>
         <CheckCircle fill="success600" />
@@ -114,6 +127,20 @@ const EntryValidationText = ({
           {formatMessage({
             id: 'content-manager.bulk-publish.already-published',
             defaultMessage: 'Already Published',
+          })}
+        </Typography>
+      </Flex>
+    );
+  }
+
+  if (status === 'modified') {
+    return (
+      <Flex gap={2}>
+        <ArrowsCounterClockwise fill="alternative600" />
+        <Typography>
+          {formatMessage({
+            id: 'content-manager.bulk-publish.modified',
+            defaultMessage: 'Ready to publish changes',
           })}
         </Typography>
       </Flex>
@@ -208,7 +235,7 @@ const SelectedEntriesTableContent = ({
               ) : (
                 <EntryValidationText
                   validationErrors={validationErrors[row.documentId]}
-                  isPublished={row.status === 'published'}
+                  status={row.status}
                 />
               )}
             </Table.Cell>
@@ -333,15 +360,16 @@ const SelectedEntriesModalContent = ({
   const { publishMany: bulkPublishAction } = useDocumentActions();
   const [, { isLoading: isSubmittingForm }] = usePublishManyDocumentsMutation();
 
-  const selectedEntries = useTable('publishAction', (state) => state.selectedRows);
+  const selectedRows = useTable('publishAction', (state) => state.selectedRows);
 
-  const entriesToPublish = selectedEntries.reduce((acc, entry) => {
-    if (!validationErrors[entry.documentId]) {
-      acc.push(entry.documentId);
-    }
+  // Filter selected entries from the updated modal table rows
+  const selectedEntries = rows.filter((entry) =>
+    selectedRows.some((selectedEntry) => selectedEntry.documentId === entry.documentId)
+  );
 
-    return acc;
-  }, []);
+  const entriesToPublish = selectedEntries
+    .filter((entry) => !validationErrors[entry.documentId])
+    .map((entry) => entry.documentId);
 
   const selectedEntriesWithErrorsCount = selectedEntries.filter(
     ({ documentId }) => validationErrors[documentId]
@@ -403,7 +431,7 @@ const SelectedEntriesModalContent = ({
 
   return (
     <>
-      <ModalBody>
+      <Modal.Body>
         <Typography>{getFormattedCountMessage()}</Typography>
         <Box marginTop={5}>
           <SelectedEntriesTableContent
@@ -413,35 +441,32 @@ const SelectedEntriesModalContent = ({
             validationErrors={validationErrors}
           />
         </Box>
-      </ModalBody>
-      <ModalFooter
-        startActions={
-          <Button onClick={toggleModal} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
+      </Modal.Body>
+      <Modal.Footer>
+        <Button onClick={toggleModal} variant="tertiary">
+          {formatMessage({
+            id: 'app.components.Button.cancel',
+            defaultMessage: 'Cancel',
+          })}
+        </Button>
+        <Flex gap={2}>
+          <Button onClick={refetch} variant="tertiary" loading={isFetching}>
+            {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
           </Button>
-        }
-        endActions={
-          <Flex gap={2}>
-            <Button onClick={refetch} variant="tertiary" loading={isFetching}>
-              {formatMessage({ id: 'app.utils.refresh', defaultMessage: 'Refresh' })}
-            </Button>
-            <Button
-              onClick={toggleDialog}
-              disabled={
-                selectedEntries.length === 0 ||
-                selectedEntries.length === selectedEntriesWithErrorsCount ||
-                isLoading
-              }
-              loading={isSubmittingForm}
-            >
-              {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
-            </Button>
-          </Flex>
-        }
-      />
+          <Button
+            onClick={toggleDialog}
+            disabled={
+              selectedEntries.length === 0 ||
+              selectedEntries.length === selectedEntriesWithErrorsCount ||
+              selectedEntriesPublished === selectedEntries.length ||
+              isLoading
+            }
+            loading={isSubmittingForm}
+          >
+            {formatMessage({ id: 'app.utils.publish', defaultMessage: 'Publish' })}
+          </Button>
+        </Flex>
+      </Modal.Footer>
       <ConfirmDialogPublishAll
         isOpen={isDialogOpen}
         onToggleDialog={toggleDialog}

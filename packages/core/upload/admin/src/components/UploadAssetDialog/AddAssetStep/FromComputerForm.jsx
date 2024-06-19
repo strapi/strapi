@@ -2,7 +2,7 @@
 import React, { useRef, useState } from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
-import { Box, Button, Flex, ModalFooter, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { PlusCircle as PicturePlus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -156,16 +156,14 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
         </label>
       </Box>
 
-      <ModalFooter
-        startActions={
-          <Button onClick={onClose} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'cancel',
-            })}
-          </Button>
-        }
-      />
+      <Modal.Footer>
+        <Button onClick={onClose} variant="tertiary">
+          {formatMessage({
+            id: 'app.components.Button.cancel',
+            defaultMessage: 'cancel',
+          })}
+        </Button>
+      </Modal.Footer>
     </form>
   );
 };

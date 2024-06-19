@@ -11,17 +11,13 @@ import {
   Box,
   Button,
   Dialog,
-  DialogBody,
-  DialogFooter,
-  DialogProps,
   Flex,
-  ModalBody,
-  ModalHeader,
-  ModalLayout,
+  Modal,
   Radio,
   Typography,
   VisuallyHidden,
   Menu,
+  ButtonProps,
 } from '@strapi/design-system';
 import { CrossCircle, More, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
@@ -60,7 +56,7 @@ interface DocumentActionDescription {
   /**
    * @default 'secondary'
    */
-  variant?: 'default' | 'secondary' | 'danger' | 'success';
+  variant?: ButtonProps['variant'];
 }
 
 interface DialogOptions {
@@ -89,7 +85,7 @@ interface ModalOptions {
   type: 'modal';
   title: string;
   content: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
-  footer: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
+  footer?: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
   onClose?: () => void;
 }
 
@@ -295,7 +291,9 @@ const DocumentActionsMenu = ({
             >
               <Flex justifyContent="space-between" gap={4}>
                 <Flex color={convertActionVariantToColor(action.variant)} gap={2} tag="span">
-                  {action.icon}
+                  <Box tag="span" color={convertActionVariantToIconColor(action.variant)}>
+                    {action.icon}
+                  </Box>
                   {action.label}
                 </Flex>
                 {/* TODO: remove this in 5.1 release */}
@@ -363,14 +361,29 @@ const convertActionVariantToColor = (
   }
 };
 
+const convertActionVariantToIconColor = (
+  variant: DocumentActionDescription['variant'] = 'secondary'
+): keyof DefaultTheme['colors'] | undefined => {
+  switch (variant) {
+    case 'danger':
+      return 'danger600';
+    case 'secondary':
+      return 'neutral500';
+    case 'success':
+      return 'success600';
+    default:
+      return 'primary600';
+  }
+};
+
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionConfirmDialog
  * -----------------------------------------------------------------------------------------------*/
 
-interface DocumentActionConfirmDialogProps
-  extends DialogOptions,
-    Pick<DialogProps, 'onClose' | 'isOpen'>,
-    Pick<Action, 'variant'> {}
+interface DocumentActionConfirmDialogProps extends DialogOptions, Pick<Action, 'variant'> {
+  onClose: () => void;
+  isOpen: Dialog.Props['open'];
+}
 
 const DocumentActionConfirmDialog = ({
   onClose,
@@ -400,27 +413,28 @@ const DocumentActionConfirmDialog = ({
   };
 
   return (
-    <Dialog isOpen={isOpen} title={title} onClose={handleClose}>
-      <DialogBody>{content}</DialogBody>
-      <DialogFooter
-        startAction={
-          <Button onClick={handleClose} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
-        }
-        endAction={
+    <Dialog.Root open={isOpen} onOpenChange={handleClose}>
+      <Dialog.Content>
+        <Dialog.Header>{title}</Dialog.Header>
+        <Dialog.Body>{content}</Dialog.Body>
+        <Dialog.Footer>
+          <Dialog.Cancel>
+            <Button variant="tertiary">
+              {formatMessage({
+                id: 'app.components.Button.cancel',
+                defaultMessage: 'Cancel',
+              })}
+            </Button>
+          </Dialog.Cancel>
           <Button onClick={handleConfirm} variant={variant}>
             {formatMessage({
               id: 'app.components.Button.confirm',
               defaultMessage: 'Confirm',
             })}
           </Button>
-        }
-      />
-    </Dialog>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 };
 
@@ -441,12 +455,6 @@ const DocumentActionModal = ({
   content: Content,
   onModalClose,
 }: DocumentActionModalProps) => {
-  const id = React.useId();
-
-  if (!isOpen) {
-    return null;
-  }
-
   const handleClose = () => {
     if (onClose) {
       onClose();
@@ -456,28 +464,19 @@ const DocumentActionModal = ({
   };
 
   return (
-    <ModalLayout borderRadius="4px" overflow="hidden" onClose={handleClose} labelledBy={id}>
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" tag="h2" id={id}>
-          {title}
-        </Typography>
-      </ModalHeader>
-      <ModalBody>
-        {typeof Content === 'function' ? <Content onClose={handleClose} /> : Content}
-      </ModalBody>
-      <Box
-        paddingTop={4}
-        paddingBottom={4}
-        paddingLeft={5}
-        paddingRight={5}
-        borderWidth="1px 0 0 0"
-        borderStyle="solid"
-        borderColor="neutral150"
-        background="neutral100"
-      >
+    <Modal.Root open={isOpen} onOpenChange={handleClose}>
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        {typeof Content === 'function' ? (
+          <Content onClose={handleClose} />
+        ) : (
+          <Modal.Body>{Content}</Modal.Body>
+        )}
         {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
-      </Box>
-    </ModalLayout>
+      </Modal.Content>
+    </Modal.Root>
   );
 };
 
@@ -766,11 +765,8 @@ const UnpublishAction: DocumentActionComponent = ({
 
   const isDocumentModified = document?.status === 'modified';
 
-  const handleChange: React.FormEventHandler<HTMLFieldSetElement> &
-    React.FormEventHandler<HTMLDivElement> = (e) => {
-    if ('value' in e.target) {
-      setShouldKeepDraft(e.target.value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
-    }
+  const handleChange = (value: string) => {
+    setShouldKeepDraft(value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
   };
 
   if (!schema?.options?.draftAndPublish) {
@@ -837,36 +833,28 @@ const UnpublishAction: DocumentActionComponent = ({
                   })}
                 </Typography>
               </Flex>
-              <Flex
-                onChange={handleChange}
-                direction="column"
-                alignItems="flex-start"
-                tag="fieldset"
-                borderWidth={0}
-                gap={3}
+              <Radio.Group
+                defaultValue={UNPUBLISH_DRAFT_OPTIONS.KEEP}
+                name="discard-options"
+                aria-label={formatMessage({
+                  id: 'content-manager.actions.unpublish.dialog.radio-label',
+                  defaultMessage: 'Choose an option to unpublish the document.',
+                })}
+                onValueChange={handleChange}
               >
-                <VisuallyHidden tag="legend"></VisuallyHidden>
-                <Radio
-                  checked={shouldKeepDraft}
-                  value={UNPUBLISH_DRAFT_OPTIONS.KEEP}
-                  name="discard-options"
-                >
+                <Radio.Item checked={shouldKeepDraft} value={UNPUBLISH_DRAFT_OPTIONS.KEEP}>
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.option.keep-draft',
                     defaultMessage: 'Keep draft',
                   })}
-                </Radio>
-                <Radio
-                  checked={!shouldKeepDraft}
-                  value={UNPUBLISH_DRAFT_OPTIONS.DISCARD}
-                  name="discard-options"
-                >
+                </Radio.Item>
+                <Radio.Item checked={!shouldKeepDraft} value={UNPUBLISH_DRAFT_OPTIONS.DISCARD}>
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.option.replace-draft',
                     defaultMessage: 'Replace draft',
                   })}
-                </Radio>
-              </Flex>
+                </Radio.Item>
+              </Radio.Group>
             </Flex>
           ),
           onConfirm: async () => {
@@ -974,5 +962,5 @@ const StyledCrossCircle = styled(CrossCircle)`
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
-export { DocumentActions, DocumentActionsMenu, DEFAULT_ACTIONS };
+export { DocumentActions, DocumentActionsMenu, DocumentActionButton, DEFAULT_ACTIONS };
 export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };

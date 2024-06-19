@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { BaseCheckbox, Box, BoxComponent, Flex, FlexComponent } from '@strapi/design-system';
+import { Checkbox, Box, BoxComponent, Flex, FlexComponent, Modal } from '@strapi/design-system';
 import { ChevronDown, ChevronUp } from '@strapi/icons';
 import get from 'lodash/get';
 import isEmpty from 'lodash/isEmpty';
@@ -116,18 +116,9 @@ const Collapse = ({
   onClickToggle,
   pathToData,
 }: CollapseProps) => {
-  const [isModalOpen, setModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
   const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
     usePermissionsDataManager();
-
-  const handleToggleModalIsOpen = () => {
-    setModalOpen((s) => !s);
-  };
-
-  const handleModalClose = () => {
-    setModalOpen(false);
-  };
 
   // This corresponds to the data related to the CT left checkbox
   // modifiedData: { collectionTypes: { [ctuid]: {create: {properties: { fields: {f1: true} }, update: {}, ... } } } }
@@ -206,7 +197,7 @@ const Collapse = ({
                         background="primary600"
                       />
                     )}
-                    <BaseCheckbox
+                    <Checkbox
                       disabled={isFormDisabled}
                       name={checkboxName}
                       aria-label={formatMessage(
@@ -217,16 +208,15 @@ const Collapse = ({
                         { label: `${permissionLabel} ${label}` }
                       )}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={(value) => {
+                      onCheckedChange={(value) => {
                         onChangeParentCheckbox({
                           target: {
                             name: checkboxName,
-                            value,
+                            value: !!value,
                           },
                         });
                       }}
-                      indeterminate={hasSomeActionsSelected}
-                      value={hasAllActionsSelected}
+                      checked={hasSomeActionsSelected ? 'indeterminate' : hasAllActionsSelected}
                     />
                   </Cell>
                 );
@@ -246,41 +236,37 @@ const Collapse = ({
                       background="primary600"
                     />
                   )}
-                  <BaseCheckbox
+                  <Checkbox
                     disabled={isFormDisabled}
-                    indeterminate={hasConditions}
                     name={checkboxName}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                    onValueChange={(value) => {
+                    onCheckedChange={(value) => {
                       onChangeSimpleCheckbox({
                         target: {
                           name: checkboxName,
-                          value,
+                          value: !!value,
                         },
                       });
                     }}
-                    value={hasAllActionsSelected}
+                    checked={hasConditions ? 'indeterminate' : hasAllActionsSelected}
                   />
                 </Cell>
               );
             }
           )}
         </Flex>
-        {isModalOpen && (
+      </Wrapper>
+      <Box bottom="10px" right="9px" position="absolute">
+        <Modal.Root>
+          <Modal.Trigger>
+            <ConditionsButton hasConditions={doesConditionButtonHasConditions} />
+          </Modal.Trigger>
           <ConditionsModal
             headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
             actions={checkboxesActions}
             isFormDisabled={isFormDisabled}
-            onClosed={handleModalClose}
-            onToggle={handleToggleModalIsOpen}
           />
-        )}
-      </Wrapper>
-      <Box transform="translateY(10px)" right="9px" position="absolute">
-        <ConditionsButton
-          onClick={handleToggleModalIsOpen}
-          hasConditions={doesConditionButtonHasConditions}
-        />
+        </Modal.Root>
       </Box>
     </BoxWrapper>
   );
@@ -384,11 +370,14 @@ const Wrapper = styled<FlexComponent>(Flex)`
 const BoxWrapper = styled.div<{ $isActive: boolean }>`
   display: inline-flex;
   min-width: 100%;
+  position: relative;
 
   ${ConditionsButton} {
     display: none;
   }
+
   ${({ $isActive, theme }) => $isActive && activeRowStyle(theme, $isActive)}
+
   &:hover {
     ${({ theme, $isActive }) => activeRowStyle(theme, $isActive)}
   }

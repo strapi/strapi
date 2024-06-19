@@ -175,7 +175,7 @@ const populate = traverseFactory()
         // If there is a populate fragment defined, traverse it
         const newValue = await recurse(visitor, { schema, path, getModel }, { on: value?.on });
 
-        set(key, { on: newValue });
+        set(key, newValue);
 
         return;
       }

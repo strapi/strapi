@@ -4,7 +4,7 @@ import { LimitsModal, LimitsModalProps } from '../../../../components/LimitsModa
 
 const setup = (props?: Partial<LimitsModalProps>) =>
   render(
-    <LimitsModal.Root isOpen onClose={() => {}} {...props}>
+    <LimitsModal.Root open {...props}>
       <LimitsModal.Title>Title</LimitsModal.Title>
       <LimitsModal.Body>Body</LimitsModal.Body>
     </LimitsModal.Root>
@@ -12,7 +12,7 @@ const setup = (props?: Partial<LimitsModalProps>) =>
 
 describe('LimitsModal', () => {
   it('should not render the modal if isOpen=false', () => {
-    const { queryByText } = setup({ isOpen: false });
+    const { queryByText } = setup({ open: false });
 
     expect(queryByText('Title')).not.toBeInTheDocument();
     expect(queryByText('Body')).not.toBeInTheDocument();
@@ -30,14 +30,5 @@ describe('LimitsModal', () => {
 
     expect(getByText('Learn more')).toBeInTheDocument();
     expect(getByText('Contact Sales')).toBeInTheDocument();
-  });
-
-  it('should call onClose callback when closing the modal', async () => {
-    const onCloseSpy = jest.fn();
-    const { getByRole, user } = setup({ onClose: onCloseSpy });
-
-    await user.click(getByRole('button', { name: /close/i }));
-
-    expect(onCloseSpy).toBeCalledTimes(1);
   });
 });

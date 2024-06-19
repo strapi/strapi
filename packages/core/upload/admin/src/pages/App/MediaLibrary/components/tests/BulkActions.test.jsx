@@ -9,6 +9,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { BulkActions } from '../BulkActions';
 
 jest.mock('../../../../../hooks/useBulkRemove');
+jest.mock('../../../../../components/BulkMoveDialog');
 
 const setup = (
   props = {
@@ -43,7 +44,7 @@ describe('BulkActions', () => {
     jest.clearAllMocks();
   });
 
-  test('renders', () => {
+  test('renders', async () => {
     const { container } = setup();
 
     expect(container).toMatchSnapshot();
