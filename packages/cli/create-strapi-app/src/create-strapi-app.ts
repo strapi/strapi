@@ -1,15 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import commander from 'commander';
-import {
-  checkInstallPath,
-  checkRequirements,
-  generateNewApp,
-  type NewOptions,
-} from '@strapi/generate-new';
+import { checkInstallPath, generateNewApp, type NewOptions } from '@strapi/generate-new';
 import promptUser from './utils/prompt-user';
 import type { Program } from './types';
-import { handleCloudProject } from './cloud';
+import { handleCloudLogin } from './cloud';
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
@@ -61,8 +56,7 @@ async function generateApp(
   }
 
   if (!options.skipCloud) {
-    checkRequirements();
-    await handleCloudProject(projectName);
+    await handleCloudLogin();
   }
 
   return generateNewApp(projectName, options).then(() => {
