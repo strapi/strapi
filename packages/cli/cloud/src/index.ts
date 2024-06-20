@@ -40,7 +40,11 @@ export async function buildStrapiCloudCommands({
   for (const cloudCommand of cloudCommands) {
     try {
       // Add this command to the Commander command object
-      await cloudCommand.command({ command, ctx, argv });
+      const subCommand = await cloudCommand.command({ command, ctx, argv });
+
+      if (subCommand) {
+        command.addCommand(subCommand);
+      }
     } catch (e) {
       console.error(`Failed to load command ${cloudCommand.name}`, e);
     }

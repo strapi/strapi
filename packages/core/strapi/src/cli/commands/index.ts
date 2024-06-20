@@ -59,6 +59,5 @@ export const commands: StrapiCommand[] = [
   /**
    * Cloud
    */
-  // @ts-expect-error - TODO: fix this
   cloudCommands,
 ];

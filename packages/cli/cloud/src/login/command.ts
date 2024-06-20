@@ -1,3 +1,4 @@
+import { createCommand } from 'commander';
 import type { StrapiCloudCommand } from '../types';
 import { runAction } from '../utils/helpers';
 import action from './action';
@@ -5,9 +6,8 @@ import action from './action';
 /**
  * `$ cloud device flow login`
  */
-const command: StrapiCloudCommand = ({ command, ctx }) => {
-  command
-    .command('cloud:login')
+const command: StrapiCloudCommand = ({ ctx }) => {
+  return createCommand('cloud:login')
     .alias('login')
     .description('Strapi Cloud Login')
     .addHelpText(

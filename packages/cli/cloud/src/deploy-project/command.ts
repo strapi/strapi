@@ -1,3 +1,4 @@
+import { createCommand } from 'commander';
 import { type StrapiCloudCommand } from '../types';
 import { runAction } from '../utils/helpers';
 import action from './action';
@@ -5,9 +6,8 @@ import action from './action';
 /**
  * `$ deploy project to the cloud`
  */
-const command: StrapiCloudCommand = ({ command, ctx }) => {
-  command
-    .command('cloud:deploy')
+const command: StrapiCloudCommand = ({ ctx }) => {
+  return createCommand('cloud:deploy')
     .alias('deploy')
     .description('Deploy a Strapi Cloud project')
     .option('-d, --debug', 'Enable debugging mode with verbose logs')
