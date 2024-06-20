@@ -216,7 +216,7 @@ type ValidationFn = (
 ) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
 
 const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
-  if (attribute.required) {
+  if (attribute.required && attribute.type !== 'relation') {
     return schema.required({
       id: translatedErrors.required.id,
       defaultMessage: 'This field is required.',
