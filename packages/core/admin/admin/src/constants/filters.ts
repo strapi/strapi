@@ -158,11 +158,14 @@ const STRING_PARSE_FILTERS = [
   },
 ] satisfies FilterOption[];
 
+const FILTERS_WITH_NO_VALUE = ['$null', '$notNull'];
+
 export {
   BASE_FILTERS,
   NUMERIC_FILTERS,
   IS_SENSITIVE_FILTERS,
   CONTAINS_FILTERS,
   STRING_PARSE_FILTERS,
+  FILTERS_WITH_NO_VALUE,
 };
 export type { FilterOption };

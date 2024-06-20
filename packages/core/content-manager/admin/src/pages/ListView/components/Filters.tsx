@@ -163,6 +163,16 @@ const FiltersImpl = ({ disabled, schema }: FiltersProps) => {
             };
           }
 
+          if (attribute.type === 'enumeration') {
+            filter = {
+              ...filter,
+              options: attribute.enum.map((value) => ({
+                label: value,
+                value,
+              })),
+            };
+          }
+
           return filter;
         })
         .filter(Boolean) as Filters.Filter[]
