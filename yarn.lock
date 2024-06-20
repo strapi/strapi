@@ -8992,6 +8992,7 @@ __metadata:
     browserslist: "npm:^4.23.0"
     browserslist-to-esbuild: "npm:1.2.0"
     chalk: "npm:4.1.2"
+    chokidar: "npm:3.5.3"
     ci-info: "npm:3.8.0"
     cli-progress: "npm:3.12.0"
     cli-table3: "npm:0.6.2"
