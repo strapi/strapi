@@ -7,7 +7,8 @@ export const RelativeBox = styled(Box)`
 
 export const Wrapper = styled.div`
   position: relative;
-  text-align: center;
+  display: flex;
+  justify-content: center;
   background: repeating-conic-gradient(
       ${({ theme }) => theme.colors.neutral100} 0% 25%,
       transparent 0% 50%

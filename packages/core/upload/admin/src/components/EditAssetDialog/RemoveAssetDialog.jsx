@@ -8,9 +8,12 @@ import { useRemoveAsset } from '../../hooks/useRemoveAsset';
 
 export const RemoveAssetDialog = ({ open, onClose, asset }) => {
   // `null` means asset is deleted
-  const { removeAsset } = useRemoveAsset(() => onClose(null));
+  const { removeAsset } = useRemoveAsset(() => {
+    onClose(null);
+  });
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (event) => {
+    event.preventDefault();
     await removeAsset(asset.id);
   };
 

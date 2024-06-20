@@ -199,6 +199,11 @@ const getSelectStyles = (theme, error) => {
       color: theme.colors.neutral800,
       gridTemplateColumns: '0 100%',
     }),
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: theme.zIndices.dialog,
+      pointerEvents: 'auto',
+    }),
     menu(base) {
       return {
         ...base,
@@ -219,10 +224,6 @@ const getSelectStyles = (theme, error) => {
       paddingTop: theme.spaces[1],
       paddingRight: theme.spaces[1],
       paddingBottom: theme.spaces[1],
-    }),
-    menuPortal: (base) => ({
-      ...base,
-      zIndex: 100,
     }),
     option(base, state) {
       let backgroundColor = base.backgroundColor;
