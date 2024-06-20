@@ -214,7 +214,7 @@ export const AssetContent = ({
         </Modal.Title>
       </Modal.Header>
 
-      <Tabs.Root variant="simple" defaultValue={selectedAssets.length > 0 ? 'selected' : 'browse'}>
+      <TabsRoot variant="simple" defaultValue={selectedAssets.length > 0 ? 'selected' : 'browse'}>
         <Flex paddingLeft={8} paddingRight={8} paddingTop={6} justifyContent="space-between">
           <Tabs.List>
             <Tabs.Trigger value="browse">
@@ -283,7 +283,7 @@ export const AssetContent = ({
             />
           </Tabs.Content>
         </Modal.Body>
-      </Tabs.Root>
+      </TabsRoot>
       <DialogFooter onClose={onClose} onValidate={() => onValidate(selectedAssets)} />
     </>
   );
@@ -342,3 +342,9 @@ AssetDialog.propTypes = {
   onValidate: PropTypes.func.isRequired,
   trackedLocation: PropTypes.string,
 };
+
+const TabsRoot = styled(Tabs.Root)`
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+`;

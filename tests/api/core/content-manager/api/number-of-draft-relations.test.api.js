@@ -475,7 +475,7 @@ describe('CM API - Number of draft relations', () => {
     });
 
     // Given products have a oneToMany relation with categories, adding categoryIds[0] here // steals the relation from p1. Hence why we are expecting totalDraftRelations to equal 3 below
-    
+
     const p2 = await rq({
       method: 'POST',
       url: `/content-manager/collection-types/${UID_PRODUCT}`,
