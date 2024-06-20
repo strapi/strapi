@@ -1,19 +1,16 @@
-import { Attribute, Entity } from '@strapi/strapi';
+import type { Schema, Data } from '@strapi/strapi';
 
-export const AUTHOR_UID = 'api::author.author';
-export type Author = Attribute.GetAll<typeof AUTHOR_UID> & { documentId: string; id: number };
+export const AUTHOR_UID = 'api::author.author' as const;
+export type Author = Data.ContentType<typeof AUTHOR_UID>;
 
-export const ARTICLE_UID = 'api::article.article';
-export type Article = Attribute.GetAll<typeof ARTICLE_UID> & { documentId: string; id: number };
+export const ARTICLE_UID = 'api::article.article' as const;
+export type Article = Data.ContentType<typeof ARTICLE_UID>;
 
-export const CATEGORY_UID = 'api::category.category';
-export type Category = Attribute.GetValues<
+export const CATEGORY_UID = 'api::category.category' as const;
+export type Category = Data.ContentType<
   typeof CATEGORY_UID,
-  Attribute.GetNonPopulatableKeys<typeof CATEGORY_UID>
-> & {
-  documentId?: string;
-  id?: Entity.ID;
-};
+  Schema.NonPopulatableAttributeNames<typeof CATEGORY_UID>
+>;
 
 export const findArticleDb = async (where: any) => {
   return strapi.db.query(ARTICLE_UID).findOne({ where }) as Article | undefined;

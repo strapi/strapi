@@ -222,12 +222,12 @@ describe('Deep Filtering API', () => {
                 $and: [
                   {
                     name: {
-                      $contains: 'HUGO',
+                      $containsi: 'HUGO',
                     },
                   },
                   {
                     name: {
-                      $contains: 'LLORIS',
+                      $containsi: 'LLORIS',
                     },
                   },
                 ],
