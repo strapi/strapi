@@ -154,8 +154,7 @@ export const wrapWithDeepSort = (originalQuery: knex.Knex.QueryBuilder, ctx: Ord
         ...orderByColumns
       )
       // The row number is used to assign an index to every row in every partition
-      .rowNumber(COL_STRAPI_ROW_NUMBER, function (subQuery) {
-        // Each row number is assigned using the sort columns depending on their partition
+      .rowNumber(COL_STRAPI_ROW_NUMBER, (subQuery) => {
         for (const orderByClause of prefixedOrderBy) {
           subQuery.orderBy(orderByClause.column, orderByClause.order, 'last');
         }
