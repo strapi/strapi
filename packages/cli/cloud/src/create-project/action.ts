@@ -3,19 +3,14 @@ import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
 import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
 import { tokenServiceFactory, cloudApiFactory, local } from '../services';
+import { promptLogin } from '../login/action';
 
 async function handleError(ctx: CLIContext, error: Error) {
-  const tokenService = await tokenServiceFactory(ctx);
   const { logger } = ctx;
-
   logger.debug(error);
   if (error instanceof AxiosError) {
     const errorMessage = typeof error.response?.data === 'string' ? error.response.data : null;
     switch (error.response?.status) {
-      case 401:
-        logger.error('Your session has expired. Please log in again.');
-        await tokenService.eraseToken();
-        return;
       case 403:
         logger.error(
           errorMessage ||
@@ -45,12 +40,11 @@ async function handleError(ctx: CLIContext, error: Error) {
 
 export default async (ctx: CLIContext) => {
   const { logger } = ctx;
-  const { getValidToken } = await tokenServiceFactory(ctx);
+  const { getValidToken, eraseToken } = await tokenServiceFactory(ctx);
 
-  const token = await getValidToken();
-  if (!token) {
-    return;
-  }
+  const token = await getValidToken(ctx, promptLogin);
+  if (!token) return;
+
   const cloudApi = await cloudApiFactory(token);
   const { data: config } = await cloudApi.config();
   const { questions, defaults: defaultValues } = config.projectCreation;
@@ -67,7 +61,24 @@ export default async (ctx: CLIContext) => {
     spinner.succeed('Project created successfully!');
     return data;
   } catch (e: Error | unknown) {
-    spinner.fail('Failed to create project on Strapi Cloud.');
-    await handleError(ctx, e as Error);
+    if (e instanceof AxiosError && e.response?.status === 401) {
+      spinner.fail('Oops! Your session has expired. Please log in again.');
+      await eraseToken();
+      if (await promptLogin(ctx)) {
+        try {
+          const spinner = logger.spinner('Setting up your project...').start();
+          const { data } = await cloudApi.createProject(projectInput);
+          await local.save({ project: data });
+          spinner.succeed('Project created successfully!');
+          return data;
+        } catch (e: Error | unknown) {
+          spinner.fail('Failed to create project on Strapi Cloud.');
+          await handleError(ctx, e as Error);
+        }
+      }
+    } else {
+      spinner.fail('Failed to create project on Strapi Cloud.');
+      await handleError(ctx, e as Error);
+    }
   }
 };
