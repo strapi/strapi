@@ -49,7 +49,6 @@ resource "aws_vpc_security_group_ingress_rule" "allow" {
   from_port   = var.security_group_info.outbound_rules[count.index].from_port
   ip_protocol = var.security_group_info.outbound_rules[count.index].protocol
   to_port     = var.security_group_info.outbound_rules[count.index].to_port
-  description = var.security_group_info.outboud_rules[count.index].description
 }
 resource "aws_internet_gateway" "slim" {
   vpc_id = aws_vpc.network.id
@@ -87,6 +86,10 @@ resource "aws_instance" "slim" {
   key_name                    = var.web_instance_info.key_name
 
   depends_on = [aws_subnet.web, aws_security_group.all]
+
+   provisioner "remote-exec" {
+    script = "install.sh"
+   }
 
 
 }

@@ -18,11 +18,6 @@ private_subnet = [{
   name = "db1"
   cidr = "192.168.2.0/24"
   az   = "ap-south-1a"
-  }, 
-  {
-  name = "db2"
-  cidr = "192.168.3.0/24"
-  az   = "ap-south-1b"
   }
 ]
 security_group = [ {
@@ -47,15 +42,15 @@ security_group_info = {
     },
     {
       cidr        = "0.0.0.0/0"
-      port        = 8080
+      port        = 5432
       protocol    = "tcp"
-      description = "open for jenkins"
+      description = "open for in postgers"
     },
     {
       cidr        = "0.0.0.0/0"
-      port        = 3000
+      port        = 1337
       protocol    = "tcp"
-      description = "open for npm"
+      description = "open for strapi"
     }
   ]
   outbound_rules   = []
