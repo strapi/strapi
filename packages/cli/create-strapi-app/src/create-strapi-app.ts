@@ -2,14 +2,17 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import commander from 'commander';
 
-import { checkRequirements, generateNewApp, type Options as GenerateNewAppOptions } from '@strapi/generate-new';
+import {
+  checkRequirements,
+  generateNewApp,
+  type Options as GenerateNewAppOptions,
+} from '@strapi/generate-new';
 
 import * as prompts from './prompts';
 import type { Options } from './types';
 import { detectPackageManager } from './package-manager';
 import * as database from './database';
 import { handleCloudProject } from './cloud';
-
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
