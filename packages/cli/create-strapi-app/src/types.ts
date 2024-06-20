@@ -5,6 +5,7 @@ export interface Options {
   quickstart?: boolean;
   run?: boolean;
   dbclient?: DBClient;
+  skipCloud?: boolean;
   dbhost?: string;
   dbport?: string;
   dbname?: string;

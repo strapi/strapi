@@ -1,12 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import commander from 'commander';
-import { generateNewApp, type Options as GenerateNewAppOptions } from '@strapi/generate-new';
+
+import { checkRequirements, generateNewApp, type Options as GenerateNewAppOptions } from '@strapi/generate-new';
 
 import * as prompts from './prompts';
 import type { Options } from './types';
 import { detectPackageManager } from './package-manager';
 import * as database from './database';
+import { handleCloudProject } from './cloud';
+
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
@@ -29,6 +32,7 @@ command
   .option('--use-pnpm', 'Use pnpm as the project package manager')
 
   // Database options
+  .option('--skip-cloud', 'Skip cloud login and project creation')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')
@@ -49,12 +53,20 @@ command
 async function createStrapiApp(directory: string | undefined, options: Options) {
   validateOptions(options);
 
+  // !!! FIX BEFORE MERGE
+  const projectName = 'new-project';
+
   if (options.quickstart && !directory) {
     console.error('Please specify the <directory> of your project when using --quickstart');
     process.exit(1);
   }
 
   const appDirectory = directory || (await prompts.directory());
+
+  if (!options.skipCloud) {
+    checkRequirements();
+    await handleCloudProject(projectName);
+  }
 
   const appOptions = {
     directory: appDirectory,

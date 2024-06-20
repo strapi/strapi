@@ -16,6 +16,7 @@ export default async (scope: Scope) => {
       start: 'strapi start',
       build: 'strapi build',
       strapi: 'strapi',
+      deploy: 'strapi deploy',
     },
     devDependencies: scope.devDependencies,
     dependencies: scope.dependencies,
