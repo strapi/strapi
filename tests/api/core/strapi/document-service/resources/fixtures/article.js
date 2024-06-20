@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = (fixtures) => {
   const category = (name) => {
     const categoryID = fixtures.category.find((cat) => cat.name === name)?.id;
