@@ -3,9 +3,8 @@ import { omit } from 'lodash/fp';
 import type { Core } from '@strapi/types';
 
 import { createTestSetup, destroyTestSetup } from '../../../utils/builder-helper';
-import { testInTransaction } from '../../../utils/index';
 import resources from './resources/index';
-import { ARTICLE_UID, findArticlesDb, AUTHOR_UID } from './utils';
+import { ARTICLE_UID } from './utils';
 
 // Data to create a new article
 const articleData = {
