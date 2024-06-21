@@ -6,7 +6,7 @@ import execa from 'execa';
 
 import stopProcess from './utils/stop-process';
 import { trackUsage } from './utils/usage';
-import mergeTemplate from './utils/merge-template.js';
+// import mergeTemplate from './utils/merge-template.js';
 import tryGitInit from './utils/git';
 
 import createPackageJSON from './resources/json/common/package.json';
@@ -92,18 +92,18 @@ export default async function createProject(scope: Scope) {
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
 
     // merge template files if a template is specified
-    const hasTemplate = Boolean(scope.template);
-    if (hasTemplate) {
-      try {
-        await mergeTemplate(scope, rootPath);
-      } catch (error) {
-        if (error instanceof Error) {
-          throw new Error(`⛔️ Template installation failed: ${error.message}`);
-        }
+    // const hasTemplate = Boolean(scope.template);
+    // if (hasTemplate) {
+    //   try {
+    //     await mergeTemplate(scope, rootPath);
+    //   } catch (error) {
+    //     if (error instanceof Error) {
+    //       throw new Error(`⛔️ Template installation failed: ${error.message}`);
+    //     }
 
-        throw error;
-      }
-    }
+    //     throw error;
+    //   }
+    // }
   } catch (err) {
     await fse.remove(scope.rootPath);
     throw err;
