@@ -36,7 +36,8 @@ export const SettingsPage = () => {
   const handleSubmit = async (body: UpdateSettings.Request['body']) => {
     const { defaultTimezone } = body;
     const isBodyTimezoneValid = timezoneList.some((timezone) => timezone.value === defaultTimezone);
-    const newBody = !defaultTimezone || !isBodyTimezoneValid ? { defaultTimezone: null } : {...body};
+    const newBody =
+      !defaultTimezone || !isBodyTimezoneValid ? { defaultTimezone: null } : { ...body };
     try {
       const response = await updateReleaseSettings(newBody);
 
@@ -49,16 +50,16 @@ export const SettingsPage = () => {
           }),
         });
       } else if (isFetchError(response.error)) {
-         toggleNotification({
-            type: 'danger',
-            message: formatAPIError(response.error),
-          });
+        toggleNotification({
+          type: 'danger',
+          message: formatAPIError(response.error),
+        });
       } else {
         toggleNotification({
           type: 'danger',
           message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
         });
-      } 
+      }
     } catch (error) {
       toggleNotification({
         type: 'danger',
@@ -85,9 +86,11 @@ export const SettingsPage = () => {
         <Form
           method="PUT"
           initialValues={
-            data?.data.defaultTimezone ? data.data : {
-              defaultTimezone: null,
-            }
+            data?.data.defaultTimezone
+              ? data.data
+              : {
+                  defaultTimezone: null,
+                }
           }
           onSubmit={handleSubmit}
           validationSchema={SETTINGS_SCHEMA}
@@ -157,7 +160,7 @@ const TimezoneDropdown = () => {
   const field = useField('defaultTimezone');
   return (
     <Field.Root
-      name='defaultTimezone'
+      name="defaultTimezone"
       hint={formatMessage({
         id: 'content-releases.pages.Settings.releases.timezone.hint',
         defaultMessage: 'The timezone of every release can still be changed individually. ',
