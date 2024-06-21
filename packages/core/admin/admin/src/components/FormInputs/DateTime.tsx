@@ -11,7 +11,7 @@ import { InputProps } from './types';
 const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const { formatMessage } = useIntl();
-    const field = useField<Date>(name);
+    const field = useField<Date | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
@@ -24,9 +24,9 @@ const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
           ref={composedRefs}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
           onChange={(date) => {
-            field.onChange(name, date);
+            field.onChange(name, date ? date : null);
           }}
-          onClear={() => field.onChange(name, undefined)}
+          onClear={() => field.onChange(name, null)}
           value={value}
           {...props}
         />
