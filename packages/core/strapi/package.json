@@ -110,6 +110,7 @@
   "dependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "0.5.11",
     "@strapi/admin": "5.0.0-beta.14",
+    "@strapi/cloud-cli": "5.0.0-beta.14",
     "@strapi/content-manager": "5.0.0-beta.14",
     "@strapi/content-releases": "5.0.0-beta.14",
     "@strapi/content-type-builder": "5.0.0-beta.14",
@@ -135,6 +136,8 @@
     "browserslist-to-esbuild": "1.2.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
+    "ci-info": "3.8.0",
+    "cli-progress": "3.12.0",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
     "concurrently": "8.2.2",

@@ -14,6 +14,8 @@ import createProject from './create-project';
 import { addDatabaseDependencies } from './utils/database';
 
 export type { Options };
+export { default as checkInstallPath } from './utils/check-install-path';
+export { default as checkRequirements } from './utils/check-requirements';
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
@@ -32,7 +34,7 @@ export const generateNewApp = async (options: Options) => {
     database: options.database,
     runApp: options.runApp ?? false,
     isQuickstart: options.isQuickstart,
-    // use pacakge version as strapiVersion (all packages have the same version);
+    // use package version as strapiVersion (all packages have the same version);
     strapiVersion: packageJson.version,
     template: options.template,
     packageJsonStrapi: {
