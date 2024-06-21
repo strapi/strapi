@@ -20,8 +20,8 @@ import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { SETTINGS_SCHEMA } from '../../../shared/validation-schemas';
-import { getTimezones } from '../components/ReleaseModal';
 import { useGetReleaseSettingsQuery, useUpdateReleaseSettingsMutation } from '../services/release';
+import { getTimezones } from '../utils/getTimezones';
 
 import type { UpdateSettings } from '../../../shared/contracts/settings';
 
@@ -105,7 +105,6 @@ export const SettingsPage = () => {
                       loading={isSubmitting}
                       startIcon={<Check />}
                       type="submit"
-                      size="L"
                     >
                       {formatMessage({
                         id: 'global.save',
