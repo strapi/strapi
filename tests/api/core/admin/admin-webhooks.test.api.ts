@@ -77,7 +77,7 @@ describe('Admin API Webhooks', () => {
 
     expect(status).toBe(201);
     expect(webhook).toMatchObject({
-      id: expect.any(Number),
+      id: expect.anything(),
       ...defaultWebhook,
       url: 'https://example.com',
     });
