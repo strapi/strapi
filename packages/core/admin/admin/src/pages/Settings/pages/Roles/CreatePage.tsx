@@ -150,7 +150,7 @@ const CreatePage = () => {
         message: formatMessage({ id: 'Settings.roles.created', defaultMessage: 'created' }),
       });
 
-      navigate(res.data.id.toString(), { replace: true });
+      navigate(`../roles/${res.data.id.toString()}`, { replace: true });
     } catch (err) {
       toggleNotification({
         type: 'danger',

@@ -99,7 +99,10 @@ const useDocument: UseDocument = (args, opts) => {
     isLoading: isLoadingDocument,
     isFetching: isFetchingDocument,
     error,
-  } = useGetDocumentQuery(args, opts);
+  } = useGetDocumentQuery(args, {
+    ...opts,
+    skip: (!args.documentId && args.collectionType !== SINGLE_TYPES) || opts?.skip,
+  });
 
   const { components, schema, isLoading: isLoadingSchema } = useContentTypeSchema(args.model);
 

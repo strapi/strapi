@@ -20,6 +20,7 @@ const LocaleListCell = ({
   collectionType,
   model,
 }: LocaleListCellProps) => {
+  // TODO: avoid loading availableLocales for each row but get that from the BE
   const { meta, isLoading } = useDocument({
     documentId,
     collectionType,

@@ -1,12 +1,14 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import commander from 'commander';
+
 import { generateNewApp, type Options as GenerateNewAppOptions } from '@strapi/generate-new';
 
 import * as prompts from './prompts';
 import type { Options } from './types';
 import { detectPackageManager } from './package-manager';
 import * as database from './database';
+// import { handleCloudProject } from './cloud';
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
@@ -29,6 +31,8 @@ command
   .option('--use-pnpm', 'Use pnpm as the project package manager')
 
   // Database options
+  // TODO V5: Uncomment when cloud-cli is ready
+  // .option('--skip-cloud', 'Skip cloud login and project creation')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')
@@ -55,6 +59,12 @@ async function createStrapiApp(directory: string | undefined, options: Options) 
   }
 
   const appDirectory = directory || (await prompts.directory());
+
+  // TODO V5: Uncomment when cloud-cli is ready
+  // if (!options.skipCloud) {
+  //   checkRequirements();
+  //   await handleCloudProject(projectName);
+  // }
 
   const appOptions = {
     directory: appDirectory,

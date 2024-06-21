@@ -20,7 +20,7 @@ const STEPS = {
 
 export const MediaLibraryInput = forwardRef(
   (
-    { attribute: { allowedTypes }, label, hint, disabled, labelAction, multiple, name, required },
+    { attribute: { allowedTypes, multiple }, label, hint, disabled, labelAction, name, required },
     forwardedRef
   ) => {
     const { formatMessage } = useIntl();
@@ -179,60 +179,68 @@ export const MediaLibraryInput = forwardRef(
           trackedLocation="content-manager"
         />
 
-        <AssetDialog
-          allowedTypes={fieldAllowedTypes}
-          initiallySelectedAssets={initiallySelectedAssets}
-          folderId={folderId}
-          onClose={() => {
-            setStep(undefined);
-            setFolderId(null);
-          }}
-          open={step === STEPS.AssetSelect}
-          onValidate={handleValidation}
-          multiple={multiple}
-          onAddAsset={() => setStep(STEPS.AssetUpload)}
-          onAddFolder={() => setStep(STEPS.FolderCreate)}
-          onChangeFolder={(folder) => setFolderId(folder)}
-          trackedLocation="content-manager"
-        />
+        {step === STEPS.AssetSelect && (
+          <AssetDialog
+            allowedTypes={fieldAllowedTypes}
+            initiallySelectedAssets={initiallySelectedAssets}
+            folderId={folderId}
+            onClose={() => {
+              setStep(undefined);
+              setFolderId(null);
+            }}
+            open={step === STEPS.AssetSelect}
+            onValidate={handleValidation}
+            multiple={multiple}
+            onAddAsset={() => setStep(STEPS.AssetUpload)}
+            onAddFolder={() => setStep(STEPS.FolderCreate)}
+            onChangeFolder={(folder) => setFolderId(folder)}
+            trackedLocation="content-manager"
+          />
+        )}
 
-        <UploadAssetDialog
-          open={step === STEPS.AssetUpload}
-          onClose={() => setStep(STEPS.AssetSelect)}
-          initialAssetsToAdd={droppedAssets}
-          addUploadedFiles={handleFilesUploadSucceeded}
-          trackedLocation="content-manager"
-          folderId={folderId}
-          validateAssetsTypes={validateAssetsTypes}
-        />
+        {step === STEPS.AssetUpload && (
+          <UploadAssetDialog
+            open={step === STEPS.AssetUpload}
+            onClose={() => setStep(STEPS.AssetSelect)}
+            initialAssetsToAdd={droppedAssets}
+            addUploadedFiles={handleFilesUploadSucceeded}
+            trackedLocation="content-manager"
+            folderId={folderId}
+            validateAssetsTypes={validateAssetsTypes}
+          />
+        )}
 
-        <EditFolderDialog
-          open={step === STEPS.FolderCreate}
-          onClose={() => setStep(STEPS.AssetSelect)}
-          parentFolderId={folderId}
-        />
+        {step === STEPS.FolderCreate && (
+          <EditFolderDialog
+            open={step === STEPS.FolderCreate}
+            onClose={() => setStep(STEPS.AssetSelect)}
+            parentFolderId={folderId}
+          />
+        )}
       </>
     );
   }
 );
 
 MediaLibraryInput.defaultProps = {
-  attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'] },
+  attribute: { allowedTypes: ['videos', 'files', 'images', 'audios'], multiple: false },
   disabled: false,
   hint: undefined,
   label: undefined,
   labelAction: undefined,
-  multiple: false,
   required: false,
 };
 
 MediaLibraryInput.propTypes = {
-  attribute: PropTypes.shape({ allowedTypes: PropTypes.arrayOf(PropTypes.string) }),
+  attribute: PropTypes.shape({
+    allowedTypes: PropTypes.arrayOf(PropTypes.string),
+    multiple: PropTypes.bool,
+  }),
   disabled: PropTypes.bool,
   hint: PropTypes.string,
   label: PropTypes.string,
   labelAction: PropTypes.node,
-  multiple: PropTypes.bool,
+
   name: PropTypes.string.isRequired,
   required: PropTypes.bool,
 };

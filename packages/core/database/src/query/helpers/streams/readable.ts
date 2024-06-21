@@ -92,7 +92,7 @@ class ReadableStrapiQuery extends Readable {
    * Custom ._read() implementation
    *
    *  NOTE: Here "size" means the number of entities to be read from the database.
-   *  Not the actual byte size, as it would means that we need to return partial entities.
+   *  Not the actual byte size, as it would mean that we need to return partial entities.
    *
    */
   async _read(size: number) {
@@ -147,7 +147,7 @@ class ReadableStrapiQuery extends Readable {
 
       const { populate } = this._qb.state;
 
-      // Apply populate if needed
+      // Applies the populate if needed
       if (populate) {
         await applyPopulate(results, populate, { qb: this._qb, uid: this._uid, db: this._db });
       }

@@ -55,15 +55,19 @@ export const findAndClose = async (
   closeLabel: string = 'Close'
 ) => {
   // Verify the popup text is visible.
-  await expect(page.locator(`:has-text("${text}")[role="${role}"]`)).toBeVisible();
+  const elements = page.locator(`:has-text("${text}")[role="${role}"]`);
+  await expect(elements.first()).toBeVisible(); // expect at least one element
 
-  // Find the 'Close' button that is a sibling of the element containing the specified text.
-  const closeBtn = await page.locator(
+  // Find all 'Close' buttons that are siblings of the elements containing the specified text.
+  const closeBtns = page.locator(
     `:has-text("${text}")[role="${role}"] ~ button:has-text("${closeLabel}")`
   );
 
-  // Click the 'Close' button.
-  await closeBtn.click();
+  // Click all 'Close' buttons.
+  const count = await closeBtns.count();
+  for (let i = 0; i < count; i++) {
+    await closeBtns.nth(i).click();
+  }
 };
 
 export const createSingleType = async (page, data) => {

@@ -172,6 +172,9 @@ export default async function createProject(scope: Scope) {
   console.log(`  ${cmd} build`);
   console.log('  Build Strapi admin panel.');
   console.log();
+  console.log(`  ${cmd} deploy`);
+  console.log('  Deploy Strapi project.');
+  console.log();
   console.log(`  ${cmd} strapi`);
   console.log(`  Display all available commands.`);
   console.log();

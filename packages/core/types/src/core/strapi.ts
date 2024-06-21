@@ -84,7 +84,8 @@ export interface Strapi extends Container {
   stop(exitCode?: number): never;
   register(): Promise<Strapi>;
   bootstrap(): Promise<Strapi>;
-  runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy'): Promise<void>;
+  runPluginsLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy'): Promise<void>;
+  runUserLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy'): Promise<void>;
   getModel<TSchemaUID extends UID.Schema>(
     uid: TSchemaUID
   ): TSchemaUID extends UID.ContentType
