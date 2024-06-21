@@ -41,6 +41,8 @@ export const transformJSON = async (
    *
    * Due to this, if hookIgnoreNodeModules is set to true or left unspecified,
    * esbuild-register won't try to compile them upon require.
+   *
+   * hookMatcher is added to make sure we're not matching anything else than our codemod in external directories.
    */
   const esbuildOptions = {
     extensions: ['.js', '.mjs', '.ts'],
