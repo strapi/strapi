@@ -76,13 +76,6 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
 
       const databaseSchema = await db.dialect.schemaInspector.getSchema();
       const storedSchema = await this.schemaStorage.read();
-      let previousSchema: Schema;
-
-      if (!storedSchema) {
-        previousSchema = this.schema;
-      } else {
-        previousSchema = storedSchema.schema;
-      }
 
       /*
         3way diff - DB schema / previous metadataSchema / new metadataSchema
@@ -95,7 +88,7 @@ export const createSchemaProvider = (db: Database): SchemaProvider => {
       */
 
       const { status, diff } = await this.schemaDiff.diff({
-        previousSchema,
+        previousSchema: storedSchema?.schema,
         databaseSchema,
         userSchema: this.schema,
       });

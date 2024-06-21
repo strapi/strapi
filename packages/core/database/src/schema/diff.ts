@@ -28,7 +28,7 @@ type TableDiffContext = {
 };
 
 type SchemaDiffContext = {
-  previousSchema: Schema;
+  previousSchema?: Schema;
   databaseSchema: Schema;
   userSchema: Schema;
 };
@@ -395,7 +395,8 @@ export default (db: Database) => {
     // for each table in the user schema, check if it already exists in the database schema
     for (const userSchemaTable of userSchema.tables) {
       const databaseTable = helpers.findTable(databaseSchema, userSchemaTable.name);
-      const previousTable = helpers.findTable(previousSchema, userSchemaTable.name);
+      const previousTable =
+        previousSchema && helpers.findTable(previousSchema, userSchemaTable.name);
 
       if (databaseTable) {
         const { status, diff } = diffTables({
@@ -434,20 +435,17 @@ export default (db: Database) => {
 
     // for all tables in the database schema, check if they are not in the user schema
     for (const databaseTable of databaseSchema.tables) {
+      const isInUserSchema = helpers.hasTable(userSchema, databaseTable.name);
+      const wasTracked = previousSchema && helpers.hasTable(previousSchema, databaseTable.name);
+      const isReserved = reservedTables.includes(databaseTable.name);
+
       // NOTE: if db table is not in the user schema and is not in the previous stored schema leave it alone. it is a user custom table that we should not touch
-      if (
-        !helpers.hasTable(userSchema, databaseTable.name) &&
-        !helpers.hasTable(previousSchema, databaseTable.name)
-      ) {
+      if (!isInUserSchema && !wasTracked) {
         continue;
       }
 
       // if a db table is not in the user schema I want to delete it
-      if (
-        !helpers.hasTable(userSchema, databaseTable.name) &&
-        helpers.hasTable(previousSchema, databaseTable.name) &&
-        !reservedTables.includes(databaseTable.name)
-      ) {
+      if (!isInUserSchema && wasTracked && !isReserved) {
         const dependencies = persistedTables
           .filter((table: PersistedTable) => {
             const dependsOn = table?.dependsOn;
