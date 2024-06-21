@@ -37,7 +37,6 @@ export const generateNewApp = async (options: Options) => {
     template: options.template,
     packageJsonStrapi: {
       template: options.template,
-      starter: options.starter,
     },
     uuid: (process.env.STRAPI_UUID_PREFIX || '') + crypto.randomUUID(),
     docker: process.env.DOCKER === 'true',

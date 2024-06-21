@@ -12,7 +12,7 @@ export interface Options {
   dbpassword?: string;
   dbssl?: string;
   dbfile?: string;
-  template?: string;
+  // template?: string;
   typescript?: boolean;
   javascript?: boolean;
 }
