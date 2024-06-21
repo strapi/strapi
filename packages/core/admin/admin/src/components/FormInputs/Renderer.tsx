@@ -36,6 +36,7 @@ const InputRenderer = memo(
       case 'biginteger':
       case 'timestamp':
       case 'string':
+      case 'uid':
         return <StringInput ref={forwardRef} {...props} />;
       case 'boolean':
         return <BooleanInput ref={forwardRef} {...props} />;

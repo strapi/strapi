@@ -8,7 +8,7 @@ import { useIntl } from 'react-intl';
  * ConfirmDialog
  * -----------------------------------------------------------------------------------------------*/
 interface ConfirmDialogProps extends Pick<ButtonProps, 'variant'>, Pick<Dialog.BodyProps, 'icon'> {
-  onConfirm?: () => Promise<void> | void;
+  onConfirm?: (e?: React.MouseEvent<HTMLButtonElement>) => Promise<void> | void;
   children?: React.ReactNode;
   endAction?: React.ReactNode;
   startAction?: React.ReactNode;
@@ -66,14 +66,14 @@ const ConfirmDialog = ({
       defaultMessage: 'Are you sure?',
     });
 
-  const handleConfirm = async () => {
+  const handleConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!onConfirm) {
       return;
     }
 
     try {
       setIsConfirming(true);
-      await onConfirm();
+      await onConfirm(e);
     } finally {
       setIsConfirming(false);
     }

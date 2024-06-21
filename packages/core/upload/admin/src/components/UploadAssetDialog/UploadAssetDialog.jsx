@@ -93,16 +93,18 @@ export const UploadAssetDialog = ({
 
   return (
     <Modal.Root open={open} onOpenChange={handleClose}>
-      <Modal.Content>
-        {step === Steps.AddAsset && (
+      {step === Steps.AddAsset && (
+        <Modal.Content>
           <AddAssetStep
             onClose={onClose}
             onAddAsset={handleAddToPendingAssets}
             trackedLocation={trackedLocation}
           />
-        )}
+        </Modal.Content>
+      )}
 
-        {step === Steps.PendingAsset && (
+      {step === Steps.PendingAsset && (
+        <Modal.Content>
           <PendingAssetStep
             onClose={handleClose}
             assets={assets}
@@ -116,9 +118,11 @@ export const UploadAssetDialog = ({
             folderId={folderId}
             trackedLocation={trackedLocation}
           />
-        )}
+        </Modal.Content>
+      )}
 
-        {assetToEdit && (
+      {assetToEdit && (
+        <Modal.Content>
           <EditAssetContent
             onClose={handleAssetEditValidation}
             asset={assetToEdit}
@@ -127,8 +131,8 @@ export const UploadAssetDialog = ({
             canDownload={false}
             trackedLocation={trackedLocation}
           />
-        )}
-      </Modal.Content>
+        </Modal.Content>
+      )}
     </Modal.Root>
   );
 };

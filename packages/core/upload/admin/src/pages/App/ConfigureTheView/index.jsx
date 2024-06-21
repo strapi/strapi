@@ -44,7 +44,7 @@ const ConfigureTheView = ({ config }) => {
   const handleConfirm = async () => {
     trackUsage('willEditMediaLibraryConfig');
     await mutateConfig.mutateAsync(modifiedData);
-    toggleWarningSubmit();
+    setWarningSubmit(false);
     dispatch(setLoaded());
     toggleNotification({
       type: 'success',

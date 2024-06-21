@@ -233,27 +233,19 @@ const createDzValidator =
     return validator;
   };
 
-const createRelationValidator =
-  (createOrUpdate: CreateOrUpdate) =>
-  (
-    { attr, updatedAttribute }: ValidatorMeta<Schema.Attribute.Relation>,
-    { isDraft }: ValidatorContext
-  ) => {
-    let validator;
+const createRelationValidator = ({
+  updatedAttribute,
+}: ValidatorMeta<Schema.Attribute.Relation>) => {
+  let validator;
 
-    if (Array.isArray(updatedAttribute.value)) {
-      validator = yup.array().of(yup.mixed());
-    } else {
-      validator = yup.mixed();
-    }
+  if (Array.isArray(updatedAttribute.value)) {
+    validator = yup.array().of(yup.mixed());
+  } else {
+    validator = yup.mixed();
+  }
 
-    validator = addRequiredValidation(createOrUpdate)(validator, {
-      attr: { required: !isDraft && attr.required },
-      updatedAttribute,
-    });
-
-    return validator;
-  };
+  return validator;
+};
 
 const createScalarAttributeValidator =
   (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMeta, options: ValidatorContext) => {
@@ -336,13 +328,10 @@ const createAttributeValidator =
           options
         );
       } else if (metas.attr.type === 'relation') {
-        validator = createRelationValidator(createOrUpdate)(
-          {
-            attr: metas.attr,
-            updatedAttribute: metas.updatedAttribute,
-          },
-          options
-        );
+        validator = createRelationValidator({
+          attr: metas.attr,
+          updatedAttribute: metas.updatedAttribute,
+        });
       }
 
       validator = preventCast(validator);
