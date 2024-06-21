@@ -11,7 +11,7 @@ import { InputProps } from './types';
 const DateTimeInput = forwardRef<HTMLInputElement, InputProps>(
   ({ name, required, label, hint, labelAction, ...props }, ref) => {
     const { formatMessage } = useIntl();
-    const field = useField(name);
+    const field = useField<Date | null>(name);
     const fieldRef = useFocusInputField<HTMLInputElement>(name);
 
     const composedRefs = useComposedRefs(ref, fieldRef);
