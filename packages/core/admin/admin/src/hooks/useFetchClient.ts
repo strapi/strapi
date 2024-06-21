@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { useAuth } from '../features/Auth';
 import { getFetchClient } from '../utils/getFetchClient';
 
 /**
@@ -50,12 +51,14 @@ const useFetchClient = () => {
     };
   }, []);
 
+  const token = useAuth('useFetchClient', (auth) => auth.token);
+
   return React.useMemo(
     () =>
       getFetchClient({
         signal: controller.current!.signal,
       }),
-    []
+    [token]
   );
 };
 

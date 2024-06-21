@@ -50,7 +50,7 @@ interface AuthContextValue {
   isLoading: boolean;
   permissions: Permission[];
   refetchPermissions: () => Promise<void>;
-  setToken: (token: string | null) => void;
+  setToken: (token: string) => void;
   token: string | null;
   user?: User;
 }
@@ -144,11 +144,10 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
     }
   }, [dispatch, user]);
 
-  React.useEffect(() => {
-    if (token) {
-      storeToken(token, false);
-    }
-  }, [token]);
+  const updateToken = React.useCallback((newToken: string) => {
+    setToken(newToken);
+    storeToken(newToken);
+  }, []);
 
   React.useEffect(() => {
     /**
@@ -272,7 +271,7 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
       permissions={userPermissions}
       checkUserHasPermissions={checkUserHasPermissions}
       refetchPermissions={refetchPermissions}
-      setToken={setToken}
+      setToken={updateToken}
       isLoading={isLoading}
     >
       {children}
