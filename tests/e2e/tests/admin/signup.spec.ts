@@ -99,5 +99,6 @@ test.describe('Sign Up', () => {
     await page.getByRole('button', { name: "Let's start" }).click();
 
     await expect(page).toHaveTitle(TITLE_HOME);
+    await page.getByRole('link', { name: 'Content-Type Builder' }).click();
   });
 });
