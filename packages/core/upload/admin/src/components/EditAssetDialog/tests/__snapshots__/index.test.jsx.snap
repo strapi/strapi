@@ -485,7 +485,8 @@ exports[`<EditAssetDialog /> renders and matches the snapshot 1`] = `
 
 .c24 {
   position: relative;
-  text-align: center;
+  display: flex;
+  justify-content: center;
   background: repeating-conic-gradient(       #f6f6f9 0% 25%,       transparent 0% 50%     ) 50%/20px 20px;
 }
 

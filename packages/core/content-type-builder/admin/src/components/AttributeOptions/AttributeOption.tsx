@@ -51,7 +51,7 @@ export const AttributeOption = ({ type = 'text' }: AttributeOptionProps) => {
         <AttributeIcon type={type} />
         <Box paddingLeft={4} width="100%">
           <Flex justifyContent="space-between">
-            <Typography fontWeight="bold">
+            <Typography fontWeight="bold" textColor="neutral800">
               {formatMessage({ id: getTrad(`attribute.${type}`), defaultMessage: type })}
             </Typography>
             {newAttributes.includes(type) && <NewBadge />}

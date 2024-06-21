@@ -1,13 +1,13 @@
-import _ from 'lodash/fp';
 import type { Knex } from 'knex';
-
-import { DatabaseError } from '../errors';
-import * as helpers from './helpers';
-import { transactionCtx } from '../transaction-context';
-import type { Join } from './helpers/join';
+import _ from 'lodash/fp';
 
 import type { Database } from '..';
+
+import { DatabaseError } from '../errors';
+import { transactionCtx } from '../transaction-context';
 import { isKnexQuery } from '../utils/knex';
+import * as helpers from './helpers';
+import type { Join } from './helpers/join';
 
 interface State {
   type: 'select' | 'insert' | 'update' | 'delete' | 'count' | 'max' | 'truncate';
@@ -38,48 +38,86 @@ interface State {
 export interface QueryBuilder {
   alias: string;
   state: State;
+  raw: Knex.RawBuilder;
+
   getAlias(): string;
+
   clone(): QueryBuilder;
+
   select(args: string | Array<string | Knex.Raw>): QueryBuilder;
+
   addSelect(args: string | string[]): QueryBuilder;
+
   insert<TData extends Record<string, unknown> | Record<string, unknown>[]>(
     data: TData
   ): QueryBuilder;
+
   onConflict(args: any): QueryBuilder;
+
   merge(args: any): QueryBuilder;
+
   ignore(): QueryBuilder;
+
   delete(): QueryBuilder;
+
   ref(name: string): any;
+
   update<TData extends Record<string, unknown>>(data: TData): QueryBuilder;
+
   increment(column: string, amount?: number): QueryBuilder;
+
   decrement(column: string, amount?: number): QueryBuilder;
+
   count(count?: string): QueryBuilder;
+
   max(column: string): QueryBuilder;
+
   where(where?: object): QueryBuilder;
+
   limit(limit: number): QueryBuilder;
+
   offset(offset: number): QueryBuilder;
+
   orderBy(orderBy: any): QueryBuilder;
+
   groupBy(groupBy: any): QueryBuilder;
+
   populate(populate: any): QueryBuilder;
+
   search(query: string): QueryBuilder;
+
   transacting(transaction: any): QueryBuilder;
+
   forUpdate(): QueryBuilder;
+
   init(params?: any): QueryBuilder;
+
   filters(filters: any): void;
+
   first(): QueryBuilder;
+
   join(join: any): QueryBuilder;
+
   mustUseAlias(): boolean;
 
   aliasColumn(key: any, alias?: string): any;
 
-  raw: Knex.RawBuilder;
   shouldUseSubQuery(): boolean;
+
   runSubQuery(): any;
+
   processState(): void;
+
   shouldUseDistinct(): boolean;
+
+  shouldUseDeepSort(): boolean;
+
   processSelect(): void;
+
   getKnexQuery(): Knex.QueryBuilder;
+
   execute<T>(options?: { mapResults?: boolean }): Promise<T>;
+
   stream(options?: { mapResults?: boolean }): helpers.ReadableQuery;
 }
 
@@ -408,6 +446,34 @@ const createQueryBuilder = (
       return state.joins.length > 0 && _.isEmpty(state.groupBy);
     },
 
+    shouldUseDeepSort() {
+      return (
+        state.orderBy
+          .filter(({ column }) => column.indexOf('.') >= 0)
+          .filter(({ column }) => {
+            const col = column.split('.');
+
+            for (let i = 0; i < col.length - 1; i += 1) {
+              const el = col[i];
+
+              // order by "rel"."xxx"
+              const isRelationAttribute = meta.attributes[el]?.type === 'relation';
+
+              // order by "t2"."xxx"
+              const isAliasedRelation = Object.values(state.joins)
+                .map((join) => join.alias)
+                .includes(el);
+
+              if (isRelationAttribute || isAliasedRelation) {
+                return true;
+              }
+            }
+
+            return false;
+          }).length > 0
+      );
+    },
+
     processSelect() {
       state.select = state.select.map((field) => {
         if (isKnexQuery(field)) {
@@ -554,6 +620,10 @@ const createQueryBuilder = (
 
       if (state.joins.length > 0) {
         helpers.applyJoins(qb, state.joins);
+      }
+
+      if (this.shouldUseDeepSort()) {
+        return helpers.wrapWithDeepSort(qb, { qb: this, db, uid });
       }
 
       return qb;
