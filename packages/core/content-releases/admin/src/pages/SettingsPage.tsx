@@ -21,7 +21,7 @@ import { useIntl } from 'react-intl';
 
 import { SETTINGS_SCHEMA } from '../../../shared/validation-schemas';
 import { useGetReleaseSettingsQuery, useUpdateReleaseSettingsMutation } from '../services/release';
-import { getTimezones } from '../utils/getTimezones';
+import { getTimezones } from '../utils/time';
 
 import type { UpdateSettings } from '../../../shared/contracts/settings';
 

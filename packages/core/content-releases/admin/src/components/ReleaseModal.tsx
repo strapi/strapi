@@ -22,7 +22,7 @@ import { useLocation } from 'react-router-dom';
 
 import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
 import { pluginId } from '../pluginId';
-import { getTimezones } from '../utils/getTimezones';
+import { getTimezones } from '../utils/time';
 
 export interface FormValues {
   name: string;
