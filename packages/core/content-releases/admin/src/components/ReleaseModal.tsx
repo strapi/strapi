@@ -22,7 +22,7 @@ import { useLocation } from 'react-router-dom';
 
 import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
 import { pluginId } from '../pluginId';
-import { getTimezoneOffset } from '../utils/time';
+import { getTimezones } from '../utils/time';
 
 export interface FormValues {
   name: string;
@@ -247,23 +247,6 @@ interface ITimezoneOption {
   offset: string;
   value: string;
 }
-
-const getTimezones = (selectedDate: Date) => {
-  const timezoneList: ITimezoneOption[] = Intl.supportedValuesOf('timeZone').map((timezone) => {
-    // Timezone will be in the format GMT${OFFSET} where offset could be nothing,
-    // a four digit string e.g. +05:00 or -08:00
-    const utcOffset = getTimezoneOffset(timezone, selectedDate);
-
-    // Offset and timezone are concatenated with '&', so to split and save the required timezone in DB
-    return { offset: utcOffset, value: `${utcOffset}&${timezone}` } satisfies ITimezoneOption;
-  });
-
-  const systemTimezone = timezoneList.find(
-    (timezone) => timezone.value.split('&')[1] === Intl.DateTimeFormat().resolvedOptions().timeZone
-  );
-
-  return { timezoneList, systemTimezone };
-};
 
 const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOption[] }) => {
   const { values, errors, setFieldValue } = useFormikContext<FormValues>();
