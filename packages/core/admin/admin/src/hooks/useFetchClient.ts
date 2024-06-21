@@ -51,14 +51,12 @@ const useFetchClient = () => {
     };
   }, []);
 
-  const token = useAuth('useFetchClient', (auth) => auth.token);
-
   return React.useMemo(
     () =>
       getFetchClient({
         signal: controller.current!.signal,
       }),
-    [token]
+    []
   );
 };
 
