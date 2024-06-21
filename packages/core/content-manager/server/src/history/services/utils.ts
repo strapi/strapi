@@ -187,6 +187,12 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
     return attributes.reduce((acc: any, [attributeName, attribute]) => {
       switch (attribute.type) {
         case 'relation': {
+          // TODO: Support polymorphic relations
+          const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
+          if (isMorphRelation) {
+            break;
+          }
+
           const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
           if (isVisible) {
             acc[attributeName] = { fields: ['documentId', 'locale', 'publishedAt'] };
