@@ -56,6 +56,8 @@ const admin: Plugin.Config.AdminInput = {
         });
       }
 
+      // TODO: Uncomment this when the Settings page is ready
+      /*
       app.addSettingsLink('global', {
         id: pluginId,
         to: 'releases',
@@ -69,6 +71,7 @@ const admin: Plugin.Config.AdminInput = {
           return { default: SettingsPage };
         },
       });
+      */
 
       // app.plugins['content-manager'].apis.addBulkAction((actions: BulkActionComponent[]) => {
       //   // We want to add this action to just before the delete action all the time
