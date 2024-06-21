@@ -77,7 +77,7 @@ export const PendingAssetStep = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <>
       <Modal.Header>
         <Modal.Title>
           {formatMessage({
@@ -159,7 +159,7 @@ export const PendingAssetStep = ({
         <Button onClick={onClose} variant="tertiary">
           {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
         </Button>
-        <Button type="submit" loading={uploadStatus === Status.Uploading}>
+        <Button onClick={handleSubmit} loading={uploadStatus === Status.Uploading}>
           {formatMessage(
             {
               id: getTrad('modal.upload-list.footer.button'),
@@ -170,7 +170,7 @@ export const PendingAssetStep = ({
           )}
         </Button>
       </Modal.Footer>
-    </form>
+    </>
   );
 };
 

@@ -262,10 +262,11 @@ exports[`Header renders 1`] = `
         class="c1"
       >
         <a
+          aria-current="page"
           aria-disabled="false"
-          class="c2 c3"
+          class="c2 c3 active"
+          href="/?folder=2&folderPath=/1"
           target="_self"
-          to="/?folder=2&folderPath=/1"
         >
           <svg
             fill="currentColor"

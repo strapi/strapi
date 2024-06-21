@@ -278,7 +278,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: 500;
-  color: currentcolor;
+  color: #32324d;
 }
 
 .c56 {

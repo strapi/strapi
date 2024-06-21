@@ -309,7 +309,7 @@ const ListPage = () => {
                     <Td>
                       <Typography textColor="neutral800">{webhook.url}</Typography>
                     </Td>
-                    <Td>
+                    <Td onClick={(e) => e.stopPropagation()}>
                       <Flex>
                         <Switch
                           onLabel={formatMessage({
