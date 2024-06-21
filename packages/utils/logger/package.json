@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "5.0.0-beta.13",
+  "version": "5.0.0-beta.14",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "bugs": {
@@ -43,8 +43,8 @@
   },
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
-    "eslint-config-custom": "5.0.0-beta.13",
-    "tsconfig": "5.0.0-beta.13"
+    "eslint-config-custom": "5.0.0-beta.14",
+    "tsconfig": "5.0.0-beta.14"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
