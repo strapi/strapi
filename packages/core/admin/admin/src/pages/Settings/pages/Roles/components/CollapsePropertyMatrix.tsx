@@ -68,7 +68,7 @@ const CollapsePropertyMatrix = ({
   );
 
   return (
-    <Flex display="inline-flex" direction="column" minWidth={0}>
+    <Flex display="inline-flex" direction="column" alignItems="stretch" minWidth={0}>
       <Header label={label} headers={propertyActions} />
       <Box>
         {childrenForm.map(({ children: childrenForm, label, value, required }, i) => (

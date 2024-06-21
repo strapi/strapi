@@ -61,9 +61,11 @@ const ContentTypeCollapses = ({
             key={uid}
             direction="column"
             display="inline-flex"
+            alignItems="stretch"
             minWidth="100%"
             borderColor="primary600"
-            borderWidth={isActive ? 1 : 0}
+            borderWidth={isActive ? '1px' : 0}
+            borderStyle={isActive ? 'solid' : 'none'}
           >
             <Collapse
               availableActions={availableActions}
@@ -119,6 +121,7 @@ const Collapse = ({
   const { formatMessage } = useIntl();
   const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
     usePermissionsDataManager();
+  const [isConditionMoalOpen, setIsConditionModalOpen] = React.useState(false);
 
   // This corresponds to the data related to the CT left checkbox
   // modifiedData: { collectionTypes: { [ctuid]: {create: {properties: { fields: {f1: true} }, update: {}, ... } } } }
@@ -257,7 +260,12 @@ const Collapse = ({
         </Flex>
       </Wrapper>
       <Box bottom="10px" right="9px" position="absolute">
-        <Modal.Root>
+        <Modal.Root
+          open={isConditionMoalOpen}
+          onOpenChange={() => {
+            setIsConditionModalOpen((prev) => !prev);
+          }}
+        >
           <Modal.Trigger>
             <ConditionsButton hasConditions={doesConditionButtonHasConditions} />
           </Modal.Trigger>
@@ -265,6 +273,9 @@ const Collapse = ({
             headerBreadCrumbs={[label, 'Settings.permissions.conditions.conditions']}
             actions={checkboxesActions}
             isFormDisabled={isFormDisabled}
+            onClose={() => {
+              setIsConditionModalOpen(false);
+            }}
           />
         </Modal.Root>
       </Box>

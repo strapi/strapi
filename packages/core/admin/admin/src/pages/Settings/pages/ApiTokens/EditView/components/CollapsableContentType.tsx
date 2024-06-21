@@ -19,7 +19,8 @@ import { useApiTokenPermissions } from '../apiTokenPermissions';
 
 const activeCheckboxWrapperStyles = css`
   background: ${(props) => props.theme.colors.primary100};
-  svg {
+
+  #cog {
     opacity: 1;
   }
 `;
@@ -29,7 +30,7 @@ const CheckboxWrapper = styled<BoxComponent>(Box)<{ $isActive: boolean }>`
   justify-content: space-between;
   align-items: center;
 
-  svg {
+  #cog {
     opacity: 0;
     path {
       fill: ${(props) => props.theme.colors.primary600};
@@ -137,7 +138,7 @@ export const CollapsableContentType = ({
                             }
                             style={{ display: 'inline-flex', alignItems: 'center' }}
                           >
-                            <Cog />
+                            <Cog id="cog" />
                           </button>
                         </CheckboxWrapper>
                       </Grid.Item>
