@@ -1,15 +1,15 @@
-import glob, { IOptions } from 'glob';
+import glob from 'glob';
 
 /**
  * Promise based glob
  */
-function promiseGlob(...args: [string, IOptions]): Promise<string[]> {
-  return new Promise((resolve, reject) => {
-    glob(...args, (err, files) => {
-      if (err) return reject(err);
-      resolve(files);
-    });
-  });
+async function promiseGlob(...args: [string, any]): Promise<string[]> {
+  try {
+    const results = await glob(...args);
+    return results;
+  } catch (err) {
+    return Promise.reject(err);
+  }
 }
 
 export default promiseGlob;

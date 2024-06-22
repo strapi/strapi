@@ -147,7 +147,7 @@
     "fs-extra": "10.0.0",
     "get-latest-version": "5.1.0",
     "git-url-parse": "13.1.0",
-    "glob": "7.2.3",
+    "glob": "9.0.0",
     "http-errors": "1.8.1",
     "https-proxy-agent": "5.0.1",
     "inquirer": "8.2.5",
