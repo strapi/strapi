@@ -36,6 +36,26 @@ const RowLabelWithCheckbox = ({
 }: RowLabelWithCheckboxProps) => {
   const { formatMessage } = useIntl();
 
+  const collapseLabelProps = {
+    title: label,
+    alignItems: 'center',
+    $isCollapsable: isCollapsable,
+  };
+
+  if (isCollapsable) {
+    Object.assign(collapseLabelProps, {
+      onClick,
+      'aria-expanded': isActive,
+      onKeyDown({ key }: React.KeyboardEvent<HTMLDivElement>) {
+        if (key === 'Enter' || key === ' ') {
+          onClick();
+        }
+      },
+      tabIndex: 0,
+      role: 'button',
+    });
+  }
+
   return (
     <Flex alignItems="center" paddingLeft={6} width={firstRowWidth} shrink={0}>
       <Box paddingRight={2}>
@@ -61,26 +81,8 @@ const RowLabelWithCheckbox = ({
           checked={someChecked ? 'indeterminate' : value}
         />
       </Box>
-      <CollapseLabel
-        title={label}
-        alignItems="center"
-        $isCollapsable={isCollapsable}
-        {...(isCollapsable && {
-          onClick,
-          'aria-expanded': isActive,
-          onKeyDown: ({ key }: React.KeyboardEvent<HTMLDivElement>) =>
-            (key === 'Enter' || key === ' ') && onClick(),
-          tabIndex: 0,
-          role: 'button',
-        })}
-      >
-        <Typography
-          fontWeight={isActive ? 'bold' : undefined}
-          textColor={isActive ? 'primary600' : 'neutral800'}
-          ellipsis
-        >
-          {capitalise(label)}
-        </Typography>
+      <CollapseLabel {...collapseLabelProps}>
+        <Typography ellipsis>{label}</Typography>
         {children}
       </CollapseLabel>
     </Flex>

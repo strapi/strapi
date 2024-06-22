@@ -18,7 +18,7 @@ import { createArrayOfValues } from '../utils/createArrayOfValues';
 import { ConditionForm } from '../utils/forms';
 import { getCheckboxState } from '../utils/getCheckboxState';
 
-import { CollapsePropertyMatrix, _internalActiveStyle } from './CollapsePropertyMatrix';
+import { CollapsePropertyMatrix } from './CollapsePropertyMatrix';
 import { ConditionsButton } from './ConditionsButton';
 import { ConditionsModal } from './ConditionsModal';
 import { HiddenAction } from './HiddenAction';
@@ -358,15 +358,14 @@ const activeRowStyle = (theme: DefaultTheme, isActive?: boolean): string => `
     background-color: ${theme.colors.primary100};
     color: ${theme.colors.primary600};
     border-radius: ${isActive ? '2px 2px 0 0' : '2px'};
+    font-weight: ${theme.fontWeights.bold};
   }
+
   ${Chevron} {
     display: flex;
   }
   ${ConditionsButton} {
     display: block;
-  }
-  &:hover {
-    ${_internalActiveStyle(theme)}
   }
 
   &:focus-within {
@@ -401,10 +400,12 @@ const Cell = styled<FlexComponent>(Flex)`
 
 const Chevron = styled<BoxComponent>(Box)`
   display: none;
+
   svg {
-    width: 11px;
+    width: 1.4rem;
   }
-  * {
+
+  path {
     fill: ${({ theme }) => theme.colors.primary600};
   }
 `;

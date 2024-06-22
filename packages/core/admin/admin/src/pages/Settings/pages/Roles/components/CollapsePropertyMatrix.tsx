@@ -225,7 +225,7 @@ const ActionRow = ({
                           },
                         });
                       }}
-                      value={checkboxValue}
+                      checked={checkboxValue}
                     />
                   </Flex>
                 );
@@ -322,15 +322,15 @@ const Wrapper = styled<FlexComponent>(Flex)<{ $isCollapsable?: boolean; $isActiv
   height: ${rowHeight};
   flex: 1;
 
-  ${({ $isCollapsable, theme }) =>
+  &:hover {
+    ${({ $isCollapsable, theme }) => $isCollapsable && activeStyle(theme)}
+  }
+
+  ${({ $isCollapsable }) =>
     $isCollapsable &&
     `
       ${CarretIcon} {
-        display: block;
-        color: ${theme.colors.neutral100};
-      }
-      &:hover {
-        ${activeStyle(theme)}
+        display: flex;
       }
   `}
   ${({ $isActive, theme }) => $isActive && activeStyle(theme)};
@@ -338,7 +338,15 @@ const Wrapper = styled<FlexComponent>(Flex)<{ $isCollapsable?: boolean; $isActiv
 
 const CarretIcon = styled(CaretDown)<{ $isActive: boolean }>`
   display: none;
-  width: 1rem;
+
+  svg {
+    width: 1.4rem;
+  }
+
+  path {
+    fill: ${({ theme }) => theme.colors.neutral200};
+  }
+
   transform: rotate(${({ $isActive }) => ($isActive ? '180' : '0')}deg);
   margin-left: ${({ theme }) => theme.spaces[2]};
 `;
@@ -485,7 +493,7 @@ const SubActionRow = ({
                                   },
                                 });
                               }}
-                              value={checkboxValue}
+                              checked={checkboxValue}
                             />
                           </Flex>
                         );
@@ -566,15 +574,15 @@ const RowStyle = styled<FlexComponent>(Flex)<{
   padding-left: ${({ theme }) => theme.spaces[4]};
   width: ${({ $level }) => 145 - $level * 36}px;
 
-  ${({ $isCollapsable, theme }) =>
+  &:hover {
+    ${({ $isCollapsable, theme }) => $isCollapsable && activeStyle(theme)}
+  }
+
+  ${({ $isCollapsable }) =>
     $isCollapsable &&
     `
       ${CarretIcon} {
-        display: block;
-        color: ${theme.colors.neutral100};
-      }
-      &:hover {
-        ${activeStyle(theme)}
+        display: flex;
       }
   `}
   ${({ $isActive, theme }) => $isActive && activeStyle(theme)};
@@ -658,26 +666,15 @@ const Header = ({ headers = [], label }: HeaderProps) => {
   );
 };
 
-/* -------------------------------------------------------------------------------------------------
- * activeStyle (util)
- * -----------------------------------------------------------------------------------------------*/
-
-/**
- * @internal
- */
 const activeStyle = (theme: DefaultTheme) => css`
-  ${RowLabel} {
-    color: ${theme.colors.primary600};
-    font-weight: ${theme.fontWeights.bold};
-  }
-  ${CarretIcon} {
-    display: block;
+  color: ${theme.colors.primary600};
+  font-weight: ${theme.fontWeights.bold};
 
+  ${CarretIcon} {
     path {
       fill: ${theme.colors.primary600};
     }
   }
 `;
 
-export { activeStyle as _internalActiveStyle };
 export { CollapsePropertyMatrix };
