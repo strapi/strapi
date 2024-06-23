@@ -144,7 +144,7 @@ const SubCategory = ({
 }: SubCategoryProps) => {
   const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
     usePermissionsDataManager();
-  const [isConditionMoalOpen, setIsConditionModalOpen] = React.useState(false);
+  const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
 
   const mainData = get(modifiedData, pathToData, {});
@@ -250,7 +250,7 @@ const SubCategory = ({
             })}
           </Grid.Root>
           <Modal.Root
-            open={isConditionMoalOpen}
+            open={isConditionModalOpen}
             onOpenChange={() => {
               setIsConditionModalOpen((prev) => !prev);
             }}

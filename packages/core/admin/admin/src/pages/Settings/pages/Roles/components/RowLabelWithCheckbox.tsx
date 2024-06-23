@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Checkbox, Box, Flex, Typography } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
-import { capitalise } from '../../../../../utils/strings';
 import { PermissionsDataManagerContextValue } from '../hooks/usePermissionsDataManager';
 import { firstRowWidth } from '../utils/constants';
 

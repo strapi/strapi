@@ -9,6 +9,7 @@ import { useIntl } from 'react-intl';
 import { styled, DefaultTheme } from 'styled-components';
 
 import { Action, Subject } from '../../../../../../../shared/contracts/permissions';
+import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
   usePermissionsDataManager,
@@ -121,7 +122,7 @@ const Collapse = ({
   const { formatMessage } = useIntl();
   const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
     usePermissionsDataManager();
-  const [isConditionMoalOpen, setIsConditionModalOpen] = React.useState(false);
+  const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
 
   // This corresponds to the data related to the CT left checkbox
   // modifiedData: { collectionTypes: { [ctuid]: {create: {properties: { fields: {f1: true} }, update: {}, ... } } } }
@@ -159,7 +160,7 @@ const Collapse = ({
         <RowLabelWithCheckbox
           isCollapsable
           isFormDisabled={isFormDisabled}
-          label={label}
+          label={capitalise(label)}
           checkboxName={pathToData}
           onChange={onChangeParentCheckbox}
           onClick={onClickToggle}
@@ -261,7 +262,7 @@ const Collapse = ({
       </Wrapper>
       <Box bottom="10px" right="9px" position="absolute">
         <Modal.Root
-          open={isConditionMoalOpen}
+          open={isConditionModalOpen}
           onOpenChange={() => {
             setIsConditionModalOpen((prev) => !prev);
           }}

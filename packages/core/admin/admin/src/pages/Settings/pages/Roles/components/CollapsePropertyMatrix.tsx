@@ -15,7 +15,6 @@ import { useIntl } from 'react-intl';
 import { styled, DefaultTheme, css } from 'styled-components';
 
 import { Action, SubjectProperty } from '../../../../../../../shared/contracts/permissions';
-import { capitalise } from '../../../../../utils/strings';
 import {
   PermissionsDataManagerContextValue,
   usePermissionsDataManager,
@@ -440,7 +439,7 @@ const SubActionRow = ({
                     })}
                     title={label}
                   >
-                    <RowLabel ellipsis>{capitalise(label)}</RowLabel>
+                    <RowLabel ellipsis>{label}</RowLabel>
                     {required && <RequiredSign />}
                     <CarretIcon $isActive={isActive} />
                   </CollapseLabel>

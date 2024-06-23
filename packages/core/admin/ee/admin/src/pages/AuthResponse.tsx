@@ -4,13 +4,15 @@ import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
 
 import { Page } from '../../../../admin/src/components/PageHelpers';
-import { useAuth } from '../../../../admin/src/features/Auth';
+import { useTypedDispatch } from '../../../../admin/src/core/store/hooks';
+import { login } from '../../../../admin/src/reducer';
 import { getCookieValue, deleteCookie } from '../utils/cookies';
 
 const AuthResponse = () => {
   const match = useMatch('/auth/login/:authResponse');
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
+  const dispatch = useTypedDispatch();
 
   const redirectToOops = React.useCallback(() => {
     navigate({
@@ -24,8 +26,6 @@ const AuthResponse = () => {
     });
   }, [navigate, formatMessage]);
 
-  const { setToken } = useAuth('AuthResponse', (auth) => auth);
-
   React.useEffect(() => {
     if (match?.params.authResponse === 'error') {
       redirectToOops();
@@ -35,7 +35,11 @@ const AuthResponse = () => {
       const jwtToken = getCookieValue('jwtToken');
 
       if (jwtToken) {
-        setToken(jwtToken);
+        dispatch(
+          login({
+            token: jwtToken,
+          })
+        );
 
         deleteCookie('jwtToken');
 
@@ -44,7 +48,7 @@ const AuthResponse = () => {
         redirectToOops();
       }
     }
-  }, [match, redirectToOops, setToken, navigate]);
+  }, [dispatch, match, redirectToOops, navigate]);
 
   return <Page.Loading />;
 };

@@ -35,7 +35,7 @@ describe('Permissions', () => {
 
     COLLECTION_TYPES.forEach((type) =>
       expect(
-        screen.getByRole('checkbox', { name: `Select all ${type} permissions` })
+        screen.getByRole('checkbox', { name: `Select all ${capitalise(type)} permissions` })
       ).toBeInTheDocument()
     );
 
@@ -73,7 +73,7 @@ describe('Permissions', () => {
       });
     });
 
-    await user.click(screen.getByRole('button', { name: 'Repeat_req_min' }));
+    await user.click(screen.getByRole('button', { name: 'repeat_req_min' }));
 
     COLUMN_HEADERS.filter((head) => head !== 'Publish' && head !== 'Delete').forEach((head) => {
       expect(
