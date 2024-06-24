@@ -20,7 +20,6 @@ const alreadyUsedAttributeNames = (
       const snakeCaseKey = snakeCase(value);
 
       return !usedNames.some((existingKey) => {
-        if (existingKey === value) return false; // don't compare against itself
         return snakeCase(existingKey) === snakeCaseKey;
       });
     },
