@@ -128,6 +128,7 @@ const EditPage = () => {
   const {
     allowedActions: { canDelete, canUpdate, canCreate },
   } = useRBAC(permissions);
+
   const [savePrompts, setSavePrompts] = React.useState<{
     hasDeletedServerStages?: boolean;
     hasReassignedContentTypes?: boolean;
@@ -389,10 +390,10 @@ const EditPage = () => {
             />
             <Layout.Root>
               <Flex alignItems="stretch" direction="column" gap={7}>
-                <WorkflowAttributes canUpdate={canUpdate} />
+                <WorkflowAttributes canUpdate={canUpdate || canCreate} />
                 <Stages
                   canDelete={canDelete}
-                  canUpdate={canUpdate}
+                  canUpdate={canUpdate || canCreate}
                   isCreating={isCreatingWorkflow}
                 />
               </Flex>

@@ -9,13 +9,14 @@ import { ResetPassword } from '../../../../../shared/contracts/authentication';
 import { Form } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
-import { useAuth } from '../../../features/Auth';
+import { useTypedDispatch } from '../../../core/store/hooks';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import {
   Column,
   LayoutContent,
   UnauthenticatedLayout,
 } from '../../../layouts/UnauthenticatedLayout';
+import { login } from '../../../reducer';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
 import { translatedErrors } from '../../../utils/translatedErrors';
@@ -64,12 +65,11 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
 
 const ResetPassword = () => {
   const { formatMessage } = useIntl();
+  const dispatch = useTypedDispatch();
   const navigate = useNavigate();
   const { search: searchString } = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-
-  const { setToken } = useAuth('ResetPassword', (auth) => auth);
 
   const [resetPassword, { error }] = useResetPasswordMutation();
 
@@ -77,7 +77,7 @@ const ResetPassword = () => {
     const res = await resetPassword(body);
 
     if ('data' in res) {
-      setToken(res.data.token);
+      dispatch(login({ token: res.data.token }));
       navigate('/');
     }
   };

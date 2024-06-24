@@ -41,12 +41,14 @@ interface ConditionAction extends Pick<ActionRowProps, 'label'> {
 interface ConditionsModalProps extends Pick<ActionRowProps, 'isFormDisabled'> {
   actions?: Array<ConditionAction | HiddenCheckboxAction | VisibleCheckboxAction>;
   headerBreadCrumbs?: string[];
+  onClose?: () => void;
 }
 
 const ConditionsModal = ({
   actions = [],
   headerBreadCrumbs = [],
   isFormDisabled,
+  onClose,
 }: ConditionsModalProps) => {
   const { formatMessage } = useIntl();
   const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
@@ -98,6 +100,15 @@ const ConditionsModal = ({
     );
 
     onChangeConditions(conditionsWithoutCategory);
+    onClose && onClose();
+  };
+
+  const onCloseModal = () => {
+    setState(
+      createDefaultConditionsForm(actionsToDisplay, modifiedData, arrayOfOptionsGroupedByCategory)
+    );
+
+    onClose && onClose();
   };
 
   return (
@@ -146,11 +157,9 @@ const ConditionsModal = ({
         </ul>
       </Modal.Body>
       <Modal.Footer>
-        <Modal.Close>
-          <Button variant="tertiary">
-            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-          </Button>
-        </Modal.Close>
+        <Button variant="tertiary" onClick={() => onCloseModal()}>
+          {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+        </Button>
         <Button onClick={handleSubmit}>
           {formatMessage({
             id: 'Settings.permissions.conditions.apply',

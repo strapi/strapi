@@ -137,11 +137,12 @@ const NoData = (props: NoDataProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <PageMain height="100%">
+    <PageMain height="100%" background="neutral100">
       <Flex alignItems="center" height="100%" width="100%" justifyContent="center">
         <Box minWidth="50%">
           <EmptyStateLayout
             icon={<EmptyDocuments width="16rem" />}
+            action={props.action}
             content={formatMessage({
               id: 'app.components.EmptyStateLayout.content-document',
               defaultMessage: 'No content found',

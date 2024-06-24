@@ -273,7 +273,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
         />
       ),
       footer: ({ onClose }) => (
-        <Modal.Footer>
+        <>
           <Button onClick={onClose} variant="tertiary" name="cancel">
             {formatMessage({
               id: 'content-releases.content-manager-edit-view.add-to-release.cancel-button',
@@ -292,7 +292,7 @@ const ReleaseActionModalForm: DocumentActionComponent = ({
               defaultMessage: 'Continue',
             })}
           </Button>
-        </Modal.Footer>
+        </>
       ),
     },
   };

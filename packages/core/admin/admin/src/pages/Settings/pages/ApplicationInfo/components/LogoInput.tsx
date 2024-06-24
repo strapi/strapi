@@ -81,7 +81,14 @@ const LogoInput = ({
   };
 
   return (
-    <Modal.Root>
+    <Modal.Root
+      open={!!currentStep}
+      onOpenChange={(state) => {
+        if (state === false) {
+          handleClose();
+        }
+      }}
+    >
       <LogoInputContextProvider
         setLocalImage={setLocalImage}
         localImage={localImage}
@@ -307,8 +314,12 @@ const ComputerForm = () => {
 
   const { setLocalImage, goToStep, onClose } = useLogoInputContext('ComputerForm');
 
-  const handleDragEnter = () => setDragOver(true);
-  const handleDragLeave = () => setDragOver(false);
+  const handleDragEnter = () => {
+    setDragOver(true);
+  };
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
 
   const handleClick: ButtonProps['onClick'] = (e) => {
     e.preventDefault();
@@ -367,15 +378,17 @@ const ComputerForm = () => {
                     })}
                   </Typography>
                 </Box>
-                <FileInput
-                  accept={ACCEPTED_FORMAT.join(', ')}
-                  type="file"
-                  name="files"
-                  tabIndex={-1}
-                  onChange={handleChange}
-                  ref={inputRef}
-                  id={id}
-                />
+                <Box position="relative">
+                  <FileInput
+                    accept={ACCEPTED_FORMAT.join(', ')}
+                    type="file"
+                    name="files"
+                    tabIndex={-1}
+                    onChange={handleChange}
+                    ref={inputRef}
+                    id={id}
+                  />
+                </Box>
                 <Button type="button" onClick={handleClick}>
                   {formatMessage({
                     id: 'Settings.application.customization.modal.upload.cta.browse',

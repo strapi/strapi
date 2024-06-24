@@ -1,10 +1,16 @@
 import * as React from 'react';
 
-import { useQueryParams, Page, createContext, useRBAC } from '@strapi/admin/strapi-admin';
-import { Box, Flex, FocusTrap, Main, Portal } from '@strapi/design-system';
+import {
+  useQueryParams,
+  Page,
+  createContext,
+  useRBAC,
+  BackButton,
+} from '@strapi/admin/strapi-admin';
+import { Box, Flex, FocusTrap, Main, Portal, Link } from '@strapi/design-system';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams, NavLink } from 'react-router-dom';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { PERMISSIONS } from '../../constants/plugin';
@@ -133,7 +139,23 @@ const HistoryPage = () => {
 
   // It was a success, handle empty data
   if (!versionsResponse.isError && !versionsResponse.data?.data?.length) {
-    return <Page.NoData />;
+    return (
+      <>
+        <Page.NoData
+          action={
+            <Link
+              tag={NavLink}
+              to={`/content-manager/${collectionType}/${slug}${documentId ? `/${documentId}` : ''}`}
+            >
+              {formatMessage({
+                id: 'global.back',
+                defaultMessage: 'Back',
+              })}
+            </Link>
+          }
+        />
+      </>
+    );
   }
 
   // We have data, handle selected version

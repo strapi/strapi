@@ -469,12 +469,12 @@ const DocumentActionModal = ({
         <Modal.Header>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
-        {typeof Content === 'function' ? (
-          <Content onClose={handleClose} />
-        ) : (
-          <Modal.Body>{Content}</Modal.Body>
-        )}
-        {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
+        <Modal.Body>
+          {typeof Content === 'function' ? <Content onClose={handleClose} /> : Content}
+        </Modal.Body>
+        <Modal.Footer>
+          {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
+        </Modal.Footer>
       </Modal.Content>
     </Modal.Root>
   );

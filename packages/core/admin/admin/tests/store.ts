@@ -1,10 +1,12 @@
 import { fixtures } from '@strapi/admin-test-utils';
 
+import { getStoredToken } from '../src/reducer';
+
 /**
  * This is for the redux store in `utils`.
  * The more we adopt it, the bigger it will get – which is okay.
  */
-const initialState = {
+const initialState = () => ({
   admin_app: {
     language: {
       locale: 'en',
@@ -15,7 +17,8 @@ const initialState = {
       availableThemes: [],
       currentTheme: 'light',
     },
+    token: getStoredToken(),
   },
-};
+});
 
 export { initialState };
