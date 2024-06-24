@@ -22,7 +22,7 @@ export default async (ctx: CLIContext) => {
     openModule.then((open) => {
       open
         .default(
-          `${cliConfig.baseUrl}oidc/logout?client_id=${encodeURIComponent(
+          `${cliConfig.baseUrl}/oidc/logout?client_id=${encodeURIComponent(
             cliConfig.clientId
           )}&logout_hint=${encodeURIComponent(token)}
           `
