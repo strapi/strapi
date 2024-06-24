@@ -51,7 +51,7 @@ export default async (ctx: CLIContext) => {
   if (!token) {
     return;
   }
-  const cloudApi = await cloudApiFactory(token);
+  const cloudApi = await cloudApiFactory(ctx, token);
   const { data: config } = await cloudApi.config();
   const { questions, defaults: defaultValues } = config.projectCreation;
 
