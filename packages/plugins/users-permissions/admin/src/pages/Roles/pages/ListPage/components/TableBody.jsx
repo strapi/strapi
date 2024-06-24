@@ -13,7 +13,7 @@ const EditLink = styled(Link)`
   width: 3.2rem;
   display: flex;
   justify-content: center;
-  padding: ${({ theme }) => `${theme.spaces[2]}}`};
+  padding: ${({ theme }) => `${theme.spaces[2]}`};
 
   svg {
     height: 1.6rem;
