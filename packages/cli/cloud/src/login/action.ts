@@ -12,7 +12,7 @@ export async function promptLogin(ctx: CLIContext) {
     {
       type: 'confirm',
       name: 'login',
-      message: 'Do you want to login?',
+      message: 'Would you like to login?',
     },
   ]);
 
