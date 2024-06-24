@@ -98,7 +98,8 @@ test.describe('Sign Up', () => {
   }) => {
     await page.getByRole('button', { name: "Let's start" }).click();
 
+    // Ensure home page is loaded and the permissions are fetched
     await expect(page).toHaveTitle(TITLE_HOME);
-    await page.getByRole('link', { name: 'Content-Type Builder' }).click();
+    await expect(page.getByRole('link', { name: 'Content-Type Builder' })).toBeVisible();
   });
 });
