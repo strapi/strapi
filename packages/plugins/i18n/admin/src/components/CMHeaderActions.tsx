@@ -474,13 +474,17 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     };
   }
 
+  const hasPermission = selectedRows
+    .map(({ locale }) => locale)
+    .every((locale) => canPublish.includes(locale));
+
   return {
     label: formatMessage({
       id: getTranslation('CMEditViewBulkLocale.publish-title'),
       defaultMessage: 'Publish Multiple Locales',
     }),
     icon: <ListPlus />,
-    disabled: isPublishedTab || !canPublish,
+    disabled: isPublishedTab || canPublish.length === 0,
     position: ['panel'],
     variant: 'secondary',
     dialog: {
@@ -510,10 +514,10 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         );
       },
       footer: () => (
-        <Flex justifyContent="flex-end">
+        <Flex justifyContent="flex-end" width="100%">
           <Button
             loading={isDraftRelationsLoading}
-            disabled={localesToPublish.length === 0}
+            disabled={!hasPermission || localesToPublish.length === 0}
             variant="default"
             onClick={handleAction}
           >

@@ -62,6 +62,9 @@ interface AuthProviderProps {
    * @internal could be removed at any time.
    */
   _defaultPermissions?: Permission[];
+
+  // NOTE: this is used for testing purposed only
+  _disableRenewToken?: boolean;
 }
 
 const STORAGE_KEYS = {
@@ -69,11 +72,15 @@ const STORAGE_KEYS = {
   USER: 'userInfo',
 };
 
-const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps) => {
+const AuthProvider = ({
+  children,
+  _defaultPermissions = [],
+  _disableRenewToken = false,
+}: AuthProviderProps) => {
   const dispatch = useTypedDispatch();
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
-  const { token = null } = useTypedSelector((state) => state.admin_app);
+  const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
   const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
     /**
@@ -82,6 +89,7 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
      */
     skip: !token,
   });
+
   const {
     data: userPermissions = _defaultPermissions,
     refetch,
@@ -109,7 +117,7 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
    * does click "remember me" when they login. We also need to renew the token.
    */
   React.useEffect(() => {
-    if (token) {
+    if (token && !_disableRenewToken) {
       renewTokenMutation({ token }).then((res) => {
         if ('data' in res) {
           dispatch(
@@ -122,7 +130,7 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
         }
       });
     }
-  }, [token, dispatch, renewTokenMutation, clearStateAndLogout]);
+  }, [token, dispatch, renewTokenMutation, clearStateAndLogout, _disableRenewToken]);
 
   React.useEffect(() => {
     if (user) {

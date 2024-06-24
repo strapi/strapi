@@ -84,10 +84,10 @@ const adminSlice = createSlice({
     },
     logout(state) {
       state.token = null;
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      sessionStorage.removeItem(STORAGE_KEYS.TOKEN);
-      sessionStorage.removeItem(STORAGE_KEYS.TOKEN);
-      sessionStorage.removeItem(STORAGE_KEYS.USER);
+      window.localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      window.localStorage.removeItem(STORAGE_KEYS.USER);
+      window.sessionStorage.removeItem(STORAGE_KEYS.TOKEN);
+      window.sessionStorage.removeItem(STORAGE_KEYS.USER);
     },
   },
 });

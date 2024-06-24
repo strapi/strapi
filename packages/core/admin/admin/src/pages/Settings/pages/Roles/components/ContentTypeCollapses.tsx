@@ -64,9 +64,7 @@ const ContentTypeCollapses = ({
             display="inline-flex"
             alignItems="stretch"
             minWidth="100%"
-            borderColor="primary600"
-            borderWidth={isActive ? '1px' : 0}
-            borderStyle={isActive ? 'solid' : 'none'}
+            borderColor={isActive ? 'primary600' : undefined}
           >
             <Collapse
               availableActions={availableActions}

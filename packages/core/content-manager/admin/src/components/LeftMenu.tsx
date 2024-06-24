@@ -28,6 +28,7 @@ const LeftMenu = () => {
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager'].app.collectionTypeLinks
   );
+
   const singleTypeLinks = useTypedSelector((state) => state['content-manager'].app.singleTypeLinks);
   const { schemas } = useContentTypeSchema();
 

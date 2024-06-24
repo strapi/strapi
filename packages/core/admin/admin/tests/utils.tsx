@@ -140,7 +140,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
             settings={{}}
           >
             <Provider store={store}>
-              <AuthProvider _defaultPermissions={allPermissions}>
+              <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
                 <QueryClientProvider client={queryClient}>
                   <DndProvider backend={HTML5Backend}>
                     <LanguageProvider messages={{}}>
