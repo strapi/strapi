@@ -36,7 +36,7 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) =
       const isLocalized = strapi
         .plugin('i18n')
         .service('content-types')
-        .isLocalizedContentType(oldContentType);
+        .isLocalizedContentType(contentType);
 
       // if d&p was enabled set publishedAt to eq createdAt
       if (
