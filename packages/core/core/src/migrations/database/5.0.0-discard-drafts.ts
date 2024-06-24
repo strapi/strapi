@@ -1,8 +1,10 @@
 /* eslint-disable no-continue */
-import type { UID } from '@strapi/types';
+import type { UID, Modules } from '@strapi/types';
 import type { Database, Migration } from '@strapi/database';
 import { async, contentTypes } from '@strapi/utils';
 
+type DiscardDraftParams<TSchemaUID extends UID.ContentType> =
+  Modules.Documents.ServiceParams<TSchemaUID>['discardDraft'];
 type DocumentVersion = { documentId: string; locale: string };
 type Knex = Parameters<Migration['up']>[0];
 
@@ -16,21 +18,29 @@ export async function* getBatchToDiscard({
   db,
   trx,
   uid,
+  isLocalized,
   batchSize = 1000,
 }: {
   db: Database;
   trx: Knex;
   uid: string;
+  isLocalized: boolean;
   batchSize?: number;
 }) {
   let offset = 0;
   let hasMore = true;
 
+  const fields = ['id', 'documentId'];
+
+  if (isLocalized) {
+    fields.push('locale');
+  }
+
   while (hasMore) {
     // Look for the published entries to discard
     const batch: DocumentVersion[] = await db
       .queryBuilder(uid)
-      .select(['id', 'documentId', 'locale'])
+      .select(fields)
       .where({ publishedAt: { $ne: null } })
       .limit(batchSize)
       .offset(offset)
@@ -57,22 +67,36 @@ const migrateUp = async (trx: Knex, db: Database) => {
 
     const uid = meta.uid as UID.ContentType;
     const model = strapi.getModel(uid);
+
     const hasDP = contentTypes.hasDraftAndPublish(model);
+    const isLocalized = strapi
+      .plugin('i18n')
+      .service('content-types')
+      .isLocalizedContentType(model);
+
     if (!hasDP) {
       continue;
     }
 
-    const discardDraft = async (entry: DocumentVersion) =>
+    const discardDraft = async (entry: DocumentVersion) => {
+      const params: DiscardDraftParams<typeof uid> = { documentId: entry.documentId };
+
+      // Only add the locale param if the model is localized
+      if (isLocalized) {
+        params.locale = entry.locale;
+      }
+
       strapi
         .documents(uid)
-        // Discard draft by referencing the documentId and locale
-        .discardDraft({ documentId: entry.documentId, locale: entry.locale });
+        // Discard draft by referencing the documentId (and locale if the model is localized)
+        .discardDraft(params);
+    };
 
     /**
      * Load a batch of entries (batched to prevent loading millions of rows at once ),
      * and discard them using the document service.
      */
-    for await (const batch of getBatchToDiscard({ db, trx, uid: meta.uid })) {
+    for await (const batch of getBatchToDiscard({ db, trx, uid: meta.uid, isLocalized })) {
       await async.map(batch, discardDraft, { concurrency: 10 });
     }
   }
