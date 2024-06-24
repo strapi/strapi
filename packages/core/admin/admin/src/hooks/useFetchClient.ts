@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { useAuth } from '../features/Auth';
 import { getFetchClient } from '../utils/getFetchClient';
 
 /**
