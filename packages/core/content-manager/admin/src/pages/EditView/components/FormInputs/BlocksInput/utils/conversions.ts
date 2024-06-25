@@ -1,4 +1,4 @@
-import { type Element, Editor, Transforms } from 'slate';
+import { type Element, type Path, Editor, Transforms } from 'slate';
 
 /**
  * Extracts some logic that is common to most blocks' handleConvert functions.
@@ -7,7 +7,7 @@ import { type Element, Editor, Transforms } from 'slate';
 const baseHandleConvert = <T extends Element>(
   editor: Editor,
   attributesToSet: Partial<T> & { type: T['type'] }
-): void => {
+): void | Path => {
   // If there is no selection, convert last inserted node
   const [_, lastNodePath] = Editor.last(editor, []);
 
@@ -18,27 +18,29 @@ const baseHandleConvert = <T extends Element>(
     at: editor.selection ?? lastNodePath,
   });
 
-  // Make sure we get block nodes (elements), not an inline node
+  // Make sure we get a block node, not an inline node
   const [, updatedLastNodePath] = Editor.last(editor, []);
-  const nodes = Editor.nodes(editor, {
+  const entry = Editor.above(editor, {
     match: (node) => !Editor.isEditor(node) && node.type !== 'text' && node.type !== 'link',
     at: editor.selection ?? updatedLastNodePath,
   });
 
-  if (!nodes) {
+  if (!entry || Editor.isEditor(entry[0])) {
     return;
   }
 
-  for (const [element, elementPath] of nodes) {
-    Transforms.setNodes(
-      editor,
-      {
-        ...getAttributesToClear(element as Element), // because of the match we can safely assume it's a Node of type Element
-        ...attributesToSet,
-      } as Partial<Element>,
-      { at: elementPath }
-    );
-  }
+  const [element, elementPath] = entry;
+
+  Transforms.setNodes(
+    editor,
+    {
+      ...getAttributesToClear(element),
+      ...attributesToSet,
+    } as Partial<Element>,
+    { at: elementPath }
+  );
+
+  return elementPath;
 };
 
 /**

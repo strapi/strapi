@@ -272,9 +272,11 @@ const handleEnterKeyOnList = (editor: Editor) => {
  * Common handler for converting a node to a list
  */
 const handleConvertToList = (editor: Editor, format: Block<'list'>['format']) => {
-  baseHandleConvert<Block<'list-item'>>(editor, { type: 'list-item' });
+  const convertedPath = baseHandleConvert<Block<'list-item'>>(editor, { type: 'list-item' });
 
-  Transforms.wrapNodes(editor, { type: 'list', format, children: [] });
+  if (!convertedPath) return;
+
+  Transforms.wrapNodes(editor, { type: 'list', format, children: [] }, { at: convertedPath });
 };
 
 /**

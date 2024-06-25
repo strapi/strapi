@@ -1419,38 +1419,29 @@ describe('List', () => {
 
   it('converts a heading with a link to a list', () => {
     const baseEditor = createEditor();
-
     baseEditor.children = [
       {
         type: 'heading',
+        level: 1,
         children: [
-          {
-            text: '',
-            type: 'text',
-          },
           {
             type: 'link',
             url: 'https://strapi.io',
             children: [
               {
-                text: 'Heading link',
                 type: 'text',
+                text: 'Heading link',
               },
             ],
           },
-          {
-            text: '',
-            type: 'text',
-          },
         ],
-        level: 1,
       },
     ];
 
     // Set the cursor on the heading
     Transforms.select(baseEditor, {
-      anchor: { path: [0, 1, 0], offset: 0 },
-      focus: { path: [0, 1, 0], offset: 0 },
+      anchor: { path: [0, 0, 0], offset: 0 },
+      focus: { path: [0, 0, 0], offset: 0 },
     });
 
     listBlocks['list-ordered'].handleConvert!(baseEditor);

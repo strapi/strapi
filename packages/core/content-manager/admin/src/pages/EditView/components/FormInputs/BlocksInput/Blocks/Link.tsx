@@ -34,7 +34,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const [linkText, setLinkText] = React.useState(elementText);
     const [linkUrl, setLinkUrl] = React.useState(link.url);
     const linkInputRef = React.useRef<HTMLInputElement>(null);
-    const showRemoveButton = editor.lastInsertedLinkPath
+    const isLastInsertedLink = editor.lastInsertedLinkPath
       ? !Path.equals(path, editor.lastInsertedLinkPath)
       : true;
     const [isSaveDisabled, setIsSaveDisabled] = React.useState(false);
@@ -147,7 +147,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
               <RemoveButton
                 variant="danger-light"
                 onClick={() => removeLink(editor)}
-                $visible={showRemoveButton}
+                $visible={isLastInsertedLink}
               >
                 {formatMessage({
                   id: 'components.Blocks.popover.remove',
