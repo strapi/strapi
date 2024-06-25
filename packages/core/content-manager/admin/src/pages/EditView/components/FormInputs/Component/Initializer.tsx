@@ -46,11 +46,6 @@ const Initializer = ({ disabled, name, onClick }: InitializerProps) => {
           </Flex>
         </Flex>
       </Box>
-      {field.error && (
-        <Typography textColor="danger600" variant="pi">
-          {field.error}
-        </Typography>
-      )}
     </>
   );
 };

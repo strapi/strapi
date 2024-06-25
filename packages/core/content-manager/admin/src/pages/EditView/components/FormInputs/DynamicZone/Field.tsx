@@ -192,10 +192,7 @@ const DynamicZone = ({
     removeFieldRow(name, currentIndex);
   };
 
-  const hasError =
-    error !== undefined ||
-    dynamicDisplayedComponentsLength < min ||
-    dynamicDisplayedComponentsLength > max;
+  const hasError = error !== undefined;
 
   const renderButtonLabel = () => {
     if (addComponentIsOpen) {
