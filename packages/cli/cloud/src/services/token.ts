@@ -77,9 +77,12 @@ export async function tokenServiceFactory({ logger }: { logger: CLIContext['logg
     // Verify the JWT token signature using the JWKS Key
     return new Promise<void>((resolve, reject) => {
       jwt.verify(idToken, getKey, (err: VerifyErrors | null) => {
-        if (err) reject(err);
-        if (decodedToken.payload.exp < Math.floor(Date.now() / 1000))
+        if (err) {
+          reject(err);
+        }
+        if (decodedToken.payload.exp < Math.floor(Date.now() / 1000)) {
           reject(new Error('Token is expired'));
+        }
         resolve();
       });
     });

@@ -140,10 +140,14 @@ async function getProject(ctx: CLIContext) {
 export default async (ctx: CLIContext) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
   const token = await getValidToken(ctx, promptLogin);
-  if (!token) return;
+  if (!token) {
+    return;
+  }
 
   const project = await getProject(ctx);
-  if (!project) return;
+  if (!project) {
+    return;
+  }
 
   const cloudApiService = await cloudApiFactory();
   try {
