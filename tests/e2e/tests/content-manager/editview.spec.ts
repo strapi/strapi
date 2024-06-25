@@ -15,7 +15,7 @@ test.describe('Edit View', () => {
       /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
 
-    test.only('as a user I want to be warned if I try to publish content that has draft relations', async ({
+    test('as a user I want to be warned if I try to publish content that has draft relations', async ({
       page,
     }) => {
       await page.getByLabel('Content Manager').click();
