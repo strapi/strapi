@@ -103,7 +103,32 @@ const ListPage = () => {
     }
   };
 
-  const confirmDelete = async () => {
+  const deleteWebhook = async (id: string) => {
+    try {
+      const res = await deleteManyWebhooks({
+        ids: [id],
+      });
+
+      if ('error' in res) {
+        toggleNotification({
+          type: 'danger',
+          message: formatAPIError(res.error),
+        });
+
+        return;
+      }
+    } catch {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        }),
+      });
+    }
+  };
+
+  const confirmBulkDelete = async () => {
     try {
       const res = await deleteManyWebhooks({
         ids: webhooksToDelete,
@@ -349,20 +374,11 @@ const ListPage = () => {
                           </IconButton>
                         )}
                         {canDelete && (
-                          <IconButton
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setWebhooksToDelete([webhook.id]);
-                              setShowModal(true);
+                          <DeleteActionButton
+                            onDelete={() => {
+                              deleteWebhook(webhook.id);
                             }}
-                            label={formatMessage({
-                              id: 'Settings.webhooks.events.delete',
-                              defaultMessage: 'Delete webhook',
-                            })}
-                            borderWidth={0}
-                          >
-                            <Trash />
-                          </IconButton>
+                          />
                         )}
                       </Flex>
                     </Td>
@@ -392,9 +408,49 @@ const ListPage = () => {
         </Layouts.Content>
       </Page.Main>
       <Dialog.Root open={showModal} onOpenChange={setShowModal}>
-        <ConfirmDialog onConfirm={confirmDelete} />
+        <ConfirmDialog onConfirm={confirmBulkDelete} />
       </Dialog.Root>
     </Layouts.Root>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * DeleteActionButton
+ * -----------------------------------------------------------------------------------------------*/
+
+type DeleteActionButtonProps = {
+  onDelete: () => void;
+};
+
+const DeleteActionButton = ({ onDelete }: DeleteActionButtonProps) => {
+  const [showModal, setShowModal] = React.useState(false);
+  const { formatMessage } = useIntl();
+
+  return (
+    <>
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          setShowModal(true);
+        }}
+        label={formatMessage({
+          id: 'Settings.webhooks.events.delete',
+          defaultMessage: 'Delete webhook',
+        })}
+        borderWidth={0}
+      >
+        <Trash />
+      </IconButton>
+
+      <Dialog.Root open={showModal} onOpenChange={setShowModal}>
+        <ConfirmDialog
+          onConfirm={(e) => {
+            e?.stopPropagation();
+            onDelete();
+          }}
+        />
+      </Dialog.Root>
+    </>
   );
 };
 
