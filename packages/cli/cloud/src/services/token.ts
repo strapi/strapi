@@ -12,7 +12,7 @@ interface DecodedToken {
 }
 
 export async function tokenServiceFactory({ logger }: { logger: CLIContext['logger'] }) {
-  const cloudApiService = await cloudApiFactory();
+  const cloudApiService = await cloudApiFactory({ logger });
 
   async function saveToken(str: string) {
     const appConfig = await getLocalConfig();

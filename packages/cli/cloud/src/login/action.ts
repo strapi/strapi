@@ -10,7 +10,7 @@ export default async (ctx: CLIContext): Promise<boolean> => {
   const { logger } = ctx;
   const tokenService = await tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
-  const cloudApiService = await cloudApiFactory(existingToken || undefined);
+  const cloudApiService = await cloudApiFactory(ctx, existingToken || undefined);
 
   const trackFailedLogin = async () => {
     try {
@@ -126,7 +126,7 @@ export default async (ctx: CLIContext): Promise<boolean> => {
           }
 
           logger.debug('🔍 Fetching user information...');
-          const cloudApiServiceWithToken = await cloudApiFactory(authTokenData.access_token);
+          const cloudApiServiceWithToken = await cloudApiFactory(ctx, authTokenData.access_token);
           // Call to get user info to create the user in DB if not exists
           await cloudApiServiceWithToken.getUserInfo();
           logger.debug('🔍 User information fetched successfully!');

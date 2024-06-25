@@ -26,7 +26,7 @@ async function upload(
   token: string,
   maxProjectFileSize: number
 ) {
-  const cloudApi = await cloudApiFactory(token);
+  const cloudApi = await cloudApiFactory(ctx, token);
   // * Upload project
   try {
     const storagePath = await getTmpStoragePath();
@@ -138,7 +138,7 @@ async function getProject(ctx: CLIContext) {
 
 export default async (ctx: CLIContext) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
-  const cloudApiService = await cloudApiFactory();
+  const cloudApiService = await cloudApiFactory(ctx);
   const token = await getValidToken();
 
   if (!token) {
