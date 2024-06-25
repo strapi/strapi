@@ -536,47 +536,47 @@ const PublishAction: DocumentActionComponent = ({
 
   React.useEffect(() => {
     let totalDraftRelations = 0;
+    const localDraftRelations = new Set();
+
+    /**
+     * Extracts draft relations from the provided data object.
+     * It checks for a connect array of relations.
+     * If a relation has a status of 'draft', its id is added to the localDraftRelations set.
+     */
+    const extractDraftRelations = (data: Omit<RelationsFormValue, 'disconnect'>) => {
+      const relations = data.connect || [];
+      relations.forEach((relation) => {
+        if (relation.status === 'draft') {
+          localDraftRelations.add(relation.id);
+        }
+      });
+    };
+
+    /**
+     * Recursively traverses the provided data object to extract draft relations from arrays within 'connect' keys.
+     * If the data is an object, it looks for 'connect' keys to pass their array values to extractDraftRelations.
+     * It recursively calls itself for any non-null objects it contains.
+     */
+    const traverseAndExtract = (data: { [field: string]: any }) => {
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'connect' && Array.isArray(value)) {
+          extractDraftRelations({ connect: value });
+        } else if (typeof value === 'object' && value !== null) {
+          traverseAndExtract(value);
+        }
+      });
+    };
+
     if (!documentId || modified) {
-      // If the document does not yet exist or the form has been modified and the user choses to directly
-      // publish we need to count the draft relations from the frontend formValues.
-      const draftRelations = new Set();
-
-      /**
-       * Extracts draft relations from the provided data object.
-       * It checks for a connect array of relations.
-       * If a relation has a status of 'draft', its id is added to the draftRelations set.
-       */
-      const extractDraftRelations = (data: Omit<RelationsFormValue, 'disconnect'>) => {
-        const relations = data.connect || [];
-        relations.forEach((relation) => {
-          if (relation.status === 'draft') {
-            draftRelations.add(relation.id);
-          }
-        });
-      };
-
-      /**
-       * Recursively traverses the provided data object to extract draft relations from arrays within 'connect' keys.
-       * If the data is an object, it looks for 'connect' keys to pass their array values to extractDraftRelations.
-       * It recursively calls itself for any non-null objects it contains.
-       */
-      const traverseAndExtract = (data: { [field: string]: any }) => {
-        Object.entries(data).forEach(([key, value]) => {
-          if (key === 'connect' && Array.isArray(value)) {
-            extractDraftRelations({ connect: value });
-          } else if (typeof value === 'object' && value !== null) {
-            traverseAndExtract(value);
-          }
-        });
-      };
-
       traverseAndExtract(formValues);
-      totalDraftRelations += draftRelations.size;
+
+      totalDraftRelations += localDraftRelations.size;
     }
 
     if (!documentId) {
       // If the document does not yet exist, we don't need to check for draft
       // relations on the backend.
+
       setCountOfDraftRelations(totalDraftRelations);
       return;
     }
@@ -594,14 +594,10 @@ const PublishAction: DocumentActionComponent = ({
           throw error;
         }
 
-        if (!data) {
-          return;
+        if (data) {
+          totalDraftRelations += data.data;
+          setCountOfDraftRelations(totalDraftRelations);
         }
-
-        const { data: draftRelationCount } = data;
-        totalDraftRelations += draftRelationCount;
-
-        setCountOfDraftRelations(totalDraftRelations);
       };
 
       checkForDraftRelations();
