@@ -510,7 +510,8 @@ const PublishAction: DocumentActionComponent = ({
     countDraftRelations,
     { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
   ] = useGetDraftRelationCountQuery();
-  const [countOfDraftRelations, setCountOfDraftRelations] = React.useState(0);
+  const [localCountOfDraftRelations, setLocalCountOfDraftRelations] = React.useState(0);
+  const [serverCountOfDraftRelations, setServerCountOfDraftRelations] = React.useState(0);
 
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
@@ -535,7 +536,6 @@ const PublishAction: DocumentActionComponent = ({
   }, [isErrorDraftRelations, toggleNotification, formatMessage]);
 
   React.useEffect(() => {
-    let totalDraftRelations = 0;
     const localDraftRelations = new Set();
 
     /**
@@ -569,20 +569,13 @@ const PublishAction: DocumentActionComponent = ({
 
     if (!documentId || modified) {
       traverseAndExtract(formValues);
-
-      totalDraftRelations += localDraftRelations.size;
+      setLocalCountOfDraftRelations(localDraftRelations.size);
     }
+  }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
 
-    if (!documentId) {
-      // If the document does not yet exist, we don't need to check for draft
-      // relations on the backend.
-
-      setCountOfDraftRelations(totalDraftRelations);
-      return;
-    }
-
-    if (!isLoadingDraftRelations) {
-      const checkForDraftRelations = async () => {
+  React.useEffect(() => {
+    if (documentId && !isLoadingDraftRelations) {
+      const fetchDraftRelationsCount = async () => {
         const { data, error } = await countDraftRelations({
           collectionType,
           model,
@@ -595,23 +588,13 @@ const PublishAction: DocumentActionComponent = ({
         }
 
         if (data) {
-          totalDraftRelations += data.data;
-          setCountOfDraftRelations(totalDraftRelations);
+          setServerCountOfDraftRelations(data.data);
         }
       };
 
-      checkForDraftRelations();
+      fetchDraftRelationsCount();
     }
-  }, [
-    countDraftRelations,
-    isLoadingDraftRelations,
-    collectionType,
-    model,
-    documentId,
-    params,
-    formValues,
-    modified,
-  ]);
+  }, [documentId, isLoadingDraftRelations, countDraftRelations, collectionType, model, params]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -671,7 +654,8 @@ const PublishAction: DocumentActionComponent = ({
     }
   };
 
-  const hasDraftRelations = countOfDraftRelations > 0;
+  const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
+  const hasDraftRelations = totalDraftRelations > 0;
 
   return {
     /**
@@ -723,7 +707,7 @@ const PublishAction: DocumentActionComponent = ({
                 'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. Publishing it could leave broken links in your app.',
             },
             {
-              count: countOfDraftRelations,
+              count: totalDraftRelations,
             }
           ),
           onConfirm: async () => {
