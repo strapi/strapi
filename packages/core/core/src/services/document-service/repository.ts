@@ -148,7 +148,12 @@ export const createContentTypeRepository: RepositoryFactoryMethod = (uid) => {
         assoc('documentId', createDocumentId()),
         // Merge new data into it
         (data) => merge(data, queryParams.data),
-        (data) => entries.create({ ...queryParams, data, status: 'draft' })
+        (data) =>
+          entries.create({
+            ...queryParams,
+            data,
+            status: hasDraftAndPublish ? 'draft' : 'published',
+          })
       )
     );
 

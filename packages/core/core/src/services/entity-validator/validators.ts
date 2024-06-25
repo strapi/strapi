@@ -177,7 +177,7 @@ const addUniqueValidator = <T extends yup.AnySchema>(
     let queryUid: string;
     let queryWhere: Record<string, any> = {};
 
-    if (componentContext) {
+    if (componentContext.pathToComponent.length > 0) {
       const hasRepeatableData = componentContext.repeatableData.length > 0;
       if (hasRepeatableData) {
         // If we are validating a unique field within a repeatable component,
