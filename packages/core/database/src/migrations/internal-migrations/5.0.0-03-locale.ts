@@ -1,5 +1,4 @@
 import type { Knex } from 'knex';
-import { isNil } from 'lodash/fp';
 
 import type { Migration } from '../common';
 
