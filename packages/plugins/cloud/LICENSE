@@ -1,6 +1,8 @@
 Copyright (c) 2015-present Strapi Solutions SAS
 
-* All software that resides within this directory and its subdirectories, is licensed under the license defined below.
+Portions of the Strapi software are licensed as follows:
+
+* All software that resides under an "ee/" directory (the “EE Software”), if that directory exists, is licensed under the license defined below.
 
 Enterprise License
 
@@ -15,3 +17,21 @@ IF YOU ARE NOT AUTHORIZED TO ACCEPT THESE TERMS ON BEHALF OF THE COMPANY YOU REP
 HAVE NOT OTHERWISE EXECUTED A WRITTEN AGREEMENT WITH STRAPI, YOU ARE NOT AUTHORIZED TO ACCESS OR USE OR ALLOW ANY USER TO ACCESS OR USE ANY PART OF
 THE ENTERPRISE EDITION OF THE STRAPI SOFTWARE.  YOUR ACCESS RIGHTS ARE CONDITIONAL ON YOUR CONSENT TO THE RELEVANT REFERENCED TERMS TO THE EXCLUSION OF ALL OTHER TERMS;
 IF THE RELEVANT REFERENCED TERMS ARE CONSIDERED AN OFFER BY YOU, ACCEPTANCE IS EXPRESSLY LIMITED TO THE RELEVANT REFERENCED TERMS.
+
+* All software outside of the above-mentioned directories or restrictions above is available under the "MIT Expat" license as set forth below.
+
+MIT Expat License
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
