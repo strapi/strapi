@@ -15,15 +15,16 @@ const useWebhooks = (
   queryArgs?: Parameters<typeof useGetWebhooksQuery>[1]
 ) => {
   const { data: webhooks, isLoading, error } = useGetWebhooksQuery(args, queryArgs);
-  const [createWebhook] = useCreateWebhookMutation();
-  const [updateWebhook] = useUpdateWebhookMutation();
+  const [createWebhook, { error: createError }] = useCreateWebhookMutation();
+  const [updateWebhook, { error: updateError }] = useUpdateWebhookMutation();
+
   const [triggerWebhook] = useTriggerWebhookMutation();
   const [deleteManyWebhooks] = useDeleteManyWebhooksMutation();
 
   return {
     webhooks: webhooks as GetWebhooks.Response['data'] | undefined,
     isLoading: isLoading as boolean,
-    error: error as BaseQueryError | SerializedError,
+    error: (error || createError || updateError) as BaseQueryError | SerializedError,
     createWebhook,
     updateWebhook,
     triggerWebhook,

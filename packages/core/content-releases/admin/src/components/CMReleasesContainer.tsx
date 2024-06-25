@@ -329,7 +329,7 @@ export const CMReleasesContainer = () => {
                 alignItems="start"
                 borderWidth="1px"
                 borderStyle="solid"
-                borderColor={getReleaseColorVariant(release.action.type, '200')}
+                borderColor={getReleaseColorVariant(release.actions[0].type, '200')}
                 overflow="hidden"
                 hasRadius
               >
@@ -338,13 +338,13 @@ export const CMReleasesContainer = () => {
                   paddingBottom={3}
                   paddingLeft={4}
                   paddingRight={4}
-                  background={getReleaseColorVariant(release.action.type, '100')}
+                  background={getReleaseColorVariant(release.actions[0].type, '100')}
                   width="100%"
                 >
                   <Typography
                     fontSize={1}
                     variant="pi"
-                    textColor={getReleaseColorVariant(release.action.type, '600')}
+                    textColor={getReleaseColorVariant(release.actions[0].type, '600')}
                   >
                     {formatMessage(
                       {
@@ -352,7 +352,7 @@ export const CMReleasesContainer = () => {
                         defaultMessage:
                           '{isPublish, select, true {Will be published in} other {Will be unpublished in}}',
                       },
-                      { isPublish: release.action.type === 'publish' }
+                      { isPublish: release.actions[0].type === 'publish' }
                     )}
                   </Typography>
                 </Box>
@@ -391,7 +391,7 @@ export const CMReleasesContainer = () => {
                       <ReleaseActionMenu.EditReleaseItem releaseId={release.id} />
                       <ReleaseActionMenu.DeleteReleaseActionItem
                         releaseId={release.id}
-                        actionId={release.action.id}
+                        actionId={release.actions[0].id}
                       />
                     </ReleaseActionMenu.Root>
                   </CheckPermissions>

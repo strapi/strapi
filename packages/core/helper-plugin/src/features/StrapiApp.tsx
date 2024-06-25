@@ -23,7 +23,7 @@ interface MenuItem extends Pick<LinkProps, 'to'> {
   notificationsCount?: number;
   Component?: ComponentModule;
   exact?: boolean;
-  lockIcon?: boolean;
+  lockIcon?: boolean; // TODO: to replace with another name in v5
 }
 
 /* -------------------------------------------------------------------------------------------------
