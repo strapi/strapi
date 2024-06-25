@@ -4,9 +4,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { Login } from '../../../shared/contracts/authentication';
 import { createContext } from '../components/Context';
-import { useTypedDispatch } from '../core/store/hooks';
+import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useStrapiApp } from '../features/StrapiApp';
-import { setLocale } from '../reducer';
+import { login as loginAction, logout as logoutAction, setLocale } from '../reducer';
 import { adminApi } from '../services/api';
 import {
   useGetMeQuery,
@@ -50,7 +50,6 @@ interface AuthContextValue {
   isLoading: boolean;
   permissions: Permission[];
   refetchPermissions: () => Promise<void>;
-  setToken: (token: string | null) => void;
   token: string | null;
   user?: User;
 }
@@ -63,6 +62,9 @@ interface AuthProviderProps {
    * @internal could be removed at any time.
    */
   _defaultPermissions?: Permission[];
+
+  // NOTE: this is used for testing purposed only
+  _disableRenewToken?: boolean;
 }
 
 const STORAGE_KEYS = {
@@ -70,20 +72,15 @@ const STORAGE_KEYS = {
   USER: 'userInfo',
 };
 
-const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps) => {
+const AuthProvider = ({
+  children,
+  _defaultPermissions = [],
+  _disableRenewToken = false,
+}: AuthProviderProps) => {
   const dispatch = useTypedDispatch();
   const runRbacMiddleware = useStrapiApp('AuthProvider', (state) => state.rbac.run);
   const location = useLocation();
-  const [token, setToken] = React.useState<string | null>(() => {
-    const token =
-      localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN);
-
-    if (typeof token === 'string') {
-      return JSON.parse(token);
-    }
-
-    return null;
-  });
+  const token = useTypedSelector((state) => state.admin_app.token ?? null);
 
   const { data: user, isLoading: isLoadingUser } = useGetMeQuery(undefined, {
     /**
@@ -92,6 +89,7 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
      */
     skip: !token,
   });
+
   const {
     data: userPermissions = _defaultPermissions,
     refetch,
@@ -107,13 +105,11 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
   const [renewTokenMutation] = useRenewTokenMutation();
   const [logoutMutation] = useLogoutMutation();
 
-  const clearStorage = React.useCallback(() => {
-    localStorage.removeItem(STORAGE_KEYS.TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    sessionStorage.removeItem(STORAGE_KEYS.TOKEN);
-    sessionStorage.removeItem(STORAGE_KEYS.USER);
-    setToken(null);
-  }, []);
+  const clearStateAndLogout = React.useCallback(() => {
+    dispatch(adminApi.util.resetApiState());
+    dispatch(logoutAction());
+    navigate('/auth/login');
+  }, [dispatch, navigate]);
 
   /**
    * Fetch data from storages on mount and store it in our state.
@@ -121,20 +117,20 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
    * does click "remember me" when they login. We also need to renew the token.
    */
   React.useEffect(() => {
-    const token =
-      localStorage.getItem(STORAGE_KEYS.TOKEN) ?? sessionStorage.getItem(STORAGE_KEYS.TOKEN);
-
-    if (token) {
-      renewTokenMutation({ token: JSON.parse(token) }).then((res) => {
+    if (token && !_disableRenewToken) {
+      renewTokenMutation({ token }).then((res) => {
         if ('data' in res) {
-          setToken(res.data.token);
+          dispatch(
+            loginAction({
+              token: res.data.token,
+            })
+          );
         } else {
-          clearStorage();
-          navigate('/auth/login');
+          clearStateAndLogout();
         }
       });
     }
-  }, [renewTokenMutation, clearStorage, navigate]);
+  }, [token, dispatch, renewTokenMutation, clearStateAndLogout, _disableRenewToken]);
 
   React.useEffect(() => {
     if (user) {
@@ -145,19 +141,12 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
   }, [dispatch, user]);
 
   React.useEffect(() => {
-    if (token) {
-      storeToken(token, false);
-    }
-  }, [token]);
-
-  React.useEffect(() => {
     /**
      * This will log a user out of all tabs if they log out in one tab.
      */
     const handleUserStorageChange = (event: StorageEvent) => {
       if (event.key === STORAGE_KEYS.USER && event.newValue === null) {
-        clearStorage();
-        navigate('/auth/login');
+        clearStateAndLogout();
       }
     };
 
@@ -179,21 +168,23 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
       if ('data' in res) {
         const { token } = res.data;
 
-        storeToken(token, rememberMe);
-        setToken(token);
+        dispatch(
+          loginAction({
+            token,
+            persist: rememberMe,
+          })
+        );
       }
 
       return res;
     },
-    [loginMutation]
+    [dispatch, loginMutation]
   );
 
   const logout = React.useCallback(async () => {
     await logoutMutation();
-    dispatch(adminApi.util.resetApiState());
-    clearStorage();
-    navigate('/auth/login');
-  }, [clearStorage, dispatch, logoutMutation, navigate]);
+    clearStateAndLogout();
+  }, [clearStateAndLogout, logoutMutation]);
 
   const refetchPermissions = React.useCallback(async () => {
     if (!isUninitialized) {
@@ -272,19 +263,11 @@ const AuthProvider = ({ children, _defaultPermissions = [] }: AuthProviderProps)
       permissions={userPermissions}
       checkUserHasPermissions={checkUserHasPermissions}
       refetchPermissions={refetchPermissions}
-      setToken={setToken}
       isLoading={isLoading}
     >
       {children}
     </Provider>
   );
-};
-
-const storeToken = (token: string, persist?: boolean) => {
-  if (!persist) {
-    return window.sessionStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
-  }
-  return window.localStorage.setItem(STORAGE_KEYS.TOKEN, JSON.stringify(token));
 };
 
 export { AuthProvider, useAuth, STORAGE_KEYS };

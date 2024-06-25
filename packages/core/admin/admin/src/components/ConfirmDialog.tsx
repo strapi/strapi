@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Button, ButtonProps, Dialog } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * ConfirmDialog
@@ -49,7 +50,7 @@ interface ConfirmDialogProps extends Pick<ButtonProps, 'variant'>, Pick<Dialog.B
  */
 const ConfirmDialog = ({
   children,
-  icon = <WarningCircle width="24px" height="24px" fill="danger600" />,
+  icon = <StyledWarning />,
   onConfirm,
   variant = 'danger-light',
   startAction,
@@ -114,6 +115,15 @@ const ConfirmDialog = ({
     </Dialog.Content>
   );
 };
+
+const StyledWarning = styled(WarningCircle)`
+  width: 24px;
+  height: 24px;
+
+  path {
+    fill: ${({ theme }) => theme.colors.danger600};
+  }
+`;
 
 export { ConfirmDialog };
 export type { ConfirmDialogProps };

@@ -22,12 +22,12 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   padding-inline-start: 24px;
 }
 
-.c11 {
+.c12 {
   padding-block: 16px;
   padding-inline: 16px;
 }
 
-.c14 {
+.c15 {
   background: #4945ff;
   padding-block: 8px;
   padding-inline: 8px;
@@ -54,7 +54,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   gap: 8px;
 }
 
-.c12 {
+.c13 {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -62,7 +62,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   justify-content: space-between;
 }
 
-.c15 {
+.c16 {
   align-items: center;
   display: inline-flex;
   flex-direction: row;
@@ -76,13 +76,13 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   color: currentcolor;
 }
 
-.c10 {
+.c11 {
   font-size: 1.4rem;
   line-height: 1.43;
   color: currentcolor;
 }
 
-.c18 {
+.c19 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
@@ -100,16 +100,16 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   width: 1px;
 }
 
-.c16 {
+.c17 {
   position: relative;
   outline: none;
 }
 
-.c16[aria-disabled='true'] {
+.c17[aria-disabled='true'] {
   pointer-events: none;
 }
 
-.c16:after {
+.c17:after {
   transition-property: all;
   transition-duration: 0.2s;
   border-radius: 8px;
@@ -122,11 +122,11 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid transparent;
 }
 
-.c16:focus-visible {
+.c17:focus-visible {
   outline: none;
 }
 
-.c16:focus-visible:after {
+.c17:focus-visible:after {
   border-radius: 8px;
   content: '';
   position: absolute;
@@ -137,65 +137,65 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border: 2px solid #4945ff;
 }
 
-.c17 {
+.c18 {
   height: 3.2rem;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
 }
 
-.c17 svg {
+.c18 svg {
   height: 1.2rem;
 }
 
-.c17[aria-disabled='true'] {
+.c18[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c17[aria-disabled='true']:active {
+.c18[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c17:hover {
+.c18:hover {
   background-color: #f6f6f9;
 }
 
-.c17:active {
+.c18:active {
   background-color: #eaeaef;
 }
 
-.c19 {
+.c20 {
   height: 3.2rem;
   border: 1px solid #f5c0b8;
   background: #fcecea;
   color: #b72b1a;
 }
 
-.c19 svg {
+.c20 svg {
   height: 1.2rem;
 }
 
-.c19[aria-disabled='true'] {
+.c20[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c19[aria-disabled='true']:active {
+.c20[aria-disabled='true']:active {
   border: 1px solid #dcdce4;
   background: #eaeaef;
   color: #666687;
 }
 
-.c19:hover {
+.c20:hover {
   background-color: #ffffff;
 }
 
-.c19:active {
+.c20:active {
   background-color: #ffffff;
   border: 1px solid #d02b20;
   color: #d02b20;
@@ -233,19 +233,28 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   border-bottom: solid 1px #eaeaef;
 }
 
-.c13 {
+.c14 {
   border-top: solid 1px #eaeaef;
   flex: 1;
 }
 
+.c10 {
+  width: 24px;
+  height: 24px;
+}
+
+.c10 path {
+  fill: #d02b20;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .c17 {
+  .c18 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c19 {
+  .c20 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -338,7 +347,8 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
       class="c8 c9"
     >
       <svg
-        fill="#d02b20"
+        class="c10"
+        fill="currentColor"
         height="24"
         viewBox="0 0 32 32"
         width="24"
@@ -349,33 +359,33 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
         />
       </svg>
       <p
-        class="c10"
+        class="c11"
         id="radix-:r2:"
       >
         Are you sure?
       </p>
     </div>
     <footer
-      class="c11 c12 c13"
+      class="c12 c13 c14"
     >
       <button
         aria-disabled="false"
-        class="c14 c15 c16 c17"
+        class="c15 c16 c17 c18"
         type="button"
       >
         <span
-          class="c18"
+          class="c19"
         >
           Cancel
         </span>
       </button>
       <button
         aria-disabled="false"
-        class="c14 c15 c16 c19"
+        class="c15 c16 c17 c20"
         type="button"
       >
         <span
-          class="c18"
+          class="c19"
         >
           Confirm
         </span>

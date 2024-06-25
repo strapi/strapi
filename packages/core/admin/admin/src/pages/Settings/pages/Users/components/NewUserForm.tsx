@@ -103,17 +103,12 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
     });
 
     if ('data' in res) {
+      // NOTE: when enabling SSO, the user doesn't have to register and the token is undefined
       if (res.data.registrationToken) {
         setRegistrationToken(res.data.registrationToken);
-
-        goNext();
-      } else {
-        // This shouldn't happen, but just incase.
-        toggleNotification({
-          type: 'danger',
-          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occured' }),
-        });
       }
+
+      goNext();
     } else {
       toggleNotification({
         type: 'danger',

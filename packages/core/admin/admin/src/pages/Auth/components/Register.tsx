@@ -17,11 +17,12 @@ import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { useGuidedTour } from '../../../components/GuidedTour/Provider';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
-import { useAuth } from '../../../features/Auth';
+import { useTypedDispatch } from '../../../core/store/hooks';
 import { useNotification } from '../../../features/Notifications';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
+import { login } from '../../../reducer';
 import {
   useGetRegistrationInfoQuery,
   useRegisterAdminMutation,
@@ -192,7 +193,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
 
   const [registerAdmin] = useRegisterAdminMutation();
   const [registerUser] = useRegisterUserMutation();
-  const { setToken } = useAuth('Register', (auth) => auth);
+  const dispatch = useTypedDispatch();
 
   const handleRegisterAdmin = async (
     { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },
@@ -201,7 +202,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     const res = await registerAdmin(body);
 
     if ('data' in res) {
-      setToken(res.data.token);
+      dispatch(login({ token: res.data.token }));
 
       const { roles } = res.data.user;
 
@@ -247,7 +248,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     const res = await registerUser(body);
 
     if ('data' in res) {
-      setToken(res.data.token);
+      dispatch(login({ token: res.data.token }));
 
       if (news) {
         // Only enable EE survey if user accepted the newsletter

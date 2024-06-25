@@ -103,7 +103,7 @@ const SubCategory = ({ subCategory }) => {
                         }
                       )}
                     </VisuallyHidden>
-                    <CogIcon />
+                    <CogIcon id="cog" />
                   </button>
                 </CheckboxWrapper>
               </Grid.Item>

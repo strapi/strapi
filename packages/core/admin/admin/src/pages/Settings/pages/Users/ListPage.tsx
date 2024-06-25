@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { Flex, Typography, Status, IconButton } from '@strapi/design-system';
+import { Flex, Typography, Status, IconButton, Dialog } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import * as qs from 'qs';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 
 import { SanitizedAdminUser } from '../../../../../../shared/contracts/shared';
+import { ConfirmDialog } from '../../../../components/ConfirmDialog';
 import { Filters } from '../../../../components/Filters';
 import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
@@ -39,6 +40,8 @@ const ListPageCE = () => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { search } = useLocation();
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = React.useState(false);
+  const [idsToDelete, setIdsToDelete] = React.useState<Array<SanitizedAdminUser['id']>>([]);
   const { data, isError, isLoading } = useAdminUsers(qs.parse(search, { ignoreQueryPrefix: true }));
 
   const { pagination, users = [] } = data ?? {};
@@ -79,7 +82,6 @@ const ListPageCE = () => {
         });
       }
     } catch (err) {
-      console.error(err);
       toggleNotification({
         type: 'danger',
         message: formatMessage({
@@ -96,8 +98,15 @@ const ListPageCE = () => {
     }
   };
 
-  const handleDeleteClick = (id: SanitizedAdminUser['id']) => async () =>
-    await handleDeleteAll([id]);
+  const handleDeleteClick = (id: SanitizedAdminUser['id']) => async () => {
+    setIdsToDelete([id]);
+    setShowDeleteConfirmation(true);
+  };
+
+  const confirmDelete = async () => {
+    await handleDeleteAll(idsToDelete);
+    setShowDeleteConfirmation(false);
+  };
 
   // block rendering until the EE component is fully loaded
   if (!CreateAction) {
@@ -217,6 +226,9 @@ const ListPageCE = () => {
         </Pagination.Root>
       </Layouts.Content>
       {isModalOpened && <ModalForm onToggle={handleToggle} />}
+      <Dialog.Root open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+        <ConfirmDialog onConfirm={confirmDelete} />
+      </Dialog.Root>
     </Page.Main>
   );
 };

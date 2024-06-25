@@ -4,9 +4,11 @@ import {
   Middleware,
   Reducer,
   combineReducers,
+  MiddlewareAPI,
+  isRejected,
 } from '@reduxjs/toolkit';
 
-import { reducer as appReducer, AppState } from '../../reducer';
+import { reducer as appReducer, AppState, logout } from '../../reducer';
 import { adminApi } from '../../services/api';
 
 /**
@@ -73,6 +75,7 @@ const configureStoreImpl = (
     devTools: process.env.NODE_ENV !== 'production',
     middleware: (getDefaultMiddleware) => [
       ...getDefaultMiddleware(defaultMiddlewareOptions),
+      rtkQueryUnauthorizedMiddleware,
       adminApi.middleware,
       ...appMiddlewares.map((m) => m()),
     ],
@@ -81,6 +84,20 @@ const configureStoreImpl = (
 
   return store;
 };
+
+const rtkQueryUnauthorizedMiddleware: Middleware =
+  ({ dispatch }: MiddlewareAPI) =>
+  (next) =>
+  (action) => {
+    // isRejectedWithValue Or isRejected
+    if (isRejected(action) && action.payload?.status === 401) {
+      dispatch(logout());
+      window.location.href = '/admin/auth/login';
+      return;
+    }
+
+    return next(action);
+  };
 
 type Store = ReturnType<typeof configureStoreImpl> & {
   asyncReducers: Record<string, Reducer>;
