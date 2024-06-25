@@ -535,8 +535,9 @@ const PublishAction: DocumentActionComponent = ({
   }, [isErrorDraftRelations, toggleNotification, formatMessage]);
 
   React.useEffect(() => {
-    if (!documentId) {
-      // If the document does not yet exist and the user choses to directly
+    let totalDraftRelations = 0;
+    if (!documentId || modified) {
+      // If the document does not yet exist or the form has been modified and the user choses to directly
       // publish we need to count the draft relations from the frontend formValues.
       const draftRelations = new Set();
 
@@ -570,8 +571,17 @@ const PublishAction: DocumentActionComponent = ({
       };
 
       traverseAndExtract(formValues);
-      setCountOfDraftRelations(draftRelations.size);
-    } else if (!isLoadingDraftRelations) {
+      totalDraftRelations += draftRelations.size;
+    }
+
+    if (!documentId) {
+      // If the document does not yet exist, we don't need to check for draft
+      // relations on the backend.
+      setCountOfDraftRelations(totalDraftRelations);
+      return;
+    }
+
+    if (!isLoadingDraftRelations) {
       const checkForDraftRelations = async () => {
         const { data, error } = await countDraftRelations({
           collectionType,
@@ -589,8 +599,9 @@ const PublishAction: DocumentActionComponent = ({
         }
 
         const { data: draftRelationCount } = data;
+        totalDraftRelations += draftRelationCount;
 
-        setCountOfDraftRelations(draftRelationCount);
+        setCountOfDraftRelations(totalDraftRelations);
       };
 
       checkForDraftRelations();
@@ -603,6 +614,7 @@ const PublishAction: DocumentActionComponent = ({
     documentId,
     params,
     formValues,
+    modified,
   ]);
 
   const isDocumentPublished =
