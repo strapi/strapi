@@ -34,8 +34,8 @@ import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
 import { getTranslation } from '../../../utils/translations';
 
+import type { RelationsFormValue } from './FormInputs/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
-
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -535,31 +535,75 @@ const PublishAction: DocumentActionComponent = ({
   }, [isErrorDraftRelations, toggleNotification, formatMessage]);
 
   React.useEffect(() => {
-    const checkForDraftRelations = async () => {
-      const { data, error } = await countDraftRelations({
-        collectionType,
-        model,
-        documentId,
-        params,
-      });
+    if (!documentId) {
+      // If the document does not yet exist and the user choses to directly
+      // publish we need to count the draft relations from the frontend formValues.
+      const draftRelations = new Set();
 
-      if (error) {
-        throw error;
-      }
+      /**
+       * Extracts draft relations from the provided data object.
+       * It checks for a connect array of relations.
+       * If a relation has a status of 'draft', its id is added to the draftRelations set.
+       */
+      const extractDraftRelations = (data: Omit<RelationsFormValue, 'disconnect'>) => {
+        const relations = data.connect || [];
+        relations.forEach((relation) => {
+          if (relation.status === 'draft') {
+            draftRelations.add(relation.id);
+          }
+        });
+      };
 
-      if (!data) {
-        return;
-      }
+      /**
+       * Recursively traverses the provided data object to extract draft relations from arrays within 'connect' keys.
+       * If the data is an object, it looks for 'connect' keys to pass their array values to extractDraftRelations.
+       * It recursively calls itself for any non-null objects it contains.
+       */
+      const traverseAndExtract = (data: { [field: string]: any }) => {
+        Object.entries(data).forEach(([key, value]) => {
+          if (key === 'connect' && Array.isArray(value)) {
+            extractDraftRelations({ connect: value });
+          } else if (typeof value === 'object' && value !== null) {
+            traverseAndExtract(value);
+          }
+        });
+      };
 
-      const { data: draftRelatiionCount } = data;
+      traverseAndExtract(formValues);
+      setCountOfDraftRelations(draftRelations.size);
+    } else if (!isLoadingDraftRelations) {
+      const checkForDraftRelations = async () => {
+        const { data, error } = await countDraftRelations({
+          collectionType,
+          model,
+          documentId,
+          params,
+        });
 
-      setCountOfDraftRelations(draftRelatiionCount);
-    };
+        if (error) {
+          throw error;
+        }
 
-    if (!isLoadingDraftRelations) {
+        if (!data) {
+          return;
+        }
+
+        const { data: draftRelationCount } = data;
+
+        setCountOfDraftRelations(draftRelationCount);
+      };
+
       checkForDraftRelations();
     }
-  }, [countDraftRelations, isLoadingDraftRelations, collectionType, model, documentId, params]);
+  }, [
+    countDraftRelations,
+    isLoadingDraftRelations,
+    collectionType,
+    model,
+    documentId,
+    params,
+    formValues,
+  ]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
