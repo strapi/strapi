@@ -48,12 +48,6 @@ updates:
         patterns:
           - '@testing-library/*'
 
-      webpack:
-        patterns:
-          - 'webpack'
-          - 'webpack-cli'
-          - 'webpack-dev-server'
-
     commit-message:
       prefix: 'chore'
       include: 'scope'

@@ -8,12 +8,6 @@ type BuildCLIOptions = BuildOptions;
 
 const action = async (options: BuildCLIOptions) => {
   try {
-    if (options.bundler === 'webpack') {
-      options.logger.warn(
-        '[@strapi/strapi]: Using webpack as a bundler is deprecated. You should migrate to vite.'
-      );
-    }
-
     /**
      * ENFORCE NODE_ENV to production when building
      */
@@ -36,7 +30,6 @@ const action = async (options: BuildCLIOptions) => {
  */
 const command: StrapiCommand = ({ ctx }) => {
   return createCommand('build')
-    .option('--bundler [bundler]', 'Bundler to use (webpack or vite)', 'vite')
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
     .option('--minify', 'Minify the output', true)
     .option('--silent', "Don't log anything", false)

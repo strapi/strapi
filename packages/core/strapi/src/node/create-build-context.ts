@@ -16,7 +16,6 @@ interface BaseOptions {
   stats?: boolean;
   minify?: boolean;
   sourcemaps?: boolean;
-  bundler?: 'webpack' | 'vite';
   open?: boolean;
 }
 
@@ -131,12 +130,9 @@ const createBuildContext = async <TOptions extends BaseOptions>({
 
   const features = strapiInstance.config.get('features', undefined);
 
-  const { bundler = 'webpack', ...restOptions } = options;
-
   const buildContext = {
     appDir,
     basePath: `${adminPath}/`,
-    bundler,
     customisations,
     cwd,
     distDir,
@@ -145,7 +141,7 @@ const createBuildContext = async <TOptions extends BaseOptions>({
     env,
     features,
     logger,
-    options: restOptions as BaseOptions & TOptions,
+    options,
     plugins: pluginsWithFront,
     runtimeDir,
     strapi: strapiInstance,

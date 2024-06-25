@@ -7,12 +7,6 @@ import { writeStaticClientFiles } from './staticFiles';
 
 interface BuildOptions extends CLIContext {
   /**
-   * Which bundler to use for building.
-   *
-   * @default webpack
-   */
-  bundler?: 'webpack' | 'vite';
-  /**
    * Minify the output
    *
    * @default true
@@ -78,13 +72,8 @@ const build = async ({ logger, cwd, tsconfig, ...options }: BuildOptions) => {
   try {
     await writeStaticClientFiles(ctx);
 
-    if (ctx.bundler === 'webpack') {
-      const { build: buildWebpack } = await import('./webpack/build');
-      await buildWebpack(ctx);
-    } else if (ctx.bundler === 'vite') {
-      const { build: buildVite } = await import('./vite/build');
-      await buildVite(ctx);
-    }
+    const { build: buildVite } = await import('./vite/build');
+    await buildVite(ctx);
 
     const buildDuration = timer.end('buildAdmin');
     buildingSpinner.text = `Building admin panel (${prettyTime(buildDuration)})`;

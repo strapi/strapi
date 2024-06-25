@@ -1,7 +1,6 @@
 import type { Core } from '@strapi/types';
 
 import type { CLIContext } from '../cli/types';
-import { BuildOptions } from './build';
 
 interface BaseContext {
   /**
@@ -13,10 +12,6 @@ interface BaseContext {
    * this path so all asset paths will be rewritten accordingly
    */
   basePath: string;
-  /**
-   * The bundler to use for building & watching
-   */
-  bundler: Pick<Required<BuildOptions>, 'bundler'>['bundler'];
   /**
    * The current working directory
    */

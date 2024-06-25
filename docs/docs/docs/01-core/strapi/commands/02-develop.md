@@ -7,7 +7,7 @@ tags:
   - development
 ---
 
-The `develop` command is used to develop your strapi node application e.g. creating content-types in the `content-type-builder` as well as "watching" the admin panel with webpack for local development whether in the strapi monorepo or in a standalone project.
+The `develop` command is used to develop your strapi node application e.g. creating content-types in the `content-type-builder` as well as "watching" the admin panel with vite for local development whether in the strapi monorepo or in a standalone project.
 
 ## Usage
 

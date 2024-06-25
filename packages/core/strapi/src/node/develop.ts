@@ -10,18 +10,11 @@ import type { CLIContext } from '../cli/types';
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import { createBuildContext } from './create-build-context';
-import type { WebpackWatcher } from './webpack/watch';
 import type { ViteWatcher } from './vite/watch';
 
 import { writeStaticClientFiles } from './staticFiles';
 
 interface DevelopOptions extends CLIContext {
-  /**
-   * Which bundler to use for building.
-   *
-   * @default webpack
-   */
-  bundler?: 'webpack' | 'vite';
   polling?: boolean;
   open?: boolean;
   watchAdmin?: boolean;
@@ -120,13 +113,8 @@ const develop = async ({
 
       await writeStaticClientFiles(ctx);
 
-      if (ctx.bundler === 'webpack') {
-        const { build: buildWebpack } = await import('./webpack/build');
-        await buildWebpack(ctx);
-      } else if (ctx.bundler === 'vite') {
-        const { build: buildVite } = await import('./vite/build');
-        await buildVite(ctx);
-      }
+      const { build: buildVite } = await import('./vite/build');
+      await buildVite(ctx);
 
       const adminDuration = timer.end('creatingAdmin');
       adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
@@ -177,7 +165,7 @@ const develop = async ({
      * If we're watching the admin panel then we're going to attach the watcher
      * as a strapi middleware.
      */
-    let bundleWatcher: WebpackWatcher | ViteWatcher | undefined;
+    let bundleWatcher: ViteWatcher | undefined;
 
     if (watchAdmin) {
       timer.start('createBuildContext');
@@ -200,13 +188,8 @@ const develop = async ({
 
       await writeStaticClientFiles(ctx);
 
-      if (ctx.bundler === 'webpack') {
-        const { watch: watchWebpack } = await import('./webpack/watch');
-        bundleWatcher = await watchWebpack(ctx);
-      } else if (ctx.bundler === 'vite') {
-        const { watch: watchVite } = await import('./vite/watch');
-        bundleWatcher = await watchVite(ctx);
-      }
+      const { watch: watchVite } = await import('./vite/watch');
+      bundleWatcher = await watchVite(ctx);
 
       const adminDuration = timer.end('creatingAdmin');
       adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;

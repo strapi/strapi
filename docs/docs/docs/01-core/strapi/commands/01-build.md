@@ -128,7 +128,7 @@ The next step is to create a `runtime` folder in the root of the strapi project,
 
 ### Bundling
 
-We currently support both `webpack` & `vite` bundlers, with `vite` being the default. Because there is no global `strapi.config` file we don't have an already existing API to pass your own bundler. In the future we may decide to do this if there is a need. Each bundler supplies a build function & a develop function. We don't need a serve function because they're expected to produce the same `index.html` output defined by the static files step described above.
+We use `vite` as our default bundler. Because there is no global `strapi.config` file we don't have an already existing API to pass your own bundler. In the future we may decide to do this if there is a need. Each bundler supplies a build function & a develop function. We don't need a serve function because they're expected to produce the same `index.html` output defined by the static files step described above.
 
 ## Node Usage
 
