@@ -15,8 +15,22 @@ describe('useField hook', () => {
   it('formats and returns nested error messages correctly for field constraints', () => {
     const expectedError = 'This attribute must be unique';
     const initialErrors = {
-      'repeatable.0.nestedUnique.TextShort': 'Another error message',
-      'repeatable.1.nestedUnique.nestedLevelOne.nestedLevelTwo.Unique': expectedError,
+      repeatable: [
+        {
+          nestedUnique: {
+            TextShort: 'Another error message',
+          },
+        },
+        {
+          nestedUnique: {
+            nestedLevelOne: {
+              nestedLevelTwo: {
+                Unique: expectedError,
+              },
+            },
+          },
+        },
+      ],
     };
 
     const { result } = renderHook(
@@ -35,7 +49,9 @@ describe('useField hook', () => {
       defaultMessage: 'This attribute must be unique',
     };
     const initialErrors = {
-      'nested.uniqueAttribute': messageDescriptor,
+      nested: {
+        uniqueAttribute: messageDescriptor,
+      },
     };
 
     const { result } = renderHook(() => useField('nested.uniqueAttribute'), {
@@ -51,9 +67,11 @@ describe('useField hook', () => {
       defaultMessage: 'Mixed error message',
     };
     const initialErrors = {
-      'mixed.errorField': messageDescriptor,
-      'mixed.stringError': 'String error message',
-      'mixed.otherError': 123, // Non-string, non-descriptor error
+      mixed: {
+        errorField: messageDescriptor,
+        stringError: 'String error message',
+        otherError: 123, // Non-string, non-descriptor error
+      },
     };
 
     const { result } = renderHook(() => useField('mixed.otherError'), {
@@ -65,8 +83,14 @@ describe('useField hook', () => {
 
   it('handles errors associated with array indices', () => {
     const initialErrors = {
-      'array.0.field': 'Error on first array item',
-      'array.1.field': 'Error on second array item',
+      array: [
+        {
+          field: 'Error on first array item',
+        },
+        {
+          field: 'Error on second array item',
+        },
+      ],
     };
 
     const { result } = renderHook(() => useField('array.0.field'), {
@@ -88,7 +112,9 @@ describe('useField hook', () => {
 
   it('returns undefined for non-existent error paths', () => {
     const initialErrors = {
-      'valid.path': 'Error message',
+      valid: {
+        path: 'Error message',
+      },
     };
 
     const { result } = renderHook(() => useField('invalid.path'), {

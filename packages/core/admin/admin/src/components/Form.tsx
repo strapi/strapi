@@ -619,7 +619,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.values = setIn(
           state.values,
           action.payload.field,
-          newValue.length > 0 ? newValue : undefined
+          newValue.length > 0 ? newValue : []
         );
 
         break;
