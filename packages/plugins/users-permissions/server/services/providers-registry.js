@@ -214,20 +214,12 @@ const getInitialProviders = ({ purest }) => ({
   async linkedin({ accessToken }) {
     const linkedIn = purest({ provider: 'linkedin' });
     const {
-      body: { localizedFirstName },
-    } = await linkedIn.get('me').auth(accessToken).request();
-    const {
-      body: { elements },
-    } = await linkedIn
-      .get('emailAddress?q=members&projection=(elements*(handle~))')
-      .auth(accessToken)
-      .request();
-
-    const email = elements[0]['handle~'];
+      body: { given_name: givenName, email },
+    } = await linkedIn.get('userinfo').auth(accessToken).request();
 
     return {
-      username: localizedFirstName,
-      email: email.emailAddress,
+      username: givenName,
+      email,
     };
   },
   async reddit({ accessToken }) {
