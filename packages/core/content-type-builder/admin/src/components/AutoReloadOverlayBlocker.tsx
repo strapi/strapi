@@ -77,7 +77,7 @@ const AutoReloadOverlayBlockerProvider = ({ children }: AutoReloadOverlayBlocker
   let description = {
     id: config?.description || 'components.OverlayBlocker.description',
     defaultMessage:
-      "You're using a feature that needs the server to restart. Please wait until the server is up.",
+      "You're using a feature that needs the server to restart. The page will reload automatically.",
   };
 
   let title = {
