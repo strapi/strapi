@@ -86,7 +86,7 @@ const Header: React.FC<HeaderProps> = ({ title, subtitle, navigationAction, prim
           }
         )}
       </Page.Title>
-      <Layouts.Header
+      <Layouts.BaseHeader
         navigationAction={navigationAction}
         primaryAction={primaryAction}
         title={title}
