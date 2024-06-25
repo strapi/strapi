@@ -71,12 +71,12 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
    * Ideally the server would return the correct shape, however, for admin user relations
    * it sanitizes everything out when it finds an object for the relation value.
    */
-  const formattedFieldValue = Array.isArray(field.value)
-    ? {
-        results: field.value,
-        meta: { missingCount: 0 },
-      }
-    : field.value;
+  let formattedFieldValue;
+  if (field) {
+    formattedFieldValue = Array.isArray(field.value)
+      ? { results: field.value, meta: { missingCount: 0 } }
+      : field.value;
+  }
 
   if (
     !formattedFieldValue ||
