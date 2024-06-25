@@ -34,7 +34,9 @@ export const createdLocale: Migration = {
       }
 
       // Create locale column if it doesn't exist
-      if (isNil(meta.attributes.locale)) {
+      const hasLocaleColumn = await knex.schema.hasColumn(meta.tableName, 'locale');
+
+      if (meta.attributes.locale && !hasLocaleColumn) {
         await createLocaleColumn(knex, meta.tableName);
       }
     }
