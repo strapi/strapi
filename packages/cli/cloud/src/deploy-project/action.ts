@@ -27,7 +27,7 @@ async function upload(
   token: string,
   maxProjectFileSize: number
 ) {
-  const cloudApi = await cloudApiFactory(token);
+  const cloudApi = await cloudApiFactory(ctx, token);
   // * Upload project
   try {
     const storagePath = await getTmpStoragePath();
@@ -149,7 +149,7 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  const cloudApiService = await cloudApiFactory();
+  const cloudApiService = await cloudApiFactory(ctx);
   try {
     await cloudApiService.track('willDeployWithCLI', { projectInternalName: project.name });
   } catch (e) {

@@ -57,9 +57,11 @@ export default async (ctx: CLIContext) => {
   const { getValidToken, eraseToken } = await tokenServiceFactory(ctx);
 
   const token = await getValidToken(ctx, promptLogin);
-  if (!token) return;
+  if (!token) {
+    return;
+  }
 
-  const cloudApi = await cloudApiFactory(token);
+  const cloudApi = await cloudApiFactory(ctx, token);
   const { data: config } = await cloudApi.config();
   const { questions, defaults: defaultValues } = config.projectCreation;
 

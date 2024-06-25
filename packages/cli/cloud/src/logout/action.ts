@@ -10,7 +10,7 @@ export default async (ctx: CLIContext) => {
     logger.log("You're already logged out.");
     return;
   }
-  const cloudApiService = await cloudApiFactory(token);
+  const cloudApiService = await cloudApiFactory(ctx, token);
   try {
     // we might want also to perform extra actions like logging out from the auth0 tenant
     await eraseToken();
