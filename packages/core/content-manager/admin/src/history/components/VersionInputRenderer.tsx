@@ -168,9 +168,9 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const CustomMediaInput = (props: VersionInputRendererProps) => {
-  const {
-    value: { results, meta },
-  } = useField(props.name);
+  const { value } = useField(props.name);
+  const results = value ? value.results : [];
+  const meta = value ? value.meta : { missingCount: 0 };
   const { formatMessage } = useIntl();
 
   const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);
