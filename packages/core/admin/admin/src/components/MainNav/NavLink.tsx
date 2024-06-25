@@ -55,7 +55,7 @@ const LinkImpl = ({ children, ...props }: LinkProps) => {
  * -----------------------------------------------------------------------------------------------*/
 const TooltipImpl = ({ children, label, position = 'right' }: NavLink.TooltipProps) => {
   return (
-    <Tooltip side={position} label={label}>
+    <Tooltip side={position} label={label} delayDuration={0}>
       <span>{children}</span>
     </Tooltip>
   );

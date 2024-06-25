@@ -95,7 +95,7 @@ const LeftMenu = () => {
 
   const label = formatMessage({
     id: getTranslation('header.name'),
-    defaultMessage: 'Content',
+    defaultMessage: 'Content Manager',
   });
 
   const getPluginsParamsForLink = (link: ContentManagerLink) => {
