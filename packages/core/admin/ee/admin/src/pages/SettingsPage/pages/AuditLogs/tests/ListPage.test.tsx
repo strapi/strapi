@@ -28,7 +28,6 @@ describe('ADMIN | Pages | AUDIT LOGS | ListPage', () => {
       'Action',
       'Date',
       'User',
-      'Actions',
       'Admin logout',
       'October 31, 2023, 15:56:54',
       'Create user',

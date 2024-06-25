@@ -527,7 +527,7 @@ export const FormModal = () => {
           if (canEditContentType(allDataSchema, modifiedData)) {
             onCloseModal();
 
-            submitData(modifiedData);
+            await submitData(modifiedData);
           } else {
             toggleNotification({
               type: 'danger',

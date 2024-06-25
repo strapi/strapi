@@ -1,17 +1,16 @@
-import { Box, BoxComponent, VisuallyHidden } from '@strapi/design-system';
+import { Box, Flex, type FlexComponent, VisuallyHidden } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useConfiguration } from '../../features/Configuration';
 
-const BrandIconWrapper = styled<BoxComponent>(Box)`
+const BrandIconWrapper = styled<FlexComponent>(Flex)`
   svg,
   img {
     border-radius: ${({ theme }) => theme.borderRadius};
     object-fit: contain;
     height: 2.4rem;
     width: 2.4rem;
-    margin: 0.4rem;
   }
 `;
 
@@ -22,13 +21,20 @@ export const NavBrand = () => {
   } = useConfiguration('LeftMenu');
   return (
     <Box padding={3}>
-      <BrandIconWrapper width="3.2rem" height="3.2rem">
+      <BrandIconWrapper
+        flexDirection="column"
+        justifyContent="center"
+        width="3.2rem"
+        height="3.2rem"
+      >
         <img
           src={menu.custom?.url || menu.default}
           alt={formatMessage({
             id: 'app.components.LeftMenu.logo.alt',
             defaultMessage: 'Application logo',
           })}
+          width="100%"
+          height="100%"
         />
         <VisuallyHidden>
           <span>

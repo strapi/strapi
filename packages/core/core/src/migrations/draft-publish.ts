@@ -1,9 +1,7 @@
 import { contentTypes as contentTypesUtils, async } from '@strapi/utils';
-import type { Modules, Schema } from '@strapi/types';
+import { Schema } from '@strapi/types';
 
 import { getBatchToDiscard } from './database/5.0.0-discard-drafts';
-
-type DiscardDraftParams = Modules.Documents.ServiceParams['discardDraft'];
 
 interface Input {
   oldContentTypes: Record<string, Schema.ContentType>;
@@ -33,37 +31,22 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }: Input) =
       const oldContentType = oldContentTypes[uid];
       const contentType = contentTypes[uid];
 
-      const isLocalized = strapi
-        .plugin('i18n')
-        .service('content-types')
-        .isLocalizedContentType(contentType);
-
       // if d&p was enabled set publishedAt to eq createdAt
       if (
         !contentTypesUtils.hasDraftAndPublish(oldContentType) &&
         contentTypesUtils.hasDraftAndPublish(contentType)
       ) {
-        const discardDraft = async (entry: { documentId: string; locale: string }) => {
-          const params: DiscardDraftParams = { documentId: entry.documentId };
-
-          // Only add the locale param if the old content-type is localized
-          if (isLocalized) {
-            params.locale = entry.locale;
-          }
-
-          return (
-            strapi
-              .documents(uid as any)
-              // Discard draft by referencing the documentId (and locale if the model is localized)
-              .discardDraft(params)
-          );
-        };
+        const discardDraft = async (entry: { documentId: string; locale: string }) =>
+          strapi
+            .documents(uid as any)
+            // Discard draft by referencing the documentId and locale
+            .discardDraft({ documentId: entry.documentId, locale: entry.locale });
 
         /**
          * Load a batch of entries (batched to prevent loading millions of rows at once ),
          * and discard them using the document service.
          */
-        for await (const batch of getBatchToDiscard({ db: strapi.db, trx, uid, isLocalized })) {
+        for await (const batch of getBatchToDiscard({ db: strapi.db, trx, uid })) {
           await async.map(batch, discardDraft, { concurrency: 10 });
         }
       }

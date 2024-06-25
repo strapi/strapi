@@ -13,9 +13,14 @@ import {
 } from '@strapi/design-system';
 import { Minus, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { styled } from 'styled-components';
 
 import { useField, useForm } from '../../../../../components/Form';
 import { StringInput } from '../../../../../components/FormInputs/String';
+
+const AddHeaderButton = styled(TextButton)`
+  cursor: pointer;
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * HeadersInput
@@ -44,7 +49,7 @@ const HeadersInput = () => {
       <Box padding={8} background="neutral100" hasRadius>
         {value.map((_, index) => {
           return (
-            <Grid.Root key={index} gap={4}>
+            <Grid.Root key={index} gap={4} padding={2}>
               <Grid.Item col={6}>
                 <HeaderCombobox
                   name={`headers.${index}.key`}
@@ -92,23 +97,23 @@ const HeadersInput = () => {
                   </Flex>
                 </Flex>
               </Grid.Item>
-              <Grid.Item col={12}>
-                <TextButton
-                  type="button"
-                  onClick={() => {
-                    addFieldRow('headers', { key: '', value: '' });
-                  }}
-                  startIcon={<Plus />}
-                >
-                  {formatMessage({
-                    id: 'Settings.webhooks.create.header',
-                    defaultMessage: 'Create new header',
-                  })}
-                </TextButton>
-              </Grid.Item>
             </Grid.Root>
           );
         })}
+        <Box paddingTop={4}>
+          <AddHeaderButton
+            type="button"
+            onClick={() => {
+              addFieldRow('headers', { key: '', value: '' });
+            }}
+            startIcon={<Plus />}
+          >
+            {formatMessage({
+              id: 'Settings.webhooks.create.header',
+              defaultMessage: 'Create new header',
+            })}
+          </AddHeaderButton>
+        </Box>
       </Box>
     </Flex>
   );

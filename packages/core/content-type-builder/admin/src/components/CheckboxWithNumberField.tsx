@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { Box, Checkbox, Field, Flex, NumberInput, TextInput } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
@@ -23,7 +21,6 @@ export const CheckboxWithNumberField = ({
   value = null,
 }: CheckboxWithNumberFieldProps) => {
   const { formatMessage } = useIntl();
-  const [showInput, setShowInput] = useState(!!value || value === 0);
   const label = intlLabel.id
     ? formatMessage(
         { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
@@ -46,13 +43,12 @@ export const CheckboxWithNumberField = ({
           const nextValue = value ? initValue : null;
 
           onChange({ target: { name, value: nextValue } });
-          setShowInput((prev) => !prev);
         }}
-        checked={showInput}
+        checked={value !== null}
       >
         {label}
       </Checkbox>
-      {showInput && (
+      {value !== null && (
         <Box paddingLeft={6} style={{ maxWidth: '200px' }}>
           {type === 'text' ? (
             <Field.Root error={errorMessage} name={name}>
@@ -70,7 +66,7 @@ export const CheckboxWithNumberField = ({
                 aria-label={label}
                 disabled={disabled}
                 onValueChange={(value: any) => {
-                  onChange({ target: { name, value, type } });
+                  onChange({ target: { name, value: value ?? 0, type } });
                 }}
                 value={value || 0}
               />

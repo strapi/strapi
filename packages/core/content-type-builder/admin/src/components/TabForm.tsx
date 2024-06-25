@@ -42,6 +42,7 @@ export const TabForm = ({
             <Grid.Root gap={4}>
               {section.items.map((input: any, i: number) => {
                 const key = `${sectionIndex}.${i}`;
+
                 /**
                  * Use undefined as the default value because not every input wants a string e.g. Date pickers
                  */

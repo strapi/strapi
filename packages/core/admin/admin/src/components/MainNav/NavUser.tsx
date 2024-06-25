@@ -18,6 +18,12 @@ export interface NavUserProps extends ButtonProps {
  */
 const MenuTrigger = styled(Menu.Trigger)`
   height: 100%;
+  border-radius: 0;
+  border-width: 1px 0 0 0;
+  border-color: ${({ theme }) => theme.colors.neutral150};
+  border-style: solid;
+  // Prevent empty pixel from appearing below the main nav
+  overflow: hidden;
 `;
 
 const MenuContent = styled(Menu.Content)`
@@ -45,6 +51,7 @@ export const NavUser = ({ children, initials, ...props }: NavUserProps) => {
     logout();
     navigate('/auth/login');
   };
+
   return (
     <Flex justifyContent="center" {...props}>
       <Menu.Root>

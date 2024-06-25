@@ -70,17 +70,9 @@ const Stages = ({ canDelete = true, canUpdate = true, isCreating }: StagesProps)
           position="absolute"
           top="0"
           width={2}
-          zIndex={1}
         />
 
-        <Flex
-          direction="column"
-          alignItems="stretch"
-          gap={6}
-          zIndex={2}
-          position="relative"
-          tag="ol"
-        >
+        <Flex direction="column" alignItems="stretch" gap={6} position="relative" tag="ol">
           {stages.map((stage, index) => {
             return (
               <Box key={stage.__temp_key__} tag="li">
