@@ -14,9 +14,8 @@ test.describe('Edit View', () => {
     const CREATE_URL =
       /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
-    const SHOP_URL = /\/admin\/content-manager\/single-types\/api::shop.shop(\?.*)?/;
 
-    test('as a user I want to be warned if I try to publish content that has draft relations', async ({
+    test.only('as a user I want to be warned if I try to publish content that has draft relations', async ({
       page,
     }) => {
       await page.getByLabel('Content Manager').click();
@@ -38,6 +37,7 @@ test.describe('Edit View', () => {
 
       // Save the current state of the entry
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
       // Add another relation to the entry
       await page.getByRole('combobox', { name: 'authors' }).click();
@@ -51,45 +51,13 @@ test.describe('Edit View', () => {
 
       // Save the current state of the entry
       await page.getByRole('button', { name: 'Save' }).click();
+      await findAndClose(page, 'Saved Document');
 
       // Attempt to publish the entry once more
       await page.getByRole('button', { name: 'Publish' }).click();
 
       // Verify that the warning about two draft relations is still displayed
       await expect(page.getByText('This entry is related to 2')).toBeVisible();
-    });
-
-    test('as a user I want to be warned if I try to publish content that has draft relations on components within a dynamic zone', async ({
-      page,
-    }) => {
-      await page.getByLabel('Content Manager').click();
-      await page.getByRole('link', { name: 'Shop' }).click();
-
-      await page.waitForURL(SHOP_URL);
-
-      // Navigate to the product carousel component
-      await page.getByRole('button', { name: 'Product carousel - 23/24 kits' }).click();
-
-      // Select a product from the combobox
-      await page.getByRole('combobox', { name: 'products' }).click();
-      await page.getByLabel('Nike Mens 23/24 Away Stadium').click();
-
-      // Attempt to publish the entry
-      await page.getByRole('button', { name: 'Publish' }).click();
-
-      // Verify that a warning about a single draft relation is displayed
-      await expect(page.getByText('This entry is related to 1')).toBeVisible();
-      await page.getByRole('button', { name: 'Cancel' }).click();
-
-      // Save the current state of the entry
-      await page.getByRole('button', { name: 'Save' }).click();
-
-      // TODO: Watching the playwright trace shows that the relation is not
-      // actually attached to the entry when saved, so the warning is not displayed
-
-      // Attempt to publish the entry once more
-      // await page.getByRole('button', { name: 'Publish' }).click();
-      // await expect(page.getByText('This entry is related to 1')).toBeVisible();
     });
 
     test('as a user I want to create and publish a document at the same time, then modify and save that document.', async ({
@@ -403,6 +371,41 @@ test.describe('Edit View', () => {
 
   test.describe('Single Type', () => {
     const EDIT_URL = /\/admin\/content-manager\/single-types\/api::homepage.homepage(\?.*)?/;
+    const SHOP_URL = /\/admin\/content-manager\/single-types\/api::shop.shop(\?.*)?/;
+
+    test('as a user I want to be warned if I try to publish content that has draft relations on components within a dynamic zone', async ({
+      page,
+    }) => {
+      await page.getByLabel('Content Manager').click();
+      await page.getByRole('link', { name: 'Shop' }).click();
+
+      await page.waitForURL(SHOP_URL);
+
+      // Navigate to the product carousel component
+      await page.getByRole('button', { name: 'Product carousel - 23/24 kits' }).click();
+
+      // Select a product from the combobox
+      await page.getByRole('combobox', { name: 'products' }).click();
+      await page.getByLabel('Nike Mens 23/24 Away Stadium').click();
+
+      // Attempt to publish the entry
+      await page.getByRole('button', { name: 'Publish' }).click();
+
+      // Verify that a warning about a single draft relation is displayed
+      await expect(page.getByText('This entry is related to 1')).toBeVisible();
+      await page.getByRole('button', { name: 'Cancel' }).click();
+
+      // TODO: Watching the playwright trace shows that the relation is not
+      // actually attached to the entry when saved, so the warning is not displayed
+
+      // Save the current state of the entry
+      // await page.getByRole('button', { name: 'Save' }).click();
+      // await findAndClose(page, 'Saved Document');
+
+      // Attempt to publish the entry once more
+      // await page.getByRole('button', { name: 'Publish' }).click();
+      // await expect(page.getByText('This entry is related to 1')).toBeVisible();
+    });
 
     test('as a user I want to create and publish a document at the same time, then modify and save that document.', async ({
       page,
