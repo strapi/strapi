@@ -7,7 +7,7 @@ import {
   SubNavSections,
 } from '@strapi/design-system/v2';
 import { useTracking } from '@strapi/helper-plugin';
-import { Lock } from '@strapi/icons';
+import { Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,6 +22,10 @@ import { SettingsMenu } from '../../../hooks/useSettingsMenu';
 const CustomIcon = styled(Icon)`
   right: 15px;
   position: absolute;
+
+  path {
+    fill: ${({ theme }) => theme.colors.warning500};
+  }
 `;
 
 interface SettingsNavProps {
@@ -77,9 +81,12 @@ const SettingsNav = ({ menu }: SettingsNavProps) => {
                   key={link.id}
                 >
                   {formatMessage(link.intlLabel)}
-                  {link?.lockIcon && (
-                    <CustomIcon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lock} />
-                  )}
+                  {
+                    // TODO: to replace with another name in v5
+                    link?.lockIcon && (
+                      <CustomIcon width={`${15 / 16}rem`} height={`${15 / 16}rem`} as={Lightning} />
+                    )
+                  }
                 </SubNavLink>
               );
             })}

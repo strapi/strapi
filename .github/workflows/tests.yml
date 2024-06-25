@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
     paths-ignore:
       - 'docs/**'
@@ -29,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: dorny/paths-filter@v2
+      - uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: .github/filters.yaml
@@ -41,10 +42,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run lint
@@ -58,10 +59,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -74,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
       - name: Monorepo install
@@ -90,10 +91,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - uses: nrwl/nx-set-shas@v3
+          node-version: 20
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -118,10 +119,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -140,10 +141,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -151,10 +152,10 @@ jobs:
       - name: Run test
         run: yarn nx affected --target=test:front --nx-ignore-cycles -- --runInBand
 
-  e2e:
+  e2e_ce:
     timeout-minutes: 60
     needs: [changes, build, typescript, unit_front]
-    name: 'e2e (browser: ${{ matrix.project }})'
+    name: '[CE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -165,9 +166,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
 
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
@@ -178,15 +179,84 @@ jobs:
       - name: Monorepo build
         uses: ./.github/actions/run-build
 
-      - name: Run E2E tests
-        run: yarn test:e2e --setup --concurrency=1 --project=${{ matrix.project }}
+      - name: Run [CE] E2E tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: false
+          jestOptions: --project=${{ matrix.project }}
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: playwright-trace
-          path: test-apps/e2e/**/test-results/**/trace.zip
+          name: ce-playwright-trace
+          path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
+
+  e2e_ee:
+    timeout-minutes: 60
+    needs: [changes, build, typescript, unit_front]
+    name: '[EE] e2e (browser: ${{ matrix.project }})'
+    runs-on: ubuntu-latest
+    env:
+      STRAPI_LICENSE: ${{ secrets.strapiLicense }}
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ['chromium', 'webkit', 'firefox']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Install Playwright Browsers
+        run: npx playwright@1.38.1 install --with-deps
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run [EE] E2E tests
+        uses: ./.github/actions/run-e2e-tests
+        with:
+          runEE: true
+          enableFutureFeatures: true
+          jestOptions: --project=${{ matrix.project }}
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: ee-playwright-trace
+          path: test-apps/e2e/test-results/**/trace.zip
+          retention-days: 1
+
+  cli:
+    timeout-minutes: 60
+    needs: [changes, build, typescript]
+    name: 'CLI Tests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run CLI tests
+        run: yarn test:cli
 
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
@@ -218,7 +288,7 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -248,7 +318,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -259,7 +328,7 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -299,7 +368,7 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -323,7 +392,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -370,7 +439,7 @@ jobs:
           - 5432:5432
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -403,7 +472,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -414,7 +482,7 @@ jobs:
           - 3306:3306
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install
@@ -441,7 +509,7 @@ jobs:
         shard: [1/5, 2/5, 3/5, 4/5, 5/5]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
       - name: Monorepo install

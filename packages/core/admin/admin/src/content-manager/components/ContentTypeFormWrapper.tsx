@@ -27,6 +27,7 @@ import {
   setStatus,
   submitSucceeded,
 } from '../sharedReducers/crud/actions';
+import { buildValidGetParams } from '../utils/api';
 import { createDefaultDataStructure, removePasswordFieldsFromData } from '../utils/data';
 import { getTranslation } from '../utils/translations';
 
@@ -87,7 +88,13 @@ const ContentTypeFormWrapper = ({
   const { setCurrentStep } = useGuidedTour();
   const { trackUsage } = useTracking();
   const { push, replace } = useHistory();
-  const [{ query, rawQuery }] = useQueryParams();
+  const [{ query, rawQuery }] = useQueryParams<{
+    plugins?: {
+      i18n?: {
+        locale?: string;
+      };
+    };
+  }>();
   const dispatch = useTypedDispatch();
   const { componentsDataStructure, contentTypeDataStructure, data, isLoading, status } =
     useTypedSelector((state) => state['content-manager_editViewCrudReducer']);
@@ -100,7 +107,7 @@ const ContentTypeFormWrapper = ({
   const { put, post, del } = fetchClient;
 
   const isSingleType = collectionType === 'single-types';
-  const [isCreatingEntry, setIsCreatingEntry] = React.useState(!isSingleType && !id);
+  const isCreatingEntry = !isSingleType && !id;
 
   const requestURL =
     isCreatingEntry && !origin
@@ -160,6 +167,8 @@ const ContentTypeFormWrapper = ({
     };
   }, [dispatch]);
 
+  const validParams = React.useMemo(() => buildValidGetParams(query), [query]);
+
   React.useEffect(() => {
     const CancelToken = axios.CancelToken;
     const source = CancelToken.source();
@@ -172,7 +181,10 @@ const ContentTypeFormWrapper = ({
       dispatch(getData());
 
       try {
-        const { data } = await fetchClient.get(requestURL, { cancelToken: source.token });
+        const { data } = await fetchClient.get(requestURL, {
+          cancelToken: source.token,
+          params: validParams,
+        });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
       } catch (err) {
@@ -187,7 +199,6 @@ const ContentTypeFormWrapper = ({
           return;
         } else if (resStatus === 404 && isSingleType) {
           // Creating a single type
-          setIsCreatingEntry(true);
           dispatch(initForm(rawQuery, true));
         }
 
@@ -205,7 +216,7 @@ const ContentTypeFormWrapper = ({
 
     // This is needed in order to reset the form when the query changes
     const init = async () => {
-      dispatch(getData());
+      await dispatch(getData());
       dispatch(initForm(rawQuery));
     };
 
@@ -232,6 +243,7 @@ const ContentTypeFormWrapper = ({
     redirectionLink,
     toggleNotification,
     isSingleType,
+    validParams,
   ]);
 
   const displayErrors = React.useCallback(
@@ -246,8 +258,12 @@ const ContentTypeFormWrapper = ({
       try {
         trackUsage('willDeleteEntry', trackerProperty);
 
+        const locale = query?.plugins?.i18n?.locale;
+        const params = isSingleType && locale ? { locale } : {};
+
         const { data } = await del<Contracts.CollectionTypes.Delete.Response>(
-          `/content-manager/${collectionType}/${slug}/${id}`
+          `/content-manager/${collectionType}/${slug}/${id}`,
+          { params }
         );
 
         toggleNotification({
@@ -258,7 +274,6 @@ const ContentTypeFormWrapper = ({
         trackUsage('didDeleteEntry', trackerProperty);
 
         if (isSingleType) {
-          setIsCreatingEntry(true);
           dispatch(initForm(rawQuery, true));
         } else {
           replace(redirectionLink);
@@ -313,7 +328,7 @@ const ContentTypeFormWrapper = ({
             : `/content-manager/${collectionType}/${slug}`,
           isCloning ? restBody : body,
           {
-            params: query,
+            params: validParams,
           }
         );
 
@@ -327,7 +342,6 @@ const ContentTypeFormWrapper = ({
 
         // TODO: need to find a better place, or a better abstraction
         queryClient.invalidateQueries(['relation']);
-        setIsCreatingEntry(false);
 
         dispatch(submitSucceeded(cleanReceivedData(data)));
 
@@ -358,7 +372,7 @@ const ContentTypeFormWrapper = ({
       put,
       post,
       slug,
-      query,
+      validParams,
       trackUsage,
       toggleNotification,
       setCurrentStep,
@@ -409,7 +423,11 @@ const ContentTypeFormWrapper = ({
       const { data } = await post<Contracts.CollectionTypes.Publish.Response>(
         isSingleType
           ? `/content-manager/${collectionType}/${slug}/actions/publish`
-          : `/content-manager/${collectionType}/${slug}/${id}/actions/publish`
+          : `/content-manager/${collectionType}/${slug}/${id}/actions/publish`,
+        undefined,
+        {
+          params: validParams,
+        }
       );
 
       trackUsage('didPublishEntry');
@@ -440,6 +458,7 @@ const ContentTypeFormWrapper = ({
     collectionType,
     slug,
     id,
+    validParams,
     cleanReceivedData,
     toggleNotification,
     displayErrors,
@@ -456,7 +475,9 @@ const ContentTypeFormWrapper = ({
           Contracts.CollectionTypes.Update.Response,
           AxiosResponse<Contracts.CollectionTypes.Update.Response>,
           Contracts.CollectionTypes.Update.Request['body']
-        >(`/content-manager/${collectionType}/${slug}/${id}`, body);
+        >(`/content-manager/${collectionType}/${slug}/${id}`, body, {
+          params: validParams,
+        });
 
         trackUsage('didEditEntry', trackerProperty);
         toggleNotification({
@@ -491,6 +512,7 @@ const ContentTypeFormWrapper = ({
       collectionType,
       slug,
       id,
+      validParams,
       toggleNotification,
       queryClient,
       cleanReceivedData,
@@ -507,7 +529,11 @@ const ContentTypeFormWrapper = ({
       const { data } = await post<Contracts.CollectionTypes.Unpublish.Response>(
         isSingleType
           ? `/content-manager/${collectionType}/${slug}/actions/unpublish`
-          : `/content-manager/${collectionType}/${slug}/${id}/actions/unpublish`
+          : `/content-manager/${collectionType}/${slug}/${id}/actions/unpublish`,
+        undefined,
+        {
+          params: validParams,
+        }
       );
 
       trackUsage('didUnpublishEntry');
@@ -535,6 +561,7 @@ const ContentTypeFormWrapper = ({
     collectionType,
     slug,
     id,
+    validParams,
     toggleNotification,
     cleanReceivedData,
     displayErrors,

@@ -12,7 +12,7 @@ import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
 import { getAliases } from './aliases';
 import { loadStrapiMonorepo } from '../core/monorepo';
 import type { BuildContext } from '../createBuildContext';
-import { loadFile } from '../core/files';
+import { getUserConfig } from '../core/config';
 
 const resolveBaseConfig = async (ctx: BuildContext) => {
   const monorepo = await loadStrapiMonorepo(ctx.cwd);
@@ -200,21 +200,8 @@ const USER_CONFIGS = ['webpack.config.js', 'webpack.config.mjs', 'webpack.config
 
 type UserWebpackConfig = (config: Configuration, webpack: unknown) => Configuration;
 
-const getUserConfig = async (ctx: BuildContext): Promise<UserWebpackConfig | undefined> => {
-  for (const file of USER_CONFIGS) {
-    const filePath = path.join(ctx.appDir, 'src', 'admin', file);
-    const configFile = await loadFile(filePath);
-
-    if (configFile) {
-      return configFile;
-    }
-  }
-
-  return undefined;
-};
-
 const mergeConfigWithUserConfig = async (config: Configuration, ctx: BuildContext) => {
-  const userConfig = await getUserConfig(ctx);
+  const userConfig = await getUserConfig<UserWebpackConfig>(USER_CONFIGS, ctx);
 
   if (userConfig) {
     if (typeof userConfig === 'function') {

@@ -46,6 +46,7 @@ const Wrapper = ({ children, baseEditor = defaultBaseEditor }: WrapperProps) => 
             disabled={false}
             name="blocks"
             setLiveText={() => {}}
+            isExpandedMode={false}
           >
             {children}
           </BlocksEditorProvider>

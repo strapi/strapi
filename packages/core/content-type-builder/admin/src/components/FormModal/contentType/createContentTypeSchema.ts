@@ -1,4 +1,5 @@
 import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
+import { snakeCase } from 'lodash/fp';
 import * as yup from 'yup';
 
 import { getTrad } from '../../../utils/getTrad';
@@ -32,7 +33,11 @@ export const createContentTypeSchema = ({
 
           const name = createUid(value);
 
-          return !usedContentTypeNames.includes(name);
+          const snakeCaseKey = snakeCase(name);
+
+          return !usedContentTypeNames.some((value) => {
+            return snakeCase(value) === snakeCaseKey;
+          });
         },
       })
       .test({
@@ -42,8 +47,11 @@ export const createContentTypeSchema = ({
           if (!value) {
             return false;
           }
+          const snakeCaseKey = snakeCase(value);
 
-          return !reservedModels.includes(value?.trim()?.toLowerCase());
+          return !reservedModels.some((key) => {
+            return snakeCase(key) === snakeCaseKey;
+          });
         },
       })
       .required(errorsTrads.required),
@@ -57,7 +65,11 @@ export const createContentTypeSchema = ({
             return false;
           }
 
-          return !pluralNames.includes(value);
+          const snakeCaseKey = snakeCase(value);
+
+          return !pluralNames.some((key) => {
+            return snakeCase(key) === snakeCaseKey;
+          });
         },
       })
       .test({
@@ -68,7 +80,11 @@ export const createContentTypeSchema = ({
             return false;
           }
 
-          return !singularNames.includes(value);
+          const snakeCaseKey = snakeCase(value);
+
+          return !singularNames.some((key) => {
+            return snakeCase(key) === snakeCaseKey;
+          });
         },
       })
       .test({
@@ -79,7 +95,7 @@ export const createContentTypeSchema = ({
             return false;
           }
 
-          return context.parent.singularName !== value;
+          return snakeCase(context.parent.singularName) !== snakeCase(value);
         },
       })
       .test({
@@ -90,7 +106,11 @@ export const createContentTypeSchema = ({
             return false;
           }
 
-          return !reservedModels.includes(value?.trim()?.toLowerCase());
+          const snakeCaseKey = snakeCase(value);
+
+          return !reservedModels.some((key) => {
+            return snakeCase(key) === snakeCaseKey;
+          });
         },
       })
       .test({
@@ -101,7 +121,11 @@ export const createContentTypeSchema = ({
             return false;
           }
 
-          return !collectionNames.includes(value?.trim()?.toLowerCase());
+          const snakeCaseKey = snakeCase(value);
+
+          return !collectionNames.some((key) => {
+            return snakeCase(key) === snakeCaseKey;
+          });
         },
       })
       .required(errorsTrads.required),
@@ -115,7 +139,11 @@ export const createContentTypeSchema = ({
             return false;
           }
 
-          return !singularNames.includes(value);
+          const snakeCaseKey = snakeCase(value);
+
+          return !singularNames.some((key) => {
+            return snakeCase(key) === snakeCaseKey;
+          });
         },
       })
       .test({
@@ -126,7 +154,11 @@ export const createContentTypeSchema = ({
             return false;
           }
 
-          return !pluralNames.includes(value);
+          const snakeCaseKey = snakeCase(value);
+
+          return !pluralNames.some((key) => {
+            return snakeCase(key) === snakeCaseKey;
+          });
         },
       })
       .test({
@@ -137,7 +169,7 @@ export const createContentTypeSchema = ({
             return false;
           }
 
-          return context.parent.pluralName !== value;
+          return snakeCase(context.parent.pluralName) !== snakeCase(value);
         },
       })
       .test({
@@ -148,7 +180,11 @@ export const createContentTypeSchema = ({
             return false;
           }
 
-          return !reservedModels.includes(value?.trim()?.toLowerCase());
+          const snakeCaseKey = snakeCase(value);
+
+          return !reservedModels.some((key) => {
+            return snakeCase(key) === snakeCaseKey;
+          });
         },
       })
       .required(errorsTrads.required),

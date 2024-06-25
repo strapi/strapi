@@ -1,4 +1,4 @@
-import type { Utils, Attribute, Common } from '../..';
+import type { Utils, Common, UID } from '../..';
 
 export * from './controller';
 export * from './middleware';
@@ -11,12 +11,17 @@ export * from './plugin';
 export * from './module';
 export * from './api';
 
-/**
- * Determines if the shared registries for components and content types have been extended or if they're still represented as loose mapped types
- *
- * Here we use the fact that once the registries are extended, Attribute.GetKeys<Common.UID.Schema> will resolve to either never or a more
- * deterministic value rather than string | number which represent the keys of the initial mapped type (Component & ContentType's registries)
- */
-export type AreSchemaRegistriesExtended = Utils.Expression.Not<
-  Utils.Expression.Extends<string | number, Attribute.GetKeys<Common.UID.Schema>>
+export type AreSchemaRegistriesExtended = Utils.Expression.Or<
+  IsComponentRegistryExtended,
+  IsContentTypeRegistryExtended
+>;
+
+export type IsContentTypeRegistryExtended = Utils.Expression.NotStrictEqual<
+  UID.ContentType,
+  Common.UID.ContentType
+>;
+
+export type IsComponentRegistryExtended = Utils.Expression.NotStrictEqual<
+  UID.Component,
+  Common.UID.Component
 >;

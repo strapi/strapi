@@ -68,6 +68,15 @@ const configureStoreImpl = (
 ) => {
   const coreReducers = { ...staticReducers, ...injectedReducers } as const;
 
+  const defaultMiddlewareOptions = {} as any;
+
+  // These are already disabled in 'production' env but we also need to disable it in test environments
+  // However, we want to leave them on for development so any issues can still be caught
+  if (process.env.NODE_ENV === 'test') {
+    defaultMiddlewareOptions.serializableCheck = false;
+    defaultMiddlewareOptions.immutableCheck = false;
+  }
+
   const store = configureStore({
     preloadedState: {
       admin_app: preloadedState.admin_app,
@@ -75,7 +84,7 @@ const configureStoreImpl = (
     reducer: coreReducers,
     devTools: process.env.NODE_ENV !== 'production',
     middleware: (getDefaultMiddleware) => [
-      ...getDefaultMiddleware(),
+      ...getDefaultMiddleware(defaultMiddlewareOptions),
       adminApi.middleware,
       ...appMiddlewares.map((m) => m()),
     ],

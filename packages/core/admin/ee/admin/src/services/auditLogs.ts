@@ -6,7 +6,9 @@ const auditLogsService = adminApi.injectEndpoints({
     getAuditLogs: builder.query<AuditLogs.GetAll.Response, AuditLogs.GetAll.Request['query']>({
       query: (params) => ({
         url: `/admin/audit-logs`,
-        params,
+        config: {
+          params,
+        },
       }),
     }),
     getAuditLog: builder.query<AuditLogs.Get.Response, AuditLogs.Get.Params['id']>({

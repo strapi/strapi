@@ -3,36 +3,75 @@ import strapiUtils from '@strapi/utils';
 
 const { isVisibleAttribute } = strapiUtils.contentTypes;
 
-function isProhibitedRelation(model: any, attributeName: any) {
+/**
+ * Use an array of strings to represent the path to a field, so we can show breadcrumbs in the admin
+ * We can't use special characters as delimiters, because the path includes display names
+ * for dynamic zone components, which can contain any character.
+ */
+type ProhibitedCloningField = [string[], 'unique' | 'relation'];
+
+function checkRelation(model: any, attributeName: any, path: string[]): ProhibitedCloningField[] {
   // we don't care about createdBy, updatedBy, localizations etc.
   if (!isVisibleAttribute(model, attributeName)) {
-    return false;
+    // Return empty array and not null so we can always spread the result
+    return [];
   }
 
-  return true;
+  /**
+   * Only one-to-many and one-to-one (when they're reversed, not one-way) are dangerous,
+   * because the other relations don't "steal" the relation from the entry we're cloning
+   */
+  const { relation, inversedBy, mappedBy } = model.attributes[attributeName];
+
+  if (
+    ['oneToOne', 'oneToMany'].includes(relation) &&
+    [mappedBy, inversedBy].some((key) => key != null)
+  ) {
+    return [[[...path, attributeName], 'relation']];
+  }
+
+  return [];
 }
 
-const hasProhibitedCloningFields = (uid: any): boolean => {
+const getProhibitedCloningFields = (
+  uid: any,
+  pathPrefix: string[] = []
+): ProhibitedCloningField[] => {
   const model = strapi.getModel(uid);
 
-  return Object.keys(model.attributes).some((attributeName: any) => {
-    const attribute: any = model.attributes[attributeName];
+  const prohibitedFields = Object.keys(model.attributes).reduce<ProhibitedCloningField[]>(
+    (acc, attributeName) => {
+      const attribute: any = model.attributes[attributeName];
+      const attributePath = [...pathPrefix, attributeName];
 
-    switch (attribute.type) {
-      case 'relation':
-        return isProhibitedRelation(model, attributeName);
-      case 'component':
-        return hasProhibitedCloningFields(attribute.component);
-      case 'dynamiczone':
-        return (attribute.components || []).some((componentUID: any) =>
-          hasProhibitedCloningFields(componentUID)
-        );
-      case 'uid':
-        return true;
-      default:
-        return attribute?.unique ?? false;
-    }
-  });
+      switch (attribute.type) {
+        case 'relation':
+          return [...acc, ...checkRelation(model, attributeName, pathPrefix)];
+        case 'component':
+          return [...acc, ...getProhibitedCloningFields(attribute.component, attributePath)];
+        case 'dynamiczone':
+          return [
+            ...acc,
+            ...(attribute.components || []).flatMap((componentUID: any) =>
+              getProhibitedCloningFields(componentUID, [
+                ...attributePath,
+                strapi.getModel(componentUID).info.displayName,
+              ])
+            ),
+          ];
+        case 'uid':
+          return [...acc, [attributePath, 'unique']];
+        default:
+          if (attribute?.unique) {
+            return [...acc, [attributePath, 'unique']];
+          }
+          return acc;
+      }
+    },
+    []
+  );
+
+  return prohibitedFields;
 };
 
 /**
@@ -79,4 +118,4 @@ const excludeNotCreatableFields =
     }, body);
   };
 
-export { hasProhibitedCloningFields, excludeNotCreatableFields };
+export { getProhibitedCloningFields, excludeNotCreatableFields };

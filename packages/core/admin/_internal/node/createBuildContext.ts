@@ -10,7 +10,7 @@ import { getStrapiAdminEnvVars, loadEnv } from './core/env';
 import type { BuildOptions } from './build';
 import { DevelopOptions } from './develop';
 import { PluginMeta, getEnabledPlugins, getMapOfPluginsWithAdmin } from './core/plugins';
-import { Strapi } from '@strapi/types';
+import { Strapi, FeaturesService } from '@strapi/types';
 import { AppFile, loadUserAppFile } from './core/admin-customisations';
 
 interface BuildContext {
@@ -27,6 +27,10 @@ interface BuildContext {
    * The customisations defined by the user in their app.js file
    */
   customisations?: AppFile;
+  /**
+   * The bundler to use for building & watching
+   */
+  bundler: Pick<Required<BuildOptions>, 'bundler'>['bundler'];
   /**
    * The current working directory
    */
@@ -47,6 +51,10 @@ interface BuildContext {
    * The environment variables to be included in the JS bundle
    */
   env: Record<string, string>;
+  /**
+   * Features object with future flags
+   */
+  features?: FeaturesService['config'];
   logger: CLIContext['logger'];
   /**
    * The build options
@@ -74,7 +82,7 @@ interface BuildContext {
 
 interface CreateBuildContextArgs extends CLIContext {
   strapi?: Strapi;
-  options?: BuildContext['options'];
+  options?: BuildContext['options'] & { bundler?: BuildOptions['bundler'] };
 }
 
 const DEFAULT_BROWSERSLIST = [
@@ -154,15 +162,20 @@ const createBuildContext = async ({
 
   const pluginsWithFront = getMapOfPluginsWithAdmin(plugins);
 
-  logger.debug('Enabled plugins with FE', os.EOL, plugins);
+  logger.debug('Enabled plugins with FE', os.EOL, pluginsWithFront);
 
   const target = browserslist.loadConfig({ path: cwd }) ?? DEFAULT_BROWSERSLIST;
 
   const customisations = await loadUserAppFile({ appDir, runtimeDir });
 
+  const features = strapiInstance.config.get('features', undefined);
+
+  const { bundler = 'webpack', ...restOptions } = options;
+
   const buildContext = {
     appDir,
     basePath: `${adminPath}/`,
+    bundler,
     customisations,
     cwd,
     distDir,
@@ -170,12 +183,13 @@ const createBuildContext = async ({
     entry,
     env,
     logger,
-    options,
+    options: restOptions,
     plugins: pluginsWithFront,
     runtimeDir,
     strapi: strapiInstance,
     target,
     tsconfig,
+    features,
   } satisfies BuildContext;
 
   return buildContext;

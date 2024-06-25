@@ -3,21 +3,24 @@ import { getFetchClient } from '@strapi/helper-plugin';
 import { createRoot } from 'react-dom/client';
 
 import { StrapiApp, StrapiAppConstructorArgs } from './StrapiApp';
+import { createAbsoluteUrl } from './utils/urls';
+
+import type { FeaturesService } from '@strapi/types';
 
 interface RenderAdminArgs {
   customisations: StrapiAppConstructorArgs['adminConfig'];
   plugins: StrapiAppConstructorArgs['appPlugins'];
+  features?: FeaturesService['config'];
 }
 
 const renderAdmin = async (
   mountNode: HTMLElement | null,
-  { plugins, customisations }: RenderAdminArgs
+  { plugins, customisations, features }: RenderAdminArgs
 ) => {
   if (!mountNode) {
     throw new Error('[@strapi/admin]: Could not find the root element to mount the admin app');
   }
 
-  // @ts-expect-error – there's pollution from the global scope of Node.
   window.strapi = {
     /**
      * This ENV variable is passed from the strapi instance, by default no url is set
@@ -25,9 +28,15 @@ const renderAdmin = async (
      *
      * To ensure that the backendURL is always set, we use the window.location.origin as a fallback.
      */
-    backendURL: process.env.STRAPI_ADMIN_BACKEND_URL || window.location.origin,
+    backendURL: createAbsoluteUrl(process.env.STRAPI_ADMIN_BACKEND_URL),
     isEE: false,
     telemetryDisabled: process.env.STRAPI_TELEMETRY_DISABLED === 'true' ? true : false,
+    future: {
+      isEnabled: (name: keyof FeaturesService['config']) => {
+        return features?.future?.[name] === true;
+      },
+    },
+    // @ts-expect-error – there's pollution from the global scope of Node.
     features: {
       SSO: 'sso',
       AUDIT_LOGS: 'audit-logs',
@@ -98,6 +107,10 @@ const renderAdmin = async (
     typeof module.hot.accept === 'function'
   ) {
     module.hot.accept();
+  }
+
+  if (typeof import.meta.hot?.accept === 'function') {
+    import.meta.hot.accept();
   }
 };
 

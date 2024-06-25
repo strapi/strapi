@@ -18,9 +18,21 @@ const textNodeValidator = yup.object().shape({
   code: yup.boolean(),
 });
 
+const checkValidLink = (link: string) => {
+  try {
+    // eslint-disable-next-line no-new
+    new URL(link.startsWith('/') ? `https://strapi.io${link}` : link);
+  } catch (error) {
+    return false;
+  }
+  return true;
+};
+
 const linkNodeValidator = yup.object().shape({
   type: yup.string().equals(['link']).required(),
-  url: yup.string().url().required(),
+  url: yup
+    .string()
+    .test('invalid-url', 'Please specify a valid link.', (value) => checkValidLink(value ?? '')),
   children: yup.array().of(textNodeValidator).required(),
 });
 
@@ -81,13 +93,27 @@ const listItemNode = yup.object().shape({
   children: yup.array().of(inlineNodeValidator).required(),
 });
 
+// Allow children to be either a listItemNode or a listNode itself
+const listChildrenValidator = yup.lazy((value: { type: string }) => {
+  switch (value.type) {
+    case 'list':
+      return listNodeValidator;
+    case 'list-item':
+      return listItemNode;
+    default:
+      return yup.mixed().test('invalid-type', 'Inline node must be list-item or list', () => {
+        return false;
+      });
+  }
+});
+
 const listNodeValidator = yup.object().shape({
   type: yup.string().equals(['list']).required(),
   format: yup.string().equals(['ordered', 'unordered']).required(),
   children: yup
     .array()
-    .of(listItemNode)
-    .min(1, 'List node children must have at least one ListItem node')
+    .of(listChildrenValidator)
+    .min(1, 'List node children must have at least one ListItem or ListNode')
     .required(),
 });
 

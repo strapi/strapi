@@ -130,6 +130,7 @@ export interface IConfiguration<T = unknown> {
 }
 
 interface IFile {
+  id: number;
   name: string;
   alternativeText?: string;
   caption?: string;

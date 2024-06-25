@@ -38,7 +38,7 @@ const AuthPage = ({ hasAdmin }: AuthPageProps) => {
     }
   );
 
-  const token = useAuth('AuthPage', (state) => state.token);
+  const { token } = useAuth('AuthPage');
 
   if (!authType || !forms) {
     return <Redirect to="/" />;

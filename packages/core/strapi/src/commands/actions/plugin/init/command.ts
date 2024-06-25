@@ -1,5 +1,4 @@
 import type { StrapiCommand } from '../../../types';
-import { runAction } from '../../../utils/helpers';
 import action from './action';
 
 /**
@@ -12,7 +11,9 @@ const command: StrapiCommand = ({ command, ctx }) => {
     .argument('[path]', 'path to the plugin', './src/plugins/my-plugin')
     .option('-d, --debug', 'Enable debugging mode with verbose logs', false)
     .option('--silent', "Don't log anything", false)
-    .action((...args) => runAction('plugin:init', action)(...args, ctx));
+    .action((path, options) => {
+      return action(path, options, ctx);
+    });
 };
 
 export default command;

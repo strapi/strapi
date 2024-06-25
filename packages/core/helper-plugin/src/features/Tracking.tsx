@@ -141,7 +141,8 @@ interface EventWithoutProperties {
     | 'willSaveComponent'
     | 'willSaveContentType'
     | 'willSaveContentTypeLayout'
-    | 'didEditFieldNameOnContentType';
+    | 'didEditFieldNameOnContentType'
+    | 'didCreateRelease';
   properties?: never;
 }
 
@@ -289,6 +290,15 @@ interface DidFilterEntriesEvent {
   };
 }
 
+interface DidPublishRelease {
+  name: 'didPublishRelease';
+  properties: {
+    totalEntries: number;
+    totalPublishedEntries: number;
+    totalUnpublishedEntries: number;
+  };
+}
+
 type EventsWithProperties =
   | CreateEntryEvents
   | DidAccessTokenListEvent
@@ -306,7 +316,8 @@ type EventsWithProperties =
   | TokenEvents
   | UpdateEntryEvents
   | WillModifyTokenEvent
-  | WillNavigateEvent;
+  | WillNavigateEvent
+  | DidPublishRelease;
 
 export type TrackingEvent = EventWithoutProperties | EventsWithProperties;
 export interface UseTrackingReturn {

@@ -73,7 +73,14 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       'content-manager_editViewCrudReducer': crudReducer,
     },
     // @ts-expect-error – this fails.
-    middleware: (getDefaultMiddleware) => [...getDefaultMiddleware(), adminApi.middleware],
+    middleware: (getDefaultMiddleware) => [
+      ...getDefaultMiddleware({
+        // Disable timing checks for test env
+        immutableCheck: false,
+        serializableCheck: false,
+      }),
+      adminApi.middleware,
+    ],
   });
 
   // en is the default locale of the admin app.

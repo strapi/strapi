@@ -1,6 +1,6 @@
 // @ts-expect-error - types are not generated for this file
 // eslint-disable-next-line import/no-relative-packages
-import createContext from '../../../../../../../test/helpers/create-context';
+import createContext from '../../../../../../../tests/helpers/create-context';
 import relations from '../relations';
 
 const contentTypes = {
@@ -163,6 +163,17 @@ describe('Relations', () => {
 
   describe('findExisting', () => {
     test('Query mainField when mainField is listable', async () => {
+      global.strapi.plugins['content-manager'].services[
+        'permission-checker'
+      ].create.mockReturnValue({
+        cannot: {
+          read: jest.fn().mockReturnValue(false),
+        },
+        sanitizedQuery: {
+          read: jest.fn((queryParams) => queryParams),
+        },
+      });
+
       const ctx = createContext(
         {
           params: {

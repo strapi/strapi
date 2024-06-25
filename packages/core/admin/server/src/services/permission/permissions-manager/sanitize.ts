@@ -241,12 +241,7 @@ export default ({ action, ability, model }: any) => {
 
     const nonVisibleWritableAttributes = intersection(nonVisibleAttributes, writableAttributes);
 
-    return uniq([
-      ...fields,
-      ...STATIC_FIELDS,
-      ...COMPONENT_FIELDS,
-      ...nonVisibleWritableAttributes,
-    ]);
+    return uniq([...fields, ...COMPONENT_FIELDS, ...nonVisibleWritableAttributes]);
   };
 
   const getOutputFields = (fields = []) => {

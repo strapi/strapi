@@ -122,7 +122,7 @@ interface ContentData extends Entity {
 
 interface Localization extends Pick<ContentData, 'id'> {
   locale: string;
-  publishedAt: string | null;
+  publishedAt?: string | null;
 }
 
 const getLocalizationsFromData = (entity: unknown): Localization[] =>

@@ -1,7 +1,9 @@
 import * as React from 'react';
 
 import { createContext } from '@radix-ui/react-context';
-import { InputWrapper, Divider, VisuallyHidden } from '@strapi/design-system';
+import { IconButton, Divider, VisuallyHidden } from '@strapi/design-system';
+import { pxToRem } from '@strapi/helper-plugin';
+import { Expand } from '@strapi/icons';
 import { type Attribute } from '@strapi/types';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, type Descendant, createEditor } from 'slate';
@@ -18,8 +20,9 @@ import { linkBlocks } from './Blocks/Link';
 import { listBlocks } from './Blocks/List';
 import { paragraphBlocks } from './Blocks/Paragraph';
 import { quoteBlocks } from './Blocks/Quote';
-import { BlocksContent } from './BlocksContent';
+import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
+import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
@@ -35,6 +38,7 @@ interface BaseBlock {
   handleConvert?: (editor: Editor) => void | (() => React.JSX.Element);
   handleEnterKey?: (editor: Editor) => void;
   handleBackspaceKey?: (editor: Editor, event: React.KeyboardEvent<HTMLElement>) => void;
+  handleTab?: (editor: Editor) => void;
   snippets?: string[];
   dragHandleTopMargin?: CSSProperties['marginTop'];
 }
@@ -84,6 +88,7 @@ interface BlocksEditorContextValue {
   disabled: boolean;
   name: string;
   setLiveText: (text: string) => void;
+  isExpandedMode: boolean;
 }
 
 const [BlocksEditorProvider, usePartialBlocksEditorContext] =
@@ -107,6 +112,12 @@ function useBlocksEditorContext(
 
 const EditorDivider = styled(Divider)`
   background: ${({ theme }) => theme.colors.neutral200};
+`;
+
+const ExpandIconButton = styled(IconButton)`
+  position: absolute;
+  bottom: ${pxToRem(12)};
+  right: ${pxToRem(12)};
 `;
 
 /**
@@ -150,29 +161,29 @@ const pipe =
   (value: Editor) =>
     fns.reduce<Editor>((prev, fn) => fn(prev), value);
 
-interface BlocksEditorProps {
+interface BlocksEditorProps extends BlocksContentProps {
   name: string;
   onChange: (event: {
     target: { name: string; value: Attribute.BlocksValue; type: 'blocks' };
   }) => void;
   disabled?: boolean;
   value?: Attribute.BlocksValue;
-  placeholder?: MessageDescriptor;
   error?: string;
 }
 
 const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
-  ({ disabled = false, name, placeholder, onChange, value, error }, forwardedRef) => {
+  ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() =>
       pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
+    const [isExpandedMode, setIsExpandedMode] = React.useState(false);
 
-    const formattedPlaceholder =
-      placeholder &&
-      formatMessage({ id: placeholder.id, defaultMessage: placeholder.defaultMessage });
+    const handleToggleExpand = () => {
+      setIsExpandedMode((prev) => !prev);
+    };
 
     /**
      * Editable is not able to hold the ref, https://github.com/ianstormtaylor/slate/issues/4082
@@ -236,20 +247,29 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
             disabled={disabled}
             name={name}
             setLiveText={setLiveText}
+            isExpandedMode={isExpandedMode}
           >
-            <InputWrapper
-              direction="column"
-              alignItems="flex-start"
-              height="512px"
+            <EditorLayout
+              error={error}
               disabled={disabled}
-              hasError={Boolean(error)}
-              style={{ overflow: 'hidden' }}
-              aria-describedby={ariaDescriptionId}
+              onCollapse={handleToggleExpand}
+              ariaDescriptionId={ariaDescriptionId}
             >
               <BlocksToolbar />
               <EditorDivider width="100%" />
-              <BlocksContent placeholder={formattedPlaceholder} />
-            </InputWrapper>
+              <BlocksContent {...contentProps} />
+              {!isExpandedMode && (
+                <ExpandIconButton
+                  aria-label={formatMessage({
+                    id: getTranslation('components.Blocks.expand'),
+                    defaultMessage: 'Expand',
+                  })}
+                  onClick={handleToggleExpand}
+                >
+                  <Expand />
+                </ExpandIconButton>
+              )}
+            </EditorLayout>
           </BlocksEditorProvider>
         </Slate>
       </>

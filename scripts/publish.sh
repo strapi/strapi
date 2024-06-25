@@ -12,7 +12,7 @@ read -r version
 
 # publish packages
 ./node_modules/.bin/nx run-many --target=clean --nx-ignore-cycles
-./node_modules/.bin/nx run-many --target=build --nx-ignore-cycles
+./node_modules/.bin/nx run-many --target=build --nx-ignore-cycles --skip-nx-cache
 ./node_modules/.bin/lerna publish --no-push --force-publish --dist-tag latest --exact "$version"
 
 # push main branch
