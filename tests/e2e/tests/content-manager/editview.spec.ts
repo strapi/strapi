@@ -10,7 +10,7 @@ test.describe('Edit View', () => {
     await login({ page });
   });
 
-  test.describe.only('Collection Type', () => {
+  test.describe('Collection Type', () => {
     const CREATE_URL =
       /\/admin\/content-manager\/collection-types\/api::article.article\/create(\?.*)?/;
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
@@ -59,7 +59,7 @@ test.describe('Edit View', () => {
       await expect(page.getByText('This entry is related to 2')).toBeVisible();
     });
 
-    test.only('as a user I want to be warned if I try to publish content that has draft relations on components within a dynamic zone', async ({
+    test('as a user I want to be warned if I try to publish content that has draft relations on components within a dynamic zone', async ({
       page,
     }) => {
       await page.getByLabel('Content Manager').click();
