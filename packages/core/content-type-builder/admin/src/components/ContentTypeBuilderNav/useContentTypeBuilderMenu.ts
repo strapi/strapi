@@ -191,6 +191,7 @@ export const useContentTypeBuilderMenu = () => {
             };
           })
           .filter(Boolean),
+        linksCount: section.links.reduce((acc, link) => acc + link.links.length, 0),
       };
     }
 
@@ -199,6 +200,7 @@ export const useContentTypeBuilderMenu = () => {
       links: section.links
         .filter((link) => startsWith(link.title, search))
         .sort((a, b) => formatter.compare(a.title, b.title)),
+      linksCount: section.links.length,
     };
   });
 
