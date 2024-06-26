@@ -85,7 +85,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
 
     async create(uid: UID.CollectionType, opts: DocServiceParams<'create'> = {} as any) {
       const populate = opts.populate ?? (await buildDeepPopulate(uid));
-      const params = { ...opts, status: 'draft' as const, populate };
+      const params = { ...opts, status: opts?.status ?? ('draft' as const), populate };
 
       return strapi.documents(uid).create(params);
     },
