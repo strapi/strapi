@@ -575,13 +575,13 @@ const PublishAction: DocumentActionComponent = ({
         );
 
         if ('data' in res && collectionType !== SINGLE_TYPES) {
-          /**
-           * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
-           */
-          navigate({
-            pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-            search: rawQuery,
-          });
+          navigate(
+            {
+              pathname: `../${res.data.documentId}`,
+              search: rawQuery,
+            },
+            { relative: 'path' }
+          );
         } else if (
           'error' in res &&
           isBaseQueryError(res.error) &&
@@ -674,13 +674,13 @@ const UpdateAction: DocumentActionComponent = ({
           );
 
           if ('data' in res) {
-            /**
-             * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
-             */
-            navigate({
-              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-              search: rawQuery,
-            });
+            navigate(
+              {
+                pathname: `../${res.data.documentId}`,
+                search: rawQuery,
+              },
+              { relative: 'path' }
+            );
           } else if (
             'error' in res &&
             isBaseQueryError(res.error) &&
@@ -718,15 +718,12 @@ const UpdateAction: DocumentActionComponent = ({
           );
 
           if ('data' in res && collectionType !== SINGLE_TYPES) {
-            /**
-             * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
-             */
             navigate(
               {
-                pathname: `../${collectionType}/${model}/${res.data.documentId}`,
+                pathname: `../${res.data.documentId}`,
                 search: rawQuery,
               },
-              { replace: true }
+              { replace: true, relative: 'path' }
             );
           } else if (
             'error' in res &&
