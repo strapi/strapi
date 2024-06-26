@@ -21,7 +21,7 @@ export async function handleCloudLogin(): Promise<void> {
     debug: process.argv.includes('--debug'),
     timestamp: false,
   });
-  const cloudApiService = await cloudServices.cloudApiFactory();
+  const cloudApiService = await cloudServices.cloudApiFactory({ logger });
   const defaultErrorMessage =
     'An error occurred while trying to interact with Strapi Cloud. Use strapi deploy command once the project is generated.';
 
