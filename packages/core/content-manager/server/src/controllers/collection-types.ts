@@ -660,10 +660,7 @@ export default {
       .populateFromQuery(permissionQuery)
       .build();
 
-    const {
-      locale,
-      status = contentTypes.hasDraftAndPublish(strapi.getModel(model)) ? 'draft' : 'published',
-    } = await getDocumentLocaleAndStatus(ctx.query);
+    const { locale, status = 'draft' } = await getDocumentLocaleAndStatus(ctx.query);
     const entity = await documentManager.findOne(id, model, { populate, locale, status });
 
     if (!entity) {
