@@ -209,13 +209,13 @@ const createManyToMany = (
  *  set info in the traget
  */
 const createMorphToOne = (attributeName: string, attribute: Relation.MorphToOne) => {
-  const idColumnName = 'target_id';
-  const typeColumnName = 'target_type';
+  // TODO: (breaking) support ${attributeName}_id and ${attributeName}_type as default column names
+  const idColumnName = `target_id`;
+  const typeColumnName = `target_type`;
 
   Object.assign(attribute, {
     owner: true,
-    morphColumn: {
-      // TODO: add referenced column
+    morphColumn: attribute.morphColumn ?? {
       typeColumn: {
         name: typeColumnName,
       },
@@ -225,8 +225,6 @@ const createMorphToOne = (attributeName: string, attribute: Relation.MorphToOne)
       },
     },
   });
-
-  // TODO: implement bidirectional
 };
 
 /**

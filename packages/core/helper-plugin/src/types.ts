@@ -61,7 +61,7 @@ export interface FilterData {
     options?: string[];
     mainField?: {
       name: string;
-      schema?: Attribute.Any;
+      type?: Attribute.Any['type'];
     };
   };
   trackedEvent?: TrackingEvent;

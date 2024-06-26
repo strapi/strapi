@@ -89,6 +89,7 @@ module.exports = [
     required: false,
     schema: {
       type: 'object',
+      additionalProperties: true,
     },
     style: 'deepObject',
   },

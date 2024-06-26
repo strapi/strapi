@@ -280,8 +280,8 @@ export default {
           ordering: 'desc',
         } as any,
         {
-          page: ctx.request.query.page,
-          pageSize: ctx.request.query.pageSize,
+          page: 1,
+          pageSize: ids.length,
         }
       );
 

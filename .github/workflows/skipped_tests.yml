@@ -66,6 +66,13 @@ jobs:
     steps:
       - run: echo "Skipped"
 
+  cli:
+    name: 'CLI Tests'
+    needs: [changes, build]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Skipped"
+
   api_ce_pg:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]

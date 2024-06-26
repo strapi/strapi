@@ -45,7 +45,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Run lint
@@ -62,7 +62,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -94,7 +94,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -122,7 +122,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -144,7 +144,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-      - uses: nrwl/nx-set-shas@v3
+      - uses: nrwl/nx-set-shas@v4
       - name: Monorepo install
         uses: ./.github/actions/yarn-nm-install
       - name: Monorepo build
@@ -225,6 +225,7 @@ jobs:
         uses: ./.github/actions/run-e2e-tests
         with:
           runEE: true
+          enableFutureFeatures: true
           jestOptions: --project=${{ matrix.project }}
 
       - uses: actions/upload-artifact@v4
@@ -233,6 +234,29 @@ jobs:
           name: ee-playwright-trace
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
+
+  cli:
+    timeout-minutes: 60
+    needs: [changes, build, typescript]
+    name: 'CLI Tests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run CLI tests
+        run: yarn test:cli
 
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
@@ -294,7 +318,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -449,7 +472,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
