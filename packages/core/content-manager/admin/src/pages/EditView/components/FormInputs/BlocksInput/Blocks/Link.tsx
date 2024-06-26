@@ -34,21 +34,10 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const [linkText, setLinkText] = React.useState(elementText);
     const [linkUrl, setLinkUrl] = React.useState(link.url);
     const linkInputRef = React.useRef<HTMLInputElement>(null);
-    const [showRemoveButton, setShowRemoveButton] = React.useState(false);
+    const isLastInsertedLink = editor.lastInsertedLinkPath
+      ? !Path.equals(path, editor.lastInsertedLinkPath)
+      : true;
     const [isSaveDisabled, setIsSaveDisabled] = React.useState(false);
-
-    const handleOpenChange: Popover.Props['onOpenChange'] = (isOpen) => {
-      if (isOpen) {
-        setPopoverOpen(isOpen);
-        setShowRemoveButton(isOpen);
-      } else {
-        setPopoverOpen(isOpen);
-        if (link.url === '') {
-          removeLink(editor);
-        }
-        ReactEditor.focus(editor);
-      }
-    };
 
     const onLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setIsSaveDisabled(false);
@@ -76,6 +65,16 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       editLink(editor, { url: linkUrl, text: linkText });
       setPopoverOpen(false);
       editor.lastInsertedLinkPath = null;
+      ReactEditor.focus(editor);
+    };
+
+    const handleClose = () => {
+      if (link.url === '') {
+        removeLink(editor);
+      }
+
+      setPopoverOpen(false);
+      ReactEditor.focus(editor);
     };
 
     React.useEffect(() => {
@@ -89,14 +88,20 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       (link.url && link.url === linkUrl && elementText && elementText === linkText);
 
     return (
-      <Popover.Root onOpenChange={handleOpenChange} open={popoverOpen}>
+      <Popover.Root open={popoverOpen}>
         <Popover.Trigger>
-          <StyledBaseLink {...attributes} ref={forwardedRef} href={link.url} color="primary600">
+          <StyledBaseLink
+            {...attributes}
+            ref={forwardedRef}
+            href={link.url}
+            onClick={() => setPopoverOpen(true)}
+            color="primary600"
+          >
             {children}
           </StyledBaseLink>
         </Popover.Trigger>
-        <Popover.Content>
-          <Flex padding={4} tag="form" onSubmit={handleSave} direction="column" gap={4}>
+        <Popover.Content onPointerDownOutside={handleClose}>
+          <Flex padding={4} direction="column" gap={4}>
             <Field.Root width="368px">
               <Flex direction="column" gap={1} alignItems="stretch">
                 <Field.Label>
@@ -142,7 +147,7 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
               <RemoveButton
                 variant="danger-light"
                 onClick={() => removeLink(editor)}
-                $visible={showRemoveButton}
+                $visible={isLastInsertedLink}
               >
                 {formatMessage({
                   id: 'components.Blocks.popover.remove',
@@ -150,13 +155,13 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
                 })}
               </RemoveButton>
               <Flex gap={2}>
-                <Button variant="tertiary" onClick={() => handleOpenChange(false)}>
+                <Button variant="tertiary" onClick={handleClose}>
                   {formatMessage({
                     id: 'components.Blocks.popover.cancel',
                     defaultMessage: 'Cancel',
                   })}
                 </Button>
-                <Button type="submit" disabled={Boolean(inputNotDirty) || isSaveDisabled}>
+                <Button disabled={Boolean(inputNotDirty) || isSaveDisabled} onClick={handleSave}>
                   {formatMessage({
                     id: 'components.Blocks.popover.save',
                     defaultMessage: 'Save',
