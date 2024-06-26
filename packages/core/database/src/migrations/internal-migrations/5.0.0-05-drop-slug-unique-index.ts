@@ -9,10 +9,12 @@ import type { Knex } from 'knex';
 
 import type { Migration } from '../common';
 
-const dropIndex = async (knex: Knex, tableName: string, columName: string) => {
+const dropIndex = async (knex: Knex, tableName: string, columnName: string) => {
   try {
     await knex.schema.alterTable(tableName, (table) => {
-      table.dropUnique([columName]);
+      // NOTE: Can not use "identifiers" utility, as the 5.0.0-01 migration does not rename this particular index
+      // to `tableName_columnName_uq`.
+      table.dropUnique([columnName], `${tableName}_${columnName}_unique`);
     });
   } catch (error) {
     // If unique index does not exist, do nothing
