@@ -131,7 +131,7 @@ const createBuildContext = async <TOptions extends BaseOptions>({
 
   const features = strapiInstance.config.get('features', undefined);
 
-  const { bundler = 'webpack', ...restOptions } = options;
+  const { bundler = 'vite', ...restOptions } = options;
 
   const buildContext = {
     appDir,

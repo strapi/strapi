@@ -93,7 +93,13 @@ const ConfirmDialog = ({
       <Dialog.Footer>
         {startAction || (
           <Dialog.Cancel>
-            <Button fullWidth variant="tertiary">
+            <Button
+              fullWidth
+              variant="tertiary"
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+            >
               {formatMessage({
                 id: 'app.components.Button.cancel',
                 defaultMessage: 'Cancel',
