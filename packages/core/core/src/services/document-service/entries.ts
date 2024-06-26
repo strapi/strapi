@@ -26,7 +26,7 @@ const createEntriesService = (uid: UID.ContentType) => {
 
     const validData = await entityValidator.validateEntityCreation(contentType, data, {
       // Note: publishedAt value will always be set when DP is disabled
-      isDraft: params.status ? params.status === 'draft' : !params?.data?.publishedAt,
+      isDraft: !params?.data?.publishedAt,
       locale: params?.locale,
     });
 
