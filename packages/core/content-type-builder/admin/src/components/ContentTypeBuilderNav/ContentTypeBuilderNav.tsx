@@ -50,7 +50,7 @@ export const ContentTypeBuilderNav = () => {
                 defaultMessage: section.title.defaultMessage,
               })}
               collapsable
-              badgeLabel={section.linksCount}
+              badgeLabel={section.linksCount.toString()}
             >
               {section.links.map((link) => {
                 if (link.links) {
