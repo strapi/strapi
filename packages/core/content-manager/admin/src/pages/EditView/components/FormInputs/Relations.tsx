@@ -81,7 +81,7 @@ interface RelationsFieldProps
   extends Omit<Extract<EditFieldLayout, { type: 'relation' }>, 'size' | 'hint'>,
     Pick<InputProps, 'hint'> {}
 
-interface RelationsFormValue {
+export interface RelationsFormValue {
   connect?: Relation[];
   disconnect?: Pick<Relation, 'id'>[];
 }
