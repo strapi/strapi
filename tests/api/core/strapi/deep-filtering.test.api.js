@@ -152,6 +152,40 @@ describe('Deep Filtering API', () => {
         expect(res.body.data[0]).toMatchObject(data.collector[0]);
       });
 
+      test('should return 2 results when deep filtering with nested $or', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/collectors',
+          qs: {
+            filters: {
+              cards: {
+                $or: [
+                  {
+                    name: data.card[0].attributes.name,
+                  },
+                  {
+                    name: data.card[1].attributes.name,
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 2,
+        });
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(2);
+        expect(res.body.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining(data.collector[0]),
+            expect.objectContaining(data.collector[1]),
+          ])
+        );
+      });
+
       test('should return 2 results when deep filtering with $or', async () => {
         const res = await rq({
           method: 'GET',
@@ -186,6 +220,77 @@ describe('Deep Filtering API', () => {
             expect.objectContaining(data.collector[1]),
           ])
         );
+      });
+
+      test('should return a result when deep filtering with nested $and', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/collectors',
+          qs: {
+            filters: {
+              cards: {
+                $and: [
+                  {
+                    name: {
+                      $contains: 'HUGO',
+                    },
+                  },
+                  {
+                    name: {
+                      $contains: 'LLORIS',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          total: 2,
+        });
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(2);
+        expect(res.body.data).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining(data.collector[0]),
+            expect.objectContaining(data.collector[1]),
+          ])
+        );
+      });
+
+      test('should return no result when deep filtering with nested $and', async () => {
+        const res = await rq({
+          method: 'GET',
+          url: '/collectors',
+          qs: {
+            filters: {
+              cards: {
+                $and: [
+                  {
+                    name: {
+                      $contains: 'HUGO',
+                    },
+                  },
+                  {
+                    name: {
+                      $contains: 'UMTITI',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        });
+
+        expect(res.body.meta.pagination).toMatchObject({
+          ...pagination,
+          pageCount: 0,
+          total: 0,
+        });
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(0);
       });
     });
 

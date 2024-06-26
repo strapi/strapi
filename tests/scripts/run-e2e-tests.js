@@ -59,10 +59,10 @@ const setupTestEnvironment = async (generatedAppPath) => {
 yargs
   .parserConfiguration({
     /**
-     * This lets us pass any other arguments to playwright
-     * e.g. the name of a specific test or the project we want to run
+     * When unknown options is false, using -- to separate playwright args from test:e2e args works
+     * When it is true, the script gets confused about additional arguments, with or without using -- to separate commands
      */
-    'unknown-options-as-args': true,
+    'unknown-options-as-args': false,
   })
   .command({
     command: '*',
@@ -214,6 +214,28 @@ module.exports = config
 
               await fs.writeFile(pathToPlaywrightConfig, configFileTemplate);
 
+              // Store the filesystem state with git so it can be reset between tests
+              // TODO: if we have a large test test suite, it might be worth it to run a `strapi start` and then shutdown here to generate documentation and types only once and save unneccessary server restarts from those files being cleared every time
+              console.log('Initializing git');
+
+              const gitUser = ['-c', 'user.name=Strapi CLI', '-c', 'user.email=test@strapi.io'];
+
+              await execa('git', [...gitUser, 'init'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+
+              // we need to use -A to track even hidden files like .env; remember we're only using git as a file state manager
+              await execa('git', [...gitUser, 'add', '-A', '.'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+
+              await execa('git', [...gitUser, 'commit', '-m', 'initial commit'], {
+                stdio: 'inherit',
+                cwd: testAppPath,
+              });
+
               console.log(`Running ${chalk.blue(domain)} e2e tests`);
 
               await execa(
@@ -225,6 +247,7 @@ module.exports = config
                   env: {
                     PORT: port,
                     HOST: '127.0.0.1',
+                    TEST_APP_PATH: testAppPath,
                     STRAPI_DISABLE_EE: !process.env.STRAPI_LICENSE,
                   },
                 }

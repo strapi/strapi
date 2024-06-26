@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { describeOnCondition } from '../../utils/shared';
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
@@ -93,33 +93,52 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
   });
 
   test('A user should be able to perform bulk release on entries', async ({ page }) => {
-    await page.getByRole('link', { name: 'Content Manager' }).click();
+    await test.step('bulk release', async () => {
+      // Navigate to the releases page
+      await page.getByRole('link', { name: 'Releases' }).click();
+      await page.getByRole('button', { name: 'New release' }).click();
+      await expect(page.getByRole('dialog', { name: 'New release' })).toBeVisible();
+      // Create a new release
+      const newReleaseName = 'The Diamond Dogs';
+      await page.getByRole('textbox', { name: 'Name' }).fill(newReleaseName);
+      // Uncheck default scheduling of a release and save
+      await page.getByRole('checkbox', { name: 'Schedule release' }).uncheck();
+      await page.getByRole('button', { name: 'Continue' }).click();
+      // Wait for client side redirect to created release
+      await page.waitForURL('/admin/plugins/content-releases/*');
+      await expect(page.getByRole('heading', { name: newReleaseName })).toBeVisible();
 
-    await expect(page).toHaveTitle('Content Manager');
-    await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-    const publishedItems = page.getByRole('gridcell', { name: 'published' });
-    expect(publishedItems).toHaveCount(2);
-    const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
+      // Navigate to the content manager
+      await page.getByRole('link', { name: 'Open the Content Manager' }).click();
+      await expect(page).toHaveTitle('Content Manager');
+      await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
+      expect(page.getByRole('gridcell', { name: 'published' })).toHaveCount(2);
 
-    // Select all entries to release
-    await checkbox.check();
-    const addToRelease = page.getByRole('button', { name: 'add to release' });
-    await addToRelease.click();
+      // Select all entries to release
+      await page.getByRole('checkbox', { name: 'Select all entries' }).check();
+      await page.getByRole('button', { name: 'add to release' }).click();
 
-    // Wait for the add to release dialog to appear
-    await page
-      .getByRole('combobox', {
-        name: 'Select a release',
-      })
-      .click();
+      // Wait for the add to release dialog to appear
+      await page
+        .getByRole('combobox', {
+          name: 'Select a release',
+        })
+        .click();
 
-    await page.getByRole('option', { name: 'Trent Crimm: The Independent' }).click();
-    const unpublishButton = page.getByText('unpublish', { exact: true });
-    await unpublishButton.click();
-    await page.getByText('continue').click();
-    await page.getByText(/Successfully added to release./).waitFor({
-      state: 'visible',
-      timeout: 5000,
+      await page.getByRole('option', { name: 'The Diamond Dogs' }).click();
+      await page.getByText('unpublish', { exact: true }).click();
+      await page.getByText('continue').click();
+      await page.getByText(/Successfully added to release./).waitFor({
+        state: 'visible',
+        timeout: 5000,
+      });
+    });
+
+    await test.step('releases should be updated in the release column of list view', async () => {
+      const releaseColumn = page.getByRole('button', { name: '2 releases' });
+      await releaseColumn.first().click();
+      await expect(page.getByText('The Diamond Dogs')).toBeVisible();
+      await expect(page.getByText('Trent Crimm: The Independent')).toBeVisible();
     });
   });
 });

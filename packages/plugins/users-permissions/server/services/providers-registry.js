@@ -311,6 +311,7 @@ const getInitialProviders = ({ purest }) => ({
             origin: 'https://www.patreon.com',
             path: 'api/oauth2/{path}',
             headers: {
+              'user-agent': 'strapi',
               authorization: 'Bearer {auth}',
             },
           },

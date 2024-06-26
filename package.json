@@ -33,6 +33,7 @@
     "build": "nx run-many --target=build --nx-ignore-cycles",
     "build:size": "cd examples/getstarted && yarn build",
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
+    "build:watch": "nx watch --all --nx-ignore-cycles -- nx run \\$NX_PROJECT_NAME:build --nx-ignore-cycles",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
     "doc:api": "node scripts/open-api/serve.js",
     "format": "yarn format:code && yarn format:other",
@@ -48,7 +49,11 @@
     "prettier:write": "prettier --write \"**/*.{js,ts,jsx,tsx,json,md,mdx,css,scss,yaml,yml}\"",
     "setup": "yarn && yarn clean && yarn build --skip-nx-cache",
     "test:api": "node tests/scripts/run-api-tests.js",
-    "test:clean": "rimraf ./coverage",
+    "test:api:clean": "rimraf ./coverage",
+    "test:clean": "yarn test:api:clean && yarn test:e2e:clean",
+    "test:cli": "node tests/scripts/run-cli-tests.js",
+    "test:cli:clean": "node tests/scripts/run-cli-tests.js clean",
+    "test:cli:debug": "node tests/scripts/run-cli-tests.js --debug",
     "test:e2e": "node tests/scripts/run-e2e-tests.js",
     "test:e2e:clean": "node tests/scripts/run-e2e-tests.js clean",
     "test:e2e:debug": "node tests/scripts/run-e2e-tests.js --debug",
@@ -68,11 +73,10 @@
     "test:ts:packages": "nx run-many --target=test:ts --nx-ignore-cycles",
     "test:unit": "jest --config jest.config.js",
     "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
-    "test:unit:watch": "run test:unit --watch",
-    "watch": "nx run-many --target=watch --nx-ignore-cycles"
+    "test:unit:watch": "run test:unit --watch"
   },
   "resolutions": {
-    "@strapi/design-system": "1.17.0-typescript.0",
+    "@strapi/design-system": "1.20.0-typescript.0",
     "@types/koa": "2.13.4"
   },
   "devDependencies": {
@@ -97,6 +101,7 @@
     "babel-eslint": "10.1.0",
     "chalk": "4.1.2",
     "chokidar": "3.5.3",
+    "coffee": "5.5.1",
     "core-js": "3.33.0",
     "cross-env": "7.0.3",
     "dotenv": "14.2.0",
