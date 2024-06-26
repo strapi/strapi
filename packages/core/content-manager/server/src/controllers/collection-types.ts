@@ -191,8 +191,7 @@ export default {
       .countRelations()
       .build();
 
-    const { locale, status = contentTypes.hasDraftAndPublish(model) ? 'draft' : 'published' } =
-      await getDocumentLocaleAndStatus(ctx.query);
+    const { locale, status = 'draft' } = await getDocumentLocaleAndStatus(ctx.query);
 
     const version = await documentManager.findOne(id, model, {
       populate,
