@@ -117,6 +117,8 @@ const ListPage = () => {
 
         return;
       }
+
+      setWebhooksToDelete((prev) => prev.filter((webhookId) => webhookId !== id));
     } catch {
       toggleNotification({
         type: 'danger',
