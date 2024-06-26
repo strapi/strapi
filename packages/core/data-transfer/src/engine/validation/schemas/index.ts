@@ -1,4 +1,4 @@
-import type { Schema } from '@strapi/strapi';
+import type { Schema } from '@strapi/types';
 import { isArray, isObject, reject } from 'lodash/fp';
 import type { Diff } from '../../../utils/json';
 import * as utils from '../../../utils';
@@ -21,11 +21,11 @@ const isAttributeIgnorable = (diff: Diff) => {
 // exclude admin tables that are not transferrable and are optionally available (such as audit logs which are only available in EE)
 const isOptionalAdminType = (diff: Diff) => {
   if ('value' in diff && isObject(diff.value)) {
-    const name = (diff?.value as Schema.Schema)?.info?.singularName;
+    const name = (diff?.value as Schema.ContentType)?.info?.singularName;
     return (OPTIONAL_CONTENT_TYPES as ReadonlyArray<string | undefined>).includes(name);
   }
   if ('values' in diff && isArray(diff.values) && isObject(diff.values[0])) {
-    const name = (diff?.values[0] as Schema.Schema)?.info?.singularName;
+    const name = (diff?.values[0] as Schema.ContentType)?.info?.singularName;
     return (OPTIONAL_CONTENT_TYPES as ReadonlyArray<string | undefined>).includes(name);
   }
   return false;

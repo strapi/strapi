@@ -6,6 +6,5 @@
       "@tests/*": ["./tests/*"]
     }
   },
-  "include": ["src", "tests", "jest.config.front.js", "webpack.config.js"],
-  "exclude": ["node_modules"]
+  "include": ["src", "custom.d.ts"]
 }

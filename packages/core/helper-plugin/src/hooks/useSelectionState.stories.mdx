@@ -1,4 +1,4 @@
-{/*- useLockScroll.stories.mdx -*/}
+{/* - useLockScroll.stories.mdx - */}
 
 import { Meta } from '@storybook/addon-docs';
 
@@ -14,12 +14,18 @@ This hook is used in order to facilitate the select / partial selection of a glo
 import { useSelectionState } from '@strapi/helper-plugin';
 
 const Modal = ({ onToggle, isOpen }) => {
-  const [selectedAssets, { selectOne, selectAll, selectOnly, selectMultiple, deselectMultiple, setSelections }] = useSelectionState(
+  const [
+    selectedAssets,
+    { selectOne, selectAll, selectOnly, selectMultiple, deselectMultiple, setSelections },
+  ] = useSelectionState(
     ['id'], // This are the comparaison attribute names
     []
   );
 
-  const elements = [{ id: 1, name: 'Hello' }, { id: 2, name: 'World' }];
+  const elements = [
+    { id: 1, name: 'Hello' },
+    { id: 2, name: 'World' },
+  ];
 
   // selectOne({ id: 1 name: 'Hello' }) add the object to the selection list
   // selectOnly({ id: 1 name: 'Hello' }) add the object to the selection list and remove every others in the list
@@ -31,7 +37,7 @@ const Modal = ({ onToggle, isOpen }) => {
   return (
     <div>
       <button onClick={() => selectAll(assets)}>Select all</button>
-      {elements.map(el => (
+      {elements.map((el) => (
         <div key={el.id}>{el.name}</div>
       ))}
     </div>

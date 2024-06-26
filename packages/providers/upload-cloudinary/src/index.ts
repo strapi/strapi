@@ -14,6 +14,7 @@ interface File {
   ext?: string;
   mime: string;
   size: number;
+  sizeInBytes: number;
   url: string;
   previewUrl?: string;
   path?: string;
@@ -23,7 +24,7 @@ interface File {
   buffer?: Buffer;
 }
 
-export = {
+export default {
   init(options: ConfigOptions) {
     cloudinary.config(options);
 

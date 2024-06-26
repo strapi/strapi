@@ -2,6 +2,7 @@ import { Writable, Readable } from 'stream';
 import path from 'path';
 import * as fse from 'fs-extra';
 import type { Knex } from 'knex';
+import type { LoadedStrapi } from '@strapi/types';
 import type {
   IAsset,
   IDestinationProvider,
@@ -13,17 +14,21 @@ import type {
 
 import { restore } from './strategies';
 import * as utils from '../../../utils';
-import { ProviderTransferError, ProviderValidationError } from '../../../errors/providers';
+import {
+  ProviderInitializationError,
+  ProviderTransferError,
+  ProviderValidationError,
+} from '../../../errors/providers';
 import { assertValidStrapi } from '../../../utils/providers';
 
 export const VALID_CONFLICT_STRATEGIES = ['restore'];
 export const DEFAULT_CONFLICT_STRATEGY = 'restore';
 
 export interface ILocalStrapiDestinationProviderOptions {
-  getStrapi(): Strapi.Strapi | Promise<Strapi.Strapi>; // return an initialized instance of Strapi
+  getStrapi(): LoadedStrapi | Promise<LoadedStrapi>; // return an initialized instance of Strapi
 
   autoDestroy?: boolean; // shut down the instance returned by getStrapi() at the end of the transfer
-  restore?: restore.IRestoreOptions; // erase all data in strapi database before transfer
+  restore?: restore.IRestoreOptions; // erase data in strapi database before transfer; required if strategy is 'restore'
   strategy: 'restore'; // conflict management strategy; only the restore strategy is available at this time
 }
 
@@ -34,11 +39,13 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   options: ILocalStrapiDestinationProviderOptions;
 
-  strapi?: Strapi.Strapi;
+  strapi?: LoadedStrapi;
 
   transaction?: Transaction;
 
   uploadsBackupDirectoryName: string;
+
+  onWarning?: ((message: string) => void) | undefined;
 
   /**
    * The entities mapper is used to map old entities to their new IDs
@@ -54,9 +61,28 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async bootstrap(): Promise<void> {
     this.#validateOptions();
     this.strapi = await this.options.getStrapi();
+    if (!this.strapi) {
+      throw new ProviderInitializationError('Could not access local strapi');
+    }
 
     this.transaction = utils.transaction.createTransaction(this.strapi);
   }
+
+  // TODO: either move this to restore strategy, or restore strategy should given access to these instead of repeating the logic possibly in a different way
+  #areAssetsIncluded = () => {
+    return this.options.restore?.assets;
+  };
+
+  #isContentTypeIncluded = (type: string) => {
+    const notIncluded =
+      this.options.restore?.entities?.include &&
+      !this.options.restore?.entities?.include?.includes(type);
+    const excluded =
+      this.options.restore?.entities?.exclude &&
+      this.options.restore?.entities.exclude.includes(type);
+
+    return !excluded && !notIncluded;
+  };
 
   async close(): Promise<void> {
     const { autoDestroy } = this.options;
@@ -76,17 +102,30 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
         validStrategies: VALID_CONFLICT_STRATEGIES,
       });
     }
+
+    // require restore options when using restore
+    if (this.options.strategy === 'restore' && !this.options.restore) {
+      throw new ProviderValidationError('Missing restore options');
+    }
   }
 
-  async #deleteAll() {
+  async #deleteFromRestoreOptions() {
     assertValidStrapi(this.strapi);
+    if (!this.options.restore) {
+      throw new ProviderValidationError('Missing restore options');
+    }
     return restore.deleteRecords(this.strapi, this.options.restore);
   }
 
   async #deleteAllAssets(trx?: Knex.Transaction) {
     assertValidStrapi(this.strapi);
 
-    const stream: Readable = strapi.db
+    // if we're not restoring files, don't touch the files
+    if (!this.#areAssetsIncluded()) {
+      return;
+    }
+
+    const stream: Readable = this.strapi.db
       // Create a query builder instance (default type is 'select')
       .queryBuilder('plugin::upload.file')
       // Fetch all columns
@@ -98,10 +137,10 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
     // TODO use bulk delete when exists in providers
     for await (const file of stream) {
-      await strapi.plugin('upload').provider.delete(file);
+      await this.strapi.plugin('upload').provider.delete(file);
       if (file.formats) {
         for (const fileFormat of Object.values(file.formats)) {
-          await strapi.plugin('upload').provider.delete(fileFormat);
+          await this.strapi.plugin('upload').provider.delete(fileFormat);
         }
       }
     }
@@ -117,11 +156,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     }
 
     await this.transaction?.attach(async (trx) => {
-      await this.#handleAssetsBackup();
       try {
         if (this.options.strategy === 'restore') {
+          await this.#handleAssetsBackup();
           await this.#deleteAllAssets(trx);
-          await this.#deleteAll();
+          await this.#deleteFromRestoreOptions();
         }
       } catch (error) {
         throw new Error(`restore failed ${error}`);
@@ -130,7 +169,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   getMetadata(): IMetadata {
-    const strapiVersion = strapi.config.get('info.strapi');
+    assertValidStrapi(this.strapi, 'Not able to get Schemas');
+    const strapiVersion = this.strapi.config.get<string>('info.strapi');
     const createdAt = new Date().toISOString();
 
     return {
@@ -181,7 +221,12 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async #handleAssetsBackup() {
     assertValidStrapi(this.strapi, 'Not able to create the assets backup');
 
-    if (strapi.config.get('plugin.upload').provider === 'local') {
+    // if we're not restoring assets, don't back them up because they won't be touched
+    if (!this.#areAssetsIncluded()) {
+      return;
+    }
+
+    if (this.strapi.config.get<{ provider: string }>('plugin.upload').provider === 'local') {
       const assetsDirectory = path.join(this.strapi.dirs.static.public, 'uploads');
       const backupDirectory = path.join(
         this.strapi.dirs.static.public,
@@ -215,7 +260,14 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   }
 
   async #removeAssetsBackup() {
-    if (strapi.config.get('plugin.upload').provider === 'local') {
+    assertValidStrapi(this.strapi, 'Not able to remove Assets');
+    // if we're not restoring assets, don't back them up because they won't be touched
+    if (!this.#areAssetsIncluded()) {
+      return;
+    }
+
+    // TODO: this should catch all thrown errors and bubble it up to engine so it can be reported as a non-fatal diagnostic message telling the user they may need to manually delete assets
+    if (this.strapi.config.get<{ provider: string }>('plugin.upload').provider === 'local') {
       assertValidStrapi(this.strapi);
       const backupDirectory = path.join(
         this.strapi.dirs.static.public,
@@ -229,15 +281,25 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
   async createAssetsWriteStream(): Promise<Writable> {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
+    if (!this.#areAssetsIncluded()) {
+      throw new ProviderTransferError(
+        'Attempting to transfer assets when `assets` is not set in restore options'
+      );
+    }
+
     const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
     const strapi = this.strapi;
     const transaction = this.transaction;
     const backupDirectory = this.uploadsBackupDirectoryName;
+    const fileEntitiesMapper = this.#entitiesMapper['plugin::upload.file'];
+
+    const restoreMediaEntitiesContent = this.#isContentTypeIncluded('plugin::upload.file');
+
     return new Writable({
       objectMode: true,
       async final(next) {
-        // Deletes the backup folder
-        removeAssetsBackup();
+        // Delete the backup folder
+        await removeAssetsBackup();
         next();
       },
       async write(chunk: IAsset, _encoding, callback) {
@@ -276,28 +338,38 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               });
             return;
           }
+
           const uploadData = {
             ...chunk.metadata,
             stream: Readable.from(chunk.stream),
             buffer: chunk?.buffer,
           };
 
-          const provider = strapi.config.get('plugin.upload').provider;
+          const provider = strapi.config.get<{ provider: string }>('plugin.upload').provider;
 
           try {
             await strapi.plugin('upload').provider.uploadStream(uploadData);
 
+            // if we're not supposed to transfer the associated entities, stop here
+            if (!restoreMediaEntitiesContent) {
+              return callback();
+            }
+
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {
+              // Support usage of main hash for older versions
+              const condition = uploadData?.id
+                ? { id: fileEntitiesMapper[uploadData.id] }
+                : { hash: uploadData.mainHash };
               const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: { hash: uploadData.mainHash },
+                where: condition,
               });
               const specificFormat = entry?.formats?.[uploadData.type];
               if (specificFormat) {
                 specificFormat.url = uploadData.url;
               }
               await strapi.db.query('plugin::upload.file').update({
-                where: { hash: uploadData.mainHash },
+                where: { id: entry.id },
                 data: {
                   formats: entry.formats,
                   provider,
@@ -306,11 +378,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               return callback();
             }
             const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-              where: { hash: uploadData.hash },
+              where: { id: fileEntitiesMapper[uploadData.id] },
             });
             entry.url = uploadData.url;
             await strapi.db.query('plugin::upload.file').update({
-              where: { hash: uploadData.hash },
+              where: { id: entry.id },
               data: {
                 url: entry.url,
                 provider,
@@ -350,7 +422,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const mapID = (uid: string, id: number): number | undefined => this.#entitiesMapper[uid]?.[id];
 
     if (strategy === 'restore') {
-      return restore.createLinksWriteStream(mapID, this.strapi, this.transaction);
+      return restore.createLinksWriteStream(mapID, this.strapi, this.transaction, this.onWarning);
     }
 
     throw new ProviderValidationError(`Invalid strategy ${strategy}`, {

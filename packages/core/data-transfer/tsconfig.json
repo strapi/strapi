@@ -1,8 +1,5 @@
 {
   "extends": "tsconfig/base.json",
-  "compilerOptions": {
-    "outDir": "dist"
-  },
-  "include": ["types", "src"],
-  "exclude": ["node_modules", "**/__tests__/**"]
+  "include": ["types", "src", "packup.config.ts"],
+  "exclude": ["node_modules"]
 }

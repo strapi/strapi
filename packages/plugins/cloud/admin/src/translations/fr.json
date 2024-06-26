@@ -1,0 +1,17 @@
+{
+  "Plugin.name": "Déploiement",
+  "Homepage.title": "Hébergement cloud entièrement géré pour votre projet Strapi",
+  "Homepage.subTitle": "Suivez ce processus en 2 étapes pour obtenir tout ce dont vous avez besoin pour exécuter Strapi en production.",
+  "Homepage.githubBox.title.versioned": "Projet uploadé sur GitHub",
+  "Homepage.githubBox.title.not-versioned": "Upload ton projet sur GitHub",
+  "Homepage.githubBox.subTitle.versioned": "Bien joué ! Il ne manque plus qu'une étape pour déployer ton projet sur Strapi Cloud",
+  "Homepage.githubBox.subTitle.not-versioned": "Ton projet doit être versionné sur GitHub avant d'être déployé sur Strapi Cloud.",
+  "Homepage.githubBox.buttonText": "Upload sur GitHub",
+  "Homepage.cloudBox.title": "Deploie sur Strapi Cloud",
+  "Homepage.cloudBox.subTitle": "Profitez d'une stack opptimisé pour Strapi comprenant une base de données, un email provider et un CDN.",
+  "Homepage.cloudBox.buttonText": "Deploie sur Strapi Cloud",
+  "Homepage.textBox.label.versioned": "Essaies Strapi Cloud gratuitement !",
+  "Homepage.textBox.label.not-versioned": "Pourquoi uploader mon projet sur GitHub ?",
+  "Homepage.textBox.text.versioned": "Strapi Cloud propose un essai gratuit de 14 jours pour te permettre d'expérimenter ton projet sur le cloud !",
+  "Homepage.textBox.text.not-versioned": "Strapi Cloud récupérera et déploiera ton projet à partir de ton repo GitHub. C’est la meilleure façon de versionner, gérer et déployer votre projet. Suivez les étapes sur GitHub pour l'uploader avec succès"
+}

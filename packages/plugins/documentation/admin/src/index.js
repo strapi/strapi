@@ -24,7 +24,11 @@ export default {
         defaultMessage: 'Documentation',
       },
       permissions: PERMISSIONS.main,
-      Component: () => import(/* webpackChunkName: "documentation-page" */ './pages/PluginPage'),
+      async Component() {
+        const component = await import('./pages/PluginPage');
+
+        return component;
+      },
     });
 
     app.registerPlugin({
@@ -40,17 +44,18 @@ export default {
       },
       id: 'documentation',
       to: `/settings/${pluginId}`,
-      Component: () =>
-        import(/* webpackChunkName: "documentation-settings" */ './pages/SettingsPage'),
+      async Component() {
+        const component = await import('./pages/SettingsPage');
+
+        return component;
+      },
       permissions: PERMISSIONS.main,
     });
   },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map((locale) => {
-        return import(
-          /* webpackChunkName: "documentation-translation-[request]" */ `./translations/${locale}.json`
-        )
+        return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
               data: prefixPluginTranslations(data, pluginId),

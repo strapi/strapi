@@ -1,0 +1,45 @@
+---
+title: Build
+tags:
+  - pack-up
+  - CLI
+---
+
+## Usage
+
+```bash
+$ yarn pack-up build
+```
+
+Builds your current package based on the configuration in your `package.json` and `package.config.ts` (if applicable).
+
+### Options
+
+- `--minify` – minifies the output (default `false`).
+- `--sourcemap` – generates sourcemaps for the output (default `true`).
+
+## API
+
+### Usage
+
+```ts
+import { build } from '@strapi/pack-up';
+
+build();
+```
+
+## Typescript
+
+```ts
+interface BuildOptions {
+  configFile: false;
+  config?: Config;
+  cwd?: string;
+  debug?: boolean;
+  minify?: boolean;
+  silent?: boolean;
+  sourcemap?: boolean;
+}
+
+type Build = (options?: BuildOptions) => Promise<void>;
+```

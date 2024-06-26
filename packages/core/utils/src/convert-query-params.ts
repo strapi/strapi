@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/naming-convention */
 /* eslint-disable max-classes-per-file */
 
 /**
@@ -62,8 +61,8 @@ export interface Params {
   fields?: FieldsParams;
   filters?: FiltersParams;
   populate?: PopulateParams;
-  count: boolean;
-  ordering: unknown;
+  count?: boolean;
+  ordering?: unknown;
   _q?: string;
   limit?: number | string;
   start?: number | string;

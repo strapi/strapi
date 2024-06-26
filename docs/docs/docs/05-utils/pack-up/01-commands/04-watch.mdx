@@ -1,0 +1,38 @@
+---
+title: Watch
+tags:
+  - pack-up
+  - CLI
+---
+
+## Usage
+
+```bash
+$ yarn pack-up watch
+```
+
+Watches your current package for changes and rebuilds when necessary.
+
+## API
+
+### Usage
+
+```ts
+import { watch } from '@strapi/pack-up';
+
+watch();
+```
+
+## Typescript
+
+```ts
+interface WatchOptions {
+  configFile: false;
+  config?: Config;
+  cwd?: string;
+  debug?: boolean;
+  silent?: boolean;
+}
+
+type Watch = (options?: WatchOptions) => Promise<void>;
+```

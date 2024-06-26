@@ -13,6 +13,10 @@ inputs:
     description: 'Allowed hosts for packages resolution'
     required: false
     default: 'https://registry.yarnpkg.com'
+  allowedURLs:
+    description: 'Allowed URLs to enable certain specific resources'
+    required: false
+    default: ''
 runs:
   using: 'composite'
   steps:
@@ -21,4 +25,5 @@ runs:
         LOCKFILE_PATH: ${{ inputs.path }}
         LOCKFILE_TYPE: ${{ inputs.type }}
         LOCKFILE_ALLOWED_HOSTS: ${{ inputs.allowedHosts }}
+        LOCKFILE_ALLOWED_URLS: ${{ inputs.allowedURLs }}
       shell: bash
