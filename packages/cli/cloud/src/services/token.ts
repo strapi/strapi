@@ -62,7 +62,6 @@ export async function tokenServiceFactory({ logger }: { logger: CLIContext['logg
       });
     };
 
-    // Decode the JWT token to get the header and payload
     const decodedToken = jwt.decode(idToken, { complete: true }) as DecodedToken;
     if (!decodedToken) {
       if (typeof idToken === 'undefined' || idToken === '') {
@@ -72,6 +71,7 @@ export async function tokenServiceFactory({ logger }: { logger: CLIContext['logg
           'There seems to be a problem with your login information. Please try logging in again.'
         );
       }
+      return Promise.reject(new Error('Invalid token'));
     }
 
     // Verify the JWT token signature using the JWKS Key
@@ -79,9 +79,11 @@ export async function tokenServiceFactory({ logger }: { logger: CLIContext['logg
       jwt.verify(idToken, getKey, (err: VerifyErrors | null) => {
         if (err) {
           reject(err);
-        } else {
-          resolve();
         }
+        if (decodedToken.payload.exp < Math.floor(Date.now() / 1000)) {
+          reject(new Error('Token is expired'));
+        }
+        resolve();
       });
     });
   }
@@ -121,17 +123,22 @@ export async function tokenServiceFactory({ logger }: { logger: CLIContext['logg
     }
   }
 
-  async function getValidToken() {
-    const token = await retrieveToken();
-    if (!token) {
-      logger.log('No token found. Please login first.');
-      return null;
+  async function getValidToken(
+    ctx: CLIContext,
+    loginAction: (ctx: CLIContext) => Promise<boolean>
+  ) {
+    let token = await retrieveToken();
+
+    while (!token || !(await isTokenValid(token))) {
+      logger.log(
+        token
+          ? 'Oops! Your token seems expired or invalid. Please login again.'
+          : "We couldn't find a valid token. You need to be logged in to use this feature."
+      );
+      if (!(await loginAction(ctx))) return null;
+      token = await retrieveToken();
     }
 
-    if (!(await isTokenValid(token))) {
-      logger.log('Unable to proceed: Token is expired or not valid. Please login again.');
-      return null;
-    }
     return token;
   }
 
