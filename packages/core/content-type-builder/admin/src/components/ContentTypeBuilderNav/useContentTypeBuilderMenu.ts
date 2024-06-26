@@ -199,14 +199,14 @@ export const useContentTypeBuilderMenu = () => {
       };
     }
 
-    const fileteredLinks = section.links
+    const filteredLinks = section.links
       .filter((link) => startsWith(link.title, search))
       .sort((a, b) => formatter.compare(a.title, b.title));
 
     return {
       ...section,
-      links: fileteredLinks,
-      linksCount: fileteredLinks.length,
+      links: filteredLinks,
+      linksCount: filteredLinks.length,
     };
   });
 
