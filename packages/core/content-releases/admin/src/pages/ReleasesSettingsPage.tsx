@@ -96,7 +96,7 @@ export const ReleasesSettingsPage = () => {
         <Form
           method="PUT"
           initialValues={{
-            defaultTimezone: data?.data.defaultTimezone || '',
+            defaultTimezone: data?.data.defaultTimezone,
           }}
           onSubmit={handleSubmit}
           validationSchema={SETTINGS_SCHEMA}

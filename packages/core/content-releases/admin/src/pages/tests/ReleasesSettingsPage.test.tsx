@@ -42,7 +42,7 @@ describe('Releases Settings page', () => {
         res(
           ctx.json({
             data: {
-              defaultTimezone: '',
+              defaultTimezone: null,
             },
           })
         )
