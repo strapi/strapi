@@ -65,8 +65,8 @@ const admin: Plugin.Config.AdminInput = {
         },
         permissions: [],
         async Component() {
-          const { SettingsPage } = await import('./pages/SettingsPage');
-          return { default: SettingsPage };
+          const { ProtectedReleasesSettingsPage } = await import('./pages/ReleasesSettingsPage');
+          return { default: ProtectedReleasesSettingsPage };
         },
       });
 

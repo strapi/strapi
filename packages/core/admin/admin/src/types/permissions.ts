@@ -8,7 +8,7 @@ type SettingsPermissions =
   | 'users'
   | 'webhooks';
 
-type EESettingsPermissions = 'auditLogs' | 'review-workflows' | 'sso';
+type EESettingsPermissions = 'auditLogs' | 'review-workflows' | 'sso' | 'releases';
 
 type CRUDPermissions = {
   main?: Permission[];

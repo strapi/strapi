@@ -72,3 +72,26 @@ export const PERMISSIONS = {
     },
   ],
 } satisfies Record<string, StrapiPermission[]>;
+
+export const PERMISSIONS_SETTINGS = {
+  read: [
+    {
+      action: 'plugin::content-releases.settings.read',
+      subject: null,
+      id: '',
+      actionParameters: {},
+      properties: {},
+      conditions: [],
+    },
+  ],
+  update: [
+    {
+      action: 'plugin::content-releases.settings.update',
+      subject: null,
+      id: '',
+      actionParameters: {},
+      properties: {},
+      conditions: [],
+    },
+  ],
+} satisfies Record<string, StrapiPermission[]>;
