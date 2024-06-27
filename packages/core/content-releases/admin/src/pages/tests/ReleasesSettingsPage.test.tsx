@@ -32,6 +32,7 @@ describe('Releases Settings page', () => {
   });
 
   it('renders the settings page with read permission', async () => {
+    // @ts-expect-error – mocking
     useRBAC.mockImplementation(() => ({
       isLoading: false,
       allowedActions: { canRead: true, canUpdate: false },
@@ -61,6 +62,7 @@ describe('Releases Settings page', () => {
   });
 
   it('renders the settings page with read and update permissions', async () => {
+    // @ts-expect-error – mocking
     useRBAC.mockImplementation(() => ({
       isLoading: false,
       allowedActions: { canRead: true, canUpdate: true },
