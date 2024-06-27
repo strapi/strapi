@@ -1,6 +1,10 @@
+import isLocalhostIp from 'is-localhost-ip';
+// Regular import references a deprecated node module,
+// See https://www.npmjs.com/package/punycode.js#installation
+import punycode from 'punycode/';
 import type { Context } from 'koa';
-
 import _ from 'lodash';
+
 import { yup, validateYupSchema } from '@strapi/utils';
 import { Webhook } from '@strapi/types';
 
@@ -20,7 +24,27 @@ const urlRegex =
 const webhookValidator = yup
   .object({
     name: yup.string().required(),
-    url: yup.string().matches(urlRegex, 'url must be a valid URL').required(),
+    url: yup
+      .string()
+      .matches(urlRegex, 'url must be a valid URL')
+      .required()
+      .test(
+        'is-public-url',
+        "Url is not supported because it isn't reachable over the public internet",
+        async (url) => {
+          if (process.env.NODE_ENV !== 'production') {
+            return true;
+          }
+
+          try {
+            const parsedUrl = new URL(punycode.toASCII(url!));
+            const isLocalUrl = await isLocalhostIp(parsedUrl.hostname);
+            return !isLocalUrl;
+          } catch {
+            return false;
+          }
+        }
+      ),
     headers: yup.lazy((data) => {
       if (typeof data !== 'object') {
         return yup.object().required();
