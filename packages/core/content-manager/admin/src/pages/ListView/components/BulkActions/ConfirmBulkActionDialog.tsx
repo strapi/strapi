@@ -32,7 +32,7 @@ const ConfirmBulkActionDialog = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Dialog.Root onOpenChange={onToggleDialog} open={isOpen}>
+    <Dialog.Root open={isOpen}>
       <Dialog.Content>
         <Dialog.Header>
           {formatMessage({
