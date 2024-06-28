@@ -2,6 +2,7 @@ import { Feather } from '@strapi/icons';
 
 import { PLUGIN_ID } from './constants/plugin';
 import { ContentManagerPlugin } from './content-manager';
+import { historyAdmin } from './history';
 import { reducer } from './modules/reducers';
 import { routes } from './router';
 import { prefixPluginTranslations } from './utils/translations';
@@ -39,6 +40,11 @@ export default {
     });
 
     app.registerPlugin(cm.config);
+  },
+  bootstrap(app: any) {
+    if (typeof historyAdmin.bootstrap === 'function') {
+      historyAdmin.bootstrap(app);
+    }
   },
   async registerTrads({ locales }: { locales: string[] }) {
     const importedTrads = await Promise.all(

@@ -125,7 +125,6 @@ class ContentManagerPlugin {
     ...DEFAULT_ACTIONS,
     ...DEFAULT_TABLE_ROW_ACTIONS,
     ...DEFAULT_HEADER_ACTIONS,
-    HistoryAction,
   ];
   editViewSidePanels: PanelComponent[] = [ActionsPanel];
   headerActions: HeaderActionComponent[] = [];
