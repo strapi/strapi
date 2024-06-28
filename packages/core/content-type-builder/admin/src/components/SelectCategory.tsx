@@ -15,6 +15,7 @@ interface SelectCategoryProps {
   name: string;
   onChange: (value: { target: { name: string; value: any; type: string } }) => void;
   value?: string;
+  isCreating?: boolean;
 }
 
 export const SelectCategory = ({
@@ -23,6 +24,7 @@ export const SelectCategory = ({
   name,
   onChange,
   value = undefined,
+  isCreating,
 }: SelectCategoryProps) => {
   const { formatMessage } = useIntl();
   const { allComponentsCategories } = useDataManager();
@@ -43,7 +45,13 @@ export const SelectCategory = ({
   return (
     <Field.Root error={errorMessage} name={name}>
       <Field.Label>{label}</Field.Label>
-      <Combobox onChange={handleChange} onCreateOption={handleCreateOption} value={value} creatable>
+      <Combobox
+        disabled={!isCreating}
+        onChange={handleChange}
+        onCreateOption={handleCreateOption}
+        value={value}
+        creatable
+      >
         {categories.map((category) => (
           <ComboboxOption key={category} value={category}>
             {category}
