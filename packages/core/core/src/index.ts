@@ -20,3 +20,25 @@ export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi 
 
   return strapi;
 };
+
+// Augment Koa query type based on Strapi query middleware
+
+import * as qs from 'qs';
+
+declare module 'koa' {
+  type ParsedQuery = ReturnType<typeof qs.parse>;
+
+  export interface BaseRequest {
+    _querycache?: ParsedQuery;
+
+    get query(): ParsedQuery;
+    set query(obj: any);
+  }
+
+  export interface BaseContext {
+    _querycache?: ParsedQuery;
+
+    get query(): ParsedQuery;
+    set query(obj: any);
+  }
+}
