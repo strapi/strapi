@@ -1,8 +1,11 @@
-import type { Plugin } from '@strapi/types';
-import type { StrapiApp } from '@strapi/admin/strapi-admin';
-import { DocumentActionComponent } from 'src';
+/* eslint-disable check-file/no-index */
+
+import { type ContentManagerPlugin } from '../content-manager';
+
 import { HistoryAction } from './components/HistoryAction';
-import { ContentManagerPlugin } from 'src/content-manager';
+
+import type { StrapiApp } from '@strapi/admin/strapi-admin';
+import type { Plugin } from '@strapi/types';
 
 const historyAdmin: Partial<Plugin.Config.AdminInput> = {
   bootstrap(app: StrapiApp) {
