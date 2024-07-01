@@ -104,11 +104,9 @@ const watch = async (ctx: BuildContext): Promise<ViteWatcher> => {
         // Manually close the hmr server
         // /!\ This operation MUST be done after calling .close() on the vite
         //      instance to avoid flaky behaviors with attached clients
-        await new Promise<void>((resolve, reject) =>
-          hmrServer.close((err) => {
-            err ? reject(err) : resolve();
-          })
-        );
+        await new Promise<void>((resolve, reject) => {
+          hmrServer.close((err) => (err ? reject(err) : resolve()));
+        });
       }
     },
   };
