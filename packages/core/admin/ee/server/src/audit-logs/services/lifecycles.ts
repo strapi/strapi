@@ -112,11 +112,7 @@ const createAuditLogsLifecycleService = (strapi: Core.Strapi) => {
     const processedEvent = processEvent(name, ...args);
 
     if (processedEvent) {
-      // This stores the event when after the transaction is committed,
-      // so it's not stored if the transaction is rolled back
-      await strapi.db.transaction(({ onCommit }) => {
-        onCommit(() => auditLogsService.saveEvent(processedEvent));
-      });
+      await auditLogsService.saveEvent(processedEvent);
     }
   };
 

@@ -31,6 +31,7 @@ export const mockData = [
         restrictRelationsTo: null,
       },
     ],
+    linksCount: 2,
   },
   {
     name: 'singleTypes',
@@ -54,6 +55,7 @@ export const mockData = [
         restrictRelationsTo: null,
       },
     ],
+    linksCount: 1,
   },
   {
     name: 'components',
@@ -96,5 +98,6 @@ export const mockData = [
         ],
       },
     ],
+    linksCount: 3,
   },
 ];

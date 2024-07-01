@@ -23,22 +23,19 @@ export const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
 
+  const pluginName = formatMessage({
+    id: getTrad('plugin.name'),
+    defaultMessage: 'Content-Type Builder',
+  });
+
   return (
-    <SubNav
-      aria-label={formatMessage({
-        id: `${getTrad('plugin.name')}`,
-        defaultMessage: 'Content-Types Builder',
-      })}
-    >
+    <SubNav aria-label={pluginName}>
       <SubNavHeader
         searchable
         value={searchValue}
         onClear={() => onSearchChange('')}
         onChange={(e) => onSearchChange(e.target.value)}
-        label={formatMessage({
-          id: `${getTrad('plugin.name')}`,
-          defaultMessage: 'Content-Types Builder',
-        })}
+        label={pluginName}
         searchLabel={formatMessage({
           id: 'global.search',
           defaultMessage: 'Search',
@@ -53,7 +50,7 @@ export const ContentTypeBuilderNav = () => {
                 defaultMessage: section.title.defaultMessage,
               })}
               collapsable
-              badgeLabel={section.links.length.toString()}
+              badgeLabel={section.linksCount.toString()}
             >
               {section.links.map((link) => {
                 if (link.links) {
