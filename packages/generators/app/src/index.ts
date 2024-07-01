@@ -13,7 +13,6 @@ import machineID from './utils/machine-id';
 import type { Scope, NewOptions } from './types';
 
 export { default as checkInstallPath } from './utils/check-install-path';
-export { default as checkRequirements } from './utils/check-requirements';
 
 export type { NewOptions } from './types';
 

@@ -5,19 +5,14 @@ import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
 import { tokenServiceFactory, cloudApiFactory, local } from '../services';
 import { getProjectNameFromPackageJson } from './utils/get-project-name-from-pkg';
 import { applyDefaultName } from './utils/apply-default-name';
+import { promptLogin } from '../login/action';
 
 async function handleError(ctx: CLIContext, error: Error) {
-  const tokenService = await tokenServiceFactory(ctx);
   const { logger } = ctx;
-
   logger.debug(error);
   if (error instanceof AxiosError) {
     const errorMessage = typeof error.response?.data === 'string' ? error.response.data : null;
     switch (error.response?.status) {
-      case 401:
-        logger.error('Your session has expired. Please log in again.');
-        await tokenService.eraseToken();
-        return;
       case 403:
         logger.error(
           errorMessage ||
@@ -45,15 +40,30 @@ async function handleError(ctx: CLIContext, error: Error) {
   );
 }
 
+async function createProject(ctx: CLIContext, cloudApi: any, projectInput: ProjectInput) {
+  const { logger } = ctx;
+  const spinner = logger.spinner('Setting up your project...').start();
+  try {
+    const { data } = await cloudApi.createProject(projectInput);
+    await local.save({ project: data });
+    spinner.succeed('Project created successfully!');
+    return data;
+  } catch (e: Error | unknown) {
+    spinner.fail('An error occurred while creating the project on Strapi Cloud.');
+    throw e;
+  }
+}
+
 export default async (ctx: CLIContext) => {
   const { logger } = ctx;
-  const { getValidToken } = await tokenServiceFactory(ctx);
+  const { getValidToken, eraseToken } = await tokenServiceFactory(ctx);
 
-  const token = await getValidToken();
+  const token = await getValidToken(ctx, promptLogin);
   if (!token) {
     return;
   }
-  const cloudApi = await cloudApiFactory(token);
+
+  const cloudApi = await cloudApiFactory(ctx, token);
   const { data: config } = await cloudApi.config();
 
   // We retrieve the questions and default values from the config, and apply the default name immediately
@@ -68,14 +78,17 @@ export default async (ctx: CLIContext) => {
 
   const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
 
-  const spinner = logger.spinner('Setting up your project...').start();
   try {
-    const { data } = await cloudApi.createProject(projectInput);
-    await local.save({ project: data });
-    spinner.succeed('Project created successfully!');
-    return data;
+    return await createProject(ctx, cloudApi, projectInput);
   } catch (e: Error | unknown) {
-    spinner.fail('Failed to create project on Strapi Cloud.');
-    await handleError(ctx, e as Error);
+    if (e instanceof AxiosError && e.response?.status === 401) {
+      logger.warn('Oops! Your session has expired. Please log in again to retry.');
+      await eraseToken();
+      if (await promptLogin(ctx)) {
+        return await createProject(ctx, cloudApi, projectInput);
+      }
+    } else {
+      await handleError(ctx, e as Error);
+    }
   }
 };
