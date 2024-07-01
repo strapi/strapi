@@ -260,6 +260,7 @@ const DynamicZone = ({ name, labelAction, fieldSchema, metadatas }: DynamicZoneP
             {dynamicDisplayedComponents.map(({ componentUid, id }, index) => (
               <DynamicComponent
                 componentUid={componentUid}
+                fieldSchema={fieldSchema}
                 formErrors={formErrors}
                 key={`${componentUid}-${id}`}
                 index={index}
