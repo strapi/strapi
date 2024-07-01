@@ -46,6 +46,8 @@ export const SelectCategory = ({
     <Field.Root error={errorMessage} name={name}>
       <Field.Label>{label}</Field.Label>
       <Combobox
+        // TODO: re-enable category edits, renaming categories of already existing components currently breaks other functionality
+        // See https://github.com/strapi/strapi/issues/20356
         disabled={!isCreating}
         onChange={handleChange}
         onCreateOption={handleCreateOption}
