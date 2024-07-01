@@ -796,7 +796,7 @@ const ListViewPage = ({
                           );
                         })}
                         {/* Actions: edit, duplicate, delete */}
-                        {(canDelete || canPublish) && isBulkable && (
+                        {(canCreate || canDelete || canPublish) && isBulkable && (
                           <Td>
                             <Table.EntityActionsDataCell
                               rowId={rowData.id}
