@@ -6,6 +6,7 @@ import {
   isFetchError,
   useNotification,
   useField,
+  useRBAC,
 } from '@strapi/admin/strapi-admin';
 import {
   Button,
@@ -20,19 +21,28 @@ import { Check } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { SETTINGS_SCHEMA } from '../../../shared/validation-schemas';
+import { useTypedSelector } from '../modules/hooks';
 import { useGetReleaseSettingsQuery, useUpdateReleaseSettingsMutation } from '../services/release';
 import { getTimezones } from '../utils/time';
 
 import type { UpdateSettings } from '../../../shared/contracts/settings';
 
-export const SettingsPage = () => {
+const ReleasesSettingsPage = () => {
   const { formatMessage } = useIntl();
+  const { formatAPIError } = useAPIErrorHandler();
+  const { toggleNotification } = useNotification();
   const { data, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [updateReleaseSettings, { isLoading: isSubmittingForm }] =
     useUpdateReleaseSettingsMutation();
-  const { toggleNotification } = useNotification();
-  const { formatAPIError } = useAPIErrorHandler();
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions['settings']?.['releases']
+  );
+  const {
+    allowedActions: { canUpdate },
+  } = useRBAC(permissions);
+
   const { timezoneList } = getTimezones(new Date());
+
   const handleSubmit = async (body: UpdateSettings.Request['body']) => {
     const { defaultTimezone } = body;
     const isBodyTimezoneValid = timezoneList.some((timezone) => timezone.value === defaultTimezone);
@@ -85,13 +95,9 @@ export const SettingsPage = () => {
       <Page.Main aria-busy={isLoadingSettings} tabIndex={-1}>
         <Form
           method="PUT"
-          initialValues={
-            data?.data.defaultTimezone
-              ? data.data
-              : {
-                  defaultTimezone: null,
-                }
-          }
+          initialValues={{
+            defaultTimezone: data?.data.defaultTimezone,
+          }}
           onSubmit={handleSubmit}
           validationSchema={SETTINGS_SCHEMA}
         >
@@ -100,17 +106,19 @@ export const SettingsPage = () => {
               <>
                 <Layouts.Header
                   primaryAction={
-                    <Button
-                      disabled={!modified || isSubmittingForm}
-                      loading={isSubmitting}
-                      startIcon={<Check />}
-                      type="submit"
-                    >
-                      {formatMessage({
-                        id: 'global.save',
-                        defaultMessage: 'Save',
-                      })}
-                    </Button>
+                    canUpdate ? (
+                      <Button
+                        disabled={!modified || isSubmittingForm}
+                        loading={isSubmitting}
+                        startIcon={<Check />}
+                        type="submit"
+                      >
+                        {formatMessage({
+                          id: 'global.save',
+                          defaultMessage: 'Save',
+                        })}
+                      </Button>
+                    ) : null
                   }
                   title={formatMessage({
                     id: 'content-releases.pages.Settings.releases.title',
@@ -154,6 +162,12 @@ export const SettingsPage = () => {
 };
 
 const TimezoneDropdown = () => {
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions['settings']?.['releases']
+  );
+  const {
+    allowedActions: { canUpdate },
+  } = useRBAC(permissions);
   const { formatMessage } = useIntl();
   const { timezoneList } = getTimezones(new Date());
   const field = useField('defaultTimezone');
@@ -177,7 +191,8 @@ const TimezoneDropdown = () => {
         onChange={(value) => field.onChange('defaultTimezone', value)}
         onTextValueChange={(value) => field.onChange('defaultTimezone', value)}
         onClear={() => field.onChange('defaultTimezone', '')}
-        value={field.value ?? ''}
+        value={field.value}
+        disabled={!canUpdate}
       >
         {timezoneList.map((timezone) => (
           <ComboboxOption key={timezone.value} value={timezone.value}>
@@ -188,5 +203,21 @@ const TimezoneDropdown = () => {
       <Field.Hint />
       <Field.Error />
     </Field.Root>
+  );
+};
+
+/* -------------------------------------------------------------------------------------------------
+ * ProtectedSettingsPage
+ * -----------------------------------------------------------------------------------------------*/
+
+export const ProtectedReleasesSettingsPage = () => {
+  const permissions = useTypedSelector(
+    (state) => state.admin_app.permissions['settings']?.['releases']?.read
+  );
+
+  return (
+    <Page.Protect permissions={permissions}>
+      <ReleasesSettingsPage />
+    </Page.Protect>
   );
 };
