@@ -103,7 +103,7 @@ const DragIconButton = styled<IconButtonComponent<'div'>>(IconButton)<{
   }
   svg {
     height: auto;
-    width: ${({ theme }) => theme.spaces[3]};
+    min-width: ${({ theme }) => theme.spaces[3]};
 
     path {
       fill: ${({ theme }) => theme.colors.neutral700};
@@ -248,7 +248,7 @@ const DragAndDropElement = ({
             // For some blocks top margin added to drag handle to align at the text level
             $dragHandleTopMargin={dragHandleTopMargin}
           >
-            <Drag color="neutral600" />
+            <Drag color="primary500" />
           </DragIconButton>
           {children}
         </DragItem>
