@@ -2,7 +2,8 @@ import { useRBAC } from '@strapi/admin/strapi-admin';
 import { render, server, screen } from '@tests/utils';
 import { rest } from 'msw';
 
-import { ReleasesSettingsPage, ProtectedReleasesSettingsPage } from '../ReleasesSettingsPage';
+import { useTypedSelector } from '../../modules/hooks';
+import { ProtectedReleasesSettingsPage } from '../ReleasesSettingsPage';
 
 jest.mock('@strapi/admin/strapi-admin', () => ({
   ...jest.requireActual('@strapi/admin/strapi-admin'),
@@ -10,6 +11,11 @@ jest.mock('@strapi/admin/strapi-admin', () => ({
     isLoading: false,
     allowedActions: { canRead: false, canUpdate: false },
   })),
+}));
+
+jest.mock('../../modules/hooks', () => ({
+  ...jest.requireActual('../../modules/hooks'),
+  useTypedSelector: jest.fn(() => []),
 }));
 
 describe('Releases Settings page', () => {
@@ -37,6 +43,13 @@ describe('Releases Settings page', () => {
       isLoading: false,
       allowedActions: { canRead: true, canUpdate: false },
     }));
+    // @ts-expect-error – mocking
+    useTypedSelector.mockImplementation(() => [
+      {
+        action: 'plugin::content-releases.settings.read',
+        subject: null,
+      },
+    ]);
     server.use(
       rest.get('/content-releases/settings', (req, res, ctx) =>
         res(
@@ -49,7 +62,7 @@ describe('Releases Settings page', () => {
       )
     );
 
-    render(<ReleasesSettingsPage />);
+    render(<ProtectedReleasesSettingsPage />);
 
     const title = await screen.findByRole('heading', { name: 'Releases' });
     expect(title).toBeInTheDocument();
@@ -79,7 +92,7 @@ describe('Releases Settings page', () => {
       )
     );
 
-    render(<ReleasesSettingsPage />);
+    render(<ProtectedReleasesSettingsPage />);
 
     const title = await screen.findByRole('heading', { name: 'Releases' });
     expect(title).toBeInTheDocument();

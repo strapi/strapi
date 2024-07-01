@@ -27,7 +27,7 @@ import { getTimezones } from '../utils/time';
 
 import type { UpdateSettings } from '../../../shared/contracts/settings';
 
-export const ReleasesSettingsPage = () => {
+const ReleasesSettingsPage = () => {
   const { formatMessage } = useIntl();
   const { formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
