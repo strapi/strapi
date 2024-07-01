@@ -2,7 +2,7 @@ import axios, { type AxiosResponse } from 'axios';
 import fse from 'fs-extra';
 import os from 'os';
 import { apiConfig } from '../config/api';
-import type { CloudCliConfig } from '../types';
+import type { CLIContext, CloudCliConfig } from '../types';
 import { getLocalConfig } from '../config/local';
 
 import packageJson from '../../package.json';
@@ -52,7 +52,10 @@ export interface CloudApiService {
   track(event: string, payload?: TrackPayload): Promise<AxiosResponse<void>>;
 }
 
-export async function cloudApiFactory(token?: string): Promise<CloudApiService> {
+export async function cloudApiFactory(
+  { logger }: { logger: CLIContext['logger'] },
+  token?: string
+): Promise<CloudApiService> {
   const localConfig = await getLocalConfig();
   const customHeaders = {
     'x-device-id': localConfig.deviceId,
@@ -111,8 +114,22 @@ export async function cloudApiFactory(token?: string): Promise<CloudApiService> 
       return axiosCloudAPI.get('/user');
     },
 
-    config(): Promise<AxiosResponse<CloudCliConfig>> {
-      return axiosCloudAPI.get('/config');
+    async config(): Promise<AxiosResponse<CloudCliConfig>> {
+      try {
+        const response = await axiosCloudAPI.get('/config');
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud CLI config from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve the cloud CLI config from the server. Please try again."
+        );
+
+        throw error;
+      }
     },
 
     listProjects() {
