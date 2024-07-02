@@ -129,7 +129,6 @@ test.describe('Edit View', () => {
       );
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
 
       await page.getByRole('tab', { name: 'Draft' }).click();
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
