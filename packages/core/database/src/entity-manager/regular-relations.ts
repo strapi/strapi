@@ -514,14 +514,15 @@ const cleanInverseOrderColumn = async ({
         )
         WHERE `t1`.`:joinColumnName` = :id
       */
+      const joinTableName = addSchema(strapi.db, joinTable.name);
       // New inverse order will be the max value + 1
       const selectMaxInverseOrder = con.raw(`max(${inverseOrderColumnName}) + 1`);
 
-      const subQuery = con(`${joinTable.name} as t2`)
+      const subQuery = con(`${joinTableName} as t2`)
         .select(selectMaxInverseOrder)
         .whereRaw(`t2.${inverseJoinColumn.name} = t1.${inverseJoinColumn.name}`);
 
-      await con(`${joinTable.name} as t1`)
+      await con(`${joinTableName} as t1`)
         .where(`t1.${joinColumn.name}`, id)
         .update({ [inverseOrderColumnName]: subQuery })
         .transacting(trx);
