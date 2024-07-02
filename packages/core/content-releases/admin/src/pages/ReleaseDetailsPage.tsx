@@ -883,6 +883,17 @@ const ReleaseDetailsPage = () => {
     setReleaseModalShown((prev) => !prev);
   };
 
+  const getTimezoneValue = () => {
+    if (releaseData?.timezone) {
+      return releaseData.timezone;
+    } else {
+      if (dataTimezone?.data.defaultTimezone) {
+        return dataTimezone.data.defaultTimezone;
+      }
+      return null;
+    }
+  };
+
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
   if (isLoadingDetails || isLoadingTimezone) {
@@ -903,11 +914,7 @@ const ReleaseDetailsPage = () => {
   const releaseData = (isSuccessDetails && data?.data) || null;
 
   const title = releaseData?.name || '';
-  const timezone = releaseData?.timezone
-    ? releaseData.timezone
-    : dataTimezone?.data.defaultTimezone
-      ? dataTimezone.data.defaultTimezone
-      : null;
+  const timezone = getTimezoneValue();
   const scheduledAt =
     releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
   // Just get the date and time to display without considering updated timezone time

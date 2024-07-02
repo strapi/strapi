@@ -197,7 +197,7 @@ const ReleasesPage = () => {
     allowedActions: { canCreate },
   } = useRBAC(PERMISSIONS);
 
-  const { isLoading, isSuccess, isError } = response;
+  const { isLoading: isLoadingReleases, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
 
   // Check if we have some errors and show a notification to the user to explain the error
@@ -222,7 +222,7 @@ const ReleasesPage = () => {
     setReleaseModalShown((prev) => !prev);
   };
 
-  if (isLoading || isLoadingSettings) {
+  if (isLoadingReleases || isLoadingSettings) {
     return <Page.Loading />;
   }
 
@@ -276,7 +276,7 @@ const ReleasesPage = () => {
   };
 
   return (
-    <Main aria-busy={isLoading}>
+    <Main aria-busy={isLoadingReleases || isLoadingSettings}>
       <Layouts.Header
         title={formatMessage({
           id: 'content-releases.pages.Releases.title',
