@@ -76,7 +76,7 @@ const EditorLayout = ({
               <Flex height="100%" alignItems="flex-start" direction="column">
                 {children}
                 <CollapseIconButton
-                  aria-label={formatMessage({
+                  label={formatMessage({
                     id: getTranslation('components.Blocks.collapse'),
                     defaultMessage: 'Collapse',
                   })}

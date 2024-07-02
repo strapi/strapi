@@ -253,7 +253,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
               <BlocksContent {...contentProps} />
               {!isExpandedMode && (
                 <ExpandIconButton
-                  aria-label={formatMessage({
+                  label={formatMessage({
                     id: getTranslation('components.Blocks.expand'),
                     defaultMessage: 'Expand',
                   })}
