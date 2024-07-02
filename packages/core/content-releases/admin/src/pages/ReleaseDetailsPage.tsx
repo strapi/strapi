@@ -57,6 +57,7 @@ import {
   GetReleaseActionsQueryParams,
   useGetReleaseActionsQuery,
   useGetReleaseQuery,
+  useGetReleaseSettingsQuery,
   useUpdateReleaseMutation,
   useUpdateReleaseActionMutation,
   usePublishReleaseMutation,
@@ -874,6 +875,7 @@ const ReleaseDetailsPage = () => {
       skip: !releaseId,
     }
   );
+  const { data: dataTimezone, isLoading: isLoadingTimezone } = useGetReleaseSettingsQuery();
   const [updateRelease, { isLoading: isSubmittingForm }] = useUpdateReleaseMutation();
   const [deleteRelease] = useDeleteReleaseMutation();
 
@@ -883,7 +885,7 @@ const ReleaseDetailsPage = () => {
 
   const toggleWarningSubmit = () => setWarningSubmit((prevState) => !prevState);
 
-  if (isLoadingDetails) {
+  if (isLoadingDetails || isLoadingTimezone) {
     return (
       <ReleaseDetailsLayout
         toggleEditReleaseModal={toggleEditReleaseModal}
@@ -901,7 +903,11 @@ const ReleaseDetailsPage = () => {
   const releaseData = (isSuccessDetails && data?.data) || null;
 
   const title = releaseData?.name || '';
-  const timezone = releaseData?.timezone ?? null;
+  const timezone = releaseData?.timezone
+    ? releaseData.timezone
+    : dataTimezone?.data.defaultTimezone
+      ? dataTimezone.data.defaultTimezone
+      : null;
   const scheduledAt =
     releaseData?.scheduledAt && timezone ? utcToZonedTime(releaseData.scheduledAt, timezone) : null;
   // Just get the date and time to display without considering updated timezone time

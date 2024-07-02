@@ -38,6 +38,7 @@ import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import {
   useGetReleasesQuery,
+  useGetReleaseSettingsQuery,
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
@@ -185,6 +186,7 @@ const ReleasesPage = () => {
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
+  const { data, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
   const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
@@ -220,7 +222,7 @@ const ReleasesPage = () => {
     setReleaseModalShown((prev) => !prev);
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingSettings) {
     return <Page.Loading />;
   }
 
@@ -388,7 +390,10 @@ const ReleasesPage = () => {
         handleClose={toggleAddReleaseModal}
         handleSubmit={handleAddRelease}
         isLoading={isSubmittingForm}
-        initialValues={INITIAL_FORM_VALUES}
+        initialValues={{
+          ...INITIAL_FORM_VALUES,
+          timezone: data?.data.defaultTimezone ? data.data.defaultTimezone.split('&')[1] : null,
+        }}
       />
     </Main>
   );
