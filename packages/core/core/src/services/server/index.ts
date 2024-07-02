@@ -1,6 +1,7 @@
 import Router from '@koa/router';
 import type { Core, Modules } from '@strapi/types';
 
+import { isBoolean } from 'lodash/fp';
 import { createHTTPServer } from './http-server';
 import { createRouteManager } from './routing';
 import { createAdminAPI } from './admin-api';
@@ -15,9 +16,25 @@ const healthCheck: Core.MiddlewareHandler = async (ctx) => {
   ctx.status = 204;
 };
 
+const shouldTrustProxy = (strapi: Core.Strapi) => {
+  const explicit = strapi.config.get('server.proxy.koa', undefined);
+
+  if (isBoolean(explicit)) {
+    return explicit;
+  }
+
+  const implicit =
+    !!strapi.config.get('server.proxy.global') ||
+    strapi.config.get('server.proxy.http') ||
+    strapi.config.get('server.proxy.https') ||
+    false;
+
+  return implicit;
+};
+
 const createServer = (strapi: Core.Strapi): Modules.Server.Server => {
   const app = createKoaApp({
-    proxy: strapi.config.get('server.proxy.koa'),
+    proxy: shouldTrustProxy(strapi),
     keys: strapi.config.get('server.app.keys'),
   });
 
