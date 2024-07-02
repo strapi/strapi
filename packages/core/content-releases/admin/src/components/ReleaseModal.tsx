@@ -17,10 +17,10 @@ import {
 import { formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { Formik, Form, useFormikContext } from 'formik';
-import { useIntl } from 'react-intl';
+import { MessageDescriptor, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
-import { RELEASE_SCHEMA } from '../../../shared/validation-schemas';
+import { RELEASE_SCHEMA } from '../validation/schemas';
 import { pluginId } from '../pluginId';
 import { getTimezones } from '../utils/time';
 
@@ -111,7 +111,13 @@ export const ReleaseModal = ({
               <Form>
                 <Modal.Body>
                   <Flex direction="column" alignItems="stretch" gap={6}>
-                    <Field.Root name="name" error={errors.name} required>
+                    <Field.Root
+                      name="name"
+                      error={
+                        errors.name ? formatMessage(errors.name as MessageDescriptor) : undefined
+                      }
+                      required
+                    >
                       <Field.Label>
                         {formatMessage({
                           id: 'content-releases.modal.form.input.label.release-name',
@@ -158,7 +164,15 @@ export const ReleaseModal = ({
                       <>
                         <Flex gap={4} alignItems="start">
                           <Box width="100%">
-                            <Field.Root name="date" error={errors.date} required>
+                            <Field.Root
+                              name="date"
+                              error={
+                                errors.date
+                                  ? formatMessage(errors.date as MessageDescriptor)
+                                  : undefined
+                              }
+                              required
+                            >
                               <Field.Label>
                                 {formatMessage({
                                   id: 'content-releases.modal.form.input.label.date',
@@ -186,7 +200,15 @@ export const ReleaseModal = ({
                             </Field.Root>
                           </Box>
                           <Box width="100%">
-                            <Field.Root name="time" error={errors.time} required>
+                            <Field.Root
+                              name="time"
+                              error={
+                                errors.time
+                                  ? formatMessage(errors.time as MessageDescriptor)
+                                  : undefined
+                              }
+                              required
+                            >
                               <Field.Label>
                                 {formatMessage({
                                   id: 'content-releases.modal.form.input.label.time',
@@ -269,7 +291,11 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
   }, [setFieldValue, values.date, values.timezone]);
 
   return (
-    <Field.Root name="timezone" error={errors.timezone} required>
+    <Field.Root
+      name="timezone"
+      error={errors.timezone ? formatMessage(errors.timezone as MessageDescriptor) : undefined}
+      required
+    >
       <Field.Label>
         {formatMessage({
           id: 'content-releases.modal.form.input.label.timezone',

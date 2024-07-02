@@ -1,5 +1,5 @@
 import { yup, validateYupSchema } from '@strapi/utils';
-import { RELEASE_SCHEMA } from '../../../../shared/validation-schemas';
+import { RELEASE_SCHEMA } from '../validation/schemas';
 
 const FIND_BY_DOCUMENT_ATTACHED_PARAMS_SCHEMA = yup
   .object()
