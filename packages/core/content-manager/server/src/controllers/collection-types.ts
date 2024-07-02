@@ -390,12 +390,37 @@ export default {
         .countRelations()
         .build();
 
-      const document = id
-        ? await updateDocument(ctx, { populate })
-        : await createDocument(ctx, { populate });
+      const document = await documentManager.findOne(id, model, { populate });
 
       if (permissionChecker.cannot.publish(document)) {
         throw new errors.ForbiddenError();
+      }
+
+      /**
+       * Publish can be called on two scenarios:
+       * 1. Create a new document and publish it in one request
+       * 2. Update an existing document and publish it in one request
+       *
+       * Based on user permissions:
+       * 1. User cannot create a document, but can publish
+       *    Action will be forbidden as user cannot create a document
+       * 2. User can update and publish a document
+       *    Action will be allowed, but document will not be updated, only published with the latest draft
+       */
+      const isCreate = !id;
+      const isUpdate = id;
+
+      if (isCreate && permissionChecker.cannot.create(document)) {
+        throw new errors.ForbiddenError();
+      }
+
+      if (isCreate) {
+        await createDocument(ctx);
+      }
+
+      // Update if user has update permissions
+      if (isUpdate && permissionChecker.can.update(document)) {
+        await updateDocument(ctx);
       }
 
       const { locale } = await getDocumentLocaleAndStatus(body);
