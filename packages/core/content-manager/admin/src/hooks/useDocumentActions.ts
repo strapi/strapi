@@ -600,8 +600,6 @@ const useDocumentActions: UseDocumentActions = () => {
         });
 
         if ('error' in res) {
-          toggleNotification({ type: 'danger', message: formatAPIError(res.error) });
-
           return { error: res.error };
         }
 
