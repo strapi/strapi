@@ -1,3 +1,4 @@
+import * as qs from 'qs';
 import type { Core } from '@strapi/types';
 
 import Strapi, { type StrapiOptions } from './Strapi';
@@ -22,8 +23,6 @@ export const createStrapi = (options: Partial<StrapiOptions> = {}): Core.Strapi 
 };
 
 // Augment Koa query type based on Strapi query middleware
-
-import * as qs from 'qs';
 
 declare module 'koa' {
   type ParsedQuery = ReturnType<typeof qs.parse>;
