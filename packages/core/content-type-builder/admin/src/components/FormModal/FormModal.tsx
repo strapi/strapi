@@ -1070,48 +1070,48 @@ export const FormModal = () => {
                 </Tabs.Content>
               </Tabs.Root>
             </Modal.Body>
-            <Modal.Footer>
-              <Button variant="tertiary" onClick={handleClosed}>
-                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-              </Button>
-              {/* TODO: refactor this component. Nuf said. */}
-              <FormModalEndActions
-                deleteCategory={deleteCategory}
-                deleteContentType={deleteData}
-                deleteComponent={deleteData}
-                categoryName={initialData.name}
-                isAttributeModal={modalType === 'attribute'}
-                isCustomFieldModal={modalType === 'customField'}
-                isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
-                isComponentAttribute={attributeType === 'component'}
-                isComponentModal={modalType === 'component'}
-                isContentTypeModal={modalType === 'contentType'}
-                isCreatingComponent={actionType === 'create'}
-                isCreatingDz={actionType === 'create'}
-                isCreatingComponentAttribute={modifiedData.createComponent || false}
-                isCreatingComponentInDz={modifiedData.createComponent || false}
-                isCreatingComponentWhileAddingAField={isCreatingComponentWhileAddingAField}
-                isCreatingContentType={actionType === 'create'}
-                isEditingAttribute={actionType === 'edit'}
-                isDzAttribute={attributeType === 'dynamiczone'}
-                isEditingCategory={modalType === 'editCategory'}
-                isInFirstComponentStep={step === '1'}
-                onSubmitAddComponentAttribute={handleSubmit}
-                onSubmitAddComponentToDz={handleSubmit}
-                onSubmitCreateComponent={handleSubmit}
-                onSubmitCreateContentType={handleSubmit}
-                onSubmitCreateDz={handleSubmit}
-                onSubmitEditAttribute={handleSubmit}
-                onSubmitEditCategory={handleSubmit}
-                onSubmitEditComponent={handleSubmit}
-                onSubmitEditContentType={handleSubmit}
-                onSubmitEditCustomFieldAttribute={handleSubmit}
-                onSubmitEditDz={handleSubmit}
-                onClickFinish={handleClickFinish}
-              />
-            </Modal.Footer>
           </form>
         )}
+        <Modal.Footer>
+          <Button variant="tertiary" onClick={handleClosed}>
+            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+          </Button>
+          {/* TODO: refactor this component. Nuf said. */}
+          <FormModalEndActions
+            deleteCategory={deleteCategory}
+            deleteContentType={deleteData}
+            deleteComponent={deleteData}
+            categoryName={initialData.name}
+            isAttributeModal={modalType === 'attribute'}
+            isCustomFieldModal={modalType === 'customField'}
+            isComponentToDzModal={modalType === 'addComponentToDynamicZone'}
+            isComponentAttribute={attributeType === 'component'}
+            isComponentModal={modalType === 'component'}
+            isContentTypeModal={modalType === 'contentType'}
+            isCreatingComponent={actionType === 'create'}
+            isCreatingDz={actionType === 'create'}
+            isCreatingComponentAttribute={modifiedData.createComponent || false}
+            isCreatingComponentInDz={modifiedData.createComponent || false}
+            isCreatingComponentWhileAddingAField={isCreatingComponentWhileAddingAField}
+            isCreatingContentType={actionType === 'create'}
+            isEditingAttribute={actionType === 'edit'}
+            isDzAttribute={attributeType === 'dynamiczone'}
+            isEditingCategory={modalType === 'editCategory'}
+            isInFirstComponentStep={step === '1'}
+            onSubmitAddComponentAttribute={handleSubmit}
+            onSubmitAddComponentToDz={handleSubmit}
+            onSubmitCreateComponent={handleSubmit}
+            onSubmitCreateContentType={handleSubmit}
+            onSubmitCreateDz={handleSubmit}
+            onSubmitEditAttribute={handleSubmit}
+            onSubmitEditCategory={handleSubmit}
+            onSubmitEditComponent={handleSubmit}
+            onSubmitEditContentType={handleSubmit}
+            onSubmitEditCustomFieldAttribute={handleSubmit}
+            onSubmitEditDz={handleSubmit}
+            onClickFinish={handleClickFinish}
+          />
+        </Modal.Footer>
       </Modal.Content>
     </Modal.Root>
   );
