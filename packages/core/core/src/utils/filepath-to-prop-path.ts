@@ -1,19 +1,36 @@
 import path from 'node:path';
-import _ from 'lodash';
+import fp from 'lodash/fp';
 
 /**
  * Returns a path (as an array) from a file path
  */
-export const filePathToPropPath = (filePath: string, useFileNameAsKey = true) => {
-  const cleanPath = filePath.startsWith('./') ? filePath.slice(2) : filePath;
+export const filePathToPropPath = (
+  entryPath: string,
+  useFileNameAsKey: boolean = true
+): string[] => {
+  const transform = fp.pipe(
+    // Remove the relative path prefix (posix or win32) and ".\" (win32) prefixes
+    removeRelativePrefix,
+    // Remove the path metadata and extensions
+    fp.replace(/(\.settings|\.json|\.js)/g, ''),
+    // Make sure it's lowercase
+    fp.lowerCase,
+    // Split the cleaned path by matching every possible separator (either "/" or "\" depending on the OS)
+    fp.split(new RegExp(`${path.win32.sep}|${path.posix.sep}`)),
+    // Make sure to remove leading '.' from the different path parts
+    fp.map(fp.trimCharsStart('.')),
+    // join + split in case some '.' characters are still present in different parts of the path
+    fp.join('.'),
+    fp.split('.'),
+    // Remove the last portion of the path array if the file name shouldn't be used as a key
+    useFileNameAsKey ? fp.identity : fp.slice(0, -1)
+  );
 
-  const prop = cleanPath
-    .replace(/(\.settings|\.json|\.js)/g, '')
-    .toLowerCase()
-    .split(path.sep)
-    .map((p) => _.trimStart(p, '.'))
-    .join('.')
-    .split('.');
+  return transform(entryPath) as string[];
+};
 
-  return useFileNameAsKey === true ? prop : prop.slice(0, -1);
+const removeRelativePrefix = (filePath: string) => {
+  return filePath.startsWith(`.${path.win32.sep}`) || filePath.startsWith(`.${path.posix.sep}`)
+    ? filePath.slice(2)
+    : filePath;
 };
