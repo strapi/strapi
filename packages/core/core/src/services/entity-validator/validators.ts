@@ -8,7 +8,11 @@ import type { ComponentContext } from '.';
 interface ValidatorMetas<TAttribute extends Schema.Attribute.AnyAttribute> {
   attr: TAttribute;
   model: Struct.ContentTypeSchema;
-  updatedAttribute: { name: string; value: unknown };
+  updatedAttribute: {
+    name: string;
+    // TODO fix use of any
+    value: any;
+  };
   entity: Modules.EntityValidator.Entity;
   componentContext: ComponentContext;
 }
@@ -135,9 +139,6 @@ const addStringRegexValidator = (
     : validator;
 };
 
-/**
- * Adds unique validator
- */
 const addUniqueValidator = <T extends yup.AnySchema>(
   validator: T,
   {
@@ -152,6 +153,178 @@ const addUniqueValidator = <T extends yup.AnySchema>(
   if (attr.type !== 'uid' && !attr.unique) {
     return validator;
   }
+
+  const validateUniqueFieldWithinComponent = async (value: any): Promise<boolean> => {
+    // If we are validating a unique field within a repeatable component,
+    // we first need to ensure that the repeatable in the current entity is
+    // valid against itself.
+    const hasRepeatableData = componentContext.repeatableData.length > 0;
+    if (hasRepeatableData) {
+      const { name: updatedName, value: updatedValue } = updatedAttribute;
+      // Construct the full path to the unique field within the component.
+      const pathToCheck = [...componentContext.pathToComponent.slice(1), updatedName].join('.');
+
+      // Extract the values from the repeatable data using the constructed path
+      const values = componentContext.repeatableData.map((item) => {
+        return pathToCheck.split('.').reduce((acc, key) => acc[key], item as any);
+      });
+
+      // Check if the value is repeated in the current entity
+      const isUpdatedAttributeRepeatedInThisEntity =
+        values.filter((value) => value === updatedValue).length > 1;
+
+      if (isUpdatedAttributeRepeatedInThisEntity) {
+        return false;
+      }
+    }
+
+    /**
+     * When `componentContext` is present it means we are dealing with a unique
+     * field within a component.
+     *
+     * The unique validation must consider the specific context of the
+     * component, which will always be contained within a parent content type
+     * and may also be nested within another component.
+     *
+     * We construct a query that takes into account the parent's model UID,
+     * dimensions (such as draft and publish state/locale) and excludes the current
+     * content type entity by its ID if provided.
+     */
+    const {
+      model: parentModel,
+      options: parentOptions,
+      id: excludeId,
+    } = componentContext.parentContent;
+
+    const whereConditions: Record<string, any> = {};
+    const isParentDraft = parentOptions && parentOptions.isDraft;
+
+    whereConditions.publishedAt = isParentDraft ? null : { $notNull: true };
+
+    if (parentOptions?.locale) {
+      whereConditions.locale = parentOptions.locale;
+    }
+
+    if (excludeId && !Number.isNaN(excludeId)) {
+      whereConditions.id = { $ne: excludeId };
+    }
+
+    const queryUid = parentModel.uid;
+    const queryWhere = {
+      ...componentContext.pathToComponent.reduceRight((acc, key) => ({ [key]: acc }), {
+        [updatedAttribute.name]: value,
+      }),
+
+      ...whereConditions,
+    };
+
+    // The validation should pass if there is no other record found from the query
+    return !(await strapi.db.query(queryUid).findOne({ where: queryWhere }));
+  };
+
+  const validateUniqueFieldWithinDynamicZoneComponent = async (
+    startOfPath: string
+  ): Promise<boolean> => {
+    const targetComponentUID = model.uid;
+    // Ensure that the value is unique within the dynamic zone in this entity.
+    const countOfValueInThisEntity = (componentContext?.fullDynamicZoneContent ?? []).reduce(
+      (acc, component) => {
+        if (component.__component !== targetComponentUID) {
+          return acc;
+        }
+
+        const updatedValue = component[updatedAttribute.name];
+        return updatedValue === updatedAttribute.value ? acc + 1 : acc;
+      },
+      0
+    );
+
+    if (countOfValueInThisEntity > 1) {
+      // If the value is repeated in the current entity, the validation fails.
+      return false;
+    }
+
+    // When validating a unique field within a dynamiczone, we cannot
+    // directly use a where on the db query layer see:
+    // TODO add known issue link
+
+    // Instead we interact directly with knex.
+    // Here we fetch all the entity IDs of all components of the target type
+    // that are used within the parent content type in this dynamic zone.
+    const trx = await strapi.db.transaction();
+
+    try {
+      const parentContentTypeTable = componentContext.parentContent.model.collectionName;
+
+      const componentIds = await strapi.db
+        .getConnection(parentContentTypeTable)
+        .transacting(trx.get())
+        .select(`${parentContentTypeTable}_cmps.cmp_id`)
+        // eslint-disable-next-line func-names
+        .innerJoin(`${parentContentTypeTable}_cmps`, function () {
+          this.on(`${parentContentTypeTable}.id`, '=', `${parentContentTypeTable}_cmps.entity_id`);
+        })
+        .where((queryBuilder) => {
+          queryBuilder
+            // Which components are used in the dynamic zone are determined by the start
+            // of the pathToComponent. This will be the key to the dynamic zone in the parent content type.
+            .where(`${parentContentTypeTable}_cmps.field`, startOfPath)
+            // This clause ensures that we are only looking for components of the target type.
+            .andWhere(`${parentContentTypeTable}_cmps.component_type`, targetComponentUID);
+
+          if (componentContext.parentContent.id) {
+            // This clause excludes matching on the current parent content
+            // type entity by its ID if available
+            queryBuilder.andWhereNot(
+              `${parentContentTypeTable}.id`,
+              componentContext.parentContent.id
+            );
+          }
+
+          // We also apply clauses to filter the parent content type
+          // entities by matching dimensions (e.g. locale, publication state)
+          if (componentContext.parentContent.options?.locale) {
+            queryBuilder.andWhere(
+              `${parentContentTypeTable}.locale`,
+              componentContext.parentContent.options?.locale
+            );
+          }
+
+          if (componentContext.parentContent.options?.isDraft) {
+            queryBuilder.andWhere(`${parentContentTypeTable}.published_at`, null);
+          } else {
+            queryBuilder.andWhereNot(`${parentContentTypeTable}.published_at`, null);
+          }
+        });
+
+      const componentIdArray = componentIds.map((item: { cmp_id: number }) => item.cmp_id);
+      if (componentIdArray.length === 0) {
+        // If there are no components of the target type in the dynamic zone, the validation passes.
+        return true;
+      }
+
+      // Here we check for the existence of any components of the target type
+      // where the updated attribute value matches. This is the actual unique validation.
+      // We use count(*) to check if any rows exist that match the condition.
+      const matchingComponentCount = await strapi.db
+        .getConnection(model.collectionName)
+        .transacting(trx.get())
+        .count('*')
+        .whereIn('id', componentIdArray)
+        // TODO is it sufficient to exactly match in a where clause like this for all field types?
+        .andWhere(updatedAttribute.name, updatedAttribute.value)
+        .first();
+
+      trx.commit();
+
+      // If the count is greater than 0, the validation fails.
+      return matchingComponentCount === 0;
+    } catch (error) {
+      trx.rollback();
+
+      return false;
+    }
+  };
 
   return validator.test('unique', 'This attribute must be unique', async (value) => {
     const isPublish = options.isDraft === false;
@@ -174,101 +347,43 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       return true;
     }
 
-    let queryUid: string;
-    let queryWhere: Record<string, any> = {};
-
     const hasPathToComponent = componentContext?.pathToComponent?.length > 0;
     if (hasPathToComponent) {
-      const hasRepeatableData = componentContext.repeatableData.length > 0;
-      if (hasRepeatableData) {
-        // If we are validating a unique field within a repeatable component,
-        // we first need to ensure that the repeatable in the current entity is
-        // valid against itself.
+      // Detect if we are validating within a dynamiczone by checking if the first
+      // path is a dynamiczone attribute in the parent content type.
+      const startOfPath = componentContext.pathToComponent[0];
+      const testingDZ =
+        componentContext.parentContent.model.attributes[startOfPath].type === 'dynamiczone';
 
-        const { name: updatedName, value: updatedValue } = updatedAttribute;
-        // Construct the full path to the unique field within the component.
-        const pathToCheck = [...componentContext.pathToComponent.slice(1), updatedName].join('.');
-
-        // Extract the values from the repeatable data using the constructed path
-        const values = componentContext.repeatableData.map((item) => {
-          return pathToCheck.split('.').reduce((acc, key) => acc[key], item as any);
-        });
-
-        // Check if the value is repeated in the current entity
-        const isUpdatedAttributeRepeatedInThisEntity =
-          values.filter((value) => value === updatedValue).length > 1;
-
-        if (isUpdatedAttributeRepeatedInThisEntity) {
-          return false;
-        }
+      if (testingDZ) {
+        return validateUniqueFieldWithinDynamicZoneComponent(startOfPath);
       }
 
-      /**
-       * When `componentContext` is present it means we are dealing with a unique
-       * field within a component.
-       *
-       * The unique validation must consider the specific context of the
-       * component, which will always be contained within a parent content type
-       * and may also be nested within another component.
-       *
-       * We construct a query that takes into account the parent's model UID,
-       * dimensions (such as draft and publish state/locale) and excludes the current
-       * content type entity by its ID if provided.
-       */
-      const {
-        model: parentModel,
-        options: parentOptions,
-        id: excludeId,
-      } = componentContext.parentContent;
-      queryUid = parentModel.uid;
+      return validateUniqueFieldWithinComponent(value);
+    }
 
-      const whereConditions: Record<string, any> = {};
-      const isParentDraft = parentOptions && parentOptions.isDraft;
+    /**
+     * Here we are validating a scalar unique field from the content type's schema.
+     * We construct a query to check if the value is unique
+     * considering dimensions (e.g. locale, publication state) and excluding the current entity by its ID if available.
+     */
+    const scalarAttributeWhere: Record<string, any> = {
+      [updatedAttribute.name]: value,
+    };
 
-      whereConditions.publishedAt = isParentDraft ? null : { $notNull: true };
+    scalarAttributeWhere.publishedAt = options.isDraft ? null : { $notNull: true };
 
-      if (parentOptions?.locale) {
-        whereConditions.locale = parentOptions.locale;
-      }
+    if (options?.locale) {
+      scalarAttributeWhere.locale = options.locale;
+    }
 
-      if (excludeId && !Number.isNaN(excludeId)) {
-        whereConditions.id = { $ne: excludeId };
-      }
-
-      queryWhere = {
-        ...componentContext.pathToComponent.reduceRight((acc, key) => ({ [key]: acc }), {
-          [updatedAttribute.name]: value,
-        }),
-
-        ...whereConditions,
-      };
-    } else {
-      /**
-       * Here we are validating a scalar unique field from the content type's schema.
-       * We construct a query to check if the value is unique
-       * considering dimensions (e.g. locale, publication state) and excluding the current entity by its ID if available.
-       */
-      queryUid = model.uid;
-      const scalarAttributeWhere: Record<string, any> = {
-        [updatedAttribute.name]: value,
-      };
-
-      scalarAttributeWhere.publishedAt = options.isDraft ? null : { $notNull: true };
-
-      if (options?.locale) {
-        scalarAttributeWhere.locale = options.locale;
-      }
-
-      if (entity?.id) {
-        scalarAttributeWhere.id = { $ne: entity.id };
-      }
-
-      queryWhere = scalarAttributeWhere;
+    if (entity?.id) {
+      scalarAttributeWhere.id = { $ne: entity.id };
     }
 
     // The validation should pass if there is no other record found from the query
-    // TODO query not working for dynamic zones (type === relation)
-    return !(await strapi.db.query(queryUid).findOne({ where: queryWhere }));
+    const queryUid = model.uid;
+    return !(await strapi.db.query(queryUid).findOne({ where: scalarAttributeWhere }));
   });
 };
 

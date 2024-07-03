@@ -34,6 +34,8 @@ export type ComponentContext = {
   // If working with a repeatable component this contains the
   // full data of the repeatable component in the current entity.
   repeatableData: Modules.EntityValidator.Entity[];
+  // TODO fix types (should be an array of components)
+  fullDynamicZoneContent?: Record<string, any>[];
 };
 
 interface WithComponentContext {
@@ -321,6 +323,7 @@ const createAttributeValidator =
         const newComponentContext = {
           ...(metas?.componentContext ?? {}),
           pathToComponent,
+          fullDynamicZoneContent: metas.updatedAttribute.value,
         };
 
         validator = createDzValidator(createOrUpdate)(
