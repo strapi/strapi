@@ -17,12 +17,12 @@ import {
 import { formatISO } from 'date-fns';
 import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { Formik, Form, useFormikContext } from 'formik';
-import { useIntl } from 'react-intl';
+import { MessageDescriptor, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
 import { pluginId } from '../pluginId';
 import { getTimezones } from '../utils/time';
-import { RELEASE_SCHEMA } from '../validation/schemas';
+import { useTranslatedSchema } from '../validation/schemas';
 
 export interface FormValues {
   name: string;
@@ -55,6 +55,7 @@ export const ReleaseModal = ({
   const { timezoneList, systemTimezone = { value: 'UTC+00:00-Africa/Abidjan ' } } = getTimezones(
     initialValues.scheduledAt ? new Date(initialValues.scheduledAt) : new Date()
   );
+  const { RELEASE_SCHEMA } = useTranslatedSchema();
 
   /**
    * Generate scheduled time using selected date, time and timezone
