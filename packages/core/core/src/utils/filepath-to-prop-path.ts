@@ -13,10 +13,11 @@ export const filePathToPropPath = (
     removeRelativePrefix,
     // Remove the path metadata and extensions
     fp.replace(/(\.settings|\.json|\.js)/g, ''),
-    // Make sure it's lowercase
-    fp.lowerCase,
+    // Transform to lowercase
+    // Note: We're using fp.toLower instead of fp.lowercase as the latest removes special characters such as "/"
+    fp.toLower,
     // Split the cleaned path by matching every possible separator (either "/" or "\" depending on the OS)
-    fp.split(new RegExp(`${path.win32.sep}|${path.posix.sep}`, 'g')),
+    fp.split(new RegExp(`[${path.win32.sep}|${path.posix.sep}]`, 'g')),
     // Make sure to remove leading '.' from the different path parts
     fp.map(fp.trimCharsStart('.')),
     // join + split in case some '.' characters are still present in different parts of the path
