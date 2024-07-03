@@ -16,7 +16,7 @@ export const filePathToPropPath = (
     // Make sure it's lowercase
     fp.lowerCase,
     // Split the cleaned path by matching every possible separator (either "/" or "\" depending on the OS)
-    fp.split(new RegExp(`${path.win32.sep}|${path.posix.sep}`)),
+    fp.split(new RegExp(`${path.win32.sep}|${path.posix.sep}`, 'g')),
     // Make sure to remove leading '.' from the different path parts
     fp.map(fp.trimCharsStart('.')),
     // join + split in case some '.' characters are still present in different parts of the path
