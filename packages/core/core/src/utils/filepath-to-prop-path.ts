@@ -31,7 +31,7 @@ export const filePathToPropPath = (
 };
 
 const removeRelativePrefix = (filePath: string) => {
-  return filePath.startsWith(`.\\${path.win32.sep}`) || filePath.startsWith(`.${path.posix.sep}`)
+  return filePath.startsWith(`.${path.win32.sep}`) || filePath.startsWith(`.${path.posix.sep}`)
     ? filePath.slice(2)
     : filePath;
 };
