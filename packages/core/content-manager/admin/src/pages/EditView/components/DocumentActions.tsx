@@ -30,10 +30,12 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { CLONE_PATH } from '../../../router';
+import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
+import { getTranslation } from '../../../utils/translations';
 
+import type { RelationsFormValue } from './FormInputs/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
-
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -63,6 +65,7 @@ interface DialogOptions {
   type: 'dialog';
   title: string;
   content?: React.ReactNode;
+  variant?: ButtonProps['variant'];
   onConfirm?: () => void | Promise<void>;
   onCancel?: () => void | Promise<void>;
 }
@@ -193,7 +196,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
       {action.dialog?.type === 'dialog' ? (
         <DocumentActionConfirmDialog
           {...action.dialog}
-          variant={action.variant}
+          variant={action.dialog?.variant ?? action.variant}
           isOpen={dialogId === action.id}
           onClose={handleClose}
         />
@@ -503,14 +506,95 @@ const PublishAction: DocumentActionComponent = ({
     ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
   );
   const { publish } = useDocumentActions();
+  const [
+    countDraftRelations,
+    { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
+  ] = useGetDraftRelationCountQuery();
+  const [localCountOfDraftRelations, setLocalCountOfDraftRelations] = React.useState(0);
+  const [serverCountOfDraftRelations, setServerCountOfDraftRelations] = React.useState(0);
+
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
+
   const modified = useForm('PublishAction', ({ modified }) => modified);
   const setSubmitting = useForm('PublishAction', ({ setSubmitting }) => setSubmitting);
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+
+  React.useEffect(() => {
+    if (isErrorDraftRelations) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslation('error.records.fetch-draft-relatons'),
+          defaultMessage: 'An error occurred while fetching draft relations on this document.',
+        }),
+      });
+    }
+  }, [isErrorDraftRelations, toggleNotification, formatMessage]);
+
+  React.useEffect(() => {
+    const localDraftRelations = new Set();
+
+    /**
+     * Extracts draft relations from the provided data object.
+     * It checks for a connect array of relations.
+     * If a relation has a status of 'draft', its id is added to the localDraftRelations set.
+     */
+    const extractDraftRelations = (data: Omit<RelationsFormValue, 'disconnect'>) => {
+      const relations = data.connect || [];
+      relations.forEach((relation) => {
+        if (relation.status === 'draft') {
+          localDraftRelations.add(relation.id);
+        }
+      });
+    };
+
+    /**
+     * Recursively traverses the provided data object to extract draft relations from arrays within 'connect' keys.
+     * If the data is an object, it looks for 'connect' keys to pass their array values to extractDraftRelations.
+     * It recursively calls itself for any non-null objects it contains.
+     */
+    const traverseAndExtract = (data: { [field: string]: any }) => {
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'connect' && Array.isArray(value)) {
+          extractDraftRelations({ connect: value });
+        } else if (typeof value === 'object' && value !== null) {
+          traverseAndExtract(value);
+        }
+      });
+    };
+
+    if (!documentId || modified) {
+      traverseAndExtract(formValues);
+      setLocalCountOfDraftRelations(localDraftRelations.size);
+    }
+  }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
+
+  React.useEffect(() => {
+    if (documentId) {
+      const fetchDraftRelationsCount = async () => {
+        const { data, error } = await countDraftRelations({
+          collectionType,
+          model,
+          documentId,
+          params,
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          setServerCountOfDraftRelations(data.data);
+        }
+      };
+
+      fetchDraftRelationsCount();
+    }
+  }, [documentId, countDraftRelations, collectionType, model, params]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -520,6 +604,58 @@ const PublishAction: DocumentActionComponent = ({
   if (!schema?.options?.draftAndPublish) {
     return null;
   }
+
+  const performPublish = async () => {
+    setSubmitting(true);
+
+    try {
+      const { errors } = await validate();
+
+      if (errors) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({
+            id: 'content-manager.validation.error',
+            defaultMessage:
+              'There are validation errors in your document. Please fix them before saving.',
+          }),
+        });
+
+        return;
+      }
+
+      const res = await publish(
+        {
+          collectionType,
+          model,
+          documentId,
+          params,
+        },
+        formValues
+      );
+
+      if ('data' in res && collectionType !== SINGLE_TYPES) {
+        /**
+         * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
+         */
+        navigate({
+          pathname: `../${collectionType}/${model}/${res.data.documentId}`,
+          search: rawQuery,
+        });
+      } else if (
+        'error' in res &&
+        isBaseQueryError(res.error) &&
+        res.error.name === 'ValidationError'
+      ) {
+        setErrors(formatValidationErrors(res.error));
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
+  const hasDraftRelations = totalDraftRelations > 0;
 
   return {
     /**
@@ -536,6 +672,7 @@ const PublishAction: DocumentActionComponent = ({
     disabled:
       isCloning ||
       isSubmitting ||
+      isLoadingDraftRelations ||
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
       (!modified && !document?.documentId) ||
@@ -546,53 +683,38 @@ const PublishAction: DocumentActionComponent = ({
       defaultMessage: 'Publish',
     }),
     onClick: async () => {
-      setSubmitting(true);
-
-      try {
-        const { errors } = await validate();
-
-        if (errors) {
-          toggleNotification({
-            type: 'danger',
-            message: formatMessage({
-              id: 'content-manager.validation.error',
-              defaultMessage:
-                'There are validation errors in your document. Please fix them before saving.',
-            }),
-          });
-
-          return;
-        }
-
-        const res = await publish(
-          {
-            collectionType,
-            model,
-            documentId,
-            params,
-          },
-          formValues
-        );
-
-        if ('data' in res && collectionType !== SINGLE_TYPES) {
-          /**
-           * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
-           */
-          navigate({
-            pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-            search: rawQuery,
-          });
-        } else if (
-          'error' in res &&
-          isBaseQueryError(res.error) &&
-          res.error.name === 'ValidationError'
-        ) {
-          setErrors(formatValidationErrors(res.error));
-        }
-      } finally {
-        setSubmitting(false);
+      if (hasDraftRelations) {
+        // In this case we need to show the user a confirmation dialog.
+        // Return from the onClick and let the dialog handle the process.
+        return;
       }
+
+      await performPublish();
     },
+    dialog: hasDraftRelations
+      ? {
+          type: 'dialog',
+          variant: 'danger',
+          footer: null,
+          title: formatMessage({
+            id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.title`),
+            defaultMessage: 'Confirmation',
+          }),
+          content: formatMessage(
+            {
+              id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.message`),
+              defaultMessage:
+                'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. Publishing it could leave broken links in your app.',
+            },
+            {
+              count: totalDraftRelations,
+            }
+          ),
+          onConfirm: async () => {
+            await performPublish();
+          },
+        }
+      : undefined,
   };
 };
 
@@ -674,13 +796,13 @@ const UpdateAction: DocumentActionComponent = ({
           );
 
           if ('data' in res) {
-            /**
-             * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
-             */
-            navigate({
-              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-              search: rawQuery,
-            });
+            navigate(
+              {
+                pathname: `../${res.data.documentId}`,
+                search: rawQuery,
+              },
+              { relative: 'path' }
+            );
           } else if (
             'error' in res &&
             isBaseQueryError(res.error) &&
@@ -718,13 +840,13 @@ const UpdateAction: DocumentActionComponent = ({
           );
 
           if ('data' in res && collectionType !== SINGLE_TYPES) {
-            /**
-             * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
-             */
-            navigate({
-              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-              search: rawQuery,
-            });
+            navigate(
+              {
+                pathname: `../${res.data.documentId}`,
+                search: rawQuery,
+              },
+              { replace: true, relative: 'path' }
+            );
           } else if (
             'error' in res &&
             isBaseQueryError(res.error) &&

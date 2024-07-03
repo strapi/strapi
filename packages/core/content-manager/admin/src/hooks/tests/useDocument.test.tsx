@@ -78,7 +78,11 @@ describe('useDocument', () => {
         postal_code: 'N2',
         notrepeat_req: {},
         city: 'London',
-        repeat_req: [],
+        repeat_req: [
+          {
+            name: 'toto',
+          },
+        ],
       })
     ).toBeNull();
 
@@ -89,7 +93,11 @@ describe('useDocument', () => {
         notrepeat_req: {},
         postal_code: 12,
         city: 'London',
-        repeat_req: [],
+        repeat_req: [
+          {
+            name: 'toto',
+          },
+        ],
       })
     ).toMatchInlineSnapshot(`
       {

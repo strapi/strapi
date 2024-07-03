@@ -465,32 +465,36 @@ describe('CM API - Number of draft relations', () => {
 
     const categoryIds = categories.map(({ body: { data } }) => data.id);
 
-    const products = await Promise.all([
-      rq({
-        method: 'POST',
-        url: `/content-manager/collection-types/${UID_PRODUCT}`,
-        body: {
-          name: 'New Product 1',
-          categories: [categoryIds[0]],
-        },
-      }),
-      rq({
-        method: 'POST',
-        url: `/content-manager/collection-types/${UID_PRODUCT}`,
-        body: {
-          name: 'New Product 2',
-          categories: [categoryIds[1], categoryIds[0]],
-        },
-      }),
-      rq({
-        method: 'POST',
-        url: `/content-manager/collection-types/${UID_PRODUCT}`,
-        body: {
-          name: 'New Product 3',
-          categories: [categoryIds[2]],
-        },
-      }),
-    ]);
+    const p1 = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
+      body: {
+        name: 'New Product 1',
+        categories: [categoryIds[0]],
+      },
+    });
+
+    // Given products have a oneToMany relation with categories, adding categoryIds[0] here // steals the relation from p1. Hence why we are expecting totalDraftRelations to equal 3 below
+
+    const p2 = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
+      body: {
+        name: 'New Product 2',
+        categories: [categoryIds[1], categoryIds[0]],
+      },
+    });
+
+    const p3 = await rq({
+      method: 'POST',
+      url: `/content-manager/collection-types/${UID_PRODUCT}`,
+      body: {
+        name: 'New Product 3',
+        categories: [categoryIds[2]],
+      },
+    });
+
+    const products = [p1, p2, p3];
 
     const productIds = products.map(({ body: { data } }) => data.documentId);
 

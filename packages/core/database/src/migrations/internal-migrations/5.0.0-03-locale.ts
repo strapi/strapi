@@ -1,5 +1,4 @@
 import type { Knex } from 'knex';
-import { isNil } from 'lodash/fp';
 
 import type { Migration } from '../common';
 
@@ -34,7 +33,9 @@ export const createdLocale: Migration = {
       }
 
       // Create locale column if it doesn't exist
-      if (isNil(meta.attributes.locale)) {
+      const hasLocaleColumn = await knex.schema.hasColumn(meta.tableName, 'locale');
+
+      if (meta.attributes.locale && !hasLocaleColumn) {
         await createLocaleColumn(knex, meta.tableName);
       }
     }

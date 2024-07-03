@@ -70,17 +70,9 @@ const Stages = ({ canDelete = true, canUpdate = true, isCreating }: StagesProps)
           position="absolute"
           top="0"
           width={2}
-          zIndex={1}
         />
 
-        <Flex
-          direction="column"
-          alignItems="stretch"
-          gap={6}
-          zIndex={2}
-          position="relative"
-          tag="ol"
-        >
+        <Flex direction="column" alignItems="stretch" gap={6} position="relative" tag="ol">
           {stages.map((stage, index) => {
             return (
               <Box key={stage.__temp_key__} tag="li">
@@ -517,25 +509,34 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
   const { value = [], error, onChange } = useField<StagePermission[]>(name);
   const allStages = useForm<WorkflowStage[]>('PermissionsField', (state) => state.values.stages);
   const onFormValueChange = useForm('PermissionsField', (state) => state.onChange);
+  const rolesErrorCount = React.useRef(0);
 
-  const { data: roles = [], isLoading } = useGetAdminRolesQuery();
+  const { data: roles = [], isLoading, error: getRolesError } = useGetAdminRolesQuery();
 
   // Super admins always have permissions to do everything and therefore
   // there is no point for this role to show up in the role combobox
   const filteredRoles = roles?.filter((role) => role.code !== 'strapi-super-admin') ?? [];
 
   React.useEffect(() => {
-    if (!isLoading && roles.length === 0) {
+    if (
+      !isLoading &&
+      getRolesError &&
+      'status' in getRolesError &&
+      getRolesError.status == 403 &&
+      rolesErrorCount.current === 0
+    ) {
+      rolesErrorCount.current = 1;
+
       toggleNotification({
         blockTransition: true,
         type: 'danger',
         message: formatMessage({
           id: 'review-workflows.stage.permissions.noPermissions.description',
-          defaultMessage: 'You don’t have the permission to see roles',
+          defaultMessage: 'You don’t have the permission to see roles. Contact your administrator.',
         }),
       });
     }
-  }, [formatMessage, isLoading, roles, toggleNotification]);
+  }, [formatMessage, isLoading, roles, toggleNotification, getRolesError]);
 
   if (!isLoading && filteredRoles.length === 0) {
     return (

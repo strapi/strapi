@@ -79,5 +79,9 @@
   "pages.ReleaseDetails.groupBy.option.content-type": "Content-Types",
   "pages.ReleaseDetails.groupBy.option.locales": "Locales",
   "pages.ReleaseDetails.groupBy.option.actions": "Actions",
-  "pages.ReleaseDetails.header-subtitle.scheduled": "Scheduled for {date} at {time} ({offset})"
+  "pages.ReleaseDetails.header-subtitle.scheduled": "Scheduled for {date} at {time} ({offset})",
+  "pages.Settings.releases.title": "Releases",
+  "pages.Settings.releases.description": "Create and manage content updates",
+  "pages.Settings.releases.timezone.label": "Default timezone",
+  "pages.Settings.releases.setting.default-timezone-notification-success": "Default timezone updated."
 }

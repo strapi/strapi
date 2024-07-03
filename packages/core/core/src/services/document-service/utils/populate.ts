@@ -16,6 +16,12 @@ export const getDeepPopulate = (uid: UID.Schema, opts: Options = {}) => {
   return attributes.reduce((acc: any, [attributeName, attribute]) => {
     switch (attribute.type) {
       case 'relation': {
+        // TODO: Support polymorphic relations
+        const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
+        if (isMorphRelation) {
+          break;
+        }
+
         // TODO: Should this just be a plain list?
         // Ignore createdBy, updatedBy, ...
         const isVisible = contentTypes.isVisibleAttribute(model, attributeName);

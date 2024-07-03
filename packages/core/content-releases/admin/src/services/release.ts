@@ -21,6 +21,7 @@ import type {
   PublishRelease,
   MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
+import type { GetSettings, UpdateSettings } from '../../../shared/contracts/settings';
 import type { EndpointDefinition } from '@reduxjs/toolkit/query';
 
 export interface GetReleasesQueryParams {
@@ -78,7 +79,7 @@ const extendInvalidatesTags = (
 
 const releaseApi = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease'],
+    addTagTypes: ['Release', 'ReleaseAction', 'EntriesInRelease', 'ReleaseSettings'],
     endpoints: {
       updateDocument(endpoint: AnyEndpointDefinition) {
         extendInvalidatesTags(endpoint, [
@@ -355,6 +356,20 @@ const releaseApi = adminApi
           },
           providesTags: [{ type: 'EntriesInRelease' }],
         }),
+        getReleaseSettings: build.query<GetSettings.Response, GetSettings.Request | void>({
+          query: () => '/content-releases/settings',
+          providesTags: [{ type: 'ReleaseSettings' }],
+        }),
+        updateReleaseSettings: build.mutation<void, UpdateSettings.Request['body']>({
+          query(data) {
+            return {
+              url: '/content-releases/settings',
+              method: 'PUT',
+              data,
+            };
+          },
+          invalidatesTags: (result, error, arg) => [{ type: 'ReleaseSettings' }],
+        }),
       };
     },
   });
@@ -373,6 +388,8 @@ const {
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
   useGetMappedEntriesInReleasesQuery,
+  useGetReleaseSettingsQuery,
+  useUpdateReleaseSettingsMutation,
 } = releaseApi;
 
 export {
@@ -389,5 +406,7 @@ export {
   useDeleteReleaseActionMutation,
   useDeleteReleaseMutation,
   useGetMappedEntriesInReleasesQuery,
+  useGetReleaseSettingsQuery,
+  useUpdateReleaseSettingsMutation,
   releaseApi,
 };

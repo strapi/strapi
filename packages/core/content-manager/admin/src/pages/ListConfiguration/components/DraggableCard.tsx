@@ -73,10 +73,13 @@ const DraggableCard = ({
     }
   }, [isDraggingSibling]);
 
-  const composedRefs = useComposedRefs(dragRef, objectRef);
+  const composedRefs = useComposedRefs<HTMLButtonElement>(
+    dropRef,
+    objectRef as React.RefObject<HTMLButtonElement>
+  );
 
   return (
-    <FieldWrapper ref={dropRef}>
+    <FieldWrapper ref={composedRefs}>
       {isDragging && <CardDragPreview label={label} />}
       {!isDragging && isDraggingSibling && <CardDragPreview isSibling label={label} />}
 
@@ -90,7 +93,7 @@ const DraggableCard = ({
         >
           <Flex gap={3}>
             <DragButton
-              tag="span"
+              ref={dragRef}
               aria-label={formatMessage(
                 {
                   id: getTranslation('components.DraggableCard.move.field'),
@@ -99,8 +102,6 @@ const DraggableCard = ({
                 { item: label }
               )}
               onClick={(e) => e.stopPropagation()}
-              // @ts-expect-error – TODO: fix this TS error
-              ref={composedRefs}
             >
               <Drag />
             </DragButton>

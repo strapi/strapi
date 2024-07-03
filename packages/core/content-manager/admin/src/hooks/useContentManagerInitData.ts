@@ -131,8 +131,9 @@ const useContentManagerInitData = (): AppState => {
     const collectionTypeLinksPermissions = await Promise.all(
       collectionTypeSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
     );
+
     const authorizedCollectionTypeLinks = collectionTypeSectionLinks.filter(
-      (_, index) => collectionTypeLinksPermissions[index]
+      (_, index) => collectionTypeLinksPermissions[index].length > 0
     );
 
     // Single Types verifications
@@ -140,7 +141,7 @@ const useContentManagerInitData = (): AppState => {
       singleTypeSectionLinks.map(({ permissions }) => checkUserHasPermissions(permissions))
     );
     const authorizedSingleTypeLinks = singleTypeSectionLinks.filter(
-      (_, index) => singleTypeLinksPermissions[index]
+      (_, index) => singleTypeLinksPermissions[index].length > 0
     );
     const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
       ctLinks: authorizedCollectionTypeLinks,

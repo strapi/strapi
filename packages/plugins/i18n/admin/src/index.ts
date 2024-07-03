@@ -12,7 +12,6 @@ import {
   PublishModalAdditionalInfo,
   UnpublishModalAdditionalInfo,
 } from './components/CMListViewModalsAdditionalInformation';
-import { Initializer } from './components/Initializer';
 import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
 import { mutateEditViewHook } from './contentManagerHooks/editView';
@@ -41,8 +40,6 @@ export default {
     app.addRBACMiddleware([localeMiddleware]);
     app.registerPlugin({
       id: pluginId,
-      initializer: Initializer,
-      isReady: false,
       name: pluginId,
     });
   },

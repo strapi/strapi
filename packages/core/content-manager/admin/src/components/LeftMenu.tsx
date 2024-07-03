@@ -28,6 +28,7 @@ const LeftMenu = () => {
   const collectionTypeLinks = useTypedSelector(
     (state) => state['content-manager'].app.collectionTypeLinks
   );
+
   const singleTypeLinks = useTypedSelector((state) => state['content-manager'].app.singleTypeLinks);
   const { schemas } = useContentTypeSchema();
 
@@ -94,7 +95,7 @@ const LeftMenu = () => {
 
   const label = formatMessage({
     id: getTranslation('header.name'),
-    defaultMessage: 'Content',
+    defaultMessage: 'Content Manager',
   });
 
   const getPluginsParamsForLink = (link: ContentManagerLink) => {

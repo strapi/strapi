@@ -15,7 +15,7 @@ import {
   unstable_useDocumentActions as useDocumentActions,
   buildValidParams,
 } from '@strapi/content-manager/strapi-admin';
-import { Flex, Status, Typography, Button } from '@strapi/design-system';
+import { Flex, Status, Typography, Button, Modal } from '@strapi/design-system';
 import { WarningCircle, ListPlus, Trash } from '@strapi/icons';
 import { Modules } from '@strapi/types';
 import { useIntl } from 'react-intl';
@@ -474,13 +474,17 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
     };
   }
 
+  const hasPermission = selectedRows
+    .map(({ locale }) => locale)
+    .every((locale) => canPublish.includes(locale));
+
   return {
     label: formatMessage({
       id: getTranslation('CMEditViewBulkLocale.publish-title'),
       defaultMessage: 'Publish Multiple Locales',
     }),
     icon: <ListPlus />,
-    disabled: isPublishedTab || !canPublish,
+    disabled: isPublishedTab || canPublish.length === 0,
     position: ['panel'],
     variant: 'secondary',
     dialog: {
@@ -510,10 +514,10 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         );
       },
       footer: () => (
-        <Flex justifyContent="flex-end">
+        <Modal.Footer justifyContent="flex-end">
           <Button
             loading={isDraftRelationsLoading}
-            disabled={localesToPublish.length === 0}
+            disabled={!hasPermission || localesToPublish.length === 0}
             variant="default"
             onClick={handleAction}
           >
@@ -522,7 +526,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
               defaultMessage: 'Publish',
             })}
           </Button>
-        </Flex>
+        </Modal.Footer>
       ),
     },
   };

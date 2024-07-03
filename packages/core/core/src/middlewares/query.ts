@@ -1,8 +1,8 @@
-import qs, { IParseOptions } from 'qs';
+import qs from 'qs';
 import type Koa from 'koa';
 import type { Core } from '@strapi/types';
 
-type Config = IParseOptions;
+type Config = Parameters<typeof qs.parse>[1];
 
 const defaults: Config = {
   strictNullHandling: true,
@@ -22,6 +22,7 @@ const addQsParser = (app: Koa, settings: Config) => {
      */
     get() {
       const qstr = this.querystring;
+
       this._querycache = this._querycache || {};
       const cache = this._querycache;
 
@@ -38,7 +39,7 @@ const addQsParser = (app: Koa, settings: Config) => {
     set(obj) {
       this.querystring = qs.stringify(obj);
     },
-  });
+  } satisfies PropertyDescriptor & ThisType<Koa.BaseRequest>);
 
   return app;
 };

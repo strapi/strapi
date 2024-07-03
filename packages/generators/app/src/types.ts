@@ -27,7 +27,6 @@ export interface Options {
 
   runApp?: boolean;
   template?: string;
-  starter?: string;
 
   isQuickstart?: boolean;
 

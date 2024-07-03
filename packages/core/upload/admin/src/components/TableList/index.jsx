@@ -56,7 +56,7 @@ export const TableList = ({
                 defaultMessage: 'Select all folders & assets',
               })}
               disabled={shouldDisableBulkSelect}
-              onCheckedValue={(checked) => onSelectAll(checked, rows)}
+              onCheckedChange={(checked) => onSelectAll(checked, rows)}
               checked={
                 indeterminate && !shouldDisableBulkSelect
                   ? 'indeterminate'

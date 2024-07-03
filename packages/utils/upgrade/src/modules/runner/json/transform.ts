@@ -27,7 +27,28 @@ export const transformJSON = async (
     stats: {},
   };
 
-  const esbuildOptions = { extensions: ['.js', '.mjs', '.ts'] };
+  /**
+   * Why do we need to include node_modules (hookIgnoreNodeModules) and specify a matcher (hookMatcher) to esbuild?
+   *
+   * When using tools like npx or dlx, the execution context is different from when running the program in a local
+   * project. npx and dlx run the commands in a temporary installation, which is isolated from local project files.
+   *
+   * When hookIgnoreNodeModules is not specified (or set to true), esbuild-register instructs
+   * Pirates (https://github.com/danez/pirates) to not transpile any files that come from node_modules.
+   *
+   * Now, when using npx or dlx to run a script, its location can be seen as "external" because it's not part of
+   * the temporary environment where npx or dlx execute. Therefore, it's considered to be part of node_modules.
+   *
+   * Due to this, if hookIgnoreNodeModules is set to true or left unspecified,
+   * esbuild-register won't try to compile them upon require.
+   *
+   * hookMatcher is added to make sure we're not matching anything else than our codemod in external directories.
+   */
+  const esbuildOptions = {
+    extensions: ['.js', '.mjs', '.ts'],
+    hookIgnoreNodeModules: false,
+    hookMatcher: isEqual(codemodPath),
+  };
   const { unregister } = register(esbuildOptions);
 
   const module = require(codemodPath);

@@ -96,7 +96,7 @@ const EditPage = () => {
 
   React.useEffect(() => {
     if (error) {
-      // Redirect the use to the homepage if is not allowed to read
+      // Redirect the user to the homepage if is not allowed to read
       if (error.name === 'UnauthorizedError') {
         toggleNotification({
           type: 'info',

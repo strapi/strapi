@@ -4,20 +4,20 @@ import { Flex, IconButton, Link, Tbody, Td, Tr, Typography } from '@strapi/desig
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
 
 const EditLink = styled(Link)`
   align-items: center;
   height: 3.2rem;
+  width: 3.2rem;
   display: flex;
   justify-content: center;
-  padding: ${({ theme }) => `${theme.spaces[2]}}`};
-  width: 3.2rem;
+  padding: ${({ theme }) => `${theme.spaces[2]}`};
 
   svg {
-    height: 1.2rem;
-    width: 1.2rem;
+    height: 1.6rem;
+    width: 1.6rem;
 
     path {
       fill: ${({ theme }) => theme.colors.neutral500};
@@ -72,6 +72,7 @@ const TableBody = ({ sortedRoles, canDelete, canUpdate, setRoleToDelete, onDelet
             <Flex justifyContent="end" onClick={(e) => e.stopPropagation()}>
               {canUpdate ? (
                 <EditLink
+                  tag={NavLink}
                   to={role.id.toString()}
                   aria-label={formatMessage(
                     { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },

@@ -315,6 +315,8 @@ export const transformContentTypesToModels = (
         ...documentIdAttribute,
         ...transformAttributes(contentType, identifiers),
       },
+      indexes: contentType.indexes as Model['indexes'],
+      foreignKeys: contentType.foreignKeys as Model['foreignKeys'],
     };
 
     // Add indexes to model

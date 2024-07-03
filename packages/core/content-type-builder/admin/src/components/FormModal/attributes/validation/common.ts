@@ -20,7 +20,6 @@ const alreadyUsedAttributeNames = (
       const snakeCaseKey = snakeCase(value);
 
       return !usedNames.some((existingKey) => {
-        if (existingKey === value) return false; // don't compare against itself
         return snakeCase(existingKey) === snakeCaseKey;
       });
     },
@@ -82,7 +81,7 @@ const validators = {
     yup
       .number()
       .integer()
-      .min(0)
+      .min(1)
       .when('maxLength', (maxLength, schema) => {
         if (maxLength) {
           return schema.max(maxLength, getTrad('error.validation.minSupMax'));
@@ -119,7 +118,11 @@ const createTextShape = (usedAttributeNames: Array<string>, reservedNames: Array
         name: 'isValidRegExpPattern',
         message: getTrad('error.validation.regex'),
         test(value) {
-          return new RegExp(value || '') !== null;
+          try {
+            return new RegExp(value || '') !== null;
+          } catch (e) {
+            return false;
+          }
         },
       })
       .nullable(),

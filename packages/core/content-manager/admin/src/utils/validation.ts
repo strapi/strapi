@@ -216,11 +216,17 @@ type ValidationFn = (
 ) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
 
 const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
-  if (attribute.required) {
-    return schema.required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'This field is required.',
-    });
+  if (
+    ((attribute.type === 'component' && attribute.repeatable) ||
+      attribute.type === 'dynamiczone') &&
+    attribute.required &&
+    'min' in schema
+  ) {
+    return schema.min(1, translatedErrors.required);
+  }
+
+  if (attribute.required && attribute.type !== 'relation') {
+    return schema.required(translatedErrors.required);
   }
 
   return schema?.nullable
@@ -276,6 +282,35 @@ const addMinValidation: ValidationFn =
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
     if ('min' in attribute) {
       const min = toInteger(attribute.min);
+
+      if (
+        (attribute.type === 'component' && attribute.repeatable) ||
+        attribute.type === 'dynamiczone'
+      ) {
+        if (!attribute.required && 'test' in schema && min) {
+          // @ts-expect-error - We know the schema is an array here but ts doesn't know.
+          return schema.test(
+            'custom-min',
+            {
+              ...translatedErrors.min,
+              values: {
+                min: attribute.min,
+              },
+            },
+            (value: Array<unknown>) => {
+              if (!value) {
+                return true;
+              }
+
+              if (Array.isArray(value) && value.length === 0) {
+                return true;
+              }
+
+              return value.length >= min;
+            }
+          );
+        }
+      }
 
       if ('min' in schema && min) {
         return schema.min(min, {

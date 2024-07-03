@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import browserslist from 'browserslist';
 import { createStrapi } from '@strapi/core';
 import { Core, Modules } from '@strapi/types';
+import type { Server } from 'node:http';
 
 import type { CLIContext } from '../cli/types';
 import { getStrapiAdminEnvVars, loadEnv } from './core/env';
@@ -18,6 +19,8 @@ interface BaseOptions {
   sourcemaps?: boolean;
   bundler?: 'webpack' | 'vite';
   open?: boolean;
+  hmrServer?: Server;
+  hmrClientPort?: number;
 }
 
 interface BuildContext<TOptions = unknown> extends BaseContext {
@@ -131,7 +134,7 @@ const createBuildContext = async <TOptions extends BaseOptions>({
 
   const features = strapiInstance.config.get('features', undefined);
 
-  const { bundler = 'webpack', ...restOptions } = options;
+  const { bundler = 'vite', ...restOptions } = options;
 
   const buildContext = {
     appDir,

@@ -753,6 +753,7 @@ describe('BlocksToolbar', () => {
 
     // Convert selection to a unordered list
     await user.click(unorderedListButton);
+
     expect(baseEditor.children).toEqual([
       {
         type: 'list',

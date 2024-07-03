@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 
 import { Box, Checkbox, Flex, Typography, Grid, VisuallyHidden } from '@strapi/design-system';
-import { Cog as CogIcon } from '@strapi/icons';
+import { Cog } from '@strapi/icons';
 import get from 'lodash/get';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
@@ -103,7 +103,7 @@ const SubCategory = ({ subCategory }) => {
                         }
                       )}
                     </VisuallyHidden>
-                    <CogIcon />
+                    <Cog id="cog" />
                   </button>
                 </CheckboxWrapper>
               </Grid.Item>

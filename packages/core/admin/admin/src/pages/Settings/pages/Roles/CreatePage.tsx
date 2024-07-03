@@ -14,7 +14,7 @@ import {
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useNavigate, useMatch } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { styled } from 'styled-components';
 import * as yup from 'yup';
 
@@ -58,7 +58,7 @@ interface CreateRoleFormValues {
  * manage the state of the child is nonsensical.
  */
 const CreatePage = () => {
-  const match = useMatch('/settings/roles/duplicate/:id');
+  const { id } = useParams();
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
@@ -69,9 +69,7 @@ const CreatePage = () => {
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
 
-  const id = match?.params.id ?? null;
-
-  const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
+  const { isLoading: isLoadingPermissionsLayout, currentData: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
       /**
        * Role here is a query param so if there's no role we pass an empty string
@@ -84,7 +82,7 @@ const CreatePage = () => {
    * We need this so if we're cloning a role, we can fetch
    * the current permissions that role has.
    */
-  const { data: rolePermissions, isLoading: isLoadingRole } = useGetRolePermissionsQuery(
+  const { currentData: rolePermissions, isLoading: isLoadingRole } = useGetRolePermissionsQuery(
     {
       id: id!,
     },
@@ -150,7 +148,7 @@ const CreatePage = () => {
         message: formatMessage({ id: 'Settings.roles.created', defaultMessage: 'created' }),
       });
 
-      navigate(res.data.id.toString(), { replace: true });
+      navigate(`../roles/${res.data.id.toString()}`, { replace: true });
     } catch (err) {
       toggleNotification({
         type: 'danger',

@@ -144,6 +144,7 @@ const SubCategory = ({
 }: SubCategoryProps) => {
   const { modifiedData, onChangeParentCheckbox, onChangeSimpleCheckbox } =
     usePermissionsDataManager();
+  const [isConditionModalOpen, setIsConditionModalOpen] = React.useState(false);
   const { formatMessage } = useIntl();
 
   const mainData = get(modifiedData, pathToData, {});
@@ -248,7 +249,12 @@ const SubCategory = ({
               );
             })}
           </Grid.Root>
-          <Modal.Root>
+          <Modal.Root
+            open={isConditionModalOpen}
+            onOpenChange={() => {
+              setIsConditionModalOpen((prev) => !prev);
+            }}
+          >
             <Modal.Trigger>
               <ConditionsButton hasConditions={doesButtonHasCondition} />
             </Modal.Trigger>
@@ -256,6 +262,9 @@ const SubCategory = ({
               headerBreadCrumbs={[categoryName, subCategoryName]}
               actions={formattedActions}
               isFormDisabled={isFormDisabled}
+              onClose={() => {
+                setIsConditionModalOpen(false);
+              }}
             />
           </Modal.Root>
         </Flex>
