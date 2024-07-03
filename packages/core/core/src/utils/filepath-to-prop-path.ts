@@ -1,3 +1,4 @@
+import path from 'node:path';
 import _ from 'lodash';
 
 /**
@@ -9,7 +10,7 @@ export const filePathToPropPath = (filePath: string, useFileNameAsKey = true) =>
   const prop = cleanPath
     .replace(/(\.settings|\.json|\.js)/g, '')
     .toLowerCase()
-    .split('/')
+    .split(path.sep)
     .map((p) => _.trimStart(p, '.'))
     .join('.')
     .split('.');
