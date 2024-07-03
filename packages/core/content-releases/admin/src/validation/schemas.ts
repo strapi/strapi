@@ -1,5 +1,5 @@
-import * as yup from 'yup';
 import { translatedErrors } from '@strapi/admin/strapi-admin';
+import * as yup from 'yup';
 
 export const RELEASE_SCHEMA = yup
   .object()

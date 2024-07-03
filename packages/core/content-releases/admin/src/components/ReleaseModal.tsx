@@ -20,9 +20,9 @@ import { Formik, Form, useFormikContext } from 'formik';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
-import { RELEASE_SCHEMA } from '../validation/schemas';
 import { pluginId } from '../pluginId';
 import { getTimezoneOffset } from '../utils/time';
+import { RELEASE_SCHEMA } from '../validation/schemas';
 
 export interface FormValues {
   name: string;
