@@ -17,7 +17,7 @@ export const filePathToPropPath = (
     // Note: We're using fp.toLower instead of fp.lowercase as the latest removes special characters such as "/"
     fp.toLower,
     // Split the cleaned path by matching every possible separator (either "/" or "\" depending on the OS)
-    fp.split(new RegExp(`[${path.win32.sep}|${path.posix.sep}]`, 'g')),
+    fp.split(new RegExp(`[\\${path.win32.sep}|${path.posix.sep}]`, 'g')),
     // Make sure to remove leading '.' from the different path parts
     fp.map(fp.trimCharsStart('.')),
     // join + split in case some '.' characters are still present in different parts of the path
@@ -31,7 +31,7 @@ export const filePathToPropPath = (
 };
 
 const removeRelativePrefix = (filePath: string) => {
-  return filePath.startsWith(`.${path.win32.sep}`) || filePath.startsWith(`.${path.posix.sep}`)
+  return filePath.startsWith(`.\\${path.win32.sep}`) || filePath.startsWith(`.${path.posix.sep}`)
     ? filePath.slice(2)
     : filePath;
 };
