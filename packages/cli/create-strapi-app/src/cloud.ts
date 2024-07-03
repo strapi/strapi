@@ -1,5 +1,4 @@
 import inquirer from 'inquirer';
-import { resolve } from 'node:path';
 import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
 import parseToChalk from './utils/parse-to-chalk';
 
