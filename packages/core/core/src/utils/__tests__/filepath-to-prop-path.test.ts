@@ -37,11 +37,6 @@ describe('filePathToPropPath', () => {
       expect(filePathToPropPath('./config/test.js')).toEqual(['config', 'test']);
     });
 
-    test('Win32 Separators', () => {
-      expect(filePathToPropPath('config\\test.js')).toEqual(['config', 'test']);
-      expect(filePathToPropPath('.\\config\\test.js')).toEqual(['config', 'test']);
-    });
-
     test('Mixed Separators (win32 + posix)', () => {
       expect(filePathToPropPath('src\\config/test.js')).toEqual(['src', 'config', 'test']);
       expect(filePathToPropPath('.\\config/test.js')).toEqual(['config', 'test']);

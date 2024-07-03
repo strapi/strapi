@@ -9,7 +9,7 @@ export const filePathToPropPath = (
   useFileNameAsKey: boolean = true
 ): string[] => {
   const transform = fp.pipe(
-    // Remove the relative path prefix (posix or win32) and ".\" (win32) prefixes
+    // Remove the relative path prefixes: './' for posix (and some win32) and ".\" for win32
     removeRelativePrefix,
     // Remove the path metadata and extensions
     fp.replace(/(\.settings|\.json|\.js)/g, ''),
