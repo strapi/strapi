@@ -8,7 +8,7 @@ import * as prompts from './prompts';
 import type { Options } from './types';
 import { detectPackageManager } from './package-manager';
 import * as database from './database';
-import { handleCloudLogin } from './cloud';
+// import { handleCloudLogin } from './cloud';
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
