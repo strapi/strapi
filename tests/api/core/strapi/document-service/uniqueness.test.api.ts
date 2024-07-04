@@ -121,64 +121,65 @@ describe('Document Service', () => {
     };
 
     for (const [field, value] of Object.entries(testValues)) {
-      it(`cannot create multiple entities with the same unique ${field} value in the same locale and publication state`, async () => {
-        // Create an article in the default locale and publish it
-        const article = await strapi.documents(ARTICLE_UID).create({
-          data: {
-            identifiers: {
-              nestedUnique: {
-                [field]: value,
-              },
-            },
-          },
+      const testCases = [
+        {
+          description: 'identifiers',
+          createData: (field, value) => ({ identifiers: { nestedUnique: { [field]: value } } }),
+        },
+        {
+          description: 'identifiersDz',
+          createData: (field, value) => ({
+            identifiersDz: [{ __component: 'article.compo-unique-all', [field]: value }],
+          }),
+        },
+        // TODO handle repeatable components with testCases array approach
+        // {
+        //   description: 'repeatableIdentifiers',
+        //   createData: (field, value) => ({
+        //     repeatableIdentifiers: [
+        //       { nestedUnique: { [field]: value } },
+        //       { nestedUnique: { [field]: value } },
+        //     ],
+        //   }),
+        //   expectError: '2 errors occurred',
+        // },
+      ];
+
+      for (const { description, createData } of testCases) {
+        it(`cannot create multiple entities with the same unique ${field} value in the same ${description}, locale and publication state`, async () => {
+          // Create an article in the default locale and publish it
+          const article = await strapi.documents(ARTICLE_UID).create({
+            data: createData(field, value),
+          });
+          await strapi.documents(ARTICLE_UID).publish({ documentId: article.documentId });
+
+          // Create and publish an article in a different locale with the same unique value as the first article
+          const articleDifferentLocale = await strapi.documents(ARTICLE_UID).create({
+            data: createData(field, value),
+            locale: otherLocale,
+          });
+          expect(articleDifferentLocale).toBeDefined();
+          await strapi
+            .documents(ARTICLE_UID)
+            .publish({ documentId: articleDifferentLocale.documentId, locale: otherLocale });
+
+          // Attempt to create another article in the default locale with the same unique value
+          // The draft articles should collide and trigger a uniqueness error
+          await expect(
+            strapi.documents(ARTICLE_UID).create({
+              data: createData(field, value),
+            })
+          ).rejects.toThrow('This attribute must be unique');
+
+          const differentValue = modifyToDifferentValue(field, value);
+
+          // Create an article in the same locale with a different unique value
+          const secondArticle = await strapi.documents(ARTICLE_UID).create({
+            data: createData(field, differentValue),
+          });
+          expect(secondArticle).toBeDefined();
         });
-        await strapi.documents(ARTICLE_UID).publish({ documentId: article.documentId });
-
-        // Create and publish an article in a different locale with the same
-        // unique value as the first article
-        const articleDifferentLocale = await strapi.documents(ARTICLE_UID).create({
-          data: {
-            identifiers: {
-              nestedUnique: {
-                [field]: value,
-              },
-            },
-          },
-          locale: otherLocale,
-        });
-        expect(articleDifferentLocale).toBeDefined();
-        await strapi
-          .documents(ARTICLE_UID)
-          .publish({ documentId: articleDifferentLocale.documentId, locale: otherLocale });
-
-        // Attempt to create another article in the default locale with the same unique value
-        // The draft articles should collide and trigger a uniqueness error
-        await expect(
-          strapi.documents(ARTICLE_UID).create({
-            data: {
-              identifiers: {
-                nestedUnique: {
-                  [field]: value,
-                },
-              },
-            },
-          })
-        ).rejects.toThrow('This attribute must be unique');
-
-        const differentValue = modifyToDifferentValue(field, value);
-
-        // Create an article in the same locale with a different unique value
-        const secondArticle = await strapi.documents(ARTICLE_UID).create({
-          data: {
-            identifiers: {
-              nestedUnique: {
-                [field]: differentValue,
-              },
-            },
-          },
-        });
-        expect(secondArticle).toBeDefined();
-      });
+      }
 
       it(`cannot create an entity with repeated unique ${field} value within a repeatable component in the same locale and publication state`, async () => {
         // Attempt to create an article with the same unique value in a repeatable component.

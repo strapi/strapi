@@ -297,28 +297,25 @@ const addUniqueValidator = <T extends yup.AnySchema>(
           }
         });
 
+      trx.commit();
+
       const componentIdArray = componentIds.map((item: { cmp_id: number }) => item.cmp_id);
       if (componentIdArray.length === 0) {
         // If there are no components of the target type in the dynamic zone, the validation passes.
         return true;
       }
 
-      // Here we check for the existence of any components of the target type
-      // where the updated attribute value matches. This is the actual unique validation.
-      // We use count(*) to check if any rows exist that match the condition.
-      const matchingComponentCount = await strapi.db
-        .getConnection(model.collectionName)
-        .transacting(trx.get())
-        .count('*')
-        .whereIn('id', componentIdArray)
-        // TODO is it sufficient to exactly match in a where clause like this for all field types?
-        .andWhere(updatedAttribute.name, updatedAttribute.value)
-        .first();
-
-      trx.commit();
-
-      // If the count is greater than 0, the validation fails.
-      return matchingComponentCount === 0;
+      // Here we check if any of the components we found from the above step
+      // share the same value as the updated attribute.
+      // Now we have the entity IDs of the potentially conflicting components we
+      // can use the db query layer to check if any of them share the same value
+      // as the updated attribute.
+      return !(await strapi.db.query(model.uid).findOne({
+        where: {
+          id: { $in: componentIdArray },
+          [updatedAttribute.name]: updatedAttribute.value,
+        },
+      }));
     } catch (error) {
       trx.rollback();
 
