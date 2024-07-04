@@ -244,6 +244,12 @@ const getDeepPopulateDraftCount = (uid: UID.Schema) => {
 
     switch (attribute.type) {
       case 'relation': {
+        // TODO: Support polymorphic relations
+        const isMorphRelation = attribute.relation.toLowerCase().startsWith('morph');
+        if (isMorphRelation) {
+          break;
+        }
+
         if (isVisibleAttribute(model, attributeName)) {
           populateAcc[attributeName] = {
             count: true,

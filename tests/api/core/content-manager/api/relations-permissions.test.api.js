@@ -88,8 +88,7 @@ const createUserAndReq = async (userName, permissions) => {
   return rq;
 };
 
-// TODO: Fix relations
-describe.skip('Relations', () => {
+describe('Relation permissions', () => {
   const builder = createTestBuilder();
 
   const createFixtures = async () => {
@@ -130,12 +129,16 @@ describe.skip('Relations', () => {
     rq = await createAuthRequest({ strapi });
     await createFixtures();
 
-    product = await createEntry('api::product.product', { name: 'Skate' });
-    shop = await createEntry(
+    const productEntry = await createEntry('api::product.product', { name: 'Skate' });
+    product = productEntry.data;
+
+    const shopEntry = await createEntry(
       'api::shop.shop',
       { name: 'Shop', products: [product.id] },
       populateShop
     );
+    shop = shopEntry.data;
+
     user = await createEntry('plugin::users-permissions.user', {
       username: 'Alice',
       email: 'test-relations@strapi.io',
@@ -154,7 +157,7 @@ describe.skip('Relations', () => {
       rqPermissive,
       'api::shop.shop',
       'products',
-      shop.id
+      shop.documentId
     );
 
     // Main field should be in here
@@ -168,7 +171,7 @@ describe.skip('Relations', () => {
       rqRestricted,
       'api::shop.shop',
       'products',
-      shop.id
+      shop.documentId
     );
 
     expect(products.results).toHaveLength(1);
@@ -186,10 +189,10 @@ describe.skip('Relations', () => {
       rqRestricted,
       'plugin::users-permissions.user',
       'role',
-      user.id
+      user.documentId
     );
 
     // Main field should be visible
-    expect(role.data?.name).toBe('Authenticated');
+    expect(role.results?.[0].name).toBe('Authenticated');
   });
 });

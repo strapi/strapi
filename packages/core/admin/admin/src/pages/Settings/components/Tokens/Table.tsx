@@ -176,6 +176,7 @@ const DefaultButton = ({
     <LinkStyled
       tag={NavLink}
       to={tokenId.toString()}
+      onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => e.stopPropagation()}
       title={formatMessage(MESSAGES_MAP[buttonType], { target: tokenName })}
     >
       {children}

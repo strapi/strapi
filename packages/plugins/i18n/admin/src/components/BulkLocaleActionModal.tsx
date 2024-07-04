@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { FormErrors, Table, useTable } from '@strapi/admin/strapi-admin';
-import { Box, Typography, IconButton, Flex, Tooltip, Status } from '@strapi/design-system';
+import { Box, Typography, IconButton, Flex, Tooltip, Status, Modal } from '@strapi/design-system';
 import { Pencil, CheckCircle, CrossCircle, ArrowsCounterClockwise } from '@strapi/icons';
 import { Modules } from '@strapi/types';
 import { stringify } from 'qs';
@@ -197,7 +197,7 @@ const BulkLocaleActionModal = ({
   };
 
   return (
-    <React.Fragment>
+    <Modal.Body>
       <Typography>{getFormattedCountMessage()}</Typography>
       <Box marginTop={5}>
         <Table.Content>
@@ -271,7 +271,7 @@ const BulkLocaleActionModal = ({
           </Table.Body>
         </Table.Content>
       </Box>
-    </React.Fragment>
+    </Modal.Body>
   );
 };
 

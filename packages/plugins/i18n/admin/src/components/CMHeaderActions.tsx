@@ -15,7 +15,7 @@ import {
   unstable_useDocumentActions as useDocumentActions,
   buildValidParams,
 } from '@strapi/content-manager/strapi-admin';
-import { Flex, Status, Typography, Button } from '@strapi/design-system';
+import { Flex, Status, Typography, Button, Modal } from '@strapi/design-system';
 import { WarningCircle, ListPlus, Trash } from '@strapi/icons';
 import { Modules } from '@strapi/types';
 import { useIntl } from 'react-intl';
@@ -514,7 +514,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
         );
       },
       footer: () => (
-        <Flex justifyContent="flex-end" width="100%">
+        <Modal.Footer justifyContent="flex-end">
           <Button
             loading={isDraftRelationsLoading}
             disabled={!hasPermission || localesToPublish.length === 0}
@@ -526,7 +526,7 @@ const BulkLocalePublishAction: DocumentActionComponent = ({
               defaultMessage: 'Publish',
             })}
           </Button>
-        </Flex>
+        </Modal.Footer>
       ),
     },
   };

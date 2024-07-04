@@ -87,7 +87,10 @@ const resolveDevelopmentConfig = async (ctx: BuildContext): Promise<InlineConfig
     server: {
       middlewareMode: true,
       open: ctx.options.open,
-      hmr: { server: ctx.strapi.server.httpServer },
+      hmr: {
+        server: ctx.options.hmrServer,
+        clientPort: ctx.options.hmrClientPort,
+      },
     },
     appType: 'custom',
   };

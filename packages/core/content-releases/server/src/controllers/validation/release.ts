@@ -1,5 +1,18 @@
 import { yup, validateYupSchema } from '@strapi/utils';
-import { RELEASE_SCHEMA } from '../../../../shared/validation-schemas';
+
+export const RELEASE_SCHEMA = yup
+  .object()
+  .shape({
+    name: yup.string().trim().required(),
+    scheduledAt: yup.string().nullable(),
+    timezone: yup.string().when('scheduledAt', {
+      is: (value: any) => value !== null && value !== undefined,
+      then: yup.string().required(),
+      otherwise: yup.string().nullable(),
+    }),
+  })
+  .required()
+  .noUnknown();
 
 const FIND_BY_DOCUMENT_ATTACHED_PARAMS_SCHEMA = yup
   .object()

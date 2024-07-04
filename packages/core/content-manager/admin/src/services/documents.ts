@@ -34,7 +34,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params: query,
         },
       }),
-      invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
+      invalidatesTags: (_result, error, { model }) => {
+        if (error) {
+          return [];
+        }
+
+        return [{ type: 'Document', id: `${model}_LIST` }];
+      },
     }),
     cloneDocument: builder.mutation<
       Clone.Response,
