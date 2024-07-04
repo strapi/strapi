@@ -36,10 +36,10 @@ yarn build
 
 Strapi gives you many possible deployment options for your project including [Strapi Cloud](https://cloud.strapi.io). Browse the [deployment section of the documentation](https://docs.strapi.io/dev-docs/deployment) to find the best solution for your use case.
 
-```
-yarn strapi deploy
-```
-
+[comment]: <> (TODO - To be included when Cloud is v5 compatible)
+[comment]: <> (```)
+[comment]: <> (yarn strapi deploy)
+[comment]: <> (```)
 ## 📚 Learn more
 
 - [Resource center](https://strapi.io/resource-center) - Strapi resource center.
