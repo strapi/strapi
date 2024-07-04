@@ -1,5 +1,6 @@
-import { setCreatorFields, async, errors } from '@strapi/utils';
+import { isNil } from 'lodash/fp';
 
+import { setCreatorFields, async, errors } from '@strapi/utils';
 import type { Modules, UID } from '@strapi/types';
 
 import { getService } from '../utils';
@@ -390,11 +391,7 @@ export default {
         .countRelations()
         .build();
 
-      const document = await documentManager.findOne(id, model, { populate });
-
-      if (permissionChecker.cannot.publish(document)) {
-        throw new errors.ForbiddenError();
-      }
+      let document: any;
 
       /**
        * Publish can be called on two scenarios:
@@ -407,25 +404,36 @@ export default {
        * 2. User can update and publish a document
        *    Action will be allowed, but document will not be updated, only published with the latest draft
        */
-      const isCreate = !id;
-      const isUpdate = id;
-
-      if (isCreate && permissionChecker.cannot.create(document)) {
-        throw new errors.ForbiddenError();
-      }
-
+      const isCreate = !isNil(id);
       if (isCreate) {
-        await createDocument(ctx);
+        if (permissionChecker.cannot.create()) {
+          throw new errors.ForbiddenError();
+        }
+
+        document = await createDocument(ctx);
       }
 
-      // Update if user has update permissions
-      if (isUpdate && permissionChecker.can.update(document)) {
-        await updateDocument(ctx);
+      const isUpdate = !isCreate;
+      if (isUpdate) {
+        document = await documentManager.findOne(id!, model, { populate });
+
+        if (!document) {
+          throw new errors.NotFoundError('Document not found');
+        }
+
+        // Only Update if user has update permissions
+        if (permissionChecker.can.update(document)) {
+          await updateDocument(ctx);
+        }
+      }
+
+      if (permissionChecker.cannot.publish(document)) {
+        throw new errors.ForbiddenError();
       }
 
       const { locale } = await getDocumentLocaleAndStatus(body, model);
 
-      const publishResult = await documentManager.publish(document!.documentId, model, {
+      const publishResult = await documentManager.publish(document.documentId, model, {
         locale,
         // TODO: Allow setting creator fields on publish
         // data: setCreatorFields({ user, isEdition: true })({}),
