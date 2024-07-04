@@ -60,9 +60,10 @@ async function createStrapiApp(directory: string | undefined, options: Options) 
 
   const appDirectory = directory || (await prompts.directory());
 
-  if (!options.skipCloud) {
-    await handleCloudLogin();
-  }
+// TODO V5: Uncomment when cloud is v5 compatible
+//  if (!options.skipCloud) {
+//    await handleCloudLogin();
+//  }
 
   const appOptions = {
     directory: appDirectory,
