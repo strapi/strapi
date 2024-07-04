@@ -81,6 +81,16 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'No entry yet. Click on the' }).click();
     await page.getByRole('textbox', { name: 'title' }).nth(1).fill('Negozio sportivo');
     await page.getByRole('checkbox', { name: 'indexable' }).click();
+
+    /**
+     * Try to publish. It should fail because content has a min: 2 constraint
+     * Then it should display the "missing component" validation error (as a button)
+     */
+    await page.getByRole('button', { name: 'Publish' }).click();
+
+    /**
+     * Create the missing components in the "content" dynamic zone.
+     */
     await page.getByRole('button', { name: 'There are 2 missing components' }).click();
     await page.getByRole('button', { name: 'Product carousel' }).click();
     await page.getByRole('button', { name: 'Product carousel' }).click();
@@ -91,6 +101,10 @@ test.describe('Settings', () => {
     await page.getByRole('button', { name: 'There is 1 missing component' }).click();
     await page.getByRole('button', { name: 'Hero image' }).click();
     await expect(page.getByText('content (2)')).toBeVisible();
+
+    /**
+     * Successfully publish the entry once the data is valid.
+     */
     await page.getByRole('button', { name: 'Publish' }).click();
     await findAndClose(page, 'Success:Published');
   });
