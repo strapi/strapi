@@ -410,7 +410,7 @@ export default {
           throw new errors.ForbiddenError();
         }
 
-        document = await createDocument(ctx);
+        document = await createDocument(ctx, { populate });
       }
 
       const isUpdate = !isCreate;
