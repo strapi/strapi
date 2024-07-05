@@ -1,6 +1,6 @@
 {
   "name": "@strapi/review-workflows",
-  "version": "5.0.0-rc.1",
+  "version": "5.0.0-rc.2",
   "description": "Review workflows for your content",
   "repository": {
     "type": "git",
@@ -65,11 +65,11 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.0.0-rc.1",
-    "@strapi/content-manager": "5.0.0-rc.1",
+    "@strapi/admin": "5.0.0-rc.2",
+    "@strapi/content-manager": "5.0.0-rc.2",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "5.0.0-rc.1",
-    "@strapi/utils": "5.0.0-rc.1",
+    "@strapi/types": "5.0.0-rc.2",
+    "@strapi/utils": "5.0.0-rc.2",
     "@testing-library/react": "15.0.7",
     "msw": "1.3.0",
     "react": "18.3.1",
