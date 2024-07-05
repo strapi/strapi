@@ -39,26 +39,25 @@ const isIgnoredFile = (folderPath: string, file: string, ignorePatterns: string[
 const getFiles = async (
   dirPath: string,
   ignorePatterns: string[] = [],
-  arrayOfFiles: string[] = [],
   subfolder: string = ''
 ): Promise<string[]> => {
+  const arrayOfFiles: string[] = [];
   const entries = await fse.readdir(path.join(dirPath, subfolder));
 
-  entries.forEach((entry) => {
+  for (const entry of entries) {
     const entryPathFromRoot = path.join(subfolder, entry);
     const entryPath = path.relative(dirPath, entryPathFromRoot);
     const isIgnored = isIgnoredFile(dirPath, entryPathFromRoot, ignorePatterns);
 
-    if (isIgnored) {
-      return;
+    if (!isIgnored) {
+      if (fse.statSync(entryPath).isDirectory()) {
+        const subFiles = await getFiles(dirPath, ignorePatterns, entryPathFromRoot);
+        arrayOfFiles.push(...subFiles);
+      } else {
+        arrayOfFiles.push(entryPath);
+      }
     }
-
-    if (fse.statSync(entryPath).isDirectory()) {
-      getFiles(dirPath, ignorePatterns, arrayOfFiles, entryPathFromRoot);
-    } else {
-      arrayOfFiles.push(entryPath);
-    }
-  });
+  }
   return arrayOfFiles;
 };
 
