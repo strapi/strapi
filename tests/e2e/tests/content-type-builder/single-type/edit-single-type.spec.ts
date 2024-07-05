@@ -56,7 +56,7 @@ describeOnCondition(!process.env.CI)('Edit single type', () => {
     await page.getByRole('button', { name: 'Edit', exact: true }).click();
     await page.getByRole('tab', { name: 'Advanced settings' }).click();
     await page.getByText('Draft & publish').click();
-    await page.getByRole('button', { name: 'Confirm' }).click();
+    await page.getByRole('button', { name: 'Yes, disable' }).click();
     await page.getByRole('button', { name: 'Finish' }).click();
 
     await waitForRestart(page);
