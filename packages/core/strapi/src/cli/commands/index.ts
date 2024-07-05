@@ -1,4 +1,4 @@
-// import { buildStrapiCloudCommands as cloudCommands } from '@strapi/cloud-cli';
+import { buildStrapiCloudCommands as cloudCommands } from '@strapi/cloud-cli';
 
 import { command as createAdminUser } from './admin/create-user';
 import { command as resetAdminUserPassword } from './admin/reset-user-password';
@@ -59,6 +59,5 @@ export const commands: StrapiCommand[] = [
   /**
    * Cloud
    */
-  // TODO V5: Uncomment when cloud-cli is ready
-  // cloudCommands,
+  cloudCommands,
 ];

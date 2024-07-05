@@ -8,7 +8,7 @@ import * as prompts from './prompts';
 import type { Options } from './types';
 import { detectPackageManager } from './package-manager';
 import * as database from './database';
-// import { handleCloudProject } from './cloud';
+import { handleCloudLogin } from './cloud';
 
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
@@ -30,9 +30,10 @@ command
   .option('--use-yarn', 'Use yarn as the project package manager')
   .option('--use-pnpm', 'Use pnpm as the project package manager')
 
+  // Cloud options
+  .option('--skip-cloud', 'Skip cloud login and project creation')
+
   // Database options
-  // TODO V5: Uncomment when cloud-cli is ready
-  // .option('--skip-cloud', 'Skip cloud login and project creation')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
   .option('--dbport <dbport>', 'Database port')
@@ -60,11 +61,9 @@ async function createStrapiApp(directory: string | undefined, options: Options) 
 
   const appDirectory = directory || (await prompts.directory());
 
-  // TODO V5: Uncomment when cloud-cli is ready
-  // if (!options.skipCloud) {
-  //   checkRequirements();
-  //   await handleCloudProject(projectName);
-  // }
+  if (!options.skipCloud) {
+    await handleCloudLogin();
+  }
 
   const appOptions = {
     directory: appDirectory,
