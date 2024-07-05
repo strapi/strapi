@@ -12,6 +12,7 @@ import { cloudApiFactory, tokenServiceFactory, local } from '../services';
 import { notificationServiceFactory } from '../services/notification';
 import { loadPkg } from '../utils/pkg';
 import { buildLogsServiceFactory } from '../services/build-logs';
+import { promptLogin } from '../login/action';
 
 type PackageJson = {
   name: string;
@@ -26,7 +27,7 @@ async function upload(
   token: string,
   maxProjectFileSize: number
 ) {
-  const cloudApi = await cloudApiFactory(token);
+  const cloudApi = await cloudApiFactory(ctx, token);
   // * Upload project
   try {
     const storagePath = await getTmpStoragePath();
@@ -138,19 +139,17 @@ async function getProject(ctx: CLIContext) {
 
 export default async (ctx: CLIContext) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
-  const cloudApiService = await cloudApiFactory();
-  const token = await getValidToken();
-
+  const token = await getValidToken(ctx, promptLogin);
   if (!token) {
     return;
   }
 
   const project = await getProject(ctx);
-
   if (!project) {
     return;
   }
 
+  const cloudApiService = await cloudApiFactory(ctx);
   try {
     await cloudApiService.track('willDeployWithCLI', { projectInternalName: project.name });
   } catch (e) {
