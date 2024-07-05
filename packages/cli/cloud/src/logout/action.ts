@@ -1,6 +1,8 @@
 import type { CLIContext } from '../types';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
 
+const openModule = import('open');
+
 export default async (ctx: CLIContext) => {
   const { logger } = ctx;
   const { retrieveToken, eraseToken } = await tokenServiceFactory(ctx);
@@ -10,10 +12,27 @@ export default async (ctx: CLIContext) => {
     logger.log("You're already logged out.");
     return;
   }
-  const cloudApiService = await cloudApiFactory(token);
+  const cloudApiService = await cloudApiFactory(ctx, token);
+  const config = await cloudApiService.config();
+  const cliConfig = config.data;
+
   try {
-    // we might want also to perform extra actions like logging out from the auth0 tenant
     await eraseToken();
+
+    openModule.then((open) => {
+      open
+        .default(
+          `${cliConfig.baseUrl}/oidc/logout?client_id=${encodeURIComponent(
+            cliConfig.clientId
+          )}&logout_hint=${encodeURIComponent(token)}
+          `
+        )
+        .catch((e: Error) => {
+          // Failing to open the logout URL is not a critical error, so we just log it
+          logger.debug(e.message, e);
+        });
+    });
+
     logger.log(
       '🔌 You have been logged out from the CLI. If you are on a shared computer, please make sure to log out from the Strapi Cloud Dashboard as well.'
     );
