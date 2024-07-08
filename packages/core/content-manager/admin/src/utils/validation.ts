@@ -20,12 +20,17 @@ type AnySchema =
  * createYupSchema
  * -----------------------------------------------------------------------------------------------*/
 
+interface ValidationOptions {
+  status: 'draft' | 'published' | null;
+}
+
 /**
  * TODO: should we create a Map to store these based on the hash of the schema?
  */
 const createYupSchema = (
   attributes: Schema['attributes'] = {},
-  components: ComponentsDictionary = {}
+  components: ComponentsDictionary = {},
+  options: ValidationOptions = { status: null }
 ): yup.ObjectSchema<any> => {
   const createModelSchema = (attributes: Schema['attributes']): yup.ObjectSchema<any> =>
     yup
@@ -48,7 +53,7 @@ const createYupSchema = (
             addMinValidation,
             addMaxValidation,
             addRegexValidation,
-          ].map((fn) => fn(attribute));
+          ].map((fn) => fn(attribute, options));
 
           const transformSchema = pipe(...validations);
 
@@ -222,10 +227,15 @@ const createAttributeSchema = (
  * attribute and then have the schema piped through them.
  */
 type ValidationFn = (
-  attribute: Schema['attributes'][string]
+  attribute: Schema['attributes'][string],
+  options: ValidationOptions
 ) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
 
-const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
+const addRequiredValidation: ValidationFn = (attribute, options) => (schema) => {
+  if (options.status === 'draft') {
+    return schema;
+  }
+
   if (
     ((attribute.type === 'component' && attribute.repeatable) ||
       attribute.type === 'dynamiczone') &&
@@ -248,8 +258,13 @@ const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
 };
 
 const addMinLengthValidation: ValidationFn =
-  (attribute) =>
+  (attribute, options) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
+    // Skip minLength validation for draft
+    if (options.status === 'draft') {
+      return schema;
+    }
+
     if (
       'minLength' in attribute &&
       attribute.minLength &&
@@ -288,8 +303,12 @@ const addMaxLengthValidation: ValidationFn =
   };
 
 const addMinValidation: ValidationFn =
-  (attribute) =>
+  (attribute, options) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
+    if (options.status === 'draft') {
+      return schema;
+    }
+
     if ('min' in attribute) {
       const min = toInteger(attribute.min);
 
