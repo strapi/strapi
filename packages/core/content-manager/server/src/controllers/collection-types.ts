@@ -393,6 +393,8 @@ export default {
 
       let document: any;
 
+      const { locale } = await getDocumentLocaleAndStatus(body, model);
+
       /**
        * Publish can be called on two scenarios:
        * 1. Create a new document and publish it in one request
@@ -415,7 +417,7 @@ export default {
 
       const isUpdate = !isCreate;
       if (isUpdate) {
-        document = await documentManager.findOne(id!, model, { populate });
+        document = await documentManager.findOne(id!, model, { populate, locale });
 
         if (!document) {
           throw new errors.NotFoundError('Document not found');
@@ -430,8 +432,6 @@ export default {
       if (permissionChecker.cannot.publish(document)) {
         throw new errors.ForbiddenError();
       }
-
-      const { locale } = await getDocumentLocaleAndStatus(body, model);
 
       const publishResult = await documentManager.publish(document.documentId, model, {
         locale,
