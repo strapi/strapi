@@ -11,7 +11,6 @@ import {
 } from '@strapi/design-system/v2';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Plus } from '@strapi/icons';
-import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
@@ -58,7 +57,7 @@ export const ContentTypeBuilderNav = () => {
               {section.links.map((link) => {
                 if (link.links) {
                   return (
-                    <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
+                    <SubNavLinkSection key={link.name} label={link.title}>
                       {link.links.map((subLink: any) => (
                         <SubNavLink
                           as={NavLink}
@@ -68,9 +67,7 @@ export const ContentTypeBuilderNav = () => {
                           key={subLink.name}
                           isSubSectionChild
                         >
-                          {upperFirst(
-                            formatMessage({ id: subLink.name, defaultMessage: subLink.title })
-                          )}
+                          {formatMessage({ id: subLink.name, defaultMessage: subLink.title })}
                         </SubNavLink>
                       ))}
                     </SubNavLinkSection>
@@ -80,7 +77,7 @@ export const ContentTypeBuilderNav = () => {
                 return (
                   // @ts-expect-error verify if "to" is needed
                   <SubNavLink as={NavLink} to={link.to} active={link.active} key={link.name}>
-                    {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
+                    {formatMessage({ id: link.name, defaultMessage: link.title })}
                   </SubNavLink>
                 );
               })}
