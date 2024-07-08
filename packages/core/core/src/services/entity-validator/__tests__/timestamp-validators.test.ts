@@ -1,7 +1,7 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 
-import validators from '../validators';
+import { Validators } from '../validators';
 import { mockOptions } from './utils';
 
 describe('Time validator', () => {
@@ -42,7 +42,7 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
+        Validators.timestamp(
           {
             attr: { type: 'timestamp' },
             model: fakeModel,
@@ -65,20 +65,18 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators
-          .timestamp(
-            {
-              attr: { type: 'timestamp', unique: true },
-              model: fakeModel,
-              updatedAttribute: {
-                name: 'attrTimestampUnique',
-                value: null,
-              },
-              entity: null,
+        Validators.timestamp(
+          {
+            attr: { type: 'timestamp', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrTimestampUnique',
+              value: null,
             },
-            mockOptions
-          )
-          .nullable()
+            entity: null,
+          },
+          mockOptions
+        ).nullable()
       );
 
       await validator(null);
@@ -89,7 +87,7 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
+        Validators.timestamp(
           {
             attr: { type: 'timestamp', unique: true },
             model: fakeModel,
@@ -111,7 +109,7 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrTimestampUnique: '1638140400' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
+        Validators.timestamp(
           {
             attr: { type: 'timestamp', unique: true },
             model: fakeModel,
@@ -136,7 +134,7 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrTimestampUnique: '1638140400' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
+        Validators.timestamp(
           {
             attr: { type: 'timestamp', unique: true },
             model: fakeModel,
@@ -158,7 +156,7 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
+        Validators.timestamp(
           {
             attr: { type: 'timestamp', unique: true },
             model: fakeModel,
@@ -187,7 +185,7 @@ describe('Time validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.timestamp(
+        Validators.timestamp(
           {
             attr: { type: 'timestamp', unique: true },
             model: fakeModel,

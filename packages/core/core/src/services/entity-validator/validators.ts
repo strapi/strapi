@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Schema, Struct, Modules } from '@strapi/types';
-import blocksValidator from './blocks-validator';
+import { blocksValidator } from './blocks-validator';
 
 import type { ComponentContext } from '.';
 
@@ -254,14 +254,8 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       return false;
     }
 
-    // When validating a unique field within a dynamiczone, we cannot
-    // directly use a where on the db query layer see:
-    // TODO add known issue link
-
-    // Instead we interact directly with knex.
-    // Here we fetch all the entity IDs of all components of the target type
-    // that are used within the parent content type in this dynamic zone.
-
+    // Build a query for the parent content type to find all entities in the
+    // same locale and publication state
     type QueryType = {
       select: string[];
       where: {
@@ -277,9 +271,6 @@ const addUniqueValidator = <T extends yup.AnySchema>(
         };
       };
     };
-
-    // Build a query for the parent content type to find all entities in the
-    // same locale and publication state
 
     // Populate the dynamic zone for any components that share the same value
     // as the updated attribute.
@@ -330,48 +321,72 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       return false;
     }
 
-    // Option 2 using KNEX
-    // More efficient in terms of row returned from the DB but less readable
+    return true;
+
+    // Option 2 using Knex directly
+    // This is more efficient in terms of row returned from the DB but less
+    // readable
+
+    // When validating a unique field within a dynamiczone, we cannot
+    // directly use a where on the db query layer see:
+    // TODO add known issue link
+
+    // Instead we interact directly with knex.
+    // Here we fetch all the entity IDs of all components of the target type
+    // that are used within the parent content type in this dynamic zone.
     /*
       const trx = await strapi.db.transaction();
       try {
-        const parentContentTypeTable = componentContext.parentContent.model.collectionName;
+        if (!componentContext) {
+          throw new Error('Component context is missing');
+        }
+
+        const componentTableSuffix = '_cmps';
+        const parentContentTypeTable = componentContext!.parentContent.model.collectionName;
+        const parentContentTypeComponentsTable = `${parentContentTypeTable}${componentTableSuffix}`;
 
         const possibleComponentIdClashes = await strapi.db
           .getConnection(parentContentTypeTable)
           .transacting(trx.get())
-          .select(`${parentContentTypeTable}_cmps.cmp_id`)
+          .select(`${parentContentTypeTable}${componentTableSuffix}.cmp_id`)
           // eslint-disable-next-line func-names
-          .innerJoin(`${parentContentTypeTable}_cmps`, function () {
-            this.on(`${parentContentTypeTable}.id`, '=', `${parentContentTypeTable}_cmps.entity_id`);
+          .innerJoin(parentContentTypeComponentsTable, function () {
+            this.on(
+              `${parentContentTypeTable}.id`,
+              '=',
+              `${parentContentTypeComponentsTable}.entity_id`
+            );
           })
           .where((queryBuilder) => {
             queryBuilder
               // Which components are used in the dynamic zone are determined by the start
               // of the pathToComponent. This will be the key to the dynamic zone in the parent content type.
-              .where(`${parentContentTypeTable}_cmps.field`, startOfPath)
+              .where(`${parentContentTypeTable}${componentTableSuffix}.field`, startOfPath)
               // This clause ensures that we are only looking for components of the target type.
-              .andWhere(`${parentContentTypeTable}_cmps.component_type`, targetComponentUID);
+              .andWhere(
+                `${parentContentTypeTable}${componentTableSuffix}.component_type`,
+                targetComponentUID
+              );
 
-            if (componentContext.parentContent.id) {
+            if (componentContext!.parentContent.id) {
               // This clause excludes matching on the current parent content
               // type entity by its ID if available
               queryBuilder.andWhereNot(
                 `${parentContentTypeTable}.id`,
-                componentContext.parentContent.id
+                componentContext!.parentContent.id
               );
             }
 
             // We also apply clauses to filter the parent content type
             // entities by matching dimensions (e.g. locale, publication state)
-            if (componentContext.parentContent.options?.locale) {
+            if (componentContext!.parentContent.options?.locale) {
               queryBuilder.andWhere(
                 `${parentContentTypeTable}.locale`,
-                componentContext.parentContent.options?.locale
+                componentContext!.parentContent.options?.locale
               );
             }
 
-            if (componentContext.parentContent.options?.isDraft) {
+            if (componentContext!.parentContent.options?.isDraft) {
               queryBuilder.andWhere(`${parentContentTypeTable}.published_at`, null);
             } else {
               queryBuilder.andWhereNot(`${parentContentTypeTable}.published_at`, null);
@@ -491,27 +506,34 @@ const stringValidator = (
   return schema;
 };
 
-const emailValidator = (
+export const emailValidator = (
   metas: ValidatorMetas<Schema.Attribute.Email>,
   options: ValidatorOptions
 ) => {
   const schema = stringValidator(metas, options);
-  return schema.email().min(1, '${path} cannot be empty');
+  return schema.email().min(
+    1,
+    // eslint-disable-next-line no-template-curly-in-string
+    '${path} cannot be empty'
+  );
 };
 
-const uidValidator = (metas: ValidatorMetas<Schema.Attribute.UID>, options: ValidatorOptions) => {
+export const uidValidator = (
+  metas: ValidatorMetas<Schema.Attribute.UID>,
+  options: ValidatorOptions
+) => {
   const schema = stringValidator(metas, options);
 
   return schema.matches(/^[A-Za-z0-9-_.~]*$/);
 };
 
-const enumerationValidator = ({ attr }: { attr: Schema.Attribute.Enumeration }) => {
+export const enumerationValidator = ({ attr }: { attr: Schema.Attribute.Enumeration }) => {
   return yup
     .string()
     .oneOf((Array.isArray(attr.enum) ? attr.enum : [attr.enum]).concat(null as any));
 };
 
-const integerValidator = (
+export const integerValidator = (
   metas: ValidatorMetas<Schema.Attribute.Integer | Schema.Attribute.BigInteger>,
   options: ValidatorOptions
 ) => {
@@ -524,7 +546,7 @@ const integerValidator = (
   return schema;
 };
 
-const floatValidator = (
+export const floatValidator = (
   metas: ValidatorMetas<Schema.Attribute.Decimal | Schema.Attribute.Float>,
   options: ValidatorOptions
 ) => {
@@ -536,7 +558,7 @@ const floatValidator = (
   return schema;
 };
 
-const bigintegerValidator = (
+export const bigintegerValidator = (
   metas: ValidatorMetas<Schema.Attribute.BigInteger>,
   options: ValidatorOptions
 ) => {
@@ -544,7 +566,7 @@ const bigintegerValidator = (
   return addUniqueValidator(schema, metas, options);
 };
 
-const datesValidator = (
+export const datesValidator = (
   metas: ValidatorMetas<
     | Schema.Attribute.Date
     | Schema.Attribute.DateTime
@@ -557,7 +579,7 @@ const datesValidator = (
   return addUniqueValidator(schema, metas, options);
 };
 
-export default {
+export const Validators = {
   string: stringValidator,
   text: stringValidator,
   richtext: stringValidator,

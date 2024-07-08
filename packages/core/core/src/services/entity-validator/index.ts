@@ -7,7 +7,7 @@ import { uniqBy, castArray, isNil, isArray, mergeWith } from 'lodash';
 import { has, prop, isObject, isEmpty } from 'lodash/fp';
 import strapiUtils from '@strapi/utils';
 import { Modules, UID, Struct, Schema } from '@strapi/types';
-import validators, { ValidatorMetas } from './validators';
+import { Validators, ValidatorMetas } from './validators';
 
 type CreateOrUpdate = 'creation' | 'update';
 
@@ -245,8 +245,8 @@ const createScalarAttributeValidator =
   (createOrUpdate: CreateOrUpdate) => (metas: ValidatorMeta, options: ValidatorContext) => {
     let validator;
 
-    if (has(metas.attr.type, validators)) {
-      validator = (validators as any)[metas.attr.type](metas, options);
+    if (has(metas.attr.type, Validators)) {
+      validator = (Validators as any)[metas.attr.type](metas, options);
     } else {
       // No validators specified - fall back to mixed
       validator = yup.mixed();
