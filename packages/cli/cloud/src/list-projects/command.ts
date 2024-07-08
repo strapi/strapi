@@ -3,7 +3,7 @@ import { runAction } from '../utils/helpers';
 import action from './action';
 
 /**
- * `$ deploy project to the cloud`
+ * `$ list project from the cloud`
  */
 const command: StrapiCloudCommand = ({ command, ctx }) => {
   command
