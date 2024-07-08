@@ -305,10 +305,6 @@ const addMaxLengthValidation: ValidationFn =
 const addMinValidation: ValidationFn =
   (attribute, options) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
-    if (options.status === 'draft') {
-      return schema;
-    }
-
     if ('min' in attribute) {
       const min = toInteger(attribute.min);
 
@@ -316,7 +312,7 @@ const addMinValidation: ValidationFn =
         (attribute.type === 'component' && attribute.repeatable) ||
         attribute.type === 'dynamiczone'
       ) {
-        if (!attribute.required && 'test' in schema && min) {
+        if (options.status !== 'draft' && !attribute.required && 'test' in schema && min) {
           // @ts-expect-error - We know the schema is an array here but ts doesn't know.
           return schema.test(
             'custom-min',
