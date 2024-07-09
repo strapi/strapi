@@ -274,7 +274,6 @@ const addUniqueValidator = <T extends yup.AnySchema>(
 
     // Populate the dynamic zone for any components that share the same value
     // as the updated attribute.
-    // TODO do we also need to populate based on the type of component?
     const query: QueryType = {
       select: ['id'],
       where: {},
@@ -308,13 +307,8 @@ const addUniqueValidator = <T extends yup.AnySchema>(
     // Filter the results to only include results that have components in the
     // dynamic zone that match the target component type.
     const filteredResults = parentModelQueryResult
-      .filter((result) => Array.isArray(result[startOfPath] && result[startOfPath].length))
-      .flatMap(
-        (
-          // TODO fix type
-          result: any
-        ) => result[startOfPath]
-      )
+      .filter((result) => Array.isArray(result[startOfPath]) && result[startOfPath].length)
+      .flatMap((result) => result[startOfPath])
       .filter((dynamicZoneComponent) => dynamicZoneComponent.__component === targetComponentUID);
 
     if (filteredResults.length >= 1) {
@@ -322,104 +316,6 @@ const addUniqueValidator = <T extends yup.AnySchema>(
     }
 
     return true;
-
-    // Option 2 using Knex directly
-    // This is more efficient in terms of row returned from the DB but less
-    // readable
-
-    // When validating a unique field within a dynamiczone, we cannot
-    // directly use a where on the db query layer see:
-    // TODO add known issue link
-
-    // Instead we interact directly with knex.
-    // Here we fetch all the entity IDs of all components of the target type
-    // that are used within the parent content type in this dynamic zone.
-    /*
-      const trx = await strapi.db.transaction();
-      try {
-        if (!componentContext) {
-          throw new Error('Component context is missing');
-        }
-
-        const componentTableSuffix = '_cmps';
-        const parentContentTypeTable = componentContext!.parentContent.model.collectionName;
-        const parentContentTypeComponentsTable = `${parentContentTypeTable}${componentTableSuffix}`;
-
-        const possibleComponentIdClashes = await strapi.db
-          .getConnection(parentContentTypeTable)
-          .transacting(trx.get())
-          .select(`${parentContentTypeTable}${componentTableSuffix}.cmp_id`)
-          // eslint-disable-next-line func-names
-          .innerJoin(parentContentTypeComponentsTable, function () {
-            this.on(
-              `${parentContentTypeTable}.id`,
-              '=',
-              `${parentContentTypeComponentsTable}.entity_id`
-            );
-          })
-          .where((queryBuilder) => {
-            queryBuilder
-              // Which components are used in the dynamic zone are determined by the start
-              // of the pathToComponent. This will be the key to the dynamic zone in the parent content type.
-              .where(`${parentContentTypeTable}${componentTableSuffix}.field`, startOfPath)
-              // This clause ensures that we are only looking for components of the target type.
-              .andWhere(
-                `${parentContentTypeTable}${componentTableSuffix}.component_type`,
-                targetComponentUID
-              );
-
-            if (componentContext!.parentContent.id) {
-              // This clause excludes matching on the current parent content
-              // type entity by its ID if available
-              queryBuilder.andWhereNot(
-                `${parentContentTypeTable}.id`,
-                componentContext!.parentContent.id
-              );
-            }
-
-            // We also apply clauses to filter the parent content type
-            // entities by matching dimensions (e.g. locale, publication state)
-            if (componentContext!.parentContent.options?.locale) {
-              queryBuilder.andWhere(
-                `${parentContentTypeTable}.locale`,
-                componentContext!.parentContent.options?.locale
-              );
-            }
-
-            if (componentContext!.parentContent.options?.isDraft) {
-              queryBuilder.andWhere(`${parentContentTypeTable}.published_at`, null);
-            } else {
-              queryBuilder.andWhereNot(`${parentContentTypeTable}.published_at`, null);
-            }
-          });
-
-        trx.commit();
-
-        const componentIdArray = possibleComponentIdClashes.map(
-          (item: { cmp_id: number }) => item.cmp_id
-        );
-        if (componentIdArray.length === 0) {
-          // If there are no components of the target type in the dynamic zone, the validation passes.
-          return true;
-        }
-
-        // Here we check if any of the components we found from the above step
-        // share the same value as the updated attribute.
-        // Now we have the entity IDs of the potentially conflicting components we
-        // can use the db query layer to check if any of them share the same value
-        // as the updated attribute.
-        return !(await strapi.db.query(model.uid).findOne({
-          where: {
-            id: { $in: componentIdArray },
-            [updatedAttribute.name]: updatedAttribute.value,
-          },
-        }));
-      } catch (error) {
-        trx.rollback();
-
-        return false;
-      }
-    */
   };
 
   return validator.test('unique', 'This attribute must be unique', async (value) => {
