@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
-import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
+import type { CLIContext, ProjectAnswers, CreateProjectInput } from '../types';
 import { tokenServiceFactory, cloudApiFactory, local } from '../services';
 import { getProjectNameFromPackageJson } from './utils/get-project-name-from-pkg';
 import { applyDefaultName } from './utils/apply-default-name';
@@ -40,11 +40,15 @@ async function handleError(ctx: CLIContext, error: Error) {
   );
 }
 
-async function createProject(ctx: CLIContext, cloudApi: any, projectInput: ProjectInput) {
+async function createProject(
+  ctx: CLIContext,
+  cloudApi: any,
+  createProjectInput: CreateProjectInput
+) {
   const { logger } = ctx;
   const spinner = logger.spinner('Setting up your project...').start();
   try {
-    const { data } = await cloudApi.createProject(projectInput);
+    const { data } = await cloudApi.createProject(createProjectInput);
     await local.save({ project: data });
     spinner.succeed('Project created successfully!');
     return data;
@@ -76,16 +80,16 @@ export default async (ctx: CLIContext) => {
   const projectAnswersDefaulted = defaults(defaultValues);
   const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
 
-  const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
+  const createProjectInput: CreateProjectInput = projectAnswersDefaulted(projectAnswers);
 
   try {
-    return await createProject(ctx, cloudApi, projectInput);
+    return await createProject(ctx, cloudApi, createProjectInput);
   } catch (e: Error | unknown) {
     if (e instanceof AxiosError && e.response?.status === 401) {
       logger.warn('Oops! Your session has expired. Please log in again to retry.');
       await eraseToken();
       if (await promptLogin(ctx)) {
-        return await createProject(ctx, cloudApi, projectInput);
+        return await createProject(ctx, cloudApi, createProjectInput);
       }
     } else {
       await handleError(ctx, e as Error);

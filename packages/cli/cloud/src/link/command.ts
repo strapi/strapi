@@ -3,16 +3,16 @@ import { runAction } from '../utils/helpers';
 import action from './action';
 
 /**
- * `$ list project from the cloud`
+ * `$ link local directory to project of the cloud`
  */
 const command: StrapiCloudCommand = ({ command, ctx }) => {
   command
-    .command('cloud:projects')
-    .alias('projects')
-    .description('List Strapi Cloud projects')
+    .command('cloud:link')
+    .alias('link')
+    .description('Link a local directory to a Strapi Cloud project')
     .option('-d, --debug', 'Enable debugging mode with verbose logs')
     .option('-s, --silent', "Don't log anything")
-    .action(() => runAction('projects', action)(ctx));
+    .action(() => runAction('link', action)(ctx));
 };
 
 export default command;

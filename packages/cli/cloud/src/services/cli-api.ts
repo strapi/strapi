@@ -10,13 +10,15 @@ import packageJson from '../../package.json';
 export const VERSION = 'v1';
 
 export type ProjectInfos = {
+  id: string;
   name: string;
-  nodeVersion: string;
-  region: string;
+  displayName?: string;
+  nodeVersion?: string;
+  region?: string;
   plan?: string;
   url?: string;
 };
-export type ProjectInput = Omit<ProjectInfos, 'id'>;
+export type CreateProjectInput = Omit<ProjectInfos, 'id'>;
 
 export type DeployResponse = {
   build_id: string;
@@ -26,6 +28,12 @@ export type DeployResponse = {
 export type TrackPayload = Record<string, unknown>;
 
 export type ListProjectsResponse = {
+  data: {
+    data: string;
+  };
+};
+
+export type ListLinkProjectsResponse = {
   data: {
     data: string;
   };
@@ -44,8 +52,8 @@ export interface CloudApiService {
     }
   ): Promise<AxiosResponse<DeployResponse>>;
 
-  createProject(projectInput: ProjectInput): Promise<{
-    data: ProjectInfos;
+  createProject(createProjectInput: CreateProjectInput): Promise<{
+    data: CreateProjectInput;
     status: number;
   }>;
 
@@ -54,6 +62,8 @@ export interface CloudApiService {
   config(): Promise<AxiosResponse<CloudCliConfig>>;
 
   listProjects(): Promise<AxiosResponse<ListProjectsResponse>>;
+
+  listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse>>;
 
   track(event: string, payload?: TrackPayload): Promise<AxiosResponse<void>>;
 }
@@ -141,6 +151,23 @@ export async function cloudApiFactory(
     async listProjects(): Promise<AxiosResponse<ListProjectsResponse>> {
       try {
         const response = await axiosCloudAPI.get('/projects');
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud projects from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's list from the server. Please try again."
+        );
+        throw error;
+      }
+    },
+
+    async listLinkProjects(): Promise<AxiosResponse<ListProjectsResponse>> {
+      try {
+        const response = await axiosCloudAPI.get('/projects/link');
 
         if (response.status !== 200) {
           throw new Error('Error fetching cloud projects from the server.');
