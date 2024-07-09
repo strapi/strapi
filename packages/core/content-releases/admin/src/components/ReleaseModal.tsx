@@ -22,7 +22,7 @@ import { useLocation } from 'react-router-dom';
 
 import { pluginId } from '../pluginId';
 import { getTimezones } from '../utils/time';
-import { useTranslatedSchema } from '../validation/schemas';
+import { RELEASE_SCHEMA } from '../validation/schemas';
 
 export interface FormValues {
   name: string;
@@ -55,7 +55,6 @@ export const ReleaseModal = ({
   const { timezoneList, systemTimezone = { value: 'UTC+00:00-Africa/Abidjan ' } } = getTimezones(
     initialValues.scheduledAt ? new Date(initialValues.scheduledAt) : new Date()
   );
-  const { RELEASE_SCHEMA } = useTranslatedSchema();
 
   /**
    * Generate scheduled time using selected date, time and timezone
@@ -112,7 +111,14 @@ export const ReleaseModal = ({
               <Form>
                 <Modal.Body>
                   <Flex direction="column" alignItems="stretch" gap={6}>
-                    <Field.Root name="name" error={errors.name} required>
+                    <Field.Root
+                      name="name"
+                      error={
+                        errors.name &&
+                        formatMessage({ id: errors.name, defaultMessage: errors.name })
+                      }
+                      required
+                    >
                       <Field.Label>
                         {formatMessage({
                           id: 'content-releases.modal.form.input.label.release-name',
@@ -159,7 +165,14 @@ export const ReleaseModal = ({
                       <>
                         <Flex gap={4} alignItems="start">
                           <Box width="100%">
-                            <Field.Root name="date" error={errors.date} required>
+                            <Field.Root
+                              name="date"
+                              error={
+                                errors.date &&
+                                formatMessage({ id: errors.date, defaultMessage: errors.date })
+                              }
+                              required
+                            >
                               <Field.Label>
                                 {formatMessage({
                                   id: 'content-releases.modal.form.input.label.date',
@@ -187,7 +200,14 @@ export const ReleaseModal = ({
                             </Field.Root>
                           </Box>
                           <Box width="100%">
-                            <Field.Root name="time" error={errors.time} required>
+                            <Field.Root
+                              name="time"
+                              error={
+                                errors.time &&
+                                formatMessage({ id: errors.time, defaultMessage: errors.time })
+                              }
+                              required
+                            >
                               <Field.Label>
                                 {formatMessage({
                                   id: 'content-releases.modal.form.input.label.time',
@@ -270,7 +290,13 @@ const TimezoneComponent = ({ timezoneOptions }: { timezoneOptions: ITimezoneOpti
   }, [setFieldValue, values.date, values.timezone]);
 
   return (
-    <Field.Root name="timezone" error={errors.timezone} required>
+    <Field.Root
+      name="timezone"
+      error={
+        errors.timezone && formatMessage({ id: errors.timezone, defaultMessage: errors.timezone })
+      }
+      required
+    >
       <Field.Label>
         {formatMessage({
           id: 'content-releases.modal.form.input.label.timezone',
