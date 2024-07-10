@@ -930,6 +930,7 @@
   "global.enabled": "Enabled",
   "global.finish": "Finish",
   "global.marketplace": "Marketplace",
+  "global.docs-assistant": "Strapi Assistant",
   "global.name": "Name",
   "global.none": "None",
   "global.password": "Password",

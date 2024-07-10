@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Divider, Flex, FocusTrap, Icon, Typography } from '@strapi/design-system';
+import { Box, Button, Divider, Flex, FocusTrap, Icon, Typography } from '@strapi/design-system';
 import {
   MainNav,
   NavBrand,
@@ -12,7 +12,7 @@ import {
   NavUser,
 } from '@strapi/design-system/v2';
 import { useAppInfo, usePersistentState, useTracking } from '@strapi/helper-plugin';
-import { Exit, Write, Lightning } from '@strapi/icons';
+import { Exit, Write, Lightning, Spark } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
@@ -20,6 +20,8 @@ import styled from 'styled-components';
 import { useAuth } from '../features/Auth';
 import { useConfiguration } from '../features/Configuration';
 import { Menu } from '../hooks/useMenu';
+
+import { StrapiAssistantModal } from './StrapiAssistantModal';
 
 const LinkUserWrapper = styled(Box)`
   width: ${150 / 16}rem;
@@ -68,6 +70,7 @@ interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSecti
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
   const navUserRef = React.useRef<HTMLDivElement>(null!);
+  const [openStrapiAssistantDialog, setOpenStrapiAssistant] = React.useState(false);
   const [userLinksVisible, setUserLinksVisible] = React.useState(false);
   const {
     logos: { menu },
@@ -108,161 +111,178 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     defaultMessage: 'Strapi Dashboard',
   });
 
+  const openStrapiAssistant = () => {
+    setOpenStrapiAssistant(true);
+  };
+
   return (
-    <MainNav condensed={condensed}>
-      <NavBrand
-        as={RouterNavLink}
-        workplace={formatMessage({
-          id: 'app.components.LeftMenu.navbrand.workplace',
-          defaultMessage: 'Workplace',
-        })}
-        title={menuTitle}
-        icon={
-          <img
-            src={menu.custom?.url || menu.default}
-            alt={formatMessage({
-              id: 'app.components.LeftMenu.logo.alt',
-              defaultMessage: 'Application logo',
-            })}
-          />
-        }
-      />
-
-      <Divider />
-
-      <NavSections>
-        <NavLink
+    <>
+      {openStrapiAssistantDialog && (
+        <StrapiAssistantModal onClose={() => setOpenStrapiAssistant(false)} />
+      )}
+      <MainNav condensed={condensed}>
+        <NavBrand
           as={RouterNavLink}
-          // @ts-expect-error the props from the passed as prop are not inferred // joined together
-          to="/content-manager"
-          icon={<Write />}
-          onClick={() => handleClickOnLink('/content-manager')}
-        >
-          {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
-        </NavLink>
+          workplace={formatMessage({
+            id: 'app.components.LeftMenu.navbrand.workplace',
+            defaultMessage: 'Workplace',
+          })}
+          title={menuTitle}
+          icon={
+            <img
+              src={menu.custom?.url || menu.default}
+              alt={formatMessage({
+                id: 'app.components.LeftMenu.logo.alt',
+                defaultMessage: 'Application logo',
+              })}
+            />
+          }
+        />
 
-        {pluginsSectionLinks.length > 0 ? (
-          <NavSection
-            label={formatMessage({
-              id: 'app.components.LeftMenu.plugins',
-              defaultMessage: 'Plugins',
-            })}
+        <Divider />
+
+        <NavSections>
+          <NavLink
+            as={RouterNavLink}
+            // @ts-expect-error the props from the passed as prop are not inferred // joined together
+            to="/content-manager"
+            icon={<Write />}
+            onClick={() => handleClickOnLink('/content-manager')}
           >
-            {pluginsSectionLinks.map((link) => {
-              const LinkIcon = link.icon;
-              return (
-                <NavLinkWrapper key={link.to}>
+            {formatMessage({ id: 'global.content-manager', defaultMessage: 'Content manager' })}
+          </NavLink>
+
+          {pluginsSectionLinks.length > 0 ? (
+            <NavSection
+              label={formatMessage({
+                id: 'app.components.LeftMenu.plugins',
+                defaultMessage: 'Plugins',
+              })}
+            >
+              {pluginsSectionLinks.map((link) => {
+                const LinkIcon = link.icon;
+                return (
+                  <NavLinkWrapper key={link.to}>
+                    <NavLink
+                      as={RouterNavLink}
+                      to={link.to}
+                      icon={<LinkIcon />}
+                      onClick={() => handleClickOnLink(link.to)}
+                      // @ts-expect-error: badgeContent in the DS accept only strings
+                      badgeContent={
+                        // TODO: to replace with another name in v5
+                        link?.lockIcon ? (
+                          <BadgeIcon
+                            width={`${15 / 16}rem`}
+                            height={`${15 / 16}rem`}
+                            as={Lightning}
+                          />
+                        ) : undefined
+                      }
+                    >
+                      {formatMessage(link.intlLabel)}
+                    </NavLink>
+                  </NavLinkWrapper>
+                );
+              })}
+            </NavSection>
+          ) : null}
+
+          {generalSectionLinks.length > 0 ? (
+            <NavSection
+              label={formatMessage({
+                id: 'app.components.LeftMenu.general',
+                defaultMessage: 'General',
+              })}
+            >
+              {generalSectionLinks.map((link) => {
+                const LinkIcon = link.icon;
+
+                return (
                   <NavLink
                     as={RouterNavLink}
+                    badgeContent={
+                      link.notificationsCount && link.notificationsCount > 0
+                        ? link.notificationsCount.toString()
+                        : undefined
+                    }
+                    // @ts-expect-error the props from the passed as prop are not inferred // joined together
                     to={link.to}
+                    key={link.to}
                     icon={<LinkIcon />}
                     onClick={() => handleClickOnLink(link.to)}
-                    // @ts-expect-error: badgeContent in the DS accept only strings
-                    badgeContent={
-                      // TODO: to replace with another name in v5
-                      link?.lockIcon ? (
-                        <BadgeIcon
-                          width={`${15 / 16}rem`}
-                          height={`${15 / 16}rem`}
-                          as={Lightning}
-                        />
-                      ) : undefined
-                    }
                   >
                     {formatMessage(link.intlLabel)}
                   </NavLink>
-                </NavLinkWrapper>
-              );
-            })}
-          </NavSection>
-        ) : null}
-
-        {generalSectionLinks.length > 0 ? (
-          <NavSection
-            label={formatMessage({
-              id: 'app.components.LeftMenu.general',
-              defaultMessage: 'General',
-            })}
-          >
-            {generalSectionLinks.map((link) => {
-              const LinkIcon = link.icon;
-
-              return (
-                <NavLink
-                  as={RouterNavLink}
-                  badgeContent={
-                    link.notificationsCount && link.notificationsCount > 0
-                      ? link.notificationsCount.toString()
-                      : undefined
-                  }
-                  // @ts-expect-error the props from the passed as prop are not inferred // joined together
-                  to={link.to}
-                  key={link.to}
-                  icon={<LinkIcon />}
-                  onClick={() => handleClickOnLink(link.to)}
-                >
-                  {formatMessage(link.intlLabel)}
-                </NavLink>
-              );
-            })}
-          </NavSection>
-        ) : null}
-      </NavSections>
-
-      <NavFooter>
-        <NavUser
-          id="main-nav-user-button"
-          ref={navUserRef}
-          onClick={handleToggleUserLinks}
-          initials={initials}
-        >
-          {userDisplayName}
-        </NavUser>
-        {userLinksVisible && (
-          <LinkUserWrapper
-            onBlur={handleBlur}
-            padding={1}
-            shadow="tableShadow"
-            background="neutral0"
-            hasRadius
-          >
-            <FocusTrap onEscape={handleToggleUserLinks}>
-              <Flex direction="column" alignItems="stretch" gap={0}>
-                <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
-                  <Typography>
-                    {formatMessage({
-                      id: 'global.profile',
-                      defaultMessage: 'Profile',
-                    })}
-                  </Typography>
-                </LinkUser>
-                <LinkUser tabIndex={0} onClick={logout} to="/auth/login">
-                  <Typography textColor="danger600">
-                    {formatMessage({
-                      id: 'app.components.LeftMenu.logout',
-                      defaultMessage: 'Logout',
-                    })}
-                  </Typography>
-                  <Exit />
-                </LinkUser>
-              </Flex>
-            </FocusTrap>
-          </LinkUserWrapper>
-        )}
-
-        <NavCondense onClick={() => setCondensed((s) => !s)}>
-          {condensed
-            ? formatMessage({
-                id: 'app.components.LeftMenu.expand',
-                defaultMessage: 'Expand the navbar',
-              })
-            : formatMessage({
-                id: 'app.components.LeftMenu.collapse',
-                defaultMessage: 'Collapse the navbar',
+                );
               })}
-        </NavCondense>
-      </NavFooter>
-    </MainNav>
+            </NavSection>
+          ) : null}
+        </NavSections>
+
+        <NavFooter>
+          <Box padding={4}>
+            <Button onClick={openStrapiAssistant} fullWidth startIcon={<Spark />}>
+              {formatMessage({
+                id: 'global.docs-assistant',
+                defaultMessage: 'Documentation Assistant',
+              })}
+            </Button>
+          </Box>
+          <NavUser
+            id="main-nav-user-button"
+            ref={navUserRef}
+            onClick={handleToggleUserLinks}
+            initials={initials}
+          >
+            {userDisplayName}
+          </NavUser>
+          {userLinksVisible && (
+            <LinkUserWrapper
+              onBlur={handleBlur}
+              padding={1}
+              shadow="tableShadow"
+              background="neutral0"
+              hasRadius
+            >
+              <FocusTrap onEscape={handleToggleUserLinks}>
+                <Flex direction="column" alignItems="stretch" gap={0}>
+                  <LinkUser tabIndex={0} onClick={handleToggleUserLinks} to="/me">
+                    <Typography>
+                      {formatMessage({
+                        id: 'global.profile',
+                        defaultMessage: 'Profile',
+                      })}
+                    </Typography>
+                  </LinkUser>
+                  <LinkUser tabIndex={0} onClick={logout} to="/auth/login">
+                    <Typography textColor="danger600">
+                      {formatMessage({
+                        id: 'app.components.LeftMenu.logout',
+                        defaultMessage: 'Logout',
+                      })}
+                    </Typography>
+                    <Exit />
+                  </LinkUser>
+                </Flex>
+              </FocusTrap>
+            </LinkUserWrapper>
+          )}
+
+          <NavCondense onClick={() => setCondensed((s) => !s)}>
+            {condensed
+              ? formatMessage({
+                  id: 'app.components.LeftMenu.expand',
+                  defaultMessage: 'Expand the navbar',
+                })
+              : formatMessage({
+                  id: 'app.components.LeftMenu.collapse',
+                  defaultMessage: 'Collapse the navbar',
+                })}
+          </NavCondense>
+        </NavFooter>
+      </MainNav>
+    </>
   );
 };
 
