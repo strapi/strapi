@@ -177,4 +177,25 @@ export default {
 
     ctx.send({ plugins }) satisfies Plugins.Response;
   },
+
+  async dashboard(ctx: Context) {
+    const stats = await getService('statistics').getStatistics();
+    const upcomingReleases = strapi.documents('plugin::content-releases.release').findMany({
+      limit: 10,
+      filters: {
+        scheduledAt: {
+          $gt: new Date(),
+        }
+      },
+      sort: 'scheduledAt:desc',
+    });
+
+    ctx.body = {
+      name: ctx.state.user.firstname,
+      statistics: stats,
+      releases: {
+        upcoming: upcomingReleases
+      }
+    };
+  },
 };

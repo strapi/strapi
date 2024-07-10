@@ -66,4 +66,12 @@ export default [
       ],
     },
   },
+  {
+    method: 'GET',
+    path: '/dashboard-stats',
+    handler: 'admin.dashboard',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
 ];
