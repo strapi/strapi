@@ -86,7 +86,7 @@ const File = ({ attributes, children, element }: RenderElementProps) => {
           </Link>
           <Typography>{formatBytes(size)}</Typography>
         </Box>
-        <Box alignItems={{ medium: 'flex-end' }}>
+        <Box alignItems={{ initial: 'flex-end' }}>
           <StyledTrash />
         </Box>
       </Flex>
@@ -130,7 +130,11 @@ const FileDialog = () => {
     Transforms.removeNodes(editor);
 
     const nodesToInsert = files.map((file) => {
-      const fileNode: Block<'file'> = { type: 'file', file };
+      const fileNode: Block<'file'> = {
+        type: 'file',
+        file,
+        children: [{ type: 'text', text: '' }],
+      };
       return fileNode;
     });
 
@@ -155,11 +159,13 @@ const FileDialog = () => {
     setIsOpen(false);
   };
 
-  <MediaLibraryDialog
-    allowedTypes={['files']}
-    onClose={() => setIsOpen(false)}
-    onSelectAssets={handleSelectAssets}
-  />;
+  return (
+    <MediaLibraryDialog
+      allowedTypes={['files']}
+      onClose={() => setIsOpen(false)}
+      onSelectAssets={handleSelectAssets}
+    />
+  );
 };
 
 const fileBlocks: Pick<BlocksStore, 'file'> = {
@@ -176,8 +182,8 @@ const fileBlocks: Pick<BlocksStore, 'file'> = {
       if (editor.children.length === 1) {
         Transforms.setNodes(editor, {
           type: 'paragraph',
-          // @ts-expect-error we're only setting image as null so that Slate deletes it
-          image: null,
+          // @ts-expect-error we're only setting file as null so that Slate deletes it
+          file: null,
           children: [{ type: 'text', text: '' }],
         });
       } else {
