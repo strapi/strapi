@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@strapi/icons": "2.0.0-beta.6",
+    "@strapi/plugin-cloud": "workspace:*",
     "@strapi/plugin-color-picker": "5.0.0-rc.2",
     "@strapi/plugin-documentation": "5.0.0-rc.2",
     "@strapi/plugin-graphql": "5.0.0-rc.2",
