@@ -8,6 +8,7 @@ import { Slate, withReact } from 'slate-react';
 import { type BlocksStore, BlocksEditorProvider } from '../../BlocksEditor';
 import { modifiers } from '../../Modifiers';
 import { codeBlocks } from '../Code';
+import { fileBlocks } from '../File';
 import { headingBlocks } from '../Heading';
 import { imageBlocks } from '../Image';
 import { linkBlocks } from '../Link';
@@ -31,6 +32,7 @@ const Wrapper = ({ children, baseEditor = defaultBaseEditor }: WrapperProps) => 
     ...listBlocks,
     ...linkBlocks,
     ...imageBlocks,
+    ...fileBlocks,
     ...quoteBlocks,
     ...codeBlocks,
   };

@@ -8377,6 +8377,7 @@ __metadata:
     "@testing-library/react": "npm:15.0.7"
     "@types/jest": "npm:29.5.2"
     "@types/lodash": "npm:^4.14.191"
+    byte-size: "npm:8.1.1"
     codemirror5: "npm:codemirror@^5.65.11"
     date-fns: "npm:2.30.0"
     fractional-indexing: "npm:3.2.0"
@@ -22139,6 +22140,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "kitchensink-ts@workspace:examples/kitchensink-ts"
   dependencies:
+    "@strapi/plugin-documentation": "npm:5.0.0-rc.2"
     "@strapi/plugin-users-permissions": "npm:5.0.0-rc.2"
     "@strapi/strapi": "npm:5.0.0-rc.2"
     better-sqlite3: "npm:9.4.3"

@@ -10,6 +10,10 @@ const getEntries = <T extends object>(object: T) =>
 // Wrap Object.keys to get the correct types
 const getKeys = <T extends object>(object: T) => Object.keys(object) as (keyof T)[];
 
+const isFile = (element: Element): element is Block<'file'> => {
+  return element.type === 'file';
+};
+
 const isLinkNode = (element: Element): element is Schema.Attribute.LinkInlineNode => {
   return element.type === 'link';
 };
@@ -18,4 +22,4 @@ const isListNode = (element: Element): element is Schema.Attribute.ListBlockNode
   return element.type === 'list';
 };
 
-export { type Block, getEntries, getKeys, isLinkNode, isListNode };
+export { type Block, getEntries, getKeys, isFile, isLinkNode, isListNode };
