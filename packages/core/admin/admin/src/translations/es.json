@@ -328,6 +328,7 @@
   "component.Input.error.validation.integer": "El valor debe ser un número entero",
   "components.AutoReloadBlocker.description": "Inicia Strapi con uno de los siguientes comandos:",
   "components.AutoReloadBlocker.header": "Es necesario recargar para este plugin.",
+  "components.Blocks.blocks.file": "Archivo",
   "components.ErrorBoundary.title": "Algo salió mal...",
   "components.FilterOptions.FILTER_TYPES.$contains": "contiene",
   "components.FilterOptions.FILTER_TYPES.$containsi": "contiene (insensible a mayúsculas y minúsculas)",

@@ -167,7 +167,7 @@ const fileBlocks: Pick<BlocksStore, 'file'> = {
     renderElement: (props) => <File {...props} />,
     icon: FileIcon,
     label: {
-      id: 'components.Blocks.blocks.image', // TODO
+      id: 'components.Blocks.blocks.file', // TODO
       defaultMessage: 'File',
     },
     matchNode: (node) => node.type === 'file',
