@@ -8978,6 +8978,7 @@ __metadata:
     tsconfig: "npm:5.0.0-rc.2"
     typescript: "npm:5.2.2"
   peerDependencies:
+    "@strapi/admin": "workspace:*"
     "@strapi/strapi": ^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc
     react: ^17.0.0 || ^18.0.0
     react-dom: ^17.0.0 || ^18.0.0
