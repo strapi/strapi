@@ -74,6 +74,7 @@ const HomePageCE = () => {
   if (isLoadingForModels) {
     return <Page.Loading />;
   }
+  // we need to start working on this page
 
   return (
     <Layouts.Root>
