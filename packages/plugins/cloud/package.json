@@ -29,11 +29,9 @@
     "dist/"
   ],
   "scripts": {
-    "build": "strapi-plugin build",
-    "clean": "run -T rimraf ./dist",
-    "develop": "strapi-plugin watch",
+    "build": "pack-up build",
     "lint": "run -T eslint .",
-    "test:ts:front": "run -T tsc -p admin/tsconfig.json"
+    "watch": "pack-up watch"
   },
   "dependencies": {
     "@strapi/design-system": "2.0.0-beta.6",
@@ -41,6 +39,8 @@
     "react-intl": "6.6.2"
   },
   "devDependencies": {
+    "@strapi/admin": "workspace:*",
+    "@strapi/pack-up": "5.0.0",
     "@strapi/sdk-plugin": "^5.0.0",
     "@strapi/strapi": "5.0.0-rc.2",
     "eslint-config-custom": "5.0.0-rc.2",
@@ -52,6 +52,7 @@
     "typescript": "5.2.2"
   },
   "peerDependencies": {
+    "@strapi/admin": "workspace:*",
     "@strapi/strapi": "^5.0.0 || ^5.0.0-beta || ^5.0.0-alpha || ^5.0.0-rc",
     "react": "^17.0.0 || ^18.0.0",
     "react-dom": "^17.0.0 || ^18.0.0",

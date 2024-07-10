@@ -2,7 +2,6 @@
 
 import { Cloud } from '@strapi/icons';
 
-import { Initializer } from './components/Initializer';
 import { pluginId } from './pluginId';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
@@ -11,39 +10,24 @@ const name = 'Deploy';
 // eslint-disable-next-line import/no-default-export
 export default {
   register(app: any) {
-    const { backendURL } = window.strapi;
+    app.addMenuLink({
+      to: `plugins/${pluginId}`,
+      icon: Cloud,
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: name,
+      },
+      Component: () => import('./pages/App').then((mod) => ({ default: mod.App })),
+    });
 
-    // Only add the plugin menu link and registering it if the project is on development (localhost).
-    if (backendURL?.includes('localhost')) {
-      app.addMenuLink({
-        to: `plugins/${pluginId}`,
-        icon: Cloud,
-        intlLabel: {
-          id: `${pluginId}.plugin.name`,
-          defaultMessage: name,
-        },
-        Component: async () => {
-          const { App } = await import('./pages/App');
-
-          return App;
-        },
-      });
-      const plugin = {
-        id: pluginId,
-        initializer: Initializer,
-        isReady: false,
-        name,
-      };
-
-      app.registerPlugin(plugin);
-    }
+    app.registerPlugin({ id: pluginId, name });
   },
 
   async registerTrads(app: any) {
     const { locales } = app;
 
     const importedTrads = await Promise.all(
-      (locales as any[]).map((locale) => {
+      (locales as string[]).map((locale) => {
         return import(`./translations/${locale}.json`)
           .then(({ default: data }) => {
             return {
