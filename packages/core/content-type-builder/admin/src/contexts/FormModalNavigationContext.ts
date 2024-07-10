@@ -27,16 +27,27 @@ export interface FormModalNavigationContextValue {
   onOpenModalEditField: (options: ModalEventProps) => void;
   onOpenModalEditCustomField: (options: ModalEventProps) => void;
   onOpenModalEditSchema: (options: ModalEventProps) => void;
+  onOpenModalAIArchitect: () => void;
+  onCloseModalAIArchitect: () => void;
   setFormModalNavigationState: (value: React.SetStateAction<typeof INITIAL_STATE_DATA>) => void;
-  actionType: string;
+  actionType: 'edit' | 'create';
   attributeName: string;
   attributeType: string;
   customFieldUid: string;
   categoryName: string;
   dynamicZoneTarget: string;
   forTarget: SchemaType;
-  modalType: string;
+  modalType:
+    | 'attribute'
+    | 'editCategory'
+    | 'component'
+    | 'contentType'
+    | 'addComponentToDynamicZone'
+    | 'customField'
+    | 'chooseAttribute'
+    | 'ai-architect';
   isOpen: boolean;
+  isAIModalOpen: boolean;
   showBackLink: boolean;
   kind: string;
   step: string;

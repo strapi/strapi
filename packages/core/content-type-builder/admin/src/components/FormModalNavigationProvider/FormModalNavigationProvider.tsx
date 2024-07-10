@@ -26,6 +26,7 @@ export type ModalEventProps = {
   actionType?: string;
   isOpen?: boolean;
   showBackLink?: boolean;
+  isAIModalOpen?: boolean;
 };
 
 export const FormModalNavigationProvider = ({ children }: FormModalNavigationProviderProps) => {
@@ -167,6 +168,24 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
     });
   };
 
+  const onOpenModalAIArchitect = () => {
+    setFormModalNavigationState((prevState: State) => {
+      return {
+        ...prevState,
+        isAIModalOpen: true,
+      };
+    });
+  };
+
+  const onCloseModalAIArchitect = () => {
+    setFormModalNavigationState((prevState: State) => {
+      return {
+        ...prevState,
+        isAIModalOpen: false,
+      };
+    });
+  };
+
   const onCloseModal = () => {
     setFormModalNavigationState(INITIAL_STATE_DATA);
   };
@@ -226,6 +245,8 @@ export const FormModalNavigationProvider = ({ children }: FormModalNavigationPro
           onOpenModalEditCustomField,
           onOpenModalEditSchema,
           setFormModalNavigationState,
+          onOpenModalAIArchitect,
+          onCloseModalAIArchitect,
         } as any
       }
     >

@@ -7,12 +7,15 @@ import { Page, useGuidedTour, Layouts } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
+import { AIArchitectModal } from '../../components/AIArchitectModal';
 import { AutoReloadOverlayBlockerProvider } from '../../components/AutoReloadOverlayBlocker';
 import { ContentTypeBuilderNav } from '../../components/ContentTypeBuilderNav/ContentTypeBuilderNav';
 import DataManagerProvider from '../../components/DataManagerProvider/DataManagerProvider';
 import { FormModalNavigationProvider } from '../../components/FormModalNavigationProvider/FormModalNavigationProvider';
 import { PERMISSIONS } from '../../constants';
+import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { pluginId } from '../../pluginId';
+// eslint-disable-next-line import/no-unresolved
 import { RecursivePath } from '../RecursivePath/RecursivePath';
 
 const ListView = lazy(() => import('../ListView/ListView'));
@@ -42,6 +45,7 @@ const App = () => {
           {/* @ts-ignore */}
           <DataManagerProvider>
             <Layouts.Root sideNav={<ContentTypeBuilderNav />}>
+              <AIArchitectModal />
               <Suspense fallback={<Page.Loading />}>
                 <Routes>
                   <Route path="content-types/:uid" element={<ListView />} />

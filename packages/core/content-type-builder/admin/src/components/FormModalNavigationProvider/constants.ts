@@ -12,6 +12,7 @@ const INITIAL_STATE_DATA = {
   step: null,
   targetUid: null,
   customFieldUid: null,
+  isAIModalOpen: false,
 };
 
 export { INITIAL_STATE_DATA };

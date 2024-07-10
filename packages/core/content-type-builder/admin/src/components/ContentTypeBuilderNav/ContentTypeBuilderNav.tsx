@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 
 import {
   Box,
+  Button,
   TextButton,
   SubNav,
   SubNavHeader,
@@ -15,6 +16,7 @@ import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
 
+import { useFormModalNavigation } from '../../hooks/useFormModalNavigation';
 import { getTrad } from '../../utils/getTrad';
 
 import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
@@ -22,6 +24,8 @@ import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
 export const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
+
+  const { onOpenModalAIArchitect } = useFormModalNavigation();
 
   const pluginName = formatMessage({
     id: getTrad('plugin.name'),
@@ -41,6 +45,13 @@ export const ContentTypeBuilderNav = () => {
           defaultMessage: 'Search',
         })}
       />
+      <Button
+        onClick={() => {
+          onOpenModalAIArchitect();
+        }}
+      >
+        AI Stuff
+      </Button>
       <SubNavSections>
         {menu.map((section) => (
           <Fragment key={section.name}>

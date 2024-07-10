@@ -58,6 +58,7 @@ const findAttributeIndex = (schema: any, attributeToFind?: string) => {
 
 const reducer = (state = initialState, action: Action) =>
   produce(state, (draftState: any) => {
+    console.log(action.type);
     switch (action.type) {
       case actions.ADD_ATTRIBUTE: {
         const {
@@ -290,7 +291,7 @@ const reducer = (state = initialState, action: Action) =>
           isTemporary: true,
           schema: {
             ...action.data,
-            attributes: [],
+            attributes: action.data.attributes ?? [],
           },
         };
 

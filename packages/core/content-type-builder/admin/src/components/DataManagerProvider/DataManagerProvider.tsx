@@ -246,6 +246,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     componentCategory?: string,
     shouldAddComponentToData = false
   ) => {
+    console.log(data, schemaType, uid);
     const type = schemaType === 'contentType' ? CREATE_SCHEMA : CREATE_COMPONENT_SCHEMA;
 
     dispatch({
@@ -441,6 +442,9 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     const schemaToSet = get(currentSchemas, currentUid ?? '', {
       schema: { attributes: [] },
     });
+
+    console.log(schemaToSet);
+    console.log(currentUid);
 
     const retrievedComponents = retrieveComponentsFromSchema(
       schemaToSet.schema.attributes,
