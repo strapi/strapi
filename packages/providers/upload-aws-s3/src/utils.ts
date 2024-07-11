@@ -3,7 +3,7 @@ const ENDPOINT_PATTERN = /^(.+\.)?s3[.-]([a-z0-9-]+)\./;
 type BucketInfo = {
   bucket?: string | null;
   err?: string;
-}
+};
 
 export function isUrlFromBucket(fileUrl: string, bucketName: string, baseUrl = ''): boolean {
   const url = new URL(fileUrl);

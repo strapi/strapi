@@ -33,7 +33,7 @@ export type File = {
   provider_metadata?: Record<string, unknown>;
   stream?: ReadStream;
   buffer?: Buffer;
-}
+};
 
 export type UploadCommandOutput = (
   | CompleteMultipartUploadCommandOutput
@@ -46,7 +46,7 @@ export type AWSParams = {
   Bucket: string;
   ACL?: ObjectCannedACL;
   signedUrlExpires?: number;
-}
+};
 
 export type InitOptions = {
   s3Options: S3ClientConfig & { params: AWSParams },
