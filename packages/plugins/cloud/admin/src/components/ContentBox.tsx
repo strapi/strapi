@@ -35,7 +35,7 @@ const ContentBox = ({
       </IconWrapper>
       <Flex direction="column" alignItems="stretch" gap={endAction ? 0 : 1}>
         <Flex>
-          <TypographyWordBreak fontWeight="semiBold" variant="pi">
+          <TypographyWordBreak fontWeight="semiBold" variant="omega">
             {title}
           </TypographyWordBreak>
           {endAction}
