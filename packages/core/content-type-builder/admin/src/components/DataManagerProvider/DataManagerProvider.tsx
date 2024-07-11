@@ -43,6 +43,7 @@ import {
   SET_MODIFIED_DATA,
   UPDATE_SCHEMA,
   UPDATE_INITIAL_STATE,
+  UPDATE_CREATING_FROM_AI,
 } from './constants';
 import { makeSelectDataManagerProvider } from './selectors';
 import { formatMainDataType, getComponentsToPost, sortContentType } from './utils/cleanData';
@@ -80,6 +81,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     initialData,
     modifiedData,
     reservedNames,
+    isCreatingFromAIArchitect,
   } = useSelector(makeSelectDataManagerProvider());
   const { toggleNotification } = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
@@ -246,7 +248,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     componentCategory?: string,
     shouldAddComponentToData = false
   ) => {
-    console.log(data, schemaType, uid);
     const type = schemaType === 'contentType' ? CREATE_SCHEMA : CREATE_COMPONENT_SCHEMA;
 
     dispatch({
@@ -443,9 +444,6 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       schema: { attributes: [] },
     });
 
-    console.log(schemaToSet);
-    console.log(currentUid);
-
     const retrievedComponents = retrieveComponentsFromSchema(
       schemaToSet.schema.attributes,
       components
@@ -458,9 +456,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
       isInContentTypeView
     );
 
-    const hasJustCreatedSchema =
-      get(schemaToSet, 'isTemporary', false) &&
-      size(get(schemaToSet, 'schema.attributes', [])) === 0;
+    const hasJustCreatedSchema = get(schemaToSet, 'isTemporary', false);
 
     dispatch({
       type: SET_MODIFIED_DATA,
@@ -620,6 +616,12 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     });
   };
 
+  const toggleAI = () => {
+    dispatch({
+      type: UPDATE_CREATING_FROM_AI,
+    });
+  };
+
   return (
     <DataManagerContext.Provider
       value={{
@@ -650,6 +652,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
         sortedContentTypesList: sortContentType(contentTypes),
         submitData,
         updateSchema,
+        toggleAI,
       }}
     >
       {isLoadingForDataToBeSet ? (

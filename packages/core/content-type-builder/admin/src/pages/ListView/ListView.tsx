@@ -20,8 +20,14 @@ import { LinkToCMSettingsView } from './LinkToCMSettingsView';
 /* eslint-disable indent */
 
 const ListView = () => {
-  const { initialData, modifiedData, isInDevelopmentMode, isInContentTypeView, submitData } =
-    useDataManager();
+  const {
+    initialData,
+    modifiedData,
+    isInDevelopmentMode,
+    isInContentTypeView,
+    submitData,
+    isCreatingFromAIArchitect,
+  } = useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
 
@@ -141,7 +147,7 @@ const ListView = () => {
                 startIcon={<Check />}
                 onClick={async () => await submitData()}
                 type="submit"
-                disabled={isEqual(modifiedData, initialData)}
+                disabled={isEqual(modifiedData, initialData) && !isCreatingFromAIArchitect}
               >
                 {formatMessage({
                   id: 'global.save',

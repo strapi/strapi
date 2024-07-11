@@ -170,5 +170,11 @@ export default {
         ],
       },
     },
+    {
+      method: 'POST',
+      path: '/architect',
+      handler: 'architect.createSchema',
+      config: {},
+    },
   ],
 };

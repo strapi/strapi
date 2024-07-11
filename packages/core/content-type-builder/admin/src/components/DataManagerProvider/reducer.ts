@@ -34,6 +34,7 @@ const initialState: DataManagerStateType = {
   reservedNames: {},
   isLoading: true,
   isLoadingForDataToBeSet: true,
+  isCreatingFromAIArchitect: false,
 };
 
 const ONE_SIDE_RELATIONS = ['oneWay', 'manyWay'];
@@ -58,7 +59,6 @@ const findAttributeIndex = (schema: any, attributeToFind?: string) => {
 
 const reducer = (state = initialState, action: Action) =>
   produce(state, (draftState: any) => {
-    console.log(action.type);
     switch (action.type) {
       case actions.ADD_ATTRIBUTE: {
         const {
@@ -692,6 +692,10 @@ const reducer = (state = initialState, action: Action) =>
 
         break;
       }
+      case actions.UPDATE_CREATING_FROM_AI: {
+        draftState.isCreatingFromAIArchitect = !draftState.isCreatingFromAIArchitect;
+      }
+
       default:
         return draftState;
     }

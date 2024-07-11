@@ -18,4 +18,7 @@ module.exports = ({ env }) => ({
     nps: env.bool('FLAG_NPS', true),
     promoteEE: env.bool('FLAG_PROMOTE_EE', true),
   },
+  aiArchitect: {
+    apiKey: env('AI_API_KEY'),
+  },
 });

@@ -53,6 +53,7 @@ export interface DataManagerContextValue {
   componentsThatHaveOtherComponentInTheirAttributes: any[]; // Define the actual type
   contentTypes: Record<string, any>;
   initialData: Record<string, any>;
+  isCreatingFromAIArchitect: boolean;
   isInContentTypeView: boolean;
   isInDevelopmentMode?: boolean;
   modifiedData: Record<string, any>;
@@ -62,6 +63,7 @@ export interface DataManagerContextValue {
     attributes: string[];
   };
   allComponentsCategories: any[];
+  toggleAI: () => void;
 }
 
 // @ts-expect-error need to pass initial value to params
