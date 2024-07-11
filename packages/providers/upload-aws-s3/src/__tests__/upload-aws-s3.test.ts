@@ -1,12 +1,5 @@
+import { BucketCannedACL } from '@aws-sdk/client-s3';
 import awsProvider, { File } from '../index';
-
-jest.mock('../utils', () => ({
-  ...jest.requireActual('../utils'),
-  extractCredentials: jest.fn().mockReturnValue({
-    accessKeyId: 'test',
-    secretAccessKey: 'test',
-  }),
-}));
 
 const uploadMock = {
   done: jest.fn().mockImplementation(() =>
@@ -45,6 +38,7 @@ describe('AWS-S3 provider', () => {
         ext: '.json',
         mime: 'application/json',
         buffer: Buffer.from(''),
+        sizeInBytes: 100
       };
 
       await providerInstance.upload(file);
@@ -72,6 +66,7 @@ describe('AWS-S3 provider', () => {
         ext: '.json',
         mime: 'application/json',
         buffer: Buffer.from(''),
+        sizeInBytes: 0
       };
 
       await providerInstance.upload(file);
@@ -101,6 +96,7 @@ describe('AWS-S3 provider', () => {
         ext: '.json',
         mime: 'application/json',
         buffer: Buffer.from(''),
+        sizeInBytes: 0
       };
 
       await providerInstance.upload(file);
@@ -130,6 +126,7 @@ describe('AWS-S3 provider', () => {
         ext: '.json',
         mime: 'application/json',
         buffer: Buffer.from(''),
+        sizeInBytes: 0
       };
 
       await providerInstance.upload(file);
@@ -159,11 +156,13 @@ describe('AWS-S3 provider', () => {
     test('Should not sign files if ACL is public', async () => {
       const providerInstance = awsProvider.init({
         s3Options: {
-          accessKeyId: 'test',
-          secretAccessKey: 'test',
+          credentials: {
+            accessKeyId: 'test',
+            secretAccessKey: 'test',
+          },
           params: {
             Bucket: 'test',
-            ACL: 'public',
+            ACL: BucketCannedACL.public_read_write,
           },
         },
       });

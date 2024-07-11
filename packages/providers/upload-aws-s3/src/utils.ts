@@ -1,9 +1,6 @@
-import type { AwsCredentialIdentity } from '@aws-sdk/types';
-import type { InitOptions } from '.';
-
 const ENDPOINT_PATTERN = /^(.+\.)?s3[.-]([a-z0-9-]+)\./;
 
-interface BucketInfo {
+type BucketInfo = {
   bucket?: string | null;
   err?: string;
 }
@@ -87,13 +84,3 @@ function getBucketFromAwsUrl(fileUrl: string): BucketInfo {
   // https://<bucket-name>.s3.amazonaws.com/
   return { bucket: prefix.substring(0, prefix.length - 1) };
 }
-
-export const extractCredentials = (options: InitOptions): AwsCredentialIdentity | null => {
-  if (options.s3Options?.credentials) {
-    return {
-      accessKeyId: options.s3Options.credentials.accessKeyId,
-      secretAccessKey: options.s3Options.credentials.secretAccessKey,
-    };
-  }
-  return null;
-};
