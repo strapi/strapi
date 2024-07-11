@@ -61,8 +61,7 @@ const assertUrlProtocol = (url: string) => {
 };
 
 export default {
-  init({ baseUrl, rootPath, s3Options }: InitOptions) {
-    const config = s3Options;
+  init({ baseUrl, rootPath, s3Options: config }: InitOptions) {
     const s3Client = new S3Client(config);
     const filePrefix = rootPath ? `${rootPath.replace(/\/+$/, '')}/` : '';
 
