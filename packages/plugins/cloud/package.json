@@ -74,7 +74,7 @@
     "npm": ">=6.0.0"
   },
   "strapi": {
-    "name": "strapi-cloud",
+    "name": "cloud",
     "description": "Instructions to deploy your local project to Strapi Cloud",
     "kind": "plugin",
     "displayName": "Strapi Cloud"

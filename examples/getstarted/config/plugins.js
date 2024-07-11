@@ -23,6 +23,9 @@ module.exports = () => ({
       },
     },
   },
+  cloud: {
+    enabled: true,
+  },
   myplugin: {
     enabled: true,
     resolve: `./src/plugins/local-plugin`, // From the root of the project
