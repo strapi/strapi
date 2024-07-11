@@ -2,5 +2,11 @@
   "plugin.name": "Deploy",
   "pages.home.title": "Strapi Cloud",
   "pages.home.subtitle": "Manage your app deployments",
-  "pages.home.open-dashboard": "Open dashboard"
+  "pages.home.open-dashboard": "Open dashboard",
+  "pages.home.features.tools-title": "Get Everything You Need to Run Strapi in Production",
+  "pages.home.features.tools-description": "Get a database, email provider, and CDN without having to manage it all yourself.",
+  "pages.home.features.deploy-title": "Deploy Strapi to Production in Just a Few Clicks",
+  "pages.home.features.deploy-description": "Connect your repository, choose your region, and get started with generous usage limits.",
+  "pages.home.features.control-title": "Remain in Complete Control",
+  "pages.home.features.control-description": "No lock-in. You remain in control of your stack and the tools you use"
 }
