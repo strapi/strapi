@@ -108,7 +108,6 @@ export default {
         const fileKey = getFileKey(file);
 
         const url = await getSignedUrl(
-          // @ts-expect-error - TODO fix client type
           s3Client,
           new GetObjectCommand({
             Bucket: config.params.Bucket,
@@ -116,7 +115,7 @@ export default {
             ...customParams,
           }),
           {
-            expiresIn: config?.params.signedUrlExpires ?? 15 * 60,
+            expiresIn: config.params.signedUrlExpires ?? 15 * 60,
           }
         );
 
