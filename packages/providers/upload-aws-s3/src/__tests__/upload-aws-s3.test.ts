@@ -38,7 +38,7 @@ describe('AWS-S3 provider', () => {
         ext: '.json',
         mime: 'application/json',
         buffer: Buffer.from(''),
-        sizeInBytes: 100
+        sizeInBytes: 100,
       };
 
       await providerInstance.upload(file);
@@ -66,7 +66,7 @@ describe('AWS-S3 provider', () => {
         ext: '.json',
         mime: 'application/json',
         buffer: Buffer.from(''),
-        sizeInBytes: 0
+        sizeInBytes: 0,
       };
 
       await providerInstance.upload(file);
@@ -96,7 +96,7 @@ describe('AWS-S3 provider', () => {
         ext: '.json',
         mime: 'application/json',
         buffer: Buffer.from(''),
-        sizeInBytes: 0
+        sizeInBytes: 0,
       };
 
       await providerInstance.upload(file);
@@ -126,7 +126,7 @@ describe('AWS-S3 provider', () => {
         ext: '.json',
         mime: 'application/json',
         buffer: Buffer.from(''),
-        sizeInBytes: 0
+        sizeInBytes: 0,
       };
 
       await providerInstance.upload(file);

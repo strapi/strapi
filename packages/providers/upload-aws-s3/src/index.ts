@@ -49,7 +49,7 @@ export type AWSParams = {
 };
 
 export type InitOptions = {
-  s3Options: S3ClientConfig & { params: AWSParams },
+  s3Options: S3ClientConfig & { params: AWSParams };
   baseUrl?: string;
   rootPath?: string;
   [k: string]: any;
