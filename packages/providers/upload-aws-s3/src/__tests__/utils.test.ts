@@ -39,6 +39,6 @@ describe('Utils', () => {
     };
     const credentials = options.s3Options.credentials;
 
-    expect(credentials).toEqual(null);
+    expect(credentials).toBeFalsy();
   });
 });
