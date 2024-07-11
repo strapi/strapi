@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Layouts, Page } from '@strapi/admin/strapi-admin';
+import { Layouts, Page, useFetchClient } from '@strapi/admin/strapi-admin';
 import { Button, Flex, LinkButton, Main, Typography } from '@strapi/design-system';
 import { CheckCircle } from '@strapi/icons';
 import { CodeSquare, PlaySquare, GlassesSquare } from '@strapi/icons/symbols';
@@ -111,6 +111,17 @@ const Home = () => {
   const isLoading = false;
   const isError = false;
   const dashboardUrl = 'https://cloud.strapi.io';
+
+  const { get } = useFetchClient();
+  React.useEffect(() => {
+    const fetch = async () => {
+      const { data } = await get('/cloud-plugin/me');
+      // eslint-disable-next-line no-console
+      console.log(data);
+    };
+
+    fetch();
+  }, [get]);
 
   if (isLoading) {
     return <Page.Loading />;
