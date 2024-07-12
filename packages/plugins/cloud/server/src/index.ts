@@ -2,7 +2,7 @@ import { type Core } from '@strapi/types';
 import { routes } from './routes';
 import { services } from './services';
 
-const CLOUD_API = 'https://platform-api-jimi.tunnel.cloud.strapi.team';
+const CLOUD_API = 'https://api.qa-chicken.cloud.strapi.team';
 
 export default () =>
   ({

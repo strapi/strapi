@@ -6,12 +6,23 @@ import { CodeSquare, GlassesSquare, PlaySquare } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
+import { useCreateCloudProjectMutation } from '../services/cloud';
 import { getTranslation } from '../utils/getTranslation';
 
 import { ContentBox } from './ContentBox';
 
 const MarketingPresentation = () => {
   const { formatMessage } = useIntl();
+  const [createCloudProject, { isLoading }] = useCreateCloudProjectMutation();
+
+  const handleDeploy = async () => {
+    await createCloudProject({
+      displayName: 'My Demo Application',
+      nodeVersion: '20',
+      region: 'NYC',
+      planPriceId: 'Strapi-Cloud-Free-USD-Monthly',
+    });
+  };
 
   return (
     <Flex direction="row" gap={4} alignItems="flex-start">
@@ -94,7 +105,9 @@ const MarketingPresentation = () => {
           ))}
         </Flex>
         <Flex direction="row" gap={3}>
-          <Button>Start free trial</Button>
+          <Button onClick={handleDeploy}>
+            {isLoading ? 'Deploying your app...' : 'Deploy your app'}
+          </Button>
           <LinkButton variant="secondary" tag={Link} to="https://strapi.io/pricing-cloud">
             View pricing plans
           </LinkButton>

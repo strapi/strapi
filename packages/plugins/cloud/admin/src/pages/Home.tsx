@@ -1,12 +1,16 @@
 import * as React from 'react';
 
 import { Layouts, Page } from '@strapi/admin/strapi-admin';
-import { Button, Flex, Main } from '@strapi/design-system';
+import { Button, Main } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 import { MarketingPresentation } from '../components/MarketingPresentation';
-import { ProjectPreview } from '../components/ProjectPreview';
-import { useGetCloudUserQuery, useGetCloudProjectsQuery } from '../services/cloud';
+import { ProjectDetails } from '../components/ProjectDetails';
+import {
+  useGetCloudUserQuery,
+  useGetCloudProjectsQuery,
+  useGetCloudProjectQuery,
+} from '../services/cloud';
 import { getTranslation } from '../utils/getTranslation';
 
 const Home = () => {
@@ -19,8 +23,15 @@ const Home = () => {
     data: projects,
   } = useGetCloudProjectsQuery(null);
 
-  const isLoading = isLoadingUser || isLoadingProjects;
-  const isError = isErrorUser || isErrorProjects;
+  const projectName = projects?.data.at(0)?.name;
+  const {
+    data: project,
+    isLoading: isLoadingProject,
+    isError: isErrorProject,
+  } = useGetCloudProjectQuery(projectName!, { skip: projectName == null });
+
+  const isLoading = isLoadingUser || isLoadingProjects || isLoadingProject;
+  const isError = isErrorUser || isErrorProjects || isErrorProject;
 
   if (isLoading) {
     return <Page.Loading />;
@@ -44,15 +55,7 @@ const Home = () => {
         primaryAction={<Button variant="secondary">{user == null ? 'Log in' : 'Log out'}</Button>}
       />
       <Layouts.Content>
-        {user == null ? (
-          <MarketingPresentation />
-        ) : (
-          <Flex direction="column" gap={2} alignItems="stretch">
-            {projects?.data.map((project) => (
-              <ProjectPreview key={project.name} project={project} />
-            ))}
-          </Flex>
-        )}
+        {project == null ? <MarketingPresentation /> : <ProjectDetails project={project.data} />}
       </Layouts.Content>
     </Main>
   );
