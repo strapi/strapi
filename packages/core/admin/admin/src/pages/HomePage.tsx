@@ -108,49 +108,49 @@ type ResponseData = {
 const ListIcon = styled(List)`
   background-color: ${({ theme }) => theme.colors.primary600};
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.3rem;
 `;
 
 const ImagesIcon = styled(Images)`
   background-color: ${({ theme }) => theme.colors.warning600};
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.3rem;
 `;
 
 const StackIcon = styled(Stack)`
   background-color: ${({ theme }) => theme.colors.secondary500};
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.3rem;
 `;
 
 const SquaresFourIcon = styled(SquaresFour)`
   background-color: ${({ theme }) => theme.colors.alternative600};
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.3rem;
 `;
 
 const EarthIcon = styled(Earth)`
   background-color: ${({ theme }) => theme.colors.success500};
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.3rem;
 `;
 
 const PaperPlaneIcon = styled(PaperPlane)`
   background-color: ${({ theme }) => theme.colors.danger600};
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.3rem;
 `;
 
 const SparkleIcon = styled(Typhoon)`
   background-color: ${({ theme }) => theme.colors.alternative500};
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.3rem;
 `;
 
 const KeyIcon = styled(Key)`
   background-color: ${({ theme }) => theme.colors.neutral1000};
   border-radius: 4px;
-  padding: 0.5rem;
+  padding: 0.3rem;
 `;
 
 const getStatistics = (data: ResponseData) => {
@@ -1008,8 +1008,8 @@ const IconWrapper = styled<FlexComponent>(Flex)`
   margin-right: ${({ theme }) => theme.spaces[6]};
 
   svg {
-    width: 3.2rem;
-    height: 3.2rem;
+    width: 2.6rem;
+    height: 2.6rem;
   }
 `;
 
@@ -1033,8 +1033,8 @@ const StatisticsCard = ({
 }) => {
   const { formatNumber } = useIntl();
   return (
-    <Flex shadow="tableShadow" hasRadius padding={6} background="neutral0">
-      <IconWrapper background={iconBackground} hasRadius padding={3}>
+    <Flex shadow="tableShadow" hasRadius padding={5} background="neutral0">
+      <IconWrapper background={iconBackground} hasRadius padding={2}>
         {icon}
       </IconWrapper>
       <Flex direction="column" alignItems="stretch" gap={1}>
