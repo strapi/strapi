@@ -253,7 +253,14 @@ export default {
       return bTotal - aTotal;
     }).slice(0, 5);
 
-    const assignedToMe = await assignedEntries(ctx.state.user.id);
+
+    const locales = (await strapi.documents('plugin::i18n.locale').findMany()).reduce((acc, locale) => {
+      acc[locale.code] = locale.name;
+      return acc;
+    }, {} as Record<string, string>);
+
+    const assignedToMe = await assignedEntries(ctx.state.user.id, locales);
+
 
     ctx.body = {
       name: ctx.state.user.firstname,
@@ -273,7 +280,7 @@ type AssignedEntriesResult = {
   entry: { id: number, documentId: string, updatedAt: string, name: string, locale: string},
 }[];
 
-async function assignedEntries(userId: number): Promise<AssignedEntriesResult> {
+async function assignedEntries(userId: number, locales: Record<string, string>): Promise<AssignedEntriesResult> {
   const workflows = await strapi.documents('plugin::review-workflows.workflow').findMany();
 
   const contentTypes = [...new Set(workflows.flatMap((workflow) => workflow.contentTypes))]; // Set to remove duplicates
@@ -298,7 +305,7 @@ async function assignedEntries(userId: number): Promise<AssignedEntriesResult> {
               },
               entry: {
                 documentId: entry.documentId,
-                locale: entry.locale,
+                locale: locales[entry.locale] ?? entry.locale,
                 name: entryDisplayName(entry),
                 id: entry.id,
                 updatedAt: entry.updatedAt,
