@@ -68,8 +68,8 @@ export default [
   },
   {
     method: 'GET',
-    path: '/dashboard-stats',
-    handler: 'admin.dashboard',
+    path: '/dashboard-data',
+    handler: 'admin.dashboardData',
     config: {
       policies: ['admin::isAuthenticatedAdmin'],
     },

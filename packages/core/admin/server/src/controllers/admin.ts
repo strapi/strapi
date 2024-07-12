@@ -8,6 +8,7 @@ import { exists } from 'fs-extra';
 import '@strapi/types';
 import { env } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
+import { Modules } from '@strapi/types';
 import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
@@ -178,9 +179,9 @@ export default {
     ctx.send({ plugins }) satisfies Plugins.Response;
   },
 
-  async dashboard(ctx: Context) {
+  async dashboardData(ctx: Context) {
     const stats = await getService('statistics').getStatistics();
-    const upcomingReleases = strapi.documents('plugin::content-releases.release').findMany({
+    const upcomingReleases = await strapi.documents('plugin::content-releases.release').findMany({
       limit: 10,
       filters: {
         scheduledAt: {
@@ -190,12 +191,104 @@ export default {
       sort: 'scheduledAt:desc',
     });
 
+    const lastActivities = await strapi.documents('admin::audit-log').findMany({
+      limit: 10,
+      sort: 'createdAt:desc',
+    });
+
+
+    const oneWeekAgo = new Date();
+
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+
+    const contributions = await strapi.documents('admin::audit-log').findMany({
+      sort: 'date:desc',
+      populate: ['user'],
+      filters: {
+        action: ['entry.create', 'entry.update', 'entry.delete'],
+        date: {
+          $gt: oneWeekAgo,
+        }
+      },
+    });
+
+    const topContributors = contributions.reduce((acc, log) => {
+      const user = log.user.documentId;
+
+      if (!acc[user]) {
+        acc[user] = {
+          creations: 0,
+          updates: 0,
+          deletions: 0,
+          user: {
+            id: user,
+            firstname: log.user.firstname,
+            lastname: log.user.lastname,
+          },
+        };
+      }
+
+      if (log.action === 'entry.create') {
+        acc[user].creations += 1;
+      } else if (log.action === 'entry.update') {
+        acc[user].updates += 1;
+      } else if (log.action === 'entry.delete') {
+        acc[user].deletions += 1;
+      }
+
+      return acc;
+    }, {} as { [id: string]: { creations: number, updates: number, deletions: number,  user: { id: string, firstname: string, lastname: string } } });
+
+    const assignedToMe = await assignedEntries(ctx.state.user.id);
+
     ctx.body = {
       name: ctx.state.user.firstname,
       statistics: stats,
       releases: {
         upcoming: upcomingReleases
-      }
+      },
+      lastActivities,
+      topContributors,
+      assignedToMe,
     };
   },
 };
+
+type AssignedEntriesResult = {
+  contentType: { name: string, uid: string },
+  entry: { id: number, updatedAt: Date },
+
+}[];
+
+async function assignedEntries(userId: number): Promise<AssignedEntriesResult> {
+  const workflows = await strapi.documents('plugin::review-workflows.workflow').findMany();
+
+  const contentTypes = [...new Set(workflows.flatMap((workflow) => workflow.contentTypes))]; // Set to remove duplicates
+
+  const result: AssignedEntriesResult = [];
+
+  await Promise.all(contentTypes.flatMap((contentType) => {
+    return strapi.documents(contentType).findMany({
+      filters: {
+        strapi_assignee: userId,
+      }
+    }).then((entries) => {
+      entries.forEach((entry) => {
+        result.push({
+          contentType: {
+            name: strapi.contentTypes[contentType].info.displayName,
+            uid: contentType,
+          },
+          entry: {
+            id: entry.id,
+            updatedAt: entry.updatedAt,
+          }
+        });
+      });
+    });
+  }));
+
+  return result.sort((a, b) => {
+    return a.entry.updatedAt.getTime() - b.entry.updatedAt.getTime();
+  });
+}

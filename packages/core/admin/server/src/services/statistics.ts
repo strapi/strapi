@@ -66,11 +66,6 @@ const defaultProviders: {[name: string]: () => Promise<number>} = {
       return false;
     }) as UID.CollectionType[];
 
-    console.log({
-      components : strapi.components
-
-    });
-
     let result = 0;
 
     await Promise.all(types.map(async (contentType) => {
