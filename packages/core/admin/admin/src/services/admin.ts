@@ -21,7 +21,7 @@ interface ConfigurationLogo {
 
 const admin = adminApi
   .enhanceEndpoints({
-    addTagTypes: ['ProjectSettings', 'LicenseLimits'],
+    addTagTypes: ['ProjectSettings', 'LicenseLimits', 'Statistics'],
   })
   .injectEndpoints({
     endpoints: (builder) => ({
@@ -107,6 +107,13 @@ const admin = adminApi
         }),
         providesTags: ['LicenseLimits'],
       }),
+      getStatistics: builder.query<any, void>({
+        query: () => ({
+          url: '/admin/dashboard-data',
+          method: 'GET',
+        }),
+        providesTags: ['Statistics'],
+      }),
     }),
     overrideExisting: false,
   });
@@ -119,6 +126,7 @@ const {
   useUpdateProjectSettingsMutation,
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
+  useGetStatisticsQuery,
 } = admin;
 
 export {
@@ -129,6 +137,7 @@ export {
   useUpdateProjectSettingsMutation,
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
+  useGetStatisticsQuery,
 };
 
 export type { ConfigurationLogo };

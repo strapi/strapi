@@ -65,6 +65,7 @@ import { useAppInfo } from '../features/AppInfo';
 import { useTracking } from '../features/Tracking';
 import { useContentTypes } from '../hooks/useContentTypes';
 import { useEnterprise } from '../hooks/useEnterprise';
+import { useGetStatisticsQuery } from '../services/admin';
 
 import cornerOrnamentPath from './assets/corner-ornament.svg';
 import cloudIconBackgroundImage from './assets/strapi-cloud-background.png';
@@ -182,7 +183,7 @@ const getStatistics = (data: ResponseData) => {
     },
     {
       label: 'Total releases',
-      value: data.totalReleases,
+      value: data.releases,
       icon: <PaperPlaneIcon fill="neutral0" />,
       iconBackground: 'danger100',
     },
@@ -212,6 +213,11 @@ const HomePageCE = () => {
   const guidedTourState = useGuidedTour('HomePage', (state) => state.guidedTourState);
   const isGuidedTourVisible = useGuidedTour('HomePage', (state) => state.isGuidedTourVisible);
   const isSkipped = useGuidedTour('HomePage', (state) => state.isSkipped);
+  const {
+    data,
+    isError: isErrorStatistics,
+    isLoading: isLoadingStatistics,
+  } = useGetStatisticsQuery();
 
   const showGuidedTour =
     !Object.values(guidedTourState).every((section) =>
@@ -228,9 +234,14 @@ const HomePageCE = () => {
 
   const hasAlreadyCreatedContentTypes = collectionTypes.length > 1 || singleTypes.length > 0;
 
-  if (isLoadingForModels) {
+  if (isLoadingForModels || isLoadingStatistics) {
     return <Page.Loading />;
   }
+
+  if (isErrorStatistics) {
+    return <Page.Error />;
+  }
+
   // we need to start working on this page
   const mockedData = {
     name: 'Simone',
@@ -320,7 +331,7 @@ const HomePageCE = () => {
     ],
   };
 
-  const statistics = getStatistics(mockedData);
+  const statistics = getStatistics(data.statistics);
 
   return (
     <Layouts.Root>
@@ -348,7 +359,7 @@ const HomePageCE = () => {
                               defaultMessage: 'Welcome {name} 👋',
                             },
                             {
-                              name: mockedData.name,
+                              name: data.name,
                             }
                           )
                         : formatMessage(
@@ -357,7 +368,7 @@ const HomePageCE = () => {
                               defaultMessage: 'Welcome on board, {name}!👋',
                             },
                             {
-                              name: mockedData.name,
+                              name: data.name,
                             }
                           )}
                     </Typography>
@@ -440,7 +451,7 @@ const HomePageCE = () => {
                 </Box>
                 {/* Upcoming releases */}
                 <Tabs.Content value="upcomingReleases">
-                  <Table colCount={3} rowCount={mockedData.releases.upcoming.length}>
+                  <Table colCount={3} rowCount={data.releases.upcoming.length}>
                     <Thead>
                       <Tr>
                         <Th>
@@ -465,7 +476,7 @@ const HomePageCE = () => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {mockedData.releases.upcoming.map((release) => (
+                      {data.releases.upcoming.map((release) => (
                         <React.Fragment key={release.id}>
                           <Tr>
                             <Td>
@@ -475,7 +486,7 @@ const HomePageCE = () => {
                             </Td>
                             <Td>
                               <Typography textColor="neutral800">
-                                {formatDate(new Date(release.scheduled), {
+                                {formatDate(new Date(release.scheduledAt), {
                                   year: 'numeric',
                                   month: 'short',
                                   day: 'numeric',
@@ -511,7 +522,7 @@ const HomePageCE = () => {
                 </Tabs.Content>
                 {/* Assigned to me releases */}
                 <Tabs.Content value="assignedToMe">
-                  <Table colCount={4} rowCount={mockedData.releases.assignedToMe.length}>
+                  <Table colCount={4} rowCount={data.assignedToMe.length}>
                     <Thead>
                       <Tr>
                         <Th>
@@ -544,30 +555,36 @@ const HomePageCE = () => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {mockedData.releases.assignedToMe.map((release) => (
-                        <React.Fragment key={release.id}>
+                      {data.assignedToMe.map((release) => (
+                        <React.Fragment key={`${release.contentType.uid}/${release.entry.id}`}>
                           <Tr>
                             <Td>
                               <Typography textColor="neutral800" fontWeight="bold" ellipsis>
-                                {release.name}
+                                {release.contentType.uid}
                               </Typography>
                             </Td>
                             <Td>
-                              <Typography textColor="neutral800">{release.contentType}</Typography>
+                              <Typography textColor="neutral800">
+                                {release.contentType.name}
+                              </Typography>
                             </Td>
                             <Td>
                               <Typography textColor="neutral800">{release.locale}</Typography>
                             </Td>
                             <Td>
                               <IconButton
-                                onClick={() => navigate(`plugins/content-releases/${release.id}`)}
+                                onClick={() =>
+                                  navigate(
+                                    `content-manager/collection-types/${release.contentType.uid}/${release.entry.id}`
+                                  )
+                                }
                                 label={formatMessage(
                                   {
                                     id: 'app.components.HomePage.releasesStatistics.tab.assigned.scheduled.actions.open',
-                                    defaultMessage: 'Open {name} release',
+                                    defaultMessage: 'Open {name} entry',
                                   },
                                   {
-                                    name: release.name,
+                                    name: release.contentType.uid,
                                   }
                                 )}
                                 borderWidth={0}
@@ -613,7 +630,7 @@ const HomePageCE = () => {
                 </Box>
                 {/* Last activities releases */}
                 <Tabs.Content value="lastActivities">
-                  <Table colCount={4} rowCount={mockedData.lastActivies.length}>
+                  <Table colCount={4} rowCount={data.lastActivities.length}>
                     <Thead>
                       <Tr>
                         <Th>
@@ -646,7 +663,7 @@ const HomePageCE = () => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {mockedData.lastActivies.map((activity) => (
+                      {data.lastActivities.slice(0, 3).map((activity) => (
                         <React.Fragment key={activity.documentId}>
                           <Tr>
                             <Td>
@@ -655,7 +672,9 @@ const HomePageCE = () => {
                               </Typography>
                             </Td>
                             <Td>
-                              <Typography textColor="neutral800">{activity.user}</Typography>
+                              <Typography textColor="neutral800">
+                                {activity.payload.user?.firstname} {activity.payload.user?.lastname}
+                              </Typography>
                             </Td>
                             <Td>
                               <Typography textColor="neutral800">
@@ -680,7 +699,7 @@ const HomePageCE = () => {
                                 label={formatMessage(
                                   {
                                     id: 'app.components.HomePage.releasesStatistics.tab.assigned.scheduled.actions.open',
-                                    defaultMessage: 'Open {name} release',
+                                    defaultMessage: 'Open {name} entry',
                                   },
                                   {
                                     name: activity.action,

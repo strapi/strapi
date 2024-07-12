@@ -437,7 +437,7 @@
   "app.components.HomePage.releasesStatistics.tab.assigned.name": "Name",
   "app.components.HomePage.releasesStatistics.tab.assigned.scheduled": "Scheduled",
   "app.components.HomePage.releasesStatistics.tab.assigned.scheduled.actions.edit": "Edit {name} release",
-  "app.components.HomePage.releasesStatistics.tab.assigned.scheduled.actions.open": "Open {name} release",
+  "app.components.HomePage.releasesStatistics.tab.assigned.scheduled.actions.open": "Open {name} entry",
   "app.components.HomePage.releasesStatistics.tab.assigned.locale": "Locale",
   "app.components.HomePage.releasesStatistics.tab.assigned.contentType": "Content type",
   "app.components.HomePage.releasesStatistics.tab.lastActivities.action": "Action",
