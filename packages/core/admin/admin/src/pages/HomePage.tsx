@@ -22,6 +22,8 @@ import {
   Td,
   VisuallyHidden,
   Tbody,
+  Combobox,
+  ComboboxOption,
 } from '@strapi/design-system';
 import {
   ArrowRight,
@@ -67,10 +69,11 @@ import { useContentTypes } from '../hooks/useContentTypes';
 import { useEnterprise } from '../hooks/useEnterprise';
 import { useGetStatisticsQuery } from '../services/admin';
 
+import bars from './assets/Bars.png';
 import cornerOrnamentPath from './assets/corner-ornament.svg';
+import legend from './assets/Legends.png';
 import cloudIconBackgroundImage from './assets/strapi-cloud-background.png';
 import cloudFlagsImage from './assets/strapi-cloud-flags.svg';
-
 /* -------------------------------------------------------------------------------------------------
  * HomePageCE
  * -----------------------------------------------------------------------------------------------*/
@@ -476,7 +479,7 @@ const HomePageCE = () => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {data.releases.upcoming.map((release) => (
+                      {data.releases.upcoming.slice(0, 3).map((release) => (
                         <React.Fragment key={release.id}>
                           <Tr>
                             <Td>
@@ -555,27 +558,27 @@ const HomePageCE = () => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {data.assignedToMe.map((release) => (
-                        <React.Fragment key={`${release.contentType.uid}/${release.entry.id}`}>
+                      {data.assignedToMe.slice(0, 3).map((entry) => (
+                        <React.Fragment key={`${entry.contentType.uid}/${entry.entry.id}`}>
                           <Tr>
                             <Td>
                               <Typography textColor="neutral800" fontWeight="bold" ellipsis>
-                                {release.contentType.uid}
+                                {entry.contentType.uid}
                               </Typography>
                             </Td>
                             <Td>
                               <Typography textColor="neutral800">
-                                {release.contentType.name}
+                                {entry.contentType.name}
                               </Typography>
                             </Td>
                             <Td>
-                              <Typography textColor="neutral800">{release.locale}</Typography>
+                              <Typography textColor="neutral800">{entry.entry.locale}</Typography>
                             </Td>
                             <Td>
                               <IconButton
                                 onClick={() =>
                                   navigate(
-                                    `content-manager/collection-types/${release.contentType.uid}/${release.entry.id}`
+                                    `content-manager/collection-types/${entry.contentType.uid}/${entry.entry.id}`
                                   )
                                 }
                                 label={formatMessage(
@@ -584,7 +587,7 @@ const HomePageCE = () => {
                                     defaultMessage: 'Open {name} entry',
                                   },
                                   {
-                                    name: release.contentType.uid,
+                                    name: entry.contentType.uid,
                                   }
                                 )}
                                 borderWidth={0}
@@ -740,7 +743,7 @@ const HomePageCE = () => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {mockedData.topContributors.map((contributor) => (
+                      {mockedData.topContributors.slice(0, 3).map((contributor) => (
                         <React.Fragment key={contributor.user}>
                           <Tr height={11}>
                             <Td>
@@ -798,9 +801,37 @@ const HomePageCE = () => {
                   <Divider />
                 </Box>
                 {/* Api requests */}
-                <Tabs.Content value="apiRequests">api requests</Tabs.Content>
+                <Tabs.Content value="apiRequests">
+                  <Flex
+                    shadow="tableShadow"
+                    hasRadius
+                    padding={6}
+                    background="neutral0"
+                    direction="column"
+                    gap={4}
+                  >
+                    <Flex
+                      style={{
+                        alignSelf: 'flex-end',
+                      }}
+                    >
+                      <Combobox
+                        aria-label="change timeframe"
+                        value="week"
+                        onChange={() => console.log('change')}
+                      >
+                        <ComboboxOption value="week">This week</ComboboxOption>
+                        <ComboboxOption value="year">This year</ComboboxOption>
+                      </Combobox>
+                    </Flex>
+                    <img src={bars} alt="Graph" />
+                    <img src={legend} alt="Legend" />
+                  </Flex>
+                </Tabs.Content>
                 {/* Assets bandwidth */}
-                <Tabs.Content value="assetsBandwidth">assets Bandwidth</Tabs.Content>
+                <Tabs.Content value="assetsBandwidth">
+                  <Flex shadow="tableShadow" hasRadius padding={6} background="neutral0"></Flex>
+                </Tabs.Content>
               </Tabs.Root>
             </Grid.Item>
             <Grid.Item col={6} s={12}>
