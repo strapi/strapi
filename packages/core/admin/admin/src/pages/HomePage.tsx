@@ -4,6 +4,8 @@ import {
   Box,
   Button,
   Flex,
+  Divider,
+  IconButton,
   Grid,
   Main,
   Typography,
@@ -12,8 +14,29 @@ import {
   TypographyComponent,
   BoxComponent,
   FlexComponent,
+  Tabs,
+  Table,
+  Thead,
+  Tr,
+  Th,
+  Td,
+  VisuallyHidden,
+  Tbody,
 } from '@strapi/design-system';
-import { ArrowRight, ExternalLink } from '@strapi/icons';
+import {
+  ArrowRight,
+  ExternalLink,
+  Key,
+  List,
+  Images,
+  Stack,
+  SquaresFour,
+  Earth,
+  PaperPlane,
+  Sparkle,
+  Pencil,
+  Eye,
+} from '@strapi/icons';
 import {
   CodeSquare,
   Discord,
@@ -26,9 +49,12 @@ import {
   Strapi,
   X as Twitter,
 } from '@strapi/icons/symbols';
+import { format, id } from 'date-fns';
+import { entries } from 'lodash';
 import { useIntl } from 'react-intl';
 import { useNavigate } from 'react-router-dom';
 import { styled } from 'styled-components';
+import { date } from 'yup';
 
 import { ContentBox } from '../components/ContentBox';
 import { GuidedTourHomepage } from '../components/GuidedTour/Homepage';
@@ -47,9 +73,140 @@ import cloudFlagsImage from './assets/strapi-cloud-flags.svg';
 /* -------------------------------------------------------------------------------------------------
  * HomePageCE
  * -----------------------------------------------------------------------------------------------*/
+type ResponseData = {
+  name: string;
+  entries: number;
+  assets: number;
+  contentTypes: number;
+  components: number;
+  locales: number;
+  totalReleases: number;
+  webhooks: number;
+  apiTokens: number;
+  releases: {
+    upcoming: Array<{ id: string; name: string; scheduled: string }>;
+    assignedToMe: Array<{ id: string; name: string; contentType: string; locale: string }>;
+  };
+  lastActivies: Array<{
+    action: string;
+    user: string;
+    date: string;
+    uid: string;
+    documentId: string;
+  }>;
+  topContributors: Array<{
+    user: string;
+    entries: number;
+  }>;
+};
+
+const ListIcon = styled(List)`
+  background-color: ${({ theme }) => theme.colors.primary600};
+  border-radius: 4px;
+  padding: 0.2rem;
+`;
+
+const ImagesIcon = styled(Images)`
+  background-color: ${({ theme }) => theme.colors.warning600};
+  border-radius: 4px;
+  padding: 0.2rem;
+`;
+
+const StackIcon = styled(Stack)`
+  background-color: ${({ theme }) => theme.colors.secondary500};
+  border-radius: 4px;
+  padding: 0.2rem;
+`;
+
+const SquaresFourIcon = styled(SquaresFour)`
+  background-color: ${({ theme }) => theme.colors.alternative600};
+  border-radius: 4px;
+  padding: 0.2rem;
+`;
+
+const EarthIcon = styled(Earth)`
+  background-color: ${({ theme }) => theme.colors.success500};
+  border-radius: 4px;
+  padding: 0.2rem;
+`;
+
+const PaperPlaneIcon = styled(PaperPlane)`
+  background-color: ${({ theme }) => theme.colors.danger600};
+  border-radius: 4px;
+  padding: 0.2rem;
+`;
+
+const SparkleIcon = styled(Sparkle)`
+  background-color: ${({ theme }) => theme.colors.secondary500};
+  border-radius: 4px;
+  padding: 0.2rem;
+`;
+
+const KeyIcon = styled(Key)`
+  background-color: ${({ theme }) => theme.colors.neutral1000};
+  border-radius: 4px;
+  padding: 0.2rem;
+`;
+
+const getStatistics = (data: ResponseData) => {
+  return [
+    {
+      label: 'Entries',
+      value: data.entries,
+      icon: <ListIcon fill="neutral0" />,
+      iconBackground: 'primary100',
+    },
+    {
+      label: 'Assets',
+      value: data.assets,
+      icon: <ImagesIcon fill="neutral0" />,
+      iconBackground: 'warning100',
+    },
+    {
+      label: 'Content types',
+      value: data.contentTypes,
+      icon: <StackIcon fill="neutral0" />,
+      iconBackground: 'secondary100',
+    },
+    {
+      label: 'Components',
+      value: data.components,
+      icon: <SquaresFourIcon fill="neutral0" />,
+      iconBackground: 'alternative100',
+    },
+    {
+      label: 'Locales',
+      value: data.locales,
+      icon: <EarthIcon fill="neutral0" />,
+      iconBackground: 'danger100',
+    },
+    {
+      label: 'Total releases',
+      value: data.totalReleases,
+      icon: <PaperPlaneIcon fill="neutral0" />,
+      iconBackground: 'danger100',
+    },
+    {
+      label: 'Webhooks',
+      value: data.webhooks,
+      icon: <SparkleIcon fill="neutral0" />,
+      iconBackground: 'secondary100',
+    },
+    {
+      label: 'API tokens',
+      value: data.apiTokens,
+      icon: <KeyIcon fill="neutral0" />,
+      iconBackground: 'neutral150',
+    },
+  ];
+};
 
 const HomePageCE = () => {
-  const { formatMessage } = useIntl();
+  const [activeReleasesTab, setActiveReleasesTab] = React.useState<string>('upcomingReleases');
+  const [activeActivitiesTab, setActiveActivitiesTab] = React.useState<string>('lastActivities');
+  const [activePerformancesTab, setActivePerformancesTab] = React.useState<string>('apiRequests');
+  const [activeLogsTab, setActiveLogsTab] = React.useState<string>('slowestRequests');
+  const { formatMessage, formatDate, formatNumber } = useIntl();
   // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useContentTypes();
   const guidedTourState = useGuidedTour('HomePage', (state) => state.guidedTourState);
@@ -75,6 +232,95 @@ const HomePageCE = () => {
     return <Page.Loading />;
   }
   // we need to start working on this page
+  const mockedData = {
+    name: 'Simone',
+    entries: 114000,
+    assets: 48693,
+    contentTypes: 37,
+    components: 71,
+    locales: 3,
+    totalReleases: 13,
+    webhooks: 2,
+    apiTokens: 2,
+    releases: {
+      upcoming: [
+        {
+          name: 'Summer 2024',
+          scheduled: '2024-07-21T00:00:00.000Z',
+          id: '1',
+        },
+        {
+          name: 'Winter 2024',
+          scheduled: '2024-12-21T00:00:00.000Z',
+          id: '2',
+        },
+        {
+          name: 'Spring 2025',
+          scheduled: '2025-03-21T00:00:00.000Z',
+          id: '3',
+        },
+      ],
+      assignedToMe: [
+        {
+          id: 1,
+          name: 'Arsenal 23/24 Home Jersey',
+          contentType: 'article',
+          locale: 'English',
+        },
+        {
+          id: 2,
+          name: 'PSG 23/24 Home Jersey',
+          contentType: 'article',
+          locale: 'Spanish',
+        },
+        {
+          id: 3,
+          name: 'Manchester 23/24 Home Jersey',
+          contentType: 'article',
+          locale: 'German',
+        },
+      ],
+    },
+    lastActivies: [
+      {
+        action: 'Create entry (category)',
+        user: 'Aurélien Georget',
+        date: '2024-07-10T12:35:13.000Z',
+        uid: 'api::address.address',
+        documentId: 'suop02h0cwok8cbced2hkz0w',
+      },
+      {
+        action: 'Update entry (article)',
+        user: 'Florent Baldino',
+        date: '2024-07-10T12:34:57.000Z',
+        uid: 'api::address.address',
+        documentId: 'suop02h0cwok8cbced2hkz0w',
+      },
+      {
+        action: 'Delete user',
+        user: 'Yevheniia Korsakova',
+        date: '2024-07-10T11:11:38.000Z',
+        uid: 'api::address.address',
+        documentId: 'suop02h0cwok8cbced2hkz0w',
+      },
+    ],
+    topContributors: [
+      {
+        user: 'Aurélien Georget',
+        entries: 114,
+      },
+      {
+        user: 'Florent Baldino',
+        entries: 112,
+      },
+      {
+        user: 'Yevheniia Korsakova',
+        entries: 98,
+      },
+    ],
+  };
+
+  const statistics = getStatistics(mockedData);
 
   return (
     <Layouts.Root>
@@ -92,58 +338,485 @@ const HomePageCE = () => {
           <Grid.Root>
             <Grid.Item col={8} s={12}>
               <div>
-                <Box paddingLeft={6} paddingBottom={10}>
+                <Box paddingBottom={10}>
                   <Flex direction="column" alignItems="flex-start" gap={5}>
                     <Typography tag="h1" variant="alpha">
                       {hasAlreadyCreatedContentTypes
-                        ? formatMessage({
-                            id: 'app.components.HomePage.welcome.again',
-                            defaultMessage: 'Welcome 👋',
-                          })
-                        : formatMessage({
-                            id: 'app.components.HomePage.welcome',
-                            defaultMessage: 'Welcome on board!',
-                          })}
+                        ? formatMessage(
+                            {
+                              id: 'app.components.HomePage.welcome.again',
+                              defaultMessage: 'Welcome {name} 👋',
+                            },
+                            {
+                              name: mockedData.name,
+                            }
+                          )
+                        : formatMessage(
+                            {
+                              id: 'app.components.HomePage.welcome',
+                              defaultMessage: 'Welcome on board, {name}!👋',
+                            },
+                            {
+                              name: mockedData.name,
+                            }
+                          )}
                     </Typography>
-                    <WordWrap textColor="neutral600" variant="epsilon">
-                      {hasAlreadyCreatedContentTypes
-                        ? formatMessage({
-                            id: 'app.components.HomePage.welcomeBlock.content.again',
-                            defaultMessage:
-                              'We hope you are making progress on your project! Feel free to read the latest news about Strapi. We are giving our best to improve the product based on your feedback.',
-                          })
-                        : formatMessage({
+
+                    {!hasAlreadyCreatedContentTypes && (
+                      <>
+                        <WordWrap textColor="neutral600" variant="epsilon">
+                          {formatMessage({
                             id: 'app.components.HomePage.welcomeBlock.content',
                             defaultMessage:
                               'Congrats! You are logged as the first administrator. To discover the powerful features provided by Strapi, we recommend you to create your first Content type!',
                           })}
-                    </WordWrap>
-                    {hasAlreadyCreatedContentTypes ? (
-                      <Link isExternal href="https://strapi.io/blog">
-                        {formatMessage({
-                          id: 'app.components.HomePage.button.blog',
-                          defaultMessage: 'See more on the blog',
-                        })}
-                      </Link>
-                    ) : (
-                      <Button size="L" onClick={handleClick} endIcon={<ArrowRight />}>
-                        {formatMessage({
-                          id: 'app.components.HomePage.create',
-                          defaultMessage: 'Create your first Content type',
-                        })}
-                      </Button>
+                        </WordWrap>
+                        <Button size="L" onClick={handleClick} endIcon={<ArrowRight />}>
+                          {formatMessage({
+                            id: 'app.components.HomePage.create',
+                            defaultMessage: 'Create your first Content type',
+                          })}
+                        </Button>
+                      </>
                     )}
                   </Flex>
                 </Box>
               </div>
             </Grid.Item>
           </Grid.Root>
-          <Grid.Root gap={6}>
-            <Grid.Item col={8} s={12}>
+          <Typography color="neutral0" fontSize={3} fontWeight="bold">
+            {formatMessage({
+              id: 'app.components.HomePage.statistics.sectionTitle',
+              defaultMessage: 'Project statistics',
+            })}
+          </Typography>
+          <Grid.Root gap={6} marginTop={4}>
+            {statistics.map((statistic) => (
+              <Grid.Item key={statistic.label} col={3} s={6}>
+                <StatisticsCard
+                  label={statistic.label}
+                  value={statistic.value}
+                  icon={statistic.icon}
+                  iconBackground={statistic.iconBackground}
+                />
+              </Grid.Item>
+            ))}
+
+            {/* <Grid.Item col={8} s={12}>
               {showGuidedTour ? <GuidedTourHomepage /> : <ContentBlocks />}
             </Grid.Item>
             <Grid.Item col={4} s={12}>
               <SocialLinks />
+            </Grid.Item> */}
+          </Grid.Root>
+          <Grid.Root gap={6} marginTop={7} marginBottom={8}>
+            <Grid.Item col={6} s={12}>
+              <Tabs.Root
+                variant="simple"
+                value={activeReleasesTab}
+                onValueChange={(value) => setActiveReleasesTab(value)}
+              >
+                <Box paddingBottom={8}>
+                  <Tabs.List
+                    aria-label={formatMessage({
+                      id: 'app.components.HomePage.releasesStatistics',
+                      defaultMessage: 'Releases Statistics',
+                    })}
+                  >
+                    <Tabs.Trigger value="upcomingReleases">
+                      {formatMessage({
+                        id: 'app.components.HomePage.releasesStatistics.tab.upcoming',
+                        defaultMessage: 'Upcoming releases',
+                      })}
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="assignedToMe">
+                      {formatMessage({
+                        id: 'app.components.HomePage.releasesStatistics.tab.assigned',
+                        defaultMessage: 'Assigned to me',
+                      })}
+                    </Tabs.Trigger>
+                  </Tabs.List>
+                  <Divider />
+                </Box>
+                {/* Upcoming releases */}
+                <Tabs.Content value="upcomingReleases">
+                  <Table colCount={3} rowCount={mockedData.releases.upcoming.length}>
+                    <Thead>
+                      <Tr>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.releasesStatistics.tab.assigned.name',
+                              defaultMessage: 'Name',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.releasesStatistics.tab.assigned.scheduled',
+                              defaultMessage: 'Scheduled',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <VisuallyHidden>Actions</VisuallyHidden>
+                        </Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {mockedData.releases.upcoming.map((release) => (
+                        <React.Fragment key={release.id}>
+                          <Tr>
+                            <Td>
+                              <Typography textColor="neutral800" fontWeight="bold" ellipsis>
+                                {release.name}
+                              </Typography>
+                            </Td>
+                            <Td>
+                              <Typography textColor="neutral800">
+                                {formatDate(new Date(release.scheduled), {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: 'numeric',
+                                  second: 'numeric',
+                                  hour12: false,
+                                })}
+                              </Typography>
+                            </Td>
+                            <Td>
+                              <IconButton
+                                onClick={() => navigate(`plugins/content-releases/${release.id}`)}
+                                label={formatMessage(
+                                  {
+                                    id: 'app.components.HomePage.releasesStatistics.tab.assigned.scheduled.actions.edit',
+                                    defaultMessage: 'Edit {name} release',
+                                  },
+                                  {
+                                    name: release.name,
+                                  }
+                                )}
+                                borderWidth={0}
+                              >
+                                <Pencil />
+                              </IconButton>
+                            </Td>
+                          </Tr>
+                        </React.Fragment>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </Tabs.Content>
+                {/* Assigned to me releases */}
+                <Tabs.Content value="assignedToMe">
+                  <Table colCount={4} rowCount={mockedData.releases.assignedToMe.length}>
+                    <Thead>
+                      <Tr>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.releasesStatistics.tab.assigned.name',
+                              defaultMessage: 'Name',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.releasesStatistics.tab.assigned.contentType',
+                              defaultMessage: 'Content Type',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.releasesStatistics.tab.assigned.locale',
+                              defaultMessage: 'Locale',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <VisuallyHidden>Actions</VisuallyHidden>
+                        </Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {mockedData.releases.assignedToMe.map((release) => (
+                        <React.Fragment key={release.id}>
+                          <Tr>
+                            <Td>
+                              <Typography textColor="neutral800" fontWeight="bold" ellipsis>
+                                {release.name}
+                              </Typography>
+                            </Td>
+                            <Td>
+                              <Typography textColor="neutral800">{release.contentType}</Typography>
+                            </Td>
+                            <Td>
+                              <Typography textColor="neutral800">{release.locale}</Typography>
+                            </Td>
+                            <Td>
+                              <IconButton
+                                onClick={() => navigate(`plugins/content-releases/${release.id}`)}
+                                label={formatMessage(
+                                  {
+                                    id: 'app.components.HomePage.releasesStatistics.tab.assigned.scheduled.actions.open',
+                                    defaultMessage: 'Open {name} release',
+                                  },
+                                  {
+                                    name: release.name,
+                                  }
+                                )}
+                                borderWidth={0}
+                              >
+                                <Eye />
+                              </IconButton>
+                            </Td>
+                          </Tr>
+                        </React.Fragment>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </Tabs.Content>
+              </Tabs.Root>
+            </Grid.Item>
+            <Grid.Item col={6} s={12}>
+              <Tabs.Root
+                variant="simple"
+                value={activeActivitiesTab}
+                onValueChange={(value) => setActiveActivitiesTab(value)}
+              >
+                <Box paddingBottom={8}>
+                  <Tabs.List
+                    aria-label={formatMessage({
+                      id: 'app.components.HomePage.activitiesStatistics',
+                      defaultMessage: 'Activity Statistics',
+                    })}
+                  >
+                    <Tabs.Trigger value="lastActivities">
+                      {formatMessage({
+                        id: 'app.components.HomePage.releasesStatistics.tab.last',
+                        defaultMessage: 'Last activities',
+                      })}
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="topContributors">
+                      {formatMessage({
+                        id: 'app.components.HomePage.releasesStatistics.tab.contributors',
+                        defaultMessage: 'Top contributors',
+                      })}
+                    </Tabs.Trigger>
+                  </Tabs.List>
+                  <Divider />
+                </Box>
+                {/* Last activities releases */}
+                <Tabs.Content value="lastActivities">
+                  <Table colCount={4} rowCount={mockedData.lastActivies.length}>
+                    <Thead>
+                      <Tr>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.releasesStatistics.tab.lastActivities.action',
+                              defaultMessage: 'Action',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.releasesStatistics.tab.lastActivities.user',
+                              defaultMessage: 'User',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.releasesStatistics.tab.lastActivities.date',
+                              defaultMessage: 'Date',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <VisuallyHidden>Actions</VisuallyHidden>
+                        </Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {mockedData.lastActivies.map((activity) => (
+                        <React.Fragment key={activity.documentId}>
+                          <Tr>
+                            <Td>
+                              <Typography textColor="neutral800" fontWeight="bold" ellipsis>
+                                {activity.action}
+                              </Typography>
+                            </Td>
+                            <Td>
+                              <Typography textColor="neutral800">{activity.user}</Typography>
+                            </Td>
+                            <Td>
+                              <Typography textColor="neutral800">
+                                {formatDate(new Date(activity.date), {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: 'numeric',
+                                  second: 'numeric',
+                                  hour12: false,
+                                })}
+                              </Typography>
+                            </Td>
+                            <Td>
+                              <IconButton
+                                onClick={() =>
+                                  navigate(
+                                    `content-manager/collection-types/${activity.uid}/${activity.documentId}`
+                                  )
+                                }
+                                label={formatMessage(
+                                  {
+                                    id: 'app.components.HomePage.releasesStatistics.tab.assigned.scheduled.actions.open',
+                                    defaultMessage: 'Open {name} release',
+                                  },
+                                  {
+                                    name: activity.action,
+                                  }
+                                )}
+                                borderWidth={0}
+                              >
+                                <Eye />
+                              </IconButton>
+                            </Td>
+                          </Tr>
+                        </React.Fragment>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </Tabs.Content>
+                {/* Top contributors */}
+                <Tabs.Content value="topContributors">
+                  <Table colCount={2} rowCount={mockedData.topContributors.length}>
+                    <Thead>
+                      <Tr>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.contrubutors.tab.contributors.user',
+                              defaultMessage: 'User',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.contrubutors.tab.contributors.entries',
+                              defaultMessage: 'Entries Created',
+                            })}
+                          </Typography>
+                        </Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {mockedData.topContributors.map((contributor) => (
+                        <React.Fragment key={contributor.user}>
+                          <Tr height={11}>
+                            <Td>
+                              <Typography textColor="neutral800" fontWeight="bold" ellipsis>
+                                {contributor.user}
+                              </Typography>
+                            </Td>
+                            <Td>
+                              <Typography textColor="neutral800">
+                                {formatNumber(contributor.entries)}
+                              </Typography>
+                            </Td>
+                          </Tr>
+                        </React.Fragment>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </Tabs.Content>
+              </Tabs.Root>
+            </Grid.Item>
+          </Grid.Root>
+          <Typography color="neutral0" fontSize={3} fontWeight="bold">
+            {formatMessage({
+              id: 'app.components.HomePage.usage.sectionTitle',
+              defaultMessage: 'Usage',
+            })}
+          </Typography>
+          <Grid.Root gap={6} marginTop={7} marginBottom={8}>
+            <Grid.Item col={6} s={12}>
+              <Tabs.Root
+                variant="simple"
+                value={activePerformancesTab}
+                onValueChange={(value) => setActivePerformancesTab(value)}
+              >
+                <Box paddingBottom={8}>
+                  <Tabs.List
+                    aria-label={formatMessage({
+                      id: 'app.components.HomePage.performances',
+                      defaultMessage: 'Performances',
+                    })}
+                  >
+                    <Tabs.Trigger value="apiRequests">
+                      {formatMessage({
+                        id: 'app.components.HomePage.performances.tab.api',
+                        defaultMessage: 'Api Requests',
+                      })}
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="assetsBandwidth">
+                      {formatMessage({
+                        id: 'app.components.HomePage.performances.tab.assets',
+                        defaultMessage: 'Assets bandwidth',
+                      })}
+                    </Tabs.Trigger>
+                  </Tabs.List>
+                  <Divider />
+                </Box>
+                {/* Api requests */}
+                <Tabs.Content value="apiRequests">api requests</Tabs.Content>
+                {/* Assets bandwidth */}
+                <Tabs.Content value="assetsBandwidth">assets Bandwidth</Tabs.Content>
+              </Tabs.Root>
+            </Grid.Item>
+            <Grid.Item col={6} s={12}>
+              <Tabs.Root
+                variant="simple"
+                value={activeLogsTab}
+                onValueChange={(value) => setActiveLogsTab(value)}
+              >
+                <Box paddingBottom={8}>
+                  <Tabs.List
+                    aria-label={formatMessage({
+                      id: 'app.components.HomePage.logs',
+                      defaultMessage: 'Logs',
+                    })}
+                  >
+                    <Tabs.Trigger value="slowestRequests">
+                      {formatMessage({
+                        id: 'app.components.HomePage.logs.tab.slowestRequests',
+                        defaultMessage: 'Slowest Requests',
+                      })}
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="errorLogs">
+                      {formatMessage({
+                        id: 'app.components.HomePage.logs.tab.logs',
+                        defaultMessage: 'Error logs',
+                      })}
+                    </Tabs.Trigger>
+                  </Tabs.List>
+                  <Divider />
+                </Box>
+                {/* Slowest Requests */}
+                <Tabs.Content value="slowestRequests">slowest Requests</Tabs.Content>
+                {/* Top contributors */}
+                <Tabs.Content value="errorLogs">error Logs</Tabs.Content>
+              </Tabs.Root>
             </Grid.Item>
           </Grid.Root>
         </Box>
@@ -165,6 +838,52 @@ const LogoContainer = styled<BoxComponent>(Box)`
 const WordWrap = styled<TypographyComponent>(Typography)`
   word-break: break-word;
 `;
+
+/* -------------------------------------------------------------------------------------------------
+ * StatisticsCard
+ * -----------------------------------------------------------------------------------------------*/
+const IconWrapper = styled<FlexComponent>(Flex)`
+  margin-right: ${({ theme }) => theme.spaces[6]};
+
+  svg {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+`;
+
+const TypographyWordBreak = styled<TypographyComponent>(Typography)`
+  color: ${({ theme }) => theme.colors.neutral800};
+  word-break: break-all;
+`;
+
+const StatisticsCard = ({
+  label,
+  value,
+  icon,
+  iconBackground,
+}: {
+  label: string;
+  value: number;
+  icon: React.ForwardRefExoticComponent<
+    Omit<React.SVGProps<SVGSVGElement>, 'ref'> & React.RefAttributes<SVGSVGElement>
+  >;
+  iconBackground: string;
+}) => {
+  const { formatNumber } = useIntl();
+  return (
+    <Flex shadow="tableShadow" hasRadius padding={6} background="neutral0">
+      <IconWrapper background={iconBackground} hasRadius padding={3}>
+        {icon}
+      </IconWrapper>
+      <Flex direction="column" alignItems="stretch" gap={1}>
+        <TypographyWordBreak fontWeight="bold" variant="delta">
+          {label}
+        </TypographyWordBreak>
+        <Typography textColor="neutral600">{formatNumber(value)}</Typography>
+      </Flex>
+    </Flex>
+  );
+};
 
 /* -------------------------------------------------------------------------------------------------
  * ContentBlocks
