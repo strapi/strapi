@@ -599,7 +599,7 @@ const HomePageCE = () => {
                           <Tr>
                             <Td>
                               <Typography textColor="neutral800" fontWeight="bold" ellipsis>
-                                {entry.contentType.uid}
+                                {entry.entry.name}
                               </Typography>
                             </Td>
                             <Td>
