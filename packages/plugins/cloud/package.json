@@ -23,26 +23,41 @@
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
+    "./strapi-server": {
+      "types": "./dist/server/src/index.d.ts",
+      "source": "./server/src/index.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js",
+      "default": "./dist/server/index.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
-    "dist/"
+    "dist/",
+    "strapi-server.js"
   ],
   "scripts": {
     "build": "pack-up build",
+    "clean": "run -T rimraf ./dist",
     "lint": "run -T eslint .",
     "watch": "pack-up watch"
   },
   "dependencies": {
     "@strapi/design-system": "2.0.0-beta.6",
     "@strapi/icons": "2.0.0-beta.6",
-    "react-intl": "6.6.2"
+    "axios": "1.6.0",
+    "fs-extra": "11.2.0",
+    "minimatch": "9.0.3",
+    "pkg-up": "3.1.0",
+    "react-intl": "6.6.2",
+    "tar": "6.1.13"
   },
   "devDependencies": {
     "@strapi/admin": "workspace:*",
     "@strapi/pack-up": "5.0.0",
     "@strapi/sdk-plugin": "^5.0.0",
     "@strapi/strapi": "5.0.0-rc.2",
+    "@strapi/types": "workspace:*",
     "eslint-config-custom": "5.0.0-rc.2",
     "react": "18.3.1",
     "react-dom": "18.3.1",
@@ -64,7 +79,7 @@
     "npm": ">=6.0.0"
   },
   "strapi": {
-    "name": "strapi-cloud",
+    "name": "cloud",
     "description": "Instructions to deploy your local project to Strapi Cloud",
     "kind": "plugin",
     "displayName": "Strapi Cloud"

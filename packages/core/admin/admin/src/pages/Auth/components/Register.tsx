@@ -139,6 +139,7 @@ const REGISTER_ADMIN_SCHEMA = yup.object().shape({
       id: translatedErrors.required.id,
       defaultMessage: 'Email is required',
     }),
+  registerCloud: yup.boolean().required({}),
 });
 
 interface RegisterProps {
@@ -153,6 +154,7 @@ interface RegisterFormValues {
   confirmPassword: string;
   registrationToken: string | undefined;
   news: boolean;
+  registerCloud: boolean;
 }
 
 const Register = ({ hasAdmin }: RegisterProps) => {
@@ -322,6 +324,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
               confirmPassword: '',
               registrationToken: registrationToken || undefined,
               news: false,
+              registerCloud: false,
             } satisfies RegisterFormValues
           }
           onSubmit={async (data, helpers) => {
@@ -430,9 +433,51 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                 {
                   label: formatMessage(
                     {
-                      id: 'Auth.form.register.news.label',
+                      id: 'Auth.form.register.register-cloud.label',
+                      defaultMessage: 'Sign me up for a free 14 day trial with {cloud}.',
+                    },
+                    {
+                      cloud: (
+                        <A target="_blank" href="https://strapi.io/cloud" rel="noreferrer">
+                          {formatMessage({
+                            id: 'Auth.form.register.register-cloud.link',
+                            defaultMessage: 'Strapi Cloud',
+                          })}
+                        </A>
+                      ),
+                    }
+                  ),
+                  name: 'registerCloud',
+                  size: 12,
+                  type: 'checkbox' as const,
+                },
+                {
+                  label: formatMessage({
+                    id: 'Auth.form.register.news.label',
+                    defaultMessage: 'Keep me updated about new features & upcoming improvements',
+                  }),
+                  name: 'news',
+                  size: 12,
+                  type: 'checkbox' as const,
+                },
+              ].map(({ size, ...field }) => (
+                <Grid.Item key={field.name} col={size}>
+                  <InputRenderer {...field} />
+                </Grid.Item>
+              ))}
+              <Grid.Item col={12}>
+                <Typography
+                  tag="p"
+                  variant="epsilon"
+                  textColor="neutral600"
+                  fontSize={'1'}
+                  textAlign="center"
+                >
+                  {formatMessage(
+                    {
+                      id: 'Auth.form.register.accept-terms-and-policy',
                       defaultMessage:
-                        'Keep me updated about new features & upcoming improvements (by doing this you accept the {terms} and the {policy}).',
+                        'By checking the above boxes, you agree to our {terms} and {policy}.',
                     },
                     {
                       terms: (
@@ -452,16 +497,9 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                         </A>
                       ),
                     }
-                  ),
-                  name: 'news',
-                  size: 12,
-                  type: 'checkbox' as const,
-                },
-              ].map(({ size, ...field }) => (
-                <Grid.Item key={field.name} col={size}>
-                  <InputRenderer {...field} />
-                </Grid.Item>
-              ))}
+                  )}
+                </Typography>
+              </Grid.Item>
             </Grid.Root>
             <Button fullWidth size="L" type="submit">
               {formatMessage({
@@ -534,6 +572,7 @@ function normalizeData(data: RegisterFormValues) {
       confirmPassword: string;
       registrationToken: string | undefined;
       news: boolean;
+      registerCloud: boolean;
     }
   );
 }
