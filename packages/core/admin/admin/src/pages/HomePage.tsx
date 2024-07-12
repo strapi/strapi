@@ -614,7 +614,7 @@ const HomePageCE = () => {
                               <IconButton
                                 onClick={() =>
                                   navigate(
-                                    `content-manager/collection-types/${entry.contentType.uid}/${entry.entry.id}`
+                                    `content-manager/collection-types/${entry.contentType.uid}/${entry.entry.documentId}`
                                   )
                                 }
                                 label={formatMessage(
