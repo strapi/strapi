@@ -861,7 +861,7 @@ const HomePageCE = () => {
                       </Combobox>
                     </Flex>
                     <img src={bars} alt="Graph" />
-                    <img src={legend} alt="Legend" />
+                    <img src={legend} alt="Legend" style={{maxWidth: '388px' }} />
                   </Flex>
                 </Tabs.Content>
                 {/* Assets bandwidth */}
