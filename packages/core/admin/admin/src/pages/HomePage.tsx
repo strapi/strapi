@@ -24,6 +24,7 @@ import {
   Tbody,
   Combobox,
   ComboboxOption,
+  Badge,
 } from '@strapi/design-system';
 import {
   ArrowRight,
@@ -332,9 +333,44 @@ const HomePageCE = () => {
         entries: 98,
       },
     ],
+    slowestRequests: [
+      {
+        route: '/api/articles?populate=cover',
+        action: 'GET',
+        averageResponseTime: 931,
+      },
+      {
+        route: '/api/search?q=Stripe',
+        action: 'POST',
+        averageResponseTime: 649,
+      },
+      {
+        route: '/api/registerNewsletter',
+        action: 'POST',
+        averageResponseTime: 571,
+      },
+      {
+        route: '/api/registerNewsletter',
+        action: 'PATCH',
+        averageResponseTime: 482,
+      },
+    ],
   };
 
   const statistics = getStatistics(data.statistics);
+
+  const getBadgeColor = (action: string) => {
+    switch (action) {
+      case 'GET':
+        return { color: 'secondary500', background: 'secondary100' };
+      case 'POST':
+        return { color: 'warning600', background: 'warning100' };
+      case 'PATCH':
+        return { color: 'alternative600', background: 'alternative100' };
+      default:
+        return { color: 'secondary500', background: 'secondary100' };
+    }
+  };
 
   return (
     <Layouts.Root>
@@ -721,7 +757,7 @@ const HomePageCE = () => {
                 </Tabs.Content>
                 {/* Top contributors */}
                 <Tabs.Content value="topContributors">
-                  <Table colCount={2} rowCount={mockedData.topContributors.length}>
+                  <Table colCount={2} rowCount={data.topContributors.length}>
                     <Thead>
                       <Tr>
                         <Th>
@@ -743,17 +779,17 @@ const HomePageCE = () => {
                       </Tr>
                     </Thead>
                     <Tbody>
-                      {mockedData.topContributors.slice(0, 3).map((contributor) => (
+                      {data.topContributors.slice(0, 3).map((contributor) => (
                         <React.Fragment key={contributor.user}>
                           <Tr height={11}>
                             <Td>
                               <Typography textColor="neutral800" fontWeight="bold" ellipsis>
-                                {contributor.user}
+                                {contributor.user.firstname} {contributor.user.lastname}
                               </Typography>
                             </Td>
                             <Td>
                               <Typography textColor="neutral800">
-                                {formatNumber(contributor.entries)}
+                                {formatNumber(contributor.creations)}
                               </Typography>
                             </Td>
                           </Tr>
@@ -863,9 +899,85 @@ const HomePageCE = () => {
                   <Divider />
                 </Box>
                 {/* Slowest Requests */}
-                <Tabs.Content value="slowestRequests">slowest Requests</Tabs.Content>
+                <Tabs.Content value="slowestRequests">
+                  <Table colCount={4} rowCount={mockedData.slowestRequests.length}>
+                    <Thead>
+                      <Tr>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.performances.tab.slowestRequests.route',
+                              defaultMessage: 'Route',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.performances.tab.slowestRequests.action',
+                              defaultMessage: 'Action',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <Typography variant="sigma" textColor="neutral600">
+                            {formatMessage({
+                              id: 'app.components.HomePage.performances.tab.slowestRequests.avgResponseTime',
+                              defaultMessage: 'Avg Resp. Time',
+                            })}
+                          </Typography>
+                        </Th>
+                        <Th>
+                          <VisuallyHidden>Actions</VisuallyHidden>
+                        </Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {mockedData.slowestRequests.map((request) => (
+                        <React.Fragment key={request.route}>
+                          <Tr>
+                            <Td>
+                              <Typography textColor="neutral800" ellipsis>
+                                {request.route}
+                              </Typography>
+                            </Td>
+                            <Td>
+                              <Badge backgroundColor={getBadgeColor(request.action).background}>
+                                <Typography textColor={getBadgeColor(request.action).color}>
+                                  {request.action}
+                                </Typography>
+                              </Badge>
+                            </Td>
+                            <Td>
+                              <Typography textColor="danger600">{`${request.averageResponseTime}ms`}</Typography>
+                            </Td>
+                            <Td>
+                              <IconButton
+                                onClick={() => console.log('clicked')}
+                                label={formatMessage(
+                                  {
+                                    id: 'app.components.HomePage.performances.tab.slowestRequests.open',
+                                    defaultMessage: 'Open {name}',
+                                  },
+                                  {
+                                    name: request.action,
+                                  }
+                                )}
+                                borderWidth={0}
+                              >
+                                <Eye />
+                              </IconButton>
+                            </Td>
+                          </Tr>
+                        </React.Fragment>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </Tabs.Content>
                 {/* Top contributors */}
-                <Tabs.Content value="errorLogs">error Logs</Tabs.Content>
+                <Tabs.Content value="errorLogs">
+                  <Flex shadow="tableShadow" hasRadius padding={6} background="neutral0"></Flex>
+                </Tabs.Content>
               </Tabs.Root>
             </Grid.Item>
           </Grid.Root>
