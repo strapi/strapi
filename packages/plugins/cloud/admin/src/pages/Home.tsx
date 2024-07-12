@@ -8,7 +8,42 @@ import { useIntl } from 'react-intl';
 import { Link, NavLink } from 'react-router-dom';
 
 import { ContentBox } from '../components/ContentBox';
+import { DeployButton } from '../components/DeployButton';
 import { getTranslation } from '../utils/getTranslation';
+
+interface Project {
+  createdAt: Date;
+  displayName: string;
+  environments: { [key: string]: Environment };
+  hasGitSource: boolean;
+  isMaintainer: boolean;
+  name: string;
+  ownerId: string;
+  region: string;
+  repository: any;
+  stats: { daysLeftInTria: number };
+  suspendedAt: Date | null;
+  suspendedReasons: [];
+  updatedAt: Date;
+}
+interface ProjectDetails extends Project {
+  environments: { [key: string]: EnvironmentDetails };
+  hasGitSource: boolean;
+  isTrial: boolean;
+}
+
+interface Environment {
+  branch: string;
+  failedChecks: [];
+  hasLiveDeployment: boolean;
+  id: string;
+  isProduction: boolean;
+  url: string;
+}
+
+interface EnvironmentDetails extends Environment {
+  internalName: string;
+}
 
 const MarketingPresentation = () => {
   const { formatMessage } = useIntl();
@@ -106,22 +141,59 @@ const MarketingPresentation = () => {
 
 const Home = () => {
   const { formatMessage } = useIntl();
-
+  const [projects, setProjects] = React.useState([] as Project[]);
+  const [projectInternalName, setProjectInternalName] = React.useState('' as string);
   // TODO: hook to api calls
   const isLoading = false;
   const isError = false;
   const dashboardUrl = 'https://cloud.strapi.io';
 
-  const { get } = useFetchClient();
+  const { get, post } = useFetchClient();
+
+  async function deploy() {
+    // eslint-disable-next-line no-console
+    console.log(`Deploying ${projectInternalName}...`);
+    const { data } = await post('/cloud/deploy', {
+      project: projectInternalName,
+    });
+    // eslint-disable-next-line no-console
+    console.log(data);
+  }
+
   React.useEffect(() => {
     const fetch = async () => {
-      const { data } = await get('/cloud-plugin/me');
+      const { data } = await get('/cloud/me');
       // eslint-disable-next-line no-console
       console.log(data);
     };
 
     fetch();
   }, [get]);
+
+  React.useEffect(() => {
+    const fetchUserProjects = async () => {
+      const { data }: { data: { data: Project[] } } = await get('/cloud/projects');
+      setProjects(data.data);
+    };
+
+    fetchUserProjects();
+  }, [get]);
+
+  React.useEffect(() => {
+    const fetchProject = async () => {
+      const projectName = projects[0].name;
+
+      const { data }: { data: { data: ProjectDetails } } = await get(
+        `/cloud/projects/${projectName}`
+      );
+
+      setProjectInternalName(data.data.environments.production.internalName);
+    };
+
+    if (projects.length > 0) {
+      fetchProject();
+    }
+  }, [get, projects]);
 
   if (isLoading) {
     return <Page.Loading />;
@@ -150,6 +222,7 @@ const Home = () => {
       />
       <Layouts.Content>
         <MarketingPresentation />
+        <DeployButton onClick={deploy} disabled={projectInternalName === ''} />
       </Layouts.Content>
     </Main>
   );

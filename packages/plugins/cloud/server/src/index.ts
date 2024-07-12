@@ -1,4 +1,6 @@
 import { type Core } from '@strapi/types';
+import { routes } from './routes';
+import { services } from './services';
 
 const CLOUD_API = 'https://platform-api-jimi.tunnel.cloud.strapi.team';
 const REMI_TOKEN =
@@ -29,27 +31,7 @@ export default () =>
           }
         }
       });
-
-      strapi.server.router.get('/cloud-plugin/me', async (ctx) => {
-        // Fetch the cloud user profile
-        const profileResponse = await fetch(`${CLOUD_API}/me`, {
-          headers: {
-            Authorization: `Bearer ${REMI_TOKEN}`, // ctx.state.cloudUser.token,
-          },
-        });
-        const profile = await profileResponse.json();
-        ctx.response.body = { data: profile };
-      });
-
-      strapi.server.router.get('/cloud-plugin/projects', async (ctx) => {
-        // Fetch the cloud user profile
-        const profileResponse = await fetch(`${CLOUD_API}/projects`, {
-          headers: {
-            Authorization: `Bearer ${REMI_TOKEN}`, // ctx.state.cloudUser.token,
-          },
-        });
-        const projects = await profileResponse.json();
-        ctx.response.body = { data: projects };
-      });
     },
-  }) as Core.Plugin;
+    routes,
+    services,
+  }) as Partial<Core.Plugin>;
