@@ -211,9 +211,8 @@ export default {
       },
     });
 
-    const topContributors = contributions.reduce(
-      (acc, log) => {
-        const user = log.user.documentId;
+    const allContributors = contributions.reduce((acc, log) => {
+      const user = log.user.documentId;
 
         if (!acc[user]) {
           acc[user] = {
@@ -248,6 +247,13 @@ export default {
       }
     );
 
+    const topContributors = Object.values(allContributors).sort((a, b) => {
+      const aTotal = a.creations + a.updates + a.deletions;
+      const bTotal = b.creations + b.updates + b.deletions;
+
+      return bTotal - aTotal;
+    }).slice(0, 5);
+
     const assignedToMe = await assignedEntries(ctx.state.user.id);
 
     ctx.body = {
@@ -257,15 +263,15 @@ export default {
         upcoming: upcomingReleases,
       },
       lastActivities,
-      topContributors,
+      topContributors: Object.values(topContributors),
       assignedToMe,
     };
   },
 };
 
 type AssignedEntriesResult = {
-  contentType: { name: string; uid: string };
-  entry: { id: number; updatedAt: Date };
+  contentType: { name: string, uid: string },
+  entry: { id: number, documentId: string, updatedAt: string, name: string, locale: string},
 }[];
 
 async function assignedEntries(userId: number): Promise<AssignedEntriesResult> {
@@ -283,25 +289,42 @@ async function assignedEntries(userId: number): Promise<AssignedEntriesResult> {
           filters: {
             strapi_assignee: userId,
           },
-        })
-        .then((entries) => {
-          entries.forEach((entry) => {
-            result.push({
-              contentType: {
-                name: strapi.contentTypes[contentType].info.displayName,
-                uid: contentType,
-              },
-              entry: {
-                id: entry.id,
-                updatedAt: entry.updatedAt,
-              },
-            });
-          });
+          entry: {
+            documentId: entry.documentId,
+            locale: entry.locale,
+            name: entryDisplayName(entry),
+            id: entry.id,
+            updatedAt: entry.updatedAt,
+          }
         });
     })
   );
 
   return result.sort((a, b) => {
-    return new Date(a.entry.updatedAt).getTime() - new Date(b.entry.updatedAt).getTime();
+    return new Date(b.entry.updatedAt).getTime() - new Date(a.entry.updatedAt).getTime();
   });
+}
+
+function entryDisplayName(entry): string {
+  const entryLowercased = Object.fromEntries(
+    Object.entries(entry).map(([k, v]) => [k.toLowerCase(), v])
+  );
+
+  const displayName = entryLowercased.name || entryLowercased.title;;
+
+  if (displayName) {
+    return displayName;
+  }
+
+  delete entryLowercased.id;
+  delete entryLowercased.documentid;
+
+  const values = Object.values(entryLowercased).filter((v) => typeof v === 'string') as string[];
+
+  if (values.length > 0) {
+    const value = values[0];
+    return value.length > 20 ? `${value.slice(0, 20)}...` : value;
+  }
+
+  return `Item #${entry.id}`;
 }
