@@ -626,6 +626,7 @@ const DataManagerProvider = ({ children }: DataManagerProviderProps) => {
     <DataManagerContext.Provider
       value={{
         addAttribute,
+        isCreatingFromAIArchitect,
         addCustomFieldAttribute,
         addCreatedComponentToDynamicZone,
         allComponentsCategories: retrieveSpecificInfoFromComponents(components, ['category']),

@@ -31,11 +31,12 @@ const systemPrompt = `
             </schema_kind>
 
             <info_properties>
+              You MUST provide all the following properties:
+              - name: Same as pluralName
               - displayName: Default name to use in the admin panel
               - singularName: Singular form of the content-type name. Used to generate the API routes and databases/tables collection. Must be kebab-case.
               - pluralName: Plural form of the content-type name. Used to generate the API routes and databases/tables collection. Must be kebab-case.
               - description: Description of the model, it should describe the general purpose of the content-type, why it's used for, what it represents.
-              - name: Same as pluralName
             </info_properties>
 
             <field_types>
@@ -116,11 +117,11 @@ const systemPrompt = `
                   "kind": "collectionType",
                   "collectionName": "posts",
                   "info": {
-                    "displayName": "Blog Posts",
-                    "singularName": "Blog Post",
-                    "pluralName": "Blog Posts",
-                    "description": "A collection of blog posts",
                     "name": "posts"
+                    "displayName": "Blog Posts",
+                    "singularName": "blog-post",
+                    "pluralName": "blog-posts",
+                    "description": "A collection of blog posts",
                   },
                   "options": {
                     "draftAndPublish": true
@@ -151,12 +152,46 @@ const systemPrompt = `
           </examples>
     `;
 
+const applyDefaultValues = (schema: any) => {
+  // Transform info properties to be kebab-case always
+  schema.info.singularName = schema.info.singularName.toLowerCase().replace(/\s+/g, '-');
+  schema.info.pluralName = schema.info.pluralName.toLowerCase().replace(/\s+/g, '-');
+  if (!schema.info.name) schema.info.name = schema.info.pluralName;
+
+  // Apply default values to attributes
+  Object.entries(schema.attributes).forEach(([name, attribute]: any) => {
+    switch (attribute.type) {
+      case 'integer':
+        break;
+      case 'email':
+        break;
+      case 'boolean':
+        break;
+      case 'enumeration':
+        schema.attributes[name].enum = ['a', 'b'];
+        break;
+      case 'relation':
+        schema.attributes[name].relation = 'oneToOne';
+        schema.attributes[name].target = 'api::tag.tag';
+        break;
+      case 'media':
+        schema.attributes[name].allowedTypes = ['images'];
+        schema.attributes[name].multiple = false;
+        break;
+      default:
+        break;
+    }
+  });
+
+  return schema;
+};
+
 export const create = async (prompt: string, previousSchema?: object) => {
   console.log({ previousSchema });
 
   const { object } = await generateObject({
     model: anthropic('claude-3-sonnet-20240229', {}),
-    maxRetries: 3,
+    maxRetries: 10,
     schema: z.object({
       // collectionType or singleType
       kind: z.enum(['collectionType', 'singleType']),
@@ -166,7 +201,7 @@ export const create = async (prompt: string, previousSchema?: object) => {
         singularName: z.string(),
         pluralName: z.string(),
         description: z.string().optional(),
-        name: z.string(),
+        name: z.string().optional(), // Model forgets to add this sometimes
       }),
       options: z.object({
         draftAndPublish: z.boolean(),
@@ -199,8 +234,6 @@ export const create = async (prompt: string, previousSchema?: object) => {
             'json',
             'media',
             'relation',
-            'component',
-            'dynamiczone',
             'blocks',
           ]),
         })
@@ -218,5 +251,5 @@ export const create = async (prompt: string, previousSchema?: object) => {
     prompt,
   });
 
-  return object;
+  return applyDefaultValues(object);
 };
