@@ -8,7 +8,6 @@ import { exists } from 'fs-extra';
 import '@strapi/types';
 import { env } from '@strapi/utils';
 import tsUtils from '@strapi/typescript-utils';
-import { Modules } from '@strapi/types';
 import {
   validateUpdateProjectSettings,
   validateUpdateProjectSettingsFiles,
@@ -188,7 +187,7 @@ export default {
           $gt: new Date(),
         },
       },
-      sort: 'scheduledAt:desc',
+      sort: 'scheduledAt:asc',
     });
 
     const lastActivities = await strapi.documents('admin::audit-log').findMany({
@@ -289,13 +288,23 @@ async function assignedEntries(userId: number): Promise<AssignedEntriesResult> {
           filters: {
             strapi_assignee: userId,
           },
-          entry: {
-            documentId: entry.documentId,
-            locale: entry.locale,
-            name: entryDisplayName(entry),
-            id: entry.id,
-            updatedAt: entry.updatedAt,
-          }
+        })
+        .then((entries) => {
+          entries.forEach((entry) => {
+            result.push({
+              contentType: {
+                name: strapi.contentTypes[contentType].info.displayName,
+                uid: contentType,
+              },
+              entry: {
+                documentId: entry.documentId,
+                locale: entry.locale,
+                name: entryDisplayName(entry),
+                id: entry.id,
+                updatedAt: entry.updatedAt,
+              },
+            });
+          });
         });
     })
   );
@@ -305,14 +314,14 @@ async function assignedEntries(userId: number): Promise<AssignedEntriesResult> {
   });
 }
 
-function entryDisplayName(entry): string {
+function entryDisplayName(entry: {[k: string]: unknown}): string {
   const entryLowercased = Object.fromEntries(
     Object.entries(entry).map(([k, v]) => [k.toLowerCase(), v])
   );
 
-  const displayName = entryLowercased.name || entryLowercased.title;;
+  const displayName = entryLowercased.name || entryLowercased.title;
 
-  if (displayName) {
+  if (typeof displayName === 'string') {
     return displayName;
   }
 
