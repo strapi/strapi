@@ -36,9 +36,9 @@ import {
   SquaresFour,
   Earth,
   PaperPlane,
-  Sparkle,
   Pencil,
   Eye,
+  Typhoon,
 } from '@strapi/icons';
 import {
   CodeSquare,
@@ -108,49 +108,49 @@ type ResponseData = {
 const ListIcon = styled(List)`
   background-color: ${({ theme }) => theme.colors.primary600};
   border-radius: 4px;
-  padding: 0.2rem;
+  padding: 0.5rem;
 `;
 
 const ImagesIcon = styled(Images)`
   background-color: ${({ theme }) => theme.colors.warning600};
   border-radius: 4px;
-  padding: 0.2rem;
+  padding: 0.5rem;
 `;
 
 const StackIcon = styled(Stack)`
   background-color: ${({ theme }) => theme.colors.secondary500};
   border-radius: 4px;
-  padding: 0.2rem;
+  padding: 0.5rem;
 `;
 
 const SquaresFourIcon = styled(SquaresFour)`
   background-color: ${({ theme }) => theme.colors.alternative600};
   border-radius: 4px;
-  padding: 0.2rem;
+  padding: 0.5rem;
 `;
 
 const EarthIcon = styled(Earth)`
   background-color: ${({ theme }) => theme.colors.success500};
   border-radius: 4px;
-  padding: 0.2rem;
+  padding: 0.5rem;
 `;
 
 const PaperPlaneIcon = styled(PaperPlane)`
   background-color: ${({ theme }) => theme.colors.danger600};
   border-radius: 4px;
-  padding: 0.2rem;
+  padding: 0.5rem;
 `;
 
-const SparkleIcon = styled(Sparkle)`
-  background-color: ${({ theme }) => theme.colors.secondary500};
+const SparkleIcon = styled(Typhoon)`
+  background-color: ${({ theme }) => theme.colors.alternative500};
   border-radius: 4px;
-  padding: 0.2rem;
+  padding: 0.5rem;
 `;
 
 const KeyIcon = styled(Key)`
   background-color: ${({ theme }) => theme.colors.neutral1000};
   border-radius: 4px;
-  padding: 0.2rem;
+  padding: 0.5rem;
 `;
 
 const getStatistics = (data: ResponseData) => {
@@ -183,7 +183,7 @@ const getStatistics = (data: ResponseData) => {
       label: 'Locales',
       value: data.locales,
       icon: <EarthIcon fill="neutral0" />,
-      iconBackground: 'danger100',
+      iconBackground: 'success100',
     },
     {
       label: 'Total releases',
@@ -195,7 +195,7 @@ const getStatistics = (data: ResponseData) => {
       label: 'Webhooks',
       value: data.webhooks,
       icon: <SparkleIcon fill="neutral0" />,
-      iconBackground: 'secondary100',
+      iconBackground: 'alternative100',
     },
     {
       label: 'API tokens',

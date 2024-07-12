@@ -105,7 +105,7 @@ export default {
 
     const numberOfAllContentTypes = _.size(strapi.contentTypes);
     const numberOfComponents = _.size(strapi.components);
-
+   
     const getNumberOfDynamicZones = () => {
       return pipe(
         map('attributes'),
