@@ -1,14 +1,11 @@
 import * as React from 'react';
 
 import { Flex, Icon, ModalBody, ModalHeader, ModalLayout, Typography } from '@strapi/design-system';
-
-import { useLocation } from 'react-router-dom';
-
 import { ExternalLink, Book } from '@strapi/icons';
+import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import StrapiLogo from '../assets/images/logo-strapi-2022.svg';
-
 import { getOnboardingDocLink } from '../utils/getOnboardingDocLink';
 
 import { KapaPrompt } from './KapaPrompt';
@@ -33,6 +30,7 @@ export interface DocInfo {
 
 const StrapiAssistantModal = ({ onClose }: StrapiAssistantModal) => {
   const location = useLocation();
+  const modalBodyRef = React.useRef<HTMLDivElement>(null);
   const [docInfo, setDocInfo] = React.useState<DocInfo>({
     route: '/',
     title: 'General',
@@ -57,11 +55,11 @@ const StrapiAssistantModal = ({ onClose }: StrapiAssistantModal) => {
         <Flex gap={4}>
           <Preview src={StrapiLogo} alt="" />
           <Typography variant="beta" fontWeight="semiBold">
-            Strapi Media library AI assistant
+            Strapi assistant
           </Typography>
         </Flex>
       </ModalHeader>
-      <ModalBody>
+      <ModalBody id="kapa-modal-layout">
         <Flex direction="column" alignItems="stretch" gap={2}>
           <Typography variant="delta" fontWeight="bold">
             Looking for the {docInfo.title} documentation?
@@ -74,12 +72,14 @@ const StrapiAssistantModal = ({ onClose }: StrapiAssistantModal) => {
           >
             <Flex borderColor="neutral150" gap={2} padding={4}>
               <Icon as={Book} width={8} height={8} />
-              <Typography>{docInfo.description}</Typography>
+              <Flex flex={1}>
+                <Typography>{docInfo.description}</Typography>
+              </Flex>
               <Icon as={ExternalLink} />
             </Flex>
           </a>
         </Flex>
-        <KapaPrompt />
+        <KapaPrompt modalBodyRef={modalBodyRef} />
       </ModalBody>
     </ModalLayout>
   );

@@ -13,10 +13,9 @@ const defaults: Config = {
   contentSecurityPolicy: {
     useDefaults: true,
     directives: {
-      'frame-src': ['*'],
       'connect-src': ["'self'", 'https:'],
-      'img-src': ['*', "'self'", 'data:', 'blob:', 'https://market-assets.strapi.io'],
-      'media-src': ['*', "'self'", 'data:', 'blob:'],
+      'img-src': ["'self'", 'data:', 'blob:', 'https://market-assets.strapi.io'],
+      'media-src': ["'self'", 'data:', 'blob:'],
       upgradeInsecureRequests: null,
     },
   },
@@ -54,9 +53,8 @@ export const security: Common.MiddlewareFactory<Config> =
       helmetConfig = mergeConfig(helmetConfig, {
         contentSecurityPolicy: {
           directives: {
-            'frame-src': ['*'],
-            'script-src': ['*', "'self'", "'unsafe-inline'", 'cdn.jsdelivr.net', 'widget.kapa.ai'],
-            'img-src': ['*', "'self'", 'data:', 'cdn.jsdelivr.net', 'strapi.io'],
+            'script-src': ["'self'", "'unsafe-inline'", 'cdn.jsdelivr.net'],
+            'img-src': ["'self'", 'data:', 'cdn.jsdelivr.net', 'strapi.io'],
           },
         },
       });
@@ -66,9 +64,8 @@ export const security: Common.MiddlewareFactory<Config> =
       helmetConfig = mergeConfig(helmetConfig, {
         contentSecurityPolicy: {
           directives: {
-            'frame-src': ['*'],
-            'script-src': ['*', "'self'", "'unsafe-inline'", 'widget.kapa.ai'],
-            'connect-src': ['*', "'self'", 'https:', 'ws:'],
+            'script-src': ["'self'", "'unsafe-inline'"],
+            'connect-src': ["'self'", 'https:', 'ws:'],
           },
         },
       });

@@ -8,7 +8,7 @@ import {
   useStrapiApp,
   StrapiAppContextValue,
 } from '@strapi/helper-plugin';
-import { Cog, Puzzle, ShoppingCart, Spark } from '@strapi/icons';
+import { Cog, Puzzle, ShoppingCart } from '@strapi/icons';
 import cloneDeep from 'lodash/cloneDeep';
 import { useSelector } from 'react-redux';
 
@@ -33,15 +33,6 @@ const useMenu = () => {
   const permissions = useSelector(selectAdminPermissions);
   const [menuWithUserPermissions, setMenuWithUserPermissions] = React.useState<Menu>({
     generalSectionLinks: [
-      {
-        icon: Spark,
-        intlLabel: {
-          id: 'global.docs-assistant',
-          defaultMessage: 'Documentation Assistant',
-        },
-        to: '/marketplace',
-        permissions: permissions.marketplace?.main ?? [],
-      },
       {
         icon: Puzzle,
         intlLabel: {
