@@ -90,14 +90,16 @@ const cloudApi = adminApi.injectEndpoints({
           return {
             url: '/cloud/projects',
             method: 'POST',
+            data: params,
           };
         },
       }),
       deployProject: build.mutation<any, string>({
         query(projectName) {
           return {
-            url: `/cloud/projects/${projectName}/deploy`,
+            url: `/cloud/deploy`,
             method: 'POST',
+            data: { project: projectName },
           };
         },
       }),

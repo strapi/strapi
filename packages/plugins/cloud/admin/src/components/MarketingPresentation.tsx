@@ -11,17 +11,21 @@ import { getTranslation } from '../utils/getTranslation';
 
 import { ContentBox } from './ContentBox';
 
-const MarketingPresentation = () => {
+const MarketingPresentation = ({ onStartTrial }) => {
   const { formatMessage } = useIntl();
   const [createCloudProject, { isLoading }] = useCreateCloudProjectMutation();
 
-  const handleDeploy = async () => {
-    await createCloudProject({
-      displayName: 'My Demo Application',
+  const handleStartTrial = async () => {
+    const data = await createCloudProject({
+      displayName: 'trial-project',
       nodeVersion: '20',
       region: 'NYC',
       planPriceId: 'Strapi-Cloud-Free-USD-Monthly',
     });
+
+    if (data) {
+      onStartTrial();
+    }
   };
 
   return (
@@ -105,8 +109,8 @@ const MarketingPresentation = () => {
           ))}
         </Flex>
         <Flex direction="row" gap={3}>
-          <Button onClick={handleDeploy}>
-            {isLoading ? 'Deploying your app...' : 'Deploy your app'}
+          <Button onClick={handleStartTrial} disabled={isLoading}>
+            {isLoading ? 'Creating your free trial project...' : 'Start your Free Trial'}
           </Button>
           <LinkButton variant="secondary" tag={Link} to="https://strapi.io/pricing-cloud">
             View pricing plans

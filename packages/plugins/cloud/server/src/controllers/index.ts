@@ -1,8 +1,9 @@
 import { compressFilesToTar, upload } from '../services/deploy';
 
-const CLOUD_API = 'https://api.qa-chicken.cloud.strapi.team';
+const CLOUD_API = 'https://platform-api-jimi.tunnel.cloud.strapi.team';
+// const CLOUD_API = 'https://api.qa-chicken.cloud.strapi.team';
 const REMI_TOKEN =
-  'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ikk5SzY1aHdYV21jM1ZnM2JyWVRCMCJ9.eyJpc3MiOiJodHRwczovL3N0cmFwaS51cy5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjY4ZmVlODQ2ZWJjM2QzZmEyYTcyOTRmIiwiYXVkIjoiaHR0cDovL2Nsb3VkLnN0cmFwaS5pbyIsImlhdCI6MTcyMDcwODc0MSwiZXhwIjoxNzIwNzk1MTQxLCJzY29wZSI6ImZlYXR1cmU6YmlsbGluZyBjcmVhdGU6dXNlcnMgcmVhZDp1c2VycyByZWFkOnByb2ZpbGUiLCJndHkiOiJwYXNzd29yZCIsImF6cCI6ImhRc1ZkSGlrclo4Y1lJRW1oNHlrVkt5YXlQNUFyUGVTIn0.dWrxuuzwxloM1VMiDC26O-ul4UG7N6vtuos3YZXVpoqpCGxSYpnCdm2gtakNWFssI6XQbnBCl-J96np-I4GuY_8w4fJPjdPZYZ7c5bUk2C_j-APvk2FUs9arfnLhJY54ztUy5qKZ0ndLEcRY8k8nAKMGUbVu23O0Fb24j-kwUDIIpbkWzObKiV_0vASwAnjX_VlKaSXU9zRegQFGeSOUfWVUkhu5P4juT_SDb-vt9PA6P9O72XUCz7C9B7oKRpF0N2qs2bP_xYU83aayYwqz4DnfWeEuAOBhJHBq9ttLeHS9enaBvciUMrrRb_MtXSc6zE7tJbTquO3i7hUA93iRQw';
+  'eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6Ikk5SzY1aHdYV21jM1ZnM2JyWVRCMCJ9.eyJpc3MiOiJodHRwczovL3N0cmFwaS51cy5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjY5MjZiZWE0YmVhZjlmNWVhZjdlMmJkIiwiYXVkIjoiaHR0cDovL2Nsb3VkLnN0cmFwaS5pbyIsImlhdCI6MTcyMDg3MTkxNCwiZXhwIjoxNzIwOTU4MzE0LCJzY29wZSI6ImZlYXR1cmU6YmlsbGluZyBjcmVhdGU6dXNlcnMgcmVhZDp1c2VycyByZWFkOnByb2ZpbGUiLCJndHkiOiJwYXNzd29yZCIsImF6cCI6ImhRc1ZkSGlrclo4Y1lJRW1oNHlrVkt5YXlQNUFyUGVTIn0.RRYoibsnDJrkDrvvVwVjKV4HrCUIRS1_Qu4HF64xiOjNAUSmeq47iNo-F-hEaaUw38Edz7ltnyJyUGqavV5aBDMlX6jgkibyJpcJbf3g0DHBrPzLZtLZyHdxmsyvrAl1OVk2loTCIYZcz2UogzZua1arUgi5Za5JO5gVWdp1mcBLqcyTEWbT78WucqLI6giMrZzhg377JbqJCWmtO3l0cgJPDiHYag2hUyFFZ_Ce0kS7Kh3hMlpHVX5NZKTfqswNZHzpkkXddyOhb23xaVAgGS3qezTBhx9upFvMLxOtAJlASNfD94_28b_AxIlXhoiM4ycwgvSXTnAIUvE9e9Uolw';
 
 const controllers = {
   userController: {
@@ -38,6 +39,20 @@ const controllers = {
       });
       const project = await profileResponse.json();
       ctx.response.body = { data: project };
+    },
+    async createProject(ctx: any) {
+      // Create a new project
+      const project = ctx.request.body;
+      const createProjectResponse = await fetch(`${CLOUD_API}/projects/trial`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${REMI_TOKEN}`, // ctx.state.cloudUser.token,
+        },
+        body: JSON.stringify(project),
+      });
+      const newProject = await createProjectResponse.json();
+      ctx.response.body = { data: newProject };
     },
   },
   deployController: {

@@ -15,7 +15,6 @@ import { getTranslation } from '../utils/getTranslation';
 
 const Home = () => {
   const { formatMessage } = useIntl();
-
   const { isLoading: isLoadingUser, isError: isErrorUser, data: user } = useGetCloudUserQuery(null);
   const {
     isLoading: isLoadingProjects,
@@ -55,7 +54,15 @@ const Home = () => {
         primaryAction={<Button variant="secondary">{user == null ? 'Log in' : 'Log out'}</Button>}
       />
       <Layouts.Content>
-        {project == null ? <MarketingPresentation /> : <ProjectDetails project={project.data} />}
+        {project == null ? (
+          <MarketingPresentation
+            onStartTrial={() => {
+              document.location.reload();
+            }}
+          />
+        ) : (
+          <ProjectDetails project={project.data} />
+        )}
       </Layouts.Content>
     </Main>
   );

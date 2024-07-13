@@ -25,6 +25,13 @@ const routes: Route[] = [
   },
   {
     method: 'POST',
+    path: '/projects',
+    handler: controllers.projectsController.createProject,
+    config: {},
+    info: {},
+  },
+  {
+    method: 'POST',
     path: '/deploy',
     handler: controllers.deployController.deploy,
     config: {},
