@@ -4,10 +4,7 @@ import fp from 'lodash/fp';
 /**
  * Returns a path (as an array) from a file path
  */
-export default (
-  entryPath: string,
-  useFileNameAsKey: boolean = true
-): string[] => {
+export default (entryPath: string, useFileNameAsKey: boolean = true): string[] => {
   const transform = fp.pipe(
     // Remove the relative path prefixes: './' for posix (and some win32) and ".\" for win32
     removeRelativePrefix,
