@@ -269,13 +269,7 @@ const createAttributeValidator =
     } else if (isScalarAttribute(metas.attr)) {
       validator = createScalarAttributeValidator(createOrUpdate)(metas, options);
     } else {
-      if (metas.attr.type === 'component') {
-        if (!metas.componentContext) {
-          // TODO check if this creates an error
-          // Log an error / throw error
-          return validator;
-        }
-
+      if (metas.attr.type === 'component' && metas.componentContext) {
         // Build the path to the component within the parent content type schema.
         const pathToComponent = [
           ...(metas?.componentContext?.pathToComponent ?? []),
@@ -309,12 +303,7 @@ const createAttributeValidator =
           },
           options
         );
-      } else if (metas.attr.type === 'dynamiczone') {
-        if (!metas.componentContext) {
-          // TODO check if this creates an error
-          return validator;
-        }
-
+      } else if (metas.attr.type === 'dynamiczone' && metas.componentContext) {
         const newComponentContext: ComponentContext = {
           ...metas.componentContext,
           fullDynamicZoneContent: metas.updatedAttribute.value,
