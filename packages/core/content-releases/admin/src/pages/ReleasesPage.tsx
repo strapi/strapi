@@ -28,6 +28,7 @@ import {
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
+import { format } from 'date-fns';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -170,7 +171,7 @@ const StyledAlert = styled(Alert)`
 
 const INITIAL_FORM_VALUES = {
   name: '',
-  date: undefined,
+  date: format(new Date(), 'yyyy-MM-dd'),
   time: '',
   isScheduled: true,
   scheduledAt: null,

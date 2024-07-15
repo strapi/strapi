@@ -51,6 +51,7 @@
   "modal.form.input.label.timezone": "Timezone",
   "modal.form.input.clearLabel": "Clear",
   "modal.form.button.submit": "{isCreatingRelease, select, true {Continue} other {Save}}",
+  "modal.form.time.has-passed": "Selected time has already passed.",
   "pages.Details.header-subtitle": "{number, plural, =0 {No entries} one {# entry} other {# entries}}",
   "pages.Releases.tab-group.label": "Releases list",
   "pages.Releases.tab.pending": "Pending ({count})",

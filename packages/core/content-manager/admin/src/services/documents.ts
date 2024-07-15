@@ -335,6 +335,20 @@ const documentApi = contentManagerApi.injectEndpoints({
           'Relations',
         ];
       },
+      async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
+        // Optimistically update the cache with the new data
+        const patchResult = dispatch(
+          documentApi.util.updateQueryData('getDocument', patch, (draft) => {
+            Object.assign(draft.data, data);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          // Rollback the optimistic update if there's an error
+          patchResult.undo();
+        }
+      },
     }),
     unpublishDocument: builder.mutation<
       Unpublish.Response,
