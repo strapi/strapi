@@ -28,6 +28,7 @@ import {
 } from '@strapi/design-system';
 import { Plus } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
+import { format } from 'date-fns';
 import { useIntl } from 'react-intl';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
@@ -38,6 +39,7 @@ import { ReleaseModal, FormValues } from '../components/ReleaseModal';
 import { PERMISSIONS } from '../constants';
 import {
   useGetReleasesQuery,
+  useGetReleaseSettingsQuery,
   GetReleasesQueryParams,
   useCreateReleaseMutation,
 } from '../services/release';
@@ -169,7 +171,7 @@ const StyledAlert = styled(Alert)`
 
 const INITIAL_FORM_VALUES = {
   name: '',
-  date: undefined,
+  date: format(new Date(), 'yyyy-MM-dd'),
   time: '',
   isScheduled: true,
   scheduledAt: null,
@@ -185,6 +187,7 @@ const ReleasesPage = () => {
   const { formatAPIError } = useAPIErrorHandler();
   const [{ query }, setQuery] = useQueryParams<GetReleasesQueryParams>();
   const response = useGetReleasesQuery(query);
+  const { data, isLoading: isLoadingSettings } = useGetReleaseSettingsQuery();
   const [createRelease, { isLoading: isSubmittingForm }] = useCreateReleaseMutation();
   const { getFeature } = useLicenseLimits();
   const { maximumReleases = 3 } = getFeature('cms-content-releases') as {
@@ -195,7 +198,7 @@ const ReleasesPage = () => {
     allowedActions: { canCreate },
   } = useRBAC(PERMISSIONS);
 
-  const { isLoading, isSuccess, isError } = response;
+  const { isLoading: isLoadingReleases, isSuccess, isError } = response;
   const activeTab = response?.currentData?.meta?.activeTab || 'pending';
 
   // Check if we have some errors and show a notification to the user to explain the error
@@ -220,7 +223,7 @@ const ReleasesPage = () => {
     setReleaseModalShown((prev) => !prev);
   };
 
-  if (isLoading) {
+  if (isLoadingReleases || isLoadingSettings) {
     return <Page.Loading />;
   }
 
@@ -274,7 +277,7 @@ const ReleasesPage = () => {
   };
 
   return (
-    <Main aria-busy={isLoading}>
+    <Main aria-busy={isLoadingReleases || isLoadingSettings}>
       <Layouts.Header
         title={formatMessage({
           id: 'content-releases.pages.Releases.title',
@@ -388,7 +391,10 @@ const ReleasesPage = () => {
         handleClose={toggleAddReleaseModal}
         handleSubmit={handleAddRelease}
         isLoading={isSubmittingForm}
-        initialValues={INITIAL_FORM_VALUES}
+        initialValues={{
+          ...INITIAL_FORM_VALUES,
+          timezone: data?.data.defaultTimezone ? data.data.defaultTimezone.split('&')[1] : null,
+        }}
       />
     </Main>
   );

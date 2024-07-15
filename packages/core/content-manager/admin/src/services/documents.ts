@@ -34,7 +34,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params: query,
         },
       }),
-      invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
+      invalidatesTags: (_result, error, { model }) => {
+        if (error) {
+          return [];
+        }
+
+        return [{ type: 'Document', id: `${model}_LIST` }];
+      },
     }),
     cloneDocument: builder.mutation<
       Clone.Response,
@@ -328,6 +334,20 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           'Relations',
         ];
+      },
+      async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
+        // Optimistically update the cache with the new data
+        const patchResult = dispatch(
+          documentApi.util.updateQueryData('getDocument', patch, (draft) => {
+            Object.assign(draft.data, data);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          // Rollback the optimistic update if there's an error
+          patchResult.undo();
+        }
       },
     }),
     unpublishDocument: builder.mutation<

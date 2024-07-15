@@ -109,10 +109,7 @@ const documentManager = ({ strapi }: { strapi: Core.Strapi }) => {
     ) {
       const populate = await buildDeepPopulate(uid);
       const params = {
-        data: {
-          ...omitIdField(body),
-          [PUBLISHED_AT_ATTRIBUTE]: null,
-        },
+        data: omitIdField(body),
         populate,
       };
 
