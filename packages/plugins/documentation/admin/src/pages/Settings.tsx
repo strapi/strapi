@@ -35,8 +35,6 @@ const SettingsPage = () => {
       })
       .catch((err) => {
         if (isBaseQueryError(err) && err.name === 'ValidationError') {
-          formik.setErrors(formatValidationErrors(err));
-        } else {
           toggleNotification({
             type: 'danger',
             message: formatAPIError(err),
