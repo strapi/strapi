@@ -14,10 +14,23 @@ import { Plus } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../../utils/getTrad';
 
 import { useContentTypeBuilderMenu } from './useContentTypeBuilderMenu';
+
+const SubNavLinkCustom = styled(SubNavLink)`
+  div {
+    width: inherit;
+    span:nth-child(2) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: inherit;
+    }
+  }
+`;
 
 export const ContentTypeBuilderNav = () => {
   const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
@@ -74,9 +87,15 @@ export const ContentTypeBuilderNav = () => {
                 }
 
                 return (
-                  <SubNavLink tag={NavLink} to={link.to} active={link.active} key={link.name}>
+                  <SubNavLinkCustom
+                    tag={NavLink}
+                    to={link.to}
+                    active={link.active}
+                    key={link.name}
+                    width="100%"
+                  >
                     {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
-                  </SubNavLink>
+                  </SubNavLinkCustom>
                 );
               })}
             </SubNavSection>
