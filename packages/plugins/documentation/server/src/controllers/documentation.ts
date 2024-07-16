@@ -12,7 +12,7 @@ import { getService } from '../utils';
 import type { Config } from '../types';
 
 const validation = {
-  validatSettings: validateYupSchema(
+  validateSettings: validateYupSchema(
     yup.object().shape({
       restrictedAccess: yup.boolean(),
       password: yup
@@ -230,7 +230,7 @@ export default {
   async updateSettings(ctx: Koa.Context) {
     const pluginStore = strapi.store({ type: 'plugin', name: 'documentation' });
 
-    const data = await validation.validatSettings(ctx.request.body);
+    const data = await validation.validateSettings(ctx.request.body);
 
     const config: Config = {
       restrictedAccess: Boolean(data.restrictedAccess),
