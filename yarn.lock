@@ -8264,7 +8264,7 @@ __metadata:
     markdown-it-sup: "npm:1.0.0"
     mini-css-extract-plugin: "npm:2.7.7"
     msw: "npm:1.3.0"
-    node-schedule: "npm:2.1.0"
+    node-schedule: "npm:2.1.1"
     ora: "npm:5.4.1"
     outdent: "npm:0.8.0"
     p-map: "npm:4.0.0"
@@ -8375,7 +8375,7 @@ __metadata:
     koa: "npm:2.13.4"
     lodash: "npm:4.17.21"
     msw: "npm:1.3.0"
-    node-schedule: "npm:2.1.0"
+    node-schedule: "npm:2.1.1"
     react: "npm:^18.2.0"
     react-dom: "npm:^18.2.0"
     react-intl: "npm:6.4.1"
@@ -9213,7 +9213,7 @@ __metadata:
     "@types/lodash": "npm:^4.14.191"
     "@types/mime-types": "npm:2.1.1"
     "@types/node": "npm:18.18.4"
-    "@types/node-schedule": "npm:2.1.0"
+    "@types/node-schedule": "npm:2.1.7"
     "@types/nodemon": "npm:1.19.6"
     "@types/statuses": "npm:2.0.1"
     bcryptjs: "npm:2.4.3"
@@ -9252,7 +9252,7 @@ __metadata:
     mime-types: "npm:2.1.35"
     node-fetch: "npm:2.7.0"
     node-machine-id: "npm:1.1.12"
-    node-schedule: "npm:2.1.0"
+    node-schedule: "npm:2.1.1"
     nodemon: "npm:3.0.2"
     open: "npm:8.4.0"
     ora: "npm:5.4.1"
@@ -9298,13 +9298,13 @@ __metadata:
     "@types/jest": "npm:29.5.2"
     "@types/koa": "npm:2.13.4"
     "@types/koa__router": "npm:12.0.0"
-    "@types/node-schedule": "npm:2.1.0"
+    "@types/node-schedule": "npm:2.1.7"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:4.25.3"
     https-proxy-agent: "npm:5.0.1"
     koa: "npm:2.13.4"
     node-fetch: "npm:2.7.0"
-    node-schedule: "npm:2.1.0"
+    node-schedule: "npm:2.1.1"
     tsconfig: "npm:4.25.3"
     typescript: "npm:5.2.2"
   languageName: unknown
@@ -10627,12 +10627,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node-schedule@npm:2.1.0":
-  version: 2.1.0
-  resolution: "@types/node-schedule@npm:2.1.0"
+"@types/node-schedule@npm:2.1.7":
+  version: 2.1.7
+  resolution: "@types/node-schedule@npm:2.1.7"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10c0/4180e48d94f67b4107966962b43668701ac93979e5ced2efd7bf013a3acfe6a3a8dc64352b4b4817d199c6573196b7f2c9a931ac59ecb0d75ac5cd9a00d5ceb4
+  checksum: 10c0/fd9ad081c165fda966cedc1fef1565ab3e4b032a702d824cc2713a3102e9ec1e41f5af18bf94fcca633a672e985e3c061680d79036530e35d8430b528f244399
   languageName: node
   linkType: hard
 
@@ -14853,13 +14853,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cron-parser@npm:^3.5.0":
-  version: 3.5.0
-  resolution: "cron-parser@npm:3.5.0"
+"cron-parser@npm:^4.2.0":
+  version: 4.9.0
+  resolution: "cron-parser@npm:4.9.0"
   dependencies:
-    is-nan: "npm:^1.3.2"
-    luxon: "npm:^1.26.0"
-  checksum: 10c0/00a7b0d7856ff4b97db620a780c2419a47b08bdbd774505a90bb872b2c7b65655ddd73c95743bcb5c885da1ae6b36a7921429a0279b87bee335047cafbe9cd7a
+    luxon: "npm:^3.2.1"
+  checksum: 10c0/348622bdcd1a15695b61fc33af8a60133e5913a85cf99f6344367579e7002896514ba3b0a9d6bb569b02667d6b06836722bf2295fcd101b3de378f71d37bed0b
   languageName: node
   linkType: hard
 
@@ -20278,7 +20277,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-nan@npm:^1.2.1, is-nan@npm:^1.3.2":
+"is-nan@npm:^1.2.1":
   version: 1.3.2
   resolution: "is-nan@npm:1.3.2"
   dependencies:
@@ -22649,10 +22648,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"luxon@npm:^1.26.0":
-  version: 1.28.1
-  resolution: "luxon@npm:1.28.1"
-  checksum: 10c0/5c561ce4364bb2301ca5811c74d11a9e087f82164109c7997dc8f0959e64d51259d8e630914dca2edc6702525ce5ab066a4b85caa19d04be71f10e79ffe2bc84
+"luxon@npm:^3.2.1":
+  version: 3.4.4
+  resolution: "luxon@npm:3.4.4"
+  checksum: 10c0/02e26a0b039c11fd5b75e1d734c8f0332c95510f6a514a9a0991023e43fb233884da02d7f966823ffb230632a733fc86d4a4b1e63c3fbe00058b8ee0f8c728af
   languageName: node
   linkType: hard
 
@@ -24399,14 +24398,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-schedule@npm:2.1.0":
-  version: 2.1.0
-  resolution: "node-schedule@npm:2.1.0"
+"node-schedule@npm:2.1.1":
+  version: 2.1.1
+  resolution: "node-schedule@npm:2.1.1"
   dependencies:
-    cron-parser: "npm:^3.5.0"
+    cron-parser: "npm:^4.2.0"
     long-timeout: "npm:0.1.1"
     sorted-array-functions: "npm:^1.3.0"
-  checksum: 10c0/556994e2d42c3a3f8b6bbd1c585d537d9cadf0d1dc35a830ce954fbd632e375f44595dd6650cb626ee7f49c1fc707eee6fa3d0986c412a333138dcd340ea9ec7
+  checksum: 10c0/6ec51b34b9e676740ac25298e4ced5ee46053379f0d3aad533e51d7e083bc24ced045df1772a95bf9d9cfdb81299340bbf551549a7c5eb6e4d2dc6468c85c70e
   languageName: node
   linkType: hard
 
