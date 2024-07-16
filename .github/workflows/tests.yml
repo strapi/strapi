@@ -235,6 +235,29 @@ jobs:
           path: test-apps/e2e/test-results/**/trace.zip
           retention-days: 1
 
+  cli:
+    timeout-minutes: 60
+    needs: [changes, build, typescript]
+    name: 'CLI Tests'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Monorepo install
+        uses: ./.github/actions/yarn-nm-install
+
+      - name: Monorepo build
+        uses: ./.github/actions/run-build
+
+      - name: Run CLI tests
+        run: yarn test:cli
+
   api_ce_pg:
     if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
@@ -295,7 +318,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -450,7 +472,6 @@ jobs:
           MYSQL_USER: strapi
           MYSQL_PASSWORD: strapi
           MYSQL_DATABASE: strapi_test
-          MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
