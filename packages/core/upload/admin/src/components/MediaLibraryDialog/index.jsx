@@ -23,11 +23,7 @@ export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) =>
           allowedTypes={allowedTypes}
           folderId={folderId}
           open
-          onClose={() => {
-            setStep(undefined);
-            setFolderId(null);
-            onClose();
-          }}
+          onClose={onClose}
           onValidate={onSelectAssets}
           onAddAsset={() => setStep(STEPS.AssetUpload)}
           onAddFolder={() => setStep(STEPS.FolderCreate)}
