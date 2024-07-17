@@ -22,6 +22,7 @@ export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) =>
         <AssetDialog
           allowedTypes={allowedTypes}
           folderId={folderId}
+          open
           onClose={() => {
             setStep(undefined);
             setFolderId(null);
