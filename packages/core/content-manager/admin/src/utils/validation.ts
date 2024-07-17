@@ -182,7 +182,14 @@ const createAttributeSchema = (
         }
 
         try {
-          JSON.parse(value);
+          /**
+           * Only allow saving if the value is an object, not a string.
+           * It can be a string is the JSON field fails to parse the value.
+           * This is done to ensure we keep giving live visual feedback, even the JSON is invalid.
+           */
+          if (typeof value !== 'object') {
+            return false;
+          }
 
           return true;
         } catch (err) {
