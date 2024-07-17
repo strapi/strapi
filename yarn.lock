@@ -8335,14 +8335,14 @@ __metadata:
     "@types/cli-progress": "npm:3.11.5"
     "@types/eventsource": "npm:1.1.15"
     "@types/lodash": "npm:^4.14.191"
-    axios: "npm:1.6.0"
+    axios: "npm:1.6.8"
     chalk: "npm:4.1.2"
     cli-progress: "npm:3.12.0"
     commander: "npm:8.3.0"
     eslint-config-custom: "npm:5.0.0-rc.4"
     eventsource: "npm:2.0.2"
     fast-safe-stringify: "npm:2.1.1"
-    fs-extra: "npm:10.0.0"
+    fs-extra: "npm:11.2.0"
     inquirer: "npm:8.2.5"
     jsonwebtoken: "npm:9.0.0"
     jwks-rsa: "npm:3.1.0"
@@ -12885,17 +12885,6 @@ __metadata:
   version: 4.6.3
   resolution: "axe-core@npm:4.6.3"
   checksum: 10c0/b26ee77b5c1f9c399a4ed5dadf82c5302fd70326f36b68f5023a57b7ec213d5db126aade0a2cd2866b9563e213192f4257bc5dc35edebb10a73f90155baa39da
-  languageName: node
-  linkType: hard
-
-"axios@npm:1.6.0":
-  version: 1.6.0
-  resolution: "axios@npm:1.6.0"
-  dependencies:
-    follow-redirects: "npm:^1.15.0"
-    form-data: "npm:^4.0.0"
-    proxy-from-env: "npm:^1.1.0"
-  checksum: 10c0/2879e17b96cbca7e2096d231a44e2d0f03e657d79f8928ea38ec5fbaf5a5b7bf952d580cdb58a66ba328c26eb3528b89d5a32da57cc5cf89813786c044f7e9d6
   languageName: node
   linkType: hard
 
@@ -18172,7 +18161,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.14.8, follow-redirects@npm:^1.15.0, follow-redirects@npm:^1.15.2":
+"follow-redirects@npm:^1.14.8, follow-redirects@npm:^1.15.2":
   version: 1.15.3
   resolution: "follow-redirects@npm:1.15.3"
   peerDependenciesMeta:
@@ -18364,17 +18353,6 @@ __metadata:
   version: 1.0.0
   resolution: "fs-constants@npm:1.0.0"
   checksum: 10c0/a0cde99085f0872f4d244e83e03a46aa387b74f5a5af750896c6b05e9077fac00e9932fdf5aef84f2f16634cd473c63037d7a512576da7d5c2b9163d1909f3a8
-  languageName: node
-  linkType: hard
-
-"fs-extra@npm:10.0.0":
-  version: 10.0.0
-  resolution: "fs-extra@npm:10.0.0"
-  dependencies:
-    graceful-fs: "npm:^4.2.0"
-    jsonfile: "npm:^6.0.1"
-    universalify: "npm:^2.0.0"
-  checksum: 10c0/85802f3d9e49d197744a8372f0d78d5a1faa3df73f4c5375d6366a4b9f745197d3da1f095841443d50f29a9f81cdc01363eb6d17bef2ba70c268559368211040
   languageName: node
   linkType: hard
 
