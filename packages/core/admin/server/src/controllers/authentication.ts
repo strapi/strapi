@@ -44,6 +44,9 @@ export default {
           strapi.eventHub.emit('admin.auth.error', {
             error: new Error(info.message),
             provider: 'local',
+            user: {
+              email: ctx.request.body.email
+            }
           });
           throw new ApplicationError(info.message);
         }
