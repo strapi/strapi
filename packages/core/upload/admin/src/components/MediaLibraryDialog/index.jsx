@@ -38,11 +38,17 @@ export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) =>
 
     case STEPS.FolderCreate:
       return (
-        <EditFolderDialog onClose={() => setStep(STEPS.AssetSelect)} parentFolderId={folderId} />
+        <EditFolderDialog
+          open
+          onClose={() => setStep(STEPS.AssetSelect)}
+          parentFolderId={folderId}
+        />
       );
 
     default:
-      return <UploadAssetDialog onClose={() => setStep(STEPS.AssetSelect)} folderId={folderId} />;
+      return (
+        <UploadAssetDialog open onClose={() => setStep(STEPS.AssetSelect)} folderId={folderId} />
+      );
   }
 };
 
