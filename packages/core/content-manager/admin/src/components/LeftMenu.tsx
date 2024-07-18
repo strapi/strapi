@@ -22,7 +22,6 @@ import { getTranslation } from '../utils/translations';
 import type { ContentManagerLink } from '../hooks/useContentManagerInitData';
 
 const SubNavLinkCustom = styled(SubNavLink)`
-  width: 100%;
   div {
     width: inherit;
     span:nth-child(2) {
