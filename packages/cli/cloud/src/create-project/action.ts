@@ -40,11 +40,11 @@ async function handleError(ctx: CLIContext, error: Error) {
   );
 }
 
-async function createProject(ctx: CLIContext, cloudApi: any, createProjectInput: ProjectInput) {
+async function createProject(ctx: CLIContext, cloudApi: any, projectInput: ProjectInput) {
   const { logger } = ctx;
   const spinner = logger.spinner('Setting up your project...').start();
   try {
-    const { data } = await cloudApi.createProject(createProjectInput);
+    const { data } = await cloudApi.createProject(projectInput);
     await local.save({ project: data });
     spinner.succeed('Project created successfully!');
     return data;
@@ -76,16 +76,16 @@ export default async (ctx: CLIContext) => {
   const projectAnswersDefaulted = defaults(defaultValues);
   const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
 
-  const createProjectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
+  const projectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
 
   try {
-    return await createProject(ctx, cloudApi, createProjectInput);
+    return await createProject(ctx, cloudApi, projectInput);
   } catch (e: Error | unknown) {
     if (e instanceof AxiosError && e.response?.status === 401) {
       logger.warn('Oops! Your session has expired. Please log in again to retry.');
       await eraseToken();
       if (await promptLogin(ctx)) {
-        return await createProject(ctx, cloudApi, createProjectInput);
+        return await createProject(ctx, cloudApi, projectInput);
       }
     } else {
       await handleError(ctx, e as Error);
