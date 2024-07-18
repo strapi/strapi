@@ -2,7 +2,7 @@ import axios, { type AxiosResponse } from 'axios';
 import fse from 'fs-extra';
 import os from 'os';
 import { apiConfig } from '../config/api';
-import type { CLIContext, CloudCliConfig } from '../types';
+import type { CLIContext, CloudCliConfig, TrackPayload } from '../types';
 import { getLocalConfig } from '../config/local';
 
 import packageJson from '../../package.json';
@@ -24,8 +24,6 @@ export type DeployResponse = {
   build_id: string;
   image: string;
 };
-
-export type TrackPayload = Record<string, unknown>;
 
 export type ListProjectsResponse = {
   data: {

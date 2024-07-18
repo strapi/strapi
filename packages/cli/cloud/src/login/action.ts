@@ -4,6 +4,7 @@ import inquirer from 'inquirer';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
 import type { CloudCliConfig, CLIContext } from '../types';
 import { apiConfig } from '../config/api';
+import { trackEvent } from '../utils/analytics';
 
 const openModule = import('open');
 
@@ -28,14 +29,6 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
   const tokenService = await tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
   const cloudApiService = await cloudApiFactory(ctx, existingToken || undefined);
-
-  const trackFailedLogin = async () => {
-    try {
-      await cloudApiService.track('didNotLogin', { loginMethod: 'cli' });
-    } catch (e) {
-      logger.debug('Failed to track failed login', e);
-    }
-  };
 
   if (existingToken) {
     const isTokenValid = await tokenService.isTokenValid(existingToken);
@@ -71,9 +64,9 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
   }
 
   try {
-    await cloudApiService.track('willLoginAttempt', {});
+    await trackEvent(cloudApiService, 'willLoginAttempt', {}, ctx);
   } catch (e) {
-    logger.debug('Failed to track login attempt', e);
+    /* noop */
   }
 
   logger.debug('🔐 Creating device authentication request...', {
@@ -167,7 +160,11 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
             'There seems to be a problem with your login information. Please try logging in again.'
           );
           spinnerFail();
-          await trackFailedLogin();
+          try {
+            await trackEvent(cloudApiService, 'didNotLogin', { loginMethod: 'cli' }, ctx);
+          } catch (e) {
+            /* noop */
+          }
           return false;
         }
         if (
@@ -176,7 +173,11 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
         ) {
           logger.debug(e);
           spinnerFail();
-          await trackFailedLogin();
+          try {
+            await trackEvent(cloudApiService, 'didNotLogin', { loginMethod: 'cli' }, ctx);
+          } catch (e) {
+            /* noop */
+          }
           return false;
         }
         // Await interval before retrying
@@ -192,9 +193,9 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
     );
     logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
     try {
-      await cloudApiService.track('didLogin', { loginMethod: 'cli' });
+      await trackEvent(cloudApiService, 'didLogin', { loginMethod: 'cli' }, ctx);
     } catch (e) {
-      logger.debug('Failed to track login', e);
+      /* noop */
     }
   };
 

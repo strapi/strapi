@@ -8,11 +8,9 @@ export type LocalSave = {
   project?: Omit<ProjectInfos, 'id'>;
 };
 
-export async function save(
-  data: LocalSave,
-  { directoryPath, override }: { directoryPath?: string; override?: boolean } = {}
-) {
-  const storedData = override ? data : { ...(await retrieve({ directoryPath })), ...data };
+export async function save(data: LocalSave, { directoryPath }: { directoryPath?: string } = {}) {
+  const alreadyInFileData = await retrieve({ directoryPath });
+  const storedData = { ...alreadyInFileData, ...data };
   const pathToFile = path.join(directoryPath || process.cwd(), LOCAL_SAVE_FILENAME);
   // Ensure the directory exists
   await fse.ensureDir(path.dirname(pathToFile));
