@@ -1,7 +1,7 @@
 import inquirer from 'inquirer';
 import { AxiosError } from 'axios';
 import { defaults } from 'lodash/fp';
-import type { CLIContext, ProjectAnswers, CreateProjectInput } from '../types';
+import type { CLIContext, ProjectAnswers, ProjectInput } from '../types';
 import { tokenServiceFactory, cloudApiFactory, local } from '../services';
 import { getProjectNameFromPackageJson } from './utils/get-project-name-from-pkg';
 import { applyDefaultName } from './utils/apply-default-name';
@@ -40,11 +40,7 @@ async function handleError(ctx: CLIContext, error: Error) {
   );
 }
 
-async function createProject(
-  ctx: CLIContext,
-  cloudApi: any,
-  createProjectInput: CreateProjectInput
-) {
+async function createProject(ctx: CLIContext, cloudApi: any, createProjectInput: ProjectInput) {
   const { logger } = ctx;
   const spinner = logger.spinner('Setting up your project...').start();
   try {
@@ -80,7 +76,7 @@ export default async (ctx: CLIContext) => {
   const projectAnswersDefaulted = defaults(defaultValues);
   const projectAnswers = await inquirer.prompt<ProjectAnswers>(questions);
 
-  const createProjectInput: CreateProjectInput = projectAnswersDefaulted(projectAnswers);
+  const createProjectInput: ProjectInput = projectAnswersDefaulted(projectAnswers);
 
   try {
     return await createProject(ctx, cloudApi, createProjectInput);

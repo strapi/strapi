@@ -18,7 +18,7 @@ export type ProjectInfos = {
   plan?: string;
   url?: string;
 };
-export type CreateProjectInput = Omit<ProjectInfos, 'id'>;
+export type ProjectInput = Omit<ProjectInfos, 'id'>;
 
 export type DeployResponse = {
   build_id: string;
@@ -50,8 +50,8 @@ export interface CloudApiService {
     }
   ): Promise<AxiosResponse<DeployResponse>>;
 
-  createProject(createProjectInput: CreateProjectInput): Promise<{
-    data: CreateProjectInput;
+  createProject(createProjectInput: ProjectInput): Promise<{
+    data: ProjectInput;
     status: number;
   }>;
 
