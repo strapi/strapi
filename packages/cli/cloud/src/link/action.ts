@@ -56,9 +56,9 @@ async function getExistingConfig(ctx: CLIContext, logger: any) {
       }
     }
   } catch (e) {
-    logger.debug('Failed to check project config', e);
-    logger.error('An error occurred while trying to link the project.');
-    throw e;
+    logger.debug('Failed to get project config', e);
+    logger.error('An error occurred while retrieving config data from your local project.');
+    return null;
   }
 
   return existingConfig;
@@ -88,13 +88,13 @@ async function getProjectsList(
       });
     if (projects.length === 0) {
       logger.log("We couldn't find any projects available for linking in Strapi Cloud");
-      return;
+      return null;
     }
     return projects;
   } catch (e) {
-    logger.debug('Failed to list projects', e);
     spinner.fail('An error occurred while fetching your projects from Strapi Cloud.');
-    throw e;
+    logger.debug('Failed to list projects', e);
+    return null;
   }
 }
 
@@ -119,7 +119,7 @@ async function getUserSelection(
     return answer as LinkProjectAnswer;
   } catch (e) {
     logger.debug('Failed to get user input', e);
-    logger.error('An error occurred while trying to link the project.');
+    logger.error('An error occurred while trying to get your input.');
     return null;
   }
 }
@@ -133,15 +133,9 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  let existingConfig: LocalSave | null;
-
-  try {
-    existingConfig = await getExistingConfig(ctx, logger);
-    // If user selects not to relink, return
-    if (existingConfig === null) {
-      return;
-    }
-  } catch (e) {
+  const existingConfig: LocalSave | null = await getExistingConfig(ctx, logger);
+  // If user selects not to relink, return
+  if (!existingConfig) {
     return;
   }
 
@@ -153,25 +147,17 @@ export default async (ctx: CLIContext) => {
     /* noop */
   }
 
-  let projects: ProjectsList | undefined;
-
-  try {
-    projects = await getProjectsList(cloudApiService, logger, existingConfig);
-  } catch (e) {
-    return;
-  }
+  const projects: ProjectsList | null | undefined = await getProjectsList(
+    cloudApiService,
+    logger,
+    existingConfig
+  );
 
   if (!projects) {
     return;
   }
 
-  let answer: LinkProjectAnswer | null = null;
-
-  try {
-    answer = await getUserSelection(projects, logger);
-  } catch (e) {
-    return;
-  }
+  const answer: LinkProjectAnswer | null = await getUserSelection(projects, logger);
 
   if (!answer) {
     return;
