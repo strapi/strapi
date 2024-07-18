@@ -268,7 +268,13 @@ export default ({ strapi }: { strapi: Core.Strapi }) => ({
     opts: GetMetadataOptions = {}
   ) {
     if (!document) {
-      return document;
+      return {
+        data: document,
+        meta: {
+          availableLocales: [],
+          availableStatus: [],
+        },
+      };
     }
 
     const hasDraftAndPublish = contentTypes.hasDraftAndPublish(strapi.getModel(uid));
