@@ -53,6 +53,9 @@ const { INJECT_COLUMN_IN_TABLE } = HOOKS;
 /* -------------------------------------------------------------------------------------------------
  * ListViewPage
  * -----------------------------------------------------------------------------------------------*/
+const LayoutsHeaderCustom = styled(Layouts.Header)`
+  overflow-wrap: anywhere;
+`;
 
 const ListViewPage = () => {
   const { trackUsage } = useTracking();
@@ -191,7 +194,7 @@ const ListViewPage = () => {
   return (
     <Page.Main>
       <Page.Title>{`${contentTypeTitle}`}</Page.Title>
-      <Layouts.Header
+      <LayoutsHeaderCustom
         primaryAction={canCreate ? <CreateButton /> : null}
         subtitle={formatMessage(
           {
@@ -377,6 +380,8 @@ const CreateButton = ({ variant }: CreateButtonProps) => {
         pathname: 'create',
         search: stringify({ plugins: query.plugins }),
       }}
+      minWidth="max-content"
+      marginLeft={2}
     >
       {formatMessage({
         id: getTranslation('HeaderLayout.button.label-add-entry'),
