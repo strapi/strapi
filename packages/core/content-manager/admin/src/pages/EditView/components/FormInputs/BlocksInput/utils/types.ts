@@ -10,7 +10,7 @@ const getEntries = <T extends object>(object: T) =>
 // Wrap Object.keys to get the correct types
 const getKeys = <T extends object>(object: T) => Object.keys(object) as (keyof T)[];
 
-const isFile = (element: Element): element is Block<'file'> => {
+const isFile = (element: Element): element is Schema.Attribute.FileBlockNode => {
   return element.type === 'file';
 };
 

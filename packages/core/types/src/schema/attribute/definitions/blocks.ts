@@ -101,7 +101,7 @@ interface ImageBlockNode extends BaseNode {
   children: [{ type: 'text'; text: '' }];
 }
 
-interface FileBlockNode extends BaseNode {
+export interface FileBlockNode extends BaseNode {
   type: 'file';
   file: Attribute.MediaValue<false>;
 }

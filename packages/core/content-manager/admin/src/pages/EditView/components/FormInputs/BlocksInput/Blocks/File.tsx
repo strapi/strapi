@@ -63,14 +63,16 @@ const File = ({ attributes, children, element }: RenderElementProps) => {
       hasRadius
     >
       <Flex
-        direction={{
+        /*         direction={{
           initial: 'column',
           medium: 'row',
         }}
         alignItems={{
           initial: 'center',
           medium: 'flex-start',
-        }}
+        }} */
+        direction="row"
+        alignItems="flex-start"
       >
         <Box
           margin={10}
@@ -86,7 +88,10 @@ const File = ({ attributes, children, element }: RenderElementProps) => {
           </Link>
           <Typography>{formatBytes(size)}</Typography>
         </Box>
-        <Box alignItems={{ initial: 'flex-end' }}>
+        <Box
+          // alignItems={{ initial: 'flex-end' }}
+          alignItems="flex-end"
+        >
           <StyledTrash />
         </Box>
       </Flex>
