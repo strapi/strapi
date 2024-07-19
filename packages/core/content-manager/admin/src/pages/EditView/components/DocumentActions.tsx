@@ -293,8 +293,17 @@ const DocumentActionsMenu = ({
               key={action.id}
             >
               <Flex justifyContent="space-between" gap={4}>
-                <Flex color={convertActionVariantToColor(action.variant)} gap={2} tag="span">
-                  <Box tag="span" color={convertActionVariantToIconColor(action.variant)}>
+                <Flex
+                  color={!action.disabled ? convertActionVariantToColor(action.variant) : 'inherit'}
+                  gap={2}
+                  tag="span"
+                >
+                  <Box
+                    tag="span"
+                    color={
+                      !action.disabled ? convertActionVariantToColor(action.variant) : 'inherit'
+                    }
+                  >
                     {action.icon}
                   </Box>
                   {action.label}
