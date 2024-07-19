@@ -62,12 +62,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
     logger.debug(e);
     return false;
   }
-
-  try {
-    await trackEvent(cloudApiService, 'willLoginAttempt', {}, ctx);
-  } catch (e) {
-    /* noop */
-  }
+  await trackEvent(ctx, cloudApiService, 'willLoginAttempt', {});
 
   logger.debug('🔐 Creating device authentication request...', {
     client_id: cliConfig.clientId,
@@ -160,11 +155,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
             'There seems to be a problem with your login information. Please try logging in again.'
           );
           spinnerFail();
-          try {
-            await trackEvent(cloudApiService, 'didNotLogin', { loginMethod: 'cli' }, ctx);
-          } catch (e) {
-            /* noop */
-          }
+          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli' });
           return false;
         }
         if (
@@ -173,11 +164,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
         ) {
           logger.debug(e);
           spinnerFail();
-          try {
-            await trackEvent(cloudApiService, 'didNotLogin', { loginMethod: 'cli' }, ctx);
-          } catch (e) {
-            /* noop */
-          }
+          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli' });
           return false;
         }
         // Await interval before retrying
@@ -192,11 +179,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
       'To access your dashboard, please copy and paste the following URL into your web browser:'
     );
     logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
-    try {
-      await trackEvent(cloudApiService, 'didLogin', { loginMethod: 'cli' }, ctx);
-    } catch (e) {
-      /* noop */
-    }
+    await trackEvent(ctx, cloudApiService, 'didLogin', { loginMethod: 'cli' });
   };
 
   await authenticate();

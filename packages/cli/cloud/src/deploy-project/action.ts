@@ -168,16 +168,9 @@ export default async (ctx: CLIContext) => {
 
   const cloudApiService = await cloudApiFactory(ctx);
 
-  try {
-    await trackEvent(
-      cloudApiService,
-      'willDeployWithCLI',
-      { projectInternalName: project.name },
-      ctx
-    );
-  } catch (e) {
-    /* noop */
-  }
+  await trackEvent(ctx, cloudApiService, 'willDeployWithCLI', {
+    projectInternalName: project.name,
+  });
 
   const notificationService = notificationServiceFactory(ctx);
   const buildLogsService = buildLogsServiceFactory(ctx);

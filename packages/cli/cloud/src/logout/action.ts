@@ -41,9 +41,5 @@ export default async (ctx: CLIContext) => {
     logger.error('🥲 Oops! Something went wrong while logging you out. Please try again.');
     logger.debug(e);
   }
-  try {
-    await trackEvent(cloudApiService, 'didLogout', { loginMethod: 'cli' }, ctx);
-  } catch (e) {
-    /* noop */
-  }
+  await trackEvent(ctx, cloudApiService, 'didLogout', { loginMethod: 'cli' });
 };
