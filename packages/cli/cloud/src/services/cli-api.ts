@@ -25,6 +25,12 @@ export type DeployResponse = {
 
 export type TrackPayload = Record<string, unknown>;
 
+export type ListProjectsResponse = {
+  data: {
+    data: string;
+  };
+};
+
 export interface CloudApiService {
   deploy(
     deployInput: {
@@ -47,7 +53,7 @@ export interface CloudApiService {
 
   config(): Promise<AxiosResponse<CloudCliConfig>>;
 
-  listProjects(): Promise<AxiosResponse<ProjectInfos[]>>;
+  listProjects(): Promise<AxiosResponse<ListProjectsResponse>>;
 
   track(event: string, payload?: TrackPayload): Promise<AxiosResponse<void>>;
 }
@@ -132,8 +138,21 @@ export async function cloudApiFactory(
       }
     },
 
-    listProjects() {
-      return axiosCloudAPI.get<ProjectInfos[]>('/projects');
+    async listProjects(): Promise<AxiosResponse<ListProjectsResponse>> {
+      try {
+        const response = await axiosCloudAPI.get('/projects');
+
+        if (response.status !== 200) {
+          throw new Error('Error fetching cloud projects from the server.');
+        }
+
+        return response;
+      } catch (error) {
+        logger.debug(
+          "🥲 Oops! Couldn't retrieve your project's list from the server. Please try again."
+        );
+        throw error;
+      }
     },
 
     track(event, payload = {}) {
