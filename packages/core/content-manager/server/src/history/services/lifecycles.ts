@@ -143,14 +143,14 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
         });
 
         await strapi.db.transaction(async ({ onCommit }) => {
+          // .createVersion() is executed asynchronously,
+          // onCommit prevents creating a history version
+          // when the transaction has already been committed
           onCommit(async () => {
             for (const entry of localeEntries) {
               const status = await serviceUtils.getVersionStatus(uid, entry);
 
-              // .createVersion is executed asynchronously,
-              // onCommit prevents creating a history version
-              // when the transaction has already been committed
-              getService(strapi, 'history').createVersion({
+              await getService(strapi, 'history').createVersion({
                 contentType: uid,
                 data: omit(FIELDS_TO_IGNORE, entry) as Modules.Documents.AnyDocument,
                 relatedDocumentId: documentId,
