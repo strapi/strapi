@@ -14,7 +14,9 @@ interface ContentTypes {
   singleType: ContentType[];
 }
 
-const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
+const SINGLE_TYPES = 'single-types';
+
+const contentManagerApi = reviewWorkflowsApi.enhanceEndpoints({}).injectEndpoints({
   endpoints: (builder) => ({
     getStages: builder.query<
       {
@@ -51,6 +53,15 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         },
       }),
       transformResponse: (res: UpdateStage.Response) => res.data,
+      invalidatesTags: (_result, _error, { slug, id, model }) => {
+        return [
+          {
+            type: 'Document',
+            id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
+          },
+          { type: 'Document', id: `${model}_LIST` },
+        ];
+      },
     }),
     updateAssignee: builder.mutation<
       UpdateAssignee.Response['data'],
@@ -65,6 +76,15 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         },
       }),
       transformResponse: (res: UpdateAssignee.Response) => res.data,
+      invalidatesTags: (_result, _error, { slug, id, model }) => {
+        return [
+          {
+            type: 'Document',
+            id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
+          },
+          { type: 'Document', id: `${model}_LIST` },
+        ];
+      },
     }),
     getContentTypes: builder.query<ContentTypes, void>({
       query: () => ({
