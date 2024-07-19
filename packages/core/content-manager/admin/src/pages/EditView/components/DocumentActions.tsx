@@ -298,14 +298,7 @@ const DocumentActionsMenu = ({
                   gap={2}
                   tag="span"
                 >
-                  <Box
-                    tag="span"
-                    color={
-                      !action.disabled ? convertActionVariantToColor(action.variant) : 'inherit'
-                    }
-                  >
-                    {action.icon}
-                  </Box>
+                  <span>{action.icon}</span>
                   {action.label}
                 </Flex>
                 {/* TODO: remove this in 5.1 release */}
