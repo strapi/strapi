@@ -1,10 +1,10 @@
 import type { CLIContext, CloudApiService, TrackPayload } from '../types';
 
 const trackEvent = async (
+  ctx: CLIContext,
   cloudApiService: CloudApiService,
   eventName: string,
-  eventData: TrackPayload,
-  ctx: CLIContext
+  eventData: TrackPayload
 ) => {
   try {
     await cloudApiService.track(eventName, eventData);

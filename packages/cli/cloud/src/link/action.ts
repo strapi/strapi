@@ -52,14 +52,9 @@ async function getExistingConfig(ctx: CLIContext, cloudApiService: CloudApiServi
       ]);
 
       if (!shouldRelink) {
-        await trackEvent(
-          cloudApiService,
-          'didNotLinkProject',
-          {
-            currentProjectName: existingConfig.project?.name,
-          },
-          ctx
-        );
+        await trackEvent(ctx, cloudApiService, 'didNotLinkProject', {
+          currentProjectName: existingConfig.project?.name,
+        });
         return null;
       }
     }
@@ -149,7 +144,7 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  await trackEvent(cloudApiService, 'willLinkProject', {}, ctx);
+  await trackEvent(ctx, cloudApiService, 'willLinkProject', {});
 
   const projects: ProjectsList | null | undefined = await getProjectsList(
     ctx,
@@ -179,34 +174,23 @@ export default async (ctx: CLIContext) => {
     ]);
 
     if (!confirmAction) {
-      await trackEvent(
-        cloudApiService,
-        'didNotLinkProject',
-        {
-          cancelledProjectName: answer.linkProject.name,
-          currentProjectName: existingConfig.project?.name,
-        },
-        ctx
-      );
+      await trackEvent(ctx, cloudApiService, 'didNotLinkProject', {
+        cancelledProjectName: answer.linkProject.name,
+        currentProjectName: existingConfig.project?.name,
+      });
       return;
     }
 
     await local.save({ project: answer.linkProject });
     logger.log(`Project ${chalk.cyan(answer.linkProject.displayName)} linked successfully.`);
-    await trackEvent(
-      cloudApiService,
-      'didLinkProject',
-      { projectInternalName: answer.linkProject },
-      ctx
-    );
+    await trackEvent(ctx, cloudApiService, 'didLinkProject', {
+      projectInternalName: answer.linkProject,
+    });
   } catch (e) {
     logger.debug('Failed to link project', e);
     logger.error('An error occurred while linking the project.');
-    await trackEvent(
-      cloudApiService,
-      'didNotLinkProject',
-      { projectInternalName: answer.linkProject },
-      ctx
-    );
+    await trackEvent(ctx, cloudApiService, 'didNotLinkProject', {
+      projectInternalName: answer.linkProject,
+    });
   }
 };
