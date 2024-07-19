@@ -33,7 +33,7 @@ type ProjectsList = {
   };
 }[];
 
-async function getExistingConfig(ctx: CLIContext, logger: any) {
+async function getExistingConfig(ctx: CLIContext, cloudApiService: CloudApiService) {
   let existingConfig: LocalSave;
   try {
     existingConfig = await local.retrieve();
@@ -52,12 +52,20 @@ async function getExistingConfig(ctx: CLIContext, logger: any) {
       ]);
 
       if (!shouldRelink) {
+        await trackEvent(
+          cloudApiService,
+          'didNotLinkProject',
+          {
+            currentProjectName: existingConfig.project?.name,
+          },
+          ctx
+        );
         return null;
       }
     }
   } catch (e) {
-    logger.debug('Failed to get project config', e);
-    logger.error('An error occurred while retrieving config data from your local project.');
+    ctx.logger.debug('Failed to get project config', e);
+    ctx.logger.error('An error occurred while retrieving config data from your local project.');
     return null;
   }
 
@@ -65,11 +73,11 @@ async function getExistingConfig(ctx: CLIContext, logger: any) {
 }
 
 async function getProjectsList(
+  ctx: CLIContext,
   cloudApiService: CloudApiService,
-  logger: any,
   existingConfig: LocalSave
 ) {
-  const spinner = logger.spinner('Fetching your projects...\n').start();
+  const spinner = ctx.logger.spinner('Fetching your projects...\n').start();
 
   try {
     const {
@@ -87,13 +95,13 @@ async function getProjectsList(
         };
       });
     if (projects.length === 0) {
-      logger.log("We couldn't find any projects available for linking in Strapi Cloud");
+      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud");
       return null;
     }
     return projects;
   } catch (e) {
     spinner.fail('An error occurred while fetching your projects from Strapi Cloud.');
-    logger.debug('Failed to list projects', e);
+    ctx.logger.debug('Failed to list projects', e);
     return null;
   }
 }
@@ -133,23 +141,19 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  const existingConfig: LocalSave | null = await getExistingConfig(ctx, logger);
+  const cloudApiService = await cloudApiFactory(ctx, token);
+
+  const existingConfig: LocalSave | null = await getExistingConfig(ctx, cloudApiService);
   // If user selects not to relink, return
   if (!existingConfig) {
     return;
   }
 
-  const cloudApiService = await cloudApiFactory(ctx, token);
-
-  try {
-    await trackEvent(cloudApiService, 'willLinkProject', {}, ctx);
-  } catch (e) {
-    /* noop */
-  }
+  await trackEvent(cloudApiService, 'willLinkProject', {}, ctx);
 
   const projects: ProjectsList | null | undefined = await getProjectsList(
+    ctx,
     cloudApiService,
-    logger,
     existingConfig
   );
 
@@ -175,21 +179,26 @@ export default async (ctx: CLIContext) => {
     ]);
 
     if (!confirmAction) {
+      await trackEvent(
+        cloudApiService,
+        'didNotLinkProject',
+        {
+          cancelledProjectName: answer.linkProject.name,
+          currentProjectName: existingConfig.project?.name,
+        },
+        ctx
+      );
       return;
     }
 
     await local.save({ project: answer.linkProject });
     logger.log(`Project ${chalk.cyan(answer.linkProject.displayName)} linked successfully.`);
-    try {
-      await trackEvent(
-        cloudApiService,
-        'didLinkProject',
-        { projectInternalName: answer.linkProject },
-        ctx
-      );
-    } catch (e) {
-      /* noop */
-    }
+    await trackEvent(
+      cloudApiService,
+      'didLinkProject',
+      { projectInternalName: answer.linkProject },
+      ctx
+    );
   } catch (e) {
     logger.debug('Failed to link project', e);
     logger.error('An error occurred while linking the project.');
