@@ -50,4 +50,30 @@ test.describe('Blocks editor', () => {
     await expect(page.getByText('Fortran')).toBeVisible();
     await expect(page.getByText('Plain text')).not.toBeVisible();
   });
+
+  test('adds file block', async ({ page }) => {
+    // Write some text into a blocks editor
+    const dummy = 'lorem ipsum bla bla bla';
+    await navToHeader(page, ['Content Manager', 'Homepage'], 'Untitled');
+    await expect(page.getByRole('link', { name: 'Back' })).toBeVisible();
+    const textbox = page.getByRole('textbox').nth(1);
+    await expect(textbox).toBeVisible();
+    await textbox.click();
+    await textbox.fill(dummy);
+    await expect(page.getByText(dummy)).toBeVisible();
+
+    // Use the toolbar to add  a new file
+    const toolbar = page.getByRole('toolbar');
+    await toolbar.getByRole('combobox').click();
+    await page.getByLabel('File').click();
+    /** TODO:
+     * 1. check the modal is opened
+     * 2. mock chosing a file
+     * 3. check the file box is rendered */
+
+    // Save and reload to make sure the change is persisted
+    await page.getByRole('button', { name: 'Save' }).click();
+    await page.reload();
+    // TODO: check the file box is rendered by tis name
+  });
 });
