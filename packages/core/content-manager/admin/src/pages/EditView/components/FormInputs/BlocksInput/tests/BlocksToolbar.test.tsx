@@ -9,6 +9,7 @@ import { type Descendant, type Editor, type Location, createEditor, Transforms }
 import { Slate, withReact, ReactEditor } from 'slate-react';
 
 import { codeBlocks } from '../Blocks/Code';
+import { fileBlocks } from '../Blocks/File';
 import { headingBlocks } from '../Blocks/Heading';
 import { imageBlocks } from '../Blocks/Image';
 import { linkBlocks } from '../Blocks/Link';
@@ -46,28 +47,34 @@ const mixedInitialValue: Descendant[] = [
   },
 ];
 
+const imageFile = {
+  name: 'test.jpg',
+  alternativeText: 'test',
+  caption: null,
+  createdAt: '2021-08-31T14:00:00.000Z',
+  ext: '.jpg',
+  formats: {},
+  hash: 'test',
+  height: 300,
+  mime: 'image/jpeg',
+  previewUrl: null,
+  provider: 'local',
+  size: 100,
+  updatedAt: '2021-08-31T14:00:00.000Z',
+  url: '/uploads/test.jpg',
+  width: 200,
+};
+
 const imageInitialValue: Descendant[] = [
   {
     type: 'image',
     children: [{ text: '', type: 'text' }],
-    image: {
-      name: 'test.jpg',
-      alternativeText: 'test',
-      caption: null,
-      createdAt: '2021-08-31T14:00:00.000Z',
-      ext: '.jpg',
-      formats: {},
-      hash: 'test',
-      height: 300,
-      mime: 'image/jpeg',
-      previewUrl: null,
-      provider: 'local',
-      size: 100,
-      updatedAt: '2021-08-31T14:00:00.000Z',
-      url: '/uploads/test.jpg',
-      width: 200,
-    },
+    image: imageFile,
   },
+];
+
+const fileInitialValue: Descendant[] = [
+  { type: 'file', children: [{ text: '', type: 'text' }], file: imageFile },
 ];
 
 const blocks: BlocksStore = {
@@ -78,6 +85,7 @@ const blocks: BlocksStore = {
   ...imageBlocks,
   ...quoteBlocks,
   ...codeBlocks,
+  ...fileBlocks,
 };
 
 // Create editor outside of the component to have direct access to it from the tests
@@ -840,6 +848,22 @@ describe('BlocksToolbar', () => {
     // The dropdown should show only one option selected which is the image
     const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
     expect(within(blocksDropdown).getByText(/image/i)).toBeInTheDocument();
+
+    const linkButton = screen.getByLabelText(/link/i);
+    expect(linkButton).toBeDisabled();
+  });
+
+  it('should disable the modifiers buttons when the selection is inside a file', async () => {
+    setup(fileInitialValue);
+
+    await select({
+      anchor: { path: [0, 0], offset: 0 },
+      focus: { path: [0, 0], offset: 0 },
+    });
+
+    // The dropdown should show only one option selected which is the file
+    const blocksDropdown = screen.getByRole('combobox', { name: /Select a block/i });
+    expect(within(blocksDropdown).getByText(/file/i)).toBeInTheDocument();
 
     const linkButton = screen.getByLabelText(/link/i);
     expect(linkButton).toBeDisabled();
