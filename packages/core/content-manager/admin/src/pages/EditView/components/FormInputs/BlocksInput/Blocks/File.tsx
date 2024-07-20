@@ -53,17 +53,18 @@ const File = ({ attributes, children, element }: RenderElementProps) => {
 
   const cleanExt = ext.substring(1);
 
-  <Box {...attributes}>
-    {children}
-    <FileWrapper
-      background="neutral100"
-      contentEditable={false}
-      justifyContent="center"
-      $isFocused={editorIsFocused && fileIsSelected}
-      hasRadius
-    >
-      <Flex
-        /*         direction={{
+  return (
+    <Box {...attributes}>
+      {children}
+      <FileWrapper
+        background="neutral100"
+        contentEditable={false}
+        justifyContent="center"
+        $isFocused={editorIsFocused && fileIsSelected}
+        hasRadius
+      >
+        <Flex
+          /*         direction={{
           initial: 'column',
           medium: 'row',
         }}
@@ -71,32 +72,34 @@ const File = ({ attributes, children, element }: RenderElementProps) => {
           initial: 'center',
           medium: 'flex-start',
         }} */
-        direction="row"
-        alignItems="flex-start"
-      >
-        <Box
-          margin={10}
-          display="flex"
-          alignItems="center"
-          background={FILE_EXTENSION_COLORS[cleanExt]}
+          direction="row"
+          alignItems="flex-start"
         >
-          <Typography textColor="neutral0">{cleanExt}</Typography>
-        </Box>
-        <Box display="flex" flexDirection="column" alignItems="flex-start">
-          <Link href={url}>
-            <Typography>{name}</Typography>
-          </Link>
-          <Typography>{formatBytes(size)}</Typography>
-        </Box>
-        <Box
-          // alignItems={{ initial: 'flex-end' }}
-          alignItems="flex-end"
-        >
-          <StyledTrash />
-        </Box>
-      </Flex>
-    </FileWrapper>
-  </Box>;
+          <Box
+            margin={10}
+            display="flex"
+            alignItems="center"
+            background={FILE_EXTENSION_COLORS[cleanExt]}
+            data-testid="extension-box"
+          >
+            <Typography textColor="neutral0">{cleanExt}</Typography>
+          </Box>
+          <Box display="flex" flexDirection="column" alignItems="flex-start">
+            <Link href={url}>
+              <Typography>{name}</Typography>
+            </Link>
+            <Typography>{formatBytes(size)}</Typography>
+          </Box>
+          <Box
+            // alignItems={{ initial: 'flex-end' }}
+            alignItems="flex-end"
+          >
+            <StyledTrash />
+          </Box>
+        </Flex>
+      </FileWrapper>
+    </Box>
+  );
 };
 
 const FileDialog = () => {
