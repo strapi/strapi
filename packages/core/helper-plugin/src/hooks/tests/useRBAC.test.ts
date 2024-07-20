@@ -10,6 +10,8 @@ describe('useRBAC', () => {
       useRBAC({
         create: [
           {
+            id: 1,
+            actionParameters: {},
             action: 'admin::roles.create',
             subject: null,
             conditions: [],
@@ -18,6 +20,8 @@ describe('useRBAC', () => {
         ],
         delete: [
           {
+            id: 2,
+            actionParameters: {},
             action: 'admin::roles.delete',
             subject: null,
             conditions: [],
@@ -26,6 +30,8 @@ describe('useRBAC', () => {
         ],
         read: [
           {
+            id: 3,
+            actionParameters: {},
             action: 'admin::roles.read',
             subject: null,
             conditions: [],
@@ -34,6 +40,8 @@ describe('useRBAC', () => {
         ],
         update: [
           {
+            id: 4,
+            actionParameters: {},
             action: 'admin::roles.update',
             subject: null,
             conditions: [],
@@ -71,6 +79,8 @@ describe('useRBAC', () => {
       useRBAC({
         create: [
           {
+            id: 1,
+            actionParameters: {},
             action: 'admin::something.create',
             subject: null,
             conditions: [],
@@ -96,6 +106,8 @@ describe('useRBAC', () => {
           {
             create: [
               {
+                id: 1,
+                actionParameters: {},
                 action: 'admin::roles.create',
                 subject: null,
                 conditions: [],
@@ -105,6 +117,8 @@ describe('useRBAC', () => {
           },
           [
             {
+              id: 2,
+              actionParameters: {},
               action: 'admin::roles.create',
               subject: null,
               conditions: [],
@@ -129,6 +143,8 @@ describe('useRBAC', () => {
           {
             create: [
               {
+                id: 1,
+                actionParameters: {},
                 action: 'admin::something.create',
                 subject: null,
                 conditions: [],
@@ -138,6 +154,8 @@ describe('useRBAC', () => {
           },
           [
             {
+              id: 2,
+              actionParameters: {},
               action: 'admin::roles.create',
               subject: null,
               conditions: [],
@@ -171,6 +189,8 @@ describe('useRBAC', () => {
             permissionsToCheck: {
               create: [
                 {
+                  id: 1,
+                  actionParameters: {},
                   action: 'plugin::content-manager.explorer.update',
                   subject: 'api::about.about',
                   properties: {},
@@ -180,6 +200,8 @@ describe('useRBAC', () => {
             },
             permissions: [
               {
+                id: 2,
+                actionParameters: {},
                 action: 'plugin::content-manager.explorer.update',
                 subject: 'api::about.about',
                 properties: {},
@@ -202,6 +224,8 @@ describe('useRBAC', () => {
         permissionsToCheck: {
           create: [
             {
+              id: 1,
+              actionParameters: {},
               action: 'plugin::content-manager.explorer.update',
               subject: 'api::term.term',
               properties: {},
@@ -211,6 +235,8 @@ describe('useRBAC', () => {
         },
         permissions: [
           {
+            id: 2,
+            actionParameters: {},
             action: 'plugin::content-manager.explorer.update',
             subject: 'api::about.about',
             properties: {},
@@ -231,6 +257,8 @@ describe('useRBAC', () => {
         permissionsToCheck: {
           create: [
             {
+              id: 1,
+              actionParameters: {},
               action: 'plugin::content-manager.explorer.update',
               subject: 'api::term.term',
               properties: {},
@@ -240,6 +268,8 @@ describe('useRBAC', () => {
         },
         permissions: [
           {
+            id: 2,
+            actionParameters: {},
             action: 'plugin::content-manager.explorer.update',
             subject: 'api::term.term',
             properties: {},
@@ -265,6 +295,8 @@ describe('useRBAC', () => {
           {
             create: [
               {
+                id: 1,
+                actionParameters: {},
                 action: 'admin::roles.create',
                 subject: null,
                 conditions: ['willPass'],
@@ -274,6 +306,8 @@ describe('useRBAC', () => {
           },
           [
             {
+              id: 2,
+              actionParameters: {},
               action: 'admin::roles.create',
               subject: null,
               conditions: ['willPass'],
@@ -302,6 +336,8 @@ describe('useRBAC', () => {
           {
             create: [
               {
+                id: 1,
+                actionParameters: {},
                 action: 'admin::roles.create',
                 subject: null,
                 conditions: ['willFail'],
@@ -311,6 +347,8 @@ describe('useRBAC', () => {
           },
           [
             {
+              id: 2,
+              actionParameters: {},
               action: 'admin::roles.create',
               subject: null,
               conditions: ['willFail'],
@@ -351,15 +389,18 @@ describe('useRBAC', () => {
           {
             create: [
               {
+                id: 1,
+                actionParameters: {},
                 action: 'admin::roles.create',
                 subject: null,
                 conditions: ['willFail'],
-
                 properties: {},
               },
             ],
             update: [
               {
+                id: 2,
+                actionParameters: {},
                 action: 'admin::roles.update',
                 subject: null,
                 conditions: ['willPass'],
@@ -369,12 +410,16 @@ describe('useRBAC', () => {
           },
           [
             {
+              id: 3,
+              actionParameters: {},
               action: 'admin::roles.create',
               subject: null,
               conditions: ['willFail'],
               properties: {},
             },
             {
+              id: 4,
+              actionParameters: {},
               action: 'admin::roles.update',
               subject: null,
               conditions: ['willPass'],

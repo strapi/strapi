@@ -96,3 +96,4 @@ test
 tests
 __tests__
 jest.config.js
+dist/**/*.d.ts.map

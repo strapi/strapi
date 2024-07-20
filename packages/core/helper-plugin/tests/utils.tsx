@@ -1,7 +1,6 @@
 /* eslint-disable check-file/filename-naming-convention */
 import * as React from 'react';
 
-// @ts-expect-error - the package is slightly broken, but will be fixed with https://github.com/strapi/strapi/pull/18233
 import { fixtures } from '@strapi/admin-test-utils';
 import { DesignSystemProvider } from '@strapi/design-system';
 import {
@@ -13,12 +12,11 @@ import {
   act,
 } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { MemoryRouter, MemoryRouterProps } from 'react-router-dom';
 
-import { RBACContext } from '../src/features/RBAC';
+import { Permission, RBACContext, RBACContextValue } from '../src/features/RBAC';
 
 import { server } from './server';
 
@@ -28,9 +26,10 @@ interface ProvidersProps {
 }
 
 const Providers = ({ children, initialEntries }: ProvidersProps) => {
-  const rbacContextValue = React.useMemo(
+  const rbacContextValue: RBACContextValue = React.useMemo(
     () => ({
-      allPermissions: fixtures.permissions.allPermissions,
+      allPermissions: fixtures.permissions.allPermissions as unknown as Permission[],
+      refetchPermissions: jest.fn(),
     }),
     []
   );
@@ -58,15 +57,6 @@ const Providers = ({ children, initialEntries }: ProvidersProps) => {
       </IntlProvider>
     </MemoryRouter>
   );
-};
-
-Providers.defaultProps = {
-  initialEntries: undefined,
-};
-
-Providers.propTypes = {
-  children: PropTypes.node.isRequired,
-  initialEntries: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.object])),
 };
 
 // eslint-disable-next-line react/jsx-no-useless-fragment

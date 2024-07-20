@@ -6,6 +6,6 @@ import { NavLink } from 'react-router-dom';
  *
  * @deprecated Use @strapi/design-system LinkButton instead.
  */
-const Link = (props: DSLinkProps) => <DSLink {...props} as={NavLink} />;
+const Link = (props: DSLinkProps & { to?: string }) => <DSLink {...props} as={NavLink} />;
 
 export { Link };

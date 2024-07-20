@@ -165,7 +165,7 @@ const onlineUpdate = async ({ strapi }: { strapi: Strapi }) => {
 
     if (shouldContactRegistry) {
       result.license = license ?? null;
-      const query = strapi.db?.queryBuilder('strapi::core-store').transacting(transaction);
+      const query = strapi.db!.queryBuilder('strapi::core-store').transacting(transaction);
 
       if (!storedInfo) {
         query.insert({ key: 'ee_information', value: JSON.stringify(result) });

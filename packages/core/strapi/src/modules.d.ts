@@ -1,5 +1,3 @@
-declare module '@strapi/admin';
-
 declare module 'koa-favicon' {
   import type Koa from 'koa';
 

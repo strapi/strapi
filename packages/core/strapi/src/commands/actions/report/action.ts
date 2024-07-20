@@ -1,5 +1,5 @@
 import { EOL } from 'os';
-import strapi from '../../../index';
+import strapi from '../../../Strapi';
 
 interface CmdOptions {
   uuid: boolean;

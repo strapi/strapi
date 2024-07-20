@@ -38,6 +38,10 @@ export const cors: Common.MiddlewareFactory<Config> = (config) => {
 
   return koaCors({
     async origin(ctx) {
+      if (!ctx.get('Origin')) {
+        return '*';
+      }
+
       let originList: string | string[];
 
       if (typeof origin === 'function') {
@@ -46,17 +50,16 @@ export const cors: Common.MiddlewareFactory<Config> = (config) => {
         originList = origin;
       }
 
-      const whitelist = Array.isArray(originList) ? originList : originList.split(/\s*,\s*/);
-
-      const requestOrigin = ctx.headers.origin ?? '';
-      if (whitelist.includes('*')) {
-        return credentials ? requestOrigin : '*';
+      if (Array.isArray(originList)) {
+        return originList.includes(ctx.get('Origin')) ? ctx.get('Origin') : false;
       }
 
-      if (!whitelist.includes(requestOrigin)) {
-        return ctx.throw(`${requestOrigin} is not a valid origin`);
+      const parsedOrigin = originList.split(',').map((origin) => origin.trim());
+      if (parsedOrigin.length > 1) {
+        return parsedOrigin.includes(ctx.get('Origin')) ? ctx.get('Origin') : false;
       }
-      return requestOrigin;
+
+      return originList;
     },
     exposeHeaders: expose,
     maxAge,

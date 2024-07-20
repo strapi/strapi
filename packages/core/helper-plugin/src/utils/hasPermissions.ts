@@ -1,11 +1,15 @@
 import { getFetchClient } from './getFetchClient';
 
-import type { domain } from '@strapi/permissions';
+import type { Permission } from '../features/RBAC';
 import type { GenericAbortSignal } from 'axios';
 
-type Permission = domain.permission.Permission;
+type PermissionToCheckAgainst = Pick<Permission, 'action' | 'subject'> &
+  Partial<Pick<Permission, 'actionParameters' | 'conditions' | 'properties'>>;
 
-const findMatchingPermissions = (userPermissions: Permission[], permissions: Permission[]) =>
+const findMatchingPermissions = (
+  userPermissions: Permission[],
+  permissions: PermissionToCheckAgainst[]
+) =>
   userPermissions.reduce<Permission[]>((acc, curr) => {
     const associatedPermission = permissions.find(
       (perm) => perm.action === curr.action && perm.subject === curr.subject
@@ -24,7 +28,7 @@ const formatPermissionsForRequest = (permissions: Permission[]) =>
       return {};
     }
 
-    const returnedPermission: Permission = {
+    const returnedPermission: Partial<Permission> = {
       action: permission.action,
     };
 
@@ -44,7 +48,7 @@ const shouldCheckPermissions = (permissions: Permission[]) =>
 
 const hasPermissions = async (
   userPermissions: Permission[],
-  permissions: Permission[],
+  permissions: PermissionToCheckAgainst[],
   signal?: GenericAbortSignal
 ) => {
   if (!permissions || !permissions.length) {
@@ -84,3 +88,5 @@ export {
   formatPermissionsForRequest,
   shouldCheckPermissions,
 };
+
+export type { PermissionToCheckAgainst };

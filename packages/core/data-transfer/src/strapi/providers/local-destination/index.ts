@@ -45,6 +45,8 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
   uploadsBackupDirectoryName: string;
 
+  onWarning?: ((message: string) => void) | undefined;
+
   /**
    * The entities mapper is used to map old entities to their new IDs
    */
@@ -280,13 +282,16 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     assertValidStrapi(this.strapi, 'Not able to stream Assets');
 
     if (!this.#areAssetsIncluded()) {
-      throw new ProviderTransferError('Attempting to transfer assets when they are not included');
+      throw new ProviderTransferError(
+        'Attempting to transfer assets when `assets` is not set in restore options'
+      );
     }
 
     const removeAssetsBackup = this.#removeAssetsBackup.bind(this);
     const strapi = this.strapi;
     const transaction = this.transaction;
     const backupDirectory = this.uploadsBackupDirectoryName;
+    const fileEntitiesMapper = this.#entitiesMapper['plugin::upload.file'];
 
     const restoreMediaEntitiesContent = this.#isContentTypeIncluded('plugin::upload.file');
 
@@ -352,15 +357,19 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
 
             // Files formats are stored within the parent file entity
             if (uploadData?.type) {
+              // Support usage of main hash for older versions
+              const condition = uploadData?.id
+                ? { id: fileEntitiesMapper[uploadData.id] }
+                : { hash: uploadData.mainHash };
               const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-                where: { hash: uploadData.mainHash },
+                where: condition,
               });
               const specificFormat = entry?.formats?.[uploadData.type];
               if (specificFormat) {
                 specificFormat.url = uploadData.url;
               }
               await strapi.db.query('plugin::upload.file').update({
-                where: { hash: uploadData.mainHash },
+                where: { id: entry.id },
                 data: {
                   formats: entry.formats,
                   provider,
@@ -369,11 +378,11 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
               return callback();
             }
             const entry: IFile = await strapi.db.query('plugin::upload.file').findOne({
-              where: { hash: uploadData.hash },
+              where: { id: fileEntitiesMapper[uploadData.id] },
             });
             entry.url = uploadData.url;
             await strapi.db.query('plugin::upload.file').update({
-              where: { hash: uploadData.hash },
+              where: { id: entry.id },
               data: {
                 url: entry.url,
                 provider,
@@ -413,7 +422,7 @@ class LocalStrapiDestinationProvider implements IDestinationProvider {
     const mapID = (uid: string, id: number): number | undefined => this.#entitiesMapper[uid]?.[id];
 
     if (strategy === 'restore') {
-      return restore.createLinksWriteStream(mapID, this.strapi, this.transaction);
+      return restore.createLinksWriteStream(mapID, this.strapi, this.transaction, this.onWarning);
     }
 
     throw new ProviderValidationError(`Invalid strategy ${strategy}`, {

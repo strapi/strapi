@@ -10,6 +10,6 @@ const errorsTrads = {
   required: 'components.Input.error.validation.required',
   unique: 'components.Input.error.validation.unique',
   integer: 'component.Input.error.validation.integer',
-};
+} as const;
 
 export { errorsTrads as translatedErrors };

@@ -2,4 +2,4 @@ coverage
 test-apps
 dist
 build
-.cache
+.strapi

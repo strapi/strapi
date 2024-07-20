@@ -131,3 +131,4 @@ schema.graphql
 front-workspace.code-workspace
 .yarn
 .yarnrc
+dist/**/*.d.ts.map

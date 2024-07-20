@@ -1,7 +1,7 @@
 import { yup } from '@strapi/utils';
 import _ from 'lodash';
 import inquirer from 'inquirer';
-import strapi from '../../../../index';
+import strapi from '../../../../Strapi';
 
 interface CmdOptions {
   email?: string;

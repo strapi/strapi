@@ -1,8 +1,5 @@
 {
   "extends": "tsconfig/base.json",
-  "compilerOptions": {
-    "noEmit": true
-  },
-  "include": ["types", "src"],
+  "include": ["types", "src", "packup.config.ts"],
   "exclude": ["node_modules"]
 }

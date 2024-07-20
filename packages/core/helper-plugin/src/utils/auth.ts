@@ -19,8 +19,8 @@ interface UserInfo {
   id: number;
   isActive?: boolean;
   blocked: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface StorageItems {
@@ -39,9 +39,12 @@ interface StorageItems {
 
 type StorageItemValues = StorageItems[keyof StorageItems];
 
-const parse = JSON.parse;
-const stringify = JSON.stringify;
-
+/**
+ * @deprecated if you're trying to interact with the token or current user you use should use the `useAuth` hook instead.
+ * If you're generally interacting with localStorage, then access this directly e.g. `localStorage.getItem('myKey')`.
+ *
+ * This will be removed in V5.
+ */
 const auth = {
   clear(key: keyof StorageItems) {
     if (localStorage.getItem(key)) {
@@ -71,14 +74,14 @@ const auth = {
 
       localStorage.clear();
 
-      localStorage.setItem('videos', stringify(videos));
-      localStorage.setItem(CURRENT_STEP, stringify(guidedTourCurrentStep));
-      localStorage.setItem(COMPLETED_STEPS, stringify(guidedTourState));
-      localStorage.setItem(SKIPPED, stringify(guidedTourSkipped));
-      localStorage.setItem('STRAPI_UPDATE_NOTIF', stringify(strapiUpdateNotification));
+      localStorage.setItem('videos', JSON.stringify(videos));
+      localStorage.setItem(CURRENT_STEP, JSON.stringify(guidedTourCurrentStep));
+      localStorage.setItem(COMPLETED_STEPS, JSON.stringify(guidedTourState));
+      localStorage.setItem(SKIPPED, JSON.stringify(guidedTourSkipped));
+      localStorage.setItem('STRAPI_UPDATE_NOTIF', JSON.stringify(strapiUpdateNotification));
 
       if (onboarding) {
-        localStorage.setItem('onboarding', stringify(onboarding));
+        localStorage.setItem('onboarding', JSON.stringify(onboarding));
       }
 
       if (localeLang) {
@@ -90,37 +93,27 @@ const auth = {
       }
 
       if (!isNil(uploadMediaLibraryView)) {
-        localStorage.setItem(UPLOAD_VIEW, stringify(uploadMediaLibraryView));
+        localStorage.setItem(UPLOAD_VIEW, JSON.stringify(uploadMediaLibraryView));
       }
 
       if (!isNil(uploadMediaLibraryModalView)) {
-        localStorage.setItem(UPLOAD_MODAL_VIEW, stringify(uploadMediaLibraryModalView));
+        localStorage.setItem(UPLOAD_MODAL_VIEW, JSON.stringify(uploadMediaLibraryModalView));
       }
     }
 
     sessionStorage.clear();
   },
 
-  get<T extends keyof StorageItems>(key: T): StorageItems[T] | string | null {
-    const localStorageItem = localStorage.getItem(key);
-    if (localStorageItem) {
+  get<T extends keyof StorageItems>(key: T): StorageItems[T] | null {
+    const item = localStorage.getItem(key) ?? sessionStorage.getItem(key);
+    if (item) {
       try {
-        const parsedItem = parse(localStorageItem);
+        const parsedItem = JSON.parse(item);
         return parsedItem;
       } catch (error) {
         // Failed to parse return the string value
-        return localStorageItem;
-      }
-    }
-
-    const sessionStorageItem = sessionStorage.getItem(key);
-    if (sessionStorageItem) {
-      try {
-        const parsedItem = parse(sessionStorageItem);
-        return parsedItem;
-      } catch (error) {
-        // Failed to parse return the string value
-        return sessionStorageItem;
+        // @ts-expect-error - this is fine
+        return item;
       }
     }
 
@@ -133,10 +126,10 @@ const auth = {
     }
 
     if (isLocalStorage) {
-      return localStorage.setItem(key, stringify(value));
+      return localStorage.setItem(key, JSON.stringify(value));
     }
 
-    return sessionStorage.setItem(key, stringify(value));
+    return sessionStorage.setItem(key, JSON.stringify(value));
   },
 
   /**
@@ -196,3 +189,4 @@ const auth = {
 };
 
 export { auth };
+export type { UserInfo, StorageItems };

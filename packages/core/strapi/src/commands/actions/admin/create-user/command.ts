@@ -1,5 +1,6 @@
-import { getLocalScript } from '../../../utils/helpers';
+import { runAction } from '../../../utils/helpers';
 import type { StrapiCommand } from '../../../types';
+import action from './action';
 
 /**
  * `$ strapi admin:create-user`
@@ -13,7 +14,7 @@ const command: StrapiCommand = ({ command }) => {
     .option('-p, --password <password>', 'Password of the new admin')
     .option('-f, --firstname <first name>', 'First name of the new admin')
     .option('-l, --lastname <last name>', 'Last name of the new admin')
-    .action(getLocalScript('admin/create-user'));
+    .action(runAction('admin:create-user', action));
 };
 
 export default command;

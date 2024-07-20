@@ -8,7 +8,7 @@ import { TranslationMessage } from '../types';
 interface NotAllowedInputProps extends Pick<TextInputProps, 'labelAction' | 'name'> {
   description?: TranslationMessage;
   error?: string;
-  intlLabel: TranslationMessage;
+  intlLabel?: TranslationMessage;
 }
 
 const NotAllowedInput = ({
