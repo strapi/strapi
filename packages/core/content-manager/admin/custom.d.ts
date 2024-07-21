@@ -21,6 +21,7 @@ declare module 'slate' {
     Element: Schema.Attribute.BlocksNode;
     Descendant: Schema.Attribute.BlocksInlineNode | Text;
     Text: Schema.Attribute.BlocksTextNode;
+    File: Schema.Attribute.FileBlockNode;
   }
 }
 

@@ -12,6 +12,7 @@ import { styled, type CSSProperties } from 'styled-components';
 import { getTranslation } from '../../../../../utils/translations';
 
 import { codeBlocks } from './Blocks/Code';
+import { fileBlocks } from './Blocks/File';
 import { headingBlocks } from './Blocks/Heading';
 import { imageBlocks } from './Blocks/Image';
 import { linkBlocks } from './Blocks/Link';
@@ -22,6 +23,7 @@ import { BlocksContent, type BlocksContentProps } from './BlocksContent';
 import { BlocksToolbar } from './BlocksToolbar';
 import { EditorLayout } from './EditorLayout';
 import { type ModifiersStore, modifiers } from './Modifiers';
+import { withFiles } from './plugins/withFiles';
 import { withImages } from './plugins/withImages';
 import { withLinks } from './plugins/withLinks';
 import { withStrapiSchema } from './plugins/withStrapiSchema';
@@ -66,6 +68,7 @@ const selectorBlockKeys = [
   'list-ordered',
   'list-unordered',
   'image',
+  'file',
   'quote',
   'code',
 ] as const;
@@ -172,7 +175,14 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
   ({ disabled = false, name, onChange, value, error, ...contentProps }, forwardedRef) => {
     const { formatMessage } = useIntl();
     const [editor] = React.useState(() =>
-      pipe(withHistory, withImages, withStrapiSchema, withReact, withLinks)(createEditor())
+      pipe(
+        withHistory,
+        withImages,
+        withFiles,
+        withStrapiSchema,
+        withReact,
+        withLinks
+      )(createEditor())
     );
     const [liveText, setLiveText] = React.useState('');
     const ariaDescriptionId = React.useId();
@@ -215,6 +225,7 @@ const BlocksEditor = React.forwardRef<{ focus: () => void }, BlocksEditorProps>(
       ...listBlocks,
       ...linkBlocks,
       ...imageBlocks,
+      ...fileBlocks,
       ...quoteBlocks,
       ...codeBlocks,
     };

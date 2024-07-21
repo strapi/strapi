@@ -215,6 +215,11 @@ const blocksData: Schema.Attribute.BlocksValue = [
     children: [{ type: 'text', text: '' }], // for void elements this needs to be defined
     image: mockImage,
   },
+  {
+    type: 'file',
+    children: [{ type: 'text', text: '' }], // for void elements this needs to be defined
+    file: mockImage,
+  },
 ];
 
 export { blocksData, mockImage };

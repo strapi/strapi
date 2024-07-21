@@ -413,6 +413,7 @@
   "component.Input.error.validation.integer": "Değer sayı olmalı",
   "components.AutoReloadBlocker.description": "Strapi'yi aşağıdaki komutlardan biri ile çalıştırın:",
   "components.AutoReloadBlocker.header": "Bu eklenti için tekrar yükleme özelliği gerekiyor.",
+  "components.Blocks.blocks.file": "Dosya",
   "components.ErrorBoundary.title": "Bir şeyler yanlış gitti...",
   "components.FilterOptions.FILTER_TYPES.$contains": "içerir",
   "components.FilterOptions.FILTER_TYPES.$containsi": "içerir (büyük/küçük harfe duyarsız)",
