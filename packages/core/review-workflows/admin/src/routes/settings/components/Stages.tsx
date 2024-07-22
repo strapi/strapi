@@ -305,7 +305,7 @@ const Stage = ({
                       <IconButton
                         background="transparent"
                         hasRadius
-                        borderWidth={0}
+                        variant="ghost"
                         data-handler-id={handlerId}
                         ref={dragRef}
                         label={formatMessage({
@@ -363,7 +363,7 @@ const Stage = ({
                     type: 'permissions' as const,
                   },
                 ].map(({ size, ...field }) => (
-                  <Grid.Item key={field.name} col={size}>
+                  <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
                     <InputRenderer {...field} />
                   </Grid.Item>
                 ))}

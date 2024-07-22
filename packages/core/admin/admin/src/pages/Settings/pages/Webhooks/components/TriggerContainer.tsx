@@ -21,7 +21,7 @@ const TriggerContainer = ({ isPending, onCancel, response }: TriggerContainerPro
   return (
     <Box background="neutral0" padding={5} shadow="filterShadow" hasRadius>
       <Grid.Root gap={4} style={{ alignItems: 'center' }}>
-        <Grid.Item col={3}>
+        <Grid.Item col={3} direction="column" alignItems="stretch">
           <Typography>
             {formatMessage({
               id: 'Settings.webhooks.trigger.test',
@@ -29,10 +29,10 @@ const TriggerContainer = ({ isPending, onCancel, response }: TriggerContainerPro
             })}
           </Typography>
         </Grid.Item>
-        <Grid.Item col={3}>
+        <Grid.Item col={3} direction="column" alignItems="stretch">
           <Status isPending={isPending} statusCode={statusCode} />
         </Grid.Item>
-        <Grid.Item col={6}>
+        <Grid.Item col={6} direction="column" alignItems="stretch">
           {!isPending ? (
             <Message statusCode={statusCode} message={message} />
           ) : (

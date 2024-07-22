@@ -228,7 +228,7 @@ const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps
               { target: `${tokenName}` }
             )}
             name="delete"
-            borderWidth={0}
+            variant="ghost"
           >
             <Trash />
           </IconButton>

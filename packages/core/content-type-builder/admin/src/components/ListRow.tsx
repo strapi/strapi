@@ -147,7 +147,7 @@ export const ListRow = memo(
                         id: 'app.utils.edit',
                         defaultMessage: 'Edit',
                       })} ${name}`}
-                      borderWidth={0}
+                      variant="ghost"
                     >
                       <Pencil />
                     </IconButton>
@@ -165,7 +165,7 @@ export const ListRow = memo(
                       id: 'global.delete',
                       defaultMessage: 'Delete',
                     })} ${name}`}
-                    borderWidth={0}
+                    variant="ghost"
                   >
                     <Trash />
                   </IconButton>

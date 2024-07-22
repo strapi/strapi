@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import {
-  BaseButton,
+  Button,
   Box,
   Field,
   Flex,
@@ -49,7 +49,7 @@ const ColorPicker = styled(HexColorPicker)`
   }
 `;
 
-const ColorPickerToggle = styled(BaseButton)`
+const ColorPickerToggle = styled(Button)`
   display: flex;
   justify-content: space-between;
   align-items: center;

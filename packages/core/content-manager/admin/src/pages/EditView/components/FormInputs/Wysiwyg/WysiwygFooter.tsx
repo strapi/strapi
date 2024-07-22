@@ -1,11 +1,11 @@
-import { BaseButtonProps, Box, Flex, Typography } from '@strapi/design-system';
+import { ButtonProps, Box, Flex, Typography } from '@strapi/design-system';
 import { Expand } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 
 import { ExpandButton } from './WysiwygStyles';
 
 interface WysiwygFooterProps {
-  onToggleExpand: BaseButtonProps['onClick'];
+  onToggleExpand: ButtonProps['onClick'];
 }
 
 const WysiwygFooter = ({ onToggleExpand }: WysiwygFooterProps) => {

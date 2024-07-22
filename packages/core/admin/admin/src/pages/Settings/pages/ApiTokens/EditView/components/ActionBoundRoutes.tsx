@@ -21,6 +21,8 @@ export const ActionBoundRoutes = () => {
       paddingLeft={7}
       paddingRight={7}
       style={{ minHeight: '100%' }}
+      direction="column"
+      alignItems="stretch"
     >
       {selectedAction ? (
         <Flex direction="column" alignItems="stretch" gap={2}>

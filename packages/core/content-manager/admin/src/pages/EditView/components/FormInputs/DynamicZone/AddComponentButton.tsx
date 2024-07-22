@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { BaseButton, Flex, Typography, TypographyComponent } from '@strapi/design-system';
+import { Button, Flex, Typography, TypographyComponent } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
 import { styled } from 'styled-components';
 
@@ -62,7 +62,7 @@ const StyledAddIcon = styled(PlusCircle)<{ $isOpen?: boolean; $hasError?: boolea
 
 const AddComponentTitle = styled<TypographyComponent>(Typography)``;
 
-const StyledButton = styled(BaseButton)`
+const StyledButton = styled(Button)`
   border-radius: 26px;
   border-color: ${({ theme }) => theme.colors.neutral150};
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};

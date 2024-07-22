@@ -62,7 +62,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
           </Button>
         </Flex>
         <Grid.Root gap={4}>
-          <Grid.Item col={6}>
+          <Grid.Item col={6} direction="column" alignItems="stretch">
             <Field.Root
               name="name"
               error={errors.name && formatMessage({ id: errors.name })}
@@ -83,7 +83,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }: RoleForm
               <Field.Error />
             </Field.Root>
           </Grid.Item>
-          <Grid.Item col={6}>
+          <Grid.Item col={6} direction="column" alignItems="stretch">
             <Field.Root
               name="description"
               error={errors.name && formatMessage({ id: errors.name })}

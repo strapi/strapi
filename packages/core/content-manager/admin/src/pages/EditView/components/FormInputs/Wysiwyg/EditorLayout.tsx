@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import {
-  BaseButton,
+  Button,
   Box,
   BoxComponent,
   Flex,
@@ -124,7 +124,7 @@ const BoxWithBorder = styled<BoxComponent>(Box)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
-const ExpandButton = styled(BaseButton)`
+const ExpandButton = styled(Button)`
   background-color: transparent;
   border: none;
   align-items: center;
