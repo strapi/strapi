@@ -18,6 +18,7 @@ export type ProjectInfos = {
   plan?: string;
   url?: string;
 };
+
 export type ProjectInput = Omit<ProjectInfos, 'id'>;
 
 export type DeployResponse = {
@@ -33,7 +34,7 @@ export type ListProjectsResponse = {
 
 export type ListLinkProjectsResponse = {
   data: {
-    data: string;
+    data: ProjectInfos[];
   };
 };
 
@@ -163,7 +164,7 @@ export async function cloudApiFactory(
       }
     },
 
-    async listLinkProjects(): Promise<AxiosResponse<ListProjectsResponse>> {
+    async listLinkProjects(): Promise<AxiosResponse<ListLinkProjectsResponse, unknown>> {
       try {
         const response = await axiosCloudAPI.get('/projects/linkable');
 

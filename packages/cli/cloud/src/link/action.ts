@@ -33,6 +33,12 @@ type ProjectsList = {
   };
 }[];
 
+type Project = {
+  name: string;
+  displayName: string;
+  isMaintainer: boolean;
+};
+
 async function getExistingConfig(ctx: CLIContext, cloudApiService: CloudApiService) {
   let existingConfig: LocalSave;
   try {
@@ -79,11 +85,12 @@ async function getProjectsList(
       data: { data: projectList },
     } = await cloudApiService.listLinkProjects();
     spinner.succeed();
-    const projects: ProjectsList = Object.values(projectList)
+    const projects: ProjectsList = (projectList as unknown as Project[])
       .filter(
-        (project: any) => !(project.isMaintainer || project.name === existingConfig?.project?.name)
+        (project: Project) =>
+          !(project.isMaintainer || project.name === existingConfig?.project?.name)
       )
-      .map((project: any) => {
+      .map((project: Project) => {
         return {
           name: project.displayName,
           value: { name: project.name, displayName: project.displayName },
@@ -102,9 +109,10 @@ async function getProjectsList(
 }
 
 async function getUserSelection(
-  projects: ProjectsList,
-  logger: any
+  ctx: CLIContext,
+  projects: ProjectsList
 ): Promise<LinkProjectAnswer | null> {
+  const { logger } = ctx;
   try {
     const answer: LinkProjectInput = await inquirer.prompt([
       {
@@ -156,7 +164,7 @@ export default async (ctx: CLIContext) => {
     return;
   }
 
-  const answer: LinkProjectAnswer | null = await getUserSelection(projects, logger);
+  const answer: LinkProjectAnswer | null = await getUserSelection(ctx, projects);
 
   if (!answer) {
     return;
