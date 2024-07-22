@@ -16,7 +16,7 @@ interface ContentTypes {
 
 const SINGLE_TYPES = 'single-types';
 
-const contentManagerApi = reviewWorkflowsApi.enhanceEndpoints({}).injectEndpoints({
+const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
   endpoints: (builder) => ({
     getStages: builder.query<
       {
