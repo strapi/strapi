@@ -13,6 +13,7 @@ import { notificationServiceFactory } from '../services/notification';
 import { loadPkg } from '../utils/pkg';
 import { buildLogsServiceFactory } from '../services/build-logs';
 import { promptLogin } from '../login/action';
+import { trackEvent } from '../utils/analytics';
 
 type PackageJson = {
   name: string;
@@ -166,11 +167,10 @@ export default async (ctx: CLIContext) => {
   }
 
   const cloudApiService = await cloudApiFactory(ctx);
-  try {
-    await cloudApiService.track('willDeployWithCLI', { projectInternalName: project.name });
-  } catch (e) {
-    ctx.logger.debug('Failed to track willDeploy', e);
-  }
+
+  await trackEvent(ctx, cloudApiService, 'willDeployWithCLI', {
+    projectInternalName: project.name,
+  });
 
   const notificationService = notificationServiceFactory(ctx);
   const buildLogsService = buildLogsServiceFactory(ctx);

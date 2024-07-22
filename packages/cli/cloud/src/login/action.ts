@@ -4,6 +4,7 @@ import inquirer from 'inquirer';
 import { tokenServiceFactory, cloudApiFactory } from '../services';
 import type { CloudCliConfig, CLIContext } from '../types';
 import { apiConfig } from '../config/api';
+import { trackEvent } from '../utils/analytics';
 
 const openModule = import('open');
 
@@ -28,14 +29,6 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
   const tokenService = await tokenServiceFactory(ctx);
   const existingToken = await tokenService.retrieveToken();
   const cloudApiService = await cloudApiFactory(ctx, existingToken || undefined);
-
-  const trackFailedLogin = async () => {
-    try {
-      await cloudApiService.track('didNotLogin', { loginMethod: 'cli' });
-    } catch (e) {
-      logger.debug('Failed to track failed login', e);
-    }
-  };
 
   if (existingToken) {
     const isTokenValid = await tokenService.isTokenValid(existingToken);
@@ -69,12 +62,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
     logger.debug(e);
     return false;
   }
-
-  try {
-    await cloudApiService.track('willLoginAttempt', {});
-  } catch (e) {
-    logger.debug('Failed to track login attempt', e);
-  }
+  await trackEvent(ctx, cloudApiService, 'willLoginAttempt', {});
 
   logger.debug('🔐 Creating device authentication request...', {
     client_id: cliConfig.clientId,
@@ -167,7 +155,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
             'There seems to be a problem with your login information. Please try logging in again.'
           );
           spinnerFail();
-          await trackFailedLogin();
+          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli' });
           return false;
         }
         if (
@@ -176,7 +164,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
         ) {
           logger.debug(e);
           spinnerFail();
-          await trackFailedLogin();
+          await trackEvent(ctx, cloudApiService, 'didNotLogin', { loginMethod: 'cli' });
           return false;
         }
         // Await interval before retrying
@@ -191,11 +179,7 @@ export default async function loginAction(ctx: CLIContext): Promise<boolean> {
       'To access your dashboard, please copy and paste the following URL into your web browser:'
     );
     logger.log(chalk.underline(`${apiConfig.dashboardBaseUrl}/projects`));
-    try {
-      await cloudApiService.track('didLogin', { loginMethod: 'cli' });
-    } catch (e) {
-      logger.debug('Failed to track login', e);
-    }
+    await trackEvent(ctx, cloudApiService, 'didLogin', { loginMethod: 'cli' });
   };
 
   await authenticate();
