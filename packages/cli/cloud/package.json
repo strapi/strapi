@@ -1,6 +1,6 @@
 {
   "name": "@strapi/cloud-cli",
-  "version": "5.0.0-rc.3",
+  "version": "5.0.0-rc.4",
   "description": "Commands to interact with the Strapi Cloud",
   "keywords": [
     "strapi",
@@ -44,14 +44,14 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/utils": "5.0.0-rc.3",
-    "axios": "1.6.0",
+    "@strapi/utils": "5.0.0-rc.4",
+    "axios": "1.6.8",
     "chalk": "4.1.2",
     "cli-progress": "3.12.0",
     "commander": "8.3.0",
     "eventsource": "2.0.2",
     "fast-safe-stringify": "2.1.1",
-    "fs-extra": "10.0.0",
+    "fs-extra": "11.2.0",
     "inquirer": "8.2.5",
     "jsonwebtoken": "9.0.0",
     "jwks-rsa": "3.1.0",
@@ -69,8 +69,8 @@
     "@types/cli-progress": "3.11.5",
     "@types/eventsource": "1.1.15",
     "@types/lodash": "^4.14.191",
-    "eslint-config-custom": "5.0.0-rc.3",
-    "tsconfig": "5.0.0-rc.3"
+    "eslint-config-custom": "5.0.0-rc.4",
+    "tsconfig": "5.0.0-rc.4"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

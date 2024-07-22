@@ -196,9 +196,11 @@ const imageBlocks: Pick<BlocksStore, 'image'> = {
       });
     },
     handleConvert: () => {
-      // All the logic is managed inside the ImageDialog component,
-      // because the blocks are only created when the user selects images in the modal and submits
-      // and if he closes the modal, then no changes are made to the editor
+      /**
+       * All the logic is managed inside the ImageDialog component,
+       * because the blocks are only created when the user selects images in the modal and submits
+       * and if he closes the modal, then no changes are made to the editor
+       */
       return () => <ImageDialog />;
     },
     snippets: ['!['],
