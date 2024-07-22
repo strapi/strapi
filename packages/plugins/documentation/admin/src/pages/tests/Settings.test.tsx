@@ -61,7 +61,7 @@ describe('SettingsPage', () => {
 
     expect(getByRole('button', { name: 'Save' })).toHaveAttribute('aria-disabled', 'false');
 
-    await user.type(getByLabelText('Password'), 'password');
+    await user.type(getByLabelText('Password'), 'Password123');
 
     fireEvent.click(getByRole('button', { name: 'Save' }));
 
