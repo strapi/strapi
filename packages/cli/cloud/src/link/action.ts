@@ -39,44 +39,50 @@ type Project = {
   isMaintainer: boolean;
 };
 
-async function getExistingConfig(ctx: CLIContext, cloudApiService: CloudApiService) {
-  let existingConfig: LocalSave;
+async function getExistingConfig(ctx: CLIContext) {
   try {
-    existingConfig = await local.retrieve();
-    if (existingConfig.project) {
-      const { shouldRelink } = await inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'shouldRelink',
-          message: `A project named ${chalk.cyan(
-            existingConfig.project.displayName
-              ? existingConfig.project.displayName
-              : existingConfig.project.name
-          )} is already linked to this local folder. Do you want to update the link?`,
-          default: false,
-        },
-      ]);
-
-      if (!shouldRelink) {
-        await trackEvent(ctx, cloudApiService, 'didNotLinkProject', {
-          currentProjectName: existingConfig.project?.name,
-        });
-        return null;
-      }
-    }
+    return await local.retrieve();
   } catch (e) {
     ctx.logger.debug('Failed to get project config', e);
     ctx.logger.error('An error occurred while retrieving config data from your local project.');
     return null;
   }
+}
 
-  return existingConfig;
+async function promptForRelink(
+  ctx: CLIContext,
+  cloudApiService: CloudApiService,
+  existingConfig: LocalSave | null
+) {
+  if (existingConfig && existingConfig.project) {
+    const { shouldRelink } = await inquirer.prompt([
+      {
+        type: 'confirm',
+        name: 'shouldRelink',
+        message: `A project named ${chalk.cyan(
+          existingConfig.project.displayName
+            ? existingConfig.project.displayName
+            : existingConfig.project.name
+        )} is already linked to this local folder. Do you want to update the link?`,
+        default: false,
+      },
+    ]);
+
+    if (!shouldRelink) {
+      await trackEvent(ctx, cloudApiService, 'didNotLinkProject', {
+        currentProjectName: existingConfig.project?.name,
+      });
+      return false;
+    }
+  }
+
+  return true;
 }
 
 async function getProjectsList(
   ctx: CLIContext,
   cloudApiService: CloudApiService,
-  existingConfig: LocalSave
+  existingConfig: LocalSave | null
 ) {
   const spinner = ctx.logger.spinner('Fetching your projects...\n').start();
 
@@ -146,12 +152,12 @@ export default async (ctx: CLIContext) => {
 
   const cloudApiService = await cloudApiFactory(ctx, token);
 
-  const existingConfig: LocalSave | null = await getExistingConfig(ctx, cloudApiService);
-  // If user selects not to relink, return
-  if (!existingConfig) {
+  const existingConfig: LocalSave | null = await getExistingConfig(ctx);
+  const shouldRelink = await promptForRelink(ctx, cloudApiService, existingConfig);
+
+  if (!shouldRelink) {
     return;
   }
-
   await trackEvent(ctx, cloudApiService, 'willLinkProject', {});
 
   const projects: ProjectsList | null | undefined = await getProjectsList(
@@ -184,7 +190,7 @@ export default async (ctx: CLIContext) => {
     if (!confirmAction) {
       await trackEvent(ctx, cloudApiService, 'didNotLinkProject', {
         cancelledProjectName: answer.linkProject.name,
-        currentProjectName: existingConfig.project?.name,
+        currentProjectName: existingConfig ? existingConfig.project?.name : null,
       });
       return;
     }
