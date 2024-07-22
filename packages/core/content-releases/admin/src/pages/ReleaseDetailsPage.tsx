@@ -414,8 +414,8 @@ const ReleaseDetailsLayout = ({
                 label={<More />}
                 variant="tertiary"
                 endIcon={null}
-                paddingLeft={2}
-                paddingRight={2}
+                paddingLeft="7px"
+                paddingRight="7px"
                 aria-label={formatMessage({
                   id: 'content-releases.header.actions.open-release-actions',
                   defaultMessage: 'Release edit and delete menu',

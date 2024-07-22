@@ -268,9 +268,9 @@ const DocumentActionsMenu = ({
         disabled={isDisabled}
         size="S"
         endIcon={null}
-        paddingTop="7px"
-        paddingLeft="9px"
-        paddingRight="9px"
+        paddingTop="4px"
+        paddingLeft="7px"
+        paddingRight="7px"
         variant={variant}
       >
         <More aria-hidden focusable={false} />
