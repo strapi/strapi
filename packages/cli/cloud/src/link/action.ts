@@ -91,6 +91,11 @@ async function getProjectsList(
       data: { data: projectList },
     } = await cloudApiService.listLinkProjects();
     spinner.succeed();
+
+    if (!Array.isArray(projectList)) {
+      ctx.logger.log("We couldn't find any projects available for linking in Strapi Cloud");
+      return null;
+    }
     const projects: ProjectsList = (projectList as unknown as Project[])
       .filter(
         (project: Project) =>

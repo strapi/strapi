@@ -34,7 +34,7 @@ export type ListProjectsResponse = {
 
 export type ListLinkProjectsResponse = {
   data: {
-    data: ProjectInfos[];
+    data: ProjectInfos[] | Record<string, never>;
   };
 };
 
