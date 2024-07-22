@@ -114,13 +114,13 @@ describe('TableList | TableRows', () => {
       expect(onEditFolderSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should display folder navigation as a link if no folder url exists', () => {
+    it('should display folder navigation as a link if a folder url exists', () => {
       const { getByRole } = setup({ rows: [{ ...FOLDER_FIXTURE, folderURL: 'plugins/upload' }] });
 
       expect(getByRole('link', { name: 'Access folder', hidden: true })).toBeInTheDocument();
     });
 
-    it('should display folder nagivation as a button if a folder url exists', () => {
+    it('should display folder nagivation as a button if no folder url exists', () => {
       const { getByRole } = setup({ rows: [FOLDER_FIXTURE] });
 
       expect(getByRole('button', { name: 'Access folder', hidden: true })).toBeInTheDocument();

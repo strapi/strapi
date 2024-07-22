@@ -72,8 +72,6 @@ describe('<Input />', () => {
         display: block;
         width: 100%;
         background: inherit;
-        padding-inline-start: 16px;
-        padding-inline-end: 16px;
         padding-block: 8px;
       }
 
@@ -99,6 +97,8 @@ describe('<Input />', () => {
         box-shadow: none;
         transition-property: border-color,box-shadow,fill;
         transition-duration: 0.2s;
+        padding-inline-start: 16px;
+        padding-inline-end: 16px;
       }
 
       .c4:focus-within {
