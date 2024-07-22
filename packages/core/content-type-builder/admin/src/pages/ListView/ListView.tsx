@@ -7,6 +7,7 @@ import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { unstable_usePrompt as usePrompt, useMatch } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { List } from '../../components/List';
 import { ListRow } from '../../components/ListRow';
@@ -18,6 +19,10 @@ import { getTrad } from '../../utils/getTrad';
 import { LinkToCMSettingsView } from './LinkToCMSettingsView';
 
 /* eslint-disable indent */
+
+const LayoutsHeaderCustom = styled(Layouts.Header)`
+  overflow-wrap: anywhere;
+`;
 
 const ListView = () => {
   const { initialData, modifiedData, isInDevelopmentMode, isInContentTypeView, submitData } =
@@ -117,16 +122,17 @@ const ListView = () => {
 
   return (
     <>
-      <Layouts.Header
+      <LayoutsHeaderCustom
         id="title"
         primaryAction={
           isInDevelopmentMode && (
-            <Flex gap={2}>
+            <Flex gap={2} marginLeft={2}>
               {/* DON'T display the add field button when the content type has not been created */}
               {!isCreatingFirstContentType && (
                 <Button
                   startIcon={<Plus />}
                   variant="secondary"
+                  minWidth="max-content"
                   onClick={() => {
                     onOpenModalAddField({ forTarget, targetUid });
                   }}
