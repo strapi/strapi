@@ -41,8 +41,8 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
 }
 
 .c7 {
-  font-size: 1.2rem;
-  line-height: 1.33;
+  font-size: 1.4rem;
+  line-height: 1.43;
   font-weight: 600;
   color: currentcolor;
 }
@@ -65,21 +65,19 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
 }
 
 .c5 {
-  height: 3.2rem;
+  height: 4rem;
   text-decoration: none;
-  border: 1px solid #4945ff;
-  background: #4945ff;
-  color: #ffffff;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
 }
 
 .c5:hover {
-  border: 1px solid #7b79ff;
-  background: #7b79ff;
+  background-color: #f6f6f9;
 }
 
 .c5:active {
-  border: 1px solid #4945ff;
-  background: #4945ff;
+  background-color: #eaeaef;
 }
 
 .c5[aria-disabled='true'] {
@@ -98,10 +96,11 @@ exports[`<ColorPickerInput /> renders and matches the snapshot 1`] = `
   border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-.c6 {
+.c6>span {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
 .c6 svg {
