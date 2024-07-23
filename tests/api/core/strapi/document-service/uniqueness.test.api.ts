@@ -124,17 +124,18 @@ describe('Document Service', () => {
       return `${currentValue}-${options.suffix}`;
     };
 
+    type TestCase = {
+      description: string;
+      createData: (field: string, value: string | number, repeatTheSameValue?: boolean) => any;
+    };
+
     for (const [field, value] of Object.entries(testValues)) {
-      const testCases = [
+      // We want to test the behaviour of component unique fields in different
+      // contexts: component, repeatable component, and dynamic zones.
+      const testCases: TestCase[] = [
         {
           description: 'identifiers',
           createData: (field, value) => ({ identifiers: { nestedUnique: { [field]: value } } }),
-        },
-        {
-          description: 'identifiersDz',
-          createData: (field, value) => ({
-            identifiersDz: [{ __component: 'article.compo-unique-all', [field]: value }],
-          }),
         },
         {
           description: 'repeatableIdentifiers',
@@ -149,6 +150,12 @@ describe('Document Service', () => {
             ],
           }),
         },
+        {
+          description: 'identifiersDz',
+          createData: (field, value) => ({
+            identifiersDz: [{ __component: 'article.compo-unique-all', [field]: value }],
+          }),
+        },
       ];
 
       for (const { description, createData } of testCases) {
@@ -156,6 +163,8 @@ describe('Document Service', () => {
           const isRepeatable = description === 'repeatableIdentifiers';
 
           if (isRepeatable) {
+            // When testing the repeatable component, we first need to ensure that the
+            // unique field value must be unique within the current entity.
             await expect(
               strapi.documents(ARTICLE_UID).create({
                 data: createData(field, value, true),
@@ -163,24 +172,27 @@ describe('Document Service', () => {
             ).rejects.toThrow('2 errors occurred');
           }
 
-          // Create an article in the default locale and publish it
+          // Create an article in the default locale and publish it.
           const article = await strapi.documents(ARTICLE_UID).create({
             data: createData(field, value),
           });
           await strapi.documents(ARTICLE_UID).publish({ documentId: article.documentId });
 
-          // Create and publish an article in a different locale with the same unique value as the first article
+          // Create and publish an article in a different locale with the same
+          // unique value as the first article. This should succeed as
+          // validation only occurs within the same locale.
           const articleDifferentLocale = await strapi.documents(ARTICLE_UID).create({
             data: createData(field, value),
             locale: otherLocale,
           });
+
           expect(articleDifferentLocale).toBeDefined();
           await strapi
             .documents(ARTICLE_UID)
             .publish({ documentId: articleDifferentLocale.documentId, locale: otherLocale });
 
-          // Attempt to create another article in the default locale with the same unique value
-          // The draft articles should collide and trigger a uniqueness error
+          // Attempt to create another article in the default locale with the same unique value.
+          // The draft articles should collide and trigger a uniqueness error.
           await expect(
             strapi.documents(ARTICLE_UID).create({
               data: isRepeatable
@@ -188,7 +200,6 @@ describe('Document Service', () => {
                   // validated against other entities and don't want to trigger a
                   // validation error internal to the current entity.
                   {
-                    // @ts-expect-error
                     [description]: [createData(field, value)[description][0]],
                   }
                 : createData(field, value),
@@ -199,16 +210,16 @@ describe('Document Service', () => {
             ? // When creating the first article with a repeatable field, we
               // already applied modifications to the value to ensure
               // uniqueness.
-              // Here we want to apply a different modification to the value.
+              // Here we want to apply a different modification to the value to
+              // avoid collisions with the first article.
               {
                 increment: 10,
                 suffix: 'new-suffix',
               }
             : undefined;
-
           const differentValue = modifyToDifferentValue(field, value, modificationOptions);
 
-          // Create an article in the same locale with a different unique value
+          // Create an article in the same locale with a different unique value.
           const secondArticle = await strapi.documents(ARTICLE_UID).create({
             data: createData(field, differentValue),
           });
