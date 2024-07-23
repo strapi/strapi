@@ -37,6 +37,23 @@ export interface TrackingProviderProps {
   children: React.ReactNode;
 }
 
+// TODO WIP implementation of an inactivity timeout
+
+// Throttle function to limit the rate at which a function can fire
+const throttle = <T extends (...args: any[]) => void>(func: T, limit: number) => {
+  let inThrottle: boolean;
+  return function (this: ThisParameterType<T>, ...args: Parameters<T>) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => (inThrottle = false), limit);
+    }
+  };
+};
+
+// TODO make this configurable
+const DEFAULT_INACTIVITY_TIMEOUT_MS = 2 * 1000;
+
 const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const token = useAuth('App', (state) => state.token);
   const { data: initData } = useInitQuery();
@@ -45,6 +62,52 @@ const TrackingProvider = ({ children }: TrackingProviderProps) => {
   const { data } = useTelemetryPropertiesQuery(undefined, {
     skip: !initData?.uuid || !token,
   });
+
+  const inactivityTimer = React.useRef<NodeJS.Timeout | null>(null);
+
+  const logout = useAuth('TrackingProvider', (state) => state.logout);
+  const user = useAuth('TrackingProvider', (state) => state.user);
+
+  React.useEffect(() => {
+    const resetInactivityTimer = throttle(() => {
+      if (inactivityTimer.current) {
+        clearTimeout(inactivityTimer.current);
+      }
+
+      inactivityTimer.current = setTimeout(() => {
+        if (user) {
+          if (
+            window.confirm('You have been inactive for a while. Do you want to stay logged in?')
+          ) {
+            resetInactivityTimer(); // Reset the timer if the user wants to stay logged in
+          } else {
+            // User chose to log out, redirect to login page or another URL
+            // TODO add redirect URL query params when logging out
+            logout();
+          }
+        }
+      }, DEFAULT_INACTIVITY_TIMEOUT_MS);
+    }, 1000);
+
+    const handleActivity = () => resetInactivityTimer();
+
+    document.addEventListener('mousemove', handleActivity, false);
+    document.addEventListener('keypress', handleActivity, false);
+    document.addEventListener('click', handleActivity, false);
+    document.addEventListener('scroll', handleActivity, false);
+
+    resetInactivityTimer();
+
+    return () => {
+      document.removeEventListener('mousemove', handleActivity, false);
+      document.removeEventListener('keypress', handleActivity, false);
+      document.removeEventListener('click', handleActivity, false);
+      document.removeEventListener('scroll', handleActivity, false);
+      if (inactivityTimer.current) {
+        clearTimeout(inactivityTimer.current);
+      }
+    };
+  }, [logout, user]);
 
   React.useEffect(() => {
     if (uuid && data) {
