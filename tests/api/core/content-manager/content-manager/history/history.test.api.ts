@@ -339,6 +339,9 @@ describeOnCondition(edition === 'EE')('History API', () => {
   });
 
   afterAll(async () => {
+    // Delete all locales that have been created
+    await strapi.db.query('plugin::i18n.locale').deleteMany({ where: { code: { $ne: 'en' } } });
+
     await strapi.destroy();
     await builder.cleanup();
   });
@@ -666,6 +669,53 @@ describeOnCondition(edition === 'EE')('History API', () => {
       expect(currentDocument['images']).toHaveLength(2);
       expect(restoredDocument['image']).toBe(null);
       expect(restoredDocument['images']).toHaveLength(1);
+    });
+  });
+
+  describe('Bulk actions create versions', () => {
+    it('Creates a history version when bulk publishing document entries', async () => {
+      // Creating a new entry in multiple locales
+      const enProduct = await createEntry({
+        uid: collectionTypeUid,
+        data: { name: 'Product - En' },
+      });
+
+      const frProduct = await updateEntry({
+        uid: collectionTypeUid,
+        documentId: enProduct.data.documentId,
+        locale: 'fr',
+        data: { name: 'Product - Fr' },
+      });
+
+      // Publishing both locales should result in 2 publish history versions (one for each locale)
+      const bulkPublishResult = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/${collectionTypeUid}/actions/bulkPublish`,
+        qs: { locale: ['en', 'fr'] },
+        body: { documentIds: [enProduct.data.documentId] },
+      });
+
+      expect(bulkPublishResult.statusCode).toBe(200);
+
+      const enHistoryVersions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${enProduct.data.documentId}`,
+      });
+
+      const frHistoryVersions = await rq({
+        method: 'GET',
+        url: `/content-manager/history-versions/?contentType=${collectionTypeUid}&documentId=${frProduct.data.documentId}`,
+      });
+
+      // Create + Publish = 2 versions
+      expect(enHistoryVersions.body.data).toHaveLength(2);
+      // First one should be the publish version
+      expect(enHistoryVersions.body.data[0].status).toBe('published');
+
+      // Create + Publish = 2 versions
+      expect(frHistoryVersions.body.data).toHaveLength(2);
+      // First one should be the publish version
+      expect(frHistoryVersions.body.data[0].status).toBe('published');
     });
   });
 });
