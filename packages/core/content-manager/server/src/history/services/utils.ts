@@ -179,10 +179,14 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
    * @description
    * Creates a populate object that looks for all the relations that need
    * to be saved in history, and populates only the fields needed to later retrieve the content.
+   *
+   * @param uid - The content type UID
+   * @param useDatabaseSyntax - Whether to use the database syntax for populate, defaults to false
    */
-  const getDeepPopulate = (uid: UID.Schema) => {
+  const getDeepPopulate = (uid: UID.Schema, useDatabaseSyntax = false) => {
     const model = strapi.getModel(uid);
     const attributes = Object.entries(model.attributes);
+    const fieldSelector = useDatabaseSyntax ? 'select' : 'fields';
 
     return attributes.reduce((acc: any, [attributeName, attribute]) => {
       switch (attribute.type) {
@@ -195,13 +199,13 @@ export const createServiceUtils = ({ strapi }: { strapi: Core.Strapi }) => {
 
           const isVisible = contentTypes.isVisibleAttribute(model, attributeName);
           if (isVisible) {
-            acc[attributeName] = { fields: ['documentId', 'locale', 'publishedAt'] };
+            acc[attributeName] = { [fieldSelector]: ['documentId', 'locale', 'publishedAt'] };
           }
           break;
         }
 
         case 'media': {
-          acc[attributeName] = { fields: ['id'] };
+          acc[attributeName] = { [fieldSelector]: ['id'] };
           break;
         }
 

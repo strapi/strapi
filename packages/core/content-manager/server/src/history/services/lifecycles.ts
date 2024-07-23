@@ -1,6 +1,6 @@
-import type { Core, Modules } from '@strapi/types';
+import type { Core, Modules, UID } from '@strapi/types';
 
-import { omit } from 'lodash/fp';
+import { omit, castArray } from 'lodash/fp';
 
 import { scheduleJob } from 'node-schedule';
 
@@ -9,6 +9,86 @@ import { FIELDS_TO_IGNORE, HISTORY_VERSION_UID } from '../constants';
 
 import { CreateHistoryVersion } from '../../../../shared/contracts/history-versions';
 import { createServiceUtils } from './utils';
+
+/**
+ * Filters out actions that should not create a history version.
+ */
+const shouldCreateHistoryVersion = (
+  context: Modules.Documents.Middleware.Context
+): context is Modules.Documents.Middleware.Context & {
+  action: 'create' | 'update' | 'clone' | 'publish' | 'unpublish' | 'discardDraft';
+  contentType: UID.CollectionType;
+} => {
+  // Ignore requests that are not related to the content manager
+  if (!strapi.requestContext.get()?.request.url.startsWith('/content-manager')) {
+    return false;
+  }
+
+  // NOTE: cannot do type narrowing with array includes
+  if (
+    context.action !== 'create' &&
+    context.action !== 'update' &&
+    context.action !== 'clone' &&
+    context.action !== 'publish' &&
+    context.action !== 'unpublish' &&
+    context.action !== 'discardDraft'
+  ) {
+    return false;
+  }
+
+  /**
+   * When a document is published, the draft version of the document is also updated.
+   * It creates confusion for users because they see two history versions each publish action.
+   * To avoid this, we silence the update action during a publish request,
+   * so that they only see the published version of the document in the history.
+   */
+  if (
+    context.action === 'update' &&
+    strapi.requestContext.get()?.request.url.endsWith('/actions/publish')
+  ) {
+    return false;
+  }
+
+  // Ignore content types not created by the user
+  if (!context.contentType.uid.startsWith('api::')) {
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Returns the content type schema (and its components schemas).
+ * Used to determine if changes were made in the content type builder since a history version was created.
+ * And therefore which fields can be restored and which cannot.
+ */
+const getSchemas = (uid: UID.CollectionType) => {
+  const attributesSchema = strapi.getModel(uid).attributes;
+
+  // TODO: Handle nested components
+  const componentsSchemas = Object.keys(attributesSchema).reduce(
+    (currentComponentSchemas, key) => {
+      const fieldSchema = attributesSchema[key];
+
+      if (fieldSchema.type === 'component') {
+        const componentSchema = strapi.getModel(fieldSchema.component).attributes;
+        return {
+          ...currentComponentSchemas,
+          [fieldSchema.component]: componentSchema,
+        };
+      }
+
+      // Ignore anything that's not a component
+      return currentComponentSchemas;
+    },
+    {} as CreateHistoryVersion['componentsSchemas']
+  );
+
+  return {
+    schema: omit(FIELDS_TO_IGNORE, attributesSchema) as CreateHistoryVersion['schema'],
+    componentsSchemas,
+  };
+};
 
 const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
   const state: {
@@ -27,110 +107,58 @@ const createLifecyclesService = ({ strapi }: { strapi: Core.Strapi }) => {
       if (state.isInitialized) {
         return;
       }
-      /**
-       * TODO: Fix the types for the middleware
-       */
+
       strapi.documents.use(async (context, next) => {
-        // Ignore requests that are not related to the content manager
-        if (!strapi.requestContext.get()?.request.url.startsWith('/content-manager')) {
-          return next();
-        }
-
-        // NOTE: cannot do type narrowing with array includes
-        if (
-          context.action !== 'create' &&
-          context.action !== 'update' &&
-          context.action !== 'clone' &&
-          context.action !== 'publish' &&
-          context.action !== 'unpublish' &&
-          context.action !== 'discardDraft'
-        ) {
-          return next();
-        }
-
-        /**
-         * When a document is published, the draft version of the document is also updated.
-         * It creates confusion for users because they see two history versions each publish action.
-         * To avoid this, we silence the update action during a publish request,
-         * so that they only see the published version of the document in the history.
-         */
-        if (
-          context.action === 'update' &&
-          strapi.requestContext.get()?.request.url.endsWith('/actions/publish')
-        ) {
-          return next();
-        }
-
-        const contentTypeUid = context.contentType.uid;
-        // Ignore content types not created by the user
-        if (!contentTypeUid.startsWith('api::')) {
-          return next();
-        }
-
         const result = (await next()) as any;
 
-        const documentContext = {
-          documentId:
-            context.action === 'create' || context.action === 'clone'
-              ? result.documentId
-              : context.params.documentId,
-          locale: context.params?.locale,
-        };
-
-        const defaultLocale = await serviceUtils.getDefaultLocale();
-        const locale = documentContext.locale || defaultLocale;
-
-        if (Array.isArray(locale)) {
-          strapi.log.warn(
-            '[Content manager history middleware]: An array of locales was provided, but only a single locale is supported for the findOne operation.'
-          );
-          // TODO calls picked from the middleware could contain an array of
-          // locales. This is incompatible with our call to findOne below.
-          return next();
+        if (!shouldCreateHistoryVersion(context)) {
+          return result;
         }
 
-        const document = await strapi.documents(contentTypeUid).findOne({
-          documentId: documentContext.documentId,
-          locale,
-          populate: serviceUtils.getDeepPopulate(contentTypeUid),
+        // On create/clone actions, the documentId is not available before creating the action is executed
+        const documentId =
+          context.action === 'create' || context.action === 'clone'
+            ? result.documentId
+            : context.params.documentId;
+
+        // Apply default locale if not available in the request
+        const defaultLocale = await serviceUtils.getDefaultLocale();
+        const locales = castArray(context.params?.locale || defaultLocale);
+        if (!locales.length) {
+          return result;
+        }
+
+        // All schemas related to the content type
+        const uid = context.contentType.uid;
+        const schemas = getSchemas(uid);
+
+        // Find all affected entries
+        const localeEntries = await strapi.db.query(uid).findMany({
+          where: {
+            documentId,
+            locale: { $in: locales },
+            publishedAt: null,
+          },
+          populate: serviceUtils.getDeepPopulate(uid, true /* use database syntax */),
         });
-        const status = await serviceUtils.getVersionStatus(contentTypeUid, document);
 
-        /**
-         * Store schema of both the fields and the fields of the attributes, as it will let us know
-         * if changes were made in the CTB since a history version was created,
-         * and therefore which fields can be restored and which cannot.
-         */
-        const attributesSchema = strapi.getModel(contentTypeUid).attributes;
-        const componentsSchemas: CreateHistoryVersion['componentsSchemas'] = Object.keys(
-          attributesSchema
-        ).reduce((currentComponentSchemas, key) => {
-          const fieldSchema = attributesSchema[key];
-
-          if (fieldSchema.type === 'component') {
-            const componentSchema = strapi.getModel(fieldSchema.component).attributes;
-            return {
-              ...currentComponentSchemas,
-              [fieldSchema.component]: componentSchema,
-            };
-          }
-
-          // Ignore anything that's not a component
-          return currentComponentSchemas;
-        }, {});
-
-        // Prevent creating a history version for an action that wasn't actually executed
         await strapi.db.transaction(async ({ onCommit }) => {
-          onCommit(() => {
-            getService(strapi, 'history').createVersion({
-              contentType: contentTypeUid,
-              data: omit(FIELDS_TO_IGNORE, document) as Modules.Documents.AnyDocument,
-              schema: omit(FIELDS_TO_IGNORE, attributesSchema),
-              componentsSchemas,
-              relatedDocumentId: documentContext.documentId,
-              locale,
-              status,
-            });
+          // .createVersion() is executed asynchronously,
+          // onCommit prevents creating a history version
+          // when the transaction has already been committed
+          onCommit(async () => {
+            for (const entry of localeEntries) {
+              const status = await serviceUtils.getVersionStatus(uid, entry);
+
+              await getService(strapi, 'history').createVersion({
+                contentType: uid,
+                data: omit(FIELDS_TO_IGNORE, entry) as Modules.Documents.AnyDocument,
+                relatedDocumentId: documentId,
+                locale: entry.locale,
+                status,
+                ...schemas,
+              });
+            }
           });
         });
 
