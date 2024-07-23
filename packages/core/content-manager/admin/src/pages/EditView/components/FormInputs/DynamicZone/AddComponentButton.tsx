@@ -30,6 +30,8 @@ const AddComponentButton = ({
       paddingLeft={4}
       paddingRight={4}
       style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+      variant="tertiary"
+      size="medium"
     >
       <Flex tag="span" gap={2}>
         <StyledAddIcon aria-hidden $isOpen={isOpen} $hasError={hasError && !isOpen} />
@@ -77,7 +79,7 @@ const StyledButton = styled(Button)`
         fill: ${({ theme }) => theme.colors.primary600};
       }
       > path {
-        fill: ${({ theme }) => theme.colors.neutral100};
+        fill: ${({ theme }) => theme.colors.primary600};
       }
     }
   }
