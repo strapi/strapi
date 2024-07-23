@@ -50,9 +50,12 @@ const ColorPicker = styled(HexColorPicker)`
 `;
 
 const ColorPickerToggle = styled(Button)`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  & > span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
 
   svg {
     width: ${({ theme }) => theme.spaces[2]};
@@ -101,6 +104,8 @@ export const ColorPickerInput = React.forwardRef<HTMLButtonElement, ColorPickerI
                 aria-expanded={showColorPicker}
                 aria-disabled={disabled}
                 disabled={disabled}
+                variant="tertiary"
+                size="L"
               >
                 <Flex>
                   <ColorPreview color={color} />

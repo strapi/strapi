@@ -25,13 +25,8 @@ const AddComponentButton = ({
       onClick={onClick}
       disabled={isDisabled}
       background="neutral0"
-      paddingTop={3}
-      paddingBottom={3}
-      paddingLeft={4}
-      paddingRight={4}
       style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
       variant="tertiary"
-      size="medium"
     >
       <Flex tag="span" gap={2}>
         <StyledAddIcon aria-hidden $isOpen={isOpen} $hasError={hasError && !isOpen} />
@@ -68,6 +63,7 @@ const StyledButton = styled(Button)`
   border-radius: 26px;
   border-color: ${({ theme }) => theme.colors.neutral150};
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+  height: 5rem;
 
   &:hover {
     ${AddComponentTitle} {
