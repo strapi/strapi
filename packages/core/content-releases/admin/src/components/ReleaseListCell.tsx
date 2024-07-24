@@ -2,42 +2,18 @@ import * as React from 'react';
 
 import { useTable, useQueryParams } from '@strapi/admin/strapi-admin';
 import { ListFieldLayout, ListLayout } from '@strapi/content-manager/strapi-admin';
-import { Box, Flex, Popover, Typography } from '@strapi/design-system';
+import { Box, Flex, Popover, Typography, Button } from '@strapi/design-system';
 import { Link } from '@strapi/design-system';
+import { CaretDown } from '@strapi/icons';
 import { Modules, UID } from '@strapi/types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 import { useGetMappedEntriesInReleasesQuery } from '../services/release';
 
-const Button = styled.button`
-  svg {
-    > g,
-    path {
-      fill: ${({ theme }) => theme.colors.neutral500};
-    }
-  }
-  &:hover {
-    svg {
-      > g,
-      path {
-        fill: ${({ theme }) => theme.colors.neutral600};
-      }
-    }
-  }
-  &:active {
-    svg {
-      > g,
-      path {
-        fill: ${({ theme }) => theme.colors.neutral400};
-      }
-    }
-  }
-`;
-
-const ActionWrapper = styled(Flex)`
-  svg {
-    height: 0.4rem;
+const StyledButton = styled(Button)`
+  span {
+    font-weight: 400;
   }
 `;
 
@@ -121,7 +97,7 @@ const ReleaseListCell = ({ documentId, model }: ReleaseListCellProps) => {
   return (
     <Popover.Root>
       <Popover.Trigger>
-        <Button type="button" onClick={(e) => e.stopPropagation()}>
+        <StyledButton variant="ghost" onClick={(e) => e.stopPropagation()} endIcon={<CaretDown />}>
           <Typography style={{ maxWidth: '252px', cursor: 'pointer' }} textColor="neutral800">
             {releases.length > 0
               ? formatMessage(
@@ -135,7 +111,7 @@ const ReleaseListCell = ({ documentId, model }: ReleaseListCellProps) => {
                 )
               : '-'}
           </Typography>
-        </Button>
+        </StyledButton>
       </Popover.Trigger>
       <Popover.Content>
         <ul>
