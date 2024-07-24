@@ -6,13 +6,14 @@ import * as crypto from 'node:crypto';
 import { apiConfig } from '../config/api';
 import { compressFilesToTar } from '../utils/compress-files';
 import createProjectAction from '../create-project/action';
-import type { CLIContext, ProjectInfos } from '../types';
+import type { CLIContext, CloudApiService, CloudCliConfig, ProjectInfos } from '../types';
 import { getTmpStoragePath } from '../config/local';
 import { cloudApiFactory, tokenServiceFactory, local } from '../services';
 import { notificationServiceFactory } from '../services/notification';
 import { loadPkg } from '../utils/pkg';
 import { buildLogsServiceFactory } from '../services/build-logs';
 import { promptLogin } from '../login/action';
+import { trackEvent } from '../utils/analytics';
 
 type PackageJson = {
   name: string;
@@ -137,6 +138,22 @@ async function getProject(ctx: CLIContext) {
   return project;
 }
 
+async function getConfig({
+  ctx,
+  cloudApiService,
+}: {
+  ctx: CLIContext;
+  cloudApiService: CloudApiService;
+}): Promise<CloudCliConfig | null> {
+  try {
+    const { data: cliConfig } = await cloudApiService.config();
+    return cliConfig;
+  } catch (e) {
+    ctx.logger.debug('Failed to get cli config', e);
+    return null;
+  }
+}
+
 export default async (ctx: CLIContext) => {
   const { getValidToken } = await tokenServiceFactory(ctx);
   const token = await getValidToken(ctx, promptLogin);
@@ -150,16 +167,21 @@ export default async (ctx: CLIContext) => {
   }
 
   const cloudApiService = await cloudApiFactory(ctx);
-  try {
-    await cloudApiService.track('willDeployWithCLI', { projectInternalName: project.name });
-  } catch (e) {
-    ctx.logger.debug('Failed to track willDeploy', e);
-  }
+
+  await trackEvent(ctx, cloudApiService, 'willDeployWithCLI', {
+    projectInternalName: project.name,
+  });
 
   const notificationService = notificationServiceFactory(ctx);
   const buildLogsService = buildLogsServiceFactory(ctx);
 
-  const { data: cliConfig } = await cloudApiService.config();
+  const cliConfig = await getConfig({ ctx, cloudApiService });
+  if (!cliConfig) {
+    ctx.logger.error(
+      'An error occurred while retrieving data from Strapi Cloud. Please try check your network or again later.'
+    );
+    return;
+  }
 
   let maxSize: number = parseInt(cliConfig.maxProjectFileSize, 10);
   if (Number.isNaN(maxSize)) {
@@ -186,10 +208,11 @@ export default async (ctx: CLIContext) => {
       chalk.underline(`${apiConfig.dashboardBaseUrl}/projects/${project.name}/deployments`)
     );
   } catch (e: Error | unknown) {
+    ctx.logger.debug(e);
     if (e instanceof Error) {
       ctx.logger.error(e.message);
     } else {
-      throw e;
+      ctx.logger.error('An error occurred while deploying the project. Please try again later.');
     }
   }
 };

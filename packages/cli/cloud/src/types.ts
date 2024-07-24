@@ -46,4 +46,6 @@ export type StrapiCloudCommandInfo = {
   action: (ctx: CLIContext) => Promise<unknown>;
 };
 
+export type TrackPayload = Record<string, unknown>;
+
 export type * from './services/cli-api';
