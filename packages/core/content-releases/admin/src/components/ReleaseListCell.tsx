@@ -87,6 +87,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }: AddColumnToTableHook
  * -----------------------------------------------------------------------------------------------*/
 
 interface ReleaseListCellProps extends Modules.Documents.AnyDocument {
+  documentId: Modules.Documents.ID;
   model: UID.ContentType;
 }
 
@@ -97,7 +98,11 @@ const ReleaseListCell = ({ documentId, model }: ReleaseListCellProps) => {
   return (
     <Popover.Root>
       <Popover.Trigger>
-        <StyledButton variant="ghost" onClick={(e) => e.stopPropagation()} endIcon={<CaretDown />}>
+        <StyledButton
+          variant="ghost"
+          onClick={(e: React.MouseEvent<HTMLElement>) => e.stopPropagation()}
+          endIcon={<CaretDown />}
+        >
           <Typography style={{ maxWidth: '252px', cursor: 'pointer' }} textColor="neutral800">
             {releases.length > 0
               ? formatMessage(
