@@ -41,11 +41,7 @@ export async function bootstrap({ strapi }: { strapi: Core.Strapi }) {
   await getService('weeklyMetrics').registerCron();
   getService('metrics').sendUploadPluginMetrics();
 
-  if (strapi.config.get('plugin::upload.signAdminURLsOnly', false)) {
-    getService('extensions').contentManager.entityManager.addSignedFileUrlsToAdmin();
-  } else {
-    getService('extensions').core.entityService.addSignedFileUrlsToEntityService();
-  }
+  getService('extensions').signFileUrlsOnDocumentService();
 }
 
 const registerWebhookEvents = async () =>
