@@ -51,6 +51,15 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         },
       }),
       transformResponse: (res: UpdateStage.Response) => res.data,
+      // @ts-expect-error - FIXME: TS isn't aware that "Document" was added as a tag
+      invalidatesTags(result, error, args) {
+        return [
+          {
+            type: 'Document',
+            id: `${args.model}_${args.id}`,
+          },
+        ];
+      },
     }),
     updateAssignee: builder.mutation<
       UpdateAssignee.Response['data'],
@@ -65,6 +74,15 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         },
       }),
       transformResponse: (res: UpdateAssignee.Response) => res.data,
+      // @ts-expect-error - FIXME: TSisn't aware that "Document" was added as a tag
+      invalidatesTags(result, error, args) {
+        return [
+          {
+            type: 'Document',
+            id: `${args.model}_${args.id}`,
+          },
+        ];
+      },
     }),
     getContentTypes: builder.query<ContentTypes, void>({
       query: () => ({
