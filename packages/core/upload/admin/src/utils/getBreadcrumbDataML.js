@@ -1,5 +1,5 @@
 import getFolderURL from './getFolderURL';
-import getTrad from './getTrad';
+import { getTrad } from './getTrad';
 
 const getBreadcrumbDataML = (folder, { pathname, query }) => {
   let data = [

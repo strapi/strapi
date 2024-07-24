@@ -28,7 +28,7 @@ import { AssetDefinition } from '../../constants';
 import { useEditAsset } from '../../hooks/useEditAsset';
 import { useFolderStructure } from '../../hooks/useFolderStructure';
 import { findRecursiveFolderByValue, getTrad, getFileExtension } from '../../utils';
-import formatBytes from '../../utils/formatBytes';
+import { formatBytes } from '../../utils/formatBytes';
 import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 

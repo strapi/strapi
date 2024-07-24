@@ -1,4 +1,4 @@
-import toSingularTypes from '../toSingularTypes';
+import { toSingularTypes } from '../toSingularTypes';
 
 describe('UPLOAD | utils | toSingularTypes', () => {
   it('returns an array', () => {
