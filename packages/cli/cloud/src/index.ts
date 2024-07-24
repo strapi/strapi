@@ -53,4 +53,6 @@ export async function buildStrapiCloudCommands({
 
 export * as services from './services';
 
+export * as analytics from './utils/analytics';
+
 export * from './types';

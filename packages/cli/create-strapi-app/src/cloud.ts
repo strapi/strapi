@@ -1,5 +1,5 @@
 import inquirer from 'inquirer';
-import { cli as cloudCli, services as cloudServices } from '@strapi/cloud-cli';
+import { cli as cloudCli, services as cloudServices, analytics as utils } from '@strapi/cloud-cli';
 import parseToChalk from './utils/parse-to-chalk';
 
 interface CloudError {
@@ -42,12 +42,12 @@ export async function handleCloudLogin(): Promise<void> {
     },
   ]);
 
-  if (userChoice !== 'Skip') {
-    const cliContext = {
-      logger,
-      cwd: process.cwd(),
-    };
+  const cliContext = {
+    logger,
+    cwd: process.cwd(),
+  };
 
+  if (userChoice !== 'Skip') {
     try {
       await cloudCli.login.action(cliContext);
     } catch (e: Error | CloudError | unknown) {
@@ -67,5 +67,7 @@ export async function handleCloudLogin(): Promise<void> {
       }
       logger.error(defaultErrorMessage);
     }
+  } else {
+    await utils.trackEvent(cliContext, cloudApiService, 'didSkipCLILogin', {});
   }
 }
