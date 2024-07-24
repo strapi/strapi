@@ -5,8 +5,7 @@ import {
   ApolloServerPluginLandingPageGraphQLPlayground,
 } from 'apollo-server-core';
 import depthLimit from 'graphql-depth-limit';
-// eslint-disable-next-line import/extensions
-import graphqlUploadKoa from 'graphql-upload/graphqlUploadKoa.js';
+import { graphqlUploadKoa } from 'graphql-upload';
 import type { Config } from 'apollo-server-core';
 import type { Strapi } from '@strapi/types';
 
@@ -115,9 +114,6 @@ export async function bootstrap({ strapi }: { strapi: Strapi }) {
               type: 'content-api',
             },
           };
-
-          // allow graphql playground to load without authentication
-          if (ctx.request.method === 'GET') return next();
 
           return strapi.auth.authenticate(ctx, next);
         },

@@ -6,14 +6,14 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import cluster from 'node:cluster';
+import strapiFactory from '@strapi/strapi';
 
 import { checkRequiredDependencies } from './core/dependencies';
 import { getTimer, prettyTime, type TimeMeasurer } from './core/timer';
 import { createBuildContext } from './createBuildContext';
-import { build as buildWebpack } from './webpack/build';
-import { watch as watchWebpack, WebpackWatcher } from './webpack/watch';
+import type { WebpackWatcher } from './webpack/watch';
+import type { ViteWatcher } from './vite/watch';
 
-import strapiFactory from '@strapi/strapi';
 import EE from '@strapi/strapi/dist/utils/ee';
 import { writeStaticClientFiles } from './staticFiles';
 
@@ -22,6 +22,12 @@ interface DevelopOptions extends CLIContext {
    * @default false
    */
   ignorePrompts?: boolean;
+  /**
+   * Which bundler to use for building.
+   *
+   * @default webpack
+   */
+  bundler?: 'webpack' | 'vite';
   polling?: boolean;
   open?: boolean;
   watchAdmin?: boolean;
@@ -123,7 +129,14 @@ const develop = async ({
 
       EE.init(cwd);
       await writeStaticClientFiles(ctx);
-      await buildWebpack(ctx);
+
+      if (ctx.bundler === 'webpack') {
+        const { build: buildWebpack } = await import('./webpack/build');
+        await buildWebpack(ctx);
+      } else if (ctx.bundler === 'vite') {
+        const { build: buildVite } = await import('./vite/build');
+        await buildVite(ctx);
+      }
 
       const adminDuration = timer.end('creatingAdmin');
       adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
@@ -169,12 +182,13 @@ const develop = async ({
       autoReload: true,
       serveAdminPanel: !watchAdmin,
     });
-    let webpackWatcher: WebpackWatcher | undefined;
 
     /**
      * If we're watching the admin panel then we're going to attach the watcher
      * as a strapi middleware.
      */
+    let bundleWatcher: WebpackWatcher | ViteWatcher | undefined;
+
     if (watchAdmin) {
       timer.start('createBuildContext');
       const contextSpinner = logger.spinner(`Building build context`).start();
@@ -196,7 +210,14 @@ const develop = async ({
 
       EE.init(cwd);
       await writeStaticClientFiles(ctx);
-      webpackWatcher = await watchWebpack(ctx);
+
+      if (ctx.bundler === 'webpack') {
+        const { watch: watchWebpack } = await import('./webpack/watch');
+        bundleWatcher = await watchWebpack(ctx);
+      } else if (ctx.bundler === 'vite') {
+        const { watch: watchVite } = await import('./vite/watch');
+        bundleWatcher = await watchVite(ctx);
+      }
 
       const adminDuration = timer.end('creatingAdmin');
       adminSpinner.text = `Creating admin (${prettyTime(adminDuration)})`;
@@ -209,20 +230,24 @@ const develop = async ({
     loadStrapiSpinner.text = `Loading Strapi (${prettyTime(loadStrapiDuration)})`;
     loadStrapiSpinner.succeed();
 
-    timer.start('generatingTS');
-    const generatingTsSpinner = logger.spinner(`Generating types`).start();
+    // For TS projects, type generation is a requirement for the develop command so that the server can restart
+    // For JS projects, we respect the experimental autogenerate setting
+    if (tsconfig?.config || strapi.config.get('typescript.autogenerate') !== false) {
+      timer.start('generatingTS');
+      const generatingTsSpinner = logger.spinner(`Generating types`).start();
 
-    await tsUtils.generators.generate({
-      strapi: strapiInstance,
-      pwd: cwd,
-      rootDir: undefined,
-      logger: { silent: true, debug: false },
-      artifacts: { contentTypes: true, components: true },
-    });
+      await tsUtils.generators.generate({
+        strapi: strapiInstance,
+        pwd: cwd,
+        rootDir: undefined,
+        logger: { silent: true, debug: false },
+        artifacts: { contentTypes: true, components: true },
+      });
 
-    const generatingDuration = timer.end('generatingTS');
-    generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
-    generatingTsSpinner.succeed();
+      const generatingDuration = timer.end('generatingTS');
+      generatingTsSpinner.text = `Generating types (${prettyTime(generatingDuration)})`;
+      generatingTsSpinner.succeed();
+    }
 
     if (tsconfig?.config) {
       timer.start('compilingTS');
@@ -269,6 +294,8 @@ const develop = async ({
           '**/exports/**',
           '**/dist/**',
           '**/*.d.ts',
+          '**/.yalc/**',
+          '**/yalc.lock',
           ...strapiInstance.config.get('admin.watchIgnoreFiles', []),
         ],
       })
@@ -295,8 +322,8 @@ const develop = async ({
 
           await strapiInstance.destroy();
 
-          if (webpackWatcher) {
-            webpackWatcher.close();
+          if (bundleWatcher) {
+            bundleWatcher.close();
           }
           process.send?.('killed');
           break;

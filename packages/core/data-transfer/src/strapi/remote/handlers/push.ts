@@ -452,6 +452,11 @@ export const createPushController = handlerControllerFactory<Partial<PushHandler
       getStrapi: () => strapi as LoadedStrapi,
     });
 
+    this.provider.onWarning = (message) => {
+      // TODO send a warning message to the client
+      strapi.log.warn(message);
+    };
+
     return { transferID: this.transferID };
   },
 

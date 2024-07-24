@@ -32,14 +32,14 @@ side output we recommend doing the following:
   "version": "1.0.0",
   "exports": {
     "./strapi-admin": {
-      "types": "./dist/admin/index.d.ts",
+      "types": "./dist/admin/src/index.d.ts",
       "source": "./admin/src/index.ts",
       "import": "./dist/admin/index.mjs",
       "require": "./dist/admin/index.js",
       "default": "./dist/admin/index.js"
     },
     "./strapi-server": {
-      "types": "./dist/server/index.d.ts",
+      "types": "./dist/server/src/index.d.ts",
       "source": "./server/src/index.ts",
       "import": "./dist/server/index.mjs",
       "require": "./dist/server/index.js",

@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Box, Divider, Flex, FocusTrap, Typography } from '@strapi/design-system';
+import { Box, Divider, Flex, FocusTrap, Icon, Typography } from '@strapi/design-system';
 import {
   MainNav,
   NavBrand,
@@ -11,19 +11,14 @@ import {
   NavSections,
   NavUser,
 } from '@strapi/design-system/v2';
-import {
-  auth,
-  getFetchClient,
-  useAppInfo,
-  usePersistentState,
-  useTracking,
-} from '@strapi/helper-plugin';
-import { Exit, Write } from '@strapi/icons';
+import { useAppInfo, usePersistentState, useTracking } from '@strapi/helper-plugin';
+import { Exit, Write, Lightning } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { NavLink as RouterNavLink, useHistory, useLocation } from 'react-router-dom';
+import { NavLink as RouterNavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
-import { useConfiguration } from '../contexts/configuration';
+import { useAuth } from '../features/Auth';
+import { useConfiguration } from '../features/Configuration';
 import { Menu } from '../hooks/useMenu';
 
 const LinkUserWrapper = styled(Box)`
@@ -54,6 +49,21 @@ const LinkUser = styled(RouterNavLink)<{ logout?: boolean }>`
   }
 `;
 
+const NavLinkWrapper = styled(Box)`
+  div:nth-child(2) {
+    /* remove badge background color */
+    background: transparent;
+  }
+`;
+
+const BadgeIcon = styled(Icon)`
+  &&& {
+    path {
+      fill: ${({ theme }) => theme.colors.warning500};
+    }
+  }
+`;
+
 interface LeftMenuProps extends Pick<Menu, 'generalSectionLinks' | 'pluginsSectionLinks'> {}
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) => {
@@ -61,14 +71,13 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
   const [userLinksVisible, setUserLinksVisible] = React.useState(false);
   const {
     logos: { menu },
-  } = useConfiguration();
+  } = useConfiguration('LeftMenu');
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const { userDisplayName } = useAppInfo();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { pathname } = useLocation();
-  const history = useHistory();
-  const { post } = getFetchClient();
+  const { logout } = useAuth('Logout');
 
   const initials = userDisplayName
     .split(' ')
@@ -77,13 +86,6 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
     .substring(0, 2);
 
   const handleToggleUserLinks = () => setUserLinksVisible((prev) => !prev);
-
-  const handleLogout = async () => {
-    await post('/admin/logout');
-    auth.clearAppStorage();
-    handleToggleUserLinks();
-    history.push('/auth/login');
-  };
 
   const handleBlur: React.FocusEventHandler = (e) => {
     if (
@@ -117,7 +119,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
         title={menuTitle}
         icon={
           <img
-            src={menu.custom || menu.default}
+            src={menu.custom?.url || menu.default}
             alt={formatMessage({
               id: 'app.components.LeftMenu.logo.alt',
               defaultMessage: 'Application logo',
@@ -147,19 +149,29 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
             })}
           >
             {pluginsSectionLinks.map((link) => {
-              const Icon = link.icon;
-
+              const LinkIcon = link.icon;
               return (
-                <NavLink
-                  as={RouterNavLink}
-                  // @ts-expect-error the props from the passed as prop are not inferred // joined together
-                  to={link.to}
-                  key={link.to}
-                  icon={<Icon />}
-                  onClick={() => handleClickOnLink(link.to)}
-                >
-                  {formatMessage(link.intlLabel)}
-                </NavLink>
+                <NavLinkWrapper key={link.to}>
+                  <NavLink
+                    as={RouterNavLink}
+                    to={link.to}
+                    icon={<LinkIcon />}
+                    onClick={() => handleClickOnLink(link.to)}
+                    // @ts-expect-error: badgeContent in the DS accept only strings
+                    badgeContent={
+                      // TODO: to replace with another name in v5
+                      link?.lockIcon ? (
+                        <BadgeIcon
+                          width={`${15 / 16}rem`}
+                          height={`${15 / 16}rem`}
+                          as={Lightning}
+                        />
+                      ) : undefined
+                    }
+                  >
+                    {formatMessage(link.intlLabel)}
+                  </NavLink>
+                </NavLinkWrapper>
               );
             })}
           </NavSection>
@@ -224,7 +236,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }: LeftMenuProps) =
                     })}
                   </Typography>
                 </LinkUser>
-                <LinkUser tabIndex={0} onClick={handleLogout} to="/auth/login">
+                <LinkUser tabIndex={0} onClick={logout} to="/auth/login">
                   <Typography textColor="danger600">
                     {formatMessage({
                       id: 'app.components.LeftMenu.logout',

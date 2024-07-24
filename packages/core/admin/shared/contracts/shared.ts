@@ -18,14 +18,6 @@ export interface Permission extends Entity {
   conditions: string[];
 }
 
-export interface AdminRole extends Entity {
-  name: string;
-  code: string;
-  description?: string;
-  users: AdminUser[];
-  permissions: Permission[];
-}
-
 export interface AdminUser extends Entity {
   firstname?: string;
   lastname?: string;
@@ -40,9 +32,36 @@ export interface AdminUser extends Entity {
   preferedLanguage?: string;
 }
 
-export type SanitizedAdminUser = Omit<
+export type AdminUserCreationPayload = Omit<
   AdminUser,
-  'password' | 'resetPasswordToken' | 'registrationToken'
+  keyof Entity | 'roles' | 'isActive' | 'blocked'
+> & {
+  roles: TEntity.ID[];
+};
+
+export type AdminUserUpdatePayload = Omit<AdminUser, keyof Entity | 'roles'> & {
+  roles: TEntity.ID[];
+};
+
+export type SanitizedAdminUser = Omit<AdminUser, 'password' | 'resetPasswordToken' | 'roles'> & {
+  roles: SanitizedAdminRole[];
+};
+export interface AdminRole extends Entity {
+  name: string;
+  code: string;
+  description?: string;
+  users: AdminUser[];
+  permissions: Permission[];
+}
+
+export type SanitizedAdminRole = Omit<
+  AdminRole,
+  'users' | 'permissions' | 'createdAt' | 'updatedAt'
 >;
 
-export type SanitizedAdminRole = Omit<AdminRole, 'users' | 'permissions'>;
+export interface Pagination {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+}

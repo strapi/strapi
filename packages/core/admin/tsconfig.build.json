@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "dist/cli"
+    "outDir": "./dist"
   },
   "include": ["_internal"]
 }

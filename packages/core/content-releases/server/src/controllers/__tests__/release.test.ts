@@ -1,14 +1,16 @@
 import releaseController from '../release';
 
 const mockFindPage = jest.fn();
-const mockFindManyForContentTypeEntry = jest.fn();
+const mockFindManyWithContentTypeEntryAttached = jest.fn();
+const mockFindManyWithoutContentTypeEntryAttached = jest.fn();
 const mockCountActions = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
-    findOne: jest.fn(() => ({ id: 1 })),
+    findOne: jest.fn(() => ({ id: 1, createdBy: { firstname: 'test' } })),
     findPage: mockFindPage,
-    findManyForContentTypeEntry: mockFindManyForContentTypeEntry,
+    findManyWithContentTypeEntryAttached: mockFindManyWithContentTypeEntryAttached,
+    findManyWithoutContentTypeEntryAttached: mockFindManyWithoutContentTypeEntryAttached,
     countActions: mockCountActions,
     getContentTypesDataForActions: jest.fn(),
   })),
@@ -19,7 +21,7 @@ describe('Release controller', () => {
   describe('findMany', () => {
     it('should call findPage', async () => {
       mockFindPage.mockResolvedValue({ results: [], pagination: {} });
-      mockFindManyForContentTypeEntry.mockResolvedValue([]);
+      mockFindManyWithContentTypeEntryAttached.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -45,6 +47,9 @@ describe('Release controller', () => {
             },
           },
         },
+        query: jest.fn().mockReturnValue({
+          count: jest.fn().mockResolvedValue(2),
+        }),
       };
 
       // @ts-expect-error partial context
@@ -53,9 +58,9 @@ describe('Release controller', () => {
       expect(mockFindPage).toHaveBeenCalled();
     });
 
-    it('should call findManyForContentTypeEntry', async () => {
+    it('should call findManyWithoutContentTypeEntryAttached', async () => {
       mockFindPage.mockResolvedValue({ results: [], pagination: {} });
-      mockFindManyForContentTypeEntry.mockResolvedValue([]);
+      mockFindManyWithContentTypeEntryAttached.mockResolvedValue([]);
       const userAbility = {
         can: jest.fn(),
       };
@@ -86,7 +91,7 @@ describe('Release controller', () => {
       // @ts-expect-error partial context
       await releaseController.findMany(ctx);
 
-      expect(mockFindManyForContentTypeEntry).toHaveBeenCalled();
+      expect(mockFindManyWithoutContentTypeEntryAttached).toHaveBeenCalled();
     });
   });
   describe('create', () => {
@@ -153,15 +158,31 @@ describe('Release controller', () => {
 
   describe('findOne', () => {
     beforeAll(() => {
+      // @ts-expect-error Ignore global error
       global.strapi = {
+        // @ts-expect-error Ignore global error
         ...global.strapi,
-        // @ts-expect-error Ignore missing properties
         admin: {
           services: {
-            permission: {
-              createPermissionsManager: jest.fn(() => ({
-                sanitizeOutput: jest.fn(),
-              })),
+            user: {
+              sanitizeUser: jest.fn(),
+            },
+          },
+        },
+        plugins: {
+          'content-manager': {
+            services: {
+              'content-types': {
+                findAllContentTypes: jest
+                  .fn()
+                  .mockReturnValue([
+                    { uid: 'api::contentTypeA.contentTypeA' },
+                    { uid: 'api::contentTypeB.contentTypeB' },
+                  ]),
+              },
+              components: {
+                findAllComponents: jest.fn().mockReturnValue([{ uid: 'component.component' }]),
+              },
             },
           },
         },
@@ -194,7 +215,7 @@ describe('Release controller', () => {
       expect(() => releaseController.findOne(ctx).rejects.toThrow('Release not found for id: 1'));
     });
 
-    it('returns the right meta object', async () => {
+    it('should have a body with meta including actions count', async () => {
       const ctx = {
         state: {
           userAbility: {
@@ -218,7 +239,6 @@ describe('Release controller', () => {
       };
       // We mock the count all actions
       mockCountActions.mockResolvedValueOnce(2);
-
       // We mock the count hidden actions
       mockCountActions.mockResolvedValueOnce(1);
 
@@ -226,6 +246,105 @@ describe('Release controller', () => {
       await releaseController.findOne(ctx);
       expect(ctx.body.data.actions.meta).toEqual({
         count: 2,
+      });
+    });
+
+    it('should call sanitize user', async () => {
+      const ctx = {
+        state: {
+          userAbility: {
+            can: jest.fn(() => true),
+          },
+        },
+        params: {
+          id: 1,
+        },
+        user: {},
+      };
+
+      // @ts-expect-error partial context
+      await releaseController.findOne(ctx);
+      expect(strapi.admin.services.user.sanitizeUser).toHaveBeenCalled();
+    });
+  });
+
+  describe('mapEntriesToReleases', () => {
+    it('should throw an error if contentTypeUid or entriesIds are missing', async () => {
+      const ctx = {
+        query: {},
+      };
+
+      // @ts-expect-error partial context
+      await expect(() => releaseController.mapEntriesToReleases(ctx)).rejects.toThrow(
+        'Missing required query parameters'
+      );
+    });
+
+    it('should call findManyWithContentTypeEntryAttached with correct parameters', async () => {
+      const ctx = {
+        query: {
+          contentTypeUid: 'api::kitchensink.kitchensink',
+          entriesIds: [1, 2, 3],
+        },
+      };
+
+      const mockRelease = {
+        id: 1,
+        name: 'Test Release',
+        actions: [
+          {
+            entry: {
+              id: 1,
+            },
+          },
+        ],
+      };
+
+      mockFindManyWithContentTypeEntryAttached.mockResolvedValue([mockRelease]);
+
+      // @ts-expect-error partial context
+      await releaseController.mapEntriesToReleases(ctx);
+
+      expect(mockFindManyWithContentTypeEntryAttached).toHaveBeenCalledWith(
+        'api::kitchensink.kitchensink',
+        [1, 2, 3]
+      );
+    });
+
+    it('should map entries to releases correctly', async () => {
+      const ctx = {
+        query: {
+          contentTypeUid: 'api::kitchensink.kitchensink',
+          entriesIds: [1, 2, 3],
+        },
+        body: { data: {} },
+      };
+
+      const mockRelease = {
+        id: 1,
+        name: 'Test Release',
+        actions: [
+          {
+            entry: {
+              id: 1,
+            },
+          },
+          {
+            entry: {
+              id: 2,
+            },
+          },
+        ],
+      };
+
+      mockFindManyWithContentTypeEntryAttached.mockResolvedValue([mockRelease]);
+
+      // @ts-expect-error partial context
+      await releaseController.mapEntriesToReleases(ctx);
+
+      expect(ctx.body.data).toEqual({
+        1: [{ id: 1, name: 'Test Release' }],
+        2: [{ id: 1, name: 'Test Release' }],
       });
     });
   });

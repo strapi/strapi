@@ -1,10 +1,6 @@
-import { darkTheme, lightTheme } from '@strapi/design-system';
 import { useGuidedTour } from '@strapi/helper-plugin';
-import { render, screen } from '@testing-library/react';
-import { IntlProvider } from 'react-intl';
+import { render, screen } from '@tests/utils';
 
-import { Theme } from '../../Theme';
-import { ThemeToggleProvider } from '../../ThemeToggleProvider';
 import { GuidedTourModal } from '../Modal';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -29,24 +25,14 @@ jest.mock('@strapi/helper-plugin', () => ({
   })),
 }));
 
-const App = (
-  <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
-    <ThemeToggleProvider themes={{ light: lightTheme, dark: darkTheme }}>
-      <Theme>
-        <GuidedTourModal />
-      </Theme>
-    </ThemeToggleProvider>
-  </IntlProvider>
-);
-
 describe('<GuidedTourModal />', () => {
   it('should match the snapshot with contentTypeBuilder.create layout', async () => {
-    render(App);
+    render(<GuidedTourModal />);
 
     expect(screen.getByText('🧠 Create a first Collection type')).toBeInTheDocument();
 
     expect(document.body).toMatchInlineSnapshot(`
-      .c0 {
+      .c2 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -58,7 +44,7 @@ describe('<GuidedTourModal />', () => {
         width: 1px;
       }
 
-      .c15 {
+      .c17 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
@@ -66,14 +52,14 @@ describe('<GuidedTourModal />', () => {
         color: #4945ff;
       }
 
-      .c18 {
+      .c20 {
         font-size: 0.875rem;
         line-height: 1.43;
         font-weight: 500;
         color: #ffffff;
       }
 
-      .c19 {
+      .c21 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
@@ -81,24 +67,33 @@ describe('<GuidedTourModal />', () => {
         color: #32324d;
       }
 
-      .c23 {
+      .c25 {
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c27 {
+      .c29 {
         font-size: 0.75rem;
         line-height: 1.33;
         font-weight: 600;
         color: #ffffff;
       }
 
-      .c1 {
+      .c0 {
+        margin-left: -250px;
+        position: fixed;
+        left: 50%;
+        top: 2.875rem;
+        z-index: 10;
+        width: 31.25rem;
+      }
+
+      .c3 {
         padding: 40px;
       }
 
-      .c4 {
+      .c6 {
         background: #ffffff;
         padding: 16px;
         border-radius: 4px;
@@ -106,7 +101,7 @@ describe('<GuidedTourModal />', () => {
         width: 41.25rem;
       }
 
-      .c7 {
+      .c9 {
         background: #ffffff;
         padding: 8px;
         border-radius: 4px;
@@ -115,17 +110,17 @@ describe('<GuidedTourModal />', () => {
         cursor: pointer;
       }
 
-      .c10 {
+      .c12 {
         padding-right: 32px;
         padding-left: 32px;
       }
 
-      .c12 {
+      .c14 {
         margin-right: 40px;
         min-width: 1.875rem;
       }
 
-      .c13 {
+      .c15 {
         background: #7b79ff;
         border-radius: 4px;
         width: 0.125rem;
@@ -133,7 +128,7 @@ describe('<GuidedTourModal />', () => {
         min-height: 1.5rem;
       }
 
-      .c17 {
+      .c19 {
         background: #4945ff;
         padding: 8px;
         padding-top: 12px;
@@ -143,11 +138,11 @@ describe('<GuidedTourModal />', () => {
         height: 1.875rem;
       }
 
-      .c21 {
+      .c23 {
         padding-bottom: 24px;
       }
 
-      .c24 {
+      .c26 {
         background: #4945ff;
         padding: 8px;
         padding-right: 16px;
@@ -158,7 +153,22 @@ describe('<GuidedTourModal />', () => {
         cursor: pointer;
       }
 
-      .c2 {
+      .c1 {
+        -webkit-align-items: stretch;
+        -webkit-box-align: stretch;
+        -ms-flex-align: stretch;
+        align-items: stretch;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .c4 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -176,7 +186,7 @@ describe('<GuidedTourModal />', () => {
         justify-content: center;
       }
 
-      .c5 {
+      .c7 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -191,7 +201,7 @@ describe('<GuidedTourModal />', () => {
         gap: 40px;
       }
 
-      .c6 {
+      .c8 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -209,7 +219,7 @@ describe('<GuidedTourModal />', () => {
         justify-content: flex-end;
       }
 
-      .c11 {
+      .c13 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -223,7 +233,7 @@ describe('<GuidedTourModal />', () => {
         flex-direction: row;
       }
 
-      .c16 {
+      .c18 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -237,7 +247,7 @@ describe('<GuidedTourModal />', () => {
         flex-direction: row;
       }
 
-      .c20 {
+      .c22 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -255,7 +265,7 @@ describe('<GuidedTourModal />', () => {
         justify-content: center;
       }
 
-      .c22 {
+      .c24 {
         -webkit-align-items: stretch;
         -webkit-box-align: stretch;
         -ms-flex-align: stretch;
@@ -270,7 +280,7 @@ describe('<GuidedTourModal />', () => {
         gap: 16px;
       }
 
-      .c25 {
+      .c27 {
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -285,26 +295,26 @@ describe('<GuidedTourModal />', () => {
         gap: 8px;
       }
 
-      .c8 {
+      .c10 {
         position: relative;
         outline: none;
       }
 
-      .c8 > svg {
+      .c10 > svg {
         height: 12px;
         width: 12px;
       }
 
-      .c8 > svg > g,
-      .c8 > svg path {
+      .c10 > svg > g,
+      .c10 > svg path {
         fill: #ffffff;
       }
 
-      .c8[aria-disabled='true'] {
+      .c10[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c8:after {
+      .c10:after {
         -webkit-transition-property: all;
         transition-property: all;
         -webkit-transition-duration: 0.2s;
@@ -319,11 +329,11 @@ describe('<GuidedTourModal />', () => {
         border: 2px solid transparent;
       }
 
-      .c8:focus-visible {
+      .c10:focus-visible {
         outline: none;
       }
 
-      .c8:focus-visible:after {
+      .c10:focus-visible:after {
         border-radius: 8px;
         content: '';
         position: absolute;
@@ -334,62 +344,8 @@ describe('<GuidedTourModal />', () => {
         border: 2px solid #4945ff;
       }
 
-      .c26 {
-        height: 2rem;
-      }
-
-      .c26 svg {
-        height: 0.75rem;
-        width: auto;
-      }
-
-      .c26[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c26[aria-disabled='true'] .c14 {
-        color: #666687;
-      }
-
-      .c26[aria-disabled='true'] svg > g,
-      .c26[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c26[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c26[aria-disabled='true']:active .c14 {
-        color: #666687;
-      }
-
-      .c26[aria-disabled='true']:active svg > g,
-      .c26[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c26:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c26:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c26 svg > g,
-      .c26 svg path {
-        fill: #ffffff;
-      }
-
       .c28 {
         height: 2rem;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
       }
 
       .c28 svg {
@@ -402,7 +358,7 @@ describe('<GuidedTourModal />', () => {
         background: #eaeaef;
       }
 
-      .c28[aria-disabled='true'] .c14 {
+      .c28[aria-disabled='true'] .c16 {
         color: #666687;
       }
 
@@ -416,7 +372,7 @@ describe('<GuidedTourModal />', () => {
         background: #eaeaef;
       }
 
-      .c28[aria-disabled='true']:active .c14 {
+      .c28[aria-disabled='true']:active .c16 {
         color: #666687;
       }
 
@@ -426,45 +382,99 @@ describe('<GuidedTourModal />', () => {
       }
 
       .c28:hover {
-        background-color: #f6f6f9;
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
       }
 
       .c28:active {
-        background-color: #eaeaef;
-      }
-
-      .c28 .c14 {
-        color: #32324d;
+        border: 1px solid #4945ff;
+        background: #4945ff;
       }
 
       .c28 svg > g,
       .c28 svg path {
+        fill: #ffffff;
+      }
+
+      .c30 {
+        height: 2rem;
+        border: 1px solid #dcdce4;
+        background: #ffffff;
+      }
+
+      .c30 svg {
+        height: 0.75rem;
+        width: auto;
+      }
+
+      .c30[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c30[aria-disabled='true'] .c16 {
+        color: #666687;
+      }
+
+      .c30[aria-disabled='true'] svg > g,
+      .c30[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c30[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c30[aria-disabled='true']:active .c16 {
+        color: #666687;
+      }
+
+      .c30[aria-disabled='true']:active svg > g,
+      .c30[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c30:hover {
+        background-color: #f6f6f9;
+      }
+
+      .c30:active {
+        background-color: #eaeaef;
+      }
+
+      .c30 .c16 {
+        color: #32324d;
+      }
+
+      .c30 svg > g,
+      .c30 svg path {
         fill: #32324d;
       }
 
-      .c9 {
+      .c11 {
         border-color: #dcdce4;
         height: 2rem;
         width: 2rem;
       }
 
-      .c9 svg g,
-      .c9 svg path {
+      .c11 svg g,
+      .c11 svg path {
         fill: #8e8ea9;
       }
 
-      .c9:hover svg g,
-      .c9:focus svg g,
-      .c9:hover svg path,
-      .c9:focus svg path {
+      .c11:hover svg g,
+      .c11:focus svg g,
+      .c11:hover svg path,
+      .c11:focus svg path {
         fill: #666687;
       }
 
-      .c9[aria-disabled='true'] svg path {
+      .c11[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c3 {
+      .c5 {
         position: fixed;
         z-index: 4;
         inset: 0;
@@ -474,7 +484,10 @@ describe('<GuidedTourModal />', () => {
       <body>
         <div>
           <div
-            class="c0"
+            class="c0 c1"
+          />
+          <div
+            class="c2"
           >
             <p
               aria-live="polite"
@@ -500,24 +513,24 @@ describe('<GuidedTourModal />', () => {
           class=""
         >
           <div
-            class="c1 c2 c3"
+            class="c3 c4 c5"
           >
             <div>
               <div
                 aria-modal="true"
-                class="c4 c5"
+                class="c6 c7"
                 role="dialog"
               >
                 <div
-                  class="c6"
+                  class="c8"
                 >
                   <button
                     aria-disabled="false"
-                    class="c7 c2 c8 c9"
+                    class="c9 c4 c10 c11"
                     type="button"
                   >
                     <span
-                      class="c0"
+                      class="c2"
                     >
                       Close
                     </span>
@@ -538,84 +551,84 @@ describe('<GuidedTourModal />', () => {
                   </button>
                 </div>
                 <div
-                  class="c10"
+                  class="c12"
                 >
                   <div
-                    class="c11"
+                    class="c13"
                   >
                     <div
-                      class="c12 c2"
+                      class="c14 c4"
                     >
                       <div
-                        class="c13"
+                        class="c15"
                       />
                     </div>
                     <span
-                      class="c14 c15"
+                      class="c16 c17"
                     >
                       3 steps to get started
                     </span>
                   </div>
                   <div
-                    class="c16"
+                    class="c18"
                   >
                     <div
-                      class="c12 c16"
+                      class="c14 c18"
                     >
                       <div
-                        class="c17 c2"
+                        class="c19 c4"
                       >
                         <span
-                          class="c14 c18"
+                          class="c16 c20"
                         >
                           3
                         </span>
                       </div>
                     </div>
                     <h3
-                      class="c14 c19"
+                      class="c16 c21"
                       id="title"
                     >
                       🧠 Create a first Collection type
                     </h3>
                   </div>
                   <div
-                    class="c11"
+                    class="c13"
                   >
                     <div
-                      class="c12 c20"
+                      class="c14 c22"
                     />
                     <div
                       class=""
                     >
                       <div
-                        class="c21 c22"
+                        class="c23 c24"
                       >
                         <span
-                          class="c14 c23"
+                          class="c16 c25"
                         >
                           Collection types help you manage several entries, Single types are suitable to manage only one entry.
                         </span>
                          
                         <span
-                          class="c14 c23"
+                          class="c16 c25"
                         >
                           Ex: For a Blog website, Articles would be a Collection type whereas a Homepage would be a Single type.
                         </span>
                       </div>
                       <button
                         aria-disabled="false"
-                        class="c24 c25 c8 c26"
+                        class="c26 c27 c10 c28"
                         type="button"
                       >
                         <span
-                          class="c14 c27"
+                          class="c16 c29"
                         >
                           Build a Collection type
                         </span>
                         <div
                           aria-hidden="true"
-                          class="c16"
+                          class="c18"
                         >
                           <svg
                             fill="none"
@@ -635,15 +648,15 @@ describe('<GuidedTourModal />', () => {
                   </div>
                 </div>
                 <div
-                  class="c6"
+                  class="c8"
                 >
                   <button
                     aria-disabled="false"
-                    class="c24 c25 c8 c28"
+                    class="c26 c27 c10 c30"
                     type="button"
                   >
                     <span
-                      class="c14 c27"
+                      class="c16 c29"
                     >
                       Skip the tour
                     </span>
@@ -678,7 +691,7 @@ describe('<GuidedTourModal />', () => {
       currentStep: null,
     }));
 
-    const { queryByText } = render(App);
+    const { queryByText } = render(<GuidedTourModal />);
 
     expect(queryByText('3 steps to get started')).not.toBeInTheDocument();
   });
@@ -704,7 +717,7 @@ describe('<GuidedTourModal />', () => {
       currentStep: 'contentTypeBuilder.create',
     }));
 
-    const { queryByText } = render(App);
+    const { queryByText } = render(<GuidedTourModal />);
 
     expect(queryByText('3 steps to get started')).not.toBeInTheDocument();
   });

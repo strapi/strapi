@@ -22,7 +22,7 @@ describe('useAdminRoles', () => {
   });
 
   test('fetches a single role', async () => {
-    const { result } = renderHook(() => useAdminRoles({ id: 1 }));
+    const { result } = renderHook(() => useAdminRoles({ id: '1' }));
 
     expect(result.current.isLoading).toBe(true);
 
@@ -39,7 +39,7 @@ describe('useAdminRoles', () => {
 
   test('forwards all query params except `id`', async () => {
     // @ts-expect-error - test purposes
-    const { result } = renderHook(() => useAdminRoles({ id: 1, filters: 'param' }));
+    const { result } = renderHook(() => useAdminRoles({ id: '1', filters: 'param' }));
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
@@ -54,12 +54,12 @@ describe('useAdminRoles', () => {
     ]);
   });
 
-  test('extends the default react-query options', async () => {
+  test('extends the default options', async () => {
     const { result } = renderHook(() =>
       useAdminRoles(
         {},
         {
-          enabled: false,
+          skip: true,
         }
       )
     );

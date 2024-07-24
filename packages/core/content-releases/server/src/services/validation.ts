@@ -1,8 +1,16 @@
 import { errors } from '@strapi/utils';
 import { LoadedStrapi } from '@strapi/types';
-import type { Release } from '../../../shared/contracts/releases';
+import EE from '@strapi/strapi/dist/utils/ee';
+import type { Release, CreateRelease, UpdateRelease } from '../../../shared/contracts/releases';
 import type { CreateReleaseAction } from '../../../shared/contracts/release-actions';
 import { RELEASE_MODEL_UID } from '../constants';
+
+export class AlreadyOnReleaseError extends errors.ApplicationError<'AlreadyOnReleaseError'> {
+  constructor(message: string) {
+    super(message);
+    this.name = 'AlreadyOnReleaseError';
+  }
+}
 
 const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) => ({
   async validateUniqueEntry(
@@ -28,7 +36,7 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
     );
 
     if (isEntryInRelease) {
-      throw new errors.ValidationError(
+      throw new AlreadyOnReleaseError(
         `Entry with id ${releaseActionArgs.entry.id} and contentType ${releaseActionArgs.entry.contentType} already exists in release with id ${releaseId}`
       );
     }
@@ -47,6 +55,52 @@ const createReleaseValidationService = ({ strapi }: { strapi: LoadedStrapi }) =>
       throw new errors.ValidationError(
         `Content type with uid ${contentTypeUid} does not have draftAndPublish enabled`
       );
+    }
+  },
+  async validatePendingReleasesLimit() {
+    // Use the maximum releases option if it exists, otherwise default to 3
+    const maximumPendingReleases =
+      // @ts-expect-error - options is not typed into features
+      EE.features.get('cms-content-releases')?.options?.maximumReleases || 3;
+
+    const [, pendingReleasesCount] = await strapi.db.query(RELEASE_MODEL_UID).findWithCount({
+      filters: {
+        releasedAt: {
+          $null: true,
+        },
+      },
+    });
+
+    // Unlimited is a number that will never be reached like 9999
+    if (pendingReleasesCount >= maximumPendingReleases) {
+      throw new errors.ValidationError('You have reached the maximum number of pending releases');
+    }
+  },
+  async validateUniqueNameForPendingRelease(
+    name: CreateRelease.Request['body']['name'],
+    id?: UpdateRelease.Request['params']['id']
+  ) {
+    const pendingReleases = (await strapi.entityService.findMany(RELEASE_MODEL_UID, {
+      filters: {
+        releasedAt: {
+          $null: true,
+        },
+        name,
+        ...(id && { id: { $ne: id } }),
+      },
+    })) as Release[];
+
+    const isNameUnique = pendingReleases.length === 0;
+
+    if (!isNameUnique) {
+      throw new errors.ValidationError(`Release with name ${name} already exists`);
+    }
+  },
+  async validateScheduledAtIsLaterThanNow(
+    scheduledAt: CreateRelease.Request['body']['scheduledAt']
+  ) {
+    if (scheduledAt && new Date(scheduledAt) <= new Date()) {
+      throw new errors.ValidationError('Scheduled at must be later than now');
     }
   },
 });

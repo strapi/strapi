@@ -27,16 +27,16 @@ import { SortIcon } from '../icons/SortIcon';
 import { ConfirmDialog } from './ConfirmDialog';
 import { EmptyStateLayout, EmptyStateLayoutProps } from './EmptyStateLayout';
 
-import type { Attribute } from '@strapi/types';
+import type { Attribute, Entity } from '@strapi/types';
 
 /* -------------------------------------------------------------------------------------------------
  * Context
  * -----------------------------------------------------------------------------------------------*/
 
-interface TableContextValue<TRow extends { id: number } = { id: number }> {
-  selectedEntries: number[];
-  setSelectedEntries: React.Dispatch<React.SetStateAction<number[]>>;
-  onSelectRow: (args: { name: number; value: boolean }) => void;
+interface TableContextValue<TRow extends { id: Entity.ID } = { id: Entity.ID }> {
+  selectedEntries: Entity.ID[];
+  setSelectedEntries: React.Dispatch<React.SetStateAction<Entity.ID[]>>;
+  onSelectRow: (args: { name: Entity.ID; value: boolean }) => void;
   rows: TRow[];
   isLoading: boolean;
   isFetching: boolean;
@@ -46,14 +46,14 @@ interface TableContextValue<TRow extends { id: number } = { id: number }> {
 
 const TableContext = React.createContext<TableContextValue | null>(null);
 
-const useTableContext = () => {
+const useTableContext = <TRow extends { id: Entity.ID }>() => {
   const context = React.useContext(TableContext);
 
   if (!context) {
     throw new Error('useTableContext must be used within a TableProvider');
   }
 
-  return context;
+  return context as TableContextValue<TRow>;
 };
 
 /* -------------------------------------------------------------------------------------------------
@@ -91,7 +91,7 @@ const ActionBar = ({ children }: ActionBarProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface BulkDeleteButtonProps {
-  onConfirmDeleteAll: (ids: number[]) => Promise<void>;
+  onConfirmDeleteAll: (ids: Entity.ID[]) => Promise<void>;
 }
 
 const BulkDeleteButton = ({ onConfirmDeleteAll }: BulkDeleteButtonProps) => {
@@ -216,7 +216,7 @@ const HeaderHiddenActionsCell = () => {
  * -----------------------------------------------------------------------------------------------*/
 
 interface HeaderCellProps {
-  fieldSchemaType: Attribute.Kind;
+  fieldSchemaType: Attribute.Kind | 'custom';
   name: string;
   relationFieldName?: string;
   isSortable?: boolean;
@@ -299,9 +299,9 @@ const HeaderCell = ({
  * -----------------------------------------------------------------------------------------------*/
 
 interface RootProps
-  extends Pick<TableContextValue, 'colCount' | 'rows' | 'isLoading' | 'isFetching'> {
+  extends Partial<Pick<TableContextValue, 'colCount' | 'rows' | 'isLoading' | 'isFetching'>> {
   children: React.ReactNode;
-  defaultSelectedEntries?: number[];
+  defaultSelectedEntries?: Entity.ID[];
 }
 
 const Root = ({
@@ -309,13 +309,13 @@ const Root = ({
   defaultSelectedEntries = [],
   rows = [],
   colCount = 0,
-  isLoading,
-  isFetching,
+  isLoading = false,
+  isFetching = false,
 }: RootProps) => {
-  const [selectedEntries, setSelectedEntries] = React.useState<number[]>(defaultSelectedEntries);
+  const [selectedEntries, setSelectedEntries] = React.useState<Entity.ID[]>(defaultSelectedEntries);
   const rowCount = rows.length + 1;
 
-  const onSelectRow = React.useCallback(({ name, value }: { name: number; value: unknown }) => {
+  const onSelectRow = React.useCallback<TableContextValue['onSelectRow']>(({ name, value }) => {
     setSelectedEntries((prev) => {
       if (value) {
         return prev.concat(name);

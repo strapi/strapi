@@ -4,11 +4,11 @@ import action from './action';
 /**
  * `$ strapi watch-admin`
  */
-const command: StrapiCommand = ({ command }) => {
+const command: StrapiCommand = ({ command, ctx }) => {
   command
     .command('watch-admin')
     .option('--browser <name>', 'Open the browser', true)
     .description('Start the admin development server')
-    .action(runAction('watch-admin', action));
+    .action((...args) => runAction('watch-admin', action)(...args, ctx));
 };
 export default command;

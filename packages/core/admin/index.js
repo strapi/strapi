@@ -102,7 +102,7 @@ async function watchAdmin({ browser, open, polling }) {
   );
 
   const cwd = process.cwd();
-  const logger = createLogger({ debug: true, silent: false, timestamp: false });
+  const logger = createLogger({ debug: false, silent: false, timestamp: false });
 
   const tsconfig = loadTsConfig({
     cwd,

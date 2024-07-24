@@ -10,7 +10,6 @@ import isNil from 'lodash/isNil';
 import { useIntl } from 'react-intl';
 import { useLocation } from 'react-router-dom';
 
-// @ts-expect-error – Not typed, yet.
 import { useLicenseLimits } from './useLicenseLimits';
 
 const STORAGE_KEY_PREFIX = 'strapi-notification-seat-limit';
@@ -25,7 +24,7 @@ export const useLicenseLimitNotification = () => {
   const { pathname } = useLocation();
 
   const { enforcementUserCount, permittedSeats, licenseLimitStatus, isHostedOnStrapiCloud } =
-    license;
+    license ?? {};
 
   React.useEffect(() => {
     if (isError || isLoading) {

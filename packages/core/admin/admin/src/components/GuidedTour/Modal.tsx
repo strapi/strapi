@@ -53,7 +53,10 @@ const GuidedTourModal = () => {
 
   const handleCtaClick = () => {
     setStepState(currentStep, true);
-    trackUsage(stepData.trackingEvent);
+
+    if (stepData) {
+      trackUsage(stepData.trackingEvent);
+    }
 
     setCurrentStep(null);
   };
@@ -98,14 +101,14 @@ const GuidedTourModal = () => {
               paddingBottom={!hasStepAfter && !hasSectionAfter ? 8 : 0}
             >
               <GuidedTourStepper
-                title={stepData.title}
-                cta={'cta' in stepData ? stepData.cta : undefined}
+                title={stepData && 'title' in stepData ? stepData.title : undefined}
+                cta={stepData && 'cta' in stepData ? stepData.cta : undefined}
                 onCtaClick={handleCtaClick}
                 sectionIndex={sectionIndex}
                 stepIndex={stepIndex}
                 hasSectionAfter={hasSectionAfter}
               >
-                <GuidedTourContent {...stepData.content} />
+                {stepData && 'content' in stepData && <GuidedTourContent {...stepData.content} />}
               </GuidedTourStepper>
             </Box>
             {!(!hasStepAfter && !hasSectionAfter) && (
@@ -138,7 +141,7 @@ const ModalWrapper = styled(Flex)`
  * -----------------------------------------------------------------------------------------------*/
 
 interface GuidedTourStepperProps {
-  title: MessageDescriptor;
+  title: MessageDescriptor | undefined;
   children: React.ReactNode;
   cta?: {
     title: MessageDescriptor;
@@ -188,9 +191,11 @@ const GuidedTourStepper = ({
             {sectionIndex + 1}
           </Number>
         </Flex>
-        <Typography variant="alpha" fontWeight="bold" textColor="neutral800" as="h3" id="title">
-          {formatMessage(title)}
-        </Typography>
+        {title && (
+          <Typography variant="alpha" fontWeight="bold" textColor="neutral800" as="h3" id="title">
+            {formatMessage(title)}
+          </Typography>
+        )}
       </Flex>
       <Flex alignItems="stretch">
         <Flex marginRight={8} direction="column" justifyContent="center" minWidth={pxToRem(30)}>

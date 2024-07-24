@@ -109,6 +109,9 @@ describe('STRAPI_HELPER_PLUGIN | utils | formatContentTypeData', () => {
         category: 'component',
         globalId: 'Compos.SubCompo',
         modelType: 'component',
+        info: {
+          displayName: 'sub-compo',
+        },
         attributes: {
           id: { type: 'integer' },
           name: { type: 'string' },

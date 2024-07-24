@@ -49,8 +49,10 @@ module.exports = ({ env }) => ({
         baseUrl: env('CDN_URL'),
         rootPath: env('CDN_ROOT_PATH'),
         s3Options: {
-          accessKeyId: env('AWS_ACCESS_KEY_ID'),
-          secretAccessKey: env('AWS_ACCESS_SECRET'),
+          credentials: {
+            accessKeyId: env('AWS_ACCESS_KEY_ID'),
+            secretAccessKey: env('AWS_ACCESS_SECRET'),
+          },
           region: env('AWS_REGION'),
           params: {
             ACL: env('AWS_ACL', 'public-read'),
@@ -87,8 +89,10 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        accessKeyId: env('AWS_ACCESS_KEY_ID'),
-        secretAccessKey: env('AWS_ACCESS_SECRET'),
+        credentials: {
+          accessKeyId: env('AWS_ACCESS_KEY_ID'),
+          secretAccessKey: env('AWS_ACCESS_SECRET'),
+        },
         region: env('AWS_REGION'),
         params: {
           ACL: 'private', // <== set ACL to private
@@ -109,7 +113,7 @@ module.exports = ({ env }) => ({
 
 #### Configuration for S3 compatible services
 
-This plugin may work with S3 compatible services by using the `endpoint` option instead of `region`. Scaleway example:
+This plugin may work with S3 compatible services by using the `endpoint`. Scaleway example:
 `./config/plugins.js`
 
 ```js
@@ -119,9 +123,12 @@ module.exports = ({ env }) => ({
     config: {
       provider: 'aws-s3',
       providerOptions: {
-        accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
-        secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
-        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "s3.fr-par.scw.cloud"
+        credentials: {
+          accessKeyId: env('SCALEWAY_ACCESS_KEY_ID'),
+          secretAccessKey: env('SCALEWAY_ACCESS_SECRET'),
+        },
+        region: env('SCALEWAY_REGION'), // e.g "fr-par"
+        endpoint: env('SCALEWAY_ENDPOINT'), // e.g. "https://s3.fr-par.scw.cloud"
         params: {
           Bucket: env('SCALEWAY_BUCKET'),
         },
@@ -171,7 +178,7 @@ module.exports = [
 ];
 ```
 
-If you use dots in your bucket name, the url of the resource is in directory style (`s3.yourRegion.amazonaws.com/your.bucket.name/image.jpg`) instead of `yourBucketName.s3.yourRegion.amazonaws.com/image.jpg` so in that case the img-src and media-src directives to add will be `s3.yourRegion.amazonaws.com` without the bucket name in the url.
+If you use dots in your bucket name (`forcePathStyle set to false`), the url of the resource is in directory style (`s3.yourRegion.amazonaws.com/your.bucket.name/image.jpg`) instead of `yourBucketName.s3.yourRegion.amazonaws.com/image.jpg` so in that case the img-src and media-src directives to add will be `s3.yourRegion.amazonaws.com` without the bucket name in the url.
 
 ## Bucket CORS Configuration
 
@@ -224,8 +231,10 @@ upload: {
   config: {
     provider: 'aws-s3',
     providerOptions: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: process.env.AWS_ACCESS_SECRET,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_ACCESS_SECRET,
+      },
       region: process.env.AWS_REGION,
       baseUrl: `https://s3.${region}.amazonaws.com/${bucket}`, // This line sets the custom url format
       params: {

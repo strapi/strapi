@@ -1,8 +1,10 @@
+import { AlreadyOnReleaseError } from '../../services/validation';
 import releaseActionController from '../release-action';
 
 const mockSanitizedQueryRead = jest.fn().mockResolvedValue({});
 const mockFindActions = jest.fn().mockResolvedValue({ results: [], pagination: {} });
 const mockSanitizeOutput = jest.fn((entry: { id: number; name: string }) => ({ id: entry.id }));
+const mockCreateAction = jest.fn();
 
 jest.mock('../../utils', () => ({
   getService: jest.fn(() => ({
@@ -18,6 +20,7 @@ jest.mock('../../utils', () => ({
         displayName: 'contentTypeB',
       },
     })),
+    createAction: mockCreateAction,
   })),
   getPermissionsChecker: jest.fn(() => ({
     sanitizedQuery: {
@@ -92,6 +95,85 @@ describe('Release Action controller', () => {
     });
   });
 
+  describe('createMany', () => {
+    beforeEach(() => {
+      global.strapi = {
+        db: {
+          transaction: jest.fn((cb) => cb()),
+        },
+      };
+
+      jest.clearAllMocks();
+    });
+
+    it('creates multiple release actions', async () => {
+      mockCreateAction.mockResolvedValue({ id: 1 });
+
+      const ctx: any = {
+        params: {
+          releaseId: 1,
+        },
+        request: {
+          body: [
+            {
+              entry: {
+                id: 1,
+                contentType: 'api::contentTypeA.contentTypeA',
+              },
+              type: 'publish',
+            },
+            {
+              entry: {
+                id: 2,
+                contentType: 'api::contentTypeB.contentTypeB',
+              },
+              type: 'unpublish',
+            },
+          ],
+        },
+      };
+
+      await releaseActionController.createMany(ctx);
+
+      expect(mockCreateAction).toHaveBeenCalledTimes(2);
+      expect(ctx.body.data).toHaveLength(2);
+      expect(ctx.body.meta.totalEntries).toBe(2);
+      expect(ctx.body.meta.entriesAlreadyInRelease).toBe(0);
+    });
+
+    it('should count already added entries and dont throw an error', async () => {
+      mockCreateAction.mockRejectedValue(
+        new AlreadyOnReleaseError(
+          'Entry with id 1 and contentType api::contentTypeA.contentTypeA already exists in release with id 1'
+        )
+      );
+
+      const ctx: any = {
+        params: {
+          releaseId: 1,
+        },
+        request: {
+          body: [
+            {
+              entry: {
+                id: 1,
+                contentType: 'api::contentTypeA.contentTypeA',
+              },
+              type: 'publish',
+            },
+          ],
+        },
+      };
+
+      await releaseActionController.createMany(ctx);
+
+      expect(mockCreateAction).toHaveBeenCalledTimes(1);
+      expect(ctx.body.data).toHaveLength(0);
+      expect(ctx.body.meta.totalEntries).toBe(1);
+      expect(ctx.body.meta.entriesAlreadyInRelease).toBe(1);
+    });
+  });
+
   describe('update', () => {
     it('throws an error given bad request arguments', () => {
       const ctx = {
@@ -110,100 +192,6 @@ describe('Release Action controller', () => {
       expect(() => releaseActionController.update(ctx)).rejects.toThrow(
         'type must be one of the following values: publish, unpublish'
       );
-    });
-  });
-
-  describe('findMany', () => {
-    it('should return the data for an entry', async () => {
-      mockFindActions.mockResolvedValueOnce({
-        results: [
-          {
-            id: 1,
-            contentType: 'api::contentTypeA.contentTypeA',
-            entry: { id: 1, name: 'test 1', locale: 'en' },
-          },
-          {
-            id: 2,
-            contentType: 'api::contentTypeB.contentTypeB',
-            entry: { id: 2, name: 'test 2', locale: 'fr' },
-          },
-        ],
-        pagination: {},
-      });
-      global.strapi = {
-        plugins: {
-          // @ts-expect-error Ignore missing properties
-          i18n: {
-            services: {
-              locales: {
-                find: jest.fn().mockReturnValue([
-                  {
-                    id: 1,
-                    name: 'English (en)',
-                    code: 'en',
-                  },
-                  {
-                    id: 2,
-                    name: 'French (fr)',
-                    code: 'fr',
-                  },
-                ]),
-              },
-            },
-          },
-        },
-        // @ts-expect-error Ignore missing properties
-        admin: {
-          services: {
-            permission: {
-              createPermissionsManager: jest.fn(() => ({
-                ability: {
-                  can: jest.fn(),
-                },
-                validateQuery: jest.fn(),
-                sanitizeQuery: jest.fn(() => ctx.query),
-              })),
-            },
-          },
-        },
-      };
-
-      const ctx = {
-        state: {
-          userAbility: {},
-        },
-        params: {
-          releaseId: 1,
-        },
-        query: {},
-      };
-      // @ts-expect-error Ignore missing properties
-      await releaseActionController.findMany(ctx);
-
-      // @ts-expect-error Ignore missing properties
-      expect(ctx.body.data[0].entry).toEqual({
-        id: 1,
-        contentType: {
-          displayName: 'contentTypeA',
-          mainFieldValue: 'test 1',
-        },
-        locale: {
-          code: 'en',
-          name: 'English (en)',
-        },
-      });
-      // @ts-expect-error Ignore missing properties
-      expect(ctx.body.data[1].entry).toEqual({
-        id: 2,
-        contentType: {
-          displayName: 'contentTypeB',
-          mainFieldValue: 'test 2',
-        },
-        locale: {
-          code: 'fr',
-          name: 'French (fr)',
-        },
-      });
     });
   });
 });

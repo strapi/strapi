@@ -14,6 +14,8 @@ import type { Scope, NewOptions } from './types';
 
 export { default as checkInstallPath } from './utils/check-install-path';
 
+export type { NewOptions } from './types';
+
 const packageJson = JSON.parse(readFileSync(resolve(__dirname, '../package.json'), 'utf8'));
 
 export const generateNewApp = (projectDirectory: string, options: Partial<NewOptions>) => {

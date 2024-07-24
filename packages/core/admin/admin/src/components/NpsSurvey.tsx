@@ -13,13 +13,14 @@ import {
   FieldInput,
   VisuallyHidden,
 } from '@strapi/design-system';
-import { auth, useNotification, useAppInfo, usePersistentState } from '@strapi/helper-plugin';
+import { useNotification, useAppInfo, usePersistentState } from '@strapi/helper-plugin';
 import { Cross } from '@strapi/icons';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
 import styled, { useTheme } from 'styled-components';
 import * as yup from 'yup';
+
+import { useAuth } from '../features/Auth';
 
 const FieldWrapper = styled(Field)`
   height: ${32 / 16}rem;
@@ -58,9 +59,9 @@ const FieldWrapper = styled(Field)`
 
 const delays = {
   postResponse: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
-  postFirstDismissal: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+  postFirstDismissal: 14 * 24 * 60 * 60 * 1000, // 14 days in ms
   postSubsequentDismissal: 90 * 24 * 60 * 60 * 1000, // 90 days in ms
-  display: 5 * 60 * 1000, // 5 minutes in ms
+  display: 30 * 60 * 1000, // 30 minutes in ms
 };
 
 const ratingArray = [...Array(11).keys()];
@@ -145,45 +146,6 @@ const NpsSurvey = () => {
     license: 'Enterprise' | 'Community';
   }
 
-  const { mutate, isLoading } = useMutation<unknown, unknown, NpsSurveyMutationBody>(
-    async (form) => {
-      const res = await fetch('https://analytics.strapi.io/submit-nps', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to submit NPS survey');
-      }
-
-      return res;
-    },
-    {
-      onSuccess() {
-        setNpsSurveySettings((settings) => ({
-          ...settings,
-          lastResponseDate: new Date().toString(),
-          firstDismissalDate: null,
-          lastDismissalDate: null,
-        }));
-        setIsFeedbackResponse(true);
-        // Thank you message displayed in the banner should disappear after few seconds.
-        setTimeout(() => {
-          setSurveyIsShown(false);
-        }, 3000);
-      },
-      onError() {
-        toggleNotification({
-          type: 'warning',
-          message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
-        });
-      },
-    }
-  );
-
   // Only check on first render if the survey should be shown
   const [surveyIsShown, setSurveyIsShown] = React.useState(
     checkIfShouldShowSurvey(npsSurveySettings)
@@ -202,6 +164,8 @@ const NpsSurvey = () => {
     };
   }, []);
 
+  const { user } = useAuth('NpsSurvey');
+
   if (!displaySurvey) {
     return null;
   }
@@ -210,22 +174,51 @@ const NpsSurvey = () => {
     return null;
   }
 
-  const handleSubmitResponse = ({
+  const handleSubmitResponse = async ({
     npsSurveyRating,
     npsSurveyFeedback,
   }: {
     npsSurveyRating: NpsSurveyMutationBody['rating'];
     npsSurveyFeedback: NpsSurveyMutationBody['comment'];
   }) => {
-    const userInfo = auth.getUserInfo();
-    mutate({
-      email: typeof userInfo === 'object' && userInfo !== null ? userInfo.email : '',
-      rating: npsSurveyRating,
-      comment: npsSurveyFeedback,
-      environment: currentEnvironment,
-      version: strapiVersion ?? undefined,
-      license: window.strapi.projectType,
-    });
+    try {
+      const body = {
+        email: typeof user === 'object' && user.email ? user.email : '',
+        rating: npsSurveyRating,
+        comment: npsSurveyFeedback,
+        environment: currentEnvironment,
+        version: strapiVersion ?? undefined,
+        license: window.strapi.projectType,
+      };
+      const res = await fetch('https://analytics.strapi.io/submit-nps', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to submit NPS survey');
+      }
+
+      setNpsSurveySettings((settings) => ({
+        ...settings,
+        lastResponseDate: new Date().toString(),
+        firstDismissalDate: null,
+        lastDismissalDate: null,
+      }));
+      setIsFeedbackResponse(true);
+      // Thank you message displayed in the banner should disappear after few seconds.
+      setTimeout(() => {
+        setSurveyIsShown(false);
+      }, 3000);
+    } catch (err) {
+      toggleNotification({
+        type: 'warning',
+        message: formatMessage({ id: 'notification.error', defaultMessage: 'An error occurred' }),
+      });
+    }
   };
 
   const handleDismiss = () => {
@@ -259,7 +252,7 @@ const NpsSurvey = () => {
           npsSurveyRating: yup.number().required(),
         })}
       >
-        {({ values, handleChange, setFieldValue }) => (
+        {({ values, handleChange, setFieldValue, isSubmitting }) => (
           <Form name="npsSurveyForm">
             <Flex
               hasRadius
@@ -366,7 +359,7 @@ const NpsSurvey = () => {
                           {values.npsSurveyFeedback}
                         </Textarea>
                       </Box>
-                      <Button marginBottom={2} type="submit" loading={isLoading}>
+                      <Button marginBottom={2} type="submit" loading={isSubmitting}>
                         {formatMessage({
                           id: 'app.components.NpsSurvey.submit-feedback',
                           defaultMessage: 'Submit Feedback',

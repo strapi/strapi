@@ -1,35 +1,28 @@
 import { Box, Button, Flex, Main, TextInput, Typography } from '@strapi/design-system';
 import { Link } from '@strapi/design-system/v2';
-import { Form, translatedErrors, useFetchClient } from '@strapi/helper-plugin';
+import { Form, translatedErrors, useAPIErrorHandler } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
 import { NavLink, useHistory } from 'react-router-dom';
 import * as yup from 'yup';
 
-import { ForgotPassword } from '../../../../../shared/contracts/authentication';
 import { Logo } from '../../../components/UnauthenticatedLogo';
 import {
   Column,
   LayoutContent,
   UnauthenticatedLayout,
 } from '../../../layouts/UnauthenticatedLayout';
+import { useForgotPasswordMutation } from '../../../services/auth';
+import { isBaseQueryError } from '../../../utils/baseQuery';
+
+import type { ForgotPassword } from '../../../../../shared/contracts/authentication';
 
 const ForgotPassword = () => {
   const { push } = useHistory();
-  const { post } = useFetchClient();
   const { formatMessage } = useIntl();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { mutate, isError } = useMutation(
-    async (body: ForgotPassword.Request['body']) => {
-      await post('/admin/forgot-password', body);
-    },
-    {
-      onSuccess() {
-        push('/auth/forgot-password-success');
-      },
-    }
-  );
+  const [forgotPassword, { error }] = useForgotPasswordMutation();
 
   return (
     <UnauthenticatedLayout>
@@ -45,12 +38,14 @@ const ForgotPassword = () => {
                 })}
               </Typography>
             </Box>
-            {isError ? (
+            {error ? (
               <Typography id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
-                {formatMessage({
-                  id: 'notification.error',
-                  defaultMessage: 'An error occurred',
-                })}
+                {isBaseQueryError(error)
+                  ? formatAPIError(error)
+                  : formatMessage({
+                      id: 'notification.error',
+                      defaultMessage: 'An error occurred',
+                    })}
               </Typography>
             ) : null}
           </Column>
@@ -59,8 +54,12 @@ const ForgotPassword = () => {
             initialValues={{
               email: '',
             }}
-            onSubmit={(values) => {
-              mutate(values);
+            onSubmit={async (body) => {
+              const res = await forgotPassword(body);
+
+              if (!('error' in res)) {
+                push('/auth/forgot-password-success');
+              }
             }}
             validationSchema={yup.object().shape({
               email: yup.string().email(translatedErrors.email).required(translatedErrors.required),

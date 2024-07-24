@@ -11,6 +11,7 @@ import type {
   DeleteRelease,
   GetContentTypeEntryReleases,
   GetReleases,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -40,9 +41,9 @@ const releaseController = {
       const hasEntryAttached: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] =
         typeof query.hasEntryAttached === 'string' ? JSON.parse(query.hasEntryAttached) : false;
 
-      const data = await releaseService.findManyForContentTypeEntry(contentTypeUid, entryId, {
-        hasEntryAttached,
-      });
+      const data = hasEntryAttached
+        ? await releaseService.findManyWithContentTypeEntryAttached(contentTypeUid, entryId)
+        : await releaseService.findManyWithoutContentTypeEntryAttached(contentTypeUid, entryId);
 
       ctx.body = { data };
     } else {
@@ -62,7 +63,13 @@ const releaseController = {
         };
       });
 
-      ctx.body = { data, meta: { pagination } };
+      const pendingReleasesCount = await strapi.query(RELEASE_MODEL_UID).count({
+        where: {
+          releasedAt: null,
+        },
+      });
+
+      ctx.body = { data, meta: { pagination, pendingReleasesCount } };
     }
   },
 
@@ -70,23 +77,22 @@ const releaseController = {
     const id: GetRelease.Request['params']['id'] = ctx.params.id;
 
     const releaseService = getService('release', { strapi });
-
     const release = await releaseService.findOne(id, { populate: ['createdBy'] });
-    const permissionsManager = strapi.admin.services.permission.createPermissionsManager({
-      ability: ctx.state.userAbility,
-      model: RELEASE_MODEL_UID,
-    });
-    const sanitizedRelease = await permissionsManager.sanitizeOutput(release);
+    if (!release) {
+      throw new errors.NotFoundError(`Release not found for id: ${id}`);
+    }
 
     const count = await releaseService.countActions({
       filters: {
         release: id,
       },
     });
-
-    if (!release) {
-      throw new errors.NotFoundError(`Release not found for id: ${id}`);
-    }
+    const sanitizedRelease = {
+      ...release,
+      createdBy: release.createdBy
+        ? strapi.admin.services.user.sanitizeUser(release.createdBy)
+        : null,
+    };
 
     // Format the data object
     const data = {
@@ -99,6 +105,40 @@ const releaseController = {
     };
 
     ctx.body = { data };
+  },
+
+  async mapEntriesToReleases(ctx: Koa.Context) {
+    const { contentTypeUid, entriesIds } = ctx.query;
+
+    if (!contentTypeUid || !entriesIds) {
+      throw new errors.ValidationError('Missing required query parameters');
+    }
+
+    const releaseService = getService('release', { strapi });
+
+    const releasesWithActions = await releaseService.findManyWithContentTypeEntryAttached(
+      contentTypeUid,
+      entriesIds
+    );
+
+    const mappedEntriesInReleases = releasesWithActions.reduce(
+      (acc: MapEntriesToReleases.Response['data']['mappedEntriesInReleases'], release: Release) => {
+        release.actions.forEach((action) => {
+          if (!acc[action.entry.id]) {
+            acc[action.entry.id] = [{ id: release.id, name: release.name }];
+          } else {
+            acc[action.entry.id].push({ id: release.id, name: release.name });
+          }
+        });
+
+        return acc;
+      },
+      {} as MapEntriesToReleases.Response['data']['mappedEntriesInReleases']
+    );
+
+    ctx.body = {
+      data: mappedEntriesInReleases,
+    };
   },
 
   async create(ctx: Koa.Context) {
@@ -158,8 +198,28 @@ const releaseController = {
     const releaseService = getService('release', { strapi });
     const release = await releaseService.publish(id, { user });
 
+    const [countPublishActions, countUnpublishActions] = await Promise.all([
+      releaseService.countActions({
+        filters: {
+          release: id,
+          type: 'publish',
+        },
+      }),
+      releaseService.countActions({
+        filters: {
+          release: id,
+          type: 'unpublish',
+        },
+      }),
+    ]);
+
     ctx.body = {
       data: release,
+      meta: {
+        totalEntries: countPublishActions + countUnpublishActions,
+        totalPublishedEntries: countPublishActions,
+        totalUnpublishedEntries: countUnpublishActions,
+      },
     };
   },
 };

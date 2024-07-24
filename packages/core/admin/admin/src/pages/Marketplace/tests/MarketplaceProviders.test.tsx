@@ -6,9 +6,6 @@ import { Route } from 'react-router-dom';
 
 import { MarketplacePage } from '../MarketplacePage';
 
-// Increase the jest timeout to accommodate long running tests
-jest.setTimeout(50000);
-
 /**
  * MOCKS
  */

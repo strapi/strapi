@@ -4,15 +4,6 @@ import { rest } from 'msw';
 
 import { NpsSurvey } from '../NpsSurvey';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  auth: {
-    getUserInfo: jest.fn(() => ({
-      email: 'john@doe.com',
-    })),
-  },
-}));
-
 const localStorageMock = {
   getItem: jest.fn(),
   setItem: jest.fn(),
@@ -248,8 +239,8 @@ describe('NPS survey', () => {
 
   it('respects the delay after first user dismissal', async () => {
     const initialDate = new Date('2020-01-01');
-    const withinDelay = new Date('2020-01-04');
-    const beyondDelay = new Date('2020-01-08');
+    const withinDelay = new Date('2020-01-08');
+    const beyondDelay = new Date('2020-01-15');
 
     localStorageMock.getItem.mockImplementation((key) => {
       if (key === NPS_KEY) {

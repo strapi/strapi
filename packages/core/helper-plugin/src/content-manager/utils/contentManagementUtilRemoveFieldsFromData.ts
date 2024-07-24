@@ -2,13 +2,13 @@ import get from 'lodash/get';
 
 import { getOtherInfos, getType } from './getAttributeInfos';
 
-import type { Schema } from '@strapi/types';
+import type { Attribute, Schema } from '@strapi/types';
 
 const defaultFields = ['createdBy', 'updatedBy', 'publishedAt', 'id', '_id'];
 
 const contentManagementUtilRemoveFieldsFromData = <
   TSchema extends Schema.ContentType,
-  TData extends Record<keyof TSchema['attributes'], unknown>
+  TData extends { [K in keyof TSchema['attributes']]: Attribute.GetValue<TSchema['attributes'][K]> }
 >(
   data: TData,
   contentTypeSchema: TSchema,
@@ -17,7 +17,9 @@ const contentManagementUtilRemoveFieldsFromData = <
 ) => {
   const recursiveCleanData = <
     TSchemum extends Schema.Schema,
-    TDatum extends { [P in keyof TSchemum['attributes']]: unknown }
+    TDatum extends {
+      [P in keyof TSchemum['attributes']]: Attribute.GetValue<TSchemum['attributes'][P]>;
+    }
   >(
     data: TDatum,
     schema: TSchemum
@@ -44,6 +46,7 @@ const contentManagementUtilRemoveFieldsFromData = <
       }
 
       if (attrType === 'dynamiczone' && Array.isArray(value)) {
+        // @ts-expect-error – TODO: fix the fact we can't assign this.
         acc[current] = value.map((componentValue) => {
           const subCleanedData = recursiveCleanData(
             componentValue,
@@ -58,12 +61,14 @@ const contentManagementUtilRemoveFieldsFromData = <
 
       if (attrType === 'component') {
         if (isRepeatable && Array.isArray(value)) {
+          // @ts-expect-error – TODO: fix the fact we can't assign this.
           acc[current] = value.map((compoData) => {
             const subCleanedData = recursiveCleanData(compoData, componentSchema[component]);
 
             return subCleanedData;
           });
         } else {
+          // @ts-expect-error – TODO: fix the fact we can't assign this.
           acc[current] = recursiveCleanData(value, componentSchema[component]);
         }
 
@@ -71,7 +76,7 @@ const contentManagementUtilRemoveFieldsFromData = <
       }
 
       return acc;
-    }, Object.assign({}, data) as Record<string, unknown>);
+    }, Object.assign({}, data) as TDatum);
   };
 
   return recursiveCleanData(data, contentTypeSchema);

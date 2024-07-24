@@ -43,8 +43,8 @@ const createCoreController = <
 
     Object.setPrototypeOf(userCtrl, baseController);
 
-    const isCustomController = typeof cfg !== 'undefined';
-    if (isCustomController) {
+    const isCustom = typeof cfg !== 'undefined';
+    if (isCustom) {
       Object.defineProperty(userCtrl, symbols.CustomController, {
         writable: false,
         configurable: false,

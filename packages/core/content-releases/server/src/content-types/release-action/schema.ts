@@ -33,11 +33,17 @@ export default {
       type: 'string',
       required: true,
     },
+    locale: {
+      type: 'string',
+    },
     release: {
       type: 'relation',
       relation: 'manyToOne',
       target: RELEASE_MODEL_UID,
       inversedBy: 'actions',
+    },
+    isEntryValid: {
+      type: 'boolean',
     },
   },
 };

@@ -16,10 +16,14 @@ const globalStyles = `
   }
 `;
 
+interface DefaultDocumentProps {
+  entryPath?: string;
+}
+
 /**
  * @internal
  */
-const DefaultDocument = () => {
+const DefaultDocument = ({ entryPath }: DefaultDocumentProps) => {
   return (
     <html lang="en">
       <head>
@@ -34,6 +38,7 @@ const DefaultDocument = () => {
       <body>
         <div id="strapi" />
         <NoJavascript />
+        {entryPath ? <script type="module" src={entryPath} /> : null}
       </body>
     </html>
   );

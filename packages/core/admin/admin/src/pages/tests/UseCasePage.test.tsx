@@ -5,12 +5,6 @@ import { UseCasePage } from '../UseCasePage';
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
-  auth: {
-    get: jest.fn(() => ({
-      firstname: 'Michka',
-      email: 'michka@ronronscelestes.com',
-    })),
-  },
 }));
 
 describe('Admin | UseCasePage', () => {

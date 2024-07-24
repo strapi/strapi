@@ -31,6 +31,7 @@ export default (opts: Opts) => {
       start: 'strapi start',
       build: 'strapi build',
       strapi: 'strapi',
+      deploy: 'strapi deploy',
     },
     devDependencies: {},
     dependencies: {

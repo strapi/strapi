@@ -17,6 +17,19 @@ const initialState = {
         conditions: [],
       },
     ],
+    collectionTypesRelatedPermissions: {
+      'api::category.category': {
+        'plugin::content-manager.explorer.update': [
+          {
+            action: 'plugin::content-manager.explorer.update',
+            subject: 'api::category.category',
+            properties: {
+              locales: ['en'],
+            },
+          },
+        ],
+      },
+    },
   },
 };
 

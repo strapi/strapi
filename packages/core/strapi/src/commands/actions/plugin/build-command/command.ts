@@ -6,7 +6,7 @@ import action from './action';
 /**
  * `$ strapi plugin:build`
  */
-const command: StrapiCommand = ({ command }) => {
+const command: StrapiCommand = ({ command, ctx }) => {
   command
     .command('plugin:build')
     .description('Bundle your strapi plugin for publishing.')
@@ -15,7 +15,7 @@ const command: StrapiCommand = ({ command }) => {
     .option('--silent', "Don't log anything", false)
     .option('--sourcemap', 'produce sourcemaps', false)
     .option('--minify', 'minify the output', false)
-    .action(runAction('plugin:build', action));
+    .action((...args) => runAction('plugin:build', action)(...args, ctx));
 };
 
 export default command;

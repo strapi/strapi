@@ -1,6 +1,5 @@
 import { GraphQLDateTime, GraphQLLong, GraphQLJSON } from 'graphql-scalars';
-// eslint-disable-next-line import/extensions
-import GraphQLUpload from 'graphql-upload/GraphQLUpload.js';
+import { GraphQLUpload } from 'graphql-upload';
 import { asNexusMethod } from 'nexus';
 
 import TimeScalar from './time';

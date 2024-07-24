@@ -8,9 +8,6 @@ jest.mock('@strapi/helper-plugin', () => ({
    * DISABLES NPS SURVEY
    */
   usePersistentState: jest.fn().mockImplementation(() => [{ enabled: false }, jest.fn()]),
-  auth: {
-    get: () => ({ firstname: 'kai', lastname: 'doe', email: 'testemail@strapi.io' }),
-  },
   useGuidedTour: jest.fn(() => ({
     setGuidedTourVisibility: jest.fn(),
   })),

@@ -43,22 +43,21 @@ export type RootLevelOperatorFiltering<TSchemaUID extends Common.UID.Schema> = {
  * Represents a type for filtering on attributes based on a given schema.
  *  @template TSchemaUID - The UID of the schema.
  */
-export type AttributesFiltering<TSchemaUID extends Common.UID.Schema> = Utils.Guard.Never<
-  // Combines filtering for scalar and nested attributes based on schema UID
-  ScalarAttributesFiltering<TSchemaUID> & NestedAttributeFiltering<TSchemaUID>,
-  // Abstract representation of the filter object tree in case we don't have access to the attributes' list
-  {
-    [TKey in string]?:
-      | AttributeCondition<TSchemaUID, never>
-      | NestedAttributeCondition<TSchemaUID, never>;
-  }
->;
-
+export type AttributesFiltering<TSchemaUID extends Common.UID.Schema> =
+  // Manually added filtering on virtual ID attribute
+  IDFiltering &
+    Utils.Expression.If<
+      Common.AreSchemaRegistriesExtended,
+      // Combines filtering for scalar and nested attributes based on schema UID
+      ScalarAttributesFiltering<TSchemaUID> & NestedAttributeFiltering<TSchemaUID>,
+      // Abstract representation of the filter object tree in case we don't have access to the attributes' list
+      AbstractAttributesFiltering<TSchemaUID>
+    >;
 /**
  * Definition of scalar attribute filtering for a given schema UID.
  * @template TSchemaUID - The UID of the schema.
  */
-export type ScalarAttributesFiltering<TSchemaUID extends Common.UID.Schema> = IDFiltering & {
+export type ScalarAttributesFiltering<TSchemaUID extends Common.UID.Schema> = {
   [TKey in AttributeUtils.GetScalarKeys<TSchemaUID>]?: AttributeCondition<TSchemaUID, TKey>;
 };
 
@@ -141,3 +140,9 @@ type NestedAttributeCondition<
   // Ensure the resolved target isn't `never`, else, fallback to Common.UID.Schema
   Utils.Guard.Never<Attribute.GetTarget<TSchemaUID, TAttributeName>, Common.UID.Schema>
 >;
+
+export type AbstractAttributesFiltering<TSchemaUID extends Common.UID.Schema> = {
+  [TKey in string]?:
+    | AttributeCondition<TSchemaUID, never>
+    | NestedAttributeCondition<TSchemaUID, never>;
+};

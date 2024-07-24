@@ -17,34 +17,25 @@ import {
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
-  useFetchClient,
+  useAPIErrorHandler,
   useFocusWhenNavigate,
   useNotification,
 } from '@strapi/helper-plugin';
 import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'react-query';
 import { useSelector } from 'react-redux';
 
 import { selectAdminPermissions } from '../selectors';
+import { useGetPluginsQuery } from '../services/admin';
 
 const InstalledPluginsPage = () => {
   const { formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
   const toggleNotification = useNotification();
-  const { get } = useFetchClient();
+  const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   useFocusWhenNavigate();
 
-  const { status, data, error } = useQuery(['plugins'], async () => {
-    /**
-     * TODO: why is this a different format?
-     */
-    const { data } = await get<{
-      plugins: Array<{ name: string; displayName: string; description: string }>;
-    }>('/admin/plugins');
-
-    return data;
-  });
+  const { isLoading, data, error } = useGetPluginsQuery();
 
   React.useEffect(() => {
     if (data) {
@@ -67,12 +58,10 @@ const InstalledPluginsPage = () => {
     if (error) {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: formatAPIError(error),
       });
     }
-  }, [data, error, formatMessage, notifyStatus, toggleNotification]);
-
-  const isLoading = status !== 'success' && status !== 'error';
+  }, [data, error, formatAPIError, formatMessage, notifyStatus, toggleNotification]);
 
   if (isLoading) {
     return (
