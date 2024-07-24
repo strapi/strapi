@@ -266,7 +266,10 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       populate: {
         [key: string]: {
           on: {
-            [key: string]: { where: { [key: string]: string | number | boolean } };
+            [key: string]: {
+              select: string[];
+              where: { [key: string]: string | number | boolean };
+            };
           };
         };
       };
@@ -280,7 +283,10 @@ const addUniqueValidator = <T extends yup.AnySchema>(
       populate: {
         [startOfPath]: {
           on: {
-            [targetComponentUID]: { where: { [updatedAttribute.name]: updatedAttribute.value } },
+            [targetComponentUID]: {
+              select: ['id'],
+              where: { [updatedAttribute.name]: updatedAttribute.value },
+            },
           },
         },
       },
