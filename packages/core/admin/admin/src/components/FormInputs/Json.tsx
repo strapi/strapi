@@ -24,7 +24,9 @@ const JsonInput = forwardRef<JSONInputRef, InputProps>(
         <Field.Label action={labelAction}>{label}</Field.Label>
         <JSONInputImpl
           ref={composedRefs}
-          value={field.value}
+          value={
+            typeof field.value == 'object' ? JSON.stringify(field.value, null, 2) : field.value
+          }
           onChange={(json) => {
             // Default to null when the field is not required and there is no input value
             const value = required && !json.length ? null : json;
