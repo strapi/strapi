@@ -9,6 +9,7 @@ export default createPolicy({
   validator: validateHasPermissionsInput,
   /**
    * NOTE: Action aliases are currently not checked at this level (policy).
+   *       This is currently the intended behavior to avoid changing the behavior of API related permissions.
    *       If you want to add support for it, please create a dedicated RFC with a list of potential side effect this could have.
    */
   handler(ctx: Context, config = {}) {
