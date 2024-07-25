@@ -13,13 +13,14 @@ import {
   CardTitle,
   Flex,
   IconButton,
+  Typography,
 } from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { getTrad } from '../../utils';
+// TODO: use the `getTrad` function from the `utils` package when the migration to TS is over
+import { getTrad } from '../../utils/getTrad';
 
 const Extension = styled.span`
   text-transform: uppercase;
@@ -43,35 +44,45 @@ const CardContainer = styled(Card)`
   }
 `;
 
-export const AssetCardBase = ({
+interface AssetCardBaseProps {
+  children?: React.ReactNode;
+  extension: string;
+  isSelectable?: boolean;
+  name: string;
+  onSelect?: () => void;
+  onRemove?: React.MouseEventHandler<HTMLButtonElement>;
+  onEdit?: React.MouseEventHandler<HTMLElement>;
+  selected?: boolean;
+  subtitle?: string;
+  variant: 'Image' | 'Video' | 'Audio' | 'Doc';
+}
+
+export const AssetCardBase: React.FC<AssetCardBaseProps> = ({
   children,
   extension,
-  isSelectable,
+  isSelectable = true,
   name,
   onSelect,
   onRemove,
   onEdit,
-  selected,
-  subtitle,
-  variant,
+  selected = false,
+  subtitle = '',
+  variant = 'Image',
 }) => {
   const { formatMessage } = useIntl();
 
-  /** @type {import("react").MouseEventHandler<HTMLDivElement> } */
-  const handleClick = (e) => {
+  const handleClick: React.MouseEventHandler<HTMLDivElement> = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (onEdit) {
       onEdit(e);
     }
   };
 
   /**
-   * @type {import("react").MouseEventHandler<HTMLDivElement> }
-   *
    * This is required because we need to stop the propagation of the event
    * bubbling to the `CardContainer`, however the `CardCheckbox` only returns
    * the `boolean` value as opposed to the event itself.
    */
-  const handlePropagationClick = (e) => {
+  const handlePropagationClick: React.MouseEventHandler<HTMLDivElement> = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     e.stopPropagation();
   };
 
@@ -113,7 +124,9 @@ export const AssetCardBase = ({
       <CardBody>
         <CardContent>
           <Box paddingTop={1}>
-            <CardTitle tag="h2">{name}</CardTitle>
+            <Typography tag='h2'>
+              <CardTitle tag='span'>{name}</CardTitle>
+            </Typography>          
           </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>
@@ -131,28 +144,4 @@ export const AssetCardBase = ({
       </CardBody>
     </CardContainer>
   );
-};
-
-AssetCardBase.defaultProps = {
-  children: undefined,
-  isSelectable: true,
-  onEdit: undefined,
-  onSelect: undefined,
-  onRemove: undefined,
-  selected: false,
-  subtitle: '',
-  variant: 'Image',
-};
-
-AssetCardBase.propTypes = {
-  children: PropTypes.node,
-  extension: PropTypes.string.isRequired,
-  isSelectable: PropTypes.bool,
-  name: PropTypes.string.isRequired,
-  onEdit: PropTypes.func,
-  onSelect: PropTypes.func,
-  onRemove: PropTypes.func,
-  selected: PropTypes.bool,
-  subtitle: PropTypes.string,
-  variant: PropTypes.oneOf(['Image', 'Video', 'Audio', 'Doc']),
 };

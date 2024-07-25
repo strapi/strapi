@@ -71,12 +71,12 @@ describe('DocAssetCard', () => {
         padding-block-start: 4px;
       }
 
-      .c25 {
+      .c26 {
         padding-block-start: 4px;
         flex-grow: 1;
       }
 
-      .c28 {
+      .c29 {
         background: #eaeaef;
         padding-inline-end: 8px;
         padding-inline-start: 8px;
@@ -103,13 +103,13 @@ describe('DocAssetCard', () => {
         flex-direction: row;
       }
 
-      .c26 {
+      .c27 {
         align-items: center;
         display: flex;
         flex-direction: row;
       }
 
-      .c29 {
+      .c30 {
         align-items: center;
         display: inline-flex;
         flex-direction: row;
@@ -117,19 +117,25 @@ describe('DocAssetCard', () => {
       }
 
       .c22 {
+        font-size: 1.4rem;
+        line-height: 1.43;
+        color: currentcolor;
+      }
+
+      .c23 {
         font-size: 1.2rem;
         line-height: 1.33;
         font-weight: 600;
         color: #32324d;
       }
 
-      .c23 {
+      .c24 {
         font-size: 1.2rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c32 {
+      .c33 {
         font-weight: 600;
         font-size: 1.1rem;
         line-height: 1.45;
@@ -149,7 +155,7 @@ describe('DocAssetCard', () => {
         width: 1px;
       }
 
-      .c30 {
+      .c31 {
         border-radius: 4px;
         padding-block: 0.7rem;
       }
@@ -203,12 +209,12 @@ describe('DocAssetCard', () => {
         right: 12px;
       }
 
-      .c27 {
+      .c28 {
         margin-left: auto;
         flex-shrink: 0;
       }
 
-      .c31 {
+      .c32 {
         margin-left: 4px;
       }
 
@@ -272,7 +278,7 @@ describe('DocAssetCard', () => {
         color: #666687;
       }
 
-      .c24 {
+      .c25 {
         text-transform: uppercase;
       }
 
@@ -356,9 +362,7 @@ describe('DocAssetCard', () => {
                 </svg>
                 <span
                   class="c14"
-                >
-                  Edit
-                </span>
+                />
               </button>
             </div>
             <div
@@ -396,35 +400,37 @@ describe('DocAssetCard', () => {
                 >
                   <h2
                     class="c22"
-                    id=":r0:-title"
                   >
-                    hello.png
+                    <span
+                      class="c23"
+                      id=":r0:-title"
+                    >
+                      hello.png
+                    </span>
                   </h2>
                 </div>
                 <div
-                  class="c23"
+                  class="c24"
                 >
                   <span
-                    class="c24"
+                    class="c25"
                   >
                     png
                   </span>
                 </div>
               </div>
               <div
-                class="c25 c26"
+                class="c26 c27"
               >
                 <div
-                  class="c27"
+                  class="c28"
                 >
                   <div
-                    class="c28 c29 c30 c31"
+                    class="c29 c30 c31 c32"
                   >
                     <span
-                      class="c32"
-                    >
-                      Doc
-                    </span>
+                      class="c33"
+                    />
                   </div>
                 </div>
               </div>
