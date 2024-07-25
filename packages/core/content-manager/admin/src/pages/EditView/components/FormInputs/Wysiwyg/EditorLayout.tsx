@@ -102,14 +102,16 @@ const EditorLayout = ({
   }
 
   return (
-    <Box
+    <Flex
       borderColor={error ? 'danger600' : 'neutral200'}
       borderStyle="solid"
       borderWidth="1px"
       hasRadius
+      direction="column"
+      alignItems="stretch"
     >
       {children}
-    </Box>
+    </Flex>
   );
 };
 

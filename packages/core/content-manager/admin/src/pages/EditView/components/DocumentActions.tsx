@@ -190,6 +190,8 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
         onClick={handleClick(action)}
         justifyContent="center"
         variant={action.variant || 'default'}
+        paddingTop="7px"
+        paddingBottom="7px"
       >
         {action.label}
       </Button>
