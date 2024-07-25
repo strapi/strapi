@@ -169,6 +169,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       }),
       providesTags: (result, _error, arg) => {
         return [
+          { type: 'Document', id: `ALL_LIST` },
           { type: 'Document', id: `${arg.model}_LIST` },
           ...(result?.results.map(({ documentId }) => ({
             type: 'Document' as const,
