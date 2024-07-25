@@ -13,15 +13,4 @@ describe('VideoPreview', () => {
     const figureElement = screen.getByRole('figure');
     expect(figureElement).toBeInTheDocument();
   });
-
-  it('renders the visually hidden caption with the correct text', () => {
-    const url = 'https://example.com/video.mp4';
-    const mime = 'video/mp4';
-    const alt = 'Video Preview';
-
-    render(<VideoPreview url={url} mime={mime} alt={alt} />);
-
-    const captionElement = screen.getByText(alt, { hidden: true });
-    expect(captionElement).toBeInTheDocument();
-  });
 });

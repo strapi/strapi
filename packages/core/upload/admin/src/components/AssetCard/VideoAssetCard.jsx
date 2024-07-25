@@ -4,7 +4,8 @@ import { Box, CardAsset, CardTimer } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
-import { formatDuration } from '../../utils';
+// TODO: Replace it with the import from utils when all the utils are migrated to typescript
+import { formatDuration } from '../../utils/formatDuration';
 
 import { AssetCardBase } from './AssetCardBase';
 import { VideoPreview } from './VideoPreview';
@@ -21,7 +22,7 @@ const VideoPreviewWrapper = styled(Box)`
 
 export const VideoAssetCard = ({ name, url, mime, size, ...props }) => {
   const [duration, setDuration] = useState();
-
+  
   const formattedDuration = duration && formatDuration(duration);
 
   return (
