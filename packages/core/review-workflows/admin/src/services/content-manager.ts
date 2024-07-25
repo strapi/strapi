@@ -14,6 +14,8 @@ interface ContentTypes {
   singleType: ContentType[];
 }
 
+const SINGLE_TYPES = 'single-types';
+
 const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
   endpoints: (builder) => ({
     getStages: builder.query<
@@ -51,13 +53,13 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         },
       }),
       transformResponse: (res: UpdateStage.Response) => res.data,
-      // @ts-expect-error - FIXME: TS isn't aware that "Document" was added as a tag
-      invalidatesTags(result, error, args) {
+      invalidatesTags: (_result, _error, { slug, id, model }) => {
         return [
           {
             type: 'Document',
-            id: `${args.model}_${args.id}`,
+            id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
           },
+          { type: 'Document', id: `${model}_LIST` },
         ];
       },
     }),
@@ -74,13 +76,13 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         },
       }),
       transformResponse: (res: UpdateAssignee.Response) => res.data,
-      // @ts-expect-error - FIXME: TSisn't aware that "Document" was added as a tag
-      invalidatesTags(result, error, args) {
+      invalidatesTags: (_result, _error, { slug, id, model }) => {
         return [
           {
             type: 'Document',
-            id: `${args.model}_${args.id}`,
+            id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
           },
+          { type: 'Document', id: `${model}_LIST` },
         ];
       },
     }),
