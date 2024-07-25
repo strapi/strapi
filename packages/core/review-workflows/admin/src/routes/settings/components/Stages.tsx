@@ -626,7 +626,6 @@ const PermissionsField = ({ disabled, name, placeholder, required }: Permissions
                 defaultMessage: 'Apply to all stages',
               })}
               size="L"
-              variant="secondary"
             >
               <Duplicate />
             </IconButton>

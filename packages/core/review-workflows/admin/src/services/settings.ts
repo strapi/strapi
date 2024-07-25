@@ -1,12 +1,6 @@
 import { reviewWorkflowsApi } from './api';
 
-import type {
-  Create,
-  Update,
-  Delete,
-  GetAll,
-  Get,
-} from '../../../shared/contracts/review-workflows';
+import type { Create, Update, Delete, GetAll } from '../../../shared/contracts/review-workflows';
 
 const settingsApi = reviewWorkflowsApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -18,39 +12,25 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
       GetWorkflowsParams | void
     >({
       query: (args) => {
-        const { id, ...params } = args ?? {};
-
         return {
-          url: `/review-workflows/workflows${id ? `/${id}` : ''}`,
+          url: '/review-workflows/workflows',
           method: 'GET',
           config: {
-            params,
+            params: args ?? {},
           },
         };
       },
-      transformResponse: (res: GetAll.Response | Get.Response) => {
-        let workflows: GetAll.Response['data'] = [];
-
-        if (Array.isArray(res.data)) {
-          workflows = res.data;
-        } else {
-          workflows = [res.data];
-        }
-
+      transformResponse: (res: GetAll.Response) => {
         return {
-          workflows,
+          workflows: res.data,
           meta: 'meta' in res ? res.meta : undefined,
         };
       },
-      providesTags: (res, _err, arg) => {
-        if (typeof arg === 'object' && 'id' in arg && arg.id !== '') {
-          return [{ type: 'ReviewWorkflow' as const, id: arg.id }];
-        } else {
-          return [
-            ...(res?.workflows.map(({ id }) => ({ type: 'ReviewWorkflow' as const, id })) ?? []),
-            { type: 'ReviewWorkflow' as const, id: 'LIST' },
-          ];
-        }
+      providesTags: (res) => {
+        return [
+          ...(res?.workflows.map(({ id }) => ({ type: 'ReviewWorkflow' as const, id })) ?? []),
+          { type: 'ReviewWorkflow' as const, id: 'LIST' },
+        ];
       },
     }),
     createWorkflow: builder.mutation<Create.Response['data'], Create.Request['body']>({
@@ -112,7 +92,7 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
   overrideExisting: false,
 });
 
-type GetWorkflowsParams = Get.Params | (GetAll.Request['query'] & { id?: never });
+type GetWorkflowsParams = GetAll.Request['query'];
 
 const {
   useGetWorkflowsQuery,

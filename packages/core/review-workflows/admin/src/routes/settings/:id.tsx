@@ -119,7 +119,7 @@ const EditPage = () => {
     error,
     update,
     create,
-  } = useReviewWorkflows({ id: isCreatingWorkflow ? undefined : id });
+  } = useReviewWorkflows();
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions['settings']?.['review-workflows']
   );
@@ -188,7 +188,7 @@ const EditPage = () => {
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         } else if ('data' in res) {
-          navigate(`../${res.data.id}`);
+          navigate(`../${res.data.id}`, { replace: true });
         }
       }
     } catch (error) {
@@ -397,7 +397,7 @@ const EditPage = () => {
                         {
                           count:
                             contentTypesFromOtherWorkflows?.filter((contentType) =>
-                              currentWorkflow?.contentTypes?.includes(contentType)
+                              values.contentTypes.includes(contentType)
                             ).length ?? 0,
                         }
                       )}
