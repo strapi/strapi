@@ -40,12 +40,18 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
         data,
       }),
       transformResponse: (res: Create.Response) => res.data,
-      invalidatesTags: [
-        { type: 'ReviewWorkflow' as const, id: 'LIST' },
-        'ReviewWorkflowStages',
-        { type: 'Document', id: `ALL_LIST` },
-        { type: 'ContentTypeSettings', id: 'LIST' },
-      ],
+      invalidatesTags(res) {
+        return [
+          { type: 'ReviewWorkflow' as const, id: 'LIST' },
+          'ReviewWorkflowStages',
+          { type: 'Document', id: `ALL_LIST` },
+          { type: 'ContentTypeSettings', id: 'LIST' },
+          ...(res?.contentTypes.map((uid) => ({
+            type: 'Document' as const,
+            id: `${uid}_ALL_ITEMS`,
+          })) ?? []),
+        ];
+      },
     }),
     updateWorkflow: builder.mutation<
       Update.Response['data'],
@@ -60,8 +66,12 @@ const settingsApi = reviewWorkflowsApi.injectEndpoints({
       invalidatesTags: (res, _err, arg) => [
         { type: 'ReviewWorkflow' as const, id: arg.id },
         'ReviewWorkflowStages',
-        { type: 'Document', id: `ALL_LIST` },
+        { type: 'Document', id: 'ALL_LIST' },
         { type: 'ContentTypeSettings', id: 'LIST' },
+        ...(res?.contentTypes.map((uid) => ({
+          type: 'Document' as const,
+          id: `${uid}_ALL_ITEMS`,
+        })) ?? []),
       ],
     }),
     deleteWorkflow: builder.mutation<Delete.Response['data'], Delete.Params>({
