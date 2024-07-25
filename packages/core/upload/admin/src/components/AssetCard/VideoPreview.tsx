@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React from 'react';
+import * as React from 'react';
 
 import { Box, BoxProps, VisuallyHidden } from '@strapi/design-system';
 

@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { Box, CardAsset, CardTimer } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
 // TODO: Replace it with the import from utils when all the utils are migrated to typescript
@@ -9,6 +8,8 @@ import { formatDuration } from '../../utils/formatDuration';
 
 import { AssetCardBase } from './AssetCardBase';
 import { VideoPreview } from './VideoPreview';
+
+import type { AssetCardBaseProps } from './AssetCardBase';
 
 const VideoPreviewWrapper = styled(Box)`
   canvas,
@@ -20,8 +21,14 @@ const VideoPreviewWrapper = styled(Box)`
   }
 `;
 
-export const VideoAssetCard = ({ name, url, mime, size, ...props }) => {
-  const [duration, setDuration] = useState();
+export interface VideoAssetCardProps extends AssetCardBaseProps {
+  mime: string;
+  url: string;
+  size?: 'S' | 'M';
+}
+
+export const VideoAssetCard: React.FC<VideoAssetCardProps> = ({ name, url, mime, size = 'M', ...props }) => {
+  const [duration, setDuration] = React.useState<number>();
   
   const formattedDuration = duration && formatDuration(duration);
 
@@ -35,24 +42,4 @@ export const VideoAssetCard = ({ name, url, mime, size, ...props }) => {
       <CardTimer>{formattedDuration || '...'}</CardTimer>
     </AssetCardBase>
   );
-};
-
-VideoAssetCard.defaultProps = {
-  onSelect: undefined,
-  onEdit: undefined,
-  onRemove: undefined,
-  selected: false,
-  size: 'M',
-};
-
-VideoAssetCard.propTypes = {
-  extension: PropTypes.string.isRequired,
-  mime: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  onSelect: PropTypes.func,
-  onEdit: PropTypes.func,
-  onRemove: PropTypes.func,
-  url: PropTypes.string.isRequired,
-  selected: PropTypes.bool,
-  size: PropTypes.oneOf(['S', 'M']),
 };
