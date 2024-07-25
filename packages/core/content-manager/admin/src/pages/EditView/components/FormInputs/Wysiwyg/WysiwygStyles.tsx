@@ -44,6 +44,14 @@ export const ExpandButton = styled(Button)`
   border: none;
   align-items: center;
 
+  & > span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-weight: ${({ theme }) => theme.fontWeights.regular};
+  }
+
   svg {
     margin-left: ${({ theme }) => `${theme.spaces[2]}`};
     path {

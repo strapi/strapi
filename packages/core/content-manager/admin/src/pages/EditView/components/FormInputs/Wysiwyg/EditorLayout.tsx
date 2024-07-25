@@ -78,7 +78,7 @@ const EditorLayout = ({
                     shrink={0}
                     width="100%"
                   >
-                    <ExpandButton onClick={onCollapse}>
+                    <ExpandButton onClick={onCollapse} variant="tertiary" size="M">
                       <Typography>
                         {formatMessage({
                           id: 'components.Wysiwyg.collapse',
@@ -128,6 +128,14 @@ const ExpandButton = styled(Button)`
   background-color: transparent;
   border: none;
   align-items: center;
+
+  & > span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-weight: ${({ theme }) => theme.fontWeights.regular};
+  }
 
   svg {
     margin-left: ${({ theme }) => `${theme.spaces[2]}`};
