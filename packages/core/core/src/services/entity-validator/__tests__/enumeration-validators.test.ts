@@ -1,6 +1,6 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-import validators from '../validators';
+import { Validators } from '../validators';
 
 describe('Enumeration validator', () => {
   const fakeModel: Schema.ContentType = {
@@ -25,7 +25,7 @@ describe('Enumeration validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.enumeration({
+        Validators.enumeration({
           attr: { type: 'enumeration', enum: ['strapi', 'headless'] },
           model: fakeModel,
           updatedAttribute: { name: 'attrFloatUnique', value: 1 },
@@ -42,7 +42,7 @@ describe('Enumeration validator', () => {
 
     test('it validates the value if it is part of the allowed values', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.enumeration({
+        Validators.enumeration({
           attr: { type: 'enumeration', enum: ['strapi', 'headless'] },
           model: fakeModel,
           updatedAttribute: { name: 'attrEnumUnique', value: 1 },

@@ -1,6 +1,6 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-import validators from '../validators';
+import { Validators } from '../validators';
 import { mockOptions } from './utils';
 
 describe('Float validator', () => {
@@ -41,7 +41,7 @@ describe('Float validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float' },
             model: fakeModel,
@@ -61,17 +61,15 @@ describe('Float validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators
-          .float(
-            {
-              attr: { type: 'float', unique: true },
-              model: fakeModel,
-              updatedAttribute: { name: 'attrFloatUnique', value: null },
-              entity: null,
-            },
-            mockOptions
-          )
-          .nullable()
+        Validators.float(
+          {
+            attr: { type: 'float', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrFloatUnique', value: null },
+            entity: null,
+          },
+          mockOptions
+        ).nullable()
       );
 
       await validator(null);
@@ -83,7 +81,7 @@ describe('Float validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float', unique: true },
             model: fakeModel,
@@ -102,7 +100,7 @@ describe('Float validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrFloatUnique: 2 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float', unique: true },
             model: fakeModel,
@@ -124,7 +122,7 @@ describe('Float validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrFloatUnique: 3 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float', unique: true },
             model: fakeModel,
@@ -142,7 +140,7 @@ describe('Float validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float', unique: true },
             model: fakeModel,
@@ -168,7 +166,7 @@ describe('Float validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float', unique: true },
             model: fakeModel,
@@ -199,7 +197,7 @@ describe('Float validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float', min: 3 },
             model: fakeModel,
@@ -219,7 +217,7 @@ describe('Float validator', () => {
 
     test('it validates the min constraint if the float is higher than the define min', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float', min: 3 },
             model: fakeModel,
@@ -239,7 +237,7 @@ describe('Float validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float', max: 3 },
             model: fakeModel,
@@ -259,7 +257,7 @@ describe('Float validator', () => {
 
     test('it validates the max constraint if the float is lower than the define max', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.float(
+        Validators.float(
           {
             attr: { type: 'float', max: 3 },
             model: fakeModel,

@@ -19,7 +19,7 @@ export default class JSONField extends Field {
         const parsedValue = JSON.parse(value);
 
         /**
-         * On Strapi 5 until 5.0.0-rc.6, the values were accidentally stringified twice when saved,
+         * On Strapi 5 until 5.0.0-rc.7, the values were accidentally stringified twice when saved,
          * so in those cases we need to parse them twice to retrieve the actual value.
          */
         if (typeof parsedValue === 'string') {

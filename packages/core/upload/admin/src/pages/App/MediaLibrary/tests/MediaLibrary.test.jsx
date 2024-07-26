@@ -67,6 +67,11 @@ jest.mock('../../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../../hooks/useFolders');
 jest.mock('../../../../hooks/useFolder');
 jest.mock('../../../../hooks/useAssets');
+jest.mock('../../../../hooks/useFolderStructure', () => ({
+  useFolderStructure: jest
+    .fn()
+    .mockReturnValue({ data: [{ label: 'Folder 1', value: 1, children: [] }], isLoading: false }),
+}));
 jest.mock('../../../../hooks/useSelectionState', () => ({
   useSelectionState: jest
     .fn()

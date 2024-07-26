@@ -72,6 +72,15 @@ module.exports = {
         },
       },
     },
+    identifiersDz: {
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+      type: 'dynamiczone',
+      components: ['article.compo-unique-all'],
+    },
     categories: {
       type: 'relation',
       relation: 'manyToMany',

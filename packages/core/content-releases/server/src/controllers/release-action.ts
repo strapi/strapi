@@ -8,14 +8,14 @@ import {
 } from './validation/release-action';
 import type {
   CreateReleaseAction,
-  // CreateManyReleaseActions,
+  CreateManyReleaseActions,
   GetReleaseActions,
   UpdateReleaseAction,
   DeleteReleaseAction,
 } from '../../../shared/contracts/release-actions';
 import { getService } from '../utils';
 import { RELEASE_ACTION_MODEL_UID } from '../constants';
-// import { AlreadyOnReleaseError } from '../services/validation';
+import { AlreadyOnReleaseError } from '../services/validation';
 
 const releaseActionController = {
   async create(ctx: Koa.Context) {
@@ -32,13 +32,14 @@ const releaseActionController = {
     });
   },
 
-  /*
   async createMany(ctx: Koa.Context) {
     const releaseId: CreateManyReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
     const releaseActionsArgs = ctx.request.body as CreateManyReleaseActions.Request['body'];
+
     await Promise.all(
       releaseActionsArgs.map((releaseActionArgs) => validateReleaseAction(releaseActionArgs))
     );
+
     const releaseActionService = getService('release-action', { strapi });
     const releaseActions = await strapi.db.transaction(async () => {
       const releaseActions = await Promise.all(
@@ -57,7 +58,9 @@ const releaseActionController = {
       );
       return releaseActions;
     });
+
     const newReleaseActions = releaseActions.filter((action) => action !== null);
+
     ctx.created({
       data: newReleaseActions,
       meta: {
@@ -66,7 +69,6 @@ const releaseActionController = {
       },
     });
   },
-  */
 
   async findMany(ctx: Koa.Context) {
     const releaseId: GetReleaseActions.Request['params']['releaseId'] = ctx.params.releaseId;
