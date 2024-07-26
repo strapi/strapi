@@ -15,6 +15,7 @@
   "content-releases.content-manager-edit-view.edit-entry": "Edit entry",
   "content-manager-edit-view.remove-from-release.notification.success": "Entry removed from release",
   "content-manager-edit-view.release-action-menu": "Release action options",
+  "content-manager.list-view.releases.header": "To be released in",
   "content-manager-list-view.add-to-release": "Add to release",
   "content-manager-list-view.add-to-release.cancel-button": "Cancel",
   "content-manager-list-view.add-to-release.continue-button": "Continue",

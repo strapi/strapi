@@ -1,6 +1,6 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-import validators from '../validators';
+import { Validators } from '../validators';
 
 describe('Email validator', () => {
   const fakeModel: Schema.ContentType = {
@@ -25,7 +25,7 @@ describe('Email validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.email(
+        Validators.email(
           {
             attr: { type: 'email' },
             model: fakeModel,
@@ -45,7 +45,7 @@ describe('Email validator', () => {
 
     test('it validates the email if it is valid', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.email(
+        Validators.email(
           {
             attr: { type: 'email' },
             model: fakeModel,
@@ -61,7 +61,7 @@ describe('Email validator', () => {
 
     test('it validates non-empty email required field', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.email(
+        Validators.email(
           {
             attr: { type: 'email' },
             model: fakeModel,

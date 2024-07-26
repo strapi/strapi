@@ -72,11 +72,9 @@ export declare namespace CreateManyReleaseActions {
     };
     body: Array<{
       type: ReleaseAction['type'];
-      entry: {
-        id: ReleaseActionEntry['id'];
-        locale?: ReleaseActionEntry['locale'];
-        contentType: UID.ContentType;
-      };
+      contentType: UID.ContentType;
+      entryDocumentId: ReleaseActionEntry['documentId'];
+      locale?: ReleaseActionEntry['locale'];
     }>;
   }
 

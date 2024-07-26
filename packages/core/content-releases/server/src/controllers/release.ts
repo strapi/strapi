@@ -10,7 +10,7 @@ import type {
   Release,
   DeleteRelease,
   GetReleases,
-  // MapEntriesToReleases,
+  MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
 import type { UserInfo } from '../../../shared/types';
 import { getService } from '../utils';
@@ -156,35 +156,51 @@ const releaseController = {
     ctx.body = { data };
   },
 
-  /* @TODO: Migrate to new api 
   async mapEntriesToReleases(ctx: Koa.Context) {
-    const { contentTypeUid, entriesIds } = ctx.query;
+    const { contentTypeUid, documentIds, locale } = ctx.query;
 
-    if (!contentTypeUid || !entriesIds) {
+    if (!contentTypeUid || !documentIds) {
       throw new errors.ValidationError('Missing required query parameters');
     }
 
     const releaseService = getService('release', { strapi });
 
-    const releasesWithActions = await releaseService.findMany(
-      contentTypeUid,
-      entriesIds
-    );
+    const releasesWithActions = await releaseService.findMany({
+      where: {
+        releasedAt: null,
+        actions: {
+          contentType: contentTypeUid,
+          entryDocumentId: {
+            $in: documentIds,
+          },
+          locale,
+        },
+      },
+      populate: {
+        actions: true,
+      },
+    });
 
     const mappedEntriesInReleases = releasesWithActions.reduce(
-      // TODO: Fix for v5 removed mappedEntriedToRelease
       (acc: MapEntriesToReleases.Response['data'], release: Release) => {
         release.actions.forEach((action) => {
-          if (!acc[action.entry.id]) {
-            acc[action.entry.id] = [{ id: release.id, name: release.name }];
+          if (action.contentType !== contentTypeUid) {
+            return;
+          }
+
+          if (locale && action.locale !== locale) {
+            return;
+          }
+
+          if (!acc[action.entryDocumentId]) {
+            acc[action.entryDocumentId] = [{ id: release.id, name: release.name }];
           } else {
-            acc[action.entry.id].push({ id: release.id, name: release.name });
+            acc[action.entryDocumentId].push({ id: release.id, name: release.name });
           }
         });
 
         return acc;
       },
-      // TODO: Fix for v5 removed mappedEntriedToRelease
       {} as MapEntriesToReleases.Response['data']
     );
 
@@ -192,7 +208,6 @@ const releaseController = {
       data: mappedEntriesInReleases,
     };
   },
-  */
 
   async create(ctx: Koa.Context) {
     const user: UserInfo = ctx.state.user;

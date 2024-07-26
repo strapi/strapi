@@ -28,11 +28,12 @@ const productModel = {
   },
 };
 
-// Skip all releases tests for now until releases is migrated to v5
-describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => {
+describeOnCondition(edition === 'EE')('Content Releases API', () => {
   const builder = createTestBuilder();
   let strapi;
   let rq;
+  let validEntries = [];
+  let invalidEntries = [];
 
   const createRelease = async (params: Partial<CreateRelease.Request['body']> = {}) => {
     return rq({
@@ -46,15 +47,12 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
     });
   };
 
-  const createReleaseAction = async (
-    releaseId,
-    { contentType, entryId, type, entryType = 'collection-types' }
-  ) => {
+  const createReleaseAction = async (releaseId, { contentType, entryDocumentId, type }) => {
     return rq({
       method: 'POST',
       url: `/content-releases/${releaseId}/actions`,
       body: {
-        entryDocumentId: entryId,
+        entryDocumentId,
         contentType,
         type,
       },
@@ -96,13 +94,15 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
     jest.setSystemTime(new Date('2024-01-01T00:00:00.000Z'));
 
     // Create products
-    await Promise.all([
+    validEntries = await Promise.all([
       createEntry(productUID, { name: 'Product 1', description: 'Description' }),
       createEntry(productUID, { name: 'Product 2', description: 'Description' }),
       createEntry(productUID, { name: 'Product 3', description: 'Description' }),
       createEntry(productUID, { name: 'Product 4', description: 'Description' }),
       createEntry(productUID, { name: 'Invalid Product' }),
     ]);
+
+    invalidEntries = await Promise.all([createEntry(productUID, { name: 'Invalid Product' })]);
   });
 
   beforeEach(async () => {
@@ -120,12 +120,12 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
     test('Create a release', async () => {
       const res = await createRelease();
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
     });
 
     test('cannot create a release with the same name', async () => {
       const firstCreateRes = await createRelease();
-      expect(firstCreateRes.statusCode).toBe(200);
+      expect(firstCreateRes.statusCode).toBe(201);
 
       const releaseName = firstCreateRes.body.data.name;
 
@@ -142,7 +142,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
         timezone: 'Europe/Madrid',
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
     });
 
     test('cannot create a scheduled release with date in the past', async () => {
@@ -159,45 +159,45 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
   describe('Create Release Actions', () => {
     test('Create a release action with valid status', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
       const createActionRes = await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
 
-      expect(createActionRes.statusCode).toBe(200);
+      expect(createActionRes.statusCode).toBe(201);
       expect(createActionRes.body.data.isEntryValid).toBe(true);
     });
 
     test('Create a release action with invalid status', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
       const createActionRes = await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 5,
+        entryDocumentId: invalidEntries[0].data.documentId,
         type: 'publish',
       });
 
-      expect(createActionRes.statusCode).toBe(200);
+      expect(createActionRes.statusCode).toBe(201);
       expect(createActionRes.body.data.isEntryValid).toBe(false);
     });
 
     test('cannot create an action with invalid contentTypeUid', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
       const createActionRes = await createReleaseAction(release.id, {
         contentType: 'invalid',
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
 
@@ -211,20 +211,20 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
 
       const firstCreateActionRes = await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
-      expect(firstCreateActionRes.statusCode).toBe(200);
+      expect(firstCreateActionRes.statusCode).toBe(201);
 
       const secondCreateActionRes = await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
 
       expect(secondCreateActionRes.statusCode).toBe(400);
       expect(secondCreateActionRes.body.error.message).toBe(
-        `Entry with id 1 and contentType api::product.product already exists in release with id ${release.id}`
+        `Entry with documentId ${validEntries[0].data.documentId} and contentType api::product.product already exists in release with id ${release.id}`
       );
     });
   });
@@ -232,7 +232,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
   describe('Create Many Release Actions', () => {
     test('Create many release actions', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
@@ -241,62 +241,54 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
         url: `/content-releases/${release.id}/actions/bulk`,
         body: [
           {
-            entry: {
-              id: 3,
-              contentType: productUID,
-            },
+            entryDocumentId: validEntries[0].data.documentId,
+            contentType: productUID,
             type: 'publish',
           },
           {
-            entry: {
-              id: 4,
-              contentType: productUID,
-            },
+            entryDocumentId: validEntries[1].data.documentId,
+            contentType: productUID,
             type: 'publish',
           },
         ],
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.meta.entriesAlreadyInRelease).toBe(0);
       expect(res.body.meta.totalEntries).toBe(2);
     });
 
     test('If entry is already in the release, it should not be added', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
       const createActionRes = await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 4,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
-      expect(createActionRes.statusCode).toBe(200);
+      expect(createActionRes.statusCode).toBe(201);
 
       const res = await rq({
         method: 'POST',
         url: `/content-releases/${release.id}/actions/bulk`,
         body: [
           {
+            contentType: productUID,
+            entryDocumentId: validEntries[0].data.documentId,
             type: 'publish',
-            entry: {
-              id: 4,
-              contentType: productUID,
-            },
           },
           {
-            entry: {
-              id: 5,
-              contentType: productUID,
-            },
+            contentType: productUID,
+            entryDocumentId: validEntries[1].data.documentId,
             type: 'publish',
           },
         ],
       });
 
-      expect(res.statusCode).toBe(200);
+      expect(res.statusCode).toBe(201);
       expect(res.body.meta.entriesAlreadyInRelease).toBe(1);
       expect(res.body.meta.totalEntries).toBe(2);
     });
@@ -305,18 +297,18 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
   describe('Find Many Release Actions', () => {
     test('Find many release actions', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 2,
+        entryDocumentId: validEntries[1].data.documentId,
         type: 'publish',
       });
 
@@ -331,23 +323,23 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
 
     test('Group by action type', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 2,
+        entryDocumentId: validEntries[1].data.documentId,
         type: 'publish',
       });
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 3,
+        entryDocumentId: validEntries[2].data.documentId,
         type: 'unpublish',
       });
 
@@ -365,17 +357,17 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
   describe('Edit Release Action', () => {
     test('Edit a release action', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
       const createActionRes = await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
 
-      expect(createActionRes.statusCode).toBe(200);
+      expect(createActionRes.statusCode).toBe(201);
       const releaseAction = createActionRes.body.data;
 
       const changeToUnpublishRes = await rq({
@@ -409,7 +401,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
 
       const createActionRes = await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
       const releaseAction = createActionRes.body.data;
@@ -431,7 +423,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
 
     test('cannot delete a release action that does not exist', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
@@ -450,17 +442,17 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
   describe('Find One Release', () => {
     test('Find a release', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
       const createActionRes = await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
 
-      expect(createActionRes.statusCode).toBe(200);
+      expect(createActionRes.statusCode).toBe(201);
 
       const res = await rq({
         method: 'GET',
@@ -474,7 +466,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
 
     test('Release status is empty if doesnt have any actions', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
@@ -494,12 +486,12 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
 
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
       const createActionRes = await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 5,
+        entryDocumentId: invalidEntries[0].data.documentId,
         type: 'publish',
       });
       const releaseAction = createActionRes.body.data;
@@ -534,7 +526,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
   describe('Edit Release', () => {
     test('Edit a release', async () => {
       const createReleaseRes = await createRelease();
-      expect(createReleaseRes.statusCode).toBe(200);
+      expect(createReleaseRes.statusCode).toBe(201);
 
       const release = createReleaseRes.body.data;
 
@@ -575,7 +567,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
       const release = createFirstReleaseRes.body.data;
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
 
@@ -593,7 +585,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
       const release = createFirstReleaseRes.body.data;
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[0].data.documentId,
         type: 'publish',
       });
 
@@ -619,7 +611,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
       const release = createFirstReleaseRes.body.data;
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 5,
+        entryDocumentId: invalidEntries[0].data.documentId,
         type: 'publish',
       });
 
@@ -655,13 +647,13 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
       const release = createFirstReleaseRes.body.data;
       await createReleaseAction(release.id, {
         contentType: productUID,
-        entryId: 1,
+        entryDocumentId: validEntries[3].data.documentId,
         type: 'publish',
       });
 
       const res = await rq({
         method: 'GET',
-        url: `/content-releases?contentTypeUid=${productUID}&entryId=1&hasEntryAttached=true`,
+        url: `/content-releases/getByDocumentAttached?contentType=${productUID}&entryDocumentId=${validEntries[3].data.documentId}&hasEntryAttached=true`,
       });
 
       expect(res.statusCode).toBe(200);
@@ -675,7 +667,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
 
       const res = await rq({
         method: 'GET',
-        url: `/content-releases?contentTypeUid=${productUID}&entryId=1&hasEntryAttached=false`,
+        url: `/content-releases/getByDocumentAttached?contentType=${productUID}&entryDocumentId=${validEntries[4]}&hasEntryAttached=false`,
       });
 
       expect(res.statusCode).toBe(200);
@@ -697,8 +689,7 @@ describeOnCondition(false /* edition === 'EE' */)('Content Releases API', () => 
       expect(res.statusCode).toBe(200);
     });
 
-    // @TODO: This test is failing on CI for sqlite with node20 apparently with no reason
-    test.skip('cannot delete a release that does not exist', async () => {
+    test('cannot delete a release that does not exist', async () => {
       const res = await rq({
         method: 'DELETE',
         url: '/content-releases/999',
