@@ -118,7 +118,6 @@
     "@strapi/data-transfer": "workspace:*",
     "@strapi/database": "workspace:*",
     "@strapi/email": "workspace:*",
-    "@strapi/generate-new": "workspace:*",
     "@strapi/generators": "workspace:*",
     "@strapi/i18n": "workspace:*",
     "@strapi/logger": "workspace:*",

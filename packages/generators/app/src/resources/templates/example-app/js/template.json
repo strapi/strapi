@@ -1,8 +1,0 @@
-{
-  "package": {
-    "dependencies": {
-      "fs-extra": "^10.0.0",
-      "mime-types": "^2.1.27"
-    }
-  }
-}

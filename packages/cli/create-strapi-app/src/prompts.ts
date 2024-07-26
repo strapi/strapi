@@ -22,7 +22,7 @@ async function typescript() {
     {
       type: 'confirm',
       name: 'useTypescript',
-      message: 'Do you want to use Typescript ?',
+      message: 'Start with Typescript?',
       default: true,
     },
   ]);
@@ -37,7 +37,7 @@ async function example() {
     {
       type: 'confirm',
       name: 'useExampleApp',
-      message: 'Do you want to start with an example structure & data ?',
+      message: 'Start with an example structure & data?',
       default: true,
     },
   ]);
@@ -45,4 +45,34 @@ async function example() {
   return useExampleApp;
 }
 
-export { directory, typescript, example };
+async function gitInit() {
+  const { gitInit } = await inquirer.prompt<{
+    gitInit: boolean;
+  }>([
+    {
+      type: 'confirm',
+      name: 'gitInit',
+      message: 'Initialize a git repository ?',
+      default: true,
+    },
+  ]);
+
+  return gitInit;
+}
+
+async function installDependencies(packageManager: string) {
+  const { installDependencies } = await inquirer.prompt<{
+    installDependencies: boolean;
+  }>([
+    {
+      type: 'confirm',
+      name: 'installDependencies',
+      message: `Install dependencies with ${packageManager}?`,
+      default: true,
+    },
+  ]);
+
+  return installDependencies;
+}
+
+export { directory, typescript, example, gitInit, installDependencies };

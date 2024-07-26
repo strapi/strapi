@@ -57,7 +57,6 @@
     "@paralleldrive/cuid2": "2.2.2",
     "@strapi/admin": "workspace:*",
     "@strapi/database": "workspace:*",
-    "@strapi/generate-new": "workspace:*",
     "@strapi/generators": "workspace:*",
     "@strapi/logger": "workspace:*",
     "@strapi/pack-up": "5.0.0",

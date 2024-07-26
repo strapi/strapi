@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { rimraf } = require('rimraf');
 const execa = require('execa');
-const createProject = require('../../packages/generators/app/dist/create-project');
+const { createStrapi } = require('create-strapi-app');
 
 /**
  * Deletes a test app
@@ -50,7 +50,8 @@ const generateTestApp = async ({ appPath, database, template, link = false }) =>
     template: template ? path.resolve(template) : template,
   };
 
-  await createProject(scope);
+  await createStrapi(scope);
+
   if (link) {
     await linkPackages(scope);
   }
