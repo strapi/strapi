@@ -1,10 +1,9 @@
 import React from 'react';
 
 import { Box, CardAsset } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { styled } from 'styled-components';
 
-import { AssetCardBase } from './AssetCardBase';
+import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 import { AudioPreview } from './AudioPreview';
 
 const AudioPreviewWrapper = styled(Box)`
@@ -16,7 +15,12 @@ const AudioPreviewWrapper = styled(Box)`
   }
 `;
 
-export const AudioAssetCard = ({ name, url, size, ...restProps }) => {
+interface AudioAssetCardProps extends Omit<AssetCardBaseProps, 'variant'> {
+  size?: 'S' | 'M';
+  url: string;
+}
+
+export const AudioAssetCard: React.FC<AudioAssetCardProps> = ({ name, url, size = 'M', ...restProps }) => {
   return (
     <AssetCardBase name={name} {...restProps} variant="Audio">
       <CardAsset size={size}>
@@ -26,23 +30,4 @@ export const AudioAssetCard = ({ name, url, size, ...restProps }) => {
       </CardAsset>
     </AssetCardBase>
   );
-};
-
-AudioAssetCard.defaultProps = {
-  onSelect: undefined,
-  onEdit: undefined,
-  onRemove: undefined,
-  selected: false,
-  size: 'M',
-};
-
-AudioAssetCard.propTypes = {
-  extension: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  onSelect: PropTypes.func,
-  onEdit: PropTypes.func,
-  onRemove: PropTypes.func,
-  url: PropTypes.string.isRequired,
-  selected: PropTypes.bool,
-  size: PropTypes.oneOf(['S', 'M']),
 };
