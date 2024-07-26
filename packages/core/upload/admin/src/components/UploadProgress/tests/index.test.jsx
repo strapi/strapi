@@ -11,8 +11,8 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
-import { UploadProgress } from '..';
 import en from '../../../translations/en.json';
+import { UploadProgress } from '../UploadProgress';
 
 const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
   acc[curr] = `upload.${en[curr]}`;
@@ -53,6 +53,8 @@ describe('<UploadProgress />', () => {
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
         background: #eaeaef;
+        width: 100%;
+        height: 100%;
       }
 
       .c3 {
@@ -104,8 +106,6 @@ describe('<UploadProgress />', () => {
 
       .c2 {
         border-radius: 4px 4px 0 0;
-        width: 100%;
-        height: 100%;
       }
 
       .c7 {
@@ -195,6 +195,8 @@ describe('<UploadProgress />', () => {
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
         background: #fcecea;
+        width: 100%;
+        height: 100%;
       }
 
       .c1 {
@@ -205,8 +207,6 @@ describe('<UploadProgress />', () => {
 
       .c2 {
         border-radius: 4px 4px 0 0;
-        width: 100%;
-        height: 100%;
       }
 
       .c2 svg path {

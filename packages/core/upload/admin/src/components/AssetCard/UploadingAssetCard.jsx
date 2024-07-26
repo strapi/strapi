@@ -19,7 +19,7 @@ import { styled } from 'styled-components';
 import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';
 import { getTrad } from '../../utils';
-import { UploadProgress } from '../UploadProgress';
+import { UploadProgress } from '../UploadProgress/UploadProgress';
 
 const UploadProgressWrapper = styled.div`
   height: 8.8rem;

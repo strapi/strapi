@@ -14,7 +14,7 @@ import { createAssetUrl } from '../../../utils';
 import { downloadFile } from '../../../utils/downloadFile';
 import { getTrad } from '../../../utils/getTrad';
 import { CopyLinkButton } from '../../CopyLinkButton';
-import { UploadProgress } from '../../UploadProgress';
+import { UploadProgress } from '../../UploadProgress/UploadProgress';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
 
 import { AssetPreview } from './AssetPreview';
