@@ -410,7 +410,7 @@ const ReleaseDetailsLayout = ({
         primaryAction={
           !release.releasedAt && (
             <Flex gap={2}>
-              <SimpleMenu
+              <SimpleMenuButton
                 label={<More />}
                 variant="tertiary"
                 endIcon={null}
@@ -473,7 +473,7 @@ const ReleaseDetailsLayout = ({
                     )}
                   </Typography>
                 </ReleaseInfoWrapper>
-              </SimpleMenu>
+              </SimpleMenuButton>
               <Button size="S" variant="tertiary" onClick={handleRefresh}>
                 {formatMessage({
                   id: 'content-releases.header.actions.refresh',
@@ -502,6 +502,12 @@ const ReleaseDetailsLayout = ({
     </Main>
   );
 };
+
+const SimpleMenuButton = styled(SimpleMenu)`
+  & > span {
+    display: flex;
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * ReleaseDetailsBody

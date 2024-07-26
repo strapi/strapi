@@ -266,7 +266,7 @@ const DocumentActionsMenu = ({
 
   return (
     <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Menu.Trigger
+      <StyledMoreButton
         disabled={isDisabled}
         size="S"
         endIcon={null}
@@ -283,7 +283,7 @@ const DocumentActionsMenu = ({
               defaultMessage: 'More document actions',
             })}
         </VisuallyHidden>
-      </Menu.Trigger>
+      </StyledMoreButton>
       <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
@@ -389,6 +389,12 @@ const convertActionVariantToIconColor = (
       return 'primary600';
   }
 };
+
+const StyledMoreButton = styled(Menu.Trigger)`
+  & > span {
+    display: flex;
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionConfirmDialog
