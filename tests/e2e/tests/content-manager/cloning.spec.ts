@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
-import { findAndClose } from '../../utils/shared';
+import { findAndClose, navToHeader } from '../../utils/shared';
 
 test.describe('Cloning', () => {
   test.beforeEach(async ({ page }) => {
@@ -64,8 +64,7 @@ test.describe('Cloning', () => {
     /**
      * Get to the list view of our articles,
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.waitForURL(LIST_URL);
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await expect(page.getByRole('row', { name: 'West ham post match analysis' })).toBeVisible();
     expect(
       await page.getByRole('row', { name: 'West ham post match analysis' }).all()
