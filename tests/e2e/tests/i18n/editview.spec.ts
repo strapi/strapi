@@ -448,14 +448,14 @@ test.describe('Edit view', () => {
       const ctbOperatonType = ctbOperation?.type ?? '';
       switch (ctbOperatonType) {
         case 'click':
-          await page.getByLabel(ctbKey).click();
+          await page.getByLabel(ctbKey).first().click();
           break;
         case 'fill': {
           if (!ctbOperation?.value) {
             throw new Error('CTB operation value is required');
           }
 
-          await page.getByLabel(ctbKey).click();
+          await page.getByLabel(ctbKey).first().click();
           await page.getByRole('textbox', { name: ctbKey }).fill(ctbOperation.value);
           break;
         }
