@@ -25,7 +25,7 @@ The container module permits to generate containers.
 
 ### `createContainer(strapi)`
 
-- `strapi`: <Type>Strapi</Type> [See Strapi class documentation](Strapi.mdx)
+- `strapi`: <Type>Strapi</Type> [See Strapi class documentation](strapi.mdx)
 - Returns: <Type>Container</Type>
 
 ```javascript
@@ -45,7 +45,7 @@ const dbConfig = container.get('config').get('database');
 - `resolver`: <Type>Function</Type> | <Type>Any</Type>
   - As a function, the function will be executed when the first get method is called on this content. The result of this function will define the content of this UID.
   - `resolver(context, args)`
-    - `context`: <Type>{ Strapi }</Type> [See Strapi class documentation](Strapi.mdx)
+    - `context`: { <Type>Strapi</Type> } [See Strapi class documentation](strapi.mdx)
     - `args`: <Type>Any</Type> Anything to be used by the resolver function
   - As anything else, this value will be resolved when getting this specified content through its UID.
 

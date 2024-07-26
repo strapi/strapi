@@ -1,6 +1,7 @@
 import crypto from 'crypto';
+// eslint-disable-next-line import/no-relative-packages
+import createContext from '../../../../../../../tests/helpers/create-context';
 import { generateAdminUserHash } from '../admin-user-hash';
-import createContext from '../../../../../../../test/helpers/create-context';
 
 describe('user email hash', () => {
   test('should create a hash from admin user email', () => {

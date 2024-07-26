@@ -344,8 +344,8 @@ const DefaultInputs = ({
 const getFilterList = (filterSchema: FilterData['fieldSchema']): Operator[] => {
   let type = filterSchema.type;
 
-  if (filterSchema.type === 'relation' && filterSchema?.mainField?.schema?.type) {
-    type = filterSchema.mainField.schema.type;
+  if (filterSchema.type === 'relation' && filterSchema?.mainField?.type) {
+    type = filterSchema.mainField.type;
   }
 
   switch (type) {
