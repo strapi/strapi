@@ -162,23 +162,20 @@ class RemoteStrapiSourceProvider implements ISourceProvider {
 
           // The asset has been transferred
           else if (action === 'end') {
-            let endStreamResolve;
-            let endStreamPromise = new Promise<void>((resolve) => {
-              endStreamResolve = resolve;
-            });
-            if (assetStatus[item.assetID] === 0) {
-              endStreamResolve();
-            } else { // wait if end received before previous data finished writing
-              let fn = () => {
+            /**
+             * NOTE: This suggests we're processing streaming events wrong.
+             * We need to investigate and delay 'end' from being called
+             * until streaming has finished, rather than waiting here
+             * */
+            // Wait for all chunks to finish streaming before continuing to the end
+            await new Promise<void>((resolve) => {
+              const interval = setInterval(() => {
                 if (assetStatus[item.assetID] === 0) {
-                  endStreamResolve();
-                } else {
-                  setTimeout(fn, 300)
+                  clearInterval(interval);
+                  resolve();
                 }
-              }
-              setTimeout(fn, 300);
-            }
-            await endStreamPromise;
+              }, 100);
+            });
 
             await new Promise<void>((resolve, reject) => {
               const { stream: assetStream } = assets[item.assetID];
