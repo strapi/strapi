@@ -4,14 +4,15 @@
  *
  */
 
+import { useState } from 'react';
+
 import { ConfirmDialog } from '@strapi/admin/strapi-admin';
 import { Button, Checkbox, CheckboxProps, Dialog, Field } from '@strapi/design-system';
-import { useState } from 'react';
 import { useIntl } from 'react-intl';
 
-import type { IntlLabel } from '../types';
-
 import { getTrad } from '../utils';
+
+import type { IntlLabel } from '../types';
 
 interface Description {
   id: string;
