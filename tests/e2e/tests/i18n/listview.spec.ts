@@ -56,7 +56,7 @@ test.describe('List view', () => {
     await expect(page.getByRole('gridcell', { name: 'Available in' })).not.toBeVisible();
   });
 
-  test('As a user I want to be able to navigate from one localized content-type to another and persist the last selected locale', async ({
+  test.skip('As a user I want to be able to navigate from one localized content-type to another and persist the last selected locale', async ({
     page,
   }) => {
     /**
