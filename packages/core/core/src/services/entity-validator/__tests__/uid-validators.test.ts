@@ -1,7 +1,7 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
 
-import validators from '../validators';
+import { Validators } from '../validators';
 import { mockOptions } from './utils';
 
 describe('UID validator', () => {
@@ -42,7 +42,7 @@ describe('UID validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.uid(
+        Validators.uid(
           {
             attr: { type: 'uid' },
             model: fakeModel,
@@ -61,17 +61,15 @@ describe('UID validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators
-          .uid(
-            {
-              attr: { type: 'uid' },
-              model: fakeModel,
-              updatedAttribute: { name: 'attrUidUnique', value: null },
-              entity: null,
-            },
-            mockOptions
-          )
-          .nullable()
+        Validators.uid(
+          {
+            attr: { type: 'uid' },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrUidUnique', value: null },
+            entity: null,
+          },
+          mockOptions
+        ).nullable()
       );
 
       await validator(null);
@@ -84,7 +82,7 @@ describe('UID validator', () => {
       const valueToCheck = 'non-unique-uid';
 
       const validator = strapiUtils.validateYupSchema(
-        validators.uid(
+        Validators.uid(
           {
             attr: { type: 'uid' },
             model: fakeModel,
@@ -110,7 +108,7 @@ describe('UID validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrUidUnique: 'unique-uid' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.uid(
+        Validators.uid(
           {
             attr: { type: 'uid' },
             model: fakeModel,
@@ -132,7 +130,7 @@ describe('UID validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrUidUnique: 'unchanged-unique-uid' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.uid(
+        Validators.uid(
           {
             attr: { type: 'uid' },
             model: fakeModel,
@@ -151,7 +149,7 @@ describe('UID validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.uid(
+        Validators.uid(
           {
             attr: { type: 'uid' },
             model: fakeModel,
@@ -177,7 +175,7 @@ describe('UID validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.uid(
+        Validators.uid(
           {
             attr: { type: 'uid' },
             model: fakeModel,
@@ -206,7 +204,7 @@ describe('UID validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.uid(
+        Validators.uid(
           {
             attr: { type: 'uid' },
             model: fakeModel,
@@ -228,7 +226,7 @@ describe('UID validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.uid(
+        Validators.uid(
           {
             attr: { type: 'uid' },
             model: fakeModel,

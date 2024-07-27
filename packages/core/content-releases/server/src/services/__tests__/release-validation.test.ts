@@ -128,7 +128,7 @@ describe('Release Validation service', () => {
       expect(() =>
         releaseValidationService.validateUniqueEntry(1, mockReleaseAction)
       ).rejects.toThrow(
-        'Entry with documentId 1  and contentType api::category.category already exists in release with id 1'
+        'Entry with documentId 1 and contentType api::category.category already exists in release with id 1'
       );
     });
   });

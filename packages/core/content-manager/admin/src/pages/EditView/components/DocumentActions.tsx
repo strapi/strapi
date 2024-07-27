@@ -184,7 +184,7 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
   return (
     <>
       <Button
-        flex={1}
+        flex="auto"
         startIcon={action.icon}
         disabled={action.disabled}
         onClick={handleClick(action)}
@@ -268,9 +268,9 @@ const DocumentActionsMenu = ({
         disabled={isDisabled}
         size="S"
         endIcon={null}
-        paddingTop="7px"
-        paddingLeft="9px"
-        paddingRight="9px"
+        paddingTop="4px"
+        paddingLeft="7px"
+        paddingRight="7px"
         variant={variant}
       >
         <More aria-hidden focusable={false} />
@@ -293,10 +293,12 @@ const DocumentActionsMenu = ({
               key={action.id}
             >
               <Flex justifyContent="space-between" gap={4}>
-                <Flex color={convertActionVariantToColor(action.variant)} gap={2} tag="span">
-                  <Box tag="span" color={convertActionVariantToIconColor(action.variant)}>
-                    {action.icon}
-                  </Box>
+                <Flex
+                  color={!action.disabled ? convertActionVariantToColor(action.variant) : 'inherit'}
+                  gap={2}
+                  tag="span"
+                >
+                  <span>{action.icon}</span>
                   {action.label}
                 </Flex>
                 {/* TODO: remove this in 5.1 release */}
@@ -666,8 +668,6 @@ const PublishAction: DocumentActionComponent = ({
      *  - the document is already published & not modified
      *  - the document is being created & not modified
      *  - the user doesn't have the permission to publish
-     *  - the user doesn't have the permission to create a new document
-     *  - the user doesn't have the permission to update the document
      */
     disabled:
       isCloning ||
@@ -676,8 +676,7 @@ const PublishAction: DocumentActionComponent = ({
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
       (!modified && !document?.documentId) ||
-      !canPublish ||
-      Boolean((!document?.documentId && !canCreate) || (document?.documentId && !canUpdate)),
+      !canPublish,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -754,14 +753,8 @@ const UpdateAction: DocumentActionComponent = ({
      * - the form is submitting
      * - the document is not modified & we're not cloning (you can save a clone entity straight away)
      * - the active tab is the published tab
-     * - the user doesn't have the permission to create a new document
-     * - the user doesn't have the permission to update the document
      */
-    disabled:
-      isSubmitting ||
-      (!modified && !isCloning) ||
-      activeTab === 'published' ||
-      Boolean((!documentId && !canCreate) || (documentId && !canUpdate)),
+    disabled: isSubmitting || (!modified && !isCloning) || activeTab === 'published',
     label: formatMessage({
       id: 'content-manager.containers.Edit.save',
       defaultMessage: 'Save',

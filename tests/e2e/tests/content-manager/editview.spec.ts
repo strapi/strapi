@@ -129,7 +129,6 @@ test.describe('Edit View', () => {
       );
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
 
       await page.getByRole('tab', { name: 'Draft' }).click();
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
@@ -445,7 +444,6 @@ test.describe('Edit View', () => {
        */
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
 
       await page.getByRole('button', { name: 'Publish' }).click();
@@ -476,7 +474,6 @@ test.describe('Edit View', () => {
       );
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
 
       await page.getByRole('tab', { name: 'Draft' }).click();
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
@@ -538,7 +535,6 @@ test.describe('Edit View', () => {
        */
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
       await page.getByRole('textbox', { name: 'title' }).fill('Welcome to AFC Richmond');
 
       await page.getByRole('button', { name: 'Save' }).click();
@@ -559,7 +555,6 @@ test.describe('Edit View', () => {
       await expect(page.getByRole('heading', { name: 'Welcome to AFC Richmond' })).toBeVisible();
       await expect(page.getByRole('heading', { name: 'Untitled' })).not.toBeVisible();
       await expect(page.getByRole('button', { name: 'Save' })).toBeDisabled();
-      await expect(page.getByRole('button', { name: 'More document actions' })).toBeDisabled();
       await expect(page.getByRole('button', { name: 'Publish' })).not.toBeDisabled();
 
       await page.getByRole('textbox').nth(1).click();

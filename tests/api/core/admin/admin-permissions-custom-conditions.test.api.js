@@ -267,6 +267,7 @@ describe('Admin Permissions - Conditions', () => {
     const res = await rq({
       method: 'POST',
       url: `/content-manager/collection-types/api::article.article/${documentId}/actions/publish`,
+      body: { ...localTestData.cheapArticle, category: localTestData.categories[0].documentId },
     });
 
     expect(res.statusCode).toBe(200);
