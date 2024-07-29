@@ -423,7 +423,7 @@ const GenericInput = ({
             clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
             disabled={disabled}
             onChange={(time) => {
-              onChange({ target: { name, value: `${time}`, type } });
+              onChange({ target: { name, value: time ? `${time}:00.000` : time, type } });
             }}
             onClear={() => {
               onChange({ target: { name, value: null, type } });
