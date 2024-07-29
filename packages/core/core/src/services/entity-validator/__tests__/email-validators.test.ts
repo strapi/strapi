@@ -21,67 +21,125 @@ describe('Email validator', () => {
   };
 
   describe('email', () => {
-    test('it fails the validation if the string is not a valid email', async () => {
-      expect.assertions(1);
+    describe('draft', () => {
+      test('validation does not fail if the string is not a valid email', async () => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.email(
+            {
+              attr: { type: 'email' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrEmail', value: 1 },
+              entity: null,
+            },
+            { isDraft: true }
+          )
+        );
 
-      const validator = strapiUtils.validateYupSchema(
-        Validators.email(
-          {
-            attr: { type: 'email' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrEmail', value: 1 },
-            entity: null,
-          },
-          { isDraft: false }
-        )
-      );
-
-      try {
         await validator('invalid-email');
-      } catch (err) {
-        expect(err).toBeInstanceOf(errors.YupValidationError);
-      }
-    });
+      });
 
-    test('it validates the email if it is valid', async () => {
-      const validator = strapiUtils.validateYupSchema(
-        Validators.email(
-          {
-            attr: { type: 'email' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrEmail', value: 1 },
-            entity: null,
-          },
-          { isDraft: false }
-        )
-      );
+      test('validation does not fail if the string is empty', async () => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.email(
+            {
+              attr: { type: 'email' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrEmail', value: 1 },
+              entity: null,
+            },
+            { isDraft: true }
+          )
+        );
 
-      expect(await validator('valid@email.com')).toBe('valid@email.com');
-    });
-
-    test('it validates non-empty email required field', async () => {
-      const validator = strapiUtils.validateYupSchema(
-        Validators.email(
-          {
-            attr: { type: 'email' },
-            model: fakeModel,
-            updatedAttribute: { name: 'attrEmail', value: 1 },
-            entity: null,
-          },
-          { isDraft: false }
-        )
-      );
-
-      expect.hasAssertions();
-
-      try {
         await validator('');
-      } catch (err) {
-        if (err instanceof Error) {
+      });
+
+      test('validation fails if not a valid string', async () => {
+        expect.assertions(1);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.email(
+            {
+              attr: { type: 'email' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrEmail', value: 1 },
+              entity: null,
+            },
+            { isDraft: true }
+          )
+        );
+
+        try {
+          await validator(1);
+        } catch (err) {
           expect(err).toBeInstanceOf(errors.YupValidationError);
-          expect(err.message).toBe('this cannot be empty');
         }
-      }
+      });
+    });
+
+    describe('published', () => {
+      test('it fails the validation if the string is not a valid email', async () => {
+        expect.assertions(1);
+
+        const validator = strapiUtils.validateYupSchema(
+          Validators.email(
+            {
+              attr: { type: 'email' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrEmail', value: 1 },
+              entity: null,
+            },
+            { isDraft: false }
+          )
+        );
+
+        try {
+          await validator('invalid-email');
+        } catch (err) {
+          expect(err).toBeInstanceOf(errors.YupValidationError);
+        }
+      });
+
+      test('it validates the email if it is valid', async () => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.email(
+            {
+              attr: { type: 'email' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrEmail', value: 1 },
+              entity: null,
+            },
+            { isDraft: false }
+          )
+        );
+
+        expect(await validator('valid@email.com')).toBe('valid@email.com');
+      });
+
+      test('it validates non-empty email required field', async () => {
+        const validator = strapiUtils.validateYupSchema(
+          Validators.email(
+            {
+              attr: { type: 'email' },
+              model: fakeModel,
+              updatedAttribute: { name: 'attrEmail', value: 1 },
+              entity: null,
+            },
+            { isDraft: false }
+          )
+        );
+
+        expect.hasAssertions();
+
+        try {
+          await validator('');
+        } catch (err) {
+          if (err instanceof Error) {
+            expect(err).toBeInstanceOf(errors.YupValidationError);
+            expect(err.message).toBe('this cannot be empty');
+          }
+        }
+      });
     });
   });
 });
