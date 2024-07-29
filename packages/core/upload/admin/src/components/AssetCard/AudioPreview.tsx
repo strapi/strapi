@@ -7,7 +7,7 @@ interface AudioPreviewProps {
   url: string;
 }
 
-export const AudioPreview: React.FC<AudioPreviewProps> = ({ url, alt }) => {
+export const AudioPreview = ({ url, alt }: AudioPreviewProps) => {
   return (
     <Box>
       <audio controls src={url}>

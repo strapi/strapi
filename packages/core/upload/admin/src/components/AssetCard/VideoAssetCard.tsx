@@ -27,7 +27,7 @@ export interface VideoAssetCardProps extends AssetCardBaseProps {
   size?: 'S' | 'M';
 }
 
-export const VideoAssetCard: React.FC<VideoAssetCardProps> = ({ name, url, mime, size = 'M', ...props }) => {
+export const VideoAssetCard = ({ name, url, mime, size = 'M', ...props }: VideoAssetCardProps) => {
   const [duration, setDuration] = React.useState<number>();
   
   const formattedDuration = duration && formatDuration(duration);

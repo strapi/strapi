@@ -20,7 +20,7 @@ interface AudioAssetCardProps extends Omit<AssetCardBaseProps, 'variant'> {
   url: string;
 }
 
-export const AudioAssetCard: React.FC<AudioAssetCardProps> = ({ name, url, size = 'M', ...restProps }) => {
+export const AudioAssetCard = ({ name, url, size = 'M', ...restProps }: AudioAssetCardProps) => {
   return (
     <AssetCardBase name={name} {...restProps} variant="Audio">
       <CardAsset size={size}>

@@ -40,7 +40,7 @@ interface UploadProgressProps {
   progress: number;
 }
 
-export const UploadProgress: React.FC<UploadProgressProps> = ({ onCancel, progress, error }) => {
+export const UploadProgress = ({ onCancel, progress, error }: UploadProgressProps) => {
   const { formatMessage } = useIntl();
 
   return (

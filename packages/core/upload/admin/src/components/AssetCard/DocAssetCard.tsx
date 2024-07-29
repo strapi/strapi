@@ -21,7 +21,7 @@ interface DocAssetCardProps extends Omit<AssetCardBaseProps, "variant"> {
   size?: 'S' | 'M';
 }
 
-export const DocAssetCard: React.FC<DocAssetCardProps> = ({ name, extension, size = 'M', ...restProps }) => {
+export const DocAssetCard = ({ name, extension, size = 'M', ...restProps }: DocAssetCardProps) => {
   return (
     <AssetCardBase name={name} extension={extension} {...restProps} variant="Doc">
       <CardAsset width="100%" height={size === 'S' ? `8.8rem` : `16.4rem`} justifyContent="center">

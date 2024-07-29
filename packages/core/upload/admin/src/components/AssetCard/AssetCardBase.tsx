@@ -57,7 +57,7 @@ export interface AssetCardBaseProps {
   variant: 'Image' | 'Video' | 'Audio' | 'Doc';
 }
 
-export const AssetCardBase: React.FC<AssetCardBaseProps> = ({
+export const AssetCardBase = ({
   children,
   extension,
   isSelectable = true,
@@ -68,7 +68,7 @@ export const AssetCardBase: React.FC<AssetCardBaseProps> = ({
   selected = false,
   subtitle = '',
   variant = 'Image',
-}) => {
+}: AssetCardBaseProps) => {
   const { formatMessage } = useIntl();
 
   const handleClick: React.MouseEventHandler<HTMLDivElement> = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

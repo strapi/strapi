@@ -16,7 +16,7 @@ interface ImageAssetCardProps extends Omit<AssetCardBaseProps, 'variant'> {
   updatedAt?: string;
 };
 
-export const ImageAssetCard: React.FC<ImageAssetCardProps> = ({ height, width, thumbnail, size, alt, isUrlSigned, ...props }) => {
+export const ImageAssetCard = ({ height, width, thumbnail, size, alt, isUrlSigned, ...props }: ImageAssetCardProps) => {
   // appending the updatedAt param to the thumbnail URL prevents it from being cached by the browser (cache busting)
   // applied only if the url is not signed to prevent the signature from being invalidated
   const thumbnailUrl = isUrlSigned
