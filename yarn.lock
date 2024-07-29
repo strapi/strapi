@@ -4443,6 +4443,59 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@mux/mux-player-react@npm:2.8.1":
+  version: 2.8.1
+  resolution: "@mux/mux-player-react@npm:2.8.1"
+  dependencies:
+    "@mux/mux-player": "npm:2.8.1"
+    "@mux/playback-core": "npm:0.25.0"
+    prop-types: "npm:^15.7.2"
+  peerDependencies:
+    "@types/react": ^17.0.0 || ^18
+    react: ^17.0.2 || ^18
+    react-dom: ^17.0.2 || ^18
+  peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
+  checksum: 10c0/7c8fe93ec5fc8939604a0801f811da38fcc2966b5c849b1ca3a50cc918af1ef32beb09f974e777b9d76b6c8d2d6b1fe0b8f65e491df54b50a0c66f4d93e5a350
+  languageName: node
+  linkType: hard
+
+"@mux/mux-player@npm:2.8.1":
+  version: 2.8.1
+  resolution: "@mux/mux-player@npm:2.8.1"
+  dependencies:
+    "@mux/mux-video": "npm:0.20.0"
+    "@mux/playback-core": "npm:0.25.0"
+    media-chrome: "npm:~3.2.5"
+  checksum: 10c0/692dfe9e49c1552864fd8e9d07d473791df7319228059816aa1e77fa5fabbfac3026d37bdb5433239a6e55f1102b7a19f8232b63067cd66618eef576952324bb
+  languageName: node
+  linkType: hard
+
+"@mux/mux-video@npm:0.20.0":
+  version: 0.20.0
+  resolution: "@mux/mux-video@npm:0.20.0"
+  dependencies:
+    "@mux/playback-core": "npm:0.25.0"
+    castable-video: "npm:~1.0.9"
+    custom-media-element: "npm:~1.3.1"
+    media-tracks: "npm:~0.3.2"
+  checksum: 10c0/f909c180a871d84123673f3a02d40a1099cf89e4da5f695663bb1d1938c83e2333c10dedd9a1465a5f4802ae99c39c41aa2ce7f9acbcddd7137d4c8c76bfe59b
+  languageName: node
+  linkType: hard
+
+"@mux/playback-core@npm:0.25.0":
+  version: 0.25.0
+  resolution: "@mux/playback-core@npm:0.25.0"
+  dependencies:
+    hls.js: "npm:~1.5.11"
+    mux-embed: "npm:~5.2.0"
+  checksum: 10c0/e1f87b830e51d4e108d608c33ede4d91fd7cccda8b6f805e16d0d1973caa81ad581cc2a19a086728ee288a50f9c5c97213caa1a2e891a00b01ea0d0b5f673635
+  languageName: node
+  linkType: hard
+
 "@ndelangen/get-tarball@npm:^3.0.7":
   version: 3.0.9
   resolution: "@ndelangen/get-tarball@npm:3.0.9"
@@ -8973,6 +9026,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@strapi/plugin-upload@workspace:packages/core/upload"
   dependencies:
+    "@mux/mux-player-react": "npm:2.8.1"
     "@strapi/design-system": "npm:1.19.0"
     "@strapi/helper-plugin": "npm:4.25.5"
     "@strapi/icons": "npm:1.19.0"
@@ -13627,6 +13681,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"castable-video@npm:~1.0.9":
+  version: 1.0.10
+  resolution: "castable-video@npm:1.0.10"
+  dependencies:
+    custom-media-element: "npm:~1.3.2"
+  checksum: 10c0/e742f1ce04ac875f95cf63f6049e7e9782cc1660e2775c955156055036ded40ee3d536f35fb57106ee2c5341183588cd3e6f989e529774b8e2f798d9217ec069
+  languageName: node
+  linkType: hard
+
 "ccount@npm:^2.0.0":
   version: 2.0.1
   resolution: "ccount@npm:2.0.1"
@@ -15042,6 +15105,13 @@ __metadata:
   version: 3.1.0
   resolution: "csstype@npm:3.1.0"
   checksum: 10c0/4edcf1eb8b8e83e8b1dc557d9f61e720012e6d2453f4c05fa4221dacf604c4d7552383f0cead9adea4b3f23e3da3aa25cc4fb05823b51fb1cbad43e1d8bb45ff
+  languageName: node
+  linkType: hard
+
+"custom-media-element@npm:~1.3.1, custom-media-element@npm:~1.3.2":
+  version: 1.3.2
+  resolution: "custom-media-element@npm:1.3.2"
+  checksum: 10c0/49b1efa65ecb3dbf2c49f66132496c50bc44fd73dcdb5529bdc601e9642eba1d02400ad18c28d640c1fe0d671cee3613ae26f50575a1c7702a14f656a69e9d10
   languageName: node
   linkType: hard
 
@@ -19232,6 +19302,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hls.js@npm:~1.5.11":
+  version: 1.5.13
+  resolution: "hls.js@npm:1.5.13"
+  checksum: 10c0/58f5b9dda5c0faca72059be51f88180a8cff49bf1011f50c9d6f30cdb21b44ab9f9493f18443bf6861ee68f262adb0e43bbba8dea668108816adff738e2a3f7e
+  languageName: node
+  linkType: hard
+
 "hmac-drbg@npm:^1.0.1":
   version: 1.0.1
   resolution: "hmac-drbg@npm:1.0.1"
@@ -23119,6 +23196,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"media-chrome@npm:~3.2.5":
+  version: 3.2.5
+  resolution: "media-chrome@npm:3.2.5"
+  checksum: 10c0/57169c1ab3180d2e771f40d54fb93035a61d14890e58772129e9b4d1c8e83f7546eac7624927579dd71bec80acfcbd71ff2ef9a6868887f3b96eff2299185390
+  languageName: node
+  linkType: hard
+
+"media-tracks@npm:~0.3.2":
+  version: 0.3.3
+  resolution: "media-tracks@npm:0.3.3"
+  checksum: 10c0/ecd57e628222b6e0611f21813a291a47b30c96aa1c9d7e13546932b59e8bb206651961a36360cc5584bf76bf890ce01be3bb0c045facf76ab8b1cfacecf9808b
+  languageName: node
+  linkType: hard
+
 "media-typer@npm:0.3.0":
   version: 0.3.0
   resolution: "media-typer@npm:0.3.0"
@@ -24052,6 +24143,13 @@ __metadata:
   version: 0.0.8
   resolution: "mute-stream@npm:0.0.8"
   checksum: 10c0/18d06d92e5d6d45e2b63c0e1b8f25376af71748ac36f53c059baa8b76ffac31c5ab225480494e7d35d30215ecdb18fed26ec23cafcd2f7733f2f14406bcd19e2
+  languageName: node
+  linkType: hard
+
+"mux-embed@npm:~5.2.0":
+  version: 5.2.1
+  resolution: "mux-embed@npm:5.2.1"
+  checksum: 10c0/be83010814461c4faa15a590fdeee72a6b6824405fabfe031be02cff42be692f7d33bf3f654a1a8da8e867a0859e556a0485e2280a6c519c4bded833946f1b04
   languageName: node
   linkType: hard
 
