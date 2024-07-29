@@ -3,7 +3,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import { AssetDefinition, AssetType } from '../../constants';
-import { createAssetUrl, getFileExtension, prefixFileUrlWithBackendUrl } from '../../utils';
+import { createAssetUrl, getFileExtension } from '../../utils';
+// TODO: replace this import with the one from utils when the index file is migrated to typescript
+import { prefixFileUrlWithBackendUrl } from '../../utils/prefixFileUrlWithBackendUrl';
 
 import { AudioAssetCard } from './AudioAssetCard';
 import { DocAssetCard } from './DocAssetCard';
