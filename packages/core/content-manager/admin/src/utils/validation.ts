@@ -181,6 +181,16 @@ const createAttributeSchema = (
           return true;
         }
 
+        // If the value was created via content API and wasn't changed, then it's still an object
+        if (typeof value === 'object') {
+          try {
+            JSON.stringify(value);
+            return true;
+          } catch (err) {
+            return false;
+          }
+        }
+
         try {
           JSON.parse(value);
 
