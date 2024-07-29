@@ -368,7 +368,7 @@ const releaseApi = adminApi
               data,
             };
           },
-          invalidatesTags: (_result, _error, _arg) => [{ type: 'ReleaseSettings' }],
+          invalidatesTags: [{ type: 'ReleaseSettings' }],
         }),
       };
     },

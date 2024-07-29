@@ -2,7 +2,7 @@ import type { Context } from 'koa';
 import { update, map, property } from 'lodash/fp';
 
 import type { Core } from '@strapi/types';
-import { async, errors } from '@strapi/utils';
+import { async } from '@strapi/utils';
 
 import { getService } from '../utils';
 import { validateWorkflowCreate, validateWorkflowUpdate } from '../validation/review-workflows';
