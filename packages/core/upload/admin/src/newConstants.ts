@@ -5,3 +5,8 @@ export enum AssetType {
   Document = 'doc',
   Audio = 'audio',
 }
+
+export enum AssetSource {
+  Url = 'url',
+  Computer = 'computer',
+}
