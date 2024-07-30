@@ -1,4 +1,4 @@
-export const toSingularTypes = (types: string[]) => {
+export const toSingularTypes = (types?: string[]) => {
   if (!types) {
     return [];
   }
