@@ -48,6 +48,7 @@ export const FromUrlForm = ({ onClose, onAddAsset, trackedLocation }) => {
         <Form noValidate>
           <Box paddingLeft={8} paddingRight={8} paddingBottom={6} paddingTop={6}>
             <Field.Root
+              name="urls"
               hint={formatMessage({
                 id: getTrad('input.url.description'),
                 defaultMessage: 'Separate your URL links by a carriage return.',
