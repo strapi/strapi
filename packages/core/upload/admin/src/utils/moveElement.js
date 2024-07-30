@@ -1,3 +1,5 @@
+// TODO: check if this function is used because the only component that uses it is the AssetDialog component and I am not sure it is used anymore
+
 const move = (array, oldIndex, newIndex) => {
   if (newIndex >= array.length) {
     newIndex = array.length - 1;

@@ -1,4 +1,4 @@
-import { containsAssetFilter } from '..';
+import { containsAssetFilter } from '../containsAssetFilter';
 
 describe('containsAssetFilter', () => {
   test('does not fail on empty query objects', () => {
@@ -14,7 +14,7 @@ describe('containsAssetFilter', () => {
         filters: {
           $and: [
             {
-              mime: 'image',
+              mime: { $eq: 'image' },
             },
           ],
         },
@@ -26,10 +26,10 @@ describe('containsAssetFilter', () => {
         filters: {
           $and: [
             {
-              some: 'filter',
+              some: { $eq: 'filter' },
             },
             {
-              mime: 'image',
+              mime: { $eq: 'image' },
             },
           ],
         },
