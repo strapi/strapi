@@ -10,7 +10,8 @@ describe('downloadFile', () => {
 
     documentSpy.mockReturnValue({
       click: clickSpy,
-      set href(val) {
+      // @ts-ignore I don't need to change the type of the mocked element
+      set href(val: any) {
         hrefSpy(val);
       },
       setAttribute: setAttributeSpy,
