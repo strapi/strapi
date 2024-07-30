@@ -298,7 +298,7 @@ const SettingsPage = () => {
                       />
                     </Field.Root>
                   </Grid.Item>
-                  <Grid.Item col={7} s={12} direction="column" alignItems="stretch">
+                  <Grid.Item col={7} s={12} direction="column" alignItems="start">
                     <Button
                       loading={mutation.isLoading}
                       disabled={!isTestAddressValid}
