@@ -1,4 +1,5 @@
-import { AssetType } from '../../constants';
+// TODO: replace with the constants file when it will be migrated to TS
+import { AssetType } from '../../newConstants';
 import { typeFromMime } from '../typeFromMime';
 
 describe('typeFromMime', () => {
