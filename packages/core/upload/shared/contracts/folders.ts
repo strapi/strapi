@@ -1,6 +1,3 @@
-/**
- * Used to store the folder structure inside the media library.
- */
 import type { Data, Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import PropTypes from 'prop-types';
 
@@ -13,8 +13,8 @@ const STEPS = {
 };
 
 export const MediaLibraryDialog = ({ onClose, onSelectAssets, allowedTypes }) => {
-  const [step, setStep] = useState(STEPS.AssetSelect);
-  const [folderId, setFolderId] = useState(null);
+  const [step, setStep] = React.useState(STEPS.AssetSelect);
+  const [folderId, setFolderId] = React.useState(null);
 
   switch (step) {
     case STEPS.AssetSelect:

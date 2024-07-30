@@ -1,6 +1,3 @@
-/**
- * Used to store the folder structure inside the media library.
- */
 import type { Data, Modules } from '@strapi/types';
 import { errors } from '@strapi/utils';
 
@@ -15,11 +12,11 @@ export interface File {
   id: Data.ID;
   documentId: Modules.Documents.ID;
   name: string;
-  alternativeText: string | null;
-  caption: string | null;
-  width: number;
-  height: number;
-  formats: {
+  alternativeText?: string | null;
+  caption?: string | null;
+  width?: number;
+  height?: number;
+  formats?: {
     thumbnail: {
       name: string;
       hash: string;
@@ -34,13 +31,13 @@ export interface File {
     } | null;
   };
   hash: string;
-  ext: string;
+  ext?: string;
   mime: string;
   size: number;
   url: string;
-  previewUrl: null | string;
-  provider: string;
-  provider_metadata: null | string;
+  previewUrl?: null | string;
+  provider?: string;
+  provider_metadata?: null | string;
   folderPath: string;
   createdAt: string;
   updatedAt: string;
