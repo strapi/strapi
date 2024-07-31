@@ -159,7 +159,9 @@ const UseCasePage = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            <TextButton onClick={(event) => handleSubmit(event, true)}>
+            <TextButton
+              onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleSubmit(event, true)}
+            >
               {formatMessage({
                 id: 'Usecase.button.skip',
                 defaultMessage: 'Skip this question',

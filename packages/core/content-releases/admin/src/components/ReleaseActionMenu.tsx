@@ -230,7 +230,7 @@ const Root = ({ children }: RootProps) => {
     // A user can access the dropdown if they have permissions to delete a release-action OR update a release
     allowedActions.canDeleteAction || allowedActions.canUpdate ? (
       <Menu.Root>
-        <Menu.Trigger variant="tertiary" endIcon={null} paddingLeft="7px" paddingRight="7px">
+        <StyledMoreButton variant="tertiary" endIcon={null} paddingLeft="7px" paddingRight="7px">
           <AccessibleIcon
             label={formatMessage({
               id: 'content-releases.content-manager-edit-view.release-action-menu',
@@ -239,7 +239,7 @@ const Root = ({ children }: RootProps) => {
           >
             <More />
           </AccessibleIcon>
-        </Menu.Trigger>
+        </StyledMoreButton>
         <Menu.Content top={1} popoverPlacement="bottom-end">
           {children}
         </Menu.Content>
@@ -247,6 +247,12 @@ const Root = ({ children }: RootProps) => {
     ) : null
   );
 };
+
+const StyledMoreButton = styled(Menu.Trigger)`
+  & > span {
+    display: flex;
+  }
+`;
 
 export const ReleaseActionMenu = {
   Root,

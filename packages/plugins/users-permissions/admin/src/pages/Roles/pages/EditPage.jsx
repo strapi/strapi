@@ -143,7 +143,7 @@ export const EditPage = () => {
                   </Typography>
 
                   <Grid.Root gap={4}>
-                    <Grid.Item col={6}>
+                    <Grid.Item col={6} direction="column" alignItems="stretch">
                       <Field.Root
                         name="name"
                         error={
@@ -166,7 +166,7 @@ export const EditPage = () => {
                         <Field.Error />
                       </Field.Root>
                     </Grid.Item>
-                    <Grid.Item col={6}>
+                    <Grid.Item col={6} direction="column" alignItems="stretch">
                       <Field.Root
                         name="description"
                         error={

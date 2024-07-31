@@ -15,7 +15,7 @@ export const ContextInfo = ({ blocks }) => {
     >
       <Grid.Root gap={4}>
         {blocks.map(({ label, value }) => (
-          <Grid.Item col={6} xs={12} key={label}>
+          <Grid.Item col={6} xs={12} key={label} direction="column" alignItems="stretch">
             <Flex direction="column" alignItems="stretch" gap={1}>
               <Typography variant="sigma" textColor="neutral600">
                 {label}

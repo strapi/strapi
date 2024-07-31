@@ -58,7 +58,7 @@ describe('Filters', () => {
     await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Jimbob');
     fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
 
-    await screen.findByRole('button', { name: 'Name $eq Jimbob' });
+    await screen.findByText('Name $eq Jimbob');
 
     expect(screen.queryByRole('combobox', { name: 'Select field' })).not.toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: 'Select filter' })).not.toBeInTheDocument();
@@ -73,9 +73,9 @@ describe('Filters', () => {
     await user.type(screen.getByRole('textbox', { name: 'Name' }), 'Jimbob');
     fireEvent.click(screen.getByRole('button', { name: 'Add filter' }));
 
-    await screen.findByRole('button', { name: 'Name $eq Jimbob' });
+    const filter = await screen.findByText('Name $eq Jimbob');
 
-    fireEvent.click(screen.getByRole('button', { name: 'Name $eq Jimbob' }));
+    fireEvent.click(filter);
 
     await waitFor(() =>
       expect(screen.queryByRole('button', { name: 'Name $eq Jimbob' })).not.toBeInTheDocument()

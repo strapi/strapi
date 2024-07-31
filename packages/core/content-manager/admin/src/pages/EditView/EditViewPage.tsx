@@ -186,7 +186,7 @@ const EditViewPage = () => {
                 ) : null}
               </Tabs.List>
               <Grid.Root paddingTop={8} gap={4}>
-                <Grid.Item col={9} s={12}>
+                <Grid.Item col={9} s={12} direction="column" alignItems="stretch">
                   <Tabs.Content value="draft">
                     <FormLayout layout={layout} />
                   </Tabs.Content>
@@ -194,7 +194,7 @@ const EditViewPage = () => {
                     <FormLayout layout={layout} />
                   </Tabs.Content>
                 </Grid.Item>
-                <Grid.Item col={3} s={12}>
+                <Grid.Item col={3} s={12} direction="column" alignItems="stretch">
                   <Panels />
                 </Grid.Item>
               </Grid.Root>

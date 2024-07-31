@@ -61,9 +61,8 @@ export const ReviewWorkflowsListView = () => {
     setWorkflowToDelete(null);
   };
 
-  const handleCreateClick = (
-    event: React.MouseEvent<HTMLButtonElement> & React.MouseEvent<HTMLAnchorElement>
-  ) => {
+  const handleCreateClick: React.MouseEventHandler<HTMLAnchorElement> &
+    ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) = (event) => {
     event.preventDefault();
     /**
      * If the current license has a workflow limit:
@@ -244,7 +243,7 @@ export const ReviewWorkflowsListView = () => {
                             },
                             { name: 'Default workflow' }
                           )}
-                          borderWidth={0}
+                          variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteWorkflow(String(workflow.id));

@@ -15,7 +15,7 @@ import { styled } from 'styled-components';
  * -----------------------------------------------------------------------------------------------*/
 const MainNavLinkWrapper = styled(RouterLink)`
   text-decoration: none;
-  display: block;
+  display: flex;
   border-radius: ${({ theme }) => theme.borderRadius};
   background: ${({ theme }) => theme.colors.neutral0};
   color: ${({ theme }) => theme.colors.neutral500};

@@ -379,7 +379,7 @@ const FormTransferTokenContainer = ({
           })}
         </Typography>
         <Grid.Root gap={5}>
-          <Grid.Item key="name" col={6} xs={12}>
+          <Grid.Item key="name" col={6} xs={12} direction="column" alignItems="stretch">
             <TokenName
               error={errors['name']}
               value={values['name']}
@@ -387,7 +387,7 @@ const FormTransferTokenContainer = ({
               onChange={onChange}
             />
           </Grid.Item>
-          <Grid.Item key="description" col={6} xs={12}>
+          <Grid.Item key="description" col={6} xs={12} direction="column" alignItems="stretch">
             <TokenDescription
               error={errors['description']}
               value={values['description']}
@@ -395,7 +395,7 @@ const FormTransferTokenContainer = ({
               onChange={onChange}
             />
           </Grid.Item>
-          <Grid.Item key="lifespan" col={6} xs={12}>
+          <Grid.Item key="lifespan" col={6} xs={12} direction="column" alignItems="stretch">
             <LifeSpanInput
               isCreating={isCreating}
               error={errors['lifespan']}
@@ -404,7 +404,7 @@ const FormTransferTokenContainer = ({
               token={transferToken}
             />
           </Grid.Item>
-          <Grid.Item key="permissions" col={6} xs={12}>
+          <Grid.Item key="permissions" col={6} xs={12} direction="column" alignItems="stretch">
             <TokenTypeSelect
               name="permissions"
               value={values['permissions']}

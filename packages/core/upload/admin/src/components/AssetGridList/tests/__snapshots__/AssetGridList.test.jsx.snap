@@ -5,7 +5,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   height: 100%;
 }
 
-.c3 {
+.c4 {
   background: #ffffff;
   border-radius: 4px;
   border-style: solid;
@@ -15,34 +15,34 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   height: 100%;
 }
 
-.c5 {
+.c6 {
   position: relative;
 }
 
-.c13 {
+.c14 {
   padding-block-start: 8px;
   padding-inline-end: 12px;
   padding-block-end: 8px;
   padding-inline-start: 12px;
 }
 
-.c16 {
+.c17 {
   padding-block-start: 4px;
 }
 
-.c20 {
+.c21 {
   padding-block-start: 4px;
   flex-grow: 1;
 }
 
-.c23 {
+.c24 {
   background: #eaeaef;
   padding-inline-end: 8px;
   padding-inline-start: 8px;
   min-width: 20px;
 }
 
-.c30 {
+.c31 {
   background: #32324d;
   color: #ffffff;
   padding-block: 4px;
@@ -53,58 +53,64 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   bottom: 4px;
 }
 
-.c32 {
+.c33 {
   width: 100%;
   height: 16.4rem;
 }
 
-.c6 {
+.c2 {
+  align-items: stretch;
+  display: flex;
+  flex-direction: column;
+}
+
+.c7 {
   align-items: center;
   display: flex;
   flex-direction: row;
   justify-content: center;
 }
 
-.c8 {
+.c9 {
   align-items: center;
   display: flex;
   flex-direction: row;
   gap: 8px;
 }
 
-.c14 {
+.c15 {
   align-items: flex-start;
   display: flex;
   flex-direction: row;
 }
 
-.c21 {
+.c22 {
   align-items: center;
   display: flex;
   flex-direction: row;
 }
 
-.c24 {
+.c25 {
   align-items: center;
   display: inline-flex;
   flex-direction: row;
   justify-content: center;
 }
 
-.c17 {
+.c18 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c18 {
+.c19 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c27 {
+.c28 {
   font-weight: 600;
   font-size: 1.1rem;
   line-height: 1.45;
@@ -113,13 +119,13 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   color: #666687;
 }
 
-.c31 {
+.c32 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #ffffff;
 }
 
-.c29 {
+.c30 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -130,18 +136,18 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   width: 1px;
 }
 
-.c25 {
+.c26 {
   border-radius: 4px;
   padding-block: 0.7rem;
 }
 
-.c9 {
+.c10 {
   position: absolute;
   top: 12px;
   left: 12px;
 }
 
-.c12 {
+.c13 {
   margin: 0;
   padding: 0;
   max-height: 100%;
@@ -149,7 +155,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   object-fit: contain;
 }
 
-.c11 {
+.c12 {
   display: flex;
   justify-content: center;
   height: 16.4rem;
@@ -159,16 +165,16 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   border-top-right-radius: 4px;
 }
 
-.c22 {
+.c23 {
   margin-left: auto;
   flex-shrink: 0;
 }
 
-.c26 {
+.c27 {
   margin-left: 4px;
 }
 
-.c10 {
+.c11 {
   background: #ffffff;
   width: 2rem;
   height: 2rem;
@@ -182,17 +188,17 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   flex: 0 0 2rem;
 }
 
-.c10[data-state='checked'],
-.c10[data-state='indeterminate'] {
+.c11[data-state='checked'],
+.c11[data-state='indeterminate'] {
   border: 1px solid #4945ff;
   background-color: #4945ff;
 }
 
-.c10[data-disabled] {
+.c11[data-disabled] {
   background-color: #dcdce4;
 }
 
-.c10::before {
+.c11::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -204,11 +210,11 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   min-height: 44px;
 }
 
-.c15 {
+.c16 {
   word-break: break-all;
 }
 
-.c7 {
+.c8 {
   border-bottom: 1px solid #eaeaef;
 }
 
@@ -218,30 +224,30 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
   gap: 16px;
 }
 
-.c2 {
+.c3 {
   grid-column: span 3;
   max-width: 100%;
 }
 
-.c19 {
+.c20 {
   text-transform: uppercase;
 }
 
-.c4 {
+.c5 {
   cursor: pointer;
 }
 
-.c34 svg {
+.c35 svg {
   font-size: 4.8rem;
 }
 
-.c33 {
+.c34 {
   border-radius: 4px 4px 0 0;
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 }
 
-.c28 canvas,
-.c28 video {
+.c29 canvas,
+.c29 video {
   display: block;
   pointer-events: none;
   max-width: 100%;
@@ -249,19 +255,19 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c10 {
+  .c11 {
     transition: border-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (max-width: 1100px) {
-  .c2 {
+  .c3 {
     grid-column: span;
   }
 }
 
 @media (max-width: 550px) {
-  .c2 {
+  .c3 {
     grid-column: span;
   }
 }
@@ -274,25 +280,25 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
       class="c0"
     >
       <div
-        class="c1 c2"
+        class="c1 c2 c3"
       >
         <article
           aria-labelledby=":r0:-title"
-          class="c3 c4"
+          class="c4 c5"
           role="button"
           tabindex="-1"
         >
           <div
-            class="c5 c6 c7"
+            class="c6 c7 c8"
           >
             <div>
               <div
-                class="c8 c9"
+                class="c9 c10"
               >
                 <button
                   aria-checked="false"
                   aria-labelledby=":r0:-title"
-                  class="c10"
+                  class="c11"
                   data-state="unchecked"
                   role="checkbox"
                   type="button"
@@ -301,40 +307,40 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
               </div>
             </div>
             <div
-              class="c11"
+              class="c12"
             >
               <img
                 alt="strapi-cover_1fabc982ce.png"
                 aria-hidden="true"
-                class="c12"
+                class="c13"
                 src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png?updatedAt=2021-09-14T07%3A32%3A50.816Z"
               />
             </div>
           </div>
           <div
-            class="c13"
+            class="c14"
           >
             <div
-              class="c14"
+              class="c15"
             >
               <div
-                class="c15"
+                class="c16"
               >
                 <div
-                  class="c16"
+                  class="c17"
                 >
                   <h2
-                    class="c17"
+                    class="c18"
                     id=":r0:-title"
                   >
                     strapi-cover_1fabc982ce.png
                   </h2>
                 </div>
                 <div
-                  class="c18"
+                  class="c19"
                 >
                   <span
-                    class="c19"
+                    class="c20"
                   >
                     png
                   </span>
@@ -342,16 +348,16 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                 </div>
               </div>
               <div
-                class="c20 c21"
+                class="c21 c22"
               >
                 <div
-                  class="c22"
+                  class="c23"
                 >
                   <div
-                    class="c23 c24 c25 c26"
+                    class="c24 c25 c26 c27"
                   >
                     <span
-                      class="c27"
+                      class="c28"
                     >
                       Image
                     </span>
@@ -363,25 +369,25 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
         </article>
       </div>
       <div
-        class="c1 c2"
+        class="c1 c2 c3"
       >
         <article
           aria-labelledby=":r2:-title"
-          class="c3 c4"
+          class="c4 c5"
           role="button"
           tabindex="-1"
         >
           <div
-            class="c5 c6 c7"
+            class="c6 c7 c8"
           >
             <div>
               <div
-                class="c8 c9"
+                class="c9 c10"
               >
                 <button
                   aria-checked="false"
                   aria-labelledby=":r2:-title"
-                  class="c10"
+                  class="c11"
                   data-state="unchecked"
                   role="checkbox"
                   type="button"
@@ -390,10 +396,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
               </div>
             </div>
             <div
-              class="c11"
+              class="c12"
             >
               <div
-                class="c28"
+                class="c29"
               >
                 <figure
                   class=""
@@ -407,7 +413,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
                     />
                   </video>
                   <figcaption
-                    class="c29"
+                    class="c30"
                   >
                     mov_bbb.mp4
                   </figcaption>
@@ -415,55 +421,55 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
               </div>
             </div>
             <time
-              class="c30"
+              class="c31"
             >
               <span
-                class="c31"
+                class="c32"
               >
                 ...
               </span>
             </time>
           </div>
           <div
-            class="c13"
+            class="c14"
           >
             <div
-              class="c14"
+              class="c15"
             >
               <div
-                class="c15"
+                class="c16"
               >
                 <div
-                  class="c16"
+                  class="c17"
                 >
                   <h2
-                    class="c17"
+                    class="c18"
                     id=":r2:-title"
                   >
                     mov_bbb.mp4
                   </h2>
                 </div>
                 <div
-                  class="c18"
+                  class="c19"
                 >
                   <span
-                    class="c19"
+                    class="c20"
                   >
                     mp4
                   </span>
                 </div>
               </div>
               <div
-                class="c20 c21"
+                class="c21 c22"
               >
                 <div
-                  class="c22"
+                  class="c23"
                 >
                   <div
-                    class="c23 c24 c25 c26"
+                    class="c24 c25 c26 c27"
                   >
                     <span
-                      class="c27"
+                      class="c28"
                     >
                       Video
                     </span>
@@ -475,25 +481,25 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
         </article>
       </div>
       <div
-        class="c1 c2"
+        class="c1 c2 c3"
       >
         <article
           aria-labelledby=":r4:-title"
-          class="c3 c4"
+          class="c4 c5"
           role="button"
           tabindex="-1"
         >
           <div
-            class="c5 c6 c7"
+            class="c6 c7 c8"
           >
             <div>
               <div
-                class="c8 c9"
+                class="c9 c10"
               >
                 <button
                   aria-checked="false"
                   aria-labelledby=":r4:-title"
-                  class="c10"
+                  class="c11"
                   data-state="unchecked"
                   role="checkbox"
                   type="button"
@@ -502,10 +508,10 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
               </div>
             </div>
             <div
-              class="c32 c6 c33"
+              class="c33 c7 c34"
             >
               <span
-                class="c34"
+                class="c35"
               >
                 <svg
                   aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -523,45 +529,45 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
             </div>
           </div>
           <div
-            class="c13"
+            class="c14"
           >
             <div
-              class="c14"
+              class="c15"
             >
               <div
-                class="c15"
+                class="c16"
               >
                 <div
-                  class="c16"
+                  class="c17"
                 >
                   <h2
-                    class="c17"
+                    class="c18"
                     id=":r4:-title"
                   >
                     CARTE MARIAGE AVS - Printemps.pdf
                   </h2>
                 </div>
                 <div
-                  class="c18"
+                  class="c19"
                 >
                   <span
-                    class="c19"
+                    class="c20"
                   >
                     pdf
                   </span>
                 </div>
               </div>
               <div
-                class="c20 c21"
+                class="c21 c22"
               >
                 <div
-                  class="c22"
+                  class="c23"
                 >
                   <div
-                    class="c23 c24 c25 c26"
+                    class="c24 c25 c26 c27"
                   >
                     <span
-                      class="c27"
+                      class="c28"
                     >
                       Doc
                     </span>
@@ -575,7 +581,7 @@ exports[`MediaLibrary / AssetList snapshots the asset list 1`] = `
     </div>
   </div>
   <span
-    class="c29"
+    class="c30"
   >
     <p
       aria-live="polite"

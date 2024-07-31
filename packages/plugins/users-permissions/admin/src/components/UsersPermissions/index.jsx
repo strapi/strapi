@@ -62,7 +62,15 @@ const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
   return (
     <UsersPermissionsProvider value={providerValue}>
       <Grid.Root gap={0} shadow="filterShadow" hasRadius background="neutral0">
-        <Grid.Item col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
+        <Grid.Item
+          col={7}
+          paddingTop={6}
+          paddingBottom={6}
+          paddingLeft={7}
+          paddingRight={7}
+          direction="column"
+          alignItems="stretch"
+        >
           <Flex direction="column" alignItems="stretch" gap={6}>
             <Flex direction="column" alignItems="stretch" gap={2}>
               <Typography variant="delta" tag="h2">

@@ -151,7 +151,7 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
                 id: getTrad('IconPicker.search.button.label'),
                 defaultMessage: 'Search icon button',
               })}
-              borderWidth={0}
+              variant="ghost"
             >
               <Search />
             </IconButton>
@@ -170,7 +170,7 @@ export const IconPicker = ({ intlLabel, name, onChange, value = '' }: IconPicker
                   id: getTrad('IconPicker.remove.button'),
                   defaultMessage: 'Remove the selected icon',
                 })}
-                borderWidth={0}
+                variant="ghost"
               >
                 <Trash />
               </IconButton>

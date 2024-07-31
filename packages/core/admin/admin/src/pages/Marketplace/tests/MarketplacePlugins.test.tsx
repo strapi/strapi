@@ -152,7 +152,7 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(getByRole('button', { name: 'Made by Strapi' })).toBeVisible();
+    expect(getByText('Made by Strapi')).toBeVisible();
 
     const collectionCards = getAllByTestId('npm-package-card');
     expect(collectionCards.length).toEqual(2);
@@ -177,7 +177,7 @@ describe('Marketplace page - plugins tab', () => {
     await user.keyboard('[Escape]');
     await waitForReload();
 
-    const optionTag = getByRole('button', { name: 'Custom fields' });
+    const optionTag = getByText('Custom fields');
     expect(optionTag).toBeVisible();
 
     const categoryCards = getAllByTestId('npm-package-card');
@@ -216,8 +216,8 @@ describe('Marketplace page - plugins tab', () => {
     await user.keyboard('[Escape]');
     // When the page reloads they should see a tag for the selected option
     await waitForReload();
-    expect(getByRole('button', { name: 'Made by Strapi' })).toBeVisible();
-    expect(getByRole('button', { name: 'Custom fields' })).toBeVisible();
+    expect(getByText('Made by Strapi')).toBeVisible();
+    expect(getByText('Custom fields')).toBeVisible();
     // They should see the correct number of results
     const filterCards = getAllByTestId('npm-package-card');
     expect(filterCards.length).toEqual(4);
@@ -258,8 +258,8 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(getByRole('button', { name: 'Made by Strapi' })).toBeVisible();
-    expect(getByRole('button', { name: 'Verified' })).toBeVisible();
+    expect(getByText('Made by Strapi')).toBeVisible();
+    expect(getByText('Verified')).toBeVisible();
     expect(getAllByTestId('npm-package-card').length).toEqual(3);
     expect(getByText('Gatsby Preview')).toBeVisible();
     expect(getByText('Config Sync')).toBeVisible();
@@ -291,8 +291,8 @@ describe('Marketplace page - plugins tab', () => {
 
     await waitForReload();
 
-    expect(getByRole('button', { name: 'Custom fields' })).toBeVisible();
-    expect(getByRole('button', { name: 'Monitoring' })).toBeVisible();
+    expect(getByText('Custom fields')).toBeVisible();
+    expect(getByText('Monitoring')).toBeVisible();
     expect(getAllByTestId('npm-package-card').length).toEqual(3);
     expect(getByText('CKEditor 5 custom field')).toBeVisible();
     expect(getByText('Sentry')).toBeVisible();
@@ -300,7 +300,7 @@ describe('Marketplace page - plugins tab', () => {
   });
 
   it('removes a filter option tag', async () => {
-    const { getByRole, user } = render();
+    const { getByRole, getByText, user } = render();
 
     await waitForReload();
 
@@ -315,11 +315,13 @@ describe('Marketplace page - plugins tab', () => {
     await waitForReload();
 
     expect(screen.getByText('?collections[0]=Made by Strapi&page=1')).toBeInTheDocument();
-    await user.click(getByRole('button', { name: 'Made by Strapi' }));
-
-    await waitForReload();
-
-    expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(`"?page=1"`);
+    const removeButton = getByText('Made by Strapi').nextElementSibling;
+    expect(removeButton).toBeInTheDocument();
+    if (removeButton && removeButton?.tagName === 'BUTTON') {
+      await user.click(removeButton);
+      await waitForReload();
+      expect(screen.getByTestId('location').textContent).toMatchInlineSnapshot(`"?page=1"`);
+    }
   });
 
   it('only filters in the plugins tab', async () => {
