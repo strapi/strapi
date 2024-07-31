@@ -778,6 +778,7 @@ const UpdateAction: DocumentActionComponent = ({
       setSubmitting(true);
 
       try {
+        // TODO: This is not what we should do. We should just run some validation and skip others instead.
         // Don't run the validation for drafts
         if (activeTab !== 'draft') {
           const { errors } = await validate();
