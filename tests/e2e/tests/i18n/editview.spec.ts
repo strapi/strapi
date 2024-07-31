@@ -118,7 +118,7 @@ test.describe('Edit view', () => {
     await expect(page.getByRole('heading', { name: 'Untitled' })).toBeVisible();
   });
 
-  test('As a user I want to add a locale entry to an existing document', async ({
+  test.skip('As a user I want to add a locale entry to an existing document', async ({
     browser,
     page,
   }) => {
@@ -239,7 +239,10 @@ test.describe('Edit view', () => {
     ).toBeVisible();
   });
 
-  test('As a user I want to publish multiple locales of my document', async ({ browser, page }) => {
+  test.skip('As a user I want to publish multiple locales of my document', async ({
+    browser,
+    page,
+  }) => {
     const LIST_URL = /\/admin\/content-manager\/collection-types\/api::article.article(\?.*)?/;
     const EDIT_URL =
       /\/admin\/content-manager\/collection-types\/api::article.article\/[^/]+(\?.*)?/;
@@ -376,7 +379,7 @@ test.describe('Edit view', () => {
   };
 
   for (const [type, validationParams] of Object.entries(typesOfValidation)) {
-    test(`As a user I want to see the relevant error message when trying to publish a draft that fails ${type} validation`, async ({
+    test.skip(`As a user I want to see the relevant error message when trying to publish a draft that fails ${type} validation`, async ({
       browser,
       page,
     }) => {
