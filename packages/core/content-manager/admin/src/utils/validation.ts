@@ -219,6 +219,16 @@ const createAttributeSchema = (
   }
 };
 
+// Helper function to return schema.nullable() if it exists, otherwise return schema
+const nullableSchema = <TSchema extends AnySchema>(schema: TSchema) => {
+  return schema?.nullable
+    ? schema.nullable()
+    : // In some cases '.nullable' will not be available on the schema.
+      // e.g. when the schema has been built using yup.lazy (e.g. for relations).
+      // In these cases we should just return the schema as it is.
+      schema;
+};
+
 /* -------------------------------------------------------------------------------------------------
  * Validators
  * -----------------------------------------------------------------------------------------------*/
@@ -233,7 +243,7 @@ type ValidationFn = (
 
 const addRequiredValidation: ValidationFn = (attribute, options) => (schema) => {
   if (options.status === 'draft') {
-    return schema;
+    return nullableSchema(schema);
   }
 
   if (
@@ -249,12 +259,7 @@ const addRequiredValidation: ValidationFn = (attribute, options) => (schema) => 
     return schema.required(translatedErrors.required);
   }
 
-  return schema?.nullable
-    ? schema.nullable()
-    : // In some cases '.nullable' will not be available on the schema.
-      // e.g. when the schema has been built using yup.lazy (e.g. for relations).
-      // In these cases we should just return the schema as it is.
-      schema;
+  return nullableSchema(schema);
 };
 
 const addMinLengthValidation: ValidationFn =
