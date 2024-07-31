@@ -92,13 +92,6 @@ yargs
         type: 'boolean',
         default: false,
       });
-      yarg.option('shard', {
-        alias: 's',
-        type: 'string',
-        default: "1/1",
-        describe:
-          'amount of shards you want',
-      });
     },
     handler: async (argv) => {
       try {
@@ -107,7 +100,7 @@ yargs
           dotenv.config({ path: path.join(testRoot, '.env') });
         }
 
-        const { concurrency, domains, setup, shard } = argv;
+        const { concurrency, domains, setup } = argv;
 
         /**
          * We don't need to spawn more apps than we have domains,
@@ -244,9 +237,10 @@ module.exports = config
               });
 
               console.log(`Running ${chalk.blue(domain)} e2e tests`);
+
               await execa(
                 'yarn',
-                ['playwright', 'test', "--shard", shard, '--config', pathToPlaywrightConfig, ...argv._],
+                ['playwright', 'test', '--config', pathToPlaywrightConfig, ...argv._],
                 {
                   stdio: 'inherit',
                   cwd,
