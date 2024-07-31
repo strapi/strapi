@@ -23,7 +23,7 @@ interface ProviderOptions {
   amazon?: string;
 }
 
-export = {
+export default {
   init(providerOptions: ProviderOptions, settings: Settings) {
     const client = nodeSES.createClient(providerOptions);
 

@@ -7,6 +7,7 @@ import type {
   RelationalAttribute,
   ComponentAttribute,
   DynamicZoneAttribute,
+  WithRequired,
 } from './types';
 
 const SINGLE_TYPE = 'singleType';
@@ -47,6 +48,20 @@ const getTimestamps = (model: Model) => {
 
   if (has(UPDATED_AT_ATTRIBUTE, model.attributes)) {
     attributes.push(UPDATED_AT_ATTRIBUTE);
+  }
+
+  return attributes;
+};
+
+const getCreatorFields = (model: Model) => {
+  const attributes = [];
+
+  if (has(CREATED_BY_ATTRIBUTE, model.attributes)) {
+    attributes.push(CREATED_BY_ATTRIBUTE);
+  }
+
+  if (has(UPDATED_BY_ATTRIBUTE, model.attributes)) {
+    attributes.push(UPDATED_BY_ATTRIBUTE);
   }
 
   return attributes;
@@ -132,7 +147,9 @@ const isMediaAttribute = (attribute: Attribute) => attribute?.type === 'media';
 const isRelationalAttribute = (attribute: Attribute): attribute is RelationalAttribute =>
   attribute?.type === 'relation';
 
-const isComponentAttribute = (attribute: Attribute): attribute is ComponentAttribute =>
+const isComponentAttribute = (
+  attribute: Attribute
+): attribute is ComponentAttribute | DynamicZoneAttribute =>
   ['component', 'dynamiczone'].includes(attribute?.type);
 
 const isDynamicZoneAttribute = (attribute: Attribute): attribute is DynamicZoneAttribute =>
@@ -177,7 +194,7 @@ const isTypedAttribute = (attribute: Attribute, type: string) => {
  * @param {object} contentType
  * @returns {string}
  */
-const getContentTypeRoutePrefix = (contentType: Model) => {
+const getContentTypeRoutePrefix = (contentType: WithRequired<Model, 'info'>) => {
   return isSingleType(contentType)
     ? _.kebabCase(contentType.info.singularName)
     : _.kebabCase(contentType.info.pluralName);
@@ -202,6 +219,7 @@ export {
   getNonVisibleAttributes,
   getVisibleAttributes,
   getTimestamps,
+  getCreatorFields,
   isVisibleAttribute,
   hasDraftAndPublish,
   getOptions,

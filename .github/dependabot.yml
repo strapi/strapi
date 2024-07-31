@@ -31,13 +31,18 @@ updates:
 
       redux:
         patterns:
-          - 'redux'
+          - '@reduxjs/toolkit'
           - 'react-redux'
 
       richtext-editor:
         patterns:
           - 'markdown-it'
           - 'markdown-it-*'
+
+      storybook:
+        patterns:
+          - 'storybook'
+          - '@storybook/*'
 
       testing-library:
         patterns:
@@ -49,11 +54,14 @@ updates:
           - 'webpack-cli'
           - 'webpack-dev-server'
 
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
     schedule:
       interval: weekly
       day: sunday
       time: '22:00'
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     versioning-strategy: increase
     ignore:
       # Only allow patch as minor babel versions need to be upgraded all together
@@ -70,9 +78,13 @@ updates:
     labels:
       - 'source: dependencies'
       - 'pr: chore'
+
   - package-ecosystem: github-actions
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 0
     directory: /
+    commit-message:
+      prefix: 'chore'
+      include: 'scope'
     schedule:
       interval: weekly
       day: sunday

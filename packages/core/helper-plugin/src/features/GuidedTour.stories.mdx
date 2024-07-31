@@ -1,4 +1,4 @@
-<!--- GuidedTourProvider.stories.mdx --->
+{/* - GuidedTourProvider.stories.mdx - */}
 
 import { Meta } from '@storybook/addon-docs';
 
@@ -10,7 +10,7 @@ This Provider is used to create a new context for the GuidedTour. The example us
 
 ## Usage
 
-``` js
+```js
 import { GuidedTourProvider } from '@strapi/helper-plugin';
 const initialState = {
   currentStep: null,
@@ -39,8 +39,8 @@ const GuidedTour = ({ children }) => {
     init
   );
 
-  const setCurrentStep = step => {
-    // currentStep format: 'contentTypeBuilder.create' 
+  const setCurrentStep = (step) => {
+    // currentStep format: 'contentTypeBuilder.create'
 
     return dispatch({
       type: 'SET_CURRENT_STEP',
@@ -48,7 +48,7 @@ const GuidedTour = ({ children }) => {
     });
   };
 
-  const setGuidedTourVisibility = value => {
+  const setGuidedTourVisibility = (value) => {
     dispatch({
       type: 'SET_GUIDED_TOUR_VISIBILITY',
       value,
@@ -63,13 +63,13 @@ const GuidedTour = ({ children }) => {
     });
   };
 
-  const startSection = sectionName => {
+  const startSection = (sectionName) => {
     // Add conditions for the section to start, which will allow the ModalGuidedTour to be visible
-    
-    return setCurrentStep(`${sectionName}.${step-to-show}`);
+
+    return setCurrentStep(`${sectionName}.${step - to - show}`);
   };
 
-  const setSkipped = value => {
+  const setSkipped = (value) => {
     dispatch({
       type: 'SET_SKIPPED',
       value,

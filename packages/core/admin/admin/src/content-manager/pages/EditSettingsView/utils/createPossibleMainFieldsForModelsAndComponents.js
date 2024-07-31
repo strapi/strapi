@@ -12,6 +12,7 @@ const createPossibleMainFieldsForModelsAndComponents = (array) => {
         'relation',
         'text',
         'richtext',
+        'blocks',
       ].includes(attributes?.[attr]?.type ?? '');
     });
 

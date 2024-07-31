@@ -1,2 +1,4 @@
 node_modules/
 .eslintrc.js
+jest.config.js
+dist/
