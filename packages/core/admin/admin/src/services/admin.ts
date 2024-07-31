@@ -6,6 +6,9 @@ import {
   type UpdateProjectSettings,
   type Plugins,
   type GetLicenseLimitInformation,
+  GetDashboardKeyNumbers,
+  GetDashboardContentTypeStatistics,
+  GetDashboardEEStatistics,
 } from '../../../shared/contracts/admin';
 import { prefixFileUrlWithBackendUrl } from '../utils/urls';
 
@@ -107,9 +110,30 @@ const admin = adminApi
         }),
         providesTags: ['LicenseLimits'],
       }),
-      getStatistics: builder.query<any, void>({
+      getDashboardKeyNumbers: builder.query<GetDashboardKeyNumbers.Response['data'], void>({
         query: () => ({
-          url: '/admin/dashboard-data',
+          url: '/admin/dashboard-key-numbers',
+          method: 'GET',
+        }),
+        providesTags: ['Statistics'],
+      }),
+      getDashboardStatistics: builder.query<
+        GetDashboardContentTypeStatistics.Response['statistics'],
+        GetDashboardContentTypeStatistics.Params['uid']
+      >({
+        query: (data) => ({
+          url: `/admin/dashboard-statistics/${data}`,
+          method: 'GET',
+          data,
+        }),
+        providesTags: ['Statistics'],
+      }),
+      getDashboardEEStatistics: builder.query<
+        GetDashboardEEStatistics.Response['statistics'],
+        void
+      >({
+        query: () => ({
+          url: `/admin/dashboard-ee-statistics`,
           method: 'GET',
         }),
         providesTags: ['Statistics'],
@@ -126,7 +150,9 @@ const {
   useUpdateProjectSettingsMutation,
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
-  useGetStatisticsQuery,
+  useGetDashboardKeyNumbersQuery,
+  useGetDashboardStatisticsQuery,
+  useGetDashboardEEStatisticsQuery,
 } = admin;
 
 export {
@@ -137,7 +163,9 @@ export {
   useUpdateProjectSettingsMutation,
   useGetPluginsQuery,
   useGetLicenseLimitsQuery,
-  useGetStatisticsQuery,
+  useGetDashboardKeyNumbersQuery,
+  useGetDashboardStatisticsQuery,
+  useGetDashboardEEStatisticsQuery,
 };
 
 export type { ConfigurationLogo };

@@ -68,8 +68,24 @@ export default [
   },
   {
     method: 'GET',
-    path: '/dashboard-data',
-    handler: 'admin.dashboardData',
+    path: '/dashboard-key-numbers',
+    handler: 'admin.getDashboardKeyNumbers',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/dashboard-statistics/:uid',
+    handler: 'admin.getDashboardContentTypeStatistics',
+    config: {
+      policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/dashboard-ee-statistics',
+    handler: 'admin.getDashboardEEStatistics',
     config: {
       policies: ['admin::isAuthenticatedAdmin'],
     },

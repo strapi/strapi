@@ -105,7 +105,7 @@ export default {
 
     const numberOfAllContentTypes = _.size(strapi.contentTypes);
     const numberOfComponents = _.size(strapi.components);
-   
+
     const getNumberOfDynamicZones = () => {
       return pipe(
         map('attributes'),
@@ -178,169 +178,21 @@ export default {
     ctx.send({ plugins }) satisfies Plugins.Response;
   },
 
-  async dashboardData(ctx: Context) {
-    const stats = await getService('statistics').getStatistics();
-    const upcomingReleases = await strapi.documents('plugin::content-releases.release').findMany({
-      limit: 10,
-      filters: {
-        scheduledAt: {
-          $gt: new Date(),
-        },
-      },
-      sort: 'scheduledAt:asc',
-    });
+  async getDashboardKeyNumbers(ctx: Context) {
+    const keyNumbers = await getService('statistics').getKeyNumbers();
+    ctx.body = keyNumbers;
+  },
 
-    const lastActivities = await strapi.documents('admin::audit-log').findMany({
-      limit: 10,
-      sort: 'createdAt:desc',
-    });
+  async getDashboardContentTypeStatistics(ctx: Context) {
+    const { uid } = ctx.params;
+    const userId = ctx.state.user.id;
 
-    const oneWeekAgo = new Date();
+    const statistics = await getService('statistics').getContentTypeStatistics(uid, userId);
+    ctx.body = statistics;
+  },
 
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
-    const contributions = await strapi.documents('admin::audit-log').findMany({
-      sort: 'date:desc',
-      populate: ['user'],
-      filters: {
-        action: ['entry.create', 'entry.update', 'entry.delete'],
-        date: {
-          $gt: oneWeekAgo,
-        },
-      },
-    });
-
-    const allContributors = contributions.reduce((acc, log) => {
-      const user = log.user.documentId;
-
-        if (!acc[user]) {
-          acc[user] = {
-            creations: 0,
-            updates: 0,
-            deletions: 0,
-            user: {
-              id: user,
-              firstname: log.user.firstname,
-              lastname: log.user.lastname,
-            },
-          };
-        }
-
-        if (log.action === 'entry.create') {
-          acc[user].creations += 1;
-        } else if (log.action === 'entry.update') {
-          acc[user].updates += 1;
-        } else if (log.action === 'entry.delete') {
-          acc[user].deletions += 1;
-        }
-
-        return acc;
-      },
-      {} as {
-        [id: string]: {
-          creations: number;
-          updates: number;
-          deletions: number;
-          user: { id: string; firstname: string; lastname: string };
-        };
-      }
-    );
-
-    const topContributors = Object.values(allContributors).sort((a, b) => {
-      const aTotal = a.creations + a.updates + a.deletions;
-      const bTotal = b.creations + b.updates + b.deletions;
-
-      return bTotal - aTotal;
-    }).slice(0, 5);
-
-
-    const locales = (await strapi.documents('plugin::i18n.locale').findMany()).reduce((acc, locale) => {
-      acc[locale.code] = locale.name;
-      return acc;
-    }, {} as Record<string, string>);
-
-    const assignedToMe = await assignedEntries(ctx.state.user.id, locales);
-
-
-    ctx.body = {
-      name: ctx.state.user.firstname,
-      statistics: stats,
-      releases: {
-        upcoming: upcomingReleases,
-      },
-      lastActivities,
-      topContributors: Object.values(topContributors),
-      assignedToMe,
-    };
+  async getDashboardEEStatistics(ctx: Context) {
+    const statistics = await getService('statistics').getEEStatistics();
+    ctx.body = statistics;
   },
 };
-
-type AssignedEntriesResult = {
-  contentType: { name: string, uid: string },
-  entry: { id: number, documentId: string, updatedAt: string, name: string, locale: string},
-}[];
-
-async function assignedEntries(userId: number, locales: Record<string, string>): Promise<AssignedEntriesResult> {
-  const workflows = await strapi.documents('plugin::review-workflows.workflow').findMany();
-
-  const contentTypes = [...new Set(workflows.flatMap((workflow) => workflow.contentTypes))]; // Set to remove duplicates
-
-  const result: AssignedEntriesResult = [];
-
-  await Promise.all(
-    contentTypes.flatMap((contentType) => {
-      return strapi
-        .documents(contentType)
-        .findMany({
-          filters: {
-            strapi_assignee: userId,
-          },
-        })
-        .then((entries) => {
-          entries.forEach((entry) => {
-            result.push({
-              contentType: {
-                name: strapi.contentTypes[contentType].info.displayName,
-                uid: contentType,
-              },
-              entry: {
-                documentId: entry.documentId,
-                locale: locales[entry.locale] ?? entry.locale,
-                name: entryDisplayName(entry),
-                id: entry.id,
-                updatedAt: entry.updatedAt,
-              },
-            });
-          });
-        });
-    })
-  );
-
-  return result.sort((a, b) => {
-    return new Date(b.entry.updatedAt).getTime() - new Date(a.entry.updatedAt).getTime();
-  });
-}
-
-function entryDisplayName(entry: {[k: string]: unknown}): string {
-  const entryLowercased = Object.fromEntries(
-    Object.entries(entry).map(([k, v]) => [k.toLowerCase(), v])
-  );
-
-  const displayName = entryLowercased.name || entryLowercased.title;
-
-  if (typeof displayName === 'string') {
-    return displayName;
-  }
-
-  delete entryLowercased.id;
-  delete entryLowercased.documentid;
-
-  const values = Object.values(entryLowercased).filter((v) => typeof v === 'string') as string[];
-
-  if (values.length > 0) {
-    const value = values[0];
-    return value.length > 20 ? `${value.slice(0, 20)}...` : value;
-  }
-
-  return `Item #${entry.id}`;
-}

@@ -1,5 +1,8 @@
 import { errors } from '@strapi/utils';
 import type { File } from 'formidable';
+import { UID } from "@strapi/types";
+
+import type { KeyNumbers, ContentTypeStatistics, EEStatistics } from 'src/services/statistics';
 
 export interface Logo {
   name: string;
@@ -212,6 +215,46 @@ export declare namespace GetLicenseLimitInformation {
       shouldNotify: boolean;
       shouldStopCreate: boolean;
     };
+    error?: errors.ApplicationError;
+  }
+}
+
+export declare namespace GetDashboardKeyNumbers {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+
+  export interface Response {
+    data: KeyNumbers | undefined;
+    error?: errors.ApplicationError;
+  }
+}
+
+export declare namespace GetDashboardContentTypeStatistics {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+
+  export interface Params {
+    uid: UID.CollectionType | null;
+  }
+
+  export interface Response {
+    statistics: ContentTypeStatistics | undefined;
+    error?: errors.ApplicationError;
+  }
+}
+
+export declare namespace GetDashboardEEStatistics {
+  export interface Request {
+    body: {};
+    query: {};
+  }
+
+  export interface Response {
+    statistics: EEStatistics | undefined;
     error?: errors.ApplicationError;
   }
 }
