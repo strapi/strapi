@@ -1,29 +1,37 @@
 import React from 'react';
 
 import { DesignSystemProvider } from '@strapi/design-system';
-import { render as renderTL } from '@testing-library/react';
+import { render as renderTL, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-import { AssetGridList } from '..';
 import en from '../../../translations/en.json';
+import { AssetGridList } from '../../AssetGridList/AssetGridList';
 
 jest.mock('../../../utils', () => ({
   ...jest.requireActual('../../../utils'),
-  getTrad: (x) => x,
+  getTrad: (x: string) => x,
 }));
 
+type Messages = typeof en;
+
 jest.mock('react-intl', () => ({
-  useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id]) }),
+  useIntl: () => ({ formatMessage: jest.fn(({ id }: { id: keyof Messages }) => en[id]) }),
 }));
 
 const data = [
   {
     id: 1,
+    documentId: 'document1',
     name: 'strapi-cover_1fabc982ce.png',
     alternativeText: '',
     caption: '',
     width: 1066,
     height: 551,
+    folder: null,
+    type: 'images',
+    isSelectable: true,
+    isLocal: true,
+    allowedTypes: ['images', 'files', 'videos', 'audios'],
     formats: {
       thumbnail: {
         name: 'thumbnail_strapi-cover_1fabc982ce.png',
@@ -34,6 +42,7 @@ const data = [
         height: 127,
         size: 3.37,
         path: null,
+        sizeInBytes: 3370,
         url: '/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png',
       },
       large: {
@@ -44,6 +53,7 @@ const data = [
         width: 1000,
         height: 517,
         size: 22.43,
+        sizeInBytes: 22430,
         path: null,
         url: '/uploads/large_strapi_cover_1fabc982ce_5b43615ed5.png',
       },
@@ -55,6 +65,7 @@ const data = [
         width: 750,
         height: 388,
         size: 14.62,
+        sizeInBytes: 14620,
         path: null,
         url: '/uploads/medium_strapi_cover_1fabc982ce_5b43615ed5.png',
       },
@@ -66,6 +77,7 @@ const data = [
         width: 500,
         height: 258,
         size: 8.38,
+        sizeInBytes: 8380,
         path: null,
         url: '/uploads/small_strapi_cover_1fabc982ce_5b43615ed5.png',
       },
@@ -80,15 +92,21 @@ const data = [
     provider_metadata: null,
     createdAt: '2021-09-14T07:32:50.816Z',
     updatedAt: '2021-09-14T07:32:50.816Z',
+    published_at: '2021-09-14T07:32:50.816Z',
+    locale: null,
+    isUrlSigned: false,
   },
   {
     id: 5,
+    documentId: 'document5',
     name: 'mov_bbb.mp4',
     alternativeText: '',
     caption: '',
     width: null,
     height: null,
     formats: null,
+    folder: null,
+    type: 'videos',
     hash: 'mov_bbb_2f3907f7aa',
     ext: '.mp4',
     mime: 'video/mp4',
@@ -99,15 +117,19 @@ const data = [
     provider_metadata: null,
     createdAt: '2021-09-14T07:48:30.882Z',
     updatedAt: '2021-09-14T07:48:30.882Z',
+    published_at: '2021-09-14T07:48:30.882Z',
+    locale: null,
   },
   {
     id: 6,
+    documentId: 'document6',
     name: 'CARTE MARIAGE AVS - Printemps.pdf',
     alternativeText: '',
     caption: '',
     width: null,
     height: null,
     formats: null,
+    folder: null,
     hash: 'CARTE_MARIAGE_AVS_Printemps_1f87b19e18',
     ext: '.pdf',
     mime: 'application/pdf',
@@ -118,6 +140,7 @@ const data = [
     provider_metadata: null,
     createdAt: '2021-09-14T07:51:59.845Z',
     updatedAt: '2021-09-14T07:51:59.845Z',
+    locale: null,
   },
 ];
 
@@ -138,9 +161,30 @@ describe('MediaLibrary / AssetList', () => {
     });
   });
 
-  it('snapshots the asset list', () => {
+  it('shows the assets details', () => {
     const { container } = setup();
 
-    expect(container).toMatchSnapshot();
+    screen.debug();
+
+    // check if the image is displayed
+    expect(screen.getByAltText('strapi-cover_1fabc982ce.png')).toBeInTheDocument();
+    expect(screen.getByRole('heading', {
+      name: 'strapi-cover_1fabc982ce.png',
+      level: 2,
+    })).toBeInTheDocument();
+    expect(screen.getByText(/1066✕551/)).toBeInTheDocument();
+
+    // check if the video is displayed
+    expect(screen.getByRole('figure')).toBeInTheDocument();
+    expect(screen.getByRole('heading', {
+      name: 'mov_bbb.mp4',
+      level: 2,
+    })).toBeInTheDocument();
+
+    // check if the pdf is displayed
+    expect(screen.getByRole('heading', {
+      name: 'CARTE MARIAGE AVS - Printemps.pdf',
+      level: 2,
+    })).toBeInTheDocument();
   });
 });

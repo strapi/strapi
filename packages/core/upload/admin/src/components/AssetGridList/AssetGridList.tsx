@@ -6,17 +6,37 @@ import PropTypes from 'prop-types';
 import { AssetCard } from '../AssetCard/AssetCard';
 
 import { Draggable } from './Draggable';
+import type { File } from '../../../../shared/contracts/files';
+
+interface AssetProps extends File  {
+  type?: string;
+  isSelectable?: boolean;
+  isLocal?: boolean;
+  allowedTypes?: string[];
+}
+
+interface AssetGridListProps {
+  allowedTypes?: string[];
+  assets: AssetProps[];
+  onEditAsset?: (asset: AssetProps) => void;
+  onSelectAsset: (asset: AssetProps) => void;
+  selectedAssets: AssetProps[];
+  onReorderAsset?: (hoverIndex: number, destIndex: number) => void;
+  size?: 'S' | 'M';
+  title?: string;
+}
 
 export const AssetGridList = ({
-  allowedTypes,
   assets,
   onEditAsset,
   onSelectAsset,
   selectedAssets,
-  size,
   onReorderAsset,
   title,
-}) => {
+  size = 'M',
+  allowedTypes = ['images', 'files', 'videos', 'audios'],
+}: AssetGridListProps) => {
+  
   return (
     <KeyboardNavigable tagName="article">
       {title && (

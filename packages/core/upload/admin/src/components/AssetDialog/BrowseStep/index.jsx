@@ -27,7 +27,7 @@ import { usePersistentState } from '../../../hooks/usePersistentState';
 import { getBreadcrumbDataCM, toSingularTypes } from '../../../utils';
 import getAllowedFiles from '../../../utils/getAllowedFiles';
 import { getTrad } from '../../../utils/getTrad';
-import { AssetGridList } from '../../AssetGridList';
+import { AssetGridList } from '../../AssetGridList/AssetGridList';
 import { Breadcrumbs } from '../../Breadcrumbs';
 import { EmptyAssets } from '../../EmptyAssets';
 import { FolderCard, FolderCardBody, FolderCardBodyAction } from '../../FolderCard';

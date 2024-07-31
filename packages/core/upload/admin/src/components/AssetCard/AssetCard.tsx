@@ -26,6 +26,7 @@ export const AssetCard = ({ asset, onSelect, onEdit, onRemove, size = 'M', local
   onRemove?: (asset: AssetProps) => void;
   size?: 'S' | 'M';
   local?: boolean;
+  allowedTypes?: string[];
 }) => {
   const handleSelect = onSelect ? () => onSelect(asset) : undefined;
 

@@ -24,7 +24,7 @@ import { useIntl } from 'react-intl';
 import { Link as ReactRouterLink, useNavigate, useLocation } from 'react-router-dom';
 import { styled } from 'styled-components';
 
-import { AssetGridList } from '../../../components/AssetGridList';
+import { AssetGridList } from '../../../components/AssetGridList/AssetGridList';
 import { EditAssetDialog } from '../../../components/EditAssetDialog';
 import { EditFolderDialog } from '../../../components/EditFolderDialog';
 import {

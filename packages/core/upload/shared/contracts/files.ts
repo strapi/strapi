@@ -15,8 +15,8 @@ export interface File {
   name: string;
   alternativeText?: string | null;
   caption?: string | null;
-  width?: number;
-  height?: number;
+  width?: number | null;
+  height?: number | null;
   folder: null | Pick<
     Folder,
     | 'createdAt'
@@ -42,7 +42,7 @@ export interface File {
       sizeInBytes: number;
       url: string;
     } | null;
-    small: {
+    small?: {
       name: string;
       hash: string;
       ext: string;
@@ -54,7 +54,31 @@ export interface File {
       sizeInBytes: number;
       url: string;
     } | null;
-  };
+    medium?: {
+      name: string;
+      hash: string;
+      ext: string;
+      mime: string;
+      path: null | string;
+      width: number;
+      height: number;
+      size: number;
+      sizeInBytes: number;
+      url: string;
+    } | null;
+    large?: {
+      name: string;
+      hash: string;
+      ext: string;
+      mime: string;
+      path: null | string;
+      width: number;
+      height: number;
+      size: number;
+      sizeInBytes: number;
+      url: string;
+    } | null;
+  } | null;
   hash: string;
   ext?: string;
   mime: string;
@@ -63,12 +87,12 @@ export interface File {
   previewUrl?: null | string;
   provider?: string;
   provider_metadata?: null | string;
-  folderPath: string;
+  folderPath?: string;
   createdAt: string;
   updatedAt: string;
-  publishedAt: string | null;
+  publishedAt?: string | null;
   locale: string | null;
-  isUrlSigned: boolean;
+  isUrlSigned?: boolean;
 }
 
 export interface Pagination {

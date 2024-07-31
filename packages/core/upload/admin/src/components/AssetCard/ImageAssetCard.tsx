@@ -8,8 +8,8 @@ import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 interface ImageAssetCardProps extends Omit<AssetCardBaseProps, 'variant'> {
   alt: string;
   extension: string;
-  height?: number;
-  width?: number;
+  height?: number | null;
+  width?: number | null;
   thumbnail?: string;
   isUrlSigned: boolean;
   size?: 'S' | 'M';

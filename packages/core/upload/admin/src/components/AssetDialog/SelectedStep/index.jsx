@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils/getTrad';
-import { AssetGridList } from '../../AssetGridList';
+import { AssetGridList } from '../../AssetGridList/AssetGridList';
 
 export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) => {
   const { formatMessage } = useIntl();
