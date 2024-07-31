@@ -190,6 +190,8 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
         onClick={handleClick(action)}
         justifyContent="center"
         variant={action.variant || 'default'}
+        paddingTop="7px"
+        paddingBottom="7px"
       >
         {action.label}
       </Button>
@@ -264,7 +266,7 @@ const DocumentActionsMenu = ({
 
   return (
     <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Menu.Trigger
+      <StyledMoreButton
         disabled={isDisabled}
         size="S"
         endIcon={null}
@@ -281,7 +283,7 @@ const DocumentActionsMenu = ({
               defaultMessage: 'More document actions',
             })}
         </VisuallyHidden>
-      </Menu.Trigger>
+      </StyledMoreButton>
       <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
@@ -298,7 +300,14 @@ const DocumentActionsMenu = ({
                   gap={2}
                   tag="span"
                 >
-                  <span>{action.icon}</span>
+                  <Flex
+                    tag="span"
+                    color={
+                      !action.disabled ? convertActionVariantToIconColor(action.variant) : 'inherit'
+                    }
+                  >
+                    {action.icon}
+                  </Flex>
                   {action.label}
                 </Flex>
                 {/* TODO: remove this in 5.1 release */}
@@ -380,6 +389,12 @@ const convertActionVariantToIconColor = (
       return 'primary600';
   }
 };
+
+const StyledMoreButton = styled(Menu.Trigger)`
+  & > span {
+    display: flex;
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionConfirmDialog

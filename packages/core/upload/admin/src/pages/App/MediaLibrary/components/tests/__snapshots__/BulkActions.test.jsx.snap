@@ -6,15 +6,14 @@ exports[`BulkActions renders 1`] = `
 }
 
 .c3 {
-  background: #4945ff;
-  padding-block: 8px;
-  padding-inline: 8px;
   padding-inline-end: 16px;
   padding-inline-start: 16px;
   border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
   cursor: pointer;
+}
+
+.c6 {
+  flex: 1 0 1.2rem;
 }
 
 .c1 {
@@ -24,20 +23,34 @@ exports[`BulkActions renders 1`] = `
   gap: 8px;
 }
 
+.c4 {
+  align-items: center;
+  display: inline-flex;
+  flex-direction: row;
+  gap: 8px;
+  justify-content: center;
+}
+
+.c7 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+}
+
 .c2 {
   font-size: 1.6rem;
   line-height: 1.5;
   color: #666687;
 }
 
-.c6 {
+.c8 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
   color: currentcolor;
 }
 
-.c8 {
+.c10 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -48,64 +61,12 @@ exports[`BulkActions renders 1`] = `
   width: 1px;
 }
 
-.c4 {
-  position: relative;
-  outline: none;
-}
-
-.c4[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c4:after {
-  transition-property: all;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c4:focus-visible {
-  outline: none;
-}
-
-.c4:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
 .c5 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #f5c0b8;
   background: #fcecea;
   color: #b72b1a;
-}
-
-.c5 svg {
-  height: 1.2rem;
-}
-
-.c5[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c5[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
 }
 
 .c5:hover {
@@ -118,37 +79,36 @@ exports[`BulkActions renders 1`] = `
   color: #d02b20;
 }
 
-.c7 {
+.c5[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c9 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
   color: #271fe0;
 }
 
-.c7 svg {
-  height: 1.2rem;
-}
-
-.c7[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c7[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c7:hover {
+.c9:hover {
   background-color: #ffffff;
 }
 
-.c7:active {
+.c9:active {
   background-color: #ffffff;
   border: 1px solid #4945ff;
   color: #4945ff;
+}
+
+.c9[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -158,7 +118,7 @@ exports[`BulkActions renders 1`] = `
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c7 {
+  .c9 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -177,13 +137,13 @@ exports[`BulkActions renders 1`] = `
       aria-disabled="false"
       aria-expanded="false"
       aria-haspopup="dialog"
-      class="c3 c1 c4 c5"
+      class="c3 c4 c5"
       data-state="closed"
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
-        class=""
+        class="c6 c7"
       >
         <svg
           fill="currentColor"
@@ -196,9 +156,9 @@ exports[`BulkActions renders 1`] = `
             d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
           />
         </svg>
-      </div>
+      </span>
       <span
-        class="c6"
+        class="c8"
       >
         Delete
       </span>
@@ -208,13 +168,13 @@ exports[`BulkActions renders 1`] = `
       aria-disabled="false"
       aria-expanded="false"
       aria-haspopup="dialog"
-      class="c3 c1 c4 c7"
+      class="c3 c4 c9"
       data-state="closed"
       type="button"
     >
-      <div
+      <span
         aria-hidden="true"
-        class=""
+        class="c6 c7"
       >
         <svg
           fill="currentColor"
@@ -227,16 +187,16 @@ exports[`BulkActions renders 1`] = `
             d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
           />
         </svg>
-      </div>
+      </span>
       <span
-        class="c6"
+        class="c8"
       >
         Move
       </span>
     </button>
   </div>
   <span
-    class="c8"
+    class="c10"
   >
     <p
       aria-live="polite"

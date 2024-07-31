@@ -1,9 +1,4 @@
-import {
-  BaseButton,
-  IconButton,
-  IconButtonComponent,
-  IconButtonGroup,
-} from '@strapi/design-system';
+import { Button, IconButton, IconButtonComponent, IconButtonGroup } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 // NAV BUTTONS
@@ -44,10 +39,18 @@ export const IconButtonGroupMargin = styled(IconButtonGroup)`
 `;
 
 // FOOTER
-export const ExpandButton = styled(BaseButton)`
+export const ExpandButton = styled(Button)`
   background-color: transparent;
   border: none;
   align-items: center;
+
+  & > span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-weight: ${({ theme }) => theme.fontWeights.regular};
+  }
 
   svg {
     margin-left: ${({ theme }) => `${theme.spaces[2]}`};

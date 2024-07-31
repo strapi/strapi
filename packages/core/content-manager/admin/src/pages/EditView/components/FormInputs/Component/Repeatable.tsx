@@ -258,7 +258,14 @@ const RepeatableComponent = ({
                         const completeFieldName = `${nameWithIndex}.${field.name}`;
 
                         return (
-                          <Grid.Item col={size} key={completeFieldName} s={12} xs={12}>
+                          <Grid.Item
+                            col={size}
+                            key={completeFieldName}
+                            s={12}
+                            xs={12}
+                            direction="column"
+                            alignItems="stretch"
+                          >
                             {children({ ...field, name: completeFieldName })}
                           </Grid.Item>
                         );
@@ -395,7 +402,7 @@ const Component = ({
             <Accordion.Trigger>{displayValue}</Accordion.Trigger>
             <Accordion.Actions>
               <IconButton
-                borderWidth={0}
+                variant="ghost"
                 onClick={onDeleteComponent}
                 label={formatMessage({
                   id: getTranslation('containers.Edit.delete'),
@@ -406,7 +413,7 @@ const Component = ({
               </IconButton>
               <IconButton
                 ref={composedAccordionRefs}
-                borderWidth={0}
+                variant="ghost"
                 onClick={(e) => e.stopPropagation()}
                 data-handler-id={handlerId}
                 label={formatMessage({

@@ -108,7 +108,7 @@ const ConfigurationForm = ({
                 })}
               </Typography>
               <Grid.Root>
-                <Grid.Item col={6} s={12}>
+                <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                   <InputRenderer
                     type="enumeration"
                     label={formatMessage({
@@ -145,10 +145,17 @@ const ConfigurationForm = ({
                     }, [])}
                   />
                 </Grid.Item>
-                <Grid.Item paddingTop={6} paddingBottom={6} col={12} s={12}>
+                <Grid.Item
+                  paddingTop={6}
+                  paddingBottom={6}
+                  col={12}
+                  s={12}
+                  direction="column"
+                  alignItems="stretch"
+                >
                   <Divider />
                 </Grid.Item>
-                <Grid.Item col={12} s={12}>
+                <Grid.Item col={12} s={12} direction="column" alignItems="stretch">
                   <Typography variant="delta" tag="h3">
                     {formatMessage({
                       id: getTranslation('containers.SettingPage.view'),
@@ -156,7 +163,7 @@ const ConfigurationForm = ({
                     })}
                   </Typography>
                 </Grid.Item>
-                <Grid.Item col={12} s={12}>
+                <Grid.Item col={12} s={12} direction="column" alignItems="stretch">
                   <Fields
                     attributes={attributes}
                     components={components}

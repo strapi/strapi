@@ -78,7 +78,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 id: getTrad('Email.template.form.edit.label'),
                 defaultMessage: 'Edit a template',
               })}
-              borderWidth={0}
+              variant="ghost"
               disabled={!canUpdate}
             >
               <Pencil />
@@ -111,7 +111,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
                 id: getTrad('Email.template.form.edit.label'),
                 defaultMessage: 'Edit a template',
               })}
-              borderWidth={0}
+              variant="ghost"
               disabled={!canUpdate}
             >
               <Pencil />

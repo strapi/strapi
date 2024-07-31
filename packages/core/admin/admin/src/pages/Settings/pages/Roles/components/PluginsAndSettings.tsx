@@ -226,7 +226,7 @@ const SubCategory = ({
           <Grid.Root gap={2} style={{ flex: 1 }}>
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
-                <Grid.Item col={3} key={action}>
+                <Grid.Item col={3} key={action} direction="column" alignItems="start">
                   <CheckboxWrapper $disabled={isFormDisabled} $hasConditions={hasConditions}>
                     <Checkbox
                       name={checkboxName}

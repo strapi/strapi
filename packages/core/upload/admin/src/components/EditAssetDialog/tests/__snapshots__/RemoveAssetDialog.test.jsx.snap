@@ -28,14 +28,9 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 }
 
 .c15 {
-  background: #4945ff;
-  padding-block: 8px;
-  padding-inline: 8px;
   padding-inline-end: 16px;
   padding-inline-start: 16px;
   border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
   width: 100%;
   cursor: pointer;
 }
@@ -71,7 +66,9 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 }
 
 .c6 {
-  font-size: 1.4rem;
+  font-weight: 600;
+  font-size: 1.8rem;
+  line-height: 1.22;
   font-weight: 600;
   color: currentcolor;
 }
@@ -82,7 +79,7 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
   color: currentcolor;
 }
 
-.c19 {
+.c18 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
@@ -101,104 +98,51 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 }
 
 .c17 {
-  position: relative;
-  outline: none;
-}
-
-.c17[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c17:after {
-  transition-property: all;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c17:focus-visible {
-  outline: none;
-}
-
-.c17:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c18 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
 }
 
-.c18 svg {
-  height: 1.2rem;
-}
-
-.c18[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c18[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c18:hover {
+.c17:hover {
   background-color: #f6f6f9;
 }
 
-.c18:active {
+.c17:active {
   background-color: #eaeaef;
 }
 
-.c20 {
+.c17[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c19 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #f5c0b8;
   background: #fcecea;
   color: #b72b1a;
 }
 
-.c20 svg {
-  height: 1.2rem;
-}
-
-.c20[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c20[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c20:hover {
+.c19:hover {
   background-color: #ffffff;
 }
 
-.c20:active {
+.c19:active {
   background-color: #ffffff;
   border: 1px solid #d02b20;
   color: #d02b20;
+}
+
+.c19[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
 }
 
 .c3 {
@@ -248,13 +192,13 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c18 {
+  .c17 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c20 {
+  .c19 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -339,7 +283,6 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
     <h2
       class="c5 c6 c7"
       id="radix-:r1:"
-      justifycontent="center"
     >
       Confirmation
     </h2>
@@ -370,22 +313,22 @@ exports[`RemoveAssetDialog snapshots the component 1`] = `
     >
       <button
         aria-disabled="false"
-        class="c15 c16 c17 c18"
+        class="c15 c16 c17"
         type="button"
       >
         <span
-          class="c19"
+          class="c18"
         >
           Cancel
         </span>
       </button>
       <button
         aria-disabled="false"
-        class="c15 c16 c17 c20"
+        class="c15 c16 c19"
         type="button"
       >
         <span
-          class="c19"
+          class="c18"
         >
           Confirm
         </span>
