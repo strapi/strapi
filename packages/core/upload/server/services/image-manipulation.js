@@ -18,11 +18,11 @@ const getFormatsToResize = () => {
 }
 
 const getFormatsToProcess  = () => {
-  return ['jpeg', 'jpg','png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
+  return ['jpeg', 'jpg', 'png', 'webp', 'tiff', 'svg', 'gif', 'avif'];
 }
 
 const getFormatsToOptimize = () => {
-  return ['jpeg', 'jpg','png', 'webp', 'tiff', 'avif'];
+  return ['jpeg', 'jpg', 'png', 'webp', 'tiff', 'avif'];
 }
 
 const writeStreamToFile = (stream, path) =>
