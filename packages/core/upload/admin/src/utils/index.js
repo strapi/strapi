@@ -1,6 +1,6 @@
 export { appendSearchParamsToUrl } from './appendSearchParamsToUrl';
 export { containsAssetFilter } from './containsAssetFilter';
-export { default as createAssetUrl } from './createAssetUrl';
+export { createAssetUrl } from './createAssetUrl';
 export { default as findRecursiveFolderByValue } from './findRecursiveFolderByValue';
 export { formatBytes } from './formatBytes';
 export * from './formatDuration';

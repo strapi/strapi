@@ -1,9 +1,7 @@
-import React from 'react';
-
-import PropTypes from 'prop-types';
-
-import { AssetDefinition, AssetType } from '../../constants';
-import { createAssetUrl } from '../../utils';
+// TODO: replace this import with the one from constants when the file is migrated to typescript
+import { AssetType } from '../../newConstants';
+// TODO: replace this import with the one from utils when the index file is migrated to typescript
+import { createAssetUrl } from '../../utils/createAssetUrl';
 // TODO: replace this import with the one from utils when the index file is migrated to typescript
 import { getFileExtension } from '../../utils/getFileExtension';
 // TODO: replace this import with the one from utils when the index file is migrated to typescript
@@ -13,14 +11,28 @@ import { AudioAssetCard } from './AudioAssetCard';
 import { DocAssetCard } from './DocAssetCard';
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
+import type { File } from '../../../../shared/contracts/files';
+interface AssetProps extends File  {
+  type?: string;
+  isSelectable?: boolean;
+  isLocal?: boolean;
+}
 
-export const AssetCard = ({ asset, isSelected, onSelect, onEdit, onRemove, size, local }) => {
+export const AssetCard = ({ asset, onSelect, onEdit, onRemove, size = 'M', local = false, isSelected = false }: {
+  asset: AssetProps;
+  isSelected?: boolean;
+  onSelect?: (asset: AssetProps) => void;
+  onEdit?: (asset: AssetProps) => void;
+  onRemove?: (asset: AssetProps) => void;
+  size?: 'S' | 'M';
+  local?: boolean;
+}) => {
   const handleSelect = onSelect ? () => onSelect(asset) : undefined;
 
   const commonAssetCardProps = {
     id: asset.id,
     isSelectable: asset.isSelectable,
-    extension: getFileExtension(asset.ext),
+    extension: getFileExtension(asset.ext) || '', // Ensure extension is always a string
     name: asset.name,
     url: local ? asset.url : createAssetUrl(asset, true),
     mime: asset.mime,
@@ -32,7 +44,7 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, onRemove, size,
   };
 
   if (asset.mime.includes(AssetType.Video)) {
-    return <VideoAssetCard {...commonAssetCardProps} />;
+    return <VideoAssetCard variant='Video' {...commonAssetCardProps} />;
   }
 
   if (asset.mime.includes(AssetType.Image)) {
@@ -56,22 +68,3 @@ export const AssetCard = ({ asset, isSelected, onSelect, onEdit, onRemove, size,
   return <DocAssetCard {...commonAssetCardProps} />;
 };
 
-AssetCard.defaultProps = {
-  isSelected: false,
-  // Determine if the asset is loaded locally or from a remote resource
-  local: false,
-  onSelect: undefined,
-  onEdit: undefined,
-  onRemove: undefined,
-  size: 'M',
-};
-
-AssetCard.propTypes = {
-  asset: AssetDefinition.isRequired,
-  local: PropTypes.bool,
-  onSelect: PropTypes.func,
-  onEdit: PropTypes.func,
-  onRemove: PropTypes.func,
-  isSelected: PropTypes.bool,
-  size: PropTypes.oneOf(['S', 'M']),
-};

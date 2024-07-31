@@ -10,7 +10,7 @@ interface ImageAssetCardProps extends Omit<AssetCardBaseProps, 'variant'> {
   extension: string;
   height?: number;
   width?: number;
-  thumbnail: string;
+  thumbnail?: string;
   isUrlSigned: boolean;
   size?: 'S' | 'M';
   updatedAt?: string;

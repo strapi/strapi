@@ -4,7 +4,7 @@ import { Box } from '@strapi/design-system';
 
 interface AudioPreviewProps {
   alt: string;
-  url: string;
+  url?: string;
 }
 
 export const AudioPreview = ({ url, alt }: AudioPreviewProps) => {

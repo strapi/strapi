@@ -59,7 +59,10 @@ describe('useConfig', () => {
       const { result } = renderHook(() => useConfig());
 
       act(() => {
-        result.current.mutateConfig.mutateAsync();
+        result.current.mutateConfig.mutateAsync({
+          pageSize: 10,
+          sort: 'name:ASC',
+        });
       });
 
       expect(result.current.config.isLoading).toBe(true);

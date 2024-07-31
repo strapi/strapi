@@ -5,7 +5,8 @@ import { useIntl } from 'react-intl';
 import { Route, Routes } from 'react-router-dom';
 
 import { useConfig } from '../../hooks/useConfig';
-import { getTrad } from '../../utils';
+// TODO: replace the import from the utils folder when the utils index will be migrated to TypeScript
+import { getTrad } from '../../utils/getTrad';
 
 import { MediaLibrary } from './MediaLibrary';
 

@@ -1,4 +1,5 @@
 import type { Data, Modules } from '@strapi/types';
+import type { Folder } from './folders';
 import { errors } from '@strapi/utils';
 
 type SortOrder = 'ASC' | 'DESC';
@@ -16,8 +17,32 @@ export interface File {
   caption?: string | null;
   width?: number;
   height?: number;
+  folder: null | Pick<
+    Folder,
+    | 'createdAt'
+    | 'documentId'
+    | 'id'
+    | 'locale'
+    | 'name'
+    | 'path'
+    | 'pathId'
+    | 'publishedAt'
+    | 'updatedAt'
+  >;
   formats?: {
     thumbnail: {
+      name: string;
+      hash: string;
+      ext: string;
+      mime: string;
+      path: null | string;
+      width: number;
+      height: number;
+      size: number;
+      sizeInBytes: number;
+      url: string;
+    } | null;
+    small: {
       name: string;
       hash: string;
       ext: string;
@@ -43,6 +68,7 @@ export interface File {
   updatedAt: string;
   publishedAt: string | null;
   locale: string | null;
+  isUrlSigned: boolean;
 }
 
 export interface Pagination {

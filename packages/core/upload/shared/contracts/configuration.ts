@@ -28,7 +28,9 @@ export declare namespace GetConfiguration {
   }
 
   export interface Response {
-    data: Configuration;
+    data: {
+      data: Configuration;
+    };
   }
 }
 

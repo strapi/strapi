@@ -9,7 +9,7 @@ const HAVE_FUTURE_DATA = 3;
 
 interface VideoPreviewProps extends BoxProps {
   alt: string;
-  url: string;
+  url?: string;
   mime: string;
   onLoadDuration?: (duration: number) => void;
 }

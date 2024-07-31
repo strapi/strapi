@@ -3,6 +3,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
+import { GetConfiguration, UpdateConfiguration } from '../../../shared/contracts/configuration';
 
 const endpoint = `/${pluginId}/configuration`;
 const queryKey = [pluginId, 'configuration'];
@@ -16,8 +17,7 @@ export const useConfig = () => {
   const config = useQuery(
     queryKey,
     async () => {
-      const res = await get(endpoint);
-
+      const res: GetConfiguration.Response = await get(endpoint);
       return res.data.data;
     },
     {
@@ -35,8 +35,8 @@ export const useConfig = () => {
   );
 
   const putMutation = useMutation(
-    async (body) => {
-      await put(endpoint, body);
+    async (body: UpdateConfiguration.Request['body']) => {
+      await put<UpdateConfiguration.Response>(endpoint, body);
     },
     {
       onSuccess() {
