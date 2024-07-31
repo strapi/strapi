@@ -246,7 +246,7 @@ module.exports = config
               console.log(`Running ${chalk.blue(domain)} e2e tests`);
               await execa(
                 'yarn',
-                ['playwright', 'test', "--shard", shard , '--config', pathToPlaywrightConfig, ...argv._],
+                ['playwright', 'test', "--shard", shard, '--config', pathToPlaywrightConfig, ...argv._],
                 {
                   stdio: 'inherit',
                   cwd,
