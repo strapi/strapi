@@ -1,6 +1,6 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-import validators from '../validators';
+import { Validators } from '../validators';
 import { mockOptions } from './utils';
 
 describe('Integer validator', () => {
@@ -41,7 +41,7 @@ describe('Integer validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer' },
             model: fakeModel,
@@ -61,17 +61,15 @@ describe('Integer validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators
-          .integer(
-            {
-              attr: { type: 'integer', unique: true },
-              model: fakeModel,
-              updatedAttribute: { name: 'attrIntegerUnique', value: null },
-              entity: null,
-            },
-            mockOptions
-          )
-          .nullable()
+        Validators.integer(
+          {
+            attr: { type: 'integer', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrIntegerUnique', value: null },
+            entity: null,
+          },
+          mockOptions
+        ).nullable()
       );
 
       await validator(null);
@@ -83,7 +81,7 @@ describe('Integer validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer', unique: true },
             model: fakeModel,
@@ -102,7 +100,7 @@ describe('Integer validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrIntegerUnique: 2 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer', unique: true },
             model: fakeModel,
@@ -124,7 +122,7 @@ describe('Integer validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrIntegerUnique: 3 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer', unique: true },
             model: fakeModel,
@@ -143,7 +141,7 @@ describe('Integer validator', () => {
       const valueToCheck = 4;
 
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer', unique: true },
             model: fakeModel,
@@ -170,7 +168,7 @@ describe('Integer validator', () => {
       const valueToCheck = 5;
 
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer', unique: true },
             model: fakeModel,
@@ -201,7 +199,7 @@ describe('Integer validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer', min: 3 },
             model: fakeModel,
@@ -221,7 +219,7 @@ describe('Integer validator', () => {
 
     test('it validates the min constraint if the integer is higher than the define min', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer', min: 3 },
             model: fakeModel,
@@ -241,7 +239,7 @@ describe('Integer validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer', max: 3 },
             model: fakeModel,
@@ -261,7 +259,7 @@ describe('Integer validator', () => {
 
     test('it validates the max constraint if the integer is lower than the define max', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.integer(
+        Validators.integer(
           {
             attr: { type: 'integer', max: 3 },
             model: fakeModel,

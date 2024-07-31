@@ -169,6 +169,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       }),
       providesTags: (result, _error, arg) => {
         return [
+          { type: 'Document', id: `ALL_LIST` },
           { type: 'Document', id: `${arg.model}_LIST` },
           ...(result?.results.map(({ documentId }) => ({
             type: 'Document' as const,
@@ -242,6 +243,11 @@ const documentApi = contentManagerApi.injectEndpoints({
               collectionType !== SINGLE_TYPES
                 ? `${model}_${result && 'documentId' in result ? result.documentId : documentId}`
                 : model,
+          },
+          // Make it easy to invalidate all individual documents queries for a model
+          {
+            type: 'Document',
+            id: `${model}_ALL_ITEMS`,
           },
         ];
       },

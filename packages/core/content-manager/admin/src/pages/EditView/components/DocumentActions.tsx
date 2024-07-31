@@ -184,12 +184,14 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
   return (
     <>
       <Button
-        flex={1}
+        flex="auto"
         startIcon={action.icon}
         disabled={action.disabled}
         onClick={handleClick(action)}
         justifyContent="center"
         variant={action.variant || 'default'}
+        paddingTop="7px"
+        paddingBottom="7px"
       >
         {action.label}
       </Button>
@@ -264,13 +266,13 @@ const DocumentActionsMenu = ({
 
   return (
     <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Menu.Trigger
+      <StyledMoreButton
         disabled={isDisabled}
         size="S"
         endIcon={null}
-        paddingTop="7px"
-        paddingLeft="9px"
-        paddingRight="9px"
+        paddingTop="4px"
+        paddingLeft="7px"
+        paddingRight="7px"
         variant={variant}
       >
         <More aria-hidden focusable={false} />
@@ -281,7 +283,7 @@ const DocumentActionsMenu = ({
               defaultMessage: 'More document actions',
             })}
         </VisuallyHidden>
-      </Menu.Trigger>
+      </StyledMoreButton>
       <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
@@ -293,10 +295,19 @@ const DocumentActionsMenu = ({
               key={action.id}
             >
               <Flex justifyContent="space-between" gap={4}>
-                <Flex color={convertActionVariantToColor(action.variant)} gap={2} tag="span">
-                  <Box tag="span" color={convertActionVariantToIconColor(action.variant)}>
+                <Flex
+                  color={!action.disabled ? convertActionVariantToColor(action.variant) : 'inherit'}
+                  gap={2}
+                  tag="span"
+                >
+                  <Flex
+                    tag="span"
+                    color={
+                      !action.disabled ? convertActionVariantToIconColor(action.variant) : 'inherit'
+                    }
+                  >
                     {action.icon}
-                  </Box>
+                  </Flex>
                   {action.label}
                 </Flex>
                 {/* TODO: remove this in 5.1 release */}
@@ -378,6 +389,12 @@ const convertActionVariantToIconColor = (
       return 'primary600';
   }
 };
+
+const StyledMoreButton = styled(Menu.Trigger)`
+  & > span {
+    display: flex;
+  }
+`;
 
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionConfirmDialog
@@ -666,8 +683,6 @@ const PublishAction: DocumentActionComponent = ({
      *  - the document is already published & not modified
      *  - the document is being created & not modified
      *  - the user doesn't have the permission to publish
-     *  - the user doesn't have the permission to create a new document
-     *  - the user doesn't have the permission to update the document
      */
     disabled:
       isCloning ||
@@ -676,8 +691,7 @@ const PublishAction: DocumentActionComponent = ({
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
       (!modified && !document?.documentId) ||
-      !canPublish ||
-      Boolean((!document?.documentId && !canCreate) || (document?.documentId && !canUpdate)),
+      !canPublish,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
@@ -754,14 +768,8 @@ const UpdateAction: DocumentActionComponent = ({
      * - the form is submitting
      * - the document is not modified & we're not cloning (you can save a clone entity straight away)
      * - the active tab is the published tab
-     * - the user doesn't have the permission to create a new document
-     * - the user doesn't have the permission to update the document
      */
-    disabled:
-      isSubmitting ||
-      (!modified && !isCloning) ||
-      activeTab === 'published' ||
-      Boolean((!documentId && !canCreate) || (documentId && !canUpdate)),
+    disabled: isSubmitting || (!modified && !isCloning) || activeTab === 'published',
     label: formatMessage({
       id: 'content-manager.containers.Edit.save',
       defaultMessage: 'Save',

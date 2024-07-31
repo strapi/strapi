@@ -8,9 +8,8 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import { unstable_useDocument } from '@strapi/content-manager/strapi-admin';
-import { Combobox, ComboboxOption, Field, Flex } from '@strapi/design-system';
+import { Combobox, ComboboxOption, Field } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { useTypedSelector } from '../../../../../modules/hooks';
@@ -26,7 +25,6 @@ const AssigneeSelect = () => {
     id,
     slug: model = '',
   } = useParams<{ collectionType: string; slug: string; id: string }>();
-  const dispatch = useDispatch();
   const permissions = useTypedSelector((state) => state.admin_app.permissions);
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
@@ -78,17 +76,6 @@ const AssigneeSelect = () => {
     });
 
     if ('data' in res) {
-      // Invalidates the content-manager's API cache for the document to update the stage.
-      dispatch({
-        type: 'contentManagerApi/invalidateTags',
-        payload: [
-          {
-            type: 'Document',
-            id: `${model}_${id}`,
-          },
-        ],
-      });
-
       toggleNotification({
         type: 'success',
         message: formatMessage({

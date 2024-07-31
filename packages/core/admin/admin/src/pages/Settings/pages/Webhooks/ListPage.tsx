@@ -370,7 +370,7 @@ const ListPage = () => {
                               id: 'Settings.webhooks.events.update',
                               defaultMessage: 'Update',
                             })}
-                            borderWidth={0}
+                            variant="ghost"
                           >
                             <Pencil />
                           </IconButton>
@@ -439,7 +439,7 @@ const DeleteActionButton = ({ onDelete }: DeleteActionButtonProps) => {
           id: 'Settings.webhooks.events.delete',
           defaultMessage: 'Delete webhook',
         })}
-        borderWidth={0}
+        variant="ghost"
       >
         <Trash />
       </IconButton>

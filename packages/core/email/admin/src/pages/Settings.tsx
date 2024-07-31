@@ -194,7 +194,7 @@ const SettingsPage = () => {
                   </Flex>
 
                   <Grid.Root gap={5}>
-                    <Grid.Item col={6} s={12}>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                       <Field.Root name="shipper-email">
                         <Field.Label>
                           {formatMessage({
@@ -213,7 +213,7 @@ const SettingsPage = () => {
                       </Field.Root>
                     </Grid.Item>
 
-                    <Grid.Item col={6} s={12}>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                       <Field.Root name="response-email">
                         <Field.Label>
                           {formatMessage({
@@ -232,7 +232,7 @@ const SettingsPage = () => {
                       </Field.Root>
                     </Grid.Item>
 
-                    <Grid.Item col={6} s={12}>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                       <Field.Root name="email-provider">
                         <Field.Label>
                           {formatMessage({
@@ -271,7 +271,7 @@ const SettingsPage = () => {
                 </Typography>
 
                 <Grid.Root gap={5}>
-                  <Grid.Item col={6} s={12}>
+                  <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
                     <Field.Root
                       name="test-address"
                       error={
@@ -298,7 +298,7 @@ const SettingsPage = () => {
                       />
                     </Field.Root>
                   </Grid.Item>
-                  <Grid.Item col={7} s={12}>
+                  <Grid.Item col={7} s={12} direction="column" alignItems="start">
                     <Button
                       loading={mutation.isLoading}
                       disabled={!isTestAddressValid}

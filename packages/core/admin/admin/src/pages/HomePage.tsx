@@ -89,7 +89,7 @@ const HomePageCE = () => {
         </LogoContainer>
         <Box padding={10}>
           <Grid.Root>
-            <Grid.Item col={8} s={12}>
+            <Grid.Item col={8} s={12} direction="column" alignItems="stretch">
               <div>
                 <Box paddingLeft={6} paddingBottom={10}>
                   <Flex direction="column" alignItems="flex-start" gap={5}>
@@ -138,10 +138,10 @@ const HomePageCE = () => {
             </Grid.Item>
           </Grid.Root>
           <Grid.Root gap={6}>
-            <Grid.Item col={8} s={12}>
+            <Grid.Item col={8} s={12} direction="column" alignItems="stretch">
               {showGuidedTour ? <GuidedTourHomepage /> : <ContentBlocks />}
             </Grid.Item>
-            <Grid.Item col={4} s={12}>
+            <Grid.Item col={4} s={12} direction="column" alignItems="stretch">
               <SocialLinks />
             </Grid.Item>
           </Grid.Root>
@@ -381,7 +381,7 @@ const SocialLinks = () => {
       <GridGap>
         {socialLinksExtended.map(({ icon, link, name }) => {
           return (
-            <Grid.Item col={6} s={12} key={name.id}>
+            <Grid.Item col={6} s={12} key={name.id} direction="column" alignItems="stretch">
               <LinkCustom size="L" startIcon={icon} variant="tertiary" href={link} isExternal>
                 {formatMessage(name)}
               </LinkCustom>

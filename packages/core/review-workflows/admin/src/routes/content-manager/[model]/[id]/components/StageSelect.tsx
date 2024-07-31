@@ -12,7 +12,6 @@ import {
   Typography,
 } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { LimitsModal } from '../../../../../components/LimitsModal';
@@ -38,7 +37,6 @@ export const StageSelect = () => {
     slug: string;
     id: string;
   }>();
-  const dispatch = useDispatch();
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
   const { toggleNotification } = useNotification();
@@ -120,17 +118,6 @@ export const StageSelect = () => {
           });
 
           if ('data' in res) {
-            // Invalidates the content-manager's API cache for the document to update the stage.
-            dispatch({
-              type: 'contentManagerApi/invalidateTags',
-              payload: [
-                {
-                  type: 'Document',
-                  id: `${model}_${id}`,
-                },
-              ],
-            });
-
             toggleNotification({
               type: 'success',
               message: formatMessage({
