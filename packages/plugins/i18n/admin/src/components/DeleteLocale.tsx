@@ -68,7 +68,7 @@ const DeleteLocale = ({ id, name }: DeleteLocaleProps) => {
               name,
             }
           )}
-          borderWidth={0}
+          variant="ghost"
         >
           <Trash />
         </IconButton>

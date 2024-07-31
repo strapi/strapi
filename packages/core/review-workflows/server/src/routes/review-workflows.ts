@@ -74,23 +74,6 @@ export default {
     },
     {
       method: 'GET',
-      path: '/workflows/:id',
-      handler: 'workflows.findById',
-      config: {
-        middlewares: [enableFeatureMiddleware('review-workflows')],
-        policies: [
-          'admin::isAuthenticatedAdmin',
-          {
-            name: 'admin::hasPermissions',
-            config: {
-              actions: ['admin::review-workflows.read'],
-            },
-          },
-        ],
-      },
-    },
-    {
-      method: 'GET',
       path: '/workflows/:workflow_id/stages',
       handler: 'stages.find',
       config: {

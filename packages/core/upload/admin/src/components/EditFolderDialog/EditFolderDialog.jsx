@@ -156,7 +156,7 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
             <Modal.Body>
               <Grid.Root gap={4}>
                 {isEditing && (
-                  <Grid.Item xs={12} col={12}>
+                  <Grid.Item xs={12} col={12} direction="column" alignItems="stretch">
                     <ContextInfo
                       blocks={[
                         {
@@ -188,7 +188,7 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
                   </Grid.Item>
                 )}
 
-                <Grid.Item xs={12} col={6}>
+                <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                   <Field.Root name="name" error={errors.name}>
                     <Field.Label>
                       {formatMessage({
@@ -205,7 +205,7 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
                   </Field.Root>
                 </Grid.Item>
 
-                <Grid.Item xs={12} col={6}>
+                <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                   <Field.Root id="folder-parent">
                     <Field.Label>
                       {formatMessage({

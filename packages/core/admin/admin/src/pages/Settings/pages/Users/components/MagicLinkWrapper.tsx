@@ -35,7 +35,7 @@ const MagicLinkWrapper = ({ children, target }: MagicLinkWrapperProps) => {
   return (
     <ContentBox
       endAction={
-        <IconButton label={copyLabel} borderWidth={0} onClick={handleClick}>
+        <IconButton label={copyLabel} variant="ghost" onClick={handleClick}>
           <Duplicate />
         </IconButton>
       }

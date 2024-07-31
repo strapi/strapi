@@ -118,7 +118,7 @@ const ReleasesGrid = ({ sectionTitle, releases = [], isError = false }: Releases
   return (
     <Grid.Root gap={4}>
       {releases.map(({ id, name, scheduledAt, status }) => (
-        <Grid.Item col={3} s={6} xs={12} key={id}>
+        <Grid.Item col={3} s={6} xs={12} key={id} direction="column" alignItems="stretch">
           <LinkCard tag={NavLink} to={`${id}`} isExternal={false}>
             <Flex
               direction="column"

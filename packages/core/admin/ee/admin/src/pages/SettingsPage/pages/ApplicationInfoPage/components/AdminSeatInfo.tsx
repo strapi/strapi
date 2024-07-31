@@ -43,7 +43,7 @@ export const AdminSeatInfoEE = () => {
   }
 
   return (
-    <Grid.Item col={6} s={12}>
+    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: 'Settings.application.admin-seats',

@@ -42,7 +42,14 @@ const NonRepeatableComponent = ({
                   const completeFieldName = `${name}.${field.name}`;
 
                   return (
-                    <Grid.Item col={size} key={completeFieldName} s={12} xs={12}>
+                    <Grid.Item
+                      col={size}
+                      key={completeFieldName}
+                      s={12}
+                      xs={12}
+                      direction="column"
+                      alignItems="stretch"
+                    >
                       {children({ ...field, name: completeFieldName })}
                     </Grid.Item>
                   );

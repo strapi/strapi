@@ -78,14 +78,24 @@ export const TabForm = ({
 
                 if (input.type === 'pushRight') {
                   return (
-                    <Grid.Item col={input.size || 6} key={input.name || key}>
+                    <Grid.Item
+                      col={input.size || 6}
+                      key={input.name || key}
+                      direction="column"
+                      alignItems="stretch"
+                    >
                       <div />
                     </Grid.Item>
                   );
                 }
 
                 return (
-                  <Grid.Item col={input.size || 6} key={input.name || key}>
+                  <Grid.Item
+                    col={input.size || 6}
+                    key={input.name || key}
+                    direction="column"
+                    alignItems="stretch"
+                  >
                     <GenericInput
                       {...input}
                       {...genericInputProps}

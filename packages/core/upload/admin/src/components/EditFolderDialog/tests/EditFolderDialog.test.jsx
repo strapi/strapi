@@ -22,6 +22,8 @@ jest.mock('../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../hooks/useFolderStructure');
 jest.mock('../../../hooks/useEditFolder');
 
+jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
+
 const client = new QueryClient({
   defaultOptions: {
     queries: {
