@@ -215,7 +215,7 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
           {layout.map((row, rowIndex) => (
             <Grid.Root gap={2} key={row.__temp_key__}>
               {row.children.map(({ size, ...field }, fieldIndex) => (
-                <Grid.Item key={field.name} col={size}>
+                <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
                   <Field
                     attribute={attributes[field.name]}
                     components={components}
@@ -390,7 +390,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
             </Typography>
             <Flex>
               <IconButton
-                borderWidth={0}
+                variant="ghost"
                 background="transparent"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -408,7 +408,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                 <Pencil />
               </IconButton>
               <IconButton
-                borderWidth={0}
+                variant="ghost"
                 onClick={handleRemoveField}
                 background="transparent"
                 withTooltip={false}
@@ -438,7 +438,7 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
               <Grid.Root gap={4} width="100%">
                 {components[attribute.component].layout.map((row) =>
                   row.map(({ size, ...field }) => (
-                    <Grid.Item key={field.name} col={size}>
+                    <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
                       <Flex
                         alignItems="center"
                         background="neutral0"

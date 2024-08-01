@@ -273,7 +273,12 @@ export const BrowseStep = ({
             >
               {folders.map((folder) => {
                 return (
-                  <Grid.Item col={3} key={`folder-${folder.id}`}>
+                  <Grid.Item
+                    col={3}
+                    key={`folder-${folder.id}`}
+                    direction="column"
+                    alignItems="stretch"
+                  >
                     <FolderCard
                       ariaLabel={folder.name}
                       id={`folder-${folder.id}`}

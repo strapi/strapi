@@ -198,7 +198,7 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
       action={
         isSorted &&
         sortable && (
-          <IconButton label={sortLabel} onClick={handleClickSort} borderStyle="none">
+          <IconButton label={sortLabel} onClick={handleClickSort} variant="ghost">
             <SortIcon $isUp={sortOrder === 'ASC'} />
           </IconButton>
         )

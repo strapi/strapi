@@ -175,7 +175,7 @@ export const EditAssetContent = ({
           <DialogHeader />
           <Modal.Body>
             <Grid.Root gap={4}>
-              <Grid.Item xs={12} col={6}>
+              <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                 <PreviewBox
                   asset={asset}
                   canUpdate={canUpdate}
@@ -189,7 +189,7 @@ export const EditAssetContent = ({
                   trackedLocation={trackedLocation}
                 />
               </Grid.Item>
-              <Grid.Item xs={12} col={6}>
+              <Grid.Item xs={12} col={6} direction="column" alignItems="stretch">
                 <Form noValidate>
                   <Flex direction="column" alignItems="stretch" gap={3}>
                     <ContextInfo

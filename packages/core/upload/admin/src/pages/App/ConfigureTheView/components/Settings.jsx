@@ -21,7 +21,7 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
       paddingRight={7}
     >
       <Grid.Root gap={4}>
-        <Grid.Item s={12} col={6}>
+        <Grid.Item s={12} col={6} direction="column" alignItems="stretch">
           <Field.Root
             hint={formatMessage({
               id: getTrad('config.entries.note'),
@@ -48,7 +48,7 @@ const Settings = ({ sort = '', pageSize = 10, onChange }) => {
             <Field.Hint />
           </Field.Root>
         </Grid.Item>
-        <Grid.Item s={12} col={6}>
+        <Grid.Item s={12} col={6} direction="column" alignItems="stretch">
           <Field.Root
             hint={formatMessage({
               id: getTrad('config.note'),

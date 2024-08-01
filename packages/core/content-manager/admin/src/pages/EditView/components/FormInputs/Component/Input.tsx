@@ -68,7 +68,7 @@ const ComponentInput = ({
               id: getTranslation('components.reset-entry'),
               defaultMessage: 'Reset Entry',
             })}
-            borderWidth={0}
+            variant="ghost"
             onClick={() => {
               field.onChange(name, null);
             }}

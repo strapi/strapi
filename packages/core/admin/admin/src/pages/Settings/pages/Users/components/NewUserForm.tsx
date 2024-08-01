@@ -174,7 +174,12 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                             {FORM_LAYOUT.map((row) => {
                               return row.map(({ size, ...field }) => {
                                 return (
-                                  <Grid.Item key={field.name} col={size}>
+                                  <Grid.Item
+                                    key={field.name}
+                                    col={size}
+                                    direction="column"
+                                    alignItems="stretch"
+                                  >
                                     <InputRenderer
                                       {...field}
                                       disabled={isDisabled}
@@ -198,13 +203,18 @@ const ModalForm = ({ onToggle }: ModalFormProps) => {
                       </Typography>
                       <Box paddingTop={4}>
                         <Grid.Root gap={5}>
-                          <Grid.Item col={6} xs={12}>
+                          <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                             <SelectRoles disabled={isDisabled} />
                           </Grid.Item>
                           {roleLayout.map((row) => {
                             return row.map(({ size, ...field }) => {
                               return (
-                                <Grid.Item key={field.name} col={size}>
+                                <Grid.Item
+                                  key={field.name}
+                                  col={size}
+                                  direction="column"
+                                  alignItems="stretch"
+                                >
                                   <InputRenderer
                                     {...field}
                                     disabled={isDisabled}

@@ -21,12 +21,7 @@ export const NavBrand = () => {
   } = useConfiguration('LeftMenu');
   return (
     <Box padding={3}>
-      <BrandIconWrapper
-        flexDirection="column"
-        justifyContent="center"
-        width="3.2rem"
-        height="3.2rem"
-      >
+      <BrandIconWrapper direction="column" justifyContent="center" width="3.2rem" height="3.2rem">
         <img
           src={menu.custom?.url || menu.default}
           alt={formatMessage({

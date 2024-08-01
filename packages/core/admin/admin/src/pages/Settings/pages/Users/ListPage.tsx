@@ -195,7 +195,7 @@ const ListPageCE = () => {
                               { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
                               { target: getDisplayName(user) }
                             )}
-                            borderWidth={0}
+                            variant="ghost"
                           >
                             <Pencil />
                           </IconButton>
@@ -207,7 +207,7 @@ const ListPageCE = () => {
                               { id: 'global.delete-target', defaultMessage: 'Delete {target}' },
                               { target: getDisplayName(user) }
                             )}
-                            borderWidth={0}
+                            variant="ghost"
                           >
                             <Trash />
                           </IconButton>

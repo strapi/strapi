@@ -244,6 +244,11 @@ const documentApi = contentManagerApi.injectEndpoints({
                 ? `${model}_${result && 'documentId' in result ? result.documentId : documentId}`
                 : model,
           },
+          // Make it easy to invalidate all individual documents queries for a model
+          {
+            type: 'Document',
+            id: `${model}_ALL_ITEMS`,
+          },
         ];
       },
     }),

@@ -34,7 +34,7 @@ const RelationDragPreview = ({ status, displayedValue, width }: RelationDragPrev
         gap={4}
       >
         <FlexWrapper gap={1}>
-          <IconButton withTooltip={false} label="" borderWidth={0}>
+          <IconButton withTooltip={false} label="" variant="ghost">
             <Drag />
           </IconButton>
           <Flex width="100%" minWidth={0} justifyContent="space-between">

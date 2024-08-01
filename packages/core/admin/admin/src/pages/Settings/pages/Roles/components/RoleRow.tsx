@@ -55,7 +55,7 @@ const RoleRow = ({
             if (icon) {
               return (
                 <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>
-                  <IconButton {...icon} borderWidth={0} />
+                  <IconButton {...icon} variant="ghost" />
                 </Box>
               );
             }
