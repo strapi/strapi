@@ -3,13 +3,12 @@ import React from 'react';
 import { useNotification } from '@strapi/admin/strapi-admin';
 import { IconButton } from '@strapi/design-system';
 import { Link as LinkIcon } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { useClipboard } from '../../hooks/useClipboard';
 import { getTrad } from '../../utils/getTrad';
 
-export const CopyLinkButton = ({ url }) => {
+export const CopyLinkButton = ({ url } : { url: string }) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { copy } = useClipboard();
@@ -39,8 +38,4 @@ export const CopyLinkButton = ({ url }) => {
       <LinkIcon />
     </IconButton>
   );
-};
-
-CopyLinkButton.propTypes = {
-  url: PropTypes.string.isRequired,
 };
