@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import * as React from 'react';
 
 import { useTracking, useNotification } from '@strapi/admin/strapi-admin';
 import {
@@ -44,7 +44,7 @@ export const EditFolderContent = ({ onClose, folder, location, parentFolderId })
     enabled: true,
   });
   const { canCreate, isLoading: isLoadingPermissions, canUpdate } = useMediaLibraryPermissions();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
   const { formatMessage, formatDate } = useIntl();
   const { trackUsage } = useTracking();
   const { editFolder, isLoading: isEditFolderLoading } = useEditFolder();

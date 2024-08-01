@@ -4,17 +4,24 @@ import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { sortOptions } from '../../constants';
-import { getTrad } from '../../utils';
+// TODO: replace with the import from the constants file when the file is migrated to TypeScript
+import { sortOptions } from '../../newConstants';
+// TODO: replace with the import from the utils file when the file is migrated to TypeScript
+import { getTrad } from '../../utils/getTrad';
 
-const SortPicker = ({ onChangeSort, value }) => {
+interface SortPickerProps {
+  onChangeSort: (value: string) => void;
+  value?: string;
+}
+
+const SortPicker = ({ onChangeSort, value }: SortPickerProps) => {
   const { formatMessage } = useIntl();
-
+  
   return (
     <SingleSelect
       size="S"
       value={value}
-      onChange={(value) => onChangeSort(value)}
+      onChange={(value) => onChangeSort(value.toString())}
       aria-label={formatMessage({
         id: getTrad('sort.label'),
         defaultMessage: 'Sort by',

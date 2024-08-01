@@ -3,7 +3,8 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getTrad } from '../utils';
+// TODO: to replace with the import from utils when the index is migrated to TypeScript
+import { getTrad } from '../utils/getTrad';
 
 import { recursiveRenameKeys } from './utils/rename-keys';
 

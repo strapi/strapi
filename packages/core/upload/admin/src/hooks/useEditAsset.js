@@ -1,13 +1,14 @@
-import { useState } from 'react';
+import * as React from 'react';
 
 import { useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
 import { useIntl } from 'react-intl';
 import { useMutation, useQueryClient } from 'react-query';
 
 import pluginId from '../pluginId';
-import { getTrad } from '../utils';
+// TODO: to replace with the import from utils when the index is migrated to TypeScript
+import { getTrad } from '../utils/getTrad';
 
-const editAssetRequest = (asset, file, signal, onProgress, post) => {
+const editAssetRequest = (asset, file, signal, post) => {
   const endpoint = `/${pluginId}?id=${asset.id}`;
 
   const formData = new FormData();
@@ -37,7 +38,7 @@ const editAssetRequest = (asset, file, signal, onProgress, post) => {
 };
 
 export const useEditAsset = () => {
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = React.useState(0);
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
   const queryClient = useQueryClient();

@@ -162,9 +162,7 @@ describe('MediaLibrary / AssetList', () => {
   });
 
   it('shows the assets details', () => {
-    const { container } = setup();
-
-    screen.debug();
+    setup();
 
     // check if the image is displayed
     expect(screen.getByAltText('strapi-cover_1fabc982ce.png')).toBeInTheDocument();
