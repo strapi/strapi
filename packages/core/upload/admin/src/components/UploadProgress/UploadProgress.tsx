@@ -55,7 +55,8 @@ export const UploadProgress = ({ onCancel, progress, error }: UploadProgressProp
         <Cross aria-label={error?.message} />
       ) : (
         <Flex direction="column" alignItems="center" gap={2} width="100%">
-          <ProgressBar value={progress}>{`${progress}/100%`}</ProgressBar>
+          <ProgressBar value={progress} />
+          <Typography>{`${progress}/100%`}</Typography>
 
           <CancelButton type="button" onClick={onCancel}>
             <Flex gap={2}>

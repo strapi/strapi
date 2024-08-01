@@ -74,14 +74,20 @@ describe('<UploadProgress />', () => {
         gap: 8px;
       }
 
-      .c8 {
+      .c9 {
         align-items: center;
         display: flex;
         flex-direction: row;
         gap: 8px;
       }
 
-      .c9 {
+      .c7 {
+        font-size: 1.4rem;
+        line-height: 1.43;
+        color: currentcolor;
+      }
+
+      .c10 {
         font-size: 1.2rem;
         line-height: 1.33;
         color: inherit;
@@ -108,24 +114,24 @@ describe('<UploadProgress />', () => {
         border-radius: 4px 4px 0 0;
       }
 
-      .c7 {
+      .c8 {
         border: none;
         background: none;
         width: min-content;
         color: #666687;
       }
 
-      .c7:hover,
-      .c7:focus {
+      .c8:hover,
+      .c8:focus {
         color: #4a4a6a;
       }
 
-      .c7 svg {
+      .c8 svg {
         height: 10px;
         width: 10px;
       }
 
-      .c7 svg path {
+      .c8 svg path {
         fill: currentColor;
       }
 
@@ -156,15 +162,20 @@ describe('<UploadProgress />', () => {
               style="transform: translate3D(-100%, 0, 0);"
             />
           </div>
-          <button
+          <span
             class="c7"
+          >
+            undefined/100%
+          </span>
+          <button
+            class="c8"
             type="button"
           >
             <div
-              class="c8"
+              class="c9"
             >
               <span
-                class="c9"
+                class="c10"
               >
                 Cancel
               </span>
