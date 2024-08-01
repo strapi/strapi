@@ -72,14 +72,14 @@ export const TableRows = ({
               <Flex justifyContent="flex-end">
                 {contentType === 'folder' && (
                   <IconButton
-                    tag={folderURL ? Link : undefined}
+                    tag={folderURL ? Link : 'button'}
                     label={formatMessage({
                       id: getTrad('list.folders.link-label'),
                       defaultMessage: 'Access folder',
                     })}
                     to={folderURL}
                     onClick={() => !folderURL && onChangeFolder(id)}
-                    borderWidth={0}
+                    variant="ghost"
                   >
                     <Eye />
                   </IconButton>
@@ -92,7 +92,7 @@ export const TableRows = ({
                   onClick={() =>
                     contentType === 'asset' ? onEditAsset(element) : onEditFolder(element)
                   }
-                  borderWidth={0}
+                  variant="ghost"
                 >
                   <Pencil />
                 </IconButton>

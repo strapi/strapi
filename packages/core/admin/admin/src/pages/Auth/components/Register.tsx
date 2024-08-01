@@ -458,7 +458,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                   type: 'checkbox' as const,
                 },
               ].map(({ size, ...field }) => (
-                <Grid.Item key={field.name} col={size}>
+                <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
                   <InputRenderer {...field} />
                 </Grid.Item>
               ))}

@@ -75,7 +75,15 @@ const NpmPackagesGrid = ({
   return (
     <Grid.Root gap={4}>
       {npmPackages.map((npmPackage) => (
-        <Grid.Item col={4} s={6} xs={12} style={{ height: '100%' }} key={npmPackage.id}>
+        <Grid.Item
+          col={4}
+          s={6}
+          xs={12}
+          style={{ height: '100%' }}
+          key={npmPackage.id}
+          direction="column"
+          alignItems="stretch"
+        >
           <NpmPackageCard
             npmPackage={npmPackage}
             isInstalled={installedPackageNames.includes(npmPackage.attributes.npmPackageName)}
