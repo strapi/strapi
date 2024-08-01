@@ -7,9 +7,12 @@ import { errors } from '@strapi/utils';
 import { Utils } from '@strapi/types';
 
 export interface Settings {
-  sizeOptimization: boolean;
-  responsiveDimensions: boolean;
-  autoOrientation: boolean;
+  data: {
+    sizeOptimization: boolean;
+    responsiveDimensions: boolean;
+    autoOrientation: boolean;
+    videoPreview?: boolean;
+  };
 }
 
 /**
@@ -34,11 +37,11 @@ export declare namespace GetSettings {
  */
 export declare namespace UpdateSettings {
   export interface Request {
-    body: Settings;
+    body: Settings['data'];
   }
 
   export type Response = Utils.OneOf<
-    { data: Settings },
+    { data: Settings['data'] },
     { error?: errors.ApplicationError | errors.ValidationError }
   >;
 }

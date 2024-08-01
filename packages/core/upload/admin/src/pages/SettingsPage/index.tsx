@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import * as React from 'react';
 
 import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex, Grid, Toggle, Typography, Field } from '@strapi/design-system';
@@ -7,8 +7,11 @@ import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery } from 'react-query';
 
-import { PERMISSIONS } from '../../constants';
-import { getTrad } from '../../utils';
+// TODO: to replace with the import from constants when the file is migrated to TypeScript
+import { PERMISSIONS } from '../../newConstants';
+// TODO: to replace with the import from utils when the index is migrated to TypeScript
+import { getTrad } from '../../utils/getTrad';
+import type { GetSettings, UpdateSettings } from '../../../../shared/contracts/settings'
 
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -18,14 +21,14 @@ export const SettingsPage = () => {
   const { toggleNotification } = useNotification();
   const { get, put } = useFetchClient();
 
-  const [{ initialData, modifiedData }, dispatch] = useReducer(reducer, initialState, init);
+  const [{ initialData, modifiedData }, dispatch] = React.useReducer(reducer, initialState, init);
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['upload', 'settings'],
     async queryFn() {
       const {
         data: { data },
-      } = await get('/upload/settings');
+      }: GetSettings.Response = await get('/upload/settings');
 
       return data;
     },
@@ -43,8 +46,8 @@ export const SettingsPage = () => {
   const isSaveButtonDisabled = isEqual(initialData, modifiedData);
 
   const { mutateAsync, isLoading: isSubmiting } = useMutation({
-    async mutationFn(body) {
-      return put('/upload/settings', body);
+    async mutationFn(body: UpdateSettings.Request['body']) {
+      return put<UpdateSettings.Response>('/upload/settings', body);
     },
     onSuccess() {
       refetch();
@@ -54,12 +57,12 @@ export const SettingsPage = () => {
         message: formatMessage({ id: 'notification.form.success.fields' }),
       });
     },
-    onError(err) {
+    onError(err: Error) {
       console.error(err);
     },
   });
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (isSaveButtonDisabled) {
@@ -69,7 +72,9 @@ export const SettingsPage = () => {
     await mutateAsync(modifiedData);
   };
 
-  const handleChange = ({ target: { name, value } }) => {
+  const handleChange = ({ target: { name, value } }: {
+    target: { name: string; value: boolean };
+  }) => {
     dispatch({
       type: 'ON_CHANGE',
       keys: name,
@@ -241,10 +246,8 @@ export const SettingsPage = () => {
   );
 };
 
-const ProtectedSettingsPage = () => (
+export const ProtectedSettingsPage = () => (
   <Page.Protect permissions={PERMISSIONS.settings}>
     <SettingsPage />
   </Page.Protect>
 );
-
-export default ProtectedSettingsPage;

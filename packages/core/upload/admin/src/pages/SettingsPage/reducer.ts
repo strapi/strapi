@@ -1,7 +1,14 @@
 import { produce } from 'immer';
 import set from 'lodash/set';
 
-const initialState = {
+import type { GetSettings } from '../../../../shared/contracts/settings';
+
+type InitialState = {
+  initialData: GetSettings.Response['data']['data'];
+  modifiedData: GetSettings.Response['data']['data'];
+};
+
+const initialState: InitialState = {
   initialData: {
     responsiveDimensions: true,
     sizeOptimization: true,
@@ -16,7 +23,20 @@ const initialState = {
   },
 };
 
-const reducer = (state, action) =>
+export interface OnChangeAction {
+  type: 'ON_CHANGE';
+  keys: string;
+  value: boolean;
+}
+
+export interface GetDataSucceededAction {
+  type: 'GET_DATA_SUCCEEDED';
+  data: GetSettings.Response['data']['data'];
+}
+
+type Action = GetDataSucceededAction | OnChangeAction;
+
+const reducer = (state: InitialState, action: Action) =>
   // eslint-disable-next-line consistent-return
   produce(state, (drafState) => {
     switch (action.type) {

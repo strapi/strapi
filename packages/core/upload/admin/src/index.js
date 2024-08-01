@@ -32,7 +32,11 @@ export default {
         defaultMessage: 'Media Library',
       },
       to: 'media-library',
-      Component: () => import('./pages/SettingsPage'),
+      async Component() {
+        const { ProtectedSettingsPage } = await import('./pages/SettingsPage');
+
+        return { default: ProtectedSettingsPage };
+      },
       permissions: PERMISSIONS.settings,
     });
 
