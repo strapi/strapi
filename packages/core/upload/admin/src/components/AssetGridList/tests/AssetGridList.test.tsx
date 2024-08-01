@@ -166,23 +166,29 @@ describe('MediaLibrary / AssetList', () => {
 
     // check if the image is displayed
     expect(screen.getByAltText('strapi-cover_1fabc982ce.png')).toBeInTheDocument();
-    expect(screen.getByRole('heading', {
-      name: 'strapi-cover_1fabc982ce.png',
-      level: 2,
-    })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {
+        name: 'strapi-cover_1fabc982ce.png',
+        level: 2,
+      })
+    ).toBeInTheDocument();
     expect(screen.getByText(/1066✕551/)).toBeInTheDocument();
 
     // check if the video is displayed
     expect(screen.getByRole('figure')).toBeInTheDocument();
-    expect(screen.getByRole('heading', {
-      name: 'mov_bbb.mp4',
-      level: 2,
-    })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {
+        name: 'mov_bbb.mp4',
+        level: 2,
+      })
+    ).toBeInTheDocument();
 
     // check if the pdf is displayed
-    expect(screen.getByRole('heading', {
-      name: 'CARTE MARIAGE AVS - Printemps.pdf',
-      level: 2,
-    })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', {
+        name: 'CARTE MARIAGE AVS - Printemps.pdf',
+        level: 2,
+      })
+    ).toBeInTheDocument();
   });
 });

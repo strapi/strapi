@@ -71,7 +71,9 @@ export const AssetCardBase = ({
 }: AssetCardBaseProps) => {
   const { formatMessage } = useIntl();
 
-  const handleClick: React.MouseEventHandler<HTMLDivElement> = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handleClick: React.MouseEventHandler<HTMLDivElement> = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
     if (onEdit) {
       onEdit(e);
     }
@@ -82,7 +84,9 @@ export const AssetCardBase = ({
    * bubbling to the `CardContainer`, however the `CardCheckbox` only returns
    * the `boolean` value as opposed to the event itself.
    */
-  const handlePropagationClick: React.MouseEventHandler<HTMLDivElement> = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const handlePropagationClick: React.MouseEventHandler<HTMLDivElement> = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
     e.stopPropagation();
   };
 
@@ -124,9 +128,9 @@ export const AssetCardBase = ({
       <CardBody>
         <CardContent>
           <Box paddingTop={1}>
-            <Typography tag='h2'>
-              <CardTitle tag='span'>{name}</CardTitle>
-            </Typography>          
+            <Typography tag="h2">
+              <CardTitle tag="span">{name}</CardTitle>
+            </Typography>
           </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>

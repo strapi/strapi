@@ -11,7 +11,7 @@ import { useMutation, useQuery } from 'react-query';
 import { PERMISSIONS } from '../../newConstants';
 // TODO: to replace with the import from utils when the index is migrated to TypeScript
 import { getTrad } from '../../utils/getTrad';
-import type { GetSettings, UpdateSettings } from '../../../../shared/contracts/settings'
+import type { GetSettings, UpdateSettings } from '../../../../shared/contracts/settings';
 
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -72,7 +72,9 @@ export const SettingsPage = () => {
     await mutateAsync(modifiedData);
   };
 
-  const handleChange = ({ target: { name, value } }: {
+  const handleChange = ({
+    target: { name, value },
+  }: {
     target: { name: string; value: boolean };
   }) => {
     dispatch({

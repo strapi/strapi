@@ -15,14 +15,14 @@ export const Draggable = ({ children, id, index, moveItem }: DraggableProps) => 
 
   const [, drop] = useDrop({
     accept: 'draggable',
-    hover(hoveredOverItem: { id: Data.ID, index: number }) {
+    hover(hoveredOverItem: { id: Data.ID; index: number }) {
       if (!ref.current) {
         return;
       }
-    
+
       if (hoveredOverItem.id !== id) {
         moveItem(hoveredOverItem.index, index);
-    
+
         hoveredOverItem.index = index;
       }
     },

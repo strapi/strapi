@@ -42,7 +42,7 @@ describe('AssetCardBase', () => {
         onEdit,
         name: 'Card',
         extension: 'png',
-        variant: 'Image'
+        variant: 'Image',
       });
 
       const editButton = getByRole('button', {
@@ -61,7 +61,7 @@ describe('AssetCardBase', () => {
         onRemove,
         name: 'Card',
         extension: 'png',
-        variant: 'Image'
+        variant: 'Image',
       });
 
       const removeButton = getByRole('button', {
@@ -80,7 +80,7 @@ describe('AssetCardBase', () => {
         onEdit,
         name: 'Card',
         extension: 'png',
-        variant: 'Image'
+        variant: 'Image',
       });
 
       const card = getAllByRole('button')[0];
@@ -99,7 +99,7 @@ describe('AssetCardBase', () => {
         onRemove: jest.fn(),
         name: 'Card',
         extension: 'png',
-        variant: 'Image'
+        variant: 'Image',
       });
 
       await user.tab();
@@ -114,7 +114,7 @@ describe('AssetCardBase', () => {
         onRemove: jest.fn(),
         name: 'Card',
         extension: 'png',
-        variant: 'Image'
+        variant: 'Image',
       });
 
       // checkbox
@@ -136,7 +136,7 @@ describe('AssetCardBase', () => {
         onRemove: jest.fn(),
         name: 'Card',
         extension: 'png',
-        variant: 'Image'
+        variant: 'Image',
       });
 
       // checkbox

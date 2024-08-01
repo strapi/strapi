@@ -29,7 +29,7 @@ export interface VideoAssetCardProps extends AssetCardBaseProps {
 
 export const VideoAssetCard = ({ name, url, mime, size = 'M', ...props }: VideoAssetCardProps) => {
   const [duration, setDuration] = React.useState<number>();
-  
+
   const formattedDuration = duration && formatDuration(duration);
 
   return (

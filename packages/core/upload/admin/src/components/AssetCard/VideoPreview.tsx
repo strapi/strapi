@@ -19,14 +19,14 @@ export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }: Video
     if ((e.target as HTMLVideoElement).currentTime > 0) {
       const video = e.target as HTMLVideoElement;
       const canvas = document.createElement('canvas');
-  
+
       canvas.height = video.videoHeight;
       canvas.width = video.videoWidth;
       const context = canvas.getContext('2d');
       if (context) {
         context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
       }
-  
+
       video.replaceWith(canvas);
       if (onLoadDuration) {
         onLoadDuration(video.duration);
@@ -36,13 +36,13 @@ export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }: Video
 
   const handleThumbnailVisibility: React.ReactEventHandler<HTMLVideoElement> = (e) => {
     const video = e.target as HTMLVideoElement;
-  
+
     if (video.readyState < HAVE_FUTURE_DATA) return;
-  
+
     video.play();
   };
 
-  return (    
+  return (
     <Box tag="figure" {...props}>
       <video
         muted

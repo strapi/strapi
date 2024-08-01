@@ -12,13 +12,21 @@ import { DocAssetCard } from './DocAssetCard';
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
 import type { File } from '../../../../shared/contracts/files';
-interface AssetProps extends File  {
+interface AssetProps extends File {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;
 }
 
-export const AssetCard = ({ asset, onSelect, onEdit, onRemove, size = 'M', local = false, isSelected = false }: {
+export const AssetCard = ({
+  asset,
+  onSelect,
+  onEdit,
+  onRemove,
+  size = 'M',
+  local = false,
+  isSelected = false,
+}: {
   asset: AssetProps;
   isSelected?: boolean;
   onSelect?: (asset: AssetProps) => void;
@@ -45,7 +53,7 @@ export const AssetCard = ({ asset, onSelect, onEdit, onRemove, size = 'M', local
   };
 
   if (asset.mime.includes(AssetType.Video)) {
-    return <VideoAssetCard variant='Video' {...commonAssetCardProps} />;
+    return <VideoAssetCard variant="Video" {...commonAssetCardProps} />;
   }
 
   if (asset.mime.includes(AssetType.Image)) {
@@ -68,4 +76,3 @@ export const AssetCard = ({ asset, onSelect, onEdit, onRemove, size = 'M', local
 
   return <DocAssetCard {...commonAssetCardProps} />;
 };
-

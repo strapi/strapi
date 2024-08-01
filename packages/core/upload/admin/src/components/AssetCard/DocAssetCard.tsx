@@ -17,7 +17,7 @@ const CardAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 `;
 
-interface DocAssetCardProps extends Omit<AssetCardBaseProps, "variant"> {
+interface DocAssetCardProps extends Omit<AssetCardBaseProps, 'variant'> {
   size?: 'S' | 'M';
 }
 

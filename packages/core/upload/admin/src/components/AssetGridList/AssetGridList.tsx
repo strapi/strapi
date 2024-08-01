@@ -8,7 +8,7 @@ import { AssetCard } from '../AssetCard/AssetCard';
 import { Draggable } from './Draggable';
 import type { File } from '../../../../shared/contracts/files';
 
-interface AssetProps extends File  {
+interface AssetProps extends File {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;
@@ -36,7 +36,6 @@ export const AssetGridList = ({
   size = 'M',
   allowedTypes = ['images', 'files', 'videos', 'audios'],
 }: AssetGridListProps) => {
-  
   return (
     <KeyboardNavigable tagName="article">
       {title && (

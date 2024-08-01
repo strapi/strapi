@@ -4,8 +4,8 @@
     "rootDir": "../",
     "baseUrl": ".",
     "paths": {
-      "@tests/*": ["./tests/*"],
+      "@tests/*": ["./tests/*"]
     }
   },
-  "include": ["../package.json", "./src", "../shared", "./tests"],
+  "include": ["../package.json", "./src", "../shared", "./tests"]
 }

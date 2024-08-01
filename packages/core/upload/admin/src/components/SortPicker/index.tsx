@@ -16,7 +16,7 @@ interface SortPickerProps {
 
 const SortPicker = ({ onChangeSort, value }: SortPickerProps) => {
   const { formatMessage } = useIntl();
-  
+
   return (
     <SingleSelect
       size="S"
