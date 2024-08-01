@@ -11,11 +11,11 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
 }
 
-.c5 {
+.c4 {
   display: flex;
 }
 
-.c7 {
+.c6 {
   background: #ffffff;
   border-radius: 4px;
   position: relative;
@@ -23,24 +23,18 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   cursor: default;
 }
 
-.c10 {
+.c9 {
   flex: 1;
 }
 
-.c2 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
-}
-
-.c4 {
+.c3 {
   align-items: stretch;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.c8 {
+.c7 {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -48,21 +42,21 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   justify-content: space-between;
 }
 
-.c11 {
+.c10 {
   align-items: center;
   display: flex;
   flex-direction: row;
   gap: 12px;
 }
 
-.c6 {
+.c5 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
   color: #32324d;
 }
 
-.c12 {
+.c11 {
   font-size: 1.4rem;
   line-height: 1.43;
   display: block;
@@ -72,13 +66,13 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   color: #32324d;
 }
 
-.c16 {
+.c15 {
   font-size: 1.2rem;
   line-height: 1.33;
   color: #666687;
 }
 
-.c17 {
+.c16 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -89,7 +83,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   width: 1px;
 }
 
-.c9 {
+.c8 {
   border: 1px solid #dcdce4;
   padding-block: 8px;
   padding-inline-start: 16px;
@@ -100,30 +94,30 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   transition-duration: 0.2s;
 }
 
-.c9[aria-disabled='true'] {
+.c8[aria-disabled='true'] {
   color: #666687;
 }
 
-.c9:focus-visible {
+.c8:focus-visible {
   outline: none;
 }
 
-.c9:focus-within {
+.c8:focus-within {
   border: 1px solid #4945ff;
   box-shadow: #4945ff 0px 0px 0px 2px;
 }
 
-.c15>svg {
+.c14>svg {
   fill: #666687;
 }
 
-.c13 {
+.c12 {
   flex: 1;
   font-size: 1.4rem;
   line-height: 2.2rem;
 }
 
-.c14 {
+.c13 {
   display: flex;
   gap: 4px;
   flex-wrap: wrap;
@@ -135,7 +129,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
   gap: 16px;
 }
 
-.c3 {
+.c2 {
   grid-column: span 6;
   max-width: 100%;
 }
@@ -145,13 +139,13 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 }
 
 @media (max-width: 1100px) {
-  .c3 {
+  .c2 {
     grid-column: span 12;
   }
 }
 
 @media (max-width: 550px) {
-  .c3 {
+  .c2 {
     grid-column: span;
   }
 }
@@ -164,13 +158,15 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
       class="c1"
     >
       <div
-        class="c2 c3"
+        alignitems="stretch"
+        class="c2"
+        direction="column"
       >
         <div
-          class="c4"
+          class="c3"
         >
           <label
-            class="c5 c6"
+            class="c4 c5"
             for=":r0:"
             id=":r0:-label"
           >
@@ -183,7 +179,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             aria-expanded="false"
             aria-labelledby=":r0:-label"
             aria-required="false"
-            class="c7 c8 c9"
+            class="c6 c7 c8"
             data-state="closed"
             dir="ltr"
             name="pageSize"
@@ -191,24 +187,24 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             tabindex="0"
           >
             <span
-              class="c10 c11"
+              class="c9 c10"
             >
               <span
-                class="c12 c13"
+                class="c11 c12"
               >
                 <span
-                  class="c14"
+                  class="c13"
                 >
                   10
                 </span>
               </span>
             </span>
             <span
-              class="c11"
+              class="c10"
             >
               <span
                 aria-hidden="true"
-                class="c15"
+                class="c14"
               >
                 <svg
                   fill="currentColor"
@@ -225,7 +221,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             </span>
           </div>
           <p
-            class="c16"
+            class="c15"
             id=":r0:-hint"
           >
             Number of assets displayed by default in the Media Library
@@ -233,13 +229,15 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
         </div>
       </div>
       <div
-        class="c2 c3"
+        alignitems="stretch"
+        class="c2"
+        direction="column"
       >
         <div
-          class="c4"
+          class="c3"
         >
           <label
-            class="c5 c6"
+            class="c4 c5"
             for=":r3:"
             id=":r3:-label"
           >
@@ -252,7 +250,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             aria-expanded="false"
             aria-labelledby=":r3:-label"
             aria-required="false"
-            class="c7 c8 c9"
+            class="c6 c7 c8"
             data-state="closed"
             dir="ltr"
             name="sort"
@@ -260,24 +258,24 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             tabindex="0"
           >
             <span
-              class="c10 c11"
+              class="c9 c10"
             >
               <span
-                class="c12 c13"
+                class="c11 c12"
               >
                 <span
-                  class="c14"
+                  class="c13"
                 >
                   createdAt:DESC
                 </span>
               </span>
             </span>
             <span
-              class="c11"
+              class="c10"
             >
               <span
                 aria-hidden="true"
-                class="c15"
+                class="c14"
               >
                 <svg
                   fill="currentColor"
@@ -294,7 +292,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
             </span>
           </div>
           <p
-            class="c16"
+            class="c15"
             id=":r3:-hint"
           >
             Note: You can override this value in the media library.
@@ -304,7 +302,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
     </div>
   </div>
   <span
-    class="c17"
+    class="c16"
   >
     <p
       aria-live="polite"

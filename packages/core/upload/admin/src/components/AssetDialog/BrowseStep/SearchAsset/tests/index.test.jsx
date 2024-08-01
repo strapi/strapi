@@ -28,19 +28,23 @@ describe('SearchAsset', () => {
 
     expect(container).toMatchInlineSnapshot(`
       .c0 {
+        background: #ffffff;
+        padding-block: 8px;
+        padding-inline: 8px;
         border-radius: 4px;
-        display: inline-flex;
+        border-color: #dcdce4;
+        border: 1px solid #dcdce4;
         cursor: pointer;
       }
 
       .c1 {
         align-items: center;
-        display: inline-flex;
+        display: flex;
         flex-direction: row;
         justify-content: center;
       }
 
-      .c3 {
+      .c4 {
         border: 0;
         clip: rect(0 0 0 0);
         height: 1px;
@@ -52,41 +56,64 @@ describe('SearchAsset', () => {
       }
 
       .c2 {
-        text-decoration: none;
-        padding-block: 0.9rem;
-        padding-inline: 0.9rem;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
-        color: #32324d;
-        color: #666687;
-      }
-
-      .c2:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c2:active {
-        background-color: #eaeaef;
+        position: relative;
+        outline: none;
       }
 
       .c2[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-        color: #666687;
-        cursor: default;
+        pointer-events: none;
       }
 
-      @media (prefers-reduced-motion: no-preference) {
-        .c2 {
-          transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
+      .c2:after {
+        transition-property: all;
+        transition-duration: 0.2s;
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        left: -4px;
+        right: -4px;
+        border: 2px solid transparent;
+      }
+
+      .c2:focus-visible {
+        outline: none;
+      }
+
+      .c2:focus-visible:after {
+        border-radius: 8px;
+        content: '';
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        left: -5px;
+        right: -5px;
+        border: 2px solid #4945ff;
+      }
+
+      .c3 {
+        border-color: #dcdce4;
+        height: 3.2rem;
+        width: 3.2rem;
+        color: #8e8ea9;
+      }
+
+      .c3:hover,
+      .c3:focus {
+        color: #666687;
+      }
+
+      .c3[aria-disabled='true'] {
+        color: #666687;
       }
 
       <div>
         <button
           aria-disabled="false"
-          class="c0 c1 c2"
+          class="c0 c1 c2 c3"
           data-state="closed"
+          type="button"
         >
           <svg
             aria-hidden="true"
@@ -102,13 +129,13 @@ describe('SearchAsset', () => {
             />
           </svg>
           <span
-            class="c3"
+            class="c4"
           >
             Search
           </span>
         </button>
         <span
-          class="c3"
+          class="c4"
         >
           <p
             aria-live="polite"
