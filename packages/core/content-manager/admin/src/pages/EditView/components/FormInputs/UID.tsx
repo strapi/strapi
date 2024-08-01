@@ -19,10 +19,12 @@ import {
 } from '@strapi/design-system';
 import { CheckCircle, WarningCircle, Loader, ArrowClockwise } from '@strapi/icons';
 import { useIntl } from 'react-intl';
+import { useMatch } from 'react-router-dom';
 import { styled, keyframes } from 'styled-components';
 
 import { useDebounce } from '../../../../hooks/useDebounce';
 import { useDoc } from '../../../../hooks/useDocument';
+import { CLONE_PATH } from '../../../../router';
 import {
   useGenerateUIDMutation,
   useGetAvailabilityQuery,
@@ -49,6 +51,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const allFormValues = useForm('InputUID', (form) => form.values);
     const [availability, setAvailability] = React.useState<CheckUIDAvailability.Response>();
     const [showRegenerate, setShowRegenerate] = React.useState(false);
+    const isCloning = useMatch(CLONE_PATH) !== null;
     const field = useField(name);
     const debouncedValue = useDebounce(field.value, 300);
     const hasChanged = debouncedValue !== field.initialValue;
@@ -139,7 +142,9 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
       },
       {
         // Don't check availability if the value is empty or wasn't changed
-        skip: !Boolean(hasChanged && debouncedValue && UID_REGEX.test(debouncedValue.trim())),
+        skip: !Boolean(
+          (hasChanged || isCloning) && debouncedValue && UID_REGEX.test(debouncedValue.trim())
+        ),
       }
     );
 
@@ -179,6 +184,9 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const fieldRef = useFocusInputField(name);
     const composedRefs = useComposedRefs(ref, fieldRef);
 
+    const shouldShowAvailability =
+      (hasChanged || isCloning) && debouncedValue != null && availability && !showRegenerate;
+
     return (
       <Field.Root hint={hint} name={name} error={field.error} required={required}>
         <Field.Label action={labelAction}>{label}</Field.Label>
@@ -187,7 +195,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
           disabled={props.disabled}
           endAction={
             <Flex position="relative" gap={1}>
-              {hasChanged && availability && !showRegenerate && (
+              {shouldShowAvailability && (
                 <TextValidation
                   alignItems="center"
                   gap={1}

@@ -8,7 +8,6 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
-  Box,
   Button,
   Dialog,
   Flex,
@@ -518,10 +517,7 @@ const PublishAction: DocumentActionComponent = ({
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
   const isCloning = useMatch(CLONE_PATH) !== null;
   const { formatMessage } = useIntl();
-  const { canPublish, canCreate, canUpdate } = useDocumentRBAC(
-    'PublishAction',
-    ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
-  );
+  const canPublish = useDocumentRBAC('PublishAction', ({ canPublish }) => canPublish);
   const { publish } = useDocumentActions();
   const [
     countDraftRelations,
@@ -746,10 +742,6 @@ const UpdateAction: DocumentActionComponent = ({
   const cloneMatch = useMatch(CLONE_PATH);
   const isCloning = cloneMatch !== null;
   const { formatMessage } = useIntl();
-  const { canCreate, canUpdate } = useDocumentRBAC('UpdateAction', ({ canCreate, canUpdate }) => ({
-    canCreate,
-    canUpdate,
-  }));
   const { create, update, clone } = useDocumentActions();
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
