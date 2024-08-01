@@ -51,6 +51,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
     const [showRegenerate, setShowRegenerate] = React.useState(false);
     const field = useField(name);
     const debouncedValue = useDebounce(field.value, 300);
+    const hasChanged = debouncedValue !== field.initialValue;
     const { toggleNotification } = useNotification();
     const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
     const { formatMessage } = useIntl();
@@ -137,11 +138,8 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
         params,
       },
       {
-        skip: !Boolean(
-          debouncedValue !== field.initialValue &&
-            debouncedValue &&
-            UID_REGEX.test(debouncedValue.trim())
-        ),
+        // Don't check availability if the value is empty or wasn't changed
+        skip: !Boolean(hasChanged && debouncedValue && UID_REGEX.test(debouncedValue.trim())),
       }
     );
 
@@ -189,7 +187,7 @@ const UIDInput = React.forwardRef<any, UIDInputProps>(
           disabled={props.disabled}
           endAction={
             <Flex position="relative" gap={1}>
-              {availability && !showRegenerate && (
+              {hasChanged && availability && !showRegenerate && (
                 <TextValidation
                   alignItems="center"
                   gap={1}

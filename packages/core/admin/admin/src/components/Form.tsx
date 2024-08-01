@@ -660,7 +660,7 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 
   const initialValue = useForm(
     'useField',
-    (state) => getIn(state.initialValues, path) as FieldValue<TValue>['initialValue']
+    (state) => getIn(state.initialValues.current, path) as FieldValue<TValue>['initialValue']
   );
 
   const value = useForm(
