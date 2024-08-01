@@ -410,7 +410,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
         <FormProvider
           disabled={disabled}
           onChange={handleChange}
-          initialValues={initialValues}
+          initialValues={initialValues.current}
           modified={modified}
           addFieldRow={addFieldRow}
           moveFieldRow={moveFieldRow}
@@ -660,7 +660,7 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 
   const initialValue = useForm(
     'useField',
-    (state) => getIn(state.initialValues.current, path) as FieldValue<TValue>['initialValue']
+    (state) => getIn(state.initialValues, path) as FieldValue<TValue>['initialValue']
   );
 
   const value = useForm(
