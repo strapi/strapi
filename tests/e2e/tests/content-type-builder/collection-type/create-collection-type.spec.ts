@@ -47,7 +47,7 @@ test.describe('Create collection type', () => {
 
     // TODO: fix the bug that causes webkit location to be off
     if (browserName === 'webkit') {
-      test.skip();
+      test.fixme();
     } else {
       await page.getByText('Small or long text').click();
     }

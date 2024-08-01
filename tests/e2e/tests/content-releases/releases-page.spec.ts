@@ -92,7 +92,7 @@ describeOnCondition(edition === 'EE')('Releases page', () => {
     await expect(page.getByRole('link', { name: `${newReleaseName}` })).toBeVisible();
   });
 
-  test.skip('A user should be able to perform bulk release on entries', async ({ page }) => {
+  test.fixme('A user should be able to perform bulk release on entries', async ({ page }) => {
     await test.step('bulk release', async () => {
       // Navigate to the releases page
       await page.getByRole('link', { name: 'Releases' }).click();

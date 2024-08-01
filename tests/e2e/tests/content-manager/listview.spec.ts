@@ -20,7 +20,7 @@ test.describe('List View', () => {
   });
 
   // Should be enabled once bulk publish is in action
-  test.skip('A user should be able to perform bulk actions on entries', async ({ page }) => {
+  test.fixme('A user should be able to perform bulk actions on entries', async ({ page }) => {
     await test.step('bulk publish', async () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
       // Select all entries to publish
