@@ -102,8 +102,8 @@ async function upload(
       progressBar.stop();
       if (e instanceof AxiosError && e.response?.data) {
         if (e.response.status === 404) {
-          ctx.logger.error(
-            `The project does not exist. Remove the ${local.LOCAL_SAVE_FILENAME} file and try again.`
+          ctx.logger.warn(
+            `The project does not exist. Please link your local project to a Strapi Cloud project using the link command.`
           );
         } else {
           ctx.logger.error(e.response.data);
