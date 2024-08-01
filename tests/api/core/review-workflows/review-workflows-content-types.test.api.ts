@@ -72,8 +72,8 @@ describeOnCondition(edition === 'EE')('Review workflows - Content Types', () => 
   };
 
   const getWorkflow = async (id) => {
-    const { body } = await requests.admin.get(`/review-workflows/workflows/${id}?populate=*`);
-    return body.data;
+    const { body } = await requests.admin.get(`/review-workflows/workflows?populate=*`);
+    return body.data.find((workflow) => workflow.id === id);
   };
 
   const getWorkflows = async (filters) => {
