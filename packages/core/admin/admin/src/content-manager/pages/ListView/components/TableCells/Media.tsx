@@ -52,11 +52,11 @@ const FileWrapper = ({ children }: { children: React.ReactNode }) => {
       as="span"
       position="relative"
       borderRadius="50%"
-      width="26px"
+      width="20px"
       height="26px"
       borderColor="neutral200"
       background="neutral150"
-      paddingLeft="1px"
+      paddingLeft="2px"
       justifyContent="center"
       alignItems="center"
     >
