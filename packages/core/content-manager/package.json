@@ -62,8 +62,8 @@
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/design-system": "2.0.0-rc.7",
     "@strapi/icons": "2.0.0-rc.7",
-    "@strapi/types": "5.0.0-rc.8",
-    "@strapi/utils": "5.0.0-rc.8",
+    "@strapi/types": "workspace:*",
+    "@strapi/utils": "workspace:*",
     "codemirror5": "npm:codemirror@^5.65.11",
     "date-fns": "2.30.0",
     "fractional-indexing": "3.2.0",
@@ -97,7 +97,7 @@
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.0.0-rc.8",
+    "@strapi/admin": "workspace:*",
     "@strapi/database": "workspace:*",
     "@strapi/pack-up": "5.0.0",
     "@testing-library/react": "15.0.7",

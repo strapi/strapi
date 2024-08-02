@@ -43,8 +43,8 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/cloud-cli": "5.0.0-rc.8",
-    "@strapi/generate-new": "5.0.0-rc.8",
+    "@strapi/cloud-cli": "workspace:*",
+    "@strapi/generate-new": "workspace:*",
     "chalk": "4.1.2",
     "commander": "8.3.0",
     "inquirer": "8.2.5"
@@ -52,8 +52,8 @@
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
     "@types/inquirer": "8.2.5",
-    "eslint-config-custom": "5.0.0-rc.8",
-    "tsconfig": "5.0.0-rc.8"
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
