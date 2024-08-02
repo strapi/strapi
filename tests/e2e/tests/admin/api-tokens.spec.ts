@@ -28,14 +28,6 @@ test.describe('API Tokens', () => {
     await login({ page });
   });
 
-  // test('When no tokens exist, I want to see "Add your first API Token"', async ({ page }) => {
-  //   await navToHeader(page, ['Settings', 'API Tokens'], 'API Tokens');
-  //   await expect(page.locator('thead')).toContainText('Last used');
-  //   await expect(page.getByText('Add your first API Token')).toBeVisible();
-  //   await page.getByRole('link', { name: 'Add new API Token' }).click();
-  //   await expect(page.getByRole('heading', { name: 'Create API Token' })).toBeVisible();
-  // });
-
   // Test token creation
   const testCases = [
     ['30-day Read-only token', '30 days', 'Read-only'],
