@@ -2,32 +2,38 @@
 
 exports[`BulkDeleteButton renders 1`] = `
 .c0 {
-  background: #4945ff;
-  padding-block: 8px;
-  padding-inline: 8px;
   padding-inline-end: 16px;
   padding-inline-start: 16px;
   border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
   cursor: pointer;
+}
+
+.c3 {
+  flex: 1 0 1.2rem;
 }
 
 .c1 {
   align-items: center;
-  display: flex;
+  display: inline-flex;
   flex-direction: row;
   gap: 8px;
+  justify-content: center;
 }
 
 .c4 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+}
+
+.c5 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
   color: currentcolor;
 }
 
-.c5 {
+.c6 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -39,77 +45,32 @@ exports[`BulkDeleteButton renders 1`] = `
 }
 
 .c2 {
-  position: relative;
-  outline: none;
-}
-
-.c2[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c2:after {
-  transition-property: all;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c2:focus-visible {
-  outline: none;
-}
-
-.c2:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c3 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #f5c0b8;
   background: #fcecea;
   color: #b72b1a;
 }
 
-.c3 svg {
-  height: 1.2rem;
-}
-
-.c3[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c3[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c3:hover {
+.c2:hover {
   background-color: #ffffff;
 }
 
-.c3:active {
+.c2:active {
   background-color: #ffffff;
   border: 1px solid #d02b20;
   color: #d02b20;
 }
 
+.c2[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  .c3 {
+  .c2 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -120,13 +81,13 @@ exports[`BulkDeleteButton renders 1`] = `
     aria-disabled="false"
     aria-expanded="false"
     aria-haspopup="dialog"
-    class="c0 c1 c2 c3"
+    class="c0 c1 c2"
     data-state="closed"
     type="button"
   >
-    <div
+    <span
       aria-hidden="true"
-      class=""
+      class="c3 c4"
     >
       <svg
         fill="currentColor"
@@ -139,15 +100,15 @@ exports[`BulkDeleteButton renders 1`] = `
           d="M27 6h-5V5a3 3 0 0 0-3-3h-6a3 3 0 0 0-3 3v1H5a1 1 0 0 0 0 2h1v18a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8h1a1 1 0 1 0 0-2M14 21a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm6 0a1 1 0 0 1-2 0v-8a1 1 0 0 1 2 0zm0-15h-8V5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1z"
         />
       </svg>
-    </div>
+    </span>
     <span
-      class="c4"
+      class="c5"
     >
       Delete
     </span>
   </button>
   <span
-    class="c5"
+    class="c6"
   >
     <p
       aria-live="polite"

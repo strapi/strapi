@@ -38,18 +38,13 @@ exports[`FromComputerForm snapshots the component 1`] = `
 }
 
 .c12 {
-  background: #4945ff;
-  padding-block: 8px;
-  padding-inline: 8px;
   padding-inline-end: 16px;
   padding-inline-start: 16px;
   border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
   cursor: pointer;
 }
 
-.c17 {
+.c16 {
   background: #f6f6f9;
   padding-block: 16px;
   padding-inline: 16px;
@@ -72,12 +67,13 @@ exports[`FromComputerForm snapshots the component 1`] = `
 
 .c13 {
   align-items: center;
-  display: flex;
+  display: inline-flex;
   flex-direction: row;
   gap: 8px;
+  justify-content: center;
 }
 
-.c18 {
+.c17 {
   align-items: center;
   display: flex;
   flex-direction: row;
@@ -91,14 +87,14 @@ exports[`FromComputerForm snapshots the component 1`] = `
   color: #666687;
 }
 
-.c16 {
+.c15 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
   color: currentcolor;
 }
 
-.c21 {
+.c20 {
   border: 0;
   clip: rect(0 0 0 0);
   height: 1px;
@@ -110,105 +106,54 @@ exports[`FromComputerForm snapshots the component 1`] = `
 }
 
 .c14 {
-  position: relative;
-  outline: none;
-}
-
-.c14[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c14:after {
-  transition-property: all;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c14:focus-visible {
-  outline: none;
-}
-
-.c14:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c15 {
   height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
   color: #ffffff;
 }
 
-.c15 svg {
-  height: 1.2rem;
-}
-
-.c15[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c15[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c15:hover {
+.c14:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c15:active {
+.c14:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c20 {
+.c14[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c19 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #dcdce4;
   background: #ffffff;
   color: #32324d;
 }
 
-.c20 svg {
-  height: 1.2rem;
-}
-
-.c20[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c20[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-  color: #666687;
-}
-
-.c20:hover {
+.c19:hover {
   background-color: #f6f6f9;
 }
 
-.c20:active {
+.c19:active {
   background-color: #eaeaef;
 }
 
-.c19 {
+.c19[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c18 {
   border-top: solid 1px #eaeaef;
   flex: 1;
 }
@@ -235,13 +180,13 @@ exports[`FromComputerForm snapshots the component 1`] = `
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c15 {
+  .c14 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .c20 {
+  .c19 {
     transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
   }
 }
@@ -299,11 +244,11 @@ exports[`FromComputerForm snapshots the component 1`] = `
               >
                 <button
                   aria-disabled="false"
-                  class="c12 c13 c14 c15"
+                  class="c12 c13 c14"
                   type="button"
                 >
                   <span
-                    class="c16"
+                    class="c15"
                   >
                     Browse files
                   </span>
@@ -315,15 +260,14 @@ exports[`FromComputerForm snapshots the component 1`] = `
       </label>
     </div>
     <footer
-      class="c17 c18 c19"
+      class="c16 c17 c18"
     >
       <button
         aria-disabled="false"
-        class="c12 c13 c14 c20"
-        type="button"
+        class="c12 c13 c19"
       >
         <span
-          class="c16"
+          class="c15"
         >
           cancel
         </span>
@@ -331,7 +275,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
     </footer>
   </form>
   <span
-    class="c21"
+    class="c20"
   >
     <p
       aria-live="polite"
