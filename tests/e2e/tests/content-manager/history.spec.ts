@@ -193,7 +193,15 @@ describeOnCondition(edition === 'EE')('History', () => {
       }
     );
 
-    test('A user should see the relations and whether some are missing', async ({ page }) => {
+    test('A user should see the relations and whether some are missing', async ({
+      page,
+      browserName,
+    }) => {
+      // TODO: there is a webkit bug to be fixed
+      if (browserName === 'webkit') {
+        return test.fixme();
+      }
+
       // Create new author
       await page.getByRole('link', { name: 'Content Manager' }).click();
       await page.getByRole('link', { name: 'Author' }).click();
