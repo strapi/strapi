@@ -12,13 +12,17 @@ import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import en from '../../../translations/en.json';
-import { UploadProgress } from '../UploadProgress';
+import { UploadProgress, UploadProgressProps } from '../UploadProgress';
 
-const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
+type Messages = typeof en;
+type MessageKeys = keyof Messages;
+
+const enKeys = Object.keys(en) as MessageKeys[];
+
+const messageForPlugin = enKeys.reduce((acc: { [key in MessageKeys]: string }, curr: MessageKeys) => {
   acc[curr] = `upload.${en[curr]}`;
-
   return acc;
-}, {});
+}, {} as { [key in MessageKeys]: string });
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +32,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const renderCompo = (props) => {
+const renderCompo = (props: UploadProgressProps) => {
   const target = document.createElement('div');
   document.body.appendChild(target);
 
@@ -36,7 +40,7 @@ const renderCompo = (props) => {
     <QueryClientProvider client={queryClient}>
       <DesignSystemProvider>
         <IntlProvider locale="en" messages={messageForPlugin} defaultLocale="en">
-          <UploadProgress onCancel={jest.fn()} error={undefined} {...props} />
+          <UploadProgress {...props} />
         </IntlProvider>
       </DesignSystemProvider>
     </QueryClientProvider>,
@@ -48,7 +52,9 @@ describe('<UploadProgress />', () => {
   it('renders with no error', () => {
     const {
       container: { firstChild },
-    } = renderCompo();
+    } = renderCompo({
+      onCancel: jest.fn(),
+    });
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {
@@ -165,7 +171,7 @@ describe('<UploadProgress />', () => {
           <span
             class="c7"
           >
-            undefined/100%
+            0/100%
           </span>
           <button
             class="c8"
@@ -201,7 +207,7 @@ describe('<UploadProgress />', () => {
   it('renders with an error', () => {
     const {
       container: { firstChild },
-    } = renderCompo({ error: new Error('Something went wrong') });
+    } = renderCompo({ onCancel: jest.fn(), error: new Error('Something went wrong') });
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c0 {

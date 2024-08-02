@@ -34,13 +34,13 @@ const CancelButton = styled.button`
   }
 `;
 
-interface UploadProgressProps {
-  error: Error;
+export interface UploadProgressProps {
+  error?: Error;
   onCancel: () => void;
-  progress: number;
+  progress?: number;
 }
 
-export const UploadProgress = ({ onCancel, progress, error }: UploadProgressProps) => {
+export const UploadProgress = ({ onCancel, progress = 0, error }: UploadProgressProps) => {
   const { formatMessage } = useIntl();
 
   return (
