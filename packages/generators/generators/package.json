@@ -46,8 +46,8 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/typescript-utils": "5.0.0-rc.8",
-    "@strapi/utils": "5.0.0-rc.8",
+    "@strapi/typescript-utils": "workspace:*",
+    "@strapi/utils": "workspace:*",
     "chalk": "4.1.2",
     "copyfiles": "2.4.1",
     "fs-extra": "11.2.0",
@@ -58,8 +58,8 @@
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
     "@types/fs-extra": "11.0.4",
-    "eslint-config-custom": "5.0.0-rc.8",
-    "tsconfig": "5.0.0-rc.8"
+    "eslint-config-custom": "workspace:*",
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",

@@ -54,17 +54,17 @@
   "dependencies": {
     "@strapi/design-system": "2.0.0-rc.7",
     "@strapi/icons": "2.0.0-rc.7",
-    "@strapi/provider-email-sendmail": "5.0.0-rc.8",
-    "@strapi/utils": "5.0.0-rc.8",
+    "@strapi/provider-email-sendmail": "workspace:*",
+    "@strapi/utils": "workspace:*",
     "lodash": "4.17.21",
     "react-intl": "6.6.2",
     "react-query": "3.39.3",
     "yup": "0.32.9"
   },
   "devDependencies": {
-    "@strapi/admin": "5.0.0-rc.8",
+    "@strapi/admin": "workspace:*",
     "@strapi/pack-up": "5.0.0",
-    "@strapi/types": "5.0.0-rc.8",
+    "@strapi/types": "workspace:*",
     "@testing-library/react": "15.0.7",
     "@types/koa": "2.13.4",
     "@types/lodash": "^4.14.191",

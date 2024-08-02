@@ -40,9 +40,9 @@
     "watch": "pack-up watch"
   },
   "dependencies": {
-    "@strapi/logger": "5.0.0-rc.8",
-    "@strapi/types": "5.0.0-rc.8",
-    "@strapi/utils": "5.0.0-rc.8",
+    "@strapi/logger": "workspace:*",
+    "@strapi/types": "workspace:*",
+    "@strapi/utils": "workspace:*",
     "chalk": "4.1.2",
     "cli-table3": "0.6.2",
     "commander": "8.3.0",
