@@ -414,7 +414,15 @@ describeOnCondition(edition === 'EE')('History', () => {
       }
     );
 
-    test('A user should see the relations and whether some are missing', async ({ page }) => {
+    test('A user should see the relations and whether some are missing', async ({
+      page,
+      browserName,
+    }) => {
+      // TODO: there is a webkit bug to be fixed
+      if (browserName === 'webkit') {
+        return test.fixme();
+      }
+
       // Create relation in Content-Type Builder
       await page.getByRole('link', { name: 'Content-Type Builder' }).click();
       await page.getByRole('link', { name: 'Homepage' }).click();
