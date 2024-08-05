@@ -9,12 +9,12 @@ const HAVE_FUTURE_DATA = 3;
 
 interface VideoPreviewProps extends BoxProps {
   alt: string;
-  url?: string;
+  url: string;
   mime: string | null;
   onLoadDuration?: (duration: number) => void;
 }
 
-export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }: VideoPreviewProps) => {
+export const VideoPreview = ({ url, mime, onLoadDuration = () => {}, alt, ...props }: VideoPreviewProps) => {
   const handleTimeUpdate: React.ReactEventHandler<HTMLVideoElement> = (e) => {
     if ((e.target as HTMLVideoElement).currentTime > 0) {
       const video = e.target as HTMLVideoElement;

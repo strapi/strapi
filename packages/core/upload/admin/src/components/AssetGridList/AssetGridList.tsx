@@ -1,5 +1,4 @@
 import { Box, Grid, KeyboardNavigable, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 
 import { AssetCard } from '../AssetCard/AssetCard';
 
@@ -82,23 +81,4 @@ export const AssetGridList = ({
       </Grid.Root>
     </KeyboardNavigable>
   );
-};
-
-AssetGridList.defaultProps = {
-  allowedTypes: ['images', 'files', 'videos', 'audios'],
-  onEditAsset: undefined,
-  size: 'M',
-  onReorderAsset: undefined,
-  title: null,
-};
-
-AssetGridList.propTypes = {
-  allowedTypes: PropTypes.arrayOf(PropTypes.string),
-  assets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  onEditAsset: PropTypes.func,
-  onSelectAsset: PropTypes.func.isRequired,
-  selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  size: PropTypes.oneOf(['S', 'M']),
-  onReorderAsset: PropTypes.func,
-  title: PropTypes.string,
 };

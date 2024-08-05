@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { useNotification } from '@strapi/admin/strapi-admin';
 import { IconButton } from '@strapi/design-system';
 import { Link as LinkIcon } from '@strapi/icons';

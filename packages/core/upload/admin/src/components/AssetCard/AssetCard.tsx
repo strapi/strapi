@@ -53,7 +53,7 @@ export const AssetCard = ({
   };
 
   if (asset?.mime?.includes(AssetType.Video)) {
-    return <VideoAssetCard variant="Video" {...commonAssetCardProps} />;
+    return <VideoAssetCard {...commonAssetCardProps} />;
   }
 
   if (asset?.mime?.includes(AssetType.Image)) {

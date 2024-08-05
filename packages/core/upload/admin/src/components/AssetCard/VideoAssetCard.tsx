@@ -21,9 +21,9 @@ const VideoPreviewWrapper = styled(Box)`
   }
 `;
 
-export interface VideoAssetCardProps extends AssetCardBaseProps {
+export interface VideoAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'children' | 'isSelectable' | 'subtitle'> {
   mime: string | null;
-  url?: string;
+  url: string;
   size?: 'S' | 'M';
 }
 

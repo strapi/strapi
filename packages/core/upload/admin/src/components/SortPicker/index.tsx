@@ -1,7 +1,4 @@
-import React from 'react';
-
 import { SingleSelect, SingleSelectOption } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 // TODO: replace with the import from the constants file when the file is migrated to TypeScript
@@ -38,15 +35,6 @@ const SortPicker = ({ onChangeSort, value }: SortPickerProps) => {
       ))}
     </SingleSelect>
   );
-};
-
-SortPicker.defaultProps = {
-  value: undefined,
-};
-
-SortPicker.propTypes = {
-  onChangeSort: PropTypes.func.isRequired,
-  value: PropTypes.string,
 };
 
 export default SortPicker;

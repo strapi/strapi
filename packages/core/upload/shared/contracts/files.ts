@@ -11,12 +11,17 @@ type SortKey = 'createdAt' | 'name';
  */
 export interface Asset {
   id: Data.ID;
-  documentId: Modules.Documents.ID;
+  height?: number | null;
+  width?: number | null;
+  size: number;
+  createdAt: string;
+  ext?: string;
+  mime: string | null;
   name: string;
+  url: string;
+  updatedAt: string;
   alternativeText?: string | null;
   caption?: string | null;
-  width?: number | null;
-  height?: number | null;
   folder: null | Pick<
     Folder,
     | 'createdAt'
@@ -29,6 +34,7 @@ export interface Asset {
     | 'publishedAt'
     | 'updatedAt'
   >;
+  documentId: Modules.Documents.ID;
   formats?: {
     thumbnail: {
       name: string;
@@ -80,16 +86,10 @@ export interface Asset {
     } | null;
   } | null;
   hash: string;
-  ext?: string;
-  mime: string | null;
-  size: number;
-  url: string;
   previewUrl?: null | string;
-  provider?: string;
+  provider: string;
   provider_metadata?: null | string;
-  folderPath?: string;
-  createdAt: string;
-  updatedAt: string;
+  folderPath: string;
   publishedAt?: string | null;
   locale: string | null;
   isUrlSigned?: boolean;

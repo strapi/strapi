@@ -5,9 +5,8 @@ import { appendSearchParamsToUrl } from '../../utils/appendSearchParamsToUrl';
 
 import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 
-interface ImageAssetCardProps extends Omit<AssetCardBaseProps, 'variant'> {
+interface ImageAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'children' | 'isSelectable' | 'subtitle'> {
   alt: string;
-  extension: string;
   height?: number | null;
   width?: number | null;
   thumbnail?: string;
@@ -20,7 +19,7 @@ export const ImageAssetCard = ({
   height,
   width,
   thumbnail,
-  size,
+  size = 'M',
   alt,
   isUrlSigned,
   ...props

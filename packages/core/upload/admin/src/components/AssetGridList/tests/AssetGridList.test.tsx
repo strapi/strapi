@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render as renderTL, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
@@ -95,6 +93,7 @@ const data = [
     published_at: '2021-09-14T07:32:50.816Z',
     locale: null,
     isUrlSigned: false,
+    folderPath: '/',
   },
   {
     id: 5,
@@ -119,6 +118,7 @@ const data = [
     updatedAt: '2021-09-14T07:48:30.882Z',
     published_at: '2021-09-14T07:48:30.882Z',
     locale: null,
+    folderPath: '/',
   },
   {
     id: 6,
@@ -141,6 +141,7 @@ const data = [
     createdAt: '2021-09-14T07:51:59.845Z',
     updatedAt: '2021-09-14T07:51:59.845Z',
     locale: null,
+    folderPath: '/',
   },
 ];
 

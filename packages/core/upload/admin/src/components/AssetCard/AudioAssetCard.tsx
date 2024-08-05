@@ -15,9 +15,9 @@ const AudioPreviewWrapper = styled(Box)`
   }
 `;
 
-interface AudioAssetCardProps extends Omit<AssetCardBaseProps, 'variant'> {
+interface AudioAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'children' | 'isSelectable' | 'subtitle'> {
   size?: 'S' | 'M';
-  url?: string;
+  url: string;
 }
 
 export const AudioAssetCard = ({ name, url, size = 'M', ...restProps }: AudioAssetCardProps) => {

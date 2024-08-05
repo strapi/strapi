@@ -14,11 +14,4 @@ describe('prefixFileUrlWithBackendUrl', () => {
 
     expect(prefixFileUrlWithBackendUrl(data)).toEqual(expected);
   });
-
-  it('should return the `undefined` if the url is not a provided', () => {
-    const data = undefined;
-    const expected = undefined;
-
-    expect(prefixFileUrlWithBackendUrl(data)).toEqual(expected);
-  });
 });
