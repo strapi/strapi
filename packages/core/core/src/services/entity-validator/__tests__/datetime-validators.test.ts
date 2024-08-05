@@ -1,6 +1,6 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-import validators from '../validators';
+import { Validators } from '../validators';
 import { mockOptions } from './utils';
 
 describe('Datetime validator', () => {
@@ -41,7 +41,7 @@ describe('Datetime validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime' },
             model: fakeModel,
@@ -61,17 +61,15 @@ describe('Datetime validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators
-          .datetime(
-            {
-              attr: { type: 'datetime', unique: true },
-              model: fakeModel,
-              updatedAttribute: { name: 'attrDateTimeUnique', value: null },
-              entity: null,
-            },
-            mockOptions
-          )
-          .nullable()
+        Validators.datetime(
+          {
+            attr: { type: 'datetime', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateTimeUnique', value: null },
+            entity: null,
+          },
+          mockOptions
+        ).nullable()
       );
 
       await validator(null);
@@ -82,7 +80,7 @@ describe('Datetime validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
@@ -101,7 +99,7 @@ describe('Datetime validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
@@ -123,7 +121,7 @@ describe('Datetime validator', () => {
       fakeFindOne.mockResolvedValueOnce({ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
@@ -141,7 +139,7 @@ describe('Datetime validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
@@ -167,7 +165,7 @@ describe('Datetime validator', () => {
       fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,

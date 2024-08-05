@@ -52,7 +52,13 @@ const FormModal = ({
                       {layout.form.map((row) => {
                         return row.map((input) => {
                           return (
-                            <Grid.Item key={input.name} col={input.size} xs={12}>
+                            <Grid.Item
+                              key={input.name}
+                              col={input.size}
+                              xs={12}
+                              direction="column"
+                              alignItems="stretch"
+                            >
                               <Input
                                 {...input}
                                 error={errors[input.name]}

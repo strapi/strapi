@@ -81,7 +81,12 @@ const WysiwygNav = ({
       >
         <Flex>
           <Field.Root>
-            <SingleSelect disabled placeholder={selectPlaceholder} aria-label={selectPlaceholder}>
+            <SingleSelect
+              disabled
+              placeholder={selectPlaceholder}
+              aria-label={selectPlaceholder}
+              size="S"
+            >
               <SingleSelectOption value="h1">h1</SingleSelectOption>
               <SingleSelectOption value="h2">h2</SingleSelectOption>
               <SingleSelectOption value="h3">h3</SingleSelectOption>
@@ -134,6 +139,7 @@ const WysiwygNav = ({
             aria-label={selectPlaceholder}
             // @ts-expect-error – DS v2 will only allow strings.
             onChange={(value) => onActionClick(value, editorRef)}
+            size="S"
           >
             <SingleSelectOption value="h1">h1</SingleSelectOption>
             <SingleSelectOption value="h2">h2</SingleSelectOption>

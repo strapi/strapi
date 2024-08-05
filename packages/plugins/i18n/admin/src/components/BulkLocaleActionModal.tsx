@@ -260,7 +260,7 @@ const BulkLocaleActionModal = ({
                           name: locale,
                         }
                       )}
-                      borderWidth={0}
+                      variant="ghost"
                     >
                       <Pencil />
                     </IconButton>

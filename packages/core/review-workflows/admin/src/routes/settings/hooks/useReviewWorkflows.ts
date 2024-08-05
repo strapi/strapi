@@ -27,11 +27,10 @@ const useReviewWorkflows = (params: UseReviewWorkflowsArgs = {}) => {
   const { formatMessage } = useIntl();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { id = '', skip = false, ...queryParams } = params;
+  const { skip = false, ...queryParams } = params;
 
   const { data, isLoading, error } = useGetWorkflowsQuery(
     {
-      id,
       populate: 'stages',
       ...queryParams,
     },

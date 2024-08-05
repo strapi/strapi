@@ -27,7 +27,7 @@ export const CustomFieldsList = () => {
       <Flex direction="column" alignItems="stretch" gap={3}>
         <Grid.Root gap={3}>
           {sortedCustomFields.map(([uid, customField]) => (
-            <Grid.Item key={uid} col={6}>
+            <Grid.Item key={uid} col={6} direction="column" alignItems="stretch">
               <CustomFieldOption key={uid} customFieldUid={uid} customField={customField} />
             </Grid.Item>
           ))}

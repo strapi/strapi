@@ -60,6 +60,7 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
             id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
           },
           { type: 'Document', id: `${model}_LIST` },
+          'ReviewWorkflowStages',
         ];
       },
     }),

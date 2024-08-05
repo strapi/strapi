@@ -80,13 +80,14 @@ export declare namespace MapEntriesToReleases {
   export interface Request {
     query: {
       contentTypeUid: ReleaseAction['contentType'];
-      entriesIds: ReleaseAction['entry']['id'][];
+      documentIds: ReleaseAction['entryDocumentId'][];
+      locale?: ReleaseAction['locale'];
     };
   }
 
   export interface Response {
     data: {
-      [entryId: ReleaseAction['entry']['id']]: Pick<Release, 'id' | 'name'>[];
+      [documentId: ReleaseAction['entryDocumentId']]: Pick<Release, 'id' | 'name'>[];
     };
   }
 }

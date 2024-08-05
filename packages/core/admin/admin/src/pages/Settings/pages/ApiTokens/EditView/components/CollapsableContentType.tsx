@@ -114,7 +114,12 @@ export const CollapsableContentType = ({
                 {controller?.actions &&
                   controller?.actions.map((action) => {
                     return (
-                      <Grid.Item col={6} key={action.actionId}>
+                      <Grid.Item
+                        col={6}
+                        key={action.actionId}
+                        direction="column"
+                        alignItems="stretch"
+                      >
                         <CheckboxWrapper
                           $isActive={isActionSelected(action.actionId)}
                           padding={2}
