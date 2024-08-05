@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
-import { findAndClose } from '../../utils/shared';
+import { findAndClose, navToHeader } from '../../utils/shared';
 
 test.describe('Cloning', () => {
   test.beforeEach(async ({ page }) => {
@@ -64,8 +64,7 @@ test.describe('Cloning', () => {
     /**
      * Get to the list view of our articles,
      */
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.waitForURL(LIST_URL);
+    await navToHeader(page, ['Content Manager', 'Article'], 'Article');
     await expect(page.getByRole('row', { name: 'West ham post match analysis' })).toBeVisible();
     expect(
       await page.getByRole('row', { name: 'West ham post match analysis' }).all()
@@ -79,9 +78,9 @@ test.describe('Cloning', () => {
     await page.getByRole('menuitem', { name: 'Duplicate' }).click();
 
     /**
-     * This wil fail because the author document type has a UID for it's slug.
+     * This wil fail because the author document type has a UID for its slug.
      */
-    await expect(page.getByText(/Entity could not be cloned/)).toBeVisible();
+    await expect(page.getByText(/This entry can't be duplicated directly./)).toBeVisible();
     await expect(page.getByRole('dialog', { name: 'Duplicate' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Duplicate' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Cancel' })).toBeVisible();

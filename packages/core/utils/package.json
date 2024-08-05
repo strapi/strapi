@@ -60,10 +60,10 @@
     "@types/http-errors": "2.0.4",
     "@types/koa": "2.13.4",
     "@types/node": "18.19.24",
-    "eslint-config-custom": "5.0.0-rc.8",
+    "eslint-config-custom": "workspace:*",
     "koa": "2.15.2",
     "koa-body": "6.0.1",
-    "tsconfig": "5.0.0-rc.8"
+    "tsconfig": "workspace:*"
   },
   "engines": {
     "node": ">=18.0.0 <=20.x.x",
