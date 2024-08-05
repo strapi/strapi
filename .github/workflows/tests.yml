@@ -154,7 +154,7 @@ jobs:
 
   e2e_ce:
     timeout-minutes: 60
-    needs: [changes, build, typescript, unit_front, api_ce_sqlite]
+    needs: [changes, build, typescript, unit_front]
     name: '[CE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     strategy:
@@ -194,7 +194,7 @@ jobs:
 
   e2e_ee:
     timeout-minutes: 60
-    needs: [changes, build, typescript, unit_front, api_ee_sqlite]
+    needs: [changes, build, typescript, unit_front]
     name: '[EE] e2e (browser: ${{ matrix.project }})'
     runs-on: ubuntu-latest
     env:
