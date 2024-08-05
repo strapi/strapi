@@ -110,7 +110,7 @@ export const permission = yup
         // @ts-expect-error yup types
         const action = getActionFromProvider(this.options.parent.action);
 
-        if (!action || !subject) {
+        if (!action) {
           return true;
         }
 
@@ -118,7 +118,7 @@ export const permission = yup
           return isNil(subject);
         }
 
-        if (isArray(action.subjects)) {
+        if (isArray(action.subjects) && !isNil(subject)) {
           return action.subjects.includes(subject);
         }
 
