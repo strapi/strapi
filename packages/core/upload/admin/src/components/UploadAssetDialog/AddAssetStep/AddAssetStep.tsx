@@ -1,7 +1,4 @@
-import React from 'react';
-
 import { Box, Divider, Modal, Tabs } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils/getTrad';
@@ -9,7 +6,25 @@ import { getTrad } from '../../../utils/getTrad';
 import { FromComputerForm } from './FromComputerForm';
 import { FromUrlForm } from './FromUrlForm';
 
-export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
+// TODO: replace it with the import from the costants file when it will be migrated to typescript
+import { AssetSource } from '../../../newConstants';
+import type { Asset } from '../../../../../shared/contracts/files'
+import type { RawFile } from '../../../utils/rawFileToAsset';
+
+export type UploadAsset = Pick<Asset, 'name' | 'url' | 'ext' | 'mime'> & {
+  rawFile: RawFile;
+  type?: string; 
+  isLocal?: boolean;
+  source: AssetSource;
+} & Partial<Pick<Asset, 'size' | 'createdAt'>>;
+
+interface AddAssetStepProps {
+  onClose: () => void;
+  onAddAsset: (assets: UploadAsset[]) => void;
+  trackedLocation?: string;
+}
+
+export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }: AddAssetStepProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -63,14 +78,4 @@ export const AddAssetStep = ({ onClose, onAddAsset, trackedLocation }) => {
       </Tabs.Root>
     </>
   );
-};
-
-AddAssetStep.defaultProps = {
-  trackedLocation: undefined,
-};
-
-AddAssetStep.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  onAddAsset: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };

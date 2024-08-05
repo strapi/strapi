@@ -22,7 +22,7 @@ const VideoPreviewWrapper = styled(Box)`
 `;
 
 export interface VideoAssetCardProps extends AssetCardBaseProps {
-  mime: string;
+  mime: string | null;
   url?: string;
   size?: 'S' | 'M';
 }

@@ -81,7 +81,7 @@ export interface Asset {
   } | null;
   hash: string;
   ext?: string;
-  mime: string;
+  mime: string | null;
   size: number;
   url: string;
   previewUrl?: null | string;

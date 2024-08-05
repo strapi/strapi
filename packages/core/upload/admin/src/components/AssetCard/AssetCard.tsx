@@ -52,11 +52,11 @@ export const AssetCard = ({
     size,
   };
 
-  if (asset.mime.includes(AssetType.Video)) {
+  if (asset?.mime?.includes(AssetType.Video)) {
     return <VideoAssetCard variant="Video" {...commonAssetCardProps} />;
   }
 
-  if (asset.mime.includes(AssetType.Image)) {
+  if (asset?.mime?.includes(AssetType.Image)) {
     return (
       <ImageAssetCard
         {...commonAssetCardProps}
@@ -70,7 +70,7 @@ export const AssetCard = ({
     );
   }
 
-  if (asset.mime.includes(AssetType.Audio)) {
+  if (asset?.mime?.includes(AssetType.Audio)) {
     return <AudioAssetCard {...commonAssetCardProps} />;
   }
 

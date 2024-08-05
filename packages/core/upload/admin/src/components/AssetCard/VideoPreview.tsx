@@ -10,7 +10,7 @@ const HAVE_FUTURE_DATA = 3;
 interface VideoPreviewProps extends BoxProps {
   alt: string;
   url?: string;
-  mime: string;
+  mime: string | null;
   onLoadDuration?: (duration: number) => void;
 }
 
@@ -51,7 +51,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration, alt, ...props }: Video
         crossOrigin="anonymous"
         onTimeUpdate={handleTimeUpdate}
       >
-        <source type={mime} />
+        <source type={mime || undefined} />
       </video>
       <VisuallyHidden tag="figcaption">{alt}</VisuallyHidden>
     </Box>

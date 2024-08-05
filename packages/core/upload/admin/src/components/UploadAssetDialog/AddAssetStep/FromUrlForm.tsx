@@ -4,27 +4,17 @@ import { useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, Field, Modal, Textarea } from '@strapi/design-system';
 import { Form, Formik } from 'formik';
 import { useIntl } from 'react-intl';
-// TODO: replace with the import from the constants file when the file is migrated to TypeScript
-import { AssetSource, AssetType } from '../../../newConstants';
 
 // TODO: to replace with the import from utils when the index is migrated to TypeScript
 import { getTrad } from '../../../utils/getTrad';
 import { urlsToAssets } from '../../../utils/urlsToAssets';
 import { urlSchema } from '../../../utils/urlYupSchema';
 
-type Assets = {
-  source: AssetSource;
-  name: string;
-  type?: AssetType;
-  url: string;
-  ext?: string;
-  mime?: string | null;
-  rawFile: File;
-}[];
+import type { UploadAsset } from './AddAssetStep';
 
 interface FromUrlFormProps {
   onClose: () => void;
-  onAddAsset: (assets: Assets) => void;
+  onAddAsset: (assets: UploadAsset[]) => void;
   trackedLocation?: string;
 }
 

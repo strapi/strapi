@@ -10,16 +10,9 @@ import { styled } from 'styled-components';
 // TODO: replace it with the import from the costants file when it will be migrated to typescript
 import { AssetSource } from '../../../newConstants';
 import { getTrad } from '../../../utils/getTrad';
-import { rawFileToAsset, RawFile } from '../../../utils/rawFileToAsset';
+import { rawFileToAsset } from '../../../utils/rawFileToAsset';
 
-import type { Asset } from '../../../../../shared/contracts/files'
-
-type FromComputerFormAsset = Pick<Asset, 'size' | 'createdAt' | 'name' | 'url' | 'ext' | 'mime'> & {
-  rawFile: RawFile;
-  type: string; 
-  isLocal: boolean;
-  source: AssetSource;
-};
+import type { UploadAsset } from './AddAssetStep';
 
 const Wrapper = styled(Flex)`
   flex-direction: column;
@@ -44,7 +37,7 @@ const OpaqueBox = styled(Box)`
 
 interface FromComputerFormProps {
   onClose: () => void;
-  onAddAssets: (assets: FromComputerFormAsset[]) => void;
+  onAddAssets: (assets: UploadAsset[]) => void;
   trackedLocation?: string;
 }
 
@@ -72,7 +65,7 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }: From
 
   const handleChange = () => {
     const files = inputRef.current?.files;
-    const assets: FromComputerFormAsset[] = [];
+    const assets: UploadAsset[] = [];
 
     if (files !== null && files !== undefined) {
       for (let i = 0; i < files.length; i++) {
