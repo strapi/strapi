@@ -203,7 +203,7 @@ describe('PendingAssetStep', () => {
                   onRemoveAsset={jest.fn()}
                   onUploadSucceed={jest.fn()}
                   folderId={null}
-                  trackedLocation='upload'
+                  trackedLocation="upload"
                 />
               </Modal.Content>
             </Modal.Root>
