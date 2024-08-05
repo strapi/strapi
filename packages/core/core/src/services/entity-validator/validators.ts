@@ -1,3 +1,13 @@
+/**
+ * Validators check if the entry data meets specific criteria before saving or publishing.
+ * (e.g., length, range, format).
+ *
+ * Drafts have limited validations (mainly max constraints),
+ * while published content undergoes full validation.
+ *
+ * The system also takes locales into account when validating data.
+ * E.g, unique fields must be unique within the same locale.
+ */
 import _ from 'lodash';
 import { yup } from '@strapi/utils';
 import type { Schema, Struct, Modules } from '@strapi/types';
@@ -377,7 +387,9 @@ const addUniqueValidator = <T extends yup.AnySchema>(
     }
 
     // The validation should pass if there is no other record found from the query
-    return !(await strapi.db.query(model.uid).findOne({ where: scalarAttributeWhere }));
+    return !(await strapi.db
+      .query(model.uid)
+      .findOne({ where: scalarAttributeWhere, select: ['id'] }));
   });
 };
 
