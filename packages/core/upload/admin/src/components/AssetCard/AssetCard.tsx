@@ -11,8 +11,8 @@ import { AudioAssetCard } from './AudioAssetCard';
 import { DocAssetCard } from './DocAssetCard';
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
-import type { File } from '../../../../shared/contracts/files';
-interface AssetProps extends File {
+import type { Asset } from '../../../../shared/contracts/files';
+interface AssetProps extends Asset {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;

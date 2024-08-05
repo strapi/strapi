@@ -1,16 +1,25 @@
 /* eslint-disable jsx-a11y/label-has-associated-control */
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { Box, Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { PlusCircle as PicturePlus } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetSource } from '../../../constants';
+// TODO: replace it with the import from the costants file when it will be migrated to typescript
+import { AssetSource } from '../../../newConstants';
 import { getTrad } from '../../../utils/getTrad';
-import { rawFileToAsset } from '../../../utils/rawFileToAsset';
+import { rawFileToAsset, RawFile } from '../../../utils/rawFileToAsset';
+
+import type { Asset } from '../../../../../shared/contracts/files'
+
+type FromComputerFormAsset = Pick<Asset, 'size' | 'createdAt' | 'name' | 'url' | 'ext' | 'mime'> & {
+  rawFile: RawFile;
+  type: string; 
+  isLocal: boolean;
+  source: AssetSource;
+};
 
 const Wrapper = styled(Flex)`
   flex-direction: column;
@@ -33,37 +42,47 @@ const OpaqueBox = styled(Box)`
   cursor: pointer;
 `;
 
-export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
+interface FromComputerFormProps {
+  onClose: () => void;
+  onAddAssets: (assets: FromComputerFormAsset[]) => void;
+  trackedLocation?: string;
+}
+
+export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }: FromComputerFormProps) => {
   const { formatMessage } = useIntl();
-  const [dragOver, setDragOver] = useState(false);
-  const inputRef = useRef(null);
+  const [dragOver, setDragOver] = React.useState(false);
+  const inputRef = React.useRef<HTMLInputElement>(null);
   const { trackUsage } = useTracking();
 
-  const handleDragOver = (event) => {
+  const handleDragOver = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
   };
 
-  const handleDragEnter = (event) => {
+  const handleDragEnter = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragOver(true);
   };
 
   const handleDragLeave = () => setDragOver(false);
 
-  const handleClick = (e) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    inputRef.current.click();
+    inputRef.current?.click();
   };
 
   const handleChange = () => {
-    const files = inputRef.current.files;
-    const assets = [];
+    const files = inputRef.current?.files;
+    const assets: FromComputerFormAsset[] = [];
 
-    for (let i = 0; i < files.length; i++) {
-      const file = files.item(i);
-      const asset = rawFileToAsset(file, AssetSource.Computer);
+    if (files !== null && files !== undefined) {
+      for (let i = 0; i < files.length; i++) {
+        const file = files.item(i);
+        if (file) {
+          const asset = rawFileToAsset(file, AssetSource.Computer);
 
-      assets.push(asset);
+          assets.push(asset);
+        }
+      }
     }
 
     if (trackedLocation) {
@@ -73,7 +92,7 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
     onAddAssets(assets);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
 
     if (e?.dataTransfer?.files) {
@@ -82,6 +101,9 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
 
       for (let i = 0; i < files.length; i++) {
         const file = files.item(i);
+        if (!file) {
+          continue;
+        }
         const asset = rawFileToAsset(file, AssetSource.Computer);
 
         assets.push(asset);
@@ -166,14 +188,4 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
       </Modal.Footer>
     </form>
   );
-};
-
-FromComputerForm.defaultProps = {
-  trackedLocation: undefined,
-};
-
-FromComputerForm.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  onAddAssets: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };

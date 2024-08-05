@@ -1,14 +1,12 @@
-import React from 'react';
-
 import { Box, Grid, KeyboardNavigable, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 
 import { AssetCard } from '../AssetCard/AssetCard';
 
 import { Draggable } from './Draggable';
-import type { File } from '../../../../shared/contracts/files';
+import type { Asset } from '../../../../shared/contracts/files';
 
-interface AssetProps extends File {
+interface AssetProps extends Asset {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;

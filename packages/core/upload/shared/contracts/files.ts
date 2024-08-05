@@ -9,7 +9,7 @@ type SortKey = 'createdAt' | 'name';
 /**
  * GET /upload/files - Get files
  */
-export interface File {
+export interface Asset {
   id: Data.ID;
   documentId: Modules.Documents.ID;
   name: string;
@@ -115,7 +115,7 @@ export declare namespace GetFiles {
 
   export interface Response {
     data: {
-      results: File[];
+      results: Asset[];
       pagination: Pagination;
     };
     error?: errors.ApplicationError | errors.NotFoundError;
@@ -134,7 +134,7 @@ export declare namespace BulkDeleteFiles {
 
   export interface Response {
     data: {
-      files: File[];
+      files: Asset[];
       folders: [];
     };
     error?: errors.ApplicationError | errors.ValidationError;
@@ -154,7 +154,7 @@ export declare namespace BulkMoveFiles {
 
   export interface Response {
     data: {
-      files: File[];
+      files: Asset[];
       folders: [];
     };
     error?: errors.ApplicationError | errors.ValidationError;
@@ -171,7 +171,7 @@ export declare namespace DeleteFile {
   }
 
   export interface Response {
-    data: File;
+    data: Asset;
     error?: errors.ApplicationError | errors.NotFoundError;
   }
 }

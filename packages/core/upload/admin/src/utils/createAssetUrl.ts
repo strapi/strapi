@@ -1,7 +1,7 @@
 import { prefixFileUrlWithBackendUrl } from './prefixFileUrlWithBackendUrl';
-import type { File } from '../../../shared/contracts/files';
+import type { Asset } from '../../../shared/contracts/files';
 
-interface AssetProps extends File {
+interface AssetProps extends Asset {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;
