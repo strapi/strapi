@@ -41,7 +41,7 @@ export type Action = {
   subCategory?: string;
 
   /**
-   * The plugin which provide the action
+   * The plugin that provides the action
    */
   pluginName?: string;
 
@@ -65,12 +65,12 @@ export type Action = {
    *
    * It represents the possible aliases for the current action.
    *
-   * Aliases are unidirectionals.
+   * Aliases are unidirectional.
    *
-   * Note: This is an internal property and probably shouldn't be used outside of Strapi core features.
+   * Note: This is an internal property and probably shouldn't be used outside Strapi core features.
    *       Its behavior might change at any time without notice.
    *
-   * @private
+   * @internal
    */
   aliases?: ActionAlias[];
 };
