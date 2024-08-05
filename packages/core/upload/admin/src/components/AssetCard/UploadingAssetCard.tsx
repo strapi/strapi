@@ -12,16 +12,17 @@ import {
   Flex,
   Typography,
 } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
 // TODO: replace tne import below with the one from the constants file when the file is migrated to ts
-import { useUpload } from '../../hooks/useUpload';
+import { useUpload, AssetProps } from '../../hooks/useUpload';
 import { AssetType } from '../../newConstants';
 // TODO: replace the import below with the one from the utils file when the file is migrated to ts
 import { getTrad } from '../../utils/getTrad';
 import { UploadProgress } from '../UploadProgress/UploadProgress';
+import type { Data } from '@strapi/types';
+import type { Asset } from '../../../../shared/contracts/files';
 
 const UploadProgressWrapper = styled.div`
   height: 8.8rem;
@@ -32,13 +33,21 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
+interface UploadingAssetCardProps {
+  addUploadedFiles?: (files: Asset[]) => void;
+  asset: AssetProps;
+  folderId: Data.ID | null;
+  onCancel: (file: AssetProps['rawFile']) => void;
+  onStatusChange: (status: string) => void;
+}
+
 export const UploadingAssetCard = ({
   asset,
   onCancel,
   onStatusChange,
   addUploadedFiles,
   folderId,
-}) => {
+}: UploadingAssetCardProps) => {
   const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
 
@@ -91,13 +100,15 @@ export const UploadingAssetCard = ({
       <Card borderColor={error ? 'danger600' : 'neutral150'}>
         <CardHeader>
           <UploadProgressWrapper>
-            <UploadProgress error={error} onCancel={handleCancel} progress={progress} />
+            <UploadProgress error={error?.response?.data?.error || null} onCancel={handleCancel} progress={progress} />
           </UploadProgressWrapper>
         </CardHeader>
         <CardBody>
           <CardContent>
             <Box paddingTop={1}>
-              <CardTitle tag="h2">{asset.name}</CardTitle>
+              <Typography tag="h2">
+                <CardTitle tag="span">{asset.name}</CardTitle>
+              </Typography>
             </Box>
             <CardSubtitle>
               <Extension>{asset.ext}</Extension>
@@ -129,22 +140,4 @@ export const UploadingAssetCard = ({
       ) : undefined}
     </Flex>
   );
-};
-
-UploadingAssetCard.defaultProps = {
-  addUploadedFiles: undefined,
-  folderId: null,
-};
-
-UploadingAssetCard.propTypes = {
-  addUploadedFiles: PropTypes.func,
-  asset: PropTypes.shape({
-    name: PropTypes.string,
-    ext: PropTypes.string,
-    rawFile: PropTypes.instanceOf(File),
-    type: PropTypes.oneOf(Object.values(AssetType)),
-  }).isRequired,
-  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  onCancel: PropTypes.func.isRequired,
-  onStatusChange: PropTypes.func.isRequired,
 };

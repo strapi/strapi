@@ -35,7 +35,7 @@ const CancelButton = styled.button`
 `;
 
 export interface UploadProgressProps {
-  error?: Error;
+  error: Error | null;
   onCancel: () => void;
   progress?: number;
 }

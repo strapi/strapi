@@ -54,6 +54,7 @@ describe('<UploadProgress />', () => {
       container: { firstChild },
     } = renderCompo({
       onCancel: jest.fn(),
+      error: null
     });
 
     expect(firstChild).toMatchInlineSnapshot(`
@@ -253,7 +254,10 @@ describe('<UploadProgress />', () => {
   it('cancel the upload when pressing cancel', () => {
     const onCancelSpy = jest.fn();
 
-    renderCompo({ onCancel: onCancelSpy });
+    renderCompo({
+      onCancel: onCancelSpy,
+      error: null
+    });
 
     fireEvent.click(screen.getByText('Cancel'));
 

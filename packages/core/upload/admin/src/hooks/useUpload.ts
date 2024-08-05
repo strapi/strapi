@@ -17,7 +17,7 @@ interface RawFile extends Blob {
   type: string;
 }
 
-interface AssetProps extends Asset {
+export interface AssetProps extends Asset {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;
@@ -36,6 +36,14 @@ type FetchOptions = {
   headers?: Record<string, string>;
   validateStatus?: ((status: number) => boolean) | null;
 };
+
+export type ErrorMutation = {
+  response: {
+    data: {
+      error: Error;
+    };
+  };
+} | null;
 
 type PostType = <TData = any, TSend = any>(
   url: string,
@@ -86,8 +94,12 @@ export const useUpload = () => {
     post: PostType;
   } = useFetchClient();
 
-  const mutation = useMutation(
-    ({ asset, folderId }: { asset: AssetProps; folderId: Data.ID | null }) => {
+  const mutation = useMutation<
+    Asset[],
+    ErrorMutation,
+    { asset: AssetProps; folderId: Data.ID | null }
+  >(
+    ({ asset, folderId }) => {
       return uploadAsset(asset, folderId, signal, setProgress, post);
     },
     {
