@@ -13,7 +13,7 @@ const providerMethods = [
   'has',
   'size',
   'clear',
-  'aliases',
+  'unstable_aliases',
 ];
 
 describe('Action Provider', () => {
