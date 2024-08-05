@@ -14,7 +14,13 @@ interface VideoPreviewProps extends BoxProps {
   onLoadDuration?: (duration: number) => void;
 }
 
-export const VideoPreview = ({ url, mime, onLoadDuration = () => {}, alt, ...props }: VideoPreviewProps) => {
+export const VideoPreview = ({
+  url,
+  mime,
+  onLoadDuration = () => {},
+  alt,
+  ...props
+}: VideoPreviewProps) => {
   const handleTimeUpdate: React.ReactEventHandler<HTMLVideoElement> = (e) => {
     if ((e.target as HTMLVideoElement).currentTime > 0) {
       const video = e.target as HTMLVideoElement;

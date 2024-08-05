@@ -19,10 +19,13 @@ type MessageKeys = keyof Messages;
 
 const enKeys = Object.keys(en) as MessageKeys[];
 
-const messageForPlugin = enKeys.reduce((acc: { [key in MessageKeys]: string }, curr: MessageKeys) => {
-  acc[curr] = `upload.${en[curr]}`;
-  return acc;
-}, {} as { [key in MessageKeys]: string });
+const messageForPlugin = enKeys.reduce(
+  (acc: { [key in MessageKeys]: string }, curr: MessageKeys) => {
+    acc[curr] = `upload.${en[curr]}`;
+    return acc;
+  },
+  {} as { [key in MessageKeys]: string }
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,7 +57,7 @@ describe('<UploadProgress />', () => {
       container: { firstChild },
     } = renderCompo({
       onCancel: jest.fn(),
-      error: null
+      error: null,
     });
 
     expect(firstChild).toMatchInlineSnapshot(`
@@ -256,7 +259,7 @@ describe('<UploadProgress />', () => {
 
     renderCompo({
       onCancel: onCancelSpy,
-      error: null
+      error: null,
     });
 
     fireEvent.click(screen.getByText('Cancel'));

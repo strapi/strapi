@@ -11,7 +11,12 @@ interface PaginationProps {
   pageCount: number;
 }
 
-export const Pagination = ({ children, activePage, pageCount, label = 'pagination' }: PaginationProps) => {
+export const Pagination = ({
+  children,
+  activePage,
+  pageCount,
+  label = 'pagination',
+}: PaginationProps) => {
   const paginationValue = useMemo(() => ({ activePage, pageCount }), [activePage, pageCount]);
 
   return (

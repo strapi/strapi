@@ -1,14 +1,14 @@
-import React, { useRef, useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { Button, Flex, Grid, KeyboardNavigable, Modal, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-
-import { AssetDefinition } from '../../../constants';
+import type { Data } from '@strapi/types';
 import { getTrad } from '../../../utils/getTrad';
 import { AssetCard } from '../../AssetCard/AssetCard';
 import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
+import { AssetProps } from '../../../hooks/useUpload';
+import type { Asset } from '../../../../../shared/contracts/files';
 
 const Status = {
   Idle: 'IDLE',
@@ -16,9 +16,26 @@ const Status = {
   Intermediate: 'INTERMEDIATE',
 };
 
+interface PendingAssetStepProps {
+  addUploadedFiles?: (files: Asset[]) => void;
+  assets: AssetProps[];
+  folderId: Data.ID | null;
+  onClose: () => void;
+  onEditAsset: (asset: AssetProps) => void;
+  onRemoveAsset: (asset: AssetProps) => void;
+  onClickAddAsset: () => void;
+  onUploadSucceed: (file: AssetProps['rawFile']) => void;
+  onCancelUpload: (file: AssetProps['rawFile']) => void;
+  trackedLocation: string;
+}
+
+interface AssetsCountByType {
+  [key: string]: string;
+}
+
 export const PendingAssetStep = ({
   addUploadedFiles,
-  folderId,
+  folderId = null,
   onClose,
   onEditAsset,
   onRemoveAsset,
@@ -27,25 +44,26 @@ export const PendingAssetStep = ({
   onCancelUpload,
   onUploadSucceed,
   trackedLocation,
-}) => {
-  const assetCountRef = useRef(0);
+}: PendingAssetStepProps) => {
+  const assetCountRef = React.useRef(0);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [uploadStatus, setUploadStatus] = useState(Status.Idle);
+  const [uploadStatus, setUploadStatus] = React.useState(Status.Idle);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const assetsCountByType = assets.reduce((acc, asset) => {
+    const assetsCountByType = assets.reduce<AssetsCountByType>((acc, asset) => {
       const { type } = asset;
+      if (type) {
+        if (!acc[type]) {
+          acc[type] = '0';
+        }
 
-      if (!acc[type]) {
-        acc[type] = 0;
+        // values need to be stringified because Amplitude ignores number values
+        acc[type] = `${parseInt(acc[type], 10) + 1}`;
       }
-
-      // values need to be stringified because Amplitude ignores number values
-      acc[type] = `${parseInt(acc[type], 10) + 1}`;
 
       return acc;
     }, {});
@@ -58,7 +76,7 @@ export const PendingAssetStep = ({
     setUploadStatus(Status.Uploading);
   };
 
-  const handleStatusChange = (status, file) => {
+  const handleStatusChange = (status: string, file: AssetProps['rawFile']) => {
     if (status === 'success' || status === 'error') {
       assetCountRef.current++;
 
@@ -172,23 +190,4 @@ export const PendingAssetStep = ({
       </Modal.Footer>
     </>
   );
-};
-
-PendingAssetStep.defaultProps = {
-  addUploadedFiles: undefined,
-  folderId: null,
-  trackedLocation: undefined,
-};
-
-PendingAssetStep.propTypes = {
-  addUploadedFiles: PropTypes.func,
-  assets: PropTypes.arrayOf(AssetDefinition).isRequired,
-  folderId: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  onClose: PropTypes.func.isRequired,
-  onEditAsset: PropTypes.func.isRequired,
-  onRemoveAsset: PropTypes.func.isRequired,
-  onClickAddAsset: PropTypes.func.isRequired,
-  onUploadSucceed: PropTypes.func.isRequired,
-  onCancelUpload: PropTypes.func.isRequired,
-  trackedLocation: PropTypes.string,
 };

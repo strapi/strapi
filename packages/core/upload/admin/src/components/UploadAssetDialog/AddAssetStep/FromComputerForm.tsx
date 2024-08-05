@@ -41,7 +41,11 @@ interface FromComputerFormProps {
   trackedLocation?: string;
 }
 
-export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }: FromComputerFormProps) => {
+export const FromComputerForm = ({
+  onClose,
+  onAddAssets,
+  trackedLocation,
+}: FromComputerFormProps) => {
   const { formatMessage } = useIntl();
   const [dragOver, setDragOver] = React.useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);

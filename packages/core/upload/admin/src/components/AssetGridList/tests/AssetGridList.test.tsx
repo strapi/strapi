@@ -94,6 +94,16 @@ const data = [
     locale: null,
     isUrlSigned: false,
     folderPath: '/',
+    rawFile: {
+      size: 50,
+      lastModified: 1631611919845,
+      name: 'strapi-cover_1fabc982ce.png',
+      type: 'image/png',
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(50)),
+      slice: () => new Blob(),
+      stream: () => new ReadableStream(),
+      text: () => Promise.resolve('strapi-cover_1fabc982ce.png'),
+    },
   },
   {
     id: 5,
@@ -119,6 +129,16 @@ const data = [
     published_at: '2021-09-14T07:48:30.882Z',
     locale: null,
     folderPath: '/',
+    rawFile: {
+      size: 50,
+      lastModified: 1631611919845,
+      name: 'mov_bbb.mp4',
+      type: 'video/mp4',
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(50)),
+      slice: () => new Blob(),
+      stream: () => new ReadableStream(),
+      text: () => Promise.resolve('mov_bbb.mp4'),
+    },
   },
   {
     id: 6,
@@ -142,6 +162,16 @@ const data = [
     updatedAt: '2021-09-14T07:51:59.845Z',
     locale: null,
     folderPath: '/',
+    rawFile: {
+      size: 50,
+      lastModified: 1631611919845,
+      name: 'CARTE MARIAGE AVS - Printemps.pdf',
+      type: 'application/pdf',
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(50)),
+      slice: () => new Blob(),
+      stream: () => new ReadableStream(),
+      text: () => Promise.resolve('CARTE MARIAGE AVS - Printemps.pdf'),
+    },
   },
 ];
 

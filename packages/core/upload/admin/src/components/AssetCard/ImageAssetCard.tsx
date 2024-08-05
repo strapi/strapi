@@ -5,7 +5,8 @@ import { appendSearchParamsToUrl } from '../../utils/appendSearchParamsToUrl';
 
 import { AssetCardBase, AssetCardBaseProps } from './AssetCardBase';
 
-interface ImageAssetCardProps extends Omit<AssetCardBaseProps, 'variant' | 'children' | 'isSelectable' | 'subtitle'> {
+interface ImageAssetCardProps
+  extends Omit<AssetCardBaseProps, 'variant' | 'children' | 'isSelectable' | 'subtitle'> {
   alt: string;
   height?: number | null;
   width?: number | null;

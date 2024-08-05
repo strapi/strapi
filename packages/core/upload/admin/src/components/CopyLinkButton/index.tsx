@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { useClipboard } from '../../hooks/useClipboard';
 import { getTrad } from '../../utils/getTrad';
 
-export const CopyLinkButton = ({ url } : { url: string }) => {
+export const CopyLinkButton = ({ url }: { url: string }) => {
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const { copy } = useClipboard();

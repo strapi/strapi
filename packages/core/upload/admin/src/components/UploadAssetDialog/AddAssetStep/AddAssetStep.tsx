@@ -8,12 +8,12 @@ import { FromUrlForm } from './FromUrlForm';
 
 // TODO: replace it with the import from the costants file when it will be migrated to typescript
 import { AssetSource } from '../../../newConstants';
-import type { Asset } from '../../../../../shared/contracts/files'
+import type { Asset } from '../../../../../shared/contracts/files';
 import type { RawFile } from '../../../utils/rawFileToAsset';
 
 export type UploadAsset = Pick<Asset, 'name' | 'url' | 'ext' | 'mime'> & {
   rawFile: RawFile;
-  type?: string; 
+  type?: string;
   isLocal?: boolean;
   source: AssetSource;
 } & Partial<Pick<Asset, 'size' | 'createdAt'>>;

@@ -39,6 +39,8 @@ interface UploadingAssetCardProps {
   folderId: Data.ID | null;
   onCancel: (file: AssetProps['rawFile']) => void;
   onStatusChange: (status: string) => void;
+  id?: string;
+  size?: 'S' | 'M';
 }
 
 export const UploadingAssetCard = ({
@@ -100,7 +102,11 @@ export const UploadingAssetCard = ({
       <Card borderColor={error ? 'danger600' : 'neutral150'}>
         <CardHeader>
           <UploadProgressWrapper>
-            <UploadProgress error={error?.response?.data?.error || null} onCancel={handleCancel} progress={progress} />
+            <UploadProgress
+              error={error?.response?.data?.error || null}
+              onCancel={handleCancel}
+              progress={progress}
+            />
           </UploadProgressWrapper>
         </CardHeader>
         <CardBody>

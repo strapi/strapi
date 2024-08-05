@@ -92,7 +92,7 @@ describe('useRemoveAsset', () => {
     const queryClient = useQueryClient();
     const {
       result: { current },
-    } = await setup(jest.fn) as { result: { current: any } };
+    } = (await setup(jest.fn)) as { result: { current: any } };
     const { removeAsset } = current;
 
     await act(async () => {
@@ -119,7 +119,7 @@ describe('useRemoveAsset', () => {
     const {
       result: { current },
       // @ts-expect-error We are checking the error case
-    } = await setup() as { result: { current: any } };
+    } = (await setup()) as { result: { current: any } };
     const { removeAsset } = current;
 
     try {

@@ -12,10 +12,19 @@ import { DocAssetCard } from './DocAssetCard';
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
 import type { Asset } from '../../../../shared/contracts/files';
+
+interface RawFile extends Blob {
+  size: number;
+  lastModified: number;
+  name: string;
+  type: string;
+}
 interface AssetProps extends Asset {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;
+  allowedTypes?: string[];
+  rawFile: RawFile;
 }
 
 export const AssetCard = ({
@@ -35,6 +44,7 @@ export const AssetCard = ({
   size?: 'S' | 'M';
   local?: boolean;
   allowedTypes?: string[];
+  alt?: string;
 }) => {
   const handleSelect = onSelect ? () => onSelect(asset) : undefined;
 

@@ -5,11 +5,18 @@ import { AssetCard } from '../AssetCard/AssetCard';
 import { Draggable } from './Draggable';
 import type { Asset } from '../../../../shared/contracts/files';
 
+interface RawFile extends Blob {
+  size: number;
+  lastModified: number;
+  name: string;
+  type: string;
+}
 interface AssetProps extends Asset {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;
   allowedTypes?: string[];
+  rawFile: RawFile;
 }
 
 interface AssetGridListProps {
