@@ -6,7 +6,6 @@ import { findAndClose } from '../../utils/shared';
 type Field = {
   name: string;
   value: string;
-  newValue?: string;
   role?: 'combobox' | 'textbox';
   component?: {
     isSingle: boolean;
