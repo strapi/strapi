@@ -44,6 +44,7 @@ describe('UIDInput', () => {
 
     // The value wasn't changed so the availability check should not be shown
     expect(screen.queryByText('Unavailable')).not.toBeInTheDocument();
+    expect(screen.queryByText('Available')).not.toBeInTheDocument();
 
     expect(screen.getByText('Label')).toBeInTheDocument();
     expect(screen.getByText('*')).toBeInTheDocument();
@@ -123,7 +124,7 @@ describe('UIDInput', () => {
     jest.useFakeTimers();
     const input = screen.getByRole('textbox');
     await user.clear(input);
-    await user.type(input, 'available');
+    await user.type(input, 'not-taken');
 
     // Skip debouncing delay
     act(() => {
@@ -134,7 +135,7 @@ describe('UIDInput', () => {
     expect(await screen.findByText(/^Available$/)).toBeInTheDocument();
 
     // Change the value to make it unavailable
-    await user.type(input, 'unavailable');
+    await user.type(input, 'taken');
     act(() => {
       jest.advanceTimersByTime(4000);
     });
