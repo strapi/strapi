@@ -57,7 +57,7 @@
   "devDependencies": {
     "@strapi/pack-up": "5.0.0",
     "@strapi/sdk-plugin": "^5.0.0",
-    "@strapi/strapi": "5.0.0-rc.8",
+    "@strapi/strapi": "workspace:*",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-router-dom": "6.22.3",

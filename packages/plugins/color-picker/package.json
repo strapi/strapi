@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@strapi/sdk-plugin": "^5.0.0",
-    "@strapi/strapi": "5.0.0-rc.8",
+    "@strapi/strapi": "workspace:*",
     "@testing-library/react": "15.0.7",
     "@testing-library/user-event": "14.5.2",
     "react": "18.3.1",

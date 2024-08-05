@@ -2,11 +2,11 @@
 
 exports[`Upload - Configure | Settings initial render renders and matches the snapshot 1`] = `
 .c0 {
-  background: #ffffff;
   padding-block-start: 24px;
-  padding-inline-end: 32px;
   padding-block-end: 24px;
   padding-inline-start: 32px;
+  padding-inline-end: 32px;
+  background: #ffffff;
   border-radius: 4px;
   box-shadow: 0px 1px 4px rgba(33, 33, 52, 0.1);
 }
@@ -18,9 +18,9 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 .c7 {
   background: #ffffff;
   border-radius: 4px;
+  cursor: default;
   position: relative;
   overflow: hidden;
-  cursor: default;
 }
 
 .c10 {
@@ -29,37 +29,41 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 .c2 {
   align-items: stretch;
-  display: flex;
   flex-direction: column;
+  display: flex;
 }
 
 .c4 {
-  align-items: stretch;
-  display: flex;
-  flex-direction: column;
   gap: 4px;
+  align-items: stretch;
+  flex-direction: column;
+  display: flex;
 }
 
 .c8 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 16px;
+  align-items: center;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c11 {
-  align-items: center;
-  display: flex;
-  flex-direction: row;
   gap: 12px;
+  align-items: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c6 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   color: #32324d;
+  font-weight: 600;
 }
 
 .c12 {
@@ -136,7 +140,7 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 }
 
 .c3 {
-  grid-column: span 6;
+  grid-column: span 12;
   max-width: 100%;
 }
 
@@ -144,15 +148,21 @@ exports[`Upload - Configure | Settings initial render renders and matches the sn
 
 }
 
-@media (max-width: 1100px) {
+@media (min-width: 520px) {
   .c3 {
     grid-column: span 12;
   }
 }
 
-@media (max-width: 550px) {
+@media (min-width: 768px) {
   .c3 {
-    grid-column: span;
+    grid-column: span 12;
+  }
+}
+
+@media (min-width: 1280px) {
+  .c3 {
+    grid-column: span 6;
   }
 }
 

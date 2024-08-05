@@ -3,18 +3,19 @@
 exports[`FromComputerForm snapshots the component 1`] = `
 .c0 {
   padding-block-start: 24px;
-  padding-inline-end: 40px;
   padding-block-end: 24px;
   padding-inline-start: 40px;
+  padding-inline-end: 40px;
 }
 
 .c1 {
-  background: #f6f6f9;
   padding-block-start: 64px;
   padding-block-end: 64px;
+  background: #f6f6f9;
   border-radius: 4px;
+  border-style: solid;
+  border-width: 1px;
   border-color: #c0c0cf;
-  border: 1px solid #c0c0cf;
   position: relative;
 }
 
@@ -24,13 +25,13 @@ exports[`FromComputerForm snapshots the component 1`] = `
 }
 
 .c9 {
-  position: absolute;
-  left: 0;
-  right: 0;
   top: 0;
+  left: 0;
   bottom: 0;
-  z-index: 1;
+  right: 0;
   width: 100%;
+  z-index: 1;
+  position: absolute;
 }
 
 .c11 {
@@ -38,46 +39,46 @@ exports[`FromComputerForm snapshots the component 1`] = `
 }
 
 .c12 {
-  padding-inline-end: 16px;
   padding-inline-start: 16px;
+  padding-inline-end: 16px;
   border-radius: 4px;
   cursor: pointer;
 }
 
 .c16 {
-  background: #f6f6f9;
-  padding-block: 16px;
-  padding-inline: 16px;
+  padding-block-start: 16px;
   padding-inline-end: 20px;
+  padding-block-end: 16px;
   padding-inline-start: 20px;
+  background: #f6f6f9;
 }
 
 .c3 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: center;
+  flex-direction: row;
+  display: flex;
 }
 
 .c4 {
   align-items: center;
-  display: flex;
   flex-direction: row;
+  display: flex;
 }
 
 .c13 {
-  align-items: center;
-  display: inline-flex;
-  flex-direction: row;
   gap: 8px;
+  align-items: center;
   justify-content: center;
+  flex-direction: row;
+  display: inline-flex;
 }
 
 .c17 {
   align-items: center;
-  display: flex;
-  flex-direction: row;
   justify-content: space-between;
+  flex-direction: row;
+  display: flex;
 }
 
 .c8 {
@@ -90,8 +91,8 @@ exports[`FromComputerForm snapshots the component 1`] = `
 .c15 {
   font-size: 1.2rem;
   line-height: 1.33;
-  font-weight: 600;
   color: currentcolor;
+  font-weight: 600;
 }
 
 .c20 {

@@ -24,18 +24,18 @@ describe('<MediaLibraryInput />', () => {
       }
 
       .c1 {
-        align-items: center;
-        display: flex;
-        flex-direction: column;
         gap: 12px;
+        align-items: center;
         justify-content: center;
+        flex-direction: column;
+        display: flex;
       }
 
       .c2 {
         font-size: 1.2rem;
         line-height: 1.33;
-        font-weight: 600;
         color: #666687;
+        font-weight: 600;
       }
 
       .c3 {
