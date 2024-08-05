@@ -68,7 +68,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
 
   return (
     <Menu.Root onOpenChange={(isOpen) => setIsOpen(isOpen)}>
-      <MenuTrigger onClick={(e) => e.stopPropagation()}>
+      <Menu.Trigger onClick={(e) => e.stopPropagation()}>
         <Flex gap={1} wrap="nowrap">
           <Badge>{content.count}</Badge>
           {formatMessage(
@@ -79,7 +79,7 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
             { number: content.count }
           )}
         </Flex>
-      </MenuTrigger>
+      </Menu.Trigger>
       <Menu.Content>
         {isLoading && (
           <Menu.Item disabled>
@@ -118,16 +118,6 @@ const RelationMultiple = ({ mainField, content, rowId, name }: RelationMultipleP
     </Menu.Root>
   );
 };
-
-/**
- * TODO: this needs to be solved in the Design-System
- */
-const MenuTrigger = styled(Menu.Trigger)`
-  svg {
-    width: 0.6rem;
-    height: 0.4rem;
-  }
-`;
 
 export { RelationSingle, RelationMultiple };
 export type { RelationSingleProps, RelationMultipleProps };

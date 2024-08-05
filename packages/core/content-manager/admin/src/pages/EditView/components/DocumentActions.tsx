@@ -8,7 +8,6 @@ import {
   useQueryParams,
 } from '@strapi/admin/strapi-admin';
 import {
-  Box,
   Button,
   Dialog,
   Flex,
