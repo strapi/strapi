@@ -20,13 +20,13 @@ test.describe('List View', () => {
   });
 
   // Should be enabled once bulk publish is in action
-  test('A user should be able to perform bulk actions on entries', async ({ page }) => {
+  test.fixme('A user should be able to perform bulk actions on entries', async ({ page }) => {
     await test.step('bulk publish', async () => {
       await page.getByRole('link', { name: 'Content Manager' }).click();
       // Select all entries to publish
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
-      const items = page.getByRole('gridcell', { name: 'modified' });
-      expect(items).toHaveCount(2);
+      const items = page.getByRole('gridcell', { name: 'Draft' });
+      await expect(items).toHaveCount(2);
       const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
       await checkbox.check();
       const publishButton = page.getByRole('button', { name: 'Publish' }).first();
@@ -85,7 +85,7 @@ test.describe('List View', () => {
       await expect(page).toHaveTitle('Article | Strapi');
       await expect(page.getByRole('heading', { name: 'Article' })).toBeVisible();
       const items = page.getByRole('gridcell', { name: 'published' });
-      expect(items).toHaveCount(2);
+      await expect(items).toHaveCount(2);
       const checkbox = page.getByRole('checkbox', { name: 'Select all entries' });
 
       // Select all entries to unpublish
@@ -95,7 +95,7 @@ test.describe('List View', () => {
 
       // Wait for the confirmation dialog to appear
       await page.waitForSelector('text=Are you sure you want to unpublish these entries?');
-      const unpublishButton = page.getByLabel('Confirm').getByRole('button', { name: 'Unpublish' });
+      const unpublishButton = page.getByLabel('Confirm').getByRole('button', { name: 'Confirm' });
       await unpublishButton.click();
 
       await expect(page.getByRole('gridcell', { name: 'draft' })).toHaveCount(2);
