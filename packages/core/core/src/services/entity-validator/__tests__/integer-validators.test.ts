@@ -166,6 +166,7 @@ describe('Integer validator', () => {
             publishedAt: { $notNull: true },
             attrIntegerUnique: 4,
           },
+          select: ['id'],
         });
       });
 
@@ -195,6 +196,7 @@ describe('Integer validator', () => {
             locale: 'en',
             publishedAt: { $notNull: true },
           },
+          select: ['id'],
         });
       });
     });

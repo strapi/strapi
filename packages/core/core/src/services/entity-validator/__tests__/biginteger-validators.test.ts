@@ -206,6 +206,7 @@ describe('BigInteger validator', () => {
             locale: 'en',
             attrBigIntegerUnique: 4,
           },
+          select: ['id'],
         });
       });
 
@@ -238,6 +239,7 @@ describe('BigInteger validator', () => {
             locale: 'en',
             publishedAt: { $notNull: true },
           },
+          select: ['id'],
         });
       });
     });

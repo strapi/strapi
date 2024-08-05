@@ -167,6 +167,7 @@ describe('Time validator', () => {
             publishedAt: { $notNull: true },
             attrTimeUnique: '00:00:00.000Z',
           },
+          select: ['id'],
         });
       });
 
@@ -196,6 +197,7 @@ describe('Time validator', () => {
             locale: 'en',
             publishedAt: { $notNull: true },
           },
+          select: ['id'],
         });
       });
     });

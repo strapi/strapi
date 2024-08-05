@@ -166,6 +166,7 @@ describe('Float validator', () => {
             publishedAt: { $notNull: true },
             attrFloatUnique: 4,
           },
+          select: ['id'],
         });
       });
 
@@ -195,6 +196,7 @@ describe('Float validator', () => {
             locale: 'en',
             publishedAt: { $notNull: true },
           },
+          select: ['id'],
         });
       });
     });

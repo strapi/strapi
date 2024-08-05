@@ -165,6 +165,7 @@ describe('Datetime validator', () => {
             publishedAt: { $notNull: true },
             attrDateTimeUnique: '2021-11-29T00:00:00.000Z',
           },
+          select: ['id'],
         });
       });
 
@@ -194,6 +195,7 @@ describe('Datetime validator', () => {
             locale: 'en',
             publishedAt: { $notNull: true },
           },
+          select: ['id'],
         });
       });
     });

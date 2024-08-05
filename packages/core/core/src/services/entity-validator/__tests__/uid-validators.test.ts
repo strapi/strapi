@@ -124,6 +124,7 @@ describe('UID validator', () => {
             publishedAt: { $notNull: true },
             attrUidUnique: valueToCheck,
           },
+          select: ['id'],
         });
       });
 
@@ -174,6 +175,7 @@ describe('UID validator', () => {
             publishedAt: { $notNull: true },
             attrUidUnique: valueToCheck,
           },
+          select: ['id'],
         });
       });
 
@@ -201,6 +203,7 @@ describe('UID validator', () => {
             publishedAt: { $notNull: true },
             attrUidUnique: valueToCheck,
           },
+          select: ['id'],
         });
       });
     });

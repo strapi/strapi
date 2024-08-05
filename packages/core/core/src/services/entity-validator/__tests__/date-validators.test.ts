@@ -165,6 +165,7 @@ describe('Date validator', () => {
             publishedAt: { $notNull: true },
             attrDateUnique: '2021-11-29',
           },
+          select: ['id'],
         });
       });
 
@@ -194,6 +195,7 @@ describe('Date validator', () => {
             locale: 'en',
             publishedAt: { $notNull: true },
           },
+          select: ['id'],
         });
       });
     });

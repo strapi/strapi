@@ -185,6 +185,7 @@ describe('String validator', () => {
             attrStringUnique: valueToCheck,
             publishedAt: { $notNull: true },
           },
+          select: ['id'],
         });
       });
 
@@ -218,6 +219,7 @@ describe('String validator', () => {
             locale: 'en',
             publishedAt: { $notNull: true },
           },
+          select: ['id'],
         });
       });
     });
