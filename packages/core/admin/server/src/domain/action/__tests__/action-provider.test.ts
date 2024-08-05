@@ -394,7 +394,7 @@ describe('Action Provider', () => {
 
         await provider.registerMany(actions);
 
-        const aliases = provider.aliases('plugin::bar.foo');
+        const aliases = provider.unstable_aliases('plugin::bar.foo');
 
         expect(aliases).toStrictEqual([]);
       });
@@ -421,7 +421,7 @@ describe('Action Provider', () => {
 
         await provider.registerMany(actions);
 
-        const aliases = provider.aliases('plugin::bar.foo', 'bar');
+        const aliases = provider.unstable_aliases('plugin::bar.foo', 'bar');
 
         expect(aliases).toStrictEqual([]);
         expect(aliases).toHaveLength(0);
@@ -449,7 +449,7 @@ describe('Action Provider', () => {
 
         await provider.registerMany(actions);
 
-        const aliases = provider.aliases('plugin::bar.foo');
+        const aliases = provider.unstable_aliases('plugin::bar.foo');
 
         expect(aliases).toStrictEqual([]);
         expect(aliases).toHaveLength(0);
@@ -477,7 +477,7 @@ describe('Action Provider', () => {
 
         await provider.registerMany(actions);
 
-        const aliases = provider.aliases('plugin::bar.foo');
+        const aliases = provider.unstable_aliases('plugin::bar.foo');
 
         expect(aliases).toHaveLength(1);
         expect(aliases).toStrictEqual(['api::bar']);
@@ -505,7 +505,7 @@ describe('Action Provider', () => {
 
         await provider.registerMany(actions);
 
-        const aliases = provider.aliases('plugin::bar.foo', 'baz');
+        const aliases = provider.unstable_aliases('plugin::bar.foo', 'baz');
 
         expect(aliases).toHaveLength(1);
         expect(aliases).toStrictEqual(['api::bar']);

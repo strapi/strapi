@@ -80,7 +80,10 @@ const createActionProvider = (options?: Options) => {
       return results.every((result) => result !== false);
     },
 
-    aliases(actionId: string, subject?: string | null): string[] {
+    /**
+     * @experimental
+     */
+    unstable_aliases(actionId: string, subject?: string | null): string[] {
       const isRegistered = this.has(actionId);
 
       if (!isRegistered) {

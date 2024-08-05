@@ -36,12 +36,12 @@ const createPermissionChecker =
     // eslint-disable-next-line @typescript-eslint/default-param-last
     const can = (action: string, entity?: Entity, field: string) => {
       const subject = toSubject(entity);
-      const aliases = actionProvider.aliases(action, model) as string[];
+      const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
       return (
         // Test the original action to see if it passes
         userAbility.can(action, subject, field) ||
-        // Else try every known alias, if at least one of them succeed, then the user "can"
+        // Else try every known alias if at least one of them succeed, then the user "can"
         aliases.some((alias) => userAbility.can(alias, subject, field))
       );
     };
@@ -50,7 +50,7 @@ const createPermissionChecker =
     // eslint-disable-next-line @typescript-eslint/default-param-last
     const cannot = (action: string, entity?: Entity, field: string) => {
       const subject = toSubject(entity);
-      const aliases = actionProvider.aliases(action, model) as string[];
+      const aliases = actionProvider.unstable_aliases(action, model) as string[];
 
       return (
         // Test both the original action
