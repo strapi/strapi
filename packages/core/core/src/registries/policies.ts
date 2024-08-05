@@ -1,5 +1,5 @@
 import { pickBy, has, castArray } from 'lodash/fp';
-import type { Core } from '@strapi/types';
+import type { Core, UID } from '@strapi/types';
 import { addNamespace, hasNamespace } from './namespace';
 
 const PLUGIN_PREFIX = 'plugin::';
@@ -87,7 +87,8 @@ const policiesRegistry = () => {
      * Returns this list of registered policies uids
      */
     keys() {
-      return policies.keys();
+      // Return an array so format stays the same as controllers, services, etc
+      return Array.from(policies.keys());
     },
 
     /**
@@ -108,7 +109,22 @@ const policiesRegistry = () => {
      * Returns a map with all the policies in a namespace
      */
     getAll(namespace: string) {
-      return pickBy((_, uid) => hasNamespace(uid, namespace))(Object.fromEntries(policies));
+      const filteredPolicies = pickBy((_, uid) => hasNamespace(uid, namespace))(
+        Object.fromEntries(policies)
+      );
+
+      // Return an enumerable object of the same format as controllers, services, etc
+      const map = {};
+      for (const uid of Object.keys(filteredPolicies) as UID.Policy[]) {
+        Object.defineProperty(map, uid, {
+          enumerable: true,
+          get: () => {
+            return this.get(uid);
+          },
+        });
+      }
+
+      return map;
     },
 
     /**
