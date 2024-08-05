@@ -175,3 +175,17 @@ export declare namespace DeleteFile {
     error?: errors.ApplicationError | errors.NotFoundError;
   }
 }
+
+/**
+ * POSt /upload - Create an asset
+ */
+export declare namespace CreateFile {
+  export interface Request {
+    body: FormData;
+    files: File[];
+  }
+  export interface Response {
+    data: Asset[];
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
+}

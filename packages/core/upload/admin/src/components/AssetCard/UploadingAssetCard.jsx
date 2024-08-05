@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import * as React from 'react';
 
 import {
   Box,
@@ -16,9 +16,11 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { styled } from 'styled-components';
 
-import { AssetType } from '../../constants';
+// TODO: replace tne import below with the one from the constants file when the file is migrated to ts
 import { useUpload } from '../../hooks/useUpload';
-import { getTrad } from '../../utils';
+import { AssetType } from '../../newConstants';
+// TODO: replace the import below with the one from the utils file when the file is migrated to ts
+import { getTrad } from '../../utils/getTrad';
 import { UploadProgress } from '../UploadProgress/UploadProgress';
 
 const UploadProgressWrapper = styled.div`
@@ -62,7 +64,7 @@ export const UploadingAssetCard = ({
     });
   }
 
-  useEffect(() => {
+  React.useEffect(() => {
     const uploadFile = async () => {
       const files = await upload(asset, folderId);
 
@@ -75,7 +77,7 @@ export const UploadingAssetCard = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
+  React.useEffect(() => {
     onStatusChange(status);
   }, [status, onStatusChange]);
 

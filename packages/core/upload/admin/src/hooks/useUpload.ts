@@ -2,12 +2,54 @@ import { useState } from 'react';
 
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
+import { CreateFile } from '../../../shared/contracts/files';
+import type { Asset } from '../../../shared/contracts/files';
+import type { Data } from '@strapi/types';
 
 import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}`;
 
-const uploadAsset = (asset, folderId, signal, onProgress, post) => {
+interface RawFile extends Blob {
+  size: number;
+  lastModified: number;
+  name: string;
+  type: string;
+}
+
+interface AssetProps extends Asset {
+  type?: string;
+  isSelectable?: boolean;
+  isLocal?: boolean;
+  allowedTypes?: string[];
+  rawFile: RawFile;
+}
+
+type FetchResponse<TData = any> = {
+  data: TData;
+  status?: number;
+};
+
+type FetchOptions = {
+  params?: any;
+  signal?: AbortSignal;
+  headers?: Record<string, string>;
+  validateStatus?: ((status: number) => boolean) | null;
+};
+
+type PostType = <TData = any, TSend = any>(
+  url: string,
+  data?: TSend,
+  config?: FetchOptions
+) => Promise<FetchResponse<TData>>;
+
+const uploadAsset = (
+  asset: AssetProps,
+  folderId: Data.ID | null,
+  signal: AbortSignal,
+  onProgress: (progress: number) => void,
+  post: PostType
+) => {
   const { rawFile, caption, name, alternativeText } = asset;
   const formData = new FormData();
 
@@ -30,7 +72,7 @@ const uploadAsset = (asset, folderId, signal, onProgress, post) => {
    */
   return post(endpoint, formData, {
     signal,
-  }).then((res) => res.data);
+  }).then((res: CreateFile.Response) => res.data);
 };
 
 export const useUpload = () => {
@@ -38,10 +80,14 @@ export const useUpload = () => {
   const queryClient = useQueryClient();
   const abortController = new AbortController();
   const signal = abortController.signal;
-  const { post } = useFetchClient();
+  const {
+    post,
+  }: {
+    post: PostType;
+  } = useFetchClient();
 
   const mutation = useMutation(
-    ({ asset, folderId }) => {
+    ({ asset, folderId }: { asset: AssetProps; folderId: Data.ID | null }) => {
       return uploadAsset(asset, folderId, signal, setProgress, post);
     },
     {
@@ -52,7 +98,8 @@ export const useUpload = () => {
     }
   );
 
-  const upload = (asset, folderId) => mutation.mutateAsync({ asset, folderId });
+  const upload = (asset: AssetProps, folderId: Data.ID | null) =>
+    mutation.mutateAsync({ asset, folderId });
 
   const cancel = () => abortController.abort();
 
