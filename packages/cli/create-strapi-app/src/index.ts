@@ -15,7 +15,7 @@ import { trackError } from './utils/usage';
 import { addDatabaseDependencies, getDatabaseInfos } from './utils/database';
 
 import type { Options, Scope } from './types';
-import { stopProcess } from './utils/stop-process';
+import { logger } from './utils/logger';
 
 const command = new commander.Command('create-strapi-app')
   .version(version)
@@ -69,17 +69,48 @@ async function run(args: string[]): Promise<void> {
   const options = command.parse(args).opts<Options>();
   const directory = command.args[0];
 
-  console.log(
-    `\n${chalk.bgBlueBright(` ${chalk.black('Strapi')} `)} ${chalk.green(
-      chalk.bold(`v${version}`)
-    )} ${chalk.bold("🚀 Let's create your new project")}`
+  logger.title(
+    'Strapi',
+    `${chalk.green(chalk.bold(`v${version}`))} ${chalk.bold("🚀 Let's create your new project")}\n`
   );
 
-  checkNodeRequirements();
+  if (
+    (options.javascript !== undefined || options.typescript !== undefined) &&
+    options.template !== undefined
+  ) {
+    logger.fatal(
+      `You cannot use ${chalk.bold('--javascript')} or ${chalk.bold('--typescript')} with ${chalk.bold('--template')}`
+    );
+  }
+
+  if (options.javascript === true && options.typescript === true) {
+    logger.fatal(
+      `You cannot use both ${chalk.bold('--typescript')} (--ts) and ${chalk.bold('--javascript')} (--js) flags together`
+    );
+  }
+
+  // Only prompt the example app option if there is no template option
+  if (options.example === true && options.template !== undefined) {
+    logger.fatal(`You cannot use ${chalk.bold('--example')} with ${chalk.bold('--template')}`);
+  }
+
+  if (options.template !== undefined && options.template.startsWith('-')) {
+    logger.fatal(`Template name ${chalk.bold(`"${options.template}"`)} is invalid`);
+  }
+
+  if ([options.useNpm, options.usePnpm, options.useYarn].filter(Boolean).length > 1) {
+    logger.fatal(
+      `You cannot specify multiple package managers at the same time ${chalk.bold('(--use-npm, --use-pnpm, --use-yarn)')}`
+    );
+  }
 
   if (options.quickstart && !directory) {
-    stopProcess('Please specify the <directory> of your project when using --quickstart');
+    logger.fatal(
+      `Please specify the ${chalk.bold('<directory>')} of your project when using ${chalk.bold('--quickstart')}`
+    );
   }
+
+  checkNodeRequirements();
 
   const appDirectory = directory || (await prompts.directory());
 
@@ -122,27 +153,6 @@ async function run(args: string[]): Promise<void> {
       'styled-components': '^6.0.0',
     },
   };
-
-  if ((options.javascript !== undefined || options.typescript) && options.template !== undefined) {
-    stopProcess('You cannot use --javascript or --typescript with --template');
-  }
-
-  if (options.javascript === true && options.typescript === true) {
-    stopProcess('You cannot use both --typescript (--ts) and --javascript (--js) flags together');
-  }
-
-  // Only prompt the example app option if there is no template option
-  if (options.example === true && options.template !== undefined) {
-    stopProcess('You cannot use --example with --template');
-  }
-
-  // Only prompt the example app option if there is no template option
-  if (
-    (options.javascript === true || options.typescript === true) &&
-    options.template !== undefined
-  ) {
-    stopProcess('You cannot use --javascript or --typescript with --template');
-  }
 
   if (options.template !== undefined) {
     scope.useExampleApp = false;
@@ -199,17 +209,11 @@ async function run(args: string[]): Promise<void> {
 
     await trackError({ scope, error });
 
-    stopProcess(`Error: ${error.message}`);
+    logger.fatal(error.message);
   }
 }
 
 function getPkgManager(options: Options) {
-  if ([options.useNpm, options.usePnpm, options.useYarn].filter(Boolean).length > 1) {
-    stopProcess(
-      'You cannot specify multiple package managers at the same time (--use-npm, --use-pnpm, --use-yarn)'
-    );
-  }
-
   if (options.useNpm === true) {
     return 'npm';
   }

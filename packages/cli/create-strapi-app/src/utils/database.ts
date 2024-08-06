@@ -2,7 +2,7 @@ import inquirer from 'inquirer';
 import type { Question } from 'inquirer';
 
 import type { Scope, Options, DBClient, DBConfig } from '../types';
-import { stopProcess } from './stop-process';
+import { logger } from './logger';
 
 const DBOptions = ['dbclient', 'dbhost', 'dbport', 'dbname', 'dbusername', 'dbpassword'];
 
@@ -55,7 +55,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
   }
 
   if (options.dbclient && !VALID_CLIENTS.includes(options.dbclient)) {
-    stopProcess(
+    logger.fatal(
       `Invalid --dbclient: ${options.dbclient}, expected one of ${VALID_CLIENTS.join(', ')}`
     );
   }
@@ -68,7 +68,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
     matchingArgs.length !== DBOptions.length &&
     options.dbclient !== 'sqlite'
   ) {
-    stopProcess(`Required database arguments are missing: ${missingArgs.join(', ')}.`);
+    logger.fatal(`Required database arguments are missing: ${missingArgs.join(', ')}.`);
   }
 
   const hasDBOptions = DBOptions.some((key) => key in options);
@@ -82,7 +82,7 @@ export async function getDatabaseInfos(options: Options): Promise<DBConfig> {
   }
 
   if (!options.dbclient) {
-    stopProcess('Please specify the database client');
+    return logger.fatal('Please specify the database client');
   }
 
   const database: DBConfig = {

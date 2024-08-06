@@ -4,7 +4,6 @@ import chalk from 'chalk';
 import execa from 'execa';
 import fse from 'fs-extra';
 
-import { stopProcess } from './utils/stop-process';
 import { copyTemplate } from './utils/template';
 import { tryGitInit } from './utils/git';
 import { trackUsage } from './utils/usage';
@@ -13,6 +12,7 @@ import { generateDotEnv } from './utils/dot-env';
 import { isStderrError } from './types';
 
 import type { Scope } from './types';
+import { logger } from './utils/logger';
 
 async function createStrapi(scope: Scope) {
   const { rootPath } = scope;
@@ -41,7 +41,7 @@ async function createApp(scope: Scope) {
 
   await trackUsage({ event: 'willCreateProject', scope });
 
-  console.log(`Creating a new Strapi application at ${chalk.green(rootPath)}.`);
+  logger.title('Strapi', `Creating a new application at ${chalk.green(rootPath)}`);
 
   if (!isQuickstart) {
     await trackUsage({ event: 'didChooseCustomDatabase', scope });
@@ -62,19 +62,21 @@ async function createApp(scope: Scope) {
     }
   } else {
     try {
-      console.log(`Using template: ${chalk.green(template)}`);
+      logger.info(`${chalk.cyan('Installing template')} ${template}`);
+
       await copyTemplate(scope, rootPath);
-      console.log('Template copied successfully.');
+
+      logger.success('Template copied successfully.');
     } catch (error) {
       if (error instanceof Error) {
-        throw new Error(`⛔️ Template installation failed: ${error.message}`);
+        logger.fatal(`Template installation failed: ${error.message}`);
       }
 
       throw error;
     }
 
     if (!fse.existsSync(join(rootPath, 'package.json'))) {
-      throw new Error('Missing package.json in template');
+      logger.fatal(`Missing ${chalk.bold('package.json')} in template`);
     }
   }
 
@@ -99,13 +101,15 @@ async function createApp(scope: Scope) {
 
   if (installDependencies) {
     try {
+      logger.title('deps', `Installing dependencies with ${chalk.cyan(packageManager)}`);
+
       await trackUsage({ event: 'willInstallProjectDependencies', scope });
-      console.log(`Installing dependencies with ${chalk.bold(packageManager)}\n`);
 
       await runInstall(scope);
 
-      console.log(`Dependencies installed ${chalk.green('successfully')}.`);
       await trackUsage({ event: 'didInstallProjectDependencies', scope });
+
+      logger.success(`Dependencies installed`);
     } catch (error) {
       const stderr = isStderrError(error) ? error.stderr : '';
 
@@ -115,20 +119,17 @@ async function createApp(scope: Scope) {
         error: stderr.slice(-1024),
       });
 
-      console.log(
+      logger.fatal([
         chalk.bold(
-          'Oh, it seems that you encountered errors while installing dependencies in your project.'
-        )
-      );
-      console.log(`Don't give up, your project was created correctly.`);
-      console.log(
-        `Fix the issues mentioned in the installation errors and try to run the following command`
-      );
-      console.log();
-      console.log(`cd ${chalk.green(rootPath)} && ${chalk.cyan(packageManager)} install`);
-      console.log();
-
-      stopProcess();
+          'Oh, it seems that you encountered an error while installing dependencies in your project'
+        ),
+        '',
+        `Don't give up, your project was created correctly`,
+        '',
+        `Fix the issues mentioned in the installation errors and try to run the following command:`,
+        '',
+        `cd ${chalk.green(rootPath)} && ${chalk.cyan(packageManager)} install`,
+      ]);
     }
   }
 
@@ -136,54 +137,48 @@ async function createApp(scope: Scope) {
 
   // Init git
   if (gitInit) {
-    console.log('Initializing git repository.');
+    logger.title('git', 'Initializing git repository.');
     await tryGitInit(rootPath);
-    console.log('Initialized a git repository.');
-    console.log();
+    logger.success('Initialized a git repository.');
   }
 
-  console.log();
-  console.log(`Your application was created at ${chalk.green(rootPath)}.\n`);
+  logger.title('Strapi', `Your application was created!`);
 
   const cmd = chalk.cyan(`${packageManager} run`);
 
-  console.log('Available commands in your project:');
-  console.log();
-  console.log(`  ${cmd} develop`);
-  console.log(
-    '  Start Strapi in watch mode. (Changes in Strapi project files will trigger a server restart)'
-  );
-  console.log();
-  console.log(`  ${cmd} start`);
-  console.log('  Start Strapi without watch mode.');
-  console.log();
-  console.log(`  ${cmd} build`);
-  console.log('  Build Strapi admin panel.');
-  console.log();
-  console.log(`  ${cmd} deploy`);
-  console.log('  Deploy Strapi project.');
-  console.log();
-  console.log(`  ${cmd} strapi`);
-  console.log(`  Display all available commands.`);
-  console.log();
+  logger.log([
+    'Available commands in your project:',
+    '',
+    'Start Strapi in watch mode. (Changes in Strapi project files will trigger a server restart)',
+    `${cmd} develop`,
+    '',
+    'Start Strapi without watch mode.',
+    `${cmd} start`,
+    '',
+    'Build Strapi admin panel.',
+    `${cmd} build`,
+    '',
+    'Deploy Strapi project.',
+    `${cmd} deploy`,
+    '',
+    'Display all available commands.',
+    `${cmd} strapi\n`,
+  ]);
 
   if (installDependencies) {
-    console.log('You can start by doing:');
-    console.log();
-    console.log(`  ${chalk.cyan('cd')} ${rootPath}`);
-    console.log(`  ${cmd} develop`);
-    console.log();
+    logger.log(['To get start run', '', `${chalk.cyan('cd')} ${rootPath}`, `${cmd} develop`]);
   } else {
-    console.log('You can start by doing:');
-    console.log();
-    console.log(`  ${chalk.cyan('cd')} ${rootPath}`);
-    console.log(`  ${chalk.cyan(packageManager)} install`);
-    console.log(`  ${cmd} develop`);
-    console.log();
+    logger.log([
+      'To get start run',
+      '',
+      `${chalk.cyan('cd')} ${rootPath}`,
+      `${chalk.cyan(packageManager)} install`,
+      `${cmd} develop`,
+    ]);
   }
 
   if (runApp && installDependencies) {
-    console.log(`Running your Strapi application.`);
+    logger.title('Starting', 'Running your Strapi application');
 
     try {
       await trackUsage({ event: 'willStartServer', scope });
@@ -204,7 +199,7 @@ async function createApp(scope: Scope) {
         });
       }
 
-      stopProcess();
+      logger.fatal('Failed to start your Strapi application');
     }
   }
 }
@@ -231,7 +226,9 @@ function runInstall({ rootPath, packageManager }: Scope) {
     installArguments.push(...(installArgumentsMap[packageManager] ?? []));
   }
 
-  return execa(packageManager, installArguments, options);
+  const proc = execa(packageManager, installArguments, options);
+
+  return proc;
 }
 
 export { createStrapi };
