@@ -29,24 +29,21 @@ const sanitizeMainField = (model: any, mainField: any, userAbility: any) => {
     model: model.uid,
   });
 
-  if (!isListable(model, mainField)) {
+  // Whether the main field can be displayed or not, regardless of permissions.
+  const isMainFieldListable = isListable(model, mainField);
+  // Whether the user has the permission to access the model's main field (using RBAC abilities)
+  const canReadMainField = permissionChecker.can.read(null, mainField);
+
+  if (!isMainFieldListable || !canReadMainField) {
+    // Default to 'id' if the actual main field shouldn't be displayed
     return 'id';
   }
 
-  if (permissionChecker.cannot.read(null, mainField)) {
-    // Allow reading role name if user can read the user model
-    if (model.uid === 'plugin::users-permissions.role') {
-      const userPermissionChecker = getService('permission-checker').create({
-        userAbility,
-        model: 'plugin::users-permissions.user',
-      });
+  // Edge cases
 
-      if (userPermissionChecker.can.read()) {
-        return 'name';
-      }
-    }
-
-    return 'id';
+  // 1. Enforce 'name' as the main field for users and permissions' roles
+  if (model.uid === 'plugin::users-permissions.role') {
+    return 'name';
   }
 
   return mainField;
