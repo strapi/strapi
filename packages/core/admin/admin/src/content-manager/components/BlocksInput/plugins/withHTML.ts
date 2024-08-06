@@ -74,7 +74,7 @@ const deserialize = (
   } else if (el.nodeType !== 1) {
     return null;
   } else if (el.nodeName === 'BR') {
-    return jsx('element', {}, [{ text: '' }]);
+    return jsx('element', { type: 'paragraph' }, [{ text: '' }]);
   }
 
   const { nodeName } = el;
