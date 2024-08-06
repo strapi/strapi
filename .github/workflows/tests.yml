@@ -476,3 +476,33 @@ jobs:
           dbOptions: '--dbclient=sqlite --dbfile=./tmp/data.db'
           runEE: true
           jestOptions: '--shard=${{ matrix.shard }}'
+
+  test_result:
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    name: aggregate_test_result
+    needs:
+      [
+        pretty,
+        lint,
+        build,
+        typescript,
+        unit_back,
+        unit_front,
+        e2e_ce,
+        e2e_ee,
+        cli,
+        api_ce_pg,
+        api_ce_mysql,
+        api_ce_sqlite,
+        api_ee_pg,
+        api_ee_mysql,
+        api_ee_sqlite,
+      ]
+    steps:
+      - run: exit 1
+        if: >-
+          ${{
+                contains(needs.*.result, 'failure')
+            || contains(needs.*.result, 'cancelled')
+          }}
