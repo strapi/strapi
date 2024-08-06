@@ -2,12 +2,7 @@ import { typeFromMime } from './typeFromMime';
 // TODO: import this file from the constants file when it will be migrated to TS
 import { AssetSource } from '../newConstants';
 
-export interface RawFile extends Blob {
-  size: number;
-  lastModified: number;
-  name: string;
-  type: string;
-}
+import type { RawFile } from '../types';
 
 export const rawFileToAsset = (rawFile: RawFile, assetSource: AssetSource) => {
   return {

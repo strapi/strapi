@@ -1,21 +1,15 @@
-import { useState } from 'react';
+import * as React from 'react';
 
 import { useFetchClient } from '@strapi/admin/strapi-admin';
 import { useMutation, useQueryClient } from 'react-query';
 import { CreateFile } from '../../../shared/contracts/files';
 import type { Asset } from '../../../shared/contracts/files';
 import type { Data } from '@strapi/types';
+import type { RawFile } from '../types';
 
 import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}`;
-
-interface RawFile extends Blob {
-  size: number;
-  lastModified: number;
-  name: string;
-  type: string;
-}
 
 export interface AssetProps extends Asset {
   type?: string;
@@ -84,7 +78,7 @@ const uploadAsset = (
 };
 
 export const useUpload = () => {
-  const [progress, setProgress] = useState(0);
+  const [progress, setProgress] = React.useState(0);
   const queryClient = useQueryClient();
   const abortController = new AbortController();
   const signal = abortController.signal;

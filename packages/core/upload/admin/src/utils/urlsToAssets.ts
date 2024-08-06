@@ -3,21 +3,20 @@ import { AssetSource } from '../newConstants';
 
 import { typeFromMime } from './typeFromMime';
 
+import type { RawFile } from '../types';
+
+export interface RawFileWithOptionalProperties
+  extends Omit<RawFile, 'lastModified' | 'name'>,
+    Partial<Pick<RawFile, 'lastModified' | 'name'>> {}
+
 function getFilenameFromURL(url: string) {
   return new URL(url).pathname.split('/').pop();
-}
-
-export interface RawFile extends Blob {
-  size: number;
-  lastModified?: number;
-  name?: string;
-  type: string;
 }
 
 export const urlsToAssets = async (urls: string[]) => {
   const assetPromises = urls.map((url) =>
     fetch(url).then(async (res) => {
-      const blob: RawFile = await res.blob();
+      const blob: RawFileWithOptionalProperties = await res.blob();
 
       const loadedFile = new File([blob], getFilenameFromURL(res.url)!, {
         type: res.headers.get('content-type') || undefined,

@@ -12,13 +12,8 @@ import { DocAssetCard } from './DocAssetCard';
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
 import type { Asset } from '../../../../shared/contracts/files';
+import type { RawFile } from '../../types';
 
-interface RawFile extends Blob {
-  size: number;
-  lastModified: number;
-  name: string;
-  type: string;
-}
 interface AssetProps extends Asset {
   type?: string;
   isSelectable?: boolean;

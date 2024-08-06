@@ -177,7 +177,7 @@ export declare namespace DeleteFile {
 }
 
 /**
- * POSt /upload - Create an asset
+ * POST /upload - Create an asset
  */
 export declare namespace CreateFile {
   export interface Request {
@@ -186,6 +186,20 @@ export declare namespace CreateFile {
   }
   export interface Response {
     data: Asset[];
+    error?: errors.ApplicationError | errors.ValidationError;
+  }
+}
+
+/**
+ * POST /upload?id=:id - Update asset
+ */
+export declare namespace UpdateFile {
+  export interface Request {
+    body: FormData;
+    params: { id: Data.ID };
+  }
+  export interface Response {
+    data: Asset;
     error?: errors.ApplicationError | errors.ValidationError;
   }
 }

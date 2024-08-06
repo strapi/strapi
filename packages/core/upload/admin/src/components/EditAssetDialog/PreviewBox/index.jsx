@@ -10,9 +10,10 @@ import { AssetDefinition } from '../../../constants';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';
-// TODO: replace with the import to the constants file when it will be migrated
+// TODO: replace with the import from the constants file when it will be migrated
 import { AssetType } from '../../../newConstants';
-import { createAssetUrl } from '../../../utils';
+// TODO: replace with the import from the index file when it will be migrated
+import { createAssetUrl } from '../../../utils/createAssetUrl';
 import { downloadFile } from '../../../utils/downloadFile';
 import { getTrad } from '../../../utils/getTrad';
 import { CopyLinkButton } from '../../CopyLinkButton';

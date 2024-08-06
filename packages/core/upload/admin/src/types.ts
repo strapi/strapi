@@ -46,3 +46,10 @@ export interface AssetInterface {
     };
   };
 }
+
+export interface RawFile extends Blob {
+  size: number;
+  lastModified: number;
+  name: string;
+  type: string;
+}
