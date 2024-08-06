@@ -35,6 +35,8 @@
     "build:ts": "nx run-many --target=build:ts --nx-ignore-cycles",
     "build:watch": "nx watch --all --nx-ignore-cycles -- nx run \\$NX_PROJECT_NAME:build --nx-ignore-cycles",
     "clean": "nx run-many --target=clean --nx-ignore-cycles",
+    "deps:check": "npx npm-check-updates@latest --configFileName ncurc.yml --workspaces --root --mergeConfig",
+    "deps:update": "npx npm-check-updates@latest --configFileName ncurc.yml -u --workspaces --root --mergeConfig",
     "doc:api": "node scripts/open-api/serve.js",
     "format": "yarn format:code && yarn format:other",
     "format:code": "yarn prettier:code --write",

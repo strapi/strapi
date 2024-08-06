@@ -1,0 +1,8 @@
+# npm-check-updates configuration used by yarn deps:check && yarn deps:update
+# @link https://github.com/raineorshine/npm-check-updates
+
+# Exclude those packages from default updates
+# the list should be set and maintained over time.
+reject: [
+
+]
