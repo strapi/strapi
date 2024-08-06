@@ -87,7 +87,8 @@ const policiesRegistry = () => {
      * Returns this list of registered policies uids
      */
     keys() {
-      return policies.keys();
+      // Return an array so format stays the same as controllers, services, etc
+      return Array.from(policies.keys());
     },
 
     /**

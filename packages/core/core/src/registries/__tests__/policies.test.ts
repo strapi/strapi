@@ -41,4 +41,15 @@ describe('Policy util', () => {
       expect(registry.get('test-policy', { apiName: 'test-api' })).toBe(policyFn);
     });
   });
+
+  describe('keys', () => {
+    test('Returns an array of strings', () => {
+      const keysRegistry = createPoliciesRegistry();
+      const policyFn = () => {};
+
+      keysRegistry.set('plugin::test-plugin.test-policy', policyFn as any);
+
+      expect(keysRegistry.keys()).toStrictEqual(['plugin::test-plugin.test-policy']);
+    });
+  });
 });
