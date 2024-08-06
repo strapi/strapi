@@ -29,6 +29,7 @@ const getProperties = (scope: Scope, error?: TrackError) => {
     version: scope.strapiVersion,
     docker: scope.docker,
     useYarn: scope.packageManager === 'yarn',
+    packageManager: scope.packageManager,
     useTypescriptOnServer: scope.useTypescript,
     useTypescriptOnAdmin: scope.useTypescript,
     isHostedOnStrapiCloud: process.env.STRAPI_HOSTING === 'strapi.cloud',

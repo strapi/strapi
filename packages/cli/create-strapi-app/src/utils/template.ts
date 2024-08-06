@@ -66,7 +66,9 @@ export async function copyTemplate(scope: Scope, rootPath: string) {
   if (isGithubRepo(template)) {
     const url = new URL(template);
 
-    const [owner, repo, t, branch, ...path] = stripTrailingSlash(url.pathname.slice(1)).split('/');
+    const [owner, repo, t, branch, ...pathSegments] = stripTrailingSlash(
+      url.pathname.slice(1)
+    ).split('/');
 
     if (t !== undefined && t !== 'tree') {
       throw new Error(`Invalid GitHub template URL: ${template}`);
@@ -87,7 +89,9 @@ export async function copyTemplate(scope: Scope, rootPath: string) {
           owner,
           repo,
           branch: decodeURIComponent(branch) ?? scope.templateBranch,
-          subPath: path.length ? decodeURIComponent(path.join('/')) : scope.templatePath,
+          subPath: pathSegments.length
+            ? decodeURIComponent(pathSegments.join('/'))
+            : scope.templatePath,
         }),
       {
         retries: 3,

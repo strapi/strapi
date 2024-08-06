@@ -52,7 +52,7 @@ async function gitInit() {
     {
       type: 'confirm',
       name: 'gitInit',
-      message: 'Initialize a git repository ?',
+      message: 'Initialize a git repository?',
       default: true,
     },
   ]);
