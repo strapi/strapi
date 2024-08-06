@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 
 import Cropper from 'cropperjs';
 
 const QUALITY = 1;
 
 export const useCropImg = () => {
-  const cropperRef = useRef();
-  const [isCropping, setIsCropping] = useState(false);
-  const [size, setSize] = useState({ width: undefined, height: undefined });
+  const cropperRef = React.useRef<Cropper>();
+  const [isCropping, setIsCropping] = React.useState(false);
+  const [size, setSize] = React.useState<{
+    width?: number;
+    height?: number;
+  }>({ width: undefined, height: undefined });
 
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       if (cropperRef.current) {
         cropperRef.current.destroy();
@@ -17,14 +20,18 @@ export const useCropImg = () => {
     };
   }, []);
 
-  const handleResize = ({ detail: { height, width } }) => {
+  const handleResize = ({
+    detail: { height, width },
+  }: {
+    detail: { height: number; width: number };
+  }) => {
     const roundedDataWidth = Math.round(width);
     const roundedDataHeight = Math.round(height);
 
     setSize({ width: roundedDataWidth, height: roundedDataHeight });
   };
 
-  const crop = (image) => {
+  const crop = (image: HTMLImageElement) => {
     if (!cropperRef.current) {
       cropperRef.current = new Cropper(image, {
         modal: true,
@@ -48,7 +55,7 @@ export const useCropImg = () => {
     }
   };
 
-  const produceFile = (name, mimeType, lastModifiedDate) =>
+  const produceFile = (name: string, mimeType: string, lastModifiedDate: string) =>
     new Promise((resolve, reject) => {
       if (!cropperRef.current) {
         reject(
@@ -62,9 +69,9 @@ export const useCropImg = () => {
         canvas.toBlob(
           (blob) => {
             resolve(
-              new File([blob], name, {
+              new File([blob!], name, {
                 type: mimeType,
-                lastModifiedDate,
+                lastModified: new Date(lastModifiedDate).getTime(),
               })
             );
           },

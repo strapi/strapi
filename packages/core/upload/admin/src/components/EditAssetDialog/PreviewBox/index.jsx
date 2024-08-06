@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import * as React from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
 import { Flex, IconButton } from '@strapi/design-system';
@@ -6,10 +6,12 @@ import { Crop as Resize, Download as DownloadIcon, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-import { AssetDefinition, AssetType } from '../../../constants';
+import { AssetDefinition } from '../../../constants';
 import { useCropImg } from '../../../hooks/useCropImg';
 import { useEditAsset } from '../../../hooks/useEditAsset';
 import { useUpload } from '../../../hooks/useUpload';
+// TODO: replace with the import to the constants file when it will be migrated
+import { AssetType } from '../../../newConstants';
 import { createAssetUrl } from '../../../utils';
 import { downloadFile } from '../../../utils/downloadFile';
 import { getTrad } from '../../../utils/getTrad';
@@ -42,13 +44,13 @@ export const PreviewBox = ({
   trackedLocation,
 }) => {
   const { trackUsage } = useTracking();
-  const previewRef = useRef(null);
-  const [isCropImageReady, setIsCropImageReady] = useState(false);
-  const [hasCropIntent, setHasCropIntent] = useState(null);
-  const [assetUrl, setAssetUrl] = useState(createAssetUrl(asset, false));
-  const [thumbnailUrl, setThumbnailUrl] = useState(createAssetUrl(asset, true));
+  const previewRef = React.useRef(null);
+  const [isCropImageReady, setIsCropImageReady] = React.useState(false);
+  const [hasCropIntent, setHasCropIntent] = React.useState(null);
+  const [assetUrl, setAssetUrl] = React.useState(createAssetUrl(asset, false));
+  const [thumbnailUrl, setThumbnailUrl] = React.useState(createAssetUrl(asset, true));
   const { formatMessage } = useIntl();
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
   const { crop, produceFile, stopCropping, isCropping, isCropperReady, width, height } =
     useCropImg();
   const { editAsset, error, isLoading, progress, cancel } = useEditAsset();
@@ -61,7 +63,7 @@ export const PreviewBox = ({
     progress: progressUpload,
   } = useUpload();
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Whenever a replacementUrl is set, make sure to permutate the real asset.url by
     // the locally generated one
     if (replacementFile) {
@@ -76,14 +78,14 @@ export const PreviewBox = ({
     }
   }, [replacementFile, asset]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (hasCropIntent === false) {
       stopCropping();
       onCropCancel();
     }
   }, [hasCropIntent, stopCropping, onCropCancel, onCropFinish]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (hasCropIntent && isCropImageReady) {
       crop(previewRef.current);
       onCropStart();
