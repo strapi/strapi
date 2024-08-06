@@ -11,6 +11,7 @@ on:
     branches:
       - main
       - develop
+      - v5/main
 
 jobs:
   check-pr-status:
