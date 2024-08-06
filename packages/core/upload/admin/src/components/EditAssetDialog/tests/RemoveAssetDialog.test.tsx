@@ -9,12 +9,20 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 import en from '../../../translations/en.json';
 import { RemoveAssetDialog } from '../RemoveAssetDialog';
+import { size } from 'lodash';
 
-const messageForPlugin = Object.keys(en).reduce((acc, curr) => {
-  acc[curr] = `upload.${en[curr]}`;
+type Messages = typeof en;
+type MessageKeys = keyof Messages;
 
-  return acc;
-}, {});
+const enKeys = Object.keys(en) as MessageKeys[];
+
+const messageForPlugin = enKeys.reduce(
+  (acc: { [key in MessageKeys]: string }, curr: MessageKeys) => {
+    acc[curr] = `upload.${en[curr]}`;
+    return acc;
+  },
+  {} as { [key in MessageKeys]: string }
+);
 
 const asset = {
   id: 8,
@@ -32,6 +40,7 @@ const asset = {
       width: 245,
       height: 129,
       size: 10.7,
+      sizeInBytes: 10700,
       path: null,
       url: '/uploads/thumbnail_Screenshot_2_5d4a574d61.png',
     },
@@ -43,6 +52,7 @@ const asset = {
       width: 1000,
       height: 528,
       size: 97.1,
+      sizeInBytes: 97100,
       path: null,
       url: '/uploads/large_Screenshot_2_5d4a574d61.png',
     },
@@ -54,6 +64,7 @@ const asset = {
       width: 750,
       height: 396,
       size: 58.7,
+      sizeInBytes: 58700,
       path: null,
       url: '/uploads/medium_Screenshot_2_5d4a574d61.png',
     },
@@ -65,6 +76,7 @@ const asset = {
       width: 500,
       height: 264,
       size: 31.06,
+      sizeInBytes: 31060,
       path: null,
       url: '/uploads/small_Screenshot_2_5d4a574d61.png',
     },
@@ -79,6 +91,10 @@ const asset = {
   provider_metadata: null,
   createdAt: '2021-10-04T09:42:31.670Z',
   updatedAt: '2021-10-04T09:42:31.670Z',
+  folder: null,
+  documentId: '2',
+  folderPath: '/',
+  locale: null,
 };
 
 const renderCompo = (handleCloseSpy = jest.fn()) => {

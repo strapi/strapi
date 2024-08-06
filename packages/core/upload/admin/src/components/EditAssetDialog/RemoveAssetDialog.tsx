@@ -21,7 +21,7 @@ export const RemoveAssetDialog = ({ open, onClose, asset }: RemoveAssetDialogPro
     if (event) {
       event.preventDefault();
     }
-   
+
     await removeAsset(asset.id);
   };
 
