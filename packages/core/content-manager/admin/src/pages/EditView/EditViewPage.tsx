@@ -149,7 +149,7 @@ const EditViewPage = () => {
         disabled={hasDraftAndPublished && status === 'published'}
         initialValues={initialValues}
         method={isCreatingDocument ? 'POST' : 'PUT'}
-        validationSchema={createYupSchema(schema?.attributes, components)}
+        validationSchema={createYupSchema(schema?.attributes, components, { status })}
       >
         {({ resetForm }) => (
           <>
