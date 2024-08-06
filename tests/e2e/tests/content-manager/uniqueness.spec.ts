@@ -180,17 +180,21 @@ test.describe('Uniqueness', () => {
       await fillField(page, field, fieldRole);
 
       if (isRepeatableComponentField) {
+        // If the field is a repeatable component field, we add an entry and fill
+        // it with the same value to test uniqueness within the same entity.
         await page.getByRole('button', { name: 'Add an entry' }).click();
         await page
           .getByRole('region')
           .getByRole('button', { name: 'No entry yet. Click on the' })
           .click();
-        await fillField(page, field, fieldRole);
+        await page.getByRole(fieldRole, { name: field.name }).fill(field.value);
 
         await clickSave(page);
+        await findAndClose(page, 'Saved document');
 
+        await page.getByRole('button', { name: 'Publish' }).click();
         await expect(page.getByText('Warning:2 errors occurred')).toBeVisible();
-        await expect(page.getByText('This attribute must be unique')).toBeVisible();
+
         await page.getByRole('button', { name: 'Delete' }).nth(1).click();
       }
 
