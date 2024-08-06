@@ -56,7 +56,7 @@ export const useCropImg = () => {
   };
 
   const produceFile = (name: string, mimeType: string, lastModifiedDate: string) =>
-    new Promise((resolve, reject) => {
+    new Promise<File>((resolve, reject) => {
       if (!cropperRef.current) {
         reject(
           new Error(

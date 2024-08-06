@@ -112,6 +112,7 @@ export const useUpload = () => {
   return {
     upload,
     cancel,
+    isLoading: mutation.isLoading,
     error: mutation.error,
     progress,
     status: mutation.status,

@@ -34,6 +34,7 @@ export interface Asset {
     | 'publishedAt'
     | 'updatedAt'
   >;
+  folderPath: string;
   documentId: Modules.Documents.ID;
   formats?: {
     thumbnail: {
@@ -86,13 +87,12 @@ export interface Asset {
     } | null;
   } | null;
   hash: string;
+  isUrlSigned?: boolean;
+  locale: string | null;
   previewUrl?: null | string;
   provider: string;
   provider_metadata?: null | string;
-  folderPath: string;
   publishedAt?: string | null;
-  locale: string | null;
-  isUrlSigned?: boolean;
 }
 
 export interface Pagination {

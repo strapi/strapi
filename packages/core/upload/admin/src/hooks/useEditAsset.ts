@@ -10,6 +10,7 @@ import type { RawFile } from '../types';
 import pluginId from '../pluginId';
 // TODO: replace it with the import from the index file when it will be migrated to typescript
 import { getTrad } from '../utils/getTrad';
+import { Data } from '@strapi/types';
 
 type FetchResponse<TData = any> = {
   data: TData;
@@ -29,12 +30,13 @@ type PostType = <TData = any, TSend = any>(
   config?: FetchOptions
 ) => Promise<FetchResponse<TData>>;
 
-interface AssetProps extends Asset {
+interface AssetProps extends Omit<Asset, 'folder'> {
   type?: string;
   isSelectable?: boolean;
   isLocal?: boolean;
   allowedTypes?: string[];
-  rawFile: RawFile;
+  rawFile?: RawFile;
+  folder?: Data.ID;
 }
 
 export type ErrorMutation = {
