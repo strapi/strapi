@@ -228,7 +228,7 @@ yargs
                     '--color',
                     '--verbose',
                     '--runInBand', // tests must not run concurrently
-                    ...argv._
+                    ...argv._,
                   ],
                   {
                     stdio: 'inherit',
