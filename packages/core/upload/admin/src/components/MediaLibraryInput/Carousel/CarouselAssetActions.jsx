@@ -21,9 +21,10 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
             id: getTrad('control-card.add'),
             defaultMessage: 'Add',
           })}
-          icon={<Plus />}
           onClick={() => onAddAsset(asset)}
-        />
+        >
+          <Plus />
+        </IconButton>
       )}
 
       <CopyLinkButton url={prefixFileUrlWithBackendUrl(asset.url)} />
@@ -34,9 +35,10 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
             id: 'global.delete',
             defaultMessage: 'Delete',
           })}
-          icon={<Trash />}
           onClick={() => onDeleteAsset(asset)}
-        />
+        >
+          <Trash />
+        </IconButton>
       )}
 
       {onEditAsset && (
@@ -45,9 +47,10 @@ export const CarouselAssetActions = ({ asset, onDeleteAsset, onAddAsset, onEditA
             id: getTrad('control-card.edit'),
             defaultMessage: 'edit',
           })}
-          icon={<Pencil />}
           onClick={onEditAsset}
-        />
+        >
+          <Pencil />
+        </IconButton>
       )}
     </CarouselActions>
   );

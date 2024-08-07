@@ -166,14 +166,10 @@ describe('content-manager', () => {
     it('should let users add a document action as an array', () => {
       const plugin = new ContentManagerPlugin();
 
-      expect(plugin.documentActions).toHaveLength(1);
+      expect(plugin.documentActions).toHaveLength(0);
 
       // ensure we have our default options
-      expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
-        [
-          "history",
-        ]
-      `);
+      expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`[]`);
 
       plugin.addDocumentAction([
         () => ({
@@ -183,11 +179,10 @@ describe('content-manager', () => {
         }),
       ]);
 
-      expect(plugin.documentActions).toHaveLength(2);
+      expect(plugin.documentActions).toHaveLength(1);
       // ensure we have our default options, with the new option, which will not have a type
       expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
         [
-          "history",
           undefined,
         ]
       `);
@@ -196,14 +191,10 @@ describe('content-manager', () => {
     it('should let you mutate the existing array of panels with a reducer function', () => {
       const plugin = new ContentManagerPlugin();
 
-      expect(plugin.documentActions).toHaveLength(1);
+      expect(plugin.documentActions).toHaveLength(0);
 
       // ensure we have our default options
-      expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
-        [
-          "history",
-        ]
-      `);
+      expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`[]`);
 
       const action: DocumentActionComponent = () => ({
         label: 'Publish & Notify Twitter',
@@ -213,11 +204,10 @@ describe('content-manager', () => {
 
       plugin.addDocumentAction((prev) => [...prev, action]);
 
-      expect(plugin.documentActions).toHaveLength(2);
+      expect(plugin.documentActions).toHaveLength(1);
       // ensure we have our default options, with the new option, which will not have a type. The defaults should still be at the front.
       expect(plugin.documentActions.map((action) => action.type)).toMatchInlineSnapshot(`
         [
-          "history",
           undefined,
         ]
       `);

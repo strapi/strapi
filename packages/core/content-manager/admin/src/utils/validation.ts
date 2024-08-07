@@ -1,6 +1,5 @@
 import { translatedErrors } from '@strapi/admin/strapi-admin';
 import pipe from 'lodash/fp/pipe';
-import { MessageDescriptor, PrimitiveType } from 'react-intl';
 import * as yup from 'yup';
 
 import { DOCUMENT_META_FIELDS } from '../constants/attributes';
@@ -21,12 +20,17 @@ type AnySchema =
  * createYupSchema
  * -----------------------------------------------------------------------------------------------*/
 
+interface ValidationOptions {
+  status: 'draft' | 'published' | null;
+}
+
 /**
  * TODO: should we create a Map to store these based on the hash of the schema?
  */
 const createYupSchema = (
   attributes: Schema['attributes'] = {},
-  components: ComponentsDictionary = {}
+  components: ComponentsDictionary = {},
+  options: ValidationOptions = { status: null }
 ): yup.ObjectSchema<any> => {
   const createModelSchema = (attributes: Schema['attributes']): yup.ObjectSchema<any> =>
     yup
@@ -49,7 +53,7 @@ const createYupSchema = (
             addMinValidation,
             addMaxValidation,
             addRegexValidation,
-          ].map((fn) => fn(attribute));
+          ].map((fn) => fn(attribute, options));
 
           const transformSchema = pipe(...validations);
 
@@ -80,15 +84,19 @@ const createYupSchema = (
                       (
                         data: SchemaUtils.Attribute.Value<SchemaUtils.Attribute.DynamicZone>[number]
                       ) => {
-                        const { attributes } = components[data.__component];
+                        const attributes = components?.[data?.__component]?.attributes;
 
-                        return yup
+                        const validation = yup
                           .object()
                           .shape({
                             __component: yup.string().required().oneOf(Object.keys(components)),
                           })
-                          .nullable(false)
-                          .concat(createModelSchema(attributes));
+                          .nullable(false);
+                        if (!attributes) {
+                          return validation;
+                        }
+
+                        return validation.concat(createModelSchema(attributes));
                       }
                     ) as unknown as yup.ObjectSchema<any>
                   )
@@ -98,11 +106,32 @@ const createYupSchema = (
               return {
                 ...acc,
                 [name]: transformSchema(
-                  yup.array().of(
-                    yup.object().shape({
-                      id: yup.string().required(),
-                    })
-                  )
+                  yup.lazy((value) => {
+                    if (!value) {
+                      return yup.mixed().nullable(true);
+                    } else if (Array.isArray(value)) {
+                      // If a relation value is an array, we expect
+                      // an array of objects with {id} properties, representing the related entities.
+                      return yup.array().of(
+                        yup.object().shape({
+                          id: yup.string().required(),
+                        })
+                      );
+                    } else if (typeof value === 'object') {
+                      // A realtion value can also be an object. Some API
+                      // repsonses return the number of entities in the relation
+                      // as { count: x }
+                      return yup.object();
+                    } else {
+                      return yup
+                        .mixed()
+                        .test(
+                          'type-error',
+                          'Relation values must be either null, an array of objects with {id} or an object.',
+                          () => false
+                        );
+                    }
+                  })
                 ),
               };
             default:
@@ -157,6 +186,16 @@ const createAttributeSchema = (
           return true;
         }
 
+        // If the value was created via content API and wasn't changed, then it's still an object
+        if (typeof value === 'object') {
+          try {
+            JSON.stringify(value);
+            return true;
+          } catch (err) {
+            return false;
+          }
+        }
+
         try {
           JSON.parse(value);
 
@@ -180,6 +219,16 @@ const createAttributeSchema = (
   }
 };
 
+// Helper function to return schema.nullable() if it exists, otherwise return schema
+const nullableSchema = <TSchema extends AnySchema>(schema: TSchema) => {
+  return schema?.nullable
+    ? schema.nullable()
+    : // In some cases '.nullable' will not be available on the schema.
+      // e.g. when the schema has been built using yup.lazy (e.g. for relations).
+      // In these cases we should just return the schema as it is.
+      schema;
+};
+
 /* -------------------------------------------------------------------------------------------------
  * Validators
  * -----------------------------------------------------------------------------------------------*/
@@ -188,23 +237,39 @@ const createAttributeSchema = (
  * attribute and then have the schema piped through them.
  */
 type ValidationFn = (
-  attribute: Schema['attributes'][string]
+  attribute: Schema['attributes'][string],
+  options: ValidationOptions
 ) => <TSchema extends AnySchema>(schema: TSchema) => TSchema;
 
-const addRequiredValidation: ValidationFn = (attribute) => (schema) => {
-  if (attribute.required) {
-    return schema.required({
-      id: translatedErrors.required.id,
-      defaultMessage: 'This field is required.',
-    });
+const addRequiredValidation: ValidationFn = (attribute, options) => (schema) => {
+  if (options.status === 'draft') {
+    return nullableSchema(schema);
   }
 
-  return schema.nullable();
+  if (
+    ((attribute.type === 'component' && attribute.repeatable) ||
+      attribute.type === 'dynamiczone') &&
+    attribute.required &&
+    'min' in schema
+  ) {
+    return schema.min(1, translatedErrors.required);
+  }
+
+  if (attribute.required && attribute.type !== 'relation') {
+    return schema.required(translatedErrors.required);
+  }
+
+  return nullableSchema(schema);
 };
 
 const addMinLengthValidation: ValidationFn =
-  (attribute) =>
+  (attribute, options) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
+    // Skip minLength validation for draft
+    if (options.status === 'draft') {
+      return schema;
+    }
+
     if (
       'minLength' in attribute &&
       attribute.minLength &&
@@ -243,10 +308,39 @@ const addMaxLengthValidation: ValidationFn =
   };
 
 const addMinValidation: ValidationFn =
-  (attribute) =>
+  (attribute, options) =>
   <TSchema extends AnySchema>(schema: TSchema): TSchema => {
     if ('min' in attribute) {
       const min = toInteger(attribute.min);
+
+      if (
+        (attribute.type === 'component' && attribute.repeatable) ||
+        attribute.type === 'dynamiczone'
+      ) {
+        if (options.status !== 'draft' && !attribute.required && 'test' in schema && min) {
+          // @ts-expect-error - We know the schema is an array here but ts doesn't know.
+          return schema.test(
+            'custom-min',
+            {
+              ...translatedErrors.min,
+              values: {
+                min: attribute.min,
+              },
+            },
+            (value: Array<unknown>) => {
+              if (!value) {
+                return true;
+              }
+
+              if (Array.isArray(value) && value.length === 0) {
+                return true;
+              }
+
+              return value.length >= min;
+            }
+          );
+        }
+      }
 
       if ('min' in schema && min) {
         return schema.min(min, {
@@ -306,38 +400,4 @@ const addRegexValidation: ValidationFn =
     return schema;
   };
 
-/* -------------------------------------------------------------------------------------------------
- * getInnerErrors
- * -----------------------------------------------------------------------------------------------*/
-
-interface TranslationMessage extends MessageDescriptor {
-  values?: Record<string, PrimitiveType>;
-}
-
-const extractValuesFromYupError = (
-  errorType?: string | undefined,
-  errorParams?: Record<string, any> | undefined
-) => {
-  if (!errorType || !errorParams) {
-    return {};
-  }
-
-  return {
-    [errorType]: errorParams[errorType],
-  };
-};
-
-const getInnerErrors = (error: yup.ValidationError) =>
-  (error?.inner || []).reduce<Record<string, TranslationMessage>>((acc, currentError) => {
-    if (currentError.path) {
-      acc[currentError.path.split('[').join('.').split(']').join('')] = {
-        id: currentError.message,
-        defaultMessage: currentError.message,
-        values: extractValuesFromYupError(currentError?.type, currentError?.params),
-      };
-    }
-
-    return acc;
-  }, {});
-
-export { createYupSchema, getInnerErrors };
+export { createYupSchema };

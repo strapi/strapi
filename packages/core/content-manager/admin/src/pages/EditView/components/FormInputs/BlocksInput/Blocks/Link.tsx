@@ -1,19 +1,10 @@
 import * as React from 'react';
 
-import {
-  BaseLink,
-  Button,
-  Field,
-  FieldInput,
-  FieldLabel,
-  Flex,
-  Popover,
-  useComposedRefs,
-} from '@strapi/design-system';
+import { BaseLink, Button, Field, Flex, Popover, useComposedRefs } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { Editor, Path, Range, Transforms } from 'slate';
 import { type RenderElementProps, ReactEditor } from 'slate-react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { type BlocksStore, useBlocksEditorContext } from '../BlocksEditor';
 import { editLink, removeLink } from '../utils/links';
@@ -23,8 +14,8 @@ const StyledBaseLink = styled(BaseLink)`
   text-decoration: none;
 `;
 
-const RemoveButton = styled(Button)<{ visible: boolean }>`
-  visibility: ${(props) => (props.visible ? 'visible' : 'hidden')};
+const RemoveButton = styled(Button)<{ $visible: boolean }>`
+  visibility: ${(props) => (props.$visible ? 'visible' : 'hidden')};
 `;
 
 interface LinkContentProps extends RenderElementProps {
@@ -39,19 +30,14 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
     const [popoverOpen, setPopoverOpen] = React.useState(
       editor.lastInsertedLinkPath ? Path.equals(path, editor.lastInsertedLinkPath) : false
     );
-    const linkRef = React.useRef<HTMLAnchorElement>(null!);
     const elementText = link.children.map((child) => child.text).join('');
     const [linkText, setLinkText] = React.useState(elementText);
     const [linkUrl, setLinkUrl] = React.useState(link.url);
     const linkInputRef = React.useRef<HTMLInputElement>(null);
-    const [showRemoveButton, setShowRemoveButton] = React.useState(false);
+    const isLastInsertedLink = editor.lastInsertedLinkPath
+      ? !Path.equals(path, editor.lastInsertedLinkPath)
+      : true;
     const [isSaveDisabled, setIsSaveDisabled] = React.useState(false);
-
-    const handleOpenEditPopover: React.MouseEventHandler<HTMLAnchorElement> = (e) => {
-      e.preventDefault();
-      setPopoverOpen(true);
-      setShowRemoveButton(true);
-    };
 
     const onLinkChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       setIsSaveDisabled(false);
@@ -79,115 +65,113 @@ const LinkContent = React.forwardRef<HTMLAnchorElement, LinkContentProps>(
       editLink(editor, { url: linkUrl, text: linkText });
       setPopoverOpen(false);
       editor.lastInsertedLinkPath = null;
+      ReactEditor.focus(editor);
     };
 
-    const handleDismiss = () => {
-      setPopoverOpen(false);
-
+    const handleClose = () => {
       if (link.url === '') {
         removeLink(editor);
       }
 
+      setPopoverOpen(false);
       ReactEditor.focus(editor);
     };
-
-    const inputNotDirty =
-      !linkText ||
-      !linkUrl ||
-      (link.url && link.url === linkUrl && elementText && elementText === linkText);
-
-    const composedRefs = useComposedRefs(linkRef, forwardedRef);
 
     React.useEffect(() => {
       // Focus on the link input element when the popover opens
       if (popoverOpen) linkInputRef.current?.focus();
     }, [popoverOpen]);
 
+    const inputNotDirty =
+      !linkText ||
+      !linkUrl ||
+      (link.url && link.url === linkUrl && elementText && elementText === linkText);
+
     return (
-      <>
-        <StyledBaseLink
-          {...attributes}
-          ref={composedRefs}
-          href={link.url}
-          onClick={handleOpenEditPopover}
-          color="primary600"
-        >
-          {children}
-        </StyledBaseLink>
-        {popoverOpen && (
-          <Popover source={linkRef} onDismiss={handleDismiss} padding={4} contentEditable={false}>
-            <Flex as="form" onSubmit={handleSave} direction="column" gap={4}>
-              <Field width="368px">
-                <Flex direction="column" gap={1} alignItems="stretch">
-                  <FieldLabel>
-                    {formatMessage({
-                      id: 'components.Blocks.popover.text',
-                      defaultMessage: 'Text',
-                    })}
-                  </FieldLabel>
-                  <FieldInput
-                    name="text"
-                    placeholder={formatMessage({
-                      id: 'components.Blocks.popover.text.placeholder',
-                      defaultMessage: 'Enter link text',
-                    })}
-                    value={linkText}
-                    onChange={(e) => {
-                      setLinkText(e.target.value);
-                    }}
-                  />
-                </Flex>
-              </Field>
-              <Field width="368px">
-                <Flex direction="column" gap={1} alignItems="stretch">
-                  <FieldLabel>
-                    {formatMessage({
-                      id: 'components.Blocks.popover.link',
-                      defaultMessage: 'Link',
-                    })}
-                  </FieldLabel>
-                  <FieldInput
-                    ref={linkInputRef}
-                    name="url"
-                    placeholder={formatMessage({
-                      id: 'components.Blocks.popover.link.placeholder',
-                      defaultMessage: 'Paste link',
-                    })}
-                    value={linkUrl}
-                    onChange={onLinkChange}
-                  />
-                </Flex>
-              </Field>
-              <Flex justifyContent="space-between" width="100%">
-                <RemoveButton
-                  variant="danger-light"
-                  onClick={() => removeLink(editor)}
-                  visible={showRemoveButton}
-                >
+      <Popover.Root open={popoverOpen}>
+        <Popover.Trigger>
+          <StyledBaseLink
+            {...attributes}
+            ref={forwardedRef}
+            href={link.url}
+            onClick={() => setPopoverOpen(true)}
+            color="primary600"
+          >
+            {children}
+          </StyledBaseLink>
+        </Popover.Trigger>
+        <Popover.Content onPointerDownOutside={handleClose}>
+          <Flex padding={4} direction="column" gap={4}>
+            <Field.Root width="368px">
+              <Flex direction="column" gap={1} alignItems="stretch">
+                <Field.Label>
                   {formatMessage({
-                    id: 'components.Blocks.popover.remove',
-                    defaultMessage: 'Remove',
+                    id: 'components.Blocks.popover.text',
+                    defaultMessage: 'Text',
                   })}
-                </RemoveButton>
-                <Flex gap={2}>
-                  <Button variant="tertiary" onClick={handleDismiss}>
-                    {formatMessage({
-                      id: 'components.Blocks.popover.cancel',
-                      defaultMessage: 'Cancel',
-                    })}
-                  </Button>
-                  <Button type="submit" disabled={Boolean(inputNotDirty) || isSaveDisabled}>
-                    {formatMessage({
-                      id: 'components.Blocks.popover.save',
-                      defaultMessage: 'Save',
-                    })}
-                  </Button>
-                </Flex>
+                </Field.Label>
+                <Field.Input
+                  name="text"
+                  placeholder={formatMessage({
+                    id: 'components.Blocks.popover.text.placeholder',
+                    defaultMessage: 'Enter link text',
+                  })}
+                  value={linkText}
+                  onChange={(e) => {
+                    setLinkText(e.target.value);
+                  }}
+                />
+              </Flex>
+            </Field.Root>
+            <Field.Root width="368px">
+              <Flex direction="column" gap={1} alignItems="stretch">
+                <Field.Label>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.link',
+                    defaultMessage: 'Link',
+                  })}
+                </Field.Label>
+                <Field.Input
+                  ref={linkInputRef}
+                  name="url"
+                  placeholder={formatMessage({
+                    id: 'components.Blocks.popover.link.placeholder',
+                    defaultMessage: 'Paste link',
+                  })}
+                  value={linkUrl}
+                  onChange={onLinkChange}
+                />
+              </Flex>
+            </Field.Root>
+            <Flex justifyContent="space-between" width="100%">
+              <RemoveButton
+                variant="danger-light"
+                onClick={() => removeLink(editor)}
+                $visible={isLastInsertedLink}
+              >
+                {formatMessage({
+                  id: 'components.Blocks.popover.remove',
+                  defaultMessage: 'Remove',
+                })}
+              </RemoveButton>
+              <Flex gap={2}>
+                <Button variant="tertiary" onClick={handleClose}>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.cancel',
+                    defaultMessage: 'Cancel',
+                  })}
+                </Button>
+                <Button disabled={Boolean(inputNotDirty) || isSaveDisabled} onClick={handleSave}>
+                  {formatMessage({
+                    id: 'components.Blocks.popover.save',
+                    defaultMessage: 'Save',
+                  })}
+                </Button>
               </Flex>
             </Flex>
-          </Popover>
-        )}
-      </>
+          </Flex>
+        </Popover.Content>
+      </Popover.Root>
     );
   }
 );

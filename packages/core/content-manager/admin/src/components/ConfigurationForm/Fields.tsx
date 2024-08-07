@@ -2,21 +2,23 @@ import * as React from 'react';
 
 import { useField, useForm } from '@strapi/admin/strapi-admin';
 import {
+  Modal,
   Box,
   Flex,
   Grid,
-  GridItem,
   IconButton,
+  IconButtonComponent,
   Typography,
   useComposedRefs,
+  Link,
+  Menu,
 } from '@strapi/design-system';
-import { Link, Menu } from '@strapi/design-system';
 import { Cog, Cross, Drag, Pencil, Plus } from '@strapi/icons';
 import { generateNKeysBetween as generateNKeysBetweenImpl } from 'fractional-indexing';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ItemTypes } from '../../constants/dragAndDrop';
 import { type UseDragAndDropOptions, useDragAndDrop } from '../../hooks/useDragAndDrop';
@@ -211,9 +213,9 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
       <Box padding={4} hasRadius borderStyle="dashed" borderWidth="1px" borderColor="neutral300">
         <Flex direction="column" alignItems="stretch" gap={2}>
           {layout.map((row, rowIndex) => (
-            <Grid gap={2} key={row.__temp_key__}>
+            <Grid.Root gap={2} key={row.__temp_key__}>
               {row.children.map(({ size, ...field }, fieldIndex) => (
-                <GridItem key={field.name} col={size}>
+                <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
                   <Field
                     attribute={attributes[field.name]}
                     components={components}
@@ -222,9 +224,9 @@ const Fields = ({ attributes, fieldSizes, components, metadatas = {} }: FieldsPr
                     onMoveField={handleMoveField}
                     onRemoveField={handleRemoveField(rowIndex, fieldIndex)}
                   />
-                </GridItem>
+                </Grid.Item>
               ))}
-            </Grid>
+            </Grid.Root>
           ))}
           <Menu.Root>
             <Menu.Trigger
@@ -349,11 +351,11 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
   }
 
   if (value.name === TEMP_FIELD_NAME) {
-    return <Flex as="span" height="100%" style={{ opacity: 0 }} ref={tempRefs} />;
+    return <Flex tag="span" height="100%" style={{ opacity: 0 }} ref={tempRefs} />;
   }
 
   return (
-    <>
+    <Modal.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
       <Flex
         borderColor="neutral150"
         background="neutral100"
@@ -367,8 +369,9 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
         }}
       >
         <DragButton
-          as="span"
-          aria-label={formatMessage(
+          tag="span"
+          withTooltip={false}
+          label={formatMessage(
             {
               id: getTranslation('components.DraggableCard.move.field'),
               defaultMessage: 'Move {item}',
@@ -387,13 +390,14 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
             </Typography>
             <Flex>
               <IconButton
-                borderWidth={0}
+                variant="ghost"
                 background="transparent"
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsModalOpen(true);
                 }}
-                aria-label={formatMessage(
+                withTooltip={false}
+                label={formatMessage(
                   {
                     id: getTranslation('components.DraggableCard.edit.field'),
                     defaultMessage: 'Edit {item}',
@@ -404,10 +408,11 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                 <Pencil />
               </IconButton>
               <IconButton
-                borderWidth={0}
+                variant="ghost"
                 onClick={handleRemoveField}
                 background="transparent"
-                aria-label={formatMessage(
+                withTooltip={false}
+                label={formatMessage(
                   {
                     id: getTranslation('components.DraggableCard.delete.field'),
                     defaultMessage: 'Delete {item}',
@@ -430,10 +435,10 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
               gap={2}
               width="100%"
             >
-              <Grid gap={4} width="100%">
+              <Grid.Root gap={4} width="100%">
                 {components[attribute.component].layout.map((row) =>
                   row.map(({ size, ...field }) => (
-                    <GridItem key={field.name} col={size}>
+                    <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
                       <Flex
                         alignItems="center"
                         background="neutral0"
@@ -446,16 +451,15 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
                       >
                         <Typography textColor="neutral800">{field.name}</Typography>
                       </Flex>
-                    </GridItem>
+                    </Grid.Item>
                   ))
                 )}
-              </Grid>
+              </Grid.Root>
               <Link
                 // used to stop the edit form from appearing when we click here.
                 onClick={(e) => e.stopPropagation()}
                 startIcon={<Cog />}
-                as={NavLink}
-                // @ts-expect-error – DS does not infer props from the `as` prop
+                tag={NavLink}
                 to={`../components/${attribute.component}/configurations/edit`}
               >
                 {formatMessage({
@@ -492,19 +496,22 @@ const Field = ({ attribute, components, name, index, onMoveField, onRemoveField 
           ) : null}
         </Flex>
       </Flex>
-      {isModalOpen && value.name !== TEMP_FIELD_NAME && (
+      {value.name !== TEMP_FIELD_NAME && (
         <EditFieldForm attribute={attribute} name={name} onClose={() => setIsModalOpen(false)} />
       )}
-    </>
+    </Modal.Root>
   );
 };
 
-const DragButton = styled(IconButton)`
+const DragButton = styled<IconButtonComponent<'span'>>(IconButton)`
   height: unset;
   align-self: stretch;
   display: flex;
   align-items: center;
-  padding: 0 ${({ theme }) => theme.spaces[3]};
+  padding: 0;
+  border: none;
+  background-color: transparent;
+  border-radius: 0px;
   border-right: 1px solid ${({ theme }) => theme.colors.neutral150};
   cursor: all-scroll;
 

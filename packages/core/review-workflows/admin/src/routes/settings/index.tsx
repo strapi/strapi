@@ -4,11 +4,19 @@ import * as React from 'react';
 
 import { Page, useTracking, ConfirmDialog, useRBAC, Table } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Flex, IconButton, TFooter, Typography, Link, LinkButton } from '@strapi/design-system';
+import {
+  Flex,
+  IconButton,
+  TFooter,
+  Typography,
+  Link,
+  LinkButton,
+  Dialog,
+} from '@strapi/design-system';
 import { Pencil, Plus, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { LimitsModal } from '../../components/LimitsModal';
 import { CHARGEBEE_WORKFLOW_ENTITLEMENT_NAME } from '../../constants';
@@ -53,9 +61,8 @@ export const ReviewWorkflowsListView = () => {
     setWorkflowToDelete(null);
   };
 
-  const handleCreateClick = (
-    event: React.MouseEvent<HTMLButtonElement> & React.MouseEvent<HTMLAnchorElement>
-  ) => {
+  const handleCreateClick: React.MouseEventHandler<HTMLAnchorElement> &
+    ((event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void) = (event) => {
     event.preventDefault();
     /**
      * If the current license has a workflow limit:
@@ -137,8 +144,7 @@ export const ReviewWorkflowsListView = () => {
             <LinkButton
               startIcon={<Plus />}
               size="S"
-              as={NavLink}
-              // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
+              tag={NavLink}
               to="create"
               onClick={handleCreateClick}
             >
@@ -215,7 +221,6 @@ export const ReviewWorkflowsListView = () => {
                     <Flex alignItems="center" justifyContent="end">
                       {canRead || canUpdate ? (
                         <ActionLink
-                          // @ts-expect-error – the `as` prop does not correctly infer the props of it's component
                           to={`${workflow.id}`}
                           aria-label={formatMessage(
                             {
@@ -230,20 +235,22 @@ export const ReviewWorkflowsListView = () => {
                       ) : null}
                       {workflows.length > 1 && canDelete ? (
                         <IconButton
-                          aria-label={formatMessage(
+                          withTooltip={false}
+                          label={formatMessage(
                             {
                               id: 'Settings.review-workflows.list.page.list.column.actions.delete.label',
                               defaultMessage: 'Delete {name}',
                             },
                             { name: 'Default workflow' }
                           )}
-                          icon={<Trash />}
-                          borderWidth={0}
+                          variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteWorkflow(String(workflow.id));
                           }}
-                        />
+                        >
+                          <Trash />
+                        </IconButton>
                       ) : null}
                     </Flex>
                   </Table.Cell>
@@ -253,19 +260,17 @@ export const ReviewWorkflowsListView = () => {
           </Table.Content>
         </Table.Root>
 
-        <ConfirmDialog
-          isOpen={!!workflowToDelete}
-          onClose={toggleConfirmDeleteDialog}
-          onConfirm={handleConfirmDeleteDialog}
-        >
-          {formatMessage({
-            id: 'Settings.review-workflows.list.page.delete.confirm.body',
-            defaultMessage:
-              'If you remove this worfklow, all stage-related information will be removed for this content-type. Are you sure you want to remove it?',
-          })}
-        </ConfirmDialog>
+        <Dialog.Root open={!!workflowToDelete} onOpenChange={toggleConfirmDeleteDialog}>
+          <ConfirmDialog onConfirm={handleConfirmDeleteDialog}>
+            {formatMessage({
+              id: 'Settings.review-workflows.list.page.delete.confirm.body',
+              defaultMessage:
+                'If you remove this worfklow, all stage-related information will be removed for this content-type. Are you sure you want to remove it?',
+            })}
+          </ConfirmDialog>
+        </Dialog.Root>
 
-        <LimitsModal.Root isOpen={showLimitModal} onClose={() => setShowLimitModal(false)}>
+        <LimitsModal.Root open={showLimitModal} onOpenChange={() => setShowLimitModal(false)}>
           <LimitsModal.Title>
             {formatMessage({
               id: 'Settings.review-workflows.list.page.workflows.limit.title',

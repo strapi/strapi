@@ -1,8 +1,13 @@
 import React, { useReducer, useState } from 'react';
 
-import { ConfirmDialog, useTracking, useNotification, Page } from '@strapi/admin/strapi-admin';
-import { Button, ContentLayout, HeaderLayout, Layout } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import {
+  ConfirmDialog,
+  useTracking,
+  useNotification,
+  Page,
+  Layouts,
+} from '@strapi/admin/strapi-admin';
+import { Button, Dialog, Link } from '@strapi/design-system';
 import { ArrowLeft, Check } from '@strapi/icons';
 import isEqual from 'lodash/isEqual';
 import PropTypes from 'prop-types';
@@ -39,7 +44,7 @@ const ConfigureTheView = ({ config }) => {
   const handleConfirm = async () => {
     trackUsage('willEditMediaLibraryConfig');
     await mutateConfig.mutateAsync(modifiedData);
-    toggleWarningSubmit();
+    setWarningSubmit(false);
     dispatch(setLoaded());
     toggleNotification({
       type: 'success',
@@ -55,12 +60,17 @@ const ConfigureTheView = ({ config }) => {
   };
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Main aria-busy={isSubmittingForm}>
         <form onSubmit={handleSubmit}>
-          <HeaderLayout
+          <Layouts.Header
             navigationAction={
-              <Link as={NavLink} startIcon={<ArrowLeft />} to={`/plugins/${pluginID}`} id="go-back">
+              <Link
+                tag={NavLink}
+                startIcon={<ArrowLeft />}
+                to={`/plugins/${pluginID}`}
+                id="go-back"
+              >
                 {formatMessage({ id: getTrad('config.back'), defaultMessage: 'Back' })}
               </Link>
             }
@@ -84,29 +94,26 @@ const ConfigureTheView = ({ config }) => {
             })}
           />
 
-          <ContentLayout>
+          <Layouts.Content>
             <Settings
               data-testid="settings"
               pageSize={modifiedData.pageSize || ''}
               sort={modifiedData.sort || ''}
               onChange={handleChange}
             />
-          </ContentLayout>
+          </Layouts.Content>
 
-          <ConfirmDialog
-            isOpen={showWarningSubmit}
-            onClose={toggleWarningSubmit}
-            onConfirm={handleConfirm}
-            variant="success-light"
-          >
-            {formatMessage({
-              id: getTrad('config.popUpWarning.warning.updateAllSettings'),
-              defaultMessage: 'This will modify all your settings',
-            })}
-          </ConfirmDialog>
+          <Dialog.Root open={showWarningSubmit} onOpenChange={toggleWarningSubmit}>
+            <ConfirmDialog onConfirm={handleConfirm} variant="default">
+              {formatMessage({
+                id: getTrad('config.popUpWarning.warning.updateAllSettings'),
+                defaultMessage: 'This will modify all your settings',
+              })}
+            </ConfirmDialog>
+          </Dialog.Root>
         </form>
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

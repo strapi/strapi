@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Main, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Box, Button, Flex, Main, Typography, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import * as yup from 'yup';
@@ -10,13 +9,14 @@ import { ResetPassword } from '../../../../../shared/contracts/authentication';
 import { Form } from '../../../components/Form';
 import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { Logo } from '../../../components/UnauthenticatedLogo';
-import { useAuth } from '../../../features/Auth';
+import { useTypedDispatch } from '../../../core/store/hooks';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import {
   Column,
   LayoutContent,
   UnauthenticatedLayout,
 } from '../../../layouts/UnauthenticatedLayout';
+import { login } from '../../../reducer';
 import { useResetPasswordMutation } from '../../../services/auth';
 import { isBaseQueryError } from '../../../utils/baseQuery';
 import { translatedErrors } from '../../../utils/translatedErrors';
@@ -65,12 +65,11 @@ const RESET_PASSWORD_SCHEMA = yup.object().shape({
 
 const ResetPassword = () => {
   const { formatMessage } = useIntl();
+  const dispatch = useTypedDispatch();
   const navigate = useNavigate();
   const { search: searchString } = useLocation();
   const query = React.useMemo(() => new URLSearchParams(searchString), [searchString]);
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
-
-  const setToken = useAuth('ResetPassword', (state) => state.setToken);
 
   const [resetPassword, { error }] = useResetPasswordMutation();
 
@@ -78,7 +77,7 @@ const ResetPassword = () => {
     const res = await resetPassword(body);
 
     if ('data' in res) {
-      setToken(res.data.token);
+      dispatch(login({ token: res.data.token }));
       navigate('/');
     }
   };
@@ -97,7 +96,7 @@ const ResetPassword = () => {
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={7}>
-              <Typography as="h1" variant="alpha">
+              <Typography tag="h1" variant="alpha">
                 {formatMessage({
                   id: 'global.reset-password',
                   defaultMessage: 'Reset password',
@@ -166,8 +165,7 @@ const ResetPassword = () => {
         </LayoutContent>
         <Flex justifyContent="center">
           <Box paddingTop={4}>
-            {/* @ts-expect-error – error with inferring the props from the as component */}
-            <Link as={NavLink} to="/auth/login">
+            <Link tag={NavLink} to="/auth/login">
               {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
             </Link>
           </Box>

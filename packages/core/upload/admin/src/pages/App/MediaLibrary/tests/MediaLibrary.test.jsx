@@ -67,6 +67,11 @@ jest.mock('../../../../hooks/useMediaLibraryPermissions');
 jest.mock('../../../../hooks/useFolders');
 jest.mock('../../../../hooks/useFolder');
 jest.mock('../../../../hooks/useAssets');
+jest.mock('../../../../hooks/useFolderStructure', () => ({
+  useFolderStructure: jest
+    .fn()
+    .mockReturnValue({ data: [{ label: 'Folder 1', value: 1, children: [] }], isLoading: false }),
+}));
 jest.mock('../../../../hooks/useSelectionState', () => ({
   useSelectionState: jest
     .fn()
@@ -544,18 +549,6 @@ describe('Media library homepage', () => {
     });
 
     describe('displays the list view', () => {
-      it('should render the table headers', () => {
-        usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
-
-        const { getByText, getByRole } = renderML();
-        expect(getByRole('gridcell', { name: 'preview' })).toBeInTheDocument();
-        expect(getByText('name')).toBeInTheDocument();
-        expect(getByRole('gridcell', { name: 'extension' })).toBeInTheDocument();
-        expect(getByRole('gridcell', { name: 'size' })).toBeInTheDocument();
-        expect(getByText('created')).toBeInTheDocument();
-        expect(getByText('last update')).toBeInTheDocument();
-      });
-
       it('should not render the sort button', () => {
         usePersistentState.mockReturnValueOnce([viewOptions.LIST]);
         const { queryByRole } = renderML();

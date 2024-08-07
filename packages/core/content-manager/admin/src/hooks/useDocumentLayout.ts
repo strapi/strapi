@@ -131,7 +131,7 @@ const DEFAULT_SETTINGS = {
  * const { model } = useParams<{ model: string }>();
  * const { edit: { schema: layout } } = useDocumentLayout(model);
  *
- * return layout.map(panel => panel.map(row => row.map(field => <Field {...field} />)))
+ * return layout.map(panel => panel.map(row => row.map(field => <Field.Root {...field} />)))
  * ```
  *
  */

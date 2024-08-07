@@ -1,19 +1,7 @@
-import { useId } from 'react';
-
 import { Form, useField, InputRenderer, useNotification } from '@strapi/admin/strapi-admin';
-import {
-  Button,
-  Flex,
-  Grid,
-  GridItem,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Button, Flex, FlexComponent, Grid, Modal } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
 import { FieldTypeIcon } from '../../../components/FieldTypeIcon';
@@ -36,7 +24,6 @@ const FIELD_SCHEMA = yup.object().shape({
 const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   const { formatMessage } = useIntl();
   const { toggleNotification } = useNotification();
-  const id = useId();
 
   const { value, onChange } = useField<FormData['layout'][number]>(name);
 
@@ -64,7 +51,7 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
   }
 
   return (
-    <ModalLayout onClose={onClose} labelledBy={id}>
+    <Modal.Content>
       <Form
         method="PUT"
         initialValues={value}
@@ -74,11 +61,11 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
           onClose();
         }}
       >
-        <ModalHeader>
+        <Modal.Header>
           <HeaderContainer>
             {/* @ts-expect-error attribute.type === custom does not work here */}
             <FieldTypeIcon type={attribute.type} />
-            <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
+            <Modal.Title>
               {formatMessage(
                 {
                   id: getTranslation('containers.list-settings.modal-form.label'),
@@ -86,11 +73,11 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                 },
                 { fieldName: capitalise(value.label) }
               )}
-            </Typography>
+            </Modal.Title>
           </HeaderContainer>
-        </ModalHeader>
-        <ModalBody>
-          <Grid gap={4}>
+        </Modal.Header>
+        <Modal.Body>
+          <Grid.Root gap={4}>
             {[
               {
                 name: 'label',
@@ -121,30 +108,32 @@ const EditFieldForm = ({ attribute, name, onClose }: EditFieldFormProps) => {
                   (field.name === 'sortable' && shouldDisplaySortToggle)
               )
               .map(({ size, ...field }) => (
-                <GridItem key={field.name} s={12} col={size}>
+                <Grid.Item
+                  key={field.name}
+                  s={12}
+                  col={size}
+                  direction="column"
+                  alignItems="stretch"
+                >
                   <InputRenderer {...field} />
-                </GridItem>
+                </Grid.Item>
               ))}
-          </Grid>
-        </ModalBody>
-        <ModalFooter
-          startActions={
-            <Button onClick={onClose} variant="tertiary">
-              {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-            </Button>
-          }
-          endActions={
-            <Button type="submit">
-              {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
-            </Button>
-          }
-        />
+          </Grid.Root>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button onClick={onClose} variant="tertiary">
+            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+          </Button>
+          <Button type="submit">
+            {formatMessage({ id: 'global.finish', defaultMessage: 'Finish' })}
+          </Button>
+        </Modal.Footer>
       </Form>
-    </ModalLayout>
+    </Modal.Content>
   );
 };
 
-const HeaderContainer = styled(Flex)`
+const HeaderContainer = styled<FlexComponent>(Flex)`
   svg {
     width: 3.2rem;
     margin-right: ${({ theme }) => theme.spaces[3]};

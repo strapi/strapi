@@ -15,7 +15,7 @@ const PEER_DEPS = {
   react: '^18.0.0',
   'react-dom': '^18.0.0',
   'react-router-dom': '^6.0.0',
-  'styled-components': '^5.2.1',
+  'styled-components': '^6.0.0',
 };
 
 interface CheckRequiredDependenciesResult {
@@ -41,6 +41,15 @@ const checkRequiredDependencies = async ({
   cwd,
   logger,
 }: Pick<BuildOptions, 'cwd' | 'logger'>): Promise<CheckRequiredDependenciesResult> => {
+  /**
+   * This enables us to use experimental deps for libraries like
+   * react or styled-components. This is useful for testing against.
+   */
+  if (process.env.USE_EXPERIMENTAL_DEPENDENCIES === 'true') {
+    logger.warn('You are using experimental dependencies that may not be compatible with Strapi.');
+    return { didInstall: false };
+  }
+
   const pkg = await readPkgUp({ cwd });
 
   if (!pkg) {

@@ -11,22 +11,18 @@ import {
   Box,
   Button,
   Dialog,
-  DialogBody,
-  DialogFooter,
-  DialogProps,
   Flex,
-  ModalBody,
-  ModalHeader,
-  ModalLayout,
+  Modal,
   Radio,
   Typography,
   VisuallyHidden,
   Menu,
+  ButtonProps,
 } from '@strapi/design-system';
 import { CrossCircle, More, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useMatch, useNavigate } from 'react-router-dom';
-import styled, { DefaultTheme } from 'styled-components';
+import { styled, DefaultTheme } from 'styled-components';
 
 import { PUBLISHED_AT_ATTRIBUTE_NAME } from '../../../constants/attributes';
 import { SINGLE_TYPES } from '../../../constants/collections';
@@ -34,10 +30,12 @@ import { useDocumentRBAC } from '../../../features/DocumentRBAC';
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentActions } from '../../../hooks/useDocumentActions';
 import { CLONE_PATH } from '../../../router';
+import { useGetDraftRelationCountQuery } from '../../../services/documents';
 import { isBaseQueryError, buildValidParams } from '../../../utils/api';
+import { getTranslation } from '../../../utils/translations';
 
+import type { RelationsFormValue } from './FormInputs/Relations';
 import type { DocumentActionComponent } from '../../../content-manager';
-
 /* -------------------------------------------------------------------------------------------------
  * Types
  * -----------------------------------------------------------------------------------------------*/
@@ -60,13 +58,14 @@ interface DocumentActionDescription {
   /**
    * @default 'secondary'
    */
-  variant?: 'default' | 'secondary' | 'danger' | 'success';
+  variant?: ButtonProps['variant'];
 }
 
 interface DialogOptions {
   type: 'dialog';
   title: string;
   content?: React.ReactNode;
+  variant?: ButtonProps['variant'];
   onConfirm?: () => void | Promise<void>;
   onCancel?: () => void | Promise<void>;
 }
@@ -88,8 +87,8 @@ interface NotificationOptions {
 interface ModalOptions {
   type: 'modal';
   title: string;
-  content: React.ReactNode;
-  footer: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
+  content: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
+  footer?: React.ComponentType<{ onClose: () => void }> | React.ReactNode;
   onClose?: () => void;
 }
 
@@ -185,19 +184,21 @@ const DocumentActionButton = (action: DocumentActionButtonProps) => {
   return (
     <>
       <Button
-        flex={1}
+        flex="auto"
         startIcon={action.icon}
         disabled={action.disabled}
         onClick={handleClick(action)}
         justifyContent="center"
         variant={action.variant || 'default'}
+        paddingTop="7px"
+        paddingBottom="7px"
       >
         {action.label}
       </Button>
       {action.dialog?.type === 'dialog' ? (
         <DocumentActionConfirmDialog
           {...action.dialog}
-          variant={action.variant}
+          variant={action.dialog?.variant ?? action.variant}
           isOpen={dialogId === action.id}
           onClose={handleClose}
         />
@@ -265,24 +266,24 @@ const DocumentActionsMenu = ({
 
   return (
     <Menu.Root open={isOpen} onOpenChange={setIsOpen}>
-      <Menu.Trigger
+      <StyledMoreButton
         disabled={isDisabled}
         size="S"
         endIcon={null}
-        paddingTop="7px"
-        paddingLeft="9px"
-        paddingRight="9px"
+        paddingTop="4px"
+        paddingLeft="7px"
+        paddingRight="7px"
         variant={variant}
       >
         <More aria-hidden focusable={false} />
-        <VisuallyHidden as="span">
+        <VisuallyHidden tag="span">
           {label ||
             formatMessage({
               id: 'content-manager.containers.edit.panels.default.more-actions',
               defaultMessage: 'More document actions',
             })}
         </VisuallyHidden>
-      </Menu.Trigger>
+      </StyledMoreButton>
       <Menu.Content top="4px" maxHeight={undefined} popoverPlacement="bottom-end">
         {actions.map((action) => {
           return (
@@ -294,8 +295,19 @@ const DocumentActionsMenu = ({
               key={action.id}
             >
               <Flex justifyContent="space-between" gap={4}>
-                <Flex color={convertActionVariantToColor(action.variant)} gap={2} as="span">
-                  {action.icon}
+                <Flex
+                  color={!action.disabled ? convertActionVariantToColor(action.variant) : 'inherit'}
+                  gap={2}
+                  tag="span"
+                >
+                  <Flex
+                    tag="span"
+                    color={
+                      !action.disabled ? convertActionVariantToIconColor(action.variant) : 'inherit'
+                    }
+                  >
+                    {action.icon}
+                  </Flex>
                   {action.label}
                 </Flex>
                 {/* TODO: remove this in 5.1 release */}
@@ -363,14 +375,35 @@ const convertActionVariantToColor = (
   }
 };
 
+const convertActionVariantToIconColor = (
+  variant: DocumentActionDescription['variant'] = 'secondary'
+): keyof DefaultTheme['colors'] | undefined => {
+  switch (variant) {
+    case 'danger':
+      return 'danger600';
+    case 'secondary':
+      return 'neutral500';
+    case 'success':
+      return 'success600';
+    default:
+      return 'primary600';
+  }
+};
+
+const StyledMoreButton = styled(Menu.Trigger)`
+  & > span {
+    display: flex;
+  }
+`;
+
 /* -------------------------------------------------------------------------------------------------
  * DocumentActionConfirmDialog
  * -----------------------------------------------------------------------------------------------*/
 
-interface DocumentActionConfirmDialogProps
-  extends DialogOptions,
-    Pick<DialogProps, 'onClose' | 'isOpen'>,
-    Pick<Action, 'variant'> {}
+interface DocumentActionConfirmDialogProps extends DialogOptions, Pick<Action, 'variant'> {
+  onClose: () => void;
+  isOpen: Dialog.Props['open'];
+}
 
 const DocumentActionConfirmDialog = ({
   onClose,
@@ -400,27 +433,28 @@ const DocumentActionConfirmDialog = ({
   };
 
   return (
-    <Dialog isOpen={isOpen} title={title} onClose={handleClose}>
-      <DialogBody>{content}</DialogBody>
-      <DialogFooter
-        startAction={
-          <Button onClick={handleClose} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'Cancel',
-            })}
-          </Button>
-        }
-        endAction={
+    <Dialog.Root open={isOpen} onOpenChange={handleClose}>
+      <Dialog.Content>
+        <Dialog.Header>{title}</Dialog.Header>
+        <Dialog.Body>{content}</Dialog.Body>
+        <Dialog.Footer>
+          <Dialog.Cancel>
+            <Button variant="tertiary">
+              {formatMessage({
+                id: 'app.components.Button.cancel',
+                defaultMessage: 'Cancel',
+              })}
+            </Button>
+          </Dialog.Cancel>
           <Button onClick={handleConfirm} variant={variant}>
             {formatMessage({
               id: 'app.components.Button.confirm',
               defaultMessage: 'Confirm',
             })}
           </Button>
-        }
-      />
-    </Dialog>
+        </Dialog.Footer>
+      </Dialog.Content>
+    </Dialog.Root>
   );
 };
 
@@ -438,15 +472,9 @@ const DocumentActionModal = ({
   title,
   onClose,
   footer: Footer,
-  content,
+  content: Content,
   onModalClose,
 }: DocumentActionModalProps) => {
-  const id = React.useId();
-
-  if (!isOpen) {
-    return null;
-  }
-
   const handleClose = () => {
     if (onClose) {
       onClose();
@@ -456,26 +484,19 @@ const DocumentActionModal = ({
   };
 
   return (
-    <ModalLayout borderRadius="4px" overflow="hidden" onClose={handleClose} labelledBy={id}>
-      <ModalHeader>
-        <Typography fontWeight="bold" textColor="neutral800" as="h2" id={id}>
-          {title}
-        </Typography>
-      </ModalHeader>
-      <ModalBody>{content}</ModalBody>
-      <Box
-        paddingTop={4}
-        paddingBottom={4}
-        paddingLeft={5}
-        paddingRight={5}
-        borderWidth="1px 0 0 0"
-        borderStyle="solid"
-        borderColor="neutral150"
-        background="neutral100"
-      >
+    <Modal.Root open={isOpen} onOpenChange={handleClose}>
+      <Modal.Content>
+        <Modal.Header>
+          <Modal.Title>{title}</Modal.Title>
+        </Modal.Header>
+        {typeof Content === 'function' ? (
+          <Content onClose={handleClose} />
+        ) : (
+          <Modal.Body>{Content}</Modal.Body>
+        )}
         {typeof Footer === 'function' ? <Footer onClose={handleClose} /> : Footer}
-      </Box>
-    </ModalLayout>
+      </Modal.Content>
+    </Modal.Root>
   );
 };
 
@@ -502,14 +523,95 @@ const PublishAction: DocumentActionComponent = ({
     ({ canPublish, canCreate, canUpdate }) => ({ canPublish, canCreate, canUpdate })
   );
   const { publish } = useDocumentActions();
+  const [
+    countDraftRelations,
+    { isLoading: isLoadingDraftRelations, isError: isErrorDraftRelations },
+  ] = useGetDraftRelationCountQuery();
+  const [localCountOfDraftRelations, setLocalCountOfDraftRelations] = React.useState(0);
+  const [serverCountOfDraftRelations, setServerCountOfDraftRelations] = React.useState(0);
+
   const [{ query, rawQuery }] = useQueryParams();
   const params = React.useMemo(() => buildValidParams(query), [query]);
+
   const modified = useForm('PublishAction', ({ modified }) => modified);
   const setSubmitting = useForm('PublishAction', ({ setSubmitting }) => setSubmitting);
   const isSubmitting = useForm('PublishAction', ({ isSubmitting }) => isSubmitting);
   const validate = useForm('PublishAction', (state) => state.validate);
   const setErrors = useForm('PublishAction', (state) => state.setErrors);
   const formValues = useForm('PublishAction', ({ values }) => values);
+
+  React.useEffect(() => {
+    if (isErrorDraftRelations) {
+      toggleNotification({
+        type: 'danger',
+        message: formatMessage({
+          id: getTranslation('error.records.fetch-draft-relatons'),
+          defaultMessage: 'An error occurred while fetching draft relations on this document.',
+        }),
+      });
+    }
+  }, [isErrorDraftRelations, toggleNotification, formatMessage]);
+
+  React.useEffect(() => {
+    const localDraftRelations = new Set();
+
+    /**
+     * Extracts draft relations from the provided data object.
+     * It checks for a connect array of relations.
+     * If a relation has a status of 'draft', its id is added to the localDraftRelations set.
+     */
+    const extractDraftRelations = (data: Omit<RelationsFormValue, 'disconnect'>) => {
+      const relations = data.connect || [];
+      relations.forEach((relation) => {
+        if (relation.status === 'draft') {
+          localDraftRelations.add(relation.id);
+        }
+      });
+    };
+
+    /**
+     * Recursively traverses the provided data object to extract draft relations from arrays within 'connect' keys.
+     * If the data is an object, it looks for 'connect' keys to pass their array values to extractDraftRelations.
+     * It recursively calls itself for any non-null objects it contains.
+     */
+    const traverseAndExtract = (data: { [field: string]: any }) => {
+      Object.entries(data).forEach(([key, value]) => {
+        if (key === 'connect' && Array.isArray(value)) {
+          extractDraftRelations({ connect: value });
+        } else if (typeof value === 'object' && value !== null) {
+          traverseAndExtract(value);
+        }
+      });
+    };
+
+    if (!documentId || modified) {
+      traverseAndExtract(formValues);
+      setLocalCountOfDraftRelations(localDraftRelations.size);
+    }
+  }, [documentId, modified, formValues, setLocalCountOfDraftRelations]);
+
+  React.useEffect(() => {
+    if (documentId) {
+      const fetchDraftRelationsCount = async () => {
+        const { data, error } = await countDraftRelations({
+          collectionType,
+          model,
+          documentId,
+          params,
+        });
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          setServerCountOfDraftRelations(data.data);
+        }
+      };
+
+      fetchDraftRelationsCount();
+    }
+  }, [documentId, countDraftRelations, collectionType, model, params]);
 
   const isDocumentPublished =
     (document?.[PUBLISHED_AT_ATTRIBUTE_NAME] ||
@@ -520,6 +622,58 @@ const PublishAction: DocumentActionComponent = ({
     return null;
   }
 
+  const performPublish = async () => {
+    setSubmitting(true);
+
+    try {
+      const { errors } = await validate();
+
+      if (errors) {
+        toggleNotification({
+          type: 'danger',
+          message: formatMessage({
+            id: 'content-manager.validation.error',
+            defaultMessage:
+              'There are validation errors in your document. Please fix them before saving.',
+          }),
+        });
+
+        return;
+      }
+
+      const res = await publish(
+        {
+          collectionType,
+          model,
+          documentId,
+          params,
+        },
+        formValues
+      );
+
+      if ('data' in res && collectionType !== SINGLE_TYPES) {
+        /**
+         * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
+         */
+        navigate({
+          pathname: `../${collectionType}/${model}/${res.data.documentId}`,
+          search: rawQuery,
+        });
+      } else if (
+        'error' in res &&
+        isBaseQueryError(res.error) &&
+        res.error.name === 'ValidationError'
+      ) {
+        setErrors(formatValidationErrors(res.error));
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const totalDraftRelations = localCountOfDraftRelations + serverCountOfDraftRelations;
+  const hasDraftRelations = totalDraftRelations > 0;
+
   return {
     /**
      * Disabled when:
@@ -529,69 +683,52 @@ const PublishAction: DocumentActionComponent = ({
      *  - the document is already published & not modified
      *  - the document is being created & not modified
      *  - the user doesn't have the permission to publish
-     *  - the user doesn't have the permission to create a new document
-     *  - the user doesn't have the permission to update the document
      */
     disabled:
       isCloning ||
       isSubmitting ||
+      isLoadingDraftRelations ||
       activeTab === 'published' ||
       (!modified && isDocumentPublished) ||
       (!modified && !document?.documentId) ||
-      !canPublish ||
-      Boolean((!document?.documentId && !canCreate) || (document?.documentId && !canUpdate)),
+      !canPublish,
     label: formatMessage({
       id: 'app.utils.publish',
       defaultMessage: 'Publish',
     }),
     onClick: async () => {
-      setSubmitting(true);
-
-      try {
-        const { errors } = await validate();
-
-        if (errors) {
-          toggleNotification({
-            type: 'danger',
-            message: formatMessage({
-              id: 'content-manager.validation.error',
-              defaultMessage:
-                'There are validation errors in your document. Please fix them before saving.',
-            }),
-          });
-
-          return;
-        }
-
-        const res = await publish(
-          {
-            collectionType,
-            model,
-            documentId,
-            params,
-          },
-          formValues
-        );
-
-        if ('data' in res && collectionType !== SINGLE_TYPES) {
-          /**
-           * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
-           */
-          navigate({
-            pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-            search: rawQuery,
-          });
-        } else if (
-          'error' in res &&
-          isBaseQueryError(res.error) &&
-          res.error.name === 'ValidationError'
-        ) {
-          setErrors(formatValidationErrors(res.error));
-        }
-      } finally {
-        setSubmitting(false);
+      if (hasDraftRelations) {
+        // In this case we need to show the user a confirmation dialog.
+        // Return from the onClick and let the dialog handle the process.
+        return;
       }
+
+      await performPublish();
     },
+    dialog: hasDraftRelations
+      ? {
+          type: 'dialog',
+          variant: 'danger',
+          footer: null,
+          title: formatMessage({
+            id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.title`),
+            defaultMessage: 'Confirmation',
+          }),
+          content: formatMessage(
+            {
+              id: getTranslation(`popUpwarning.warning.bulk-has-draft-relations.message`),
+              defaultMessage:
+                'This entry is related to {count, plural, one {# draft entry} other {# draft entries}}. Publishing it could leave broken links in your app.',
+            },
+            {
+              count: totalDraftRelations,
+            }
+          ),
+          onConfirm: async () => {
+            await performPublish();
+          },
+        }
+      : undefined,
   };
 };
 
@@ -631,14 +768,8 @@ const UpdateAction: DocumentActionComponent = ({
      * - the form is submitting
      * - the document is not modified & we're not cloning (you can save a clone entity straight away)
      * - the active tab is the published tab
-     * - the user doesn't have the permission to create a new document
-     * - the user doesn't have the permission to update the document
      */
-    disabled:
-      isSubmitting ||
-      (!modified && !isCloning) ||
-      activeTab === 'published' ||
-      Boolean((!documentId && !canCreate) || (documentId && !canUpdate)),
+    disabled: isSubmitting || (!modified && !isCloning) || activeTab === 'published',
     label: formatMessage({
       id: 'content-manager.containers.Edit.save',
       defaultMessage: 'Save',
@@ -647,19 +778,23 @@ const UpdateAction: DocumentActionComponent = ({
       setSubmitting(true);
 
       try {
-        const { errors } = await validate();
+        // TODO: This is not what we should do. We should just run some validation and skip others instead.
+        // Don't run the validation for drafts
+        if (activeTab !== 'draft') {
+          const { errors } = await validate();
 
-        if (errors) {
-          toggleNotification({
-            type: 'danger',
-            message: formatMessage({
-              id: 'content-manager.validation.error',
-              defaultMessage:
-                'There are validation errors in your document. Please fix them before saving.',
-            }),
-          });
+          if (errors) {
+            toggleNotification({
+              type: 'danger',
+              message: formatMessage({
+                id: 'content-manager.validation.error',
+                defaultMessage:
+                  'There are validation errors in your document. Please fix them before saving.',
+              }),
+            });
 
-          return;
+            return;
+          }
         }
 
         if (isCloning) {
@@ -673,13 +808,13 @@ const UpdateAction: DocumentActionComponent = ({
           );
 
           if ('data' in res) {
-            /**
-             * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
-             */
-            navigate({
-              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-              search: rawQuery,
-            });
+            navigate(
+              {
+                pathname: `../${res.data.documentId}`,
+                search: rawQuery,
+              },
+              { relative: 'path' }
+            );
           } else if (
             'error' in res &&
             isBaseQueryError(res.error) &&
@@ -717,13 +852,13 @@ const UpdateAction: DocumentActionComponent = ({
           );
 
           if ('data' in res && collectionType !== SINGLE_TYPES) {
-            /**
-             * TODO: refactor the router so we can just do `../${res.data.documentId}` instead of this.
-             */
-            navigate({
-              pathname: `../${collectionType}/${model}/${res.data.documentId}`,
-              search: rawQuery,
-            });
+            navigate(
+              {
+                pathname: `../${res.data.documentId}`,
+                search: rawQuery,
+              },
+              { replace: true, relative: 'path' }
+            );
           } else if (
             'error' in res &&
             isBaseQueryError(res.error) &&
@@ -764,11 +899,8 @@ const UnpublishAction: DocumentActionComponent = ({
 
   const isDocumentModified = document?.status === 'modified';
 
-  const handleChange: React.FormEventHandler<HTMLFieldSetElement> &
-    React.FormEventHandler<HTMLDivElement> = (e) => {
-    if ('value' in e.target) {
-      setShouldKeepDraft(e.target.value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
-    }
+  const handleChange = (value: string) => {
+    setShouldKeepDraft(value === UNPUBLISH_DRAFT_OPTIONS.KEEP);
   };
 
   if (!schema?.options?.draftAndPublish) {
@@ -828,42 +960,35 @@ const UnpublishAction: DocumentActionComponent = ({
             <Flex alignItems="flex-start" direction="column" gap={6}>
               <Flex width="100%" direction="column" gap={2}>
                 <WarningCircle width="24px" height="24px" fill="danger600" />
-                <Typography as="p" variant="omega" textAlign="center">
+                <Typography tag="p" variant="omega" textAlign="center">
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.body',
                     defaultMessage: 'Are you sure?',
                   })}
                 </Typography>
               </Flex>
-              <Flex
-                onChange={handleChange}
-                direction="column"
-                alignItems="flex-start"
-                as="fieldset"
-                gap={3}
+              <Radio.Group
+                defaultValue={UNPUBLISH_DRAFT_OPTIONS.KEEP}
+                name="discard-options"
+                aria-label={formatMessage({
+                  id: 'content-manager.actions.unpublish.dialog.radio-label',
+                  defaultMessage: 'Choose an option to unpublish the document.',
+                })}
+                onValueChange={handleChange}
               >
-                <VisuallyHidden as="legend"></VisuallyHidden>
-                <Radio
-                  checked={shouldKeepDraft}
-                  value={UNPUBLISH_DRAFT_OPTIONS.KEEP}
-                  name="discard-options"
-                >
+                <Radio.Item checked={shouldKeepDraft} value={UNPUBLISH_DRAFT_OPTIONS.KEEP}>
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.option.keep-draft',
                     defaultMessage: 'Keep draft',
                   })}
-                </Radio>
-                <Radio
-                  checked={!shouldKeepDraft}
-                  value={UNPUBLISH_DRAFT_OPTIONS.DISCARD}
-                  name="discard-options"
-                >
+                </Radio.Item>
+                <Radio.Item checked={!shouldKeepDraft} value={UNPUBLISH_DRAFT_OPTIONS.DISCARD}>
                   {formatMessage({
                     id: 'content-manager.actions.unpublish.dialog.option.replace-draft',
                     defaultMessage: 'Replace draft',
                   })}
-                </Radio>
-              </Flex>
+                </Radio.Item>
+              </Radio.Group>
             </Flex>
           ),
           onConfirm: async () => {
@@ -937,7 +1062,7 @@ const DiscardAction: DocumentActionComponent = ({
       content: (
         <Flex direction="column" gap={2}>
           <WarningCircle width="24px" height="24px" fill="danger600" />
-          <Typography as="p" variant="omega" textAlign="center">
+          <Typography tag="p" variant="omega" textAlign="center">
             {formatMessage({
               id: 'content-manager.actions.discard.dialog.body',
               defaultMessage: 'Are you sure?',
@@ -971,5 +1096,5 @@ const StyledCrossCircle = styled(CrossCircle)`
 
 const DEFAULT_ACTIONS = [PublishAction, UpdateAction, UnpublishAction, DiscardAction];
 
-export { DocumentActions, DocumentActionsMenu, DEFAULT_ACTIONS };
+export { DocumentActions, DocumentActionsMenu, DocumentActionButton, DEFAULT_ACTIONS };
 export type { DocumentActionDescription, DialogOptions, NotificationOptions, ModalOptions };

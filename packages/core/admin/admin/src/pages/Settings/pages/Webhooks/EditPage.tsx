@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Main } from '@strapi/design-system';
 import { Modules } from '@strapi/types';
-import { FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useNavigate, useMatch } from 'react-router-dom';
 
@@ -14,7 +13,7 @@ import { useAPIErrorHandler } from '../../../../hooks/useAPIErrorHandler';
 import { selectAdminPermissions } from '../../../../selectors';
 import { isBaseQueryError } from '../../../../utils/baseQuery';
 
-import { WebhookForm, WebhookFormValues } from './components/WebhookForm';
+import { WebhookForm, WebhookFormProps, WebhookFormValues } from './components/WebhookForm';
 import { useWebhooks } from './hooks/useWebhooks';
 
 /* -------------------------------------------------------------------------------------------------
@@ -46,6 +45,13 @@ const EditPage = () => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
+
+  /**
+   * Prevents the notifications from showing up twice because the function identity
+   * coming from the helper plugin is not stable
+   */
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const stableFormatAPIError = React.useCallback(formatAPIError, []);
   const [isTriggering, setIsTriggering] = React.useState(false);
   const [triggerResponse, setTriggerResponse] = React.useState<TriggerWebhook.Response['data']>();
 
@@ -60,10 +66,10 @@ const EditPage = () => {
     if (error) {
       toggleNotification({
         type: 'danger',
-        message: formatAPIError(error),
+        message: stableFormatAPIError(error),
       });
     }
-  }, [error, toggleNotification, formatAPIError]);
+  }, [error, toggleNotification, stableFormatAPIError]);
 
   const handleTriggerWebhook = async () => {
     try {
@@ -94,17 +100,14 @@ const EditPage = () => {
     }
   };
 
-  const handleSubmit = async (
-    data: WebhookFormValues,
-    formik: FormikHelpers<WebhookFormValues>
-  ) => {
+  const handleSubmit: WebhookFormProps['handleSubmit'] = async (data, helpers) => {
     try {
       if (isCreating) {
         const res = await createWebhook(cleanData(data));
 
         if ('error' in res) {
           if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
-            formik.setErrors(formatValidationErrors(res.error));
+            helpers.setErrors(formatValidationErrors(res.error));
           } else {
             toggleNotification({
               type: 'danger',
@@ -120,13 +123,13 @@ const EditPage = () => {
           message: formatMessage({ id: 'Settings.webhooks.created' }),
         });
 
-        navigate(res.data.id, { replace: true });
+        navigate(`../webhooks/${res.data.id}`, { replace: true });
       } else {
         const res = await updateWebhook({ id: id!, ...cleanData(data) });
 
         if ('error' in res) {
           if (isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
-            formik.setErrors(formatValidationErrors(res.error));
+            helpers.setErrors(formatValidationErrors(res.error));
           } else {
             toggleNotification({
               type: 'danger',

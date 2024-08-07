@@ -1,7 +1,7 @@
-// import type { Readable } from 'node:stream';
 import type { File as FormidableFile } from 'formidable';
 
 export type InputFile = FormidableFile & {
+  path?: string;
   tmpWorkingDirectory?: string;
 };
 
@@ -61,6 +61,7 @@ export interface Config {
 }
 
 export interface UploadableFile extends Omit<File, 'id'> {
+  filepath?: string;
   getStream: () => NodeJS.ReadableStream;
   stream?: NodeJS.ReadableStream;
   buffer?: Buffer;

@@ -78,7 +78,11 @@ describe('useDocument', () => {
         postal_code: 'N2',
         notrepeat_req: {},
         city: 'London',
-        repeat_req: [],
+        repeat_req: [
+          {
+            name: 'toto',
+          },
+        ],
       })
     ).toBeNull();
 
@@ -89,17 +93,15 @@ describe('useDocument', () => {
         notrepeat_req: {},
         postal_code: 12,
         city: 'London',
-        repeat_req: [],
+        repeat_req: [
+          {
+            name: 'toto',
+          },
+        ],
       })
     ).toMatchInlineSnapshot(`
       {
-        "postal_code": {
-          "defaultMessage": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
-          "id": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
-          "values": {
-            "typeError": undefined,
-          },
-        },
+        "postal_code": "postal_code must be a \`string\` type, but the final value was: \`12\`.",
       }
     `);
   });

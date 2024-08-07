@@ -2,11 +2,11 @@
 import React, { useRef, useState } from 'react';
 
 import { useTracking } from '@strapi/admin/strapi-admin';
-import { Box, Button, Flex, ModalFooter, Typography } from '@strapi/design-system';
+import { Box, Button, Flex, Modal, Typography } from '@strapi/design-system';
 import { PlusCircle as PicturePlus } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetSource } from '../../../constants';
 import getTrad from '../../../utils/getTrad';
@@ -117,7 +117,7 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
                 </IconWrapper>
 
                 <Box paddingTop={3} paddingBottom={5}>
-                  <Typography variant="delta" textColor="neutral600" as="span">
+                  <Typography variant="delta" textColor="neutral600" tag="span">
                     {formatMessage({
                       id: getTrad('input.label'),
                       defaultMessage: 'Drag & Drop here or',
@@ -126,7 +126,7 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
                 </Box>
 
                 <OpaqueBox
-                  as="input"
+                  tag="input"
                   position="absolute"
                   left={0}
                   right={0}
@@ -156,16 +156,14 @@ export const FromComputerForm = ({ onClose, onAddAssets, trackedLocation }) => {
         </label>
       </Box>
 
-      <ModalFooter
-        startActions={
-          <Button onClick={onClose} variant="tertiary">
-            {formatMessage({
-              id: 'app.components.Button.cancel',
-              defaultMessage: 'cancel',
-            })}
-          </Button>
-        }
-      />
+      <Modal.Footer>
+        <Button onClick={onClose} variant="tertiary">
+          {formatMessage({
+            id: 'app.components.Button.cancel',
+            defaultMessage: 'cancel',
+          })}
+        </Button>
+      </Modal.Footer>
     </form>
   );
 };

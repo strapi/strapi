@@ -1,6 +1,6 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-import validators from '../validators';
+import { Validators } from '../validators';
 import { mockOptions } from './utils';
 
 describe('BigInteger validator', () => {
@@ -22,26 +22,26 @@ describe('BigInteger validator', () => {
   };
 
   describe('unique', () => {
-    const fakeFindFirst = jest.fn();
+    const fakeFindOne = jest.fn();
 
     global.strapi = {
       db: {
         query: () => ({
-          findOne: fakeFindFirst,
+          findOne: fakeFindOne,
         }),
       },
     } as any;
 
     afterEach(() => {
       jest.clearAllMocks();
-      fakeFindFirst.mockReset();
+      fakeFindOne.mockReset();
     });
 
     test('it does not validate the unique constraint if the attribute is not set as unique', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger(
+        Validators.biginteger(
           {
             attr: { type: 'biginteger' },
             model: fakeModel,
@@ -57,39 +57,37 @@ describe('BigInteger validator', () => {
 
       await validator(1);
 
-      expect(fakeFindFirst).not.toHaveBeenCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it does not validate the unique constraint if the attribute value is `null`', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators
-          .biginteger(
-            {
-              attr: { type: 'biginteger', unique: true },
-              model: fakeModel,
-              updatedAttribute: {
-                name: 'attrBigIntegerUnique',
-                value: null,
-              },
-              entity: null,
+        Validators.biginteger(
+          {
+            attr: { type: 'biginteger', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrBigIntegerUnique',
+              value: null,
             },
-            mockOptions
-          )
-          .nullable()
+            entity: null,
+          },
+          mockOptions
+        ).nullable()
       );
 
       await validator(null);
 
-      expect(fakeFindFirst).not.toHaveBeenCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it validates the unique constraint if there is no other record in the database', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger(
+        Validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
@@ -108,10 +106,10 @@ describe('BigInteger validator', () => {
 
     test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
       expect.assertions(1);
-      fakeFindFirst.mockResolvedValueOnce({ attrBigIntegerUnique: 2 });
+      fakeFindOne.mockResolvedValueOnce({ attrBigIntegerUnique: 2 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger(
+        Validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
@@ -133,10 +131,10 @@ describe('BigInteger validator', () => {
     });
 
     test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
-      fakeFindFirst.mockResolvedValueOnce({ attrBigIntegerUnique: 3 });
+      fakeFindOne.mockResolvedValueOnce({ attrBigIntegerUnique: 3 });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger(
+        Validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
@@ -154,10 +152,10 @@ describe('BigInteger validator', () => {
     });
 
     test('it checks the database for records with the same value for the checked attribute', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger(
+        Validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
@@ -173,7 +171,7 @@ describe('BigInteger validator', () => {
 
       await validator(4);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           publishedAt: null,
           locale: 'en',
@@ -183,10 +181,10 @@ describe('BigInteger validator', () => {
     });
 
     test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.biginteger(
+        Validators.biginteger(
           {
             attr: { type: 'biginteger', unique: true },
             model: fakeModel,
@@ -202,7 +200,7 @@ describe('BigInteger validator', () => {
 
       await validator(5);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           attrBigIntegerUnique: 5,
           id: {

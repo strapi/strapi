@@ -1,15 +1,6 @@
 import * as React from 'react';
 
-import {
-  Button,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Flex,
-  Typography,
-  useCallbackRef,
-  useComposedRefs,
-} from '@strapi/design-system';
+import { Button, Dialog, useCallbackRef, useComposedRefs } from '@strapi/design-system';
 import { WarningCircle } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { produce } from 'immer';
@@ -140,6 +131,7 @@ interface FormProps<TFormValues extends FormValues = FormValues>
   onSubmit?: (values: TFormValues, helpers: FormHelpers<TFormValues>) => Promise<void> | void;
   // TODO: type the return value for a validation schema func from Yup.
   validationSchema?: Yup.AnySchema;
+  initialErrors?: FormErrors<TFormValues>;
 }
 
 /**
@@ -149,11 +141,11 @@ interface FormProps<TFormValues extends FormValues = FormValues>
  * use the generic useForm hook or the useField hook when providing the name of your field.
  */
 const Form = React.forwardRef<HTMLFormElement, FormProps>(
-  ({ disabled = false, method, onSubmit, ...props }, ref) => {
+  ({ disabled = false, method, onSubmit, initialErrors, ...props }, ref) => {
     const formRef = React.useRef<HTMLFormElement>(null!);
     const initialValues = React.useRef(props.initialValues ?? {});
     const [state, dispatch] = React.useReducer(reducer, {
-      errors: {},
+      errors: initialErrors ?? {},
       isSubmitting: false,
       values: props.initialValues ?? {},
     });
@@ -228,18 +220,7 @@ const Form = React.forwardRef<HTMLFormElement, FormProps>(
           return { data };
         } catch (err) {
           if (isErrorYupValidationError(err)) {
-            let errors: FormErrors = {};
-
-            if (err.inner) {
-              if (err.inner.length === 0) {
-                return setIn(errors, err.path!, err.message);
-              }
-              for (const error of err.inner) {
-                if (!getIn(errors, error.path!)) {
-                  errors = setIn(errors, error.path!, error.message);
-                }
-              }
-            }
+            const errors = getYupValidationErrors(err);
 
             if (shouldSetErrors) {
               setErrors(errors);
@@ -471,6 +452,31 @@ const isErrorYupValidationError = (err: any): err is Yup.ValidationError =>
   err.name === 'ValidationError';
 
 /* -------------------------------------------------------------------------------------------------
+ * getYupValidationErrors
+ * -----------------------------------------------------------------------------------------------*/
+
+/**
+ * @description handy utility to convert a yup validation error into a form
+ * error object. To be used elsewhere.
+ */
+const getYupValidationErrors = (err: Yup.ValidationError): FormErrors => {
+  let errors: FormErrors = {};
+
+  if (err.inner) {
+    if (err.inner.length === 0) {
+      return setIn(errors, err.path!, err.message);
+    }
+    for (const error of err.inner) {
+      if (!getIn(errors, error.path!)) {
+        errors = setIn(errors, error.path!, error.message);
+      }
+    }
+  }
+
+  return errors;
+};
+
+/* -------------------------------------------------------------------------------------------------
  * reducer
  * -----------------------------------------------------------------------------------------------*/
 
@@ -482,7 +488,7 @@ type FormErrors<TFormValues extends FormValues = FormValues> = {
       : string // this would let us support errors for the dynamic zone or repeatable component not the components within.
     : TFormValues[Key] extends object // is it a regular component?
       ? FormErrors<TFormValues[Key]> // handles nested components
-      : string; // otherwise its just a field.
+      : string | TranslationMessage; // otherwise its just a field or a translation message.
 };
 
 interface FormState<TFormValues extends FormValues = FormValues> {
@@ -613,7 +619,7 @@ const reducer = <TFormValues extends FormValues = FormValues>(
         draft.values = setIn(
           state.values,
           action.payload.field,
-          newValue.length > 0 ? newValue : undefined
+          newValue.length > 0 ? newValue : []
         );
 
         break;
@@ -664,12 +670,21 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
 
   const handleChange = useForm('useField', (state) => state.onChange);
 
-  const error = useForm('useField', (state) => getIn(state.errors, path));
+  const error = useForm('useField', (state) => {
+    const error = getIn(state.errors, path);
+
+    if (isErrorMessageDescriptor(error)) {
+      const { values, ...message } = error;
+      return formatMessage(message, values);
+    }
+
+    return error;
+  });
 
   return {
     initialValue,
     /**
-     * Errors can be a string, or a MesaageDescriptor, so we need to handle both cases.
+     * Errors can be a string, or a MessageDescriptor, so we need to handle both cases.
      * If it's anything else, we don't return it.
      */
     error: isErrorMessageDescriptor(error)
@@ -688,9 +703,13 @@ const useField = <TValue = any,>(path: string): FieldValue<TValue | undefined> =
   };
 };
 
-const isErrorMessageDescriptor = (object?: string | object): object is TranslationMessage => {
+const isErrorMessageDescriptor = (object?: object): object is TranslationMessage => {
   return (
-    typeof object === 'object' && object !== null && 'id' in object && 'defaultMessage' in object
+    typeof object === 'object' &&
+    object !== null &&
+    !Array.isArray(object) &&
+    'id' in object &&
+    'defaultMessage' in object
   );
 };
 
@@ -721,41 +740,37 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
   });
 
   if (blocker.state === 'blocked') {
-    const handleCancel = () => {
-      onCancel();
-      blocker.reset();
+    const handleCancel = (isOpen: boolean) => {
+      if (!isOpen) {
+        onCancel();
+        blocker.reset();
+      }
     };
 
     return (
-      <Dialog
-        isOpen
-        title={formatMessage({
-          id: 'app.components.ConfirmDialog.title',
-          defaultMessage: 'Confirmation',
-        })}
-        onClose={handleCancel}
-      >
-        <DialogBody>
-          <Flex direction="column" gap={2}>
-            <WarningCircle width="24px" height="24px" fill="danger600" />
-            <Typography as="p" variant="omega" textAlign="center">
-              {formatMessage({
-                id: 'global.prompt.unsaved',
-                defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
-              })}
-            </Typography>
-          </Flex>
-        </DialogBody>
-        <DialogFooter
-          startAction={
-            <Button onClick={handleCancel} variant="tertiary">
-              {formatMessage({
-                id: 'app.components.Button.cancel',
-                defaultMessage: 'Cancel',
-              })}
-            </Button>
-          }
-          endAction={
+      <Dialog.Root open onOpenChange={handleCancel}>
+        <Dialog.Content>
+          <Dialog.Header>
+            {formatMessage({
+              id: 'app.components.ConfirmDialog.title',
+              defaultMessage: 'Confirmation',
+            })}
+          </Dialog.Header>
+          <Dialog.Body icon={<WarningCircle width="24px" height="24px" fill="danger600" />}>
+            {formatMessage({
+              id: 'global.prompt.unsaved',
+              defaultMessage: 'You have unsaved changes, are you sure you want to leave?',
+            })}
+          </Dialog.Body>
+          <Dialog.Footer>
+            <Dialog.Cancel>
+              <Button variant="tertiary">
+                {formatMessage({
+                  id: 'app.components.Button.cancel',
+                  defaultMessage: 'Cancel',
+                })}
+              </Button>
+            </Dialog.Cancel>
             <Button
               onClick={() => {
                 onProceed();
@@ -768,17 +783,18 @@ const Blocker = ({ onProceed = () => {}, onCancel = () => {} }: BlockerProps) =>
                 defaultMessage: 'Confirm',
               })}
             </Button>
-          }
-        />
-      </Dialog>
+          </Dialog.Footer>
+        </Dialog.Content>
+      </Dialog.Root>
     );
   }
 
   return null;
 };
 
-export { Form, Blocker, useField, useForm };
+export { Form, Blocker, useField, useForm, getYupValidationErrors };
 export type {
+  FormErrors,
   FormHelpers,
   FormProps,
   FormValues,

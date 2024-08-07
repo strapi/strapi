@@ -16,32 +16,22 @@ import {
   Button,
   ButtonProps,
   Divider,
+  Field,
   Flex,
   Grid,
-  GridItem,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-  ModalLayout,
+  Modal,
   SingleSelect,
   SingleSelectOption,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
   Tabs,
   Typography,
+  useId,
 } from '@strapi/design-system';
 import { Check, Plus } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import * as yup from 'yup';
 
 import { CreateLocale } from '../../../shared/contracts/locales';
-import {
-  useCreateLocaleMutation,
-  useGetDefaultLocalesQuery,
-  useGetLocalesQuery,
-} from '../services/locales';
+import { useCreateLocaleMutation, useGetDefaultLocalesQuery } from '../services/locales';
 import { isBaseQueryError } from '../utils/baseQuery';
 import { getTranslation } from '../utils/getTranslation';
 
@@ -56,21 +46,23 @@ const CreateLocale = ({ disabled, variant = 'default' }: CreateLocaleProps) => {
   const [visible, setVisible] = React.useState(false);
 
   return (
-    <>
-      <Button
-        variant={variant}
-        disabled={disabled}
-        startIcon={<Plus />}
-        onClick={() => setVisible(true)}
-        size="S"
-      >
-        {formatMessage({
-          id: getTranslation('Settings.list.actions.add'),
-          defaultMessage: 'Add new locale',
-        })}
-      </Button>
-      {visible ? <CreateModal onClose={() => setVisible(false)} /> : null}
-    </>
+    <Modal.Root open={visible} onOpenChange={setVisible}>
+      <Modal.Trigger>
+        <Button
+          variant={variant}
+          disabled={disabled}
+          startIcon={<Plus />}
+          onClick={() => setVisible(true)}
+          size="S"
+        >
+          {formatMessage({
+            id: getTranslation('Settings.list.actions.add'),
+            defaultMessage: 'Add new locale',
+          })}
+        </Button>
+      </Modal.Trigger>
+      <CreateModal onClose={() => setVisible(false)} />
+    </Modal.Root>
   );
 };
 
@@ -109,6 +101,7 @@ type ModalCreateProps = {
 };
 
 const CreateModal = ({ onClose }: ModalCreateProps) => {
+  const titleId = useId();
   const { toggleNotification } = useNotification();
   const {
     _unstableFormatAPIError: formatAPIError,
@@ -153,79 +146,69 @@ const CreateModal = ({ onClose }: ModalCreateProps) => {
     }
   };
 
-  const titleId = React.useId();
-
   return (
-    <ModalLayout onClose={onClose} labelledBy={titleId}>
+    <Modal.Content>
       <Form
         method="POST"
         initialValues={initialFormValues}
         validationSchema={LOCALE_SCHEMA}
         onSubmit={handleSubmit}
       >
-        <ModalHeader>
-          <Typography fontWeight="bold" textColor="neutral800" as="h2" id={titleId}>
+        <Modal.Header>
+          <Modal.Title>
             {formatMessage({
               id: getTranslation('Settings.list.actions.add'),
               defaultMessage: 'Add new locale',
             })}
-          </Typography>
-        </ModalHeader>
-        <ModalBody>
-          <TabGroup
-            label={formatMessage({
-              id: getTranslation('Settings.locales.modal.title'),
-              defaultMessage: 'Configurations',
-            })}
-            variant="simple"
-          >
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Tabs.Root variant="simple" defaultValue="basic">
             <Flex justifyContent="space-between">
-              <Typography as="h2" variant="beta">
+              <Typography tag="h2" variant="beta" id={titleId}>
                 {formatMessage({
                   id: getTranslation('Settings.locales.modal.title'),
                   defaultMessage: 'Configuration',
                 })}
               </Typography>
-              <Tabs>
-                <Tab>
+              <Tabs.List aria-labelledby={titleId}>
+                <Tabs.Trigger value="basic">
                   {formatMessage({
                     id: getTranslation('Settings.locales.modal.base'),
                     defaultMessage: 'Basic settings',
                   })}
-                </Tab>
-                <Tab>
+                </Tabs.Trigger>
+                <Tabs.Trigger value="advanced">
                   {formatMessage({
                     id: getTranslation('Settings.locales.modal.advanced'),
                     defaultMessage: 'Advanced settings',
                   })}
-                </Tab>
-              </Tabs>
+                </Tabs.Trigger>
+              </Tabs.List>
             </Flex>
 
             <Divider />
 
             <Box paddingTop={7} paddingBottom={7}>
-              <TabPanels>
-                <TabPanel>
-                  <BaseForm />
-                </TabPanel>
-                <TabPanel>
-                  <AdvancedForm />
-                </TabPanel>
-              </TabPanels>
+              <Tabs.Content value="basic">
+                <BaseForm />
+              </Tabs.Content>
+              <Tabs.Content value="advanced">
+                <AdvancedForm />
+              </Tabs.Content>
             </Box>
-          </TabGroup>
-        </ModalBody>
-        <ModalFooter
-          startActions={
-            <Button variant="tertiary" onClick={onClose}>
+          </Tabs.Root>
+        </Modal.Body>
+        <Modal.Footer>
+          <Modal.Close>
+            <Button variant="tertiary">
               {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
             </Button>
-          }
-          endActions={<SubmitButton />}
-        />
+          </Modal.Close>
+          <SubmitButton />
+        </Modal.Footer>
       </Form>
-    </ModalLayout>
+    </Modal.Content>
   );
 };
 
@@ -258,8 +241,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   const { toggleNotification } = useNotification();
   const { _unstableFormatAPIError: formatAPIError } = useAPIErrorHandler();
 
-  const { data: defaultLocales = [], error } = useGetDefaultLocalesQuery();
-  const { data: locales = [] } = useGetLocalesQuery();
+  const { data: defaultLocales, error } = useGetDefaultLocalesQuery();
 
   React.useEffect(() => {
     if (error) {
@@ -270,7 +252,7 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
     }
   }, [error, formatAPIError, toggleNotification]);
 
-  if (!Array.isArray(defaultLocales) || !Array.isArray(locales)) {
+  if (!Array.isArray(defaultLocales)) {
     return null;
   }
 
@@ -318,13 +300,13 @@ const BaseForm = ({ mode = 'create' }: BaseFormProps) => {
   }));
 
   return (
-    <Grid gap={4}>
+    <Grid.Root gap={4}>
       {translatedForm.map(({ size, ...field }) => (
-        <GridItem key={field.name} col={size}>
+        <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
           <FormRenderer {...field} />
-        </GridItem>
+        </Grid.Item>
       ))}
-    </Grid>
+    </Grid.Root>
   );
 };
 
@@ -361,13 +343,13 @@ const AdvancedForm = ({ isDefaultLocale }: AdvancedFormProps) => {
   })) satisfies InputProps[];
 
   return (
-    <Grid gap={4}>
+    <Grid.Root gap={4}>
       {form.map(({ size, ...field }) => (
-        <GridItem key={field.name} col={size}>
+        <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
           <FormRenderer {...field} />
-        </GridItem>
+        </Grid.Item>
       ))}
-    </Grid>
+    </Grid.Root>
   );
 };
 
@@ -414,25 +396,24 @@ const EnumerationInput = ({
   };
 
   return (
-    <SingleSelect
-      disabled={disabled}
-      error={error}
-      hint={hint}
-      // @ts-expect-error – label _could_ be a ReactNode since it's a child, this should be fixed in the DS.
-      label={label}
-      name={name}
-      // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
-      onChange={handleChange}
-      placeholder={placeholder}
-      required={required}
-      value={value}
-    >
-      {options.map((option) => (
-        <SingleSelectOption value={option.value} key={option.value}>
-          {option.label}
-        </SingleSelectOption>
-      ))}
-    </SingleSelect>
+    <Field.Root error={error} hint={hint} name={name} required={required}>
+      <Field.Label>{label}</Field.Label>
+      <SingleSelect
+        disabled={disabled}
+        // @ts-expect-error – This will dissapear when the DS removes support for numbers to be returned by SingleSelect.
+        onChange={handleChange}
+        placeholder={placeholder}
+        value={value}
+      >
+        {options.map((option) => (
+          <SingleSelectOption value={option.value} key={option.value}>
+            {option.label}
+          </SingleSelectOption>
+        ))}
+      </SingleSelect>
+      <Field.Error />
+      <Field.Hint />
+    </Field.Root>
   );
 };
 

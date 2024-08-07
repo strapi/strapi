@@ -5,7 +5,7 @@ import map from 'lodash/map';
 import tail from 'lodash/tail';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import getMethodColor from './getMethodColor';
 
@@ -24,7 +24,7 @@ function BoundRoute({ route }) {
 
   return (
     <Flex direction="column" alignItems="stretch" gap={2}>
-      <Typography variant="delta" as="h3">
+      <Typography variant="delta" tag="h3">
         {formatMessage({
           id: 'users-permissions.BoundRoute.title',
           defaultMessage: 'Bound route to',

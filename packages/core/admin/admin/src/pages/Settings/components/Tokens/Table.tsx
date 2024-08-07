@@ -1,11 +1,18 @@
 import * as React from 'react';
 
-import { Box, Flex, IconButton, Typography, useCollator } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import {
+  Box,
+  Flex,
+  IconButton,
+  Typography,
+  useCollator,
+  Link,
+  Dialog,
+} from '@strapi/design-system';
 import { Pencil, Trash } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { NavLink, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { ApiToken } from '../../../../../../shared/contracts/api-token';
 import { SanitizedTransferToken } from '../../../../../../shared/contracts/transfer';
@@ -167,8 +174,9 @@ const DefaultButton = ({
 
   return (
     <LinkStyled
-      forwardedAs={NavLink}
+      tag={NavLink}
       to={tokenId.toString()}
+      onClick={(e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => e.stopPropagation()}
       title={formatMessage(MESSAGES_MAP[buttonType], { target: tokenName })}
     >
       {children}
@@ -200,9 +208,7 @@ interface DeleteButtonProps extends Pick<ButtonProps, 'tokenName'>, Pick<TablePr
 const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps) => {
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [showConfirmDialog, setShowConfirmDialog] = React.useState(false);
   const handleClickDelete = () => {
-    setShowConfirmDialog(false);
     trackUsage('willDeleteToken', {
       tokenType,
     });
@@ -210,28 +216,26 @@ const DeleteButton = ({ tokenName, onClickDelete, tokenType }: DeleteButtonProps
   };
 
   return (
-    <Box paddingLeft={1} onClick={(e) => e.stopPropagation()}>
-      <IconButton
-        onClick={() => {
-          setShowConfirmDialog(true);
-        }}
-        label={formatMessage(
-          {
-            id: 'global.delete-target',
-            defaultMessage: 'Delete {target}',
-          },
-          { target: `${tokenName}` }
-        )}
-        name="delete"
-        borderWidth={0}
-        icon={<Trash />}
-      />
-      <ConfirmDialog
-        onClose={() => setShowConfirmDialog(false)}
-        onConfirm={handleClickDelete}
-        isOpen={showConfirmDialog}
-      />
-    </Box>
+    <Dialog.Root>
+      <Box<'div'> paddingLeft={1} onClick={(e) => e.stopPropagation()}>
+        <Dialog.Trigger>
+          <IconButton
+            label={formatMessage(
+              {
+                id: 'global.delete-target',
+                defaultMessage: 'Delete {target}',
+              },
+              { target: `${tokenName}` }
+            )}
+            name="delete"
+            variant="ghost"
+          >
+            <Trash />
+          </IconButton>
+        </Dialog.Trigger>
+        <ConfirmDialog onConfirm={handleClickDelete} />
+      </Box>
+    </Dialog.Root>
   );
 };
 

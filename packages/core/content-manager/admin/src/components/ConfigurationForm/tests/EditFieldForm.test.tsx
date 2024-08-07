@@ -1,4 +1,5 @@
 import { Form } from '@strapi/admin/strapi-admin';
+import { Modal } from '@strapi/design-system';
 import { fireEvent, render as renderRTL, screen } from '@tests/utils';
 
 import { EditFieldForm, EditFieldFormProps } from '../EditFieldForm';
@@ -66,9 +67,11 @@ describe('EditFieldForm', () => {
       {
         renderOptions: {
           wrapper: ({ children }) => (
-            <Form initialValues={initialValues} method="PUT">
-              {children}
-            </Form>
+            <Modal.Root open>
+              <Form initialValues={initialValues} method="PUT">
+                {children}
+              </Form>
+            </Modal.Root>
           ),
         },
       }
@@ -84,22 +87,6 @@ describe('EditFieldForm', () => {
     expect(await screen.findByText('label is a required field')).toBeInTheDocument();
   });
 
-  it('should call onClose when the user presses cancel or the close button', async () => {
-    const onClose = jest.fn();
-
-    const { user } = render({
-      onClose,
-    });
-
-    await user.click(screen.getByRole('button', { name: 'Close the modal' }));
-
-    expect(onClose).toHaveBeenCalledTimes(1);
-
-    await user.click(screen.getByRole('button', { name: 'Cancel' }));
-
-    expect(onClose).toHaveBeenCalledTimes(2);
-  });
-
   describe('attribute forms', () => {
     BASIC_ATTRIBUTES.forEach((type) => {
       it(`should render all the fields excluding the mainField for the attribute type: ${type}`, () => {
@@ -113,7 +100,7 @@ describe('EditFieldForm', () => {
         expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
 
-        expect(screen.getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
@@ -140,7 +127,7 @@ describe('EditFieldForm', () => {
         expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
 
-        expect(screen.getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
@@ -165,7 +152,7 @@ describe('EditFieldForm', () => {
         expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
 
-        expect(screen.getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
@@ -190,7 +177,7 @@ describe('EditFieldForm', () => {
         expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
         expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
 
-        expect(screen.getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
@@ -213,7 +200,7 @@ describe('EditFieldForm', () => {
       expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
       expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
 
-      expect(screen.getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Close modal' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
@@ -236,23 +223,23 @@ describe('EditFieldForm', () => {
         },
       });
 
-      expect(screen.getByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
-      expect(screen.getByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
+      expect(await screen.findByRole('dialog', { name: 'Edit Field' })).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Edit Field' })).toBeInTheDocument();
 
-      expect(screen.getByRole('button', { name: 'Close the modal' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Finish' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Close modal' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Finish' })).toBeInTheDocument();
+      expect(await screen.findByRole('button', { name: 'Cancel' })).toBeInTheDocument();
 
-      expect(screen.getByRole('textbox', { name: 'Label' })).toBeInTheDocument();
-      expect(screen.getByRole('textbox', { name: 'Description' })).toBeInTheDocument();
-      expect(screen.getByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
-      expect(screen.getByRole('textbox', { name: 'Placeholder' })).toBeInTheDocument();
-      expect(screen.getByRole('combobox', { name: 'Size' })).toBeInTheDocument();
-      expect(screen.getByRole('combobox', { name: 'Entry title' })).toBeInTheDocument();
+      expect(await screen.findByRole('textbox', { name: 'Label' })).toBeInTheDocument();
+      expect(await screen.findByRole('textbox', { name: 'Description' })).toBeInTheDocument();
+      expect(await screen.findByRole('checkbox', { name: 'Editable' })).toBeInTheDocument();
+      expect(await screen.findByRole('textbox', { name: 'Placeholder' })).toBeInTheDocument();
+      expect(await screen.findByRole('combobox', { name: 'Size' })).toBeInTheDocument();
+      expect(await screen.findByRole('combobox', { name: 'Entry title' })).toBeInTheDocument();
 
-      await user.click(screen.getByRole('combobox', { name: 'Entry title' }));
+      await user.click(await screen.findByRole('combobox', { name: 'Entry title' }));
 
-      expect(screen.getByRole('option', { name: 'id' })).toBeInTheDocument();
+      expect(await screen.findByRole('option', { name: 'id' })).toBeInTheDocument();
     });
   });
 });

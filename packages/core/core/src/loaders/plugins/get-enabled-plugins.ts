@@ -28,13 +28,16 @@ interface PluginDeclaration {
 
 /**
  * otherwise known as "core features"
+ *
+ * NOTE: These are excluded from the content manager plugin list, as they are always enabled.
+ *       See admin.ts server controller on the content-manager plugin for more details.
  */
 const INTERNAL_PLUGINS = [
-  '@strapi/plugin-content-manager',
-  '@strapi/plugin-content-type-builder',
-  '@strapi/plugin-email',
-  '@strapi/plugin-upload',
-  '@strapi/plugin-i18n',
+  '@strapi/content-manager',
+  '@strapi/content-type-builder',
+  '@strapi/email',
+  '@strapi/upload',
+  '@strapi/i18n',
   '@strapi/content-releases',
   '@strapi/review-workflows',
 ];
@@ -87,7 +90,13 @@ export const getEnabledPlugins = async (strapi: Core.Strapi, { client } = { clie
 
   for (const dep of INTERNAL_PLUGINS) {
     const packagePath = join(dep, 'package.json');
-    const packageInfo = require(packagePath);
+
+    // NOTE: internal plugins should be resolved from the strapi package
+    const packageModulePath = require.resolve(packagePath, {
+      paths: [require.resolve('@strapi/strapi/package.json'), process.cwd()],
+    });
+
+    const packageInfo = require(packageModulePath);
 
     validatePluginName(packageInfo.strapi.name);
     internalPlugins[packageInfo.strapi.name] = {

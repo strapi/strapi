@@ -3,11 +3,9 @@ import * as React from 'react';
 import {
   Box,
   Button,
-  ContentLayout,
+  Field,
   Flex,
   Grid,
-  GridItem,
-  HeaderLayout,
   Main,
   Textarea,
   TextInput,
@@ -16,10 +14,11 @@ import {
 import { format } from 'date-fns';
 import { Formik, Form, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
-import { useNavigate, useMatch } from 'react-router-dom';
-import styled from 'styled-components';
+import { useNavigate, useParams } from 'react-router-dom';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
@@ -59,7 +58,7 @@ interface CreateRoleFormValues {
  * manage the state of the child is nonsensical.
  */
 const CreatePage = () => {
-  const match = useMatch('/settings/roles/duplicate/:id');
+  const { id } = useParams();
   const { toggleNotification } = useNotification();
   const { formatMessage } = useIntl();
   const navigate = useNavigate();
@@ -70,9 +69,7 @@ const CreatePage = () => {
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
 
-  const id = match?.params.id ?? null;
-
-  const { isLoading: isLoadingPermissionsLayout, data: permissionsLayout } =
+  const { isLoading: isLoadingPermissionsLayout, currentData: permissionsLayout } =
     useGetRolePermissionLayoutQuery({
       /**
        * Role here is a query param so if there's no role we pass an empty string
@@ -85,7 +82,7 @@ const CreatePage = () => {
    * We need this so if we're cloning a role, we can fetch
    * the current permissions that role has.
    */
-  const { data: rolePermissions, isLoading: isLoadingRole } = useGetRolePermissionsQuery(
+  const { currentData: rolePermissions, isLoading: isLoadingRole } = useGetRolePermissionsQuery(
     {
       id: id!,
     },
@@ -151,7 +148,7 @@ const CreatePage = () => {
         message: formatMessage({ id: 'Settings.roles.created', defaultMessage: 'created' }),
       });
 
-      navigate(res.data.id.toString(), { replace: true });
+      navigate(`../roles/${res.data.id.toString()}`, { replace: true });
     } catch (err) {
       toggleNotification({
         type: 'danger',
@@ -191,7 +188,7 @@ const CreatePage = () => {
         {({ values, errors, handleReset, handleChange, isSubmitting }) => (
           <Form>
             <>
-              <HeaderLayout
+              <Layouts.Header
                 primaryAction={
                   <Flex gap={2}>
                     <Button
@@ -225,7 +222,7 @@ const CreatePage = () => {
                 })}
                 navigationAction={<BackButton />}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                     <Flex direction="column" alignItems="stretch" gap={4}>
@@ -259,34 +256,38 @@ const CreatePage = () => {
                           )}
                         </UsersRoleNumber>
                       </Flex>
-                      <Grid gap={4}>
-                        <GridItem col={6}>
-                          <TextInput
+                      <Grid.Root gap={4}>
+                        <Grid.Item col={6} direction="column" alignItems="start">
+                          <Field.Root
                             name="name"
                             error={errors.name && formatMessage({ id: errors.name })}
-                            label={formatMessage({
-                              id: 'global.name',
-                              defaultMessage: 'Name',
-                            })}
-                            onChange={handleChange}
                             required
-                            value={values.name}
-                          />
-                        </GridItem>
-                        <GridItem col={6}>
-                          <Textarea
-                            label={formatMessage({
-                              id: 'global.description',
-                              defaultMessage: 'Description',
-                            })}
-                            id="description"
-                            error={errors.description && formatMessage({ id: errors.description })}
-                            onChange={handleChange}
                           >
-                            {values.description}
-                          </Textarea>
-                        </GridItem>
-                      </Grid>
+                            <Field.Label>
+                              {formatMessage({
+                                id: 'global.name',
+                                defaultMessage: 'Name',
+                              })}
+                            </Field.Label>
+                            <TextInput onChange={handleChange} value={values.name} />
+                            <Field.Error />
+                          </Field.Root>
+                        </Grid.Item>
+                        <Grid.Item col={6} direction="column" alignItems="start">
+                          <Field.Root
+                            name="description"
+                            error={errors.description && formatMessage({ id: errors.description })}
+                          >
+                            <Field.Label>
+                              {formatMessage({
+                                id: 'global.description',
+                                defaultMessage: 'Description',
+                              })}
+                            </Field.Label>
+                            <Textarea onChange={handleChange} value={values.description} />
+                          </Field.Root>
+                        </Grid.Item>
+                      </Grid.Root>
                     </Flex>
                   </Box>
                   <Box shadow="filterShadow" hasRadius>
@@ -298,7 +299,7 @@ const CreatePage = () => {
                     />
                   </Box>
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </>
           </Form>
         )}

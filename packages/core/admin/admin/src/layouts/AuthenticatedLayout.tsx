@@ -47,7 +47,7 @@ const AdminLayout = () => {
       fetch('https://api.github.com/repos/strapi/strapi/releases/latest')
         .then(async (res) => {
           if (!res.ok) {
-            throw new Error();
+            return;
           }
 
           const response = (await res.json()) as { tag_name: string | null | undefined };

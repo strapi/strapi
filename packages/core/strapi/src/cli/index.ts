@@ -41,9 +41,9 @@ const createCLI = async (argv: string[], command = new Command()) => {
   } satisfies CLIContext;
 
   // Load all commands
-  strapiCommands.forEach((commandFactory) => {
+  for (const commandFactory of strapiCommands) {
     try {
-      const subCommand = commandFactory({ command, argv, ctx });
+      const subCommand = await commandFactory({ command, argv, ctx });
 
       // Add this command to the Commander command object
       if (subCommand) {
@@ -52,8 +52,44 @@ const createCLI = async (argv: string[], command = new Command()) => {
     } catch (e) {
       console.error(`Failed to load command`, e);
     }
-  });
+  }
 
+  // TODO v6: remove these deprecation notices
+  const deprecatedCommands = [
+    { name: 'plugin:init', message: 'Please use `npx @strapi/sdk-plugin init` instead.' },
+    {
+      name: 'plugin:verify',
+      message: 'After migrating your plugin to v5, use `strapi-plugin verify`',
+    },
+    {
+      name: 'plugin:watch',
+      message: 'After migrating your plugin to v5, use `strapi-plugin watch`',
+    },
+    {
+      name: 'plugin:watch:link',
+      message: 'After migrating your plugin to v5, use `strapi-plugin watch:link`',
+    },
+    {
+      name: 'plugin:build',
+      message: 'After migrating your plugin to v5, use `strapi-plugin build`',
+    },
+  ];
+
+  // Add hidden commands for deprecatedCommands that output a warning that the command has been removed.
+  deprecatedCommands.forEach(({ name, message }) => {
+    const deprecated = new Command(name)
+      .command(name)
+      .description('(deprecated)')
+      .action(() => {
+        console.warn(
+          `The command ${name} has been deprecated. See the Strapi 5 migration guide for more information.`
+        );
+        if (message) {
+          console.warn(message);
+        }
+      });
+    command.addCommand(deprecated, { hidden: true });
+  });
   return command;
 };
 

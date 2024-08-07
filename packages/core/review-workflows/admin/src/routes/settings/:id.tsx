@@ -12,11 +12,10 @@ import {
   FormHelpers,
 } from '@strapi/admin/strapi-admin';
 import { useLicenseLimits } from '@strapi/admin/strapi-admin/ee';
-import { Button, Flex, Typography } from '@strapi/design-system';
+import { Button, Dialog, Flex, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import { generateNKeysBetween } from 'fractional-indexing';
 import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import * as yup from 'yup';
 
@@ -113,7 +112,6 @@ const EditPage = () => {
   const { _unstableFormatValidationErrors: formatValidationErrors } = useAPIErrorHandler();
   const navigate = useNavigate();
   const { toggleNotification } = useNotification();
-  const dispatch = useDispatch();
   const {
     isLoading: isLoadingWorkflow,
     meta,
@@ -121,13 +119,14 @@ const EditPage = () => {
     error,
     update,
     create,
-  } = useReviewWorkflows({ id: isCreatingWorkflow ? undefined : id });
+  } = useReviewWorkflows();
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions['settings']?.['review-workflows']
   );
   const {
     allowedActions: { canDelete, canUpdate, canCreate },
   } = useRBAC(permissions);
+
   const [savePrompts, setSavePrompts] = React.useState<{
     hasDeletedServerStages?: boolean;
     hasReassignedContentTypes?: boolean;
@@ -182,19 +181,6 @@ const EditPage = () => {
 
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
-        } else if ('data' in res) {
-          for (const uid of res.data.contentTypes) {
-            // Invalidates the content-manager's API cache for the document layout so we can see RW enabled.
-            dispatch({
-              type: 'contentManagerApi/invalidateTags',
-              payload: [
-                {
-                  type: 'ContentTypesConfiguration',
-                  id: uid,
-                },
-              ],
-            });
-          }
         }
       } else {
         const res = await create(data);
@@ -202,20 +188,7 @@ const EditPage = () => {
         if ('error' in res && isBaseQueryError(res.error) && res.error.name === 'ValidationError') {
           helpers.setErrors(formatValidationErrors(res.error));
         } else if ('data' in res) {
-          for (const uid of res.data.contentTypes) {
-            // Invalidates the content-manager's API cache for the document layout so we can see RW enabled.
-            dispatch({
-              type: 'contentManagerApi/invalidateTags',
-              payload: [
-                {
-                  type: 'ContentTypesConfiguration',
-                  id: uid,
-                },
-              ],
-            });
-          }
-
-          navigate(`../${res.data.id}`);
+          navigate(`../${res.data.id}`, { replace: true });
         }
       }
     } catch (error) {
@@ -389,63 +362,64 @@ const EditPage = () => {
             />
             <Layout.Root>
               <Flex alignItems="stretch" direction="column" gap={7}>
-                <WorkflowAttributes canUpdate={canUpdate} />
+                <WorkflowAttributes canUpdate={canUpdate || canCreate} />
                 <Stages
                   canDelete={canDelete}
-                  canUpdate={canUpdate}
+                  canUpdate={canUpdate || canCreate}
                   isCreating={isCreatingWorkflow}
                 />
               </Flex>
             </Layout.Root>
-            <ConfirmDialog
-              isOpen={Object.keys(savePrompts).length > 0}
-              onClose={handleConfirmClose}
-              onConfirm={handleConfirmDeleteDialog(values, { setErrors })}
+            <Dialog.Root
+              open={Object.keys(savePrompts).length > 0}
+              onOpenChange={handleConfirmClose}
             >
-              <Flex direction="column" gap={5}>
-                {savePrompts.hasDeletedServerStages && (
+              <ConfirmDialog onConfirm={handleConfirmDeleteDialog(values, { setErrors })}>
+                <Flex direction="column" gap={5}>
+                  {savePrompts.hasDeletedServerStages && (
+                    <Typography textAlign="center" variant="omega">
+                      {formatMessage({
+                        id: 'review-workflows.page.delete.confirm.stages.body',
+                        defaultMessage:
+                          'All entries assigned to deleted stages will be moved to the previous stage.',
+                      })}
+                    </Typography>
+                  )}
+
+                  {savePrompts.hasReassignedContentTypes && (
+                    <Typography textAlign="center" variant="omega">
+                      {formatMessage(
+                        {
+                          id: 'review-workflows.page.delete.confirm.contentType.body',
+                          defaultMessage:
+                            '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to {count, plural, one {another workflow} other {other workflows}}. If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the {count, plural, one {another workflow} other {other workflows}} and all corresponding information will be removed.',
+                        },
+                        {
+                          count:
+                            contentTypesFromOtherWorkflows?.filter((contentType) =>
+                              values.contentTypes.includes(contentType)
+                            ).length ?? 0,
+                        }
+                      )}
+                    </Typography>
+                  )}
+
                   <Typography textAlign="center" variant="omega">
                     {formatMessage({
-                      id: 'review-workflows.page.delete.confirm.stages.body',
-                      defaultMessage:
-                        'All entries assigned to deleted stages will be moved to the previous stage.',
+                      id: 'review-workflows.page.delete.confirm.confirm',
+                      defaultMessage: 'Are you sure you want to save?',
                     })}
                   </Typography>
-                )}
-
-                {savePrompts.hasReassignedContentTypes && (
-                  <Typography textAlign="center" variant="omega">
-                    {formatMessage(
-                      {
-                        id: 'review-workflows.page.delete.confirm.contentType.body',
-                        defaultMessage:
-                          '{count} {count, plural, one {content-type} other {content-types}} {count, plural, one {is} other {are}} already mapped to {count, plural, one {another workflow} other {other workflows}}. If you save changes, {count, plural, one {this} other {these}} {count, plural, one {content-type} other {{count} content-types}} will no more be mapped to the {count, plural, one {another workflow} other {other workflows}} and all corresponding information will be removed.',
-                      },
-                      {
-                        count:
-                          contentTypesFromOtherWorkflows?.filter((contentType) =>
-                            currentWorkflow?.contentTypes?.includes(contentType)
-                          ).length ?? 0,
-                      }
-                    )}
-                  </Typography>
-                )}
-
-                <Typography textAlign="center" variant="omega">
-                  {formatMessage({
-                    id: 'review-workflows.page.delete.confirm.confirm',
-                    defaultMessage: 'Are you sure you want to save?',
-                  })}
-                </Typography>
-              </Flex>
-            </ConfirmDialog>
+                </Flex>
+              </ConfirmDialog>
+            </Dialog.Root>
           </>
         )}
       </Form>
 
       <LimitsModal.Root
-        isOpen={showLimitModal === 'workflow'}
-        onClose={() => setShowLimitModal(null)}
+        open={showLimitModal === 'workflow'}
+        onOpenChange={() => setShowLimitModal(null)}
       >
         <LimitsModal.Title>
           {formatMessage({
@@ -462,7 +436,10 @@ const EditPage = () => {
         </LimitsModal.Body>
       </LimitsModal.Root>
 
-      <LimitsModal.Root isOpen={showLimitModal === 'stage'} onClose={() => setShowLimitModal(null)}>
+      <LimitsModal.Root
+        open={showLimitModal === 'stage'}
+        onOpenChange={() => setShowLimitModal(null)}
+      >
         <LimitsModal.Title>
           {formatMessage({
             id: 'review-workflows.edit.page.stages.limit.title',

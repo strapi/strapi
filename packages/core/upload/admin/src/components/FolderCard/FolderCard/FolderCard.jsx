@@ -4,7 +4,7 @@ import { Box, CardAction, Flex } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { FolderCardContext } from '../contexts/FolderCard';
 import useId from '../hooks/useId';
@@ -37,7 +37,7 @@ const Card = styled(Box)`
   &:hover,
   &:focus-within {
     ${CardActionDisplay} {
-      display: ${({ isCardActions }) => (isCardActions ? 'block' : '')};
+      display: ${({ $isCardActions }) => ($isCardActions ? 'block' : '')};
     }
   }
 `;
@@ -49,10 +49,10 @@ export const FolderCard = forwardRef(
 
     return (
       <FolderCardContext.Provider value={fodlerCtxValue}>
-        <Card position="relative" tabIndex={0} isCardActions={!!cardActions} ref={ref} {...props}>
+        <Card position="relative" tabIndex={0} $isCardActions={!!cardActions} ref={ref} {...props}>
           <FauxClickWrapper
             to={to || undefined}
-            as={to ? NavLink : 'button'}
+            tag={to ? NavLink : 'button'}
             type={to ? undefined : 'button'}
             onClick={onClick}
             tabIndex={-1}

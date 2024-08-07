@@ -1,7 +1,6 @@
-import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, Typography } from '@strapi/design-system';
 import { Check, Cross, Loader } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled, { DefaultTheme, css } from 'styled-components';
 
 /* -------------------------------------------------------------------------------------------------
  * TriggerContainer
@@ -21,19 +20,19 @@ const TriggerContainer = ({ isPending, onCancel, response }: TriggerContainerPro
 
   return (
     <Box background="neutral0" padding={5} shadow="filterShadow" hasRadius>
-      <Grid gap={4} style={{ alignItems: 'center' }}>
-        <GridItem col={3}>
+      <Grid.Root gap={4} style={{ alignItems: 'center' }}>
+        <Grid.Item col={3} direction="column" alignItems="stretch">
           <Typography>
             {formatMessage({
               id: 'Settings.webhooks.trigger.test',
               defaultMessage: 'Test-trigger',
             })}
           </Typography>
-        </GridItem>
-        <GridItem col={3}>
+        </Grid.Item>
+        <Grid.Item col={3} direction="column" alignItems="stretch">
           <Status isPending={isPending} statusCode={statusCode} />
-        </GridItem>
-        <GridItem col={6}>
+        </Grid.Item>
+        <Grid.Item col={6} direction="column" alignItems="stretch">
           {!isPending ? (
             <Message statusCode={statusCode} message={message} />
           ) : (
@@ -51,8 +50,8 @@ const TriggerContainer = ({ isPending, onCancel, response }: TriggerContainerPro
               </button>
             </Flex>
           )}
-        </GridItem>
-      </Grid>
+        </Grid.Item>
+      </Grid.Root>
     </Box>
   );
 };

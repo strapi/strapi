@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Flex, PopoverPrimitives, Tag, useComposedRefs } from '@strapi/design-system';
+import { Box, Button, Flex, Popover, Tag } from '@strapi/design-system';
 import { Plus, Filter as FilterIcon, Cross } from '@strapi/icons';
 import { Schema } from '@strapi/types';
 import { useIntl } from 'react-intl';
@@ -12,6 +12,7 @@ import {
   IS_SENSITIVE_FILTERS,
   NUMERIC_FILTERS,
   STRING_PARSE_FILTERS,
+  FILTERS_WITH_NO_VALUE,
 } from '../constants/filters';
 import { useControllableState } from '../hooks/useControllableState';
 import { useQueryParams } from '../hooks/useQueryParams';
@@ -33,56 +34,48 @@ interface FilterFormData {
 interface FitlersContextValue {
   disabled: boolean;
   onChange: (data: FilterFormData) => void;
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  setTriggerNode: (node: HTMLButtonElement | null) => void;
-  triggerNode: HTMLButtonElement | null;
   options: Filters.Filter[];
+  setOpen: (open: boolean) => void;
 }
 
 const [FiltersProvider, useFilters] = createContext<FitlersContextValue>('Filters');
 
-interface RootProps
-  extends Partial<Pick<FitlersContextValue, 'disabled' | 'onChange' | 'options' | 'open'>> {
+interface RootProps extends Partial<FitlersContextValue>, Popover.Props {
   children: React.ReactNode;
-  defaultOpen?: boolean;
-  onOpenChange?: (open: boolean) => void;
 }
 
 const Root = ({
   children,
   disabled = false,
   onChange,
+  options = [],
   onOpenChange,
   open: openProp,
   defaultOpen,
-  options = [],
+  ...restProps
 }: RootProps) => {
-  const [triggerNode, setTriggerNode] = React.useState<FitlersContextValue['triggerNode']>(null);
+  const handleChange = (data: FilterFormData) => {
+    if (onChange) {
+      onChange(data);
+    }
+  };
   const [open = false, setOpen] = useControllableState({
     prop: openProp,
     defaultProp: defaultOpen,
     onChange: onOpenChange,
   });
 
-  const handleChange = (data: FilterFormData) => {
-    if (onChange) {
-      onChange(data);
-    }
-  };
-
   return (
-    <FiltersProvider
-      disabled={disabled}
-      onChange={handleChange}
-      open={open}
-      options={options}
-      setOpen={setOpen}
-      setTriggerNode={setTriggerNode}
-      triggerNode={triggerNode}
-    >
-      {children}
-    </FiltersProvider>
+    <Popover.Root open={open} onOpenChange={setOpen} {...restProps}>
+      <FiltersProvider
+        setOpen={setOpen}
+        disabled={disabled}
+        onChange={handleChange}
+        options={options}
+      >
+        {children}
+      </FiltersProvider>
+    </Popover.Root>
   );
 };
 
@@ -93,28 +86,20 @@ const Root = ({
 const Trigger = React.forwardRef<HTMLButtonElement, Filters.TriggerProps>(
   ({ label }, forwardedRef) => {
     const { formatMessage } = useIntl();
-    const { setTriggerNode, setOpen } = useFilters('Trigger', ({ setTriggerNode, setOpen }) => ({
-      setTriggerNode,
-      setOpen,
-    }));
     const disabled = useFilters('Trigger', ({ disabled }) => disabled);
-    const open = useFilters('Trigger', ({ open }) => open);
-
-    const composedRefs = useComposedRefs(forwardedRef, setTriggerNode);
-
-    const handleClick = () => setOpen(!open);
 
     return (
-      <Button
-        variant="tertiary"
-        ref={composedRefs}
-        startIcon={<FilterIcon />}
-        onClick={handleClick}
-        size="S"
-        disabled={disabled}
-      >
-        {label || formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
-      </Button>
+      <Popover.Trigger>
+        <Button
+          variant="tertiary"
+          ref={forwardedRef}
+          startIcon={<FilterIcon />}
+          size="S"
+          disabled={disabled}
+        >
+          {label || formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
+        </Button>
+      </Popover.Trigger>
     );
   }
 );
@@ -126,18 +111,18 @@ const Trigger = React.forwardRef<HTMLButtonElement, Filters.TriggerProps>(
 const PopoverImpl = () => {
   const [{ query }, setQuery] = useQueryParams<Filters.Query>();
   const { formatMessage } = useIntl();
-  const open = useFilters('Popover', ({ open }) => open);
   const options = useFilters('Popover', ({ options }) => options);
-  const triggerNode = useFilters('Popover', ({ triggerNode }) => triggerNode);
-  const setOpen = useFilters('Popover', ({ setOpen }) => setOpen);
   const onChange = useFilters('Popover', ({ onChange }) => onChange);
+  const setOpen = useFilters('Popover', ({ setOpen }) => setOpen);
 
-  if (!open || options.length === 0 || !triggerNode) {
+  if (options.length === 0) {
     return null;
   }
 
   const handleSubmit = (data: FilterFormData) => {
-    if (!data.value) {
+    const value = FILTERS_WITH_NO_VALUE.includes(data.filter) ? 'true' : data.value;
+
+    if (!value) {
       return;
     }
 
@@ -148,12 +133,12 @@ const PopoverImpl = () => {
     /**
      * There will ALWAYS be an option because we use the options to create the form data.
      */
-    const filterType = options.find((filter) => filter.name === data.name)!.type;
+    const fieldOptions = options.find((filter) => filter.name === data.name)!;
 
     /**
      * If the filter is a relation, we need to nest the filter object,
-     * we always use ids to filter relations. But the nested object is
-     * the operator & value pair. This value _could_ look like:
+     * we filter based on the mainField of the relation, if there is no mainField, we use the id.
+     * At the end, we pass the operator & value. This value _could_ look like:
      * ```json
      * {
      *  "$eq": "1",
@@ -161,7 +146,7 @@ const PopoverImpl = () => {
      * ```
      */
     const operatorValuePairing = {
-      [data.filter]: data.value,
+      [data.filter]: value,
     };
 
     const newFilterQuery = {
@@ -170,9 +155,9 @@ const PopoverImpl = () => {
         ...(query.filters?.$and ?? []),
         {
           [data.name]:
-            filterType === 'relation'
+            fieldOptions.type === 'relation'
               ? {
-                  id: operatorValuePairing,
+                  [fieldOptions.mainField?.name ?? 'id']: operatorValuePairing,
                 }
               : operatorValuePairing,
         },
@@ -184,94 +169,90 @@ const PopoverImpl = () => {
   };
 
   return (
-    <PopoverPrimitives.Content
-      source={{ current: triggerNode }}
-      onDismiss={() => setOpen(false)}
-      padding={3}
-      spacing={4}
-      maxHeight="unset"
-    >
-      <Form
-        method="POST"
-        initialValues={
-          {
-            name: options[0]?.name,
-            filter: BASE_FILTERS[0].value,
-          } satisfies FilterFormData
-        }
-        onSubmit={handleSubmit}
-      >
-        {({ values: formValues, modified, isSubmitting }) => {
-          const filter = options.find((filter) => filter.name === formValues.name);
-          const Input = filter?.input || InputRenderer;
-          return (
-            <Flex direction="column" alignItems="stretch" gap={2} style={{ minWidth: 184 }}>
-              {[
-                {
-                  ['aria-label']: formatMessage({
-                    id: 'app.utils.select-field',
-                    defaultMessage: 'Select field',
-                  }),
-                  name: 'name',
-                  options: options.map((filter) => ({
-                    label: filter.label,
-                    value: filter.name,
-                  })),
-                  placholder: formatMessage({
-                    id: 'app.utils.select-field',
-                    defaultMessage: 'Select field',
-                  }),
-                  type: 'enumeration' as const,
-                },
-                {
-                  ['aria-label']: formatMessage({
-                    id: 'app.utils.select-filter',
-                    defaultMessage: 'Select filter',
-                  }),
-                  name: 'filter',
-                  options:
-                    filter?.operators ||
-                    getFilterList(filter).map((opt) => ({
-                      label: formatMessage(opt.label),
-                      value: opt.value,
+    <Popover.Content>
+      <Box padding={3}>
+        <Form
+          method="POST"
+          initialValues={
+            {
+              name: options[0]?.name,
+              filter: BASE_FILTERS[0].value,
+            } satisfies FilterFormData
+          }
+          onSubmit={handleSubmit}
+        >
+          {({ values: formValues, modified, isSubmitting }) => {
+            const filter = options.find((filter) => filter.name === formValues.name);
+            const Input = filter?.input || InputRenderer;
+            return (
+              <Flex direction="column" alignItems="stretch" gap={2} style={{ minWidth: 184 }}>
+                {[
+                  {
+                    ['aria-label']: formatMessage({
+                      id: 'app.utils.select-field',
+                      defaultMessage: 'Select field',
+                    }),
+                    name: 'name',
+                    options: options.map((filter) => ({
+                      label: filter.label,
+                      value: filter.name,
                     })),
-                  placeholder: formatMessage({
-                    id: 'app.utils.select-filter',
-                    defaultMessage: 'Select filter',
-                  }),
-                  type: 'enumeration' as const,
-                },
-              ].map((field) => (
-                <InputRenderer key={field.name} {...field} />
-              ))}
-              {filter &&
-              formValues.filter &&
-              formValues.filter !== '$null' &&
-              formValues.filter !== '$notNull' ? (
-                <Input
-                  {...filter}
-                  label={null}
-                  aria-label={filter.label}
-                  name="value"
-                  // @ts-expect-error – if type is `custom` then `Input` will be a custom component.
-                  type={filter.mainField?.type ?? filter.type}
-                />
-              ) : null}
-              <Button
-                disabled={!modified || isSubmitting}
-                size="L"
-                variant="secondary"
-                startIcon={<Plus />}
-                type="submit"
-                fullWidth
-              >
-                {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
-              </Button>
-            </Flex>
-          );
-        }}
-      </Form>
-    </PopoverPrimitives.Content>
+                    placholder: formatMessage({
+                      id: 'app.utils.select-field',
+                      defaultMessage: 'Select field',
+                    }),
+                    type: 'enumeration' as const,
+                  },
+                  {
+                    ['aria-label']: formatMessage({
+                      id: 'app.utils.select-filter',
+                      defaultMessage: 'Select filter',
+                    }),
+                    name: 'filter',
+                    options:
+                      filter?.operators ||
+                      getFilterList(filter).map((opt) => ({
+                        label: formatMessage(opt.label),
+                        value: opt.value,
+                      })),
+                    placeholder: formatMessage({
+                      id: 'app.utils.select-filter',
+                      defaultMessage: 'Select filter',
+                    }),
+                    type: 'enumeration' as const,
+                  },
+                ].map((field) => (
+                  <InputRenderer key={field.name} {...field} />
+                ))}
+                {filter &&
+                formValues.filter &&
+                formValues.filter !== '$null' &&
+                formValues.filter !== '$notNull' ? (
+                  <Input
+                    {...filter}
+                    label={null}
+                    aria-label={filter.label}
+                    name="value"
+                    // @ts-expect-error – if type is `custom` then `Input` will be a custom component.
+                    type={filter.mainField?.type ?? filter.type}
+                  />
+                ) : null}
+                <Button
+                  disabled={!modified || isSubmitting}
+                  size="L"
+                  variant="secondary"
+                  startIcon={<Plus />}
+                  type="submit"
+                  fullWidth
+                >
+                  {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
+                </Button>
+              </Flex>
+            );
+          }}
+        </Form>
+      </Box>
+    </Popover.Content>
   );
 };
 
@@ -288,7 +269,6 @@ const getFilterList = (filter?: Filters.Filter): FilterOption[] => {
   switch (type) {
     case 'email':
     case 'text':
-    case 'enumeration':
     case 'string': {
       return [
         ...BASE_FILTERS,
@@ -311,6 +291,10 @@ const getFilterList = (filter?: Filters.Filter): FilterOption[] => {
 
     case 'datetime': {
       return [...BASE_FILTERS, ...NUMERIC_FILTERS];
+    }
+
+    case 'enumeration': {
+      return BASE_FILTERS;
     }
 
     default:

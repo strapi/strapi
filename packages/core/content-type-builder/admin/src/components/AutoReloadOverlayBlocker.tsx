@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Box, Flex, Typography, Link } from '@strapi/design-system';
 import { Clock, ArrowClockwise } from '@strapi/icons';
 import { createPortal } from 'react-dom';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import styled, { keyframes } from 'styled-components';
+import { styled, keyframes } from 'styled-components';
 
 /**
  * TODO: realistically a lot of this logic is isolated to the `core/admin` package.
@@ -78,7 +77,7 @@ const AutoReloadOverlayBlockerProvider = ({ children }: AutoReloadOverlayBlocker
   let description = {
     id: config?.description || 'components.OverlayBlocker.description',
     defaultMessage:
-      "You're using a feature that needs the server to restart. Please wait until the server is up.",
+      "You're using a feature that needs the server to restart. The page will reload automatically.",
   };
 
   let title = {
@@ -136,10 +135,10 @@ const Blocker = ({ displayedIcon, description, title, isOpen }: BlockerProps) =>
     ? createPortal(
         <Overlay id="autoReloadOverlayBlocker" direction="column" alignItems="center" gap={6}>
           <Flex direction="column" alignItems="center" gap={2}>
-            <Typography as="h1" variant="alpha">
+            <Typography tag="h1" variant="alpha">
               {formatMessage(title)}
             </Typography>
-            <Typography as="h2" textColor="neutral600" fontSize={4} fontWeight="regular">
+            <Typography tag="h2" textColor="neutral600" fontSize={4} fontWeight="regular">
               {formatMessage(description)}
             </Typography>
           </Flex>

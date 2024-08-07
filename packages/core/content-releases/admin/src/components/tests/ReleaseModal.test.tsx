@@ -1,6 +1,5 @@
 import { fireEvent } from '@testing-library/react';
 import { render, screen, waitFor } from '@tests/utils';
-import { MemoryRouter } from 'react-router-dom';
 
 import { pluginId } from '../../pluginId';
 import { ReleaseModal } from '../ReleaseModal';
@@ -22,9 +21,10 @@ describe('ReleaseModal', () => {
     const handleCloseMocked = jest.fn();
     const { user } = render(
       <ReleaseModal
+        open
         handleClose={handleCloseMocked}
         handleSubmit={jest.fn()}
-        initialValues={{ name: '', date: null, time: '', timezone: '', scheduledAt: null }}
+        initialValues={{ name: '', time: '', timezone: '', scheduledAt: null }}
         isLoading={false}
       />,
       {
@@ -42,9 +42,10 @@ describe('ReleaseModal', () => {
   it('should show scheduled fields when selecting schedule release', async () => {
     render(
       <ReleaseModal
+        open
         handleClose={jest.fn()}
         handleSubmit={jest.fn()}
-        initialValues={{ name: 'title', date: null, time: '', timezone: '', scheduledAt: null }}
+        initialValues={{ name: 'title', time: '', timezone: '', scheduledAt: null }}
         isLoading={false}
       />
     );
@@ -72,7 +73,7 @@ describe('ReleaseModal', () => {
     expect(dateField).toBeInTheDocument();
 
     const time = await screen.findByRole('combobox', {
-      name: /time\s/i,
+      name: 'Timezone',
     });
     expect(time).toBeInTheDocument();
 

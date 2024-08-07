@@ -1,16 +1,8 @@
 import _ from 'lodash';
 import utils, { errors } from '@strapi/utils';
-import type { Schema, Struct } from '@strapi/types';
+import type { Schema } from '@strapi/types';
 
 const { ApplicationError } = errors;
-
-export const hasComponent = (model: Struct.Schema) => {
-  const compoKeys = Object.keys(model.attributes || {}).filter((key) => {
-    return model.attributes[key].type === 'component';
-  });
-
-  return compoKeys.length > 0;
-};
 
 export const isConfigurable = (attribute: Schema.Attribute.AnyAttribute) =>
   _.get(attribute, 'configurable', true);

@@ -26,19 +26,38 @@ const createPermissionChecker =
       model,
     });
 
-    const toSubject = (entity?: Entity) =>
-      entity ? permissionsManager.toSubject(entity, model) : model;
+    const { actionProvider } = strapi.service('admin::permission');
+
+    const toSubject = (entity?: Entity) => {
+      return entity ? permissionsManager.toSubject(entity, model) : model;
+    };
 
     // @ts-expect-error preserve the parameter order
     // eslint-disable-next-line @typescript-eslint/default-param-last
     const can = (action: string, entity?: Entity, field: string) => {
-      return userAbility.can(action, toSubject(entity), field);
+      const subject = toSubject(entity);
+      const aliases = actionProvider.unstable_aliases(action, model) as string[];
+
+      return (
+        // Test the original action to see if it passes
+        userAbility.can(action, subject, field) ||
+        // Else try every known alias if at least one of them succeed, then the user "can"
+        aliases.some((alias) => userAbility.can(alias, subject, field))
+      );
     };
 
     // @ts-expect-error preserve the parameter order
     // eslint-disable-next-line @typescript-eslint/default-param-last
     const cannot = (action: string, entity?: Entity, field: string) => {
-      return userAbility.cannot(action, toSubject(entity), field);
+      const subject = toSubject(entity);
+      const aliases = actionProvider.unstable_aliases(action, model) as string[];
+
+      return (
+        // Test both the original action
+        userAbility.cannot(action, subject, field) &&
+        // and every known alias, if all of them fail (cannot), then the user truly "cannot"
+        aliases.every((alias) => userAbility.cannot(alias, subject, field))
+      );
     };
 
     const sanitizeOutput = (data: Entity, { action = ACTIONS.read }: { action?: string } = {}) => {

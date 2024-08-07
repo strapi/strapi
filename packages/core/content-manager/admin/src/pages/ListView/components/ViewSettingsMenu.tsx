@@ -5,7 +5,7 @@ import {
   Flex,
   IconButton,
   Popover,
-  BaseCheckbox,
+  Checkbox,
   TextButton,
   Typography,
   useCollator,
@@ -15,7 +15,6 @@ import { Cog, ListPlus } from '@strapi/icons';
 import { stringify } from 'qs';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
 
 import { useDoc } from '../../../hooks/useDocument';
 import { useDocumentLayout } from '../../../hooks/useDocumentLayout';
@@ -25,8 +24,6 @@ import { checkIfAttributeIsDisplayable } from '../../../utils/attributes';
 interface ViewSettingsMenuProps extends FieldPickerProps {}
 
 const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
-  const [isVisible, setIsVisible] = React.useState(false);
-  const cogButtonRef = React.useRef<HTMLButtonElement>(null!);
   const permissions = useTypedSelector(
     (state) => state.admin_app.permissions.contentManager?.collectionTypesConfigurations ?? []
   );
@@ -36,55 +33,43 @@ const ViewSettingsMenu = (props: ViewSettingsMenuProps) => {
     allowedActions: { canConfigureView },
   } = useRBAC(permissions);
 
-  const handleToggle = () => {
-    setIsVisible((prev) => !prev);
-  };
-
   return (
-    <>
-      <IconButton
-        icon={<Cog />}
-        label={formatMessage({
-          id: 'components.ViewSettings.tooltip',
-          defaultMessage: 'View Settings',
-        })}
-        ref={cogButtonRef}
-        onClick={handleToggle}
-      />
-      {isVisible && (
-        <Popover
-          placement="bottom-end"
-          source={cogButtonRef}
-          onDismiss={handleToggle}
-          spacing={4}
-          padding={3}
+    <Popover.Root>
+      <Popover.Trigger>
+        <IconButton
+          label={formatMessage({
+            id: 'components.ViewSettings.tooltip',
+            defaultMessage: 'View Settings',
+          })}
         >
-          <Flex alignItems="stretch" direction="column" gap={3}>
-            {canConfigureView ? (
-              <LinkButton
-                size="S"
-                startIcon={<ListPlus />}
-                variant="secondary"
-                as={NavLink}
-                // @ts-expect-error – inference from the as prop does not work in the DS.
-                to={{
-                  pathname: 'configurations/list',
-                  search: query.plugins
-                    ? stringify({ plugins: query.plugins }, { encode: false })
-                    : '',
-                }}
-              >
-                {formatMessage({
-                  id: 'app.links.configure-view',
-                  defaultMessage: 'Configure the view',
-                })}
-              </LinkButton>
-            ) : null}
-            <FieldPicker {...props} />
-          </Flex>
-        </Popover>
-      )}
-    </>
+          <Cog />
+        </IconButton>
+      </Popover.Trigger>
+      <Popover.Content side="bottom" align="end" sideOffset={4}>
+        <Flex alignItems="stretch" direction="column" padding={3} gap={3}>
+          {canConfigureView ? (
+            <LinkButton
+              size="S"
+              startIcon={<ListPlus />}
+              variant="secondary"
+              tag={NavLink}
+              to={{
+                pathname: 'configurations/list',
+                search: query.plugins
+                  ? stringify({ plugins: query.plugins }, { encode: false })
+                  : '',
+              }}
+            >
+              {formatMessage({
+                id: 'app.links.configure-view',
+                defaultMessage: 'Configure the view',
+              })}
+            </LinkButton>
+          ) : null}
+          <FieldPicker {...props} />
+        </Flex>
+      </Popover.Content>
+    </Popover.Root>
   );
 };
 
@@ -134,9 +119,9 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
   };
 
   return (
-    <Flex as="fieldset" direction="column" alignItems="stretch" gap={3}>
+    <Flex tag="fieldset" direction="column" alignItems="stretch" gap={3} borderWidth={0}>
       <Flex justifyContent="space-between">
-        <Typography as="legend" variant="pi" fontWeight="bold">
+        <Typography tag="legend" variant="pi" fontWeight="bold">
           {formatMessage({
             id: 'containers.list.displayedFields',
             defaultMessage: 'Displayed fields',
@@ -156,34 +141,28 @@ const FieldPicker = ({ headers = [], resetHeaders, setHeaders }: FieldPickerProp
           const isActive = headers.includes(header.name);
 
           return (
-            <ChackboxWrapper
+            <Flex
               wrap="wrap"
               gap={2}
-              as="label"
               background={isActive ? 'primary100' : 'transparent'}
               hasRadius
               padding={2}
               key={header.name}
             >
-              <BaseCheckbox
-                onChange={() => handleChange(header.name)}
-                value={isActive}
+              <Checkbox
+                onCheckedChange={() => handleChange(header.name)}
+                checked={isActive}
                 name={header.name}
-              />
-              <Typography fontSize={1}>{header.label}</Typography>
-            </ChackboxWrapper>
+              >
+                <Typography fontSize={1}>{header.label}</Typography>
+              </Checkbox>
+            </Flex>
           );
         })}
       </Flex>
     </Flex>
   );
 };
-
-const ChackboxWrapper = styled(Flex)`
-  :hover {
-    background-color: ${(props) => props.theme.colors.primary100};
-  }
-`;
 
 export { ViewSettingsMenu };
 export type { ViewSettingsMenuProps, FieldPickerProps };

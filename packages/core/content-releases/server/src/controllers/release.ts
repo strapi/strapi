@@ -1,7 +1,7 @@
 import type Koa from 'koa';
 import { errors } from '@strapi/utils';
 import { RELEASE_MODEL_UID } from '../constants';
-import { validateRelease } from './validation/release';
+import { validateRelease, validatefindByDocumentAttachedParams } from './validation/release';
 import type {
   CreateRelease,
   UpdateRelease,
@@ -9,7 +9,6 @@ import type {
   GetRelease,
   Release,
   DeleteRelease,
-  GetContentTypeEntryReleases,
   GetReleases,
   MapEntriesToReleases,
 } from '../../../shared/contracts/releases';
@@ -19,7 +18,75 @@ import { getService } from '../utils';
 type ReleaseWithPopulatedActions = Release & { actions: { count: number } };
 
 const releaseController = {
-  async findMany(ctx: Koa.Context) {
+  /**
+   * Find releases based on documents attached or not to the release.
+   * If `hasEntryAttached` is true, it will return all releases that have the entry attached.
+   * If `hasEntryAttached` is false, it will return all releases that don't have the entry attached.
+   */
+  async findByDocumentAttached(ctx: Koa.Context) {
+    const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
+      ability: ctx.state.userAbility,
+      model: RELEASE_MODEL_UID,
+    });
+    await permissionsManager.validateQuery(ctx.query);
+    const releaseService = getService('release', { strapi });
+    const query = await permissionsManager.sanitizeQuery(ctx.query);
+
+    await validatefindByDocumentAttachedParams(query);
+
+    const { contentType, entryDocumentId, hasEntryAttached, locale } = query;
+    const isEntryAttached =
+      typeof hasEntryAttached === 'string' ? Boolean(JSON.parse(hasEntryAttached)) : false;
+
+    if (isEntryAttached) {
+      const releases = await releaseService.findMany({
+        where: {
+          releasedAt: null,
+          actions: {
+            contentType,
+            entryDocumentId: entryDocumentId ?? null,
+            locale: locale ?? null,
+          },
+        },
+        populate: {
+          actions: {
+            fields: ['type'],
+          },
+        },
+      });
+      ctx.body = { data: releases };
+    } else {
+      const relatedReleases = await releaseService.findMany({
+        where: {
+          releasedAt: null,
+          actions: {
+            contentType,
+            entryDocumentId: entryDocumentId ?? null,
+            locale: locale ?? null,
+          },
+        },
+      });
+
+      const releases = await releaseService.findMany({
+        where: {
+          $or: [
+            {
+              id: {
+                $notIn: relatedReleases.map((release: any) => release.id),
+              },
+            },
+            {
+              actions: null,
+            },
+          ],
+          releasedAt: null,
+        },
+      });
+      ctx.body = { data: releases };
+    }
+  },
+
+  async findPage(ctx: Koa.Context) {
     const permissionsManager = strapi.service('admin::permission').createPermissionsManager({
       ability: ctx.state.userAbility,
       model: RELEASE_MODEL_UID,
@@ -29,60 +96,42 @@ const releaseController = {
 
     const releaseService = getService('release', { strapi });
 
-    // Handle requests for releases filtered by content type entry
-    const isFindManyForContentTypeEntry = Boolean(ctx.query?.contentTypeUid && ctx.query?.entryId);
-    if (isFindManyForContentTypeEntry) {
-      const query: GetContentTypeEntryReleases.Request['query'] =
-        await permissionsManager.sanitizeQuery(ctx.query);
+    const query: GetReleases.Request['query'] = await permissionsManager.sanitizeQuery(ctx.query);
+    const { results, pagination } = await releaseService.findPage(query);
 
-      const contentTypeUid = query.contentTypeUid;
-      const entryId = query.entryId;
-      // Parse the string value or fallback to a default
-      const hasEntryAttached: GetContentTypeEntryReleases.Request['query']['hasEntryAttached'] =
-        typeof query.hasEntryAttached === 'string' ? JSON.parse(query.hasEntryAttached) : false;
+    const data = results.map((release: ReleaseWithPopulatedActions) => {
+      const { actions, ...releaseData } = release;
 
-      const data = hasEntryAttached
-        ? await releaseService.findManyWithContentTypeEntryAttached(contentTypeUid, entryId)
-        : await releaseService.findManyWithoutContentTypeEntryAttached(contentTypeUid, entryId);
-
-      ctx.body = { data };
-    } else {
-      const query: GetReleases.Request['query'] = await permissionsManager.sanitizeQuery(ctx.query);
-      const { results, pagination } = await releaseService.findPage(query);
-
-      const data = results.map((release: ReleaseWithPopulatedActions) => {
-        const { actions, ...releaseData } = release;
-
-        return {
-          ...releaseData,
-          actions: {
-            meta: {
-              count: actions.count,
-            },
+      return {
+        ...releaseData,
+        actions: {
+          meta: {
+            count: actions.count,
           },
-        };
-      });
-
-      const pendingReleasesCount = await strapi.db.query(RELEASE_MODEL_UID).count({
-        where: {
-          releasedAt: null,
         },
-      });
+      };
+    });
 
-      ctx.body = { data, meta: { pagination, pendingReleasesCount } };
-    }
+    const pendingReleasesCount = await strapi.db.query(RELEASE_MODEL_UID).count({
+      where: {
+        releasedAt: null,
+      },
+    });
+
+    ctx.body = { data, meta: { pagination, pendingReleasesCount } };
   },
 
   async findOne(ctx: Koa.Context) {
     const id: GetRelease.Request['params']['id'] = ctx.params.id;
 
     const releaseService = getService('release', { strapi });
+    const releaseActionService = getService('release-action', { strapi });
     const release = await releaseService.findOne(id, { populate: ['createdBy'] });
     if (!release) {
       throw new errors.NotFoundError(`Release not found for id: ${id}`);
     }
 
-    const count = await releaseService.countActions({
+    const count = await releaseActionService.countActions({
       filters: {
         release: id,
       },
@@ -108,33 +157,50 @@ const releaseController = {
   },
 
   async mapEntriesToReleases(ctx: Koa.Context) {
-    const { contentTypeUid, entriesIds } = ctx.query;
+    const { contentTypeUid, documentIds, locale } = ctx.query;
 
-    if (!contentTypeUid || !entriesIds) {
+    if (!contentTypeUid || !documentIds) {
       throw new errors.ValidationError('Missing required query parameters');
     }
 
     const releaseService = getService('release', { strapi });
 
-    const releasesWithActions = await releaseService.findManyWithContentTypeEntryAttached(
-      contentTypeUid,
-      entriesIds
-    );
+    const releasesWithActions = await releaseService.findMany({
+      where: {
+        releasedAt: null,
+        actions: {
+          contentType: contentTypeUid,
+          entryDocumentId: {
+            $in: documentIds,
+          },
+          locale,
+        },
+      },
+      populate: {
+        actions: true,
+      },
+    });
 
     const mappedEntriesInReleases = releasesWithActions.reduce(
-      // TODO: Fix for v5 removed mappedEntriedToRelease
       (acc: MapEntriesToReleases.Response['data'], release: Release) => {
         release.actions.forEach((action) => {
-          if (!acc[action.entry.id]) {
-            acc[action.entry.id] = [{ id: release.id, name: release.name }];
+          if (action.contentType !== contentTypeUid) {
+            return;
+          }
+
+          if (locale && action.locale !== locale) {
+            return;
+          }
+
+          if (!acc[action.entryDocumentId]) {
+            acc[action.entryDocumentId] = [{ id: release.id, name: release.name }];
           } else {
-            acc[action.entry.id].push({ id: release.id, name: release.name });
+            acc[action.entryDocumentId].push({ id: release.id, name: release.name });
           }
         });
 
         return acc;
       },
-      // TODO: Fix for v5 removed mappedEntriedToRelease
       {} as MapEntriesToReleases.Response['data']
     );
 
@@ -194,20 +260,20 @@ const releaseController = {
   },
 
   async publish(ctx: Koa.Context) {
-    const user: PublishRelease.Request['state']['user'] = ctx.state.user;
     const id: PublishRelease.Request['params']['id'] = ctx.params.id;
 
     const releaseService = getService('release', { strapi });
-    const release = await releaseService.publish(id, { user });
+    const releaseActionService = getService('release-action', { strapi });
+    const release = await releaseService.publish(id);
 
     const [countPublishActions, countUnpublishActions] = await Promise.all([
-      releaseService.countActions({
+      releaseActionService.countActions({
         filters: {
           release: id,
           type: 'publish',
         },
       }),
-      releaseService.countActions({
+      releaseActionService.countActions({
         filters: {
           release: id,
           type: 'unpublish',

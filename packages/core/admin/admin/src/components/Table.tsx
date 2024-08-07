@@ -19,7 +19,7 @@ import {
   Thead,
   Tr,
   RawTrProps,
-  BaseCheckbox,
+  Checkbox,
   Loader,
   Table as DSTable,
   EmptyStateLayout,
@@ -30,7 +30,7 @@ import {
 import { CaretDown } from '@strapi/icons';
 import { EmptyDocuments } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { useControllableState } from '../hooks/useControllableState';
 import { useQueryParams } from '../hooks/useQueryParams';
@@ -198,19 +198,16 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
       action={
         isSorted &&
         sortable && (
-          <IconButton
-            label={sortLabel}
-            onClick={handleClickSort}
-            icon={<SortIcon isUp={sortOrder === 'ASC'} />}
-            borderStyle="none"
-          />
+          <IconButton label={sortLabel} onClick={handleClickSort} variant="ghost">
+            <SortIcon $isUp={sortOrder === 'ASC'} />
+          </IconButton>
         )
       }
     >
       <Tooltip label={sortable ? sortLabel : label}>
         <Typography
           textColor="neutral600"
-          as={!isSorted && sortable ? 'button' : 'span'}
+          tag={!isSorted && sortable ? 'button' : 'span'}
           onClick={handleClickSort}
           variant="sigma"
         >
@@ -221,12 +218,10 @@ const HeaderCell = <TData, THead>({ name, label, sortable }: TableHeader<TData, 
   );
 };
 
-interface SortIconProps {
-  isUp: boolean;
-}
-
-const SortIcon = styled(CaretDown)<SortIconProps>`
-  transform: ${({ isUp }) => `rotate(${isUp ? '180' : '0'}deg)`};
+const SortIcon = styled(CaretDown)<{
+  $isUp: boolean;
+}>`
+  transform: ${({ $isUp }) => `rotate(${$isUp ? '180' : '0'}deg)`};
 `;
 
 /* -------------------------------------------------------------------------------------------------
@@ -289,15 +284,14 @@ const HeaderCheckboxCell = () => {
 
   return (
     <Th>
-      <BaseCheckbox
+      <Checkbox
         aria-label={formatMessage({
           id: 'global.select-all-entries',
           defaultMessage: 'Select all entries',
         })}
         disabled={rows.length === 0}
-        checked={areAllEntriesSelected}
-        indeterminate={isIndeterminate}
-        onChange={handleSelectAll}
+        checked={isIndeterminate ? 'indeterminate' : areAllEntriesSelected}
+        onCheckedChange={handleSelectAll}
       />
     </Th>
   );
@@ -390,7 +384,9 @@ const Row = (props: Table.RowProps) => {
 /* -------------------------------------------------------------------------------------------------
  * Cell
  * -----------------------------------------------------------------------------------------------*/
-const Cell = Td;
+const Cell = (props: Table.CellProps) => {
+  return <Td {...props} />;
+};
 
 /* -------------------------------------------------------------------------------------------------
  * Row
@@ -410,14 +406,17 @@ const CheckboxCell = ({ id, ...props }: Table.CheckboxCellProps) => {
 
   return (
     <Cell {...props} onClick={(e) => e.stopPropagation()}>
-      <BaseCheckbox
-        aria-label={formatMessage({
-          id: 'global.select-all-entries',
-          defaultMessage: 'Select all entries',
-        })}
+      <Checkbox
+        aria-label={formatMessage(
+          {
+            id: 'app.component.table.select.one-entry',
+            defaultMessage: `Select {target}`,
+          },
+          { target: id }
+        )}
         disabled={rows.length === 0}
         checked={isChecked}
-        onChange={handleSelectRow}
+        onCheckedChange={handleSelectRow}
       />
     </Cell>
   );

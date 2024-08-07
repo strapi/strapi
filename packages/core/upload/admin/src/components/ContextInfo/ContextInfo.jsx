@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 
 export const ContextInfo = ({ blocks }) => {
@@ -13,9 +13,9 @@ export const ContextInfo = ({ blocks }) => {
       paddingBottom={4}
       background="neutral100"
     >
-      <Grid gap={4}>
+      <Grid.Root gap={4}>
         {blocks.map(({ label, value }) => (
-          <GridItem col={6} xs={12} key={label}>
+          <Grid.Item col={6} xs={12} key={label} direction="column" alignItems="stretch">
             <Flex direction="column" alignItems="stretch" gap={1}>
               <Typography variant="sigma" textColor="neutral600">
                 {label}
@@ -24,9 +24,9 @@ export const ContextInfo = ({ blocks }) => {
                 {value}
               </Typography>
             </Flex>
-          </GridItem>
+          </Grid.Item>
         ))}
-      </Grid>
+      </Grid.Root>
     </Box>
   );
 };

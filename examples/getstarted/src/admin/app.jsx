@@ -5,8 +5,6 @@ const config = {
   locales: ['it', 'es', 'en'],
 };
 const bootstrap = (app) => {
-  console.log('I AM  BOOTSTRAPPED');
-
   app.getPlugin('content-manager').injectComponent('editView', 'right-links', {
     name: 'PreviewButton',
     Component: () => (

@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, memo } from 'react';
 
 import {
   useStrapiApp,
@@ -179,7 +179,9 @@ const useFieldHint = (hint: ReactNode = undefined, attribute: Schema.Attribute.A
     return hint;
   }
 
-  const units = !['biginteger', 'integer', 'number'].includes(attribute.type)
+  const units = !['biginteger', 'integer', 'number', 'dynamiczone', 'component'].includes(
+    attribute.type
+  )
     ? formatMessage(
         {
           id: 'content-manager.form.Input.hint.character.unit',
@@ -228,5 +230,7 @@ const getMinMax = (attribute: Schema.Attribute.AnyAttribute) => {
   }
 };
 
+const MemoizedInputRenderer = memo(InputRenderer);
+
 export type { InputRendererProps };
-export { InputRenderer, useFieldHint };
+export { MemoizedInputRenderer as InputRenderer, useFieldHint };

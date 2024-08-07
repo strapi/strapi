@@ -1,15 +1,6 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Button, Flex, Grid, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import pick from 'lodash/pick';
 import { useIntl } from 'react-intl';
@@ -19,6 +10,7 @@ import * as yup from 'yup';
 import { Update } from '../../../../../../shared/contracts/user';
 import { Form, FormHelpers } from '../../../../components/Form';
 import { InputRenderer } from '../../../../components/FormInputs/Renderer';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { BackButton } from '../../../../features/BackButton';
@@ -104,7 +96,7 @@ const EditPage = () => {
 
   React.useEffect(() => {
     if (error) {
-      // Redirect the use to the homepage if is not allowed to read
+      // Redirect the user to the homepage if is not allowed to read
       if (error.name === 'UnauthorizedError') {
         toggleNotification({
           type: 'info',
@@ -192,7 +184,7 @@ const EditPage = () => {
         {({ isSubmitting, modified }) => {
           return (
             <>
-              <HeaderLayout
+              <Layouts.Header
                 primaryAction={
                   <Button
                     disabled={isSubmitting || !canUpdate || !modified}
@@ -216,7 +208,7 @@ const EditPage = () => {
                 )}
                 navigationAction={<BackButton />}
               />
-              <ContentLayout>
+              <Layouts.Content>
                 {user?.registrationToken && (
                   <Box paddingBottom={6}>
                     <MagicLink registrationToken={user.registrationToken} />
@@ -233,17 +225,22 @@ const EditPage = () => {
                     paddingRight={7}
                   >
                     <Flex direction="column" alignItems="stretch" gap={4}>
-                      <Typography variant="delta" as="h2">
+                      <Typography variant="delta" tag="h2">
                         {formatMessage({
                           id: 'app.components.Users.ModalCreateBody.block-title.details',
                           defaultMessage: 'Details',
                         })}
                       </Typography>
-                      <Grid gap={5}>
+                      <Grid.Root gap={5}>
                         {LAYOUT.map((row) =>
                           row.map(({ size, label, ...field }) => {
                             return (
-                              <GridItem key={field.name} col={size}>
+                              <Grid.Item
+                                key={field.name}
+                                col={size}
+                                direction="column"
+                                alignItems="stretch"
+                              >
                                 <InputRenderer
                                   {...field}
                                   disabled={!canUpdate}
@@ -254,11 +251,11 @@ const EditPage = () => {
                                       : undefined
                                   }
                                 />
-                              </GridItem>
+                              </Grid.Item>
                             );
                           })
                         )}
-                      </Grid>
+                      </Grid.Root>
                     </Flex>
                   </Box>
                   <Box
@@ -271,21 +268,21 @@ const EditPage = () => {
                     paddingRight={7}
                   >
                     <Flex direction="column" alignItems="stretch" gap={4}>
-                      <Typography variant="delta" as="h2">
+                      <Typography variant="delta" tag="h2">
                         {formatMessage({
                           id: 'global.roles',
                           defaultMessage: "User's role",
                         })}
                       </Typography>
-                      <Grid gap={5}>
-                        <GridItem col={6} xs={12}>
+                      <Grid.Root gap={5}>
+                        <Grid.Item col={6} xs={12} direction="column" alignItems="stretch">
                           <SelectRoles disabled={!canUpdate} />
-                        </GridItem>
-                      </Grid>
+                        </Grid.Item>
+                      </Grid.Root>
                     </Flex>
                   </Box>
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </>
           );
         }}

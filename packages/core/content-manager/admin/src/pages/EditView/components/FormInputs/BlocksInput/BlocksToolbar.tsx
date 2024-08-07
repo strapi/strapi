@@ -1,12 +1,20 @@
 import * as React from 'react';
 
 import * as Toolbar from '@radix-ui/react-toolbar';
-import { Flex, Tooltip, SingleSelect, SingleSelectOption, Box } from '@strapi/design-system';
+import {
+  Flex,
+  Tooltip,
+  SingleSelect,
+  SingleSelectOption,
+  Box,
+  FlexComponent,
+  BoxComponent,
+} from '@strapi/design-system';
 import { Link } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
 import { Editor, Transforms, Element as SlateElement, Node, type Ancestor } from 'slate';
 import { ReactEditor } from 'slate-react';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import {
   type BlocksStore,
@@ -17,7 +25,7 @@ import {
 import { insertLink } from './utils/links';
 import { type Block, getEntries, getKeys } from './utils/types';
 
-const ToolbarWrapper = styled(Flex)`
+const ToolbarWrapper = styled<FlexComponent>(Flex)`
   &[aria-disabled='true'] {
     cursor: not-allowed;
   }
@@ -29,7 +37,7 @@ const Separator = styled(Toolbar.Separator)`
   height: 2.4rem;
 `;
 
-const FlexButton = styled(Flex)`
+const FlexButton = styled<FlexComponent<'button'>>(Flex)`
   // Inherit the not-allowed cursor from ToolbarWrapper when disabled
   &[aria-disabled] {
     cursor: inherit;
@@ -45,7 +53,7 @@ const FlexButton = styled(Flex)`
   }
 `;
 
-const SelectWrapper = styled(Box)`
+const SelectWrapper = styled<BoxComponent>(Box)`
   // Styling changes to SingleSelect component don't work, so adding wrapper to target SingleSelect
   div[role='combobox'] {
     border: none;
@@ -128,7 +136,7 @@ const ToolbarButton = ({
         asChild
       >
         <FlexButton
-          as="button"
+          tag="button"
           background={isActive ? 'primary100' : ''}
           alignItems="center"
           justifyContent="center"
@@ -354,6 +362,39 @@ const ListButton = ({ block, format }: ListButtonProps) => {
     return false;
   };
 
+  /**
+   * @TODO: Currently, applying list while multiple blocks are selected is not supported.
+   * We should implement this feature in the future.
+   */
+  const isListDisabled = () => {
+    // Always disabled when the whole editor is disabled
+    if (disabled) {
+      return true;
+    }
+
+    // Always enabled when there's no selection
+    if (!editor.selection) {
+      return false;
+    }
+
+    // Get the block node closest to the anchor and focus
+    const anchorNodeEntry = Editor.above(editor, {
+      at: editor.selection.anchor,
+      match: (node) => !Editor.isEditor(node) && node.type !== 'text',
+    });
+    const focusNodeEntry = Editor.above(editor, {
+      at: editor.selection.focus,
+      match: (node) => !Editor.isEditor(node) && node.type !== 'text',
+    });
+
+    if (!anchorNodeEntry || !focusNodeEntry) {
+      return false;
+    }
+
+    // Disabled if the anchor and focus are not in the same block
+    return anchorNodeEntry[0] !== focusNodeEntry[0];
+  };
+
   const toggleList = (format: Block<'list'>['format']) => {
     let currentListEntry;
     if (editor.selection) {
@@ -395,7 +436,7 @@ const ListButton = ({ block, format }: ListButtonProps) => {
       name={format}
       label={block.label}
       isActive={isListActive()}
-      disabled={disabled}
+      disabled={isListDisabled()}
       handleClick={() => toggleList(format)}
     />
   );

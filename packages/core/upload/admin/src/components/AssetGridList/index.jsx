@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Box, Grid, GridItem, KeyboardNavigable, Typography } from '@strapi/design-system';
+import { Box, Grid, KeyboardNavigable, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 
 import { AssetCard } from '../AssetCard/AssetCard';
@@ -21,19 +21,19 @@ export const AssetGridList = ({
     <KeyboardNavigable tagName="article">
       {title && (
         <Box paddingTop={2} paddingBottom={2}>
-          <Typography as="h2" variant="delta" fontWeight="semiBold">
+          <Typography tag="h2" variant="delta" fontWeight="semiBold">
             {title}
           </Typography>
         </Box>
       )}
 
-      <Grid gap={4}>
+      <Grid.Root gap={4}>
         {assets.map((asset, index) => {
           const isSelected = !!selectedAssets.find((currentAsset) => currentAsset.id === asset.id);
 
           if (onReorderAsset) {
             return (
-              <GridItem key={asset.id} col={3} height="100%">
+              <Grid.Item key={asset.id} col={3} height="100%">
                 <Draggable index={index} moveItem={onReorderAsset} id={asset.id}>
                   <AssetCard
                     allowedTypes={allowedTypes}
@@ -44,12 +44,12 @@ export const AssetGridList = ({
                     size={size}
                   />
                 </Draggable>
-              </GridItem>
+              </Grid.Item>
             );
           }
 
           return (
-            <GridItem col={3} key={asset.id} height="100%">
+            <Grid.Item col={3} key={asset.id} height="100%" direction="column" alignItems="stretch">
               <AssetCard
                 key={asset.id}
                 allowedTypes={allowedTypes}
@@ -59,10 +59,10 @@ export const AssetGridList = ({
                 onSelect={() => onSelectAsset(asset)}
                 size={size}
               />
-            </GridItem>
+            </Grid.Item>
           );
         })}
-      </Grid>
+      </Grid.Root>
     </KeyboardNavigable>
   );
 };

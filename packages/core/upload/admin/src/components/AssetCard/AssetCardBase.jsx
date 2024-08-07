@@ -17,7 +17,7 @@ import {
 import { Pencil, Trash } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../../utils';
 
@@ -81,7 +81,7 @@ export const AssetCardBase = ({
         {isSelectable && (
           // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
           <div onClick={handlePropagationClick}>
-            <CardCheckbox value={selected} onValueChange={onSelect} />
+            <CardCheckbox checked={selected} onCheckedChange={onSelect} />
           </div>
         )}
         {(onRemove || onEdit) && (
@@ -92,17 +92,19 @@ export const AssetCardBase = ({
                   id: getTrad('control-card.remove-selection'),
                   defaultMessage: 'Remove from selection',
                 })}
-                icon={<Trash />}
                 onClick={onRemove}
-              />
+              >
+                <Trash />
+              </IconButton>
             )}
 
             {onEdit && (
               <IconButton
                 label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-                icon={<Pencil />}
                 onClick={onEdit}
-              />
+              >
+                <Pencil />
+              </IconButton>
             )}
           </CardActionsContainer>
         )}
@@ -111,7 +113,7 @@ export const AssetCardBase = ({
       <CardBody>
         <CardContent>
           <Box paddingTop={1}>
-            <CardTitle as="h2">{name}</CardTitle>
+            <CardTitle tag="h2">{name}</CardTitle>
           </Box>
           <CardSubtitle>
             <Extension>{extension}</Extension>

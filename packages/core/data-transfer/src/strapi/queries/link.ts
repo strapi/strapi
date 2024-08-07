@@ -332,14 +332,12 @@ export const createLinkQuery = (strapi: Core.Strapi, trx?: Knex.Transaction) => 
   return query;
 };
 
-const filterValidRelationalAttributes = (attributes: Record<string, any>) => {
+export const filterValidRelationalAttributes = (attributes: Record<string, any>) => {
   const isOwner = (attribute: any) => {
     return attribute.owner || (!attribute.mappedBy && !attribute.morphBy);
   };
 
-  const isComponentLike = (attribute: any) => {
-    return attribute.component || attribute.components;
-  };
+  const isComponentLike = (attribute: any) => attribute.joinTable?.name.endsWith('_cmps');
 
   return Object.entries(attributes)
     .filter(([, attribute]) => {

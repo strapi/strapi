@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Avatar, AvatarGroup, Flex, Tooltip, Typography } from '@strapi/design-system';
-import styled from 'styled-components';
+import { Avatar, Flex, Tooltip, Typography, TypographyComponent } from '@strapi/design-system';
+import { styled } from 'styled-components';
 
 import { prefixFileUrlWithBackendUrl } from '../../../../utils/urls';
 
@@ -36,7 +36,14 @@ const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSi
     const thumbnail = formats?.thumbnail?.url;
     const mediaURL = prefixFileUrlWithBackendUrl(thumbnail) || fileURL;
 
-    return <Avatar src={mediaURL} alt={alternativeText || name} preview />;
+    return (
+      <Avatar.Item
+        src={mediaURL}
+        alt={alternativeText || name}
+        fallback={alternativeText || name}
+        preview
+      />
+    );
   }
 
   const fileExtension = getFileExtension(ext);
@@ -52,7 +59,7 @@ const MediaSingle = ({ url, mime, alternativeText, name, ext, formats }: MediaSi
 const FileWrapper = ({ children }: { children: React.ReactNode }) => {
   return (
     <Flex
-      as="span"
+      tag="span"
       position="relative"
       borderRadius="50%"
       width="26px"
@@ -70,7 +77,7 @@ const FileWrapper = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const FileTypography = styled(Typography)`
+const FileTypography = styled<TypographyComponent>(Typography)`
   font-size: 0.9rem;
   line-height: 0.9rem;
 `;
@@ -85,7 +92,7 @@ interface MediaMultipleProps {
 
 const MediaMultiple = ({ content }: MediaMultipleProps) => {
   return (
-    <AvatarGroup>
+    <Avatar.Group>
       {content.map((file, index) => {
         const key = `${file.id}${index}`;
 
@@ -101,7 +108,7 @@ const MediaMultiple = ({ content }: MediaMultipleProps) => {
 
         return <MediaSingle key={key} {...file} />;
       })}
-    </AvatarGroup>
+    </Avatar.Group>
   );
 };
 

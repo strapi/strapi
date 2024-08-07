@@ -1,23 +1,21 @@
 import * as React from 'react';
 
-import { Page, useNotification, useFetchClient } from '@strapi/admin/strapi-admin';
+import { Page, useNotification, useFetchClient, Layouts } from '@strapi/admin/strapi-admin';
 import {
   Box,
   Button,
-  ContentLayout,
   Flex,
   Grid,
-  GridItem,
-  HeaderLayout,
   SingleSelectOption,
   SingleSelect,
   TextInput,
   Typography,
+  Field,
 } from '@strapi/design-system';
 import { Mail } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useQuery, useMutation } from 'react-query';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import { ValidationError } from 'yup';
 
 import { PERMISSIONS } from '../constants';
@@ -136,7 +134,7 @@ const SettingsPage = () => {
           }
         )}
       </Page.Title>
-      <HeaderLayout
+      <Layouts.Header
         id="title"
         title={formatMessage({
           id: 'email.Settings.email.plugin.title',
@@ -148,7 +146,7 @@ const SettingsPage = () => {
         })}
       />
 
-      <ContentLayout>
+      <Layouts.Content>
         {data && (
           <form onSubmit={handleSubmit}>
             <Flex direction="column" alignItems="stretch" gap={7}>
@@ -163,7 +161,7 @@ const SettingsPage = () => {
               >
                 <Flex direction="column" alignItems="stretch" gap={4}>
                   <Flex direction="column" alignItems="stretch" gap={1}>
-                    <Typography variant="delta" as="h2">
+                    <Typography variant="delta" tag="h2">
                       {formatMessage({
                         id: 'email.Settings.email.plugin.title.config',
                         defaultMessage: 'Configuration',
@@ -195,55 +193,61 @@ const SettingsPage = () => {
                     </Typography>
                   </Flex>
 
-                  <Grid gap={5}>
-                    <GridItem col={6} s={12}>
-                      <TextInput
-                        name="shipper-email"
-                        label={formatMessage({
-                          id: 'email.Settings.email.plugin.label.defaultFrom',
-                          defaultMessage: 'Default sender email',
-                        })}
-                        placeholder={formatMessage({
-                          id: 'email.Settings.email.plugin.placeholder.defaultFrom',
-                          defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
-                        })}
-                        disabled
-                        value={data.settings.defaultFrom}
-                      />
-                    </GridItem>
+                  <Grid.Root gap={5}>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Field.Root name="shipper-email">
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'email.Settings.email.plugin.label.defaultFrom',
+                            defaultMessage: 'Default sender email',
+                          })}
+                        </Field.Label>
+                        <TextInput
+                          placeholder={formatMessage({
+                            id: 'email.Settings.email.plugin.placeholder.defaultFrom',
+                            defaultMessage: "ex: Strapi No-Reply '<'no-reply@strapi.io'>'",
+                          })}
+                          disabled
+                          value={data.settings.defaultFrom}
+                        />
+                      </Field.Root>
+                    </Grid.Item>
 
-                    <GridItem col={6} s={12}>
-                      <TextInput
-                        name="response-email"
-                        label={formatMessage({
-                          id: 'email.Settings.email.plugin.label.defaultReplyTo',
-                          defaultMessage: 'Default response email',
-                        })}
-                        placeholder={formatMessage({
-                          id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
-                          defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
-                        })}
-                        disabled
-                        value={data.settings.defaultReplyTo}
-                      />
-                    </GridItem>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Field.Root name="response-email">
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'email.Settings.email.plugin.label.defaultReplyTo',
+                            defaultMessage: 'Default response email',
+                          })}
+                        </Field.Label>
+                        <TextInput
+                          placeholder={formatMessage({
+                            id: 'email.Settings.email.plugin.placeholder.defaultReplyTo',
+                            defaultMessage: `ex: Strapi '<'example@strapi.io'>'`,
+                          })}
+                          disabled
+                          value={data.settings.defaultReplyTo}
+                        />
+                      </Field.Root>
+                    </Grid.Item>
 
-                    <GridItem col={6} s={12}>
-                      <SingleSelect
-                        name="email-provider"
-                        label={formatMessage({
-                          id: 'email.Settings.email.plugin.label.provider',
-                          defaultMessage: 'Email provider',
-                        })}
-                        disabled
-                        value={data.provider}
-                      >
-                        <SingleSelectOption value={data.provider}>
-                          {data.provider}
-                        </SingleSelectOption>
-                      </SingleSelect>
-                    </GridItem>
-                  </Grid>
+                    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                      <Field.Root name="email-provider">
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'email.Settings.email.plugin.label.provider',
+                            defaultMessage: 'Email provider',
+                          })}
+                        </Field.Label>
+                        <SingleSelect disabled value={data.provider}>
+                          <SingleSelectOption value={data.provider}>
+                            {data.provider}
+                          </SingleSelectOption>
+                        </SingleSelect>
+                      </Field.Root>
+                    </Grid.Item>
+                  </Grid.Root>
                 </Flex>
               </Box>
 
@@ -259,24 +263,17 @@ const SettingsPage = () => {
                 paddingLeft={7}
                 paddingRight={7}
               >
-                <Typography variant="delta" as="h2">
+                <Typography variant="delta" tag="h2">
                   {formatMessage({
                     id: 'email.Settings.email.plugin.title.test',
                     defaultMessage: 'Test email delivery',
                   })}
                 </Typography>
 
-                <Grid gap={5}>
-                  <GridItem col={6} s={12}>
-                    <TextInput
-                      id="test-address-input"
+                <Grid.Root gap={5}>
+                  <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
+                    <Field.Root
                       name="test-address"
-                      onChange={handleChange}
-                      label={formatMessage({
-                        id: 'email.Settings.email.plugin.label.testAddress',
-                        defaultMessage: 'Recipient email',
-                      })}
-                      value={testAddress}
                       error={
                         formErrors.email?.id &&
                         formatMessage({
@@ -284,13 +281,24 @@ const SettingsPage = () => {
                           defaultMessage: 'This is not a valid email',
                         })
                       }
-                      placeholder={formatMessage({
-                        id: 'email.Settings.email.plugin.placeholder.testAddress',
-                        defaultMessage: 'ex: developer@example.com',
-                      })}
-                    />
-                  </GridItem>
-                  <GridItem col={7} s={12}>
+                    >
+                      <Field.Label>
+                        {formatMessage({
+                          id: 'email.Settings.email.plugin.label.testAddress',
+                          defaultMessage: 'Recipient email',
+                        })}
+                      </Field.Label>
+                      <TextInput
+                        onChange={handleChange}
+                        value={testAddress}
+                        placeholder={formatMessage({
+                          id: 'email.Settings.email.plugin.placeholder.testAddress',
+                          defaultMessage: 'ex: developer@example.com',
+                        })}
+                      />
+                    </Field.Root>
+                  </Grid.Item>
+                  <Grid.Item col={7} s={12} direction="column" alignItems="start">
                     <Button
                       loading={mutation.isLoading}
                       disabled={!isTestAddressValid}
@@ -302,13 +310,13 @@ const SettingsPage = () => {
                         defaultMessage: 'Send test email',
                       })}
                     </Button>
-                  </GridItem>
-                </Grid>
+                  </Grid.Item>
+                </Grid.Root>
               </Flex>
             </Flex>
           </form>
         )}
-      </ContentLayout>
+      </Layouts.Content>
     </Page.Main>
   );
 };

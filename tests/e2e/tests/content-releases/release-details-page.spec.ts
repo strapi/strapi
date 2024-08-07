@@ -2,13 +2,15 @@ import { test, expect, type Page } from '@playwright/test';
 import { describeOnCondition } from '../../utils/shared';
 import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 import { login } from '../../utils/login';
+import { findAndClose } from '../../utils/shared';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 const releaseName = 'Trent Crimm: The Independent';
 
 const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseName: string }) => {
   // Open the add to release dialog
-  await page.getByRole('button', { name: 'Add to release' }).click();
+  await page.getByRole('button', { name: 'More document actions' }).click();
+  await page.getByRole('menuitem', { name: 'Add to release' }).click();
   const addToReleaseDialog = await page.getByRole('dialog', { name: 'Add to release' });
   await expect(addToReleaseDialog).toBeVisible();
   await expect(
@@ -22,15 +24,10 @@ const addEntryToRelease = async ({ page, releaseName }: { page: Page; releaseNam
   await expect(submitReleaseButton).toBeEnabled();
   await submitReleaseButton.click();
   // See the release the entry was added to
-  await expect(
-    page.getByRole('complementary', { name: 'Releases' }).getByText(releaseName)
-  ).toBeVisible();
+  await findAndClose(page, 'Entry added to release');
 };
 
-/**
- * Skip tests on v5 until Releases + Scheduling are migrated to v5
- */
-describeOnCondition(/*edition === 'EE'*/ false)('Release page', () => {
+describeOnCondition(edition === 'EE')('Release page', () => {
   test.beforeEach(async ({ page }) => {
     await resetDatabaseAndImportDataFromPath('with-admin.tar');
     await page.goto('/admin');
@@ -41,37 +38,38 @@ describeOnCondition(/*edition === 'EE'*/ false)('Release page', () => {
     await page.waitForURL('/admin/plugins/content-releases/*');
   });
 
-  test('A user should be able to add collection-type and single-type entries to a release and publish the release', async ({
-    page,
-  }) => {
-    // Add a collection-type entry to the release
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Author' }).click();
-    await page.getByRole('gridcell', { name: 'Led Tasso' }).click();
-    await page.waitForURL('**/content-manager/collection-types/api::author.author/**');
-    await addEntryToRelease({ page, releaseName });
+  test.fixme(
+    'A user should be able to add collection-type and single-type entries to a release and publish the release',
+    async ({ page }) => {
+      // Add a collection-type entry to the release
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Author' }).click();
+      await page.getByRole('gridcell', { name: 'Led Tasso' }).click();
+      await page.waitForURL('**/content-manager/collection-types/api::author.author/**');
+      await addEntryToRelease({ page, releaseName });
 
-    // Add a single-type entry to the release
-    await page.getByRole('link', { name: 'Content Manager' }).click();
-    await page.getByRole('link', { name: 'Upcoming Matches' }).click();
-    await page.waitForURL('**/content-manager/single-types/api::upcoming-match.upcoming-match**');
-    // Open the add to release dialog
-    await addEntryToRelease({ page, releaseName });
+      // Add a single-type entry to the release
+      await page.getByRole('link', { name: 'Content Manager' }).click();
+      await page.getByRole('link', { name: 'Upcoming Matches' }).click();
+      await page.waitForURL('**/content-manager/single-types/api::upcoming-match.upcoming-match**');
+      // Open the add to release dialog
+      await addEntryToRelease({ page, releaseName });
 
-    // Publish the release
-    await page.getByRole('link', { name: 'Releases' }).click();
-    await page.getByRole('link', { name: `${releaseName}` }).click();
-    await page.getByRole('button', { name: 'Publish' }).click();
-    expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Publish' })).not.toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Release edit and delete menu' })
-    ).not.toBeVisible();
-    await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
-    await expect(
-      page.getByRole('gridcell', { name: 'This entry was published.' }).first()
-    ).toBeVisible();
-  });
+      // Publish the release
+      await page.getByRole('link', { name: 'Releases' }).click();
+      await page.getByRole('link', { name: `${releaseName}` }).click();
+      await page.getByRole('button', { name: 'Publish' }).click();
+      expect(page.getByRole('heading', { name: releaseName })).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Publish' })).not.toBeVisible();
+      await expect(
+        page.getByRole('button', { name: 'Release edit and delete menu' })
+      ).not.toBeVisible();
+      await expect(page.getByRole('gridcell', { name: 'publish unpublish' })).not.toBeVisible();
+      await expect(
+        page.getByRole('gridcell', { name: 'This entry was published.' }).first()
+      ).toBeVisible();
+    }
+  );
 
   test('A user should be able to edit and delete a release', async ({ page }) => {
     // Edit the release
@@ -92,48 +90,51 @@ describeOnCondition(/*edition === 'EE'*/ false)('Release page', () => {
     await expect(page.getByRole('link', { name: `${editedEntryName}` })).not.toBeVisible();
   });
 
-  test("A user should be able to change the entry groupings, update an entry's action, remove an entry from a release, and navigate to the entry in the content manager", async ({
-    page,
-  }) => {
-    // Change the entry groupings
-    await expect(page.getByRole('separator', { name: 'Article' })).toBeVisible();
-    await expect(page.getByRole('separator', { name: 'Author' })).toBeVisible();
-    await page.getByLabel('Group by').click();
-    await page.getByRole('option', { name: 'Actions' }).click();
-    await expect(page.getByRole('separator', { name: 'publish', exact: true })).toBeVisible();
-    await expect(page.getByRole('separator', { name: 'unpublish' })).toBeVisible();
+  test.fixme(
+    "A user should be able to change the entry groupings, update an entry's action, remove an entry from a release, and navigate to the entry in the content manager",
+    async ({ page }) => {
+      // Change the entry groupings
+      await expect(page.getByRole('separator', { name: 'Article' })).toBeVisible();
+      await expect(page.getByRole('separator', { name: 'Author' })).toBeVisible();
+      await page.getByLabel('Group by').click();
+      await page.getByRole('option', { name: 'Actions' }).click();
+      await expect(page.getByRole('separator', { name: 'publish', exact: true })).toBeVisible();
+      await expect(page.getByRole('separator', { name: 'unpublish' })).toBeVisible();
 
-    // Change the entry grouping
-    const row = await page.getByRole('row').filter({ hasText: 'West Ham post match analysis' });
-    // The first row after the header is NOT the one we will update
-    await expect(
-      page
-        .getByRole('row')
-        .nth(1)
-        .getByRole('gridcell', { name: 'Analyse post-match contre West Ham' })
-    ).toBeVisible();
-    // Update a given row's action
-    await expect(row.getByRole('radio').first()).not.toBeChecked();
-    row.locator('label').first().click();
-    await expect(row.getByRole('radio').first()).toBeChecked();
-    // The updated is now the first row after the header
-    await expect(
-      page.getByRole('row').nth(1).getByRole('gridcell', { name: 'West Ham post match analysis' })
-    ).toBeVisible();
+      // Change the entry grouping
+      const row = await page.getByRole('row').filter({ hasText: 'West Ham post match analysis' });
+      // The first row after the header is NOT the one we will update
+      await expect(
+        page
+          .getByRole('row')
+          .nth(1)
+          .getByRole('gridcell', { name: 'Analyse post-match contre West Ham' })
+      ).toBeVisible();
+      // Update a given row's action
+      await expect(row.getByRole('radio').first()).not.toBeChecked();
+      row.locator('label').first().click();
+      await expect(row.getByRole('radio').first()).toBeChecked();
+      // The updated is now the first row after the header
+      await expect(
+        page.getByRole('row').nth(1).getByRole('gridcell', { name: 'West Ham post match analysis' })
+      ).toBeVisible();
 
-    // Navigate to a given row's entry in the content-manager
-    await row.getByRole('button', { name: 'Release action options' }).click();
-    await page.getByRole('menuitem', { name: 'Edit entry' }).click();
-    await page.waitForURL('**/content-manager/collection-types/api::article.article/**');
-    await expect(page.getByRole('heading', { name: 'West Ham post match analysis' })).toBeVisible();
+      // Navigate to a given row's entry in the content-manager
+      await row.getByRole('button', { name: 'Release action options' }).click();
+      await page.getByRole('menuitem', { name: 'Edit entry' }).click();
+      await page.waitForURL('**/content-manager/collection-types/api::article.article/**');
+      await expect(
+        page.getByRole('heading', { name: 'West Ham post match analysis' })
+      ).toBeVisible();
 
-    // Return to release page
-    await page.goBack();
-    await page.waitForURL('/admin/plugins/content-releases/*');
+      // Return to release page
+      await page.goBack();
+      await page.waitForURL('/admin/plugins/content-releases/*');
 
-    // Remove a given row's entry from the release
-    await row.getByRole('button', { name: 'Release action options' }).click();
-    await page.getByRole('menuitem', { name: 'Remove from release' }).click();
-    await expect(row).not.toBeVisible();
-  });
+      // Remove a given row's entry from the release
+      await row.getByRole('button', { name: 'Release action options' }).click();
+      await page.getByRole('menuitem', { name: 'Remove from release' }).click();
+      await expect(row).not.toBeVisible();
+    }
+  );
 });

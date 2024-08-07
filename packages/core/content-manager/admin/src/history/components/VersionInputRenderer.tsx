@@ -7,10 +7,10 @@ import {
   useField,
   Form,
 } from '@strapi/admin/strapi-admin';
-import { Alert, Box, FieldLabel, Flex, Link, Tooltip } from '@strapi/design-system';
+import { Alert, Box, Field, Flex, Link, Tooltip } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 import { NavLink } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { COLLECTION_TYPES } from '../../constants/collections';
 import { useDocumentRBAC } from '../../features/DocumentRBAC';
@@ -71,18 +71,22 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
    * Ideally the server would return the correct shape, however, for admin user relations
    * it sanitizes everything out when it finds an object for the relation value.
    */
-  const formattedFieldValue = Array.isArray(field.value)
-    ? {
-        results: field.value,
-        meta: { missingCount: 0 },
-      }
-    : field.value;
+  let formattedFieldValue;
+  if (field) {
+    formattedFieldValue = Array.isArray(field.value)
+      ? { results: field.value, meta: { missingCount: 0 } }
+      : field.value;
+  }
 
-  if (!formattedFieldValue || formattedFieldValue.results.length === 0) {
+  if (
+    !formattedFieldValue ||
+    (formattedFieldValue.results.length === 0 && formattedFieldValue.meta.missingCount === 0)
+  ) {
     return (
       <>
-        <FieldLabel>{props.label}</FieldLabel>
+        <Field.Label action={props.labelAction}>{props.label}</Field.Label>
         <Box marginTop={1}>
+          {/* @ts-expect-error – we dont need closeLabel */}
           <StyledAlert variant="default">
             {formatMessage({
               id: 'content-manager.history.content.no-relations',
@@ -98,7 +102,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
 
   return (
     <Box>
-      <FieldLabel>{props.label}</FieldLabel>
+      <Field.Label>{props.label}</Field.Label>
       {results.length > 0 && (
         <Flex direction="column" gap={2} marginTop={1} alignItems="stretch">
           {results.map((relationData) => {
@@ -120,7 +124,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
               >
                 <Box minWidth={0} paddingTop={1} paddingBottom={1} paddingRight={4}>
                   <Tooltip description={label}>
-                    <LinkEllipsis forwardedAs={NavLink} to={href}>
+                    <LinkEllipsis tag={NavLink} to={href}>
                       {label}
                     </LinkEllipsis>
                   </Tooltip>
@@ -132,6 +136,7 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
         </Flex>
       )}
       {meta.missingCount > 0 && (
+        /* @ts-expect-error – we dont need closeLabel */
         <StyledAlert
           marginTop={1}
           variant="warning"
@@ -154,16 +159,6 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
           )}
         </StyledAlert>
       )}
-      {results.length === 0 && meta.missingCount === 0 && (
-        <Box marginTop={1}>
-          <StyledAlert variant="default">
-            {formatMessage({
-              id: 'content-manager.history.content.no-relations',
-              defaultMessage: 'No relations.',
-            })}
-          </StyledAlert>
-        </Box>
-      )}
     </Box>
   );
 };
@@ -173,9 +168,9 @@ const CustomRelationInput = (props: RelationsFieldProps) => {
  * -----------------------------------------------------------------------------------------------*/
 
 const CustomMediaInput = (props: VersionInputRendererProps) => {
-  const {
-    value: { results, meta },
-  } = useField(props.name);
+  const { value } = useField(props.name);
+  const results = value ? value.results : [];
+  const meta = value ? value.meta : { missingCount: 0 };
   const { formatMessage } = useIntl();
 
   const fields = useStrapiApp('CustomMediaInput', (state) => state.fields);
@@ -224,6 +219,44 @@ type VersionInputRendererProps = DistributiveOmit<EditFieldLayout, 'size'> & {
 };
 
 /**
+ * Checks if the i18n plugin added a label action to the field and modifies it
+ * to adapt the wording for the history page.
+ */
+const getLabelAction = (labelAction: VersionInputRendererProps['labelAction']) => {
+  if (!React.isValidElement(labelAction)) {
+    return labelAction;
+  }
+
+  // TODO: find a better way to do this rather than access internals
+  const labelActionTitleId = labelAction.props.title.id;
+
+  if (labelActionTitleId === 'i18n.Field.localized') {
+    return React.cloneElement(labelAction, {
+      ...labelAction.props,
+      title: {
+        id: 'history.content.localized',
+        defaultMessage:
+          'This value is specific to this locale. If you restore this version, the content will not be replaced for other locales.',
+      },
+    });
+  }
+
+  if (labelActionTitleId === 'i18n.Field.not-localized') {
+    return React.cloneElement(labelAction, {
+      ...labelAction.props,
+      title: {
+        id: 'history.content.not-localized',
+        defaultMessage:
+          'This value is common to all locales. If you restore this version and save the changes, the content will be replaced for all locales.',
+      },
+    });
+  }
+
+  // Label action is unrelated to i18n, don't touch it.
+  return labelAction;
+};
+
+/**
  * @internal
  *
  * @description An abstraction around the regular form input renderer designed specifically
@@ -234,8 +267,11 @@ const VersionInputRenderer = ({
   visible,
   hint: providedHint,
   shouldIgnoreRBAC = false,
+  labelAction,
   ...props
 }: VersionInputRendererProps) => {
+  const customLabelAction = getLabelAction(labelAction);
+
   const { formatMessage } = useIntl();
   const version = useHistoryContext('VersionContent', (state) => state.selectedVersion);
   const configuration = useHistoryContext('VersionContent', (state) => state.configuration);
@@ -292,7 +328,7 @@ const VersionInputRenderer = ({
   if (Object.keys(addedAttributes).includes(props.name)) {
     return (
       <Flex direction="column" alignItems="flex-start" gap={1}>
-        <FieldLabel>{props.label}</FieldLabel>
+        <Field.Label>{props.label}</Field.Label>
         <StyledAlert
           width="100%"
           closeLabel="Close"
@@ -321,14 +357,22 @@ const VersionInputRenderer = ({
     const CustomInput = lazyComponentStore[props.attribute.customField];
 
     if (CustomInput) {
-      // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
-      return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <CustomInput
+          {...props}
+          // @ts-expect-error – TODO: fix this type error in the useLazyComponents hook.
+          hint={hint}
+          labelAction={customLabelAction}
+          disabled={fieldIsDisabled}
+        />
+      );
     }
 
     return (
       <FormInputRenderer
         {...props}
         hint={hint}
+        labelAction={customLabelAction}
         // @ts-expect-error – this workaround lets us display that the custom field is missing.
         type={props.attribute.customField}
         disabled={fieldIsDisabled}
@@ -341,7 +385,9 @@ const VersionInputRenderer = ({
    * we need to handle the them before other custom inputs coming from the useLibrary hook.
    */
   if (props.type === 'media') {
-    return <CustomMediaInput {...props} disabled={fieldIsDisabled} />;
+    return (
+      <CustomMediaInput {...props} labelAction={customLabelAction} disabled={fieldIsDisabled} />
+    );
   }
   /**
    * This is where we handle ONLY the fields from the `useLibrary` hook.
@@ -349,8 +395,15 @@ const VersionInputRenderer = ({
   const addedInputTypes = Object.keys(fields);
   if (!attributeHasCustomFieldProperty(props.attribute) && addedInputTypes.includes(props.type)) {
     const CustomInput = fields[props.type];
-    // @ts-expect-error – TODO: fix this type error in the useLibrary hook.
-    return <CustomInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+    return (
+      <CustomInput
+        {...props}
+        // @ts-expect-error – TODO: fix this type error in the useLibrary hook.
+        hint={hint}
+        labelAction={customLabelAction}
+        disabled={fieldIsDisabled}
+      />
+    );
   }
 
   /**
@@ -375,19 +428,50 @@ const VersionInputRenderer = ({
           {...props}
           layout={[...layout, ...(remainingFieldsLayout || [])]}
           hint={hint}
+          labelAction={customLabelAction}
           disabled={fieldIsDisabled}
         >
           {(inputProps) => <VersionInputRenderer {...inputProps} shouldIgnoreRBAC={true} />}
         </ComponentInput>
       );
     case 'dynamiczone':
-      return <DynamicZone {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <DynamicZone
+          {...props}
+          hint={hint}
+          labelAction={customLabelAction}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'relation':
-      return <CustomRelationInput {...props} hint={hint} disabled={fieldIsDisabled} />;
+      return (
+        <CustomRelationInput
+          {...props}
+          hint={hint}
+          labelAction={customLabelAction}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'richtext':
-      return <Wysiwyg {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      return (
+        <Wysiwyg
+          {...props}
+          hint={hint}
+          type={props.type}
+          labelAction={customLabelAction}
+          disabled={fieldIsDisabled}
+        />
+      );
     case 'uid':
-      return <UIDInput {...props} hint={hint} type={props.type} disabled={fieldIsDisabled} />;
+      return (
+        <UIDInput
+          {...props}
+          hint={hint}
+          type={props.type}
+          labelAction={customLabelAction}
+          disabled={fieldIsDisabled}
+        />
+      );
     /**
      * Enumerations are a special case because they require options.
      */
@@ -396,6 +480,7 @@ const VersionInputRenderer = ({
         <FormInputRenderer
           {...props}
           hint={hint}
+          labelAction={customLabelAction}
           options={props.attribute.enum.map((value) => ({ value }))}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}
@@ -409,6 +494,7 @@ const VersionInputRenderer = ({
         <FormInputRenderer
           {...restProps}
           hint={hint}
+          labelAction={customLabelAction}
           // @ts-expect-error – Temp workaround so we don't forget custom-fields don't work!
           type={props.customField ? 'custom-field' : props.type}
           disabled={fieldIsDisabled}

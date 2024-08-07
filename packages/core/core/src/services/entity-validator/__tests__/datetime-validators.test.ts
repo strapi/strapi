@@ -1,6 +1,6 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-import validators from '../validators';
+import { Validators } from '../validators';
 import { mockOptions } from './utils';
 
 describe('Datetime validator', () => {
@@ -22,26 +22,26 @@ describe('Datetime validator', () => {
   };
 
   describe('unique', () => {
-    const fakeFindFirst = jest.fn();
+    const fakeFindOne = jest.fn();
 
     global.strapi = {
       db: {
         query: () => ({
-          findOne: fakeFindFirst,
+          findOne: fakeFindOne,
         }),
       },
     } as any;
 
     afterEach(() => {
       jest.clearAllMocks();
-      fakeFindFirst.mockReset();
+      fakeFindOne.mockReset();
     });
 
     test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime' },
             model: fakeModel,
@@ -54,35 +54,33 @@ describe('Datetime validator', () => {
 
       await validator('2021-11-29T00:00:00.000Z');
 
-      expect(fakeFindFirst).not.toHaveBeenCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it does not validates the unique constraint if the attribute value is `null`', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators
-          .datetime(
-            {
-              attr: { type: 'datetime', unique: true },
-              model: fakeModel,
-              updatedAttribute: { name: 'attrDateTimeUnique', value: null },
-              entity: null,
-            },
-            mockOptions
-          )
-          .nullable()
+        Validators.datetime(
+          {
+            attr: { type: 'datetime', unique: true },
+            model: fakeModel,
+            updatedAttribute: { name: 'attrDateTimeUnique', value: null },
+            entity: null,
+          },
+          mockOptions
+        ).nullable()
       );
 
       await validator(null);
-      expect(fakeFindFirst).not.toHaveBeenCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it validates the unique constraint if there is no other record in the database', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
@@ -98,10 +96,10 @@ describe('Datetime validator', () => {
 
     test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
       expect.assertions(1);
-      fakeFindFirst.mockResolvedValueOnce({ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' });
+      fakeFindOne.mockResolvedValueOnce({ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
@@ -120,10 +118,10 @@ describe('Datetime validator', () => {
     });
 
     test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
-      fakeFindFirst.mockResolvedValueOnce({ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' });
+      fakeFindOne.mockResolvedValueOnce({ attrDateTimeUnique: '2021-11-29T00:00:00.000Z' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
@@ -138,10 +136,10 @@ describe('Datetime validator', () => {
     });
 
     test('it checks the database for records with the same value for the checked attribute', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
@@ -154,7 +152,7 @@ describe('Datetime validator', () => {
 
       await validator('2021-11-29T00:00:00.000Z');
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           locale: 'en',
           publishedAt: null,
@@ -164,10 +162,10 @@ describe('Datetime validator', () => {
     });
 
     test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.datetime(
+        Validators.datetime(
           {
             attr: { type: 'datetime', unique: true },
             model: fakeModel,
@@ -180,7 +178,7 @@ describe('Datetime validator', () => {
 
       await validator('2021-11-29T00:00:00.000Z');
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           attrDateTimeUnique: '2021-11-29T00:00:00.000Z',
           id: {

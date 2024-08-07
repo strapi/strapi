@@ -49,6 +49,7 @@ const getFileData = (filePath: string) => ({
   ext: '.png',
   folder: null,
   folderPath: '/',
+  filepath: filePath,
   getStream: () => fs.createReadStream(filePath),
   hash: 'image_d9b4f84424',
   height: 1000,

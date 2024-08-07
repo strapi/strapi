@@ -89,6 +89,7 @@ const params: OpenAPIV3.ParameterObject[] = [
     required: false,
     schema: {
       type: 'object',
+      additionalProperties: true,
     },
     style: 'deepObject',
   },

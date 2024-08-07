@@ -1,9 +1,18 @@
 import * as React from 'react';
 
-import { BaseButton, Box, Flex, FocusTrap, Portal, Typography } from '@strapi/design-system';
+import {
+  Button,
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  FocusTrap,
+  Portal,
+  Typography,
+} from '@strapi/design-system';
 import { Collapse } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { PreviewWysiwyg } from './PreviewWysiwyg';
 
@@ -48,7 +57,7 @@ const EditorLayout = ({
             justifyContent="center"
             onClick={onCollapse}
           >
-            <Box
+            <Box<'div'>
               background="neutral0"
               hasRadius
               shadow="popupShadow"
@@ -69,7 +78,7 @@ const EditorLayout = ({
                     shrink={0}
                     width="100%"
                   >
-                    <ExpandButton onClick={onCollapse}>
+                    <ExpandButton onClick={onCollapse} variant="tertiary" size="M">
                       <Typography>
                         {formatMessage({
                           id: 'components.Wysiwyg.collapse',
@@ -93,32 +102,42 @@ const EditorLayout = ({
   }
 
   return (
-    <Box
+    <Flex
       borderColor={error ? 'danger600' : 'neutral200'}
       borderStyle="solid"
       borderWidth="1px"
       hasRadius
+      direction="column"
+      alignItems="stretch"
     >
       {children}
-    </Box>
+    </Flex>
   );
 };
 
-const ExpandWrapper = styled(Flex)`
+const ExpandWrapper = styled<FlexComponent>(Flex)`
   background: ${({ theme }) =>
     `${theme.colors.neutral800}${Math.floor(0.2 * 255)
       .toString(16)
       .padStart(2, '0')}`};
 `;
 
-const BoxWithBorder = styled(Box)`
+const BoxWithBorder = styled<BoxComponent>(Box)`
   border-right: 1px solid ${({ theme }) => theme.colors.neutral200};
 `;
 
-const ExpandButton = styled(BaseButton)`
+const ExpandButton = styled(Button)`
   background-color: transparent;
   border: none;
   align-items: center;
+
+  & > span {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-weight: ${({ theme }) => theme.fontWeights.regular};
+  }
 
   svg {
     margin-left: ${({ theme }) => `${theme.spaces[2]}`};

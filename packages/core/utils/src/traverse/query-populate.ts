@@ -12,8 +12,6 @@ import {
   cloneDeep,
   join,
   first,
-  omit,
-  merge,
 } from 'lodash/fp';
 
 import traverseFactory from './factory';
@@ -177,7 +175,9 @@ const populate = traverseFactory()
         // If there is a populate fragment defined, traverse it
         const newValue = await recurse(visitor, { schema, path, getModel }, { on: value?.on });
 
-        set(key, { on: newValue });
+        set(key, newValue);
+
+        return;
       }
 
       const targetSchemaUID = attribute.target;
@@ -214,48 +214,17 @@ const populate = traverseFactory()
     set(key, newValue);
   })
   // Handle populate on dynamic zones
-  .onDynamicZone(
-    async ({ key, value, attribute, schema, visitor, path, getModel }, { set, recurse }) => {
-      if (isNil(value)) {
-        return;
-      }
-
-      if (isObject(value)) {
-        const { components } = attribute;
-
-        const newValue = {};
-
-        // Handle legacy DZ params
-        let newProperties: unknown = omit('on', value);
-
-        for (const componentUID of components) {
-          const componentSchema = getModel(componentUID);
-
-          const properties = await recurse(
-            visitor,
-            { schema: componentSchema, path, getModel },
-            value
-          );
-          newProperties = merge(newProperties, properties);
-        }
-
-        Object.assign(newValue, newProperties);
-
-        // Handle new morph fragment syntax
-        if ('on' in value && value.on) {
-          const newOn = await recurse(visitor, { schema, path, getModel }, { on: value.on });
-
-          // Recompose both syntaxes
-          Object.assign(newValue, newOn);
-        }
-
-        set(key, newValue);
-      } else {
-        const newValue = await recurse(visitor, { schema, path, getModel }, value);
-
-        set(key, newValue);
-      }
+  .onDynamicZone(async ({ key, value, schema, visitor, path, getModel }, { set, recurse }) => {
+    if (isNil(value) || !isObject(value)) {
+      return;
     }
-  );
+
+    // Handle fragment syntax
+    if ('on' in value && value.on) {
+      const newOn = await recurse(visitor, { schema, path, getModel }, { on: value.on });
+
+      set(key, newOn);
+    }
+  });
 
 export default curry(populate.traverse);

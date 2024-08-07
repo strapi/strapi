@@ -1,3 +1,5 @@
+import { buildStrapiCloudCommands as cloudCommands } from '@strapi/cloud-cli';
+
 import { command as createAdminUser } from './admin/create-user';
 import { command as resetAdminUserPassword } from './admin/reset-user-password';
 import { command as listComponents } from './components/list';
@@ -25,11 +27,6 @@ import exportCommand from './export/command';
 import importCommand from './import/command';
 import transferCommand from './transfer/command';
 
-import { command as buildPluginCommand } from './plugin/build';
-import { command as initPluginCommand } from './plugin/init';
-import { command as linkWatchPluginCommand } from './plugin/link-watch';
-import { command as watchPluginCommand } from './plugin/watch';
-import { command as verifyPluginCommand } from './plugin/verify';
 import { StrapiCommand } from '../types';
 
 export const commands: StrapiCommand[] = [
@@ -60,11 +57,7 @@ export const commands: StrapiCommand[] = [
   importCommand,
   transferCommand,
   /**
-   * Plugins
+   * Cloud
    */
-  buildPluginCommand,
-  initPluginCommand,
-  linkWatchPluginCommand,
-  watchPluginCommand,
-  verifyPluginCommand,
+  cloudCommands,
 ];

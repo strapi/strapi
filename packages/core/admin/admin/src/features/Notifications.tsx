@@ -1,7 +1,6 @@
 import * as React from 'react';
 
-import { Alert, AlertVariant, Flex, useCallbackRef } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Alert, AlertVariant, Flex, useCallbackRef, Link } from '@strapi/design-system';
 import { useIntl } from 'react-intl';
 
 interface NotificationLink {
@@ -91,7 +90,7 @@ const NotificationsProvider = ({ children }: NotificationsProviderProps) => {
         gap={2}
         top={`4.6rem`}
         width={`50rem`}
-        zIndex={10}
+        zIndex="notification"
       >
         {notifications.map((notification) => {
           return (

@@ -1,11 +1,10 @@
 import * as React from 'react';
 
-import { Box, Button, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
-import { Link } from '@strapi/design-system';
+import { Box, Button, Flex, Grid, Typography, Link } from '@strapi/design-system';
 import omit from 'lodash/omit';
 import { useIntl } from 'react-intl';
 import { NavLink, Navigate, useNavigate, useMatch, useLocation } from 'react-router-dom';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 import * as yup from 'yup';
 import { ValidationError } from 'yup';
 
@@ -18,11 +17,12 @@ import { InputRenderer } from '../../../components/FormInputs/Renderer';
 import { useGuidedTour } from '../../../components/GuidedTour/Provider';
 import { useNpsSurveySettings } from '../../../components/NpsSurvey';
 import { Logo } from '../../../components/UnauthenticatedLogo';
-import { useAuth } from '../../../features/Auth';
+import { useTypedDispatch } from '../../../core/store/hooks';
 import { useNotification } from '../../../features/Notifications';
 import { useTracking } from '../../../features/Tracking';
 import { useAPIErrorHandler } from '../../../hooks/useAPIErrorHandler';
 import { LayoutContent, UnauthenticatedLayout } from '../../../layouts/UnauthenticatedLayout';
+import { login } from '../../../reducer';
 import {
   useGetRegistrationInfoQuery,
   useRegisterAdminMutation,
@@ -193,7 +193,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
 
   const [registerAdmin] = useRegisterAdminMutation();
   const [registerUser] = useRegisterUserMutation();
-  const setToken = useAuth('Register', (state) => state.setToken);
+  const dispatch = useTypedDispatch();
 
   const handleRegisterAdmin = async (
     { news, ...body }: RegisterAdmin.Request['body'] & { news: boolean },
@@ -202,7 +202,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     const res = await registerAdmin(body);
 
     if ('data' in res) {
-      setToken(res.data.token);
+      dispatch(login({ token: res.data.token }));
 
       const { roles } = res.data.user;
 
@@ -248,7 +248,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
     const res = await registerUser(body);
 
     if ('data' in res) {
-      setToken(res.data.token);
+      dispatch(login({ token: res.data.token }));
 
       if (news) {
         // Only enable EE survey if user accepted the newsletter
@@ -292,7 +292,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         <Flex direction="column" alignItems="center" gap={3}>
           <Logo />
 
-          <Typography as="h1" variant="alpha" textAlign="center">
+          <Typography tag="h1" variant="alpha" textAlign="center">
             {formatMessage({
               id: 'Auth.form.welcome.title',
               defaultMessage: 'Welcome to Strapi!',
@@ -370,7 +370,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
           }}
         >
           <Flex direction="column" alignItems="stretch" gap={6} marginTop={7}>
-            <Grid gap={4}>
+            <Grid.Root gap={4}>
               {[
                 {
                   label: formatMessage({
@@ -458,11 +458,11 @@ const Register = ({ hasAdmin }: RegisterProps) => {
                   type: 'checkbox' as const,
                 },
               ].map(({ size, ...field }) => (
-                <GridItem key={field.name} col={size}>
+                <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
                   <InputRenderer {...field} />
-                </GridItem>
+                </Grid.Item>
               ))}
-            </Grid>
+            </Grid.Root>
             <Button fullWidth size="L" type="submit">
               {formatMessage({
                 id: 'Auth.form.button.register',
@@ -474,8 +474,7 @@ const Register = ({ hasAdmin }: RegisterProps) => {
         {match?.params.authType === 'register' && (
           <Box paddingTop={4}>
             <Flex justifyContent="center">
-              {/* @ts-expect-error – error with inferring the props from the as component */}
-              <Link as={NavLink} to="/auth/login">
+              <Link tag={NavLink} to="/auth/login">
                 {formatMessage({
                   id: 'Auth.link.signin.account',
                   defaultMessage: 'Already have an account?',

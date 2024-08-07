@@ -15,19 +15,18 @@ import {
 } from '@strapi/admin/strapi-admin/test';
 
 import { reducer } from '../src/modules/reducers';
-import { contentManagerApi } from '../src/services/api';
 
-const storeConfig: ConfigureStoreOptions = {
-  preloadedState: defaultTestStoreConfig.preloadedState,
-  reducer: {
-    ...defaultTestStoreConfig.reducer,
-    [contentManagerApi.reducerPath]: contentManagerApi.reducer,
-    'content-manager': reducer,
-  },
-  middleware: (getDefaultMiddleware) => [
-    ...defaultTestStoreConfig.middleware(getDefaultMiddleware),
-    contentManagerApi.middleware,
-  ],
+const storeConfig = (): ConfigureStoreOptions => {
+  const testStoreConfig = defaultTestStoreConfig();
+
+  return {
+    preloadedState: testStoreConfig.preloadedState,
+    reducer: {
+      ...testStoreConfig.reducer,
+      'content-manager': reducer,
+    },
+    middleware: (getDefaultMiddleware) => [...testStoreConfig.middleware(getDefaultMiddleware)],
+  };
 };
 
 const render = (
@@ -36,13 +35,13 @@ const render = (
 ): ReturnType<typeof renderAdmin> =>
   renderAdmin(ui, {
     ...options,
-    providerOptions: { storeConfig },
+    providerOptions: { storeConfig: storeConfig() },
   });
 
 const renderHook: typeof renderHookAdmin = (hook, options) =>
   renderHookAdmin(hook, {
     ...options,
-    providerOptions: { storeConfig },
+    providerOptions: { storeConfig: storeConfig() },
   });
 
 export { fireEvent, render, waitFor, act, screen, server, renderHook };

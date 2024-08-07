@@ -1,10 +1,18 @@
 import * as React from 'react';
 
-import { Box, Flex, Typography, useComposedRefs } from '@strapi/design-system';
+import {
+  Box,
+  BoxComponent,
+  Flex,
+  FlexComponent,
+  Modal,
+  Typography,
+  useComposedRefs,
+} from '@strapi/design-system';
 import { Cross, Drag, Pencil } from '@strapi/icons';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { CardDragPreview } from '../../../components/DragPreviews/CardDragPreview';
 import { ItemTypes } from '../../../constants/dragAndDrop';
@@ -65,10 +73,13 @@ const DraggableCard = ({
     }
   }, [isDraggingSibling]);
 
-  const composedRefs = useComposedRefs<HTMLSpanElement>(dragRef, objectRef);
+  const composedRefs = useComposedRefs<HTMLButtonElement>(
+    dropRef,
+    objectRef as React.RefObject<HTMLButtonElement>
+  );
 
   return (
-    <FieldWrapper ref={dropRef}>
+    <FieldWrapper ref={composedRefs}>
       {isDragging && <CardDragPreview label={label} />}
       {!isDragging && isDraggingSibling && <CardDragPreview isSibling label={label} />}
 
@@ -82,7 +93,7 @@ const DraggableCard = ({
         >
           <Flex gap={3}>
             <DragButton
-              as="span"
+              ref={dragRef}
               aria-label={formatMessage(
                 {
                   id: getTranslation('components.DraggableCard.move.field'),
@@ -91,29 +102,38 @@ const DraggableCard = ({
                 { item: label }
               )}
               onClick={(e) => e.stopPropagation()}
-              ref={composedRefs}
             >
               <Drag />
             </DragButton>
             <Typography fontWeight="bold">{label}</Typography>
           </Flex>
-          <Flex paddingLeft={3}>
-            <ActionButton
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsModalOpen(true);
-              }}
-              aria-label={formatMessage(
-                {
-                  id: getTranslation('components.DraggableCard.edit.field'),
-                  defaultMessage: 'Edit {item}',
-                },
-                { item: label }
-              )}
-              type="button"
-            >
-              <Pencil width="1.2rem" height="1.2rem" />
-            </ActionButton>
+          <Flex paddingLeft={3} onClick={(e) => e.stopPropagation()}>
+            <Modal.Root open={isModalOpen} onOpenChange={setIsModalOpen}>
+              <Modal.Trigger>
+                <ActionButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}
+                  aria-label={formatMessage(
+                    {
+                      id: getTranslation('components.DraggableCard.edit.field'),
+                      defaultMessage: 'Edit {item}',
+                    },
+                    { item: label }
+                  )}
+                  type="button"
+                >
+                  <Pencil width="1.2rem" height="1.2rem" />
+                </ActionButton>
+              </Modal.Trigger>
+              <EditFieldForm
+                attribute={attribute}
+                name={`layout.${index}`}
+                onClose={() => {
+                  setIsModalOpen(false);
+                }}
+              />
+            </Modal.Root>
             <ActionButton
               onClick={onRemoveField}
               data-testid={`delete-${name}`}
@@ -130,13 +150,6 @@ const DraggableCard = ({
             </ActionButton>
           </Flex>
         </FieldContainer>
-      )}
-      {isModalOpen && (
-        <EditFieldForm
-          attribute={attribute}
-          name={`layout.${index}`}
-          onClose={() => setIsModalOpen(false)}
-        />
       )}
     </FieldWrapper>
   );
@@ -163,12 +176,12 @@ const DragButton = styled(ActionButton)`
   cursor: all-scroll;
 `;
 
-const FieldContainer = styled(Flex)`
+const FieldContainer = styled<FlexComponent>(Flex)`
   max-height: 3.2rem;
   cursor: pointer;
 `;
 
-const FieldWrapper = styled(Box)`
+const FieldWrapper = styled<BoxComponent>(Box)`
   &:last-child {
     padding-right: ${({ theme }) => theme.spaces[3]};
   }

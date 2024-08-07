@@ -61,9 +61,9 @@ interface ListViewContext {
    */
   collectionType: string;
   /**
-   * TODO: add comment
+   * The current selected documents in the table
    */
-  documentIds: string[];
+  documents: Document[];
   /**
    * The current content-type's model.
    */
@@ -106,7 +106,7 @@ interface BulkActionComponentProps extends ListViewContext {}
 
 interface BulkActionComponent
   extends DescriptionComponent<BulkActionComponentProps, BulkActionDescription> {
-  actionType?: 'delete' | 'publish' | 'unpublish';
+  type?: 'delete' | 'publish' | 'unpublish';
 }
 
 /* -------------------------------------------------------------------------------------------------
@@ -125,7 +125,6 @@ class ContentManagerPlugin {
     ...DEFAULT_ACTIONS,
     ...DEFAULT_TABLE_ROW_ACTIONS,
     ...DEFAULT_HEADER_ACTIONS,
-    HistoryAction,
   ];
   editViewSidePanels: PanelComponent[] = [ActionsPanel];
   headerActions: HeaderActionComponent[] = [];

@@ -1,5 +1,6 @@
 /* eslint-disable testing-library/no-node-access */
-import { render, screen, within } from '@testing-library/react';
+
+import { render, screen } from '@tests/utils';
 import { createEditor, Transforms, Editor } from 'slate';
 
 import { codeBlocks } from '../Code';
@@ -21,15 +22,14 @@ describe('Code', () => {
         },
       }),
       {
-        wrapper: Wrapper,
+        renderOptions: {
+          wrapper: Wrapper,
+        },
       }
     );
 
-    const pre = screen.getByRole('code');
-    expect(pre).toBeInTheDocument();
-
-    const code = within(pre).getByText('Some code');
-    expect(code).toBeInTheDocument();
+    expect(screen.getByRole('code')).toBeInTheDocument();
+    expect(screen.getByText('Some code')).toBeInTheDocument();
   });
 
   it('handles enter key on a code block', () => {
@@ -121,6 +121,7 @@ describe('Code', () => {
     expect(baseEditor.children).toEqual([
       {
         type: 'code',
+        language: 'plaintext',
         children: [
           {
             type: 'text',

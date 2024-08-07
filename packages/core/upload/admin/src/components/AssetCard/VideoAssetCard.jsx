@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 import { Box, CardAsset, CardTimer } from '@strapi/design-system';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { formatDuration } from '../../utils';
 

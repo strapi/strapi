@@ -2,13 +2,16 @@ import get from 'lodash/get';
 import * as yup from 'yup';
 
 import { CheckboxConfirmation } from './components/CheckboxConfirmation';
-import { DeleteLocaleAction, LocalePickerAction } from './components/CMHeaderActions';
+import {
+  BulkLocalePublishAction,
+  DeleteLocaleAction,
+  LocalePickerAction,
+} from './components/CMHeaderActions';
 import {
   DeleteModalAdditionalInfo,
   PublishModalAdditionalInfo,
   UnpublishModalAdditionalInfo,
 } from './components/CMListViewModalsAdditionalInformation';
-import { Initializer } from './components/Initializer';
 import { LocalePicker } from './components/LocalePicker';
 import { PERMISSIONS } from './constants';
 import { mutateEditViewHook } from './contentManagerHooks/editView';
@@ -24,7 +27,7 @@ import { getTranslation } from './utils/getTranslation';
 import { prefixPluginTranslations } from './utils/prefixPluginTranslations';
 import { mutateCTBContentTypeSchema } from './utils/schemas';
 
-import type { DocumentActionComponent } from '@strapi/plugin-content-manager/strapi-admin';
+import type { DocumentActionComponent } from '@strapi/content-manager/strapi-admin';
 
 // eslint-disable-next-line import/no-default-export
 export default {
@@ -37,8 +40,6 @@ export default {
     app.addRBACMiddleware([localeMiddleware]);
     app.registerPlugin({
       id: pluginId,
-      initializer: Initializer,
-      isReady: false,
       name: pluginId,
     });
   },
@@ -71,6 +72,13 @@ export default {
     contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
       const indexOfDeleteAction = actions.findIndex((action) => action.type === 'delete');
       actions.splice(indexOfDeleteAction, 0, DeleteLocaleAction);
+      return actions;
+    });
+
+    contentManager.apis.addDocumentAction((actions: DocumentActionComponent[]) => {
+      // When enabled the bulk locale publish action should be the first action
+      // in 'More Document Actions' and therefore the third action in the array
+      actions.splice(2, 0, BulkLocalePublishAction);
       return actions;
     });
 

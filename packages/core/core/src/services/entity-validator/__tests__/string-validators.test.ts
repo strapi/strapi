@@ -1,6 +1,6 @@
 import strapiUtils, { errors } from '@strapi/utils';
 import type { Schema } from '@strapi/types';
-import validators from '../validators';
+import { Validators } from '../validators';
 import { mockOptions } from './utils';
 
 describe('String validator', () => {
@@ -22,26 +22,26 @@ describe('String validator', () => {
   };
 
   describe('unique', () => {
-    const fakeFindFirst = jest.fn();
+    const fakeFindOne = jest.fn();
 
     global.strapi = {
       db: {
         query: () => ({
-          findOne: fakeFindFirst,
+          findOne: fakeFindOne,
         }),
       },
     } as any;
 
     afterEach(() => {
       jest.clearAllMocks();
-      fakeFindFirst.mockReset();
+      fakeFindOne.mockReset();
     });
 
     test('it does not validates the unique constraint if the attribute is not set as unique', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string' },
             model: fakeModel,
@@ -57,39 +57,37 @@ describe('String validator', () => {
 
       await validator('non-unique-test-data');
 
-      expect(fakeFindFirst).not.toHaveBeenCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it does not validates the unique constraint if the attribute value is `null`', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators
-          .string(
-            {
-              attr: { type: 'string', unique: true },
-              model: fakeModel,
-              updatedAttribute: {
-                name: 'attrStringUnique',
-                value: null,
-              },
-              entity: null,
+        Validators.string(
+          {
+            attr: { type: 'string', unique: true },
+            model: fakeModel,
+            updatedAttribute: {
+              name: 'attrStringUnique',
+              value: null,
             },
-            mockOptions
-          )
-          .nullable()
+            entity: null,
+          },
+          mockOptions
+        ).nullable()
       );
 
       await validator(null);
 
-      expect(fakeFindFirst).not.toHaveBeenCalled();
+      expect(fakeFindOne).not.toHaveBeenCalled();
     });
 
     test('it validates the unique constraint if there is no other record in the database', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -108,10 +106,10 @@ describe('String validator', () => {
 
     test('it fails the validation of the unique constraint if the database contains a record with the same attribute value', async () => {
       expect.assertions(1);
-      fakeFindFirst.mockResolvedValueOnce({ attrStringUnique: 'unique-test-data' });
+      fakeFindOne.mockResolvedValueOnce({ attrStringUnique: 'unique-test-data' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -133,10 +131,10 @@ describe('String validator', () => {
     });
 
     test('it validates the unique constraint if the attribute data has not changed even if there is a record in the database with the same attribute value', async () => {
-      fakeFindFirst.mockResolvedValueOnce({ attrStringUnique: 'non-updated-unique-test-data' });
+      fakeFindOne.mockResolvedValueOnce({ attrStringUnique: 'non-updated-unique-test-data' });
 
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -154,11 +152,11 @@ describe('String validator', () => {
     });
 
     test('it checks the database for records with the same value for the checked attribute', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const valueToCheck = 'test-data';
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -174,7 +172,7 @@ describe('String validator', () => {
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           locale: 'en',
           attrStringUnique: valueToCheck,
@@ -184,11 +182,11 @@ describe('String validator', () => {
     });
 
     test('it checks the database for records with the same value but not the same id for the checked attribute if an entity is passed', async () => {
-      fakeFindFirst.mockResolvedValueOnce(null);
+      fakeFindOne.mockResolvedValueOnce(null);
 
       const valueToCheck = 'test-data';
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', unique: true },
             model: fakeModel,
@@ -204,7 +202,7 @@ describe('String validator', () => {
 
       await validator(valueToCheck);
 
-      expect(fakeFindFirst).toHaveBeenCalledWith({
+      expect(fakeFindOne).toHaveBeenCalledWith({
         where: {
           attrStringUnique: valueToCheck,
           id: {
@@ -220,7 +218,7 @@ describe('String validator', () => {
   describe('minLength', () => {
     test('it does not validates the minLength constraint if it is a draft', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', minLength: 3 },
             model: fakeModel,
@@ -239,7 +237,7 @@ describe('String validator', () => {
 
     test('it fails the validation if the string is shorter than the define minLength', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', minLength: 3 },
             model: fakeModel,
@@ -262,7 +260,7 @@ describe('String validator', () => {
 
     test('it validates the minLength constraint if the string is longer than the define minLength', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', minLength: 3 },
             model: fakeModel,
@@ -285,7 +283,7 @@ describe('String validator', () => {
   describe('maxLength', () => {
     test('it does not validates the maxLength constraint if the attribute maxLength is not an integer', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', maxLength: 123 },
             model: fakeModel,
@@ -306,7 +304,7 @@ describe('String validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', maxLength: 3 },
             model: fakeModel,
@@ -329,7 +327,7 @@ describe('String validator', () => {
 
     test('it validates the maxLength constraint if the string is shorter than the define maxLength', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', maxLength: 3 },
             model: fakeModel,
@@ -352,7 +350,7 @@ describe('String validator', () => {
       expect.assertions(1);
 
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', required: true, regex: /^\w+$/ },
             model: fakeModel,
@@ -375,7 +373,7 @@ describe('String validator', () => {
 
     test('it validates a string for required field according to the regex constraint', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', required: true, regex: /^\w+$/ },
             model: fakeModel,
@@ -394,7 +392,7 @@ describe('String validator', () => {
 
     test('it validates an empty string for non-required field with a regex constraint', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', required: false, regex: /^\w+$/ },
             model: fakeModel,
@@ -413,7 +411,7 @@ describe('String validator', () => {
 
     test('it validates a string for non-required field according to the regex constraint', async () => {
       const validator = strapiUtils.validateYupSchema(
-        validators.string(
+        Validators.string(
           {
             attr: { type: 'string', required: false, regex: /^\w+$/ },
             model: fakeModel,

@@ -11,7 +11,22 @@ const ADMIN: TsConfigFiles = {
     name: 'admin/tsconfig.json',
     contents: outdent`
         {
-          "extends": "@strapi/typescript-utils/tsconfigs/admin",
+          "compilerOptions: {
+            target: 'ESNext',
+            module: 'ESNext',
+            moduleResolution: 'Bundler',
+            useDefineForClassFields: true,
+            lib: ['DOM', 'DOM.Iterable', 'ESNext'],
+            allowJs: false,
+            skipLibCheck: true,
+            esModuleInterop: true,
+            allowSyntheticDefaultImports: true,
+            strict: true,
+            forceConsistentCasingInFileNames: true,
+            resolveJsonModule: true,
+            noEmit: true,
+            jsx: 'react-jsx',
+          },
           "include": ["./src", "./custom.d.ts"],
           "compilerOptions": {
             "rootDir": "../",
@@ -42,11 +57,24 @@ const SERVER: TsConfigFiles = {
     name: 'server/tsconfig.json',
     contents: outdent`
         {
-          "extends": "@strapi/typescript-utils/tsconfigs/server",
           "include": ["./src"],
           "compilerOptions": {
             "rootDir": "../",
             "baseUrl": ".",
+            "module": "CommonJS",
+            "moduleResolution": "Node",
+            "lib": ["ES2020"],
+            "target": "ES2019",
+
+            "strict": false,
+            "skipLibCheck": true,
+            "forceConsistentCasingInFileNames": true,
+
+            "incremental": true,
+            "esModuleInterop": true,
+            "resolveJsonModule": true,
+            "noEmitOnError": true,
+            "noImplicitThis": true
           },
         }
       `,

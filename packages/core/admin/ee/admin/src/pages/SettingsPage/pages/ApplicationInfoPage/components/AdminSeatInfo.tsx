@@ -1,4 +1,4 @@
-import { Flex, GridItem, Tooltip, Typography, Link } from '@strapi/design-system';
+import { Flex, Tooltip, Typography, Link, Grid } from '@strapi/design-system';
 import { ExternalLink, WarningCircle } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import { useSelector } from 'react-redux';
@@ -43,7 +43,7 @@ export const AdminSeatInfoEE = () => {
   }
 
   return (
-    <GridItem col={6} s={12}>
+    <Grid.Item col={6} s={12} direction="column" alignItems="stretch">
       <Typography variant="sigma" textColor="neutral600">
         {formatMessage({
           id: 'Settings.application.admin-seats',
@@ -52,7 +52,7 @@ export const AdminSeatInfoEE = () => {
       </Typography>
       <Flex gap={2}>
         <Flex>
-          <Typography as="p">
+          <Typography tag="p">
             {formatMessage(
               {
                 id: 'Settings.application.ee.admin-seats.count',
@@ -76,7 +76,7 @@ export const AdminSeatInfoEE = () => {
         </Flex>
         {licenseLimitStatus === 'OVER_LIMIT' && (
           <Tooltip
-            description={formatMessage({
+            label={formatMessage({
               id: 'Settings.application.ee.admin-seats.at-limit-tooltip',
               defaultMessage: 'At limit: add seats to invite more users',
             })}
@@ -99,6 +99,6 @@ export const AdminSeatInfoEE = () => {
           { isHostedOnStrapiCloud }
         )}
       </Link>
-    </GridItem>
+    </Grid.Item>
   );
 };

@@ -4,23 +4,24 @@ import * as React from 'react';
 import { Flex, VisuallyHidden } from '@strapi/design-system';
 import { Earth, EarthStriked } from '@strapi/icons';
 import { MessageDescriptor, useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTranslation } from '../utils/getTranslation';
 
-import type { EditFieldLayout, EditLayout } from '@strapi/plugin-content-manager/strapi-admin';
+import type { EditFieldLayout, EditLayout } from '@strapi/content-manager/strapi-admin';
 
 interface MutateEditViewArgs {
   layout: EditLayout;
 }
 
 const mutateEditViewHook = ({ layout }: MutateEditViewArgs): MutateEditViewArgs => {
+  // If i18n isn't explicitly enabled on the content type, then no field can be localized
   if (
-    'i18n' in layout.options &&
-    typeof layout.options.i18n === 'object' &&
-    layout.options.i18n !== null &&
-    'localized' in layout.options.i18n &&
-    !layout.options.i18n.localized
+    !('i18n' in layout.options) ||
+    (typeof layout.options.i18n === 'object' &&
+      layout.options.i18n !== null &&
+      'localized' in layout.options.i18n &&
+      !layout.options.i18n.localized)
   ) {
     return { layout };
   }
@@ -98,8 +99,8 @@ const LabelAction = ({ title, icon }: LabelActionProps) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Span as="span">
-      <VisuallyHidden as="span">{`(${formatMessage(title)})`}</VisuallyHidden>
+    <Span tag="span">
+      <VisuallyHidden tag="span">{formatMessage(title)}</VisuallyHidden>
       {React.cloneElement(icon as React.ReactElement, {
         'aria-hidden': true,
         focusable: false, // See: https://allyjs.io/tutorials/focusing-in-svg.html#making-svg-elements-focusable

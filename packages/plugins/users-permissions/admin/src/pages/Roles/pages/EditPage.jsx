@@ -1,16 +1,14 @@
 import * as React from 'react';
 
 import {
-  ContentLayout,
-  HeaderLayout,
   Main,
   Button,
   Flex,
   TextInput,
   Textarea,
   Typography,
-  GridItem,
   Grid,
+  Field,
 } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import {
@@ -19,6 +17,7 @@ import {
   useAPIErrorHandler,
   useNotification,
   useFetchClient,
+  Layouts,
 } from '@strapi/strapi/admin';
 import { Formik, Form } from 'formik';
 import { useIntl } from 'react-intl';
@@ -102,7 +101,7 @@ export const EditPage = () => {
       >
         {({ handleSubmit, values, handleChange, errors }) => (
           <Form noValidate onSubmit={handleSubmit}>
-            <HeaderLayout
+            <Layouts.Header
               primaryAction={
                 !isLoadingPlugins ? (
                   <Button
@@ -122,7 +121,7 @@ export const EditPage = () => {
               subtitle={role.description}
               navigationAction={<BackButton />}
             />
-            <ContentLayout>
+            <Layouts.Content>
               <Flex
                 background="neutral0"
                 direction="column"
@@ -136,40 +135,40 @@ export const EditPage = () => {
                 shadow="filterShadow"
               >
                 <Flex direction="column" alignItems="stretch" gap={4}>
-                  <Typography variant="delta" as="h2">
+                  <Typography variant="delta" tag="h2">
                     {formatMessage({
                       id: getTrad('EditPage.form.roles'),
                       defaultMessage: 'Role details',
                     })}
                   </Typography>
 
-                  <Grid gap={4}>
-                    <GridItem col={6}>
-                      <TextInput
+                  <Grid.Root gap={4}>
+                    <Grid.Item col={6} direction="column" alignItems="stretch">
+                      <Field.Root
                         name="name"
-                        value={values.name || ''}
-                        onChange={handleChange}
-                        label={formatMessage({
-                          id: 'global.name',
-                          defaultMessage: 'Name',
-                        })}
                         error={
                           errors?.name
-                            ? formatMessage({ id: errors.name, defaultMessage: 'Name is required' })
+                            ? formatMessage({
+                                id: errors.name,
+                                defaultMessage: 'Name is required',
+                              })
                             : false
                         }
                         required
-                      />
-                    </GridItem>
-                    <GridItem col={6}>
-                      <Textarea
-                        id="description"
-                        value={values.description || ''}
-                        onChange={handleChange}
-                        label={formatMessage({
-                          id: 'global.description',
-                          defaultMessage: 'Description',
-                        })}
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'global.name',
+                            defaultMessage: 'Name',
+                          })}
+                        </Field.Label>
+                        <TextInput value={values.name || ''} onChange={handleChange} />
+                        <Field.Error />
+                      </Field.Root>
+                    </Grid.Item>
+                    <Grid.Item col={6} direction="column" alignItems="stretch">
+                      <Field.Root
+                        name="description"
                         error={
                           errors?.description
                             ? formatMessage({
@@ -179,9 +178,18 @@ export const EditPage = () => {
                             : false
                         }
                         required
-                      />
-                    </GridItem>
-                  </Grid>
+                      >
+                        <Field.Label>
+                          {formatMessage({
+                            id: 'global.description',
+                            defaultMessage: 'Description',
+                          })}
+                        </Field.Label>
+                        <Textarea value={values.description || ''} onChange={handleChange} />
+                        <Field.Error />
+                      </Field.Root>
+                    </Grid.Item>
+                  </Grid.Root>
                 </Flex>
 
                 {!isLoadingPlugins && (
@@ -192,7 +200,7 @@ export const EditPage = () => {
                   />
                 )}
               </Flex>
-            </ContentLayout>
+            </Layouts.Content>
           </Form>
         )}
       </Formik>

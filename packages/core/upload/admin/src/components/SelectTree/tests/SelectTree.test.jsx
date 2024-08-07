@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider } from '@strapi/design-system';
 import { act, render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 
@@ -37,9 +37,9 @@ const FIXTURE_OPTIONS = [
 
 const ComponentFixture = (props) => (
   <IntlProvider locale="en" messages={{}}>
-    <ThemeProvider theme={lightTheme}>
+    <DesignSystemProvider>
       <SelectTree defaultValue={{ value: 'f1' }} {...props} />
-    </ThemeProvider>
+    </DesignSystemProvider>
   </IntlProvider>
 );
 

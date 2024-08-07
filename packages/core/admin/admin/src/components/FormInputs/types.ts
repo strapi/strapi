@@ -24,6 +24,7 @@ interface InputProps {
   disabled?: boolean;
   hint?: ReactNode;
   label?: ReactNode;
+  labelAction?: ReactNode;
   name: string;
   placeholder?: string;
   required?: boolean;
@@ -35,7 +36,6 @@ interface InputProps {
         | 'media'
         | 'blocks'
         | 'richtext'
-        | 'uid'
         | 'dynamiczone'
         | 'component'
         | 'relation'

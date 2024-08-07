@@ -51,8 +51,8 @@ interface ProvidersProps {
   permissions?: Permission[] | ((defaultPermissions: Permission[]) => Permission[] | undefined);
 }
 
-const defaultTestStoreConfig = {
-  preloadedState: initialState,
+const defaultTestStoreConfig = () => ({
+  preloadedState: initialState(),
   reducer: {
     [adminApi.reducerPath]: adminApi.reducer,
     admin_app: appReducer,
@@ -66,7 +66,7 @@ const defaultTestStoreConfig = {
     }),
     adminApi.middleware,
   ],
-};
+});
 
 const DEFAULT_PERMISSIONS = [
   ...fixtures.permissions.allPermissions,
@@ -89,10 +89,10 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
     },
   });
 
-  const store = configureStore(
-    // @ts-expect-error – we've not filled up the entire initial state.
-    storeConfig ?? defaultTestStoreConfig
-  );
+  const store = configureStore({
+    ...defaultTestStoreConfig(),
+    ...storeConfig,
+  });
 
   const allPermissions =
     typeof permissions === 'function'
@@ -140,7 +140,7 @@ const Providers = ({ children, initialEntries, storeConfig, permissions = [] }: 
             settings={{}}
           >
             <Provider store={store}>
-              <AuthProvider _defaultPermissions={allPermissions}>
+              <AuthProvider _defaultPermissions={allPermissions} _disableRenewToken={true}>
                 <QueryClientProvider client={queryClient}>
                   <DndProvider backend={HTML5Backend}>
                     <LanguageProvider messages={{}}>
@@ -224,7 +224,10 @@ const render = (
       ),
       ...restOptions,
     }),
-    user: userEvent.setup(userEventOptions),
+    user: userEvent.setup({
+      skipHover: true,
+      ...userEventOptions,
+    }),
   };
 };
 

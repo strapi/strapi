@@ -6,7 +6,7 @@ import { FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 
 import { SettingsForm } from '../components/SettingsForm';
-import { useGetInfosQuery, useUpdateSettingsMutation } from '../services/api';
+import { useGetInfoQuery, useUpdateSettingsMutation } from '../services/api';
 import { getTrad, isBaseQueryError } from '../utils';
 
 import type { SettingsInput } from '../types';
@@ -18,7 +18,7 @@ const SettingsPage = () => {
     _unstableFormatAPIError: formatAPIError,
     _unstableFormatValidationErrors: formatValidationErrors,
   } = useAPIErrorHandler();
-  const { data, isError, isLoading } = useGetInfosQuery();
+  const { data, isError, isLoading, isFetching } = useGetInfoQuery();
   const [updateSettings] = useUpdateSettingsMutation();
 
   const onUpdateSettings = async (body: SettingsInput, formik: FormikHelpers<SettingsInput>) => {
@@ -35,8 +35,6 @@ const SettingsPage = () => {
       })
       .catch((err) => {
         if (isBaseQueryError(err) && err.name === 'ValidationError') {
-          formik.setErrors(formatValidationErrors(err));
-        } else {
           toggleNotification({
             type: 'danger',
             message: formatAPIError(err),
@@ -45,7 +43,7 @@ const SettingsPage = () => {
       });
   };
 
-  if (isLoading) {
+  if (isLoading || isFetching) {
     return <Page.Loading />;
   }
 

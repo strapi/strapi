@@ -23,7 +23,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
   padding-block-end: 20px;
 }
 
-.c10 {
+.c9 {
   position: absolute;
   left: 0;
   right: 0;
@@ -33,112 +33,69 @@ exports[`FromComputerForm snapshots the component 1`] = `
   width: 100%;
 }
 
-.c12 {
+.c11 {
   position: relative;
 }
 
-.c13 {
-  background: #4945ff;
-  padding-block: 8px;
-  padding-inline: 8px;
+.c12 {
   padding-inline-end: 16px;
   padding-inline-start: 16px;
   border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
   cursor: pointer;
 }
 
-.c18 {
+.c16 {
   background: #f6f6f9;
-  padding-block-start: 16px;
+  padding-block: 16px;
+  padding-inline: 16px;
   padding-inline-end: 20px;
-  padding-block-end: 16px;
   padding-inline-start: 20px;
 }
 
 .c3 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-  -ms-flex-pack: center;
   justify-content: center;
 }
 
 .c4 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
 }
 
-.c14 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
+.c13 {
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
+  display: inline-flex;
   flex-direction: row;
   gap: 8px;
+  justify-content: center;
 }
 
-.c20 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
+.c17 {
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
   flex-direction: row;
-  -webkit-box-pack: justify;
-  -webkit-justify-content: space-between;
-  -ms-flex-pack: justify;
   justify-content: space-between;
 }
 
-.c9 {
+.c8 {
   font-weight: 500;
   font-size: 1.6rem;
   line-height: 1.25;
   color: #666687;
 }
 
-.c17 {
+.c15 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
-  color: #ffffff;
+  color: currentcolor;
 }
 
-.c22 {
+.c20 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -148,159 +105,60 @@ exports[`FromComputerForm snapshots the component 1`] = `
   width: 1px;
 }
 
-.c15 {
-  position: relative;
-  outline: none;
-}
-
-.c15[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c15:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c15:focus-visible {
-  outline: none;
-}
-
-.c15:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c16 {
+.c14 {
   height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #4945ff;
+  background: #4945ff;
+  color: #ffffff;
 }
 
-.c16 svg {
-  height: 1.2rem;
-}
-
-.c16[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c16[aria-disabled='true'] .c8 {
-  color: #666687;
-}
-
-.c16[aria-disabled='true'] svg > g,
-.c16[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c16[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c16[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c16[aria-disabled='true']:active svg > g,
-.c16[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c16:hover {
+.c14:hover {
   border: 1px solid #7b79ff;
   background: #7b79ff;
 }
 
-.c16:active {
+.c14:active {
   border: 1px solid #4945ff;
   background: #4945ff;
 }
 
-.c16 svg > g,
-.c16 svg path {
-  fill: #ffffff;
-}
-
-.c21 {
-  height: 3.2rem;
-  border: 1px solid #dcdce4;
-  background: #ffffff;
-}
-
-.c21 svg {
-  height: 1.2rem;
-}
-
-.c21[aria-disabled='true'] {
+.c14[aria-disabled='true'] {
   border: 1px solid #dcdce4;
   background: #eaeaef;
-}
-
-.c21[aria-disabled='true'] .c8 {
   color: #666687;
-}
-
-.c21[aria-disabled='true'] svg > g,
-.c21[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c21[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c21[aria-disabled='true']:active .c8 {
-  color: #666687;
-}
-
-.c21[aria-disabled='true']:active svg > g,
-.c21[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c21:hover {
-  background-color: #f6f6f9;
-}
-
-.c21:active {
-  background-color: #eaeaef;
-}
-
-.c21 .c8 {
-  color: #32324d;
-}
-
-.c21 svg > g,
-.c21 svg path {
-  fill: #32324d;
+  cursor: default;
 }
 
 .c19 {
-  border-radius: 0 0 4px 4px;
-  border-top: 1px solid #eaeaef;
+  height: 3.2rem;
+  text-decoration: none;
+  border: 1px solid #dcdce4;
+  background: #ffffff;
+  color: #32324d;
+}
+
+.c19:hover {
+  background-color: #f6f6f9;
+}
+
+.c19:active {
+  background-color: #eaeaef;
+}
+
+.c19[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+.c18 {
+  border-top: solid 1px #eaeaef;
+  flex: 1;
 }
 
 .c5 {
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
   flex-direction: column;
 }
 
@@ -316,9 +174,21 @@ exports[`FromComputerForm snapshots the component 1`] = `
   border-style: dashed;
 }
 
-.c11 {
+.c10 {
   opacity: 0;
   cursor: pointer;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c14 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c19 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 }
 
 <div>
@@ -329,6 +199,7 @@ exports[`FromComputerForm snapshots the component 1`] = `
       <label>
         <div
           class="c1 c2"
+          justifycontent="center"
         >
           <div
             class="c3"
@@ -356,28 +227,28 @@ exports[`FromComputerForm snapshots the component 1`] = `
                 class="c7"
               >
                 <span
-                  class="c8 c9"
+                  class="c8"
                 >
                   Drag & Drop here or
                 </span>
               </div>
               <input
-                class="c10 c11"
+                class="c9 c10"
                 multiple=""
                 name="files"
                 tabindex="-1"
                 type="file"
               />
               <div
-                class="c12"
+                class="c11"
               >
                 <button
                   aria-disabled="false"
-                  class="c13 c14 c15 c16"
+                  class="c12 c13 c14"
                   type="button"
                 >
                   <span
-                    class="c8 c17"
+                    class="c15"
                   >
                     Browse files
                   </span>
@@ -388,35 +259,23 @@ exports[`FromComputerForm snapshots the component 1`] = `
         </div>
       </label>
     </div>
-    <div
-      class="c18 c19"
+    <footer
+      class="c16 c17 c18"
     >
-      <div
-        class="c20"
+      <button
+        aria-disabled="false"
+        class="c12 c13 c19"
       >
-        <div
-          class="c14"
+        <span
+          class="c15"
         >
-          <button
-            aria-disabled="false"
-            class="c13 c14 c15 c21"
-            type="button"
-          >
-            <span
-              class="c8 c17"
-            >
-              cancel
-            </span>
-          </button>
-        </div>
-        <div
-          class="c14"
-        />
-      </div>
-    </div>
+          cancel
+        </span>
+      </button>
+    </footer>
   </form>
-  <div
-    class="c22"
+  <span
+    class="c20"
   >
     <p
       aria-live="polite"
@@ -436,6 +295,6 @@ exports[`FromComputerForm snapshots the component 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

@@ -78,6 +78,7 @@ const ConfigurationProvider = ({
     (state) => state.admin_app.permissions.settings?.['project-settings']
   );
   const token = useAuth('ConfigurationProvider', (state) => state.token);
+
   const {
     allowedActions: { canRead },
   } = useRBAC(permissions);

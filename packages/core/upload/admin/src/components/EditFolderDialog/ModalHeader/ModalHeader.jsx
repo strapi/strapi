@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { ModalHeader, Typography } from '@strapi/design-system';
+import { Modal } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
@@ -10,8 +10,8 @@ export const EditFolderModalHeader = ({ isEditing }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <ModalHeader>
-      <Typography fontWeight="bold" textColor="neutral800" as="h2" id="title">
+    <Modal.Header>
+      <Modal.Title>
         {formatMessage(
           isEditing
             ? {
@@ -23,8 +23,8 @@ export const EditFolderModalHeader = ({ isEditing }) => {
                 defaultMessage: 'Add new folder',
               }
         )}
-      </Typography>
-    </ModalHeader>
+      </Modal.Title>
+    </Modal.Header>
   );
 };
 

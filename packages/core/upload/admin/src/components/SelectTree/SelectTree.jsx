@@ -4,7 +4,7 @@ import { Box } from '@strapi/design-system';
 import { Cross, CaretDown } from '@strapi/icons';
 import PropTypes from 'prop-types';
 import ReactSelect, { components } from 'react-select';
-import styled, { useTheme } from 'styled-components';
+import { styled, useTheme } from 'styled-components';
 
 import Option from './Option';
 import flattenTree from './utils/flattenTree';
@@ -126,7 +126,7 @@ const ClearIndicator = (props) => {
 
   return (
     <Component {...props}>
-      <IconBox as="button" type="button">
+      <IconBox tag="button" type="button">
         <Cross />
       </IconBox>
     </Component>
@@ -199,6 +199,11 @@ const getSelectStyles = (theme, error) => {
       color: theme.colors.neutral800,
       gridTemplateColumns: '0 100%',
     }),
+    menuPortal: (base) => ({
+      ...base,
+      zIndex: theme.zIndices.dialog,
+      pointerEvents: 'auto',
+    }),
     menu(base) {
       return {
         ...base,
@@ -219,10 +224,6 @@ const getSelectStyles = (theme, error) => {
       paddingTop: theme.spaces[1],
       paddingRight: theme.spaces[1],
       paddingBottom: theme.spaces[1],
-    }),
-    menuPortal: (base) => ({
-      ...base,
-      zIndex: 100,
     }),
     option(base, state) {
       let backgroundColor = base.backgroundColor;

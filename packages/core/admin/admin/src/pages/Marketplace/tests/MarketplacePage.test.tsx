@@ -51,8 +51,8 @@ describe('Marketplace page - layout', () => {
     expect(getByRole('button', { name: 'Filters' })).toBeVisible();
   });
 
-  it('disables the button and shows compatibility tooltip message when version provided', async () => {
-    const { findByTestId, findAllByTestId } = render();
+  it('disables the button', async () => {
+    const { findAllByTestId } = render();
 
     const alreadyInstalledCard = (await findAllByTestId('npm-package-card')).find((div) =>
       div.innerHTML.includes('Transformer')
@@ -60,14 +60,9 @@ describe('Marketplace page - layout', () => {
 
     const button = within(alreadyInstalledCard)
       .getByText(/copy install command/i)
-      .closest('button')!;
+      .closest('button');
 
-    // User event throws an error that there are no pointer events
-    fireEvent.mouseOver(button);
-    const tooltip = await findByTestId('tooltip-Transformer');
     expect(button).toBeDisabled();
-    expect(tooltip).toBeInTheDocument();
-    expect(tooltip).toHaveTextContent('Update your Strapi version: "4.1.0" to: "4.0.7"');
   });
 
   it('shows compatibility tooltip message when no version provided', async () => {

@@ -24,38 +24,46 @@ export type Count<TContentTypeUID extends UID.ContentType> = FindMany<TContentTy
 
 export type FindFirst<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'fields' | 'filters' | '_q' | 'sort' | 'populate' | 'status' | 'locale' | 'plugin' | 'lookup'
+  | 'fields'
+  | 'filters'
+  | '_q'
+  | 'sort'
+  | 'populate'
+  | 'status'
+  | 'locale:string'
+  | 'plugin'
+  | 'lookup'
 >;
 
 export type FindOne<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'fields' | 'populate' | 'filters' | 'status' | 'locale' | 'sort' | 'lookup'
+  'fields' | 'populate' | 'filters' | 'status' | 'locale:string' | 'sort' | 'lookup'
 > & {
   documentId: ID;
 };
 
 export type Delete<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'fields' | 'populate' | 'filters' | 'status' | 'locale' | 'lookup'
+  'fields' | 'populate' | 'filters' | 'status' | 'locale:string' | 'lookup'
 > & {
   documentId: ID;
 };
 
 export type Create<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'data' | 'fields' | 'populate' | 'locale' | 'lookup' | 'status'
+  'data' | 'fields' | 'populate' | 'locale:string' | 'lookup' | 'status'
 >;
 
 export type Clone<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'data' | 'fields' | 'populate' | 'status' | 'locale' | 'lookup'
+  'data' | 'fields' | 'populate' | 'status' | 'locale:string' | 'lookup'
 > & {
   documentId: ID;
 };
 
 export type Update<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'data:partial' | 'fields' | 'populate' | 'locale' | 'lookup'
+  'data:partial' | 'fields' | 'populate' | 'locale:string' | 'lookup'
 > & {
   documentId: ID;
 };
@@ -69,7 +77,7 @@ export type Publish<TContentTypeUID extends UID.ContentType> = Pick<
 
 export type Unpublish<TContentTypeUID extends UID.ContentType> = Pick<
   TContentTypeUID,
-  'filters' | 'locale' | 'lookup'
+  'filters' | 'locale:string' | 'lookup'
 > & {
   documentId: ID;
 };

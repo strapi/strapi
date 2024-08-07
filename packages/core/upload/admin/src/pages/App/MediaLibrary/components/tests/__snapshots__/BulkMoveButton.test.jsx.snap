@@ -2,42 +2,39 @@
 
 exports[`BulkMoveButton renders 1`] = `
 .c0 {
-  background: #4945ff;
-  padding-block: 8px;
-  padding-inline: 8px;
   padding-inline-end: 16px;
   padding-inline-start: 16px;
   border-radius: 4px;
-  border-color: #4945ff;
-  border: 1px solid #4945ff;
   cursor: pointer;
 }
 
+.c3 {
+  flex: 1 0 1.2rem;
+}
+
 .c1 {
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
   align-items: center;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: row;
-  -ms-flex-direction: row;
+  display: inline-flex;
   flex-direction: row;
   gap: 8px;
+  justify-content: center;
+}
+
+.c4 {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
 }
 
 .c5 {
   font-size: 1.2rem;
   line-height: 1.33;
   font-weight: 600;
-  color: #ffffff;
+  color: currentcolor;
 }
 
 .c6 {
   border: 0;
-  -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
   height: 1px;
   margin: -1px;
@@ -48,138 +45,69 @@ exports[`BulkMoveButton renders 1`] = `
 }
 
 .c2 {
-  position: relative;
-  outline: none;
-}
-
-.c2[aria-disabled='true'] {
-  pointer-events: none;
-}
-
-.c2:after {
-  -webkit-transition-property: all;
-  transition-property: all;
-  -webkit-transition-duration: 0.2s;
-  transition-duration: 0.2s;
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -4px;
-  bottom: -4px;
-  left: -4px;
-  right: -4px;
-  border: 2px solid transparent;
-}
-
-.c2:focus-visible {
-  outline: none;
-}
-
-.c2:focus-visible:after {
-  border-radius: 8px;
-  content: '';
-  position: absolute;
-  top: -5px;
-  bottom: -5px;
-  left: -5px;
-  right: -5px;
-  border: 2px solid #4945ff;
-}
-
-.c3 {
   height: 3.2rem;
+  text-decoration: none;
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
-}
-
-.c3 svg {
-  height: 1.2rem;
-}
-
-.c3[aria-disabled='true'] {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c3[aria-disabled='true'] .c4 {
-  color: #666687;
-}
-
-.c3[aria-disabled='true'] svg > g,
-.c3[aria-disabled='true'] svg path {
-  fill: #666687;
-}
-
-.c3[aria-disabled='true']:active {
-  border: 1px solid #dcdce4;
-  background: #eaeaef;
-}
-
-.c3[aria-disabled='true']:active .c4 {
-  color: #666687;
-}
-
-.c3[aria-disabled='true']:active svg > g,
-.c3[aria-disabled='true']:active svg path {
-  fill: #666687;
-}
-
-.c3:hover {
-  background-color: #ffffff;
-}
-
-.c3:active {
-  background-color: #ffffff;
-  border: 1px solid #4945ff;
-}
-
-.c3:active .c4 {
-  color: #4945ff;
-}
-
-.c3:active svg > g,
-.c3:active svg path {
-  fill: #4945ff;
-}
-
-.c3 .c4 {
   color: #271fe0;
 }
 
-.c3 svg > g,
-.c3 svg path {
-  fill: #271fe0;
+.c2:hover {
+  background-color: #ffffff;
+}
+
+.c2:active {
+  background-color: #ffffff;
+  border: 1px solid #4945ff;
+  color: #4945ff;
+}
+
+.c2[aria-disabled='true'] {
+  border: 1px solid #dcdce4;
+  background: #eaeaef;
+  color: #666687;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .c2 {
+    transition: background-color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),color 120ms cubic-bezier(0.25, 0.46, 0.45, 0.94),border-color 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
 }
 
 <div>
   <button
+    aria-controls="radix-:r0:"
     aria-disabled="false"
-    class="c0 c1 c2 c3"
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    class="c0 c1 c2"
+    data-state="closed"
     type="button"
   >
-    <div
+    <span
       aria-hidden="true"
-      class=""
+      class="c3 c4"
     >
       <svg
         fill="currentColor"
-        height="1.6rem"
+        height="16"
         viewBox="0 0 32 32"
-        width="1.6rem"
+        width="16"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
           d="M27 9H16.414L13 5.586A1.98 1.98 0 0 0 11.586 5H5a2 2 0 0 0-2 2v18.078A1.926 1.926 0 0 0 4.924 27H27.11A1.89 1.89 0 0 0 29 25.111V11a2 2 0 0 0-2-2M5 7h6.586l2 2H5z"
         />
       </svg>
-    </div>
+    </span>
     <span
-      class="c4 c5"
+      class="c5"
     >
       Move
     </span>
   </button>
-  <div
+  <span
     class="c6"
   >
     <p
@@ -200,6 +128,6 @@ exports[`BulkMoveButton renders 1`] = `
       id="live-region-alert"
       role="alert"
     />
-  </div>
+  </span>
 </div>
 `;

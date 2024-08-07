@@ -19,9 +19,11 @@ import { transformData } from './transform/data';
  *
  */
 export const createDocumentService = (strapi: Core.Strapi): Modules.Documents.Service => {
+  // Cache the repositories (one per content type)
   const repositories = new Map<string, Modules.Documents.ServiceInstance>();
-  const middlewares = createMiddlewareManager();
 
+  // Manager to handle document service middlewares
+  const middlewares = createMiddlewareManager();
   middlewares.use(databaseErrorsMiddleware);
 
   const factory = function factory(uid: UID.ContentType) {

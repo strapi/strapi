@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { BaseButton, Flex, Typography } from '@strapi/design-system';
+import { Button, Flex, Typography, TypographyComponent } from '@strapi/design-system';
 import { PlusCircle } from '@strapi/icons';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 interface AddComponentButtonProps {
   children: React.ReactNode;
@@ -25,21 +25,18 @@ const AddComponentButton = ({
       onClick={onClick}
       disabled={isDisabled}
       background="neutral0"
-      paddingTop={3}
-      paddingBottom={3}
-      paddingLeft={4}
-      paddingRight={4}
       style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+      variant="tertiary"
     >
-      <Flex as="span" gap={2}>
+      <Flex tag="span" gap={2}>
         <StyledAddIcon aria-hidden $isOpen={isOpen} $hasError={hasError && !isOpen} />
-        <Typography
+        <AddComponentTitle
           variant="pi"
           fontWeight="bold"
           textColor={hasError && !isOpen ? 'danger600' : 'neutral500'}
         >
           {children}
-        </Typography>
+        </AddComponentTitle>
       </Flex>
     </StyledButton>
   );
@@ -60,13 +57,16 @@ const StyledAddIcon = styled(PlusCircle)<{ $isOpen?: boolean; $hasError?: boolea
   }
 `;
 
-const StyledButton = styled(BaseButton)`
+const AddComponentTitle = styled<TypographyComponent>(Typography)``;
+
+const StyledButton = styled(Button)`
   border-radius: 26px;
   border-color: ${({ theme }) => theme.colors.neutral150};
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+  height: 5rem;
 
   &:hover {
-    ${Typography} {
+    ${AddComponentTitle} {
       color: ${({ theme }) => theme.colors.primary600};
     }
 
@@ -75,12 +75,12 @@ const StyledButton = styled(BaseButton)`
         fill: ${({ theme }) => theme.colors.primary600};
       }
       > path {
-        fill: ${({ theme }) => theme.colors.neutral100};
+        fill: ${({ theme }) => theme.colors.primary600};
       }
     }
   }
   &:active {
-    ${Typography} {
+    ${AddComponentTitle} {
       color: ${({ theme }) => theme.colors.primary600};
     }
     ${StyledAddIcon} {

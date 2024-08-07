@@ -1,16 +1,6 @@
 import * as React from 'react';
 
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Flex,
-  HeaderLayout,
-  useNotifyAT,
-  Grid,
-  GridItem,
-  Typography,
-} from '@strapi/design-system';
+import { Box, Button, Flex, useNotifyAT, Grid, Typography } from '@strapi/design-system';
 import { Check } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
@@ -18,6 +8,7 @@ import * as yup from 'yup';
 
 import { Form, FormHelpers } from '../components/Form';
 import { InputRenderer } from '../components/FormInputs/Renderer';
+import { Layouts } from '../components/Layouts/Layout';
 import { Page } from '../components/PageHelpers';
 import { useTypedDispatch, useTypedSelector } from '../core/store/hooks';
 import { useAuth } from '../features/Auth';
@@ -190,7 +181,7 @@ const ProfilePage = () => {
       >
         {({ isSubmitting, modified }) => (
           <>
-            <HeaderLayout
+            <Layouts.Header
               title={getDisplayName(user)}
               primaryAction={
                 <Button
@@ -204,13 +195,13 @@ const ProfilePage = () => {
               }
             />
             <Box paddingBottom={10}>
-              <ContentLayout>
+              <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   <UserInfoSection />
                   {!hasLockedRole && <PasswordSection />}
                   <PreferencesSection localeNames={localeNames} />
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </Box>
           </>
         )}
@@ -237,7 +228,7 @@ const PasswordSection = () => {
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.change-password',
             defaultMessage: 'Change password',
@@ -278,13 +269,13 @@ const PasswordSection = () => {
             },
           ],
         ].map((row, index) => (
-          <Grid key={index} gap={5}>
+          <Grid.Root key={index} gap={5}>
             {row.map(({ size, ...field }) => (
-              <GridItem key={field.name} col={size}>
+              <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
                 <InputRenderer {...field} />
-              </GridItem>
+              </Grid.Item>
             ))}
-          </Grid>
+          </Grid.Root>
         ))}
       </Flex>
     </Box>
@@ -315,7 +306,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
         <Flex direction="column" alignItems="stretch" gap={1}>
-          <Typography variant="delta" as="h2">
+          <Typography variant="delta" tag="h2">
             {formatMessage({
               id: 'Settings.profile.form.section.experience.title',
               defaultMessage: 'Experience',
@@ -331,7 +322,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
               {
                 here: (
                   <Box
-                    as="a"
+                    tag="a"
                     color="primary600"
                     target="_blank"
                     rel="noopener noreferrer"
@@ -347,7 +338,7 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
             )}
           </Typography>
         </Flex>
-        <Grid gap={5}>
+        <Grid.Root gap={5}>
           {[
             {
               hint: formatMessage({
@@ -412,11 +403,11 @@ const PreferencesSection = ({ localeNames }: PreferencesSectionProps) => {
               type: 'enumeration' as const,
             },
           ].map(({ size, ...field }) => (
-            <GridItem key={field.name} col={size}>
+            <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
               <InputRenderer {...field} />
-            </GridItem>
+            </Grid.Item>
           ))}
-        </Grid>
+        </Grid.Root>
       </Flex>
     </Box>
   );
@@ -440,13 +431,13 @@ const UserInfoSection = () => {
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.profile',
             defaultMessage: 'Profile',
           })}
         </Typography>
-        <Grid gap={5}>
+        <Grid.Root gap={5}>
           {[
             {
               label: formatMessage({
@@ -487,11 +478,11 @@ const UserInfoSection = () => {
               type: 'string' as const,
             },
           ].map(({ size, ...field }) => (
-            <GridItem key={field.name} col={size}>
+            <Grid.Item key={field.name} col={size} direction="column" alignItems="stretch">
               <InputRenderer {...field} />
-            </GridItem>
+            </Grid.Item>
           ))}
-        </Grid>
+        </Grid.Root>
       </Flex>
     </Box>
   );

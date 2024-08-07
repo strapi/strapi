@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { lightTheme, ThemeProvider } from '@strapi/design-system';
+import { DesignSystemProvider, Modal } from '@strapi/design-system';
 import { render as renderTL } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -57,20 +57,24 @@ describe('PendingAssetStep', () => {
 
     const { container } = renderTL(
       <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={lightTheme}>
+        <DesignSystemProvider>
           <IntlProvider locale="en">
-            <PendingAssetStep
-              assets={assets}
-              onClose={jest.fn()}
-              onAddAsset={jest.fn()}
-              onEditAsset={jest.fn()}
-              onClickAddAsset={jest.fn()}
-              onCancelUpload={jest.fn()}
-              onRemoveAsset={jest.fn()}
-              onUploadSucceed={jest.fn()}
-            />
+            <Modal.Root open>
+              <Modal.Content>
+                <PendingAssetStep
+                  assets={assets}
+                  onClose={jest.fn()}
+                  onAddAsset={jest.fn()}
+                  onEditAsset={jest.fn()}
+                  onClickAddAsset={jest.fn()}
+                  onCancelUpload={jest.fn()}
+                  onRemoveAsset={jest.fn()}
+                  onUploadSucceed={jest.fn()}
+                />
+              </Modal.Content>
+            </Modal.Root>
           </IntlProvider>
-        </ThemeProvider>
+        </DesignSystemProvider>
       </QueryClientProvider>
     );
 

@@ -1,22 +1,12 @@
 import * as React from 'react';
 
-import {
-  Box,
-  ContentLayout,
-  Flex,
-  Layout,
-  Searchbar,
-  Tab,
-  TabGroup,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from '@strapi/design-system';
+import { Box, Flex, Searchbar, Tabs } from '@strapi/design-system';
 import { ExternalLink } from '@strapi/icons';
 import { GlassesSquare } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
 
 import { ContentBox } from '../../components/ContentBox';
+import { Layouts } from '../../components/Layouts/Layout';
 import { Page } from '../../components/PageHelpers';
 import { Pagination } from '../../components/Pagination';
 import { useTypedSelector } from '../../core/store/hooks';
@@ -51,8 +41,10 @@ interface TabQuery {
   provider: MarketplacePageQuery;
 }
 
+const PLUGIN = 'plugin';
+const PROVIDER = 'provider';
+
 const MarketplacePage = () => {
-  const tabRef = React.useRef<any>(null);
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
   const { toggleNotification } = useNotification();
@@ -67,11 +59,11 @@ const MarketplacePage = () => {
   } = useAppInfo('MarketplacePage', (state) => state);
   const isOnline = useNavigatorOnline();
 
-  const npmPackageType = query?.npmPackageType || 'plugin';
+  const npmPackageType = query?.npmPackageType || PLUGIN;
 
   const [tabQuery, setTabQuery] = React.useState<TabQuery>({
-    plugin: npmPackageType === 'plugin' ? { ...query } : {},
-    provider: npmPackageType === 'provider' ? { ...query } : {},
+    plugin: npmPackageType === PLUGIN ? { ...query } : {},
+    provider: npmPackageType === PROVIDER ? { ...query } : {},
   });
 
   React.useEffect(() => {
@@ -100,22 +92,13 @@ const MarketplacePage = () => {
     pagination,
   } = useMarketplaceData({ npmPackageType, debouncedSearch, query, tabQuery });
 
-  const indexOfNpmPackageType = ['plugin', 'provider'].indexOf(npmPackageType);
-
-  // TODO: Replace this solution with v2 of the Design System
-  // Check if the active tab index changes and call the handler of the ref to update the tab group component
-  React.useEffect(() => {
-    if (tabRef.current) {
-      tabRef.current._handlers.setSelectedTabIndex(indexOfNpmPackageType);
-    }
-  }, [indexOfNpmPackageType]);
-
   if (!isOnline) {
     return <OfflineLayout />;
   }
 
-  const handleTabChange = (selected: number) => {
-    const selectedTab = selected === 0 ? 'plugin' : 'provider';
+  const handleTabChange = (tab: string) => {
+    const selectedTab = tab === PLUGIN || tab === PROVIDER ? tab : PLUGIN;
+
     const hasTabQuery = tabQuery[selectedTab] && Object.keys(tabQuery[selectedTab]).length;
 
     if (hasTabQuery) {
@@ -163,7 +146,7 @@ const MarketplacePage = () => {
   const installedPackageNames = Object.keys(dependencies ?? {});
 
   return (
-    <Layout>
+    <Layouts.Root>
       <Page.Main>
         <Page.Title>
           {formatMessage({
@@ -172,35 +155,31 @@ const MarketplacePage = () => {
           })}
         </Page.Title>
         <PageHeader isOnline={isOnline} npmPackageType={npmPackageType} />
-        <ContentLayout>
-          <TabGroup
-            label={formatMessage({
-              id: 'admin.pages.MarketPlacePage.tab-group.label',
-              defaultMessage: 'Plugins and Providers for Strapi',
-            })}
-            id="tabs"
-            variant="simple"
-            initialSelectedTabIndex={indexOfNpmPackageType}
-            onTabChange={handleTabChange}
-            ref={tabRef}
-          >
+        <Layouts.Content>
+          <Tabs.Root variant="simple" onValueChange={handleTabChange} value={npmPackageType}>
             <Flex justifyContent="space-between" paddingBottom={4}>
-              <Tabs>
-                <Tab>
+              <Tabs.List
+                aria-label={formatMessage({
+                  id: 'admin.pages.MarketPlacePage.tab-group.label',
+                  defaultMessage: 'Plugins and Providers for Strapi',
+                })}
+              >
+                <Tabs.Trigger value={PLUGIN}>
                   {formatMessage({
                     id: 'admin.pages.MarketPlacePage.plugins',
                     defaultMessage: 'Plugins',
                   })}{' '}
                   {pluginsResponse ? `(${pluginsResponse.meta.pagination.total})` : '...'}
-                </Tab>
-                <Tab>
+                </Tabs.Trigger>
+                <Tabs.Trigger value={PROVIDER}>
                   {formatMessage({
                     id: 'admin.pages.MarketPlacePage.providers',
                     defaultMessage: 'Providers',
                   })}{' '}
                   {providersResponse ? `(${providersResponse.meta.pagination.total})` : '...'}
-                </Tab>
-              </Tabs>
+                </Tabs.Trigger>
+              </Tabs.List>
+
               <Box width="25%">
                 <Searchbar
                   name="searchbar"
@@ -237,73 +216,68 @@ const MarketplacePage = () => {
                 handleSelectClear={handleSelectClear}
               />
             </Flex>
-
-            <TabPanels>
-              {/* Plugins panel */}
-              <TabPanel>
-                <NpmPackagesGrid
-                  npmPackages={pluginsResponse?.data}
-                  status={pluginsStatus}
-                  installedPackageNames={installedPackageNames}
-                  useYarn={useYarn}
-                  isInDevelopmentMode={isInDevelopmentMode}
-                  npmPackageType="plugin"
-                  strapiAppVersion={strapiVersion}
-                  debouncedSearch={debouncedSearch}
-                />
-              </TabPanel>
-              {/* Providers panel */}
-              <TabPanel>
-                <NpmPackagesGrid
-                  npmPackages={providersResponse?.data}
-                  status={providersStatus}
-                  installedPackageNames={installedPackageNames}
-                  useYarn={useYarn}
-                  isInDevelopmentMode={isInDevelopmentMode}
-                  npmPackageType="provider"
-                  debouncedSearch={debouncedSearch}
-                />
-              </TabPanel>
-            </TabPanels>
-          </TabGroup>
-          <Pagination.Root {...pagination} defaultPageSize={24}>
-            <Pagination.PageSize options={['12', '24', '50', '100']} />
-            <Pagination.Links />
-          </Pagination.Root>
-          <Box paddingTop={8}>
-            <a
-              href="https://strapi.canny.io/plugin-requests"
-              target="_blank"
-              rel="noopener noreferrer nofollow"
-              style={{ textDecoration: 'none' }}
-              onClick={() => trackUsage('didMissMarketplacePlugin')}
-            >
-              <ContentBox
-                title={formatMessage({
-                  id: 'admin.pages.MarketPlacePage.missingPlugin.title',
-                  defaultMessage: 'Documentation',
-                })}
-                subtitle={formatMessage({
-                  id: 'admin.pages.MarketPlacePage.missingPlugin.description',
-                  defaultMessage:
-                    "Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!",
-                })}
-                icon={<GlassesSquare />}
-                iconBackground="alternative100"
-                endAction={
-                  <ExternalLink
-                    fill="neutral600"
-                    width="1.2rem"
-                    height="1.2rem"
-                    style={{ marginLeft: '0.8rem' }}
-                  />
-                }
+            <Tabs.Content value={PLUGIN}>
+              <NpmPackagesGrid
+                npmPackages={pluginsResponse?.data}
+                status={pluginsStatus}
+                installedPackageNames={installedPackageNames}
+                useYarn={useYarn}
+                isInDevelopmentMode={isInDevelopmentMode}
+                npmPackageType="plugin"
+                strapiAppVersion={strapiVersion}
+                debouncedSearch={debouncedSearch}
               />
-            </a>
-          </Box>
-        </ContentLayout>
+            </Tabs.Content>
+            <Tabs.Content value={PROVIDER}>
+              <NpmPackagesGrid
+                npmPackages={providersResponse?.data}
+                status={providersStatus}
+                installedPackageNames={installedPackageNames}
+                useYarn={useYarn}
+                isInDevelopmentMode={isInDevelopmentMode}
+                npmPackageType="provider"
+                debouncedSearch={debouncedSearch}
+              />
+            </Tabs.Content>
+            <Pagination.Root {...pagination} defaultPageSize={24}>
+              <Pagination.PageSize options={['12', '24', '50', '100']} />
+              <Pagination.Links />
+            </Pagination.Root>
+            <Box paddingTop={8}>
+              <a
+                href="https://strapi.canny.io/plugin-requests"
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                style={{ textDecoration: 'none' }}
+                onClick={() => trackUsage('didMissMarketplacePlugin')}
+              >
+                <ContentBox
+                  title={formatMessage({
+                    id: 'admin.pages.MarketPlacePage.missingPlugin.title',
+                    defaultMessage: 'Documentation',
+                  })}
+                  subtitle={formatMessage({
+                    id: 'admin.pages.MarketPlacePage.missingPlugin.description',
+                    defaultMessage:
+                      "Tell us what plugin you are looking for and we'll let our community plugin developers know in case they are in search for inspiration!",
+                  })}
+                  icon={<GlassesSquare />}
+                  iconBackground="alternative100"
+                  endAction={
+                    <ExternalLink
+                      fill="neutral600"
+                      width="1.2rem"
+                      height="1.2rem"
+                      style={{ marginLeft: '0.8rem' }}
+                    />
+                  }
+                />
+              </a>
+            </Box>
+          </Tabs.Root>
+        </Layouts.Content>
       </Page.Main>
-    </Layout>
+    </Layouts.Root>
   );
 };
 

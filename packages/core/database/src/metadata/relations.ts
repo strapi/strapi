@@ -541,6 +541,7 @@ const createJoinTable = (
         unsigned: true,
         defaultTo: null,
       },
+      columnName: orderColumnName,
     };
     metadataSchema.indexes.push({
       name: identifiers.getOrderFkIndexName(joinTableName),
@@ -558,6 +559,7 @@ const createJoinTable = (
         unsigned: true,
         defaultTo: null,
       },
+      columnName: inverseOrderColumnName,
     };
 
     metadataSchema.indexes.push({

@@ -5,6 +5,7 @@
 const { createTestBuilder } = require('api-tests/builder');
 const { createStrapiInstance } = require('api-tests/strapi');
 const { createAuthRequest } = require('api-tests/request');
+const { async } = require('@strapi/utils');
 
 const builder = createTestBuilder();
 let strapi;
@@ -48,7 +49,14 @@ const productWithCompoAndDP = {
   pluralName: 'product-with-compo-and-dps',
   description: '',
   collectionName: '',
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
 };
+
+const extraLocales = ['fr', 'it', 'es'];
 
 describe('CM API - Basic + compo', () => {
   beforeAll(async () => {
@@ -56,6 +64,19 @@ describe('CM API - Basic + compo', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+
+    // Create new locales
+    for (const extraLocale of extraLocales) {
+      await rq({
+        method: 'POST',
+        url: '/i18n/locales',
+        body: {
+          code: extraLocale,
+          name: `Locale name: (${extraLocale})`,
+          isDefault: false,
+        },
+      });
+    }
   });
 
   afterAll(async () => {
@@ -246,9 +267,8 @@ describe('CM API - Basic + compo', () => {
       // TODO: Validate document is published
     });
 
-    // TODO: Implement bulk publish
-    test.skip('Can bulk publish product with compo - required', async () => {
-      const product = {
+    test('Can bulk publish product with compo - required', async () => {
+      const product1 = {
         name: 'Product 1',
         description: 'Product description',
         compo: {
@@ -256,22 +276,112 @@ describe('CM API - Basic + compo', () => {
           description: 'short',
         },
       };
-      const res = await rq({
+
+      const product2 = {
+        name: 'Product 2',
+        description: 'Product description',
+        compo: {
+          name: 'compo name',
+          description: 'short',
+        },
+      };
+
+      const {
+        body: {
+          data: { documentId: documentId1 },
+        },
+      } = await rq({
         method: 'POST',
         url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
-        body: product,
+        body: product1,
+      });
+
+      const {
+        body: {
+          data: { documentId: documentId2 },
+        },
+      } = await rq({
+        method: 'POST',
+        url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+        body: product2,
       });
 
       const publishRes = await rq({
         method: 'POST',
         url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/actions/bulkPublish`,
         body: {
-          ids: [res.body.documentId],
+          documentIds: [documentId1, documentId2],
         },
       });
 
       expect(publishRes.statusCode).toBe(200);
-      expect(publishRes.body).toMatchObject({ count: 1 });
+      expect(publishRes.body).toMatchObject({ count: 2 });
+    });
+
+    test('BulkPublish across multiple documents and locales', async () => {
+      // Create multiple documents in the default locales
+      const numberOfDocuments = 5;
+      const defaultDocuments = {};
+      for (let i = 0; i < numberOfDocuments; i += 1) {
+        const product = {
+          name: `Product ${i}`,
+          description: `Product description ${i}`,
+          compo: {
+            name: `compo name ${i}`,
+            description: `short ${i}`,
+          },
+        };
+
+        const {
+          body: {
+            data: { documentId },
+          },
+        } = await rq({
+          method: 'POST',
+          url: '/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp',
+          body: product,
+        });
+
+        defaultDocuments[documentId] = product;
+      }
+
+      // Add extra locales to each document
+      await async.map(Object.entries(defaultDocuments), async ([documentId, product]) => {
+        await async.map(extraLocales, async (locale) => {
+          await rq({
+            method: 'PUT',
+            url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/${documentId}`,
+            body: {
+              name: `Product ${product.name} ${locale}`,
+              compo: {
+                name: `compo name ${product.compo.name} ${locale}`,
+                description: `short ${product.compo.description} ${locale}`,
+              },
+            },
+            qs: {
+              locale,
+            },
+          });
+        });
+      });
+
+      // Bulk publish all the documents
+      const bulkPublishRes = await rq({
+        method: 'POST',
+        url: `/content-manager/collection-types/api::product-with-compo-and-dp.product-with-compo-and-dp/actions/bulkPublish`,
+        body: {
+          documentIds: Object.keys(defaultDocuments),
+        },
+        qs: {
+          locale: ['en', ...extraLocales],
+        },
+      });
+
+      expect(bulkPublishRes.statusCode).toBe(200);
+      expect(bulkPublishRes.body).toMatchObject({
+        count: numberOfDocuments * (extraLocales.length + 1),
+      });
+      // TODO verify that all the drafts are still there
     });
   });
 });

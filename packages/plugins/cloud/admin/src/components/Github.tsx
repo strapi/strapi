@@ -7,7 +7,7 @@
 import { Box, Flex, Typography, LinkButton } from '@strapi/design-system';
 import { GitHub } from '@strapi/icons/symbols';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { getTrad } from '../utils/getTrad';
 
@@ -23,9 +23,14 @@ const CustomGithubButton = styled(LinkButton)`
   background-color: #000000;
   color: #ffffff;
   border: none;
-  :hover {
-    background-color: #32324d;
-    border: none;
+
+  & svg > path {
+    fill: ${({ theme }) => theme.colors.neutral0};
+  }
+
+  &:hover {
+    background-color: #32324d !important;
+    border: none !important;
   }
 `;
 
@@ -39,14 +44,14 @@ const GithubBox = () => {
           <LinkIcon />
         </EmptyStateIconWrapper>
         <Box paddingBottom={4}>
-          <Typography variant="beta" as="p" textAlign="center" textColor="neutral1000">
+          <Typography variant="beta" tag="p" textAlign="center" textColor="neutral1000">
             {formatMessage({
               id: getTrad('Homepage.githubBox.title.not-versioned'),
               defaultMessage: 'Push your project on GitHub',
             })}
           </Typography>
         </Box>
-        <Typography variant="epsilon" as="p" textAlign="center" textColor="neutral600">
+        <Typography variant="epsilon" tag="p" textAlign="center" textColor="neutral600">
           {formatMessage({
             id: getTrad('Homepage.githubBox.subTitle.not-versioned'),
             defaultMessage:

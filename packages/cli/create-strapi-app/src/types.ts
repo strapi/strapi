@@ -1,9 +1,11 @@
-export interface Program {
-  noRun?: boolean;
+export interface Options {
   useNpm?: boolean;
-  debug?: boolean;
+  usePnpm?: boolean;
+  useYarn?: boolean;
   quickstart?: boolean;
-  dbclient?: string;
+  run?: boolean;
+  dbclient?: DBClient;
+  skipCloud?: boolean;
   dbhost?: string;
   dbport?: string;
   dbname?: string;
@@ -11,7 +13,22 @@ export interface Program {
   dbpassword?: string;
   dbssl?: string;
   dbfile?: string;
-  dbforce?: boolean;
-  template?: string;
+  // template?: string;
   typescript?: boolean;
+  javascript?: boolean;
 }
+
+export type DBClient = 'mysql' | 'postgres' | 'sqlite';
+
+export type DBConfig = {
+  client: DBClient;
+  connection: {
+    host?: string;
+    port?: string;
+    database?: string;
+    username?: string;
+    password?: string;
+    filename?: string;
+    ssl?: boolean;
+  };
+};

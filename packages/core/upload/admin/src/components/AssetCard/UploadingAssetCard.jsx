@@ -14,7 +14,7 @@ import {
 } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { styled } from 'styled-components';
 
 import { AssetType } from '../../constants';
 import { useUpload } from '../../hooks/useUpload';
@@ -95,7 +95,7 @@ export const UploadingAssetCard = ({
         <CardBody>
           <CardContent>
             <Box paddingTop={1}>
-              <CardTitle as="h2">{asset.name}</CardTitle>
+              <CardTitle tag="h2">{asset.name}</CardTitle>
             </Box>
             <CardSubtitle>
               <Extension>{asset.ext}</Extension>

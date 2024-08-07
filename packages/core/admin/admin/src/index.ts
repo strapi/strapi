@@ -1,5 +1,5 @@
 /**
- * DO NOT REMOVE. This export is whats used to render the admin panel at all.
+ * DO NOT REMOVE. This export is what's used to render the admin panel at all.
  * Without it === no admin panel.
  */
 export * from './render';
@@ -49,9 +49,10 @@ export { useAdminUsers } from './services/users';
 /**
  * Types
  */
-export type { StrapiApp, MenuItem, InjectionZoneComponent } from './StrapiApp';
+export type { StrapiApp, InjectionZoneComponent } from './StrapiApp';
 export type { Store } from './core/store/configure';
 export type { Plugin, PluginConfig } from './core/apis/Plugin';
+export type { MenuItem, StrapiAppSetting, StrapiAppSettingLink } from './core/apis/router';
 export type {
   SanitizedAdminUser,
   AdminUser,
@@ -65,4 +66,13 @@ export type { RBACContext, RBACMiddleware } from './core/apis/rbac';
  * Utils
  */
 export { translatedErrors } from './utils/translatedErrors';
-export { getFetchClient } from './utils/getFetchClient';
+export * from './utils/getFetchClient';
+export * from './utils/baseQuery';
+export * from './services/api';
+export type { CMAdminConfiguration } from './types/adminConfiguration';
+
+/**
+ * Components
+ */
+
+export { Layouts, type LayoutProps } from './components/Layouts/Layout';

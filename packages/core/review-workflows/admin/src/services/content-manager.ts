@@ -6,13 +6,15 @@ import type {
   UpdateStage,
   UpdateAssignee,
 } from '../../../shared/contracts/review-workflows';
-import type { Contracts } from '@strapi/plugin-content-manager/_internal/shared';
+import type { Contracts } from '@strapi/content-manager/_internal/shared';
 
 type ContentType = Contracts.ContentTypes.ContentType;
 interface ContentTypes {
   collectionType: ContentType[];
   singleType: ContentType[];
 }
+
+const SINGLE_TYPES = 'single-types';
 
 const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -51,6 +53,16 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         },
       }),
       transformResponse: (res: UpdateStage.Response) => res.data,
+      invalidatesTags: (_result, _error, { slug, id, model }) => {
+        return [
+          {
+            type: 'Document',
+            id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
+          },
+          { type: 'Document', id: `${model}_LIST` },
+          'ReviewWorkflowStages',
+        ];
+      },
     }),
     updateAssignee: builder.mutation<
       UpdateAssignee.Response['data'],
@@ -65,6 +77,15 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
         },
       }),
       transformResponse: (res: UpdateAssignee.Response) => res.data,
+      invalidatesTags: (_result, _error, { slug, id, model }) => {
+        return [
+          {
+            type: 'Document',
+            id: slug !== SINGLE_TYPES ? `${model}_${id}` : model,
+          },
+          { type: 'Document', id: `${model}_LIST` },
+        ];
+      },
     }),
     getContentTypes: builder.query<ContentTypes, void>({
       query: () => ({
@@ -87,6 +108,7 @@ const contentManagerApi = reviewWorkflowsApi.injectEndpoints({
       },
     }),
   }),
+  overrideExisting: true,
 });
 
 const {

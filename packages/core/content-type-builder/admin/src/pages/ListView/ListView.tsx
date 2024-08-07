@@ -1,5 +1,5 @@
-import { BackButton, useTracking } from '@strapi/admin/strapi-admin';
-import { Box, Button, ContentLayout, Flex, HeaderLayout } from '@strapi/design-system';
+import { BackButton, useTracking, Layouts } from '@strapi/admin/strapi-admin';
+import { Box, Button, Flex } from '@strapi/design-system';
 import { Check, Pencil, Plus } from '@strapi/icons';
 import get from 'lodash/get';
 import has from 'lodash/has';
@@ -7,6 +7,7 @@ import isEqual from 'lodash/isEqual';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { unstable_usePrompt as usePrompt, useMatch } from 'react-router-dom';
+import { styled } from 'styled-components';
 
 import { List } from '../../components/List';
 import { ListRow } from '../../components/ListRow';
@@ -18,6 +19,10 @@ import { getTrad } from '../../utils/getTrad';
 import { LinkToCMSettingsView } from './LinkToCMSettingsView';
 
 /* eslint-disable indent */
+
+const LayoutsHeaderCustom = styled(Layouts.Header)`
+  overflow-wrap: anywhere;
+`;
 
 const ListView = () => {
   const { initialData, modifiedData, isInDevelopmentMode, isInContentTypeView, submitData } =
@@ -117,16 +122,17 @@ const ListView = () => {
 
   return (
     <>
-      <HeaderLayout
+      <LayoutsHeaderCustom
         id="title"
         primaryAction={
           isInDevelopmentMode && (
-            <Flex gap={2}>
+            <Flex gap={2} marginLeft={2}>
               {/* DON'T display the add field button when the content type has not been created */}
               {!isCreatingFirstContentType && (
                 <Button
                   startIcon={<Plus />}
                   variant="secondary"
+                  minWidth="max-content"
                   onClick={() => {
                     onOpenModalAddField({ forTarget, targetUid });
                   }}
@@ -170,7 +176,7 @@ const ListView = () => {
         })}
         navigationAction={<BackButton />}
       />
-      <ContentLayout>
+      <Layouts.Content>
         <Flex direction="column" alignItems="stretch" gap={4}>
           <Flex justifyContent="flex-end">
             <Flex gap={2}>
@@ -195,7 +201,7 @@ const ListView = () => {
             />
           </Box>
         </Flex>
-      </ContentLayout>
+      </Layouts.Content>
     </>
   );
 };

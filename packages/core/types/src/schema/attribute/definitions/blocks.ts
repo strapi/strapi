@@ -77,6 +77,7 @@ interface QuoteBlockNode extends BaseNode {
 
 interface CodeBlockNode extends BaseNode {
   type: 'code';
+  language?: string;
   children: DefaultInlineNode[];
 }
 

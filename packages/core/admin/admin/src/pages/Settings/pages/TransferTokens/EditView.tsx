@@ -1,12 +1,13 @@
 import * as React from 'react';
 
-import { Box, ContentLayout, Flex, Grid, GridItem, Typography } from '@strapi/design-system';
+import { Box, Flex, Grid, Typography } from '@strapi/design-system';
 import { Formik, Form, FormikErrors, FormikHelpers } from 'formik';
 import { useIntl } from 'react-intl';
 import { useLocation, useNavigate, useMatch } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { useGuidedTour } from '../../../../components/GuidedTour/Provider';
+import { Layouts } from '../../../../components/Layouts/Layout';
 import { Page } from '../../../../components/PageHelpers';
 import { useTypedSelector } from '../../../../core/store/hooks';
 import { useNotification } from '../../../../features/Notifications';
@@ -268,7 +269,7 @@ const EditView = () => {
                 isSubmitting={isSubmitting}
                 regenerateUrl="/admin/transfer/tokens/"
               />
-              <ContentLayout>
+              <Layouts.Content>
                 <Flex direction="column" alignItems="stretch" gap={6}>
                   {transferToken &&
                     Boolean(transferToken?.name) &&
@@ -284,7 +285,7 @@ const EditView = () => {
                     transferToken={transferToken}
                   />
                 </Flex>
-              </ContentLayout>
+              </Layouts.Content>
             </Form>
           );
         }}
@@ -371,30 +372,30 @@ const FormTransferTokenContainer = ({
       paddingRight={7}
     >
       <Flex direction="column" alignItems="stretch" gap={4}>
-        <Typography variant="delta" as="h2">
+        <Typography variant="delta" tag="h2">
           {formatMessage({
             id: 'global.details',
             defaultMessage: 'Details',
           })}
         </Typography>
-        <Grid gap={5}>
-          <GridItem key="name" col={6} xs={12}>
+        <Grid.Root gap={5}>
+          <Grid.Item key="name" col={6} xs={12} direction="column" alignItems="stretch">
             <TokenName
               error={errors['name']}
               value={values['name']}
               canEditInputs={canEditInputs}
               onChange={onChange}
             />
-          </GridItem>
-          <GridItem key="description" col={6} xs={12}>
+          </Grid.Item>
+          <Grid.Item key="description" col={6} xs={12} direction="column" alignItems="stretch">
             <TokenDescription
               error={errors['description']}
               value={values['description']}
               canEditInputs={canEditInputs}
               onChange={onChange}
             />
-          </GridItem>
-          <GridItem key="lifespan" col={6} xs={12}>
+          </Grid.Item>
+          <Grid.Item key="lifespan" col={6} xs={12} direction="column" alignItems="stretch">
             <LifeSpanInput
               isCreating={isCreating}
               error={errors['lifespan']}
@@ -402,8 +403,8 @@ const FormTransferTokenContainer = ({
               onChange={onChange}
               token={transferToken}
             />
-          </GridItem>
-          <GridItem key="permissions" col={6} xs={12}>
+          </Grid.Item>
+          <Grid.Item key="permissions" col={6} xs={12} direction="column" alignItems="stretch">
             <TokenTypeSelect
               name="permissions"
               value={values['permissions']}
@@ -419,8 +420,8 @@ const FormTransferTokenContainer = ({
               options={typeOptions}
               canEditInputs={canEditInputs}
             />
-          </GridItem>
-        </Grid>
+          </Grid.Item>
+        </Grid.Root>
       </Flex>
     </Box>
   );

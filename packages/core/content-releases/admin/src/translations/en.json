@@ -15,6 +15,7 @@
   "content-releases.content-manager-edit-view.edit-entry": "Edit entry",
   "content-manager-edit-view.remove-from-release.notification.success": "Entry removed from release",
   "content-manager-edit-view.release-action-menu": "Release action options",
+  "content-manager.list-view.releases.header": "To be released in",
   "content-manager-list-view.add-to-release": "Add to release",
   "content-manager-list-view.add-to-release.cancel-button": "Cancel",
   "content-manager-list-view.add-to-release.continue-button": "Continue",
@@ -51,6 +52,7 @@
   "modal.form.input.label.timezone": "Timezone",
   "modal.form.input.clearLabel": "Clear",
   "modal.form.button.submit": "{isCreatingRelease, select, true {Continue} other {Save}}",
+  "modal.form.time.has-passed": "Selected time has already passed.",
   "pages.Details.header-subtitle": "{number, plural, =0 {No entries} one {# entry} other {# entries}}",
   "pages.Releases.tab-group.label": "Releases list",
   "pages.Releases.tab.pending": "Pending ({count})",
@@ -73,10 +75,15 @@
   "pages.ReleaseDetails.groupBy.aria-label": "Group by",
   "pages.ReleaseDetails.entry-validation.already-published": "Already published",
   "pages.ReleaseDetails.entry-validation.ready-to-publish": "Ready to publish",
+  "pages.ReleaseDetails.entry-validation.modified": "Ready to publish changes",
   "pages.ReleaseDetails.entry-validation.already-unpublished": "Already unpublished",
   "pages.ReleaseDetails.entry-validation.ready-to-unpublish": "Ready to unpublish",
   "pages.ReleaseDetails.groupBy.option.content-type": "Content-Types",
   "pages.ReleaseDetails.groupBy.option.locales": "Locales",
   "pages.ReleaseDetails.groupBy.option.actions": "Actions",
-  "pages.ReleaseDetails.header-subtitle.scheduled": "Scheduled for {date} at {time} ({offset})"
+  "pages.ReleaseDetails.header-subtitle.scheduled": "Scheduled for {date} at {time} ({offset})",
+  "pages.Settings.releases.title": "Releases",
+  "pages.Settings.releases.description": "Create and manage content updates",
+  "pages.Settings.releases.timezone.label": "Default timezone",
+  "pages.Settings.releases.setting.default-timezone-notification-success": "Default timezone updated."
 }

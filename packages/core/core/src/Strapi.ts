@@ -1,3 +1,4 @@
+import * as globalAgent from 'global-agent';
 import path from 'path';
 import _ from 'lodash';
 import { isFunction } from 'lodash/fp';
@@ -243,8 +244,16 @@ class Strapi extends Container implements Core.Strapi {
 
   // TODO: split into more providers
   registerInternalServices() {
+    const config = createConfigProvider(this.internal_config, this);
+
+    const logger = createLogger({
+      level: 'http', // Strapi defaults to level 'http'
+      ...config.get('logger'), // DEPRECATED
+      ...config.get('server.logger.config'),
+    });
+
     // Instantiate the Strapi container
-    this.add('config', () => createConfigProvider(this.internal_config, this))
+    this.add('config', () => config)
       .add('query-params', createQueryParamService(this))
       .add('content-api', createContentAPI(this))
       .add('auth', createAuth())
@@ -252,13 +261,7 @@ class Strapi extends Container implements Core.Strapi {
       .add('fs', () => createStrapiFs(this))
       .add('eventHub', () => createEventHub())
       .add('startupLogger', () => utils.createStartupLogger(this))
-      .add('logger', () => {
-        return createLogger({
-          level: 'http', // Strapi defaults to level 'http'
-          ...this.config.get('logger'), // DEPRECATED
-          ...this.config.get('server.logger.config'),
-        });
-      })
+      .add('logger', () => logger)
       .add('fetch', () => utils.createStrapiFetch(this))
       .add('features', () => createFeaturesService(this))
       .add('requestContext', requestContext)
@@ -271,6 +274,7 @@ class Strapi extends Container implements Core.Strapi {
         () =>
           new Database(
             _.merge(this.config.get('database'), {
+              logger,
               settings: {
                 migrations: {
                   dir: path.join(this.dirs.app.root, 'database/migrations'),
@@ -396,7 +400,8 @@ class Strapi extends Container implements Core.Strapi {
       await provider.register?.(this);
     }
 
-    await this.runLifecyclesFunctions(utils.LIFECYCLES.REGISTER);
+    await this.runPluginsLifecycles(utils.LIFECYCLES.REGISTER);
+    await this.runUserLifecycles(utils.LIFECYCLES.REGISTER);
 
     // NOTE: Swap type customField for underlying data type
     utils.convertCustomFieldType(this);
@@ -405,6 +410,8 @@ class Strapi extends Container implements Core.Strapi {
   }
 
   async bootstrap() {
+    this.configureGlobalProxy();
+
     const models = [
       ...utils.transformContentTypesToModels(
         [...Object.values(this.contentTypes), ...Object.values(this.components)],
@@ -452,22 +459,48 @@ class Strapi extends Container implements Core.Strapi {
 
     await this.contentAPI.permissions.registerActions();
 
-    await this.runLifecyclesFunctions(utils.LIFECYCLES.BOOTSTRAP);
+    await this.runPluginsLifecycles(utils.LIFECYCLES.BOOTSTRAP);
 
     for (const provider of providers) {
       await provider.bootstrap?.(this);
     }
 
+    await this.runUserLifecycles(utils.LIFECYCLES.BOOTSTRAP);
+
     return this;
+  }
+
+  configureGlobalProxy() {
+    const globalProxy = this.config.get('server.proxy.global');
+    const httpProxy = this.config.get('server.proxy.http') || globalProxy;
+    const httpsProxy = this.config.get('server.proxy.https') || globalProxy;
+
+    if (!httpProxy && !httpsProxy) {
+      return;
+    }
+
+    globalAgent.bootstrap();
+
+    if (httpProxy) {
+      this.log.info(`Using HTTP proxy: ${httpProxy}`);
+      (global as any).GLOBAL_AGENT.HTTP_PROXY = httpProxy;
+    }
+
+    if (httpsProxy) {
+      this.log.info(`Using HTTPS proxy: ${httpsProxy}`);
+      (global as any).GLOBAL_AGENT.HTTPS_PROXY = httpsProxy;
+    }
   }
 
   async destroy() {
     this.log.info('Shutting down Strapi');
-    await this.runLifecyclesFunctions(utils.LIFECYCLES.DESTROY);
+    await this.runPluginsLifecycles(utils.LIFECYCLES.DESTROY);
 
     for (const provider of providers) {
       await provider.destroy?.(this);
     }
+
+    await this.runUserLifecycles(utils.LIFECYCLES.DESTROY);
 
     await this.server.destroy();
 
@@ -483,10 +516,12 @@ class Strapi extends Container implements Core.Strapi {
     this.log.info('Strapi has been shut down');
   }
 
-  async runLifecyclesFunctions(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
+  async runPluginsLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
     // plugins
     await this.get('modules')[lifecycleName]();
+  }
 
+  async runUserLifecycles(lifecycleName: 'register' | 'bootstrap' | 'destroy') {
     // user
     const userLifecycleFunction = this.app && this.app[lifecycleName];
     if (isFunction(userLifecycleFunction)) {

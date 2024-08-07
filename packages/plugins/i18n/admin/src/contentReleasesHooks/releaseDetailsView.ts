@@ -19,18 +19,11 @@ interface AddLocaleToReleasesHookArgs {
 const addLocaleToReleasesHook = ({ displayedHeaders = [] }: AddLocaleToReleasesHookArgs) => {
   return {
     displayedHeaders: [
-      // TODO: Fix when migrating to v5
-      // ...displayedHeaders,
+      ...displayedHeaders,
       {
-        key: '__locale__',
-        fieldSchema: { type: 'string' },
-        metadatas: {
-          label: {
-            id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
-            defaultMessage: 'locale',
-          },
-          searchable: false,
-          sortable: false,
+        label: {
+          id: 'content-releases.page.ReleaseDetails.table.header.label.locale',
+          defaultMessage: 'locale',
         },
         name: 'locale',
       },

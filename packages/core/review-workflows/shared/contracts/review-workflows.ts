@@ -112,22 +112,6 @@ namespace GetAll {
   }
 }
 
-namespace Get {
-  export interface Request {
-    body: {};
-    query: {};
-  }
-
-  export interface Params {
-    id: Entity['id'];
-  }
-
-  export interface Response {
-    data: Workflow;
-    error?: errors.ApplicationError;
-  }
-}
-
 namespace Update {
   export interface Request {
     body: {
@@ -180,7 +164,6 @@ export type {
   Stage,
   Workflow,
   GetAll,
-  Get,
   Update,
   Create,
   Delete,

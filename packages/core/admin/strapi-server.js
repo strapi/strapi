@@ -11,6 +11,7 @@ const mergeRoutes = (a, b, key) => {
 if (strapi.EE) {
   const eeAdmin = require('./dist/ee/server');
   // module.exports = admin;
+  // TODO: change to avoid issue with lodash merging frozen objects
   module.exports = _.mergeWith({}, admin, eeAdmin, mergeRoutes);
 } else {
   module.exports = admin;

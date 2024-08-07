@@ -24,6 +24,7 @@ import type {
 } from '../../../shared/contracts/collection-types';
 
 const documentApi = contentManagerApi.injectEndpoints({
+  overrideExisting: true,
   endpoints: (builder) => ({
     autoCloneDocument: builder.mutation<Clone.Response, Clone.Params & { query?: string }>({
       query: ({ model, sourceId, query }) => ({
@@ -33,7 +34,13 @@ const documentApi = contentManagerApi.injectEndpoints({
           params: query,
         },
       }),
-      invalidatesTags: (_result, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
+      invalidatesTags: (_result, error, { model }) => {
+        if (error) {
+          return [];
+        }
+
+        return [{ type: 'Document', id: `${model}_LIST` }];
+      },
     }),
     cloneDocument: builder.mutation<
       Clone.Response,
@@ -99,15 +106,17 @@ const documentApi = contentManagerApi.injectEndpoints({
     }),
     deleteManyDocuments: builder.mutation<
       BulkDelete.Response,
-      BulkDelete.Params & BulkDelete.Request['body']
+      BulkDelete.Params & BulkDelete.Request['body'] & { params?: Find.Request['query'] }
     >({
-      query: ({ model, ...body }) => ({
+      query: ({ model, params, ...body }) => ({
         url: `/content-manager/collection-types/${model}/actions/bulkDelete`,
         method: 'POST',
         data: body,
+        config: {
+          params,
+        },
       }),
-      invalidatesTags: (_res, _error, { model, documentIds }) =>
-        documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
+      invalidatesTags: (_res, _error, { model }) => [{ type: 'Document', id: `${model}_LIST` }],
     }),
     discardDocument: builder.mutation<
       Discard.Response,
@@ -160,6 +169,7 @@ const documentApi = contentManagerApi.injectEndpoints({
       }),
       providesTags: (result, _error, arg) => {
         return [
+          { type: 'Document', id: `ALL_LIST` },
           { type: 'Document', id: `${arg.model}_LIST` },
           ...(result?.results.map(({ documentId }) => ({
             type: 'Document' as const,
@@ -234,6 +244,11 @@ const documentApi = contentManagerApi.injectEndpoints({
                 ? `${model}_${result && 'documentId' in result ? result.documentId : documentId}`
                 : model,
           },
+          // Make it easy to invalidate all individual documents queries for a model
+          {
+            type: 'Document',
+            id: `${model}_ALL_ITEMS`,
+          },
         ];
       },
     }),
@@ -287,12 +302,15 @@ const documentApi = contentManagerApi.injectEndpoints({
     }),
     publishManyDocuments: builder.mutation<
       BulkPublish.Response,
-      BulkPublish.Params & BulkPublish.Request['body']
+      BulkPublish.Params & BulkPublish.Request['body'] & { params?: BulkPublish.Request['query'] }
     >({
-      query: ({ model, ...body }) => ({
+      query: ({ model, params, ...body }) => ({
         url: `/content-manager/collection-types/${model}/actions/bulkPublish`,
         method: 'POST',
         data: body,
+        config: {
+          params,
+        },
       }),
       invalidatesTags: (_res, _error, { model, documentIds }) =>
         documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
@@ -322,6 +340,20 @@ const documentApi = contentManagerApi.injectEndpoints({
           },
           'Relations',
         ];
+      },
+      async onQueryStarted({ data, ...patch }, { dispatch, queryFulfilled }) {
+        // Optimistically update the cache with the new data
+        const patchResult = dispatch(
+          documentApi.util.updateQueryData('getDocument', patch, (draft) => {
+            Object.assign(draft.data, data);
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          // Rollback the optimistic update if there's an error
+          patchResult.undo();
+        }
       },
     }),
     unpublishDocument: builder.mutation<
@@ -354,12 +386,18 @@ const documentApi = contentManagerApi.injectEndpoints({
     }),
     unpublishManyDocuments: builder.mutation<
       BulkUnpublish.Response,
-      BulkUnpublish.Params & BulkUnpublish.Request['body']
+      Pick<BulkUnpublish.Params, 'model'> &
+        BulkUnpublish.Request['body'] & {
+          params?: BulkUnpublish.Request['query'];
+        }
     >({
-      query: ({ model, ...body }) => ({
+      query: ({ model, params, ...body }) => ({
         url: `/content-manager/collection-types/${model}/actions/bulkUnpublish`,
         method: 'POST',
         data: body,
+        config: {
+          params,
+        },
       }),
       invalidatesTags: (_res, _error, { model, documentIds }) =>
         documentIds.map((id) => ({ type: 'Document', id: `${model}_${id}` })),
