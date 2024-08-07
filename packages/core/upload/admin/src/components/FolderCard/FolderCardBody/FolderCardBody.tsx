@@ -1,6 +1,4 @@
-import React from 'react';
-
-import { Flex } from '@strapi/design-system';
+import { Flex, FlexProps } from '@strapi/design-system';
 import { styled } from 'styled-components';
 
 import { useFolderCard } from '../contexts/FolderCard';
@@ -9,7 +7,7 @@ const StyledBox = styled(Flex)`
   user-select: none;
 `;
 
-export const FolderCardBody = (props) => {
+export const FolderCardBody = (props: FlexProps) => {
   const { id } = useFolderCard();
 
   return (
