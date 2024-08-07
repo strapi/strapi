@@ -20,7 +20,11 @@ interface SelectedStepProps {
   onReorderAsset?: (hoverIndex: number, destIndex: number) => void;
 }
 
-export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }: SelectedStepProps) => {
+export const SelectedStep = ({
+  selectedAssets,
+  onSelectAsset,
+  onReorderAsset,
+}: SelectedStepProps) => {
   const { formatMessage } = useIntl();
 
   return (

@@ -13,7 +13,12 @@ interface ReplaceMediaButtonProps {
   trackedLocation?: string;
 }
 
-export const ReplaceMediaButton = ({ onSelectMedia, acceptedMime, trackedLocation, ...props }: ReplaceMediaButtonProps) => {
+export const ReplaceMediaButton = ({
+  onSelectMedia,
+  acceptedMime,
+  trackedLocation,
+  ...props
+}: ReplaceMediaButtonProps) => {
   const { formatMessage } = useIntl();
   const inputRef = React.useRef<HTMLInputElement>(null);
   const { trackUsage } = useTracking();

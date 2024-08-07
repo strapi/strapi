@@ -14,48 +14,53 @@ const CardAsset = styled(Flex)`
   background: linear-gradient(180deg, #ffffff 0%, #f6f6f9 121.48%);
 `;
 
-interface AssetPreviewProps extends React.HTMLAttributes<HTMLImageElement | HTMLAudioElement | HTMLVideoElement> {
+interface AssetPreviewProps
+  extends React.HTMLAttributes<HTMLImageElement | HTMLAudioElement | HTMLVideoElement> {
   mime: string;
   name: string;
   url: string;
 }
 
-export const AssetPreview = React.forwardRef<any, AssetPreviewProps>(({ mime, url, name, ...props }, ref) => {
-  const [lang] = usePersistentState('strapi-admin-language', 'en');
+export const AssetPreview = React.forwardRef<any, AssetPreviewProps>(
+  ({ mime, url, name, ...props }, ref) => {
+    const [lang] = usePersistentState('strapi-admin-language', 'en');
 
-  if (mime.includes(AssetType.Image)) {
-    return <img ref={ref as React.ForwardedRef<HTMLImageElement>} src={url} alt={name} {...props} />;
-  }
+    if (mime.includes(AssetType.Image)) {
+      return (
+        <img ref={ref as React.ForwardedRef<HTMLImageElement>} src={url} alt={name} {...props} />
+      );
+    }
 
-  if (mime.includes(AssetType.Video)) {
-    return (
-      <video controls src={url} ref={ref as React.ForwardedRef<HTMLVideoElement>} {...props}>
-        <track label={name} default kind="captions" srcLang={lang} src="" />
-      </video>
-    );
-  }
+    if (mime.includes(AssetType.Video)) {
+      return (
+        <video controls src={url} ref={ref as React.ForwardedRef<HTMLVideoElement>} {...props}>
+          <track label={name} default kind="captions" srcLang={lang} src="" />
+        </video>
+      );
+    }
 
-  if (mime.includes(AssetType.Audio)) {
-    return (
-      <audio controls src={url} ref={ref as React.Ref<HTMLAudioElement>} {...props}>
-        {name}
-      </audio>
-    );
-  }
+    if (mime.includes(AssetType.Audio)) {
+      return (
+        <audio controls src={url} ref={ref as React.Ref<HTMLAudioElement>} {...props}>
+          {name}
+        </audio>
+      );
+    }
 
-  if (mime.includes('pdf')) {
+    if (mime.includes('pdf')) {
+      return (
+        <CardAsset justifyContent="center" {...props}>
+          <FilePdf aria-label={name} />
+        </CardAsset>
+      );
+    }
+
     return (
       <CardAsset justifyContent="center" {...props}>
-        <FilePdf aria-label={name} />
+        <File aria-label={name} />
       </CardAsset>
     );
   }
-
-  return (
-    <CardAsset justifyContent="center" {...props}>
-      <File aria-label={name} />
-    </CardAsset>
-  );
-});
+);
 
 AssetPreview.displayName = 'AssetPreview';
