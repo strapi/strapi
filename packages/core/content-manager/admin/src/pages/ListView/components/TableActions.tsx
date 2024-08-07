@@ -52,9 +52,10 @@ const TableActions = ({ document }: TableActionsProps) => {
   return (
     <DescriptionComponentRenderer
       props={props}
-      descriptions={(
-        plugins['content-manager'].apis as ContentManagerPlugin['config']['apis']
-      ).getDocumentActions()}
+      descriptions={(plugins['content-manager'].apis as ContentManagerPlugin['config']['apis'])
+        .getDocumentActions()
+        // We explicitly remove the PublishAction from description so we never render it and we don't make unnecessary requests.
+        .filter((action) => action.name !== 'PublishAction')}
     >
       {(actions) => {
         const tableRowActions = actions.filter((action) => {
