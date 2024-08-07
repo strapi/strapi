@@ -1,13 +1,26 @@
-import React from 'react';
-
 import { Flex, Typography } from '@strapi/design-system';
-import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../../utils/getTrad';
 import { AssetGridList } from '../../AssetGridList/AssetGridList';
+import type { Asset } from '../../../../../shared/contracts/files';
+import type { RawFile } from '../../../types';
 
-export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) => {
+interface AssetProps extends Asset {
+  type?: string;
+  isSelectable?: boolean;
+  isLocal?: boolean;
+  allowedTypes?: string[];
+  rawFile: RawFile;
+}
+
+interface SelectedStepProps {
+  onSelectAsset: (asset: AssetProps) => void;
+  selectedAssets: AssetProps[];
+  onReorderAsset?: (hoverIndex: number, destIndex: number) => void;
+}
+
+export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }: SelectedStepProps) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -40,14 +53,4 @@ export const SelectedStep = ({ selectedAssets, onSelectAsset, onReorderAsset }) 
       />
     </Flex>
   );
-};
-
-SelectedStep.defaultProps = {
-  onReorderAsset: undefined,
-};
-
-SelectedStep.propTypes = {
-  onSelectAsset: PropTypes.func.isRequired,
-  selectedAssets: PropTypes.arrayOf(PropTypes.shape({})).isRequired,
-  onReorderAsset: PropTypes.func,
 };
