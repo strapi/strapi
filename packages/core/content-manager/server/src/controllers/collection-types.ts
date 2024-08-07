@@ -2,6 +2,7 @@ import { setCreatorFields, pipeAsync } from '@strapi/utils';
 import { getService } from '../utils';
 import { validateBulkActionInput } from './validation';
 import { getProhibitedCloningFields, excludeNotCreatableFields } from './utils/clone';
+import { Alert } from '@strapi/design-system';
 
 export default {
   async find(ctx: any) {
@@ -117,6 +118,8 @@ export default {
     const { id, model } = ctx.params;
     const { body } = ctx.request;
 
+
+
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -144,9 +147,7 @@ export default {
     const setCreator = setCreatorFields({ user, isEdition: true });
     const sanitizeFn = pipeAsync(pickPermittedFields, setCreator as any);
     const sanitizedBody = await sanitizeFn(body);
-
     const updatedEntity = await entityManager.update(entity, sanitizedBody, model);
-
     ctx.body = await permissionChecker.sanitizeOutput(updatedEntity);
   },
 
@@ -154,6 +155,18 @@ export default {
     const { userAbility, user } = ctx.state;
     const { model, sourceId: id } = ctx.params;
     const { body } = ctx.request;
+
+    const prohibitedFields = getProhibitedCloningFields(model);
+
+    if (prohibitedFields.length > 0) {
+      return ctx.badRequest(
+        'Entity could not be cloned as it has unique and/or relational fields. ' +
+          'Please edit those fields manually and save to complete the cloning.',
+        {
+          prohibitedFields,
+        }
+      );
+    }
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
