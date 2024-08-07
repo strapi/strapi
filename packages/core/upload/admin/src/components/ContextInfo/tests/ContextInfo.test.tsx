@@ -1,5 +1,3 @@
-import React from 'react';
-
 import { DesignSystemProvider } from '@strapi/design-system';
 import { render } from '@testing-library/react';
 
