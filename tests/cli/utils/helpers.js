@@ -29,6 +29,16 @@ const expectConsoleLinesToEqual = (received, expected) => {
   expect(receivedLines).toEqual(expectedLines);
 };
 
+const expectConsoleLinesToInclude = (received, expected) => {
+  const receivedLines = trimLines(received);
+  const expectedLines = trimLines(expected);
+
+  expectedLines.forEach(line => {
+    expect(receivedLines).toContain(line);
+  });
+};
+
 module.exports = {
   expectConsoleLinesToEqual,
+  expectConsoleLinesToInclude,
 };

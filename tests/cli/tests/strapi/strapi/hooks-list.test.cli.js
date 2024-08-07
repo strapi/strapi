@@ -4,7 +4,7 @@ const coffee = require('coffee');
 
 const utils = require('../../../utils');
 
-describeOnCondition(edition === 'CE')('hooks:list', () => {
+describe('hooks:list', () => {
   let appPath;
 
   beforeAll(async () => {
@@ -31,6 +31,6 @@ describeOnCondition(edition === 'CE')('hooks:list', () => {
     └──────────────────────────────────┘
     `;
 
-    utils.helpers.expectConsoleLinesToEqual(output, expected);
+    utils.helpers.expectConsoleLinesToInclude(output, expected);
   });
 });

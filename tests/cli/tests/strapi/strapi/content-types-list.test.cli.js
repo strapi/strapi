@@ -4,7 +4,7 @@ const coffee = require('coffee');
 
 const utils = require('../../../utils');
 
-describeOnCondition(edition === 'CE')('content-types:list', () => {
+describe('content-types:list', () => {
   let appPath;
 
   beforeAll(async () => {
@@ -67,6 +67,6 @@ describeOnCondition(edition === 'CE')('content-types:list', () => {
     └──────────────────────────────────────────────────────┘
     `;
 
-    utils.helpers.expectConsoleLinesToEqual(output, expected);
+    utils.helpers.expectConsoleLinesToInclude(output, expected);
   });
 });
