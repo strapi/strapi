@@ -4,7 +4,7 @@ const coffee = require('coffee');
 
 const utils = require('../../../utils');
 
-describe('services:list', () => {
+describeOnCondition(edition === 'CE')('services:list', () => {
   let appPath;
 
   beforeAll(async () => {
