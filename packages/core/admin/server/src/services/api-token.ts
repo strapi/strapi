@@ -161,10 +161,19 @@ const getExpirationFields = (lifespan: ApiTokenBody['lifespan']) => {
 };
 
 /**
+ * Validate that a string is valid accessKey
+ */
+const isValidAccessKey = (accessKey: string): boolean => {
+  // RegExp to match a valid hex string of 256 characters length
+  const hexRegExp = /^[0-9a-fA-F]{256}$/;
+  return hexRegExp.test(accessKey);
+}
+
+/**
  * Create a token and its permissions
  */
 const create = async (attributes: ApiTokenBody): Promise<ApiToken> => {
-  const accessKey = crypto.randomBytes(128).toString('hex');
+  const accessKey = isValidAccessKey(attributes.accessKey) ? attributes.accessKey : crypto.randomBytes(128).toString('hex');
 
   assertCustomTokenPermissionsValidity(attributes.type, attributes.permissions);
   assertValidLifespan(attributes.lifespan);
