@@ -20,6 +20,7 @@ export { isKnexQuery } from './utils/knex';
 interface Settings {
   forceMigration?: boolean;
   runMigrations?: boolean;
+
   [key: string]: unknown;
 }
 
@@ -38,18 +39,19 @@ class Database {
 
   metadata: Metadata;
 
-  schema: SchemaProvider;
+  schema?: SchemaProvider;
 
-  migrations: MigrationProvider;
+  migrations?: MigrationProvider;
 
-  lifecycles: LifecycleProvider;
+  lifecycles?: LifecycleProvider;
 
-  entityManager: EntityManager;
+  entityManager?: EntityManager;
 
   static transformContentTypes = transformContentTypes;
 
   static async init(config: DatabaseConfig) {
     const db = new Database(config);
+    await db.setup();
     await validateDatabase(db);
     return db;
   }
@@ -70,12 +72,14 @@ class Database {
     this.dialect.configure();
 
     this.connection = createConnection(this.config.connection);
+  }
 
+  async setup() {
     this.dialect.initialize();
 
     this.schema = createSchemaProvider(this);
 
-    this.migrations = createMigrationsProvider(this);
+    this.migrations = await createMigrationsProvider(this);
     this.lifecycles = createLifecyclesProvider(this);
 
     this.entityManager = createEntityManager(this);
@@ -86,7 +90,7 @@ class Database {
       throw new Error(`Model ${uid} not found`);
     }
 
-    return this.entityManager.getRepository(uid);
+    return this.entityManager!.getRepository(uid);
   }
 
   inTransaction() {
@@ -156,11 +160,11 @@ class Database {
   }
 
   queryBuilder(uid: string) {
-    return this.entityManager.createQueryBuilder(uid);
+    return this.entityManager!.createQueryBuilder(uid);
   }
 
   async destroy() {
-    await this.lifecycles.clear();
+    await this.lifecycles!.clear();
     await this.connection.destroy();
   }
 }

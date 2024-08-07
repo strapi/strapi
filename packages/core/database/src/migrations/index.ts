@@ -1,9 +1,9 @@
 import path from 'node:path';
 import fse from 'fs-extra';
-import { Umzug } from 'umzug';
-
 import type { Resolver } from 'umzug';
+import { Umzug } from 'umzug';
 import type { Knex } from 'knex';
+import tsUtils from '@strapi/typescript-utils';
 
 import { createStorage } from './storage';
 
@@ -11,7 +11,9 @@ import type { Database } from '..';
 
 export interface MigrationProvider {
   shouldRun(): Promise<boolean>;
+
   up(): Promise<void>;
+
   down(): Promise<void>;
 }
 
@@ -52,8 +54,14 @@ const migrationResolver: MigrationResolver = ({ name, path, context }) => {
   };
 };
 
-const createUmzugProvider = (db: Database) => {
-  const migrationDir = path.join(strapi.dirs.app.root, 'database/migrations');
+export async function findMigrationsDir(root: string) {
+  const s = path.join((await tsUtils.resolveOutDir(root)) || root, 'database/migrations');
+  console.info(`Found database migrations at ${s}`);
+  return s;
+}
+
+const createUmzugProvider = async (db: Database) => {
+  const migrationDir = await findMigrationsDir(strapi.dirs.app.root);
 
   fse.ensureDirSync(migrationDir);
 
@@ -74,8 +82,8 @@ const createUmzugProvider = (db: Database) => {
  * Creates migrations provider
  * @type {import('.').createMigrationsProvider}
  */
-export const createMigrationsProvider = (db: Database): MigrationProvider => {
-  const migrations = createUmzugProvider(db);
+export const createMigrationsProvider = async (db: Database): Promise<MigrationProvider> => {
+  const migrations = await createUmzugProvider(db);
 
   return {
     async shouldRun() {
