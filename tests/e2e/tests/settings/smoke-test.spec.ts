@@ -1,8 +1,8 @@
 import { test, expect, Page } from '@playwright/test';
-// eslint-disable-next-line import/extensions
-import { resetDatabaseAndImportDataFromPath } from '../../scripts/dts-import';
+
 import { login } from '../../utils/login';
 import { describeOnCondition, locateFirstAfter, navToHeader } from '../../utils/shared';
+import { resetDatabaseAndImportDataFromPath } from '../../utils/dts-import';
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
 
@@ -55,8 +55,7 @@ test.describe('Settings', () => {
 
   describeOnCondition(edition === 'EE')(() => {
     test('every EE feature is displayed', async ({ page }) => {
-      // TODO after RW is fixed in v5 add this back
-      // await navToHeader(page, ['Settings', 'Review Workflows'], 'Review Workflows');
+      await navToHeader(page, ['Settings', 'Review Workflows'], 'Review Workflows');
       await navToHeader(page, ['Settings', ['Administration Panel', 'Audit Logs']], 'Audit Logs');
     });
   });
