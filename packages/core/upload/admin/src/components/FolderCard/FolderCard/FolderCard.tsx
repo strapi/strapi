@@ -1,15 +1,27 @@
-import React, { forwardRef, useMemo } from 'react';
+import * as React from 'react';
 
-import { Box, CardAction, Flex } from '@strapi/design-system';
+import { Box, CardAction, Flex, BoxProps } from '@strapi/design-system';
 import { Folder } from '@strapi/icons';
-import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { styled } from 'styled-components';
+import type { Data } from '@strapi/types';
 
 import { FolderCardContext } from '../contexts/FolderCard';
 import useId from '../hooks/useId';
 
-const FauxClickWrapper = styled.button`
+type FauxClickWrapperProps = {
+  as?: React.ElementType;
+  to?: string;
+  onClick?: () => void;
+  'aria-label': string;
+  'aria-hidden': boolean;
+  type?: string;
+  tag?: React.ElementType | string;
+};
+
+const FauxClickWrapper = styled(({ as: Component = 'button', ...props }: FauxClickWrapperProps) => (
+  <Component {...props} />
+))<FauxClickWrapperProps>`
   height: 100%;
   left: 0;
   position: absolute;
@@ -42,22 +54,33 @@ const Card = styled(Box)`
   }
 `;
 
-export const FolderCard = forwardRef(
-  ({ children, id, startAction, cardActions, ariaLabel, onClick, to, ...props }, ref) => {
+interface FolderCardProps extends Omit<BoxProps, 'id'> {
+  ariaLabel: string;
+  children: React.ReactNode;
+  id: Data.ID;
+  onClick?: () => void;
+  startAction?: React.ReactNode;
+  cardActions?: React.ReactNode;
+  to?: string;
+}
+
+export const FolderCard = React.forwardRef<any, FolderCardProps>(
+  ({ children, id, startAction = null, cardActions = null, ariaLabel, onClick, to, ...props }, ref) => {
     const generatedId = useId(id);
-    const fodlerCtxValue = useMemo(() => ({ id: generatedId }), [generatedId]);
+    const fodlerCtxValue = React.useMemo(() => ({ id: generatedId }), [generatedId]);
 
     return (
       <FolderCardContext.Provider value={fodlerCtxValue}>
         <Card position="relative" tabIndex={0} $isCardActions={!!cardActions} ref={ref} {...props}>
           <FauxClickWrapper
             to={to || undefined}
-            tag={to ? NavLink : 'button'}
+            tag={to ? 'a' : 'button'}
             type={to ? undefined : 'button'}
             onClick={onClick}
             tabIndex={-1}
             aria-label={ariaLabel}
             aria-hidden
+            as={to ? NavLink : 'button'}
           />
 
           <Flex
@@ -88,7 +111,7 @@ export const FolderCard = forwardRef(
             {children}
 
             <CardActionDisplay>
-              <CardAction right={4}>{cardActions}</CardAction>
+              <CardAction right={4} position='end'>{cardActions}</CardAction>
             </CardActionDisplay>
           </Flex>
         </Card>
@@ -96,21 +119,3 @@ export const FolderCard = forwardRef(
     );
   }
 );
-
-FolderCard.defaultProps = {
-  id: undefined,
-  cardActions: null,
-  startAction: null,
-  to: undefined,
-  onClick: undefined,
-};
-
-FolderCard.propTypes = {
-  ariaLabel: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired,
-  id: PropTypes.string,
-  onClick: PropTypes.func,
-  startAction: PropTypes.element,
-  cardActions: PropTypes.element,
-  to: PropTypes.string,
-};

@@ -380,6 +380,7 @@ exports[`BrowseStep renders and match snapshot 1`] = `
 .c63 {
   position: absolute;
   top: 12px;
+  right: 12px;
 }
 
 .c7 {
