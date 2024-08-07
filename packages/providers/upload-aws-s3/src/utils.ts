@@ -8,6 +8,12 @@ interface BucketInfo {
   err?: string;
 }
 
+interface AWSCredentials {
+  accessKeyId: string;
+  secretAccessKey: string;
+  sessionToken?: string;
+}
+
 export function isUrlFromBucket(fileUrl: string, bucketName: string, baseUrl = ''): boolean {
   const url = new URL(fileUrl);
 
@@ -109,10 +115,14 @@ export const extractCredentials = (options: InitOptions): AwsCredentialIdentity 
   }
   // V5
   if (options.s3Options?.credentials) {
-    return {
+    const credentials : AWSCredentials = {
       accessKeyId: options.s3Options.credentials.accessKeyId,
-      secretAccessKey: options.s3Options.credentials.secretAccessKey,
+      secretAccessKey: options.s3Options.credentials.secretAccessKey
     };
+    if(options.s3Options.credentials.sessionToken) {
+      credentials.sessionToken = options.s3Options.credentials.sessionToken;
+    }
+    return credentials;
   }
   return null;
 };
