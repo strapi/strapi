@@ -55,17 +55,16 @@ const createEntry = async (model, data, populate) => {
     body: data,
     qs: { populate },
   });
+
   return body;
 };
 
 const getRelations = async (rq, uid, field, id, params = {}) => {
-  const res = await rq({
+  return rq({
     method: 'GET',
     url: `/content-manager/relations/${uid}/${id}/${field}`,
     qs: params,
   });
-
-  return res;
 };
 
 const createUserAndReq = async (userName, permissions) => {
@@ -84,9 +83,7 @@ const createUserAndReq = async (userName, permissions) => {
     roles: [role.id],
   });
 
-  const rq = await createAuthRequest({ strapi, userInfo: user });
-
-  return rq;
+  return createAuthRequest({ strapi, userInfo: user });
 };
 
 describe('Relation permissions', () => {
@@ -103,6 +100,9 @@ describe('Relation permissions', () => {
         action: 'plugin::content-manager.explorer.read',
         subject: 'plugin::users-permissions.user',
       },
+      {
+        action: 'plugin::users-permissions.roles.read',
+      },
     ]);
     rqPermissive = await createUserAndReq('permissive', [
       // Can read shops and products
@@ -117,6 +117,9 @@ describe('Relation permissions', () => {
       {
         action: 'plugin::content-manager.explorer.read',
         subject: 'plugin::users-permissions.user',
+      },
+      {
+        action: 'plugin::users-permissions.roles.read',
       },
     ]);
   };
@@ -161,9 +164,9 @@ describe('Relation permissions', () => {
       shop.documentId
     );
 
-    // Main field should be in here
+    // The main field should be in here
     expect(products.results).toHaveLength(1);
-    // Main field should be visible
+    // The main field should be visible
     expect(products.results[0].name).toBe(product.name);
   });
 
@@ -216,7 +219,7 @@ describe('Relation permissions', () => {
     );
 
     expect(products.results).toHaveLength(1);
-    // Main field should not be visible
+    // The main field should not be visible
     expect(products.results[0].name).toBeUndefined();
     expect(products.results[0].id).toBe(product.id);
   });
@@ -233,7 +236,7 @@ describe('Relation permissions', () => {
       user.documentId
     );
 
-    // Main field should be visible
+    // The main field should be visible
     expect(role.results?.[0].name).toBe('Authenticated');
   });
 });
