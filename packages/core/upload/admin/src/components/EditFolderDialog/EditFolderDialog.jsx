@@ -27,7 +27,7 @@ import { ContextInfo } from '../ContextInfo';
 import SelectTree from '../SelectTree';
 
 import { EditFolderModalHeader } from './ModalHeader';
-import RemoveFolderDialog from './RemoveFolderDialog';
+import { RemoveFolderDialog } from './RemoveFolderDialog';
 
 const folderSchema = yup.object({
   name: yup.string().required(),
