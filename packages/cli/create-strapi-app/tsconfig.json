@@ -1,5 +1,8 @@
 {
   "extends": "tsconfig/base.json",
-  "include": ["src", "packup.config.ts"],
-  "exclude": ["node_modules"]
+  "compilerOptions": {
+    "outDir": "dist"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "src/resources/**/*", "package.json"]
 }

@@ -1,8 +1,0 @@
-# Database
-DATABASE_CLIENT=<%= client %>
-DATABASE_HOST=<%= connection.host %>
-DATABASE_PORT=<%= connection.port %>
-DATABASE_NAME=<%= connection.database %>
-DATABASE_USERNAME=<%= connection.username %>
-DATABASE_PASSWORD=<%= connection.password %>
-DATABASE_SSL=<%= connection.ssl %>

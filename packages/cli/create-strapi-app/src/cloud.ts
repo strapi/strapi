@@ -33,6 +33,7 @@ export async function handleCloudLogin(): Promise<void> {
     logger.error(defaultErrorMessage);
     return;
   }
+
   const { userChoice } = await inquirer.prompt<{ userChoice: string }>([
     {
       type: 'list',

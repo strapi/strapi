@@ -2,3 +2,4 @@ node_modules/
 .eslintrc.js
 dist/
 bin/
+templates/
