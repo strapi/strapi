@@ -20,6 +20,7 @@ const {
   errors: { ApplicationError, NotFoundError },
   file: { bytesToKbytes },
 } = require('@strapi/utils');
+const stream = require('stream');
 
 const {
   FILE_MODEL_UID,
@@ -216,6 +217,56 @@ module.exports = ({ strapi }) => ({
     }
 
     return uploadedFiles;
+  },
+
+  /**
+   * Asynchronously upload a buffer to the media library.
+   *
+   * @param {Object} params - The parameters for uploading the buffer.
+   * @param {Buffer} params.file - The buffer to be uploaded.
+   * @param {string} params.fileName - The name of the file to be uploaded.
+   * @param {number} [params.folder] - The folder to upload the file to.
+   * @param {string} params.mime - The MIME type of the file.
+   * @param {string} params.ext - The file extension.
+   * @param {string} [params.alternativeText] - The alternative text for the file.
+   * @param {string} [params.caption] - The caption for the file.
+   *
+   * @throws {ApplicationError} If `mime`, `ext`, `file`, or `fileName` is undefined.
+   *
+   * @returns {Promise<Object>} The uploaded file entity.
+   */
+  async uploadBuffer({ file, fileName, folder, mime, ext, alternativeText, caption }) {
+    if (!mime) {
+      throw new ApplicationError('mime type is undefined');
+    }
+    if (!ext) {
+      throw new ApplicationError('ext is undefined');
+    }
+    if (!file) {
+      throw new ApplicationError('file is undefined');
+    }
+    if (!fileName) {
+      throw new ApplicationError('fileName is undefined');
+    }
+    const config = strapi.config.get('plugin.upload');
+    const entity = {
+      name: `${fileName}.${ext}`,
+      hash: generateFileName(fileName),
+      ext,
+      mime,
+      size: bytesToKbytes(Number(file.length)),
+      provider: config.provider,
+      folder,
+      caption,
+      alternativeText,
+      tmpWorkingDirectory: await createAndAssignTmpWorkingDirectoryToFiles({}),
+      getStream() {
+        // eslint-disable-next-line new-cap
+        return new stream.Readable.from(file);
+      },
+    };
+    await this.uploadImage(entity);
+    return strapi.query('plugin::upload.file').create({ data: entity });
   },
 
   /**

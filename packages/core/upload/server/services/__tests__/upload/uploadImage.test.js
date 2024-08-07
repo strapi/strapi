@@ -79,6 +79,23 @@ describe('Upload image', () => {
     expect(upload).toHaveBeenCalledTimes(2);
   });
 
+  test('Upload file using buffer', async () => {
+    // create buffer from imageFilePath
+    const file = fs.readFileSync(imageFilePath);
+    const upload = jest.fn();
+    mockUploadProvider(upload);
+
+    uploadService.uploadBuffer({
+      file,
+      fileName: 'test',
+      mime: 'image/png',
+      ext: 'png',
+      alternativeText: 'test',
+    });
+    // 1 for the original image, 1 for thumbnail, 2 for the responsive formats
+    expect(upload).toHaveBeenCalledTimes(2);
+  });
+
   test('Upload with responsive formats', async () => {
     const fileData = getFileData(imageFilePath);
     const upload = jest.fn();
