@@ -52,6 +52,16 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     isLocalizedPath(route.path)
   ).length;
 
+    // Filter the attributes that were set as 'private' in the Admin Panel
+  const privateAttributes = Object.entries(attributes).reduce((acc, attribute) => {
+    const [attributeKey, attributeValue] = attribute;
+      if (attributeValue.private) {
+        acc.push(attributeKey);
+      }
+    return acc;
+  }, []);
+  const publicAttributes = _.omit(attributes, [...privateAttributes]);
+
   const attributesToOmit = [
     'createdAt',
     'updatedAt',
@@ -61,7 +71,7 @@ const getAllSchemasForContentType = ({ routeInfo, attributes, uniqueName }) => {
     'createdBy',
     'localizations',
   ];
-  const attributesForRequest = _.omit(attributes, attributesToOmit);
+  const attributesForRequest = _.omit(publicAttributes, attributesToOmit);
   // Get a list of required attribute names
   const requiredRequestAttributes = getRequiredAttributes(attributesForRequest);
   // Build the request schemas when the route has POST or PUT methods
