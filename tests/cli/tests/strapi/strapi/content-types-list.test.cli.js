@@ -1,8 +1,6 @@
 'use strict';
 
 const coffee = require('coffee');
-const semver = require('semver');
-const assert = require('assert');
 
 const utils = require('../../../utils');
 
