@@ -73,11 +73,30 @@
     "test:ts:packages": "nx run-many --target=test:ts --nx-ignore-cycles",
     "test:unit": "jest --config jest.config.js",
     "test:unit:all": "nx run-many --target=test:unit --nx-ignore-cycles",
-    "test:unit:watch": "run test:unit --watch"
+    "test:unit:watch": "run test:unit --watch",
+    "dev": "strapi develop",
+    "start": "strapi start",
+    "strapi": "strapi"
   },
   "resolutions": {
     "@strapi/design-system": "1.20.0-typescript.0",
-    "@types/koa": "2.13.4"
+    "@types/koa": "2.13.4",
+    "@koa/cors": "5.0.0"
+  },
+  "dependencies": {
+    "@_sh/strapi-plugin-ckeditor": "^1.1.1",
+    "@aws-sdk/client-secrets-manager": "^3.480.0",
+    "@strapi/plugin-color-picker": "^4.9.1",
+    "@strapi/plugin-graphql": "^4.24.2",
+    "@strapi/plugin-i18n": "4.24.2",
+    "@strapi/plugin-users-permissions": "4.24.2",
+    "@strapi/provider-upload-aws-s3": "^4.24.2",
+    "@strapi/strapi": "4.24.2",
+    "mysql": "^2.18.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^5.3.4",
+    "styled-components": "^5.3.11"
   },
   "devDependencies": {
     "@babel/core": "^7.20.12",
@@ -143,7 +162,7 @@
     "rimraf": "3.0.2",
     "supertest": "6.3.3",
     "ts-jest": "29.1.0",
-    "typescript": "5.2.2",
+    "typescript": "^4.6.2",  
     "yargs": "17.7.2"
   },
   "packageManager": "yarn@4.3.1",
