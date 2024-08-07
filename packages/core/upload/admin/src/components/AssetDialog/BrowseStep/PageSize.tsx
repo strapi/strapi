@@ -1,19 +1,16 @@
-/**
- *
- * PageSize
- *
- */
-
-import React from 'react';
-
 import { Box, Flex, SingleSelectOption, SingleSelect, Typography } from '@strapi/design-system';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 
-const PageSize = ({ onChangePageSize, pageSize }) => {
+interface PageSizeProps {
+  onChangePageSize: (value: string | number) => void;
+  pageSize: number;
+}
+
+const PageSize = ({ onChangePageSize, pageSize }: PageSizeProps) => {
   const { formatMessage } = useIntl();
 
-  const handleChange = (value) => {
+  const handleChange = (value: string | number) => {
     onChangePageSize(value);
   };
 
