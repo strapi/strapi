@@ -139,7 +139,7 @@ class Database {
   }
 
   getSchemaName(): string | undefined {
-    return this.connection.client.connectionSettings.schema;
+    return this.connection.client?.connectionSettings?.schema;
   }
 
   getConnection(): Knex;
