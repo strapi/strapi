@@ -51,6 +51,10 @@ test.describe('Settings', () => {
       ['Settings', ['Users & Permissions', 'Advanced settings']],
       'Advanced settings'
     );
+
+    // EE features should still be displayed because they will show a "purchase" page
+    await navToHeader(page, ['Settings', 'Review Workflows'], 'Review Workflows');
+    await navToHeader(page, ['Settings', ['Administration Panel', 'Audit Logs']], 'Audit Logs');
   });
 
   describeOnCondition(edition === 'EE')(() => {
